@@ -111,6 +111,37 @@ describe("RelationshipsController", function () {
             senderRel = (await sender.relationships.getActiveRelationshipToIdentity(recipient2.identity.address))!;
             expectValidActiveFreshRelationship(senderRel, sender, recipient2, tempDate);
         });
+
+        test("should not create new relationship if templator has been deleted after requestor has loaded the template", async function () {
+            const loadedTemplate = await TestUtil.exchangeTemplate(recipient3, sender);
+
+            await recipient3.identityDeletionProcess.initiateIdentityDeletionProcess(0);
+            await TestUtil.runDeletionJob();
+
+            await sender.syncEverything();
+
+            await expect(
+                sender.relationships.canSendRelationship({
+                    template: loadedTemplate,
+                    creationContent: {
+                        mycontent: "request"
+                    }
+                })
+            ).rejects.toThrow(
+                "error.platform.recordNotFound (404): 'Identity not found. Make sure the ID exists and the record is not expired. If a password is required to fetch the record, make sure you passed the correct one.'"
+            );
+
+            await expect(
+                sender.relationships.sendRelationship({
+                    template: loadedTemplate,
+                    creationContent: {
+                        mycontent: "request"
+                    }
+                })
+            ).rejects.toThrow(
+                "error.platform.recordNotFound (404): 'Identity not found. Make sure the ID exists and the record is not expired. If a password is required to fetch the record, make sure you passed the correct one.'"
+            );
+        });
     });
 
     describe("Templator", function () {
