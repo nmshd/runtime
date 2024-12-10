@@ -1,7 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { Serializable } from "@js-soft/ts-serval";
 import { CoreDate, CoreId } from "@nmshd/core-types";
-import { AccountController, Relationship, Transport } from "../../../src";
+import { AccountController, Relationship, RelationshipStatus, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("Data cleanup after relationship decomposition", function () {
@@ -116,5 +116,44 @@ describe("Data cleanup after relationship decomposition", function () {
                 [recipient2.identity.address, relationship2Id]
             ])
         );
+    });
+});
+
+describe("Relationship decomposition due to Identity deletion", function () {
+    let connection: IDatabaseConnection;
+    let transport: Transport;
+
+    let sender: AccountController;
+    let recipient: AccountController;
+
+    beforeAll(async function () {
+        connection = await TestUtil.createDatabaseConnection();
+        transport = TestUtil.createTransport(connection);
+
+        await transport.init();
+
+        const accounts = await TestUtil.provideAccounts(transport, 2);
+        sender = accounts[0];
+        recipient = accounts[1];
+
+        await TestUtil.addRelationship(sender, recipient);
+    });
+
+    afterAll(async function () {
+        await sender.close();
+        await recipient.close();
+        await connection.close();
+    });
+
+    test("status of a previously active Relationship should be set to 'DeletionProposed' after the peer is deleted", async function () {
+        const activeRelationship = await sender.relationships.getActiveRelationshipToIdentity(recipient.identity.address);
+        expect(activeRelationship!.status).toBe(RelationshipStatus.Active);
+
+        await recipient.identityDeletionProcess.initiateIdentityDeletionProcess(0);
+        await TestUtil.runDeletionJob();
+
+        await sender.syncEverything();
+        const deletionProposedRelationship = await sender.relationships.getRelationshipToIdentity(recipient.identity.address);
+        expect(deletionProposedRelationship!.status).toBe(RelationshipStatus.DeletionProposed);
     });
 });

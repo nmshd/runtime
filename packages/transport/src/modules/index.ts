@@ -35,7 +35,6 @@ export * from "./challenges/data/ChallengeSigned";
 export * from "./devices/backbone/BackbonePostDevices";
 export * from "./devices/backbone/BackboneUpdateDevice";
 export * from "./devices/backbone/DeviceAuthClient";
-export * from "./devices/backbone/DeviceClient";
 export * from "./devices/DeviceController";
 export * from "./devices/DevicesController";
 export * from "./devices/DeviceSecretController";
