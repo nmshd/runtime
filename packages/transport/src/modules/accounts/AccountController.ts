@@ -18,7 +18,6 @@ import { DeviceController } from "../devices/DeviceController";
 import { DeviceSecretType } from "../devices/DeviceSecretController";
 import { DevicesController } from "../devices/DevicesController";
 import { BackbonePutDevicesPushNotificationRequest, DeviceAuthClient } from "../devices/backbone/DeviceAuthClient";
-import { DeviceClient } from "../devices/backbone/DeviceClient";
 import { Device, DeviceInfo, DeviceType } from "../devices/local/Device";
 import { DeviceSecretCredentials } from "../devices/local/DeviceSecretCredentials";
 import { DeviceSharedSecret } from "../devices/transmission/DeviceSharedSecret";
@@ -48,7 +47,6 @@ export class AccountController {
         return this._authenticator;
     }
 
-    public deviceClient: DeviceClient;
     public deviceAuthClient: DeviceAuthClient;
     public identityClient: IdentityClient;
 
@@ -123,7 +121,6 @@ export class AccountController {
         this.info = await this.db.getMap("AccountInfo");
         this.unpushedDatawalletModifications = await this.db.getCollection(DbCollectionName.UnpushedDatawalletModifications);
 
-        this.deviceClient = new DeviceClient(this.config, this._transport.correlator);
         this.identityClient = new IdentityClient(this.config, this._transport.correlator);
 
         this._identity = new IdentityController(this);
