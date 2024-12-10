@@ -32,6 +32,7 @@ export interface IDevice extends ICoreSynchronizable {
     initialPassword?: string;
     datawalletVersion?: number;
     isOffboarded?: boolean;
+    isBackupDevice: boolean;
 }
 
 @type("Device")
@@ -112,6 +113,16 @@ export class Device extends CoreSynchronizable implements IDevice {
     @validate({ nullable: true })
     @serialize()
     public isOffboarded?: boolean;
+
+    @validate()
+    @serialize()
+    public isBackupDevice: boolean;
+
+    protected static override preFrom(value: any): any {
+        if (value.isBackupDevice === undefined) value.isBackupDevice = false;
+
+        return value;
+    }
 
     public static from(value: IDevice): Device {
         return this.fromAny(value);
