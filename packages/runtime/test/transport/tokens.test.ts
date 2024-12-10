@@ -50,18 +50,69 @@ describe("Tokens errors", () => {
 
 describe("Tokens query", () => {
     test("query own tokens", async () => {
-        const token = await uploadOwnToken(runtimeServices1.transport, runtimeServices1.address);
+        const token = await uploadOwnToken(runtimeServices1.transport, runtimeServices1.address, { password: "password" });
         const conditions = new QueryParamConditions<GetTokensQuery>(token, runtimeServices1.transport)
             .addDateSet("expiresAt")
             .addDateSet("createdAt")
             .addStringSet("createdByDevice")
-            .addStringSet("forIdentity");
+            .addStringSet("forIdentity")
+            .addSingleCondition({
+                expectedResult: true,
+                key: "passwordProtection",
+                value: ""
+            })
+            .addSingleCondition({
+                expectedResult: false,
+                key: "passwordProtection",
+                value: "!"
+            })
+            .addStringSet("passwordProtection.password")
+            .addSingleCondition({
+                expectedResult: false,
+                key: "passwordProtection.passwordIsPin",
+                value: "true"
+            })
+            .addSingleCondition({
+                expectedResult: true,
+                key: "passwordProtection.passwordIsPin",
+                value: "!"
+            });
+        await conditions.executeTests((c, q) => c.tokens.getTokens({ query: q, ownerRestriction: OwnerRestriction.Own }));
+    });
+
+    test("query own PIN-protected tokens", async () => {
+        const token = await uploadOwnToken(runtimeServices1.transport, runtimeServices1.address, { password: "1234", passwordIsPin: true });
+        const conditions = new QueryParamConditions<GetTokensQuery>(token, runtimeServices1.transport)
+            .addStringSet("passwordProtection.password")
+            .addSingleCondition({
+                expectedResult: true,
+                key: "passwordProtection.passwordIsPin",
+                value: "true"
+            })
+            .addSingleCondition({
+                expectedResult: false,
+                key: "passwordProtection.passwordIsPin",
+                value: "!"
+            });
         await conditions.executeTests((c, q) => c.tokens.getTokens({ query: q, ownerRestriction: OwnerRestriction.Own }));
     });
 
     test("query peer tokens", async () => {
         const token = await exchangeToken(runtimeServices1.transport, runtimeServices2.transport);
-        const conditions = new QueryParamConditions<GetTokensQuery>(token, runtimeServices2.transport).addDateSet("expiresAt").addDateSet("createdAt").addStringSet("createdBy");
+        const conditions = new QueryParamConditions<GetTokensQuery>(token, runtimeServices2.transport)
+            .addDateSet("expiresAt")
+            .addDateSet("createdAt")
+            .addStringSet("createdBy")
+            .addSingleCondition({
+                expectedResult: false,
+                key: "passwordProtection",
+                value: ""
+            })
+            .addSingleCondition({
+                expectedResult: true,
+                key: "passwordProtection",
+                value: "!"
+            });
         await conditions.executeTests((c, q) => c.tokens.getTokens({ query: q, ownerRestriction: OwnerRestriction.Peer }));
     });
 });
