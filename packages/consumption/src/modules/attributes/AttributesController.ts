@@ -1294,6 +1294,25 @@ export class AttributesController extends ConsumptionBaseController {
         return ownSharedAttributeSuccessors;
     }
 
+    public async getRelationshipAttributesOfValueTypeToPeerWithGivenKeyAndOwner(key: string, owner: CoreAddress, valueType: string, peer: CoreAddress): Promise<LocalAttribute[]> {
+        return await this.getLocalAttributes({
+            "content.@type": "RelationshipAttribute",
+            "content.owner": owner.toString(),
+            "content.key": key,
+            "content.value.@type": valueType,
+            "shareInfo.peer": peer.toString(),
+            "shareInfo.thirdPartyAddress": { $exists: false },
+            "deletionInfo.deletionStatus": {
+                $nin: [
+                    LocalAttributeDeletionStatus.ToBeDeleted,
+                    LocalAttributeDeletionStatus.ToBeDeletedByPeer,
+                    LocalAttributeDeletionStatus.DeletedByPeer,
+                    LocalAttributeDeletionStatus.DeletedByOwner
+                ]
+            }
+        });
+    }
+
     public async getAttributeTagCollection(): Promise<AttributeTagCollection> {
         const backboneTagCollection = (await this.attributeTagClient.getTagCollection()).value;
         return AttributeTagCollection.from(backboneTagCollection);

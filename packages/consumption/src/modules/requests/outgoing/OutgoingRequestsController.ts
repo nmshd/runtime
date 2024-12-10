@@ -1,5 +1,19 @@
 import { EventBus } from "@js-soft/ts-utils";
-import { DeleteAttributeRequestItem, RelationshipTemplateContent, Request, RequestItem, RequestItemGroup, Response, ResponseItem, ResponseItemGroup } from "@nmshd/content";
+import {
+    CreateAttributeRequestItem,
+    DeleteAttributeRequestItem,
+    ProposeAttributeRequestItem,
+    ReadAttributeRequestItem,
+    RelationshipAttribute,
+    RelationshipAttributeQuery,
+    RelationshipTemplateContent,
+    Request,
+    RequestItem,
+    RequestItemGroup,
+    Response,
+    ResponseItem,
+    ResponseItemGroup
+} from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId, ICoreId } from "@nmshd/core-types";
 import { Message, PeerDeletionStatus, Relationship, RelationshipStatus, RelationshipTemplate, SynchronizedCollection, TransportCoreErrors } from "@nmshd/transport";
 import { ConsumptionBaseController } from "../../../consumption/ConsumptionBaseController";
@@ -23,6 +37,12 @@ import {
 import { CanCreateOutgoingRequestParameters, ICanCreateOutgoingRequestParameters } from "./createOutgoingRequest/CanCreateOutgoingRequestParameters";
 import { CreateOutgoingRequestParameters, ICreateOutgoingRequestParameters } from "./createOutgoingRequest/CreateOutgoingRequestParameters";
 import { ISentOutgoingRequestParameters, SentOutgoingRequestParameters } from "./sentOutgoingRequest/SentOutgoingRequestParameters";
+
+interface RelationshipAttributeFragment {
+    owner: string;
+    key: string;
+    value: { "@type": string };
+}
 
 export class OutgoingRequestsController extends ConsumptionBaseController {
     public constructor(
@@ -48,7 +68,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         if (parsedParams.peer) {
             const relationship = await this.relationshipResolver.getRelationshipToIdentity(parsedParams.peer);
 
-            // there should at minimum be a Pending relationship to the peer
+            // there should at minimum be a pending Relationship to the peer
             if (!relationship) {
                 return ValidationResult.error(
                     ConsumptionCoreErrors.requests.missingRelationship(`You cannot create a request to '${parsedParams.peer.toString()}' since you are not in a relationship.`)
@@ -77,8 +97,12 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         }
 
         const innerResults = await this.canCreateItems(parsedParams.content, parsedParams.peer);
-
         const result = ValidationResult.fromItems(innerResults);
+
+        const keyUniquenessValidationResult = OutgoingRequestsController.validateKeyUniquenessOfRelationshipAttributesWithinRequest(parsedParams.content.items, parsedParams.peer);
+        if (keyUniquenessValidationResult.isError() && result.isSuccess()) {
+            return keyUniquenessValidationResult;
+        }
 
         return result;
     }
@@ -115,6 +139,95 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         const result = ValidationResult.fromItems(innerResults);
 
         return result;
+    }
+
+    private static validateKeyUniquenessOfRelationshipAttributesWithinRequest(items: (RequestItem | RequestItemGroup)[], recipient?: CoreAddress) {
+        const fragmentsOfMustBeAcceptedItemsOfRequest: RelationshipAttributeFragment[] = [];
+        for (const item of items) {
+            if (item instanceof RequestItemGroup) {
+                const fragmentsOfMustBeAcceptedItemsOfGroup = OutgoingRequestsController.extractRelationshipAttributeFragmentsFromMustBeAcceptedItemsOfGroup(item, recipient);
+                if (fragmentsOfMustBeAcceptedItemsOfGroup) fragmentsOfMustBeAcceptedItemsOfRequest.push(...fragmentsOfMustBeAcceptedItemsOfGroup);
+            } else {
+                const fragmentOfMustBeAcceptedRequestItem = OutgoingRequestsController.extractRelationshipAttributeFragmentFromMustBeAcceptedRequestItem(item, recipient);
+                if (fragmentOfMustBeAcceptedRequestItem) fragmentsOfMustBeAcceptedItemsOfRequest.push(fragmentOfMustBeAcceptedRequestItem);
+            }
+        }
+
+        if (OutgoingRequestsController.containsDuplicateRelationshipAttributeFragments(fragmentsOfMustBeAcceptedItemsOfRequest)) {
+            return ValidationResult.error(
+                ConsumptionCoreErrors.requests.violatedKeyUniquenessOfRelationshipAttributes(
+                    "The Request cannot be created because its acceptance would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key, owner and value type."
+                )
+            );
+        }
+
+        return ValidationResult.success();
+    }
+
+    private static extractRelationshipAttributeFragmentsFromMustBeAcceptedItemsOfGroup(requestItemGroup: RequestItemGroup, recipient?: CoreAddress) {
+        const fragmentsOfMustBeAcceptedItemsOfGroup: RelationshipAttributeFragment[] = [];
+
+        for (const item of requestItemGroup.items) {
+            if (item instanceof RequestItemGroup) {
+                const fragments = OutgoingRequestsController.extractRelationshipAttributeFragmentsFromMustBeAcceptedItemsOfGroup(item, recipient);
+                if (fragments) fragmentsOfMustBeAcceptedItemsOfGroup.push(...fragments);
+            } else {
+                const fragment = OutgoingRequestsController.extractRelationshipAttributeFragmentFromMustBeAcceptedRequestItem(item, recipient);
+                if (fragment) fragmentsOfMustBeAcceptedItemsOfGroup.push(fragment);
+            }
+        }
+
+        if (fragmentsOfMustBeAcceptedItemsOfGroup.length !== 0) return fragmentsOfMustBeAcceptedItemsOfGroup;
+
+        return;
+    }
+
+    private static extractRelationshipAttributeFragmentFromMustBeAcceptedRequestItem(requestItem: RequestItem, recipient?: CoreAddress) {
+        if (requestItem.mustBeAccepted) {
+            return OutgoingRequestsController.extractRelationshipAttributeFragmentFromRequestItem(requestItem, recipient);
+        }
+
+        return;
+    }
+
+    private static extractRelationshipAttributeFragmentFromRequestItem(requestItem: RequestItem, recipient?: CoreAddress) {
+        if (requestItem instanceof CreateAttributeRequestItem && requestItem.attribute instanceof RelationshipAttribute) {
+            const ownerIsEmptyString = requestItem.attribute.owner.toString() === "";
+            return {
+                owner: ownerIsEmptyString && recipient ? recipient.toString() : requestItem.attribute.owner.toString(),
+                key: requestItem.attribute.key,
+                value: { "@type": requestItem.attribute.value.toJSON()["@type"] }
+            };
+        } else if (
+            (requestItem instanceof ReadAttributeRequestItem || requestItem instanceof ProposeAttributeRequestItem) &&
+            requestItem.query instanceof RelationshipAttributeQuery
+        ) {
+            const ownerIsEmptyString = requestItem.query.owner.toString() === "";
+            return {
+                owner: ownerIsEmptyString && recipient ? recipient.toString() : requestItem.query.owner.toString(),
+                key: requestItem.query.key,
+                value: { "@type": requestItem.query.attributeCreationHints.valueType }
+            };
+        }
+
+        return;
+    }
+
+    private static containsDuplicateRelationshipAttributeFragments(fragments: RelationshipAttributeFragment[]) {
+        const seenIdentifier = new Set<string>();
+
+        for (const fragment of fragments) {
+            const separator = "+%+separation-sequence+%+";
+            const identifierOfFragment = `${fragment.owner}${separator}${fragment.key}${separator}${fragment.value["@type"]}`;
+
+            if (seenIdentifier.has(identifierOfFragment)) {
+                return true;
+            }
+
+            seenIdentifier.add(identifierOfFragment);
+        }
+
+        return false;
     }
 
     public async create(params: ICreateOutgoingRequestParameters): Promise<LocalRequest> {
