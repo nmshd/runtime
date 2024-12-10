@@ -290,6 +290,21 @@ export class TestUtil {
         return accountController;
     }
 
+    public static async exchangeTemplate(from: AccountController, to: AccountController): Promise<RelationshipTemplate> {
+        const templateFrom = await from.relationshipTemplates.sendRelationshipTemplate({
+            content: {
+                mycontent: "template"
+            },
+            expiresAt: CoreDate.utc().add({ minutes: 5 }),
+            maxNumberOfAllocations: 1
+        });
+
+        const templateReference = templateFrom.toRelationshipTemplateReference().truncate();
+        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(templateReference);
+
+        return templateTo;
+    }
+
     public static async addRejectedRelationship(from: AccountController, to: AccountController): Promise<Relationship> {
         const templateFrom = await from.relationshipTemplates.sendRelationshipTemplate({
             content: {
