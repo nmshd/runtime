@@ -31,7 +31,7 @@ class Validator implements IValidator<CreateRepositoryAttributeRequest> {
 
             validationResult.addFailure(
                 new ValidationFailure(
-                    RuntimeErrors.general.invalidPropertyValue("content.value.@type must match one of the allowed attribute value types for IdentityAttributes"),
+                    RuntimeErrors.general.invalidPropertyValue("content.value.@type must match one of the allowed Attribute value types for IdentityAttributes"),
                     "@type"
                 )
             );

@@ -237,7 +237,7 @@ class Attributes {
     }
 
     public isNotRepositoryAttribute(attributeId: string | CoreId) {
-        return new CoreError("error.consumption.attributes.isNotRepositoryAttribute", `The attribute (id: ${attributeId}) is not a RepositoryAttribute.`);
+        return new CoreError("error.consumption.attributes.isNotRepositoryAttribute", `The Attribute (id: ${attributeId}) is not a RepositoryAttribute.`);
     }
 
     public isNotSharedAttribute(attributeId: string | CoreId) {

@@ -819,7 +819,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                 content: {
                     value: {
                         "@type": "GivenName",
-                        value: "Petra Pan",
+                        value: "Test GivenName",
                         additionalProperty: 1
                     },
                     tags: ["tag1", "tag2"]
@@ -839,7 +839,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                 }
             } as any;
             const result = await services1.consumption.attributes.createRepositoryAttribute(request);
-            expect(result.error.message).toBe("content.value.@type must match one of the allowed attribute value types for IdentityAttributes");
+            expect(result.error.message).toBe("content.value.@type must match one of the allowed Attribute value types for IdentityAttributes");
             expect(result.error.code).toBe("error.runtime.validation.invalidPropertyValue");
         });
     });
