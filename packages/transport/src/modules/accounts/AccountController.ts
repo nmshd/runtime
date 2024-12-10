@@ -329,7 +329,8 @@ export class AccountController {
             type: deviceInfo.type,
             certificate: "",
             username: createdIdentity.device.username,
-            datawalletVersion: this._config.supportedDatawalletVersion
+            datawalletVersion: this._config.supportedDatawalletVersion,
+            isBackupDevice: false
         });
 
         // Initialize required controllers
@@ -381,7 +382,8 @@ export class AccountController {
             publicKey: deviceKeypair.publicKey,
             username: deviceSharedSecret.username,
             initialPassword: undefined,
-            isAdmin: deviceSharedSecret.identityPrivateKey ? true : false
+            isAdmin: deviceSharedSecret.identityPrivateKey ? true : false,
+            isBackupDevice: false
         });
 
         // Initialize required controllers

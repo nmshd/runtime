@@ -3,6 +3,7 @@ export * from "./challenges";
 export * from "./devices";
 export * from "./files";
 export * from "./identityDeletionProcesses";
+export * from "./identityRecoveryKits";
 export * from "./messages";
 export * from "./publicRelationshipTemplateReferences";
 export * from "./relationships";

@@ -21753,6 +21753,43 @@ export const UploadOwnFileValidatableRequest: any = {
     }
 }
 
+export const CreateIdentityRecoveryKitRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/CreateIdentityRecoveryKitRequest",
+    "definitions": {
+        "CreateIdentityRecoveryKitRequest": {
+            "type": "object",
+            "properties": {
+                "profileName": {
+                    "type": "string"
+                },
+                "passwordProtection": {
+                    "type": "object",
+                    "properties": {
+                        "password": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "passwordIsPin": {
+                            "type": "boolean",
+                            "const": true
+                        }
+                    },
+                    "required": [
+                        "password"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "profileName",
+                "passwordProtection"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
 export const GetAttachmentMetadataRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/GetAttachmentMetadataRequest",
