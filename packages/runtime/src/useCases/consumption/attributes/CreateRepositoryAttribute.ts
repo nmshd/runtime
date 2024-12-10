@@ -1,4 +1,4 @@
-import { Result } from "@js-soft/ts-utils";
+import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { AttributesController, CreateRepositoryAttributeParams } from "@nmshd/consumption";
 import { AttributeValues } from "@nmshd/content";
 import { AccountController } from "@nmshd/transport";
@@ -39,7 +39,21 @@ class Validator implements IValidator<CreateRepositoryAttributeRequest> {
         }
 
         const contentSchemaValidator = new SchemaValidator(this.schemaRepository.getSchema(`${valueType}JSON`));
-        return contentSchemaValidator.validate(value.content.value);
+        const validationResult = contentSchemaValidator.validate(value.content.value);
+        return Validator.prependStringToErrors(valueType, validationResult);
+    }
+
+    private static prependStringToErrors(prefix: string, validationResult: ValidationResult): ValidationResult {
+        if (validationResult.isValid()) return validationResult;
+
+        const failures = validationResult.getFailures();
+        const failuresWithPrefix = failures.map(
+            (failure) => new ValidationFailure(new ApplicationError(failure.error.code, `${prefix} :: ${failure.error.message}`, failure.error.data), failure.propertyName)
+        );
+
+        const validationResultWithPrefix = new ValidationResult();
+        validationResultWithPrefix.addFailures(failuresWithPrefix);
+        return validationResultWithPrefix;
     }
 }
 

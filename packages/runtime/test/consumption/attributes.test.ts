@@ -762,7 +762,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                 } as any
             };
             const result = await services1.consumption.attributes.createRepositoryAttribute(request);
-            expect(result.error.message).toBe("value must be string");
+            expect(result.error.message).toBe("GivenName :: value must be string");
             expect(result.error.code).toBe("error.runtime.validation.invalidPropertyValue");
         });
 
@@ -779,7 +779,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                 } as any
             };
             const result = await services1.consumption.attributes.createRepositoryAttribute(request);
-            expect(result.error.message).toBe("year must be number");
+            expect(result.error.message).toBe("BirthDate :: year must be number");
             expect(result.error.code).toBe("error.runtime.validation.invalidPropertyValue");
         });
 
@@ -795,7 +795,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                 } as any
             };
             const result = await services1.consumption.attributes.createRepositoryAttribute(request);
-            expect(result.error.message).toBe("must have required property 'year'");
+            expect(result.error.message).toBe("BirthDate :: must have required property 'year'");
             expect(result.error.code).toBe("error.runtime.validation.invalidPropertyValue");
         });
 
@@ -810,7 +810,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                 } as any
             };
             const result = await services1.consumption.attributes.createRepositoryAttribute(request);
-            expect(result.error.message).toBe("value must be equal to one of the allowed values");
+            expect(result.error.message).toBe("BirthMonth :: value must be equal to one of the allowed values");
             expect(result.error.code).toBe("error.runtime.validation.invalidPropertyValue");
         });
 
@@ -826,7 +826,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                 } as any
             };
             const result = await services1.consumption.attributes.createRepositoryAttribute(request);
-            expect(result.error.message).toBe("must NOT have additional properties");
+            expect(result.error.message).toBe("GivenName :: must NOT have additional properties");
             expect(result.error.code).toBe("error.runtime.validation.invalidPropertyValue");
         });
 
