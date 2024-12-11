@@ -262,18 +262,18 @@ class IdentityDeletionProcess {
     }
 }
 
-class DeciderModule {
-    public requestConfigDoesNotMatchResponseConfig() {
-        return new ApplicationError("error.runtime.decide.requestConfigDoesNotMatchResponseConfig", "The RequestConfig does not match the ResponseConfig.");
-    }
-}
-
 class IdentityRecoveryKits {
     public datawalletDisabled() {
         return new ApplicationError(
             "error.runtime.identityRecoveryKits.datawalletDisabled",
             "The Datawallet is disabled. IdentityRecoveryKits will only work if the Datawallet is enabled."
         );
+    }
+}
+
+class DeciderModule {
+    public requestConfigDoesNotMatchResponseConfig() {
+        return new ApplicationError("error.runtime.decide.requestConfigDoesNotMatchResponseConfig", "The RequestConfig does not match the ResponseConfig.");
     }
 }
 
