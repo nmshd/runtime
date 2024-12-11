@@ -1,3 +1,4 @@
+import { OwnerRestriction } from "../../src";
 import { RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
@@ -14,6 +15,27 @@ beforeAll(async () => {
 }, 30000);
 
 afterAll(async () => await serviceProvider.stop());
+
+afterEach(async () => {
+    const devicesController = services.transport.identityRecoveryKits["createIdentityRecoveryKitUseCase"]["devicesController"];
+    const tokenController = services.transport.identityRecoveryKits["createIdentityRecoveryKitUseCase"]["tokenController"];
+
+    const devices = await devicesController.list();
+
+    const backupDevices = devices.filter((device) => device.isBackupDevice);
+    for (const backupDevice of backupDevices) {
+        const matchingTokens = await tokenController.getTokens({
+            "cache.content.@type": "TokenContentDeviceSharedSecret",
+            "cache.content.sharedSecret.id": backupDevice.id.toString()
+        });
+
+        for (const matchingToken of matchingTokens) {
+            await tokenController.delete(matchingToken);
+        }
+
+        await devicesController.delete(backupDevice);
+    }
+});
 
 describe("Identity Recovery Kits", () => {
     describe("errors", () => {
@@ -44,5 +66,40 @@ describe("Identity Recovery Kits", () => {
             const response = await services.transport.identityRecoveryKits.createIdentityRecoveryKit({ profileName: "profileName", passwordProtection });
             expect(response).toBeAnError(errorMessage, "error.runtime.validation.invalidPropertyValue");
         });
+    });
+
+    test("should create a recovery kit", async () => {
+        const response = await services.transport.identityRecoveryKits.createIdentityRecoveryKit({
+            profileName: "profileName",
+            passwordProtection: { password: "aPassword" }
+        });
+        expect(response).toBeSuccessful();
+
+        const devices = (await services.transport.devices.getDevices()).value;
+        const backupDevices = devices.filter((device) => device.isBackupDevice);
+        expect(backupDevices).toHaveLength(1);
+
+        const backupDevice = backupDevices[0];
+
+        const tokens = (await services.transport.tokens.getTokens({ ownerRestriction: OwnerRestriction.Own, query: { expiresAt: "^9999-12-31" } })).value;
+        expect(tokens).toHaveLength(1);
+
+        expect(tokens[0].content["@type"]).toBe("TokenContentDeviceSharedSecret");
+        expect(tokens[0].content.sharedSecret.id).toBe(backupDevice.id.toString());
+    });
+
+    test("should delete a recovery kit and its token when creating a consecutive recovery kit", async () => {
+        const firstToken = (await services.transport.identityRecoveryKits.createIdentityRecoveryKit({ profileName: "profileName", passwordProtection: { password: "aPassword" } }))
+            .value;
+        const firstBackupDevice = (await services.transport.devices.getDevices()).value.find((device) => device.isBackupDevice)!;
+
+        const response = await services.transport.identityRecoveryKits.createIdentityRecoveryKit({ profileName: "profileName", passwordProtection: { password: "aPassword" } });
+        expect(response).toBeSuccessful();
+
+        const getTokenResponse = await services.transport.tokens.getToken({ id: firstToken.id });
+        expect(getTokenResponse).toBeAnError("Token not found", "error.runtime.recordNotFound");
+
+        const getDeviceResponse = await services.transport.devices.getDevice({ id: firstBackupDevice.id });
+        expect(getDeviceResponse).toBeAnError("Device not found", "error.runtime.recordNotFound");
     });
 });
