@@ -54,6 +54,8 @@ export class CreateIdentityRecoveryKitUseCase extends UseCase<CreateIdentityReco
             passwordProtection: PasswordProtectionCreationParameters.create(request.passwordProtection)
         });
 
+        await this.accountController.syncDatawallet();
+
         return Result.ok(TokenMapper.toTokenDTO(token, true));
     }
 
