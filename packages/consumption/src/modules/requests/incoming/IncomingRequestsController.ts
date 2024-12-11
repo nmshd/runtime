@@ -1,18 +1,6 @@
 import { ServalError } from "@js-soft/ts-serval";
 import { EventBus } from "@js-soft/ts-utils";
-import {
-    CreateAttributeRequestItem,
-    ProposeAttributeRequestItem,
-    ReadAttributeRequestItem,
-    RelationshipAttribute,
-    RelationshipAttributeQuery,
-    RequestItem,
-    RequestItemGroup,
-    Response,
-    ResponseItemDerivations,
-    ResponseItemGroup,
-    ResponseResult
-} from "@nmshd/content";
+import { RequestItem, RequestItemGroup, Response, ResponseItemDerivations, ResponseItemGroup, ResponseResult } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreId } from "@nmshd/core-types";
 import { Message, PeerDeletionStatus, Relationship, RelationshipStatus, RelationshipTemplate, SynchronizedCollection, TransportCoreErrors } from "@nmshd/transport";
 import { ConsumptionBaseController } from "../../../consumption/ConsumptionBaseController";
@@ -27,6 +15,7 @@ import { RequestItemProcessorRegistry } from "../itemProcessors/RequestItemProce
 import { ILocalRequestSource, LocalRequest } from "../local/LocalRequest";
 import { LocalRequestStatus } from "../local/LocalRequestStatus";
 import { LocalResponse, LocalResponseSource } from "../local/LocalResponse";
+import { validateKeyUniquenessOfRelationshipAttributesWithinIncomingRequest } from "../utility/validateRelationshipAttributesWithinRequest";
 import { DecideRequestParametersValidator } from "./DecideRequestParametersValidator";
 import { CheckPrerequisitesOfIncomingRequestParameters, ICheckPrerequisitesOfIncomingRequestParameters } from "./checkPrerequisites/CheckPrerequisitesOfIncomingRequestParameters";
 import { CompleteIncomingRequestParameters, ICompleteIncomingRequestParameters } from "./complete/CompleteIncomingRequestParameters";
@@ -39,12 +28,6 @@ import {
     IRequireManualDecisionOfIncomingRequestParameters,
     RequireManualDecisionOfIncomingRequestParameters
 } from "./requireManualDecision/RequireManualDecisionOfIncomingRequestParameters";
-
-interface RelationshipAttributeFragment {
-    owner: string;
-    key: string;
-    value: { "@type": string };
-}
 
 export class IncomingRequestsController extends ConsumptionBaseController {
     private readonly decideRequestParamsValidator: DecideRequestParametersValidator = new DecideRequestParametersValidator();
@@ -191,7 +174,7 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         }
 
         const request = await this.getOrThrow(params.requestId);
-        const keyUniquenessValidationResult = this.validateKeyUniquenessOfRelationshipAttributesWithinRequest(request.content.items, params.items);
+        const keyUniquenessValidationResult = validateKeyUniquenessOfRelationshipAttributesWithinIncomingRequest(request.content.items, params.items, this.identity.address);
         if (keyUniquenessValidationResult.isError()) {
             return keyUniquenessValidationResult;
         }
@@ -285,158 +268,6 @@ export class IncomingRequestsController extends ConsumptionBaseController {
 
             return ValidationResult.error(ConsumptionCoreErrors.requests.unexpectedErrorDuringRequestItemProcessing(e));
         }
-    }
-
-    private validateKeyUniquenessOfRelationshipAttributesWithinRequest(
-        items: (RequestItem | RequestItemGroup)[],
-        params: (DecideRequestItemParametersJSON | DecideRequestItemGroupParametersJSON)[]
-    ) {
-        const fragmentsOfMustBeAcceptedItemsOfRequest: RelationshipAttributeFragment[] = [];
-
-        for (let i = 0; i < params.length; i++) {
-            const item = items[i];
-
-            if (item instanceof RequestItemGroup) {
-                const fragmentsOfMustBeAcceptedItemsOfGroup = this.extractRelationshipAttributeFragmentsFromMustBeAcceptedItemsOfGroup(item);
-                if (fragmentsOfMustBeAcceptedItemsOfGroup) {
-                    fragmentsOfMustBeAcceptedItemsOfRequest.push(...fragmentsOfMustBeAcceptedItemsOfGroup);
-                }
-            } else {
-                const fragmentOfMustBeAcceptedRequestItem = this.extractRelationshipAttributeFragmentFromMustBeAcceptedRequestItem(item);
-                if (fragmentOfMustBeAcceptedRequestItem) {
-                    fragmentsOfMustBeAcceptedItemsOfRequest.push(fragmentOfMustBeAcceptedRequestItem);
-                }
-            }
-        }
-
-        if (IncomingRequestsController.containsDuplicateRelationshipAttributeFragments(fragmentsOfMustBeAcceptedItemsOfRequest)) {
-            throw ConsumptionCoreErrors.requests.violatedKeyUniquenessOfRelationshipAttributes(
-                "The Request can never be accepted because it would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key, owner and value type."
-            );
-        }
-
-        const fragmentsOfAcceptedItemsOfRequest: RelationshipAttributeFragment[] = [];
-
-        for (let i = 0; i < params.length; i++) {
-            const item = items[i];
-            const decideItemParams = params[i];
-
-            if (item instanceof RequestItemGroup) {
-                const fragmentsOfAcceptedItemsOfGroup = this.extractRelationshipAttributeFragmentsFromAcceptedItemsOfGroup(
-                    item,
-                    decideItemParams as DecideRequestItemGroupParametersJSON
-                );
-                if (fragmentsOfAcceptedItemsOfGroup) {
-                    fragmentsOfAcceptedItemsOfRequest.push(...fragmentsOfAcceptedItemsOfGroup);
-                }
-            } else {
-                const fragmentOfAcceptedRequestItem = this.extractRelationshipAttributeFragmentFromAcceptedRequestItem(item, decideItemParams as DecideRequestItemParametersJSON);
-                if (fragmentOfAcceptedRequestItem) {
-                    fragmentsOfAcceptedItemsOfRequest.push(fragmentOfAcceptedRequestItem);
-                }
-            }
-        }
-
-        if (IncomingRequestsController.containsDuplicateRelationshipAttributeFragments(fragmentsOfAcceptedItemsOfRequest)) {
-            return ValidationResult.error(
-                ConsumptionCoreErrors.requests.invalidAcceptParameters(
-                    "The Request cannot be accepted with this parameters because it would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key, owner and value type."
-                )
-            );
-        }
-
-        return ValidationResult.success();
-    }
-
-    private extractRelationshipAttributeFragmentsFromMustBeAcceptedItemsOfGroup(requestItemGroup: RequestItemGroup) {
-        const fragmentsOfMustBeAcceptedItemsOfGroup: RelationshipAttributeFragment[] = [];
-
-        for (const item of requestItemGroup.items) {
-            if (item instanceof RequestItemGroup) {
-                const fragments = this.extractRelationshipAttributeFragmentsFromMustBeAcceptedItemsOfGroup(item);
-                if (fragments) fragmentsOfMustBeAcceptedItemsOfGroup.push(...fragments);
-            } else {
-                const fragment = this.extractRelationshipAttributeFragmentFromMustBeAcceptedRequestItem(item);
-                if (fragment) fragmentsOfMustBeAcceptedItemsOfGroup.push(fragment);
-            }
-        }
-
-        if (fragmentsOfMustBeAcceptedItemsOfGroup.length !== 0) return fragmentsOfMustBeAcceptedItemsOfGroup;
-
-        return;
-    }
-
-    private extractRelationshipAttributeFragmentsFromAcceptedItemsOfGroup(requestItemGroup: RequestItemGroup, decideGroupParams: DecideRequestItemGroupParametersJSON) {
-        const fragmentsOfAcceptedItemsOfGroup: RelationshipAttributeFragment[] = [];
-
-        for (let i = 0; i < decideGroupParams.items.length; i++) {
-            const decideItemParams = decideGroupParams.items[i];
-            const item = requestItemGroup.items[i];
-
-            if (item instanceof RequestItem) {
-                const fragment = this.extractRelationshipAttributeFragmentFromAcceptedRequestItem(item, decideItemParams);
-                if (fragment) fragmentsOfAcceptedItemsOfGroup.push(fragment);
-            }
-        }
-
-        if (fragmentsOfAcceptedItemsOfGroup.length !== 0) return fragmentsOfAcceptedItemsOfGroup;
-
-        return;
-    }
-
-    private extractRelationshipAttributeFragmentFromMustBeAcceptedRequestItem(requestItem: RequestItem) {
-        if (requestItem.mustBeAccepted) {
-            return this.extractRelationshipAttributeFragmentFromRequestItem(requestItem);
-        }
-
-        return;
-    }
-
-    private extractRelationshipAttributeFragmentFromAcceptedRequestItem(requestItem: RequestItem, decideItemParams: DecideRequestItemParametersJSON) {
-        if (decideItemParams.accept) {
-            return this.extractRelationshipAttributeFragmentFromRequestItem(requestItem);
-        }
-
-        return;
-    }
-
-    private extractRelationshipAttributeFragmentFromRequestItem(requestItem: RequestItem) {
-        if (requestItem instanceof CreateAttributeRequestItem && requestItem.attribute instanceof RelationshipAttribute) {
-            const ownerIsEmptyString = requestItem.attribute.owner.toString() === "";
-            return {
-                owner: ownerIsEmptyString ? this.identity.address.toString() : requestItem.attribute.owner.toString(),
-                key: requestItem.attribute.key,
-                value: { "@type": requestItem.attribute.value.toJSON()["@type"] }
-            };
-        } else if (
-            (requestItem instanceof ReadAttributeRequestItem || requestItem instanceof ProposeAttributeRequestItem) &&
-            requestItem.query instanceof RelationshipAttributeQuery
-        ) {
-            const ownerIsEmptyString = requestItem.query.owner.toString() === "";
-            return {
-                owner: ownerIsEmptyString ? this.identity.address.toString() : requestItem.query.owner.toString(),
-                key: requestItem.query.key,
-                value: { "@type": requestItem.query.attributeCreationHints.valueType }
-            };
-        }
-
-        return;
-    }
-
-    private static containsDuplicateRelationshipAttributeFragments(fragments: RelationshipAttributeFragment[]) {
-        const seenIdentifier = new Set<string>();
-
-        for (const fragment of fragments) {
-            const identifierOfFragment = JSON.stringify(fragment);
-
-            if (seenIdentifier.has(identifierOfFragment)) {
-                return true;
-            }
-
-            seenIdentifier.add(identifierOfFragment);
-        }
-
-        return false;
     }
 
     public async accept(params: DecideRequestParametersJSON): Promise<LocalRequest> {
