@@ -656,17 +656,20 @@ export class TestUtil {
     }
 
     public static async runDeletionJob(): Promise<void> {
-        const backboneVersion = this.getBackboneEnvVar("BACKBONE_VERSION");
+        const backboneVersion = this.getBackboneVersion();
+        const appsettingsOverrideLocation = process.env.APPSETTINGS_OVERRIDE_LOCATION ?? `${__dirname}/../../../../.dev/appsettings.override.json`;
 
         await new GenericContainer(`ghcr.io/nmshd/backbone-identity-deletion-jobs:${backboneVersion}`)
             .withWaitStrategy(Wait.forOneShotStartup())
             .withCommand(["--Worker", "ActualDeletionWorker"])
             .withNetworkMode("backbone")
-            .withCopyFilesToContainer([{ source: `${__dirname}/../../../../.dev/appsettings.override.json`, target: "/app/appsettings.override.json" }])
+            .withCopyFilesToContainer([{ source: appsettingsOverrideLocation, target: "/app/appsettings.override.json" }])
             .start();
     }
 
-    private static getBackboneEnvVar(name: string) {
+    private static getBackboneVersion() {
+        if (process.env.BACKBONE_VERSION) return process.env.BACKBONE_VERSION;
+
         const envFile = fs.readFileSync(path.resolve(`${__dirname}/../../../../.dev/compose.backbone.env`));
         const env = envFile
             .toString()
@@ -674,6 +677,6 @@ export class TestUtil {
             .map((line) => line.split("="))
             .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {} as Record<string, string>);
 
-        return env[name];
+        return env["BACKBONE_VERSION"];
     }
 }
