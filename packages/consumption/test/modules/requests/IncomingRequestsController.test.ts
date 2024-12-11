@@ -482,7 +482,7 @@ describe("IncomingRequestsController", function () {
                     ]
                 })
             ).rejects.toThrow(
-                "The Request can never be accepted because it would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key, owner and value type."
+                `The Request can never be accepted because it would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key 'uniqueKey', owner and value type.`
             );
         });
 
@@ -544,8 +544,7 @@ describe("IncomingRequestsController", function () {
             });
             expect(validationResult).errorValidationResult({
                 code: "error.consumption.requests.invalidAcceptParameters",
-                message:
-                    "The Request cannot be accepted with this parameters because it would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key, owner and value type."
+                message: `The Request cannot be accepted with this parameters because it would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key 'uniqueKey', owner and value type.`
             });
         });
 

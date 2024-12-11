@@ -246,7 +246,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     expect(result).errorValidationResult({
                         code: "error.consumption.requests.invalidRequestItem",
                         message:
-                            "The queried RelationshipAttribute could not be created because there is already a RelationshipAttribute in the context of this Relationship with the same key, owner and value type."
+                            "The queried RelationshipAttribute could not be created because there is already a RelationshipAttribute in the context of this Relationship with the same key 'uniqueKey', owner and value type."
                     });
                 });
             });
@@ -646,7 +646,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             };
 
             await expect(processor.canAccept(requestItem, acceptParams, incomingRequest)).rejects.toThrow(
-                "The queried RelationshipAttribute cannot be created because there is already a RelationshipAttribute in the context of this Relationship with the same key, owner and value type."
+                "The queried RelationshipAttribute cannot be created because there is already a RelationshipAttribute in the context of this Relationship with the same key 'uniqueKey', owner and value type."
             );
         });
 

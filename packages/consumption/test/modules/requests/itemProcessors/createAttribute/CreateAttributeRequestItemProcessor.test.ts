@@ -151,7 +151,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: relationshipAttributeWithSameKey }, TestIdentity.RECIPIENT);
             await Then.theCanCreateResultShouldBeAnErrorWith({
                 message:
-                    "The creation of the provided RelationshipAttribute cannot be requested because there is already a RelationshipAttribute in the context of this Relationship with the same key, owner and value type."
+                    "The creation of the provided RelationshipAttribute cannot be requested because there is already a RelationshipAttribute in the context of this Relationship with the same key 'uniqueKey', owner and value type."
             });
         });
 
@@ -171,7 +171,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: relationshipAttributeWithSameKeyAndEmptyOwner }, TestIdentity.RECIPIENT);
             await Then.theCanCreateResultShouldBeAnErrorWith({
                 message:
-                    "The creation of the provided RelationshipAttribute cannot be requested because there is already a RelationshipAttribute in the context of this Relationship with the same key, owner and value type."
+                    "The creation of the provided RelationshipAttribute cannot be requested because there is already a RelationshipAttribute in the context of this Relationship with the same key 'uniqueKey', owner and value type."
             });
         });
 
@@ -269,7 +269,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             });
 
             await expect(When.iCallCanAccept()).rejects.toThrow(
-                "The provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute in the context of this Relationship with the same key, owner and value type."
+                "The provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute in the context of this Relationship with the same key 'aKey', owner and value type."
             );
         });
 
@@ -285,7 +285,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             });
 
             await expect(When.iCallCanAccept()).rejects.toThrow(
-                "The provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute in the context of this Relationship with the same key, owner and value type."
+                "The provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute in the context of this Relationship with the same key 'aKey', owner and value type."
             );
         });
 
@@ -306,7 +306,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await Then.theCanAcceptResultShouldBeAnErrorWith({
                 code: "error.consumption.requests.invalidAcceptParameters",
                 message:
-                    "This CreateAttributeRequestItem cannot be accepted as the provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute in the context of this Relationship with the same key, owner and value type."
+                    "This CreateAttributeRequestItem cannot be accepted as the provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute in the context of this Relationship with the same key 'aKey', owner and value type."
             });
         });
     });

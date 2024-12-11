@@ -19,6 +19,13 @@ interface RelationshipAttributeFragment {
     value: { "@type": string };
 }
 
+type ContainsDuplicateRelationshipAttributeFragmentsResponse =
+    | { containsDuplicates: false }
+    | {
+          containsDuplicates: true;
+          duplicateFragment: RelationshipAttributeFragment;
+      };
+
 export function validateKeyUniquenessOfRelationshipAttributesWithinOutgoingRequest(items: (RequestItem | RequestItemGroup)[], recipient?: CoreAddress): ValidationResult {
     const fragmentsOfMustBeAcceptedItemsOfRequest: RelationshipAttributeFragment[] = [];
     for (const item of items) {
@@ -31,10 +38,11 @@ export function validateKeyUniquenessOfRelationshipAttributesWithinOutgoingReque
         }
     }
 
-    if (containsDuplicateRelationshipAttributeFragments(fragmentsOfMustBeAcceptedItemsOfRequest)) {
+    const containsMustBeAcceptedDuplicatesResult = containsDuplicateRelationshipAttributeFragments(fragmentsOfMustBeAcceptedItemsOfRequest);
+    if (containsMustBeAcceptedDuplicatesResult.containsDuplicates) {
         return ValidationResult.error(
             ConsumptionCoreErrors.requests.violatedKeyUniquenessOfRelationshipAttributes(
-                "The Request cannot be created because its acceptance would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key, owner and value type."
+                `The Request cannot be created because its acceptance would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key '${containsMustBeAcceptedDuplicatesResult.duplicateFragment.key}', owner and value type.`
             )
         );
     }
@@ -65,9 +73,10 @@ export function validateKeyUniquenessOfRelationshipAttributesWithinIncomingReque
         }
     }
 
-    if (containsDuplicateRelationshipAttributeFragments(fragmentsOfMustBeAcceptedItemsOfRequest)) {
+    const containsMustBeAcceptedDuplicatesResult = containsDuplicateRelationshipAttributeFragments(fragmentsOfMustBeAcceptedItemsOfRequest);
+    if (containsMustBeAcceptedDuplicatesResult.containsDuplicates) {
         throw ConsumptionCoreErrors.requests.violatedKeyUniquenessOfRelationshipAttributes(
-            "The Request can never be accepted because it would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key, owner and value type."
+            `The Request can never be accepted because it would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key '${containsMustBeAcceptedDuplicatesResult.duplicateFragment.key}', owner and value type.`
         );
     }
 
@@ -90,10 +99,11 @@ export function validateKeyUniquenessOfRelationshipAttributesWithinIncomingReque
         }
     }
 
-    if (containsDuplicateRelationshipAttributeFragments(fragmentsOfAcceptedItemsOfRequest)) {
+    const containsAcceptedDuplicatesResult = containsDuplicateRelationshipAttributeFragments(fragmentsOfAcceptedItemsOfRequest);
+    if (containsAcceptedDuplicatesResult.containsDuplicates) {
         return ValidationResult.error(
             ConsumptionCoreErrors.requests.invalidAcceptParameters(
-                "The Request cannot be accepted with this parameters because it would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key, owner and value type."
+                `The Request cannot be accepted with this parameters because it would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key '${containsAcceptedDuplicatesResult.duplicateFragment.key}', owner and value type.`
             )
         );
     }
@@ -179,18 +189,18 @@ function extractRelationshipAttributeFragmentFromRequestItem(requestItem: Reques
     return;
 }
 
-function containsDuplicateRelationshipAttributeFragments(fragments: RelationshipAttributeFragment[]): boolean {
+function containsDuplicateRelationshipAttributeFragments(fragments: RelationshipAttributeFragment[]): ContainsDuplicateRelationshipAttributeFragmentsResponse {
     const seenIdentifier = new Set<string>();
 
     for (const fragment of fragments) {
         const identifierOfFragment = JSON.stringify(fragment);
 
         if (seenIdentifier.has(identifierOfFragment)) {
-            return true;
+            return { containsDuplicates: true, duplicateFragment: fragment };
         }
 
         seenIdentifier.add(identifierOfFragment);
     }
 
-    return false;
+    return { containsDuplicates: false };
 }
