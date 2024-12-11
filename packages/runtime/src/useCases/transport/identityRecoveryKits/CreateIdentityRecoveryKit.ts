@@ -50,7 +50,7 @@ export class CreateIdentityRecoveryKitUseCase extends UseCase<CreateIdentityReco
         const token = await this.tokenController.sendToken({
             content: TokenContentDeviceSharedSecret.from({ sharedSecret }),
             expiresAt: CoreDate.from("9999-12-31"),
-            ephemeral: true,
+            ephemeral: false,
             passwordProtection: PasswordProtectionCreationParameters.create(request.passwordProtection)
         });
 
