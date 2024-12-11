@@ -52,7 +52,7 @@ export class CreateIdentityRecoveryKitUseCase extends UseCase<CreateIdentityReco
 
         await this.accountController.syncDatawallet();
 
-        return Result.ok(TokenMapper.toTokenDTO(token, true));
+        return Result.ok(TokenMapper.toTokenDTO(token, false));
     }
 
     private async removeBackupDevices(backupDevices: Device[]) {
