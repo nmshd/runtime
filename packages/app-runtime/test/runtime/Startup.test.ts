@@ -1,4 +1,4 @@
-import { AppRuntime, LocalAccountDTO } from "../../src";
+import { AppRuntime, LocalAccountDTO, LocalAccountSession } from "../../src";
 import { EventListener, TestUtil } from "../lib";
 
 describe("Runtime Startup", function () {
@@ -62,5 +62,43 @@ describe("Runtime Startup", function () {
         const selectedAccount = await runtime.selectAccount(localAccount.id);
         expect(selectedAccount).toBeDefined();
         expect(selectedAccount.account.id.toString()).toBe(localAccount.id.toString());
+    });
+});
+
+describe("Start Accounts", function () {
+    let runtime: AppRuntime;
+
+    let sessionA: LocalAccountSession;
+
+    let errorSpy: jest.SpyInstance<void, [message?: any, ...optionalParams: any[]], any>;
+
+    beforeAll(async function () {
+        runtime = await TestUtil.createRuntime();
+        await runtime.start();
+
+        const accounts = await TestUtil.provideAccounts(runtime, 1);
+        sessionA = await runtime.selectAccount(accounts[0].id);
+
+        errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    });
+
+    afterEach(() => errorSpy.mockRestore());
+
+    afterAll(async () => await runtime.stop());
+
+    test("should run startAccounts", async function () {
+        await runtime["startAccounts"]();
+        expect(errorSpy).not.toHaveBeenCalled();
+    });
+
+    test.only("should run startAccounts for one deleted Account", async function () {
+        await sessionA.transportServices.identityDeletionProcesses["initiateIdentityDeletionProcessUseCase"]["identityDeletionProcessController"].initiateIdentityDeletionProcess(
+            0
+        );
+        await TestUtil.runDeletionJob();
+
+        await runtime["startAccounts"]();
+        // TODO: check for error message
+        expect(errorSpy).toHaveBeenCalled();
     });
 });

@@ -305,10 +305,19 @@ export class AppRuntime extends Runtime<AppConfig> {
 
         for (const account of accounts) {
             const session = await this.selectAccount(account.id.toString());
-            const syncResult = await session.transportServices.account.syncDatawallet();
 
+            const syncResult = await session.transportServices.account.syncDatawallet();
             if (syncResult.isSuccess) continue;
-            // TODO: can I check whether the error is a 400?
+            // TODO: should we log the syncResult error?
+
+            session.accountController.authenticator.clear();
+            try {
+                await session.accountController.authenticator.getToken();
+                continue;
+            } catch (error) {
+                this.logger.error(error);
+                // if (!(error.status === 400)) continue;
+            }
 
             const checkDeletionResult = await session.transportServices.account.checkDeletionOfIdentity();
 
