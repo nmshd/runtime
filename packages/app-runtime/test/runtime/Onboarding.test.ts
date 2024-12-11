@@ -32,7 +32,7 @@ describe("Onboarding", function () {
         await expect(() => runtime.accountServices.onboardAccount(onboardingInfoResult.value)).rejects.toThrow("error.app-runtime.onboardedAccountAlreadyExists");
     });
 
-    test("should onboard with a recovery kit", async () => {
+    test("should onboard with a recovery kit and be able to create a new recovery kit", async () => {
         const recoveryKitResponse = await services1.transportServices.identityRecoveryKits.createIdentityRecoveryKit({
             profileName: "profileName",
             passwordProtection: { password: "aPassword" }
