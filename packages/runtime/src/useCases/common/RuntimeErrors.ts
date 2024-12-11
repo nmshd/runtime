@@ -289,6 +289,6 @@ export class RuntimeErrors {
     public static readonly notifications = new Notifications();
     public static readonly attributes = new Attributes();
     public static readonly identityDeletionProcess = new IdentityDeletionProcess();
-    public static readonly deciderModule = new DeciderModule();
     public static readonly identityRecoveryKits = new IdentityRecoveryKits();
+    public static readonly deciderModule = new DeciderModule();
 }
