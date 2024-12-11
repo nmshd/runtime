@@ -51,7 +51,8 @@ export class Device extends CoreSynchronizable implements IDevice {
         nameof<Device>((d) => d.username),
         nameof<Device>((d) => d.initialPassword),
         nameof<Device>((d) => d.datawalletVersion),
-        nameof<Device>((d) => d.isOffboarded)
+        nameof<Device>((d) => d.isOffboarded),
+        nameof<Device>((d) => d.isBackupDevice)
     ];
 
     public override readonly userdataProperties = [nameof<Device>((d) => d.name), nameof<Device>((d) => d.description)];
