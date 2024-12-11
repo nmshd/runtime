@@ -3,7 +3,7 @@ import { Inject } from "@nmshd/typescript-ioc";
 import { TokenDTO } from "../../../types";
 import { CreateIdentityRecoveryKitRequest, CreateIdentityRecoveryKitUseCase, ExistsIdentityRecoveryKitResponse, ExistsIdentityRecoveryKitUseCase } from "../../../useCases";
 
-export class IdentityRecoveryKitFacade {
+export class IdentityRecoveryKitsFacade {
     public constructor(
         @Inject private readonly createIdentityRecoveryKitUseCase: CreateIdentityRecoveryKitUseCase,
         @Inject private readonly existsIdentityRecoveryKitUseCase: ExistsIdentityRecoveryKitUseCase

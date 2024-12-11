@@ -3,7 +3,7 @@ export * from "./ChallengesFacade";
 export * from "./DevicesFacade";
 export * from "./FilesFacade";
 export * from "./IdentityDeletionProcessesFacade";
-export * from "./IdentityRecoveryKitFacade";
+export * from "./IdentityRecoveryKitsFacade";
 export * from "./MessagesFacade";
 export * from "./PublicRelationshipTemplateReferencesFacade";
 export * from "./RelationshipsFacade";
