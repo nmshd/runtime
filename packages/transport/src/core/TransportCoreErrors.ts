@@ -42,6 +42,13 @@ class Relationships {
         return new CoreError("error.transport.relationships.reactivationAlreadyRequested", message);
     }
 
+    public deletedOwnerOfRelationshipTemplate() {
+        return new CoreError(
+            "error.transport.relationships.deletedOwnerOfRelationshipTemplate",
+            "The Identity who created the RelationshipTemplate has been deleted in the meantime. Thus, it is not possible to establish a Relationship to them."
+        );
+    }
+
     public activeIdentityDeletionProcessOfOwnerOfRelationshipTemplate() {
         return new CoreError(
             "error.transport.relationships.activeIdentityDeletionProcessOfOwnerOfRelationshipTemplate",
