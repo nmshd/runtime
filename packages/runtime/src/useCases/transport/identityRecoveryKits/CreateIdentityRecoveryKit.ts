@@ -1,9 +1,9 @@
-import { ApplicationError, Result } from "@js-soft/ts-utils";
+import { Result } from "@js-soft/ts-utils";
 import { CoreDate } from "@nmshd/core-types";
 import { AccountController, Device, DevicesController, PasswordProtectionCreationParameters, TokenContentDeviceSharedSecret, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { TokenDTO } from "../../../types";
-import { SchemaRepository, TokenAndTemplateCreationValidator, UseCase } from "../../common";
+import { RuntimeErrors, SchemaRepository, TokenAndTemplateCreationValidator, UseCase } from "../../common";
 import { TokenMapper } from "../tokens/TokenMapper";
 
 export interface CreateIdentityRecoveryKitRequest {
@@ -34,11 +34,7 @@ export class CreateIdentityRecoveryKitUseCase extends UseCase<CreateIdentityReco
     }
 
     protected async executeInternal(request: CreateIdentityRecoveryKitRequest): Promise<Result<TokenDTO>> {
-        if (!this.accountController.config.datawalletEnabled) {
-            return Result.fail(
-                new ApplicationError("error.runtime.recoveryKit.datawalletDisabled", "Datawallet is disabled. Recovery kits can only be created when datawallet is enabled.")
-            );
-        }
+        if (!this.accountController.config.datawalletEnabled) return Result.fail(RuntimeErrors.identityRecoveryKits.datawalletDisabled());
 
         const devices = await this.devicesController.list();
 

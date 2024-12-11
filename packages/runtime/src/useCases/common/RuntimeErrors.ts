@@ -268,6 +268,15 @@ class DeciderModule {
     }
 }
 
+class IdentityRecoveryKits {
+    public datawalletDisabled() {
+        return new ApplicationError(
+            "error.runtime.identityRecoveryKits.datawalletDisabled",
+            "The Datawallet is disabled. IdentityRecoveryKits will only work if the Datawallet is enabled."
+        );
+    }
+}
+
 export class RuntimeErrors {
     public static readonly general = new General();
     public static readonly serval = new Serval();
@@ -281,4 +290,5 @@ export class RuntimeErrors {
     public static readonly attributes = new Attributes();
     public static readonly identityDeletionProcess = new IdentityDeletionProcess();
     public static readonly deciderModule = new DeciderModule();
+    public static readonly identityRecoveryKits = new IdentityRecoveryKits();
 }

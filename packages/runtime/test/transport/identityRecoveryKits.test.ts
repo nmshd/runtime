@@ -95,7 +95,10 @@ describe("Identity Recovery Kits", () => {
                 profileName: "profileName",
                 passwordProtection: { password: "password" }
             });
-            expect(response).toBeAnError("Datawallet is disabled. Recovery kits can only be created when datawallet is enabled.", "error.runtime.recoveryKit.datawalletDisabled");
+            expect(response).toBeAnError(
+                "The Datawallet is disabled. IdentityRecoveryKits will only work if the Datawallet is enabled.",
+                "error.runtime.identityRecoveryKits.datawalletDisabled"
+            );
         });
 
         test.each([
