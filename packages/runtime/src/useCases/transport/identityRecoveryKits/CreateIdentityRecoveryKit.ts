@@ -45,7 +45,7 @@ export class CreateIdentityRecoveryKitUseCase extends UseCase<CreateIdentityReco
         const backupDevices = devices.filter((device) => device.isBackupDevice);
         if (backupDevices.length > 0) await this.removeBackupDevices(backupDevices);
 
-        const newBackupDevice = await this.devicesController.sendDevice({ isBackupDevice: true, name: "Backup Device" });
+        const newBackupDevice = await this.devicesController.sendDevice({ isAdmin: true, isBackupDevice: true, name: "Backup Device" });
         const sharedSecret = await this.devicesController.getSharedSecret(newBackupDevice.id, request.profileName);
         const token = await this.tokenController.sendToken({
             content: TokenContentDeviceSharedSecret.from({ sharedSecret }),
