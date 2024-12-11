@@ -217,8 +217,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         const seenIdentifier = new Set<string>();
 
         for (const fragment of fragments) {
-            const separator = "+%+separation-sequence+%+";
-            const identifierOfFragment = `${fragment.owner}${separator}${fragment.key}${separator}${fragment.value["@type"]}`;
+            const identifierOfFragment = JSON.stringify(fragment);
 
             if (seenIdentifier.has(identifierOfFragment)) {
                 return true;
