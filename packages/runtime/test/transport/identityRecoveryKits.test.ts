@@ -10,8 +10,8 @@ beforeAll(async () => {
     const runtimeServices = await serviceProvider.launch(1, { enableDatawallet: true });
     services = runtimeServices[0];
 
-    const datawalletDisbledServices = await serviceProvider.launch(1, { enableDatawallet: false });
-    servicesWithDisabledDatawallet = datawalletDisbledServices[0];
+    const datawalletDisabledServices = await serviceProvider.launch(1, { enableDatawallet: false });
+    servicesWithDisabledDatawallet = datawalletDisabledServices[0];
 }, 30000);
 
 afterAll(async () => await serviceProvider.stop());
