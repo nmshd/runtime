@@ -102,4 +102,20 @@ describe("Identity Recovery Kits", () => {
         const getDeviceResponse = await services.transport.devices.getDevice({ id: firstBackupDevice.id });
         expect(getDeviceResponse).toBeAnError("Device not found", "error.runtime.recordNotFound");
     });
+
+    test("should tell that no recovery kit exists", async () => {
+        const response = await services.transport.identityRecoveryKits.existsIdentityRecoveryKit();
+        expect(response).toBeSuccessful();
+
+        expect(response.value.exists).toBe(false);
+    });
+
+    test("should tell that a recovery kit exists", async () => {
+        await services.transport.identityRecoveryKits.createIdentityRecoveryKit({ profileName: "profileName", passwordProtection: { password: "aPassword" } });
+
+        const response = await services.transport.identityRecoveryKits.existsIdentityRecoveryKit();
+        expect(response).toBeSuccessful();
+
+        expect(response.value.exists).toBe(true);
+    });
 });
