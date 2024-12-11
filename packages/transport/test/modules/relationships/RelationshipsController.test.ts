@@ -127,9 +127,7 @@ describe("RelationshipsController", function () {
                         mycontent: "request"
                     }
                 })
-            ).rejects.toThrow(
-                "error.platform.recordNotFound (404): 'Identity not found. Make sure the ID exists and the record is not expired. If a password is required to fetch the record, make sure you passed the correct one.'"
-            );
+            ).rejects.toThrow("error.transport.relationships.deletedOwnerOfRelationshipTemplate");
 
             await expect(
                 sender.relationships.sendRelationship({
@@ -138,9 +136,7 @@ describe("RelationshipsController", function () {
                         mycontent: "request"
                     }
                 })
-            ).rejects.toThrow(
-                "error.platform.recordNotFound (404): 'Identity not found. Make sure the ID exists and the record is not expired. If a password is required to fetch the record, make sure you passed the correct one.'"
-            );
+            ).rejects.toThrow("error.transport.relationships.deletedOwnerOfRelationshipTemplate");
         });
     });
 
