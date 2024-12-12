@@ -3,16 +3,16 @@ import { DevicesController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { UseCase } from "../../common";
 
-export interface ExistsIdentityRecoveryKitResponse {
+export interface DoesIdentityRecoveryKitExistResponse {
     exists: boolean;
 }
 
-export class ExistsIdentityRecoveryKitUseCase extends UseCase<void, ExistsIdentityRecoveryKitResponse> {
+export class DoesIdentityRecoveryKitExistUseCase extends UseCase<void, DoesIdentityRecoveryKitExistResponse> {
     public constructor(@Inject private readonly devicesController: DevicesController) {
         super();
     }
 
-    protected async executeInternal(): Promise<Result<ExistsIdentityRecoveryKitResponse>> {
+    protected async executeInternal(): Promise<Result<DoesIdentityRecoveryKitExistResponse>> {
         const devices = await this.devicesController.list();
 
         return Result.ok({
