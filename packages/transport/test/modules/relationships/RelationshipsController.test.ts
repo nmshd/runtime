@@ -120,14 +120,17 @@ describe("RelationshipsController", function () {
 
             await sender.syncEverything();
 
-            await expect(
-                sender.relationships.canSendRelationship({
-                    template: loadedTemplate,
-                    creationContent: {
-                        mycontent: "request"
-                    }
-                })
-            ).rejects.toThrow("error.transport.relationships.deletedOwnerOfRelationshipTemplate");
+            const canSendRelationshipResult = await sender.relationships.canSendRelationship({
+                template: loadedTemplate,
+                creationContent: {
+                    mycontent: "request"
+                }
+            });
+            expect(canSendRelationshipResult.isSuccess).toBe(false);
+            expect(canSendRelationshipResult.error.code).toBe("error.transport.relationships.deletedOwnerOfRelationshipTemplate");
+            expect(canSendRelationshipResult.error.message).toContain(
+                "The Identity who created the RelationshipTemplate has been deleted in the meantime. Thus, it is not possible to establish a Relationship to them."
+            );
 
             await expect(
                 sender.relationships.sendRelationship({
