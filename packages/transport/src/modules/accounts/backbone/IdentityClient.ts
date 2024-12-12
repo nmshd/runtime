@@ -6,6 +6,6 @@ export class IdentityClient extends RESTClient {
     protected override _logDirective = RESTClientLogDirective.LogResponse;
 
     public async createIdentity(value: BackbonePostIdentityRequest): Promise<ClientResult<BackbonePostIdentityResponse>> {
-        return await this.post<BackbonePostIdentityResponse>("/api/v1/Identities", value, {});
+        return await this.post<BackbonePostIdentityResponse>("/api/v1/Identities", value);
     }
 }
