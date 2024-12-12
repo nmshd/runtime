@@ -307,8 +307,7 @@ export class AppRuntime extends Runtime<AppConfig> {
             const session = await this.selectAccount(account.id.toString());
 
             const syncResult = await session.transportServices.account.syncDatawallet();
-            if (syncResult.isSuccess) continue;
-            // TODO: should we log the syncResult error?
+            if (syncResult.isError) this.logger.error(syncResult.error);
 
             session.accountController.authenticator.clear();
             try {
@@ -316,7 +315,12 @@ export class AppRuntime extends Runtime<AppConfig> {
                 continue;
             } catch (error) {
                 this.logger.error(error);
-                // if (!(error.status === 400)) continue;
+
+                if (!(typeof error === "object" && error !== null && "code" in error)) {
+                    continue;
+                }
+
+                if (!(error.code === "error.transport.request.noAuthGrant")) continue;
             }
 
             const checkDeletionResult = await session.transportServices.account.checkDeletionOfIdentity();
@@ -326,11 +330,9 @@ export class AppRuntime extends Runtime<AppConfig> {
                 continue;
             }
 
-            if (!checkDeletionResult.value.isDeleted) {
-                this.logger.error(syncResult.error);
+            if (checkDeletionResult.value.isDeleted) {
+                await this._multiAccountController.deleteAccount(account.id);
             }
-
-            await this._multiAccountController.deleteAccount(account.id);
         }
     }
 

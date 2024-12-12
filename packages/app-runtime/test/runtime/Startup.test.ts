@@ -86,16 +86,16 @@ describe("Start Accounts", function () {
 
     afterAll(async () => await runtime.stop());
 
-    test("should run startAccounts", async function () {
+    test("should run startAccounts for an active Identity", async function () {
         await runtime["startAccounts"]();
         expect(errorSpy).not.toHaveBeenCalled();
     });
 
-    test.only("should run startAccounts for one deleted Account", async function () {
+    test.only("should run startAccounts for a deleted Identity", async function () {
         await sessionA.transportServices.identityDeletionProcesses["initiateIdentityDeletionProcessUseCase"]["identityDeletionProcessController"].initiateIdentityDeletionProcess(
             0
         );
-        await TestUtil.runDeletionJob();
+        // await TestUtil.runDeletionJob();
 
         await runtime["startAccounts"]();
         // TODO: check for error message
