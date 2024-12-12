@@ -3,6 +3,7 @@ import { IChallengeSignedSerialized } from "../../challenges/data/ChallengeSigne
 export interface BackbonePostDevicesRequest {
     devicePassword: string;
     signedChallenge: IChallengeSignedSerialized;
+    isBackupDevice?: boolean;
 }
 
 export interface BackbonePostDevicesResponse {
@@ -10,4 +11,5 @@ export interface BackbonePostDevicesResponse {
     username: string;
     createdAt: string;
     createdByDevice: string;
+    isBackupDevice: boolean;
 }
