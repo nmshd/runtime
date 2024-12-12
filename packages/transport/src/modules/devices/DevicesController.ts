@@ -40,7 +40,21 @@ export class DevicesController extends TransportController {
         await this.devices.create(device);
     }
 
-    private async createDevice(name = "", description?: string, isAdmin = false): Promise<Device> {
+    public async sendDevice(parameters: ISendDeviceParameters): Promise<Device> {
+        if (!parameters.name) {
+            const devices = await this.parent.devices.list();
+            parameters.name = `Device ${devices.length + 1}`;
+        }
+
+        const parsedParams = SendDeviceParameters.from(parameters);
+        const device = await this.createDevice(parsedParams);
+
+        await this.devices.create(device);
+
+        return device;
+    }
+
+    private async createDevice(params: SendDeviceParameters): Promise<Device> {
         const [signedChallenge, devicePwdDn] = await Promise.all([this.parent.challenges.createChallenge(ChallengeType.Identity), PasswordGenerator.createStrongPassword(45, 50)]);
 
         this.log.trace("Device Creation Challenge signed. Creating device on backbone...");
@@ -48,7 +62,8 @@ export class DevicesController extends TransportController {
         const response = (
             await this.client.createDevice({
                 signedChallenge: signedChallenge.toJSON(),
-                devicePassword: devicePwdDn
+                devicePassword: devicePwdDn,
+                isBackupDevice: params.isBackupDevice
             })
         ).value;
 
@@ -58,28 +73,14 @@ export class DevicesController extends TransportController {
             createdAt: CoreDate.from(response.createdAt),
             createdByDevice: CoreId.from(response.createdByDevice),
             id: CoreId.from(response.id),
-            name: name,
-            description: description,
+            name: params.name,
+            description: params.description,
             type: DeviceType.Unknown,
             username: response.username,
             initialPassword: devicePwdDn,
-            isAdmin: isAdmin
+            isAdmin: params.isAdmin,
+            isBackupDevice: response.isBackupDevice
         });
-
-        return device;
-    }
-
-    public async sendDevice(parameters: ISendDeviceParameters): Promise<Device> {
-        parameters = SendDeviceParameters.from(parameters);
-
-        if (!parameters.name) {
-            const devices = await this.parent.devices.list();
-            parameters.name = `Device ${devices.length + 1}`;
-        }
-
-        const device = await this.createDevice(parameters.name, parameters.description, parameters.isAdmin);
-
-        await this.devices.create(device);
 
         return device;
     }
