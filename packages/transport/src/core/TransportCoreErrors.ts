@@ -42,10 +42,17 @@ class Relationships {
         return new CoreError("error.transport.relationships.reactivationAlreadyRequested", message);
     }
 
+    public deletedOwnerOfRelationshipTemplate() {
+        return new CoreError(
+            "error.transport.relationships.deletedOwnerOfRelationshipTemplate",
+            "The Identity that created the RelationshipTemplate has been deleted in the meantime. Thus, it is not possible to establish a Relationship to it."
+        );
+    }
+
     public activeIdentityDeletionProcessOfOwnerOfRelationshipTemplate() {
         return new CoreError(
             "error.transport.relationships.activeIdentityDeletionProcessOfOwnerOfRelationshipTemplate",
-            "The Identity who created the RelationshipTemplate is currently in the process of deleting itself. Thus, it is not possible to establish a Relationship to it."
+            "The Identity that created the RelationshipTemplate is currently in the process of deleting itself. Thus, it is not possible to establish a Relationship to it."
         );
     }
 }

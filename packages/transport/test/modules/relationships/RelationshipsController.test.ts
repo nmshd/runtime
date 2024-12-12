@@ -120,15 +120,16 @@ describe("RelationshipsController", function () {
 
             await sender.syncEverything();
 
-            await expect(
-                sender.relationships.canSendRelationship({
-                    template: loadedTemplate,
-                    creationContent: {
-                        mycontent: "request"
-                    }
-                })
-            ).rejects.toThrow(
-                "error.platform.recordNotFound (404): 'Identity not found. Make sure the ID exists and the record is not expired. If a password is required to fetch the record, make sure you passed the correct one.'"
+            const canSendRelationshipResult = await sender.relationships.canSendRelationship({
+                template: loadedTemplate,
+                creationContent: {
+                    mycontent: "request"
+                }
+            });
+            expect(canSendRelationshipResult.isSuccess).toBe(false);
+            expect(canSendRelationshipResult.error.code).toBe("error.transport.relationships.deletedOwnerOfRelationshipTemplate");
+            expect(canSendRelationshipResult.error.message).toContain(
+                "The Identity that created the RelationshipTemplate has been deleted in the meantime. Thus, it is not possible to establish a Relationship to it."
             );
 
             await expect(
@@ -138,9 +139,7 @@ describe("RelationshipsController", function () {
                         mycontent: "request"
                     }
                 })
-            ).rejects.toThrow(
-                "error.platform.recordNotFound (404): 'Identity not found. Make sure the ID exists and the record is not expired. If a password is required to fetch the record, make sure you passed the correct one.'"
-            );
+            ).rejects.toThrow("error.transport.relationships.deletedOwnerOfRelationshipTemplate");
         });
     });
 
