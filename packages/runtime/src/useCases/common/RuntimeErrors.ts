@@ -262,6 +262,15 @@ class IdentityDeletionProcess {
     }
 }
 
+class IdentityRecoveryKits {
+    public datawalletDisabled() {
+        return new ApplicationError(
+            "error.runtime.identityRecoveryKits.datawalletDisabled",
+            "The Datawallet is disabled. IdentityRecoveryKits will only work if the Datawallet is enabled."
+        );
+    }
+}
+
 class DeciderModule {
     public requestConfigDoesNotMatchResponseConfig() {
         return new ApplicationError("error.runtime.decide.requestConfigDoesNotMatchResponseConfig", "The RequestConfig does not match the ResponseConfig.");
@@ -280,5 +289,6 @@ export class RuntimeErrors {
     public static readonly notifications = new Notifications();
     public static readonly attributes = new Attributes();
     public static readonly identityDeletionProcess = new IdentityDeletionProcess();
+    public static readonly identityRecoveryKits = new IdentityRecoveryKits();
     public static readonly deciderModule = new DeciderModule();
 }
