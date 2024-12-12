@@ -236,6 +236,10 @@ class Attributes {
         );
     }
 
+    public cannotCreateDuplicateRepositoryAttribute(attributeId: CoreId | string): ApplicationError {
+        return new ApplicationError("error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute", `The Attribute is a copy of the attribute ${attributeId.toString()}.`);
+    }
+
     public setDefaultRepositoryAttributesIsDisabled(): ApplicationError {
         return new ApplicationError("error.runtime.attributes.setDefaultRepositoryAttributesIsDisabled", "Setting default RepositoryAttributes is disabled for this Account.");
     }

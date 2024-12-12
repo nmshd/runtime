@@ -4,7 +4,7 @@ import { AttributeValues } from "@nmshd/content";
 import { AccountController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { LocalAttributeDTO } from "../../../types";
-import { ISO8601DateTimeString, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { flattenObject, ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { AttributeMapper } from "./AttributeMapper";
 
 export interface CreateRepositoryAttributeRequest {
@@ -39,6 +39,19 @@ export class CreateRepositoryAttributeUseCase extends UseCase<CreateRepositoryAt
                 ...request.content
             }
         });
+        // ignore (tags,validFrom,validTo) when checking for duplicates
+        const query = flattenObject({
+            content: {
+                "@type": "IdentityAttribute",
+                owner: this.accountController.identity.address.toString(),
+                value: request.content.value
+            }
+        });
+        const existingAttribute = await this.attributeController.getLocalAttributes(query);
+        if (existingAttribute.length > 0) {
+            return Result.fail(RuntimeErrors.attributes.cannotCreateDuplicateRepositoryAttribute(existingAttribute[0].id));
+        }
+
         const createdLocalAttribute = await this.attributeController.createRepositoryAttribute(params);
 
         await this.accountController.syncDatawallet();

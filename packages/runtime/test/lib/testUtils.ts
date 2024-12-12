@@ -574,6 +574,7 @@ export async function exchangeAndAcceptRequestByMessage(
     request: CreateOutgoingRequestRequest,
     responseItems: (DecideRequestItemParametersJSON | DecideRequestItemGroupParametersJSON)[]
 ): Promise<MessageDTO> {
+    const _canCreateRequestResult = await sender.consumption.outgoingRequests.canCreate({ content: request.content, peer: recipient.address });
     const createRequestResult = await sender.consumption.outgoingRequests.create(request);
     expect(createRequestResult).toBeSuccessful();
 
@@ -874,4 +875,17 @@ export async function generateAddressPseudonym(backboneBaseUrl: string): Promise
     const pseudonym = await IdentityUtil.createAddress({ algorithm: 1, publicKey: pseudoPublicKey }, new URL(backboneBaseUrl).hostname);
 
     return pseudonym;
+}
+
+export async function cleanupAttributes(...services: TestRuntimeServices[]): Promise<void> {
+    await Promise.all(
+        services.map(async (services) => {
+            const servicesAttributeController = services.consumption.attributes["getAttributeUseCase"]["attributeController"];
+
+            const servicesAttributesResult = await services.consumption.attributes.getAttributes({});
+            for (const attribute of servicesAttributesResult.value) {
+                await servicesAttributeController.deleteAttributeUnsafe(CoreId.from(attribute.id));
+            }
+        })
+    );
 }

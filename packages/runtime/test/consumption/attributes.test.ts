@@ -14,6 +14,7 @@ import {
 } from "@nmshd/content";
 import { CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreIdHelper } from "@nmshd/transport";
+import { randomUUID } from "crypto";
 import {
     AttributeCreatedEvent,
     ChangeDefaultRepositoryAttributeUseCase,
@@ -52,6 +53,7 @@ import {
     RuntimeServiceProvider,
     TestRuntimeServices,
     acceptIncomingShareAttributeRequest,
+    cleanupAttributes,
     establishRelationship,
     exchangeAndAcceptRequestByMessage,
     executeFullCreateAndShareRelationshipAttributeFlow,
@@ -96,30 +98,18 @@ beforeAll(async () => {
 }, 30000);
 afterAll(async () => await runtimeServiceProvider.stop());
 
-beforeEach(() => {
+beforeEach(async () => {
     services1.eventBus.reset();
     services2.eventBus.reset();
     services3.eventBus.reset();
+    await cleanupAttributes(services1, services2, services3, appService);
 });
-
-async function cleanupAttributes() {
-    await Promise.all(
-        [services1, services2, services3, appService].map(async (services) => {
-            const servicesAttributeController = services.consumption.attributes["getAttributeUseCase"]["attributeController"];
-
-            const servicesAttributesResult = await services.consumption.attributes.getAttributes({});
-            for (const attribute of servicesAttributesResult.value) {
-                await servicesAttributeController.deleteAttributeUnsafe(CoreId.from(attribute.id));
-            }
-        })
-    );
-}
 
 describe("get attribute(s)", () => {
     let relationshipAttributeId: string;
     let identityAttributeIds: string[];
     let appAttributeIds: string[];
-    beforeAll(async function () {
+    beforeEach(async function () {
         const senderRequests: CreateRepositoryAttributeRequest[] = [
             {
                 content: {
@@ -172,10 +162,6 @@ describe("get attribute(s)", () => {
             const appAttribute = (await appService.consumption.attributes.createRepositoryAttribute(request)).value;
             appAttributeIds.push(appAttribute.id);
         }
-    });
-
-    afterAll(async function () {
-        await cleanupAttributes();
     });
 
     describe(GetAttributeUseCase.name, () => {
@@ -278,7 +264,7 @@ describe("attribute queries", () => {
     let repositoryAttribute: LocalAttributeDTO;
     let ownSharedRelationshipAttribute: LocalAttributeDTO;
 
-    beforeAll(async function () {
+    beforeEach(async function () {
         const createRepositoryAttributeRequest: CreateRepositoryAttributeRequest = {
             content: {
                 value: {
@@ -300,10 +286,6 @@ describe("attribute queries", () => {
                 confidentiality: RelationshipAttributeConfidentiality.Protected
             }
         });
-    });
-
-    afterAll(async function () {
-        await cleanupAttributes();
     });
 
     describe(ExecuteIdentityAttributeQueryUseCase.name, () => {
@@ -365,7 +347,7 @@ describe("get repository, own shared and peer shared attributes", () => {
 
     let services1SharedTechnicalRelationshipAttribute: LocalAttributeDTO;
 
-    beforeAll(async function () {
+    beforeEach(async function () {
         // unshared succeeded repository attribute
         services1RepoSurnameV0 = (
             await services1.consumption.attributes.createRepositoryAttribute({
@@ -493,10 +475,6 @@ describe("get repository, own shared and peer shared attributes", () => {
         });
     });
 
-    afterAll(async function () {
-        await cleanupAttributes();
-    });
-
     describe(GetRepositoryAttributesUseCase.name, () => {
         test("get only latest version of repository attributes", async () => {
             const result = await services1.consumption.attributes.getRepositoryAttributes({});
@@ -600,7 +578,7 @@ describe("get repository, own shared and peer shared attributes", () => {
         let allReceivedAttributes: LocalAttributeDTO[];
         let onlyLatestReceivedAttributes: LocalAttributeDTO[];
         let notTechnicalReceivedAttributes: LocalAttributeDTO[];
-        beforeAll(async function () {
+        beforeEach(async function () {
             const services1SharedAttributeIds = [
                 services1SharedGivenNameV0,
                 services1SharedGivenNameV1,
@@ -661,8 +639,9 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                 tags: ["tag1", "tag2"]
             }
         };
+
         const result = await services1.consumption.attributes.createRepositoryAttribute(request);
-        expect(result.isError).toBe(false);
+        expect(result.value).toBeDefined();
         const attribute = result.value;
         expect(attribute.content).toMatchObject(request.content);
         await services1.eventBus.waitForEvent(AttributeCreatedEvent, (e) => e.data.id === attribute.id);
@@ -740,14 +719,40 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
             content: {
                 value: {
                     "@type": "JobTitle",
-                    value: "A job title"
+                    value: "A unique job title"
+                }
+            }
+        };
+        const request2: CreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "JobTitle",
+                    value: "A more unique job title"
                 }
             }
         };
         await appService.consumption.attributes.createRepositoryAttribute(request);
-        const result = await appService.consumption.attributes.createRepositoryAttribute(request);
+        const result = await appService.consumption.attributes.createRepositoryAttribute(request2);
         const attribute = result.value;
         expect(attribute.isDefault).toBeUndefined();
+    });
+
+    test("should not create a duplicate RepositoryAttribute", async () => {
+        const request: CreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: `Petrus Pan${randomUUID()}`
+                },
+                tags: ["tag1", "tag2"]
+            }
+        };
+
+        const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+        expect(result.value).toBeDefined();
+
+        const result2 = await services1.consumption.attributes.createRepositoryAttribute(request);
+        expect(result2).toBeAnError(`The Attribute is a copy of the attribute ${result.value.id.toString()}.`, "error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute");
     });
 });
 
@@ -1227,7 +1232,7 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
                 content: {
                     value: {
                         "@type": "GivenName",
-                        value: "Petra Pan"
+                        value: "Petrus Pan"
                     }
                 }
             })
@@ -1397,10 +1402,6 @@ describe(SucceedRelationshipAttributeAndNotifyPeerUseCase.name, () => {
 });
 
 describe(ChangeDefaultRepositoryAttributeUseCase.name, () => {
-    beforeAll(async () => {
-        await cleanupAttributes();
-    });
-
     test("should change default RepositoryAttribute", async () => {
         const defaultAttribute = (
             await appService.consumption.attributes.createRepositoryAttribute({
@@ -1760,7 +1761,7 @@ describe("Get (shared) versions of attribute", () => {
     });
 
     describe(GetSharedVersionsOfAttributeUseCase.name, () => {
-        beforeAll(async () => {
+        beforeEach(async () => {
             await setUpIdentityAttributeVersions();
         });
 
@@ -1892,7 +1893,7 @@ describe("DeleteAttributeUseCases", () => {
             content: {
                 value: {
                     "@type": "GivenName",
-                    value: "Petra Pan"
+                    value: "Petro Pan"
                 },
                 tags: ["tag1", "tag2"]
             }
@@ -2358,8 +2359,7 @@ describe("DeleteAttributeUseCases", () => {
 
 describe("ThirdPartyRelationshipAttributes", () => {
     let localAttribute: LocalAttributeDTO;
-    beforeAll(async () => {
-        await cleanupAttributes();
+    beforeEach(async () => {
         localAttribute = await executeFullCreateAndShareRelationshipAttributeFlow(services1, services2, {
             content: {
                 key: "ThirdPartyKey",
