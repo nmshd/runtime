@@ -74,7 +74,7 @@ describe("Identity Recovery Kits", () => {
     });
 
     test("should tell that no recovery kit exists", async () => {
-        const response = await services.transport.identityRecoveryKits.doesIdentityRecoveryKitExist();
+        const response = await services.transport.identityRecoveryKits.checkForExistingIdentityRecoveryKit();
         expect(response).toBeSuccessful();
 
         expect(response.value.exists).toBe(false);
@@ -83,7 +83,7 @@ describe("Identity Recovery Kits", () => {
     test("should tell that a recovery kit exists", async () => {
         await services.transport.identityRecoveryKits.createIdentityRecoveryKit({ profileName: "profileName", passwordProtection: { password: "aPassword" } });
 
-        const response = await services.transport.identityRecoveryKits.doesIdentityRecoveryKitExist();
+        const response = await services.transport.identityRecoveryKits.checkForExistingIdentityRecoveryKit();
         expect(response).toBeSuccessful();
 
         expect(response.value.exists).toBe(true);
