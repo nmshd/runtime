@@ -294,4 +294,10 @@ export class TokenController extends TransportController {
             await this.tokens.delete(token);
         }
     }
+
+    public async delete(token: Token): Promise<void> {
+        if (token.isOwn) await this.client.deleteToken(token.id.toString());
+
+        await this.tokens.delete(token);
+    }
 }

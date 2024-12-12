@@ -19,7 +19,8 @@ export class DeviceMapper {
             operatingSystem: device.operatingSystem,
             publicKey: device.publicKey?.toBase64(false),
             isCurrentDevice: isCurrentDevice,
-            isOffboarded: device.isOffboarded
+            isOffboarded: device.isOffboarded,
+            isBackupDevice: device.isBackupDevice
         };
     }
 
