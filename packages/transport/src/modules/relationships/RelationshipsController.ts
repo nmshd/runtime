@@ -201,7 +201,7 @@ export class RelationshipsController extends TransportController {
 
         const result = await this.client.canCreateRelationship(peerAddress.toString());
 
-        if (result.isError && result.error.code === "error.platform.recordNotFound") {
+        if (result.isError && result.error.code === "error.platform.recordNotFound" && result.error.message.includes("Identity not found.")) {
             return Result.fail(TransportCoreErrors.relationships.deletedOwnerOfRelationshipTemplate());
         }
 
