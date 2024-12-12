@@ -129,7 +129,7 @@ describe("RelationshipsController", function () {
             expect(canSendRelationshipResult.isSuccess).toBe(false);
             expect(canSendRelationshipResult.error.code).toBe("error.transport.relationships.deletedOwnerOfRelationshipTemplate");
             expect(canSendRelationshipResult.error.message).toContain(
-                "The Identity who created the RelationshipTemplate has been deleted in the meantime. Thus, it is not possible to establish a Relationship to them."
+                "The Identity that created the RelationshipTemplate has been deleted in the meantime. Thus, it is not possible to establish a Relationship to it."
             );
 
             await expect(
