@@ -70,35 +70,37 @@ describe("Start Accounts", function () {
 
     let sessionA: LocalAccountSession;
 
-    let errorSpy: jest.SpyInstance<void, [message?: any, ...optionalParams: any[]], any>;
-
     beforeAll(async function () {
         runtime = await TestUtil.createRuntime();
         await runtime.start();
 
         const accounts = await TestUtil.provideAccounts(runtime, 1);
         sessionA = await runtime.selectAccount(accounts[0].id);
-
-        errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
     });
-
-    afterEach(() => errorSpy.mockRestore());
 
     afterAll(async () => await runtime.stop());
 
     test("should run startAccounts for an active Identity", async function () {
         await runtime["startAccounts"]();
-        expect(errorSpy).not.toHaveBeenCalled();
+        await expect(runtime.selectAccount(sessionA.account.id)).rejects.not.toThrow();
     });
 
-    test.only("should run startAccounts for a deleted Identity", async function () {
+    test("should run startAccounts for an Identity with expired grace period", async function () {
         await sessionA.transportServices.identityDeletionProcesses["initiateIdentityDeletionProcessUseCase"]["identityDeletionProcessController"].initiateIdentityDeletionProcess(
             0
         );
-        // await TestUtil.runDeletionJob();
 
         await runtime["startAccounts"]();
-        // TODO: check for error message
-        expect(errorSpy).toHaveBeenCalled();
+        await expect(runtime.selectAccount(sessionA.account.id)).rejects.toThrow("error.transport.recordNotFound");
+    });
+
+    test("should run startAccounts for a deleted Identity", async function () {
+        await sessionA.transportServices.identityDeletionProcesses["initiateIdentityDeletionProcessUseCase"]["identityDeletionProcessController"].initiateIdentityDeletionProcess(
+            0
+        );
+        await TestUtil.runDeletionJob();
+
+        await runtime["startAccounts"]();
+        await expect(runtime.selectAccount(sessionA.account.id)).rejects.toThrow("error.transport.recordNotFound");
     });
 });
