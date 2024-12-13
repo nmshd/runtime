@@ -326,7 +326,7 @@ export class AppRuntime extends Runtime<AppConfig> {
                 if (!(error.code === "error.transport.request.noAuthGrant")) continue;
             }
 
-            const checkDeletionResult = await session.transportServices.account.checkDeletionOfIdentity();
+            const checkDeletionResult = await session.transportServices.account.checkIfIdentityIsDeleted();
 
             if (checkDeletionResult.isError) {
                 this.logger.error(checkDeletionResult.error);

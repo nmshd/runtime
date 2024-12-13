@@ -221,7 +221,7 @@ describe("Un-/RegisterPushNotificationToken", () => {
 
 describe("CheckDeletionOfIdentity", () => {
     test("check deletion of Identity that is not deleted", async () => {
-        const result = await sTransportServices.account.checkDeletionOfIdentity();
+        const result = await sTransportServices.account.checkIfIdentityIsDeleted();
         expect(result.isSuccess).toBe(true);
         expect(result.value.isDeleted).toBe(false);
         expect(result.value.deletionDate).toBeUndefined();
@@ -231,7 +231,7 @@ describe("CheckDeletionOfIdentity", () => {
         const identityDeletionProcess =
             await sTransportServices.identityDeletionProcesses["initiateIdentityDeletionProcessUseCase"]["identityDeletionProcessController"].initiateIdentityDeletionProcess(0);
 
-        const result = await sTransportServices.account.checkDeletionOfIdentity();
+        const result = await sTransportServices.account.checkIfIdentityIsDeleted();
         expect(result.isSuccess).toBe(true);
         expect(result.value.isDeleted).toBe(true);
         expect(result.value.deletionDate).toBe(identityDeletionProcess.cache!.gracePeriodEndsAt!.toString());

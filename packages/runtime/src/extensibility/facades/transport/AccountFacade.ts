@@ -2,8 +2,8 @@ import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { Inject } from "@nmshd/typescript-ioc";
 import { DeviceDTO } from "../../../types";
 import {
-    CheckDeletionOfIdentityResponse,
-    CheckDeletionOfIdentityUseCase,
+    CheckIfIdentityIsDeletedResponse,
+    CheckIfIdentityIsDeletedUseCase,
     DisableAutoSyncUseCase,
     EnableAutoSyncUseCase,
     GetDeviceInfoUseCase,
@@ -35,7 +35,7 @@ export class AccountFacade {
         @Inject private readonly disableAutoSyncUseCase: DisableAutoSyncUseCase,
         @Inject private readonly enableAutoSyncUseCase: EnableAutoSyncUseCase,
         @Inject private readonly loadItemFromTruncatedReferenceUseCase: LoadItemFromTruncatedReferenceUseCase,
-        @Inject private readonly checkDeletionOfIdentityUseCase: CheckDeletionOfIdentityUseCase
+        @Inject private readonly checkIfIdentityIsDeletedUseCase: CheckIfIdentityIsDeletedUseCase
     ) {}
 
     public async getIdentityInfo(): Promise<Result<GetIdentityInfoResponse, ApplicationError>> {
@@ -78,7 +78,7 @@ export class AccountFacade {
         return await this.loadItemFromTruncatedReferenceUseCase.execute(request);
     }
 
-    public async checkDeletionOfIdentity(): Promise<Result<CheckDeletionOfIdentityResponse, ApplicationError>> {
-        return await this.checkDeletionOfIdentityUseCase.execute();
+    public async checkIfIdentityIsDeleted(): Promise<Result<CheckIfIdentityIsDeletedResponse, ApplicationError>> {
+        return await this.checkIfIdentityIsDeletedUseCase.execute();
     }
 }

@@ -63,14 +63,14 @@ export class IdentityController extends TransportController {
         return valid;
     }
 
-    public async checkDeletionOfIdentity(): Promise<
+    public async checkIfIdentityIsDeleted(): Promise<
         Result<{
             isDeleted: boolean;
             deletionDate?: string;
         }>
     > {
         const currentDeviceCredentials = await this.parent.activeDevice.getCredentials();
-        const identityDeletionResult = await this.identityClient.checkDeletionOfIdentity(currentDeviceCredentials.username);
+        const identityDeletionResult = await this.identityClient.checkIfIdentityIsDeleted(currentDeviceCredentials.username);
 
         if (identityDeletionResult.isError) return Result.fail(identityDeletionResult.error);
 

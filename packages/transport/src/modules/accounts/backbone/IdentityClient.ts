@@ -1,6 +1,6 @@
 import { RESTClient, RESTClientLogDirective } from "../../../core";
 import { ClientResult } from "../../../core/backbone/ClientResult";
-import { BackboneCheckDeletionOfIdentityResponse } from "./BackboneCheckDeletionOfIdentity";
+import { BackboneCheckIfIdentityIsDeletedResponse } from "./BackboneCheckIfIdentityIsDeleted";
 import { BackbonePostIdentityRequest, BackbonePostIdentityResponse } from "./BackbonePostIdentity";
 
 export class IdentityClient extends RESTClient {
@@ -10,7 +10,7 @@ export class IdentityClient extends RESTClient {
         return await this.post<BackbonePostIdentityResponse>("/api/v1/Identities", value);
     }
 
-    public async checkDeletionOfIdentity(username: string): Promise<ClientResult<BackboneCheckDeletionOfIdentityResponse>> {
-        return await this.get<BackboneCheckDeletionOfIdentityResponse>(`/api/v1/Identities/IsDeleted?username=${username}`);
+    public async checkIfIdentityIsDeleted(username: string): Promise<ClientResult<BackboneCheckIfIdentityIsDeletedResponse>> {
+        return await this.get<BackboneCheckIfIdentityIsDeletedResponse>(`/api/v1/Identities/IsDeleted?username=${username}`);
     }
 }
