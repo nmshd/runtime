@@ -143,7 +143,6 @@ export class MultiAccountController {
         await this.deleteAccount(id);
     }
 
-    // TODO: expose this on AccountsServices? -> naming clash
     public async deleteAccount(id: CoreId): Promise<void> {
         const localAccount = (await this.selectAccount(id))[0];
 

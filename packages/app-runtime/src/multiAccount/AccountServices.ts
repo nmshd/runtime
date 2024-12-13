@@ -42,6 +42,10 @@ export class AccountServices {
         await this.multiAccountController.offboardDevice(CoreId.from(id));
     }
 
+    public async deleteAccount(id: string): Promise<void> {
+        await this.multiAccountController.deleteAccount(CoreId.from(id));
+    }
+
     public async getAccountByAddress(address: string): Promise<LocalAccountDTO> {
         const localAccount = await this.multiAccountController.getAccountByAddress(address);
         return LocalAccountMapper.toLocalAccountDTO(localAccount);
