@@ -111,6 +111,36 @@ describe("RelationshipsController", function () {
             senderRel = (await sender.relationships.getActiveRelationshipToIdentity(recipient2.identity.address))!;
             expectValidActiveFreshRelationship(senderRel, sender, recipient2, tempDate);
         });
+
+        test("should not create new relationship if templator has been deleted after requestor has loaded the template", async function () {
+            const loadedTemplate = await TestUtil.exchangeTemplate(recipient3, sender);
+
+            await recipient3.identityDeletionProcess.initiateIdentityDeletionProcess(0);
+            await TestUtil.runDeletionJob();
+
+            await sender.syncEverything();
+
+            const canSendRelationshipResult = await sender.relationships.canSendRelationship({
+                template: loadedTemplate,
+                creationContent: {
+                    mycontent: "request"
+                }
+            });
+            expect(canSendRelationshipResult.isSuccess).toBe(false);
+            expect(canSendRelationshipResult.error.code).toBe("error.transport.relationships.deletedOwnerOfRelationshipTemplate");
+            expect(canSendRelationshipResult.error.message).toContain(
+                "The Identity that created the RelationshipTemplate has been deleted in the meantime. Thus, it is not possible to establish a Relationship to it."
+            );
+
+            await expect(
+                sender.relationships.sendRelationship({
+                    template: loadedTemplate,
+                    creationContent: {
+                        mycontent: "request"
+                    }
+                })
+            ).rejects.toThrow("error.transport.relationships.deletedOwnerOfRelationshipTemplate");
+        });
     });
 
     describe("Templator", function () {

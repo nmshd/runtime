@@ -9,7 +9,10 @@ import { ISerializable, Serializable } from "@js-soft/ts-serval";
 import { EventEmitter2EventBus, sleep } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
+import fs from "fs";
 import { DurationLike } from "luxon";
+import path from "path";
+import { GenericContainer, Wait } from "testcontainers";
 import { LogLevel } from "typescript-logging";
 import {
     AccountController,
@@ -285,6 +288,21 @@ export class TestUtil {
         await accountController.init(deviceSharedSecret);
 
         return accountController;
+    }
+
+    public static async exchangeTemplate(from: AccountController, to: AccountController): Promise<RelationshipTemplate> {
+        const templateFrom = await from.relationshipTemplates.sendRelationshipTemplate({
+            content: {
+                mycontent: "template"
+            },
+            expiresAt: CoreDate.utc().add({ minutes: 5 }),
+            maxNumberOfAllocations: 1
+        });
+
+        const templateReference = templateFrom.toRelationshipTemplateReference().truncate();
+        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(templateReference);
+
+        return templateTo;
     }
 
     public static async addRejectedRelationship(from: AccountController, to: AccountController): Promise<Relationship> {
@@ -635,5 +653,30 @@ export class TestUtil {
                 resolve();
             }, ms);
         });
+    }
+
+    public static async runDeletionJob(): Promise<void> {
+        const backboneVersion = this.getBackboneVersion();
+        const appsettingsOverrideLocation = process.env.APPSETTINGS_OVERRIDE_LOCATION ?? `${__dirname}/../../../../.dev/appsettings.override.json`;
+
+        await new GenericContainer(`ghcr.io/nmshd/backbone-identity-deletion-jobs:${backboneVersion}`)
+            .withWaitStrategy(Wait.forOneShotStartup())
+            .withCommand(["--Worker", "ActualDeletionWorker"])
+            .withNetworkMode("backbone")
+            .withCopyFilesToContainer([{ source: appsettingsOverrideLocation, target: "/app/appsettings.override.json" }])
+            .start();
+    }
+
+    private static getBackboneVersion() {
+        if (process.env.BACKBONE_VERSION) return process.env.BACKBONE_VERSION;
+
+        const envFile = fs.readFileSync(path.resolve(`${__dirname}/../../../../.dev/compose.backbone.env`));
+        const env = envFile
+            .toString()
+            .split("\n")
+            .map((line) => line.split("="))
+            .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {} as Record<string, string>);
+
+        return env["BACKBONE_VERSION"];
     }
 }

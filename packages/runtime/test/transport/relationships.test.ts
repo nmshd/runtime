@@ -174,7 +174,7 @@ describe("Can Create / Create Relationship", () => {
 
         expect(canCreateRelationshipResponse.isSuccess).toBe(false);
         expect(canCreateRelationshipResponse.message).toBe(
-            "The Identity who created the RelationshipTemplate is currently in the process of deleting itself. Thus, it is not possible to establish a Relationship to it."
+            "The Identity that created the RelationshipTemplate is currently in the process of deleting itself. Thus, it is not possible to establish a Relationship to it."
         );
         expect(canCreateRelationshipResponse.code).toBe("error.transport.relationships.activeIdentityDeletionProcessOfOwnerOfRelationshipTemplate");
 
@@ -184,7 +184,7 @@ describe("Can Create / Create Relationship", () => {
         });
 
         expect(createRelationshipResponse).toBeAnError(
-            "The Identity who created the RelationshipTemplate is currently in the process of deleting itself. Thus, it is not possible to establish a Relationship to it.",
+            "The Identity that created the RelationshipTemplate is currently in the process of deleting itself. Thus, it is not possible to establish a Relationship to it.",
             "error.transport.relationships.activeIdentityDeletionProcessOfOwnerOfRelationshipTemplate"
         );
     });

@@ -277,7 +277,11 @@ describe("RelationshipTemplates query", () => {
                 maxNumberOfAllocations: 1,
                 expiresAt: DateTime.utc().plus({ minutes: 10 }).toString(),
                 content: emptyRelationshipTemplateContent,
-                forIdentity: runtimeServices1.address
+                forIdentity: runtimeServices1.address,
+                passwordProtection: {
+                    password: "1234",
+                    passwordIsPin: true
+                }
             })
         ).value;
         const conditions = new QueryParamConditions<GetRelationshipTemplatesQuery>(template, runtimeServices1.transport)
@@ -287,7 +291,28 @@ describe("RelationshipTemplates query", () => {
             .addStringSet("createdBy")
             .addStringSet("createdByDevice")
             .addNumberSet("maxNumberOfAllocations")
-            .addStringSet("forIdentity");
+            .addStringSet("forIdentity")
+            .addSingleCondition({
+                expectedResult: true,
+                key: "passwordProtection",
+                value: ""
+            })
+            .addSingleCondition({
+                expectedResult: false,
+                key: "passwordProtection",
+                value: "!"
+            })
+            .addStringSet("passwordProtection.password")
+            .addSingleCondition({
+                expectedResult: true,
+                key: "passwordProtection.passwordIsPin",
+                value: "true"
+            })
+            .addSingleCondition({
+                expectedResult: false,
+                key: "passwordProtection.passwordIsPin",
+                value: "!"
+            });
 
         await conditions.executeTests((c, q) => c.relationshipTemplates.getRelationshipTemplates({ query: q }));
     });
@@ -297,7 +322,10 @@ describe("RelationshipTemplates query", () => {
             await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
                 maxNumberOfAllocations: 1,
                 expiresAt: DateTime.utc().plus({ minutes: 10 }).toString(),
-                content: emptyRelationshipTemplateContent
+                content: emptyRelationshipTemplateContent,
+                passwordProtection: {
+                    password: "password"
+                }
             })
         ).value;
         const conditions = new QueryParamConditions<GetRelationshipTemplatesQuery>(template, runtimeServices1.transport)
@@ -305,7 +333,18 @@ describe("RelationshipTemplates query", () => {
             .addDateSet("expiresAt")
             .addStringSet("createdBy")
             .addStringSet("createdByDevice")
-            .addNumberSet("maxNumberOfAllocations");
+            .addNumberSet("maxNumberOfAllocations")
+            .addStringSet("passwordProtection.password")
+            .addSingleCondition({
+                expectedResult: false,
+                key: "passwordProtection.passwordIsPin",
+                value: "true"
+            })
+            .addSingleCondition({
+                expectedResult: true,
+                key: "passwordProtection.passwordIsPin",
+                value: "!"
+            });
         await conditions.executeTests((c, q) => c.relationshipTemplates.getRelationshipTemplates({ query: q, ownerRestriction: OwnerRestriction.Own }));
     });
 
@@ -323,7 +362,17 @@ describe("RelationshipTemplates query", () => {
             .addDateSet("expiresAt")
             .addStringSet("createdBy")
             .addStringSet("createdByDevice")
-            .addNumberSet("maxNumberOfAllocations");
+            .addNumberSet("maxNumberOfAllocations")
+            .addSingleCondition({
+                expectedResult: false,
+                key: "passwordProtection",
+                value: ""
+            })
+            .addSingleCondition({
+                expectedResult: true,
+                key: "passwordProtection",
+                value: "!"
+            });
 
         await conditions.executeTests((c, q) => c.relationshipTemplates.getRelationshipTemplates({ query: q, ownerRestriction: OwnerRestriction.Peer }));
     });
