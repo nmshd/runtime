@@ -134,13 +134,17 @@ export class MultiAccountController {
         return [localAccount, accountController];
     }
 
-    public async deleteAccount(id: CoreId): Promise<void> {
-        const [localAccount, accountController] = await this.selectAccount(id);
+    public async offboardAccount(id: CoreId): Promise<void> {
+        const [_, accountController] = await this.selectAccount(id);
         await accountController.unregisterPushNotificationToken();
         await accountController.activeDevice.markAsOffboarded();
         await accountController.close();
 
-        delete this._openAccounts[localAccount.id.toString()];
+        await this.deleteAccount(id);
+    }
+
+    public async deleteAccount(id: CoreId): Promise<void> {
+        delete this._openAccounts[id.toString()];
 
         await this.databaseConnection.deleteDatabase(`acc-${id.toString()}`);
         await this._localAccounts.delete({ id: id.toString() });
