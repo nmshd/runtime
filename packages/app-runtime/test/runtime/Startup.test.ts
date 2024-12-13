@@ -69,23 +69,26 @@ describe("Start Accounts", function () {
     let runtime: AppRuntime;
 
     let sessionA: LocalAccountSession;
+    let sessionB: LocalAccountSession;
 
     beforeAll(async function () {
         runtime = await TestUtil.createRuntime();
         await runtime.start();
 
-        const accounts = await TestUtil.provideAccounts(runtime, 1);
+        const accounts = await TestUtil.provideAccounts(runtime, 2);
         sessionA = await runtime.selectAccount(accounts[0].id);
+        sessionB = await runtime.selectAccount(accounts[1].id);
     });
 
     afterAll(async () => await runtime.stop());
 
-    test("should run startAccounts for an active Identity", async function () {
+    test("should not delete Account running startAccounts for an active Identity", async function () {
         await runtime["startAccounts"]();
-        await expect(runtime.selectAccount(sessionA.account.id)).rejects.not.toThrow();
+        await expect(runtime.selectAccount(sessionA.account.id)).resolves.not.toThrow();
     });
 
-    test("should run startAccounts for an Identity with expired grace period", async function () {
+    // TODO: Jest did not exit one second after the test run has completed.
+    test("should delete Account running startAccounts for an Identity with expired grace period", async function () {
         await sessionA.transportServices.identityDeletionProcesses["initiateIdentityDeletionProcessUseCase"]["identityDeletionProcessController"].initiateIdentityDeletionProcess(
             0
         );
@@ -94,13 +97,13 @@ describe("Start Accounts", function () {
         await expect(runtime.selectAccount(sessionA.account.id)).rejects.toThrow("error.transport.recordNotFound");
     });
 
-    test("should run startAccounts for a deleted Identity", async function () {
-        await sessionA.transportServices.identityDeletionProcesses["initiateIdentityDeletionProcessUseCase"]["identityDeletionProcessController"].initiateIdentityDeletionProcess(
+    test("should delete Account running startAccounts for a deleted Identity", async function () {
+        await sessionB.transportServices.identityDeletionProcesses["initiateIdentityDeletionProcessUseCase"]["identityDeletionProcessController"].initiateIdentityDeletionProcess(
             0
         );
         await TestUtil.runDeletionJob();
 
         await runtime["startAccounts"]();
-        await expect(runtime.selectAccount(sessionA.account.id)).rejects.toThrow("error.transport.recordNotFound");
+        await expect(runtime.selectAccount(sessionB.account.id)).rejects.toThrow("error.transport.recordNotFound");
     });
 });
