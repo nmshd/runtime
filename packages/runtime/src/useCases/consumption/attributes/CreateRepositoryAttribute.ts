@@ -39,15 +39,14 @@ export class CreateRepositoryAttributeUseCase extends UseCase<CreateRepositoryAt
                 ...request.content
             }
         });
-        // ignore (tags,validFrom,validTo) when checking for duplicates
-        const query = flattenObject({
+        const queryWithoutOptionalProperties = flattenObject({
             content: {
                 "@type": "IdentityAttribute",
                 owner: this.accountController.identity.address.toString(),
                 value: request.content.value
             }
         });
-        const existingAttribute = await this.attributeController.getLocalAttributes(query);
+        const existingAttribute = await this.attributeController.getLocalAttributes(queryWithoutOptionalProperties);
         if (existingAttribute.length > 0) {
             return Result.fail(RuntimeErrors.attributes.cannotCreateDuplicateRepositoryAttribute(existingAttribute[0].id));
         }
