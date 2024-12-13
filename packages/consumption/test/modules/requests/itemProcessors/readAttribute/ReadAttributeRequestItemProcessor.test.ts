@@ -283,6 +283,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), recipient);
 
                 expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidRequestItem",
                     message:
                         "The queried RelationshipAttribute could not be created because there is already a RelationshipAttribute in the context of this Relationship with the same key 'uniqueKey', owner and value type."
                 });
@@ -810,7 +811,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 };
 
                 await expect(processor.canAccept(requestItem, acceptParams, incomingRequest)).rejects.toThrow(
-                    "The queried RelationshipAttribute cannot be created because there is already a RelationshipAttribute in the context of this Relationship with the same key 'uniqueKey', owner and value type."
+                    "error.consumption.requests.violatedKeyUniquenessOfRelationshipAttributes: 'The queried RelationshipAttribute cannot be created because there is already a RelationshipAttribute in the context of this Relationship with the same key 'uniqueKey', owner and value type.'"
                 );
             });
 

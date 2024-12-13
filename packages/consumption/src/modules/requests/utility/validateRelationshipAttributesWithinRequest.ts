@@ -103,7 +103,7 @@ export function validateKeyUniquenessOfRelationshipAttributesWithinIncomingReque
     if (containsAcceptedDuplicatesResult.containsDuplicates) {
         return ValidationResult.error(
             ConsumptionCoreErrors.requests.invalidAcceptParameters(
-                `The Request cannot be accepted with this parameters because it would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key '${containsAcceptedDuplicatesResult.duplicateFragment.key}', owner and value type.`
+                `The Request cannot be accepted with these parameters because it would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key '${containsAcceptedDuplicatesResult.duplicateFragment.key}', owner and value type.`
             )
         );
     }
@@ -111,7 +111,10 @@ export function validateKeyUniquenessOfRelationshipAttributesWithinIncomingReque
     return ValidationResult.success();
 }
 
-function extractRelationshipAttributeFragmentsFromMustBeAcceptedItemsOfGroup(requestItemGroup: RequestItemGroup, recipient?: CoreAddress): RelationshipAttributeFragment[] | void {
+function extractRelationshipAttributeFragmentsFromMustBeAcceptedItemsOfGroup(
+    requestItemGroup: RequestItemGroup,
+    recipient?: CoreAddress
+): RelationshipAttributeFragment[] | undefined {
     const fragmentsOfMustBeAcceptedItemsOfGroup: RelationshipAttributeFragment[] = [];
 
     for (const item of requestItemGroup.items) {
@@ -129,7 +132,7 @@ function extractRelationshipAttributeFragmentsFromMustBeAcceptedItemsOfGroup(req
     return;
 }
 
-function extractRelationshipAttributeFragmentFromMustBeAcceptedRequestItem(requestItem: RequestItem, recipient?: CoreAddress): RelationshipAttributeFragment | void {
+function extractRelationshipAttributeFragmentFromMustBeAcceptedRequestItem(requestItem: RequestItem, recipient?: CoreAddress): RelationshipAttributeFragment | undefined {
     if (requestItem.mustBeAccepted) {
         return extractRelationshipAttributeFragmentFromRequestItem(requestItem, recipient);
     }
@@ -140,7 +143,7 @@ function extractRelationshipAttributeFragmentFromMustBeAcceptedRequestItem(reque
 function extractRelationshipAttributeFragmentsFromAcceptedItemsOfGroup(
     requestItemGroup: RequestItemGroup,
     decideGroupParams: DecideRequestItemGroupParametersJSON
-): RelationshipAttributeFragment[] | void {
+): RelationshipAttributeFragment[] | undefined {
     const fragmentsOfAcceptedItemsOfGroup: RelationshipAttributeFragment[] = [];
 
     for (let i = 0; i < decideGroupParams.items.length; i++) {
@@ -161,7 +164,7 @@ function extractRelationshipAttributeFragmentsFromAcceptedItemsOfGroup(
 function extractRelationshipAttributeFragmentFromAcceptedRequestItem(
     requestItem: RequestItem,
     decideItemParams: DecideRequestItemParametersJSON
-): RelationshipAttributeFragment | void {
+): RelationshipAttributeFragment | undefined {
     if (decideItemParams.accept) {
         return extractRelationshipAttributeFragmentFromRequestItem(requestItem);
     }
@@ -169,7 +172,7 @@ function extractRelationshipAttributeFragmentFromAcceptedRequestItem(
     return;
 }
 
-function extractRelationshipAttributeFragmentFromRequestItem(requestItem: RequestItem, recipient?: CoreAddress): RelationshipAttributeFragment | void {
+function extractRelationshipAttributeFragmentFromRequestItem(requestItem: RequestItem, recipient?: CoreAddress): RelationshipAttributeFragment | undefined {
     if (requestItem instanceof CreateAttributeRequestItem && requestItem.attribute instanceof RelationshipAttribute) {
         const ownerIsEmptyString = requestItem.attribute.owner.toString() === "";
         return {

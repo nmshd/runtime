@@ -97,7 +97,7 @@ export class GivenSteps {
 
         this.context.givenRequestItem = CreateAttributeRequestItem.from({
             attribute: attribute,
-            mustBeAccepted: typeof params.itemMustBeAccepted !== "undefined" ? params.itemMustBeAccepted : true
+            mustBeAccepted: params.itemMustBeAccepted ?? true
         });
         return Promise.resolve();
     }

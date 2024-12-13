@@ -80,10 +80,10 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         const innerResults = await this.canCreateItems(parsedParams.content, parsedParams.peer);
         const result = ValidationResult.fromItems(innerResults);
 
+        if (result.isError()) return result;
+
         const keyUniquenessValidationResult = validateKeyUniquenessOfRelationshipAttributesWithinOutgoingRequest(parsedParams.content.items, parsedParams.peer);
-        if (keyUniquenessValidationResult.isError() && result.isSuccess()) {
-            return keyUniquenessValidationResult;
-        }
+        if (keyUniquenessValidationResult.isError()) return keyUniquenessValidationResult;
 
         return result;
     }
