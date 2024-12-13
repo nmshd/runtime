@@ -219,7 +219,7 @@ describe("Un-/RegisterPushNotificationToken", () => {
     });
 });
 
-describe("CheckDeletionOfIdentity", () => {
+describe("CheckIfIdentityIsDeleted", () => {
     test("check deletion of Identity that is not deleted", async () => {
         const result = await sTransportServices.account.checkIfIdentityIsDeleted();
         expect(result.isSuccess).toBe(true);
