@@ -1,6 +1,6 @@
 import { QueryTranslator } from "@js-soft/docdb-querytranslator";
 import { Result } from "@js-soft/ts-utils";
-import { CachedToken, Token, TokenController } from "@nmshd/transport";
+import { CachedToken, PasswordProtection, Token, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { nameof } from "ts-simple-nameof";
 import { TokenDTO } from "../../../types";
@@ -13,6 +13,9 @@ export interface GetTokensQuery {
     createdByDevice?: string | string[];
     expiresAt?: string | string[];
     forIdentity?: string | string[];
+    passwordProtection?: "" | "!";
+    "passwordProtection.password"?: string | string[];
+    "passwordProtection.passwordIsPin"?: "true" | "!";
 }
 
 export interface GetTokensRequest {
@@ -33,14 +36,33 @@ export class GetTokensUseCase extends UseCase<GetTokensRequest, TokenDTO[]> {
             [nameof<TokenDTO>((t) => t.createdBy)]: true,
             [nameof<TokenDTO>((t) => t.createdByDevice)]: true,
             [nameof<TokenDTO>((t) => t.expiresAt)]: true,
-            [nameof<TokenDTO>((t) => t.forIdentity)]: true
+            [nameof<TokenDTO>((t) => t.forIdentity)]: true,
+            [nameof<TokenDTO>((r) => r.passwordProtection)]: true,
+            [`${nameof<TokenDTO>((r) => r.passwordProtection)}.password`]: true,
+            [`${nameof<TokenDTO>((r) => r.passwordProtection)}.passwordIsPin`]: true
         },
         alias: {
             [nameof<TokenDTO>((t) => t.createdAt)]: `${nameof<Token>((t) => t.cache)}.${[nameof<CachedToken>((t) => t.createdAt)]}`,
             [nameof<TokenDTO>((t) => t.createdBy)]: `${nameof<Token>((t) => t.cache)}.${[nameof<CachedToken>((t) => t.createdBy)]}`,
             [nameof<TokenDTO>((t) => t.createdByDevice)]: `${nameof<Token>((t) => t.cache)}.${[nameof<CachedToken>((t) => t.createdByDevice)]}`,
             [nameof<TokenDTO>((t) => t.expiresAt)]: `${nameof<Token>((t) => t.cache)}.${[nameof<CachedToken>((t) => t.expiresAt)]}`,
-            [nameof<TokenDTO>((t) => t.forIdentity)]: `${nameof<Token>((t) => t.cache)}.${[nameof<CachedToken>((t) => t.forIdentity)]}`
+            [nameof<TokenDTO>((t) => t.forIdentity)]: `${nameof<Token>((t) => t.cache)}.${[nameof<CachedToken>((t) => t.forIdentity)]}`,
+            [nameof<TokenDTO>((r) => r.passwordProtection)]: nameof<Token>((r) => r.passwordProtection)
+        },
+        custom: {
+            [`${nameof<TokenDTO>((r) => r.passwordProtection)}.password`]: (query: any, input: string) => {
+                query[`${nameof<Token>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.password)}`] = input;
+            },
+            [`${nameof<TokenDTO>((t) => t.passwordProtection)}.passwordIsPin`]: (query: any, input: string) => {
+                if (input === "true") {
+                    query[`${nameof<Token>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordType)}`] = {
+                        $regex: "^pin"
+                    };
+                }
+                if (input === "!") {
+                    query[`${nameof<Token>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordType)}`] = "pw";
+                }
+            }
         }
     });
 
