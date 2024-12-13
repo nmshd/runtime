@@ -38,7 +38,7 @@ export class AccountServices {
         return LocalAccountMapper.toLocalAccountDTO(localAccount);
     }
 
-    public async offboardDevice(id: string): Promise<void> {
+    public async offboardAccount(id: string): Promise<void> {
         await this.multiAccountController.offboardDevice(CoreId.from(id));
     }
 
