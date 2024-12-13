@@ -21865,6 +21865,33 @@ export const GetTokensRequest: any = {
                             }
                         }
                     ]
+                },
+                "passwordProtection": {
+                    "type": "string",
+                    "enum": [
+                        "",
+                        "!"
+                    ]
+                },
+                "passwordProtection.password": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "passwordProtection.passwordIsPin": {
+                    "type": "string",
+                    "enum": [
+                        "true",
+                        "!"
+                    ]
                 }
             },
             "additionalProperties": false
