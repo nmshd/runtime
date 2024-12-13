@@ -134,7 +134,7 @@ export class MultiAccountController {
         return [localAccount, accountController];
     }
 
-    public async offboardDevice(id: CoreId): Promise<void> {
+    public async offboardAccount(id: CoreId): Promise<void> {
         const accountController = (await this.selectAccount(id))[1];
         await accountController.unregisterPushNotificationToken();
         await accountController.activeDevice.markAsOffboarded();

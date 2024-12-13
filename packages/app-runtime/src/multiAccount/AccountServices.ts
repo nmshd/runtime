@@ -39,7 +39,7 @@ export class AccountServices {
     }
 
     public async offboardAccount(id: string): Promise<void> {
-        await this.multiAccountController.offboardDevice(CoreId.from(id));
+        await this.multiAccountController.offboardAccount(CoreId.from(id));
     }
 
     public async deleteAccount(id: string): Promise<void> {
