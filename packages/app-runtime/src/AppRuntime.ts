@@ -293,11 +293,54 @@ export class AppRuntime extends Runtime<AppConfig> {
         return Promise.resolve();
     }
 
+    public override async start(): Promise<void> {
+        await super.start();
+
+        await this.startAccounts();
+    }
+
     public override async stop(): Promise<void> {
         const logError = (e: any) => this.logger.error(e);
 
         await super.stop().catch(logError);
         await this.lokiConnection.close().catch(logError);
+    }
+
+    private async startAccounts(): Promise<void> {
+        const accounts = await this._multiAccountController.getAccounts();
+
+        for (const account of accounts) {
+            const session = await this.selectAccount(account.id.toString());
+
+            session.accountController.authenticator.clear();
+            try {
+                await session.accountController.authenticator.getToken();
+                continue;
+            } catch (error) {
+                this.logger.error(error);
+
+                if (!(typeof error === "object" && error !== null && "code" in error)) {
+                    continue;
+                }
+
+                if (!(error.code === "error.transport.request.noAuthGrant")) continue;
+            }
+
+            const checkDeletionResult = await session.transportServices.account.checkIfIdentityIsDeleted();
+
+            if (checkDeletionResult.isError) {
+                this.logger.error(checkDeletionResult.error);
+                continue;
+            }
+
+            if (checkDeletionResult.value.isDeleted) {
+                await this._multiAccountController.deleteAccount(account.id);
+                continue;
+            }
+
+            const syncResult = await session.transportServices.account.syncDatawallet();
+            if (syncResult.isError) this.logger.error(syncResult.error);
+        }
     }
 
     private translationProvider: INativeTranslationProvider = {
