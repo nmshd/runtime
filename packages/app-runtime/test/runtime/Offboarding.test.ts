@@ -10,15 +10,13 @@ describe("Offboarding", function () {
     let localAccount2Id: string;
     let device2Id: string;
 
-    beforeAll(async function () {
+    beforeEach(async function () {
         // as we can't pop up multiple runtimes we have to allow multiple accounts with
         // the same address to test offboarding
         const configOverride = { allowMultipleAccountsWithSameAddress: true };
         runtime = await TestUtil.createRuntime(configOverride);
         await runtime.start();
-    });
 
-    beforeEach(async function () {
         const [localAccount1] = await TestUtil.provideAccounts(runtime, 1);
         services1 = await runtime.getServices(localAccount1.id);
 
@@ -35,7 +33,7 @@ describe("Offboarding", function () {
         await services1.transportServices.account.syncDatawallet();
     });
 
-    afterAll(async function () {
+    afterEach(async function () {
         await runtime.stop();
     });
 
