@@ -209,7 +209,7 @@ export class TestObjectFactory {
                             newStatus: RelationshipStatus.Active
                         }
                     ],
-                    template: this.createIncomingRelationshipTemplate()
+                    templateId: CoreId.from("aTemplateId")
                 })
         });
     }
@@ -266,7 +266,7 @@ export class TestObjectFactory {
                             newStatus: RelationshipStatus.DeletionProposed
                         }
                     ],
-                    template: this.createIncomingRelationshipTemplate()
+                    templateId: CoreId.from("aTemplateId")
                 })
         });
     }
