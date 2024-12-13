@@ -134,11 +134,18 @@ export class MultiAccountController {
         return [localAccount, accountController];
     }
 
-    public async deleteAccount(id: CoreId): Promise<void> {
-        const [localAccount, accountController] = await this.selectAccount(id);
+    public async offboardDevice(id: CoreId): Promise<void> {
+        const accountController = (await this.selectAccount(id))[1];
         await accountController.unregisterPushNotificationToken();
         await accountController.activeDevice.markAsOffboarded();
         await accountController.close();
+
+        await this.deleteAccount(id);
+    }
+
+    // TODO: expose this on AccountsServices? -> naming clash
+    public async deleteAccount(id: CoreId): Promise<void> {
+        const localAccount = (await this.selectAccount(id))[0];
 
         delete this._openAccounts[localAccount.id.toString()];
 

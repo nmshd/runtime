@@ -35,8 +35,8 @@ describe("Offboarding", function () {
         await runtime.stop();
     });
 
-    test("delete account", async function () {
-        await runtime.accountServices.deleteAccount(localAccount2Id);
+    test("offboard device", async function () {
+        await runtime.accountServices.offboardDevice(localAccount2Id);
         await services1.transportServices.account.syncDatawallet();
 
         const accounts = await runtime.accountServices.getAccounts();

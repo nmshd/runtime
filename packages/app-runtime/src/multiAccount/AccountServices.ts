@@ -38,8 +38,8 @@ export class AccountServices {
         return LocalAccountMapper.toLocalAccountDTO(localAccount);
     }
 
-    public async deleteAccount(id: string): Promise<void> {
-        await this.multiAccountController.deleteAccount(CoreId.from(id));
+    public async offboardDevice(id: string): Promise<void> {
+        await this.multiAccountController.offboardDevice(CoreId.from(id));
     }
 
     public async getAccountByAddress(address: string): Promise<LocalAccountDTO> {
