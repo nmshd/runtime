@@ -293,6 +293,12 @@ export class AppRuntime extends Runtime<AppConfig> {
         return Promise.resolve();
     }
 
+    public override async start(): Promise<void> {
+        await super.start();
+
+        await this.startAccounts();
+    }
+
     public override async stop(): Promise<void> {
         const logError = (e: any) => this.logger.error(e);
 
@@ -300,14 +306,11 @@ export class AppRuntime extends Runtime<AppConfig> {
         await this.lokiConnection.close().catch(logError);
     }
 
-    protected override async startAccounts(): Promise<void> {
+    private async startAccounts(): Promise<void> {
         const accounts = await this._multiAccountController.getAccounts();
 
         for (const account of accounts) {
             const session = await this.selectAccount(account.id.toString());
-
-            const syncResult = await session.transportServices.account.syncDatawallet();
-            if (syncResult.isError) this.logger.error(syncResult.error);
 
             session.accountController.authenticator.clear();
             try {
@@ -332,7 +335,11 @@ export class AppRuntime extends Runtime<AppConfig> {
 
             if (checkDeletionResult.value.isDeleted) {
                 await this._multiAccountController.deleteAccount(account.id);
+                continue;
             }
+
+            const syncResult = await session.transportServices.account.syncDatawallet();
+            if (syncResult.isError) this.logger.error(syncResult.error);
         }
     }
 
