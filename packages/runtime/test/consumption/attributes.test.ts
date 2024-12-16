@@ -641,7 +641,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
         };
 
         const result = await services1.consumption.attributes.createRepositoryAttribute(request);
-        expect(result.value).toBeDefined();
+        expect(result).toBeSuccessful();
         const attribute = result.value;
         expect(attribute.content).toMatchObject(request.content);
         await services1.eventBus.waitForEvent(AttributeCreatedEvent, (e) => e.data.id === attribute.id);
