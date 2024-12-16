@@ -228,12 +228,11 @@ describe("CheckIfIdentityIsDeleted", () => {
     });
 
     test("check deletion of Identity that has IdentityDeletionProcess with expired grace period", async () => {
-        const identityDeletionProcess =
-            await sTransportServices.identityDeletionProcesses["initiateIdentityDeletionProcessUseCase"]["identityDeletionProcessController"].initiateIdentityDeletionProcess(0);
+        const identityDeletionProcess = await sTransportServices.identityDeletionProcesses.initiateIdentityDeletionProcess({ lengthOfGracePeriodInDays: 0 });
 
         const result = await sTransportServices.account.checkIfIdentityIsDeleted();
         expect(result.isSuccess).toBe(true);
         expect(result.value.isDeleted).toBe(true);
-        expect(result.value.deletionDate).toBe(identityDeletionProcess.cache!.gracePeriodEndsAt!.toString());
+        expect(result.value.deletionDate).toBe(identityDeletionProcess.value.gracePeriodEndsAt!.toString());
     });
 });
