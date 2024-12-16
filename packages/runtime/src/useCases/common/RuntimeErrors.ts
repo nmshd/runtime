@@ -237,7 +237,10 @@ class Attributes {
     }
 
     public cannotCreateDuplicateRepositoryAttribute(attributeId: CoreId | string): ApplicationError {
-        return new ApplicationError("error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute", `The Attribute cannot be created because it is a copy of the attribute '${attributeId.toString()}'.`);
+        return new ApplicationError(
+            "error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute",
+            `The Attribute cannot be created because it is a copy of the attribute '${attributeId.toString()}'.`
+        );
     }
 
     public setDefaultRepositoryAttributesIsDisabled(): ApplicationError {
