@@ -225,7 +225,7 @@ describe("OutgoingRequestsController", function () {
             });
         });
 
-        test("returns a validation result that contains an error for requests th at are expired", async function () {
+        test("returns a validation result that contains an error for requests that are expired", async function () {
             const validationResult = await When.iCallCanCreateForAnOutgoingRequest({
                 content: {
                     expiresAt: CoreDate.utc().subtract({ days: 1 }),
