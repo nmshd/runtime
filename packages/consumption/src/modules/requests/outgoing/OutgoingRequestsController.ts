@@ -45,6 +45,10 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
             return ValidationResult.error(ConsumptionCoreErrors.requests.cannotShareRequestWithYourself());
         }
 
+        if (parsedParams.content.expiresAt?.isBefore(CoreDate.utc())) {
+            return ValidationResult.error(ConsumptionCoreErrors.requests.cannotCreateRequestWithExpirationDateInPast());
+        }
+
         if (parsedParams.peer) {
             const relationship = await this.relationshipResolver.getRelationshipToIdentity(parsedParams.peer);
 

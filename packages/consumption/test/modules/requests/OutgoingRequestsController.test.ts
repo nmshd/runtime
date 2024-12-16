@@ -224,6 +224,24 @@ describe("OutgoingRequestsController", function () {
                 message: "You cannot share a Request with yourself."
             });
         });
+
+        test("returns a validation result that contains an error for requests th at are expired", async function () {
+            const validationResult = await When.iCallCanCreateForAnOutgoingRequest({
+                content: {
+                    expiresAt: CoreDate.utc().subtract({ days: 1 }),
+                    items: [
+                        TestRequestItem.from({
+                            mustBeAccepted: false
+                        })
+                    ]
+                }
+            });
+
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.cannotCreateRequestWithExpirationDateInPast",
+                message: "You cannot create a Request with an expiration date in the past."
+            });
+        });
     });
 
     describe("CanCreate (on terminated relationship)", function () {

@@ -1,3 +1,4 @@
+import { sleep } from "@js-soft/ts-utils";
 import { ConsumptionIds } from "@nmshd/consumption";
 import { ConsentRequestItemJSON, Notification } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
@@ -271,6 +272,35 @@ describe("Message errors", () => {
             }
         });
         expect(result).toBeAnError("The recipient does not match the Request's peer.", "error.runtime.validation.invalidPropertyValue");
+    });
+
+    test("should throw correct error message for trying to send a Message with a Request that expired", async () => {
+        const requestItem = {
+            "@type": "ConsentRequestItem",
+            consent: "I consent to this RequestItem",
+            mustBeAccepted: true
+        };
+        const expiresAt = CoreDate.utc().add({ seconds: 5 }).toString();
+        const createRequestResult = (
+            await client1.consumption.outgoingRequests.create({
+                content: {
+                    expiresAt,
+                    items: [requestItem]
+                },
+                peer: client2.address
+            })
+        ).value;
+        while (CoreDate.utc().isBefore(CoreDate.from(expiresAt))) {
+            await sleep(1000);
+        }
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client3.address],
+            content: createRequestResult.content
+        });
+        expect(result).toBeAnError(
+            "The Message cannot be sent as the Request has already expired. Please create a new Request and try again.",
+            "error.runtime.messages.cannotSendMessageWithExpiredRequest"
+        );
     });
 
     describe("Message errors for Relationships that are not active", () => {
