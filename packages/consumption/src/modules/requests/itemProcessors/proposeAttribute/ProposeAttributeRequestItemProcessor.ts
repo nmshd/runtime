@@ -26,7 +26,7 @@ import { AcceptProposeAttributeRequestItemParameters, AcceptProposeAttributeRequ
 
 export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProcessor<ProposeAttributeRequestItem, AcceptProposeAttributeRequestItemParametersJSON> {
     public override async canCreateOutgoingRequestItem(requestItem: ProposeAttributeRequestItem, _request: Request, recipient?: CoreAddress): Promise<ValidationResult> {
-        const queryValidationResult = await this.validateQuery(requestItem, recipient);
+        const queryValidationResult = this.validateQuery(requestItem, recipient);
         if (queryValidationResult.isError()) {
             return queryValidationResult;
         }
@@ -46,6 +46,23 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             return proposedAttributeMatchesWithQueryValidationResult;
         }
 
+        if (requestItem.query instanceof RelationshipAttributeQuery && typeof recipient !== "undefined") {
+            const relationshipAttributesWithSameKey = await this.consumptionController.attributes.getRelationshipAttributesOfValueTypeToPeerWithGivenKeyAndOwner(
+                requestItem.query.key,
+                recipient,
+                requestItem.query.attributeCreationHints.valueType,
+                recipient
+            );
+
+            if (relationshipAttributesWithSameKey.length !== 0) {
+                return ValidationResult.error(
+                    ConsumptionCoreErrors.requests.invalidRequestItem(
+                        `The creation of the queried RelationshipAttribute cannot be requested because there is already a RelationshipAttribute in the context of this Relationship with the same key '${requestItem.query.key}', owner and value type.`
+                    )
+                );
+            }
+        }
+
         return ValidationResult.success();
     }
 
@@ -61,7 +78,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
         return ValidationResult.success();
     }
 
-    private async validateQuery(requestItem: ProposeAttributeRequestItem, recipient?: CoreAddress) {
+    private validateQuery(requestItem: ProposeAttributeRequestItem, recipient?: CoreAddress) {
         const commonQueryValidationResult = validateQuery(requestItem.query, this.currentIdentityAddress, recipient);
         if (commonQueryValidationResult.isError()) {
             return commonQueryValidationResult;
@@ -74,23 +91,6 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
                         "The owner of the given `query` can only be an empty string. This is because you can only propose Attributes where the Recipient of the Request is the owner anyway. And in order to avoid mistakes, the owner will be automatically filled for you."
                     )
                 );
-            }
-
-            if (typeof recipient !== "undefined") {
-                const relationshipAttributesWithSameKey = await this.consumptionController.attributes.getRelationshipAttributesOfValueTypeToPeerWithGivenKeyAndOwner(
-                    requestItem.query.key,
-                    recipient,
-                    requestItem.query.attributeCreationHints.valueType,
-                    recipient
-                );
-
-                if (relationshipAttributesWithSameKey.length !== 0) {
-                    return ValidationResult.error(
-                        ConsumptionCoreErrors.requests.invalidRequestItem(
-                            `The creation of the queried RelationshipAttribute cannot be requested because there is already a RelationshipAttribute in the context of this Relationship with the same key '${requestItem.query.key}', owner and value type.`
-                        )
-                    );
-                }
             }
         }
 
