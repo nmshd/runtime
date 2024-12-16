@@ -1234,7 +1234,7 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
                 content: {
                     value: {
                         "@type": "GivenName",
-                        value: "aGivenName2"
+                        value: "aGivenName"
                     }
                 }
             })
@@ -1895,7 +1895,7 @@ describe("DeleteAttributeUseCases", () => {
             content: {
                 value: {
                     "@type": "GivenName",
-                    value: "Petro Pan"
+                    value: "aGivenName"
                 },
                 tags: ["tag1", "tag2"]
             }
@@ -1910,7 +1910,7 @@ describe("DeleteAttributeUseCases", () => {
                 successorContent: {
                     value: {
                         "@type": "GivenName",
-                        value: "Tina Turner"
+                        value: "anotherGivenName"
                     }
                 }
             }
