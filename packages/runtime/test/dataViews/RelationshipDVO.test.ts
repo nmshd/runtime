@@ -80,7 +80,7 @@ describe("RelationshipDVO", () => {
         expect(dvo.relationship!.status).toBe("Active");
         expect(dvo.relationship!.statusText).toBe("i18n://dvo.relationship.Active");
 
-        expect(dvo.relationship!.templateId).toBe(dto.template.id);
+        expect(dvo.relationship!.templateId).toBe(dto.templateId);
     });
 
     test("check the relationship dvo for the requestor", async () => {
@@ -100,7 +100,7 @@ describe("RelationshipDVO", () => {
         expect(dvo.relationship!.status).toBe("Active");
         expect(dvo.relationship!.statusText).toBe("i18n://dvo.relationship.Active");
 
-        expect(dvo.relationship!.templateId).toBe(dto.template.id);
+        expect(dvo.relationship!.templateId).toBe(dto.templateId);
     });
 
     test("check the relationship dvo for the templator with active relationshipSetting", async () => {
