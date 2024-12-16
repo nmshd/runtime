@@ -57,7 +57,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             if (relationshipAttributesWithSameKey.length !== 0) {
                 return ValidationResult.error(
                     ConsumptionCoreErrors.requests.invalidRequestItem(
-                        `The creation of the queried RelationshipAttribute cannot be requested because there is already a RelationshipAttribute in the context of this Relationship with the same key '${requestItem.query.key}', owner and value type.`
+                        `The creation of the proposed RelationshipAttribute cannot be requested because there is already a RelationshipAttribute in the context of this Relationship with the same key '${requestItem.query.key}', owner and value type.`
                     )
                 );
             }

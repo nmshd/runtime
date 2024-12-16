@@ -7,6 +7,7 @@ import {
     IdentityAttributeQuery,
     ProposeAttributeAcceptResponseItem,
     ProposeAttributeRequestItem,
+    ProprietaryInteger,
     ProprietaryString,
     RelationshipAttribute,
     RelationshipAttributeConfidentiality,
@@ -246,8 +247,50 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     expect(result).errorValidationResult({
                         code: "error.consumption.requests.invalidRequestItem",
                         message:
-                            "The creation of the queried RelationshipAttribute cannot be requested because there is already a RelationshipAttribute in the context of this Relationship with the same key 'uniqueKey', owner and value type."
+                            "The creation of the proposed RelationshipAttribute cannot be requested because there is already a RelationshipAttribute in the context of this Relationship with the same key 'uniqueKey', owner and value type."
                     });
+                });
+
+                test("returns success when proposing a RelationshipAttribute with same key but different value type", async () => {
+                    const recipient = CoreAddress.from("Recipient");
+
+                    await consumptionController.attributes.createSharedLocalAttribute({
+                        content: RelationshipAttribute.from({
+                            key: "valueTypeSpecificUniqueKey",
+                            confidentiality: RelationshipAttributeConfidentiality.Public,
+                            owner: recipient,
+                            value: ProprietaryString.from({
+                                title: "aTitle",
+                                value: "aStringValue"
+                            })
+                        }),
+                        peer: recipient,
+                        requestReference: await ConsumptionIds.request.generate()
+                    });
+
+                    const query = RelationshipAttributeQuery.from({
+                        owner: "",
+                        key: "valueTypeSpecificUniqueKey",
+                        attributeCreationHints: {
+                            valueType: "ProprietaryInteger",
+                            title: "aTitle",
+                            confidentiality: RelationshipAttributeConfidentiality.Public
+                        }
+                    });
+
+                    const requestItem = ProposeAttributeRequestItem.from({
+                        mustBeAccepted: false,
+                        query: query,
+                        attribute: TestObjectFactory.createRelationshipAttribute({
+                            value: ProprietaryInteger.fromAny({ title: "aTitle", value: 1 }),
+                            owner: CoreAddress.from(""),
+                            key: "valueTypeSpecificUniqueKey"
+                        })
+                    });
+
+                    const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), recipient);
+
+                    expect(result).successfulValidationResult();
                 });
             });
         });

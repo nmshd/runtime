@@ -288,6 +288,42 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         "The creation of the queried RelationshipAttribute cannot be requested because there is already a RelationshipAttribute in the context of this Relationship with the same key 'uniqueKey', owner and value type."
                 });
             });
+
+            test("can query a RelationshipAttribute with same key but different value type", async function () {
+                const sender = accountController.identity.address;
+                const recipient = CoreAddress.from("Recipient");
+
+                await consumptionController.attributes.createSharedLocalAttribute({
+                    content: RelationshipAttribute.from({
+                        key: "valueTypeSpecificUniqueKey",
+                        confidentiality: RelationshipAttributeConfidentiality.Public,
+                        owner: sender,
+                        value: ProprietaryString.from({
+                            title: "aTitle",
+                            value: "aStringValue"
+                        })
+                    }),
+                    peer: recipient,
+                    requestReference: await ConsumptionIds.request.generate()
+                });
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: RelationshipAttributeQuery.from({
+                        key: "valueTypeSpecificUniqueKey",
+                        owner: sender,
+                        attributeCreationHints: {
+                            valueType: "ProprietaryInteger",
+                            title: "aTitle",
+                            confidentiality: RelationshipAttributeConfidentiality.Public
+                        }
+                    })
+                });
+
+                const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), recipient);
+
+                expect(result).successfulValidationResult();
+            });
         });
     });
 
