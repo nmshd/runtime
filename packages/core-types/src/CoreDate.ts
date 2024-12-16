@@ -13,11 +13,17 @@ export class CoreDate extends Serializable {
     }
 
     public get date(): string {
-        return this.asValidDateTime.toISODate();
+        return this.asValidDateTime.toISO();
     }
 
-    public constructor(dateTime: DateTime = DateTime.utc()) {
+    public constructor(dateTime: DateTime | CoreDate = DateTime.utc()) {
         super();
+
+        if (dateTime instanceof CoreDate) {
+            this._dateTime = dateTime._dateTime;
+            return;
+        }
+
         this._dateTime = dateTime;
     }
 
