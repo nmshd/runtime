@@ -19432,6 +19432,22 @@ export const GetIdentityDeletionProcessRequest: any = {
     }
 }
 
+export const InitiateIdentityDeletionProcessRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/InitiateIdentityDeletionProcessRequest",
+    "definitions": {
+        "InitiateIdentityDeletionProcessRequest": {
+            "type": "object",
+            "properties": {
+                "lengthOfGracePeriodInDays": {
+                    "type": "number"
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+}
+
 export const DownloadAttachmentRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/DownloadAttachmentRequest",

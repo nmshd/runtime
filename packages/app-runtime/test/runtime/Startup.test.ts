@@ -87,14 +87,14 @@ describe("Start Accounts", function () {
     });
 
     test("should delete Account running startAccounts for an Identity with expired grace period", async function () {
-        await session.transportServices.identityDeletionProcesses["initiateIdentityDeletionProcessUseCase"]["identityDeletionProcessController"].initiateIdentityDeletionProcess(0);
+        await session.transportServices.identityDeletionProcesses.initiateIdentityDeletionProcess({ lengthOfGracePeriodInDays: 0 });
 
         await runtime["startAccounts"]();
         await expect(runtime.selectAccount(session.account.id)).rejects.toThrow("error.transport.recordNotFound");
     });
 
     test("should delete Account running startAccounts for a deleted Identity", async function () {
-        await session.transportServices.identityDeletionProcesses["initiateIdentityDeletionProcessUseCase"]["identityDeletionProcessController"].initiateIdentityDeletionProcess(0);
+        await session.transportServices.identityDeletionProcesses.initiateIdentityDeletionProcess({ lengthOfGracePeriodInDays: 0 });
         await TestUtil.runDeletionJob();
 
         await runtime["startAccounts"]();
