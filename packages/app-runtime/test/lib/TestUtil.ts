@@ -15,6 +15,9 @@ import {
     SyncEverythingResponse
 } from "@nmshd/runtime";
 import { IConfigOverwrite, TransportLoggerFactory } from "@nmshd/transport";
+import fs from "fs";
+import path from "path";
+import { GenericContainer, Wait } from "testcontainers";
 import { LogLevel } from "typescript-logging";
 import { AppConfig, AppRuntime, IUIBridge, LocalAccountDTO, LocalAccountSession, createAppConfig as runtime_createAppConfig } from "../../src";
 import { FakeUIBridge } from "./FakeUIBridge";
@@ -261,5 +264,30 @@ export class TestUtil {
     public static expectSuccess<T>(result: Result<T>): void {
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         expect(result.isSuccess, `${result.error?.code} | ${result.error?.message}`).toBe(true);
+    }
+
+    public static async runDeletionJob(): Promise<void> {
+        const backboneVersion = this.getBackboneVersion();
+        const appsettingsOverrideLocation = process.env.APPSETTINGS_OVERRIDE_LOCATION ?? `${__dirname}/../../../../.dev/appsettings.override.json`;
+
+        await new GenericContainer(`ghcr.io/nmshd/backbone-identity-deletion-jobs:${backboneVersion}`)
+            .withWaitStrategy(Wait.forOneShotStartup())
+            .withCommand(["--Worker", "ActualDeletionWorker"])
+            .withNetworkMode("backbone")
+            .withCopyFilesToContainer([{ source: appsettingsOverrideLocation, target: "/app/appsettings.override.json" }])
+            .start();
+    }
+
+    private static getBackboneVersion() {
+        if (process.env.BACKBONE_VERSION) return process.env.BACKBONE_VERSION;
+
+        const envFile = fs.readFileSync(path.resolve(`${__dirname}/../../../../.dev/compose.backbone.env`));
+        const env = envFile
+            .toString()
+            .split("\n")
+            .map((line) => line.split("="))
+            .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {} as Record<string, string>);
+
+        return env["BACKBONE_VERSION"];
     }
 }
