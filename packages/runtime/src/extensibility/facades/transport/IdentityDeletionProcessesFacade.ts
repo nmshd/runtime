@@ -8,6 +8,7 @@ import {
     GetIdentityDeletionProcessesUseCase,
     GetIdentityDeletionProcessRequest,
     GetIdentityDeletionProcessUseCase,
+    InitiateIdentityDeletionProcessRequest,
     InitiateIdentityDeletionProcessUseCase,
     RejectIdentityDeletionProcessUseCase
 } from "../../../useCases";
@@ -31,8 +32,8 @@ export class IdentityDeletionProcessesFacade {
         return await this.rejectIdentityDeletionProcessUseCase.execute();
     }
 
-    public async initiateIdentityDeletionProcess(): Promise<Result<IdentityDeletionProcessDTO>> {
-        return await this.initiateIdentityDeletionProcessUseCase.execute();
+    public async initiateIdentityDeletionProcess(request: InitiateIdentityDeletionProcessRequest = {}): Promise<Result<IdentityDeletionProcessDTO>> {
+        return await this.initiateIdentityDeletionProcessUseCase.execute(request);
     }
 
     public async cancelIdentityDeletionProcess(): Promise<Result<IdentityDeletionProcessDTO>> {
