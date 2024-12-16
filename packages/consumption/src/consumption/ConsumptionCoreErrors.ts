@@ -333,7 +333,7 @@ class Requests {
     }
 
     public cannotCreateRequestWithExpirationDateInPast() {
-        return new CoreError("error.consumption.requests.cannotCreateRequestWithExpirationDateInPast", "You cannot create a Request with an expiration date in the past.");
+        return new CoreError("error.consumption.requests.cannotCreateRequestWithExpirationDateInPast", "You cannot create a Request with an expiration date that is in the past.");
     }
 
     private static readonly _decideValidation = class {
