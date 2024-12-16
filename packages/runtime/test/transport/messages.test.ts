@@ -9,6 +9,7 @@ import {
     IdentityDeletionProcessStatus,
     LocalAttributeDeletionStatus,
     LocalRequestDTO,
+    LocalRequestStatus,
     MessageReceivedEvent,
     MessageSentEvent,
     MessageWasReadAtChangedEvent,
@@ -301,6 +302,41 @@ describe("Message errors", () => {
             "The Message cannot be sent as the Request has already expired. Please create a new Request and try again.",
             "error.runtime.messages.cannotSendMessageWithExpiredRequest"
         );
+    });
+
+    test("test sync after expiration", async () => {
+        const requestItem = {
+            "@type": "ConsentRequestItem",
+            consent: "I consent to this RequestItem",
+            mustBeAccepted: true
+        };
+        const expiresAt = CoreDate.utc().add({ seconds: 10 }).toString();
+        const createRequestResult = (
+            await client1.consumption.outgoingRequests.create({
+                content: {
+                    expiresAt,
+                    items: [requestItem]
+                },
+                peer: client2.address
+            })
+        ).value;
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client2.address],
+            content: createRequestResult.content
+        });
+
+        expect(result).toBeSuccessful();
+
+        while (CoreDate.utc().isBefore(CoreDate.from(expiresAt))) {
+            await sleep(1000);
+        }
+
+        await client2.transport.account.syncEverything();
+
+        const client1ExpiredRequestResult = await client1.consumption.outgoingRequests.getRequest({ id: createRequestResult.id });
+        expect(client1ExpiredRequestResult.value.status).toBe(LocalRequestStatus.Expired);
+        const client2ExpiredRequestResult = await client2.consumption.incomingRequests.getRequest({ id: createRequestResult.id });
+        expect(client2ExpiredRequestResult.value.status).toBe(LocalRequestStatus.Expired);
     });
 
     describe("Message errors for Relationships that are not active", () => {
