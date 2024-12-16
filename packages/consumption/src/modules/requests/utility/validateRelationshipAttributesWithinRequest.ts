@@ -57,9 +57,7 @@ export function validateKeyUniquenessOfRelationshipAttributesWithinIncomingReque
 ): ValidationResult {
     const fragmentsOfMustBeAcceptedItemsOfRequest: RelationshipAttributeFragment[] = [];
 
-    for (let i = 0; i < params.length; i++) {
-        const item = items[i];
-
+    for (const item of items) {
         if (item instanceof RequestItemGroup) {
             const fragmentsOfMustBeAcceptedItemsOfGroup = extractRelationshipAttributeFragmentsFromMustBeAcceptedItemsOfGroup(item, recipient);
             if (fragmentsOfMustBeAcceptedItemsOfGroup) {
@@ -82,7 +80,7 @@ export function validateKeyUniquenessOfRelationshipAttributesWithinIncomingReque
 
     const fragmentsOfAcceptedItemsOfRequest: RelationshipAttributeFragment[] = [];
 
-    for (let i = 0; i < params.length; i++) {
+    for (let i = 0; i < items.length; i++) {
         const item = items[i];
         const decideItemParams = params[i];
 
@@ -146,9 +144,9 @@ function extractRelationshipAttributeFragmentsFromAcceptedItemsOfGroup(
 ): RelationshipAttributeFragment[] | undefined {
     const fragmentsOfAcceptedItemsOfGroup: RelationshipAttributeFragment[] = [];
 
-    for (let i = 0; i < decideGroupParams.items.length; i++) {
-        const decideItemParams = decideGroupParams.items[i];
+    for (let i = 0; i < requestItemGroup.items.length; i++) {
         const item = requestItemGroup.items[i];
+        const decideItemParams = decideGroupParams.items[i];
 
         if (item instanceof RequestItem) {
             const fragment = extractRelationshipAttributeFragmentFromAcceptedRequestItem(item, decideItemParams);
@@ -180,7 +178,9 @@ function extractRelationshipAttributeFragmentFromRequestItem(requestItem: Reques
             key: requestItem.attribute.key,
             value: { "@type": requestItem.attribute.value.toJSON()["@type"] }
         };
-    } else if ((requestItem instanceof ReadAttributeRequestItem || requestItem instanceof ProposeAttributeRequestItem) && requestItem.query instanceof RelationshipAttributeQuery) {
+    }
+
+    if ((requestItem instanceof ReadAttributeRequestItem || requestItem instanceof ProposeAttributeRequestItem) && requestItem.query instanceof RelationshipAttributeQuery) {
         const ownerIsEmptyString = requestItem.query.owner.toString() === "";
         return {
             owner: ownerIsEmptyString && recipient ? recipient.toString() : requestItem.query.owner.toString(),
