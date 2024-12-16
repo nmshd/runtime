@@ -1,12 +1,15 @@
-import { log } from "@js-soft/ts-utils";
+import { log, Result } from "@js-soft/ts-utils";
 import { CoreAddress } from "@nmshd/core-types";
 import { CoreBuffer, CryptoSignature, CryptoSignaturePrivateKey, CryptoSignaturePublicKey } from "@nmshd/crypto";
 import { ControllerName, CoreCrypto, TransportController, TransportCoreErrors } from "../../core";
 import { AccountController } from "../accounts/AccountController";
 import { DeviceSecretType } from "../devices/DeviceSecretController";
+import { IdentityClient } from "./backbone/IdentityClient";
 import { Identity } from "./data/Identity";
 
 export class IdentityController extends TransportController {
+    public identityClient: IdentityClient;
+
     public get address(): CoreAddress {
         return this._identity.address;
     }
@@ -22,6 +25,8 @@ export class IdentityController extends TransportController {
 
     public constructor(parent: AccountController) {
         super(ControllerName.Identity, parent);
+
+        this.identityClient = new IdentityClient(this.config, this.transport.correlator);
     }
 
     @log()
@@ -56,5 +61,22 @@ export class IdentityController extends TransportController {
     public async verify(content: CoreBuffer, signature: CryptoSignature): Promise<boolean> {
         const valid = await CoreCrypto.verify(content, signature, this.publicKey);
         return valid;
+    }
+
+    public async checkIfIdentityIsDeleted(): Promise<
+        Result<{
+            isDeleted: boolean;
+            deletionDate?: string;
+        }>
+    > {
+        const currentDeviceCredentials = await this.parent.activeDevice.getCredentials();
+        const identityDeletionResult = await this.identityClient.checkIfIdentityIsDeleted(currentDeviceCredentials.username);
+
+        if (identityDeletionResult.isError) return Result.fail(identityDeletionResult.error);
+
+        return Result.ok({
+            isDeleted: identityDeletionResult.value.isDeleted,
+            deletionDate: identityDeletionResult.value.deletionDate ?? undefined
+        });
     }
 }
