@@ -751,7 +751,10 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
         expect(result).toBeSuccessful();
 
         const result2 = await services1.consumption.attributes.createRepositoryAttribute(request);
-        expect(result2).toBeAnError(`The Attribute is a copy of the attribute ${result.value.id.toString()}.`, "error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute");
+        expect(result2).toBeAnError(
+            `The Attribute cannot be created because it is a copy of the attribute ${result.value.id.toString()}.`,
+            "error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute"
+        );
     });
 });
 
