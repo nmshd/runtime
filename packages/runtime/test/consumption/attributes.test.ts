@@ -14,7 +14,6 @@ import {
 } from "@nmshd/content";
 import { CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreIdHelper } from "@nmshd/transport";
-import { randomUUID } from "crypto";
 import {
     AttributeCreatedEvent,
     ChangeDefaultRepositoryAttributeUseCase,
@@ -742,7 +741,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
             content: {
                 value: {
                     "@type": "GivenName",
-                    value: `Petrus Pan${randomUUID()}`
+                    value: `aGivenName3`
                 },
                 tags: ["tag1", "tag2"]
             }
@@ -1232,7 +1231,7 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
                 content: {
                     value: {
                         "@type": "GivenName",
-                        value: "Petrus Pan"
+                        value: "aGivenName2"
                     }
                 }
             })
