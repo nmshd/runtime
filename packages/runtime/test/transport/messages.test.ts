@@ -294,7 +294,7 @@ describe("Message errors", () => {
             await sleep(1000);
         }
         const result = await client1.transport.messages.sendMessage({
-            recipients: [client3.address],
+            recipients: [client2.address],
             content: createRequestResult.content
         });
         expect(result).toBeAnError(
