@@ -5,11 +5,11 @@ export const LoadPeerTokenAnonymousRequest: any = {
         "LoadPeerTokenAnonymousRequest": {
             "type": "object",
             "properties": {
-                "reference": {
-                    "$ref": "#/definitions/TokenReferenceString"
-                },
                 "password": {
                     "type": "string"
+                },
+                "reference": {
+                    "$ref": "#/definitions/TokenReferenceString"
                 }
             },
             "required": [
@@ -78,9 +78,6 @@ export const AcceptIncomingRequestRequest: any = {
             "type": "object",
             "additionalProperties": false,
             "properties": {
-                "requestId": {
-                    "type": "string"
-                },
                 "items": {
                     "type": "array",
                     "items": {
@@ -93,6 +90,9 @@ export const AcceptIncomingRequestRequest: any = {
                             }
                         ]
                     }
+                },
+                "requestId": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -126,15 +126,15 @@ export const AcceptIncomingRequestRequest: any = {
         "RejectRequestItemParametersJSON": {
             "type": "object",
             "properties": {
-                "accept": {
-                    "type": "boolean",
-                    "const": false
+                "message": {
+                    "type": "string"
                 },
                 "code": {
                     "type": "string"
                 },
-                "message": {
-                    "type": "string"
+                "accept": {
+                    "type": "boolean",
+                    "const": false
                 }
             },
             "required": [
@@ -167,13 +167,26 @@ export const CanCreateOutgoingRequestRequest: any = {
         "CanCreateOutgoingRequestRequest": {
             "type": "object",
             "properties": {
+                "peer": {
+                    "$ref": "#/definitions/AddressString"
+                },
                 "content": {
                     "type": "object",
                     "properties": {
-                        "expiresAt": {
+                        "@context": {
+                            "type": "string"
+                        },
+                        "metadata": {
+                            "type": "object",
+                            "description": "This property can be used to add some arbitrary metadata to this request. The content of this property will be copied into the response on the side of the recipient."
+                        },
+                        "description": {
                             "type": "string",
-                            "description": "The point in time the request is considered obsolete either technically (e.g. the request is no longer valid or its response is no longer accepted) or from a business perspective (e.g. the request is no longer of interest).",
-                            "default": "undefined - the request won't expire"
+                            "description": "The human-readable description of this Request."
+                        },
+                        "title": {
+                            "type": "string",
+                            "description": "The human-readable title of this Request."
                         },
                         "items": {
                             "type": "array",
@@ -189,29 +202,16 @@ export const CanCreateOutgoingRequestRequest: any = {
                             },
                             "description": "The items of the Request. Can be either a single  {@link  RequestItemJSONDerivations RequestItem }  or a  {@link  RequestItemGroupJSON RequestItemGroup } , which itself can contain further  {@link  RequestItemJSONDerivations RequestItems } ."
                         },
-                        "title": {
+                        "expiresAt": {
                             "type": "string",
-                            "description": "The human-readable title of this Request."
-                        },
-                        "description": {
-                            "type": "string",
-                            "description": "The human-readable description of this Request."
-                        },
-                        "metadata": {
-                            "type": "object",
-                            "description": "This property can be used to add some arbitrary metadata to this request. The content of this property will be copied into the response on the side of the recipient."
-                        },
-                        "@context": {
-                            "type": "string"
+                            "description": "The point in time the request is considered obsolete either technically (e.g. the request is no longer valid or its response is no longer accepted) or from a business perspective (e.g. the request is no longer of interest).",
+                            "default": "undefined - the request won't expire"
                         }
                     },
                     "required": [
                         "items"
                     ],
                     "additionalProperties": false
-                },
-                "peer": {
-                    "$ref": "#/definitions/AddressString"
                 }
             },
             "required": [
@@ -222,34 +222,34 @@ export const CanCreateOutgoingRequestRequest: any = {
         "RequestItemGroupJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "RequestItemGroup"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this group."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this group."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this group. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
-                },
                 "items": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/RequestItemJSONDerivations"
                     },
                     "description": "The items of this group."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this group. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this group."
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this group."
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "RequestItemGroup"
                 }
             },
             "required": [
@@ -296,34 +296,34 @@ export const CanCreateOutgoingRequestRequest: any = {
         "RequestItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                "requireManualDecision": {
+                    "type": "boolean",
+                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
                     "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -335,36 +335,6 @@ export const CanCreateOutgoingRequestRequest: any = {
         "CreateAttributeRequestItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "CreateAttributeRequestItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
-                },
                 "attribute": {
                     "anyOf": [
                         {
@@ -374,6 +344,36 @@ export const CanCreateOutgoingRequestRequest: any = {
                             "$ref": "#/definitions/IdentityAttributeJSON"
                         }
                     ]
+                },
+                "requireManualDecision": {
+                    "type": "boolean",
+                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                },
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "CreateAttributeRequestItem"
                 }
             },
             "required": [
@@ -386,36 +386,36 @@ export const CanCreateOutgoingRequestRequest: any = {
         "RelationshipAttributeJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "RelationshipAttribute"
+                "confidentiality": {
+                    "$ref": "#/definitions/RelationshipAttributeConfidentiality"
                 },
-                "@context": {
-                    "type": "string"
+                "isTechnical": {
+                    "type": "boolean"
                 },
-                "@version": {
-                    "type": "string"
-                },
-                "owner": {
-                    "type": "string"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
+                "key": {
                     "type": "string"
                 },
                 "value": {
                     "$ref": "#/definitions/AttributeValues.Relationship.Json"
                 },
-                "key": {
+                "validTo": {
                     "type": "string"
                 },
-                "isTechnical": {
-                    "type": "boolean"
+                "validFrom": {
+                    "type": "string"
                 },
-                "confidentiality": {
-                    "$ref": "#/definitions/RelationshipAttributeConfidentiality"
+                "owner": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "RelationshipAttribute"
                 }
             },
             "required": [
@@ -476,27 +476,27 @@ export const CanCreateOutgoingRequestRequest: any = {
         "ProprietaryBooleanJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryBoolean"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
+                "description": {
                     "type": "string"
                 },
-                "@version": {
+                "title": {
                     "type": "string"
                 },
                 "value": {
                     "type": "boolean"
                 },
-                "title": {
+                "@version": {
                     "type": "string"
                 },
-                "description": {
+                "@context": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryBoolean"
                 }
             },
             "required": [
@@ -510,26 +510,16 @@ export const CanCreateOutgoingRequestRequest: any = {
             "type": "object",
             "additionalProperties": false,
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ValueHints"
-                },
-                "editHelp": {
+                "@version": {
                     "type": "string"
                 },
-                "min": {
-                    "type": "number"
-                },
-                "max": {
-                    "type": "number"
-                },
-                "pattern": {
+                "@context": {
                     "type": "string"
                 },
-                "values": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ValueHintsValueJSON"
+                "propertyHints": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/ValueHintsJSON"
                     }
                 },
                 "defaultValue": {
@@ -539,32 +529,42 @@ export const CanCreateOutgoingRequestRequest: any = {
                         "boolean"
                     ]
                 },
-                "propertyHints": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/ValueHintsJSON"
+                "values": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ValueHintsValueJSON"
                     }
                 },
-                "@context": {
+                "pattern": {
                     "type": "string"
                 },
-                "@version": {
+                "max": {
+                    "type": "number"
+                },
+                "min": {
+                    "type": "number"
+                },
+                "editHelp": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ValueHints"
                 }
             }
         },
         "ValueHintsValueJSON": {
             "type": "object",
             "properties": {
+                "displayName": {
+                    "type": "string"
+                },
                 "key": {
                     "type": [
                         "string",
                         "number",
                         "boolean"
                     ]
-                },
-                "displayName": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -576,32 +576,10 @@ export const CanCreateOutgoingRequestRequest: any = {
         "ValueHintsJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ValueHints"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "editHelp": {
-                    "type": "string"
-                },
-                "min": {
-                    "type": "number"
-                },
-                "max": {
-                    "type": "number"
-                },
-                "pattern": {
-                    "type": "string"
-                },
-                "values": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ValueHintsValueJSON"
+                "propertyHints": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/ValueHintsJSON"
                     }
                 },
                 "defaultValue": {
@@ -611,11 +589,33 @@ export const CanCreateOutgoingRequestRequest: any = {
                         "boolean"
                     ]
                 },
-                "propertyHints": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/ValueHintsJSON"
+                "values": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ValueHintsValueJSON"
                     }
+                },
+                "pattern": {
+                    "type": "string"
+                },
+                "max": {
+                    "type": "number"
+                },
+                "min": {
+                    "type": "number"
+                },
+                "editHelp": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ValueHints"
                 }
             },
             "required": [
@@ -626,27 +626,27 @@ export const CanCreateOutgoingRequestRequest: any = {
         "ProprietaryCountryJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryCountry"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryCountry"
                 }
             },
             "required": [
@@ -659,27 +659,27 @@ export const CanCreateOutgoingRequestRequest: any = {
         "ProprietaryEMailAddressJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryEMailAddress"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryEMailAddress"
                 }
             },
             "required": [
@@ -692,27 +692,27 @@ export const CanCreateOutgoingRequestRequest: any = {
         "ProprietaryFileReferenceJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryFileReference"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryFileReference"
                 }
             },
             "required": [
@@ -725,27 +725,27 @@ export const CanCreateOutgoingRequestRequest: any = {
         "ProprietaryFloatJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryFloat"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
+                "description": {
                     "type": "string"
                 },
-                "@version": {
+                "title": {
                     "type": "string"
                 },
                 "value": {
                     "type": "number"
                 },
-                "title": {
+                "@version": {
                     "type": "string"
                 },
-                "description": {
+                "@context": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryFloat"
                 }
             },
             "required": [
@@ -758,27 +758,27 @@ export const CanCreateOutgoingRequestRequest: any = {
         "ProprietaryHEXColorJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryHEXColor"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryHEXColor"
                 }
             },
             "required": [
@@ -791,27 +791,27 @@ export const CanCreateOutgoingRequestRequest: any = {
         "ProprietaryIntegerJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryInteger"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
+                "description": {
                     "type": "string"
                 },
-                "@version": {
+                "title": {
                     "type": "string"
                 },
                 "value": {
                     "type": "number"
                 },
-                "title": {
+                "@version": {
                     "type": "string"
                 },
-                "description": {
+                "@context": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryInteger"
                 }
             },
             "required": [
@@ -824,27 +824,27 @@ export const CanCreateOutgoingRequestRequest: any = {
         "ProprietaryLanguageJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryLanguage"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryLanguage"
                 }
             },
             "required": [
@@ -857,27 +857,27 @@ export const CanCreateOutgoingRequestRequest: any = {
         "ProprietaryPhoneNumberJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryPhoneNumber"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryPhoneNumber"
                 }
             },
             "required": [
@@ -890,27 +890,27 @@ export const CanCreateOutgoingRequestRequest: any = {
         "ProprietaryStringJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryString"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryString"
                 }
             },
             "required": [
@@ -923,27 +923,27 @@ export const CanCreateOutgoingRequestRequest: any = {
         "ProprietaryURLJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryURL"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryURL"
                 }
             },
             "required": [
@@ -956,23 +956,23 @@ export const CanCreateOutgoingRequestRequest: any = {
         "ProprietaryJSONJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryJSON"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
+                "value": {},
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "@version": {
                     "type": "string"
                 },
-                "value": {}
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryJSON"
+                }
             },
             "required": [
                 "@type",
@@ -984,30 +984,30 @@ export const CanCreateOutgoingRequestRequest: any = {
         "ProprietaryXMLJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryXML"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
+                "schemaURL": {
                     "type": "string"
                 },
                 "valueHintsOverride": {
                     "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "schemaURL": {
+                "description": {
                     "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryXML"
                 }
             },
             "required": [
@@ -1020,19 +1020,19 @@ export const CanCreateOutgoingRequestRequest: any = {
         "ConsentJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
+                "link": {
                     "type": "string"
                 },
                 "consent": {
                     "type": "string"
                 },
-                "link": {
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
                     "type": "string"
                 }
             },
@@ -1053,33 +1053,33 @@ export const CanCreateOutgoingRequestRequest: any = {
         "IdentityAttributeJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "IdentityAttribute"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "owner": {
-                    "type": "string"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
-                },
-                "value": {
-                    "$ref": "#/definitions/AttributeValues.Identity.Json"
-                },
                 "tags": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
+                },
+                "value": {
+                    "$ref": "#/definitions/AttributeValues.Identity.Json"
+                },
+                "validTo": {
+                    "type": "string"
+                },
+                "validFrom": {
+                    "type": "string"
+                },
+                "owner": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "IdentityAttribute"
                 }
             },
             "required": [
@@ -1166,24 +1166,24 @@ export const CanCreateOutgoingRequestRequest: any = {
         "AffiliationJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Affiliation"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "organization": {
+                "unit": {
                     "type": "string"
                 },
                 "role": {
                     "type": "string"
                 },
-                "unit": {
+                "organization": {
                     "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Affiliation"
                 }
             },
             "required": [
@@ -1195,24 +1195,24 @@ export const CanCreateOutgoingRequestRequest: any = {
         "BirthDateJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthDate"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "day": {
+                "year": {
                     "type": "number"
                 },
                 "month": {
                     "type": "number"
                 },
-                "year": {
+                "day": {
                     "type": "number"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthDate"
                 }
             },
             "required": [
@@ -1226,18 +1226,18 @@ export const CanCreateOutgoingRequestRequest: any = {
         "BirthNameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthName"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthName"
                 }
             },
             "required": [
@@ -1249,24 +1249,24 @@ export const CanCreateOutgoingRequestRequest: any = {
         "BirthPlaceJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthPlace"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "city": {
+                "state": {
                     "type": "string"
                 },
                 "country": {
                     "type": "string"
                 },
-                "state": {
+                "city": {
                     "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthPlace"
                 }
             },
             "required": [
@@ -1279,18 +1279,18 @@ export const CanCreateOutgoingRequestRequest: any = {
         "CitizenshipJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Citizenship"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Citizenship"
                 }
             },
             "required": [
@@ -1302,18 +1302,18 @@ export const CanCreateOutgoingRequestRequest: any = {
         "CommunicationLanguageJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "CommunicationLanguage"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "CommunicationLanguage"
                 }
             },
             "required": [
@@ -1325,39 +1325,39 @@ export const CanCreateOutgoingRequestRequest: any = {
         "DeliveryBoxAddressJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "DeliveryBoxAddress"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "recipient": {
-                    "type": "string"
-                },
-                "userId": {
-                    "type": "string"
-                },
-                "deliveryBoxId": {
-                    "type": "string"
-                },
-                "zipCode": {
-                    "type": "string"
-                },
-                "city": {
-                    "type": "string"
-                },
-                "country": {
+                "state": {
                     "type": "string"
                 },
                 "phoneNumber": {
                     "type": "string"
                 },
-                "state": {
+                "country": {
                     "type": "string"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "zipCode": {
+                    "type": "string"
+                },
+                "deliveryBoxId": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "string"
+                },
+                "recipient": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "DeliveryBoxAddress"
                 }
             },
             "required": [
@@ -1374,18 +1374,18 @@ export const CanCreateOutgoingRequestRequest: any = {
         "DisplayNameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "DisplayName"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "DisplayName"
                 }
             },
             "required": [
@@ -1397,18 +1397,18 @@ export const CanCreateOutgoingRequestRequest: any = {
         "EMailAddressJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "EMailAddress"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "EMailAddress"
                 }
             },
             "required": [
@@ -1420,18 +1420,18 @@ export const CanCreateOutgoingRequestRequest: any = {
         "FaxNumberJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "FaxNumber"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "FaxNumber"
                 }
             },
             "required": [
@@ -1443,18 +1443,18 @@ export const CanCreateOutgoingRequestRequest: any = {
         "IdentityFileReferenceJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "IdentityFileReference"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "IdentityFileReference"
                 }
             },
             "required": [
@@ -1466,18 +1466,18 @@ export const CanCreateOutgoingRequestRequest: any = {
         "JobTitleJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "JobTitle"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "JobTitle"
                 }
             },
             "required": [
@@ -1489,18 +1489,18 @@ export const CanCreateOutgoingRequestRequest: any = {
         "NationalityJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Nationality"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Nationality"
                 }
             },
             "required": [
@@ -1512,30 +1512,30 @@ export const CanCreateOutgoingRequestRequest: any = {
         "PersonNameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "PersonName"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "givenName": {
-                    "type": "string"
-                },
-                "middleName": {
-                    "type": "string"
-                },
-                "surname": {
+                "honorificPrefix": {
                     "type": "string"
                 },
                 "honorificSuffix": {
                     "type": "string"
                 },
-                "honorificPrefix": {
+                "surname": {
                     "type": "string"
+                },
+                "middleName": {
+                    "type": "string"
+                },
+                "givenName": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "PersonName"
                 }
             },
             "required": [
@@ -1548,18 +1548,18 @@ export const CanCreateOutgoingRequestRequest: any = {
         "PhoneNumberJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "PhoneNumber"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "PhoneNumber"
                 }
             },
             "required": [
@@ -1571,33 +1571,33 @@ export const CanCreateOutgoingRequestRequest: any = {
         "PostOfficeBoxAddressJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "PostOfficeBoxAddress"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "recipient": {
-                    "type": "string"
-                },
-                "boxId": {
-                    "type": "string"
-                },
-                "zipCode": {
-                    "type": "string"
-                },
-                "city": {
+                "state": {
                     "type": "string"
                 },
                 "country": {
                     "type": "string"
                 },
-                "state": {
+                "city": {
                     "type": "string"
+                },
+                "zipCode": {
+                    "type": "string"
+                },
+                "boxId": {
+                    "type": "string"
+                },
+                "recipient": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "PostOfficeBoxAddress"
                 }
             },
             "required": [
@@ -1613,18 +1613,18 @@ export const CanCreateOutgoingRequestRequest: any = {
         "PseudonymJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Pseudonym"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Pseudonym"
                 }
             },
             "required": [
@@ -1636,18 +1636,18 @@ export const CanCreateOutgoingRequestRequest: any = {
         "SexJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Sex"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Sex"
                 }
             },
             "required": [
@@ -1659,36 +1659,36 @@ export const CanCreateOutgoingRequestRequest: any = {
         "StreetAddressJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "StreetAddress"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "recipient": {
-                    "type": "string"
-                },
-                "street": {
-                    "type": "string"
-                },
-                "houseNo": {
-                    "type": "string"
-                },
-                "zipCode": {
-                    "type": "string"
-                },
-                "city": {
+                "state": {
                     "type": "string"
                 },
                 "country": {
                     "type": "string"
                 },
-                "state": {
+                "city": {
                     "type": "string"
+                },
+                "zipCode": {
+                    "type": "string"
+                },
+                "houseNo": {
+                    "type": "string"
+                },
+                "street": {
+                    "type": "string"
+                },
+                "recipient": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "StreetAddress"
                 }
             },
             "required": [
@@ -1705,18 +1705,18 @@ export const CanCreateOutgoingRequestRequest: any = {
         "WebsiteJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Website"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Website"
                 }
             },
             "required": [
@@ -1795,18 +1795,18 @@ export const CanCreateOutgoingRequestRequest: any = {
         "AffiliationOrganizationJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationOrganization"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "AffiliationOrganization"
                 }
             },
             "required": [
@@ -1818,18 +1818,18 @@ export const CanCreateOutgoingRequestRequest: any = {
         "AffiliationRoleJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationRole"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "AffiliationRole"
                 }
             },
             "required": [
@@ -1841,18 +1841,18 @@ export const CanCreateOutgoingRequestRequest: any = {
         "AffiliationUnitJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationUnit"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "AffiliationUnit"
                 }
             },
             "required": [
@@ -1864,18 +1864,18 @@ export const CanCreateOutgoingRequestRequest: any = {
         "BirthCityJSON": {
             "type": "object",
             "properties": {
-                "value": {
+                "@type": {
+                    "type": "string",
+                    "const": "BirthCity"
+                },
+                "@version": {
                     "type": "string"
                 },
                 "@context": {
                     "type": "string"
                 },
-                "@version": {
+                "value": {
                     "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthCity"
                 }
             },
             "required": [
@@ -1887,18 +1887,18 @@ export const CanCreateOutgoingRequestRequest: any = {
         "BirthCountryJSON": {
             "type": "object",
             "properties": {
-                "value": {
+                "@type": {
+                    "type": "string",
+                    "const": "BirthCountry"
+                },
+                "@version": {
                     "type": "string"
                 },
                 "@context": {
                     "type": "string"
                 },
-                "@version": {
+                "value": {
                     "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthCountry"
                 }
             },
             "required": [
@@ -1910,18 +1910,18 @@ export const CanCreateOutgoingRequestRequest: any = {
         "BirthDayJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthDay"
-                },
-                "@context": {
-                    "type": "string"
+                "value": {
+                    "type": "number"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
-                    "type": "number"
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthDay"
                 }
             },
             "required": [
@@ -1933,16 +1933,6 @@ export const CanCreateOutgoingRequestRequest: any = {
         "BirthMonthJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthMonth"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
                 "value": {
                     "type": "number",
                     "enum": [
@@ -1960,6 +1950,16 @@ export const CanCreateOutgoingRequestRequest: any = {
                         12
                     ],
                     "description": "Month values: 1 (january) - 12 (december)"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthMonth"
                 }
             },
             "required": [
@@ -1971,18 +1971,18 @@ export const CanCreateOutgoingRequestRequest: any = {
         "BirthStateJSON": {
             "type": "object",
             "properties": {
-                "value": {
+                "@type": {
+                    "type": "string",
+                    "const": "BirthState"
+                },
+                "@version": {
                     "type": "string"
                 },
                 "@context": {
                     "type": "string"
                 },
-                "@version": {
+                "value": {
                     "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthState"
                 }
             },
             "required": [
@@ -1994,18 +1994,18 @@ export const CanCreateOutgoingRequestRequest: any = {
         "BirthYearJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthYear"
-                },
-                "@context": {
-                    "type": "string"
+                "value": {
+                    "type": "number"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
-                    "type": "number"
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthYear"
                 }
             },
             "required": [
@@ -2017,18 +2017,18 @@ export const CanCreateOutgoingRequestRequest: any = {
         "CityJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "City"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "City"
                 }
             },
             "required": [
@@ -2040,18 +2040,18 @@ export const CanCreateOutgoingRequestRequest: any = {
         "CountryJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Country"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Country"
                 }
             },
             "required": [
@@ -2063,18 +2063,18 @@ export const CanCreateOutgoingRequestRequest: any = {
         "GivenNameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "GivenName"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "GivenName"
                 }
             },
             "required": [
@@ -2086,18 +2086,18 @@ export const CanCreateOutgoingRequestRequest: any = {
         "HonorificPrefixJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HonorificPrefix"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "HonorificPrefix"
                 }
             },
             "required": [
@@ -2109,18 +2109,18 @@ export const CanCreateOutgoingRequestRequest: any = {
         "HonorificSuffixJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HonorificSuffix"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "HonorificSuffix"
                 }
             },
             "required": [
@@ -2132,18 +2132,18 @@ export const CanCreateOutgoingRequestRequest: any = {
         "HouseNumberJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HouseNumber"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "HouseNumber"
                 }
             },
             "required": [
@@ -2155,18 +2155,18 @@ export const CanCreateOutgoingRequestRequest: any = {
         "MiddleNameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "MiddleName"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "MiddleName"
                 }
             },
             "required": [
@@ -2178,21 +2178,21 @@ export const CanCreateOutgoingRequestRequest: any = {
         "SchematizedXMLJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "SchematizedXML"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
+                "schemaURL": {
                     "type": "string"
                 },
                 "value": {
                     "type": "string"
                 },
-                "schemaURL": {
+                "@version": {
                     "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "SchematizedXML"
                 }
             },
             "required": [
@@ -2204,18 +2204,18 @@ export const CanCreateOutgoingRequestRequest: any = {
         "StateJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "State"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "State"
                 }
             },
             "required": [
@@ -2227,18 +2227,18 @@ export const CanCreateOutgoingRequestRequest: any = {
         "StreetJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Street"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Street"
                 }
             },
             "required": [
@@ -2250,18 +2250,18 @@ export const CanCreateOutgoingRequestRequest: any = {
         "SurnameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Surname"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Surname"
                 }
             },
             "required": [
@@ -2273,18 +2273,18 @@ export const CanCreateOutgoingRequestRequest: any = {
         "ZipCodeJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ZipCode"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ZipCode"
                 }
             },
             "required": [
@@ -2296,38 +2296,38 @@ export const CanCreateOutgoingRequestRequest: any = {
         "DeleteAttributeRequestItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "DeleteAttributeRequestItem"
-                },
-                "@context": {
+                "attributeId": {
                     "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
-                "attributeId": {
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "@version": {
                     "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "DeleteAttributeRequestItem"
                 }
             },
             "required": [
@@ -2340,35 +2340,11 @@ export const CanCreateOutgoingRequestRequest: any = {
         "ShareAttributeRequestItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ShareAttributeRequestItem"
-                },
-                "@context": {
+                "thirdPartyAddress": {
                     "type": "string"
                 },
-                "@version": {
+                "sourceAttributeId": {
                     "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
                 "attribute": {
                     "anyOf": [
@@ -2380,11 +2356,35 @@ export const CanCreateOutgoingRequestRequest: any = {
                         }
                     ]
                 },
-                "sourceAttributeId": {
+                "requireManualDecision": {
+                    "type": "boolean",
+                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                },
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "@version": {
                     "type": "string"
                 },
-                "thirdPartyAddress": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ShareAttributeRequestItem"
                 }
             },
             "required": [
@@ -2398,35 +2398,15 @@ export const CanCreateOutgoingRequestRequest: any = {
         "ProposeAttributeRequestItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProposeAttributeRequestItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                "attribute": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/IdentityAttributeJSON"
+                        },
+                        {
+                            "$ref": "#/definitions/RelationshipAttributeJSON"
+                        }
+                    ]
                 },
                 "query": {
                     "anyOf": [
@@ -2441,15 +2421,35 @@ export const CanCreateOutgoingRequestRequest: any = {
                         }
                     ]
                 },
-                "attribute": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/IdentityAttributeJSON"
-                        },
-                        {
-                            "$ref": "#/definitions/RelationshipAttributeJSON"
-                        }
-                    ]
+                "requireManualDecision": {
+                    "type": "boolean",
+                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                },
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProposeAttributeRequestItem"
                 }
             },
             "required": [
@@ -2463,18 +2463,11 @@ export const CanCreateOutgoingRequestRequest: any = {
         "IdentityAttributeQueryJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "IdentityAttributeQuery"
-                },
-                "@context": {
+                "validTo": {
                     "type": "string"
                 },
-                "@version": {
+                "validFrom": {
                     "type": "string"
-                },
-                "valueType": {
-                    "$ref": "#/definitions/AttributeValues.Identity.TypeName"
                 },
                 "tags": {
                     "type": "array",
@@ -2482,11 +2475,18 @@ export const CanCreateOutgoingRequestRequest: any = {
                         "type": "string"
                     }
                 },
-                "validFrom": {
+                "valueType": {
+                    "$ref": "#/definitions/AttributeValues.Identity.TypeName"
+                },
+                "@version": {
                     "type": "string"
                 },
-                "validTo": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "IdentityAttributeQuery"
                 }
             },
             "required": [
@@ -2560,30 +2560,30 @@ export const CanCreateOutgoingRequestRequest: any = {
         "RelationshipAttributeQueryJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "RelationshipAttributeQuery"
-                },
-                "@context": {
+                "validTo": {
                     "type": "string"
                 },
-                "@version": {
-                    "type": "string"
-                },
-                "key": {
-                    "type": "string"
-                },
-                "owner": {
+                "validFrom": {
                     "type": "string"
                 },
                 "attributeCreationHints": {
                     "$ref": "#/definitions/RelationshipAttributeCreationHintsJSON"
                 },
-                "validFrom": {
+                "owner": {
                     "type": "string"
                 },
-                "validTo": {
+                "key": {
                     "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "RelationshipAttributeQuery"
                 }
             },
             "required": [
@@ -2597,20 +2597,20 @@ export const CanCreateOutgoingRequestRequest: any = {
         "RelationshipAttributeCreationHintsJSON": {
             "type": "object",
             "properties": {
-                "title": {
+                "confidentiality": {
+                    "$ref": "#/definitions/RelationshipAttributeConfidentiality"
+                },
+                "valueHints": {
+                    "$ref": "#/definitions/ValueHintsJSON"
+                },
+                "description": {
                     "type": "string"
                 },
                 "valueType": {
                     "$ref": "#/definitions/AttributeValues.Relationship.TypeName"
                 },
-                "description": {
+                "title": {
                     "type": "string"
-                },
-                "valueHints": {
-                    "$ref": "#/definitions/ValueHintsJSON"
-                },
-                "confidentiality": {
-                    "$ref": "#/definitions/RelationshipAttributeConfidentiality"
                 }
             },
             "required": [
@@ -2642,21 +2642,21 @@ export const CanCreateOutgoingRequestRequest: any = {
         "IQLQueryJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "IQLQuery"
+                "attributeCreationHints": {
+                    "$ref": "#/definitions/IQLQueryCreationHintsJSON"
                 },
-                "@context": {
+                "queryString": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "queryString": {
+                "@context": {
                     "type": "string"
                 },
-                "attributeCreationHints": {
-                    "$ref": "#/definitions/IQLQueryCreationHintsJSON"
+                "@type": {
+                    "type": "string",
+                    "const": "IQLQuery"
                 }
             },
             "required": [
@@ -2668,14 +2668,14 @@ export const CanCreateOutgoingRequestRequest: any = {
         "IQLQueryCreationHintsJSON": {
             "type": "object",
             "properties": {
-                "valueType": {
-                    "$ref": "#/definitions/AttributeValues.Identity.TypeName"
-                },
                 "tags": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
+                },
+                "valueType": {
+                    "$ref": "#/definitions/AttributeValues.Identity.TypeName"
                 }
             },
             "required": [
@@ -2686,36 +2686,6 @@ export const CanCreateOutgoingRequestRequest: any = {
         "ReadAttributeRequestItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ReadAttributeRequestItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
-                },
                 "query": {
                     "anyOf": [
                         {
@@ -2731,6 +2701,36 @@ export const CanCreateOutgoingRequestRequest: any = {
                             "$ref": "#/definitions/IQLQueryJSON"
                         }
                     ]
+                },
+                "requireManualDecision": {
+                    "type": "boolean",
+                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                },
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ReadAttributeRequestItem"
                 }
             },
             "required": [
@@ -2743,18 +2743,17 @@ export const CanCreateOutgoingRequestRequest: any = {
         "ThirdPartyRelationshipAttributeQueryJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ThirdPartyRelationshipAttributeQuery"
-                },
-                "@context": {
+                "validTo": {
                     "type": "string"
                 },
-                "@version": {
+                "validFrom": {
                     "type": "string"
                 },
-                "key": {
-                    "type": "string"
+                "thirdParty": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "owner": {
                     "anyOf": [
@@ -2775,17 +2774,18 @@ export const CanCreateOutgoingRequestRequest: any = {
                         }
                     ]
                 },
-                "thirdParty": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "validFrom": {
+                "key": {
                     "type": "string"
                 },
-                "validTo": {
+                "@version": {
                     "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ThirdPartyRelationshipAttributeQuery"
                 }
             },
             "required": [
@@ -2807,41 +2807,41 @@ export const CanCreateOutgoingRequestRequest: any = {
         "ConsentRequestItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ConsentRequestItem"
-                },
-                "@context": {
+                "link": {
                     "type": "string"
                 },
-                "@version": {
+                "consent": {
                     "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
-                "consent": {
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "@version": {
                     "type": "string"
                 },
-                "link": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ConsentRequestItem"
                 }
             },
             "required": [
@@ -2854,35 +2854,35 @@ export const CanCreateOutgoingRequestRequest: any = {
         "AuthenticationRequestItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AuthenticationRequestItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                "requireManualDecision": {
+                    "type": "boolean",
+                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
                     "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "AuthenticationRequestItem"
                 }
             },
             "required": [
@@ -2894,38 +2894,38 @@ export const CanCreateOutgoingRequestRequest: any = {
         "FreeTextRequestItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "FreeTextRequestItem"
-                },
-                "@context": {
+                "freeText": {
                     "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
-                "freeText": {
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "@version": {
                     "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "FreeTextRequestItem"
                 }
             },
             "required": [
@@ -2938,36 +2938,6 @@ export const CanCreateOutgoingRequestRequest: any = {
         "RegisterAttributeListenerRequestItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "RegisterAttributeListenerRequestItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
-                },
                 "query": {
                     "anyOf": [
                         {
@@ -2977,6 +2947,36 @@ export const CanCreateOutgoingRequestRequest: any = {
                             "$ref": "#/definitions/ThirdPartyRelationshipAttributeQueryJSON"
                         }
                     ]
+                },
+                "requireManualDecision": {
+                    "type": "boolean",
+                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                },
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "RegisterAttributeListenerRequestItem"
                 }
             },
             "required": [
@@ -3001,9 +3001,6 @@ export const RejectIncomingRequestRequest: any = {
             "type": "object",
             "additionalProperties": false,
             "properties": {
-                "requestId": {
-                    "type": "string"
-                },
                 "items": {
                     "type": "array",
                     "items": {
@@ -3016,6 +3013,9 @@ export const RejectIncomingRequestRequest: any = {
                             }
                         ]
                     }
+                },
+                "requestId": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -3049,15 +3049,15 @@ export const RejectIncomingRequestRequest: any = {
         "RejectRequestItemParametersJSON": {
             "type": "object",
             "properties": {
-                "accept": {
-                    "type": "boolean",
-                    "const": false
+                "message": {
+                    "type": "string"
                 },
                 "code": {
                     "type": "string"
                 },
-                "message": {
-                    "type": "string"
+                "accept": {
+                    "type": "boolean",
+                    "const": false
                 }
             },
             "required": [
@@ -3113,9 +3113,6 @@ export const CompleteIncomingRequestRequest: any = {
         "CompleteIncomingRequestRequest": {
             "type": "object",
             "properties": {
-                "requestId": {
-                    "$ref": "#/definitions/RequestIdString"
-                },
                 "responseSourceId": {
                     "anyOf": [
                         {
@@ -3125,6 +3122,9 @@ export const CompleteIncomingRequestRequest: any = {
                             "$ref": "#/definitions/RelationshipIdString"
                         }
                     ]
+                },
+                "requestId": {
+                    "$ref": "#/definitions/RequestIdString"
                 }
             },
             "required": [
@@ -3154,11 +3154,11 @@ export const CompleteOutgoingRequestRequest: any = {
         "CompleteOutgoingRequestRequest": {
             "type": "object",
             "properties": {
-                "receivedResponse": {
-                    "$ref": "#/definitions/ResponseJSON"
-                },
                 "messageId": {
                     "$ref": "#/definitions/MessageIdString"
+                },
+                "receivedResponse": {
+                    "$ref": "#/definitions/ResponseJSON"
                 }
             },
             "required": [
@@ -3170,22 +3170,6 @@ export const CompleteOutgoingRequestRequest: any = {
         "ResponseJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Response"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "result": {
-                    "$ref": "#/definitions/ResponseResult"
-                },
-                "requestId": {
-                    "type": "string"
-                },
                 "items": {
                     "type": "array",
                     "items": {
@@ -3198,6 +3182,22 @@ export const CompleteOutgoingRequestRequest: any = {
                             }
                         ]
                     }
+                },
+                "requestId": {
+                    "type": "string"
+                },
+                "result": {
+                    "$ref": "#/definitions/ResponseResult"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Response"
                 }
             },
             "required": [
@@ -3218,21 +3218,21 @@ export const CompleteOutgoingRequestRequest: any = {
         "ResponseItemGroupJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ResponseItemGroup"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
                 "items": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/ResponseItemJSONDerivations"
                     }
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ResponseItemGroup"
                 }
             },
             "required": [
@@ -3288,18 +3288,18 @@ export const CompleteOutgoingRequestRequest: any = {
         "AcceptResponseItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
+                "result": {
+                    "type": "string",
+                    "const": "Accepted"
+                },
+                "@version": {
                     "type": "string"
                 },
                 "@context": {
                     "type": "string"
                 },
-                "@version": {
+                "@type": {
                     "type": "string"
-                },
-                "result": {
-                    "type": "string",
-                    "const": "Accepted"
                 }
             },
             "required": [
@@ -3311,22 +3311,22 @@ export const CompleteOutgoingRequestRequest: any = {
         "AttributeAlreadySharedAcceptResponseItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AttributeAlreadySharedAcceptResponseItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
+                "attributeId": {
                     "type": "string"
                 },
                 "result": {
                     "type": "string",
                     "const": "Accepted"
                 },
-                "attributeId": {
+                "@version": {
                     "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "AttributeAlreadySharedAcceptResponseItem"
                 }
             },
             "required": [
@@ -3339,26 +3339,6 @@ export const CompleteOutgoingRequestRequest: any = {
         "AttributeSuccessionAcceptResponseItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AttributeSuccessionAcceptResponseItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "result": {
-                    "type": "string",
-                    "const": "Accepted"
-                },
-                "predecessorId": {
-                    "type": "string"
-                },
-                "successorId": {
-                    "type": "string"
-                },
                 "successorContent": {
                     "anyOf": [
                         {
@@ -3368,6 +3348,26 @@ export const CompleteOutgoingRequestRequest: any = {
                             "$ref": "#/definitions/RelationshipAttributeJSON"
                         }
                     ]
+                },
+                "successorId": {
+                    "type": "string"
+                },
+                "predecessorId": {
+                    "type": "string"
+                },
+                "result": {
+                    "type": "string",
+                    "const": "Accepted"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "AttributeSuccessionAcceptResponseItem"
                 }
             },
             "required": [
@@ -3382,33 +3382,33 @@ export const CompleteOutgoingRequestRequest: any = {
         "IdentityAttributeJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "IdentityAttribute"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "owner": {
-                    "type": "string"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
-                },
-                "value": {
-                    "$ref": "#/definitions/AttributeValues.Identity.Json"
-                },
                 "tags": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
+                },
+                "value": {
+                    "$ref": "#/definitions/AttributeValues.Identity.Json"
+                },
+                "validTo": {
+                    "type": "string"
+                },
+                "validFrom": {
+                    "type": "string"
+                },
+                "owner": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "IdentityAttribute"
                 }
             },
             "required": [
@@ -3495,24 +3495,24 @@ export const CompleteOutgoingRequestRequest: any = {
         "AffiliationJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Affiliation"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "organization": {
+                "unit": {
                     "type": "string"
                 },
                 "role": {
                     "type": "string"
                 },
-                "unit": {
+                "organization": {
                     "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Affiliation"
                 }
             },
             "required": [
@@ -3524,24 +3524,24 @@ export const CompleteOutgoingRequestRequest: any = {
         "BirthDateJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthDate"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "day": {
+                "year": {
                     "type": "number"
                 },
                 "month": {
                     "type": "number"
                 },
-                "year": {
+                "day": {
                     "type": "number"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthDate"
                 }
             },
             "required": [
@@ -3555,18 +3555,18 @@ export const CompleteOutgoingRequestRequest: any = {
         "BirthNameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthName"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthName"
                 }
             },
             "required": [
@@ -3578,24 +3578,24 @@ export const CompleteOutgoingRequestRequest: any = {
         "BirthPlaceJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthPlace"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "city": {
+                "state": {
                     "type": "string"
                 },
                 "country": {
                     "type": "string"
                 },
-                "state": {
+                "city": {
                     "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthPlace"
                 }
             },
             "required": [
@@ -3608,18 +3608,18 @@ export const CompleteOutgoingRequestRequest: any = {
         "CitizenshipJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Citizenship"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Citizenship"
                 }
             },
             "required": [
@@ -3631,18 +3631,18 @@ export const CompleteOutgoingRequestRequest: any = {
         "CommunicationLanguageJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "CommunicationLanguage"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "CommunicationLanguage"
                 }
             },
             "required": [
@@ -3654,39 +3654,39 @@ export const CompleteOutgoingRequestRequest: any = {
         "DeliveryBoxAddressJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "DeliveryBoxAddress"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "recipient": {
-                    "type": "string"
-                },
-                "userId": {
-                    "type": "string"
-                },
-                "deliveryBoxId": {
-                    "type": "string"
-                },
-                "zipCode": {
-                    "type": "string"
-                },
-                "city": {
-                    "type": "string"
-                },
-                "country": {
+                "state": {
                     "type": "string"
                 },
                 "phoneNumber": {
                     "type": "string"
                 },
-                "state": {
+                "country": {
                     "type": "string"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "zipCode": {
+                    "type": "string"
+                },
+                "deliveryBoxId": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "string"
+                },
+                "recipient": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "DeliveryBoxAddress"
                 }
             },
             "required": [
@@ -3703,18 +3703,18 @@ export const CompleteOutgoingRequestRequest: any = {
         "DisplayNameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "DisplayName"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "DisplayName"
                 }
             },
             "required": [
@@ -3726,18 +3726,18 @@ export const CompleteOutgoingRequestRequest: any = {
         "EMailAddressJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "EMailAddress"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "EMailAddress"
                 }
             },
             "required": [
@@ -3749,18 +3749,18 @@ export const CompleteOutgoingRequestRequest: any = {
         "FaxNumberJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "FaxNumber"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "FaxNumber"
                 }
             },
             "required": [
@@ -3772,18 +3772,18 @@ export const CompleteOutgoingRequestRequest: any = {
         "IdentityFileReferenceJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "IdentityFileReference"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "IdentityFileReference"
                 }
             },
             "required": [
@@ -3795,18 +3795,18 @@ export const CompleteOutgoingRequestRequest: any = {
         "JobTitleJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "JobTitle"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "JobTitle"
                 }
             },
             "required": [
@@ -3818,18 +3818,18 @@ export const CompleteOutgoingRequestRequest: any = {
         "NationalityJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Nationality"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Nationality"
                 }
             },
             "required": [
@@ -3841,30 +3841,30 @@ export const CompleteOutgoingRequestRequest: any = {
         "PersonNameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "PersonName"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "givenName": {
-                    "type": "string"
-                },
-                "middleName": {
-                    "type": "string"
-                },
-                "surname": {
+                "honorificPrefix": {
                     "type": "string"
                 },
                 "honorificSuffix": {
                     "type": "string"
                 },
-                "honorificPrefix": {
+                "surname": {
                     "type": "string"
+                },
+                "middleName": {
+                    "type": "string"
+                },
+                "givenName": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "PersonName"
                 }
             },
             "required": [
@@ -3877,18 +3877,18 @@ export const CompleteOutgoingRequestRequest: any = {
         "PhoneNumberJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "PhoneNumber"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "PhoneNumber"
                 }
             },
             "required": [
@@ -3900,33 +3900,33 @@ export const CompleteOutgoingRequestRequest: any = {
         "PostOfficeBoxAddressJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "PostOfficeBoxAddress"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "recipient": {
-                    "type": "string"
-                },
-                "boxId": {
-                    "type": "string"
-                },
-                "zipCode": {
-                    "type": "string"
-                },
-                "city": {
+                "state": {
                     "type": "string"
                 },
                 "country": {
                     "type": "string"
                 },
-                "state": {
+                "city": {
                     "type": "string"
+                },
+                "zipCode": {
+                    "type": "string"
+                },
+                "boxId": {
+                    "type": "string"
+                },
+                "recipient": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "PostOfficeBoxAddress"
                 }
             },
             "required": [
@@ -3942,18 +3942,18 @@ export const CompleteOutgoingRequestRequest: any = {
         "PseudonymJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Pseudonym"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Pseudonym"
                 }
             },
             "required": [
@@ -3965,18 +3965,18 @@ export const CompleteOutgoingRequestRequest: any = {
         "SexJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Sex"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Sex"
                 }
             },
             "required": [
@@ -3988,36 +3988,36 @@ export const CompleteOutgoingRequestRequest: any = {
         "StreetAddressJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "StreetAddress"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "recipient": {
-                    "type": "string"
-                },
-                "street": {
-                    "type": "string"
-                },
-                "houseNo": {
-                    "type": "string"
-                },
-                "zipCode": {
-                    "type": "string"
-                },
-                "city": {
+                "state": {
                     "type": "string"
                 },
                 "country": {
                     "type": "string"
                 },
-                "state": {
+                "city": {
                     "type": "string"
+                },
+                "zipCode": {
+                    "type": "string"
+                },
+                "houseNo": {
+                    "type": "string"
+                },
+                "street": {
+                    "type": "string"
+                },
+                "recipient": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "StreetAddress"
                 }
             },
             "required": [
@@ -4034,18 +4034,18 @@ export const CompleteOutgoingRequestRequest: any = {
         "WebsiteJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Website"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Website"
                 }
             },
             "required": [
@@ -4124,18 +4124,18 @@ export const CompleteOutgoingRequestRequest: any = {
         "AffiliationOrganizationJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationOrganization"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "AffiliationOrganization"
                 }
             },
             "required": [
@@ -4147,18 +4147,18 @@ export const CompleteOutgoingRequestRequest: any = {
         "AffiliationRoleJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationRole"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "AffiliationRole"
                 }
             },
             "required": [
@@ -4170,18 +4170,18 @@ export const CompleteOutgoingRequestRequest: any = {
         "AffiliationUnitJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationUnit"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "AffiliationUnit"
                 }
             },
             "required": [
@@ -4193,18 +4193,18 @@ export const CompleteOutgoingRequestRequest: any = {
         "BirthCityJSON": {
             "type": "object",
             "properties": {
-                "value": {
+                "@type": {
+                    "type": "string",
+                    "const": "BirthCity"
+                },
+                "@version": {
                     "type": "string"
                 },
                 "@context": {
                     "type": "string"
                 },
-                "@version": {
+                "value": {
                     "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthCity"
                 }
             },
             "required": [
@@ -4216,18 +4216,18 @@ export const CompleteOutgoingRequestRequest: any = {
         "BirthCountryJSON": {
             "type": "object",
             "properties": {
-                "value": {
+                "@type": {
+                    "type": "string",
+                    "const": "BirthCountry"
+                },
+                "@version": {
                     "type": "string"
                 },
                 "@context": {
                     "type": "string"
                 },
-                "@version": {
+                "value": {
                     "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthCountry"
                 }
             },
             "required": [
@@ -4239,18 +4239,18 @@ export const CompleteOutgoingRequestRequest: any = {
         "BirthDayJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthDay"
-                },
-                "@context": {
-                    "type": "string"
+                "value": {
+                    "type": "number"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
-                    "type": "number"
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthDay"
                 }
             },
             "required": [
@@ -4262,16 +4262,6 @@ export const CompleteOutgoingRequestRequest: any = {
         "BirthMonthJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthMonth"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
                 "value": {
                     "type": "number",
                     "enum": [
@@ -4289,6 +4279,16 @@ export const CompleteOutgoingRequestRequest: any = {
                         12
                     ],
                     "description": "Month values: 1 (january) - 12 (december)"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthMonth"
                 }
             },
             "required": [
@@ -4300,18 +4300,18 @@ export const CompleteOutgoingRequestRequest: any = {
         "BirthStateJSON": {
             "type": "object",
             "properties": {
-                "value": {
+                "@type": {
+                    "type": "string",
+                    "const": "BirthState"
+                },
+                "@version": {
                     "type": "string"
                 },
                 "@context": {
                     "type": "string"
                 },
-                "@version": {
+                "value": {
                     "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthState"
                 }
             },
             "required": [
@@ -4323,18 +4323,18 @@ export const CompleteOutgoingRequestRequest: any = {
         "BirthYearJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthYear"
-                },
-                "@context": {
-                    "type": "string"
+                "value": {
+                    "type": "number"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
-                    "type": "number"
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthYear"
                 }
             },
             "required": [
@@ -4346,18 +4346,18 @@ export const CompleteOutgoingRequestRequest: any = {
         "CityJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "City"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "City"
                 }
             },
             "required": [
@@ -4369,18 +4369,18 @@ export const CompleteOutgoingRequestRequest: any = {
         "CountryJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Country"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Country"
                 }
             },
             "required": [
@@ -4392,18 +4392,18 @@ export const CompleteOutgoingRequestRequest: any = {
         "GivenNameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "GivenName"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "GivenName"
                 }
             },
             "required": [
@@ -4415,18 +4415,18 @@ export const CompleteOutgoingRequestRequest: any = {
         "HonorificPrefixJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HonorificPrefix"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "HonorificPrefix"
                 }
             },
             "required": [
@@ -4438,18 +4438,18 @@ export const CompleteOutgoingRequestRequest: any = {
         "HonorificSuffixJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HonorificSuffix"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "HonorificSuffix"
                 }
             },
             "required": [
@@ -4461,18 +4461,18 @@ export const CompleteOutgoingRequestRequest: any = {
         "HouseNumberJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HouseNumber"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "HouseNumber"
                 }
             },
             "required": [
@@ -4484,18 +4484,18 @@ export const CompleteOutgoingRequestRequest: any = {
         "MiddleNameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "MiddleName"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "MiddleName"
                 }
             },
             "required": [
@@ -4507,21 +4507,21 @@ export const CompleteOutgoingRequestRequest: any = {
         "SchematizedXMLJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "SchematizedXML"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
+                "schemaURL": {
                     "type": "string"
                 },
                 "value": {
                     "type": "string"
                 },
-                "schemaURL": {
+                "@version": {
                     "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "SchematizedXML"
                 }
             },
             "required": [
@@ -4533,18 +4533,18 @@ export const CompleteOutgoingRequestRequest: any = {
         "StateJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "State"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "State"
                 }
             },
             "required": [
@@ -4556,18 +4556,18 @@ export const CompleteOutgoingRequestRequest: any = {
         "StreetJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Street"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Street"
                 }
             },
             "required": [
@@ -4579,18 +4579,18 @@ export const CompleteOutgoingRequestRequest: any = {
         "SurnameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Surname"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Surname"
                 }
             },
             "required": [
@@ -4602,18 +4602,18 @@ export const CompleteOutgoingRequestRequest: any = {
         "ZipCodeJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ZipCode"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ZipCode"
                 }
             },
             "required": [
@@ -4625,36 +4625,36 @@ export const CompleteOutgoingRequestRequest: any = {
         "RelationshipAttributeJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "RelationshipAttribute"
+                "confidentiality": {
+                    "$ref": "#/definitions/RelationshipAttributeConfidentiality"
                 },
-                "@context": {
-                    "type": "string"
+                "isTechnical": {
+                    "type": "boolean"
                 },
-                "@version": {
-                    "type": "string"
-                },
-                "owner": {
-                    "type": "string"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
+                "key": {
                     "type": "string"
                 },
                 "value": {
                     "$ref": "#/definitions/AttributeValues.Relationship.Json"
                 },
-                "key": {
+                "validTo": {
                     "type": "string"
                 },
-                "isTechnical": {
-                    "type": "boolean"
+                "validFrom": {
+                    "type": "string"
                 },
-                "confidentiality": {
-                    "$ref": "#/definitions/RelationshipAttributeConfidentiality"
+                "owner": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "RelationshipAttribute"
                 }
             },
             "required": [
@@ -4715,27 +4715,27 @@ export const CompleteOutgoingRequestRequest: any = {
         "ProprietaryBooleanJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryBoolean"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
+                "description": {
                     "type": "string"
                 },
-                "@version": {
+                "title": {
                     "type": "string"
                 },
                 "value": {
                     "type": "boolean"
                 },
-                "title": {
+                "@version": {
                     "type": "string"
                 },
-                "description": {
+                "@context": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryBoolean"
                 }
             },
             "required": [
@@ -4749,26 +4749,16 @@ export const CompleteOutgoingRequestRequest: any = {
             "type": "object",
             "additionalProperties": false,
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ValueHints"
-                },
-                "editHelp": {
+                "@version": {
                     "type": "string"
                 },
-                "min": {
-                    "type": "number"
-                },
-                "max": {
-                    "type": "number"
-                },
-                "pattern": {
+                "@context": {
                     "type": "string"
                 },
-                "values": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ValueHintsValueJSON"
+                "propertyHints": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/ValueHintsJSON"
                     }
                 },
                 "defaultValue": {
@@ -4778,32 +4768,42 @@ export const CompleteOutgoingRequestRequest: any = {
                         "boolean"
                     ]
                 },
-                "propertyHints": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/ValueHintsJSON"
+                "values": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ValueHintsValueJSON"
                     }
                 },
-                "@context": {
+                "pattern": {
                     "type": "string"
                 },
-                "@version": {
+                "max": {
+                    "type": "number"
+                },
+                "min": {
+                    "type": "number"
+                },
+                "editHelp": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ValueHints"
                 }
             }
         },
         "ValueHintsValueJSON": {
             "type": "object",
             "properties": {
+                "displayName": {
+                    "type": "string"
+                },
                 "key": {
                     "type": [
                         "string",
                         "number",
                         "boolean"
                     ]
-                },
-                "displayName": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -4815,32 +4815,10 @@ export const CompleteOutgoingRequestRequest: any = {
         "ValueHintsJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ValueHints"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "editHelp": {
-                    "type": "string"
-                },
-                "min": {
-                    "type": "number"
-                },
-                "max": {
-                    "type": "number"
-                },
-                "pattern": {
-                    "type": "string"
-                },
-                "values": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ValueHintsValueJSON"
+                "propertyHints": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/ValueHintsJSON"
                     }
                 },
                 "defaultValue": {
@@ -4850,11 +4828,33 @@ export const CompleteOutgoingRequestRequest: any = {
                         "boolean"
                     ]
                 },
-                "propertyHints": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/ValueHintsJSON"
+                "values": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ValueHintsValueJSON"
                     }
+                },
+                "pattern": {
+                    "type": "string"
+                },
+                "max": {
+                    "type": "number"
+                },
+                "min": {
+                    "type": "number"
+                },
+                "editHelp": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ValueHints"
                 }
             },
             "required": [
@@ -4865,27 +4865,27 @@ export const CompleteOutgoingRequestRequest: any = {
         "ProprietaryCountryJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryCountry"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryCountry"
                 }
             },
             "required": [
@@ -4898,27 +4898,27 @@ export const CompleteOutgoingRequestRequest: any = {
         "ProprietaryEMailAddressJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryEMailAddress"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryEMailAddress"
                 }
             },
             "required": [
@@ -4931,27 +4931,27 @@ export const CompleteOutgoingRequestRequest: any = {
         "ProprietaryFileReferenceJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryFileReference"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryFileReference"
                 }
             },
             "required": [
@@ -4964,27 +4964,27 @@ export const CompleteOutgoingRequestRequest: any = {
         "ProprietaryFloatJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryFloat"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
+                "description": {
                     "type": "string"
                 },
-                "@version": {
+                "title": {
                     "type": "string"
                 },
                 "value": {
                     "type": "number"
                 },
-                "title": {
+                "@version": {
                     "type": "string"
                 },
-                "description": {
+                "@context": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryFloat"
                 }
             },
             "required": [
@@ -4997,27 +4997,27 @@ export const CompleteOutgoingRequestRequest: any = {
         "ProprietaryHEXColorJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryHEXColor"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryHEXColor"
                 }
             },
             "required": [
@@ -5030,27 +5030,27 @@ export const CompleteOutgoingRequestRequest: any = {
         "ProprietaryIntegerJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryInteger"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
+                "description": {
                     "type": "string"
                 },
-                "@version": {
+                "title": {
                     "type": "string"
                 },
                 "value": {
                     "type": "number"
                 },
-                "title": {
+                "@version": {
                     "type": "string"
                 },
-                "description": {
+                "@context": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryInteger"
                 }
             },
             "required": [
@@ -5063,27 +5063,27 @@ export const CompleteOutgoingRequestRequest: any = {
         "ProprietaryLanguageJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryLanguage"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryLanguage"
                 }
             },
             "required": [
@@ -5096,27 +5096,27 @@ export const CompleteOutgoingRequestRequest: any = {
         "ProprietaryPhoneNumberJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryPhoneNumber"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryPhoneNumber"
                 }
             },
             "required": [
@@ -5129,27 +5129,27 @@ export const CompleteOutgoingRequestRequest: any = {
         "ProprietaryStringJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryString"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryString"
                 }
             },
             "required": [
@@ -5162,27 +5162,27 @@ export const CompleteOutgoingRequestRequest: any = {
         "ProprietaryURLJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryURL"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryURL"
                 }
             },
             "required": [
@@ -5195,23 +5195,23 @@ export const CompleteOutgoingRequestRequest: any = {
         "ProprietaryJSONJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryJSON"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
+                "value": {},
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "@version": {
                     "type": "string"
                 },
-                "value": {}
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryJSON"
+                }
             },
             "required": [
                 "@type",
@@ -5223,30 +5223,30 @@ export const CompleteOutgoingRequestRequest: any = {
         "ProprietaryXMLJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryXML"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
+                "schemaURL": {
                     "type": "string"
                 },
                 "valueHintsOverride": {
                     "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "schemaURL": {
+                "description": {
                     "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryXML"
                 }
             },
             "required": [
@@ -5259,19 +5259,19 @@ export const CompleteOutgoingRequestRequest: any = {
         "ConsentJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
+                "link": {
                     "type": "string"
                 },
                 "consent": {
                     "type": "string"
                 },
-                "link": {
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
                     "type": "string"
                 }
             },
@@ -5292,22 +5292,22 @@ export const CompleteOutgoingRequestRequest: any = {
         "CreateAttributeAcceptResponseItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "CreateAttributeAcceptResponseItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
+                "attributeId": {
                     "type": "string"
                 },
                 "result": {
                     "type": "string",
                     "const": "Accepted"
                 },
-                "attributeId": {
+                "@version": {
                     "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "CreateAttributeAcceptResponseItem"
                 }
             },
             "required": [
@@ -5320,22 +5320,22 @@ export const CompleteOutgoingRequestRequest: any = {
         "ShareAttributeAcceptResponseItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ShareAttributeAcceptResponseItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
+                "attributeId": {
                     "type": "string"
                 },
                 "result": {
                     "type": "string",
                     "const": "Accepted"
                 },
-                "attributeId": {
+                "@version": {
                     "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ShareAttributeAcceptResponseItem"
                 }
             },
             "required": [
@@ -5348,23 +5348,6 @@ export const CompleteOutgoingRequestRequest: any = {
         "ProposeAttributeAcceptResponseItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProposeAttributeAcceptResponseItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "result": {
-                    "type": "string",
-                    "const": "Accepted"
-                },
-                "attributeId": {
-                    "type": "string"
-                },
                 "attribute": {
                     "anyOf": [
                         {
@@ -5374,6 +5357,23 @@ export const CompleteOutgoingRequestRequest: any = {
                             "$ref": "#/definitions/RelationshipAttributeJSON"
                         }
                     ]
+                },
+                "attributeId": {
+                    "type": "string"
+                },
+                "result": {
+                    "type": "string",
+                    "const": "Accepted"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProposeAttributeAcceptResponseItem"
                 }
             },
             "required": [
@@ -5387,21 +5387,7 @@ export const CompleteOutgoingRequestRequest: any = {
         "ReadAttributeAcceptResponseItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ReadAttributeAcceptResponseItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "result": {
-                    "type": "string",
-                    "const": "Accepted"
-                },
-                "attributeId": {
+                "thirdPartyAddress": {
                     "type": "string"
                 },
                 "attribute": {
@@ -5414,8 +5400,22 @@ export const CompleteOutgoingRequestRequest: any = {
                         }
                     ]
                 },
-                "thirdPartyAddress": {
+                "attributeId": {
                     "type": "string"
+                },
+                "result": {
+                    "type": "string",
+                    "const": "Accepted"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ReadAttributeAcceptResponseItem"
                 }
             },
             "required": [
@@ -5429,22 +5429,22 @@ export const CompleteOutgoingRequestRequest: any = {
         "RegisterAttributeListenerAcceptResponseItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "RegisterAttributeListenerAcceptResponseItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
+                "listenerId": {
                     "type": "string"
                 },
                 "result": {
                     "type": "string",
                     "const": "Accepted"
                 },
-                "listenerId": {
+                "@version": {
                     "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "RegisterAttributeListenerAcceptResponseItem"
                 }
             },
             "required": [
@@ -5457,22 +5457,22 @@ export const CompleteOutgoingRequestRequest: any = {
         "FreeTextAcceptResponseItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "FreeTextAcceptResponseItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
+                "freeText": {
                     "type": "string"
                 },
                 "result": {
                     "type": "string",
                     "const": "Accepted"
                 },
-                "freeText": {
+                "@version": {
                     "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "FreeTextAcceptResponseItem"
                 }
             },
             "required": [
@@ -5488,25 +5488,25 @@ export const CompleteOutgoingRequestRequest: any = {
         "RejectResponseItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "RejectResponseItem"
-                },
-                "@context": {
+                "message": {
                     "type": "string"
                 },
-                "@version": {
+                "code": {
                     "type": "string"
                 },
                 "result": {
                     "type": "string",
                     "const": "Rejected"
                 },
-                "code": {
+                "@version": {
                     "type": "string"
                 },
-                "message": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "RejectResponseItem"
                 }
             },
             "required": [
@@ -5521,25 +5521,25 @@ export const CompleteOutgoingRequestRequest: any = {
         "ErrorResponseItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ErrorResponseItem"
-                },
-                "@context": {
+                "message": {
                     "type": "string"
                 },
-                "@version": {
+                "code": {
                     "type": "string"
                 },
                 "result": {
                     "type": "string",
                     "const": "Error"
                 },
-                "code": {
+                "@version": {
                     "type": "string"
                 },
-                "message": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ErrorResponseItem"
                 }
             },
             "required": [
@@ -5564,8 +5564,8 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseRequest": {
             "type": "object",
             "properties": {
-                "templateId": {
-                    "$ref": "#/definitions/RelationshipTemplateIdString"
+                "response": {
+                    "$ref": "#/definitions/ResponseJSON"
                 },
                 "responseSourceId": {
                     "anyOf": [
@@ -5577,8 +5577,8 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                         }
                     ]
                 },
-                "response": {
-                    "$ref": "#/definitions/ResponseJSON"
+                "templateId": {
+                    "$ref": "#/definitions/RelationshipTemplateIdString"
                 }
             },
             "required": [
@@ -5603,22 +5603,6 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "ResponseJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Response"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "result": {
-                    "$ref": "#/definitions/ResponseResult"
-                },
-                "requestId": {
-                    "type": "string"
-                },
                 "items": {
                     "type": "array",
                     "items": {
@@ -5631,6 +5615,22 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                             }
                         ]
                     }
+                },
+                "requestId": {
+                    "type": "string"
+                },
+                "result": {
+                    "$ref": "#/definitions/ResponseResult"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Response"
                 }
             },
             "required": [
@@ -5651,21 +5651,21 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "ResponseItemGroupJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ResponseItemGroup"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
                 "items": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/ResponseItemJSONDerivations"
                     }
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ResponseItemGroup"
                 }
             },
             "required": [
@@ -5721,18 +5721,18 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "AcceptResponseItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
+                "result": {
+                    "type": "string",
+                    "const": "Accepted"
+                },
+                "@version": {
                     "type": "string"
                 },
                 "@context": {
                     "type": "string"
                 },
-                "@version": {
+                "@type": {
                     "type": "string"
-                },
-                "result": {
-                    "type": "string",
-                    "const": "Accepted"
                 }
             },
             "required": [
@@ -5744,22 +5744,22 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "AttributeAlreadySharedAcceptResponseItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AttributeAlreadySharedAcceptResponseItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
+                "attributeId": {
                     "type": "string"
                 },
                 "result": {
                     "type": "string",
                     "const": "Accepted"
                 },
-                "attributeId": {
+                "@version": {
                     "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "AttributeAlreadySharedAcceptResponseItem"
                 }
             },
             "required": [
@@ -5772,26 +5772,6 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "AttributeSuccessionAcceptResponseItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AttributeSuccessionAcceptResponseItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "result": {
-                    "type": "string",
-                    "const": "Accepted"
-                },
-                "predecessorId": {
-                    "type": "string"
-                },
-                "successorId": {
-                    "type": "string"
-                },
                 "successorContent": {
                     "anyOf": [
                         {
@@ -5801,6 +5781,26 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                             "$ref": "#/definitions/RelationshipAttributeJSON"
                         }
                     ]
+                },
+                "successorId": {
+                    "type": "string"
+                },
+                "predecessorId": {
+                    "type": "string"
+                },
+                "result": {
+                    "type": "string",
+                    "const": "Accepted"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "AttributeSuccessionAcceptResponseItem"
                 }
             },
             "required": [
@@ -5815,33 +5815,33 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "IdentityAttributeJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "IdentityAttribute"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "owner": {
-                    "type": "string"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
-                },
-                "value": {
-                    "$ref": "#/definitions/AttributeValues.Identity.Json"
-                },
                 "tags": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
+                },
+                "value": {
+                    "$ref": "#/definitions/AttributeValues.Identity.Json"
+                },
+                "validTo": {
+                    "type": "string"
+                },
+                "validFrom": {
+                    "type": "string"
+                },
+                "owner": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "IdentityAttribute"
                 }
             },
             "required": [
@@ -5928,24 +5928,24 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "AffiliationJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Affiliation"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "organization": {
+                "unit": {
                     "type": "string"
                 },
                 "role": {
                     "type": "string"
                 },
-                "unit": {
+                "organization": {
                     "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Affiliation"
                 }
             },
             "required": [
@@ -5957,24 +5957,24 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "BirthDateJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthDate"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "day": {
+                "year": {
                     "type": "number"
                 },
                 "month": {
                     "type": "number"
                 },
-                "year": {
+                "day": {
                     "type": "number"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthDate"
                 }
             },
             "required": [
@@ -5988,18 +5988,18 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "BirthNameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthName"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthName"
                 }
             },
             "required": [
@@ -6011,24 +6011,24 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "BirthPlaceJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthPlace"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "city": {
+                "state": {
                     "type": "string"
                 },
                 "country": {
                     "type": "string"
                 },
-                "state": {
+                "city": {
                     "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthPlace"
                 }
             },
             "required": [
@@ -6041,18 +6041,18 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "CitizenshipJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Citizenship"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Citizenship"
                 }
             },
             "required": [
@@ -6064,18 +6064,18 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "CommunicationLanguageJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "CommunicationLanguage"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "CommunicationLanguage"
                 }
             },
             "required": [
@@ -6087,39 +6087,39 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "DeliveryBoxAddressJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "DeliveryBoxAddress"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "recipient": {
-                    "type": "string"
-                },
-                "userId": {
-                    "type": "string"
-                },
-                "deliveryBoxId": {
-                    "type": "string"
-                },
-                "zipCode": {
-                    "type": "string"
-                },
-                "city": {
-                    "type": "string"
-                },
-                "country": {
+                "state": {
                     "type": "string"
                 },
                 "phoneNumber": {
                     "type": "string"
                 },
-                "state": {
+                "country": {
                     "type": "string"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "zipCode": {
+                    "type": "string"
+                },
+                "deliveryBoxId": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "string"
+                },
+                "recipient": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "DeliveryBoxAddress"
                 }
             },
             "required": [
@@ -6136,18 +6136,18 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "DisplayNameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "DisplayName"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "DisplayName"
                 }
             },
             "required": [
@@ -6159,18 +6159,18 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "EMailAddressJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "EMailAddress"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "EMailAddress"
                 }
             },
             "required": [
@@ -6182,18 +6182,18 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "FaxNumberJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "FaxNumber"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "FaxNumber"
                 }
             },
             "required": [
@@ -6205,18 +6205,18 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "IdentityFileReferenceJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "IdentityFileReference"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "IdentityFileReference"
                 }
             },
             "required": [
@@ -6228,18 +6228,18 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "JobTitleJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "JobTitle"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "JobTitle"
                 }
             },
             "required": [
@@ -6251,18 +6251,18 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "NationalityJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Nationality"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Nationality"
                 }
             },
             "required": [
@@ -6274,30 +6274,30 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "PersonNameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "PersonName"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "givenName": {
-                    "type": "string"
-                },
-                "middleName": {
-                    "type": "string"
-                },
-                "surname": {
+                "honorificPrefix": {
                     "type": "string"
                 },
                 "honorificSuffix": {
                     "type": "string"
                 },
-                "honorificPrefix": {
+                "surname": {
                     "type": "string"
+                },
+                "middleName": {
+                    "type": "string"
+                },
+                "givenName": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "PersonName"
                 }
             },
             "required": [
@@ -6310,18 +6310,18 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "PhoneNumberJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "PhoneNumber"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "PhoneNumber"
                 }
             },
             "required": [
@@ -6333,33 +6333,33 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "PostOfficeBoxAddressJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "PostOfficeBoxAddress"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "recipient": {
-                    "type": "string"
-                },
-                "boxId": {
-                    "type": "string"
-                },
-                "zipCode": {
-                    "type": "string"
-                },
-                "city": {
+                "state": {
                     "type": "string"
                 },
                 "country": {
                     "type": "string"
                 },
-                "state": {
+                "city": {
                     "type": "string"
+                },
+                "zipCode": {
+                    "type": "string"
+                },
+                "boxId": {
+                    "type": "string"
+                },
+                "recipient": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "PostOfficeBoxAddress"
                 }
             },
             "required": [
@@ -6375,18 +6375,18 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "PseudonymJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Pseudonym"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Pseudonym"
                 }
             },
             "required": [
@@ -6398,18 +6398,18 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "SexJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Sex"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Sex"
                 }
             },
             "required": [
@@ -6421,36 +6421,36 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "StreetAddressJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "StreetAddress"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "recipient": {
-                    "type": "string"
-                },
-                "street": {
-                    "type": "string"
-                },
-                "houseNo": {
-                    "type": "string"
-                },
-                "zipCode": {
-                    "type": "string"
-                },
-                "city": {
+                "state": {
                     "type": "string"
                 },
                 "country": {
                     "type": "string"
                 },
-                "state": {
+                "city": {
                     "type": "string"
+                },
+                "zipCode": {
+                    "type": "string"
+                },
+                "houseNo": {
+                    "type": "string"
+                },
+                "street": {
+                    "type": "string"
+                },
+                "recipient": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "StreetAddress"
                 }
             },
             "required": [
@@ -6467,18 +6467,18 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "WebsiteJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Website"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Website"
                 }
             },
             "required": [
@@ -6557,18 +6557,18 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "AffiliationOrganizationJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationOrganization"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "AffiliationOrganization"
                 }
             },
             "required": [
@@ -6580,18 +6580,18 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "AffiliationRoleJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationRole"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "AffiliationRole"
                 }
             },
             "required": [
@@ -6603,18 +6603,18 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "AffiliationUnitJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationUnit"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "AffiliationUnit"
                 }
             },
             "required": [
@@ -6626,18 +6626,18 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "BirthCityJSON": {
             "type": "object",
             "properties": {
-                "value": {
+                "@type": {
+                    "type": "string",
+                    "const": "BirthCity"
+                },
+                "@version": {
                     "type": "string"
                 },
                 "@context": {
                     "type": "string"
                 },
-                "@version": {
+                "value": {
                     "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthCity"
                 }
             },
             "required": [
@@ -6649,18 +6649,18 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "BirthCountryJSON": {
             "type": "object",
             "properties": {
-                "value": {
+                "@type": {
+                    "type": "string",
+                    "const": "BirthCountry"
+                },
+                "@version": {
                     "type": "string"
                 },
                 "@context": {
                     "type": "string"
                 },
-                "@version": {
+                "value": {
                     "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthCountry"
                 }
             },
             "required": [
@@ -6672,18 +6672,18 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "BirthDayJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthDay"
-                },
-                "@context": {
-                    "type": "string"
+                "value": {
+                    "type": "number"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
-                    "type": "number"
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthDay"
                 }
             },
             "required": [
@@ -6695,16 +6695,6 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "BirthMonthJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthMonth"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
                 "value": {
                     "type": "number",
                     "enum": [
@@ -6722,6 +6712,16 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                         12
                     ],
                     "description": "Month values: 1 (january) - 12 (december)"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthMonth"
                 }
             },
             "required": [
@@ -6733,18 +6733,18 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "BirthStateJSON": {
             "type": "object",
             "properties": {
-                "value": {
+                "@type": {
+                    "type": "string",
+                    "const": "BirthState"
+                },
+                "@version": {
                     "type": "string"
                 },
                 "@context": {
                     "type": "string"
                 },
-                "@version": {
+                "value": {
                     "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthState"
                 }
             },
             "required": [
@@ -6756,18 +6756,18 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "BirthYearJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthYear"
-                },
-                "@context": {
-                    "type": "string"
+                "value": {
+                    "type": "number"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
-                    "type": "number"
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthYear"
                 }
             },
             "required": [
@@ -6779,18 +6779,18 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "CityJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "City"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "City"
                 }
             },
             "required": [
@@ -6802,18 +6802,18 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "CountryJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Country"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Country"
                 }
             },
             "required": [
@@ -6825,18 +6825,18 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "GivenNameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "GivenName"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "GivenName"
                 }
             },
             "required": [
@@ -6848,18 +6848,18 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "HonorificPrefixJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HonorificPrefix"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "HonorificPrefix"
                 }
             },
             "required": [
@@ -6871,18 +6871,18 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "HonorificSuffixJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HonorificSuffix"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "HonorificSuffix"
                 }
             },
             "required": [
@@ -6894,18 +6894,18 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "HouseNumberJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HouseNumber"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "HouseNumber"
                 }
             },
             "required": [
@@ -6917,18 +6917,18 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "MiddleNameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "MiddleName"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "MiddleName"
                 }
             },
             "required": [
@@ -6940,21 +6940,21 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "SchematizedXMLJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "SchematizedXML"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
+                "schemaURL": {
                     "type": "string"
                 },
                 "value": {
                     "type": "string"
                 },
-                "schemaURL": {
+                "@version": {
                     "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "SchematizedXML"
                 }
             },
             "required": [
@@ -6966,18 +6966,18 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "StateJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "State"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "State"
                 }
             },
             "required": [
@@ -6989,18 +6989,18 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "StreetJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Street"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Street"
                 }
             },
             "required": [
@@ -7012,18 +7012,18 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "SurnameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Surname"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Surname"
                 }
             },
             "required": [
@@ -7035,18 +7035,18 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "ZipCodeJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ZipCode"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ZipCode"
                 }
             },
             "required": [
@@ -7058,36 +7058,36 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "RelationshipAttributeJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "RelationshipAttribute"
+                "confidentiality": {
+                    "$ref": "#/definitions/RelationshipAttributeConfidentiality"
                 },
-                "@context": {
-                    "type": "string"
+                "isTechnical": {
+                    "type": "boolean"
                 },
-                "@version": {
-                    "type": "string"
-                },
-                "owner": {
-                    "type": "string"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
+                "key": {
                     "type": "string"
                 },
                 "value": {
                     "$ref": "#/definitions/AttributeValues.Relationship.Json"
                 },
-                "key": {
+                "validTo": {
                     "type": "string"
                 },
-                "isTechnical": {
-                    "type": "boolean"
+                "validFrom": {
+                    "type": "string"
                 },
-                "confidentiality": {
-                    "$ref": "#/definitions/RelationshipAttributeConfidentiality"
+                "owner": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "RelationshipAttribute"
                 }
             },
             "required": [
@@ -7148,27 +7148,27 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "ProprietaryBooleanJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryBoolean"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
+                "description": {
                     "type": "string"
                 },
-                "@version": {
+                "title": {
                     "type": "string"
                 },
                 "value": {
                     "type": "boolean"
                 },
-                "title": {
+                "@version": {
                     "type": "string"
                 },
-                "description": {
+                "@context": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryBoolean"
                 }
             },
             "required": [
@@ -7182,26 +7182,16 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
             "type": "object",
             "additionalProperties": false,
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ValueHints"
-                },
-                "editHelp": {
+                "@version": {
                     "type": "string"
                 },
-                "min": {
-                    "type": "number"
-                },
-                "max": {
-                    "type": "number"
-                },
-                "pattern": {
+                "@context": {
                     "type": "string"
                 },
-                "values": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ValueHintsValueJSON"
+                "propertyHints": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/ValueHintsJSON"
                     }
                 },
                 "defaultValue": {
@@ -7211,32 +7201,42 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                         "boolean"
                     ]
                 },
-                "propertyHints": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/ValueHintsJSON"
+                "values": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ValueHintsValueJSON"
                     }
                 },
-                "@context": {
+                "pattern": {
                     "type": "string"
                 },
-                "@version": {
+                "max": {
+                    "type": "number"
+                },
+                "min": {
+                    "type": "number"
+                },
+                "editHelp": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ValueHints"
                 }
             }
         },
         "ValueHintsValueJSON": {
             "type": "object",
             "properties": {
+                "displayName": {
+                    "type": "string"
+                },
                 "key": {
                     "type": [
                         "string",
                         "number",
                         "boolean"
                     ]
-                },
-                "displayName": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -7248,32 +7248,10 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "ValueHintsJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ValueHints"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "editHelp": {
-                    "type": "string"
-                },
-                "min": {
-                    "type": "number"
-                },
-                "max": {
-                    "type": "number"
-                },
-                "pattern": {
-                    "type": "string"
-                },
-                "values": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ValueHintsValueJSON"
+                "propertyHints": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/ValueHintsJSON"
                     }
                 },
                 "defaultValue": {
@@ -7283,11 +7261,33 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                         "boolean"
                     ]
                 },
-                "propertyHints": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/ValueHintsJSON"
+                "values": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ValueHintsValueJSON"
                     }
+                },
+                "pattern": {
+                    "type": "string"
+                },
+                "max": {
+                    "type": "number"
+                },
+                "min": {
+                    "type": "number"
+                },
+                "editHelp": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ValueHints"
                 }
             },
             "required": [
@@ -7298,27 +7298,27 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "ProprietaryCountryJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryCountry"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryCountry"
                 }
             },
             "required": [
@@ -7331,27 +7331,27 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "ProprietaryEMailAddressJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryEMailAddress"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryEMailAddress"
                 }
             },
             "required": [
@@ -7364,27 +7364,27 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "ProprietaryFileReferenceJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryFileReference"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryFileReference"
                 }
             },
             "required": [
@@ -7397,27 +7397,27 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "ProprietaryFloatJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryFloat"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
+                "description": {
                     "type": "string"
                 },
-                "@version": {
+                "title": {
                     "type": "string"
                 },
                 "value": {
                     "type": "number"
                 },
-                "title": {
+                "@version": {
                     "type": "string"
                 },
-                "description": {
+                "@context": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryFloat"
                 }
             },
             "required": [
@@ -7430,27 +7430,27 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "ProprietaryHEXColorJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryHEXColor"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryHEXColor"
                 }
             },
             "required": [
@@ -7463,27 +7463,27 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "ProprietaryIntegerJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryInteger"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
+                "description": {
                     "type": "string"
                 },
-                "@version": {
+                "title": {
                     "type": "string"
                 },
                 "value": {
                     "type": "number"
                 },
-                "title": {
+                "@version": {
                     "type": "string"
                 },
-                "description": {
+                "@context": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryInteger"
                 }
             },
             "required": [
@@ -7496,27 +7496,27 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "ProprietaryLanguageJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryLanguage"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryLanguage"
                 }
             },
             "required": [
@@ -7529,27 +7529,27 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "ProprietaryPhoneNumberJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryPhoneNumber"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryPhoneNumber"
                 }
             },
             "required": [
@@ -7562,27 +7562,27 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "ProprietaryStringJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryString"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryString"
                 }
             },
             "required": [
@@ -7595,27 +7595,27 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "ProprietaryURLJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryURL"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryURL"
                 }
             },
             "required": [
@@ -7628,23 +7628,23 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "ProprietaryJSONJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryJSON"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
+                "value": {},
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "@version": {
                     "type": "string"
                 },
-                "value": {}
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryJSON"
+                }
             },
             "required": [
                 "@type",
@@ -7656,30 +7656,30 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "ProprietaryXMLJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryXML"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
+                "schemaURL": {
                     "type": "string"
                 },
                 "valueHintsOverride": {
                     "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "schemaURL": {
+                "description": {
                     "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryXML"
                 }
             },
             "required": [
@@ -7692,19 +7692,19 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "ConsentJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
+                "link": {
                     "type": "string"
                 },
                 "consent": {
                     "type": "string"
                 },
-                "link": {
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
                     "type": "string"
                 }
             },
@@ -7725,22 +7725,22 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "CreateAttributeAcceptResponseItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "CreateAttributeAcceptResponseItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
+                "attributeId": {
                     "type": "string"
                 },
                 "result": {
                     "type": "string",
                     "const": "Accepted"
                 },
-                "attributeId": {
+                "@version": {
                     "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "CreateAttributeAcceptResponseItem"
                 }
             },
             "required": [
@@ -7753,22 +7753,22 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "ShareAttributeAcceptResponseItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ShareAttributeAcceptResponseItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
+                "attributeId": {
                     "type": "string"
                 },
                 "result": {
                     "type": "string",
                     "const": "Accepted"
                 },
-                "attributeId": {
+                "@version": {
                     "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ShareAttributeAcceptResponseItem"
                 }
             },
             "required": [
@@ -7781,23 +7781,6 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "ProposeAttributeAcceptResponseItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProposeAttributeAcceptResponseItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "result": {
-                    "type": "string",
-                    "const": "Accepted"
-                },
-                "attributeId": {
-                    "type": "string"
-                },
                 "attribute": {
                     "anyOf": [
                         {
@@ -7807,6 +7790,23 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                             "$ref": "#/definitions/RelationshipAttributeJSON"
                         }
                     ]
+                },
+                "attributeId": {
+                    "type": "string"
+                },
+                "result": {
+                    "type": "string",
+                    "const": "Accepted"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProposeAttributeAcceptResponseItem"
                 }
             },
             "required": [
@@ -7820,21 +7820,7 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "ReadAttributeAcceptResponseItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ReadAttributeAcceptResponseItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "result": {
-                    "type": "string",
-                    "const": "Accepted"
-                },
-                "attributeId": {
+                "thirdPartyAddress": {
                     "type": "string"
                 },
                 "attribute": {
@@ -7847,8 +7833,22 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                         }
                     ]
                 },
-                "thirdPartyAddress": {
+                "attributeId": {
                     "type": "string"
+                },
+                "result": {
+                    "type": "string",
+                    "const": "Accepted"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ReadAttributeAcceptResponseItem"
                 }
             },
             "required": [
@@ -7862,22 +7862,22 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "RegisterAttributeListenerAcceptResponseItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "RegisterAttributeListenerAcceptResponseItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
+                "listenerId": {
                     "type": "string"
                 },
                 "result": {
                     "type": "string",
                     "const": "Accepted"
                 },
-                "listenerId": {
+                "@version": {
                     "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "RegisterAttributeListenerAcceptResponseItem"
                 }
             },
             "required": [
@@ -7890,22 +7890,22 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "FreeTextAcceptResponseItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "FreeTextAcceptResponseItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
+                "freeText": {
                     "type": "string"
                 },
                 "result": {
                     "type": "string",
                     "const": "Accepted"
                 },
-                "freeText": {
+                "@version": {
                     "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "FreeTextAcceptResponseItem"
                 }
             },
             "required": [
@@ -7921,25 +7921,25 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "RejectResponseItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "RejectResponseItem"
-                },
-                "@context": {
+                "message": {
                     "type": "string"
                 },
-                "@version": {
+                "code": {
                     "type": "string"
                 },
                 "result": {
                     "type": "string",
                     "const": "Rejected"
                 },
-                "code": {
+                "@version": {
                     "type": "string"
                 },
-                "message": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "RejectResponseItem"
                 }
             },
             "required": [
@@ -7954,25 +7954,25 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
         "ErrorResponseItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ErrorResponseItem"
-                },
-                "@context": {
+                "message": {
                     "type": "string"
                 },
-                "@version": {
+                "code": {
                     "type": "string"
                 },
                 "result": {
                     "type": "string",
                     "const": "Error"
                 },
-                "code": {
+                "@version": {
                     "type": "string"
                 },
-                "message": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ErrorResponseItem"
                 }
             },
             "required": [
@@ -7993,13 +7993,26 @@ export const CreateOutgoingRequestRequest: any = {
         "CreateOutgoingRequestRequest": {
             "type": "object",
             "properties": {
+                "peer": {
+                    "$ref": "#/definitions/AddressString"
+                },
                 "content": {
                     "type": "object",
                     "properties": {
-                        "expiresAt": {
+                        "@context": {
+                            "type": "string"
+                        },
+                        "metadata": {
+                            "type": "object",
+                            "description": "This property can be used to add some arbitrary metadata to this request. The content of this property will be copied into the response on the side of the recipient."
+                        },
+                        "description": {
                             "type": "string",
-                            "description": "The point in time the request is considered obsolete either technically (e.g. the request is no longer valid or its response is no longer accepted) or from a business perspective (e.g. the request is no longer of interest).",
-                            "default": "undefined - the request won't expire"
+                            "description": "The human-readable description of this Request."
+                        },
+                        "title": {
+                            "type": "string",
+                            "description": "The human-readable title of this Request."
                         },
                         "items": {
                             "type": "array",
@@ -8015,29 +8028,16 @@ export const CreateOutgoingRequestRequest: any = {
                             },
                             "description": "The items of the Request. Can be either a single  {@link  RequestItemJSONDerivations RequestItem }  or a  {@link  RequestItemGroupJSON RequestItemGroup } , which itself can contain further  {@link  RequestItemJSONDerivations RequestItems } ."
                         },
-                        "title": {
+                        "expiresAt": {
                             "type": "string",
-                            "description": "The human-readable title of this Request."
-                        },
-                        "description": {
-                            "type": "string",
-                            "description": "The human-readable description of this Request."
-                        },
-                        "metadata": {
-                            "type": "object",
-                            "description": "This property can be used to add some arbitrary metadata to this request. The content of this property will be copied into the response on the side of the recipient."
-                        },
-                        "@context": {
-                            "type": "string"
+                            "description": "The point in time the request is considered obsolete either technically (e.g. the request is no longer valid or its response is no longer accepted) or from a business perspective (e.g. the request is no longer of interest).",
+                            "default": "undefined - the request won't expire"
                         }
                     },
                     "required": [
                         "items"
                     ],
                     "additionalProperties": false
-                },
-                "peer": {
-                    "$ref": "#/definitions/AddressString"
                 }
             },
             "required": [
@@ -8049,34 +8049,34 @@ export const CreateOutgoingRequestRequest: any = {
         "RequestItemGroupJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "RequestItemGroup"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this group."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this group."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this group. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
-                },
                 "items": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/RequestItemJSONDerivations"
                     },
                     "description": "The items of this group."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this group. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this group."
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this group."
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "RequestItemGroup"
                 }
             },
             "required": [
@@ -8123,34 +8123,34 @@ export const CreateOutgoingRequestRequest: any = {
         "RequestItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                "requireManualDecision": {
+                    "type": "boolean",
+                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
                     "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -8162,36 +8162,6 @@ export const CreateOutgoingRequestRequest: any = {
         "CreateAttributeRequestItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "CreateAttributeRequestItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
-                },
                 "attribute": {
                     "anyOf": [
                         {
@@ -8201,6 +8171,36 @@ export const CreateOutgoingRequestRequest: any = {
                             "$ref": "#/definitions/IdentityAttributeJSON"
                         }
                     ]
+                },
+                "requireManualDecision": {
+                    "type": "boolean",
+                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                },
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "CreateAttributeRequestItem"
                 }
             },
             "required": [
@@ -8213,36 +8213,36 @@ export const CreateOutgoingRequestRequest: any = {
         "RelationshipAttributeJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "RelationshipAttribute"
+                "confidentiality": {
+                    "$ref": "#/definitions/RelationshipAttributeConfidentiality"
                 },
-                "@context": {
-                    "type": "string"
+                "isTechnical": {
+                    "type": "boolean"
                 },
-                "@version": {
-                    "type": "string"
-                },
-                "owner": {
-                    "type": "string"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
+                "key": {
                     "type": "string"
                 },
                 "value": {
                     "$ref": "#/definitions/AttributeValues.Relationship.Json"
                 },
-                "key": {
+                "validTo": {
                     "type": "string"
                 },
-                "isTechnical": {
-                    "type": "boolean"
+                "validFrom": {
+                    "type": "string"
                 },
-                "confidentiality": {
-                    "$ref": "#/definitions/RelationshipAttributeConfidentiality"
+                "owner": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "RelationshipAttribute"
                 }
             },
             "required": [
@@ -8303,27 +8303,27 @@ export const CreateOutgoingRequestRequest: any = {
         "ProprietaryBooleanJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryBoolean"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
+                "description": {
                     "type": "string"
                 },
-                "@version": {
+                "title": {
                     "type": "string"
                 },
                 "value": {
                     "type": "boolean"
                 },
-                "title": {
+                "@version": {
                     "type": "string"
                 },
-                "description": {
+                "@context": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryBoolean"
                 }
             },
             "required": [
@@ -8337,26 +8337,16 @@ export const CreateOutgoingRequestRequest: any = {
             "type": "object",
             "additionalProperties": false,
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ValueHints"
-                },
-                "editHelp": {
+                "@version": {
                     "type": "string"
                 },
-                "min": {
-                    "type": "number"
-                },
-                "max": {
-                    "type": "number"
-                },
-                "pattern": {
+                "@context": {
                     "type": "string"
                 },
-                "values": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ValueHintsValueJSON"
+                "propertyHints": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/ValueHintsJSON"
                     }
                 },
                 "defaultValue": {
@@ -8366,32 +8356,42 @@ export const CreateOutgoingRequestRequest: any = {
                         "boolean"
                     ]
                 },
-                "propertyHints": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/ValueHintsJSON"
+                "values": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ValueHintsValueJSON"
                     }
                 },
-                "@context": {
+                "pattern": {
                     "type": "string"
                 },
-                "@version": {
+                "max": {
+                    "type": "number"
+                },
+                "min": {
+                    "type": "number"
+                },
+                "editHelp": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ValueHints"
                 }
             }
         },
         "ValueHintsValueJSON": {
             "type": "object",
             "properties": {
+                "displayName": {
+                    "type": "string"
+                },
                 "key": {
                     "type": [
                         "string",
                         "number",
                         "boolean"
                     ]
-                },
-                "displayName": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -8403,32 +8403,10 @@ export const CreateOutgoingRequestRequest: any = {
         "ValueHintsJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ValueHints"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "editHelp": {
-                    "type": "string"
-                },
-                "min": {
-                    "type": "number"
-                },
-                "max": {
-                    "type": "number"
-                },
-                "pattern": {
-                    "type": "string"
-                },
-                "values": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ValueHintsValueJSON"
+                "propertyHints": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/ValueHintsJSON"
                     }
                 },
                 "defaultValue": {
@@ -8438,11 +8416,33 @@ export const CreateOutgoingRequestRequest: any = {
                         "boolean"
                     ]
                 },
-                "propertyHints": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/ValueHintsJSON"
+                "values": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ValueHintsValueJSON"
                     }
+                },
+                "pattern": {
+                    "type": "string"
+                },
+                "max": {
+                    "type": "number"
+                },
+                "min": {
+                    "type": "number"
+                },
+                "editHelp": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ValueHints"
                 }
             },
             "required": [
@@ -8453,27 +8453,27 @@ export const CreateOutgoingRequestRequest: any = {
         "ProprietaryCountryJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryCountry"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryCountry"
                 }
             },
             "required": [
@@ -8486,27 +8486,27 @@ export const CreateOutgoingRequestRequest: any = {
         "ProprietaryEMailAddressJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryEMailAddress"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryEMailAddress"
                 }
             },
             "required": [
@@ -8519,27 +8519,27 @@ export const CreateOutgoingRequestRequest: any = {
         "ProprietaryFileReferenceJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryFileReference"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryFileReference"
                 }
             },
             "required": [
@@ -8552,27 +8552,27 @@ export const CreateOutgoingRequestRequest: any = {
         "ProprietaryFloatJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryFloat"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
+                "description": {
                     "type": "string"
                 },
-                "@version": {
+                "title": {
                     "type": "string"
                 },
                 "value": {
                     "type": "number"
                 },
-                "title": {
+                "@version": {
                     "type": "string"
                 },
-                "description": {
+                "@context": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryFloat"
                 }
             },
             "required": [
@@ -8585,27 +8585,27 @@ export const CreateOutgoingRequestRequest: any = {
         "ProprietaryHEXColorJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryHEXColor"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryHEXColor"
                 }
             },
             "required": [
@@ -8618,27 +8618,27 @@ export const CreateOutgoingRequestRequest: any = {
         "ProprietaryIntegerJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryInteger"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
+                "description": {
                     "type": "string"
                 },
-                "@version": {
+                "title": {
                     "type": "string"
                 },
                 "value": {
                     "type": "number"
                 },
-                "title": {
+                "@version": {
                     "type": "string"
                 },
-                "description": {
+                "@context": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryInteger"
                 }
             },
             "required": [
@@ -8651,27 +8651,27 @@ export const CreateOutgoingRequestRequest: any = {
         "ProprietaryLanguageJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryLanguage"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryLanguage"
                 }
             },
             "required": [
@@ -8684,27 +8684,27 @@ export const CreateOutgoingRequestRequest: any = {
         "ProprietaryPhoneNumberJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryPhoneNumber"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryPhoneNumber"
                 }
             },
             "required": [
@@ -8717,27 +8717,27 @@ export const CreateOutgoingRequestRequest: any = {
         "ProprietaryStringJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryString"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryString"
                 }
             },
             "required": [
@@ -8750,27 +8750,27 @@ export const CreateOutgoingRequestRequest: any = {
         "ProprietaryURLJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryURL"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryURL"
                 }
             },
             "required": [
@@ -8783,23 +8783,23 @@ export const CreateOutgoingRequestRequest: any = {
         "ProprietaryJSONJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryJSON"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
+                "value": {},
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "@version": {
                     "type": "string"
                 },
-                "value": {}
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryJSON"
+                }
             },
             "required": [
                 "@type",
@@ -8811,30 +8811,30 @@ export const CreateOutgoingRequestRequest: any = {
         "ProprietaryXMLJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryXML"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
+                "schemaURL": {
                     "type": "string"
                 },
                 "valueHintsOverride": {
                     "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "schemaURL": {
+                "description": {
                     "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryXML"
                 }
             },
             "required": [
@@ -8847,19 +8847,19 @@ export const CreateOutgoingRequestRequest: any = {
         "ConsentJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
+                "link": {
                     "type": "string"
                 },
                 "consent": {
                     "type": "string"
                 },
-                "link": {
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
                     "type": "string"
                 }
             },
@@ -8880,33 +8880,33 @@ export const CreateOutgoingRequestRequest: any = {
         "IdentityAttributeJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "IdentityAttribute"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "owner": {
-                    "type": "string"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
-                },
-                "value": {
-                    "$ref": "#/definitions/AttributeValues.Identity.Json"
-                },
                 "tags": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
+                },
+                "value": {
+                    "$ref": "#/definitions/AttributeValues.Identity.Json"
+                },
+                "validTo": {
+                    "type": "string"
+                },
+                "validFrom": {
+                    "type": "string"
+                },
+                "owner": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "IdentityAttribute"
                 }
             },
             "required": [
@@ -8993,24 +8993,24 @@ export const CreateOutgoingRequestRequest: any = {
         "AffiliationJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Affiliation"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "organization": {
+                "unit": {
                     "type": "string"
                 },
                 "role": {
                     "type": "string"
                 },
-                "unit": {
+                "organization": {
                     "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Affiliation"
                 }
             },
             "required": [
@@ -9022,24 +9022,24 @@ export const CreateOutgoingRequestRequest: any = {
         "BirthDateJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthDate"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "day": {
+                "year": {
                     "type": "number"
                 },
                 "month": {
                     "type": "number"
                 },
-                "year": {
+                "day": {
                     "type": "number"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthDate"
                 }
             },
             "required": [
@@ -9053,18 +9053,18 @@ export const CreateOutgoingRequestRequest: any = {
         "BirthNameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthName"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthName"
                 }
             },
             "required": [
@@ -9076,24 +9076,24 @@ export const CreateOutgoingRequestRequest: any = {
         "BirthPlaceJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthPlace"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "city": {
+                "state": {
                     "type": "string"
                 },
                 "country": {
                     "type": "string"
                 },
-                "state": {
+                "city": {
                     "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthPlace"
                 }
             },
             "required": [
@@ -9106,18 +9106,18 @@ export const CreateOutgoingRequestRequest: any = {
         "CitizenshipJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Citizenship"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Citizenship"
                 }
             },
             "required": [
@@ -9129,18 +9129,18 @@ export const CreateOutgoingRequestRequest: any = {
         "CommunicationLanguageJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "CommunicationLanguage"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "CommunicationLanguage"
                 }
             },
             "required": [
@@ -9152,39 +9152,39 @@ export const CreateOutgoingRequestRequest: any = {
         "DeliveryBoxAddressJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "DeliveryBoxAddress"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "recipient": {
-                    "type": "string"
-                },
-                "userId": {
-                    "type": "string"
-                },
-                "deliveryBoxId": {
-                    "type": "string"
-                },
-                "zipCode": {
-                    "type": "string"
-                },
-                "city": {
-                    "type": "string"
-                },
-                "country": {
+                "state": {
                     "type": "string"
                 },
                 "phoneNumber": {
                     "type": "string"
                 },
-                "state": {
+                "country": {
                     "type": "string"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "zipCode": {
+                    "type": "string"
+                },
+                "deliveryBoxId": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "string"
+                },
+                "recipient": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "DeliveryBoxAddress"
                 }
             },
             "required": [
@@ -9201,18 +9201,18 @@ export const CreateOutgoingRequestRequest: any = {
         "DisplayNameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "DisplayName"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "DisplayName"
                 }
             },
             "required": [
@@ -9224,18 +9224,18 @@ export const CreateOutgoingRequestRequest: any = {
         "EMailAddressJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "EMailAddress"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "EMailAddress"
                 }
             },
             "required": [
@@ -9247,18 +9247,18 @@ export const CreateOutgoingRequestRequest: any = {
         "FaxNumberJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "FaxNumber"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "FaxNumber"
                 }
             },
             "required": [
@@ -9270,18 +9270,18 @@ export const CreateOutgoingRequestRequest: any = {
         "IdentityFileReferenceJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "IdentityFileReference"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "IdentityFileReference"
                 }
             },
             "required": [
@@ -9293,18 +9293,18 @@ export const CreateOutgoingRequestRequest: any = {
         "JobTitleJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "JobTitle"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "JobTitle"
                 }
             },
             "required": [
@@ -9316,18 +9316,18 @@ export const CreateOutgoingRequestRequest: any = {
         "NationalityJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Nationality"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Nationality"
                 }
             },
             "required": [
@@ -9339,30 +9339,30 @@ export const CreateOutgoingRequestRequest: any = {
         "PersonNameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "PersonName"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "givenName": {
-                    "type": "string"
-                },
-                "middleName": {
-                    "type": "string"
-                },
-                "surname": {
+                "honorificPrefix": {
                     "type": "string"
                 },
                 "honorificSuffix": {
                     "type": "string"
                 },
-                "honorificPrefix": {
+                "surname": {
                     "type": "string"
+                },
+                "middleName": {
+                    "type": "string"
+                },
+                "givenName": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "PersonName"
                 }
             },
             "required": [
@@ -9375,18 +9375,18 @@ export const CreateOutgoingRequestRequest: any = {
         "PhoneNumberJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "PhoneNumber"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "PhoneNumber"
                 }
             },
             "required": [
@@ -9398,33 +9398,33 @@ export const CreateOutgoingRequestRequest: any = {
         "PostOfficeBoxAddressJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "PostOfficeBoxAddress"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "recipient": {
-                    "type": "string"
-                },
-                "boxId": {
-                    "type": "string"
-                },
-                "zipCode": {
-                    "type": "string"
-                },
-                "city": {
+                "state": {
                     "type": "string"
                 },
                 "country": {
                     "type": "string"
                 },
-                "state": {
+                "city": {
                     "type": "string"
+                },
+                "zipCode": {
+                    "type": "string"
+                },
+                "boxId": {
+                    "type": "string"
+                },
+                "recipient": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "PostOfficeBoxAddress"
                 }
             },
             "required": [
@@ -9440,18 +9440,18 @@ export const CreateOutgoingRequestRequest: any = {
         "PseudonymJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Pseudonym"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Pseudonym"
                 }
             },
             "required": [
@@ -9463,18 +9463,18 @@ export const CreateOutgoingRequestRequest: any = {
         "SexJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Sex"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Sex"
                 }
             },
             "required": [
@@ -9486,36 +9486,36 @@ export const CreateOutgoingRequestRequest: any = {
         "StreetAddressJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "StreetAddress"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "recipient": {
-                    "type": "string"
-                },
-                "street": {
-                    "type": "string"
-                },
-                "houseNo": {
-                    "type": "string"
-                },
-                "zipCode": {
-                    "type": "string"
-                },
-                "city": {
+                "state": {
                     "type": "string"
                 },
                 "country": {
                     "type": "string"
                 },
-                "state": {
+                "city": {
                     "type": "string"
+                },
+                "zipCode": {
+                    "type": "string"
+                },
+                "houseNo": {
+                    "type": "string"
+                },
+                "street": {
+                    "type": "string"
+                },
+                "recipient": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "StreetAddress"
                 }
             },
             "required": [
@@ -9532,18 +9532,18 @@ export const CreateOutgoingRequestRequest: any = {
         "WebsiteJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Website"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Website"
                 }
             },
             "required": [
@@ -9622,18 +9622,18 @@ export const CreateOutgoingRequestRequest: any = {
         "AffiliationOrganizationJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationOrganization"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "AffiliationOrganization"
                 }
             },
             "required": [
@@ -9645,18 +9645,18 @@ export const CreateOutgoingRequestRequest: any = {
         "AffiliationRoleJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationRole"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "AffiliationRole"
                 }
             },
             "required": [
@@ -9668,18 +9668,18 @@ export const CreateOutgoingRequestRequest: any = {
         "AffiliationUnitJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationUnit"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "AffiliationUnit"
                 }
             },
             "required": [
@@ -9691,18 +9691,18 @@ export const CreateOutgoingRequestRequest: any = {
         "BirthCityJSON": {
             "type": "object",
             "properties": {
-                "value": {
+                "@type": {
+                    "type": "string",
+                    "const": "BirthCity"
+                },
+                "@version": {
                     "type": "string"
                 },
                 "@context": {
                     "type": "string"
                 },
-                "@version": {
+                "value": {
                     "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthCity"
                 }
             },
             "required": [
@@ -9714,18 +9714,18 @@ export const CreateOutgoingRequestRequest: any = {
         "BirthCountryJSON": {
             "type": "object",
             "properties": {
-                "value": {
+                "@type": {
+                    "type": "string",
+                    "const": "BirthCountry"
+                },
+                "@version": {
                     "type": "string"
                 },
                 "@context": {
                     "type": "string"
                 },
-                "@version": {
+                "value": {
                     "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthCountry"
                 }
             },
             "required": [
@@ -9737,18 +9737,18 @@ export const CreateOutgoingRequestRequest: any = {
         "BirthDayJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthDay"
-                },
-                "@context": {
-                    "type": "string"
+                "value": {
+                    "type": "number"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
-                    "type": "number"
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthDay"
                 }
             },
             "required": [
@@ -9760,16 +9760,6 @@ export const CreateOutgoingRequestRequest: any = {
         "BirthMonthJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthMonth"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
                 "value": {
                     "type": "number",
                     "enum": [
@@ -9787,6 +9777,16 @@ export const CreateOutgoingRequestRequest: any = {
                         12
                     ],
                     "description": "Month values: 1 (january) - 12 (december)"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthMonth"
                 }
             },
             "required": [
@@ -9798,18 +9798,18 @@ export const CreateOutgoingRequestRequest: any = {
         "BirthStateJSON": {
             "type": "object",
             "properties": {
-                "value": {
+                "@type": {
+                    "type": "string",
+                    "const": "BirthState"
+                },
+                "@version": {
                     "type": "string"
                 },
                 "@context": {
                     "type": "string"
                 },
-                "@version": {
+                "value": {
                     "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthState"
                 }
             },
             "required": [
@@ -9821,18 +9821,18 @@ export const CreateOutgoingRequestRequest: any = {
         "BirthYearJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthYear"
-                },
-                "@context": {
-                    "type": "string"
+                "value": {
+                    "type": "number"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
-                    "type": "number"
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthYear"
                 }
             },
             "required": [
@@ -9844,18 +9844,18 @@ export const CreateOutgoingRequestRequest: any = {
         "CityJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "City"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "City"
                 }
             },
             "required": [
@@ -9867,18 +9867,18 @@ export const CreateOutgoingRequestRequest: any = {
         "CountryJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Country"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Country"
                 }
             },
             "required": [
@@ -9890,18 +9890,18 @@ export const CreateOutgoingRequestRequest: any = {
         "GivenNameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "GivenName"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "GivenName"
                 }
             },
             "required": [
@@ -9913,18 +9913,18 @@ export const CreateOutgoingRequestRequest: any = {
         "HonorificPrefixJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HonorificPrefix"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "HonorificPrefix"
                 }
             },
             "required": [
@@ -9936,18 +9936,18 @@ export const CreateOutgoingRequestRequest: any = {
         "HonorificSuffixJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HonorificSuffix"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "HonorificSuffix"
                 }
             },
             "required": [
@@ -9959,18 +9959,18 @@ export const CreateOutgoingRequestRequest: any = {
         "HouseNumberJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HouseNumber"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "HouseNumber"
                 }
             },
             "required": [
@@ -9982,18 +9982,18 @@ export const CreateOutgoingRequestRequest: any = {
         "MiddleNameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "MiddleName"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "MiddleName"
                 }
             },
             "required": [
@@ -10005,21 +10005,21 @@ export const CreateOutgoingRequestRequest: any = {
         "SchematizedXMLJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "SchematizedXML"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
+                "schemaURL": {
                     "type": "string"
                 },
                 "value": {
                     "type": "string"
                 },
-                "schemaURL": {
+                "@version": {
                     "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "SchematizedXML"
                 }
             },
             "required": [
@@ -10031,18 +10031,18 @@ export const CreateOutgoingRequestRequest: any = {
         "StateJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "State"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "State"
                 }
             },
             "required": [
@@ -10054,18 +10054,18 @@ export const CreateOutgoingRequestRequest: any = {
         "StreetJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Street"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Street"
                 }
             },
             "required": [
@@ -10077,18 +10077,18 @@ export const CreateOutgoingRequestRequest: any = {
         "SurnameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Surname"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Surname"
                 }
             },
             "required": [
@@ -10100,18 +10100,18 @@ export const CreateOutgoingRequestRequest: any = {
         "ZipCodeJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ZipCode"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ZipCode"
                 }
             },
             "required": [
@@ -10123,38 +10123,38 @@ export const CreateOutgoingRequestRequest: any = {
         "DeleteAttributeRequestItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "DeleteAttributeRequestItem"
-                },
-                "@context": {
+                "attributeId": {
                     "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
-                "attributeId": {
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "@version": {
                     "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "DeleteAttributeRequestItem"
                 }
             },
             "required": [
@@ -10167,35 +10167,11 @@ export const CreateOutgoingRequestRequest: any = {
         "ShareAttributeRequestItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ShareAttributeRequestItem"
-                },
-                "@context": {
+                "thirdPartyAddress": {
                     "type": "string"
                 },
-                "@version": {
+                "sourceAttributeId": {
                     "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
                 "attribute": {
                     "anyOf": [
@@ -10207,11 +10183,35 @@ export const CreateOutgoingRequestRequest: any = {
                         }
                     ]
                 },
-                "sourceAttributeId": {
+                "requireManualDecision": {
+                    "type": "boolean",
+                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                },
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "@version": {
                     "type": "string"
                 },
-                "thirdPartyAddress": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ShareAttributeRequestItem"
                 }
             },
             "required": [
@@ -10225,35 +10225,15 @@ export const CreateOutgoingRequestRequest: any = {
         "ProposeAttributeRequestItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProposeAttributeRequestItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                "attribute": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/IdentityAttributeJSON"
+                        },
+                        {
+                            "$ref": "#/definitions/RelationshipAttributeJSON"
+                        }
+                    ]
                 },
                 "query": {
                     "anyOf": [
@@ -10268,15 +10248,35 @@ export const CreateOutgoingRequestRequest: any = {
                         }
                     ]
                 },
-                "attribute": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/IdentityAttributeJSON"
-                        },
-                        {
-                            "$ref": "#/definitions/RelationshipAttributeJSON"
-                        }
-                    ]
+                "requireManualDecision": {
+                    "type": "boolean",
+                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                },
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProposeAttributeRequestItem"
                 }
             },
             "required": [
@@ -10290,18 +10290,11 @@ export const CreateOutgoingRequestRequest: any = {
         "IdentityAttributeQueryJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "IdentityAttributeQuery"
-                },
-                "@context": {
+                "validTo": {
                     "type": "string"
                 },
-                "@version": {
+                "validFrom": {
                     "type": "string"
-                },
-                "valueType": {
-                    "$ref": "#/definitions/AttributeValues.Identity.TypeName"
                 },
                 "tags": {
                     "type": "array",
@@ -10309,11 +10302,18 @@ export const CreateOutgoingRequestRequest: any = {
                         "type": "string"
                     }
                 },
-                "validFrom": {
+                "valueType": {
+                    "$ref": "#/definitions/AttributeValues.Identity.TypeName"
+                },
+                "@version": {
                     "type": "string"
                 },
-                "validTo": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "IdentityAttributeQuery"
                 }
             },
             "required": [
@@ -10387,30 +10387,30 @@ export const CreateOutgoingRequestRequest: any = {
         "RelationshipAttributeQueryJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "RelationshipAttributeQuery"
-                },
-                "@context": {
+                "validTo": {
                     "type": "string"
                 },
-                "@version": {
-                    "type": "string"
-                },
-                "key": {
-                    "type": "string"
-                },
-                "owner": {
+                "validFrom": {
                     "type": "string"
                 },
                 "attributeCreationHints": {
                     "$ref": "#/definitions/RelationshipAttributeCreationHintsJSON"
                 },
-                "validFrom": {
+                "owner": {
                     "type": "string"
                 },
-                "validTo": {
+                "key": {
                     "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "RelationshipAttributeQuery"
                 }
             },
             "required": [
@@ -10424,20 +10424,20 @@ export const CreateOutgoingRequestRequest: any = {
         "RelationshipAttributeCreationHintsJSON": {
             "type": "object",
             "properties": {
-                "title": {
+                "confidentiality": {
+                    "$ref": "#/definitions/RelationshipAttributeConfidentiality"
+                },
+                "valueHints": {
+                    "$ref": "#/definitions/ValueHintsJSON"
+                },
+                "description": {
                     "type": "string"
                 },
                 "valueType": {
                     "$ref": "#/definitions/AttributeValues.Relationship.TypeName"
                 },
-                "description": {
+                "title": {
                     "type": "string"
-                },
-                "valueHints": {
-                    "$ref": "#/definitions/ValueHintsJSON"
-                },
-                "confidentiality": {
-                    "$ref": "#/definitions/RelationshipAttributeConfidentiality"
                 }
             },
             "required": [
@@ -10469,21 +10469,21 @@ export const CreateOutgoingRequestRequest: any = {
         "IQLQueryJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "IQLQuery"
+                "attributeCreationHints": {
+                    "$ref": "#/definitions/IQLQueryCreationHintsJSON"
                 },
-                "@context": {
+                "queryString": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "queryString": {
+                "@context": {
                     "type": "string"
                 },
-                "attributeCreationHints": {
-                    "$ref": "#/definitions/IQLQueryCreationHintsJSON"
+                "@type": {
+                    "type": "string",
+                    "const": "IQLQuery"
                 }
             },
             "required": [
@@ -10495,14 +10495,14 @@ export const CreateOutgoingRequestRequest: any = {
         "IQLQueryCreationHintsJSON": {
             "type": "object",
             "properties": {
-                "valueType": {
-                    "$ref": "#/definitions/AttributeValues.Identity.TypeName"
-                },
                 "tags": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
+                },
+                "valueType": {
+                    "$ref": "#/definitions/AttributeValues.Identity.TypeName"
                 }
             },
             "required": [
@@ -10513,36 +10513,6 @@ export const CreateOutgoingRequestRequest: any = {
         "ReadAttributeRequestItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ReadAttributeRequestItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
-                },
                 "query": {
                     "anyOf": [
                         {
@@ -10558,6 +10528,36 @@ export const CreateOutgoingRequestRequest: any = {
                             "$ref": "#/definitions/IQLQueryJSON"
                         }
                     ]
+                },
+                "requireManualDecision": {
+                    "type": "boolean",
+                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                },
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ReadAttributeRequestItem"
                 }
             },
             "required": [
@@ -10570,18 +10570,17 @@ export const CreateOutgoingRequestRequest: any = {
         "ThirdPartyRelationshipAttributeQueryJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ThirdPartyRelationshipAttributeQuery"
-                },
-                "@context": {
+                "validTo": {
                     "type": "string"
                 },
-                "@version": {
+                "validFrom": {
                     "type": "string"
                 },
-                "key": {
-                    "type": "string"
+                "thirdParty": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "owner": {
                     "anyOf": [
@@ -10602,17 +10601,18 @@ export const CreateOutgoingRequestRequest: any = {
                         }
                     ]
                 },
-                "thirdParty": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "validFrom": {
+                "key": {
                     "type": "string"
                 },
-                "validTo": {
+                "@version": {
                     "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ThirdPartyRelationshipAttributeQuery"
                 }
             },
             "required": [
@@ -10634,41 +10634,41 @@ export const CreateOutgoingRequestRequest: any = {
         "ConsentRequestItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ConsentRequestItem"
-                },
-                "@context": {
+                "link": {
                     "type": "string"
                 },
-                "@version": {
+                "consent": {
                     "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
-                "consent": {
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "@version": {
                     "type": "string"
                 },
-                "link": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ConsentRequestItem"
                 }
             },
             "required": [
@@ -10681,35 +10681,35 @@ export const CreateOutgoingRequestRequest: any = {
         "AuthenticationRequestItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AuthenticationRequestItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                "requireManualDecision": {
+                    "type": "boolean",
+                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
                     "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "AuthenticationRequestItem"
                 }
             },
             "required": [
@@ -10721,38 +10721,38 @@ export const CreateOutgoingRequestRequest: any = {
         "FreeTextRequestItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "FreeTextRequestItem"
-                },
-                "@context": {
+                "freeText": {
                     "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
-                "freeText": {
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "@version": {
                     "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "FreeTextRequestItem"
                 }
             },
             "required": [
@@ -10765,36 +10765,6 @@ export const CreateOutgoingRequestRequest: any = {
         "RegisterAttributeListenerRequestItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "RegisterAttributeListenerRequestItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
-                },
                 "query": {
                     "anyOf": [
                         {
@@ -10804,6 +10774,36 @@ export const CreateOutgoingRequestRequest: any = {
                             "$ref": "#/definitions/ThirdPartyRelationshipAttributeQueryJSON"
                         }
                     ]
+                },
+                "requireManualDecision": {
+                    "type": "boolean",
+                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                },
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "RegisterAttributeListenerRequestItem"
                 }
             },
             "required": [
@@ -10882,150 +10882,7 @@ export const GetIncomingRequestsRequest: any = {
         "GetIncomingRequestsRequestQuery": {
             "type": "object",
             "properties": {
-                "id": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "peer": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "createdAt": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "status": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.expiresAt": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.items.@type": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "source.type": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "source.reference": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "response.createdAt": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "response.source.type": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "response.source.reference": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "response.content.result": {
+                "response.content.items.items.@type": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -11051,7 +10908,150 @@ export const GetIncomingRequestsRequest: any = {
                         }
                     ]
                 },
-                "response.content.items.items.@type": {
+                "response.content.result": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "response.source.reference": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "response.source.type": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "response.createdAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "source.reference": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "source.type": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.items.@type": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.expiresAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "status": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "createdAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "peer": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "id": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -11109,150 +11109,7 @@ export const GetOutgoingRequestsRequest: any = {
         "GetOutgoingRequestsRequestQuery": {
             "type": "object",
             "properties": {
-                "id": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "peer": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "createdAt": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "status": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.expiresAt": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.items.@type": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "source.type": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "source.reference": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "response.createdAt": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "response.source.type": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "response.source.reference": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "response.content.result": {
+                "response.content.items.items.@type": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -11278,7 +11135,150 @@ export const GetOutgoingRequestsRequest: any = {
                         }
                     ]
                 },
-                "response.content.items.items.@type": {
+                "response.content.result": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "response.source.reference": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "response.source.type": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "response.createdAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "source.reference": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "source.type": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.items.@type": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.expiresAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "status": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "createdAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "peer": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "id": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -11304,9 +11304,6 @@ export const ReceivedIncomingRequestRequest: any = {
         "ReceivedIncomingRequestRequest": {
             "type": "object",
             "properties": {
-                "receivedRequest": {
-                    "$ref": "#/definitions/RequestJSON"
-                },
                 "requestSourceId": {
                     "anyOf": [
                         {
@@ -11316,6 +11313,9 @@ export const ReceivedIncomingRequestRequest: any = {
                             "$ref": "#/definitions/RelationshipTemplateIdString"
                         }
                     ]
+                },
+                "receivedRequest": {
+                    "$ref": "#/definitions/RequestJSON"
                 }
             },
             "required": [
@@ -11327,23 +11327,17 @@ export const ReceivedIncomingRequestRequest: any = {
         "RequestJSON": {
             "type": "object",
             "properties": {
-                "@type": {
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this request. The content of this property will be copied into the response on the side of the recipient."
+                },
+                "description": {
                     "type": "string",
-                    "const": "Request"
+                    "description": "The human-readable description of this Request."
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "expiresAt": {
+                "title": {
                     "type": "string",
-                    "description": "The point in time the request is considered obsolete either technically (e.g. the request is no longer valid or its response is no longer accepted) or from a business perspective (e.g. the request is no longer of interest).",
-                    "default": "undefined - the request won't expire"
+                    "description": "The human-readable title of this Request."
                 },
                 "items": {
                     "type": "array",
@@ -11359,17 +11353,23 @@ export const ReceivedIncomingRequestRequest: any = {
                     },
                     "description": "The items of the Request. Can be either a single  {@link  RequestItemJSONDerivations RequestItem }  or a  {@link  RequestItemGroupJSON RequestItemGroup } , which itself can contain further  {@link  RequestItemJSONDerivations RequestItems } ."
                 },
-                "title": {
+                "expiresAt": {
                     "type": "string",
-                    "description": "The human-readable title of this Request."
+                    "description": "The point in time the request is considered obsolete either technically (e.g. the request is no longer valid or its response is no longer accepted) or from a business perspective (e.g. the request is no longer of interest).",
+                    "default": "undefined - the request won't expire"
                 },
-                "description": {
+                "id": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
                     "type": "string",
-                    "description": "The human-readable description of this Request."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this request. The content of this property will be copied into the response on the side of the recipient."
+                    "const": "Request"
                 }
             },
             "required": [
@@ -11381,34 +11381,34 @@ export const ReceivedIncomingRequestRequest: any = {
         "RequestItemGroupJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "RequestItemGroup"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this group."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this group."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this group. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
-                },
                 "items": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/RequestItemJSONDerivations"
                     },
                     "description": "The items of this group."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this group. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the group content as they receive the response."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this group."
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this group."
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "RequestItemGroup"
                 }
             },
             "required": [
@@ -11455,34 +11455,34 @@ export const ReceivedIncomingRequestRequest: any = {
         "RequestItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                "requireManualDecision": {
+                    "type": "boolean",
+                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
                     "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -11494,36 +11494,6 @@ export const ReceivedIncomingRequestRequest: any = {
         "CreateAttributeRequestItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "CreateAttributeRequestItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
-                },
                 "attribute": {
                     "anyOf": [
                         {
@@ -11533,6 +11503,36 @@ export const ReceivedIncomingRequestRequest: any = {
                             "$ref": "#/definitions/IdentityAttributeJSON"
                         }
                     ]
+                },
+                "requireManualDecision": {
+                    "type": "boolean",
+                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                },
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "CreateAttributeRequestItem"
                 }
             },
             "required": [
@@ -11545,36 +11545,36 @@ export const ReceivedIncomingRequestRequest: any = {
         "RelationshipAttributeJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "RelationshipAttribute"
+                "confidentiality": {
+                    "$ref": "#/definitions/RelationshipAttributeConfidentiality"
                 },
-                "@context": {
-                    "type": "string"
+                "isTechnical": {
+                    "type": "boolean"
                 },
-                "@version": {
-                    "type": "string"
-                },
-                "owner": {
-                    "type": "string"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
+                "key": {
                     "type": "string"
                 },
                 "value": {
                     "$ref": "#/definitions/AttributeValues.Relationship.Json"
                 },
-                "key": {
+                "validTo": {
                     "type": "string"
                 },
-                "isTechnical": {
-                    "type": "boolean"
+                "validFrom": {
+                    "type": "string"
                 },
-                "confidentiality": {
-                    "$ref": "#/definitions/RelationshipAttributeConfidentiality"
+                "owner": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "RelationshipAttribute"
                 }
             },
             "required": [
@@ -11635,27 +11635,27 @@ export const ReceivedIncomingRequestRequest: any = {
         "ProprietaryBooleanJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryBoolean"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
+                "description": {
                     "type": "string"
                 },
-                "@version": {
+                "title": {
                     "type": "string"
                 },
                 "value": {
                     "type": "boolean"
                 },
-                "title": {
+                "@version": {
                     "type": "string"
                 },
-                "description": {
+                "@context": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryBoolean"
                 }
             },
             "required": [
@@ -11669,26 +11669,16 @@ export const ReceivedIncomingRequestRequest: any = {
             "type": "object",
             "additionalProperties": false,
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ValueHints"
-                },
-                "editHelp": {
+                "@version": {
                     "type": "string"
                 },
-                "min": {
-                    "type": "number"
-                },
-                "max": {
-                    "type": "number"
-                },
-                "pattern": {
+                "@context": {
                     "type": "string"
                 },
-                "values": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ValueHintsValueJSON"
+                "propertyHints": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/ValueHintsJSON"
                     }
                 },
                 "defaultValue": {
@@ -11698,32 +11688,42 @@ export const ReceivedIncomingRequestRequest: any = {
                         "boolean"
                     ]
                 },
-                "propertyHints": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/ValueHintsJSON"
+                "values": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ValueHintsValueJSON"
                     }
                 },
-                "@context": {
+                "pattern": {
                     "type": "string"
                 },
-                "@version": {
+                "max": {
+                    "type": "number"
+                },
+                "min": {
+                    "type": "number"
+                },
+                "editHelp": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ValueHints"
                 }
             }
         },
         "ValueHintsValueJSON": {
             "type": "object",
             "properties": {
+                "displayName": {
+                    "type": "string"
+                },
                 "key": {
                     "type": [
                         "string",
                         "number",
                         "boolean"
                     ]
-                },
-                "displayName": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -11735,32 +11735,10 @@ export const ReceivedIncomingRequestRequest: any = {
         "ValueHintsJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ValueHints"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "editHelp": {
-                    "type": "string"
-                },
-                "min": {
-                    "type": "number"
-                },
-                "max": {
-                    "type": "number"
-                },
-                "pattern": {
-                    "type": "string"
-                },
-                "values": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ValueHintsValueJSON"
+                "propertyHints": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/ValueHintsJSON"
                     }
                 },
                 "defaultValue": {
@@ -11770,11 +11748,33 @@ export const ReceivedIncomingRequestRequest: any = {
                         "boolean"
                     ]
                 },
-                "propertyHints": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/ValueHintsJSON"
+                "values": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ValueHintsValueJSON"
                     }
+                },
+                "pattern": {
+                    "type": "string"
+                },
+                "max": {
+                    "type": "number"
+                },
+                "min": {
+                    "type": "number"
+                },
+                "editHelp": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ValueHints"
                 }
             },
             "required": [
@@ -11785,27 +11785,27 @@ export const ReceivedIncomingRequestRequest: any = {
         "ProprietaryCountryJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryCountry"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryCountry"
                 }
             },
             "required": [
@@ -11818,27 +11818,27 @@ export const ReceivedIncomingRequestRequest: any = {
         "ProprietaryEMailAddressJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryEMailAddress"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryEMailAddress"
                 }
             },
             "required": [
@@ -11851,27 +11851,27 @@ export const ReceivedIncomingRequestRequest: any = {
         "ProprietaryFileReferenceJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryFileReference"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryFileReference"
                 }
             },
             "required": [
@@ -11884,27 +11884,27 @@ export const ReceivedIncomingRequestRequest: any = {
         "ProprietaryFloatJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryFloat"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
+                "description": {
                     "type": "string"
                 },
-                "@version": {
+                "title": {
                     "type": "string"
                 },
                 "value": {
                     "type": "number"
                 },
-                "title": {
+                "@version": {
                     "type": "string"
                 },
-                "description": {
+                "@context": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryFloat"
                 }
             },
             "required": [
@@ -11917,27 +11917,27 @@ export const ReceivedIncomingRequestRequest: any = {
         "ProprietaryHEXColorJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryHEXColor"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryHEXColor"
                 }
             },
             "required": [
@@ -11950,27 +11950,27 @@ export const ReceivedIncomingRequestRequest: any = {
         "ProprietaryIntegerJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryInteger"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
+                "description": {
                     "type": "string"
                 },
-                "@version": {
+                "title": {
                     "type": "string"
                 },
                 "value": {
                     "type": "number"
                 },
-                "title": {
+                "@version": {
                     "type": "string"
                 },
-                "description": {
+                "@context": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryInteger"
                 }
             },
             "required": [
@@ -11983,27 +11983,27 @@ export const ReceivedIncomingRequestRequest: any = {
         "ProprietaryLanguageJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryLanguage"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryLanguage"
                 }
             },
             "required": [
@@ -12016,27 +12016,27 @@ export const ReceivedIncomingRequestRequest: any = {
         "ProprietaryPhoneNumberJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryPhoneNumber"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryPhoneNumber"
                 }
             },
             "required": [
@@ -12049,27 +12049,27 @@ export const ReceivedIncomingRequestRequest: any = {
         "ProprietaryStringJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryString"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryString"
                 }
             },
             "required": [
@@ -12082,27 +12082,27 @@ export const ReceivedIncomingRequestRequest: any = {
         "ProprietaryURLJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryURL"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryURL"
                 }
             },
             "required": [
@@ -12115,23 +12115,23 @@ export const ReceivedIncomingRequestRequest: any = {
         "ProprietaryJSONJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryJSON"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
+                "value": {},
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "@version": {
                     "type": "string"
                 },
-                "value": {}
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryJSON"
+                }
             },
             "required": [
                 "@type",
@@ -12143,30 +12143,30 @@ export const ReceivedIncomingRequestRequest: any = {
         "ProprietaryXMLJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryXML"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
+                "schemaURL": {
                     "type": "string"
                 },
                 "valueHintsOverride": {
                     "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "schemaURL": {
+                "description": {
                     "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryXML"
                 }
             },
             "required": [
@@ -12179,19 +12179,19 @@ export const ReceivedIncomingRequestRequest: any = {
         "ConsentJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
+                "link": {
                     "type": "string"
                 },
                 "consent": {
                     "type": "string"
                 },
-                "link": {
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
                     "type": "string"
                 }
             },
@@ -12212,33 +12212,33 @@ export const ReceivedIncomingRequestRequest: any = {
         "IdentityAttributeJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "IdentityAttribute"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "owner": {
-                    "type": "string"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
-                },
-                "value": {
-                    "$ref": "#/definitions/AttributeValues.Identity.Json"
-                },
                 "tags": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
+                },
+                "value": {
+                    "$ref": "#/definitions/AttributeValues.Identity.Json"
+                },
+                "validTo": {
+                    "type": "string"
+                },
+                "validFrom": {
+                    "type": "string"
+                },
+                "owner": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "IdentityAttribute"
                 }
             },
             "required": [
@@ -12325,24 +12325,24 @@ export const ReceivedIncomingRequestRequest: any = {
         "AffiliationJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Affiliation"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "organization": {
+                "unit": {
                     "type": "string"
                 },
                 "role": {
                     "type": "string"
                 },
-                "unit": {
+                "organization": {
                     "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Affiliation"
                 }
             },
             "required": [
@@ -12354,24 +12354,24 @@ export const ReceivedIncomingRequestRequest: any = {
         "BirthDateJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthDate"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "day": {
+                "year": {
                     "type": "number"
                 },
                 "month": {
                     "type": "number"
                 },
-                "year": {
+                "day": {
                     "type": "number"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthDate"
                 }
             },
             "required": [
@@ -12385,18 +12385,18 @@ export const ReceivedIncomingRequestRequest: any = {
         "BirthNameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthName"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthName"
                 }
             },
             "required": [
@@ -12408,24 +12408,24 @@ export const ReceivedIncomingRequestRequest: any = {
         "BirthPlaceJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthPlace"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "city": {
+                "state": {
                     "type": "string"
                 },
                 "country": {
                     "type": "string"
                 },
-                "state": {
+                "city": {
                     "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthPlace"
                 }
             },
             "required": [
@@ -12438,18 +12438,18 @@ export const ReceivedIncomingRequestRequest: any = {
         "CitizenshipJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Citizenship"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Citizenship"
                 }
             },
             "required": [
@@ -12461,18 +12461,18 @@ export const ReceivedIncomingRequestRequest: any = {
         "CommunicationLanguageJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "CommunicationLanguage"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "CommunicationLanguage"
                 }
             },
             "required": [
@@ -12484,39 +12484,39 @@ export const ReceivedIncomingRequestRequest: any = {
         "DeliveryBoxAddressJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "DeliveryBoxAddress"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "recipient": {
-                    "type": "string"
-                },
-                "userId": {
-                    "type": "string"
-                },
-                "deliveryBoxId": {
-                    "type": "string"
-                },
-                "zipCode": {
-                    "type": "string"
-                },
-                "city": {
-                    "type": "string"
-                },
-                "country": {
+                "state": {
                     "type": "string"
                 },
                 "phoneNumber": {
                     "type": "string"
                 },
-                "state": {
+                "country": {
                     "type": "string"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "zipCode": {
+                    "type": "string"
+                },
+                "deliveryBoxId": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "string"
+                },
+                "recipient": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "DeliveryBoxAddress"
                 }
             },
             "required": [
@@ -12533,18 +12533,18 @@ export const ReceivedIncomingRequestRequest: any = {
         "DisplayNameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "DisplayName"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "DisplayName"
                 }
             },
             "required": [
@@ -12556,18 +12556,18 @@ export const ReceivedIncomingRequestRequest: any = {
         "EMailAddressJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "EMailAddress"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "EMailAddress"
                 }
             },
             "required": [
@@ -12579,18 +12579,18 @@ export const ReceivedIncomingRequestRequest: any = {
         "FaxNumberJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "FaxNumber"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "FaxNumber"
                 }
             },
             "required": [
@@ -12602,18 +12602,18 @@ export const ReceivedIncomingRequestRequest: any = {
         "IdentityFileReferenceJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "IdentityFileReference"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "IdentityFileReference"
                 }
             },
             "required": [
@@ -12625,18 +12625,18 @@ export const ReceivedIncomingRequestRequest: any = {
         "JobTitleJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "JobTitle"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "JobTitle"
                 }
             },
             "required": [
@@ -12648,18 +12648,18 @@ export const ReceivedIncomingRequestRequest: any = {
         "NationalityJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Nationality"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Nationality"
                 }
             },
             "required": [
@@ -12671,30 +12671,30 @@ export const ReceivedIncomingRequestRequest: any = {
         "PersonNameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "PersonName"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "givenName": {
-                    "type": "string"
-                },
-                "middleName": {
-                    "type": "string"
-                },
-                "surname": {
+                "honorificPrefix": {
                     "type": "string"
                 },
                 "honorificSuffix": {
                     "type": "string"
                 },
-                "honorificPrefix": {
+                "surname": {
                     "type": "string"
+                },
+                "middleName": {
+                    "type": "string"
+                },
+                "givenName": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "PersonName"
                 }
             },
             "required": [
@@ -12707,18 +12707,18 @@ export const ReceivedIncomingRequestRequest: any = {
         "PhoneNumberJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "PhoneNumber"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "PhoneNumber"
                 }
             },
             "required": [
@@ -12730,33 +12730,33 @@ export const ReceivedIncomingRequestRequest: any = {
         "PostOfficeBoxAddressJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "PostOfficeBoxAddress"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "recipient": {
-                    "type": "string"
-                },
-                "boxId": {
-                    "type": "string"
-                },
-                "zipCode": {
-                    "type": "string"
-                },
-                "city": {
+                "state": {
                     "type": "string"
                 },
                 "country": {
                     "type": "string"
                 },
-                "state": {
+                "city": {
                     "type": "string"
+                },
+                "zipCode": {
+                    "type": "string"
+                },
+                "boxId": {
+                    "type": "string"
+                },
+                "recipient": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "PostOfficeBoxAddress"
                 }
             },
             "required": [
@@ -12772,18 +12772,18 @@ export const ReceivedIncomingRequestRequest: any = {
         "PseudonymJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Pseudonym"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Pseudonym"
                 }
             },
             "required": [
@@ -12795,18 +12795,18 @@ export const ReceivedIncomingRequestRequest: any = {
         "SexJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Sex"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Sex"
                 }
             },
             "required": [
@@ -12818,36 +12818,36 @@ export const ReceivedIncomingRequestRequest: any = {
         "StreetAddressJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "StreetAddress"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "recipient": {
-                    "type": "string"
-                },
-                "street": {
-                    "type": "string"
-                },
-                "houseNo": {
-                    "type": "string"
-                },
-                "zipCode": {
-                    "type": "string"
-                },
-                "city": {
+                "state": {
                     "type": "string"
                 },
                 "country": {
                     "type": "string"
                 },
-                "state": {
+                "city": {
                     "type": "string"
+                },
+                "zipCode": {
+                    "type": "string"
+                },
+                "houseNo": {
+                    "type": "string"
+                },
+                "street": {
+                    "type": "string"
+                },
+                "recipient": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "StreetAddress"
                 }
             },
             "required": [
@@ -12864,18 +12864,18 @@ export const ReceivedIncomingRequestRequest: any = {
         "WebsiteJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Website"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Website"
                 }
             },
             "required": [
@@ -12954,18 +12954,18 @@ export const ReceivedIncomingRequestRequest: any = {
         "AffiliationOrganizationJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationOrganization"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "AffiliationOrganization"
                 }
             },
             "required": [
@@ -12977,18 +12977,18 @@ export const ReceivedIncomingRequestRequest: any = {
         "AffiliationRoleJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationRole"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "AffiliationRole"
                 }
             },
             "required": [
@@ -13000,18 +13000,18 @@ export const ReceivedIncomingRequestRequest: any = {
         "AffiliationUnitJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationUnit"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "AffiliationUnit"
                 }
             },
             "required": [
@@ -13023,18 +13023,18 @@ export const ReceivedIncomingRequestRequest: any = {
         "BirthCityJSON": {
             "type": "object",
             "properties": {
-                "value": {
+                "@type": {
+                    "type": "string",
+                    "const": "BirthCity"
+                },
+                "@version": {
                     "type": "string"
                 },
                 "@context": {
                     "type": "string"
                 },
-                "@version": {
+                "value": {
                     "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthCity"
                 }
             },
             "required": [
@@ -13046,18 +13046,18 @@ export const ReceivedIncomingRequestRequest: any = {
         "BirthCountryJSON": {
             "type": "object",
             "properties": {
-                "value": {
+                "@type": {
+                    "type": "string",
+                    "const": "BirthCountry"
+                },
+                "@version": {
                     "type": "string"
                 },
                 "@context": {
                     "type": "string"
                 },
-                "@version": {
+                "value": {
                     "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthCountry"
                 }
             },
             "required": [
@@ -13069,18 +13069,18 @@ export const ReceivedIncomingRequestRequest: any = {
         "BirthDayJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthDay"
-                },
-                "@context": {
-                    "type": "string"
+                "value": {
+                    "type": "number"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
-                    "type": "number"
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthDay"
                 }
             },
             "required": [
@@ -13092,16 +13092,6 @@ export const ReceivedIncomingRequestRequest: any = {
         "BirthMonthJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthMonth"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
                 "value": {
                     "type": "number",
                     "enum": [
@@ -13119,6 +13109,16 @@ export const ReceivedIncomingRequestRequest: any = {
                         12
                     ],
                     "description": "Month values: 1 (january) - 12 (december)"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthMonth"
                 }
             },
             "required": [
@@ -13130,18 +13130,18 @@ export const ReceivedIncomingRequestRequest: any = {
         "BirthStateJSON": {
             "type": "object",
             "properties": {
-                "value": {
+                "@type": {
+                    "type": "string",
+                    "const": "BirthState"
+                },
+                "@version": {
                     "type": "string"
                 },
                 "@context": {
                     "type": "string"
                 },
-                "@version": {
+                "value": {
                     "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthState"
                 }
             },
             "required": [
@@ -13153,18 +13153,18 @@ export const ReceivedIncomingRequestRequest: any = {
         "BirthYearJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthYear"
-                },
-                "@context": {
-                    "type": "string"
+                "value": {
+                    "type": "number"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
-                    "type": "number"
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthYear"
                 }
             },
             "required": [
@@ -13176,18 +13176,18 @@ export const ReceivedIncomingRequestRequest: any = {
         "CityJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "City"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "City"
                 }
             },
             "required": [
@@ -13199,18 +13199,18 @@ export const ReceivedIncomingRequestRequest: any = {
         "CountryJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Country"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Country"
                 }
             },
             "required": [
@@ -13222,18 +13222,18 @@ export const ReceivedIncomingRequestRequest: any = {
         "GivenNameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "GivenName"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "GivenName"
                 }
             },
             "required": [
@@ -13245,18 +13245,18 @@ export const ReceivedIncomingRequestRequest: any = {
         "HonorificPrefixJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HonorificPrefix"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "HonorificPrefix"
                 }
             },
             "required": [
@@ -13268,18 +13268,18 @@ export const ReceivedIncomingRequestRequest: any = {
         "HonorificSuffixJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HonorificSuffix"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "HonorificSuffix"
                 }
             },
             "required": [
@@ -13291,18 +13291,18 @@ export const ReceivedIncomingRequestRequest: any = {
         "HouseNumberJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HouseNumber"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "HouseNumber"
                 }
             },
             "required": [
@@ -13314,18 +13314,18 @@ export const ReceivedIncomingRequestRequest: any = {
         "MiddleNameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "MiddleName"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "MiddleName"
                 }
             },
             "required": [
@@ -13337,21 +13337,21 @@ export const ReceivedIncomingRequestRequest: any = {
         "SchematizedXMLJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "SchematizedXML"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
+                "schemaURL": {
                     "type": "string"
                 },
                 "value": {
                     "type": "string"
                 },
-                "schemaURL": {
+                "@version": {
                     "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "SchematizedXML"
                 }
             },
             "required": [
@@ -13363,18 +13363,18 @@ export const ReceivedIncomingRequestRequest: any = {
         "StateJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "State"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "State"
                 }
             },
             "required": [
@@ -13386,18 +13386,18 @@ export const ReceivedIncomingRequestRequest: any = {
         "StreetJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Street"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Street"
                 }
             },
             "required": [
@@ -13409,18 +13409,18 @@ export const ReceivedIncomingRequestRequest: any = {
         "SurnameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Surname"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Surname"
                 }
             },
             "required": [
@@ -13432,18 +13432,18 @@ export const ReceivedIncomingRequestRequest: any = {
         "ZipCodeJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ZipCode"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ZipCode"
                 }
             },
             "required": [
@@ -13455,38 +13455,38 @@ export const ReceivedIncomingRequestRequest: any = {
         "DeleteAttributeRequestItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "DeleteAttributeRequestItem"
-                },
-                "@context": {
+                "attributeId": {
                     "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
-                "attributeId": {
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "@version": {
                     "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "DeleteAttributeRequestItem"
                 }
             },
             "required": [
@@ -13499,35 +13499,11 @@ export const ReceivedIncomingRequestRequest: any = {
         "ShareAttributeRequestItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ShareAttributeRequestItem"
-                },
-                "@context": {
+                "thirdPartyAddress": {
                     "type": "string"
                 },
-                "@version": {
+                "sourceAttributeId": {
                     "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
                 "attribute": {
                     "anyOf": [
@@ -13539,11 +13515,35 @@ export const ReceivedIncomingRequestRequest: any = {
                         }
                     ]
                 },
-                "sourceAttributeId": {
+                "requireManualDecision": {
+                    "type": "boolean",
+                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                },
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "@version": {
                     "type": "string"
                 },
-                "thirdPartyAddress": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ShareAttributeRequestItem"
                 }
             },
             "required": [
@@ -13557,35 +13557,15 @@ export const ReceivedIncomingRequestRequest: any = {
         "ProposeAttributeRequestItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProposeAttributeRequestItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                "attribute": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/IdentityAttributeJSON"
+                        },
+                        {
+                            "$ref": "#/definitions/RelationshipAttributeJSON"
+                        }
+                    ]
                 },
                 "query": {
                     "anyOf": [
@@ -13600,15 +13580,35 @@ export const ReceivedIncomingRequestRequest: any = {
                         }
                     ]
                 },
-                "attribute": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/IdentityAttributeJSON"
-                        },
-                        {
-                            "$ref": "#/definitions/RelationshipAttributeJSON"
-                        }
-                    ]
+                "requireManualDecision": {
+                    "type": "boolean",
+                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                },
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProposeAttributeRequestItem"
                 }
             },
             "required": [
@@ -13622,18 +13622,11 @@ export const ReceivedIncomingRequestRequest: any = {
         "IdentityAttributeQueryJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "IdentityAttributeQuery"
-                },
-                "@context": {
+                "validTo": {
                     "type": "string"
                 },
-                "@version": {
+                "validFrom": {
                     "type": "string"
-                },
-                "valueType": {
-                    "$ref": "#/definitions/AttributeValues.Identity.TypeName"
                 },
                 "tags": {
                     "type": "array",
@@ -13641,11 +13634,18 @@ export const ReceivedIncomingRequestRequest: any = {
                         "type": "string"
                     }
                 },
-                "validFrom": {
+                "valueType": {
+                    "$ref": "#/definitions/AttributeValues.Identity.TypeName"
+                },
+                "@version": {
                     "type": "string"
                 },
-                "validTo": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "IdentityAttributeQuery"
                 }
             },
             "required": [
@@ -13719,30 +13719,30 @@ export const ReceivedIncomingRequestRequest: any = {
         "RelationshipAttributeQueryJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "RelationshipAttributeQuery"
-                },
-                "@context": {
+                "validTo": {
                     "type": "string"
                 },
-                "@version": {
-                    "type": "string"
-                },
-                "key": {
-                    "type": "string"
-                },
-                "owner": {
+                "validFrom": {
                     "type": "string"
                 },
                 "attributeCreationHints": {
                     "$ref": "#/definitions/RelationshipAttributeCreationHintsJSON"
                 },
-                "validFrom": {
+                "owner": {
                     "type": "string"
                 },
-                "validTo": {
+                "key": {
                     "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "RelationshipAttributeQuery"
                 }
             },
             "required": [
@@ -13756,20 +13756,20 @@ export const ReceivedIncomingRequestRequest: any = {
         "RelationshipAttributeCreationHintsJSON": {
             "type": "object",
             "properties": {
-                "title": {
+                "confidentiality": {
+                    "$ref": "#/definitions/RelationshipAttributeConfidentiality"
+                },
+                "valueHints": {
+                    "$ref": "#/definitions/ValueHintsJSON"
+                },
+                "description": {
                     "type": "string"
                 },
                 "valueType": {
                     "$ref": "#/definitions/AttributeValues.Relationship.TypeName"
                 },
-                "description": {
+                "title": {
                     "type": "string"
-                },
-                "valueHints": {
-                    "$ref": "#/definitions/ValueHintsJSON"
-                },
-                "confidentiality": {
-                    "$ref": "#/definitions/RelationshipAttributeConfidentiality"
                 }
             },
             "required": [
@@ -13801,21 +13801,21 @@ export const ReceivedIncomingRequestRequest: any = {
         "IQLQueryJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "IQLQuery"
+                "attributeCreationHints": {
+                    "$ref": "#/definitions/IQLQueryCreationHintsJSON"
                 },
-                "@context": {
+                "queryString": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "queryString": {
+                "@context": {
                     "type": "string"
                 },
-                "attributeCreationHints": {
-                    "$ref": "#/definitions/IQLQueryCreationHintsJSON"
+                "@type": {
+                    "type": "string",
+                    "const": "IQLQuery"
                 }
             },
             "required": [
@@ -13827,14 +13827,14 @@ export const ReceivedIncomingRequestRequest: any = {
         "IQLQueryCreationHintsJSON": {
             "type": "object",
             "properties": {
-                "valueType": {
-                    "$ref": "#/definitions/AttributeValues.Identity.TypeName"
-                },
                 "tags": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
+                },
+                "valueType": {
+                    "$ref": "#/definitions/AttributeValues.Identity.TypeName"
                 }
             },
             "required": [
@@ -13845,36 +13845,6 @@ export const ReceivedIncomingRequestRequest: any = {
         "ReadAttributeRequestItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ReadAttributeRequestItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
-                },
                 "query": {
                     "anyOf": [
                         {
@@ -13890,6 +13860,36 @@ export const ReceivedIncomingRequestRequest: any = {
                             "$ref": "#/definitions/IQLQueryJSON"
                         }
                     ]
+                },
+                "requireManualDecision": {
+                    "type": "boolean",
+                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                },
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ReadAttributeRequestItem"
                 }
             },
             "required": [
@@ -13902,18 +13902,17 @@ export const ReceivedIncomingRequestRequest: any = {
         "ThirdPartyRelationshipAttributeQueryJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ThirdPartyRelationshipAttributeQuery"
-                },
-                "@context": {
+                "validTo": {
                     "type": "string"
                 },
-                "@version": {
+                "validFrom": {
                     "type": "string"
                 },
-                "key": {
-                    "type": "string"
+                "thirdParty": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "owner": {
                     "anyOf": [
@@ -13934,17 +13933,18 @@ export const ReceivedIncomingRequestRequest: any = {
                         }
                     ]
                 },
-                "thirdParty": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "validFrom": {
+                "key": {
                     "type": "string"
                 },
-                "validTo": {
+                "@version": {
                     "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ThirdPartyRelationshipAttributeQuery"
                 }
             },
             "required": [
@@ -13966,41 +13966,41 @@ export const ReceivedIncomingRequestRequest: any = {
         "ConsentRequestItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ConsentRequestItem"
-                },
-                "@context": {
+                "link": {
                     "type": "string"
                 },
-                "@version": {
+                "consent": {
                     "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
-                "consent": {
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "@version": {
                     "type": "string"
                 },
-                "link": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ConsentRequestItem"
                 }
             },
             "required": [
@@ -14013,35 +14013,35 @@ export const ReceivedIncomingRequestRequest: any = {
         "AuthenticationRequestItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AuthenticationRequestItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                "requireManualDecision": {
+                    "type": "boolean",
+                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
                 "mustBeAccepted": {
                     "type": "boolean",
                     "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "AuthenticationRequestItem"
                 }
             },
             "required": [
@@ -14053,38 +14053,38 @@ export const ReceivedIncomingRequestRequest: any = {
         "FreeTextRequestItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "FreeTextRequestItem"
-                },
-                "@context": {
+                "freeText": {
                     "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
                 "requireManualDecision": {
                     "type": "boolean",
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
-                "freeText": {
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "@version": {
                     "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "FreeTextRequestItem"
                 }
             },
             "required": [
@@ -14097,36 +14097,6 @@ export const ReceivedIncomingRequestRequest: any = {
         "RegisterAttributeListenerRequestItemJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "RegisterAttributeListenerRequestItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
-                },
                 "query": {
                     "anyOf": [
                         {
@@ -14136,6 +14106,36 @@ export const ReceivedIncomingRequestRequest: any = {
                             "$ref": "#/definitions/ThirdPartyRelationshipAttributeQueryJSON"
                         }
                     ]
+                },
+                "requireManualDecision": {
+                    "type": "boolean",
+                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                },
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "RegisterAttributeListenerRequestItem"
                 }
             },
             "required": [
@@ -14186,11 +14186,11 @@ export const SentOutgoingRequestRequest: any = {
         "SentOutgoingRequestRequest": {
             "type": "object",
             "properties": {
-                "requestId": {
-                    "$ref": "#/definitions/RequestIdString"
-                },
                 "messageId": {
                     "$ref": "#/definitions/MessageIdString"
+                },
+                "requestId": {
+                    "$ref": "#/definitions/RequestIdString"
                 }
             },
             "required": [
@@ -14217,26 +14217,65 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
         "CreateAndShareRelationshipAttributeRequest": {
             "type": "object",
             "properties": {
+                "requestItemMetadata": {
+                    "type": "object",
+                    "properties": {
+                        "requireManualDecision": {
+                            "type": "boolean"
+                        },
+                        "metadata": {
+                            "type": "object"
+                        },
+                        "description": {
+                            "type": "string"
+                        },
+                        "title": {
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "requestMetadata": {
+                    "type": "object",
+                    "properties": {
+                        "expiresAt": {
+                            "$ref": "#/definitions/ISO8601DateTimeString"
+                        },
+                        "metadata": {
+                            "type": "object"
+                        },
+                        "description": {
+                            "type": "string"
+                        },
+                        "title": {
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "peer": {
+                    "$ref": "#/definitions/AddressString"
+                },
                 "content": {
                     "type": "object",
                     "properties": {
-                        "value": {
-                            "$ref": "#/definitions/AttributeValues.Relationship.Json"
-                        },
-                        "key": {
-                            "type": "string"
-                        },
-                        "confidentiality": {
-                            "$ref": "#/definitions/RelationshipAttributeConfidentiality"
-                        },
-                        "isTechnical": {
-                            "type": "boolean"
+                        "validTo": {
+                            "$ref": "#/definitions/ISO8601DateTimeString"
                         },
                         "validFrom": {
                             "$ref": "#/definitions/ISO8601DateTimeString"
                         },
-                        "validTo": {
-                            "$ref": "#/definitions/ISO8601DateTimeString"
+                        "isTechnical": {
+                            "type": "boolean"
+                        },
+                        "confidentiality": {
+                            "$ref": "#/definitions/RelationshipAttributeConfidentiality"
+                        },
+                        "key": {
+                            "type": "string"
+                        },
+                        "value": {
+                            "$ref": "#/definitions/AttributeValues.Relationship.Json"
                         }
                     },
                     "required": [
@@ -14244,45 +14283,6 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
                         "key",
                         "confidentiality"
                     ],
-                    "additionalProperties": false
-                },
-                "peer": {
-                    "$ref": "#/definitions/AddressString"
-                },
-                "requestMetadata": {
-                    "type": "object",
-                    "properties": {
-                        "title": {
-                            "type": "string"
-                        },
-                        "description": {
-                            "type": "string"
-                        },
-                        "metadata": {
-                            "type": "object"
-                        },
-                        "expiresAt": {
-                            "$ref": "#/definitions/ISO8601DateTimeString"
-                        }
-                    },
-                    "additionalProperties": false
-                },
-                "requestItemMetadata": {
-                    "type": "object",
-                    "properties": {
-                        "title": {
-                            "type": "string"
-                        },
-                        "description": {
-                            "type": "string"
-                        },
-                        "metadata": {
-                            "type": "object"
-                        },
-                        "requireManualDecision": {
-                            "type": "boolean"
-                        }
-                    },
                     "additionalProperties": false
                 }
             },
@@ -14341,27 +14341,27 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
         "ProprietaryBooleanJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryBoolean"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
+                "description": {
                     "type": "string"
                 },
-                "@version": {
+                "title": {
                     "type": "string"
                 },
                 "value": {
                     "type": "boolean"
                 },
-                "title": {
+                "@version": {
                     "type": "string"
                 },
-                "description": {
+                "@context": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryBoolean"
                 }
             },
             "required": [
@@ -14375,26 +14375,16 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
             "type": "object",
             "additionalProperties": false,
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ValueHints"
-                },
-                "editHelp": {
+                "@version": {
                     "type": "string"
                 },
-                "min": {
-                    "type": "number"
-                },
-                "max": {
-                    "type": "number"
-                },
-                "pattern": {
+                "@context": {
                     "type": "string"
                 },
-                "values": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ValueHintsValueJSON"
+                "propertyHints": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/ValueHintsJSON"
                     }
                 },
                 "defaultValue": {
@@ -14404,32 +14394,42 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
                         "boolean"
                     ]
                 },
-                "propertyHints": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/ValueHintsJSON"
+                "values": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ValueHintsValueJSON"
                     }
                 },
-                "@context": {
+                "pattern": {
                     "type": "string"
                 },
-                "@version": {
+                "max": {
+                    "type": "number"
+                },
+                "min": {
+                    "type": "number"
+                },
+                "editHelp": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ValueHints"
                 }
             }
         },
         "ValueHintsValueJSON": {
             "type": "object",
             "properties": {
+                "displayName": {
+                    "type": "string"
+                },
                 "key": {
                     "type": [
                         "string",
                         "number",
                         "boolean"
                     ]
-                },
-                "displayName": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -14441,32 +14441,10 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
         "ValueHintsJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ValueHints"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "editHelp": {
-                    "type": "string"
-                },
-                "min": {
-                    "type": "number"
-                },
-                "max": {
-                    "type": "number"
-                },
-                "pattern": {
-                    "type": "string"
-                },
-                "values": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ValueHintsValueJSON"
+                "propertyHints": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/ValueHintsJSON"
                     }
                 },
                 "defaultValue": {
@@ -14476,11 +14454,33 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
                         "boolean"
                     ]
                 },
-                "propertyHints": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/ValueHintsJSON"
+                "values": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ValueHintsValueJSON"
                     }
+                },
+                "pattern": {
+                    "type": "string"
+                },
+                "max": {
+                    "type": "number"
+                },
+                "min": {
+                    "type": "number"
+                },
+                "editHelp": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ValueHints"
                 }
             },
             "required": [
@@ -14491,27 +14491,27 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
         "ProprietaryCountryJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryCountry"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryCountry"
                 }
             },
             "required": [
@@ -14524,27 +14524,27 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
         "ProprietaryEMailAddressJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryEMailAddress"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryEMailAddress"
                 }
             },
             "required": [
@@ -14557,27 +14557,27 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
         "ProprietaryFileReferenceJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryFileReference"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryFileReference"
                 }
             },
             "required": [
@@ -14590,27 +14590,27 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
         "ProprietaryFloatJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryFloat"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
+                "description": {
                     "type": "string"
                 },
-                "@version": {
+                "title": {
                     "type": "string"
                 },
                 "value": {
                     "type": "number"
                 },
-                "title": {
+                "@version": {
                     "type": "string"
                 },
-                "description": {
+                "@context": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryFloat"
                 }
             },
             "required": [
@@ -14623,27 +14623,27 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
         "ProprietaryHEXColorJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryHEXColor"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryHEXColor"
                 }
             },
             "required": [
@@ -14656,27 +14656,27 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
         "ProprietaryIntegerJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryInteger"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
+                "description": {
                     "type": "string"
                 },
-                "@version": {
+                "title": {
                     "type": "string"
                 },
                 "value": {
                     "type": "number"
                 },
-                "title": {
+                "@version": {
                     "type": "string"
                 },
-                "description": {
+                "@context": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryInteger"
                 }
             },
             "required": [
@@ -14689,27 +14689,27 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
         "ProprietaryLanguageJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryLanguage"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryLanguage"
                 }
             },
             "required": [
@@ -14722,27 +14722,27 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
         "ProprietaryPhoneNumberJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryPhoneNumber"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryPhoneNumber"
                 }
             },
             "required": [
@@ -14755,27 +14755,27 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
         "ProprietaryStringJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryString"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryString"
                 }
             },
             "required": [
@@ -14788,27 +14788,27 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
         "ProprietaryURLJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryURL"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryURL"
                 }
             },
             "required": [
@@ -14821,23 +14821,23 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
         "ProprietaryJSONJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryJSON"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
+                "value": {},
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "@version": {
                     "type": "string"
                 },
-                "value": {}
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryJSON"
+                }
             },
             "required": [
                 "@type",
@@ -14849,30 +14849,30 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
         "ProprietaryXMLJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryXML"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
+                "schemaURL": {
                     "type": "string"
                 },
                 "valueHintsOverride": {
                     "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "schemaURL": {
+                "description": {
                     "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryXML"
                 }
             },
             "required": [
@@ -14885,19 +14885,19 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
         "ConsentJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
+                "link": {
                     "type": "string"
                 },
                 "consent": {
                     "type": "string"
                 },
-                "link": {
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
                     "type": "string"
                 }
             },
@@ -14937,8 +14937,11 @@ export const CreateRepositoryAttributeRequest: any = {
                 "content": {
                     "type": "object",
                     "properties": {
-                        "value": {
-                            "$ref": "#/definitions/AttributeValues.Identity.Json"
+                        "validTo": {
+                            "$ref": "#/definitions/ISO8601DateTimeString"
+                        },
+                        "validFrom": {
+                            "$ref": "#/definitions/ISO8601DateTimeString"
                         },
                         "tags": {
                             "type": "array",
@@ -14946,11 +14949,8 @@ export const CreateRepositoryAttributeRequest: any = {
                                 "type": "string"
                             }
                         },
-                        "validFrom": {
-                            "$ref": "#/definitions/ISO8601DateTimeString"
-                        },
-                        "validTo": {
-                            "$ref": "#/definitions/ISO8601DateTimeString"
+                        "value": {
+                            "$ref": "#/definitions/AttributeValues.Identity.Json"
                         }
                     },
                     "required": [
@@ -15041,24 +15041,24 @@ export const CreateRepositoryAttributeRequest: any = {
         "AffiliationJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Affiliation"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "organization": {
+                "unit": {
                     "type": "string"
                 },
                 "role": {
                     "type": "string"
                 },
-                "unit": {
+                "organization": {
                     "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Affiliation"
                 }
             },
             "required": [
@@ -15070,24 +15070,24 @@ export const CreateRepositoryAttributeRequest: any = {
         "BirthDateJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthDate"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "day": {
+                "year": {
                     "type": "number"
                 },
                 "month": {
                     "type": "number"
                 },
-                "year": {
+                "day": {
                     "type": "number"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthDate"
                 }
             },
             "required": [
@@ -15101,18 +15101,18 @@ export const CreateRepositoryAttributeRequest: any = {
         "BirthNameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthName"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthName"
                 }
             },
             "required": [
@@ -15124,24 +15124,24 @@ export const CreateRepositoryAttributeRequest: any = {
         "BirthPlaceJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthPlace"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "city": {
+                "state": {
                     "type": "string"
                 },
                 "country": {
                     "type": "string"
                 },
-                "state": {
+                "city": {
                     "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthPlace"
                 }
             },
             "required": [
@@ -15154,18 +15154,18 @@ export const CreateRepositoryAttributeRequest: any = {
         "CitizenshipJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Citizenship"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Citizenship"
                 }
             },
             "required": [
@@ -15177,18 +15177,18 @@ export const CreateRepositoryAttributeRequest: any = {
         "CommunicationLanguageJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "CommunicationLanguage"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "CommunicationLanguage"
                 }
             },
             "required": [
@@ -15200,39 +15200,39 @@ export const CreateRepositoryAttributeRequest: any = {
         "DeliveryBoxAddressJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "DeliveryBoxAddress"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "recipient": {
-                    "type": "string"
-                },
-                "userId": {
-                    "type": "string"
-                },
-                "deliveryBoxId": {
-                    "type": "string"
-                },
-                "zipCode": {
-                    "type": "string"
-                },
-                "city": {
-                    "type": "string"
-                },
-                "country": {
+                "state": {
                     "type": "string"
                 },
                 "phoneNumber": {
                     "type": "string"
                 },
-                "state": {
+                "country": {
                     "type": "string"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "zipCode": {
+                    "type": "string"
+                },
+                "deliveryBoxId": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "string"
+                },
+                "recipient": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "DeliveryBoxAddress"
                 }
             },
             "required": [
@@ -15249,18 +15249,18 @@ export const CreateRepositoryAttributeRequest: any = {
         "DisplayNameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "DisplayName"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "DisplayName"
                 }
             },
             "required": [
@@ -15272,18 +15272,18 @@ export const CreateRepositoryAttributeRequest: any = {
         "EMailAddressJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "EMailAddress"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "EMailAddress"
                 }
             },
             "required": [
@@ -15295,18 +15295,18 @@ export const CreateRepositoryAttributeRequest: any = {
         "FaxNumberJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "FaxNumber"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "FaxNumber"
                 }
             },
             "required": [
@@ -15318,18 +15318,18 @@ export const CreateRepositoryAttributeRequest: any = {
         "IdentityFileReferenceJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "IdentityFileReference"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "IdentityFileReference"
                 }
             },
             "required": [
@@ -15341,18 +15341,18 @@ export const CreateRepositoryAttributeRequest: any = {
         "JobTitleJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "JobTitle"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "JobTitle"
                 }
             },
             "required": [
@@ -15364,18 +15364,18 @@ export const CreateRepositoryAttributeRequest: any = {
         "NationalityJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Nationality"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Nationality"
                 }
             },
             "required": [
@@ -15387,30 +15387,30 @@ export const CreateRepositoryAttributeRequest: any = {
         "PersonNameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "PersonName"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "givenName": {
-                    "type": "string"
-                },
-                "middleName": {
-                    "type": "string"
-                },
-                "surname": {
+                "honorificPrefix": {
                     "type": "string"
                 },
                 "honorificSuffix": {
                     "type": "string"
                 },
-                "honorificPrefix": {
+                "surname": {
                     "type": "string"
+                },
+                "middleName": {
+                    "type": "string"
+                },
+                "givenName": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "PersonName"
                 }
             },
             "required": [
@@ -15423,18 +15423,18 @@ export const CreateRepositoryAttributeRequest: any = {
         "PhoneNumberJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "PhoneNumber"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "PhoneNumber"
                 }
             },
             "required": [
@@ -15446,33 +15446,33 @@ export const CreateRepositoryAttributeRequest: any = {
         "PostOfficeBoxAddressJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "PostOfficeBoxAddress"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "recipient": {
-                    "type": "string"
-                },
-                "boxId": {
-                    "type": "string"
-                },
-                "zipCode": {
-                    "type": "string"
-                },
-                "city": {
+                "state": {
                     "type": "string"
                 },
                 "country": {
                     "type": "string"
                 },
-                "state": {
+                "city": {
                     "type": "string"
+                },
+                "zipCode": {
+                    "type": "string"
+                },
+                "boxId": {
+                    "type": "string"
+                },
+                "recipient": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "PostOfficeBoxAddress"
                 }
             },
             "required": [
@@ -15488,18 +15488,18 @@ export const CreateRepositoryAttributeRequest: any = {
         "PseudonymJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Pseudonym"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Pseudonym"
                 }
             },
             "required": [
@@ -15511,18 +15511,18 @@ export const CreateRepositoryAttributeRequest: any = {
         "SexJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Sex"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Sex"
                 }
             },
             "required": [
@@ -15534,36 +15534,36 @@ export const CreateRepositoryAttributeRequest: any = {
         "StreetAddressJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "StreetAddress"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "recipient": {
-                    "type": "string"
-                },
-                "street": {
-                    "type": "string"
-                },
-                "houseNo": {
-                    "type": "string"
-                },
-                "zipCode": {
-                    "type": "string"
-                },
-                "city": {
+                "state": {
                     "type": "string"
                 },
                 "country": {
                     "type": "string"
                 },
-                "state": {
+                "city": {
                     "type": "string"
+                },
+                "zipCode": {
+                    "type": "string"
+                },
+                "houseNo": {
+                    "type": "string"
+                },
+                "street": {
+                    "type": "string"
+                },
+                "recipient": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "StreetAddress"
                 }
             },
             "required": [
@@ -15580,18 +15580,18 @@ export const CreateRepositoryAttributeRequest: any = {
         "WebsiteJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Website"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Website"
                 }
             },
             "required": [
@@ -15670,18 +15670,18 @@ export const CreateRepositoryAttributeRequest: any = {
         "AffiliationOrganizationJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationOrganization"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "AffiliationOrganization"
                 }
             },
             "required": [
@@ -15693,18 +15693,18 @@ export const CreateRepositoryAttributeRequest: any = {
         "AffiliationRoleJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationRole"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "AffiliationRole"
                 }
             },
             "required": [
@@ -15716,18 +15716,18 @@ export const CreateRepositoryAttributeRequest: any = {
         "AffiliationUnitJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationUnit"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "AffiliationUnit"
                 }
             },
             "required": [
@@ -15739,18 +15739,18 @@ export const CreateRepositoryAttributeRequest: any = {
         "BirthCityJSON": {
             "type": "object",
             "properties": {
-                "value": {
+                "@type": {
+                    "type": "string",
+                    "const": "BirthCity"
+                },
+                "@version": {
                     "type": "string"
                 },
                 "@context": {
                     "type": "string"
                 },
-                "@version": {
+                "value": {
                     "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthCity"
                 }
             },
             "required": [
@@ -15762,18 +15762,18 @@ export const CreateRepositoryAttributeRequest: any = {
         "BirthCountryJSON": {
             "type": "object",
             "properties": {
-                "value": {
+                "@type": {
+                    "type": "string",
+                    "const": "BirthCountry"
+                },
+                "@version": {
                     "type": "string"
                 },
                 "@context": {
                     "type": "string"
                 },
-                "@version": {
+                "value": {
                     "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthCountry"
                 }
             },
             "required": [
@@ -15785,18 +15785,18 @@ export const CreateRepositoryAttributeRequest: any = {
         "BirthDayJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthDay"
-                },
-                "@context": {
-                    "type": "string"
+                "value": {
+                    "type": "number"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
-                    "type": "number"
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthDay"
                 }
             },
             "required": [
@@ -15808,16 +15808,6 @@ export const CreateRepositoryAttributeRequest: any = {
         "BirthMonthJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthMonth"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
                 "value": {
                     "type": "number",
                     "enum": [
@@ -15835,6 +15825,16 @@ export const CreateRepositoryAttributeRequest: any = {
                         12
                     ],
                     "description": "Month values: 1 (january) - 12 (december)"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthMonth"
                 }
             },
             "required": [
@@ -15846,18 +15846,18 @@ export const CreateRepositoryAttributeRequest: any = {
         "BirthStateJSON": {
             "type": "object",
             "properties": {
-                "value": {
+                "@type": {
+                    "type": "string",
+                    "const": "BirthState"
+                },
+                "@version": {
                     "type": "string"
                 },
                 "@context": {
                     "type": "string"
                 },
-                "@version": {
+                "value": {
                     "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthState"
                 }
             },
             "required": [
@@ -15869,18 +15869,18 @@ export const CreateRepositoryAttributeRequest: any = {
         "BirthYearJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthYear"
-                },
-                "@context": {
-                    "type": "string"
+                "value": {
+                    "type": "number"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
-                    "type": "number"
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthYear"
                 }
             },
             "required": [
@@ -15892,18 +15892,18 @@ export const CreateRepositoryAttributeRequest: any = {
         "CityJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "City"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "City"
                 }
             },
             "required": [
@@ -15915,18 +15915,18 @@ export const CreateRepositoryAttributeRequest: any = {
         "CountryJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Country"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Country"
                 }
             },
             "required": [
@@ -15938,18 +15938,18 @@ export const CreateRepositoryAttributeRequest: any = {
         "GivenNameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "GivenName"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "GivenName"
                 }
             },
             "required": [
@@ -15961,18 +15961,18 @@ export const CreateRepositoryAttributeRequest: any = {
         "HonorificPrefixJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HonorificPrefix"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "HonorificPrefix"
                 }
             },
             "required": [
@@ -15984,18 +15984,18 @@ export const CreateRepositoryAttributeRequest: any = {
         "HonorificSuffixJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HonorificSuffix"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "HonorificSuffix"
                 }
             },
             "required": [
@@ -16007,18 +16007,18 @@ export const CreateRepositoryAttributeRequest: any = {
         "HouseNumberJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HouseNumber"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "HouseNumber"
                 }
             },
             "required": [
@@ -16030,18 +16030,18 @@ export const CreateRepositoryAttributeRequest: any = {
         "MiddleNameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "MiddleName"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "MiddleName"
                 }
             },
             "required": [
@@ -16053,21 +16053,21 @@ export const CreateRepositoryAttributeRequest: any = {
         "SchematizedXMLJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "SchematizedXML"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
+                "schemaURL": {
                     "type": "string"
                 },
                 "value": {
                     "type": "string"
                 },
-                "schemaURL": {
+                "@version": {
                     "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "SchematizedXML"
                 }
             },
             "required": [
@@ -16079,18 +16079,18 @@ export const CreateRepositoryAttributeRequest: any = {
         "StateJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "State"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "State"
                 }
             },
             "required": [
@@ -16102,18 +16102,18 @@ export const CreateRepositoryAttributeRequest: any = {
         "StreetJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Street"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Street"
                 }
             },
             "required": [
@@ -16125,18 +16125,18 @@ export const CreateRepositoryAttributeRequest: any = {
         "SurnameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Surname"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Surname"
                 }
             },
             "required": [
@@ -16148,18 +16148,18 @@ export const CreateRepositoryAttributeRequest: any = {
         "ZipCodeJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ZipCode"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ZipCode"
                 }
             },
             "required": [
@@ -16310,18 +16310,11 @@ export const ExecuteIdentityAttributeQueryRequest: any = {
         "IdentityAttributeQueryJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "IdentityAttributeQuery"
-                },
-                "@context": {
+                "validTo": {
                     "type": "string"
                 },
-                "@version": {
+                "validFrom": {
                     "type": "string"
-                },
-                "valueType": {
-                    "$ref": "#/definitions/AttributeValues.Identity.TypeName"
                 },
                 "tags": {
                     "type": "array",
@@ -16329,11 +16322,18 @@ export const ExecuteIdentityAttributeQueryRequest: any = {
                         "type": "string"
                     }
                 },
-                "validFrom": {
+                "valueType": {
+                    "$ref": "#/definitions/AttributeValues.Identity.TypeName"
+                },
+                "@version": {
                     "type": "string"
                 },
-                "validTo": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "IdentityAttributeQuery"
                 }
             },
             "required": [
@@ -16418,21 +16418,21 @@ export const ExecuteIQLQueryRequest: any = {
                     "type": "object",
                     "additionalProperties": false,
                     "properties": {
-                        "@type": {
-                            "type": "string",
-                            "const": "IQLQuery"
+                        "@version": {
+                            "type": "string"
                         },
-                        "queryString": {
+                        "@context": {
                             "type": "string"
                         },
                         "attributeCreationHints": {
                             "$ref": "#/definitions/IQLQueryCreationHintsJSON"
                         },
-                        "@context": {
+                        "queryString": {
                             "type": "string"
                         },
-                        "@version": {
-                            "type": "string"
+                        "@type": {
+                            "type": "string",
+                            "const": "IQLQuery"
                         }
                     },
                     "required": [
@@ -16448,14 +16448,14 @@ export const ExecuteIQLQueryRequest: any = {
         "IQLQueryCreationHintsJSON": {
             "type": "object",
             "properties": {
-                "valueType": {
-                    "$ref": "#/definitions/AttributeValues.Identity.TypeName"
-                },
                 "tags": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
+                },
+                "valueType": {
+                    "$ref": "#/definitions/AttributeValues.Identity.TypeName"
                 }
             },
             "required": [
@@ -16547,30 +16547,30 @@ export const ExecuteRelationshipAttributeQueryRequest: any = {
         "RelationshipAttributeQueryJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "RelationshipAttributeQuery"
-                },
-                "@context": {
+                "validTo": {
                     "type": "string"
                 },
-                "@version": {
-                    "type": "string"
-                },
-                "key": {
-                    "type": "string"
-                },
-                "owner": {
+                "validFrom": {
                     "type": "string"
                 },
                 "attributeCreationHints": {
                     "$ref": "#/definitions/RelationshipAttributeCreationHintsJSON"
                 },
-                "validFrom": {
+                "owner": {
                     "type": "string"
                 },
-                "validTo": {
+                "key": {
                     "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "RelationshipAttributeQuery"
                 }
             },
             "required": [
@@ -16584,20 +16584,20 @@ export const ExecuteRelationshipAttributeQueryRequest: any = {
         "RelationshipAttributeCreationHintsJSON": {
             "type": "object",
             "properties": {
-                "title": {
+                "confidentiality": {
+                    "$ref": "#/definitions/RelationshipAttributeConfidentiality"
+                },
+                "valueHints": {
+                    "$ref": "#/definitions/ValueHintsJSON"
+                },
+                "description": {
                     "type": "string"
                 },
                 "valueType": {
                     "$ref": "#/definitions/AttributeValues.Relationship.TypeName"
                 },
-                "description": {
+                "title": {
                     "type": "string"
-                },
-                "valueHints": {
-                    "$ref": "#/definitions/ValueHintsJSON"
-                },
-                "confidentiality": {
-                    "$ref": "#/definitions/RelationshipAttributeConfidentiality"
                 }
             },
             "required": [
@@ -16629,32 +16629,10 @@ export const ExecuteRelationshipAttributeQueryRequest: any = {
         "ValueHintsJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ValueHints"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "editHelp": {
-                    "type": "string"
-                },
-                "min": {
-                    "type": "number"
-                },
-                "max": {
-                    "type": "number"
-                },
-                "pattern": {
-                    "type": "string"
-                },
-                "values": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ValueHintsValueJSON"
+                "propertyHints": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/ValueHintsJSON"
                     }
                 },
                 "defaultValue": {
@@ -16664,11 +16642,33 @@ export const ExecuteRelationshipAttributeQueryRequest: any = {
                         "boolean"
                     ]
                 },
-                "propertyHints": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/ValueHintsJSON"
+                "values": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ValueHintsValueJSON"
                     }
+                },
+                "pattern": {
+                    "type": "string"
+                },
+                "max": {
+                    "type": "number"
+                },
+                "min": {
+                    "type": "number"
+                },
+                "editHelp": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ValueHints"
                 }
             },
             "required": [
@@ -16679,15 +16679,15 @@ export const ExecuteRelationshipAttributeQueryRequest: any = {
         "ValueHintsValueJSON": {
             "type": "object",
             "properties": {
+                "displayName": {
+                    "type": "string"
+                },
                 "key": {
                     "type": [
                         "string",
                         "number",
                         "boolean"
                     ]
-                },
-                "displayName": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -16726,18 +16726,17 @@ export const ExecuteThirdPartyRelationshipAttributeQueryRequest: any = {
         "ThirdPartyRelationshipAttributeQueryJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ThirdPartyRelationshipAttributeQuery"
-                },
-                "@context": {
+                "validTo": {
                     "type": "string"
                 },
-                "@version": {
+                "validFrom": {
                     "type": "string"
                 },
-                "key": {
-                    "type": "string"
+                "thirdParty": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "owner": {
                     "anyOf": [
@@ -16758,17 +16757,18 @@ export const ExecuteThirdPartyRelationshipAttributeQueryRequest: any = {
                         }
                     ]
                 },
-                "thirdParty": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "validFrom": {
+                "key": {
                     "type": "string"
                 },
-                "validTo": {
+                "@version": {
                     "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ThirdPartyRelationshipAttributeQuery"
                 }
             },
             "required": [
@@ -16820,14 +16820,14 @@ export const GetAttributesRequest: any = {
         "GetAttributesRequest": {
             "type": "object",
             "properties": {
-                "query": {
-                    "$ref": "#/definitions/GetAttributesRequestQuery"
+                "hideTechnical": {
+                    "type": "boolean"
                 },
                 "onlyValid": {
                     "type": "boolean"
                 },
-                "hideTechnical": {
-                    "type": "boolean"
+                "query": {
+                    "$ref": "#/definitions/GetAttributesRequestQuery"
                 }
             },
             "additionalProperties": false
@@ -16835,10 +16835,7 @@ export const GetAttributesRequest: any = {
         "GetAttributesRequestQuery": {
             "type": "object",
             "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "parentId": {
+                "deletionInfo.deletionDate": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -16851,7 +16848,7 @@ export const GetAttributesRequest: any = {
                         }
                     ]
                 },
-                "succeeds": {
+                "deletionInfo.deletionStatus": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -16864,7 +16861,7 @@ export const GetAttributesRequest: any = {
                         }
                     ]
                 },
-                "succeededBy": {
+                "deletionInfo": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -16877,10 +16874,7 @@ export const GetAttributesRequest: any = {
                         }
                     ]
                 },
-                "isDefault": {
-                    "type": "string"
-                },
-                "content.@type": {
+                "shareInfo.thirdPartyAddress": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -16893,127 +16887,7 @@ export const GetAttributesRequest: any = {
                         }
                     ]
                 },
-                "content.tags": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.owner": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.validFrom": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.validTo": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.key": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.isTechnical": {
-                    "type": "string"
-                },
-                "content.confidentiality": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.value.@type": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "shareInfo": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "shareInfo.requestReference": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "shareInfo.notificationReference": {
+                "shareInfo.sourceAttribute": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -17039,7 +16913,7 @@ export const GetAttributesRequest: any = {
                         }
                     ]
                 },
-                "shareInfo.sourceAttribute": {
+                "shareInfo.notificationReference": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -17052,7 +16926,7 @@ export const GetAttributesRequest: any = {
                         }
                     ]
                 },
-                "shareInfo.thirdPartyAddress": {
+                "shareInfo.requestReference": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -17065,7 +16939,7 @@ export const GetAttributesRequest: any = {
                         }
                     ]
                 },
-                "deletionInfo": {
+                "shareInfo": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -17078,7 +16952,7 @@ export const GetAttributesRequest: any = {
                         }
                     ]
                 },
-                "deletionInfo.deletionStatus": {
+                "content.value.@type": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -17091,7 +16965,7 @@ export const GetAttributesRequest: any = {
                         }
                     ]
                 },
-                "deletionInfo.deletionDate": {
+                "content.confidentiality": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -17103,6 +16977,132 @@ export const GetAttributesRequest: any = {
                             }
                         }
                     ]
+                },
+                "content.isTechnical": {
+                    "type": "string"
+                },
+                "content.key": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.validTo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.validFrom": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.owner": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.tags": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.@type": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "isDefault": {
+                    "type": "string"
+                },
+                "succeededBy": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "succeeds": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "parentId": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "createdAt": {
+                    "type": "string"
                 }
             },
             "additionalProperties": false
@@ -17117,21 +17117,21 @@ export const GetOwnSharedAttributesRequest: any = {
         "GetOwnSharedAttributesRequest": {
             "type": "object",
             "properties": {
-                "peer": {
-                    "$ref": "#/definitions/AddressString"
+                "onlyLatestVersions": {
+                    "type": "boolean",
+                    "description": "default: true"
                 },
-                "onlyValid": {
+                "hideTechnical": {
                     "type": "boolean"
                 },
                 "query": {
                     "$ref": "#/definitions/GetOwnSharedAttributeRequestQuery"
                 },
-                "hideTechnical": {
+                "onlyValid": {
                     "type": "boolean"
                 },
-                "onlyLatestVersions": {
-                    "type": "boolean",
-                    "description": "default: true"
+                "peer": {
+                    "$ref": "#/definitions/AddressString"
                 }
             },
             "required": [
@@ -17146,10 +17146,7 @@ export const GetOwnSharedAttributesRequest: any = {
         "GetOwnSharedAttributeRequestQuery": {
             "type": "object",
             "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "content.@type": {
+                "deletionInfo.deletionDate": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -17162,7 +17159,7 @@ export const GetOwnSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "content.tags": {
+                "deletionInfo.deletionStatus": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -17175,7 +17172,7 @@ export const GetOwnSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "content.validFrom": {
+                "deletionInfo": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -17188,88 +17185,7 @@ export const GetOwnSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "content.validTo": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.key": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.isTechnical": {
-                    "type": "string"
-                },
-                "content.confidentiality": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.value.@type": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "shareInfo": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "shareInfo.requestReference": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "shareInfo.notificationReference": {
+                "shareInfo.thirdPartyAddress": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -17295,198 +17211,7 @@ export const GetOwnSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "shareInfo.thirdPartyAddress": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "deletionInfo": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "deletionInfo.deletionStatus": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "deletionInfo.deletionDate": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                }
-            },
-            "additionalProperties": false
-        }
-    }
-}
-
-export const GetPeerSharedAttributesRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetPeerSharedAttributesRequest",
-    "definitions": {
-        "GetPeerSharedAttributesRequest": {
-            "type": "object",
-            "properties": {
-                "peer": {
-                    "$ref": "#/definitions/AddressString"
-                },
-                "onlyValid": {
-                    "type": "boolean"
-                },
-                "query": {
-                    "$ref": "#/definitions/GetPeerSharedAttributesRequestQuery"
-                },
-                "hideTechnical": {
-                    "type": "boolean"
-                },
-                "onlyLatestVersions": {
-                    "type": "boolean",
-                    "description": "default: true"
-                }
-            },
-            "required": [
-                "peer"
-            ],
-            "additionalProperties": false
-        },
-        "AddressString": {
-            "type": "string",
-            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
-        },
-        "GetPeerSharedAttributesRequestQuery": {
-            "type": "object",
-            "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "content.@type": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.tags": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.validFrom": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.validTo": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.key": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.isTechnical": {
-                    "type": "string"
-                },
-                "content.confidentiality": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.value.@type": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "shareInfo": {
+                "shareInfo.notificationReference": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -17512,7 +17237,7 @@ export const GetPeerSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "shareInfo.notificationReference": {
+                "shareInfo": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -17525,7 +17250,7 @@ export const GetPeerSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "shareInfo.thirdPartyAddress": {
+                "content.value.@type": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -17538,7 +17263,7 @@ export const GetPeerSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "deletionInfo": {
+                "content.confidentiality": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -17551,78 +17276,10 @@ export const GetPeerSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "deletionInfo.deletionStatus": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "deletionInfo.deletionDate": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                }
-            },
-            "additionalProperties": false
-        }
-    }
-}
-
-export const GetRepositoryAttributesRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetRepositoryAttributesRequest",
-    "definitions": {
-        "GetRepositoryAttributesRequest": {
-            "type": "object",
-            "properties": {
-                "onlyLatestVersions": {
-                    "type": "boolean",
-                    "description": "default: true"
-                },
-                "query": {
-                    "$ref": "#/definitions/GetRepositoryAttributesRequestQuery"
-                }
-            },
-            "additionalProperties": false
-        },
-        "GetRepositoryAttributesRequestQuery": {
-            "type": "object",
-            "properties": {
-                "createdAt": {
+                "content.isTechnical": {
                     "type": "string"
                 },
-                "isDefault": {
-                    "type": "string"
-                },
-                "content.tags": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.validFrom": {
+                "content.key": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -17648,6 +17305,181 @@ export const GetRepositoryAttributesRequest: any = {
                         }
                     ]
                 },
+                "content.validFrom": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.tags": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.@type": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "createdAt": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+}
+
+export const GetPeerSharedAttributesRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetPeerSharedAttributesRequest",
+    "definitions": {
+        "GetPeerSharedAttributesRequest": {
+            "type": "object",
+            "properties": {
+                "onlyLatestVersions": {
+                    "type": "boolean",
+                    "description": "default: true"
+                },
+                "hideTechnical": {
+                    "type": "boolean"
+                },
+                "query": {
+                    "$ref": "#/definitions/GetPeerSharedAttributesRequestQuery"
+                },
+                "onlyValid": {
+                    "type": "boolean"
+                },
+                "peer": {
+                    "$ref": "#/definitions/AddressString"
+                }
+            },
+            "required": [
+                "peer"
+            ],
+            "additionalProperties": false
+        },
+        "AddressString": {
+            "type": "string",
+            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
+        },
+        "GetPeerSharedAttributesRequestQuery": {
+            "type": "object",
+            "properties": {
+                "deletionInfo.deletionDate": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo.deletionStatus": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "shareInfo.thirdPartyAddress": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "shareInfo.notificationReference": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "shareInfo.requestReference": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "shareInfo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
                 "content.value.@type": {
                     "anyOf": [
                         {
@@ -17660,6 +17492,174 @@ export const GetRepositoryAttributesRequest: any = {
                             }
                         }
                     ]
+                },
+                "content.confidentiality": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.isTechnical": {
+                    "type": "string"
+                },
+                "content.key": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.validTo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.validFrom": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.tags": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.@type": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "createdAt": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+}
+
+export const GetRepositoryAttributesRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetRepositoryAttributesRequest",
+    "definitions": {
+        "GetRepositoryAttributesRequest": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "$ref": "#/definitions/GetRepositoryAttributesRequestQuery"
+                },
+                "onlyLatestVersions": {
+                    "type": "boolean",
+                    "description": "default: true"
+                }
+            },
+            "additionalProperties": false
+        },
+        "GetRepositoryAttributesRequestQuery": {
+            "type": "object",
+            "properties": {
+                "content.value.@type": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.validTo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.validFrom": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.tags": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "isDefault": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
                 }
             },
             "additionalProperties": false
@@ -17674,8 +17674,9 @@ export const GetSharedVersionsOfAttributeRequest: any = {
         "GetSharedVersionsOfAttributeRequest": {
             "type": "object",
             "properties": {
-                "attributeId": {
-                    "$ref": "#/definitions/AttributeIdString"
+                "onlyLatestVersions": {
+                    "type": "boolean",
+                    "description": "default: true"
                 },
                 "peers": {
                     "type": "array",
@@ -17683,9 +17684,8 @@ export const GetSharedVersionsOfAttributeRequest: any = {
                         "$ref": "#/definitions/AddressString"
                     }
                 },
-                "onlyLatestVersions": {
-                    "type": "boolean",
-                    "description": "default: true"
+                "attributeId": {
+                    "$ref": "#/definitions/AttributeIdString"
                 }
             },
             "required": [
@@ -17734,11 +17734,11 @@ export const NotifyPeerAboutRepositoryAttributeSuccessionRequest: any = {
         "NotifyPeerAboutRepositoryAttributeSuccessionRequest": {
             "type": "object",
             "properties": {
-                "attributeId": {
-                    "$ref": "#/definitions/AttributeIdString"
-                },
                 "peer": {
                     "$ref": "#/definitions/AddressString"
+                },
+                "attributeId": {
+                    "$ref": "#/definitions/AttributeIdString"
                 }
             },
             "required": [
@@ -17765,47 +17765,47 @@ export const ShareRepositoryAttributeRequest: any = {
         "ShareRepositoryAttributeRequest": {
             "type": "object",
             "properties": {
-                "attributeId": {
-                    "$ref": "#/definitions/AttributeIdString"
-                },
-                "peer": {
-                    "$ref": "#/definitions/AddressString"
+                "requestItemMetadata": {
+                    "type": "object",
+                    "properties": {
+                        "requireManualDecision": {
+                            "type": "boolean"
+                        },
+                        "metadata": {
+                            "type": "object"
+                        },
+                        "description": {
+                            "type": "string"
+                        },
+                        "title": {
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": false
                 },
                 "requestMetadata": {
                     "type": "object",
                     "properties": {
-                        "title": {
-                            "type": "string"
-                        },
-                        "description": {
-                            "type": "string"
+                        "expiresAt": {
+                            "$ref": "#/definitions/ISO8601DateTimeString"
                         },
                         "metadata": {
                             "type": "object"
                         },
-                        "expiresAt": {
-                            "$ref": "#/definitions/ISO8601DateTimeString"
+                        "description": {
+                            "type": "string"
+                        },
+                        "title": {
+                            "type": "string"
                         }
                     },
                     "additionalProperties": false
                 },
-                "requestItemMetadata": {
-                    "type": "object",
-                    "properties": {
-                        "title": {
-                            "type": "string"
-                        },
-                        "description": {
-                            "type": "string"
-                        },
-                        "metadata": {
-                            "type": "object"
-                        },
-                        "requireManualDecision": {
-                            "type": "boolean"
-                        }
-                    },
-                    "additionalProperties": false
+                "peer": {
+                    "$ref": "#/definitions/AddressString"
+                },
+                "attributeId": {
+                    "$ref": "#/definitions/AttributeIdString"
                 }
             },
             "required": [
@@ -17837,26 +17837,26 @@ export const SucceedRelationshipAttributeAndNotifyPeerRequest: any = {
         "SucceedRelationshipAttributeAndNotifyPeerRequest": {
             "type": "object",
             "properties": {
-                "predecessorId": {
-                    "$ref": "#/definitions/AttributeIdString"
-                },
                 "successorContent": {
                     "type": "object",
                     "properties": {
-                        "value": {
-                            "$ref": "#/definitions/AttributeValues.Relationship.Json"
+                        "validTo": {
+                            "$ref": "#/definitions/ISO8601DateTimeString"
                         },
                         "validFrom": {
                             "$ref": "#/definitions/ISO8601DateTimeString"
                         },
-                        "validTo": {
-                            "$ref": "#/definitions/ISO8601DateTimeString"
+                        "value": {
+                            "$ref": "#/definitions/AttributeValues.Relationship.Json"
                         }
                     },
                     "required": [
                         "value"
                     ],
                     "additionalProperties": false
+                },
+                "predecessorId": {
+                    "$ref": "#/definitions/AttributeIdString"
                 }
             },
             "required": [
@@ -17918,27 +17918,27 @@ export const SucceedRelationshipAttributeAndNotifyPeerRequest: any = {
         "ProprietaryBooleanJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryBoolean"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
+                "description": {
                     "type": "string"
                 },
-                "@version": {
+                "title": {
                     "type": "string"
                 },
                 "value": {
                     "type": "boolean"
                 },
-                "title": {
+                "@version": {
                     "type": "string"
                 },
-                "description": {
+                "@context": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryBoolean"
                 }
             },
             "required": [
@@ -17952,26 +17952,16 @@ export const SucceedRelationshipAttributeAndNotifyPeerRequest: any = {
             "type": "object",
             "additionalProperties": false,
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ValueHints"
-                },
-                "editHelp": {
+                "@version": {
                     "type": "string"
                 },
-                "min": {
-                    "type": "number"
-                },
-                "max": {
-                    "type": "number"
-                },
-                "pattern": {
+                "@context": {
                     "type": "string"
                 },
-                "values": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ValueHintsValueJSON"
+                "propertyHints": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/ValueHintsJSON"
                     }
                 },
                 "defaultValue": {
@@ -17981,32 +17971,42 @@ export const SucceedRelationshipAttributeAndNotifyPeerRequest: any = {
                         "boolean"
                     ]
                 },
-                "propertyHints": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/ValueHintsJSON"
+                "values": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ValueHintsValueJSON"
                     }
                 },
-                "@context": {
+                "pattern": {
                     "type": "string"
                 },
-                "@version": {
+                "max": {
+                    "type": "number"
+                },
+                "min": {
+                    "type": "number"
+                },
+                "editHelp": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ValueHints"
                 }
             }
         },
         "ValueHintsValueJSON": {
             "type": "object",
             "properties": {
+                "displayName": {
+                    "type": "string"
+                },
                 "key": {
                     "type": [
                         "string",
                         "number",
                         "boolean"
                     ]
-                },
-                "displayName": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -18018,32 +18018,10 @@ export const SucceedRelationshipAttributeAndNotifyPeerRequest: any = {
         "ValueHintsJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ValueHints"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "editHelp": {
-                    "type": "string"
-                },
-                "min": {
-                    "type": "number"
-                },
-                "max": {
-                    "type": "number"
-                },
-                "pattern": {
-                    "type": "string"
-                },
-                "values": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ValueHintsValueJSON"
+                "propertyHints": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/ValueHintsJSON"
                     }
                 },
                 "defaultValue": {
@@ -18053,11 +18031,33 @@ export const SucceedRelationshipAttributeAndNotifyPeerRequest: any = {
                         "boolean"
                     ]
                 },
-                "propertyHints": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/ValueHintsJSON"
+                "values": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ValueHintsValueJSON"
                     }
+                },
+                "pattern": {
+                    "type": "string"
+                },
+                "max": {
+                    "type": "number"
+                },
+                "min": {
+                    "type": "number"
+                },
+                "editHelp": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ValueHints"
                 }
             },
             "required": [
@@ -18068,27 +18068,27 @@ export const SucceedRelationshipAttributeAndNotifyPeerRequest: any = {
         "ProprietaryCountryJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryCountry"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryCountry"
                 }
             },
             "required": [
@@ -18101,27 +18101,27 @@ export const SucceedRelationshipAttributeAndNotifyPeerRequest: any = {
         "ProprietaryEMailAddressJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryEMailAddress"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryEMailAddress"
                 }
             },
             "required": [
@@ -18134,27 +18134,27 @@ export const SucceedRelationshipAttributeAndNotifyPeerRequest: any = {
         "ProprietaryFileReferenceJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryFileReference"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryFileReference"
                 }
             },
             "required": [
@@ -18167,27 +18167,27 @@ export const SucceedRelationshipAttributeAndNotifyPeerRequest: any = {
         "ProprietaryFloatJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryFloat"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
+                "description": {
                     "type": "string"
                 },
-                "@version": {
+                "title": {
                     "type": "string"
                 },
                 "value": {
                     "type": "number"
                 },
-                "title": {
+                "@version": {
                     "type": "string"
                 },
-                "description": {
+                "@context": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryFloat"
                 }
             },
             "required": [
@@ -18200,27 +18200,27 @@ export const SucceedRelationshipAttributeAndNotifyPeerRequest: any = {
         "ProprietaryHEXColorJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryHEXColor"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryHEXColor"
                 }
             },
             "required": [
@@ -18233,27 +18233,27 @@ export const SucceedRelationshipAttributeAndNotifyPeerRequest: any = {
         "ProprietaryIntegerJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryInteger"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
+                "description": {
                     "type": "string"
                 },
-                "@version": {
+                "title": {
                     "type": "string"
                 },
                 "value": {
                     "type": "number"
                 },
-                "title": {
+                "@version": {
                     "type": "string"
                 },
-                "description": {
+                "@context": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryInteger"
                 }
             },
             "required": [
@@ -18266,27 +18266,27 @@ export const SucceedRelationshipAttributeAndNotifyPeerRequest: any = {
         "ProprietaryLanguageJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryLanguage"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryLanguage"
                 }
             },
             "required": [
@@ -18299,27 +18299,27 @@ export const SucceedRelationshipAttributeAndNotifyPeerRequest: any = {
         "ProprietaryPhoneNumberJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryPhoneNumber"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryPhoneNumber"
                 }
             },
             "required": [
@@ -18332,27 +18332,27 @@ export const SucceedRelationshipAttributeAndNotifyPeerRequest: any = {
         "ProprietaryStringJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryString"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryString"
                 }
             },
             "required": [
@@ -18365,27 +18365,27 @@ export const SucceedRelationshipAttributeAndNotifyPeerRequest: any = {
         "ProprietaryURLJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryURL"
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryURL"
                 }
             },
             "required": [
@@ -18398,23 +18398,23 @@ export const SucceedRelationshipAttributeAndNotifyPeerRequest: any = {
         "ProprietaryJSONJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryJSON"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
+                "value": {},
+                "description": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "@version": {
                     "type": "string"
                 },
-                "value": {}
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryJSON"
+                }
             },
             "required": [
                 "@type",
@@ -18426,30 +18426,30 @@ export const SucceedRelationshipAttributeAndNotifyPeerRequest: any = {
         "ProprietaryXMLJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryXML"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
+                "schemaURL": {
                     "type": "string"
                 },
                 "valueHintsOverride": {
                     "$ref": "#/definitions/ValueHintsOverrideJSON"
                 },
-                "schemaURL": {
+                "description": {
                     "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryXML"
                 }
             },
             "required": [
@@ -18462,19 +18462,19 @@ export const SucceedRelationshipAttributeAndNotifyPeerRequest: any = {
         "ConsentJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
+                "link": {
                     "type": "string"
                 },
                 "consent": {
                     "type": "string"
                 },
-                "link": {
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
                     "type": "string"
                 }
             },
@@ -18499,14 +18499,14 @@ export const SucceedRepositoryAttributeRequest: any = {
         "SucceedRepositoryAttributeRequest": {
             "type": "object",
             "properties": {
-                "predecessorId": {
-                    "type": "string"
-                },
                 "successorContent": {
                     "type": "object",
                     "properties": {
-                        "value": {
-                            "$ref": "#/definitions/AttributeValues.Identity.Json"
+                        "validTo": {
+                            "$ref": "#/definitions/ISO8601DateTimeString"
+                        },
+                        "validFrom": {
+                            "$ref": "#/definitions/ISO8601DateTimeString"
                         },
                         "tags": {
                             "type": "array",
@@ -18514,17 +18514,17 @@ export const SucceedRepositoryAttributeRequest: any = {
                                 "type": "string"
                             }
                         },
-                        "validFrom": {
-                            "$ref": "#/definitions/ISO8601DateTimeString"
-                        },
-                        "validTo": {
-                            "$ref": "#/definitions/ISO8601DateTimeString"
+                        "value": {
+                            "$ref": "#/definitions/AttributeValues.Identity.Json"
                         }
                     },
                     "required": [
                         "value"
                     ],
                     "additionalProperties": false
+                },
+                "predecessorId": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -18610,24 +18610,24 @@ export const SucceedRepositoryAttributeRequest: any = {
         "AffiliationJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Affiliation"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "organization": {
+                "unit": {
                     "type": "string"
                 },
                 "role": {
                     "type": "string"
                 },
-                "unit": {
+                "organization": {
                     "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Affiliation"
                 }
             },
             "required": [
@@ -18639,24 +18639,24 @@ export const SucceedRepositoryAttributeRequest: any = {
         "BirthDateJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthDate"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "day": {
+                "year": {
                     "type": "number"
                 },
                 "month": {
                     "type": "number"
                 },
-                "year": {
+                "day": {
                     "type": "number"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthDate"
                 }
             },
             "required": [
@@ -18670,18 +18670,18 @@ export const SucceedRepositoryAttributeRequest: any = {
         "BirthNameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthName"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthName"
                 }
             },
             "required": [
@@ -18693,24 +18693,24 @@ export const SucceedRepositoryAttributeRequest: any = {
         "BirthPlaceJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthPlace"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "city": {
+                "state": {
                     "type": "string"
                 },
                 "country": {
                     "type": "string"
                 },
-                "state": {
+                "city": {
                     "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthPlace"
                 }
             },
             "required": [
@@ -18723,18 +18723,18 @@ export const SucceedRepositoryAttributeRequest: any = {
         "CitizenshipJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Citizenship"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Citizenship"
                 }
             },
             "required": [
@@ -18746,18 +18746,18 @@ export const SucceedRepositoryAttributeRequest: any = {
         "CommunicationLanguageJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "CommunicationLanguage"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "CommunicationLanguage"
                 }
             },
             "required": [
@@ -18769,39 +18769,39 @@ export const SucceedRepositoryAttributeRequest: any = {
         "DeliveryBoxAddressJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "DeliveryBoxAddress"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "recipient": {
-                    "type": "string"
-                },
-                "userId": {
-                    "type": "string"
-                },
-                "deliveryBoxId": {
-                    "type": "string"
-                },
-                "zipCode": {
-                    "type": "string"
-                },
-                "city": {
-                    "type": "string"
-                },
-                "country": {
+                "state": {
                     "type": "string"
                 },
                 "phoneNumber": {
                     "type": "string"
                 },
-                "state": {
+                "country": {
                     "type": "string"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "zipCode": {
+                    "type": "string"
+                },
+                "deliveryBoxId": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "string"
+                },
+                "recipient": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "DeliveryBoxAddress"
                 }
             },
             "required": [
@@ -18818,18 +18818,18 @@ export const SucceedRepositoryAttributeRequest: any = {
         "DisplayNameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "DisplayName"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "DisplayName"
                 }
             },
             "required": [
@@ -18841,18 +18841,18 @@ export const SucceedRepositoryAttributeRequest: any = {
         "EMailAddressJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "EMailAddress"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "EMailAddress"
                 }
             },
             "required": [
@@ -18864,18 +18864,18 @@ export const SucceedRepositoryAttributeRequest: any = {
         "FaxNumberJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "FaxNumber"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "FaxNumber"
                 }
             },
             "required": [
@@ -18887,18 +18887,18 @@ export const SucceedRepositoryAttributeRequest: any = {
         "IdentityFileReferenceJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "IdentityFileReference"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "IdentityFileReference"
                 }
             },
             "required": [
@@ -18910,18 +18910,18 @@ export const SucceedRepositoryAttributeRequest: any = {
         "JobTitleJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "JobTitle"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "JobTitle"
                 }
             },
             "required": [
@@ -18933,18 +18933,18 @@ export const SucceedRepositoryAttributeRequest: any = {
         "NationalityJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Nationality"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Nationality"
                 }
             },
             "required": [
@@ -18956,30 +18956,30 @@ export const SucceedRepositoryAttributeRequest: any = {
         "PersonNameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "PersonName"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "givenName": {
-                    "type": "string"
-                },
-                "middleName": {
-                    "type": "string"
-                },
-                "surname": {
+                "honorificPrefix": {
                     "type": "string"
                 },
                 "honorificSuffix": {
                     "type": "string"
                 },
-                "honorificPrefix": {
+                "surname": {
                     "type": "string"
+                },
+                "middleName": {
+                    "type": "string"
+                },
+                "givenName": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "PersonName"
                 }
             },
             "required": [
@@ -18992,18 +18992,18 @@ export const SucceedRepositoryAttributeRequest: any = {
         "PhoneNumberJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "PhoneNumber"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "PhoneNumber"
                 }
             },
             "required": [
@@ -19015,33 +19015,33 @@ export const SucceedRepositoryAttributeRequest: any = {
         "PostOfficeBoxAddressJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "PostOfficeBoxAddress"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "recipient": {
-                    "type": "string"
-                },
-                "boxId": {
-                    "type": "string"
-                },
-                "zipCode": {
-                    "type": "string"
-                },
-                "city": {
+                "state": {
                     "type": "string"
                 },
                 "country": {
                     "type": "string"
                 },
-                "state": {
+                "city": {
                     "type": "string"
+                },
+                "zipCode": {
+                    "type": "string"
+                },
+                "boxId": {
+                    "type": "string"
+                },
+                "recipient": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "PostOfficeBoxAddress"
                 }
             },
             "required": [
@@ -19057,18 +19057,18 @@ export const SucceedRepositoryAttributeRequest: any = {
         "PseudonymJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Pseudonym"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Pseudonym"
                 }
             },
             "required": [
@@ -19080,18 +19080,18 @@ export const SucceedRepositoryAttributeRequest: any = {
         "SexJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Sex"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Sex"
                 }
             },
             "required": [
@@ -19103,36 +19103,36 @@ export const SucceedRepositoryAttributeRequest: any = {
         "StreetAddressJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "StreetAddress"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "recipient": {
-                    "type": "string"
-                },
-                "street": {
-                    "type": "string"
-                },
-                "houseNo": {
-                    "type": "string"
-                },
-                "zipCode": {
-                    "type": "string"
-                },
-                "city": {
+                "state": {
                     "type": "string"
                 },
                 "country": {
                     "type": "string"
                 },
-                "state": {
+                "city": {
                     "type": "string"
+                },
+                "zipCode": {
+                    "type": "string"
+                },
+                "houseNo": {
+                    "type": "string"
+                },
+                "street": {
+                    "type": "string"
+                },
+                "recipient": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "StreetAddress"
                 }
             },
             "required": [
@@ -19149,18 +19149,18 @@ export const SucceedRepositoryAttributeRequest: any = {
         "WebsiteJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Website"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Website"
                 }
             },
             "required": [
@@ -19239,18 +19239,18 @@ export const SucceedRepositoryAttributeRequest: any = {
         "AffiliationOrganizationJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationOrganization"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "AffiliationOrganization"
                 }
             },
             "required": [
@@ -19262,18 +19262,18 @@ export const SucceedRepositoryAttributeRequest: any = {
         "AffiliationRoleJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationRole"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "AffiliationRole"
                 }
             },
             "required": [
@@ -19285,18 +19285,18 @@ export const SucceedRepositoryAttributeRequest: any = {
         "AffiliationUnitJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationUnit"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "AffiliationUnit"
                 }
             },
             "required": [
@@ -19308,18 +19308,18 @@ export const SucceedRepositoryAttributeRequest: any = {
         "BirthCityJSON": {
             "type": "object",
             "properties": {
-                "value": {
+                "@type": {
+                    "type": "string",
+                    "const": "BirthCity"
+                },
+                "@version": {
                     "type": "string"
                 },
                 "@context": {
                     "type": "string"
                 },
-                "@version": {
+                "value": {
                     "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthCity"
                 }
             },
             "required": [
@@ -19331,18 +19331,18 @@ export const SucceedRepositoryAttributeRequest: any = {
         "BirthCountryJSON": {
             "type": "object",
             "properties": {
-                "value": {
+                "@type": {
+                    "type": "string",
+                    "const": "BirthCountry"
+                },
+                "@version": {
                     "type": "string"
                 },
                 "@context": {
                     "type": "string"
                 },
-                "@version": {
+                "value": {
                     "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthCountry"
                 }
             },
             "required": [
@@ -19354,18 +19354,18 @@ export const SucceedRepositoryAttributeRequest: any = {
         "BirthDayJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthDay"
-                },
-                "@context": {
-                    "type": "string"
+                "value": {
+                    "type": "number"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
-                    "type": "number"
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthDay"
                 }
             },
             "required": [
@@ -19377,16 +19377,6 @@ export const SucceedRepositoryAttributeRequest: any = {
         "BirthMonthJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthMonth"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
                 "value": {
                     "type": "number",
                     "enum": [
@@ -19404,6 +19394,16 @@ export const SucceedRepositoryAttributeRequest: any = {
                         12
                     ],
                     "description": "Month values: 1 (january) - 12 (december)"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthMonth"
                 }
             },
             "required": [
@@ -19415,18 +19415,18 @@ export const SucceedRepositoryAttributeRequest: any = {
         "BirthStateJSON": {
             "type": "object",
             "properties": {
-                "value": {
+                "@type": {
+                    "type": "string",
+                    "const": "BirthState"
+                },
+                "@version": {
                     "type": "string"
                 },
                 "@context": {
                     "type": "string"
                 },
-                "@version": {
+                "value": {
                     "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthState"
                 }
             },
             "required": [
@@ -19438,18 +19438,18 @@ export const SucceedRepositoryAttributeRequest: any = {
         "BirthYearJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthYear"
-                },
-                "@context": {
-                    "type": "string"
+                "value": {
+                    "type": "number"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
-                    "type": "number"
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "BirthYear"
                 }
             },
             "required": [
@@ -19461,18 +19461,18 @@ export const SucceedRepositoryAttributeRequest: any = {
         "CityJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "City"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "City"
                 }
             },
             "required": [
@@ -19484,18 +19484,18 @@ export const SucceedRepositoryAttributeRequest: any = {
         "CountryJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Country"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Country"
                 }
             },
             "required": [
@@ -19507,18 +19507,18 @@ export const SucceedRepositoryAttributeRequest: any = {
         "GivenNameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "GivenName"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "GivenName"
                 }
             },
             "required": [
@@ -19530,18 +19530,18 @@ export const SucceedRepositoryAttributeRequest: any = {
         "HonorificPrefixJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HonorificPrefix"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "HonorificPrefix"
                 }
             },
             "required": [
@@ -19553,18 +19553,18 @@ export const SucceedRepositoryAttributeRequest: any = {
         "HonorificSuffixJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HonorificSuffix"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "HonorificSuffix"
                 }
             },
             "required": [
@@ -19576,18 +19576,18 @@ export const SucceedRepositoryAttributeRequest: any = {
         "HouseNumberJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HouseNumber"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "HouseNumber"
                 }
             },
             "required": [
@@ -19599,18 +19599,18 @@ export const SucceedRepositoryAttributeRequest: any = {
         "MiddleNameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "MiddleName"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "MiddleName"
                 }
             },
             "required": [
@@ -19622,21 +19622,21 @@ export const SucceedRepositoryAttributeRequest: any = {
         "SchematizedXMLJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "SchematizedXML"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
+                "schemaURL": {
                     "type": "string"
                 },
                 "value": {
                     "type": "string"
                 },
-                "schemaURL": {
+                "@version": {
                     "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "SchematizedXML"
                 }
             },
             "required": [
@@ -19648,18 +19648,18 @@ export const SucceedRepositoryAttributeRequest: any = {
         "StateJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "State"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "State"
                 }
             },
             "required": [
@@ -19671,18 +19671,18 @@ export const SucceedRepositoryAttributeRequest: any = {
         "StreetJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Street"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Street"
                 }
             },
             "required": [
@@ -19694,18 +19694,18 @@ export const SucceedRepositoryAttributeRequest: any = {
         "SurnameJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Surname"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "Surname"
                 }
             },
             "required": [
@@ -19717,18 +19717,18 @@ export const SucceedRepositoryAttributeRequest: any = {
         "ZipCodeJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ZipCode"
-                },
-                "@context": {
+                "value": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "value": {
+                "@context": {
                     "type": "string"
+                },
+                "@type": {
+                    "type": "string",
+                    "const": "ZipCode"
                 }
             },
             "required": [
@@ -19764,21 +19764,21 @@ export const ValidateIQLQueryRequest: any = {
         "IQLQueryJSON": {
             "type": "object",
             "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "IQLQuery"
+                "attributeCreationHints": {
+                    "$ref": "#/definitions/IQLQueryCreationHintsJSON"
                 },
-                "@context": {
+                "queryString": {
                     "type": "string"
                 },
                 "@version": {
                     "type": "string"
                 },
-                "queryString": {
+                "@context": {
                     "type": "string"
                 },
-                "attributeCreationHints": {
-                    "$ref": "#/definitions/IQLQueryCreationHintsJSON"
+                "@type": {
+                    "type": "string",
+                    "const": "IQLQuery"
                 }
             },
             "required": [
@@ -19790,14 +19790,14 @@ export const ValidateIQLQueryRequest: any = {
         "IQLQueryCreationHintsJSON": {
             "type": "object",
             "properties": {
-                "valueType": {
-                    "$ref": "#/definitions/AttributeValues.Identity.TypeName"
-                },
                 "tags": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
+                },
+                "valueType": {
+                    "$ref": "#/definitions/AttributeValues.Identity.TypeName"
                 }
             },
             "required": [
@@ -19877,10 +19877,10 @@ export const CreateDraftRequest: any = {
         "CreateDraftRequest": {
             "type": "object",
             "properties": {
-                "content": {},
                 "type": {
                     "type": "string"
-                }
+                },
+                "content": {}
             },
             "required": [
                 "content"
@@ -19952,7 +19952,7 @@ export const GetDraftsRequest: any = {
         "GetDraftsQuery": {
             "type": "object",
             "properties": {
-                "type": {
+                "lastModifiedAt": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -19978,7 +19978,7 @@ export const GetDraftsRequest: any = {
                         }
                     ]
                 },
-                "lastModifiedAt": {
+                "type": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -20004,10 +20004,10 @@ export const UpdateDraftRequest: any = {
         "UpdateDraftRequest": {
             "type": "object",
             "properties": {
+                "content": {},
                 "id": {
                     "$ref": "#/definitions/LocalDraftIdString"
-                },
-                "content": {}
+                }
             },
             "required": [
                 "id",
@@ -20029,11 +20029,11 @@ export const DeleteIdentityMetadataRequest: any = {
         "DeleteIdentityMetadataRequest": {
             "type": "object",
             "properties": {
-                "reference": {
-                    "$ref": "#/definitions/AddressString"
-                },
                 "key": {
                     "type": "string"
+                },
+                "reference": {
+                    "$ref": "#/definitions/AddressString"
                 }
             },
             "required": [
@@ -20055,11 +20055,11 @@ export const GetIdentityMetadataRequest: any = {
         "GetIdentityMetadataRequest": {
             "type": "object",
             "properties": {
-                "reference": {
-                    "$ref": "#/definitions/AddressString"
-                },
                 "key": {
                     "type": "string"
+                },
+                "reference": {
+                    "$ref": "#/definitions/AddressString"
                 }
             },
             "required": [
@@ -20081,13 +20081,13 @@ export const UpsertIdentityMetadataRequest: any = {
         "UpsertIdentityMetadataRequest": {
             "type": "object",
             "properties": {
-                "reference": {
-                    "$ref": "#/definitions/AddressString"
-                },
+                "value": {},
                 "key": {
                     "type": "string"
                 },
-                "value": {}
+                "reference": {
+                    "$ref": "#/definitions/AddressString"
+                }
             },
             "required": [
                 "reference",
@@ -20233,12 +20233,11 @@ export const CreateSettingRequest: any = {
         "CreateSettingRequest": {
             "type": "object",
             "properties": {
-                "key": {
-                    "type": "string"
+                "succeedsItem": {
+                    "$ref": "#/definitions/LocalSettingIdString"
                 },
-                "value": {},
-                "reference": {
-                    "$ref": "#/definitions/GenericIdString"
+                "succeedsAt": {
+                    "$ref": "#/definitions/ISO8601DateTimeString"
                 },
                 "scope": {
                     "type": "string",
@@ -20248,11 +20247,12 @@ export const CreateSettingRequest: any = {
                         "Relationship"
                     ]
                 },
-                "succeedsAt": {
-                    "$ref": "#/definitions/ISO8601DateTimeString"
+                "reference": {
+                    "$ref": "#/definitions/GenericIdString"
                 },
-                "succeedsItem": {
-                    "$ref": "#/definitions/LocalSettingIdString"
+                "value": {},
+                "key": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -20330,12 +20330,6 @@ export const GetSettingByKeyRequest: any = {
         "GetSettingByKeyRequest": {
             "type": "object",
             "properties": {
-                "key": {
-                    "type": "string"
-                },
-                "reference": {
-                    "type": "string"
-                },
                 "scope": {
                     "type": "string",
                     "enum": [
@@ -20343,6 +20337,12 @@ export const GetSettingByKeyRequest: any = {
                         "Device",
                         "Relationship"
                     ]
+                },
+                "reference": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -20369,46 +20369,7 @@ export const GetSettingsRequest: any = {
         "GetSettingsQuery": {
             "type": "object",
             "properties": {
-                "key": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "scope": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "reference": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "createdAt": {
+                "succeedsAt": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -20434,7 +20395,46 @@ export const GetSettingsRequest: any = {
                         }
                     ]
                 },
-                "succeedsAt": {
+                "createdAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "reference": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "scope": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "key": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -20460,10 +20460,10 @@ export const UpdateSettingRequest: any = {
         "UpdateSettingRequest": {
             "type": "object",
             "properties": {
+                "value": {},
                 "id": {
                     "$ref": "#/definitions/LocalSettingIdString"
-                },
-                "value": {}
+                }
             },
             "required": [
                 "id",
@@ -20485,13 +20485,6 @@ export const UpsertSettingByKeyRequest: any = {
         "UpsertSettingByKeyRequest": {
             "type": "object",
             "properties": {
-                "key": {
-                    "type": "string"
-                },
-                "value": {},
-                "reference": {
-                    "$ref": "#/definitions/GenericIdString"
-                },
                 "scope": {
                     "type": "string",
                     "enum": [
@@ -20499,6 +20492,13 @@ export const UpsertSettingByKeyRequest: any = {
                         "Device",
                         "Relationship"
                     ]
+                },
+                "reference": {
+                    "$ref": "#/definitions/GenericIdString"
+                },
+                "value": {},
+                "key": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -20544,6 +20544,9 @@ export const LoadItemFromTruncatedReferenceRequest: any = {
         "LoadItemFromTruncatedReferenceRequest": {
             "type": "object",
             "properties": {
+                "password": {
+                    "type": "string"
+                },
                 "reference": {
                     "anyOf": [
                         {
@@ -20556,9 +20559,6 @@ export const LoadItemFromTruncatedReferenceRequest: any = {
                             "$ref": "#/definitions/RelationshipTemplateReferenceString"
                         }
                     ]
-                },
-                "password": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -20588,21 +20588,21 @@ export const RegisterPushNotificationTokenRequest: any = {
         "RegisterPushNotificationTokenRequest": {
             "type": "object",
             "properties": {
-                "handle": {
-                    "type": "string"
-                },
-                "platform": {
-                    "type": "string"
-                },
-                "appId": {
-                    "type": "string"
-                },
                 "environment": {
                     "type": "string",
                     "enum": [
                         "Development",
                         "Production"
                     ]
+                },
+                "appId": {
+                    "type": "string"
+                },
+                "platform": {
+                    "type": "string"
+                },
+                "handle": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -20645,11 +20645,11 @@ export const DownloadAttachmentRequest: any = {
         "DownloadAttachmentRequest": {
             "type": "object",
             "properties": {
-                "id": {
-                    "$ref": "#/definitions/MessageIdString"
-                },
                 "attachmentId": {
                     "$ref": "#/definitions/FileIdString"
+                },
+                "id": {
+                    "$ref": "#/definitions/MessageIdString"
                 }
             },
             "required": [
@@ -20676,12 +20676,12 @@ export const CreateRelationshipChallengeRequest: any = {
         "CreateRelationshipChallengeRequest": {
             "type": "object",
             "properties": {
+                "relationship": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                },
                 "challengeType": {
                     "type": "string",
                     "const": "Relationship"
-                },
-                "relationship": {
-                    "$ref": "#/definitions/RelationshipIdString"
                 }
             },
             "required": [
@@ -20826,12 +20826,12 @@ export const CreateChallengeRequest: any = {
         "CreateRelationshipChallengeRequest": {
             "type": "object",
             "properties": {
+                "relationship": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                },
                 "challengeType": {
                     "type": "string",
                     "const": "Relationship"
-                },
-                "relationship": {
-                    "$ref": "#/definitions/RelationshipIdString"
                 }
             },
             "required": [
@@ -20880,10 +20880,10 @@ export const ValidateChallengeRequest: any = {
         "ValidateChallengeRequest": {
             "type": "object",
             "properties": {
-                "challengeString": {
+                "signature": {
                     "type": "string"
                 },
-                "signature": {
+                "challengeString": {
                     "type": "string"
                 }
             },
@@ -20903,14 +20903,14 @@ export const CreateDeviceRequest: any = {
         "CreateDeviceRequest": {
             "type": "object",
             "properties": {
-                "name": {
-                    "type": "string"
+                "isAdmin": {
+                    "type": "boolean"
                 },
                 "description": {
                     "type": "string"
                 },
-                "isAdmin": {
-                    "type": "boolean"
+                "name": {
+                    "type": "string"
                 }
             },
             "additionalProperties": false
@@ -20925,30 +20925,30 @@ export const CreateDeviceOnboardingTokenRequest: any = {
         "CreateDeviceOnboardingTokenRequest": {
             "type": "object",
             "properties": {
-                "id": {
-                    "$ref": "#/definitions/DeviceIdString"
-                },
-                "expiresAt": {
-                    "$ref": "#/definitions/ISO8601DateTimeString"
-                },
-                "profileName": {
-                    "type": "string"
-                },
                 "passwordProtection": {
                     "type": "object",
                     "properties": {
-                        "password": {
-                            "type": "string"
-                        },
                         "passwordIsPin": {
                             "type": "boolean",
                             "const": true
+                        },
+                        "password": {
+                            "type": "string"
                         }
                     },
                     "required": [
                         "password"
                     ],
                     "additionalProperties": false
+                },
+                "profileName": {
+                    "type": "string"
+                },
+                "expiresAt": {
+                    "$ref": "#/definitions/ISO8601DateTimeString"
+                },
+                "id": {
+                    "$ref": "#/definitions/DeviceIdString"
                 }
             },
             "required": [
@@ -21021,11 +21021,11 @@ export const GetDeviceOnboardingInfoRequest: any = {
         "GetDeviceOnboardingInfoRequest": {
             "type": "object",
             "properties": {
-                "id": {
-                    "$ref": "#/definitions/GenericIdString"
-                },
                 "profileName": {
                     "type": "string"
+                },
+                "id": {
+                    "$ref": "#/definitions/GenericIdString"
                 }
             },
             "required": [
@@ -21254,14 +21254,14 @@ export const UpdateDeviceRequest: any = {
         "UpdateDeviceRequest": {
             "type": "object",
             "properties": {
-                "id": {
-                    "$ref": "#/definitions/DeviceIdString"
+                "description": {
+                    "type": "string"
                 },
                 "name": {
                     "type": "string"
                 },
-                "description": {
-                    "type": "string"
+                "id": {
+                    "$ref": "#/definitions/DeviceIdString"
                 }
             },
             "required": [
@@ -21306,34 +21306,34 @@ export const CreateTokenForFileRequest: any = {
         "CreateTokenForFileRequest": {
             "type": "object",
             "properties": {
-                "fileId": {
-                    "$ref": "#/definitions/FileIdString"
-                },
-                "expiresAt": {
-                    "$ref": "#/definitions/ISO8601DateTimeString"
-                },
-                "ephemeral": {
-                    "type": "boolean"
-                },
-                "forIdentity": {
-                    "$ref": "#/definitions/AddressString"
-                },
                 "passwordProtection": {
                     "type": "object",
                     "properties": {
-                        "password": {
-                            "type": "string",
-                            "minLength": 1
-                        },
                         "passwordIsPin": {
                             "type": "boolean",
                             "const": true
+                        },
+                        "password": {
+                            "type": "string",
+                            "minLength": 1
                         }
                     },
                     "required": [
                         "password"
                     ],
                     "additionalProperties": false
+                },
+                "forIdentity": {
+                    "$ref": "#/definitions/AddressString"
+                },
+                "ephemeral": {
+                    "type": "boolean"
+                },
+                "expiresAt": {
+                    "$ref": "#/definitions/ISO8601DateTimeString"
+                },
+                "fileId": {
+                    "$ref": "#/definitions/FileIdString"
                 }
             },
             "required": [
@@ -21364,31 +21364,31 @@ export const CreateTokenQRCodeForFileRequest: any = {
         "CreateTokenQRCodeForFileRequest": {
             "type": "object",
             "properties": {
-                "fileId": {
-                    "$ref": "#/definitions/FileIdString"
-                },
-                "expiresAt": {
-                    "$ref": "#/definitions/ISO8601DateTimeString"
-                },
-                "forIdentity": {
-                    "$ref": "#/definitions/AddressString"
-                },
                 "passwordProtection": {
                     "type": "object",
                     "properties": {
-                        "password": {
-                            "type": "string",
-                            "minLength": 1
-                        },
                         "passwordIsPin": {
                             "type": "boolean",
                             "const": true
+                        },
+                        "password": {
+                            "type": "string",
+                            "minLength": 1
                         }
                     },
                     "required": [
                         "password"
                     ],
                     "additionalProperties": false
+                },
+                "forIdentity": {
+                    "$ref": "#/definitions/AddressString"
+                },
+                "expiresAt": {
+                    "$ref": "#/definitions/ISO8601DateTimeString"
+                },
+                "fileId": {
+                    "$ref": "#/definitions/FileIdString"
                 }
             },
             "required": [
@@ -21442,11 +21442,11 @@ export const GetFilesRequest: any = {
         "GetFilesRequest": {
             "type": "object",
             "properties": {
-                "query": {
-                    "$ref": "#/definitions/GetFilesQuery"
-                },
                 "ownerRestriction": {
                     "$ref": "#/definitions/OwnerRestriction"
+                },
+                "query": {
+                    "$ref": "#/definitions/GetFilesQuery"
                 }
             },
             "additionalProperties": false
@@ -21454,98 +21454,7 @@ export const GetFilesRequest: any = {
         "GetFilesQuery": {
             "type": "object",
             "properties": {
-                "createdAt": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "createdBy": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "createdByDevice": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "description": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "expiresAt": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "filename": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "filesize": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "mimetype": {
+                "isOwn": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -21571,7 +21480,98 @@ export const GetFilesRequest: any = {
                         }
                     ]
                 },
-                "isOwn": {
+                "mimetype": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "filesize": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "filename": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "expiresAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "description": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "createdByDevice": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "createdBy": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "createdAt": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -21604,6 +21604,9 @@ export const GetOrLoadFileRequest: any = {
         "GetOrLoadFileRequest": {
             "type": "object",
             "properties": {
+                "password": {
+                    "type": "string"
+                },
                 "reference": {
                     "anyOf": [
                         {
@@ -21613,9 +21616,6 @@ export const GetOrLoadFileRequest: any = {
                             "$ref": "#/definitions/FileReferenceString"
                         }
                     ]
-                },
-                "password": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -21642,10 +21642,31 @@ export const UploadOwnFileRequest: any = {
         "UploadOwnFileRequest": {
             "type": "object",
             "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "expiresAt": {
+                    "$ref": "#/definitions/ISO8601DateTimeString"
+                },
+                "mimetype": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                },
                 "content": {
                     "type": "object",
                     "properties": {
-                        "BYTES_PER_ELEMENT": {
+                        "length": {
+                            "type": "number"
+                        },
+                        "byteOffset": {
+                            "type": "number"
+                        },
+                        "byteLength": {
                             "type": "number"
                         },
                         "buffer": {
@@ -21660,13 +21681,7 @@ export const UploadOwnFileRequest: any = {
                             ],
                             "additionalProperties": false
                         },
-                        "byteLength": {
-                            "type": "number"
-                        },
-                        "byteOffset": {
-                            "type": "number"
-                        },
-                        "length": {
+                        "BYTES_PER_ELEMENT": {
                             "type": "number"
                         }
                     },
@@ -21680,21 +21695,6 @@ export const UploadOwnFileRequest: any = {
                     "additionalProperties": {
                         "type": "number"
                     }
-                },
-                "filename": {
-                    "type": "string"
-                },
-                "mimetype": {
-                    "type": "string"
-                },
-                "expiresAt": {
-                    "$ref": "#/definitions/ISO8601DateTimeString"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -21719,23 +21719,23 @@ export const UploadOwnFileValidatableRequest: any = {
         "UploadOwnFileValidatableRequest": {
             "type": "object",
             "properties": {
-                "filename": {
+                "content": {
+                    "type": "object"
+                },
+                "description": {
                     "type": "string"
                 },
-                "mimetype": {
+                "title": {
                     "type": "string"
                 },
                 "expiresAt": {
                     "$ref": "#/definitions/ISO8601DateTimeString"
                 },
-                "title": {
+                "mimetype": {
                     "type": "string"
                 },
-                "description": {
+                "filename": {
                     "type": "string"
-                },
-                "content": {
-                    "type": "object"
                 }
             },
             "required": [
@@ -21760,25 +21760,25 @@ export const CreateIdentityRecoveryKitRequest: any = {
         "CreateIdentityRecoveryKitRequest": {
             "type": "object",
             "properties": {
-                "profileName": {
-                    "type": "string"
-                },
                 "passwordProtection": {
                     "type": "object",
                     "properties": {
-                        "password": {
-                            "type": "string",
-                            "minLength": 1
-                        },
                         "passwordIsPin": {
                             "type": "boolean",
                             "const": true
+                        },
+                        "password": {
+                            "type": "string",
+                            "minLength": 1
                         }
                     },
                     "required": [
                         "password"
                     ],
                     "additionalProperties": false
+                },
+                "profileName": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -21797,11 +21797,11 @@ export const GetAttachmentMetadataRequest: any = {
         "GetAttachmentMetadataRequest": {
             "type": "object",
             "properties": {
-                "id": {
-                    "$ref": "#/definitions/MessageIdString"
-                },
                 "attachmentId": {
                     "$ref": "#/definitions/FileIdString"
+                },
+                "id": {
+                    "$ref": "#/definitions/MessageIdString"
                 }
             },
             "required": [
@@ -21860,111 +21860,7 @@ export const GetMessagesRequest: any = {
         "GetMessagesQuery": {
             "type": "object",
             "properties": {
-                "createdBy": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "createdByDevice": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "createdAt": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.@type": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.body": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.subject": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "attachments": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "recipients.address": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "recipients.relationshipId": {
+                "participant": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -21990,7 +21886,111 @@ export const GetMessagesRequest: any = {
                         }
                     ]
                 },
-                "participant": {
+                "recipients.relationshipId": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "recipients.address": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "attachments": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.subject": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.body": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.@type": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "createdAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "createdByDevice": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "createdBy": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -22062,19 +22062,19 @@ export const SendMessageRequest: any = {
         "SendMessageRequest": {
             "type": "object",
             "properties": {
+                "attachments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/FileIdString"
+                    }
+                },
+                "content": {},
                 "recipients": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/AddressString"
                     },
                     "minItems": 1
-                },
-                "content": {},
-                "attachments": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/FileIdString"
-                    }
                 }
             },
             "required": [
@@ -22147,10 +22147,10 @@ export const CanCreateRelationshipRequest: any = {
         "CanCreateRelationshipRequest": {
             "type": "object",
             "properties": {
+                "creationContent": {},
                 "templateId": {
                     "$ref": "#/definitions/RelationshipTemplateIdString"
-                },
-                "creationContent": {}
+                }
             },
             "required": [
                 "templateId"
@@ -22171,10 +22171,10 @@ export const CreateRelationshipRequest: any = {
         "CreateRelationshipRequest": {
             "type": "object",
             "properties": {
+                "creationContent": {},
                 "templateId": {
                     "$ref": "#/definitions/RelationshipTemplateIdString"
-                },
-                "creationContent": {}
+                }
             },
             "required": [
                 "templateId",
@@ -22219,15 +22219,15 @@ export const GetAttributesForRelationshipRequest: any = {
         "GetAttributesForRelationshipRequest": {
             "type": "object",
             "properties": {
-                "id": {
-                    "$ref": "#/definitions/RelationshipIdString"
+                "onlyLatestVersions": {
+                    "type": "boolean",
+                    "description": "default: true"
                 },
                 "hideTechnical": {
                     "type": "boolean"
                 },
-                "onlyLatestVersions": {
-                    "type": "boolean",
-                    "description": "default: true"
+                "id": {
+                    "$ref": "#/definitions/RelationshipIdString"
                 }
             },
             "required": [
@@ -22304,7 +22304,7 @@ export const GetRelationshipsRequest: any = {
         "GetRelationshipsQuery": {
             "type": "object",
             "properties": {
-                "peer": {
+                "template.id": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -22330,7 +22330,7 @@ export const GetRelationshipsRequest: any = {
                         }
                     ]
                 },
-                "template.id": {
+                "peer": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -22494,33 +22494,33 @@ export const CreateOwnRelationshipTemplateRequest: any = {
         "CreateOwnRelationshipTemplateRequest": {
             "type": "object",
             "properties": {
-                "expiresAt": {
-                    "$ref": "#/definitions/ISO8601DateTimeString"
-                },
-                "content": {},
-                "maxNumberOfAllocations": {
-                    "type": "number",
-                    "minimum": 1
-                },
-                "forIdentity": {
-                    "$ref": "#/definitions/AddressString"
-                },
                 "passwordProtection": {
                     "type": "object",
                     "properties": {
-                        "password": {
-                            "type": "string",
-                            "minLength": 1
-                        },
                         "passwordIsPin": {
                             "type": "boolean",
                             "const": true
+                        },
+                        "password": {
+                            "type": "string",
+                            "minLength": 1
                         }
                     },
                     "required": [
                         "password"
                     ],
                     "additionalProperties": false
+                },
+                "forIdentity": {
+                    "$ref": "#/definitions/AddressString"
+                },
+                "maxNumberOfAllocations": {
+                    "type": "number",
+                    "minimum": 1
+                },
+                "content": {},
+                "expiresAt": {
+                    "$ref": "#/definitions/ISO8601DateTimeString"
                 }
             },
             "required": [
@@ -22571,34 +22571,34 @@ export const CreateTokenForOwnTemplateRequest: any = {
         "CreateTokenForOwnTemplateRequest": {
             "type": "object",
             "properties": {
-                "templateId": {
-                    "$ref": "#/definitions/RelationshipTemplateIdString"
-                },
-                "expiresAt": {
-                    "$ref": "#/definitions/ISO8601DateTimeString"
-                },
-                "ephemeral": {
-                    "type": "boolean"
-                },
-                "forIdentity": {
-                    "$ref": "#/definitions/AddressString"
-                },
                 "passwordProtection": {
                     "type": "object",
                     "properties": {
-                        "password": {
-                            "type": "string",
-                            "minLength": 1
-                        },
                         "passwordIsPin": {
                             "type": "boolean",
                             "const": true
+                        },
+                        "password": {
+                            "type": "string",
+                            "minLength": 1
                         }
                     },
                     "required": [
                         "password"
                     ],
                     "additionalProperties": false
+                },
+                "forIdentity": {
+                    "$ref": "#/definitions/AddressString"
+                },
+                "ephemeral": {
+                    "type": "boolean"
+                },
+                "expiresAt": {
+                    "$ref": "#/definitions/ISO8601DateTimeString"
+                },
+                "templateId": {
+                    "$ref": "#/definitions/RelationshipTemplateIdString"
                 }
             },
             "required": [
@@ -22629,31 +22629,31 @@ export const CreateTokenQRCodeForOwnTemplateRequest: any = {
         "CreateTokenQRCodeForOwnTemplateRequest": {
             "type": "object",
             "properties": {
-                "templateId": {
-                    "$ref": "#/definitions/RelationshipTemplateIdString"
-                },
-                "expiresAt": {
-                    "$ref": "#/definitions/ISO8601DateTimeString"
-                },
-                "forIdentity": {
-                    "$ref": "#/definitions/AddressString"
-                },
                 "passwordProtection": {
                     "type": "object",
                     "properties": {
-                        "password": {
-                            "type": "string",
-                            "minLength": 1
-                        },
                         "passwordIsPin": {
                             "type": "boolean",
                             "const": true
+                        },
+                        "password": {
+                            "type": "string",
+                            "minLength": 1
                         }
                     },
                     "required": [
                         "password"
                     ],
                     "additionalProperties": false
+                },
+                "forIdentity": {
+                    "$ref": "#/definitions/AddressString"
+                },
+                "expiresAt": {
+                    "$ref": "#/definitions/ISO8601DateTimeString"
+                },
+                "templateId": {
+                    "$ref": "#/definitions/RelationshipTemplateIdString"
                 }
             },
             "required": [
@@ -22707,11 +22707,11 @@ export const GetRelationshipTemplatesRequest: any = {
         "GetRelationshipTemplatesRequest": {
             "type": "object",
             "properties": {
-                "query": {
-                    "$ref": "#/definitions/GetRelationshipTemplatesQuery"
-                },
                 "ownerRestriction": {
                     "$ref": "#/definitions/OwnerRestriction"
+                },
+                "query": {
+                    "$ref": "#/definitions/GetRelationshipTemplatesQuery"
                 }
             },
             "additionalProperties": false
@@ -22719,7 +22719,14 @@ export const GetRelationshipTemplatesRequest: any = {
         "GetRelationshipTemplatesQuery": {
             "type": "object",
             "properties": {
-                "isOwn": {
+                "passwordProtection.passwordIsPin": {
+                    "type": "string",
+                    "enum": [
+                        "true",
+                        "!"
+                    ]
+                },
+                "passwordProtection.password": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -22732,46 +22739,14 @@ export const GetRelationshipTemplatesRequest: any = {
                         }
                     ]
                 },
-                "createdAt": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
+                "passwordProtection": {
+                    "type": "string",
+                    "enum": [
+                        "",
+                        "!"
                     ]
                 },
-                "expiresAt": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "createdBy": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "createdByDevice": {
+                "forIdentity": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -22797,7 +22772,7 @@ export const GetRelationshipTemplatesRequest: any = {
                         }
                     ]
                 },
-                "forIdentity": {
+                "createdByDevice": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -22810,14 +22785,7 @@ export const GetRelationshipTemplatesRequest: any = {
                         }
                     ]
                 },
-                "passwordProtection": {
-                    "type": "string",
-                    "enum": [
-                        "",
-                        "!"
-                    ]
-                },
-                "passwordProtection.password": {
+                "createdBy": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -22830,11 +22798,43 @@ export const GetRelationshipTemplatesRequest: any = {
                         }
                     ]
                 },
-                "passwordProtection.passwordIsPin": {
-                    "type": "string",
-                    "enum": [
-                        "true",
-                        "!"
+                "expiresAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "createdAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "isOwn": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
                     ]
                 }
             },
@@ -22857,6 +22857,9 @@ export const LoadPeerRelationshipTemplateRequest: any = {
         "LoadPeerRelationshipTemplateRequest": {
             "type": "object",
             "properties": {
+                "password": {
+                    "type": "string"
+                },
                 "reference": {
                     "anyOf": [
                         {
@@ -22866,9 +22869,6 @@ export const LoadPeerRelationshipTemplateRequest: any = {
                             "$ref": "#/definitions/RelationshipTemplateReferenceString"
                         }
                     ]
-                },
-                "password": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -22895,33 +22895,33 @@ export const CreateOwnTokenRequest: any = {
         "CreateOwnTokenRequest": {
             "type": "object",
             "properties": {
-                "content": {},
-                "expiresAt": {
-                    "$ref": "#/definitions/ISO8601DateTimeString"
-                },
-                "ephemeral": {
-                    "type": "boolean"
-                },
-                "forIdentity": {
-                    "$ref": "#/definitions/AddressString"
-                },
                 "passwordProtection": {
                     "type": "object",
                     "properties": {
-                        "password": {
-                            "type": "string",
-                            "minLength": 1
-                        },
                         "passwordIsPin": {
                             "type": "boolean",
                             "const": true
+                        },
+                        "password": {
+                            "type": "string",
+                            "minLength": 1
                         }
                     },
                     "required": [
                         "password"
                     ],
                     "additionalProperties": false
-                }
+                },
+                "forIdentity": {
+                    "$ref": "#/definitions/AddressString"
+                },
+                "ephemeral": {
+                    "type": "boolean"
+                },
+                "expiresAt": {
+                    "$ref": "#/definitions/ISO8601DateTimeString"
+                },
+                "content": {}
             },
             "required": [
                 "content",
@@ -22995,11 +22995,11 @@ export const GetTokensRequest: any = {
         "GetTokensRequest": {
             "type": "object",
             "properties": {
-                "query": {
-                    "$ref": "#/definitions/GetTokensQuery"
-                },
                 "ownerRestriction": {
                     "$ref": "#/definitions/OwnerRestriction"
+                },
+                "query": {
+                    "$ref": "#/definitions/GetTokensQuery"
                 }
             },
             "additionalProperties": false
@@ -23007,7 +23007,14 @@ export const GetTokensRequest: any = {
         "GetTokensQuery": {
             "type": "object",
             "properties": {
-                "createdAt": {
+                "passwordProtection.passwordIsPin": {
+                    "type": "string",
+                    "enum": [
+                        "true",
+                        "!"
+                    ]
+                },
+                "passwordProtection.password": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -23020,20 +23027,14 @@ export const GetTokensRequest: any = {
                         }
                     ]
                 },
-                "createdBy": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
+                "passwordProtection": {
+                    "type": "string",
+                    "enum": [
+                        "",
+                        "!"
                     ]
                 },
-                "createdByDevice": {
+                "forIdentity": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -23059,7 +23060,7 @@ export const GetTokensRequest: any = {
                         }
                     ]
                 },
-                "forIdentity": {
+                "createdByDevice": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -23072,14 +23073,7 @@ export const GetTokensRequest: any = {
                         }
                     ]
                 },
-                "passwordProtection": {
-                    "type": "string",
-                    "enum": [
-                        "",
-                        "!"
-                    ]
-                },
-                "passwordProtection.password": {
+                "createdBy": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -23092,11 +23086,17 @@ export const GetTokensRequest: any = {
                         }
                     ]
                 },
-                "passwordProtection.passwordIsPin": {
-                    "type": "string",
-                    "enum": [
-                        "true",
-                        "!"
+                "createdAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
                     ]
                 }
             },
@@ -23119,14 +23119,14 @@ export const LoadPeerTokenRequest: any = {
         "LoadPeerTokenRequest": {
             "type": "object",
             "properties": {
-                "reference": {
-                    "$ref": "#/definitions/TokenReferenceString"
+                "password": {
+                    "type": "string"
                 },
                 "ephemeral": {
                     "type": "boolean"
                 },
-                "password": {
-                    "type": "string"
+                "reference": {
+                    "$ref": "#/definitions/TokenReferenceString"
                 }
             },
             "required": [
