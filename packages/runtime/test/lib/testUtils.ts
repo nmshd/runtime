@@ -574,7 +574,6 @@ export async function exchangeAndAcceptRequestByMessage(
     request: CreateOutgoingRequestRequest,
     responseItems: (DecideRequestItemParametersJSON | DecideRequestItemGroupParametersJSON)[]
 ): Promise<MessageDTO> {
-    const _canCreateRequestResult = await sender.consumption.outgoingRequests.canCreate({ content: request.content, peer: recipient.address });
     const createRequestResult = await sender.consumption.outgoingRequests.create(request);
     expect(createRequestResult).toBeSuccessful();
 

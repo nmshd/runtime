@@ -719,7 +719,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
             content: {
                 value: {
                     "@type": "JobTitle",
-                    value: "A unique job title"
+                    value: "First job title"
                 }
             }
         };
@@ -727,7 +727,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
             content: {
                 value: {
                     "@type": "JobTitle",
-                    value: "A more unique job title"
+                    value: "Second job title"
                 }
             }
         };
