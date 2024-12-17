@@ -2,6 +2,7 @@ import { ApplicationError, Result, sleep } from "@js-soft/ts-utils";
 import { ReadAttributeRequestItemJSON, RelationshipAttributeConfidentiality, RelationshipTemplateContentJSON } from "@nmshd/content";
 import { IdentityDeletionProcessStatus } from "@nmshd/transport";
 import assert from "assert";
+import { randomUUID } from "crypto";
 import { DateTime } from "luxon";
 import {
     GetRelationshipsQuery,
@@ -996,8 +997,6 @@ describe("RelationshipDecomposition", () => {
         );
     });
 
-    let nameCounter = 0;
-
     async function createRelationshipData(services1: TestRuntimeServices, services2: TestRuntimeServices) {
         const requestContent = {
             content: {
@@ -1018,7 +1017,7 @@ describe("RelationshipDecomposition", () => {
             content: {
                 value: {
                     "@type": "GivenName",
-                    value: `Own name${++nameCounter}`
+                    value: randomUUID()
                 }
             }
         });
@@ -1027,7 +1026,7 @@ describe("RelationshipDecomposition", () => {
             content: {
                 value: {
                     "@type": "GivenName",
-                    value: `Own name${++nameCounter}`
+                    value: randomUUID()
                 }
             }
         });
