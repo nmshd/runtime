@@ -711,7 +711,7 @@ describe("OutgoingRequestsController", function () {
                     items: [TestRequestItem.from({ mustBeAccepted: false })]
                 }
             });
-            await sleep(100);
+            await sleep(150);
 
             await When.iCompleteTheOutgoingRequestWith({ responseSourceObject: incomingMessage });
             await Then.theRequestMovesToStatus(LocalRequestStatus.Completed);
@@ -725,7 +725,7 @@ describe("OutgoingRequestsController", function () {
                     items: [TestRequestItem.from({ mustBeAccepted: false })]
                 }
             });
-            await sleep(100);
+            await sleep(150);
 
             const incomingMessage = TestObjectFactory.createIncomingIMessage(context.currentIdentity);
             await When.iTryToCompleteTheOutgoingRequestWith({ responseSourceObject: incomingMessage });
@@ -752,7 +752,7 @@ describe("OutgoingRequestsController", function () {
                     items: [TestRequestItem.from({ mustBeAccepted: false })]
                 }
             });
-            await sleep(100);
+            await sleep(150);
 
             await When.iGetTheOutgoingRequest();
             await Then.theRequestIsInStatus(LocalRequestStatus.Expired);
@@ -832,7 +832,7 @@ describe("OutgoingRequestsController", function () {
                     items: [TestRequestItem.from({ mustBeAccepted: false })]
                 }
             });
-            await sleep(100);
+            await sleep(150);
 
             await When.iGetOutgoingRequestsWithTheQuery({ id: outgoingRequest.id.toString() });
             await Then.theOnlyReturnedRequestIsInStatus(LocalRequestStatus.Expired);
