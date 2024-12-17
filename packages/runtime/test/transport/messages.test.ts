@@ -330,11 +330,11 @@ describe("Message errors", () => {
         while (CoreDate.utc().isBefore(CoreDate.from(expiresAt))) {
             await sleep(1000);
         }
+        const client1ExpiredRequestResult = await client1.consumption.outgoingRequests.getRequest({ id: createRequestResult.id });
+        expect(client1ExpiredRequestResult.value.status).toBe(LocalRequestStatus.Expired);
 
         await client2.transport.account.syncEverything();
 
-        const client1ExpiredRequestResult = await client1.consumption.outgoingRequests.getRequest({ id: createRequestResult.id });
-        expect(client1ExpiredRequestResult.value.status).toBe(LocalRequestStatus.Expired);
         const client2ExpiredRequestResult = await client2.consumption.incomingRequests.getRequest({ id: createRequestResult.id });
         expect(client2ExpiredRequestResult.value.status).toBe(LocalRequestStatus.Expired);
     });
