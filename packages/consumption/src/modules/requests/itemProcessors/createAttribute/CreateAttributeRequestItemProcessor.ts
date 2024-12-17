@@ -80,11 +80,13 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
                 requestInfo.peer
             );
 
-            if (relationshipAttributesWithSameKey.length !== 0 && requestItem.mustBeAccepted) {
-                throw ConsumptionCoreErrors.requests.violatedKeyUniquenessOfRelationshipAttributes(
-                    `The provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute in the context of this Relationship with the same key '${requestItem.attribute.key}', owner and value type.`
-                );
-            } else if (relationshipAttributesWithSameKey.length !== 0) {
+            if (relationshipAttributesWithSameKey.length !== 0) {
+                if (requestItem.mustBeAccepted) {
+                    throw ConsumptionCoreErrors.requests.violatedKeyUniquenessOfRelationshipAttributes(
+                        `The provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute in the context of this Relationship with the same key '${requestItem.attribute.key}', owner and value type.`
+                    );
+                }
+
                 return ValidationResult.error(
                     ConsumptionCoreErrors.requests.invalidAcceptParameters(
                         `This CreateAttributeRequestItem cannot be accepted as the provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute in the context of this Relationship with the same key '${requestItem.attribute.key}', owner and value type.`

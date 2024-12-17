@@ -214,11 +214,13 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 requestInfo.peer
             );
 
-            if (relationshipAttributesWithSameKey.length !== 0 && requestItem.mustBeAccepted) {
-                throw ConsumptionCoreErrors.requests.violatedKeyUniquenessOfRelationshipAttributes(
-                    `The queried RelationshipAttribute cannot be created because there is already a RelationshipAttribute in the context of this Relationship with the same key '${requestItem.query.key}', owner and value type.`
-                );
-            } else if (relationshipAttributesWithSameKey.length !== 0) {
+            if (relationshipAttributesWithSameKey.length !== 0) {
+                if (requestItem.mustBeAccepted) {
+                    throw ConsumptionCoreErrors.requests.violatedKeyUniquenessOfRelationshipAttributes(
+                        `The queried RelationshipAttribute cannot be created because there is already a RelationshipAttribute in the context of this Relationship with the same key '${requestItem.query.key}', owner and value type.`
+                    );
+                }
+
                 return ValidationResult.error(
                     ConsumptionCoreErrors.requests.invalidAcceptParameters(
                         `This ReadAttributeRequestItem cannot be accepted as the queried RelationshipAttribute cannot be created because there is already a RelationshipAttribute in the context of this Relationship with the same key '${requestItem.query.key}', owner and value type.`

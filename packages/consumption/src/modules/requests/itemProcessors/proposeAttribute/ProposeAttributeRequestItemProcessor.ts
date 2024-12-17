@@ -84,14 +84,12 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             return commonQueryValidationResult;
         }
 
-        if (requestItem.query instanceof RelationshipAttributeQuery) {
-            if (requestItem.query.owner.toString() !== "") {
-                return ValidationResult.error(
-                    ConsumptionCoreErrors.requests.invalidRequestItem(
-                        "The owner of the given `query` can only be an empty string. This is because you can only propose Attributes where the Recipient of the Request is the owner anyway. And in order to avoid mistakes, the owner will be automatically filled for you."
-                    )
-                );
-            }
+        if (requestItem.query instanceof RelationshipAttributeQuery && requestItem.query.owner.toString() !== "") {
+            return ValidationResult.error(
+                ConsumptionCoreErrors.requests.invalidRequestItem(
+                    "The owner of the given `query` can only be an empty string. This is because you can only propose Attributes where the Recipient of the Request is the owner anyway. And in order to avoid mistakes, the owner will be automatically filled for you."
+                )
+            );
         }
 
         return ValidationResult.success();
@@ -184,11 +182,13 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
                 requestInfo.peer
             );
 
-            if (relationshipAttributesWithSameKey.length !== 0 && requestItem.mustBeAccepted) {
-                throw ConsumptionCoreErrors.requests.violatedKeyUniquenessOfRelationshipAttributes(
-                    `The queried RelationshipAttribute cannot be created because there is already a RelationshipAttribute in the context of this Relationship with the same key '${requestItem.query.key}', owner and value type.`
-                );
-            } else if (relationshipAttributesWithSameKey.length !== 0) {
+            if (relationshipAttributesWithSameKey.length !== 0) {
+                if (requestItem.mustBeAccepted) {
+                    throw ConsumptionCoreErrors.requests.violatedKeyUniquenessOfRelationshipAttributes(
+                        `The queried RelationshipAttribute cannot be created because there is already a RelationshipAttribute in the context of this Relationship with the same key '${requestItem.query.key}', owner and value type.`
+                    );
+                }
+
                 return ValidationResult.error(
                     ConsumptionCoreErrors.requests.invalidAcceptParameters(
                         `This ProposeAttributeRequestItem cannot be accepted as the queried RelationshipAttribute cannot be created because there is already a RelationshipAttribute in the context of this Relationship with the same key '${requestItem.query.key}', owner and value type.`
