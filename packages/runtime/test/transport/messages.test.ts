@@ -7,6 +7,7 @@ import {
     AttributeDeletedEvent,
     GetMessagesQuery,
     IdentityDeletionProcessStatus,
+    IncomingRequestReceivedEvent,
     LocalAttributeDeletionStatus,
     LocalRequestDTO,
     LocalRequestStatus,
@@ -331,6 +332,7 @@ describe("Message errors", () => {
         expect(client1ExpiredRequestResult.value.status).toBe(LocalRequestStatus.Expired);
 
         await client2.transport.account.syncEverything();
+        await client2.eventBus.waitForEvent(IncomingRequestReceivedEvent, (event) => event.data.id === createRequestResult.id);
 
         const client2ExpiredRequestResult = await client2.consumption.incomingRequests.getRequest({ id: createRequestResult.id });
         expect(client2ExpiredRequestResult.value.status).toBe(LocalRequestStatus.Expired);
