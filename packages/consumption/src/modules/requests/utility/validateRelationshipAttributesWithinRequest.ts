@@ -55,24 +55,7 @@ export function validateKeyUniquenessOfRelationshipAttributesWithinIncomingReque
         );
     }
 
-    const fragmentsOfAcceptedItemsOfRequest: RelationshipAttributeFragment[] = [];
-
-    for (let i = 0; i < items.length; i++) {
-        const item = items[i];
-        const decideItemParams = params[i];
-
-        if (item instanceof RequestItemGroup) {
-            const fragmentsOfAcceptedItemsOfGroup = extractRelationshipAttributeFragmentsFromAcceptedItemsOfGroup(item, decideItemParams as DecideRequestItemGroupParametersJSON);
-            if (fragmentsOfAcceptedItemsOfGroup) {
-                fragmentsOfAcceptedItemsOfRequest.push(...fragmentsOfAcceptedItemsOfGroup);
-            }
-        } else {
-            const fragmentOfAcceptedRequestItem = extractRelationshipAttributeFragmentFromAcceptedRequestItem(item, decideItemParams as DecideRequestItemParametersJSON);
-            if (fragmentOfAcceptedRequestItem) {
-                fragmentsOfAcceptedItemsOfRequest.push(fragmentOfAcceptedRequestItem);
-            }
-        }
-    }
+    const fragmentsOfAcceptedItemsOfRequest = extractRelationshipAttributeFragmentsFromAcceptedItems(items, params);
 
     const containsAcceptedDuplicatesResult = containsDuplicateRelationshipAttributeFragments(fragmentsOfAcceptedItemsOfRequest);
     if (containsAcceptedDuplicatesResult.containsDuplicates) {
@@ -107,36 +90,35 @@ function extractRelationshipAttributeFragmentsFromMustBeAcceptedItems(
     return fragmentsOfMustBeAcceptedItemsOfGroup;
 }
 
-function extractRelationshipAttributeFragmentsFromAcceptedItemsOfGroup(
-    requestItemGroup: RequestItemGroup,
-    decideGroupParams: DecideRequestItemGroupParametersJSON
+function extractRelationshipAttributeFragmentsFromAcceptedItems(
+    items: (RequestItem | RequestItemGroup)[],
+    params: (DecideRequestItemParametersJSON | DecideRequestItemGroupParametersJSON)[]
 ): RelationshipAttributeFragment[] | undefined {
-    const fragmentsOfAcceptedItemsOfGroup: RelationshipAttributeFragment[] = [];
+    const fragmentsOfAcceptedItemsOfRequest: RelationshipAttributeFragment[] = [];
 
-    for (let i = 0; i < requestItemGroup.items.length; i++) {
-        const item = requestItemGroup.items[i];
-        const decideItemParams = decideGroupParams.items[i];
+    for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        const decideItemParams = params[i];
 
-        if (item instanceof RequestItem) {
-            const fragment = extractRelationshipAttributeFragmentFromAcceptedRequestItem(item, decideItemParams);
-            if (fragment) fragmentsOfAcceptedItemsOfGroup.push(fragment);
+        if (item instanceof RequestItemGroup) {
+            const fragmentsOfAcceptedItemsOfGroup = extractRelationshipAttributeFragmentsFromAcceptedItems(
+                item.items,
+                (decideItemParams as DecideRequestItemGroupParametersJSON).items
+            );
+            if (fragmentsOfAcceptedItemsOfGroup) {
+                fragmentsOfAcceptedItemsOfRequest.push(...fragmentsOfAcceptedItemsOfGroup);
+            }
+        } else {
+            if (!(decideItemParams as DecideRequestItemParametersJSON).accept) return;
+
+            const fragmentOfAcceptedRequestItem = extractRelationshipAttributeFragmentFromRequestItem(item);
+            if (fragmentOfAcceptedRequestItem) {
+                fragmentsOfAcceptedItemsOfRequest.push(fragmentOfAcceptedRequestItem);
+            }
         }
     }
 
-    if (fragmentsOfAcceptedItemsOfGroup.length !== 0) return fragmentsOfAcceptedItemsOfGroup;
-
-    return;
-}
-
-function extractRelationshipAttributeFragmentFromAcceptedRequestItem(
-    requestItem: RequestItem,
-    decideItemParams: DecideRequestItemParametersJSON
-): RelationshipAttributeFragment | undefined {
-    if (decideItemParams.accept) {
-        return extractRelationshipAttributeFragmentFromRequestItem(requestItem);
-    }
-
-    return;
+    return fragmentsOfAcceptedItemsOfRequest;
 }
 
 function extractRelationshipAttributeFragmentFromRequestItem(requestItem: RequestItem, recipient?: CoreAddress): RelationshipAttributeFragment | undefined {
