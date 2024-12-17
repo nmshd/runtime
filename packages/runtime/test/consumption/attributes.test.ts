@@ -752,7 +752,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
 
         const result2 = await services1.consumption.attributes.createRepositoryAttribute(request);
         expect(result2).toBeAnError(
-            `The Attribute cannot be created because it is a copy of the attribute '${result.value.id.toString()}'.`,
+            `The RepositoryAttribute cannot be created because it has the same content.value as the already existing RepositoryAttribute with id '${result.value.id.toString()}'.`,
             "error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute"
         );
     });
