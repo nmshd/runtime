@@ -304,7 +304,7 @@ describe("Message errors", () => {
         );
     });
 
-    test("should mark a request as expired when synced after the expiration date", async () => {
+    test("should mark a Request as expired when synced after the expiration date", async () => {
         const requestItem = {
             "@type": "ConsentRequestItem",
             consent: "I consent to this RequestItem",
