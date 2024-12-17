@@ -746,7 +746,7 @@ describe("OutgoingRequestsController", function () {
 
         test("moves the Request to status 'Expired' when expiredAt is reached", async function () {
             await Given.anOutgoingRequestWith({
-                status: LocalRequestStatus.Expired,
+                status: LocalRequestStatus.Draft,
                 content: {
                     expiresAt: CoreDate.utc().add({ second: 1 }),
                     items: [TestRequestItem.from({ mustBeAccepted: false })]
