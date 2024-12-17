@@ -80,7 +80,7 @@ function extractRelationshipAttributeFragmentsFromMustBeAcceptedItems(
             const fragments = extractRelationshipAttributeFragmentsFromMustBeAcceptedItems(item.items, recipient);
             if (fragments) fragmentsOfMustBeAcceptedItemsOfGroup.push(...fragments);
         } else {
-            if (!item.mustBeAccepted) return;
+            if (!item.mustBeAccepted) continue;
 
             const fragment = extractRelationshipAttributeFragmentFromRequestItem(item, recipient);
             if (fragment) fragmentsOfMustBeAcceptedItemsOfGroup.push(fragment);
@@ -109,7 +109,7 @@ function extractRelationshipAttributeFragmentsFromAcceptedItems(
                 fragmentsOfAcceptedItemsOfRequest.push(...fragmentsOfAcceptedItemsOfGroup);
             }
         } else {
-            if (!(decideItemParams as DecideRequestItemParametersJSON).accept) return;
+            if (!(decideItemParams as DecideRequestItemParametersJSON).accept) continue;
 
             const fragmentOfAcceptedRequestItem = extractRelationshipAttributeFragmentFromRequestItem(item);
             if (fragmentOfAcceptedRequestItem) {
