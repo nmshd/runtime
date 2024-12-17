@@ -27,7 +27,7 @@ type ContainsDuplicateRelationshipAttributeFragmentsResponse =
       };
 
 export function validateKeyUniquenessOfRelationshipAttributesWithinOutgoingRequest(items: (RequestItem | RequestItemGroup)[], recipient?: CoreAddress): ValidationResult {
-    const fragmentsOfMustBeAcceptedItemsOfRequest = extractRelationshipAttributeFragmentsFromMustBeAcceptedItemsOfGroup(items, recipient);
+    const fragmentsOfMustBeAcceptedItemsOfRequest = extractRelationshipAttributeFragmentsFromMustBeAcceptedItems(items, recipient);
 
     const containsMustBeAcceptedDuplicatesResult = containsDuplicateRelationshipAttributeFragments(fragmentsOfMustBeAcceptedItemsOfRequest);
     if (containsMustBeAcceptedDuplicatesResult.containsDuplicates) {
@@ -46,7 +46,7 @@ export function validateKeyUniquenessOfRelationshipAttributesWithinIncomingReque
     params: (DecideRequestItemParametersJSON | DecideRequestItemGroupParametersJSON)[],
     recipient: CoreAddress
 ): ValidationResult {
-    const fragmentsOfMustBeAcceptedItemsOfRequest = extractRelationshipAttributeFragmentsFromMustBeAcceptedItemsOfGroup(items, recipient);
+    const fragmentsOfMustBeAcceptedItemsOfRequest = extractRelationshipAttributeFragmentsFromMustBeAcceptedItems(items, recipient);
 
     const containsMustBeAcceptedDuplicatesResult = containsDuplicateRelationshipAttributeFragments(fragmentsOfMustBeAcceptedItemsOfRequest);
     if (containsMustBeAcceptedDuplicatesResult.containsDuplicates) {
@@ -86,7 +86,7 @@ export function validateKeyUniquenessOfRelationshipAttributesWithinIncomingReque
     return ValidationResult.success();
 }
 
-function extractRelationshipAttributeFragmentsFromMustBeAcceptedItemsOfGroup(
+function extractRelationshipAttributeFragmentsFromMustBeAcceptedItems(
     items: (RequestItem | RequestItemGroup)[],
     recipient?: CoreAddress
 ): RelationshipAttributeFragment[] | undefined {
@@ -94,23 +94,17 @@ function extractRelationshipAttributeFragmentsFromMustBeAcceptedItemsOfGroup(
 
     for (const item of items) {
         if (item instanceof RequestItemGroup) {
-            const fragments = extractRelationshipAttributeFragmentsFromMustBeAcceptedItemsOfGroup(item.items, recipient);
+            const fragments = extractRelationshipAttributeFragmentsFromMustBeAcceptedItems(item.items, recipient);
             if (fragments) fragmentsOfMustBeAcceptedItemsOfGroup.push(...fragments);
         } else {
-            const fragment = extractRelationshipAttributeFragmentFromMustBeAcceptedRequestItem(item, recipient);
+            if (!item.mustBeAccepted) return;
+
+            const fragment = extractRelationshipAttributeFragmentFromRequestItem(item, recipient);
             if (fragment) fragmentsOfMustBeAcceptedItemsOfGroup.push(fragment);
         }
     }
 
     return fragmentsOfMustBeAcceptedItemsOfGroup;
-}
-
-function extractRelationshipAttributeFragmentFromMustBeAcceptedRequestItem(requestItem: RequestItem, recipient?: CoreAddress): RelationshipAttributeFragment | undefined {
-    if (requestItem.mustBeAccepted) {
-        return extractRelationshipAttributeFragmentFromRequestItem(requestItem, recipient);
-    }
-
-    return;
 }
 
 function extractRelationshipAttributeFragmentsFromAcceptedItemsOfGroup(
