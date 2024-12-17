@@ -39,16 +39,18 @@ export class CreateRepositoryAttributeUseCase extends UseCase<CreateRepositoryAt
                 ...request.content
             }
         });
-        const queryWithoutOptionalRequestProperties = flattenObject({
+
+        const queryForRepositoryAttributeDuplicates = flattenObject({
             content: {
                 "@type": "IdentityAttribute",
                 owner: this.accountController.identity.address.toString(),
                 value: request.content.value
             }
         });
-        const existingAttribute = await this.attributeController.getLocalAttributes(queryWithoutOptionalRequestProperties);
-        if (existingAttribute.length > 0) {
-            return Result.fail(RuntimeErrors.attributes.cannotCreateDuplicateRepositoryAttribute(existingAttribute[0].id));
+
+        const existingRepositoryAttributes = await this.attributeController.getLocalAttributes(queryForRepositoryAttributeDuplicates);
+        if (existingRepositoryAttributes.length > 0) {
+            return Result.fail(RuntimeErrors.attributes.cannotCreateDuplicateRepositoryAttribute(existingRepositoryAttributes[0].id));
         }
 
         const createdLocalAttribute = await this.attributeController.createRepositoryAttribute(params);
