@@ -711,7 +711,7 @@ describe("OutgoingRequestsController", function () {
                     items: [TestRequestItem.from({ mustBeAccepted: false })]
                 }
             });
-            await sleep(2000);
+            await sleep(1000);
 
             await When.iCompleteTheOutgoingRequestWith({ responseSourceObject: incomingMessage });
             await Then.theRequestMovesToStatus(LocalRequestStatus.Completed);
