@@ -324,6 +324,10 @@ class Requests {
         return new CoreError("error.consumption.requests.peerIsInDeletion", message);
     }
 
+    public violatedKeyUniquenessOfRelationshipAttributes(message: string) {
+        return new CoreError("error.consumption.requests.violatedKeyUniquenessOfRelationshipAttributes", message);
+    }
+
     public inheritedFromItem(message: string) {
         return new ApplicationError("error.consumption.requests.validation.inheritedFromItem", message);
     }

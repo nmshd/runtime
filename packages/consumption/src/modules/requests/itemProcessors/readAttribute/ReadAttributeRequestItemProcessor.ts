@@ -27,10 +27,28 @@ import validateQuery from "../utility/validateQuery";
 import { AcceptReadAttributeRequestItemParameters, AcceptReadAttributeRequestItemParametersJSON } from "./AcceptReadAttributeRequestItemParameters";
 
 export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcessor<ReadAttributeRequestItem, AcceptReadAttributeRequestItemParametersJSON> {
-    public override canCreateOutgoingRequestItem(requestItem: ReadAttributeRequestItem, _request: Request, recipient?: CoreAddress): ValidationResult {
+    public override async canCreateOutgoingRequestItem(requestItem: ReadAttributeRequestItem, _request: Request, recipient?: CoreAddress): Promise<ValidationResult> {
         const queryValidationResult = this.validateQuery(requestItem, recipient);
         if (queryValidationResult.isError()) {
             return queryValidationResult;
+        }
+
+        if (requestItem.query instanceof RelationshipAttributeQuery && typeof recipient !== "undefined") {
+            const ownerIsEmptyString = requestItem.query.owner.toString() === "";
+            const relationshipAttributesWithSameKey = await this.consumptionController.attributes.getRelationshipAttributesOfValueTypeToPeerWithGivenKeyAndOwner(
+                requestItem.query.key,
+                ownerIsEmptyString ? recipient : requestItem.query.owner,
+                requestItem.query.attributeCreationHints.valueType,
+                recipient
+            );
+
+            if (relationshipAttributesWithSameKey.length !== 0) {
+                return ValidationResult.error(
+                    ConsumptionCoreErrors.requests.invalidRequestItem(
+                        `The creation of the queried RelationshipAttribute cannot be requested because there is already a RelationshipAttribute in the context of this Relationship with the same key '${requestItem.query.key}', owner and value type.`
+                    )
+                );
+            }
         }
 
         return ValidationResult.success();
@@ -42,12 +60,17 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             return commonQueryValidationResult;
         }
 
-        if (requestItem.query instanceof RelationshipAttributeQuery && !["", this.currentIdentityAddress.toString()].includes(requestItem.query.owner.toString())) {
-            return ValidationResult.error(
-                ConsumptionCoreErrors.requests.invalidRequestItem(
-                    "The owner of the given `query` can only be an empty string or yourself. This is because you can only request RelationshipAttributes using a ReadAttributeRequestitem with a RelationshipAttributeQuery where the Recipient of the Request or yourself is the owner. And in order to avoid mistakes, the Recipient automatically will become the owner of the RelationshipAttribute later on if the owner of the `query` is an empty string."
-                )
-            );
+        if (requestItem.query instanceof RelationshipAttributeQuery) {
+            const senderIsAttributeOwner = requestItem.query.owner.equals(this.currentIdentityAddress);
+            const ownerIsEmptyString = requestItem.query.owner.toString() === "";
+
+            if (!(senderIsAttributeOwner || ownerIsEmptyString)) {
+                return ValidationResult.error(
+                    ConsumptionCoreErrors.requests.invalidRequestItem(
+                        "The owner of the given `query` can only be an empty string or yourself. This is because you can only request RelationshipAttributes using a ReadAttributeRequestitem with a RelationshipAttributeQuery where the Recipient of the Request or yourself is the owner. And in order to avoid mistakes, the Recipient automatically will become the owner of the RelationshipAttribute later on if the owner of the `query` is an empty string."
+                    )
+                );
+            }
         }
 
         return ValidationResult.success();
@@ -162,8 +185,8 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
             attribute = parsedParams.newAttribute;
 
-            const ownerIsEmpty = attribute.owner.equals("");
-            if (ownerIsEmpty) {
+            const ownerIsEmptyString = attribute.owner.equals("");
+            if (ownerIsEmptyString) {
                 attribute.owner = this.currentIdentityAddress;
             }
         }
@@ -180,6 +203,31 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
         const answerToQueryValidationResult = validateAttributeMatchesWithQuery(requestItem.query, attribute, this.currentIdentityAddress, requestInfo.peer);
         if (answerToQueryValidationResult.isError()) return answerToQueryValidationResult;
+
+        if (requestItem.query instanceof RelationshipAttributeQuery) {
+            const ownerOfQueriedAttributeIsEmptyString = requestItem.query.owner.toString() === "";
+
+            const relationshipAttributesWithSameKey = await this.consumptionController.attributes.getRelationshipAttributesOfValueTypeToPeerWithGivenKeyAndOwner(
+                requestItem.query.key,
+                ownerOfQueriedAttributeIsEmptyString ? this.currentIdentityAddress : requestItem.query.owner,
+                requestItem.query.attributeCreationHints.valueType,
+                requestInfo.peer
+            );
+
+            if (relationshipAttributesWithSameKey.length !== 0) {
+                if (requestItem.mustBeAccepted) {
+                    throw ConsumptionCoreErrors.requests.violatedKeyUniquenessOfRelationshipAttributes(
+                        `The queried RelationshipAttribute cannot be created because there is already a RelationshipAttribute in the context of this Relationship with the same key '${requestItem.query.key}', owner and value type.`
+                    );
+                }
+
+                return ValidationResult.error(
+                    ConsumptionCoreErrors.requests.invalidAcceptParameters(
+                        `This ReadAttributeRequestItem cannot be accepted as the queried RelationshipAttribute cannot be created because there is already a RelationshipAttribute in the context of this Relationship with the same key '${requestItem.query.key}', owner and value type.`
+                    )
+                );
+            }
+        }
 
         if (
             requestItem.query instanceof ThirdPartyRelationshipAttributeQuery &&
