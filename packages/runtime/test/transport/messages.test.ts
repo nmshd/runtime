@@ -281,7 +281,8 @@ describe("Message errors", () => {
             consent: "I consent to this RequestItem",
             mustBeAccepted: true
         };
-        const expiresAt = CoreDate.utc().add({ seconds: 5 }).toString();
+
+        const expiresAt = CoreDate.utc().add({ seconds: 1 }).toString();
         const createRequestResult = (
             await client1.consumption.outgoingRequests.create({
                 content: {
@@ -291,9 +292,7 @@ describe("Message errors", () => {
                 peer: client2.address
             })
         ).value;
-        while (CoreDate.utc().isBefore(CoreDate.from(expiresAt))) {
-            await sleep(1000);
-        }
+        await sleep(2000);
         const result = await client1.transport.messages.sendMessage({
             recipients: [client2.address],
             content: createRequestResult.content
@@ -310,7 +309,7 @@ describe("Message errors", () => {
             consent: "I consent to this RequestItem",
             mustBeAccepted: true
         };
-        const expiresAt = CoreDate.utc().add({ seconds: 10 }).toString();
+        const expiresAt = CoreDate.utc().add({ seconds: 1 }).toString();
         const createRequestResult = (
             await client1.consumption.outgoingRequests.create({
                 content: {
@@ -327,9 +326,7 @@ describe("Message errors", () => {
 
         expect(result).toBeSuccessful();
 
-        while (CoreDate.utc().isBefore(CoreDate.from(expiresAt))) {
-            await sleep(1000);
-        }
+        await sleep(2000);
         const client1ExpiredRequestResult = await client1.consumption.outgoingRequests.getRequest({ id: createRequestResult.id });
         expect(client1ExpiredRequestResult.value.status).toBe(LocalRequestStatus.Expired);
 

@@ -1,6 +1,6 @@
 /* eslint-disable jest/no-standalone-expect */
 import { IDatabaseCollection, IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { DataEvent, EventEmitter2EventBus, sleep } from "@js-soft/ts-utils";
+import { DataEvent, EventEmitter2EventBus } from "@js-soft/ts-utils";
 import {
     AcceptResponseItem,
     DeleteAttributeRequestItem,
@@ -301,7 +301,7 @@ export class RequestsGiven {
         await this.anOutgoingRequestWith({ status });
     }
 
-    public async anOutgoingRequestWith(params: { status?: LocalRequestStatus; content?: IRequest }, waitForExpiration?: boolean): Promise<LocalRequest> {
+    public async anOutgoingRequestWith(params: { status?: LocalRequestStatus; content?: IRequest }): Promise<LocalRequest> {
         params.status ??= LocalRequestStatus.Open;
         params.content ??= {
             items: [
@@ -317,13 +317,6 @@ export class RequestsGiven {
         });
 
         await this.moveOutgoingRequestToStatus(this.context.givenLocalRequest, params.status);
-
-        if (waitForExpiration && params.content.expiresAt) {
-            while (CoreDate.utc().isBefore(CoreDate.from(params.content.expiresAt))) {
-                await sleep(1000);
-            }
-            await sleep(1000);
-        }
 
         return this.context.givenLocalRequest;
     }

@@ -1,5 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { ApplicationError } from "@js-soft/ts-utils";
+import { ApplicationError, sleep } from "@js-soft/ts-utils";
 import {
     IAcceptResponseItem,
     IRequest,
@@ -704,32 +704,28 @@ describe("OutgoingRequestsController", function () {
 
         test("allows completing an expired Request with a Message that was created before the expiry date", async function () {
             const incomingMessage = TestObjectFactory.createIncomingIMessage(context.currentIdentity, CoreDate.utc().subtract({ days: 2 }));
-            await Given.anOutgoingRequestWith(
-                {
-                    status: LocalRequestStatus.Expired,
-                    content: {
-                        expiresAt: CoreDate.utc().add({ second: 1 }),
-                        items: [TestRequestItem.from({ mustBeAccepted: false })]
-                    }
-                },
-                true
-            );
+            await Given.anOutgoingRequestWith({
+                status: LocalRequestStatus.Expired,
+                content: {
+                    expiresAt: CoreDate.utc().add({ second: 1 }),
+                    items: [TestRequestItem.from({ mustBeAccepted: false })]
+                }
+            });
+            await sleep(2000);
 
             await When.iCompleteTheOutgoingRequestWith({ responseSourceObject: incomingMessage });
             await Then.theRequestMovesToStatus(LocalRequestStatus.Completed);
         });
 
         test("throws when trying to complete an expired Request with a Message that was created after the expiry date", async function () {
-            await Given.anOutgoingRequestWith(
-                {
-                    status: LocalRequestStatus.Expired,
-                    content: {
-                        expiresAt: CoreDate.utc().add({ second: 1 }),
-                        items: [TestRequestItem.from({ mustBeAccepted: false })]
-                    }
-                },
-                true
-            );
+            await Given.anOutgoingRequestWith({
+                status: LocalRequestStatus.Expired,
+                content: {
+                    expiresAt: CoreDate.utc().add({ second: 1 }),
+                    items: [TestRequestItem.from({ mustBeAccepted: false })]
+                }
+            });
+            await sleep(2000);
 
             const incomingMessage = TestObjectFactory.createIncomingIMessage(context.currentIdentity);
             await When.iTryToCompleteTheOutgoingRequestWith({ responseSourceObject: incomingMessage });
@@ -749,16 +745,14 @@ describe("OutgoingRequestsController", function () {
         });
 
         test("moves the Request to status 'Expired' when expiredAt is reached", async function () {
-            await Given.anOutgoingRequestWith(
-                {
-                    status: LocalRequestStatus.Expired,
-                    content: {
-                        expiresAt: CoreDate.utc().add({ second: 1 }),
-                        items: [TestRequestItem.from({ mustBeAccepted: false })]
-                    }
-                },
-                true
-            );
+            await Given.anOutgoingRequestWith({
+                status: LocalRequestStatus.Expired,
+                content: {
+                    expiresAt: CoreDate.utc().add({ second: 1 }),
+                    items: [TestRequestItem.from({ mustBeAccepted: false })]
+                }
+            });
+            await sleep(2000);
 
             await When.iGetTheOutgoingRequest();
             await Then.theRequestIsInStatus(LocalRequestStatus.Expired);
@@ -831,16 +825,14 @@ describe("OutgoingRequestsController", function () {
         });
 
         test("moves the Request to status 'Expired' when expiredAt is reached", async function () {
-            const outgoingRequest = await Given.anOutgoingRequestWith(
-                {
-                    status: LocalRequestStatus.Draft,
-                    content: {
-                        expiresAt: CoreDate.utc().add({ second: 1 }),
-                        items: [TestRequestItem.from({ mustBeAccepted: false })]
-                    }
-                },
-                true
-            );
+            const outgoingRequest = await Given.anOutgoingRequestWith({
+                status: LocalRequestStatus.Draft,
+                content: {
+                    expiresAt: CoreDate.utc().add({ second: 1 }),
+                    items: [TestRequestItem.from({ mustBeAccepted: false })]
+                }
+            });
+            await sleep(2000);
 
             await When.iGetOutgoingRequestsWithTheQuery({ id: outgoingRequest.id.toString() });
             await Then.theOnlyReturnedRequestIsInStatus(LocalRequestStatus.Expired);
