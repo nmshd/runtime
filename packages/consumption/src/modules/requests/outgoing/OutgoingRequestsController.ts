@@ -15,6 +15,7 @@ import { RequestItemProcessorRegistry } from "../itemProcessors/RequestItemProce
 import { LocalRequest, LocalRequestSource } from "../local/LocalRequest";
 import { LocalRequestStatus } from "../local/LocalRequestStatus";
 import { LocalResponse } from "../local/LocalResponse";
+import { validateKeyUniquenessOfRelationshipAttributesWithinOutgoingRequest } from "../utility/validateRelationshipAttributesWithinRequest";
 import { CompleteOutgoingRequestParameters, ICompleteOutgoingRequestParameters } from "./completeOutgoingRequest/CompleteOutgoingRequestParameters";
 import {
     CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters,
@@ -52,7 +53,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         if (parsedParams.peer) {
             const relationship = await this.relationshipResolver.getRelationshipToIdentity(parsedParams.peer);
 
-            // there should at minimum be a Pending relationship to the peer
+            // there should at minimum be a pending Relationship to the peer
             if (!relationship) {
                 return ValidationResult.error(
                     ConsumptionCoreErrors.requests.missingRelationship(`You cannot create a request to '${parsedParams.peer.toString()}' since you are not in a relationship.`)
@@ -81,8 +82,12 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         }
 
         const innerResults = await this.canCreateItems(parsedParams.content, parsedParams.peer);
-
         const result = ValidationResult.fromItems(innerResults);
+
+        if (result.isError()) return result;
+
+        const keyUniquenessValidationResult = validateKeyUniquenessOfRelationshipAttributesWithinOutgoingRequest(parsedParams.content.items, parsedParams.peer);
+        if (keyUniquenessValidationResult.isError()) return keyUniquenessValidationResult;
 
         return result;
     }
