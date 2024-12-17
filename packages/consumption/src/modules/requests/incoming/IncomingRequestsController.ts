@@ -15,6 +15,7 @@ import { RequestItemProcessorRegistry } from "../itemProcessors/RequestItemProce
 import { ILocalRequestSource, LocalRequest } from "../local/LocalRequest";
 import { LocalRequestStatus } from "../local/LocalRequestStatus";
 import { LocalResponse, LocalResponseSource } from "../local/LocalResponse";
+import { validateKeyUniquenessOfRelationshipAttributesWithinIncomingRequest } from "../utility/validateRelationshipAttributesWithinRequest";
 import { DecideRequestParametersValidator } from "./DecideRequestParametersValidator";
 import { CheckPrerequisitesOfIncomingRequestParameters, ICheckPrerequisitesOfIncomingRequestParameters } from "./checkPrerequisites/CheckPrerequisitesOfIncomingRequestParameters";
 import { CompleteIncomingRequestParameters, ICompleteIncomingRequestParameters } from "./complete/CompleteIncomingRequestParameters";
@@ -166,7 +167,15 @@ export class IncomingRequestsController extends ConsumptionBaseController {
     }
 
     public async canAccept(params: DecideRequestParametersJSON): Promise<ValidationResult> {
-        return await this.canDecide({ ...params, accept: true });
+        const canDecideResult = await this.canDecide({ ...params, accept: true });
+
+        if (canDecideResult.isError()) return canDecideResult;
+
+        const request = await this.getOrThrow(params.requestId);
+        const keyUniquenessValidationResult = validateKeyUniquenessOfRelationshipAttributesWithinIncomingRequest(request.content.items, params.items, this.identity.address);
+        if (keyUniquenessValidationResult.isError()) return keyUniquenessValidationResult;
+
+        return canDecideResult;
     }
 
     public async canReject(params: DecideRequestParametersJSON): Promise<ValidationResult> {
