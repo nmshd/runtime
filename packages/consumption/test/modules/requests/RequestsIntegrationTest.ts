@@ -319,14 +319,10 @@ export class RequestsGiven {
         await this.moveOutgoingRequestToStatus(this.context.givenLocalRequest, params.status);
 
         if (waitForExpiration && params.content.expiresAt) {
-            const dateString = params.content.expiresAt.dateTime.toISO();
-            if (dateString) {
-                const date = CoreDate.from(dateString);
-                while (CoreDate.utc().isBefore(date)) {
-                    await sleep(1000);
-                }
+            while (CoreDate.utc().isBefore(CoreDate.from(params.content.expiresAt))) {
                 await sleep(1000);
             }
+            await sleep(1000);
         }
 
         return this.context.givenLocalRequest;

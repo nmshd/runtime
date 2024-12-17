@@ -3,7 +3,6 @@ import { DateTime, DateTimeUnit, Duration, DurationLike, Interval } from "luxon"
 
 export interface ICoreDate extends ISerializable {
     date: string;
-    dateTime: DateTime;
 }
 
 @type("CoreDate")
