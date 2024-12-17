@@ -298,7 +298,7 @@ describe("Message errors", () => {
             content: createRequestResult.content
         });
         expect(result).toBeAnError(
-            "The Message cannot be sent as the Request has already expired. Please create a new Request and try again.",
+            "The Message cannot be sent as the contained Request is already expired. Please create a new Request and try again.",
             "error.runtime.messages.cannotSendMessageWithExpiredRequest"
         );
     });
