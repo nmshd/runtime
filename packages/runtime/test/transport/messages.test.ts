@@ -293,11 +293,14 @@ describe("Message errors", () => {
                 peer: client2.address
             })
         ).value;
+
         await sleep(150);
+
         const result = await client1.transport.messages.sendMessage({
             recipients: [client2.address],
             content: createRequestResult.content
         });
+
         expect(result).toBeAnError(
             "The Message cannot be sent as the contained Request is already expired. Please create a new Request and try again.",
             "error.runtime.messages.cannotSendMessageWithExpiredRequest"
@@ -310,6 +313,7 @@ describe("Message errors", () => {
             consent: "I consent to this RequestItem",
             mustBeAccepted: true
         };
+
         const expiresAt = CoreDate.utc().add({ milliseconds: 100 }).toString();
         const createRequestResult = (
             await client1.consumption.outgoingRequests.create({
@@ -320,6 +324,7 @@ describe("Message errors", () => {
                 peer: client2.address
             })
         ).value;
+
         const result = await client1.transport.messages.sendMessage({
             recipients: [client2.address],
             content: createRequestResult.content
