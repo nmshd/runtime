@@ -275,13 +275,7 @@ describe("Message errors", () => {
         expect(result).toBeAnError("The recipient does not match the Request's peer.", "error.runtime.validation.invalidPropertyValue");
     });
 
-    test("should throw correct error message for trying to send a Message with a Request that expired", async () => {
-        const requestItem = {
-            "@type": "ConsentRequestItem",
-            consent: "I consent to this RequestItem",
-            mustBeAccepted: true
-        };
-
+    test("should throw correct error for trying to send a Message with an expired Request", async () => {
         const expiresAt = CoreDate.utc().add({ milliseconds: 100 }).toString();
         const createRequestResult = (
             await client1.consumption.outgoingRequests.create({
@@ -307,12 +301,6 @@ describe("Message errors", () => {
     });
 
     test("should mark a Request as expired when synced after the expiration date", async () => {
-        const requestItem = {
-            "@type": "ConsentRequestItem",
-            consent: "I consent to this RequestItem",
-            mustBeAccepted: true
-        };
-
         const expiresAt = CoreDate.utc().add({ milliseconds: 100 }).toString();
         const createRequestResult = (
             await client1.consumption.outgoingRequests.create({

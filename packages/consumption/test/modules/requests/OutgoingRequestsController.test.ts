@@ -231,6 +231,24 @@ describe("OutgoingRequestsController", function () {
             });
         });
 
+        test("returns a validation result that contains an error for requests that are expired", async function () {
+            const validationResult = await When.iCallCanCreateForAnOutgoingRequest({
+                content: {
+                    expiresAt: CoreDate.utc().subtract({ days: 1 }),
+                    items: [
+                        TestRequestItem.from({
+                            mustBeAccepted: false
+                        })
+                    ]
+                }
+            });
+
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.cannotCreateRequestWithExpirationDateInPast",
+                message: "You cannot create a Request with an expiration date that is in the past."
+            });
+        });
+
         test("returns a validation result that contains an error for requests that would lead to the creation of more than one RelationshipAttribute with the same key", async function () {
             const validationResult = await When.iCallCanCreateForAnOutgoingRequest({
                 content: {
@@ -278,24 +296,6 @@ describe("OutgoingRequestsController", function () {
                 code: "error.consumption.requests.violatedKeyUniquenessOfRelationshipAttributes",
                 message:
                     "The Request cannot be created because its acceptance would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key 'uniqueKey', owner and value type."
-            });
-        });
-
-        test("returns a validation result that contains an error for requests that are expired", async function () {
-            const validationResult = await When.iCallCanCreateForAnOutgoingRequest({
-                content: {
-                    expiresAt: CoreDate.utc().subtract({ days: 1 }),
-                    items: [
-                        TestRequestItem.from({
-                            mustBeAccepted: false
-                        })
-                    ]
-                }
-            });
-
-            expect(validationResult).errorValidationResult({
-                code: "error.consumption.requests.cannotCreateRequestWithExpirationDateInPast",
-                message: "You cannot create a Request with an expiration date that is in the past."
             });
         });
     });
