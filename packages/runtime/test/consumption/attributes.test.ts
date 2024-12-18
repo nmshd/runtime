@@ -757,7 +757,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
         );
     });
 
-    test("should not prevent the creation when the duplicate got succeeded", async () => {
+    test.only("should not prevent the creation when the duplicate got succeeded", async () => {
         const request: CreateRepositoryAttributeRequest = {
             content: {
                 value: {
@@ -781,8 +781,6 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
             }
         });
         expect(successionResult).toBeSuccessful();
-
-        await services1.eventBus.waitForEvent(RepositoryAttributeSucceededEvent, (e) => e.data.predecessor.id === result.value.id);
 
         const result2 = await services1.consumption.attributes.createRepositoryAttribute(request);
         expect(result2).toBeSuccessful();

@@ -47,7 +47,7 @@ export class CreateRepositoryAttributeUseCase extends UseCase<CreateRepositoryAt
                 owner: this.accountController.identity.address.toString(),
                 value: request.content.value
             },
-            succeededBy: undefined
+            succeededBy: { $exists: false }
         });
 
         const existingRepositoryAttributes = await this.attributeController.getLocalAttributes(queryForRepositoryAttributeDuplicates);
