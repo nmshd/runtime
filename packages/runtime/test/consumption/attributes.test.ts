@@ -782,6 +782,8 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
         });
         expect(successionResult).toBeSuccessful();
 
+        await services1.eventBus.waitForEvent(RepositoryAttributeSucceededEvent, (e) => e.data.predecessor.id === result.value.id);
+
         const result2 = await services1.consumption.attributes.createRepositoryAttribute(request);
         expect(result2).toBeSuccessful();
     });
