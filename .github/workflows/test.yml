@@ -147,7 +147,7 @@ jobs:
       - run: npm ci
       - run: npm run build:node
       - run: npm run build:schemas --workspace=@nmshd/runtime
-      - run: npm run test:ci:mongodb --workspace=@nmshd/runtime -- attributes.test.ts
+      - run: npm run test:ci:mongodb --workspace=@nmshd/runtime
         env:
           CONNECTION_STRING: mongodb://127.0.0.1:27017
           NMSHD_TEST_BASEURL: http://localhost:8090

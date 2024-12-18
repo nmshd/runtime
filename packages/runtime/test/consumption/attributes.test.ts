@@ -757,7 +757,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
         );
     });
 
-    test.only("should not prevent the creation when the duplicate got succeeded", async () => {
+    test("should not prevent the creation when the duplicate got succeeded", async () => {
         const request: CreateRepositoryAttributeRequest = {
             content: {
                 value: {
