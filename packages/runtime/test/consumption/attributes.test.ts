@@ -756,6 +756,37 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
             "error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute"
         );
     });
+
+    test("should create a RepositoryAttribute that is the same as an existing RepositoryAttribute without an optional property", async () => {
+        const request: CreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "PersonName",
+                    givenName: "aGivenName",
+                    surname: "aSurname",
+                    middleName: "aMiddleName"
+                },
+                tags: ["tag1", "tag2"]
+            }
+        };
+
+        const request2: CreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "PersonName",
+                    givenName: "aGivenName",
+                    surname: "aSurname"
+                },
+                tags: ["tag1", "tag2"]
+            }
+        };
+
+        const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+        expect(result).toBeSuccessful();
+
+        const result2 = await services1.consumption.attributes.createRepositoryAttribute(request2);
+        expect(result2).toBeSuccessful();
+    });
 });
 
 describe(ShareRepositoryAttributeUseCase.name, () => {
