@@ -816,6 +816,107 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
         const result2 = await services1.consumption.attributes.createRepositoryAttribute(request2);
         expect(result2).toBeSuccessful();
     });
+
+    test("should not create a duplicate RepositoryAttribute even if the Tags/validFrom/validTo are different", async () => {
+        const validFrom = CoreDate.utc().subtract({ day: 1 }).toString();
+        const validTo = CoreDate.utc().add({ day: 1 }).toString();
+        const request: CreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "aGivenName"
+                },
+                tags: ["tag1", "tag2"],
+                validFrom,
+                validTo
+            }
+        };
+
+        const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+        expect(result).toBeSuccessful();
+
+        const request2: CreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "aGivenName"
+                },
+                tags: ["tag1", "tag2"],
+                validFrom
+            }
+        };
+
+        const result2 = await services1.consumption.attributes.createRepositoryAttribute(request2);
+        expect(result2).toBeAnError(
+            `The RepositoryAttribute cannot be created because it has the same content.value as the already existing RepositoryAttribute with id '${result.value.id.toString()}'.`,
+            "error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute"
+        );
+        const request3: CreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "aGivenName"
+                },
+                tags: ["tag1", "tag2"],
+                validTo
+            }
+        };
+
+        const result3 = await services1.consumption.attributes.createRepositoryAttribute(request3);
+        expect(result3).toBeAnError(
+            `The RepositoryAttribute cannot be created because it has the same content.value as the already existing RepositoryAttribute with id '${result.value.id.toString()}'.`,
+            "error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute"
+        );
+        const request4: CreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "aGivenName"
+                },
+                validFrom,
+                validTo
+            }
+        };
+
+        const result4 = await services1.consumption.attributes.createRepositoryAttribute(request4);
+        expect(result4).toBeAnError(
+            `The RepositoryAttribute cannot be created because it has the same content.value as the already existing RepositoryAttribute with id '${result.value.id.toString()}'.`,
+            "error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute"
+        );
+    });
+
+    test("should not a duplicate RepositoryAttribute even if the Tags/validFrom/validTo are the same", async () => {
+        const validFrom = CoreDate.utc().subtract({ day: 1 }).toString();
+        const validTo = CoreDate.utc().add({ day: 1 }).toString();
+        const request: CreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "aGivenName"
+                },
+                tags: ["tag1", "tag2"],
+                validFrom,
+                validTo
+            }
+        };
+
+        const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+        expect(result).toBeSuccessful();
+
+        const request2: CreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "aGivenName2"
+                },
+                tags: ["tag1", "tag2"],
+                validFrom,
+                validTo
+            }
+        };
+        const result2 = await services1.consumption.attributes.createRepositoryAttribute(request2);
+        expect(result2).toBeSuccessful();
+    });
 });
 
 describe(ShareRepositoryAttributeUseCase.name, () => {
