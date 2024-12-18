@@ -53,9 +53,9 @@ export class CreateRepositoryAttributeUseCase extends UseCase<CreateRepositoryAt
 
         const existingRepositoryAttributes = await this.attributeController.getLocalAttributes(queryForRepositoryAttributeDuplicates);
 
-        const filterForExactValueContent = existingRepositoryAttributes.some((duplicate) => _.isEqual(duplicate.content.value.toJSON(), request.content.value));
+        const exactMatchExists = existingRepositoryAttributes.some((duplicate) => _.isEqual(duplicate.content.value.toJSON(), request.content.value));
 
-        if (filterForExactValueContent) {
+        if (exactMatchExists) {
             return Result.fail(RuntimeErrors.attributes.cannotCreateDuplicateRepositoryAttribute(existingRepositoryAttributes[0].id));
         }
 

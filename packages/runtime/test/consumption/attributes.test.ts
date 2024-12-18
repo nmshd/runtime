@@ -885,7 +885,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
         );
     });
 
-    test("should not a duplicate RepositoryAttribute even if the Tags/validFrom/validTo are the same", async () => {
+    test("should create a RepositoryAttribute even if the Tags/validFrom/validTo are duplicates", async () => {
         const validFrom = CoreDate.utc().subtract({ day: 1 }).toString();
         const validTo = CoreDate.utc().add({ day: 1 }).toString();
         const request: CreateRepositoryAttributeRequest = {
