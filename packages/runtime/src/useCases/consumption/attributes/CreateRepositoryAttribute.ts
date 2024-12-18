@@ -44,7 +44,8 @@ export class CreateRepositoryAttributeUseCase extends UseCase<CreateRepositoryAt
             content: {
                 "@type": "IdentityAttribute",
                 owner: this.accountController.identity.address.toString(),
-                value: request.content.value
+                value: request.content.value,
+                succeeds: "!"
             }
         });
 
