@@ -27,7 +27,7 @@ export class DevicesFacade {
         @Inject private readonly updateDeviceUseCase: UpdateDeviceUseCase,
         @Inject private readonly deleteDeviceUseCase: DeleteDeviceUseCase,
         @Inject private readonly getDeviceOnboardingInfoUseCase: GetDeviceOnboardingInfoUseCase,
-        @Inject private readonly getDeviceOnboardingTokenUseCase: CreateDeviceOnboardingTokenUseCase,
+        @Inject private readonly createDeviceOnboardingTokenUseCase: CreateDeviceOnboardingTokenUseCase,
         @Inject private readonly setCommunicationLanguageUseCase: SetCommunicationLanguageUseCase
     ) {}
 
@@ -47,8 +47,8 @@ export class DevicesFacade {
         return await this.getDeviceOnboardingInfoUseCase.execute(request);
     }
 
-    public async getDeviceOnboardingToken(request: CreateDeviceOnboardingTokenRequest): Promise<Result<TokenDTO, ApplicationError>> {
-        return await this.getDeviceOnboardingTokenUseCase.execute(request);
+    public async createDeviceOnboardingToken(request: CreateDeviceOnboardingTokenRequest): Promise<Result<TokenDTO, ApplicationError>> {
+        return await this.createDeviceOnboardingTokenUseCase.execute(request);
     }
 
     public async updateDevice(request: UpdateDeviceRequest): Promise<Result<DeviceDTO, ApplicationError>> {
