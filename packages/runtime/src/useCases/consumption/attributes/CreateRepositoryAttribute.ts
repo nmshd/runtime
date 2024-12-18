@@ -3,6 +3,7 @@ import { AttributesController, CreateRepositoryAttributeParams } from "@nmshd/co
 import { AttributeValues } from "@nmshd/content";
 import { AccountController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
+import _ from "lodash";
 import { LocalAttributeDTO } from "../../../types";
 import { flattenObject, ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { AttributeMapper } from "./AttributeMapper";
@@ -50,7 +51,8 @@ export class CreateRepositoryAttributeUseCase extends UseCase<CreateRepositoryAt
         });
 
         const existingRepositoryAttributes = await this.attributeController.getLocalAttributes(queryForRepositoryAttributeDuplicates);
-        if (existingRepositoryAttributes.length > 0) {
+        const filterForExactValueContent = existingRepositoryAttributes.some((duplicate) => _.isEqual(duplicate.content.value, request.content.value));
+        if (filterForExactValueContent && existingRepositoryAttributes.length > 0) {
             return Result.fail(RuntimeErrors.attributes.cannotCreateDuplicateRepositoryAttribute(existingRepositoryAttributes[0].id));
         }
 
