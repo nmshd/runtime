@@ -2,7 +2,7 @@ import { Serializable } from "@js-soft/ts-serval";
 import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { OutgoingRequestsController } from "@nmshd/consumption";
 import { ArbitraryMessageContent, Mail, Notification, Request, ResponseWrapper } from "@nmshd/content";
-import { CoreAddress, CoreError, CoreId } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreError, CoreId } from "@nmshd/core-types";
 import { AccountController, File, FileController, MessageController, PeerDeletionStatus, RelationshipsController, RelationshipStatus, TransportCoreErrors } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import _ from "lodash";
@@ -141,6 +141,10 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
 
         if (!_.isEqual(request.toJSON(), localRequest.content.toJSON())) {
             return RuntimeErrors.general.invalidPropertyValue("The sent Request must have the same content as the LocalRequest.");
+        }
+
+        if (request.expiresAt?.isBefore(CoreDate.utc())) {
+            return RuntimeErrors.messages.cannotSendMessageWithExpiredRequest();
         }
 
         if (!recipient.equals(localRequest.peer)) return RuntimeErrors.general.invalidPropertyValue("The recipient does not match the Request's peer.");
