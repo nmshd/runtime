@@ -1,3 +1,4 @@
+import { sleep } from "@js-soft/ts-utils";
 import { ConsumptionIds } from "@nmshd/consumption";
 import { ConsentRequestItemJSON, Notification } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
@@ -6,8 +7,10 @@ import {
     AttributeDeletedEvent,
     GetMessagesQuery,
     IdentityDeletionProcessStatus,
+    IncomingRequestReceivedEvent,
     LocalAttributeDeletionStatus,
     LocalRequestDTO,
+    LocalRequestStatus,
     MessageReceivedEvent,
     MessageSentEvent,
     MessageWasReadAtChangedEvent,
@@ -270,6 +273,61 @@ describe("Message errors", () => {
             }
         });
         expect(result).toBeAnError("The recipient does not match the Request's peer.", "error.runtime.validation.invalidPropertyValue");
+    });
+
+    test("should throw correct error for trying to send a Message with an expired Request", async () => {
+        const expiresAt = CoreDate.utc().add({ milliseconds: 100 }).toString();
+        const createRequestResult = (
+            await client1.consumption.outgoingRequests.create({
+                content: {
+                    expiresAt,
+                    items: [requestItem]
+                },
+                peer: client2.address
+            })
+        ).value;
+
+        await sleep(150);
+
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client2.address],
+            content: createRequestResult.content
+        });
+
+        expect(result).toBeAnError(
+            "The Message cannot be sent as the contained Request is already expired. Please create a new Request and try again.",
+            "error.runtime.messages.cannotSendMessageWithExpiredRequest"
+        );
+    });
+
+    test("should mark a Request as expired when synced after the expiration date", async () => {
+        const expiresAt = CoreDate.utc().add({ milliseconds: 100 }).toString();
+        const createRequestResult = (
+            await client1.consumption.outgoingRequests.create({
+                content: {
+                    expiresAt,
+                    items: [requestItem]
+                },
+                peer: client2.address
+            })
+        ).value;
+
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client2.address],
+            content: createRequestResult.content
+        });
+
+        expect(result).toBeSuccessful();
+
+        await sleep(150);
+        const client1ExpiredRequestResult = await client1.consumption.outgoingRequests.getRequest({ id: createRequestResult.id });
+        expect(client1ExpiredRequestResult.value.status).toBe(LocalRequestStatus.Expired);
+
+        await client2.transport.account.syncEverything();
+        await client2.eventBus.waitForEvent(IncomingRequestReceivedEvent, (event) => event.data.id === createRequestResult.id);
+
+        const client2ExpiredRequestResult = await client2.consumption.incomingRequests.getRequest({ id: createRequestResult.id });
+        expect(client2ExpiredRequestResult.value.status).toBe(LocalRequestStatus.Expired);
     });
 
     describe("Message errors for Relationships that are not active", () => {

@@ -128,6 +128,13 @@ class Messages {
         );
     }
 
+    public cannotSendMessageWithExpiredRequest() {
+        return new ApplicationError(
+            "error.runtime.messages.cannotSendMessageWithExpiredRequest",
+            "The Message cannot be sent as the contained Request is already expired. Please create a new Request and try again."
+        );
+    }
+
     public peerIsInDeletion(addresses: string[]) {
         return new ApplicationError(
             "error.runtime.messages.peerIsInDeletion",

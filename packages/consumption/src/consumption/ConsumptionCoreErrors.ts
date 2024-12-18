@@ -336,6 +336,10 @@ class Requests {
         return new CoreError("error.consumption.requests.cannotShareRequestWithYourself", "You cannot share a Request with yourself.");
     }
 
+    public cannotCreateRequestWithExpirationDateInPast() {
+        return new CoreError("error.consumption.requests.cannotCreateRequestWithExpirationDateInPast", "You cannot create a Request with an expiration date that is in the past.");
+    }
+
     private static readonly _decideValidation = class {
         public invalidNumberOfItems(message: string) {
             return new ApplicationError("error.consumption.requests.decide.validation.invalidNumberOfItems", message);
