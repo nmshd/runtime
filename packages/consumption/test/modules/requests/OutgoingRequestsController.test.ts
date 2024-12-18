@@ -298,6 +298,7 @@ describe("OutgoingRequestsController", function () {
                 message: "You cannot create a Request with an expiration date that is in the past."
             });
         });
+      
     });
 
     describe("CanCreate (on terminated relationship)", function () {
