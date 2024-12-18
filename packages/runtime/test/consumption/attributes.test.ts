@@ -741,7 +741,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
             content: {
                 value: {
                     "@type": "GivenName",
-                    value: "aGivenName3"
+                    value: "aGivenName"
                 },
                 tags: ["tag1", "tag2"]
             }
@@ -755,6 +755,35 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
             `The RepositoryAttribute cannot be created because it has the same content.value as the already existing RepositoryAttribute with id '${result.value.id.toString()}'.`,
             "error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute"
         );
+    });
+
+    test("should not prevent the creation when the duplicate got succeeded", async () => {
+        const request: CreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "aGivenName"
+                },
+                tags: ["tag1", "tag2"]
+            }
+        };
+
+        const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+        expect(result).toBeSuccessful();
+
+        const successionResult = await services1.consumption.attributes.succeedRepositoryAttribute({
+            predecessorId: result.value.id,
+            successorContent: {
+                value: {
+                    "@type": "GivenName",
+                    value: "AnotherGivenName"
+                }
+            }
+        });
+        expect(successionResult).toBeSuccessful();
+
+        const result2 = await services1.consumption.attributes.createRepositoryAttribute(request);
+        expect(result2).toBeSuccessful();
     });
 
     test("should create a RepositoryAttribute that is the same as an existing RepositoryAttribute without an optional property", async () => {

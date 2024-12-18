@@ -44,12 +44,12 @@ export class CreateRepositoryAttributeUseCase extends UseCase<CreateRepositoryAt
             content: {
                 "@type": "IdentityAttribute",
                 owner: this.accountController.identity.address.toString(),
-                value: request.content.value,
-                succeeds: "!"
-            }
+                value: request.content.value
+            },
+            succeededBy: undefined
         });
 
-        const existingRepositoryAttributes = await this.attributeController.getLocalAttributes(queryForRepositoryAttributeDuplicates, false, true);
+        const existingRepositoryAttributes = await this.attributeController.getLocalAttributes(queryForRepositoryAttributeDuplicates);
         if (existingRepositoryAttributes.length > 0) {
             return Result.fail(RuntimeErrors.attributes.cannotCreateDuplicateRepositoryAttribute(existingRepositoryAttributes[0].id));
         }
