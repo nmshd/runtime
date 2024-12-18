@@ -49,7 +49,7 @@ export class CreateRepositoryAttributeUseCase extends UseCase<CreateRepositoryAt
             }
         });
 
-        const existingRepositoryAttributes = await this.attributeController.getLocalAttributes(queryForRepositoryAttributeDuplicates);
+        const existingRepositoryAttributes = await this.attributeController.getLocalAttributes(queryForRepositoryAttributeDuplicates, false, true);
         if (existingRepositoryAttributes.length > 0) {
             return Result.fail(RuntimeErrors.attributes.cannotCreateDuplicateRepositoryAttribute(existingRepositoryAttributes[0].id));
         }
