@@ -55,7 +55,7 @@ export class CreateRepositoryAttributeUseCase extends UseCase<CreateRepositoryAt
 
         const filterForExactValueContent = existingRepositoryAttributes.some((duplicate) => _.isEqual(duplicate.content.value.toJSON(), request.content.value));
 
-        if (filterForExactValueContent && existingRepositoryAttributes.length > 0) {
+        if (filterForExactValueContent) {
             return Result.fail(RuntimeErrors.attributes.cannotCreateDuplicateRepositoryAttribute(existingRepositoryAttributes[0].id));
         }
 
