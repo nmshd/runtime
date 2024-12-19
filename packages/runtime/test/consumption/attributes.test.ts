@@ -757,7 +757,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
         );
     });
 
-    test("should not prevent the creation when the duplicate got succeeded", async () => {
+    test("should not prevent the creation when the RepositoryAttribute duplicate got succeeded", async () => {
         const request: CreateRepositoryAttributeRequest = {
             content: {
                 value: {
@@ -817,7 +817,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
         expect(result2).toBeSuccessful();
     });
 
-    test("should not create a duplicate RepositoryAttribute even if the Tags/validFrom/validTo are different", async () => {
+    test("should not create a duplicate RepositoryAttribute even if the tags/validFrom/validTo are different", async () => {
         const validFrom = CoreDate.utc().subtract({ day: 1 }).toString();
         const validTo = CoreDate.utc().add({ day: 1 }).toString();
         const request: CreateRepositoryAttributeRequest = {
@@ -887,7 +887,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
         );
     });
 
-    test("should create a RepositoryAttribute even if the Tags/validFrom/validTo are duplicates", async () => {
+    test("should create a RepositoryAttribute even if the tags/validFrom/validTo are duplicates", async () => {
         const validFrom = CoreDate.utc().subtract({ day: 1 }).toString();
         const validTo = CoreDate.utc().add({ day: 1 }).toString();
         const request: CreateRepositoryAttributeRequest = {
