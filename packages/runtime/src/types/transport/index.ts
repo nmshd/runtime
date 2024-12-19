@@ -6,6 +6,7 @@ export * from "./IdentityDeletionProcessDTO";
 export * from "./IdentityDTO";
 export * from "./MessageDTO";
 export * from "./MessageWithAttachmentsDTO";
+export * from "./PasswordProtectionDTO";
 export * from "./PublicRelationshipTemplateReferenceDTO";
 export * from "./RecipientDTO";
 export * from "./RelationshipDTO";

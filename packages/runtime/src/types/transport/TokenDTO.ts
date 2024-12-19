@@ -1,3 +1,5 @@
+import { PasswordProtectionDTO } from "./PasswordProtectionDTO";
+
 export interface TokenDTO {
     id: string;
     createdBy: string;
@@ -6,10 +8,7 @@ export interface TokenDTO {
     createdAt: string;
     expiresAt: string;
     forIdentity?: string;
-    passwordProtection?: {
-        password: string;
-        passwordIsPin?: true;
-    };
+    passwordProtection?: PasswordProtectionDTO;
     truncatedReference: string;
     isEphemeral: boolean;
 }
