@@ -851,6 +851,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
             `The RepositoryAttribute cannot be created because it has the same content.value as the already existing RepositoryAttribute with id '${result.value.id.toString()}'.`,
             "error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute"
         );
+
         const request3: CreateRepositoryAttributeRequest = {
             content: {
                 value: {
@@ -867,6 +868,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
             `The RepositoryAttribute cannot be created because it has the same content.value as the already existing RepositoryAttribute with id '${result.value.id.toString()}'.`,
             "error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute"
         );
+
         const request4: CreateRepositoryAttributeRequest = {
             content: {
                 value: {
