@@ -243,6 +243,13 @@ class Attributes {
         );
     }
 
+    public cannotCreateDuplicateRepositoryAttribute(attributeId: CoreId | string): ApplicationError {
+        return new ApplicationError(
+            "error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute",
+            `The RepositoryAttribute cannot be created because it has the same content.value as the already existing RepositoryAttribute with id '${attributeId.toString()}'.`
+        );
+    }
+
     public setDefaultRepositoryAttributesIsDisabled(): ApplicationError {
         return new ApplicationError("error.runtime.attributes.setDefaultRepositoryAttributesIsDisabled", "Setting default RepositoryAttributes is disabled for this Account.");
     }
