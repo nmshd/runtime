@@ -67,13 +67,19 @@ describe("File upload", () => {
         expect(file).toBeDefined();
 
         const response = await transportServices1.files.downloadFile({ id: file.id });
-        expect(response.isSuccess).toBeTruthy();
+        expect(response).toBeSuccessful();
+
         expect(response.value.content.byteLength).toBe(4);
     });
 
-    test("cannot upload an empty file", async () => {
+    test("can exchange an empty file", async () => {
         const response = await transportServices1.files.uploadOwnFile(await makeUploadRequest({ content: Buffer.of() }));
-        expect(response).toBeAnError("'content' is empty", "error.runtime.validation.invalidPropertyValue");
+        expect(response).toBeSuccessful();
+
+        const downloadResponse = await transportServices1.files.downloadFile({ id: response.value.id });
+        expect(downloadResponse).toBeSuccessful();
+
+        expect(downloadResponse.value.content.byteLength).toBe(0);
     });
 
     test("cannot upload a file that is null", async () => {

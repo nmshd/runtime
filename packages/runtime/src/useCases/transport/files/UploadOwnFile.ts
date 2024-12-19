@@ -44,15 +44,6 @@ class Validator extends SchemaValidator<UploadOwnFileValidatableRequest> {
             );
         }
 
-        if (input.content.length === 0) {
-            validationResult.addFailure(
-                new ValidationFailure(
-                    RuntimeErrors.general.invalidPropertyValue(`'${nameof<UploadOwnFileValidatableRequest>((r) => r.content)}' is empty`),
-                    nameof<UploadOwnFileValidatableRequest>((r) => r.content)
-                )
-            );
-        }
-
         if (input.expiresAt && CoreDate.from(input.expiresAt).isSameOrBefore(CoreDate.utc())) {
             validationResult.addFailure(
                 new ValidationFailure(
