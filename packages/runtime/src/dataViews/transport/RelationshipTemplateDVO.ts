@@ -1,3 +1,4 @@
+import { PasswordProtectionDTO } from "../../types";
 import { RelationshipTemplateContentDerivation } from "../../types/transport/RelationshipTemplateDTO";
 import { DataViewObject } from "../DataViewObject";
 import { LocalRequestDVO } from "../consumption/LocalRequestDVO";
@@ -13,10 +14,7 @@ export interface RelationshipTemplateDVO extends DataViewObject {
     expiresAt?: string;
     maxNumberOfAllocations?: number;
     forIdentity?: string;
-    passwordProtection?: {
-        password: string;
-        passwordIsPin?: true;
-    };
+    passwordProtection?: PasswordProtectionDTO;
 
     /**
      * Is optional, as there can be RelationshipTemplates without actual requests in it
