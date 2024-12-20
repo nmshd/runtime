@@ -92,7 +92,7 @@ export class SynchronizedCollection implements IDatabaseCollection {
         if (process && process?.env?.CI === "true") {
             const oldDocUpdated = Serializable.fromUnknown(await this.parent.read(newObject.id.toString()));
 
-            const readDiff = jsonpatch.compare(oldDocUpdated.toJSON(), { ...oldObject.toJSON(), a: 1 });
+            const readDiff = jsonpatch.compare(oldDocUpdated.toJSON(), oldObject.toJSON());
             if (readDiff.length > 0) {
                 // eslint-disable-next-line no-console
                 console.error(`
