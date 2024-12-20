@@ -88,8 +88,7 @@ export class SynchronizedCollection implements IDatabaseCollection {
 
         const newObjectJson = newObject.toJSON();
 
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (process && process?.env?.CI === "true") {
+        if (typeof process === "object" && process.env.CI === "true") {
             const oldDocUpdated = Serializable.fromUnknown(await this.parent.read(newObject.id.toString()));
 
             const readDiff = jsonpatch.compare(oldDocUpdated.toJSON(), oldObject.toJSON());
