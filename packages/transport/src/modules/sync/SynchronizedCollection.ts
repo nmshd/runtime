@@ -87,6 +87,23 @@ export class SynchronizedCollection implements IDatabaseCollection {
 
         const newObjectJson = newObject.toJSON();
 
+        if (typeof globalThis.process === "object" && globalThis.process.env.CI) {
+            const oldDocUpdated = Serializable.fromUnknown(await this.parent.read(newObject.id.toString()));
+
+            const readDiff = jsonpatch.compare(oldDocUpdated.toJSON(), oldObject.toJSON());
+            if (readDiff.length > 0) {
+                // eslint-disable-next-line no-console
+                console.error(`
+The data that is currently updated got modified between it initial reading and this update.
+This will lead to an data loss and inconsistency.
+Here is the diff of the data:
+${JSON.stringify(readDiff, null, 2)}
+
+Stack:
+${new Error().stack}`);
+            }
+        }
+
         if (!this.datawalletModifications) {
             return await this.parent.update(oldDoc, newObject);
         }
