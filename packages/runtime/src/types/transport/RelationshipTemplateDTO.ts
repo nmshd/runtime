@@ -1,4 +1,5 @@
 import { ArbitraryRelationshipTemplateContentJSON, RelationshipTemplateContentJSON } from "@nmshd/content";
+import { PasswordProtectionDTO } from "./PasswordProtectionDTO";
 
 export type RelationshipTemplateContentDerivation = RelationshipTemplateContentJSON | ArbitraryRelationshipTemplateContentJSON;
 
@@ -9,10 +10,7 @@ export interface RelationshipTemplateDTO {
     createdByDevice: string;
     createdAt: string;
     forIdentity?: string;
-    passwordProtection?: {
-        password: string;
-        passwordIsPin?: true;
-    };
+    passwordProtection?: PasswordProtectionDTO;
     content: RelationshipTemplateContentDerivation;
     expiresAt?: string;
     maxNumberOfAllocations?: number;

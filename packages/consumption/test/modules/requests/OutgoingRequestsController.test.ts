@@ -1,11 +1,17 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { ApplicationError } from "@js-soft/ts-utils";
+import { ApplicationError, sleep } from "@js-soft/ts-utils";
 import {
+    CreateAttributeRequestItem,
     IAcceptResponseItem,
     IRequest,
     IRequestItemGroup,
     IResponse,
     IResponseItemGroup,
+    ProposeAttributeRequestItem,
+    ProprietaryString,
+    RelationshipAttribute,
+    RelationshipAttributeConfidentiality,
+    RelationshipAttributeQuery,
     RelationshipTemplateContent,
     RequestItemGroup,
     ResponseItemResult,
@@ -222,6 +228,74 @@ describe("OutgoingRequestsController", function () {
             expect(validationResult).errorValidationResult({
                 code: "error.consumption.requests.cannotShareRequestWithYourself",
                 message: "You cannot share a Request with yourself."
+            });
+        });
+
+        test("returns a validation result that contains an error for requests that are expired", async function () {
+            const validationResult = await When.iCallCanCreateForAnOutgoingRequest({
+                content: {
+                    expiresAt: CoreDate.utc().subtract({ days: 1 }),
+                    items: [
+                        TestRequestItem.from({
+                            mustBeAccepted: false
+                        })
+                    ]
+                }
+            });
+
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.cannotCreateRequestWithExpirationDateInPast",
+                message: "You cannot create a Request with an expiration date that is in the past."
+            });
+        });
+
+        test("returns a validation result that contains an error for requests that would lead to the creation of more than one RelationshipAttribute with the same key", async function () {
+            const validationResult = await When.iCallCanCreateForAnOutgoingRequest({
+                content: {
+                    items: [
+                        CreateAttributeRequestItem.from({
+                            mustBeAccepted: true,
+                            attribute: RelationshipAttribute.from({
+                                "@type": "RelationshipAttribute",
+                                owner: "did:e:a-domain:dids:anidentity",
+                                key: "uniqueKey",
+                                confidentiality: RelationshipAttributeConfidentiality.Public,
+                                value: ProprietaryString.from({ title: "aTitle", value: "aStringValue" }).toJSON()
+                            })
+                        }),
+                        {
+                            "@type": "RequestItemGroup",
+                            items: [
+                                ProposeAttributeRequestItem.from({
+                                    mustBeAccepted: true,
+                                    query: RelationshipAttributeQuery.from({
+                                        owner: "",
+                                        key: "uniqueKey",
+                                        attributeCreationHints: {
+                                            valueType: "ProprietaryString",
+                                            title: "aTitle",
+                                            confidentiality: RelationshipAttributeConfidentiality.Public
+                                        }
+                                    }),
+                                    attribute: RelationshipAttribute.from({
+                                        "@type": "RelationshipAttribute",
+                                        owner: "",
+                                        key: "uniqueKey",
+                                        confidentiality: RelationshipAttributeConfidentiality.Public,
+                                        value: ProprietaryString.from({ title: "aTitle", value: "aStringValue" }).toJSON()
+                                    })
+                                })
+                            ]
+                        } as IRequestItemGroup
+                    ]
+                },
+                peer: "did:e:a-domain:dids:anidentity"
+            });
+
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.violatedKeyUniquenessOfRelationshipAttributes",
+                message:
+                    "The Request cannot be created because its acceptance would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key 'uniqueKey', owner and value type."
             });
         });
     });
@@ -689,25 +763,27 @@ describe("OutgoingRequestsController", function () {
             await Given.anOutgoingRequestWith({
                 status: LocalRequestStatus.Expired,
                 content: {
-                    expiresAt: CoreDate.utc().subtract({ days: 1 }),
+                    expiresAt: CoreDate.utc().add({ millisecond: 100 }),
                     items: [TestRequestItem.from({ mustBeAccepted: false })]
                 }
             });
+            await sleep(150);
 
             await When.iCompleteTheOutgoingRequestWith({ responseSourceObject: incomingMessage });
             await Then.theRequestMovesToStatus(LocalRequestStatus.Completed);
         });
 
         test("throws when trying to complete an expired Request with a Message that was created after the expiry date", async function () {
-            const incomingMessage = TestObjectFactory.createIncomingIMessage(context.currentIdentity);
             await Given.anOutgoingRequestWith({
                 status: LocalRequestStatus.Expired,
                 content: {
-                    expiresAt: CoreDate.utc().subtract({ days: 1 }),
+                    expiresAt: CoreDate.utc().add({ millisecond: 100 }),
                     items: [TestRequestItem.from({ mustBeAccepted: false })]
                 }
             });
+            await sleep(150);
 
+            const incomingMessage = TestObjectFactory.createIncomingIMessage(context.currentIdentity);
             await When.iTryToCompleteTheOutgoingRequestWith({ responseSourceObject: incomingMessage });
             await Then.itThrowsAnErrorWithTheErrorMessage("*Cannot complete an expired request with a response that was created before the expiration date*");
         });
@@ -728,10 +804,11 @@ describe("OutgoingRequestsController", function () {
             await Given.anOutgoingRequestWith({
                 status: LocalRequestStatus.Draft,
                 content: {
-                    expiresAt: CoreDate.utc().subtract({ days: 1 }),
+                    expiresAt: CoreDate.utc().add({ millisecond: 100 }),
                     items: [TestRequestItem.from({ mustBeAccepted: false })]
                 }
             });
+            await sleep(150);
 
             await When.iGetTheOutgoingRequest();
             await Then.theRequestIsInStatus(LocalRequestStatus.Expired);
@@ -807,10 +884,11 @@ describe("OutgoingRequestsController", function () {
             const outgoingRequest = await Given.anOutgoingRequestWith({
                 status: LocalRequestStatus.Draft,
                 content: {
-                    expiresAt: CoreDate.utc().subtract({ days: 1 }),
+                    expiresAt: CoreDate.utc().add({ millisecond: 100 }),
                     items: [TestRequestItem.from({ mustBeAccepted: false })]
                 }
             });
+            await sleep(150);
 
             await When.iGetOutgoingRequestsWithTheQuery({ id: outgoingRequest.id.toString() });
             await Then.theOnlyReturnedRequestIsInStatus(LocalRequestStatus.Expired);

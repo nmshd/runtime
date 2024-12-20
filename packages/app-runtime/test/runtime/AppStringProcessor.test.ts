@@ -182,7 +182,7 @@ describe("AppStringProcessor", function () {
 
         test("device onboarding with a password protected Token", async function () {
             const deviceResult = await runtime1Session.transportServices.devices.createDevice({});
-            const tokenResult = await runtime1Session.transportServices.devices.getDeviceOnboardingToken({
+            const tokenResult = await runtime1Session.transportServices.devices.createDeviceOnboardingToken({
                 id: deviceResult.value.id,
                 passwordProtection: { password: "password" }
             });
