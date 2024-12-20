@@ -15,7 +15,8 @@ export class SynchronizedCollection implements IDatabaseCollection {
     public constructor(
         private readonly parent: IDatabaseCollection,
         private readonly datawalletVersion: number,
-        private readonly datawalletModifications?: IDatabaseCollection
+        private readonly datawalletModifications?: IDatabaseCollection,
+        private readonly debugMode?: boolean
     ) {
         this.name = parent.name;
         this.databaseType = parent.databaseType;
@@ -86,6 +87,16 @@ export class SynchronizedCollection implements IDatabaseCollection {
         const oldObject = Serializable.fromUnknown(oldDoc);
 
         const newObjectJson = newObject.toJSON();
+
+        if (this.debugMode) {
+            const oldDocUpdated = Serializable.fromUnknown(await this.parent.read(newObject.id.toString()));
+
+            const readDiff = jsonpatch.compare(oldDocUpdated.toJSON(), { ...oldObject.toJSON(), a: 2 });
+            if (readDiff.length > 0) {
+                // eslint-disable-next-line no-console
+                console.error(`Object has been changed since last read.\n${new Error().stack}\n${JSON.stringify(readDiff, null, 2)}`);
+            }
+        }
 
         if (!this.datawalletModifications) {
             return await this.parent.update(oldDoc, newObject);

@@ -438,10 +438,10 @@ export class AccountController {
     public async getSynchronizedCollection(collectionName: string): Promise<SynchronizedCollection> {
         const collection = await this.db.getCollection(collectionName);
         if (!this.config.datawalletEnabled) {
-            return new SynchronizedCollection(collection, this.config.supportedDatawalletVersion);
+            return new SynchronizedCollection(collection, this.config.supportedDatawalletVersion, undefined, this.config.debug);
         }
 
-        return new SynchronizedCollection(collection, this.config.supportedDatawalletVersion, this.unpushedDatawalletModifications);
+        return new SynchronizedCollection(collection, this.config.supportedDatawalletVersion, this.unpushedDatawalletModifications, this.config.debug);
     }
 
     public async cleanupDataOfDecomposedRelationship(relationship: Relationship): Promise<void> {
