@@ -916,6 +916,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                 validTo
             }
         };
+
         const result2 = await services1.consumption.attributes.createRepositoryAttribute(request2);
         expect(result2).toBeSuccessful();
     });
