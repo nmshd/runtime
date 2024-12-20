@@ -88,13 +88,21 @@ export class SynchronizedCollection implements IDatabaseCollection {
 
         const newObjectJson = newObject.toJSON();
 
-        if (this.debugMode) {
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        if (process && process?.env?.CI === "true") {
             const oldDocUpdated = Serializable.fromUnknown(await this.parent.read(newObject.id.toString()));
 
-            const readDiff = jsonpatch.compare(oldDocUpdated.toJSON(), oldObject.toJSON());
+            const readDiff = jsonpatch.compare(oldDocUpdated.toJSON(), { ...oldObject.toJSON(), a: 1 });
             if (readDiff.length > 0) {
                 // eslint-disable-next-line no-console
-                console.error(`Object has been changed since last read.\n${new Error().stack}\n${JSON.stringify(readDiff, null, 2)}`);
+                console.error(`
+The data that is currently updated got modified between it initial reading and this update.
+This will lead to an data loss and inconsistency.
+Here is the diff of the data:
+${JSON.stringify(readDiff, null, 2)}
+
+Stack:
+${new Error().stack}`);
             }
         }
 
