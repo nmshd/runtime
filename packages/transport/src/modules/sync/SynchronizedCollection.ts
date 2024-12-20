@@ -15,8 +15,7 @@ export class SynchronizedCollection implements IDatabaseCollection {
     public constructor(
         private readonly parent: IDatabaseCollection,
         private readonly datawalletVersion: number,
-        private readonly datawalletModifications?: IDatabaseCollection,
-        private readonly debugMode?: boolean
+        private readonly datawalletModifications?: IDatabaseCollection
     ) {
         this.name = parent.name;
         this.databaseType = parent.databaseType;
