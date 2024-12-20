@@ -88,7 +88,7 @@ export class SynchronizedCollection implements IDatabaseCollection {
 
         const newObjectJson = newObject.toJSON();
 
-        if (typeof process === "object" && process.env.CI === "true") {
+        if (typeof globalThis.process === "object" && globalThis.process.env.CI) {
             const oldDocUpdated = Serializable.fromUnknown(await this.parent.read(newObject.id.toString()));
 
             const readDiff = jsonpatch.compare(oldDocUpdated.toJSON(), oldObject.toJSON());
