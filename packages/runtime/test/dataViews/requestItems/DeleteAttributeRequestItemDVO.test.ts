@@ -15,6 +15,7 @@ import {
     TransportServices
 } from "../../../src";
 import {
+    cleanupAttributes,
     establishRelationship,
     exchangeAndAcceptRequestByMessage,
     exchangeMessageWithRequest,
@@ -60,6 +61,7 @@ beforeAll(async () => {
 }, 30000);
 
 beforeEach(async () => {
+    await cleanupAttributes(sRuntimeServices, rRuntimeServices);
     const sOwnSharedIdentityAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(sRuntimeServices, rRuntimeServices, {
         content: {
             value: {
