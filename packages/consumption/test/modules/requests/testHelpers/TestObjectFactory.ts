@@ -68,7 +68,7 @@ export class TestObjectFactory {
                             newStatus: RelationshipStatus.Pending
                         }
                     ],
-                    template: this.createIncomingRelationshipTemplate()
+                    templateId: { id: "b9uMR7u7lsKLzRfVJNYb" }
                 })
         });
     }
@@ -110,7 +110,7 @@ export class TestObjectFactory {
                             newStatus: RelationshipStatus.Active
                         }
                     ],
-                    template: this.createIncomingRelationshipTemplate()
+                    templateId: { id: "b9uMR7u7lsKLzRfVJNYb" }
                 })
         });
     }
@@ -161,7 +161,7 @@ export class TestObjectFactory {
                             newStatus: RelationshipStatus.Terminated
                         }
                     ],
-                    template: this.createIncomingRelationshipTemplate()
+                    templateId: { id: "b9uMR7u7lsKLzRfVJNYb" }
                 })
         });
     }
@@ -209,7 +209,7 @@ export class TestObjectFactory {
                             newStatus: RelationshipStatus.Active
                         }
                     ],
-                    template: this.createIncomingRelationshipTemplate()
+                    templateId: CoreId.from("aTemplateId")
                 })
         });
     }
@@ -266,7 +266,7 @@ export class TestObjectFactory {
                             newStatus: RelationshipStatus.DeletionProposed
                         }
                     ],
-                    template: this.createIncomingRelationshipTemplate()
+                    templateId: CoreId.from("aTemplateId")
                 })
         });
     }
@@ -326,7 +326,7 @@ export class TestObjectFactory {
                             newStatus: RelationshipStatus.DeletionProposed
                         }
                     ],
-                    template: this.createIncomingRelationshipTemplate()
+                    templateId: { id: "b9uMR7u7lsKLzRfVJNYb" }
                 })
         });
     }
