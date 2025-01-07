@@ -1,10 +1,14 @@
 import { AbstractIntegerJSON, AbstractStringJSON, IdentityAttributeJSON } from "@nmshd/content";
 import { SharedToPeerAttributeDVO } from "../../src";
-import { ensureActiveRelationship, executeFullCreateAndShareRepositoryAttributeFlow, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
+import { cleanupAttributes, ensureActiveRelationship, executeFullCreateAndShareRepositoryAttributeFlow, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let services1: TestRuntimeServices;
 let services2: TestRuntimeServices;
+
+beforeEach(async () => {
+    await cleanupAttributes(services1, services2);
+});
 
 beforeAll(async () => {
     const runtimeServices = await serviceProvider.launch(2, {
