@@ -290,6 +290,8 @@ function filterConfigElementByPrefix(requestItemConfigElement: RequestItemDeriva
 function checkCompatibility(requestConfigElement: RequestConfig, requestOrRequestItem: LocalRequestDTO | RequestItemJSONDerivations): boolean {
     let compatible = true;
     for (const property in requestConfigElement) {
+        // TODO: check for RelationshipRequestConfig
+
         const unformattedRequestConfigProperty = requestConfigElement[property as keyof RequestConfig];
         if (typeof unformattedRequestConfigProperty === "undefined") {
             continue;
