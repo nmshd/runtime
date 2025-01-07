@@ -1479,7 +1479,6 @@ describe("DeciderModule", () => {
                             "content.item.query.validFrom": attributeValidFrom,
                             "content.item.query.validTo": attributeValidTo,
                             "content.item.query.key": "A key",
-                            "content.item.query.owner": "",
                             "content.item.query.attributeCreationHints.title": "Title of Attribute",
                             "content.item.query.attributeCreationHints.description": "Description of Attribute",
                             "content.item.query.attributeCreationHints.valueType": "ProprietaryString",
