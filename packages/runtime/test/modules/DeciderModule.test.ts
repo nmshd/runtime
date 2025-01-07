@@ -466,7 +466,7 @@ describe("DeciderModule", () => {
             );
         });
 
-        test("cannot decide a Request givena GeneralRequestConfig  with an expiration date too low", async () => {
+        test("cannot decide a Request given a GeneralRequestConfig  with an expiration date too low", async () => {
             const requestExpirationDate = CoreDate.utc().add({ days: 1 }).toString();
             const deciderConfig: DeciderModuleConfigurationOverwrite = {
                 automationConfig: [
