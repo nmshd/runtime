@@ -22,7 +22,7 @@ afterEach(async () => {
     }
 });
 
-describe("IdentityMetadata", () => {
+describe("Upsert IdentityMetadata", () => {
     test.each([
         {
             reference: "did:e:localhost:dids:1234567890abcdef123456",
@@ -48,7 +48,9 @@ describe("IdentityMetadata", () => {
         expect(identityMetadata.key).toStrictEqual(data.key);
         expect(identityMetadata.value).toStrictEqual(data.value);
     });
+});
 
+describe("Get IdentityMetadata", () => {
     test("should get an IdentityMetadata", async () => {
         const reference = await generateReference();
         await consumptionServices.identityMetadata.upsertIdentityMetadata({ reference: reference, value: "value" });
@@ -60,6 +62,15 @@ describe("IdentityMetadata", () => {
         expect(identityMetadata.value).toBe("value");
     });
 
+    test("cannot get an IdentityMetadata if it does not exist", async () => {
+        const reference = await generateReference();
+
+        const result = await consumptionServices.identityMetadata.getIdentityMetadata({ reference: reference });
+        expect(result).toBeAnError("IdentityMetadata not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
+    });
+});
+
+describe("Delete IdentityMetadata", () => {
     test("should delete an IdentityMetadata", async () => {
         const reference = await generateReference();
         await consumptionServices.identityMetadata.upsertIdentityMetadata({ reference: reference, value: "value" });
@@ -69,6 +80,13 @@ describe("IdentityMetadata", () => {
 
         const getResult = await consumptionServices.identityMetadata.getIdentityMetadata({ reference: reference });
         expect(getResult).toBeAnError("IdentityMetadata not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
+    });
+
+    test("cannot delete an IdentityMetadata if it does not exist", async () => {
+        const reference = await generateReference();
+
+        const result = await consumptionServices.identityMetadata.deleteIdentityMetadata({ reference: reference });
+        expect(result).toBeAnError("IdentityMetadata not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
     });
 });
 
