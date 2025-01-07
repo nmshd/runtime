@@ -300,7 +300,6 @@ describe("DeciderModule", () => {
                 ]
             };
             const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
-            await establishRelationship(sender.transport, recipient.transport);
 
             const request = Request.from({
                 expiresAt: requestExpirationDate.toString(),
@@ -437,7 +436,7 @@ describe("DeciderModule", () => {
             );
         });
 
-        test("cannot decide a Request given with an expiration date too high", async () => {
+        test("cannot decide a Request given a GeneralRequestConfig with an expiration date too high", async () => {
             const requestExpirationDate = CoreDate.utc().add({ days: 1 }).toString();
             const deciderConfig: DeciderModuleConfigurationOverwrite = {
                 automationConfig: [
@@ -467,7 +466,7 @@ describe("DeciderModule", () => {
             );
         });
 
-        test("cannot decide a Request given with an expiration date too low", async () => {
+        test("cannot decide a Request givena GeneralRequestConfig  with an expiration date too low", async () => {
             const requestExpirationDate = CoreDate.utc().add({ days: 1 }).toString();
             const deciderConfig: DeciderModuleConfigurationOverwrite = {
                 automationConfig: [
@@ -847,6 +846,44 @@ describe("DeciderModule", () => {
         });
 
         test("cannot decide a RequestItem given a RequestItemConfig that doesn't fit the RequestItem", async () => {
+            const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                automationConfig: [
+                    {
+                        requestConfig: {
+                            "content.item.mustBeAccepted": false
+                        },
+                        responseConfig: {
+                            accept: false
+                        }
+                    }
+                ]
+            };
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+            await establishRelationship(sender.transport, recipient.transport);
+
+            const message = await exchangeMessage(sender.transport, recipient.transport);
+            const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                receivedRequest: {
+                    "@type": "Request",
+                    items: [
+                        {
+                            "@type": "AuthenticationRequestItem",
+                            mustBeAccepted: true,
+                            title: "Title of RequestItem"
+                        }
+                    ]
+                },
+                requestSourceId: message.id
+            });
+            await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+            await expect(recipient.eventBus).toHavePublished(
+                MessageProcessedEvent,
+                (e) => e.data.result === MessageProcessedResult.ManualRequestDecisionRequired && e.data.message.id === message.id
+            );
+        });
+
+        test("cannot decide a RequestItem given a RequestItemConfig that doesn't fit the RequestItem regarding a boolean property", async () => {
             const deciderConfig: DeciderModuleConfigurationOverwrite = {
                 automationConfig: [
                     {
