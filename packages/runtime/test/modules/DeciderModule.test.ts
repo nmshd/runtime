@@ -850,44 +850,6 @@ describe("DeciderModule", () => {
                 automationConfig: [
                     {
                         requestConfig: {
-                            "content.item.mustBeAccepted": false
-                        },
-                        responseConfig: {
-                            accept: false
-                        }
-                    }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
-            await establishRelationship(sender.transport, recipient.transport);
-
-            const message = await exchangeMessage(sender.transport, recipient.transport);
-            const receivedRequestResult = await recipient.consumption.incomingRequests.received({
-                receivedRequest: {
-                    "@type": "Request",
-                    items: [
-                        {
-                            "@type": "AuthenticationRequestItem",
-                            mustBeAccepted: true,
-                            title: "Title of RequestItem"
-                        }
-                    ]
-                },
-                requestSourceId: message.id
-            });
-            await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
-
-            await expect(recipient.eventBus).toHavePublished(
-                MessageProcessedEvent,
-                (e) => e.data.result === MessageProcessedResult.ManualRequestDecisionRequired && e.data.message.id === message.id
-            );
-        });
-
-        test("cannot decide a RequestItem given a RequestItemConfig that doesn't fit the RequestItem regarding a boolean property", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
                             "content.item.@type": "AuthenticationRequestItem",
                             "content.item.title": "Another title of RequestItem"
                         },
@@ -908,6 +870,44 @@ describe("DeciderModule", () => {
                         {
                             "@type": "AuthenticationRequestItem",
                             mustBeAccepted: false,
+                            title: "Title of RequestItem"
+                        }
+                    ]
+                },
+                requestSourceId: message.id
+            });
+            await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+            await expect(recipient.eventBus).toHavePublished(
+                MessageProcessedEvent,
+                (e) => e.data.result === MessageProcessedResult.ManualRequestDecisionRequired && e.data.message.id === message.id
+            );
+        });
+
+        test("cannot decide a RequestItem given a RequestItemConfig that doesn't fit the RequestItem regarding a boolean property", async () => {
+            const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                automationConfig: [
+                    {
+                        requestConfig: {
+                            "content.item.mustBeAccepted": false
+                        },
+                        responseConfig: {
+                            accept: false
+                        }
+                    }
+                ]
+            };
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+            await establishRelationship(sender.transport, recipient.transport);
+
+            const message = await exchangeMessage(sender.transport, recipient.transport);
+            const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                receivedRequest: {
+                    "@type": "Request",
+                    items: [
+                        {
+                            "@type": "AuthenticationRequestItem",
+                            mustBeAccepted: true,
                             title: "Title of RequestItem"
                         }
                     ]
