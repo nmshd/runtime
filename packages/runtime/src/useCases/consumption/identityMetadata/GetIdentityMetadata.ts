@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { IdentityMetadata, IdentityMetadataController } from "@nmshd/consumption";
+import { IdentityMetadataController } from "@nmshd/consumption";
 import { CoreAddress } from "@nmshd/core-types";
 import { Inject } from "@nmshd/typescript-ioc";
 import { IdentityMetadataDTO } from "../../../types";
@@ -29,7 +29,7 @@ export class GetIdentityMetadataUseCase extends UseCase<GetIdentityMetadataReque
     protected override async executeInternal(request: GetIdentityMetadataRequest): Promise<Result<IdentityMetadataDTO>> {
         const identityMetadata = await this.identityMetadataController.getIdentityMetadata(CoreAddress.from(request.reference), request.key);
         if (!identityMetadata) {
-            return Result.fail(RuntimeErrors.general.recordNotFound(IdentityMetadata));
+            return Result.fail(RuntimeErrors.identityMetadata.recordNotFound());
         }
 
         return Result.ok(IdentityMetadataMapper.toIdentityMetadataDTO(identityMetadata));

@@ -270,8 +270,8 @@ class IdentityDeletionProcess {
 }
 
 class IdentityMetadata {
-    public recordDoesNotExist() {
-        return new ApplicationError("error.runtime.identityMetadata.recordDoesNotExist", "There is no stored IdentityMetadata for the specified combination of reference and key.");
+    public recordNotFound() {
+        return new ApplicationError("error.runtime.identityMetadata.recordNotFound", "There is no stored IdentityMetadata for the specified combination of reference and key.");
     }
 
     public unknownReferencedIdentity() {

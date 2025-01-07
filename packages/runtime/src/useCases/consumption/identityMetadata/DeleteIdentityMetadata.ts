@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { IdentityMetadata, IdentityMetadataController } from "@nmshd/consumption";
+import { IdentityMetadataController } from "@nmshd/consumption";
 import { CoreAddress } from "@nmshd/core-types";
 import { AccountController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
@@ -29,7 +29,7 @@ export class DeleteIdentityMetadataUseCase extends UseCase<DeleteIdentityMetadat
     protected override async executeInternal(request: DeleteIdentityMetadataRequest): Promise<Result<void>> {
         const identityMetadata = await this.identityMetadataController.getIdentityMetadata(CoreAddress.from(request.reference), request.key);
         if (!identityMetadata) {
-            return Result.fail(RuntimeErrors.general.recordNotFound(IdentityMetadata));
+            return Result.fail(RuntimeErrors.identityMetadata.recordNotFound());
         }
 
         await this.identityMetadataController.deleteIdentityMetadata(identityMetadata);

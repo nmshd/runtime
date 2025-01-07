@@ -64,9 +64,8 @@ describe("Get IdentityMetadata", () => {
 
     test("cannot get an IdentityMetadata if it does not exist", async () => {
         const reference = await generateReference();
-
         const result = await consumptionServices.identityMetadata.getIdentityMetadata({ reference: reference });
-        expect(result).toBeAnError("IdentityMetadata not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
+        expect(result).toBeAnError("There is no stored IdentityMetadata for the specified combination of reference and key.", "error.runtime.identityMetadata.recordNotFound");
     });
 });
 
@@ -79,14 +78,13 @@ describe("Delete IdentityMetadata", () => {
         expect(result).toBeSuccessful();
 
         const getResult = await consumptionServices.identityMetadata.getIdentityMetadata({ reference: reference });
-        expect(getResult).toBeAnError("IdentityMetadata not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
+        expect(getResult).toBeAnError("There is no stored IdentityMetadata for the specified combination of reference and key.", "error.runtime.identityMetadata.recordNotFound");
     });
 
     test("cannot delete an IdentityMetadata if it does not exist", async () => {
         const reference = await generateReference();
-
         const result = await consumptionServices.identityMetadata.deleteIdentityMetadata({ reference: reference });
-        expect(result).toBeAnError("IdentityMetadata not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
+        expect(result).toBeAnError("There is no stored IdentityMetadata for the specified combination of reference and key.", "error.runtime.identityMetadata.recordNotFound");
     });
 });
 
