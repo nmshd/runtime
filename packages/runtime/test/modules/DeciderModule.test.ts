@@ -1466,7 +1466,6 @@ describe("DeciderModule", () => {
                         requestConfig: {
                             "content.item.@type": "ProposeAttributeRequestItem",
                             "content.item.attribute.@type": "RelationshipAttribute",
-                            "content.item.attribute.owner": "",
                             "content.item.attribute.validFrom": attributeValidFrom,
                             "content.item.attribute.validTo": attributeValidTo,
                             "content.item.attribute.key": "A key",
