@@ -77,7 +77,7 @@ export class AppStringProcessor {
 
         const tokenResultHolder = reference.passwordProtection
             ? await this._runPasswordProtectedWithRetry(
-                  (password) => this.runtime.anonymousServices.tokens.loadPeerToken({ reference: truncatedReference, password }),
+                  async (password) => await this.runtime.anonymousServices.tokens.loadPeerToken({ reference: truncatedReference, password }),
                   reference.passwordProtection
               )
             : { result: await this.runtime.anonymousServices.tokens.loadPeerToken({ reference: truncatedReference }) };
@@ -116,7 +116,7 @@ export class AppStringProcessor {
 
         const resultHolder = reference.passwordProtection
             ? await this._runPasswordProtectedWithRetry(
-                  (password) => services.transportServices.account.loadItemFromTruncatedReference({ reference: reference.truncate(), password }),
+                  async (password) => await services.transportServices.account.loadItemFromTruncatedReference({ reference: reference.truncate(), password }),
                   reference.passwordProtection
               )
             : { result: await services.transportServices.account.loadItemFromTruncatedReference({ reference: reference.truncate(), password: existingPassword }) };
