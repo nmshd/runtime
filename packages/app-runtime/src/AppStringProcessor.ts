@@ -114,19 +114,20 @@ export class AppStringProcessor {
         const services = await this.runtime.getServices(account.id);
         const uiBridge = await this.runtime.uiBridge();
 
-        const resultHolder = reference.passwordProtection
-            ? await this._runPasswordProtectedWithRetry(
-                  async (password) => await services.transportServices.account.loadItemFromTruncatedReference({ reference: reference.truncate(), password }),
-                  reference.passwordProtection
-              )
-            : { result: await services.transportServices.account.loadItemFromTruncatedReference({ reference: reference.truncate(), password: existingPassword }) };
+        const result = reference.passwordProtection
+            ? (
+                  await this._runPasswordProtectedWithRetry(
+                      async (password) => await services.transportServices.account.loadItemFromTruncatedReference({ reference: reference.truncate(), password }),
+                      reference.passwordProtection
+                  )
+              ).result
+            : await services.transportServices.account.loadItemFromTruncatedReference({ reference: reference.truncate(), password: existingPassword });
 
-        if (resultHolder.result.isError) return UserfriendlyResult.fail(UserfriendlyApplicationError.fromError(resultHolder.result.error));
+        if (result.isError) return UserfriendlyResult.fail(UserfriendlyApplicationError.fromError(result.error));
 
-        const value = resultHolder.result.value;
-        switch (value.type) {
+        switch (result.value.type) {
             case "File":
-                const file = await services.dataViewExpander.expandFileDTO(value.value);
+                const file = await services.dataViewExpander.expandFileDTO(result.value.value);
                 await uiBridge.showFile(account, file);
                 break;
             case "RelationshipTemplate":
