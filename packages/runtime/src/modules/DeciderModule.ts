@@ -291,13 +291,13 @@ function checkCompatibility(requestConfigElement: RequestConfig, requestOrReques
     let compatible = true;
     for (const property in requestConfigElement) {
         const unformattedRequestConfigProperty = requestConfigElement[property as keyof RequestConfig];
-        if (!unformattedRequestConfigProperty) {
+        if (typeof unformattedRequestConfigProperty === "undefined") {
             continue;
         }
         const requestConfigProperty = makeObjectsToStrings(unformattedRequestConfigProperty);
 
         const unformattedRequestProperty = getNestedProperty(requestOrRequestItem, property);
-        if (!unformattedRequestProperty) {
+        if (typeof unformattedRequestProperty === "undefined") {
             compatible = false;
             break;
         }
