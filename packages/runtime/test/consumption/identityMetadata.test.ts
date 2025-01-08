@@ -84,7 +84,7 @@ describe("Upsert IdentityMetadata", () => {
         const unknownIdentityReference = await generateReference();
         const result = await consumptionServices.identityMetadata.upsertIdentityMetadata({ reference: unknownIdentityReference, value: "value" });
         expect(result).toBeAnError(
-            "The reference of the IdentityMetadata does not resolve to the address of a known Identity. IdentityMetadata can only be created for the own Identity or for the peers of the Relationships.",
+            "The reference of the IdentityMetadata does not resolve to the address of a known Identity. IdentityMetadata can only be upserted for the own Identity or for the peers of the Relationships.",
             "error.runtime.identityMetadata.unknownReferencedIdentity"
         );
     });
