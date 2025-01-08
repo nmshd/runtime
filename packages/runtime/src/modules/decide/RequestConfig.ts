@@ -56,7 +56,6 @@ export interface FreeTextRequestItemConfig extends RequestItemConfig {
 export interface ProposeAttributeRequestItemConfig extends RequestItemConfig {
     "content.item.@type": "ProposeAttributeRequestItem";
     "content.item.attribute.@type"?: "IdentityAttribute" | "RelationshipAttribute";
-    "content.item.attribute.owner"?: string | string[];
     "content.item.attribute.validFrom"?: string | string[];
     "content.item.attribute.validTo"?: string | string[];
     "content.item.attribute.tags"?: string[];
@@ -73,7 +72,6 @@ export interface ProposeAttributeRequestItemConfig extends RequestItemConfig {
     "content.item.query.valueType"?: string | string[];
     "content.item.query.tags"?: string[];
     "content.item.query.key"?: string | string[];
-    "content.item.query.owner"?: string | string[];
     "content.item.query.queryString"?: string | string[];
     "content.item.query.attributeCreationHints.title"?: string | string[];
     "content.item.query.attributeCreationHints.description"?: string | string[];
