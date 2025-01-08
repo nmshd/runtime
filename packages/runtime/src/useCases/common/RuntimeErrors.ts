@@ -284,7 +284,7 @@ class IdentityMetadata {
     public unknownReferencedIdentity() {
         return new ApplicationError(
             "error.runtime.identityMetadata.unknownReferencedIdentity",
-            "The reference of the IdentityMetadata does not resolve to the address of a known Identity."
+            "The reference of the IdentityMetadata does not resolve to the address of a known Identity. IdentityMetadata can only be created for the own Identity or for the peers of the Relationships."
         );
     }
 }
