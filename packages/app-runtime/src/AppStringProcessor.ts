@@ -75,20 +75,16 @@ export class AppStringProcessor {
 
         const uiBridge = await this.runtime.uiBridge();
 
-        let password: string | undefined;
-        if (reference.passwordProtection) {
-            const passwordResult = await this.enterPassword(reference.passwordProtection);
-            if (passwordResult.isError) {
-                return UserfriendlyResult.fail(new UserfriendlyApplicationError("error.appStringProcessor.passwordNotProvided", "No password was provided."));
-            }
+        const tokenResultHolder = reference.passwordProtection
+            ? await this._runPasswordProtectedWithRetry(
+                  (password) => this.runtime.anonymousServices.tokens.loadPeerToken({ reference: truncatedReference, password }),
+                  reference.passwordProtection
+              )
+            : { result: await this.runtime.anonymousServices.tokens.loadPeerToken({ reference: truncatedReference }) };
 
-            password = passwordResult.value;
-        }
+        if (tokenResultHolder.result.isError) return UserfriendlyResult.fail(UserfriendlyApplicationError.fromError(tokenResultHolder.result.error));
 
-        const tokenResult = await this.runtime.anonymousServices.tokens.loadPeerToken({ reference: truncatedReference, password: password });
-        if (tokenResult.isError) return UserfriendlyResult.fail(UserfriendlyApplicationError.fromError(tokenResult.error));
-
-        const tokenDTO = tokenResult.value;
+        const tokenDTO = tokenResultHolder.result.value;
         const tokenContent = this.parseTokenContent(tokenDTO.content);
         if (!tokenContent) {
             const error = AppRuntimeErrors.startup.wrongCode();
@@ -111,29 +107,26 @@ export class AppStringProcessor {
             return UserfriendlyResult.ok(undefined);
         }
 
-        return await this._handleReference(reference, selectedAccount, password);
+        return await this._handleReference(reference, selectedAccount, tokenResultHolder.password);
     }
 
     private async _handleReference(reference: Reference, account: LocalAccountDTO, existingPassword?: string): Promise<UserfriendlyResult<void>> {
         const services = await this.runtime.getServices(account.id);
         const uiBridge = await this.runtime.uiBridge();
 
-        let password: string | undefined = existingPassword;
-        if (reference.passwordProtection && !password) {
-            const passwordResult = await this.enterPassword(reference.passwordProtection);
-            if (passwordResult.isError) {
-                return UserfriendlyResult.fail(new UserfriendlyApplicationError("error.appStringProcessor.passwordNotProvided", "No password was provided."));
-            }
+        const resultHolder = reference.passwordProtection
+            ? await this._runPasswordProtectedWithRetry(
+                  (password) => services.transportServices.account.loadItemFromTruncatedReference({ reference: reference.truncate(), password }),
+                  reference.passwordProtection
+              )
+            : { result: await services.transportServices.account.loadItemFromTruncatedReference({ reference: reference.truncate(), password: existingPassword }) };
 
-            password = passwordResult.value;
-        }
+        if (resultHolder.result.isError) return UserfriendlyResult.fail(UserfriendlyApplicationError.fromError(resultHolder.result.error));
 
-        const result = await services.transportServices.account.loadItemFromTruncatedReference({ reference: reference.truncate(), password: password });
-        if (result.isError) return UserfriendlyResult.fail(UserfriendlyApplicationError.fromError(result.error));
-
-        switch (result.value.type) {
+        const value = resultHolder.result.value;
+        switch (value.type) {
             case "File":
-                const file = await services.dataViewExpander.expandFileDTO(result.value.value);
+                const file = await services.dataViewExpander.expandFileDTO(value.value);
                 await uiBridge.showFile(account, file);
                 break;
             case "RelationshipTemplate":
@@ -164,14 +157,47 @@ export class AppStringProcessor {
         }
     }
 
-    private async enterPassword(passwordProtection: SharedPasswordProtection): Promise<Result<string>> {
-        const uiBridge = await this.runtime.uiBridge();
-        const passwordResult = await uiBridge.enterPassword(
-            passwordProtection.passwordType === "pw" ? "pw" : "pin",
-            passwordProtection.passwordType.startsWith("pin") ? parseInt(passwordProtection.passwordType.substring(3)) : undefined
-        );
+    private async _runPasswordProtectedWithRetry<T>(
+        fun: (password: string) => Promise<Result<T>>,
+        passwordProtection: SharedPasswordProtection
+    ): Promise<{ result: Result<T>; password?: string }> {
+        let iteration = 1;
 
-        return passwordResult;
+        const uiBridge = await this.runtime.uiBridge();
+
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-constant-condition
+        while (true) {
+            const passwordResult = await uiBridge.enterPassword(
+                passwordProtection.passwordType === "pw" ? "pw" : "pin",
+                passwordProtection.passwordType.startsWith("pin") ? parseInt(passwordProtection.passwordType.substring(3)) : undefined,
+                iteration
+            );
+
+            if (passwordResult.isError) {
+                return {
+                    result: UserfriendlyResult.fail(new UserfriendlyApplicationError("error.appStringProcessor.passwordNotProvided", "No password was provided."))
+                };
+            }
+
+            const password = passwordResult.value;
+
+            const result = await fun(password);
+            iteration++;
+
+            if (result.isSuccess) {
+                return {
+                    result,
+                    password
+                };
+            }
+
+            // for security reasons the backbone is only indicating that the record was not found, but not that the password was wrong
+            if (result.isError && result.error.code === "error.runtime.recordNotFound") continue;
+
+            return {
+                result
+            };
+        }
     }
 
     private async selectAccount(forIdentityTruncated?: string): Promise<UserfriendlyResult<LocalAccountDTO | undefined>> {
