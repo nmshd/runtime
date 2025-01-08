@@ -76,7 +76,7 @@ export class AppStringProcessor {
         const uiBridge = await this.runtime.uiBridge();
 
         const tokenResultHolder = reference.passwordProtection
-            ? await this._runPasswordProtectedWithRetry(
+            ? await this._fetchPasswordProtectedItemWithRetry(
                   async (password) => await this.runtime.anonymousServices.tokens.loadPeerToken({ reference: truncatedReference, password }),
                   reference.passwordProtection
               )
@@ -116,7 +116,7 @@ export class AppStringProcessor {
 
         const result = reference.passwordProtection
             ? (
-                  await this._runPasswordProtectedWithRetry(
+                  await this._fetchPasswordProtectedItemWithRetry(
                       async (password) => await services.transportServices.account.loadItemFromTruncatedReference({ reference: reference.truncate(), password }),
                       reference.passwordProtection
                   )
@@ -158,8 +158,8 @@ export class AppStringProcessor {
         }
     }
 
-    private async _runPasswordProtectedWithRetry<T>(
-        fun: (password: string) => Promise<Result<T>>,
+    private async _fetchPasswordProtectedItemWithRetry<T>(
+        fetchFunction: (password: string) => Promise<Result<T>>,
         passwordProtection: SharedPasswordProtection
     ): Promise<{ result: Result<T>; password?: string }> {
         let iteration = 1;
@@ -182,7 +182,7 @@ export class AppStringProcessor {
 
             const password = passwordResult.value;
 
-            const result = await fun(password);
+            const result = await fetchFunction(password);
             iteration++;
 
             if (result.isSuccess) {
