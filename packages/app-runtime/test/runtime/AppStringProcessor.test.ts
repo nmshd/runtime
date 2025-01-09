@@ -169,6 +169,29 @@ describe("AppStringProcessor", function () {
         expect(mockUiBridge).requestAccountSelectionNotCalled();
     });
 
+    test("should retry for a wrong password when handling a password protected RelationshipTemplate", async function () {
+        const templateResult = await runtime1Session.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
+            content: templateContent,
+            expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(),
+            passwordProtection: { password: "password" }
+        });
+
+        mockUiBridge.setPasswordToReturnForIteration(1, "wrongPassword");
+        mockUiBridge.setPasswordToReturnForIteration(2, "password");
+
+        mockUiBridge.accountIdToReturn = runtime2SessionA.account.id;
+
+        const result = await runtime2.stringProcessor.processTruncatedReference(templateResult.value.truncatedReference);
+        expect(result).toBeSuccessful();
+        expect(result.value).toBeUndefined();
+
+        await expect(eventBus).toHavePublished(PeerRelationshipTemplateLoadedEvent);
+
+        expect(mockUiBridge).enterPasswordCalled("pw", undefined, 1);
+        expect(mockUiBridge).enterPasswordCalled("pw", undefined, 2);
+        expect(mockUiBridge).requestAccountSelectionCalled(2);
+    });
+
     describe("onboarding", function () {
         let runtime3: AppRuntime;
         const runtime3MockUiBridge = new MockUIBridge();
