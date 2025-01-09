@@ -162,7 +162,7 @@ export class AppStringProcessor {
         fetchFunction: (password: string) => Promise<Result<T>>,
         passwordProtection: SharedPasswordProtection
     ): Promise<{ result: Result<T>; password?: string }> {
-        let iteration = 1;
+        let attempt = 1;
 
         const uiBridge = await this.runtime.uiBridge();
 
@@ -171,7 +171,7 @@ export class AppStringProcessor {
             const passwordResult = await uiBridge.enterPassword(
                 passwordProtection.passwordType === "pw" ? "pw" : "pin",
                 passwordProtection.passwordType.startsWith("pin") ? parseInt(passwordProtection.passwordType.substring(3)) : undefined,
-                iteration
+                attempt
             );
             if (passwordResult.isError) {
                 return { result: UserfriendlyResult.fail(new UserfriendlyApplicationError("error.appStringProcessor.passwordNotProvided", "No password was provided.")) };
@@ -180,7 +180,7 @@ export class AppStringProcessor {
             const password = passwordResult.value;
 
             const result = await fetchFunction(password);
-            iteration++;
+            attempt++;
 
             if (result.isSuccess) return { result, password };
             if (result.isError && result.error.code === "error.runtime.recordNotFound") continue;

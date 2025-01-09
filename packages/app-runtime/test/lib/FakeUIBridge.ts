@@ -30,7 +30,7 @@ export class FakeUIBridge implements IUIBridge {
         throw new Error("Method not implemented.");
     }
 
-    public enterPassword(_passwordType: "pw" | "pin", _pinLength?: number, _iteration?: number): Promise<Result<string>> {
+    public enterPassword(_passwordType: "pw" | "pin", _pinLength?: number, _attempt?: number): Promise<Result<string>> {
         throw new Error("Method not implemented.");
     }
 }

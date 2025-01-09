@@ -10,7 +10,7 @@ export type MockUIBridgeCall =
     | { method: "showRequest"; account: LocalAccountDTO; request: LocalRequestDVO }
     | { method: "showError"; error: UserfriendlyApplicationError; account?: LocalAccountDTO }
     | { method: "requestAccountSelection"; possibleAccounts: LocalAccountDTO[]; title?: string; description?: string }
-    | { method: "enterPassword"; passwordType: "pw" | "pin"; pinLength?: number; iteration?: number };
+    | { method: "enterPassword"; passwordType: "pw" | "pin"; pinLength?: number; attempt?: number };
 
 export class MockUIBridge implements IUIBridge {
     private _accountIdToReturn: string | undefined;
@@ -18,9 +18,9 @@ export class MockUIBridge implements IUIBridge {
         this._accountIdToReturn = value;
     }
 
-    private _passwordToReturnForIteration: Record<number, string> = {};
-    public setPasswordToReturnForIteration(iteration: number, password: string): void {
-        this._passwordToReturnForIteration[iteration] = password;
+    private _passwordToReturnForAttempt: Record<number, string> = {};
+    public setPasswordToReturnForAttempt(attempt: number, password: string): void {
+        this._passwordToReturnForAttempt[attempt] = password;
     }
 
     private _calls: MockUIBridgeCall[] = [];
@@ -30,7 +30,7 @@ export class MockUIBridge implements IUIBridge {
 
     public reset(): void {
         this._accountIdToReturn = undefined;
-        this._passwordToReturnForIteration = {};
+        this._passwordToReturnForAttempt = {};
 
         this._calls = [];
     }
@@ -82,10 +82,10 @@ export class MockUIBridge implements IUIBridge {
         return Promise.resolve(Result.ok(foundAccount));
     }
 
-    public enterPassword(passwordType: "pw" | "pin", pinLength?: number, iteration?: number): Promise<Result<string>> {
-        this._calls.push({ method: "enterPassword", passwordType, pinLength, iteration });
+    public enterPassword(passwordType: "pw" | "pin", pinLength?: number, attempt?: number): Promise<Result<string>> {
+        this._calls.push({ method: "enterPassword", passwordType, pinLength, attempt });
 
-        const password = this._passwordToReturnForIteration[iteration ?? 1];
+        const password = this._passwordToReturnForAttempt[attempt ?? 1];
         if (!password) return Promise.resolve(Result.fail(new ApplicationError("code", "message")));
 
         return Promise.resolve(Result.ok(password));

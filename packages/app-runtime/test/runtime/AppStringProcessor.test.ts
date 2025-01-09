@@ -96,7 +96,7 @@ describe("AppStringProcessor", function () {
             passwordProtection: { password: "password" }
         });
 
-        mockUiBridge.setPasswordToReturnForIteration(1, "password");
+        mockUiBridge.setPasswordToReturnForAttempt(1, "password");
         mockUiBridge.accountIdToReturn = runtime2SessionA.account.id;
 
         const result = await runtime2.stringProcessor.processTruncatedReference(templateResult.value.truncatedReference);
@@ -116,7 +116,7 @@ describe("AppStringProcessor", function () {
             passwordProtection: { password: "000000", passwordIsPin: true }
         });
 
-        mockUiBridge.setPasswordToReturnForIteration(1, "000000");
+        mockUiBridge.setPasswordToReturnForAttempt(1, "000000");
         mockUiBridge.accountIdToReturn = runtime2SessionA.account.id;
 
         const result = await runtime2.stringProcessor.processTruncatedReference(templateResult.value.truncatedReference);
@@ -137,7 +137,7 @@ describe("AppStringProcessor", function () {
             forIdentity: runtime2SessionA.account.address!
         });
 
-        mockUiBridge.setPasswordToReturnForIteration(1, "password");
+        mockUiBridge.setPasswordToReturnForAttempt(1, "password");
 
         const result = await runtime2.stringProcessor.processTruncatedReference(templateResult.value.truncatedReference);
         expect(result).toBeSuccessful();
@@ -157,7 +157,7 @@ describe("AppStringProcessor", function () {
             forIdentity: runtime2SessionA.account.address!
         });
 
-        mockUiBridge.setPasswordToReturnForIteration(1, "000000");
+        mockUiBridge.setPasswordToReturnForAttempt(1, "000000");
 
         const result = await runtime2.stringProcessor.processTruncatedReference(templateResult.value.truncatedReference);
         expect(result).toBeSuccessful();
@@ -176,8 +176,8 @@ describe("AppStringProcessor", function () {
             passwordProtection: { password: "password" }
         });
 
-        mockUiBridge.setPasswordToReturnForIteration(1, "wrongPassword");
-        mockUiBridge.setPasswordToReturnForIteration(2, "password");
+        mockUiBridge.setPasswordToReturnForAttempt(1, "wrongPassword");
+        mockUiBridge.setPasswordToReturnForAttempt(2, "password");
 
         mockUiBridge.accountIdToReturn = runtime2SessionA.account.id;
 
@@ -210,7 +210,7 @@ describe("AppStringProcessor", function () {
                 passwordProtection: { password: "password" }
             });
 
-            mockUiBridge.setPasswordToReturnForIteration(1, "password");
+            mockUiBridge.setPasswordToReturnForAttempt(1, "password");
 
             const result = await runtime2.stringProcessor.processTruncatedReference(tokenResult.value.truncatedReference);
             expect(result).toBeSuccessful();

@@ -67,7 +67,7 @@ expect.extend({
 
         return { pass: true, message: () => "" };
     },
-    enterPasswordCalled(mockUIBridge: unknown, passwordType: "pw" | "pin", pinLength?: number, iteration?: number) {
+    enterPasswordCalled(mockUIBridge: unknown, passwordType: "pw" | "pin", pinLength?: number, attempt?: number) {
         if (!(mockUIBridge instanceof MockUIBridge)) {
             throw new Error("This method can only be used with expect(MockUIBridge).");
         }
@@ -77,11 +77,11 @@ expect.extend({
             return { pass: false, message: () => "The method enterPassword was not called." };
         }
 
-        const matchingCalls = calls.filter((x) => x.passwordType === passwordType && x.pinLength === pinLength && x.iteration === (iteration ?? 1));
+        const matchingCalls = calls.filter((x) => x.passwordType === passwordType && x.pinLength === pinLength && x.attempt === (attempt ?? 1));
         if (matchingCalls.length === 0) {
             const parameters = calls
                 .map((e) => {
-                    return { passwordType: e.passwordType, pinLength: e.pinLength, iteration: e.iteration };
+                    return { passwordType: e.passwordType, pinLength: e.pinLength, attempt: e.attempt };
                 })
                 .map((e) => JSON.stringify(e))
                 .join(", ");
@@ -116,7 +116,7 @@ declare global {
             showDeviceOnboardingNotCalled(): R;
             requestAccountSelectionCalled(possibleAccountsLength: number): R;
             requestAccountSelectionNotCalled(): R;
-            enterPasswordCalled(passwordType: "pw" | "pin", pinLength?: number, iteration?: number): R;
+            enterPasswordCalled(passwordType: "pw" | "pin", pinLength?: number, attempt?: number): R;
             enterPasswordNotCalled(): R;
         }
     }
