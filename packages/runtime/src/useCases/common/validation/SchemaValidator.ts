@@ -21,7 +21,7 @@ export class SchemaValidator<T> implements IValidator<T> {
             return result;
         }
 
-        result.addFailures(validationResult.errors!.map(this.schemaErrorToValidationFailure));
+        result.addFailures(validationResult.errors!.map(this.schemaErrorToValidationFailure).reverse());
 
         return result;
     }
