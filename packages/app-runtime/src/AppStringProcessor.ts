@@ -166,8 +166,8 @@ export class AppStringProcessor {
 
         const uiBridge = await this.runtime.uiBridge();
 
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-constant-condition
-        while (true) {
+        const maxRetries = 1000;
+        while (attempt <= maxRetries) {
             const passwordResult = await uiBridge.enterPassword(
                 passwordProtection.passwordType === "pw" ? "pw" : "pin",
                 passwordProtection.passwordType.startsWith("pin") ? parseInt(passwordProtection.passwordType.substring(3)) : undefined,
@@ -186,6 +186,12 @@ export class AppStringProcessor {
             if (result.isError && result.error.code === "error.runtime.recordNotFound") continue;
             return { result };
         }
+
+        return {
+            result: UserfriendlyResult.fail(
+                new UserfriendlyApplicationError("error.appStringProcessor.passwordRetryLimitReached", "The maximum number of attempts to enter the password was reached.")
+            )
+        };
     }
 
     private async selectAccount(forIdentityTruncated?: string): Promise<UserfriendlyResult<LocalAccountDTO | undefined>> {
