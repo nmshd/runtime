@@ -77,12 +77,13 @@ expect.extend({
             return { pass: false, message: () => "The method enterPassword was not called." };
         }
 
-        const matchingCalls = calls.filter((x) => x.passwordType === passwordType && x.pinLength === pinLength && x.iteration === iteration);
+        const matchingCalls = calls.filter((x) => x.passwordType === passwordType && x.pinLength === pinLength && x.iteration === (iteration ?? 1));
         if (matchingCalls.length === 0) {
             const parameters = calls
                 .map((e) => {
                     return { passwordType: e.passwordType, pinLength: e.pinLength, iteration: e.iteration };
                 })
+                .map((e) => JSON.stringify(e))
                 .join(", ");
 
             return {
