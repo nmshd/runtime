@@ -29,7 +29,7 @@ export class DeleteIdentityMetadataUseCase extends UseCase<DeleteIdentityMetadat
     protected override async executeInternal(request: DeleteIdentityMetadataRequest): Promise<Result<void>> {
         const identityMetadata = await this.identityMetadataController.getIdentityMetadata(CoreAddress.from(request.reference), request.key);
         if (!identityMetadata) {
-            return Result.fail(RuntimeErrors.identityMetadata.recordNotFound());
+            return Result.fail(RuntimeErrors.identityMetadata.notFound());
         }
 
         await this.identityMetadataController.deleteIdentityMetadata(identityMetadata);

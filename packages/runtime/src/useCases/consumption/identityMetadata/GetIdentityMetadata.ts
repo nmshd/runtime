@@ -29,7 +29,7 @@ export class GetIdentityMetadataUseCase extends UseCase<GetIdentityMetadataReque
     protected override async executeInternal(request: GetIdentityMetadataRequest): Promise<Result<IdentityMetadataDTO>> {
         const identityMetadata = await this.identityMetadataController.getIdentityMetadata(CoreAddress.from(request.reference), request.key);
         if (!identityMetadata) {
-            return Result.fail(RuntimeErrors.identityMetadata.recordNotFound());
+            return Result.fail(RuntimeErrors.identityMetadata.notFound());
         }
 
         return Result.ok(IdentityMetadataMapper.toIdentityMetadataDTO(identityMetadata));

@@ -80,12 +80,12 @@ describe("Upsert IdentityMetadata", () => {
         expect(identityMetadata.value).toStrictEqual(upsertRequest.value);
     });
 
-    test("cannot upsert an IdentityMetadata if the referenced Identity is not known", async () => {
+    test("cannot upsert an IdentityMetadata if the referenced Identity is unfamiliar", async () => {
         const unknownIdentityReference = await generateReference();
         const result = await consumptionServices.identityMetadata.upsertIdentityMetadata({ reference: unknownIdentityReference, value: "value" });
         expect(result).toBeAnError(
-            "The reference of the IdentityMetadata does not resolve to the address of a known Identity. IdentityMetadata can only be upserted for the own Identity or for the peers of the Relationships.",
-            "error.runtime.identityMetadata.unknownReferencedIdentity"
+            "The reference of the IdentityMetadata resolves neither to the address of a peer of a Relationship nor the address of the own Identity.",
+            "error.runtime.identityMetadata.unfamiliarReferencedIdentity"
         );
     });
 });
@@ -103,7 +103,7 @@ describe("Get IdentityMetadata", () => {
 
     test("cannot get an IdentityMetadata if it does not exist", async () => {
         const result = await consumptionServices.identityMetadata.getIdentityMetadata({ reference: peerAddress });
-        expect(result).toBeAnError("There is no stored IdentityMetadata for the specified combination of reference and key.", "error.runtime.identityMetadata.recordNotFound");
+        expect(result).toBeAnError("There is no stored IdentityMetadata for the specified combination of reference and key.", "error.runtime.identityMetadata.notFound");
     });
 });
 
@@ -115,12 +115,12 @@ describe("Delete IdentityMetadata", () => {
         expect(result).toBeSuccessful();
 
         const getResult = await consumptionServices.identityMetadata.getIdentityMetadata({ reference: peerAddress });
-        expect(getResult).toBeAnError("There is no stored IdentityMetadata for the specified combination of reference and key.", "error.runtime.identityMetadata.recordNotFound");
+        expect(getResult).toBeAnError("There is no stored IdentityMetadata for the specified combination of reference and key.", "error.runtime.identityMetadata.notFound");
     });
 
     test("cannot delete an IdentityMetadata if it does not exist", async () => {
         const result = await consumptionServices.identityMetadata.deleteIdentityMetadata({ reference: peerAddress });
-        expect(result).toBeAnError("There is no stored IdentityMetadata for the specified combination of reference and key.", "error.runtime.identityMetadata.recordNotFound");
+        expect(result).toBeAnError("There is no stored IdentityMetadata for the specified combination of reference and key.", "error.runtime.identityMetadata.notFound");
     });
 });
 

@@ -34,10 +34,11 @@ export class UpsertIdentityMetadataUseCase extends UseCase<UpsertIdentityMetadat
     protected override async executeInternal(request: UpsertIdentityMetadataRequest): Promise<Result<IdentityMetadataDTO>> {
         const referencedIdentity = CoreAddress.from(request.reference);
         const peersOfRelationships = (await this.relationshipsController.getRelationships({})).map((relationship) => relationship.peer.address);
-        const referencedIdentityIsKnown =
-            referencedIdentity.equals(this.accountController.identity.address) || peersOfRelationships.some((peer) => referencedIdentity.equals(peer));
-        if (!referencedIdentityIsKnown) {
-            return Result.fail(RuntimeErrors.identityMetadata.unknownReferencedIdentity());
+
+        const referencedIdentityIsFamiliar =
+            peersOfRelationships.some((peer) => referencedIdentity.equals(peer)) || referencedIdentity.equals(this.accountController.identity.address);
+        if (!referencedIdentityIsFamiliar) {
+            return Result.fail(RuntimeErrors.identityMetadata.unfamiliarReferencedIdentity());
         }
 
         const value = JSONWrapper.fromAny(request.value);

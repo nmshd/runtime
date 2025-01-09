@@ -277,14 +277,14 @@ class IdentityDeletionProcess {
 }
 
 class IdentityMetadata {
-    public recordNotFound() {
-        return new ApplicationError("error.runtime.identityMetadata.recordNotFound", "There is no stored IdentityMetadata for the specified combination of reference and key.");
+    public notFound() {
+        return new ApplicationError("error.runtime.identityMetadata.notFound", "There is no stored IdentityMetadata for the specified combination of reference and key.");
     }
 
-    public unknownReferencedIdentity() {
+    public unfamiliarReferencedIdentity() {
         return new ApplicationError(
-            "error.runtime.identityMetadata.unknownReferencedIdentity",
-            "The reference of the IdentityMetadata does not resolve to the address of a known Identity. IdentityMetadata can only be upserted for the own Identity or for the peers of the Relationships."
+            "error.runtime.identityMetadata.unfamiliarReferencedIdentity",
+            "The reference of the IdentityMetadata resolves neither to the address of a peer of a Relationship nor the address of the own Identity."
         );
     }
 }
