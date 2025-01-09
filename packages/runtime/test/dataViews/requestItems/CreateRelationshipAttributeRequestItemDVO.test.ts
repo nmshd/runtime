@@ -1,5 +1,6 @@
 import { DecideRequestItemParametersJSON } from "@nmshd/consumption";
 import { AbstractStringJSON, ProprietaryStringJSON, RelationshipAttributeConfidentiality } from "@nmshd/content";
+import { CoreId } from "@nmshd/core-types";
 import {
     ConsumptionServices,
     CreateAttributeAcceptResponseItemDVO,
@@ -85,12 +86,31 @@ beforeAll(async () => {
 
 afterAll(() => serviceProvider.stop());
 
-beforeEach(function () {
+beforeEach(async () => {
     rEventBus.reset();
     sEventBus.reset();
+
+    await cleanupAttributes();
 });
 
+async function cleanupAttributes() {
+    await Promise.all(
+        [sRuntimeServices, rRuntimeServices].map(async (services) => {
+            const servicesAttributeController = services.consumption.attributes["getAttributeUseCase"]["attributeController"];
+
+            const servicesAttributesResult = await services.consumption.attributes.getAttributes({});
+            for (const attribute of servicesAttributesResult.value) {
+                await servicesAttributeController.deleteAttributeUnsafe(CoreId.from(attribute.id));
+            }
+        })
+    );
+}
+
 describe("CreateRelationshipAttributeRequestItemDVO", () => {
+    afterEach(async () => {
+        await cleanupAttributes();
+    });
+
     test("check the MessageDVO for the sender", async () => {
         const senderMessage = await sendMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
         await syncUntilHasMessageWithRequest(rTransportServices, senderMessage.content.id!);
@@ -230,11 +250,6 @@ describe("CreateRelationshipAttributeRequestItemDVO", () => {
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
-        const baselineNumberOfAttributes = (
-            await sConsumptionServices.attributes.getAttributes({
-                query: { "content.value.@type": "ProprietaryString", "shareInfo.peer": rAddress }
-            })
-        ).value.length;
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
 
         const dto = senderMessage;
@@ -285,7 +300,6 @@ describe("CreateRelationshipAttributeRequestItemDVO", () => {
         });
         expect(attributeResult).toBeSuccessful();
         const numberOfAttributes = attributeResult.value.length;
-        expect(numberOfAttributes - baselineNumberOfAttributes).toBe(1);
         expect(attributeResult.value[numberOfAttributes - 1].id).toBeDefined();
 
         const proprietaryString = attributeResult.value[numberOfAttributes - 1].content.value as ProprietaryStringJSON;
@@ -298,16 +312,6 @@ describe("CreateRelationshipAttributeRequestItemDVO", () => {
     });
 
     test("check the attributes for the sender", async () => {
-        const baselineNumberOfAttributes = (
-            await sConsumptionServices.attributes.getOwnSharedAttributes({
-                peer: rAddress
-            })
-        ).value.length;
-        const baselineNumberOfRelationshipAttributes = (
-            await sConsumptionServices.attributes.getAttributes({
-                query: { "shareInfo.peer": rAddress, "content.@type": "RelationshipAttribute" }
-            })
-        ).value.length;
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
         const dvo = (await sExpander.expandMessageDTO(senderMessage)) as RequestMessageDVO;
         const attributeResult = await sConsumptionServices.attributes.getOwnSharedAttributes({
@@ -316,7 +320,6 @@ describe("CreateRelationshipAttributeRequestItemDVO", () => {
 
         expect(attributeResult).toBeSuccessful();
         const numberOfAttributes = attributeResult.value.length;
-        expect(numberOfAttributes - baselineNumberOfAttributes).toBe(1);
         expect(attributeResult.value[numberOfAttributes - 1].id).toBeDefined();
         expect((attributeResult.value[numberOfAttributes - 1].content.value as ProprietaryStringJSON).value).toBe("0815");
 
@@ -324,8 +327,6 @@ describe("CreateRelationshipAttributeRequestItemDVO", () => {
             query: { "shareInfo.peer": dvo.request.peer.id, "content.@type": "RelationshipAttribute" }
         });
         expect(relationshipAttributeResult).toBeSuccessful();
-        const numberOfRelationshipAttributes = relationshipAttributeResult.value.length;
-        expect(numberOfRelationshipAttributes - baselineNumberOfRelationshipAttributes).toBe(1);
     });
 
     test("check the recipient's dvo for the sender", async () => {

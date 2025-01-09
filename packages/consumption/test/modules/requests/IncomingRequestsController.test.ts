@@ -1,8 +1,24 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { IRequest, IRequestItemGroup, RejectResponseItem, Request, RequestItemGroup, ResponseItem, ResponseItemGroup, ResponseItemResult } from "@nmshd/content";
+import {
+    CreateAttributeRequestItem,
+    IRequest,
+    IRequestItemGroup,
+    ProprietaryString,
+    ReadAttributeRequestItem,
+    RejectResponseItem,
+    RelationshipAttribute,
+    RelationshipAttributeConfidentiality,
+    RelationshipAttributeQuery,
+    Request,
+    RequestItemGroup,
+    ResponseItem,
+    ResponseItemGroup,
+    ResponseItemResult
+} from "@nmshd/content";
 import { CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreIdHelper, TransportLoggerFactory } from "@nmshd/transport";
 import {
+    AcceptReadAttributeRequestItemParametersWithNewAttributeJSON,
     ConsumptionIds,
     DecideRequestItemGroupParametersJSON,
     DecideRequestParametersJSON,
@@ -406,6 +422,130 @@ describe("IncomingRequestsController", function () {
             expect(validationResult.items[1].items[0].isError()).toBe(true);
             expect(validationResult.items[1].items[1].isError()).toBe(false);
             expect(validationResult.items[1].items[2].isError()).toBe(true);
+        });
+
+        test("throws error for requests whose acceptance always would lead to the creation of more than one RelationshipAttribute with the same key", async function () {
+            await Given.anIncomingRequestWith({
+                content: {
+                    items: [
+                        CreateAttributeRequestItem.from({
+                            mustBeAccepted: true,
+                            attribute: RelationshipAttribute.from({
+                                "@type": "RelationshipAttribute",
+                                owner: context.currentIdentity.toString(),
+                                key: "uniqueKey",
+                                confidentiality: RelationshipAttributeConfidentiality.Public,
+                                value: ProprietaryString.from({ title: "aTitle", value: "aStringValue" }).toJSON()
+                            })
+                        }),
+                        {
+                            "@type": "RequestItemGroup",
+                            items: [
+                                ReadAttributeRequestItem.from({
+                                    mustBeAccepted: true,
+                                    query: RelationshipAttributeQuery.from({
+                                        owner: context.currentIdentity.toString(),
+                                        key: "uniqueKey",
+                                        attributeCreationHints: {
+                                            valueType: "ProprietaryString",
+                                            title: "aTitle",
+                                            confidentiality: RelationshipAttributeConfidentiality.Public
+                                        }
+                                    })
+                                })
+                            ]
+                        } as IRequestItemGroup
+                    ]
+                },
+                status: LocalRequestStatus.DecisionRequired
+            });
+            await expect(
+                When.iCallCanAcceptWith({
+                    items: [
+                        {
+                            accept: true
+                        },
+                        {
+                            items: [
+                                {
+                                    accept: true,
+                                    newAttribute: RelationshipAttribute.from({
+                                        "@type": "RelationshipAttribute",
+                                        owner: context.currentIdentity.toString(),
+                                        key: "uniqueKey",
+                                        confidentiality: RelationshipAttributeConfidentiality.Public,
+                                        value: ProprietaryString.from({ title: "aTitle", value: "aStringValue" }).toJSON()
+                                    }).toJSON()
+                                } as AcceptReadAttributeRequestItemParametersWithNewAttributeJSON
+                            ]
+                        }
+                    ]
+                })
+            ).rejects.toThrow(
+                `error.consumption.requests.violatedKeyUniquenessOfRelationshipAttributes: 'The Request can never be accepted because it would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key 'uniqueKey', owner and value type.'`
+            );
+        });
+
+        test("returns 'error' on requests whose acceptance only would lead to the creation of more than one RelationshipAttribute with the same key with some parameters", async function () {
+            await Given.anIncomingRequestWith({
+                content: {
+                    items: [
+                        CreateAttributeRequestItem.from({
+                            mustBeAccepted: true,
+                            attribute: RelationshipAttribute.from({
+                                "@type": "RelationshipAttribute",
+                                owner: context.currentIdentity.toString(),
+                                key: "uniqueKey",
+                                confidentiality: RelationshipAttributeConfidentiality.Public,
+                                value: ProprietaryString.from({ title: "aTitle", value: "aStringValue" }).toJSON()
+                            })
+                        }),
+                        {
+                            "@type": "RequestItemGroup",
+                            items: [
+                                ReadAttributeRequestItem.from({
+                                    mustBeAccepted: false,
+                                    query: RelationshipAttributeQuery.from({
+                                        owner: context.currentIdentity.toString(),
+                                        key: "uniqueKey",
+                                        attributeCreationHints: {
+                                            valueType: "ProprietaryString",
+                                            title: "aTitle",
+                                            confidentiality: RelationshipAttributeConfidentiality.Public
+                                        }
+                                    })
+                                })
+                            ]
+                        } as IRequestItemGroup
+                    ]
+                },
+                status: LocalRequestStatus.DecisionRequired
+            });
+            const validationResult = await When.iCallCanAcceptWith({
+                items: [
+                    {
+                        accept: true
+                    },
+                    {
+                        items: [
+                            {
+                                accept: true,
+                                newAttribute: RelationshipAttribute.from({
+                                    "@type": "RelationshipAttribute",
+                                    owner: context.currentIdentity.toString(),
+                                    key: "uniqueKey",
+                                    confidentiality: RelationshipAttributeConfidentiality.Public,
+                                    value: ProprietaryString.from({ title: "aTitle", value: "aStringValue" }).toJSON()
+                                }).toJSON()
+                            } as AcceptReadAttributeRequestItemParametersWithNewAttributeJSON
+                        ]
+                    }
+                ]
+            });
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.invalidAcceptParameters",
+                message: `The Request cannot be accepted with these parameters because it would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key 'uniqueKey', owner and value type.`
+            });
         });
 
         test("returns 'error' on terminated relationship", async function () {

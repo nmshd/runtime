@@ -1,8 +1,16 @@
 /* eslint-disable jest/no-standalone-expect */
-import { CreateAttributeAcceptResponseItem, CreateAttributeRequestItem, ResponseItemResult } from "@nmshd/content";
-import { CoreAddress, CoreId } from "@nmshd/core-types";
+import { CreateAttributeAcceptResponseItem, CreateAttributeRequestItem, RelationshipAttribute, ResponseItemResult } from "@nmshd/content";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { AccountController, Transport } from "@nmshd/transport";
-import { ConsumptionController, ConsumptionIds, CreateAttributeRequestItemProcessor, LocalAttribute, ValidationResult } from "../../../../../src";
+import {
+    ConsumptionController,
+    ConsumptionIds,
+    CreateAttributeRequestItemProcessor,
+    LocalAttribute,
+    LocalAttributeDeletionInfo,
+    LocalAttributeDeletionStatus,
+    ValidationResult
+} from "../../../../../src";
 import { TestUtil } from "../../../../core/TestUtil";
 import { TestObjectFactory } from "../../testHelpers/TestObjectFactory";
 import { TestIdentity } from "./TestIdentity";
@@ -15,6 +23,7 @@ export class Context {
     public givenResponseItem: CreateAttributeAcceptResponseItem;
     public givenRequestItem: CreateAttributeRequestItem;
     public canCreateResult: ValidationResult;
+    public canAcceptResult: ValidationResult;
     public peerAddress: CoreAddress;
     public responseItemAfterAction: CreateAttributeAcceptResponseItem;
     public createdAttributeAfterAction: LocalAttribute;
@@ -80,7 +89,7 @@ export class Context {
 export class GivenSteps {
     public constructor(private readonly context: Context) {}
 
-    public aRequestItemWithARelationshipAttribute(params: { attributeOwner: CoreAddress }): Promise<void> {
+    public aRequestItemWithARelationshipAttribute(params: { attributeOwner: CoreAddress; itemMustBeAccepted?: boolean }): Promise<void> {
         const attribute = TestObjectFactory.createRelationshipAttribute({
             owner: this.context.translateTestIdentity(params.attributeOwner)
         });
@@ -88,7 +97,7 @@ export class GivenSteps {
 
         this.context.givenRequestItem = CreateAttributeRequestItem.from({
             attribute: attribute,
-            mustBeAccepted: true
+            mustBeAccepted: params.itemMustBeAccepted ?? true
         });
         return Promise.resolve();
     }
@@ -117,13 +126,23 @@ export class GivenSteps {
 export class ThenSteps {
     public constructor(private readonly context: Context) {}
 
-    public theResultShouldBeASuccess(): Promise<void> {
+    public theCanCreateResultShouldBeASuccess(): Promise<void> {
         expect(this.context.canCreateResult).successfulValidationResult();
         return Promise.resolve();
     }
 
-    public theResultShouldBeAnErrorWith(error: { message?: string | RegExp; code?: string }): Promise<void> {
+    public theCanCreateResultShouldBeAnErrorWith(error: { message?: string | RegExp; code?: string }): Promise<void> {
         expect(this.context.canCreateResult).errorValidationResult(error);
+        return Promise.resolve();
+    }
+
+    public theCanAcceptResultShouldBeASuccess(): Promise<void> {
+        expect(this.context.canAcceptResult).successfulValidationResult();
+        return Promise.resolve();
+    }
+
+    public theCanAcceptResultShouldBeAnErrorWith(error: { message?: string | RegExp; code?: string }): Promise<void> {
+        expect(this.context.canAcceptResult).errorValidationResult(error);
         return Promise.resolve();
     }
 
@@ -176,6 +195,41 @@ export class ThenSteps {
 export class WhenSteps {
     public constructor(private readonly context: Context) {}
 
+    public async iCreateARelationshipAttribute(relationshipAttribute?: RelationshipAttribute): Promise<LocalAttribute> {
+        relationshipAttribute ??= TestObjectFactory.createRelationshipAttribute({
+            owner: this.context.accountController.identity.address
+        });
+        this.context.fillTestIdentitiesOfObject(relationshipAttribute);
+
+        return await this.context.consumptionController.attributes.createSharedLocalAttribute({
+            content: relationshipAttribute,
+            requestReference: CoreId.from("reqRef"),
+            peer: CoreAddress.from("peer")
+        });
+    }
+
+    public async iCreateAThirdPartyRelationshipAttribute(relationshipAttribute?: RelationshipAttribute): Promise<void> {
+        relationshipAttribute ??= TestObjectFactory.createRelationshipAttribute({
+            owner: this.context.accountController.identity.address
+        });
+        this.context.fillTestIdentitiesOfObject(relationshipAttribute);
+
+        await this.context.consumptionController.attributes.createSharedLocalAttribute({
+            content: relationshipAttribute,
+            requestReference: CoreId.from("reqRef"),
+            peer: CoreAddress.from("peer"),
+            thirdPartyAddress: CoreAddress.from("AThirdParty")
+        });
+    }
+
+    public async iMarkMyAttributeAsToBeDeleted(attribute: LocalAttribute): Promise<void> {
+        this.context.fillTestIdentitiesOfObject(attribute);
+
+        attribute.deletionInfo = LocalAttributeDeletionInfo.from({ deletionStatus: LocalAttributeDeletionStatus.ToBeDeleted, deletionDate: CoreDate.utc().add({ minutes: 5 }) });
+
+        await this.context.consumptionController.attributes.updateAttributeUnsafe(attribute);
+    }
+
     public async iCallCanCreateOutgoingRequestItemWith(partialRequestItem: Partial<CreateAttributeRequestItem>, recipient: CoreAddress = TestIdentity.RECIPIENT): Promise<void> {
         partialRequestItem.mustBeAccepted ??= true;
         partialRequestItem.attribute ??= TestObjectFactory.createIdentityAttribute({
@@ -189,6 +243,13 @@ export class WhenSteps {
         this.context.fillTestIdentitiesOfObject(requestItem);
 
         this.context.canCreateResult = await this.context.processor.canCreateOutgoingRequestItem(requestItem, null!, this.context.translateTestIdentity(recipient));
+    }
+
+    public async iCallCanAccept(): Promise<void> {
+        this.context.canAcceptResult = await this.context.processor.canAccept(this.context.givenRequestItem, null!, {
+            id: CoreId.from("request-id"),
+            peer: this.context.peerAddress
+        });
     }
 
     public async iCallAccept(): Promise<void> {

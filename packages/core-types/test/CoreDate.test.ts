@@ -63,14 +63,25 @@ describe("CoreDate", function () {
     });
 
     describe("From()", function () {
-        test("returns a date when provided with a date", function () {
-            const date = CoreDate.from(CoreDate.utc());
-            expect(date).toBeDefined();
+        test("returns a CoreDate when provided with a CoreDate", function () {
+            const oldDate = CoreDate.utc();
+            const date = CoreDate.from(oldDate);
+
+            expect(date.isSame(oldDate)).toBe(true);
+        });
+
+        test("returns a CoreDate when provided with a CoreDate with fromAny", function () {
+            const oldDate = CoreDate.utc();
+            const date = CoreDate.fromAny(oldDate);
+
+            expect(date.isSame(oldDate)).toBe(true);
         });
 
         test("returns a date when provided with a string", function () {
-            const date = CoreDate.from(CoreDate.utc().date);
-            expect(date).toBeDefined();
+            const oldDate = CoreDate.utc();
+            const date = CoreDate.from(oldDate.date);
+
+            expect(date.isSame(oldDate)).toBe(true);
         });
     });
 });

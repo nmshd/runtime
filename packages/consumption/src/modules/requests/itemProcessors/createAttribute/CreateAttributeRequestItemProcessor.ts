@@ -1,4 +1,12 @@
-import { CreateAttributeAcceptResponseItem, CreateAttributeRequestItem, IdentityAttribute, RejectResponseItem, Request, ResponseItemResult } from "@nmshd/content";
+import {
+    CreateAttributeAcceptResponseItem,
+    CreateAttributeRequestItem,
+    IdentityAttribute,
+    RejectResponseItem,
+    RelationshipAttribute,
+    Request,
+    ResponseItemResult
+} from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import { LocalAttribute } from "../../../attributes";
@@ -8,11 +16,7 @@ import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 import { LocalRequestInfo } from "../IRequestItemProcessor";
 
 export class CreateAttributeRequestItemProcessor extends GenericRequestItemProcessor<CreateAttributeRequestItem> {
-    public override canCreateOutgoingRequestItem(
-        requestItem: CreateAttributeRequestItem,
-        _request?: Request,
-        recipient?: CoreAddress
-    ): ValidationResult | Promise<ValidationResult> {
+    public override async canCreateOutgoingRequestItem(requestItem: CreateAttributeRequestItem, _request?: Request, recipient?: CoreAddress): Promise<ValidationResult> {
         const recipientIsAttributeOwner = requestItem.attribute.owner.equals(recipient);
         const senderIsAttributeOwner = requestItem.attribute.owner.equals(this.currentIdentityAddress);
         const ownerIsEmptyString = requestItem.attribute.owner.toString() === "";
@@ -30,30 +34,68 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
                 );
             }
 
-            if (typeof recipient !== "undefined") {
-                return ValidationResult.error(
-                    ConsumptionCoreErrors.requests.invalidRequestItem(
-                        "The owner of the provided IdentityAttribute for the `attribute` property can only be the Recipient's Address or an empty string. The latter will default to the Recipient's Address."
-                    )
-                );
-            }
-
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidRequestItem(
-                    "The owner of the provided IdentityAttribute for the `attribute` property can only be an empty string. It will default to the Recipient's Address."
+                    "The owner of the provided IdentityAttribute for the `attribute` property can only be the address of the recipient or an empty string. The latter will default to the address of the recipient."
                 )
             );
         }
 
-        if (recipientIsAttributeOwner || senderIsAttributeOwner || ownerIsEmptyString) {
-            return ValidationResult.success();
+        if (!(recipientIsAttributeOwner || senderIsAttributeOwner || ownerIsEmptyString)) {
+            return ValidationResult.error(
+                ConsumptionCoreErrors.requests.invalidRequestItem(
+                    "The owner of the provided RelationshipAttribute for the `attribute` property can only be the address of the sender, the address of the recipient or an empty string. The latter will default to the address of the recipient."
+                )
+            );
         }
 
-        return ValidationResult.error(
-            ConsumptionCoreErrors.requests.invalidRequestItem(
-                "The owner of the provided RelationshipAttribute for the `attribute` property can only be the address of the sender, recipient or an empty string. The latter will default to the address of the recipient."
-            )
-        );
+        if (typeof recipient !== "undefined") {
+            const relationshipAttributesWithSameKey = await this.consumptionController.attributes.getRelationshipAttributesOfValueTypeToPeerWithGivenKeyAndOwner(
+                requestItem.attribute.key,
+                ownerIsEmptyString ? recipient : requestItem.attribute.owner,
+                requestItem.attribute.value.toJSON()["@type"],
+                recipient
+            );
+
+            if (relationshipAttributesWithSameKey.length !== 0) {
+                return ValidationResult.error(
+                    ConsumptionCoreErrors.requests.invalidRequestItem(
+                        `The creation of the provided RelationshipAttribute cannot be requested because there is already a RelationshipAttribute in the context of this Relationship with the same key '${requestItem.attribute.key}', owner and value type.`
+                    )
+                );
+            }
+        }
+
+        return ValidationResult.success();
+    }
+
+    public override async canAccept(requestItem: CreateAttributeRequestItem, _params: AcceptRequestItemParametersJSON, requestInfo: LocalRequestInfo): Promise<ValidationResult> {
+        if (requestItem.attribute instanceof RelationshipAttribute) {
+            const ownerIsEmptyString = requestItem.attribute.owner.toString() === "";
+
+            const relationshipAttributesWithSameKey = await this.consumptionController.attributes.getRelationshipAttributesOfValueTypeToPeerWithGivenKeyAndOwner(
+                requestItem.attribute.key,
+                ownerIsEmptyString ? this.currentIdentityAddress : requestItem.attribute.owner,
+                requestItem.attribute.value.toJSON()["@type"],
+                requestInfo.peer
+            );
+
+            if (relationshipAttributesWithSameKey.length !== 0) {
+                if (requestItem.mustBeAccepted) {
+                    throw ConsumptionCoreErrors.requests.violatedKeyUniquenessOfRelationshipAttributes(
+                        `The provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute in the context of this Relationship with the same key '${requestItem.attribute.key}', owner and value type.`
+                    );
+                }
+
+                return ValidationResult.error(
+                    ConsumptionCoreErrors.requests.invalidAcceptParameters(
+                        `This CreateAttributeRequestItem cannot be accepted as the provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute in the context of this Relationship with the same key '${requestItem.attribute.key}', owner and value type.`
+                    )
+                );
+            }
+        }
+
+        return ValidationResult.success();
     }
 
     public override async accept(

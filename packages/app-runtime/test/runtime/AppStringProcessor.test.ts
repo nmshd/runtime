@@ -96,7 +96,7 @@ describe("AppStringProcessor", function () {
             passwordProtection: { password: "password" }
         });
 
-        mockUiBridge.passwordToReturn = "password";
+        mockUiBridge.setPasswordToReturnForAttempt(1, "password");
         mockUiBridge.accountIdToReturn = runtime2SessionA.account.id;
 
         const result = await runtime2.stringProcessor.processTruncatedReference(templateResult.value.truncatedReference);
@@ -116,7 +116,7 @@ describe("AppStringProcessor", function () {
             passwordProtection: { password: "000000", passwordIsPin: true }
         });
 
-        mockUiBridge.passwordToReturn = "000000";
+        mockUiBridge.setPasswordToReturnForAttempt(1, "000000");
         mockUiBridge.accountIdToReturn = runtime2SessionA.account.id;
 
         const result = await runtime2.stringProcessor.processTruncatedReference(templateResult.value.truncatedReference);
@@ -137,7 +137,7 @@ describe("AppStringProcessor", function () {
             forIdentity: runtime2SessionA.account.address!
         });
 
-        mockUiBridge.passwordToReturn = "password";
+        mockUiBridge.setPasswordToReturnForAttempt(1, "password");
 
         const result = await runtime2.stringProcessor.processTruncatedReference(templateResult.value.truncatedReference);
         expect(result).toBeSuccessful();
@@ -157,7 +157,7 @@ describe("AppStringProcessor", function () {
             forIdentity: runtime2SessionA.account.address!
         });
 
-        mockUiBridge.passwordToReturn = "000000";
+        mockUiBridge.setPasswordToReturnForAttempt(1, "000000");
 
         const result = await runtime2.stringProcessor.processTruncatedReference(templateResult.value.truncatedReference);
         expect(result).toBeSuccessful();
@@ -167,6 +167,29 @@ describe("AppStringProcessor", function () {
 
         expect(mockUiBridge).enterPasswordCalled("pin", 6);
         expect(mockUiBridge).requestAccountSelectionNotCalled();
+    });
+
+    test("should retry for a wrong password when handling a password protected RelationshipTemplate", async function () {
+        const templateResult = await runtime1Session.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
+            content: templateContent,
+            expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(),
+            passwordProtection: { password: "password" }
+        });
+
+        mockUiBridge.setPasswordToReturnForAttempt(1, "wrongPassword");
+        mockUiBridge.setPasswordToReturnForAttempt(2, "password");
+
+        mockUiBridge.accountIdToReturn = runtime2SessionA.account.id;
+
+        const result = await runtime2.stringProcessor.processTruncatedReference(templateResult.value.truncatedReference);
+        expect(result).toBeSuccessful();
+        expect(result.value).toBeUndefined();
+
+        await expect(eventBus).toHavePublished(PeerRelationshipTemplateLoadedEvent);
+
+        expect(mockUiBridge).enterPasswordCalled("pw", undefined, 1);
+        expect(mockUiBridge).enterPasswordCalled("pw", undefined, 2);
+        expect(mockUiBridge).requestAccountSelectionCalled(2);
     });
 
     describe("onboarding", function () {
@@ -182,12 +205,12 @@ describe("AppStringProcessor", function () {
 
         test("device onboarding with a password protected Token", async function () {
             const deviceResult = await runtime1Session.transportServices.devices.createDevice({});
-            const tokenResult = await runtime1Session.transportServices.devices.getDeviceOnboardingToken({
+            const tokenResult = await runtime1Session.transportServices.devices.createDeviceOnboardingToken({
                 id: deviceResult.value.id,
                 passwordProtection: { password: "password" }
             });
 
-            mockUiBridge.passwordToReturn = "password";
+            mockUiBridge.setPasswordToReturnForAttempt(1, "password");
 
             const result = await runtime2.stringProcessor.processTruncatedReference(tokenResult.value.truncatedReference);
             expect(result).toBeSuccessful();
