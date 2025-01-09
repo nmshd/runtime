@@ -173,11 +173,8 @@ export class AppStringProcessor {
                 passwordProtection.passwordType.startsWith("pin") ? parseInt(passwordProtection.passwordType.substring(3)) : undefined,
                 iteration
             );
-
             if (passwordResult.isError) {
-                return {
-                    result: UserfriendlyResult.fail(new UserfriendlyApplicationError("error.appStringProcessor.passwordNotProvided", "No password was provided."))
-                };
+                return { result: UserfriendlyResult.fail(new UserfriendlyApplicationError("error.appStringProcessor.passwordNotProvided", "No password was provided.")) };
             }
 
             const password = passwordResult.value;
@@ -185,19 +182,9 @@ export class AppStringProcessor {
             const result = await fetchFunction(password);
             iteration++;
 
-            if (result.isSuccess) {
-                return {
-                    result,
-                    password
-                };
-            }
-
-            // for security reasons the backbone is only indicating that the record was not found, but not that the password was wrong
+            if (result.isSuccess) return { result, password };
             if (result.isError && result.error.code === "error.runtime.recordNotFound") continue;
-
-            return {
-                result
-            };
+            return { result };
         }
     }
 
