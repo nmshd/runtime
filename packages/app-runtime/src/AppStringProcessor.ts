@@ -82,7 +82,13 @@ export class AppStringProcessor {
               )
             : { result: await this.runtime.anonymousServices.tokens.loadPeerToken({ reference: truncatedReference }) };
 
-        if (tokenResultHolder.result.isError) return UserfriendlyResult.fail(UserfriendlyApplicationError.fromError(tokenResultHolder.result.error));
+        if (tokenResultHolder.result.isError && tokenResultHolder.result.error.code === "error.appStringProcessor.passwordNotProvided") {
+            return UserfriendlyResult.ok(undefined);
+        }
+
+        if (tokenResultHolder.result.isError) {
+            return UserfriendlyResult.fail(UserfriendlyApplicationError.fromError(tokenResultHolder.result.error));
+        }
 
         const tokenDTO = tokenResultHolder.result.value;
         const tokenContent = this.parseTokenContent(tokenDTO.content);
@@ -123,7 +129,13 @@ export class AppStringProcessor {
               ).result
             : await services.transportServices.account.loadItemFromTruncatedReference({ reference: reference.truncate(), password: existingPassword });
 
-        if (result.isError) return UserfriendlyResult.fail(UserfriendlyApplicationError.fromError(result.error));
+        if (result.isError && result.error.code === "error.appStringProcessor.passwordNotProvided") {
+            return UserfriendlyResult.ok(undefined);
+        }
+
+        if (result.isError) {
+            return UserfriendlyResult.fail(UserfriendlyApplicationError.fromError(result.error));
+        }
 
         switch (result.value.type) {
             case "File":
