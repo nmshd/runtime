@@ -589,8 +589,7 @@ describe("DeciderModule", () => {
         });
     });
 
-    // TODO: negative tests
-    describe.only("RelationshipRequestConfig", () => {
+    describe("RelationshipRequestConfig", () => {
         test("decides a Request on new Relationship given an according RelationshipRequestConfig", async () => {
             const deciderConfig: DeciderModuleConfigurationOverwrite = {
                 automationConfig: [

@@ -10,7 +10,6 @@ export interface GeneralRequestConfig {
     "content.metadata"?: object | object[];
 }
 
-// TODO: possibly put this directly inside GeneralRequestConfig
 export interface RelationshipRequestConfig extends GeneralRequestConfig {
     relationshipAlreadyExists?: boolean;
 }

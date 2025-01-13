@@ -108,7 +108,7 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
             const generalRequestIsCompatible = await checkGeneralRequestCompatibility(requestConfigElement, request, services);
 
             if (generalRequestIsCompatible instanceof Error) {
-                this.logger.error(Error); // TODO:
+                this.logger.error(generalRequestIsCompatible);
                 break;
             }
 
