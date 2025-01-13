@@ -589,9 +589,9 @@ describe("DeciderModule", () => {
         });
     });
 
-    // TODO:
-    describe("RelationshipRequestConfig", () => {
-        test.only("decides a Request on new Relationship given a RelationshipRequestConfig", async () => {
+    // TODO: negative tests
+    describe.only("RelationshipRequestConfig", () => {
+        test("decides a Request on new Relationship given an according RelationshipRequestConfig", async () => {
             const deciderConfig: DeciderModuleConfigurationOverwrite = {
                 automationConfig: [
                     {
@@ -630,12 +630,12 @@ describe("DeciderModule", () => {
             );
         });
 
-        test("decides a Request on existing Relationship given a RelationshipRequestConfig", async () => {
+        test("decides a Request on existing Relationship given an according RelationshipRequestConfig", async () => {
             const deciderConfig: DeciderModuleConfigurationOverwrite = {
                 automationConfig: [
                     {
                         requestConfig: {
-                            peer: sender.address
+                            relationshipAlreadyExists: true
                         },
                         responseConfig: {
                             accept: true
@@ -650,91 +650,6 @@ describe("DeciderModule", () => {
             const receivedRequestResult = await recipient.consumption.incomingRequests.received({
                 receivedRequest: {
                     "@type": "Request",
-                    items: [
-                        { "@type": "AuthenticationRequestItem", mustBeAccepted: false },
-                        { "@type": "ConsentRequestItem", consent: "A consent text", mustBeAccepted: false },
-                        {
-                            "@type": "CreateAttributeRequestItem",
-                            attribute: {
-                                "@type": "RelationshipAttribute",
-                                owner: (await sender.transport.account.getIdentityInfo()).value.address,
-                                value: {
-                                    "@type": "ProprietaryFileReference",
-                                    value: "A link to a file with more than 30 characters",
-                                    title: "A title"
-                                },
-                                key: "A key",
-                                confidentiality: RelationshipAttributeConfidentiality.Public
-                            },
-                            mustBeAccepted: true
-                        },
-                        {
-                            "@type": "RegisterAttributeListenerRequestItem",
-                            query: {
-                                "@type": "IdentityAttributeQuery",
-                                valueType: "Nationality"
-                            },
-                            mustBeAccepted: true
-                        },
-                        {
-                            "@type": "ShareAttributeRequestItem",
-                            sourceAttributeId: "sourceAttributeId",
-                            attribute: {
-                                "@type": "IdentityAttribute",
-                                owner: (await sender.transport.account.getIdentityInfo()).value.address,
-                                value: {
-                                    "@type": "IdentityFileReference",
-                                    value: "A link to a file with more than 30 characters"
-                                }
-                            },
-                            mustBeAccepted: true
-                        }
-                    ]
-                },
-                requestSourceId: message.id
-            });
-            await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
-
-            await expect(recipient.eventBus).toHavePublished(
-                MessageProcessedEvent,
-                (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
-            );
-
-            const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
-            expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Decided);
-            expect(requestAfterAction.response).toBeDefined();
-
-            const responseContent = requestAfterAction.response!.content;
-            expect(responseContent.result).toBe(ResponseResult.Accepted);
-            expect(responseContent.items).toHaveLength(5);
-            expect(responseContent.items[0]["@type"]).toBe("AcceptResponseItem");
-            expect(responseContent.items[1]["@type"]).toBe("AcceptResponseItem");
-            expect(responseContent.items[2]["@type"]).toBe("CreateAttributeAcceptResponseItem");
-            expect(responseContent.items[3]["@type"]).toBe("RegisterAttributeListenerAcceptResponseItem");
-            expect(responseContent.items[4]["@type"]).toBe("ShareAttributeAcceptResponseItem");
-        });
-
-        test("decides a Request independent of Relationship given no RelationshipRequestConfig", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            peer: sender.address
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
-                    }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
-            await establishRelationship(sender.transport, recipient.transport);
-
-            const message = await exchangeMessage(sender.transport, recipient.transport);
-            const receivedRequestResult = await recipient.consumption.incomingRequests.received({
-                receivedRequest: {
-                    "@type": "Request",
-                    title: "Title of Request",
                     items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }]
                 },
                 requestSourceId: message.id
@@ -744,6 +659,77 @@ describe("DeciderModule", () => {
             await expect(recipient.eventBus).toHavePublished(
                 MessageProcessedEvent,
                 (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
+            );
+        });
+
+        test("doesn't decide a Request on new Relationship given a contrary RelationshipRequestConfig", async () => {
+            const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                automationConfig: [
+                    {
+                        requestConfig: {
+                            relationshipAlreadyExists: true
+                        },
+                        responseConfig: {
+                            accept: true
+                        }
+                    }
+                ]
+            };
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+
+            const request = Request.from({
+                items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }]
+            });
+            const template = (
+                await sender.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                    content: RelationshipTemplateContent.from({
+                        onNewRelationship: request
+                    }).toJSON(),
+                    expiresAt: CoreDate.utc().add({ hours: 1 }).toISOString()
+                })
+            ).value;
+            await recipient.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
+            const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                receivedRequest: request.toJSON(),
+                requestSourceId: template.id
+            });
+            await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+            await expect(recipient.eventBus).toHavePublished(
+                RelationshipTemplateProcessedEvent,
+                (e) => e.data.result === RelationshipTemplateProcessedResult.ManualRequestDecisionRequired && e.data.template.id === template.id
+            );
+        });
+
+        test("doesn't decide a Request on existing Relationship given a contrary RelationshipRequestConfig", async () => {
+            const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                automationConfig: [
+                    {
+                        requestConfig: {
+                            relationshipAlreadyExists: false
+                        },
+                        responseConfig: {
+                            accept: true
+                        }
+                    }
+                ]
+            };
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+            await establishRelationship(sender.transport, recipient.transport);
+
+            const message = await exchangeMessage(sender.transport, recipient.transport);
+            const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                receivedRequest: {
+                    "@type": "Request",
+                    items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }]
+                },
+                requestSourceId: message.id
+            });
+            await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+            await expect(recipient.eventBus).toHavePublished(
+                MessageProcessedEvent,
+                (e) => e.data.result === MessageProcessedResult.ManualRequestDecisionRequired && e.data.message.id === message.id
             );
         });
     });
