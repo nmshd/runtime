@@ -10,6 +10,10 @@ export interface GeneralRequestConfig {
     "content.metadata"?: object | object[];
 }
 
+export interface RelationshipRequestConfig extends GeneralRequestConfig {
+    relationshipAlreadyExists?: boolean;
+}
+
 export interface RequestItemConfig extends GeneralRequestConfig {
     "content.item.@type"?: string | string[];
     "content.item.mustBeAccepted"?: boolean;
@@ -142,4 +146,4 @@ export function isRequestItemDerivationConfig(input: any): input is RequestItemD
     return Object.keys(input).some((key) => key.startsWith("content.item."));
 }
 
-export type RequestConfig = GeneralRequestConfig | RequestItemDerivationConfig;
+export type RequestConfig = GeneralRequestConfig | RelationshipRequestConfig | RequestItemDerivationConfig;

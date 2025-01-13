@@ -589,6 +589,150 @@ describe("DeciderModule", () => {
         });
     });
 
+    describe("RelationshipRequestConfig", () => {
+        test("decides a Request on new Relationship given an according RelationshipRequestConfig", async () => {
+            const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                automationConfig: [
+                    {
+                        requestConfig: {
+                            relationshipAlreadyExists: false
+                        },
+                        responseConfig: {
+                            accept: false
+                        }
+                    }
+                ]
+            };
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+
+            const request = Request.from({
+                items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }]
+            });
+            const template = (
+                await sender.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                    content: RelationshipTemplateContent.from({
+                        onNewRelationship: request
+                    }).toJSON(),
+                    expiresAt: CoreDate.utc().add({ hours: 1 }).toISOString()
+                })
+            ).value;
+            await recipient.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
+            const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                receivedRequest: request.toJSON(),
+                requestSourceId: template.id
+            });
+            await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+            await expect(recipient.eventBus).toHavePublished(
+                RelationshipTemplateProcessedEvent,
+                (e) => e.data.result === RelationshipTemplateProcessedResult.RequestAutomaticallyDecided && e.data.template.id === template.id
+            );
+        });
+
+        test("decides a Request on existing Relationship given an according RelationshipRequestConfig", async () => {
+            const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                automationConfig: [
+                    {
+                        requestConfig: {
+                            relationshipAlreadyExists: true
+                        },
+                        responseConfig: {
+                            accept: true
+                        }
+                    }
+                ]
+            };
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+            await establishRelationship(sender.transport, recipient.transport);
+
+            const message = await exchangeMessage(sender.transport, recipient.transport);
+            const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                receivedRequest: {
+                    "@type": "Request",
+                    items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }]
+                },
+                requestSourceId: message.id
+            });
+            await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+            await expect(recipient.eventBus).toHavePublished(
+                MessageProcessedEvent,
+                (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
+            );
+        });
+
+        test("doesn't decide a Request on new Relationship given a contrary RelationshipRequestConfig", async () => {
+            const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                automationConfig: [
+                    {
+                        requestConfig: {
+                            relationshipAlreadyExists: true
+                        },
+                        responseConfig: {
+                            accept: true
+                        }
+                    }
+                ]
+            };
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+
+            const request = Request.from({
+                items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }]
+            });
+            const template = (
+                await sender.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                    content: RelationshipTemplateContent.from({
+                        onNewRelationship: request
+                    }).toJSON(),
+                    expiresAt: CoreDate.utc().add({ hours: 1 }).toISOString()
+                })
+            ).value;
+            await recipient.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
+            const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                receivedRequest: request.toJSON(),
+                requestSourceId: template.id
+            });
+            await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+            await expect(recipient.eventBus).toHavePublished(
+                RelationshipTemplateProcessedEvent,
+                (e) => e.data.result === RelationshipTemplateProcessedResult.ManualRequestDecisionRequired && e.data.template.id === template.id
+            );
+        });
+
+        test("doesn't decide a Request on existing Relationship given a contrary RelationshipRequestConfig", async () => {
+            const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                automationConfig: [
+                    {
+                        requestConfig: {
+                            relationshipAlreadyExists: false
+                        },
+                        responseConfig: {
+                            accept: true
+                        }
+                    }
+                ]
+            };
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+            await establishRelationship(sender.transport, recipient.transport);
+
+            const message = await exchangeMessage(sender.transport, recipient.transport);
+            const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                receivedRequest: {
+                    "@type": "Request",
+                    items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }]
+                },
+                requestSourceId: message.id
+            });
+            await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+            await expect(recipient.eventBus).toHavePublished(
+                MessageProcessedEvent,
+                (e) => e.data.result === MessageProcessedResult.ManualRequestDecisionRequired && e.data.message.id === message.id
+            );
+        });
+    });
+
     describe("RequestItemConfig", () => {
         test("rejects a RequestItem given a RequestItemConfig with all fields set", async () => {
             const deciderConfig: DeciderModuleConfigurationOverwrite = {
