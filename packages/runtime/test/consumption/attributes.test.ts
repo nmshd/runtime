@@ -805,7 +805,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                 content: {
                     value: {
                         "@type": "GivenName",
-                        value: "Test GivenName",
+                        value: "aGivenName",
                         additionalProperty: 1
                     },
                     tags: ["tag1", "tag2"]
