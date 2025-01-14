@@ -736,6 +736,100 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
         expect(attribute.isDefault).toBeUndefined();
     });
 
+    describe("validation errors for the attribute content", () => {
+        test("should not create a number as GivenName", async () => {
+            const request: CreateRepositoryAttributeRequest = {
+                content: {
+                    value: {
+                        "@type": "GivenName",
+                        value: 5
+                    },
+                    tags: ["tag1", "tag2"]
+                } as any
+            };
+            const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+            expect(result.error.message).toBe("GivenName :: value must be string");
+            expect(result.error.code).toBe("error.runtime.validation.invalidPropertyValue");
+        });
+
+        test("should not create a string as year of BirthDate", async () => {
+            const request: CreateRepositoryAttributeRequest = {
+                content: {
+                    value: {
+                        "@type": "BirthDate",
+                        day: 5,
+                        month: 5,
+                        year: "a-string"
+                    },
+                    tags: ["tag1", "tag2"]
+                } as any
+            };
+            const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+            expect(result.error.message).toBe("BirthDate :: year must be number");
+            expect(result.error.code).toBe("error.runtime.validation.invalidPropertyValue");
+        });
+
+        test("should not create a BirthDate with a missing year", async () => {
+            const request: CreateRepositoryAttributeRequest = {
+                content: {
+                    value: {
+                        "@type": "BirthDate",
+                        day: 5,
+                        month: 5
+                    },
+                    tags: ["tag1", "tag2"]
+                } as any
+            };
+            const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+            expect(result.error.message).toBe("BirthDate :: must have required property 'year'");
+            expect(result.error.code).toBe("error.runtime.validation.invalidPropertyValue");
+        });
+
+        test("should not create 14 as BirthMonth", async () => {
+            const request: CreateRepositoryAttributeRequest = {
+                content: {
+                    value: {
+                        "@type": "BirthMonth",
+                        value: 14
+                    },
+                    tags: ["tag1", "tag2"]
+                } as any
+            };
+            const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+            expect(result.error.message).toBe("BirthMonth :: value must be equal to one of the allowed values");
+            expect(result.error.code).toBe("error.runtime.validation.invalidPropertyValue");
+        });
+
+        test("should not accept an additional property", async () => {
+            const request: CreateRepositoryAttributeRequest = {
+                content: {
+                    value: {
+                        "@type": "GivenName",
+                        value: "aGivenName",
+                        additionalProperty: 1
+                    },
+                    tags: ["tag1", "tag2"]
+                } as any
+            };
+            const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+            expect(result.error.message).toBe("GivenName :: must NOT have additional properties");
+            expect(result.error.code).toBe("error.runtime.validation.invalidPropertyValue");
+        });
+
+        test("should not accept an invalid @type", async () => {
+            const request: CreateRepositoryAttributeRequest = {
+                content: {
+                    value: {
+                        "@type": "invalid-type"
+                    }
+                }
+            } as any;
+            const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+            expect(result.error.message).toBe("content.value.@type must match one of the allowed Attribute value types for IdentityAttributes");
+            expect(result.error.code).toBe("error.runtime.validation.invalidPropertyValue");
+        });
+    });
+
     test("should not create a duplicate RepositoryAttribute", async () => {
         const request: CreateRepositoryAttributeRequest = {
             content: {
