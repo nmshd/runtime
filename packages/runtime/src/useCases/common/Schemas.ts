@@ -14933,6 +14933,7 @@ export const CreateRepositoryAttributeRequest: any = {
     "definitions": {
         "CreateRepositoryAttributeRequest": {
             "type": "object",
+            "additionalProperties": false,
             "properties": {
                 "content": {
                     "type": "object",
@@ -14959,8 +14960,7 @@ export const CreateRepositoryAttributeRequest: any = {
             },
             "required": [
                 "content"
-            ],
-            "additionalProperties": false
+            ]
         },
         "ISO8601DateTimeString": {
             "type": "string",

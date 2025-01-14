@@ -9,14 +9,18 @@ import { flattenObject, ISO8601DateTimeString, RuntimeErrors, SchemaRepository, 
 import { IValidator } from "../../common/validation/IValidator";
 import { AttributeMapper } from "./AttributeMapper";
 
-export interface CreateRepositoryAttributeRequest {
+interface AbstractCreateRepositoryAttributeRequest<T> {
     content: {
-        value: AttributeValues.Identity.Json;
+        value: T;
         tags?: string[];
         validFrom?: ISO8601DateTimeString;
         validTo?: ISO8601DateTimeString;
     };
 }
+
+export interface CreateRepositoryAttributeRequest extends AbstractCreateRepositoryAttributeRequest<AttributeValues.Identity.Json> {}
+
+export interface SchemaValidatableCreateRepositoryAttributeRequest extends AbstractCreateRepositoryAttributeRequest<unknown> {}
 
 class Validator implements IValidator<CreateRepositoryAttributeRequest> {
     public constructor(@Inject private readonly schemaRepository: SchemaRepository) {}

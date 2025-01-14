@@ -7,7 +7,9 @@ const runtimeConfig = {
     type: "*",
     extraTags: ["errorMessage"]
 };
-const useCaseSchemaDeclarations = getSchemaDeclarations(runtimeConfig, (x) => x.endsWith("Request"));
+// use SchemaValidatableCreateRepositoryAttributeRequest instead of CreateRepositoryAttributeRequest
+const useCaseSchemaDeclarations = getSchemaDeclarations(runtimeConfig, (x) => x.endsWith("Request") && x !== "CreateRepositoryAttributeRequest");
+const cleanUseCaseSchemaDeclarations = useCaseSchemaDeclarations.replaceAll("SchemaValidatable", "");
 
 const contentConfig = {
     ...runtimeConfig,
@@ -18,7 +20,7 @@ const attributeSchemaDeclarations = getSchemaDeclarations(contentConfig, (x) => 
 const cleanAttributeSchemaDeclarations = attributeSchemaDeclarations.replaceAll("JSON", "");
 
 const outputPath = new URL("../src/useCases/common/Schemas.ts", import.meta.url).pathname;
-fs.writeFile(outputPath, `${useCaseSchemaDeclarations}\n\n${cleanAttributeSchemaDeclarations}`, (err) => {
+fs.writeFile(outputPath, `${cleanUseCaseSchemaDeclarations}\n\n${cleanAttributeSchemaDeclarations}`, (err) => {
     if (err) throw err;
 });
 
