@@ -7,17 +7,17 @@ const runtimeConfig = {
     type: "*",
     extraTags: ["errorMessage"]
 };
-const runtimeSchemaDeclarations = getSchemaDeclarations(runtimeConfig, (x) => x.endsWith("Request"));
+const useCaseSchemaDeclarations = getSchemaDeclarations(runtimeConfig, (x) => x.endsWith("Request"));
 
 const contentConfig = {
     ...runtimeConfig,
     tsconfig: new URL("../../content/tsconfig.json", import.meta.url).pathname
 };
 const attributeValues = content.AttributeValues.Identity.TYPE_NAMES.map((x) => `${x}JSON`);
-const contentSchemaDeclarations = getSchemaDeclarations(contentConfig, (x) => attributeValues.includes(x));
+const attributeSchemaDeclarations = getSchemaDeclarations(contentConfig, (x) => attributeValues.includes(x));
 
 const outputPath = new URL("../src/useCases/common/Schemas.ts", import.meta.url).pathname;
-fs.writeFile(outputPath, `${runtimeSchemaDeclarations}\n\n${contentSchemaDeclarations}`, (err) => {
+fs.writeFile(outputPath, `${useCaseSchemaDeclarations}\n\n${attributeSchemaDeclarations}`, (err) => {
     if (err) throw err;
 });
 
