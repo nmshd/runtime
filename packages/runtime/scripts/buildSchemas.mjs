@@ -13,7 +13,7 @@ const contentConfig = {
     ...runtimeConfig,
     tsconfig: new URL("../../content/tsconfig.json", import.meta.url).pathname
 };
-const attributeValues = content.AttributeValues.TYPE_NAMES.map((x) => `${x}JSON`);
+const attributeValues = content.AttributeValues.Identity.TYPE_NAMES.map((x) => `${x}JSON`);
 const contentSchemaDeclarations = getSchemaDeclarations(contentConfig, (x) => attributeValues.includes(x));
 
 const outputPath = new URL("../src/useCases/common/Schemas.ts", import.meta.url).pathname;
