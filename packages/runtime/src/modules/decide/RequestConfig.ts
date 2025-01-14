@@ -10,6 +10,10 @@ export interface GeneralRequestConfig {
     "content.metadata"?: object | object[];
 }
 
+export interface RelationshipRequestConfig extends GeneralRequestConfig {
+    relationshipAlreadyExists?: boolean;
+}
+
 export interface RequestItemConfig extends GeneralRequestConfig {
     "content.item.@type"?: string | string[];
     "content.item.mustBeAccepted"?: boolean;
@@ -56,7 +60,6 @@ export interface FreeTextRequestItemConfig extends RequestItemConfig {
 export interface ProposeAttributeRequestItemConfig extends RequestItemConfig {
     "content.item.@type": "ProposeAttributeRequestItem";
     "content.item.attribute.@type"?: "IdentityAttribute" | "RelationshipAttribute";
-    "content.item.attribute.owner"?: string | string[];
     "content.item.attribute.validFrom"?: string | string[];
     "content.item.attribute.validTo"?: string | string[];
     "content.item.attribute.tags"?: string[];
@@ -73,7 +76,6 @@ export interface ProposeAttributeRequestItemConfig extends RequestItemConfig {
     "content.item.query.valueType"?: string | string[];
     "content.item.query.tags"?: string[];
     "content.item.query.key"?: string | string[];
-    "content.item.query.owner"?: string | string[];
     "content.item.query.queryString"?: string | string[];
     "content.item.query.attributeCreationHints.title"?: string | string[];
     "content.item.query.attributeCreationHints.description"?: string | string[];
@@ -144,4 +146,4 @@ export function isRequestItemDerivationConfig(input: any): input is RequestItemD
     return Object.keys(input).some((key) => key.startsWith("content.item."));
 }
 
-export type RequestConfig = GeneralRequestConfig | RequestItemDerivationConfig;
+export type RequestConfig = GeneralRequestConfig | RelationshipRequestConfig | RequestItemDerivationConfig;

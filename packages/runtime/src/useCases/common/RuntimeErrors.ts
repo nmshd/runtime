@@ -243,6 +243,13 @@ class Attributes {
         );
     }
 
+    public cannotCreateDuplicateRepositoryAttribute(attributeId: CoreId | string): ApplicationError {
+        return new ApplicationError(
+            "error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute",
+            `The RepositoryAttribute cannot be created because it has the same content.value as the already existing RepositoryAttribute with id '${attributeId.toString()}'.`
+        );
+    }
+
     public setDefaultRepositoryAttributesIsDisabled(): ApplicationError {
         return new ApplicationError("error.runtime.attributes.setDefaultRepositoryAttributesIsDisabled", "Setting default RepositoryAttributes is disabled for this Account.");
     }
@@ -265,6 +272,19 @@ class IdentityDeletionProcess {
         return new ApplicationError(
             "error.runtime.identityDeletionProcess.activeIdentityDeletionProcessAlreadyExists",
             "There is already an active IdentityDeletionProcess. You cannot start another, as there may only be one active IdentityDeletionProcess per Identity."
+        );
+    }
+}
+
+class IdentityMetadata {
+    public notFound() {
+        return new ApplicationError("error.runtime.identityMetadata.notFound", "There is no stored IdentityMetadata for the specified combination of reference and key.");
+    }
+
+    public unfamiliarReferencedIdentity() {
+        return new ApplicationError(
+            "error.runtime.identityMetadata.unfamiliarReferencedIdentity",
+            "The reference of the IdentityMetadata resolves neither to the address of a peer of a Relationship nor the address of the own Identity."
         );
     }
 }
@@ -296,6 +316,7 @@ export class RuntimeErrors {
     public static readonly notifications = new Notifications();
     public static readonly attributes = new Attributes();
     public static readonly identityDeletionProcess = new IdentityDeletionProcess();
+    public static readonly identityMetadata = new IdentityMetadata();
     public static readonly identityRecoveryKits = new IdentityRecoveryKits();
     public static readonly deciderModule = new DeciderModule();
 }

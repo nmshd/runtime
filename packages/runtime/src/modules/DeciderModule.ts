@@ -1,5 +1,6 @@
+import { ApplicationError } from "@js-soft/ts-utils";
 import { LocalRequestStatus } from "@nmshd/consumption";
-import { RequestItemGroupJSON, RequestItemJSONDerivations } from "@nmshd/content";
+import { isRequestItemDerivation, RequestItemGroupJSON, RequestItemJSONDerivations } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
 import {
     IncomingRequestStatusChangedEvent,
@@ -103,12 +104,19 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
             const requestConfigElement = automationConfigElement.requestConfig;
             const responseConfigElement = automationConfigElement.responseConfig;
 
-            const generalRequestIsCompatible = checkGeneralRequestCompatibility(requestConfigElement, request);
+            const services = await this.runtime.getServices(event.eventTargetAddress);
+            const generalRequestIsCompatible = await checkGeneralRequestCompatibility(requestConfigElement, request, services);
+
+            if (generalRequestIsCompatible instanceof Error) {
+                this.logger.error(generalRequestIsCompatible);
+                break;
+            }
+
             if (!generalRequestIsCompatible) {
                 continue;
             }
 
-            const updatedRequestItemParameters = checkRequestItemCompatibilityAndApplyResponseConfig(
+            const updatedRequestItemParameters = await checkRequestItemCompatibilityAndApplyResponseConfig(
                 itemsOfRequest,
                 decideRequestItemParameters,
                 requestConfigElement,
@@ -260,14 +268,14 @@ function createEmptyDecideRequestItemParameters(array: any[]): { items: any[] } 
     };
 }
 
-function checkGeneralRequestCompatibility(requestConfigElement: RequestConfig, request: LocalRequestDTO): boolean {
+async function checkGeneralRequestCompatibility(requestConfigElement: RequestConfig, request: LocalRequestDTO, services: RuntimeServices): Promise<boolean | Error> {
     let generalRequestPartOfConfigElement = requestConfigElement;
 
     if (isRequestItemDerivationConfig(requestConfigElement)) {
         generalRequestPartOfConfigElement = filterConfigElementByPrefix(requestConfigElement, false);
     }
 
-    return checkCompatibility(generalRequestPartOfConfigElement, request);
+    return await checkCompatibility(generalRequestPartOfConfigElement, request, services);
 }
 
 function filterConfigElementByPrefix(requestItemConfigElement: RequestItemDerivationConfig, includePrefix: boolean): Record<string, any> {
@@ -287,17 +295,37 @@ function filterConfigElementByPrefix(requestItemConfigElement: RequestItemDeriva
     return filteredRequestItemConfigElement;
 }
 
-function checkCompatibility(requestConfigElement: RequestConfig, requestOrRequestItem: LocalRequestDTO | RequestItemJSONDerivations): boolean {
+async function checkCompatibility(requestConfigElement: RequestConfig, requestOrRequestItem: LocalRequestDTO, services: RuntimeServices): Promise<boolean | Error>;
+async function checkCompatibility(requestConfigElement: RequestConfig, requestOrRequestItem: RequestItemJSONDerivations): Promise<boolean>;
+async function checkCompatibility(
+    requestConfigElement: RequestConfig,
+    requestOrRequestItem: LocalRequestDTO | RequestItemJSONDerivations,
+    services?: RuntimeServices
+): Promise<boolean | Error> {
     let compatible = true;
+
     for (const property in requestConfigElement) {
         const unformattedRequestConfigProperty = requestConfigElement[property as keyof RequestConfig];
-        if (!unformattedRequestConfigProperty) {
+        if (typeof unformattedRequestConfigProperty === "undefined") {
             continue;
         }
         const requestConfigProperty = makeObjectsToStrings(unformattedRequestConfigProperty);
 
+        if (property === "relationshipAlreadyExists") {
+            if (isRequestItemDerivation(requestOrRequestItem)) {
+                return Error("The RelationshipRequestConfig 'relationshipAlreadyExists' is compared to a RequestItem, but should be compared to a Request.");
+            }
+
+            const relationshipCompatibility = await checkRelationshipCompatibility(requestConfigProperty, requestOrRequestItem as LocalRequestDTO, services!);
+            if (relationshipCompatibility instanceof ApplicationError) return relationshipCompatibility;
+
+            compatible &&= relationshipCompatibility;
+            if (!compatible) break;
+            continue;
+        }
+
         const unformattedRequestProperty = getNestedProperty(requestOrRequestItem, property);
-        if (!unformattedRequestProperty) {
+        if (typeof unformattedRequestProperty === "undefined") {
             compatible = false;
             break;
         }
@@ -338,6 +366,20 @@ function getNestedProperty(object: any, path: string): any {
     return nestedProperty;
 }
 
+async function checkRelationshipCompatibility(relationshipRequestConfig: boolean, request: LocalRequestDTO, services: RuntimeServices): Promise<boolean | ApplicationError> {
+    let relationshipExists = false;
+
+    const relationshipResult = await services.transportServices.relationships.getRelationshipByAddress({ address: request.peer });
+    if (relationshipResult.isError && relationshipResult.error.code !== "error.runtime.recordNotFound") return relationshipResult.error;
+
+    if (relationshipResult.isSuccess) {
+        relationshipExists = true;
+    }
+
+    const compatible = relationshipExists === relationshipRequestConfig;
+    return compatible;
+}
+
 function checkTagCompatibility(requestConfigTags: string[], requestTags: string[]): boolean {
     const atLeastOneMatchingTag = requestConfigTags.some((tag) => requestTags.includes(tag));
     return atLeastOneMatchingTag;
@@ -354,16 +396,16 @@ function checkDateCompatibility(requestConfigDate: string, requestDate: string):
     return CoreDate.from(requestDate).equals(CoreDate.from(requestConfigDate));
 }
 
-function checkRequestItemCompatibilityAndApplyResponseConfig(
+async function checkRequestItemCompatibilityAndApplyResponseConfig(
     itemsOfRequest: (RequestItemJSONDerivations | RequestItemGroupJSON)[],
     parametersToDecideRequest: any,
     requestConfigElement: RequestItemDerivationConfig,
     responseConfigElement: ResponseConfig
-): { items: any[] } {
+): Promise<{ items: any[] }> {
     for (let i = 0; i < itemsOfRequest.length; i++) {
         const item = itemsOfRequest[i];
         if (item["@type"] === "RequestItemGroup") {
-            checkRequestItemCompatibilityAndApplyResponseConfig(
+            await checkRequestItemCompatibilityAndApplyResponseConfig(
                 (item as RequestItemGroupJSON).items,
                 parametersToDecideRequest.items[i],
                 requestConfigElement,
@@ -374,7 +416,7 @@ function checkRequestItemCompatibilityAndApplyResponseConfig(
             if (alreadyDecidedByOtherConfig) continue;
 
             if (isRequestItemDerivationConfig(requestConfigElement)) {
-                const requestItemIsCompatible = checkRequestItemCompatibility(requestConfigElement, item as RequestItemJSONDerivations);
+                const requestItemIsCompatible = await checkRequestItemCompatibility(requestConfigElement, item as RequestItemJSONDerivations);
                 if (!requestItemIsCompatible) continue;
             }
 
@@ -395,7 +437,7 @@ function checkRequestItemCompatibilityAndApplyResponseConfig(
     return parametersToDecideRequest;
 }
 
-function checkRequestItemCompatibility(requestConfigElement: RequestItemDerivationConfig, requestItem: RequestItemJSONDerivations): boolean {
+async function checkRequestItemCompatibility(requestConfigElement: RequestItemDerivationConfig, requestItem: RequestItemJSONDerivations): Promise<boolean> {
     const requestItemPartOfConfigElement = filterConfigElementByPrefix(requestConfigElement, true);
-    return checkCompatibility(requestItemPartOfConfigElement, requestItem);
+    return await checkCompatibility(requestItemPartOfConfigElement, requestItem);
 }
