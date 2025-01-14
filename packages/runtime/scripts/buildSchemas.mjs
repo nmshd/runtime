@@ -3,7 +3,7 @@ import fs from "fs";
 import * as tsj from "ts-json-schema-generator";
 
 const runtimeConfig = {
-    tsconfig: new URL("../tsconfig.ajv.json", import.meta.url).pathname,
+    tsconfig: new URL("../tsconfig.json", import.meta.url).pathname,
     type: "*",
     extraTags: ["errorMessage"]
 };
