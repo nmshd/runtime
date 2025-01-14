@@ -21953,11 +21953,11 @@ export const LoadPeerTokenRequest: any = {
     }
 }
 
-export const CityJSON: any = {
+export const City: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CityJSON",
+    "$ref": "#/definitions/City",
     "definitions": {
-        "CityJSON": {
+        "City": {
             "type": "object",
             "properties": {
                 "@type": {
@@ -21983,11 +21983,11 @@ export const CityJSON: any = {
     }
 }
 
-export const CountryJSON: any = {
+export const Country: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CountryJSON",
+    "$ref": "#/definitions/Country",
     "definitions": {
-        "CountryJSON": {
+        "Country": {
             "type": "object",
             "properties": {
                 "@type": {
@@ -22013,11 +22013,11 @@ export const CountryJSON: any = {
     }
 }
 
-export const CommunicationLanguageJSON: any = {
+export const CommunicationLanguage: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CommunicationLanguageJSON",
+    "$ref": "#/definitions/CommunicationLanguage",
     "definitions": {
-        "CommunicationLanguageJSON": {
+        "CommunicationLanguage": {
             "type": "object",
             "properties": {
                 "@type": {
@@ -22043,11 +22043,11 @@ export const CommunicationLanguageJSON: any = {
     }
 }
 
-export const EMailAddressJSON: any = {
+export const EMailAddress: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/EMailAddressJSON",
+    "$ref": "#/definitions/EMailAddress",
     "definitions": {
-        "EMailAddressJSON": {
+        "EMailAddress": {
             "type": "object",
             "properties": {
                 "@type": {
@@ -22073,11 +22073,11 @@ export const EMailAddressJSON: any = {
     }
 }
 
-export const FaxNumberJSON: any = {
+export const FaxNumber: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/FaxNumberJSON",
+    "$ref": "#/definitions/FaxNumber",
     "definitions": {
-        "FaxNumberJSON": {
+        "FaxNumber": {
             "type": "object",
             "properties": {
                 "@type": {
@@ -22103,11 +22103,11 @@ export const FaxNumberJSON: any = {
     }
 }
 
-export const PhoneNumberJSON: any = {
+export const PhoneNumber: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/PhoneNumberJSON",
+    "$ref": "#/definitions/PhoneNumber",
     "definitions": {
-        "PhoneNumberJSON": {
+        "PhoneNumber": {
             "type": "object",
             "properties": {
                 "@type": {
@@ -22133,11 +22133,11 @@ export const PhoneNumberJSON: any = {
     }
 }
 
-export const WebsiteJSON: any = {
+export const Website: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/WebsiteJSON",
+    "$ref": "#/definitions/Website",
     "definitions": {
-        "WebsiteJSON": {
+        "Website": {
             "type": "object",
             "properties": {
                 "@type": {
@@ -22163,11 +22163,11 @@ export const WebsiteJSON: any = {
     }
 }
 
-export const StateJSON: any = {
+export const State: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/StateJSON",
+    "$ref": "#/definitions/State",
     "definitions": {
-        "StateJSON": {
+        "State": {
             "type": "object",
             "properties": {
                 "@type": {
@@ -22193,11 +22193,11 @@ export const StateJSON: any = {
     }
 }
 
-export const ZipCodeJSON: any = {
+export const ZipCode: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/ZipCodeJSON",
+    "$ref": "#/definitions/ZipCode",
     "definitions": {
-        "ZipCodeJSON": {
+        "ZipCode": {
             "type": "object",
             "properties": {
                 "@type": {
@@ -22223,11 +22223,11 @@ export const ZipCodeJSON: any = {
     }
 }
 
-export const DeliveryBoxAddressJSON: any = {
+export const DeliveryBoxAddress: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/DeliveryBoxAddressJSON",
+    "$ref": "#/definitions/DeliveryBoxAddress",
     "definitions": {
-        "DeliveryBoxAddressJSON": {
+        "DeliveryBoxAddress": {
             "type": "object",
             "properties": {
                 "@type": {
@@ -22279,11 +22279,11 @@ export const DeliveryBoxAddressJSON: any = {
     }
 }
 
-export const HouseNumberJSON: any = {
+export const HouseNumber: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/HouseNumberJSON",
+    "$ref": "#/definitions/HouseNumber",
     "definitions": {
-        "HouseNumberJSON": {
+        "HouseNumber": {
             "type": "object",
             "properties": {
                 "@type": {
@@ -22309,11 +22309,11 @@ export const HouseNumberJSON: any = {
     }
 }
 
-export const PostOfficeBoxAddressJSON: any = {
+export const PostOfficeBoxAddress: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/PostOfficeBoxAddressJSON",
+    "$ref": "#/definitions/PostOfficeBoxAddress",
     "definitions": {
-        "PostOfficeBoxAddressJSON": {
+        "PostOfficeBoxAddress": {
             "type": "object",
             "properties": {
                 "@type": {
@@ -22358,11 +22358,11 @@ export const PostOfficeBoxAddressJSON: any = {
     }
 }
 
-export const StreetJSON: any = {
+export const Street: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/StreetJSON",
+    "$ref": "#/definitions/Street",
     "definitions": {
-        "StreetJSON": {
+        "Street": {
             "type": "object",
             "properties": {
                 "@type": {
@@ -22388,11 +22388,11 @@ export const StreetJSON: any = {
     }
 }
 
-export const StreetAddressJSON: any = {
+export const StreetAddress: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/StreetAddressJSON",
+    "$ref": "#/definitions/StreetAddress",
     "definitions": {
-        "StreetAddressJSON": {
+        "StreetAddress": {
             "type": "object",
             "properties": {
                 "@type": {
@@ -22441,11 +22441,11 @@ export const StreetAddressJSON: any = {
     }
 }
 
-export const AffiliationOrganizationJSON: any = {
+export const AffiliationOrganization: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/AffiliationOrganizationJSON",
+    "$ref": "#/definitions/AffiliationOrganization",
     "definitions": {
-        "AffiliationOrganizationJSON": {
+        "AffiliationOrganization": {
             "type": "object",
             "properties": {
                 "@type": {
@@ -22471,11 +22471,11 @@ export const AffiliationOrganizationJSON: any = {
     }
 }
 
-export const AffiliationRoleJSON: any = {
+export const AffiliationRole: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/AffiliationRoleJSON",
+    "$ref": "#/definitions/AffiliationRole",
     "definitions": {
-        "AffiliationRoleJSON": {
+        "AffiliationRole": {
             "type": "object",
             "properties": {
                 "@type": {
@@ -22501,11 +22501,11 @@ export const AffiliationRoleJSON: any = {
     }
 }
 
-export const AffiliationUnitJSON: any = {
+export const AffiliationUnit: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/AffiliationUnitJSON",
+    "$ref": "#/definitions/AffiliationUnit",
     "definitions": {
-        "AffiliationUnitJSON": {
+        "AffiliationUnit": {
             "type": "object",
             "properties": {
                 "@type": {
@@ -22531,11 +22531,11 @@ export const AffiliationUnitJSON: any = {
     }
 }
 
-export const AffiliationJSON: any = {
+export const Affiliation: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/AffiliationJSON",
+    "$ref": "#/definitions/Affiliation",
     "definitions": {
-        "AffiliationJSON": {
+        "Affiliation": {
             "type": "object",
             "properties": {
                 "@type": {
@@ -22567,11 +22567,11 @@ export const AffiliationJSON: any = {
     }
 }
 
-export const BirthCityJSON: any = {
+export const BirthCity: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/BirthCityJSON",
+    "$ref": "#/definitions/BirthCity",
     "definitions": {
-        "BirthCityJSON": {
+        "BirthCity": {
             "type": "object",
             "properties": {
                 "value": {
@@ -22597,11 +22597,11 @@ export const BirthCityJSON: any = {
     }
 }
 
-export const BirthCountryJSON: any = {
+export const BirthCountry: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/BirthCountryJSON",
+    "$ref": "#/definitions/BirthCountry",
     "definitions": {
-        "BirthCountryJSON": {
+        "BirthCountry": {
             "type": "object",
             "properties": {
                 "value": {
@@ -22627,11 +22627,11 @@ export const BirthCountryJSON: any = {
     }
 }
 
-export const BirthDayJSON: any = {
+export const BirthDay: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/BirthDayJSON",
+    "$ref": "#/definitions/BirthDay",
     "definitions": {
-        "BirthDayJSON": {
+        "BirthDay": {
             "type": "object",
             "properties": {
                 "@type": {
@@ -22657,11 +22657,11 @@ export const BirthDayJSON: any = {
     }
 }
 
-export const BirthMonthJSON: any = {
+export const BirthMonth: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/BirthMonthJSON",
+    "$ref": "#/definitions/BirthMonth",
     "definitions": {
-        "BirthMonthJSON": {
+        "BirthMonth": {
             "type": "object",
             "properties": {
                 "@type": {
@@ -22702,11 +22702,11 @@ export const BirthMonthJSON: any = {
     }
 }
 
-export const BirthYearJSON: any = {
+export const BirthYear: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/BirthYearJSON",
+    "$ref": "#/definitions/BirthYear",
     "definitions": {
-        "BirthYearJSON": {
+        "BirthYear": {
             "type": "object",
             "properties": {
                 "@type": {
@@ -22732,11 +22732,11 @@ export const BirthYearJSON: any = {
     }
 }
 
-export const BirthDateJSON: any = {
+export const BirthDate: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/BirthDateJSON",
+    "$ref": "#/definitions/BirthDate",
     "definitions": {
-        "BirthDateJSON": {
+        "BirthDate": {
             "type": "object",
             "properties": {
                 "@type": {
@@ -22770,11 +22770,11 @@ export const BirthDateJSON: any = {
     }
 }
 
-export const BirthStateJSON: any = {
+export const BirthState: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/BirthStateJSON",
+    "$ref": "#/definitions/BirthState",
     "definitions": {
-        "BirthStateJSON": {
+        "BirthState": {
             "type": "object",
             "properties": {
                 "value": {
@@ -22800,11 +22800,11 @@ export const BirthStateJSON: any = {
     }
 }
 
-export const BirthPlaceJSON: any = {
+export const BirthPlace: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/BirthPlaceJSON",
+    "$ref": "#/definitions/BirthPlace",
     "definitions": {
-        "BirthPlaceJSON": {
+        "BirthPlace": {
             "type": "object",
             "properties": {
                 "@type": {
@@ -22837,11 +22837,11 @@ export const BirthPlaceJSON: any = {
     }
 }
 
-export const DisplayNameJSON: any = {
+export const DisplayName: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/DisplayNameJSON",
+    "$ref": "#/definitions/DisplayName",
     "definitions": {
-        "DisplayNameJSON": {
+        "DisplayName": {
             "type": "object",
             "properties": {
                 "@type": {
@@ -22867,11 +22867,11 @@ export const DisplayNameJSON: any = {
     }
 }
 
-export const IdentityFileReferenceJSON: any = {
+export const IdentityFileReference: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/IdentityFileReferenceJSON",
+    "$ref": "#/definitions/IdentityFileReference",
     "definitions": {
-        "IdentityFileReferenceJSON": {
+        "IdentityFileReference": {
             "type": "object",
             "properties": {
                 "@type": {
@@ -22897,11 +22897,11 @@ export const IdentityFileReferenceJSON: any = {
     }
 }
 
-export const SchematizedXMLJSON: any = {
+export const SchematizedXML: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/SchematizedXMLJSON",
+    "$ref": "#/definitions/SchematizedXML",
     "definitions": {
-        "SchematizedXMLJSON": {
+        "SchematizedXML": {
             "type": "object",
             "properties": {
                 "@type": {
@@ -22930,11 +22930,11 @@ export const SchematizedXMLJSON: any = {
     }
 }
 
-export const BirthNameJSON: any = {
+export const BirthName: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/BirthNameJSON",
+    "$ref": "#/definitions/BirthName",
     "definitions": {
-        "BirthNameJSON": {
+        "BirthName": {
             "type": "object",
             "properties": {
                 "@type": {
@@ -22960,11 +22960,11 @@ export const BirthNameJSON: any = {
     }
 }
 
-export const GivenNameJSON: any = {
+export const GivenName: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GivenNameJSON",
+    "$ref": "#/definitions/GivenName",
     "definitions": {
-        "GivenNameJSON": {
+        "GivenName": {
             "type": "object",
             "properties": {
                 "@type": {
@@ -22990,11 +22990,11 @@ export const GivenNameJSON: any = {
     }
 }
 
-export const HonorificPrefixJSON: any = {
+export const HonorificPrefix: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/HonorificPrefixJSON",
+    "$ref": "#/definitions/HonorificPrefix",
     "definitions": {
-        "HonorificPrefixJSON": {
+        "HonorificPrefix": {
             "type": "object",
             "properties": {
                 "@type": {
@@ -23020,11 +23020,11 @@ export const HonorificPrefixJSON: any = {
     }
 }
 
-export const HonorificSuffixJSON: any = {
+export const HonorificSuffix: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/HonorificSuffixJSON",
+    "$ref": "#/definitions/HonorificSuffix",
     "definitions": {
-        "HonorificSuffixJSON": {
+        "HonorificSuffix": {
             "type": "object",
             "properties": {
                 "@type": {
@@ -23050,11 +23050,11 @@ export const HonorificSuffixJSON: any = {
     }
 }
 
-export const MiddleNameJSON: any = {
+export const MiddleName: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/MiddleNameJSON",
+    "$ref": "#/definitions/MiddleName",
     "definitions": {
-        "MiddleNameJSON": {
+        "MiddleName": {
             "type": "object",
             "properties": {
                 "@type": {
@@ -23080,11 +23080,11 @@ export const MiddleNameJSON: any = {
     }
 }
 
-export const SurnameJSON: any = {
+export const Surname: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/SurnameJSON",
+    "$ref": "#/definitions/Surname",
     "definitions": {
-        "SurnameJSON": {
+        "Surname": {
             "type": "object",
             "properties": {
                 "@type": {
@@ -23110,11 +23110,11 @@ export const SurnameJSON: any = {
     }
 }
 
-export const PersonNameJSON: any = {
+export const PersonName: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/PersonNameJSON",
+    "$ref": "#/definitions/PersonName",
     "definitions": {
-        "PersonNameJSON": {
+        "PersonName": {
             "type": "object",
             "properties": {
                 "@type": {
@@ -23153,11 +23153,11 @@ export const PersonNameJSON: any = {
     }
 }
 
-export const PseudonymJSON: any = {
+export const Pseudonym: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/PseudonymJSON",
+    "$ref": "#/definitions/Pseudonym",
     "definitions": {
-        "PseudonymJSON": {
+        "Pseudonym": {
             "type": "object",
             "properties": {
                 "@type": {
@@ -23183,11 +23183,11 @@ export const PseudonymJSON: any = {
     }
 }
 
-export const CitizenshipJSON: any = {
+export const Citizenship: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CitizenshipJSON",
+    "$ref": "#/definitions/Citizenship",
     "definitions": {
-        "CitizenshipJSON": {
+        "Citizenship": {
             "type": "object",
             "properties": {
                 "@type": {
@@ -23213,11 +23213,11 @@ export const CitizenshipJSON: any = {
     }
 }
 
-export const JobTitleJSON: any = {
+export const JobTitle: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/JobTitleJSON",
+    "$ref": "#/definitions/JobTitle",
     "definitions": {
-        "JobTitleJSON": {
+        "JobTitle": {
             "type": "object",
             "properties": {
                 "@type": {
@@ -23243,11 +23243,11 @@ export const JobTitleJSON: any = {
     }
 }
 
-export const NationalityJSON: any = {
+export const Nationality: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/NationalityJSON",
+    "$ref": "#/definitions/Nationality",
     "definitions": {
-        "NationalityJSON": {
+        "Nationality": {
             "type": "object",
             "properties": {
                 "@type": {
@@ -23273,11 +23273,11 @@ export const NationalityJSON: any = {
     }
 }
 
-export const SexJSON: any = {
+export const Sex: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/SexJSON",
+    "$ref": "#/definitions/Sex",
     "definitions": {
-        "SexJSON": {
+        "Sex": {
             "type": "object",
             "properties": {
                 "@type": {
