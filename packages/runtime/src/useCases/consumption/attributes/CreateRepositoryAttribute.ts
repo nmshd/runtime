@@ -26,30 +26,30 @@ class Validator implements IValidator<CreateRepositoryAttributeRequest> {
         const requestValidationResult = requestSchemaValidator.validate(value);
         if (requestValidationResult.isInvalid()) return requestValidationResult;
 
-        const valueType = value.content.value["@type"];
-        if (!AttributeValues.Identity.TYPE_NAMES.includes(valueType)) {
-            const validationResult = new ValidationResult();
+        const attributeType = value.content.value["@type"];
+        if (!AttributeValues.Identity.TYPE_NAMES.includes(attributeType)) {
+            const attributeTypeValidationResult = new ValidationResult();
 
-            validationResult.addFailure(
+            attributeTypeValidationResult.addFailure(
                 new ValidationFailure(
                     RuntimeErrors.general.invalidPropertyValue("content.value.@type must match one of the allowed Attribute value types for IdentityAttributes"),
                     "@type"
                 )
             );
-            return validationResult;
+            return attributeTypeValidationResult;
         }
 
-        const contentSchemaValidator = new SchemaValidator(this.schemaRepository.getSchema(`${valueType}JSON`));
-        const validationResult = contentSchemaValidator.validate(value.content.value);
-        return Validator.prependStringToErrors(valueType, validationResult);
+        const attributeContentSchemaValidator = new SchemaValidator(this.schemaRepository.getSchema(attributeType));
+        const attributeContentValidationResult = attributeContentSchemaValidator.validate(value.content.value);
+        return Validator.addPrefixToErrorMessagesOfResult(`${attributeType} :: `, attributeContentValidationResult);
     }
 
-    private static prependStringToErrors(prefix: string, validationResult: ValidationResult): ValidationResult {
+    private static addPrefixToErrorMessagesOfResult(prefix: string, validationResult: ValidationResult): ValidationResult {
         if (validationResult.isValid()) return validationResult;
 
         const failures = validationResult.getFailures();
         const failuresWithPrefix = failures.map(
-            (failure) => new ValidationFailure(new ApplicationError(failure.error.code, `${prefix} :: ${failure.error.message}`, failure.error.data), failure.propertyName)
+            (failure) => new ValidationFailure(new ApplicationError(failure.error.code, `${prefix}${failure.error.message}`, failure.error.data), failure.propertyName)
         );
 
         const validationResultWithPrefix = new ValidationResult();
