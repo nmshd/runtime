@@ -120,9 +120,9 @@ import {
 
 // ################################################ Editable IdentityAttribute Value Types ###################################################################
 
-export module AttributeValues {
-    export module Identity {
-        export module Editable {
+export namespace AttributeValues {
+    export namespace Identity {
+        export namespace Editable {
             export type Json =
                 | AffiliationJSON
                 | BirthDateJSON
@@ -134,15 +134,19 @@ export module AttributeValues {
                 | DisplayNameJSON
                 | EMailAddressJSON
                 | FaxNumberJSON
+                | GivenNameJSON
+                | HonorificPrefixJSON
+                | HonorificSuffixJSON
                 | IdentityFileReferenceJSON
                 | JobTitleJSON
+                | MiddleNameJSON
                 | NationalityJSON
-                | PersonNameJSON
                 | PhoneNumberJSON
                 | PostOfficeBoxAddressJSON
                 | PseudonymJSON
                 | SexJSON
                 | StreetAddressJSON
+                | SurnameJSON
                 | WebsiteJSON;
 
             export type Interface =
@@ -156,15 +160,19 @@ export module AttributeValues {
                 | IDisplayName
                 | IEMailAddress
                 | IFaxNumber
+                | IGivenName
+                | IHonorificPrefix
+                | IHonorificSuffix
                 | IIdentityFileReference
                 | IJobTitle
+                | IMiddleName
                 | INationality
-                | IPersonName
                 | IPhoneNumber
                 | IPostOfficeBoxAddress
                 | IPseudonym
                 | ISex
                 | IStreetAddress
+                | ISurname
                 | IWebsite;
 
             export type Class =
@@ -178,15 +186,19 @@ export module AttributeValues {
                 | DisplayName
                 | EMailAddress
                 | FaxNumber
+                | GivenName
+                | HonorificPrefix
+                | HonorificSuffix
                 | IdentityFileReference
                 | JobTitle
+                | MiddleName
                 | Nationality
-                | PersonName
                 | PhoneNumber
                 | PostOfficeBoxAddress
                 | Pseudonym
                 | Sex
                 | StreetAddress
+                | Surname
                 | Website;
 
             export const CLASSES = [
@@ -200,16 +212,19 @@ export module AttributeValues {
                 DisplayName,
                 EMailAddress,
                 FaxNumber,
+                GivenName,
+                HonorificPrefix,
+                HonorificSuffix,
                 IdentityFileReference,
-                SchematizedXML,
                 JobTitle,
+                MiddleName,
                 Nationality,
-                PersonName,
                 PhoneNumber,
                 PostOfficeBoxAddress,
                 Pseudonym,
                 Sex,
                 StreetAddress,
+                Surname,
                 Website
             ];
 
@@ -224,16 +239,19 @@ export module AttributeValues {
                 "DisplayName",
                 "EMailAddress",
                 "FaxNumber",
+                "GivenName",
+                "HonorificPrefix",
+                "HonorificSuffix",
                 "IdentityFileReference",
-                "SchematizedXML",
                 "JobTitle",
                 "Nationality",
-                "PersonName",
+                "MiddleName",
                 "PhoneNumber",
                 "PostOfficeBoxAddress",
                 "Pseudonym",
                 "Sex",
                 "StreetAddress",
+                "Surname",
                 "Website"
             ] as const;
 
@@ -241,128 +259,12 @@ export module AttributeValues {
             export type TypeName = (typeof TYPE_NAMES)[number];
         }
 
-        export module Uneditable {
-            export type Json =
-                | AffiliationOrganizationJSON
-                | AffiliationRoleJSON
-                | AffiliationUnitJSON
-                | BirthCityJSON
-                | BirthCountryJSON
-                | BirthDayJSON
-                | BirthMonthJSON
-                | BirthStateJSON
-                | BirthYearJSON
-                | CityJSON
-                | CountryJSON
-                | GivenNameJSON
-                | HonorificPrefixJSON
-                | HonorificSuffixJSON
-                | HouseNumberJSON
-                | MiddleNameJSON
-                | SchematizedXMLJSON
-                | StateJSON
-                // | StatementJSON
-                | StreetJSON
-                | SurnameJSON
-                | ZipCodeJSON;
-
-            export type Interface =
-                | IAffiliationOrganization
-                | IAffiliationRole
-                | IAffiliationUnit
-                | IBirthCity
-                | IBirthCountry
-                | IBirthDay
-                | IBirthMonth
-                | IBirthState
-                | IBirthYear
-                | ICity
-                | ICountry
-                | IGivenName
-                | IHonorificPrefix
-                | IHonorificSuffix
-                | IHouseNumber
-                | IMiddleName
-                | ISchematizedXML
-                | IState
-                // | IStatement
-                | IStreet
-                | ISurname
-                | IZipCode;
-
-            export type Class =
-                | AffiliationOrganization
-                | AffiliationRole
-                | AffiliationUnit
-                | BirthCity
-                | BirthCountry
-                | BirthDay
-                | BirthMonth
-                | BirthState
-                | BirthYear
-                | City
-                | Country
-                | GivenName
-                | HonorificPrefix
-                | HonorificSuffix
-                | HouseNumber
-                | MiddleName
-                | SchematizedXML
-                | State
-                // | Statement
-                | Street
-                | Surname
-                | ZipCode;
-
-            export const CLASSES = [
-                AffiliationOrganization,
-                AffiliationRole,
-                AffiliationUnit,
-                BirthCity,
-                BirthCountry,
-                BirthDay,
-                BirthMonth,
-                BirthState,
-                BirthYear,
-                City,
-                Country,
-                GivenName,
-                HonorificPrefix,
-                HonorificSuffix,
-                HouseNumber,
-                MiddleName,
-                SchematizedXML,
-                State,
-                // Statement,
-                Street,
-                Surname,
-                ZipCode
-            ];
-
-            export const TYPE_NAMES = [
-                "AffiliationOrganization",
-                "AffiliationRole",
-                "AffiliationUnit",
-                "BirthCity",
-                "BirthCountry",
-                "BirthDay",
-                "BirthMonth",
-                "BirthState",
-                "BirthYear",
-                "City",
-                "Country",
-                "GivenName",
-                "HonorificPrefix",
-                "HonorificSuffix",
-                "HouseNumber",
-                "MiddleName",
-                "SchematizedXML",
-                "State",
-                // "Statement",
-                "Street",
-                "Surname",
-                "ZipCode"
-            ] as const;
+        export namespace Uneditable {
+            export type Json = SchematizedXMLJSON;
+            export type Interface = ISchematizedXML;
+            export type Class = SchematizedXML;
+            export const CLASSES = [SchematizedXML];
+            export const TYPE_NAMES = ["SchematizedXML"] as const;
 
             export const TYPE_NAMES_STRINGIFIED = JSON.stringify(TYPE_NAMES);
             export type TypeName = (typeof TYPE_NAMES)[number];
@@ -377,7 +279,7 @@ export module AttributeValues {
         export const TYPE_NAMES_STRINGIFIED = JSON.stringify(TYPE_NAMES);
     }
 
-    export module Relationship {
+    export namespace Relationship {
         export type Json =
             | ProprietaryBooleanJSON
             | ProprietaryCountryJSON
