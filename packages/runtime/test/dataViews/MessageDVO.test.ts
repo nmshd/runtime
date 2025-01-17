@@ -1,83 +1,44 @@
+import { DecideRequestItemParametersJSON } from "@nmshd/consumption";
+import { ArbitraryMessageContent, ConsentRequestItemJSON, MailJSON } from "@nmshd/content";
+import { CreateOutgoingRequestRequest, MailDVO, RequestMessageDVO, SendMessageRequest } from "../../src";
 import {
-    ArbitraryMessageContent,
-    GivenName,
-    IdentityAttribute,
-    MailJSON,
-    ReadAttributeAcceptResponseItem,
-    ReadAttributeRequestItem,
-    RelationshipCreationContent,
-    RelationshipTemplateContent,
-    ResponseItemResult,
-    ResponseResult
-} from "@nmshd/content";
-import { CoreAddress } from "@nmshd/core-types";
-import { CoreIdHelper } from "@nmshd/transport";
-import { DataViewExpander, MailDVO, SendMessageRequest, TransportServices } from "../../src";
-import { establishRelationshipWithContents, getRelationship, RuntimeServiceProvider, syncUntilHasMessage, uploadFile } from "../lib";
+    establishRelationship,
+    exchangeMessageWithRequest,
+    getRelationship,
+    RuntimeServiceProvider,
+    sendMessageWithRequest,
+    syncUntilHasMessage,
+    syncUntilHasMessageWithRequest,
+    syncUntilHasMessageWithResponse,
+    TestRuntimeServices,
+    uploadFile
+} from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
-let transportServices1: TransportServices;
-let transportServices2: TransportServices;
-let expander1: DataViewExpander;
-let expander2: DataViewExpander;
+let services1: TestRuntimeServices;
+let services2: TestRuntimeServices;
 
 beforeAll(async () => {
-    const runtimeServices = await serviceProvider.launch(2);
-    transportServices1 = runtimeServices[0].transport;
-    transportServices2 = runtimeServices[1].transport;
-    expander1 = runtimeServices[0].expander;
-    expander2 = runtimeServices[1].expander;
-    await establishRelationshipWithContents(
-        transportServices1,
-        transportServices2,
-        RelationshipTemplateContent.from({
-            onNewRelationship: {
-                "@type": "Request",
-                items: [
-                    ReadAttributeRequestItem.from({
-                        mustBeAccepted: true,
-                        query: {
-                            "@type": "IdentityAttributeQuery",
-                            valueType: "CommunicationLanguage"
-                        }
-                    })
-                ]
-            }
-        }).toJSON(),
-        RelationshipCreationContent.from({
-            response: {
-                "@type": "Response",
-                result: ResponseResult.Accepted,
-                requestId: (await CoreIdHelper.notPrefixed.generate()).toString(),
-                items: [
-                    ReadAttributeAcceptResponseItem.from({
-                        result: ResponseItemResult.Accepted,
-                        attributeId: await CoreIdHelper.notPrefixed.generate(),
-                        attribute: IdentityAttribute.from({
-                            owner: CoreAddress.from((await transportServices1.account.getIdentityInfo()).value.address),
-                            value: GivenName.from("aGivenName")
-                        })
-                    }).toJSON()
-                ]
-            }
-        }).toJSON()
-    );
+    const runtimeServices = await serviceProvider.launch(2, { enableRequestModule: true });
+    services1 = runtimeServices[0];
+    services2 = runtimeServices[1];
+
+    await establishRelationship(services1.transport, services2.transport);
 }, 30000);
 
 afterAll(() => serviceProvider.stop());
 
-describe("MessageDVO", () => {
+describe("Message with Mail", () => {
     let transportService2Address: string;
     let fileId: string;
     let messageRequest: SendMessageRequest;
     let mailRequest: SendMessageRequest;
-    // let changeAttributeMailId: string;
 
     beforeAll(async () => {
-        const file = await uploadFile(transportServices1);
+        const file = await uploadFile(services1.transport);
         fileId = file.id;
 
-        const relationship = await getRelationship(transportServices1);
+        const relationship = await getRelationship(services1.transport);
         transportService2Address = relationship.peer;
 
         messageRequest = {
@@ -103,8 +64,8 @@ describe("MessageDVO", () => {
     });
 
     test("check the message dvo for the sender", async () => {
-        const dto = (await transportServices1.messages.sendMessage(messageRequest)).value;
-        const dvo = await expander1.expandMessageDTO(dto);
+        const dto = (await services1.transport.messages.sendMessage(messageRequest)).value;
+        const dvo = await services1.expander.expandMessageDTO(dto);
         expect(dvo).toBeDefined();
         expect(dvo.name).toBe("i18n://dvo.message.name");
         expect(dvo.description).toBeUndefined();
@@ -127,10 +88,10 @@ describe("MessageDVO", () => {
     });
 
     test("check the message dvo for the recipient", async () => {
-        const senderMessage = (await transportServices1.messages.sendMessage(messageRequest)).value;
+        const senderMessage = (await services1.transport.messages.sendMessage(messageRequest)).value;
         const messageId = senderMessage.id;
-        const dto = await syncUntilHasMessage(transportServices2, messageId);
-        const dvo = await expander2.expandMessageDTO(dto);
+        const dto = await syncUntilHasMessage(services2.transport, messageId);
+        const dvo = await services2.expander.expandMessageDTO(dto);
         expect(dvo).toBeDefined();
         expect(dvo.id).toStrictEqual(messageId);
         expect(dvo.name).toBe("i18n://dvo.message.name");
@@ -154,8 +115,8 @@ describe("MessageDVO", () => {
     });
 
     test("check the mail dvo for the sender", async () => {
-        const dto = (await transportServices1.messages.sendMessage(mailRequest)).value;
-        const dvo = (await expander1.expandMessageDTO(dto)) as MailDVO;
+        const dto = (await services1.transport.messages.sendMessage(mailRequest)).value;
+        const dvo = (await services1.expander.expandMessageDTO(dto)) as MailDVO;
         expect(dto.content["@type"]).toBe("Mail");
         const mail = dto.content as MailJSON;
         expect(dvo).toBeDefined();
@@ -194,10 +155,10 @@ describe("MessageDVO", () => {
     });
 
     test("check the mail dvo for the recipient", async () => {
-        const senderMail = (await transportServices1.messages.sendMessage(mailRequest)).value;
+        const senderMail = (await services1.transport.messages.sendMessage(mailRequest)).value;
         const mailId = senderMail.id;
-        const dto = await syncUntilHasMessage(transportServices2, mailId);
-        const dvo = (await expander2.expandMessageDTO(dto)) as MailDVO;
+        const dto = await syncUntilHasMessage(services2.transport, mailId);
+        const dvo = (await services2.expander.expandMessageDTO(dto)) as MailDVO;
         expect(dto.content["@type"]).toBe("Mail");
         const mail = dto.content as MailJSON;
         expect(dvo).toBeDefined();
@@ -232,5 +193,212 @@ describe("MessageDVO", () => {
         expect(dvo.ccCount).toStrictEqual(mail.cc!.length);
         expect(dvo.subject).toStrictEqual(mail.subject);
         expect(dvo.body).toStrictEqual(mail.body);
+    });
+});
+
+describe("Message with Request", () => {
+    let requestContent: CreateOutgoingRequestRequest;
+    let responseItems: DecideRequestItemParametersJSON[];
+
+    beforeAll(() => {
+        requestContent = {
+            content: {
+                items: [
+                    {
+                        "@type": "ConsentRequestItem",
+                        consent: "Consent text",
+                        mustBeAccepted: true
+                    } as ConsentRequestItemJSON
+                ]
+            },
+            peer: services2.address
+        };
+
+        responseItems = [{ accept: true }];
+    });
+
+    test("check the MessageDVO of the Request for the sender", async () => {
+        const senderMessage = await sendMessageWithRequest(services1, services2, requestContent);
+        await syncUntilHasMessageWithRequest(services2.transport, senderMessage.content.id!);
+        const dto = senderMessage;
+        const dvo = (await services1.expander.expandMessageDTO(senderMessage)) as RequestMessageDVO;
+
+        expect(dvo).toBeDefined();
+        expect(dvo.type).toBe("RequestMessageDVO");
+        expect(dvo.name).toBe("i18n://dvo.message.name");
+        expect(dvo.description).toBeUndefined();
+        expect(dvo.date).toStrictEqual(dto.createdAt);
+        expect(dvo.createdAt).toStrictEqual(dto.createdAt);
+        expect(dvo.createdByDevice).toStrictEqual(dto.createdByDevice);
+        expect(dvo.id).toStrictEqual(dto.id);
+        expect(dvo.isOwn).toBe(true);
+        expect(dvo.createdBy.type).toBe("IdentityDVO");
+        expect(dvo.createdBy.id).toStrictEqual(dto.createdBy);
+        expect(dvo.createdBy.name).toBe("i18n://dvo.identity.self.name");
+        expect(dvo.createdBy.description).toBe("i18n://dvo.identity.self.description");
+        expect(dvo.createdBy.initials).toBe("i18n://dvo.identity.self.initials");
+        expect(dvo.createdBy.isSelf).toBe(true);
+
+        expect(dvo.recipients).toHaveLength(1);
+        const recipient = dvo.recipients[0];
+        expect(recipient.type).toBe("RecipientDVO");
+        expect(recipient.id).toStrictEqual(dto.recipients[0].address);
+        expect(recipient.name).toBe("i18n://dvo.identity.unknown");
+        expect(recipient.isSelf).toBe(false);
+
+        expect(dvo.request).toBeDefined();
+        expect(dvo.request.source!.type).toBe("Message");
+        expect(dvo.request.source!.reference).toBe(dto.id);
+        expect(dvo.request.isOwn).toBe(true);
+        expect(dvo.request.createdBy.name).toBe("i18n://dvo.identity.self.name");
+        expect(dvo.request.peer.name).toBe("i18n://dvo.identity.unknown");
+        expect(dvo.request.status).toBe("Open");
+        expect(dvo.request.statusText).toBe("i18n://dvo.localRequest.status.Open");
+        expect(dvo.request.type).toBe("LocalRequestDVO");
+        expect(dvo.request.content.type).toBe("RequestDVO");
+        expect(dvo.request.content.items).toHaveLength(1);
+        expect(dvo.request.isDecidable).toBe(false);
+        expect(dvo.request.decider.name).toBe("i18n://dvo.identity.unknown");
+        expect(dvo.request.response).toBeUndefined();
+    });
+
+    test("check the MessageDVO of the Request for the recipient before deciding", async () => {
+        const recipientMessage = await exchangeMessageWithRequest(services1, services2, requestContent);
+        const dto = recipientMessage;
+        const dvo = (await services2.expander.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
+
+        expect(dvo).toBeDefined();
+        expect(dvo.type).toBe("RequestMessageDVO");
+        expect(dvo.name).toBe("i18n://dvo.message.name");
+        expect(dvo.description).toBeUndefined();
+        expect(dvo.date).toStrictEqual(dto.createdAt);
+        expect(dvo.createdAt).toStrictEqual(dto.createdAt);
+        expect(dvo.createdByDevice).toStrictEqual(dto.createdByDevice);
+        expect(dvo.id).toStrictEqual(dto.id);
+        expect(dvo.isOwn).toBe(false);
+        expect(dvo.createdBy.type).toBe("IdentityDVO");
+        expect(dvo.createdBy.id).toStrictEqual(dto.createdBy);
+        expect(dvo.createdBy.name).toBe("i18n://dvo.identity.unknown");
+        expect(dvo.createdBy.description).toBe("i18n://dvo.relationship.Active");
+        expect(dvo.createdBy.isSelf).toBe(false);
+
+        expect(dvo.recipients).toHaveLength(1);
+        const recipient = dvo.recipients[0];
+        expect(recipient.type).toBe("RecipientDVO");
+        expect(recipient.id).toStrictEqual(dto.recipients[0].address);
+        expect(recipient.name).toBe("i18n://dvo.identity.self.name");
+        expect(recipient.isSelf).toBe(true);
+
+        expect(dvo.request).toBeDefined();
+        expect(dvo.request.source!.type).toBe("Message");
+        expect(dvo.request.isOwn).toBe(false);
+        expect(dvo.request.createdBy.name).toBe("i18n://dvo.identity.unknown");
+        expect(dvo.request.peer.name).toBe("i18n://dvo.identity.unknown");
+        expect(dvo.request.status).toBe("DecisionRequired");
+        expect(dvo.request.statusText).toBe("i18n://dvo.localRequest.status.DecisionRequired");
+        expect(dvo.request.type).toBe("LocalRequestDVO");
+        expect(dvo.request.content.type).toBe("RequestDVO");
+        expect(dvo.request.content.items).toHaveLength(1);
+        expect(dvo.request.isDecidable).toBe(true);
+        expect(dvo.request.decider.name).toBe("i18n://dvo.identity.self.name");
+        expect(dvo.request.response).toBeUndefined();
+    });
+
+    test("check the MessageDVO of the ResponseWrapper for the recipient after accepting", async () => {
+        const senderRequestMessage = await exchangeMessageWithRequest(services1, services2, requestContent);
+        await services2.consumption.incomingRequests.accept({ requestId: senderRequestMessage.content.id!, items: responseItems });
+        const senderResponseMessage = await syncUntilHasMessageWithResponse(services1.transport, senderRequestMessage.content.id!);
+        const recipientResponseMessage = (await services2.transport.messages.getMessage({ id: senderResponseMessage.id })).value;
+        const dto = recipientResponseMessage;
+        const dvo = (await services2.expander.expandMessageDTO(recipientResponseMessage)) as RequestMessageDVO;
+
+        expect(dvo).toBeDefined();
+        expect(dvo.type).toBe("RequestMessageDVO");
+        expect(dvo.name).toBe("i18n://dvo.message.name");
+        expect(dvo.description).toBeUndefined();
+        expect(dvo.date).toStrictEqual(dto.createdAt);
+        expect(dvo.createdAt).toStrictEqual(dto.createdAt);
+        expect(dvo.createdByDevice).toStrictEqual(dto.createdByDevice);
+        expect(dvo.id).toStrictEqual(dto.id);
+        expect(dvo.isOwn).toBe(true);
+        expect(dvo.createdBy.type).toBe("IdentityDVO");
+        expect(dvo.createdBy.id).toStrictEqual(dto.createdBy);
+        expect(dvo.createdBy.name).toBe("i18n://dvo.identity.self.name");
+        expect(dvo.createdBy.description).toBe("i18n://dvo.identity.self.description");
+        expect(dvo.createdBy.initials).toBe("i18n://dvo.identity.self.initials");
+        expect(dvo.createdBy.isSelf).toBe(true);
+
+        expect(dvo.recipients).toHaveLength(1);
+        const recipient = dvo.recipients[0];
+        expect(recipient.type).toBe("RecipientDVO");
+        expect(recipient.id).toStrictEqual(dto.recipients[0].address);
+        expect(recipient.name).toBe("i18n://dvo.identity.unknown");
+        expect(recipient.isSelf).toBe(false);
+
+        expect(dvo.request).toBeDefined();
+        expect(dvo.request.source!.type).toBe("Message");
+        expect(dvo.request.isOwn).toBe(false);
+        expect(dvo.request.createdBy.name).toBe("i18n://dvo.identity.unknown");
+        expect(dvo.request.peer.name).toBe("i18n://dvo.identity.unknown");
+        expect(dvo.request.status).toBe("Completed");
+        expect(dvo.request.statusText).toBe("i18n://dvo.localRequest.status.Completed");
+        expect(dvo.request.type).toBe("LocalRequestDVO");
+        expect(dvo.request.content.type).toBe("RequestDVO");
+        expect(dvo.request.content.items).toHaveLength(1);
+        expect(dvo.request.isDecidable).toBe(false);
+        expect(dvo.request.decider.name).toBe("i18n://dvo.identity.self.name");
+
+        expect(dvo.request.response!.content.items).toHaveLength(1);
+        expect(dvo.request.response!.content.result).toBe("Accepted");
+        expect(dvo.request.response!.source?.type).toBe("Message");
+        expect(dvo.request.response!.source?.reference).toBe(dvo.id);
+    });
+
+    test("check the MessageDVO of the ResponseWrapper for the sender after accepting", async () => {
+        const senderRequestMessage = await exchangeMessageWithRequest(services1, services2, requestContent);
+        await services2.consumption.incomingRequests.accept({ requestId: senderRequestMessage.content.id!, items: responseItems });
+        const senderResponseMessage = await syncUntilHasMessageWithResponse(services1.transport, senderRequestMessage.content.id!);
+        const dto = senderResponseMessage;
+        const dvo = (await services1.expander.expandMessageDTO(senderResponseMessage)) as RequestMessageDVO;
+
+        expect(dvo).toBeDefined();
+        expect(dvo.type).toBe("RequestMessageDVO");
+        expect(dvo.name).toBe("i18n://dvo.message.name");
+        expect(dvo.description).toBeUndefined();
+        expect(dvo.date).toStrictEqual(dto.createdAt);
+        expect(dvo.createdAt).toStrictEqual(dto.createdAt);
+        expect(dvo.createdByDevice).toStrictEqual(dto.createdByDevice);
+        expect(dvo.id).toStrictEqual(dto.id);
+        expect(dvo.isOwn).toBe(false);
+        expect(dvo.createdBy.type).toBe("IdentityDVO");
+        expect(dvo.createdBy.id).toStrictEqual(dto.createdBy);
+        expect(dvo.createdBy.name).toBe("i18n://dvo.identity.unknown");
+        expect(dvo.createdBy.description).toBe("i18n://dvo.relationship.Active");
+        expect(dvo.createdBy.isSelf).toBe(false);
+
+        expect(dvo.recipients).toHaveLength(1);
+        const recipient = dvo.recipients[0];
+        expect(recipient.type).toBe("RecipientDVO");
+        expect(recipient.id).toStrictEqual(dto.recipients[0].address);
+        expect(recipient.name).toBe("i18n://dvo.identity.self.name");
+        expect(recipient.isSelf).toBe(true);
+
+        expect(dvo.request).toBeDefined();
+        expect(dvo.request.source!.type).toBe("Message");
+        expect(dvo.request.isOwn).toBe(true);
+        expect(dvo.request.createdBy.name).toBe("i18n://dvo.identity.self.name");
+        expect(dvo.request.peer.name).toBe("i18n://dvo.identity.unknown");
+        expect(dvo.request.status).toBe("Completed");
+        expect(dvo.request.statusText).toBe("i18n://dvo.localRequest.status.Completed");
+        expect(dvo.request.type).toBe("LocalRequestDVO");
+        expect(dvo.request.content.type).toBe("RequestDVO");
+        expect(dvo.request.content.items).toHaveLength(1);
+        expect(dvo.request.isDecidable).toBe(false);
+        expect(dvo.request.decider.name).toBe("i18n://dvo.identity.unknown");
+
+        expect(dvo.request.response!.content.items).toHaveLength(1);
+        expect(dvo.request.response!.content.result).toBe("Accepted");
+        expect(dvo.request.response!.source?.type).toBe("Message");
+        expect(dvo.request.response!.source?.reference).toBe(dvo.id);
     });
 });
