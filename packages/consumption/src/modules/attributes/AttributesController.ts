@@ -1294,6 +1294,17 @@ export class AttributesController extends ConsumptionBaseController {
         return ownSharedAttributeSuccessors;
     }
 
+    public async getRepositoryAttributesWithSameValue(value: AttributeValues.Identity.Json): Promise<LocalAttribute[]> {
+        const queryForRepositoryAttributeDuplicates = {
+            "content.@type": "IdentityAttribute",
+            "content.owner": this.identity.address.toString(),
+            "content.value": value,
+            succeededBy: { $exists: false }
+        };
+
+        return await this.getLocalAttributes(queryForRepositoryAttributeDuplicates);
+    }
+
     public async getRelationshipAttributesOfValueTypeToPeerWithGivenKeyAndOwner(key: string, owner: CoreAddress, valueType: string, peer: CoreAddress): Promise<LocalAttribute[]> {
         return await this.getLocalAttributes({
             "content.@type": "RelationshipAttribute",
