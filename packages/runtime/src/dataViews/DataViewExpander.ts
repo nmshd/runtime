@@ -339,7 +339,7 @@ export class DataViewExpander {
 
         if (message.content["@type"] === "ResponseWrapper") {
             const query = { id: message.content.requestId };
-            const localRequestsResult = isOwn ? await this.consumption.outgoingRequests.getRequests({ query }) : await this.consumption.incomingRequests.getRequests({ query });
+            const localRequestsResult = isOwn ? await this.consumption.incomingRequests.getRequests({ query }) : await this.consumption.outgoingRequests.getRequests({ query });
 
             if (localRequestsResult.value.length === 0) throw new Error("No LocalRequest has been found for this message id.");
             if (localRequestsResult.value.length > 1) throw new Error("More than one LocalRequest has been found for this message id.");
