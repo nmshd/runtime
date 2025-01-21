@@ -1304,8 +1304,7 @@ export class AttributesController extends ConsumptionBaseController {
         });
         queryForRepositoryAttributeDuplicates["succeededBy"] = { $exists: false };
 
-        const result = await this.getLocalAttributes(queryForRepositoryAttributeDuplicates);
-        return result;
+        return await this.getLocalAttributes(queryForRepositoryAttributeDuplicates);
     }
 
     public async getRelationshipAttributesOfValueTypeToPeerWithGivenKeyAndOwner(key: string, owner: CoreAddress, valueType: string, peer: CoreAddress): Promise<LocalAttribute[]> {
