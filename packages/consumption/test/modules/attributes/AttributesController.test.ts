@@ -84,8 +84,8 @@ describe("AttributesController", function () {
     });
 
     describe("create Attributes", function () {
-        test("should create new attributes", async function () {
-            const birthDateParams: ICreateRepositoryAttributeParams = {
+        test("should create a new attribute", async function () {
+            const params: ICreateRepositoryAttributeParams = {
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "DisplayName",
@@ -95,9 +95,31 @@ describe("AttributesController", function () {
                 })
             };
 
-            const birthDate = await consumptionController.attributes.createRepositoryAttribute(birthDateParams);
-            expect(birthDate).toBeInstanceOf(LocalAttribute);
-            expect(birthDate.content).toBeInstanceOf(IdentityAttribute);
+            const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute(params);
+            expect(repositoryAttribute).toBeInstanceOf(LocalAttribute);
+            expect(repositoryAttribute.content).toBeInstanceOf(IdentityAttribute);
+
+            const attributesAfterCreate = await consumptionController.attributes.getLocalAttributes();
+            expect(attributesAfterCreate).toHaveLength(1);
+
+            mockEventBus.expectPublishedEvents(AttributeCreatedEvent);
+        });
+
+        test("should create a new attribute of type SchematizedXML", async function () {
+            const params: ICreateRepositoryAttributeParams = {
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "SchematizedXML",
+                        title: "aTitle",
+                        value: "aValue"
+                    },
+                    owner: consumptionController.accountController.identity.address
+                })
+            };
+
+            const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute(params);
+            expect(repositoryAttribute).toBeInstanceOf(LocalAttribute);
+            expect(repositoryAttribute.content).toBeInstanceOf(IdentityAttribute);
 
             const attributesAfterCreate = await consumptionController.attributes.getLocalAttributes();
             expect(attributesAfterCreate).toHaveLength(1);
