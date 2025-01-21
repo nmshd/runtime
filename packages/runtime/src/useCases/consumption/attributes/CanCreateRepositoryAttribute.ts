@@ -17,6 +17,8 @@ interface AbstractCanCreateRepositoryAttributeRequest<T> {
 
 export interface CanCreateRepositoryAttributeRequest extends AbstractCanCreateRepositoryAttributeRequest<AttributeValues.Identity.Json> {}
 
+export interface SchemaValidatableCanCreateRepositoryAttributeRequest extends AbstractCanCreateRepositoryAttributeRequest<unknown> {}
+
 class Validator implements IValidator<CanCreateRepositoryAttributeRequest> {
     public constructor(@Inject private readonly schemaRepository: SchemaRepository) {}
 
