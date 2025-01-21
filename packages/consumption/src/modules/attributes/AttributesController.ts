@@ -1295,13 +1295,22 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async getRepositoryAttributesWithSameValue(value: AttributeValues.Identity.Json): Promise<LocalAttribute[]> {
-        const flattenedValue = this.flattenObject(value);
-        const queryForRepositoryAttributeDuplicates = {
-            "content.@type": "IdentityAttribute",
-            "content.owner": this.identity.address.toString(),
-            ...flattenedValue,
-            succeededBy: { $exists: false }
-        };
+        const queryForRepositoryAttributeDuplicates = this.flattenObject({
+            content: {
+                "@type": "IdentityAttribute",
+                owner: this.identity.address.toString(),
+                value: value
+            }
+        });
+        queryForRepositoryAttributeDuplicates["succeededBy"] = { $exists: false };
+
+        // const flattenedValue = this.flattenObject({ content: { value: value } });
+        // const queryForRepositoryAttributeDuplicates = {
+        //     "content.@type": "IdentityAttribute",
+        //     "content.owner": this.identity.address.toString(),
+        //     ...flattenedValue,
+        //     succeededBy: { $exists: false }
+        // };
 
         const result = await this.getLocalAttributes(queryForRepositoryAttributeDuplicates);
         return result;
