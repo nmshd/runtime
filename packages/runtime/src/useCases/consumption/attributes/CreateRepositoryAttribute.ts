@@ -20,8 +20,6 @@ interface AbstractCreateRepositoryAttributeRequest<T> {
 
 export interface CreateRepositoryAttributeRequest extends AbstractCreateRepositoryAttributeRequest<AttributeValues.Identity.Json> {}
 
-export interface SchemaValidatableCreateRepositoryAttributeRequest extends AbstractCreateRepositoryAttributeRequest<unknown> {}
-
 class Validator implements IValidator<CreateRepositoryAttributeRequest> {
     public constructor(@Inject private readonly schemaRepository: SchemaRepository) {}
 
