@@ -25,7 +25,7 @@ import { ConsumptionControllerName } from "../../consumption/ConsumptionControll
 import { ConsumptionCoreErrors } from "../../consumption/ConsumptionCoreErrors";
 import { ConsumptionError } from "../../consumption/ConsumptionError";
 import { ConsumptionIds } from "../../consumption/ConsumptionIds";
-import { ValidationResult } from "../common";
+import { flattenObject, ValidationResult } from "../common";
 import {
     AttributeCreatedEvent,
     AttributeDeletedEvent,
@@ -1295,7 +1295,7 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async getRepositoryAttributesWithSameValue(value: AttributeValues.Identity.Json): Promise<LocalAttribute[]> {
-        const queryForRepositoryAttributeDuplicates = this.flattenObject({
+        const queryForRepositoryAttributeDuplicates = flattenObject({
             content: {
                 "@type": "IdentityAttribute",
                 owner: this.identity.address.toString(),
@@ -1304,32 +1304,7 @@ export class AttributesController extends ConsumptionBaseController {
         });
         queryForRepositoryAttributeDuplicates["succeededBy"] = { $exists: false };
 
-        // const flattenedValue = this.flattenObject({ content: { value: value } });
-        // const queryForRepositoryAttributeDuplicates = {
-        //     "content.@type": "IdentityAttribute",
-        //     "content.owner": this.identity.address.toString(),
-        //     ...flattenedValue,
-        //     succeededBy: { $exists: false }
-        // };
-
         const result = await this.getLocalAttributes(queryForRepositoryAttributeDuplicates);
-        return result;
-    }
-
-    private flattenObject(object: any): Record<string, unknown> {
-        const result: Record<string, unknown> = {};
-
-        for (const key in object) {
-            const propertyValue = object[key];
-            if (typeof propertyValue === "object" && !Array.isArray(propertyValue)) {
-                const temp = this.flattenObject(propertyValue);
-                for (const j in temp) {
-                    result[`${key}.${j}`] = temp[j];
-                }
-            } else {
-                result[key] = propertyValue;
-            }
-        }
         return result;
     }
 
