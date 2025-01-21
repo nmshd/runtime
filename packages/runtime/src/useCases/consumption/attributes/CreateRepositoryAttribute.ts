@@ -62,7 +62,7 @@ class Validator implements IValidator<CreateRepositoryAttributeRequest> {
 
 export class CreateRepositoryAttributeUseCase extends UseCase<CreateRepositoryAttributeRequest, LocalAttributeDTO> {
     public constructor(
-        @Inject private readonly attributeController: AttributesController,
+        @Inject private readonly attributesController: AttributesController,
         @Inject private readonly accountController: AccountController,
         @Inject validator: Validator
     ) {
@@ -70,7 +70,7 @@ export class CreateRepositoryAttributeUseCase extends UseCase<CreateRepositoryAt
     }
 
     protected async executeInternal(request: CreateRepositoryAttributeRequest): Promise<Result<LocalAttributeDTO>> {
-        const duplicateRepositoryAttributes = await this.attributeController.getRepositoryAttributesWithSameValue(request.content.value);
+        const duplicateRepositoryAttributes = await this.attributesController.getRepositoryAttributesWithSameValue(request.content.value);
 
         const exactMatchExists = duplicateRepositoryAttributes.some((duplicate) => _.isEqual(duplicate.content.value.toJSON(), request.content.value));
         if (exactMatchExists) {
@@ -84,7 +84,7 @@ export class CreateRepositoryAttributeUseCase extends UseCase<CreateRepositoryAt
                 ...request.content
             }
         });
-        const createdLocalAttribute = await this.attributeController.createRepositoryAttribute(params);
+        const createdLocalAttribute = await this.attributesController.createRepositoryAttribute(params);
 
         await this.accountController.syncDatawallet();
 
