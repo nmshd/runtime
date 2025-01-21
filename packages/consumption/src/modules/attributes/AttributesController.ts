@@ -1295,14 +1295,33 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async getRepositoryAttributesWithSameValue(value: AttributeValues.Identity.Json): Promise<LocalAttribute[]> {
+        const flattenedValue = this.flattenObject(value);
         const queryForRepositoryAttributeDuplicates = {
             "content.@type": "IdentityAttribute",
             "content.owner": this.identity.address.toString(),
-            "content.value": value,
+            ...flattenedValue,
             succeededBy: { $exists: false }
         };
 
-        return await this.getLocalAttributes(queryForRepositoryAttributeDuplicates);
+        const result = await this.getLocalAttributes(queryForRepositoryAttributeDuplicates);
+        return result;
+    }
+
+    private flattenObject(object: any): Record<string, unknown> {
+        const result: Record<string, unknown> = {};
+
+        for (const key in object) {
+            const propertyValue = object[key];
+            if (typeof propertyValue === "object" && !Array.isArray(propertyValue)) {
+                const temp = this.flattenObject(propertyValue);
+                for (const j in temp) {
+                    result[`${key}.${j}`] = temp[j];
+                }
+            } else {
+                result[key] = propertyValue;
+            }
+        }
+        return result;
     }
 
     public async getRelationshipAttributesOfValueTypeToPeerWithGivenKeyAndOwner(key: string, owner: CoreAddress, valueType: string, peer: CoreAddress): Promise<LocalAttribute[]> {
