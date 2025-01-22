@@ -22,13 +22,9 @@ export interface SchemaValidatableCanCreateRepositoryAttributeRequest extends Ab
 class Validator implements IValidator<CanCreateRepositoryAttributeRequest> {
     public constructor(@Inject private readonly schemaRepository: SchemaRepository) {}
 
-    public validate(value: CanCreateRepositoryAttributeRequest): Promise<ValidationResult> | ValidationResult {
+    public validate(value: CanCreateRepositoryAttributeRequest): ValidationResult {
         const requestSchemaValidator = new SchemaValidator(this.schemaRepository.getSchema("CanCreateRepositoryAttributeRequest"));
-        const requestValidationResult = requestSchemaValidator.validate(value);
-        if (requestValidationResult.isInvalid()) return requestValidationResult;
-
-        const attributeValueTypeValidator = new IdentityAttributeValueTypeValidator(this.schemaRepository);
-        return attributeValueTypeValidator.validate(value);
+        return requestSchemaValidator.validate(value);
     }
 }
 
@@ -43,12 +39,19 @@ export type CanCreateRepositoryAttributeResponse =
 export class CanCreateRepositoryAttributeUseCase extends UseCase<CanCreateRepositoryAttributeRequest, CanCreateRepositoryAttributeResponse> {
     public constructor(
         @Inject private readonly attributesController: AttributesController,
-        @Inject validator: Validator
+        @Inject private readonly validator: Validator
     ) {
         super(validator);
     }
 
     protected async executeInternal(request: CanCreateRepositoryAttributeRequest): Promise<Result<CanCreateRepositoryAttributeResponse>> {
+        const attributeValueTypeValidator = new IdentityAttributeValueTypeValidator(this.validator["schemaRepository"]);
+        const validationResult = await attributeValueTypeValidator.validate(request);
+        if (validationResult.isInvalid()) {
+            const failures = validationResult.getFailures();
+            return Result.ok({ isSuccess: false, code: failures[0].error.code, message: failures[0].error.message });
+        }
+
         const repositoryAttributeDuplicate = await this.attributesController.getRepositoryAttributeWithSameValue(request.content.value);
         if (repositoryAttributeDuplicate) {
             const error = RuntimeErrors.attributes.cannotCreateDuplicateRepositoryAttribute(repositoryAttributeDuplicate.id);
