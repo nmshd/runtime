@@ -3,9 +3,8 @@ import { AttributesController, CreateRepositoryAttributeParams } from "@nmshd/co
 import { AttributeValues } from "@nmshd/content";
 import { AccountController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import _ from "lodash";
 import { LocalAttributeDTO } from "../../../types";
-import { flattenObject, ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationFailure, ValidationResult } from "../../common";
+import { ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationFailure, ValidationResult } from "../../common";
 import { IValidator } from "../../common/validation/IValidator";
 import { AttributeMapper } from "./AttributeMapper";
 
@@ -64,7 +63,7 @@ class Validator implements IValidator<CreateRepositoryAttributeRequest> {
 
 export class CreateRepositoryAttributeUseCase extends UseCase<CreateRepositoryAttributeRequest, LocalAttributeDTO> {
     public constructor(
-        @Inject private readonly attributeController: AttributesController,
+        @Inject private readonly attributesController: AttributesController,
         @Inject private readonly accountController: AccountController,
         @Inject validator: Validator
     ) {
@@ -72,6 +71,11 @@ export class CreateRepositoryAttributeUseCase extends UseCase<CreateRepositoryAt
     }
 
     protected async executeInternal(request: CreateRepositoryAttributeRequest): Promise<Result<LocalAttributeDTO>> {
+        const repositoryAttributeDuplicate = await this.attributesController.getRepositoryAttributeWithSameValue(request.content.value);
+        if (repositoryAttributeDuplicate) {
+            return Result.fail(RuntimeErrors.attributes.cannotCreateDuplicateRepositoryAttribute(repositoryAttributeDuplicate.id));
+        }
+
         const params = CreateRepositoryAttributeParams.from({
             content: {
                 "@type": "IdentityAttribute",
@@ -79,26 +83,7 @@ export class CreateRepositoryAttributeUseCase extends UseCase<CreateRepositoryAt
                 ...request.content
             }
         });
-
-        const queryForRepositoryAttributeDuplicates = flattenObject({
-            content: {
-                "@type": "IdentityAttribute",
-                owner: this.accountController.identity.address.toString(),
-                value: request.content.value
-            }
-        });
-
-        queryForRepositoryAttributeDuplicates["succeededBy"] = { $exists: false };
-
-        const existingRepositoryAttributes = await this.attributeController.getLocalAttributes(queryForRepositoryAttributeDuplicates);
-
-        const exactMatchExists = existingRepositoryAttributes.some((duplicate) => _.isEqual(duplicate.content.value.toJSON(), request.content.value));
-
-        if (exactMatchExists) {
-            return Result.fail(RuntimeErrors.attributes.cannotCreateDuplicateRepositoryAttribute(existingRepositoryAttributes[0].id));
-        }
-
-        const createdLocalAttribute = await this.attributeController.createRepositoryAttribute(params);
+        const createdLocalAttribute = await this.attributesController.createRepositoryAttribute(params);
 
         await this.accountController.syncDatawallet();
 
