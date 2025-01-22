@@ -765,14 +765,16 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
     });
 
     test("should not allow to create a RepositoryAttribute duplicate", async () => {
-        await services1.consumption.attributes.createRepositoryAttribute(canCreateRepositoryAttributeRequest);
+        const repositoryAttribute = (await services1.consumption.attributes.createRepositoryAttribute(canCreateRepositoryAttributeRequest)).value;
 
         const result = await services1.consumption.attributes.canCreateRepositoryAttribute(canCreateRepositoryAttributeRequest);
 
         assert(!result.value.isSuccess);
 
         expect(result.value.isSuccess).toBe(false);
-        expect(result.value.message).toBe("The RepositoryAttribute cannot be created because it has the same content.value as the already existing RepositoryAttribute.");
+        expect(result.value.message).toBe(
+            `The RepositoryAttribute cannot be created because it has the same content.value as the already existing RepositoryAttribute with id '${repositoryAttribute.id.toString()}'.`
+        );
         expect(result.value.code).toBe("error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute");
     });
 
