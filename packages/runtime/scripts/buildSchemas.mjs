@@ -7,7 +7,7 @@ const runtimeConfig = {
     type: "*",
     extraTags: ["errorMessage"]
 };
-// use SchemaValidatableCreateRepositoryAttributeRequest instead of CreateRepositoryAttributeRequest
+// use SchemaValidatable(Can)CreateRepositoryAttributeRequest instead of (Can)CreateRepositoryAttributeRequest
 const useCaseSchemaDeclarations = getSchemaDeclarations(
     runtimeConfig,
     (x) => x.endsWith("Request") && x !== "CreateRepositoryAttributeRequest" && x !== "CanCreateRepositoryAttributeRequest"
