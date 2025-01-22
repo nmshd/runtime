@@ -1,9 +1,10 @@
-import { ApplicationError, Result } from "@js-soft/ts-utils";
+import { Result } from "@js-soft/ts-utils";
 import { AttributesController } from "@nmshd/consumption";
 import { AttributeValues } from "@nmshd/content";
 import { Inject } from "@nmshd/typescript-ioc";
-import { ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationFailure, ValidationResult } from "../../common";
+import { ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationResult } from "../../common";
 import { IValidator } from "../../common/validation/IValidator";
+import { IdentityAttributeValueTypeValidator } from "./CreateRepositoryAttribute";
 
 interface AbstractCanCreateRepositoryAttributeRequest<T> {
     content: {
@@ -26,35 +27,8 @@ class Validator implements IValidator<CanCreateRepositoryAttributeRequest> {
         const requestValidationResult = requestSchemaValidator.validate(value);
         if (requestValidationResult.isInvalid()) return requestValidationResult;
 
-        const attributeType = value.content.value["@type"];
-        if (!AttributeValues.Identity.TYPE_NAMES.includes(attributeType)) {
-            const attributeTypeValidationResult = new ValidationResult();
-
-            attributeTypeValidationResult.addFailure(
-                new ValidationFailure(
-                    RuntimeErrors.general.invalidPropertyValue("content.value.@type must match one of the allowed Attribute value types for IdentityAttributes"),
-                    "@type"
-                )
-            );
-            return attributeTypeValidationResult;
-        }
-
-        const attributeContentSchemaValidator = new SchemaValidator(this.schemaRepository.getSchema(attributeType));
-        const attributeContentValidationResult = attributeContentSchemaValidator.validate(value.content.value);
-        return Validator.addPrefixToErrorMessagesOfResult(`${attributeType} :: `, attributeContentValidationResult);
-    }
-
-    private static addPrefixToErrorMessagesOfResult(prefix: string, validationResult: ValidationResult): ValidationResult {
-        if (validationResult.isValid()) return validationResult;
-
-        const failures = validationResult.getFailures();
-        const failuresWithPrefix = failures.map(
-            (failure) => new ValidationFailure(new ApplicationError(failure.error.code, `${prefix}${failure.error.message}`, failure.error.data), failure.propertyName)
-        );
-
-        const validationResultWithPrefix = new ValidationResult();
-        validationResultWithPrefix.addFailures(failuresWithPrefix);
-        return validationResultWithPrefix;
+        const attributeValueTypeValidator = new IdentityAttributeValueTypeValidator(this.schemaRepository);
+        return attributeValueTypeValidator.validate(value);
     }
 }
 

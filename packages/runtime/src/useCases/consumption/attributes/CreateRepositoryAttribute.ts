@@ -29,6 +29,15 @@ class Validator implements IValidator<CreateRepositoryAttributeRequest> {
         const requestValidationResult = requestSchemaValidator.validate(value);
         if (requestValidationResult.isInvalid()) return requestValidationResult;
 
+        const attributeValueTypeValidator = new IdentityAttributeValueTypeValidator(this.schemaRepository);
+        return attributeValueTypeValidator.validate(value);
+    }
+}
+
+export class IdentityAttributeValueTypeValidator implements IValidator<CreateRepositoryAttributeRequest> {
+    public constructor(@Inject private readonly schemaRepository: SchemaRepository) {}
+
+    public validate(value: CreateRepositoryAttributeRequest): Promise<ValidationResult> | ValidationResult {
         const attributeType = value.content.value["@type"];
         if (!AttributeValues.Identity.TYPE_NAMES.includes(attributeType)) {
             const attributeTypeValidationResult = new ValidationResult();
@@ -44,7 +53,7 @@ class Validator implements IValidator<CreateRepositoryAttributeRequest> {
 
         const attributeContentSchemaValidator = new SchemaValidator(this.schemaRepository.getSchema(attributeType));
         const attributeContentValidationResult = attributeContentSchemaValidator.validate(value.content.value);
-        return Validator.addPrefixToErrorMessagesOfResult(`${attributeType} :: `, attributeContentValidationResult);
+        return IdentityAttributeValueTypeValidator.addPrefixToErrorMessagesOfResult(`${attributeType} :: `, attributeContentValidationResult);
     }
 
     private static addPrefixToErrorMessagesOfResult(prefix: string, validationResult: ValidationResult): ValidationResult {
