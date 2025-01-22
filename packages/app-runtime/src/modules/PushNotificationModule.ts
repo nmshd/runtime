@@ -1,9 +1,20 @@
 import { Result } from "@js-soft/ts-utils";
-import { AppRuntimeErrors } from "../../AppRuntimeErrors";
-import { AccountSelectedEvent, ExternalEventReceivedEvent } from "../../events";
-import { RemoteNotificationEvent, RemoteNotificationRegistrationEvent } from "../../natives";
-import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "../AppRuntimeModule";
-import { BackboneEventName, IBackboneEventContent } from "./IBackboneEventContent";
+import { AppRuntimeErrors } from "../AppRuntimeErrors";
+import { AccountSelectedEvent, ExternalEventReceivedEvent } from "../events";
+import { RemoteNotificationEvent, RemoteNotificationRegistrationEvent } from "../natives";
+import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "./AppRuntimeModule";
+
+enum BackboneEventName {
+    DatawalletModificationsCreated = "DatawalletModificationsCreated",
+    ExternalEventCreated = "ExternalEventCreated"
+}
+
+interface IBackboneEventContent {
+    devicePushIdentifier: string;
+    eventName: BackboneEventName;
+    sentAt: string;
+    payload: any;
+}
 
 export interface PushNotificationModuleConfig extends AppRuntimeModuleConfiguration {}
 
