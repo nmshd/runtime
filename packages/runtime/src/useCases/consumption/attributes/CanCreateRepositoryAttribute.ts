@@ -2,7 +2,6 @@ import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { AttributesController } from "@nmshd/consumption";
 import { AttributeValues } from "@nmshd/content";
 import { Inject } from "@nmshd/typescript-ioc";
-import _ from "lodash";
 import { ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationFailure, ValidationResult } from "../../common";
 import { IValidator } from "../../common/validation/IValidator";
 
@@ -76,11 +75,9 @@ export class CanCreateRepositoryAttributeUseCase extends UseCase<CanCreateReposi
     }
 
     protected async executeInternal(request: CanCreateRepositoryAttributeRequest): Promise<Result<CanCreateRepositoryAttributeResponse>> {
-        const duplicateRepositoryAttributes = await this.attributesController.getRepositoryAttributesWithSameValue(request.content.value);
-
-        const exactMatchExists = duplicateRepositoryAttributes.some((duplicate) => _.isEqual(duplicate.content.value.toJSON(), request.content.value));
-        if (exactMatchExists) {
-            const error = RuntimeErrors.attributes.cannotCreateDuplicateRepositoryAttribute(duplicateRepositoryAttributes[0].id);
+        const repositoryAttributeDuplicate = await this.attributesController.getRepositoryAttributeWithSameValue(request.content.value);
+        if (repositoryAttributeDuplicate) {
+            const error = RuntimeErrors.attributes.cannotCreateDuplicateRepositoryAttribute(repositoryAttributeDuplicate.id);
             return Result.ok({ isSuccess: false, code: error.code, message: error.message });
         }
 
