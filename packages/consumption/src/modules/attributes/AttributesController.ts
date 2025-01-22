@@ -1294,7 +1294,7 @@ export class AttributesController extends ConsumptionBaseController {
         return ownSharedAttributeSuccessors;
     }
 
-    public async getRepositoryAttributesWithSameValue(value: AttributeValues.Identity.Json): Promise<LocalAttribute[]> {
+    public async getRepositoryAttributeWithSameValue(value: AttributeValues.Identity.Json): Promise<LocalAttribute | undefined> {
         const queryForRepositoryAttributeDuplicates = flattenObject({
             content: {
                 "@type": "IdentityAttribute",
@@ -1304,7 +1304,10 @@ export class AttributesController extends ConsumptionBaseController {
         });
         queryForRepositoryAttributeDuplicates["succeededBy"] = { $exists: false };
 
-        return await this.getLocalAttributes(queryForRepositoryAttributeDuplicates);
+        const matchingRepositoryAttributes = await this.getLocalAttributes(queryForRepositoryAttributeDuplicates);
+
+        const repositoryAttributeDuplicate = matchingRepositoryAttributes.find((duplicate) => _.isEqual(duplicate.content.value.toJSON(), value));
+        return repositoryAttributeDuplicate;
     }
 
     public async getRelationshipAttributesOfValueTypeToPeerWithGivenKeyAndOwner(key: string, owner: CoreAddress, valueType: string, peer: CoreAddress): Promise<LocalAttribute[]> {
