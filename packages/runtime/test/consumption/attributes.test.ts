@@ -14,6 +14,7 @@ import {
 } from "@nmshd/content";
 import { CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreIdHelper } from "@nmshd/transport";
+import assert from "assert";
 import {
     AttributeCreatedEvent,
     CanCreateRepositoryAttributeRequest,
@@ -652,6 +653,9 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
                 } as any
             };
             const result = await services1.consumption.attributes.canCreateRepositoryAttribute(request);
+
+            assert(!result.value.isSuccess);
+
             expect(result.value.isSuccess).toBe(false);
             expect(result.value.message).toBe("GivenName :: value must be string");
             expect(result.value.code).toBe("error.runtime.validation.invalidPropertyValue");
@@ -670,6 +674,9 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
                 } as any
             };
             const result = await services1.consumption.attributes.canCreateRepositoryAttribute(request);
+
+            assert(!result.value.isSuccess);
+
             expect(result.value.isSuccess).toBe(false);
             expect(result.value.message).toBe("BirthDate :: year must be number");
             expect(result.value.code).toBe("error.runtime.validation.invalidPropertyValue");
@@ -687,6 +694,9 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
                 } as any
             };
             const result = await services1.consumption.attributes.canCreateRepositoryAttribute(request);
+
+            assert(!result.value.isSuccess);
+
             expect(result.value.isSuccess).toBe(false);
             expect(result.value.message).toBe("BirthDate :: must have required property 'year'");
             expect(result.value.code).toBe("error.runtime.validation.invalidPropertyValue");
@@ -703,6 +713,9 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
                 } as any
             };
             const result = await services1.consumption.attributes.canCreateRepositoryAttribute(request);
+
+            assert(!result.value.isSuccess);
+
             expect(result.value.isSuccess).toBe(false);
             expect(result.value.message).toBe("BirthMonth :: value must be equal to one of the allowed values");
             expect(result.value.code).toBe("error.runtime.validation.invalidPropertyValue");
@@ -720,6 +733,9 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
                 } as any
             };
             const result = await services1.consumption.attributes.canCreateRepositoryAttribute(request);
+
+            assert(!result.value.isSuccess);
+
             expect(result.value.isSuccess).toBe(false);
             expect(result.value.message).toBe("GivenName :: must NOT have additional properties");
             expect(result.value.code).toBe("error.runtime.validation.invalidPropertyValue");
@@ -734,6 +750,9 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
                 }
             } as any;
             const result = await services1.consumption.attributes.canCreateRepositoryAttribute(request);
+
+            assert(!result.value.isSuccess);
+
             expect(result.value.isSuccess).toBe(false);
             expect(result.value.message).toBe("content.value.@type must match one of the allowed Attribute value types for IdentityAttributes");
             expect(result.value.code).toBe("error.runtime.validation.invalidPropertyValue");
@@ -749,7 +768,12 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
         await services1.consumption.attributes.createRepositoryAttribute(canCreateRepositoryAttributeRequest);
 
         const result = await services1.consumption.attributes.canCreateRepositoryAttribute(canCreateRepositoryAttributeRequest);
-        expect(result.value.isSuccess).toBe(true);
+
+        assert(!result.value.isSuccess);
+
+        expect(result.value.isSuccess).toBe(false);
+        expect(result.value.message).toBe("The RepositoryAttribute cannot be created because it has the same content.value as the already existing RepositoryAttribute.");
+        expect(result.value.code).toBe("error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute");
     });
 
     test("should not allow to create a duplicate RepositoryAttribute even if the tags/validFrom/validTo are different", async () => {
@@ -777,6 +801,9 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
         };
 
         const result = await services1.consumption.attributes.canCreateRepositoryAttribute(canCreateAttributeRequest);
+
+        assert(!result.value.isSuccess);
+
         expect(result.value.isSuccess).toBe(false);
         expect(result.value.message).toBe(
             `The RepositoryAttribute cannot be created because it has the same content.value as the already existing RepositoryAttribute with id '${repositoryAttribute.id.toString()}'.`
