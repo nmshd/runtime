@@ -76,6 +76,12 @@ export function createAppConfig(...configs: AppConfigOverwrite[]): AppConfig {
                 location: "relationshipTemplateProcessed",
                 enabled: true
             },
+            sse: {
+                name: "SSEModule",
+                displayName: "SSE Module",
+                location: "sse",
+                enabled: false
+            },
             decider: {
                 displayName: "Decider Module",
                 name: "DeciderModule",
