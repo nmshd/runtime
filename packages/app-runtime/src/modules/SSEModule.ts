@@ -2,6 +2,7 @@ import { ILogger } from "@js-soft/logging-abstractions";
 import { ModuleConfiguration } from "@nmshd/runtime";
 import { EventSource } from "eventsource";
 import { AppRuntime } from "../AppRuntime";
+import { AccountSelectedEvent } from "../events";
 import { LocalAccountSession } from "../multiAccount";
 import { AppRuntimeModule } from "./AppRuntimeModule";
 
@@ -21,6 +22,17 @@ export class SSEModule extends AppRuntimeModule {
             await this.runSync(session);
             await this.recreateEventSource(session);
         }
+
+        this.subscribeToEvent(AccountSelectedEvent, this.handleAccountSelected.bind(this));
+    }
+
+    private async handleAccountSelected(event: AccountSelectedEvent) {
+        const session = await this.runtime.getOrCreateSession(event.eventTargetAddress);
+
+        if (this.eventSource[session.account.id]) return;
+
+        await this.runSync(session);
+        await this.recreateEventSource(session);
     }
 
     private async recreateEventSource(session: LocalAccountSession): Promise<void> {
