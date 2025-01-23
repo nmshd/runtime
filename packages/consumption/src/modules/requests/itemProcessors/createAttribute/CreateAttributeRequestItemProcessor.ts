@@ -21,6 +21,9 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
         const senderIsAttributeOwner = requestItem.attribute.owner.equals(this.currentIdentityAddress);
         const ownerIsEmptyString = requestItem.attribute.owner.toString() === "";
 
+        // TODO: add check for shared duplicate -> return error
+        // TODO: check that not two Items of same Request will create same Attribute (see key uniqueness)
+
         if (requestItem.attribute instanceof IdentityAttribute) {
             if (recipientIsAttributeOwner || ownerIsEmptyString) {
                 return ValidationResult.success();
@@ -108,8 +111,11 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
         }
 
         let sharedAttribute: LocalAttribute;
-
         if (requestItem.attribute instanceof IdentityAttribute) {
+            // TODO: check for existing RepositoryAttribute -> link to it
+            const repositoryAttributeDuplicate = await this.consumptionController.attributes.getRepositoryAttributeWithSameValue(requestItem.attribute.value.toJSON());
+            // TODO: mind tags
+
             const repositoryAttribute = await this.consumptionController.attributes.createRepositoryAttribute({
                 content: requestItem.attribute
             });
