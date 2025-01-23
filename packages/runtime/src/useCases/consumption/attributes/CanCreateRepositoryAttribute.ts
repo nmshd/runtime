@@ -4,7 +4,7 @@ import { AttributeValues } from "@nmshd/content";
 import { Inject } from "@nmshd/typescript-ioc";
 import { ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationResult } from "../../common";
 import { IValidator } from "../../common/validation/IValidator";
-import { IdentityAttributeValueTypeValidator } from "./CreateRepositoryAttribute";
+import { IdentityAttributeValueValidator } from "./CreateRepositoryAttribute";
 
 interface AbstractCanCreateRepositoryAttributeRequest<T> {
     content: {
@@ -45,10 +45,10 @@ export class CanCreateRepositoryAttributeUseCase extends UseCase<CanCreateReposi
     }
 
     protected async executeInternal(request: CanCreateRepositoryAttributeRequest): Promise<Result<CanCreateRepositoryAttributeResponse>> {
-        const attributeValueTypeValidator = new IdentityAttributeValueTypeValidator(this.validator["schemaRepository"]);
-        const validationResult = await attributeValueTypeValidator.validate(request);
-        if (validationResult.isInvalid()) {
-            const failures = validationResult.getFailures();
+        const identityAttributeValueValidator = new IdentityAttributeValueValidator(this.validator["schemaRepository"]);
+        const attributeValueValidationResult = await identityAttributeValueValidator.validate(request);
+        if (attributeValueValidationResult.isInvalid()) {
+            const failures = attributeValueValidationResult.getFailures();
             return Result.ok({ isSuccess: false, code: failures[0].error.code, message: failures[0].error.message });
         }
 

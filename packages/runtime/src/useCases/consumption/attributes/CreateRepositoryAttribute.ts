@@ -29,31 +29,31 @@ class Validator implements IValidator<CreateRepositoryAttributeRequest> {
         const requestValidationResult = requestSchemaValidator.validate(value);
         if (requestValidationResult.isInvalid()) return requestValidationResult;
 
-        const attributeValueTypeValidator = new IdentityAttributeValueTypeValidator(this.schemaRepository);
-        return attributeValueTypeValidator.validate(value);
+        const identityAttributeValueValidator = new IdentityAttributeValueValidator(this.schemaRepository);
+        return identityAttributeValueValidator.validate(value);
     }
 }
 
-export class IdentityAttributeValueTypeValidator implements IValidator<CreateRepositoryAttributeRequest> {
+export class IdentityAttributeValueValidator implements IValidator<CreateRepositoryAttributeRequest> {
     public constructor(@Inject private readonly schemaRepository: SchemaRepository) {}
 
     public validate(value: CreateRepositoryAttributeRequest): Promise<ValidationResult> | ValidationResult {
-        const attributeType = value.content.value["@type"];
-        if (!AttributeValues.Identity.TYPE_NAMES.includes(attributeType)) {
-            const attributeTypeValidationResult = new ValidationResult();
+        const attributeValueType = value.content.value["@type"];
+        if (!AttributeValues.Identity.TYPE_NAMES.includes(attributeValueType)) {
+            const attributeValueTypeValidationResult = new ValidationResult();
 
-            attributeTypeValidationResult.addFailure(
+            attributeValueTypeValidationResult.addFailure(
                 new ValidationFailure(
                     RuntimeErrors.general.invalidPropertyValue("content.value.@type must match one of the allowed Attribute value types for IdentityAttributes"),
                     "@type"
                 )
             );
-            return attributeTypeValidationResult;
+            return attributeValueTypeValidationResult;
         }
 
-        const attributeContentSchemaValidator = new SchemaValidator(this.schemaRepository.getSchema(attributeType));
-        const attributeContentValidationResult = attributeContentSchemaValidator.validate(value.content.value);
-        return IdentityAttributeValueTypeValidator.addPrefixToErrorMessagesOfResult(`${attributeType} :: `, attributeContentValidationResult);
+        const attributeValueSchemaValidator = new SchemaValidator(this.schemaRepository.getSchema(attributeValueType));
+        const attributeValueValidationResult = attributeValueSchemaValidator.validate(value.content.value);
+        return IdentityAttributeValueValidator.addPrefixToErrorMessagesOfResult(`${attributeValueType} :: `, attributeValueValidationResult);
     }
 
     private static addPrefixToErrorMessagesOfResult(prefix: string, validationResult: ValidationResult): ValidationResult {
