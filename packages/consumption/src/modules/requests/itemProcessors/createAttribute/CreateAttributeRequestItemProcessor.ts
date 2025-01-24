@@ -112,13 +112,30 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
 
         let sharedAttribute: LocalAttribute;
         if (requestItem.attribute instanceof IdentityAttribute) {
-            // TODO: check for existing RepositoryAttribute -> link to it
-            const repositoryAttributeDuplicate = await this.consumptionController.attributes.getRepositoryAttributeWithSameValue(requestItem.attribute.value.toJSON());
-            // TODO: mind tags
+            let repositoryAttribute = await this.consumptionController.attributes.getRepositoryAttributeWithSameValue((requestItem.attribute.value as any).toJSON());
 
-            const repositoryAttribute = await this.consumptionController.attributes.createRepositoryAttribute({
-                content: requestItem.attribute
-            });
+            if (!repositoryAttribute) {
+                repositoryAttribute = await this.consumptionController.attributes.createRepositoryAttribute({
+                    content: requestItem.attribute
+                });
+            }
+
+            if (!repositoryAttribute.isRepositoryAttribute(this.currentIdentityAddress)) {
+                throw new Error(`The Attribute ${repositoryAttribute} is not a RepositoryAttribute.`);
+            }
+
+            const newTags = requestItem.attribute.tags?.filter((tag) => !repositoryAttribute.content.tags?.includes(tag));
+            if (newTags && newTags.length > 0) {
+                const successorParams = {
+                    content: {
+                        ...repositoryAttribute.content.toJSON(),
+                        tags: [...(repositoryAttribute.content.tags ?? []), ...newTags]
+                    },
+                    succeeds: repositoryAttribute.id.toString()
+                };
+                const attributesAfterSuccession = await this.consumptionController.attributes.succeedRepositoryAttribute(repositoryAttribute.id, successorParams);
+                repositoryAttribute = attributesAfterSuccession.successor;
+            }
 
             sharedAttribute = await this.consumptionController.attributes.createSharedLocalAttributeCopy({
                 peer: requestInfo.peer,
