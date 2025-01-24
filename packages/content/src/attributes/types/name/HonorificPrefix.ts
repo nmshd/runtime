@@ -1,5 +1,6 @@
 import { type } from "@js-soft/ts-serval";
-import { AbstractString, AbstractStringJSON, IAbstractString } from "../AbstractString";
+import { AbstractStringJSON, IAbstractString } from "../AbstractString";
+import { AbstractNaturalPersonName } from "../strings/AbstractNaturalPersonName";
 
 export interface HonorificPrefixJSON extends AbstractStringJSON {
     "@type": "HonorificPrefix";
@@ -8,7 +9,7 @@ export interface HonorificPrefixJSON extends AbstractStringJSON {
 export interface IHonorificPrefix extends IAbstractString {}
 
 @type("HonorificPrefix")
-export class HonorificPrefix extends AbstractString implements HonorificPrefix {
+export class HonorificPrefix extends AbstractNaturalPersonName implements HonorificPrefix {
     public static from(value: HonorificPrefix | Omit<HonorificPrefixJSON, "@type"> | string): HonorificPrefix {
         return this.fromAny(value);
     }

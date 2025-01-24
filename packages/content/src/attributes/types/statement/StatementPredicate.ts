@@ -1,4 +1,5 @@
 import { PrimitiveType, serialize, type, validate } from "@js-soft/ts-serval";
+import { characterSets } from "../../constants/CharacterSets";
 import { RenderHints, RenderHintsEditType, ValueHints, ValueHintsValue } from "../../hints";
 import { AbstractString, AbstractStringJSON, IAbstractString } from "../AbstractString";
 
@@ -25,7 +26,8 @@ export class StatementPredicate extends AbstractString {
     @serialize()
     @validate({
         customValidator: StatementPredicate.validatePredicate,
-        allowedTypes: [PrimitiveType.String]
+        allowedTypes: [PrimitiveType.String],
+        regExp: characterSets.din91379DatatypeC
     })
     public override value: Predicates | `z-${string}`;
 

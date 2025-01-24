@@ -1,4 +1,5 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
+import { characterSets } from "../../constants/CharacterSets";
 import { ValueHints, ValueHintsOverride } from "../../hints";
 import { AbstractStringJSON, IAbstractString } from "../AbstractString";
 import { AbstractFileReference } from "../strings";
@@ -18,11 +19,11 @@ export interface IProprietaryFileReference extends IProprietaryAttributeValue, I
 @type("ProprietaryFileReference")
 export class ProprietaryFileReference extends AbstractFileReference {
     @serialize()
-    @validate({ max: PROPRIETARY_ATTRIBUTE_MAX_TITLE_LENGTH })
+    @validate({ max: PROPRIETARY_ATTRIBUTE_MAX_TITLE_LENGTH, regExp: characterSets.din91379DatatypeC })
     public title: string;
 
     @serialize()
-    @validate({ nullable: true, max: PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH })
+    @validate({ nullable: true, max: PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH, regExp: characterSets.din91379DatatypeC })
     public description?: string;
 
     @serialize()

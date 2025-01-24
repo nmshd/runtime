@@ -1,5 +1,6 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { AbstractAttributeValue, AbstractAttributeValueJSON, IAbstractAttributeValue } from "../../AbstractAttributeValue";
+import { characterSets } from "../../constants/CharacterSets";
 import { RenderHints, RenderHintsDataType, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../../hints";
 
 export interface ConsentJSON extends AbstractAttributeValueJSON {
@@ -15,7 +16,7 @@ export interface IConsent extends IAbstractAttributeValue {
 @type("Consent")
 export class Consent extends AbstractAttributeValue implements IConsent {
     @serialize()
-    @validate({ max: 2000 })
+    @validate({ max: 2000, regExp: characterSets.din91379DatatypeC })
     public consent: string;
 
     @serialize()
