@@ -1,4 +1,5 @@
 import { ISerializable, PrimitiveType, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
+import { characterSets } from "../constants/CharacterSets";
 
 export interface ValueHintsValueJSON {
     key: string | number | boolean;
@@ -13,12 +14,13 @@ export interface IValueHintsValue extends ISerializable {
 @type("ValueHintsValue")
 export class ValueHintsValue extends Serializable implements IValueHintsValue {
     @serialize()
-    @validate({ max: 100 })
+    @validate({ max: 100, regExp: characterSets.din91379DatatypeC })
     public displayName: string;
 
     @validate({
         allowedTypes: [PrimitiveType.String, PrimitiveType.Number, PrimitiveType.Boolean],
-        customValidator: ValueHintsValue.validateKey
+        customValidator: ValueHintsValue.validateKey,
+        regExp: characterSets.din91379DatatypeC
     })
     @serialize()
     public key: string | number | boolean;

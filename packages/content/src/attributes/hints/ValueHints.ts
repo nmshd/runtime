@@ -1,5 +1,6 @@
 import { ISerializable, PrimitiveType, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { ContentJSON } from "../../ContentJSON";
+import { characterSets } from "../constants/CharacterSets";
 import { IValueHintsValue, ValueHintsValue, ValueHintsValueJSON } from "./ValueHintsValue";
 
 export interface ValueHintsJSON extends ContentJSON {
@@ -48,7 +49,7 @@ function serializePropertyHints(hints: ValueHints | ValueHintsOverride, json: Va
 @type("ValueHints")
 export class ValueHints extends Serializable implements IValueHints {
     @serialize()
-    @validate({ nullable: true, max: 500 })
+    @validate({ nullable: true, max: 500, regExp: characterSets.din91379DatatypeC })
     public editHelp?: string;
 
     @serialize()
@@ -67,7 +68,7 @@ export class ValueHints extends Serializable implements IValueHints {
     @validate({ nullable: true })
     public values?: ValueHintsValue[];
 
-    @validate({ nullable: true, allowedTypes: [PrimitiveType.Number, PrimitiveType.String, PrimitiveType.Boolean] })
+    @validate({ nullable: true, allowedTypes: [PrimitiveType.Number, PrimitiveType.String, PrimitiveType.Boolean], regExp: characterSets.din91379DatatypeC })
     @serialize()
     public defaultValue?: number | string | boolean;
 
@@ -104,7 +105,7 @@ export class ValueHints extends Serializable implements IValueHints {
 @type("ValueHintsOverride")
 export class ValueHintsOverride extends Serializable implements IValueHintsOverride {
     @serialize()
-    @validate({ nullable: true, max: 500 })
+    @validate({ nullable: true, max: 500, regExp: characterSets.din91379DatatypeC })
     public editHelp?: string;
 
     @serialize()
@@ -124,7 +125,7 @@ export class ValueHintsOverride extends Serializable implements IValueHintsOverr
     public values?: ValueHintsValue[];
 
     @serialize({ unionTypes: [Boolean, Number, String] })
-    @validate({ nullable: true })
+    @validate({ nullable: true, regExp: characterSets.din91379DatatypeC })
     public defaultValue?: boolean | number | string;
 
     @serialize()
