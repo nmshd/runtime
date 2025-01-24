@@ -4,7 +4,7 @@ import { AttributeValues } from "@nmshd/content";
 import { Inject } from "@nmshd/typescript-ioc";
 import { ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationResult } from "../../common";
 import { IValidator } from "../../common/validation/IValidator";
-import { IdentityAttributeValueValidator } from "./CreateRepositoryAttribute";
+import { IdentityAttributeValueValidator } from "./IdentityAttributeValueValidator";
 
 interface AbstractCanCreateRepositoryAttributeRequest<T> {
     content: {
@@ -22,9 +22,9 @@ export interface SchemaValidatableCanCreateRepositoryAttributeRequest extends Ab
 class Validator implements IValidator<CanCreateRepositoryAttributeRequest> {
     public constructor(@Inject private readonly schemaRepository: SchemaRepository) {}
 
-    public validate(value: CanCreateRepositoryAttributeRequest): ValidationResult {
+    public validate(request: CanCreateRepositoryAttributeRequest): ValidationResult {
         const requestSchemaValidator = new SchemaValidator(this.schemaRepository.getSchema("CanCreateRepositoryAttributeRequest"));
-        return requestSchemaValidator.validate(value);
+        return requestSchemaValidator.validate(request);
     }
 }
 
@@ -39,14 +39,15 @@ export type CanCreateRepositoryAttributeResponse =
 export class CanCreateRepositoryAttributeUseCase extends UseCase<CanCreateRepositoryAttributeRequest, CanCreateRepositoryAttributeResponse> {
     public constructor(
         @Inject private readonly attributesController: AttributesController,
-        @Inject private readonly validator: Validator
+        @Inject private readonly schemaRepository: SchemaRepository,
+        @Inject validator: Validator
     ) {
         super(validator);
     }
 
     protected async executeInternal(request: CanCreateRepositoryAttributeRequest): Promise<Result<CanCreateRepositoryAttributeResponse>> {
-        const identityAttributeValueValidator = new IdentityAttributeValueValidator(this.validator["schemaRepository"]);
-        const attributeValueValidationResult = await identityAttributeValueValidator.validate(request);
+        const identityAttributeValueValidator = new IdentityAttributeValueValidator(this.schemaRepository);
+        const attributeValueValidationResult = await identityAttributeValueValidator.validate(request.content.value);
         if (attributeValueValidationResult.isInvalid()) {
             const failures = attributeValueValidationResult.getFailures();
             return Result.ok({ isSuccess: false, code: failures[0].error.code, message: failures[0].error.message });
