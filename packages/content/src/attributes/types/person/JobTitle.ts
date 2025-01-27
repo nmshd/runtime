@@ -1,5 +1,6 @@
 import { type } from "@js-soft/ts-serval";
-import { AbstractString as AbstractName, AbstractStringJSON, IAbstractString } from "../AbstractString";
+import { AbstractStringJSON, IAbstractString } from "../AbstractString";
+import { AbstractName } from "../strings/AbstractName";
 
 export interface JobTitleJSON extends AbstractStringJSON {
     "@type": "JobTitle";
