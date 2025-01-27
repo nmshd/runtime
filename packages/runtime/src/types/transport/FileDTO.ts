@@ -8,7 +8,7 @@ export interface FileDTO {
     expiresAt: string;
     mimetype: string;
     isOwn: boolean;
-    title: string;
+    title?: string;
     description?: string;
     truncatedReference: string;
 }
