@@ -1832,6 +1832,7 @@ export class DataViewExpander {
     public async expandFileDTO(file: FileDTO): Promise<FileDVO> {
         return {
             ...file,
+            title: file.title ? file.title : file.filename,
             type: "FileDVO",
             id: file.id,
             name: file.title ? file.title : file.filename,
