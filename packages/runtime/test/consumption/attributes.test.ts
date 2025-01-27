@@ -1,9 +1,11 @@
+import { AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON } from "@nmshd/consumption/dist/modules/requests/itemProcessors/readAttribute/AcceptReadAttributeRequestItemParameters";
 import {
     CityJSON,
     CountryJSON,
     DeleteAttributeRequestItem,
     HouseNumberJSON,
     ReadAttributeRequestItem,
+    ReadAttributeRequestItemJSON,
     RelationshipAttributeConfidentiality,
     RequestItemJSONDerivations,
     ShareAttributeRequestItem,
@@ -19,6 +21,7 @@ import {
     ChangeDefaultRepositoryAttributeUseCase,
     CreateAndShareRelationshipAttributeRequest,
     CreateAndShareRelationshipAttributeUseCase,
+    CreateOwnRelationshipTemplateRequest,
     CreateRepositoryAttributeRequest,
     CreateRepositoryAttributeUseCase,
     DeleteOwnSharedAttributeAndNotifyPeerUseCase,
@@ -40,6 +43,7 @@ import {
     NotifyPeerAboutRepositoryAttributeSuccessionUseCase,
     OwnSharedAttributeDeletedByOwnerEvent,
     PeerSharedAttributeDeletedByPeerEvent,
+    RelationshipTemplateProcessedEvent,
     RepositoryAttributeSucceededEvent,
     ShareRepositoryAttributeRequest,
     ShareRepositoryAttributeUseCase,
@@ -63,6 +67,7 @@ import {
     executeFullShareRepositoryAttributeFlow,
     executeFullSucceedRepositoryAttributeAndNotifyPeerFlow,
     syncUntilHasMessageWithNotification,
+    syncUntilHasRelationships,
     waitForRecipientToReceiveNotification
 } from "../lib";
 
@@ -2304,6 +2309,99 @@ describe("DeleteAttributeUseCases", () => {
             const updatedPredecessor = (await services2.consumption.attributes.getAttribute({ id: ownSharedIdentityAttributeVersion0.id })).value;
             expect(updatedPredecessor.deletionInfo?.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByOwner);
             expect(CoreDate.from(updatedPredecessor.deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))).toBe(true);
+        });
+
+        test.only("should revoke a relationship when a repository attribute is deleted that was required in an pending relationship", async () => {
+            const [services1, services2] = await runtimeServiceProvider.launch(2, {
+                enableRequestModule: true,
+                enableDeciderModule: true,
+                enableNotificationModule: true
+            });
+
+            const item: ReadAttributeRequestItemJSON = {
+                "@type": "ReadAttributeRequestItem",
+                mustBeAccepted: true,
+                query: {
+                    "@type": "IdentityAttributeQuery",
+                    valueType: "GivenName"
+                }
+            };
+
+            const content: CreateOwnRelationshipTemplateRequest["content"] = {
+                "@type": "RelationshipTemplateContent",
+                title: "Connect to HCM",
+                onNewRelationship: {
+                    title: "Connect to HCM2",
+                    items: [item],
+                    "@type": "Request"
+                }
+            };
+
+            const relationshipTemplateResult = await services1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                content,
+                expiresAt: CoreDate.utc().add({ day: 1 }).toISOString()
+            });
+
+            const loadedPeerTemplateResult = await services2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
+                reference: relationshipTemplateResult.value.truncatedReference
+            });
+
+            await services2.eventBus.waitForEvent(RelationshipTemplateProcessedEvent, (event) => {
+                return event.data.template.id === loadedPeerTemplateResult.value.id;
+            });
+
+            const repositoryAttribute = await services2.consumption.attributes.createRepositoryAttribute({
+                content: {
+                    value: {
+                        "@type": "GivenName",
+                        value: "123qwe"
+                    }
+                }
+            });
+
+            expect(repositoryAttribute).toBeSuccessful();
+
+            const requestsForRelationship = await services2.consumption.incomingRequests.getRequests({
+                query: {
+                    "source.reference": loadedPeerTemplateResult.value.id
+                }
+            });
+
+            const acceptRequest = await services2.consumption.incomingRequests.accept({
+                requestId: requestsForRelationship.value[0].id,
+                items: [
+                    {
+                        accept: true,
+                        existingAttributeId: repositoryAttribute.value.id
+                    } as AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON
+                ]
+            });
+
+            expect(acceptRequest).toBeSuccessful();
+
+            const relationships = await syncUntilHasRelationships(services1.transport);
+            expect(relationships).toHaveLength(1);
+
+            const sharedAttribute = await services2.consumption.attributes.getAttributes({
+                query: {
+                    "shareInfo.sourceAttribute": repositoryAttribute.value.id
+                }
+            });
+
+            const attributeDeletion = await services2.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: sharedAttribute.value[0].id });
+
+            expect(attributeDeletion).toBeSuccessful();
+
+            // const acceptResponse = await services1.transport.relationships.acceptRelationship({
+            // relationshipId: relationships[0].id
+            // });
+            // expect(acceptResponse).toBeSuccessful();
+
+            // const relationships2 = await syncUntilHasRelationships(services2.transport);
+            // expect(relationships2).toHaveLength(1);
+
+            // const attributes = await services1.consumption.attributes.getAttributes({});
+            // const attributes2 = await services2.consumption.attributes.getAttributes({});
         });
     });
 
