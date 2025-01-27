@@ -276,6 +276,19 @@ class IdentityDeletionProcess {
     }
 }
 
+class IdentityMetadata {
+    public notFound() {
+        return new ApplicationError("error.runtime.identityMetadata.notFound", "There is no stored IdentityMetadata for the specified combination of reference and key.");
+    }
+
+    public unfamiliarReferencedIdentity() {
+        return new ApplicationError(
+            "error.runtime.identityMetadata.unfamiliarReferencedIdentity",
+            "The reference of the IdentityMetadata resolves neither to the address of a peer of a Relationship nor the address of the own Identity."
+        );
+    }
+}
+
 class IdentityRecoveryKits {
     public datawalletDisabled() {
         return new ApplicationError(
@@ -303,6 +316,7 @@ export class RuntimeErrors {
     public static readonly notifications = new Notifications();
     public static readonly attributes = new Attributes();
     public static readonly identityDeletionProcess = new IdentityDeletionProcess();
+    public static readonly identityMetadata = new IdentityMetadata();
     public static readonly identityRecoveryKits = new IdentityRecoveryKits();
     public static readonly deciderModule = new DeciderModule();
 }

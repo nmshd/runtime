@@ -58,28 +58,6 @@ jobs:
           NMSHD_TEST_CLIENTID: test
           NMSHD_TEST_CLIENTSECRET: test
 
-  test-consumption-ferret:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Start Backbone
-        run: npm run start:backbone
-      - uses: actions/setup-node@v4
-        with:
-          node-version: current
-      - run: npm ci
-      - uses: js-soft/ferretdb-github-action@1.1.1
-        with:
-          ferretdb-telemetry: "enabled"
-          ferretdb-version: "1.20.1"
-      - run: npm run build:node
-      - run: npm run test:ci:mongodb --workspace=@nmshd/consumption
-        env:
-          CONNECTION_STRING: mongodb://127.0.0.1:27017
-          NMSHD_TEST_BASEURL: http://localhost:8090
-          NMSHD_TEST_CLIENTID: test
-          NMSHD_TEST_CLIENTSECRET: test
-
   test-consumption-loki:
     runs-on: ubuntu-latest
     steps:
@@ -155,30 +133,6 @@ jobs:
           NMSHD_TEST_CLIENTID: test
           NMSHD_TEST_CLIENTSECRET: test
 
-  test-runtime-ferret:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Start Backbone
-        run: npm run start:backbone
-      - uses: actions/setup-node@v4
-        with:
-          node-version: current
-      - uses: js-soft/ferretdb-github-action@1.1.1
-        with:
-          ferretdb-telemetry: "enabled"
-          ferretdb-version: "1.20.1"
-      - run: npm ci
-      - run: npm run build:node
-      - run: npm run build:schemas --workspace=@nmshd/runtime
-      - run: npm run test:ci:mongodb --workspace=@nmshd/runtime
-        env:
-          CONNECTION_STRING: mongodb://127.0.0.1:27017
-          NMSHD_TEST_BASEURL: http://localhost:8090
-          NMSHD_TEST_BASEURL_ADMIN_API: http://localhost:8091
-          NMSHD_TEST_CLIENTID: test
-          NMSHD_TEST_CLIENTSECRET: test
-
   test-runtime-loki:
     runs-on: ubuntu-latest
     steps:
@@ -216,29 +170,6 @@ jobs:
       - run: npm run build:node
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@v1
-      - run: npm run test:ci:mongodb --workspace=@nmshd/transport
-        env:
-          CONNECTION_STRING: mongodb://127.0.0.1:27017
-          NMSHD_TEST_BASEURL: http://localhost:8090
-          NMSHD_TEST_BASEURL_ADMIN_API: http://localhost:8091
-          NMSHD_TEST_CLIENTID: test
-          NMSHD_TEST_CLIENTSECRET: test
-
-  test-transport-ferret:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Start Backbone
-        run: npm run start:backbone
-      - uses: actions/setup-node@v4
-        with:
-          node-version: current
-      - run: npm ci
-      - run: npm run build:node
-      - uses: js-soft/ferretdb-github-action@1.1.1
-        with:
-          ferretdb-telemetry: "enabled"
-          ferretdb-version: "1.20.1"
       - run: npm run test:ci:mongodb --workspace=@nmshd/transport
         env:
           CONNECTION_STRING: mongodb://127.0.0.1:27017
