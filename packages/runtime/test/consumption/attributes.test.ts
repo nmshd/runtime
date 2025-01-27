@@ -2311,7 +2311,7 @@ describe("DeleteAttributeUseCases", () => {
             expect(CoreDate.from(updatedPredecessor.deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))).toBe(true);
         });
 
-        test.only("should revoke a relationship when a repository attribute is deleted that was required in an pending relationship", async () => {
+        test("should revoke a relationship when a repository attribute is deleted that was required in an pending relationship", async () => {
             const [services1, services2] = await runtimeServiceProvider.launch(2, {
                 enableRequestModule: true,
                 enableDeciderModule: true,
