@@ -10,8 +10,8 @@ const errorMessageC =
 
 describe("Test Attributes", () => {
     test("Consent is considered as valid", () => {
-        const consent = Consent.from({ consent: "\u0009" });
-        expect(consent.consent.toString()).toBe("\u0009");
+        const consent = Consent.from({ consent: "\u000D" });
+        expect(consent.consent.toString()).toBe("\u000D");
     });
 
     test("Consent is considered as invalid", () => {
@@ -29,8 +29,8 @@ describe("Test Attributes", () => {
 
     const testMapping = regularIdentityAttributeTypesA
         .map((x) => ({ type: x, testValue: "Gräf", wrongTestValue: "€", errorMessage: errorMessageA }))
-        .concat(regularIdentityAttributeTypesB.map((x) => ({ type: x, testValue: "€", wrongTestValue: "z-\u0009", errorMessage: errorMessageB })))
-        .concat(regularIdentityAttributeTypesC.map((x) => ({ type: x, testValue: "z-\u0009", wrongTestValue: "\u0012", errorMessage: errorMessageC })));
+        .concat(regularIdentityAttributeTypesB.map((x) => ({ type: x, testValue: "€", wrongTestValue: "z-\u000D", errorMessage: errorMessageB })))
+        .concat(regularIdentityAttributeTypesC.map((x) => ({ type: x, testValue: "z-\u000D", wrongTestValue: "\u0012", errorMessage: errorMessageC })));
 
     test.each(testMapping)("$testValue is considered as valid for type $type", ({ type, testValue }) => {
         const attribute = Serializable.fromUnknown({ "@type": type, value: testValue });
@@ -42,18 +42,22 @@ describe("Test Attributes", () => {
         expect(invalidCall).toThrow(new ParsingError(type, "value", errorMessage));
     });
 
-    const regularRelationshipAttributeTypesC = ["ProprietaryString", "ProprietaryJSON", "ProprietaryXML"];
+    const regularRelationshipAttributeTypesC = [
+        { type: "ProprietaryString", errorProperty: "value" },
+        { type: "ProprietaryJSON", errorProperty: "value:Object" },
+        { type: "ProprietaryXML", errorProperty: "value" }
+    ];
 
-    test.each(regularRelationshipAttributeTypesC)("is considered as valid for type %s", (type) => {
-        const attribute = Serializable.fromUnknown({ "@type": type, value: "z-\u0009", title: "aTitle" });
-        expect((attribute as any).value).toBe("z-\u0009");
+    test.each(regularRelationshipAttributeTypesC)("is considered as valid for type $type", ({ type }) => {
+        const attribute = Serializable.fromUnknown({ "@type": type, value: "z-\u000D", title: "aTitle" });
+        expect((attribute as any).value).toBe("z-\u000D");
     });
 
-    test.only.each(regularRelationshipAttributeTypesC)("is considered as invalid for type %s", (type) => {
+    test.each(regularRelationshipAttributeTypesC)("is considered as invalid for type $type", ({ type, errorProperty }) => {
         const invalidCall = () => {
             Serializable.fromUnknown({ "@type": type, value: "z-\u0012", title: "aTitle" });
         };
-        expect(invalidCall).toThrow(new ParsingError(type, "value", errorMessageC));
+        expect(invalidCall).toThrow(new ParsingError(type, errorProperty, errorMessageC));
     });
 
     const proprietaryAttributeTypes = [
@@ -73,8 +77,8 @@ describe("Test Attributes", () => {
     ];
 
     test.each(proprietaryAttributeTypes)("title is considered as valid for type $type", ({ type, value }) => {
-        const attribute = Serializable.fromUnknown({ "@type": type, value, title: "\u0009" });
-        expect((attribute as any).title).toBe("\u0009");
+        const attribute = Serializable.fromUnknown({ "@type": type, value, title: "\u000D" });
+        expect((attribute as any).title).toBe("\u000D");
     });
 
     test.each(proprietaryAttributeTypes)("title is considered as invalid for type $type", ({ type, value }) => {
@@ -85,8 +89,8 @@ describe("Test Attributes", () => {
     });
 
     test.each(proprietaryAttributeTypes)("description is considered as valid for type $type", ({ type, value }) => {
-        const attribute = Serializable.fromUnknown({ "@type": type, value, title: "aTitle", description: "\u0009" });
-        expect((attribute as any).description).toBe("\u0009");
+        const attribute = Serializable.fromUnknown({ "@type": type, value, title: "aTitle", description: "\u000D" });
+        expect((attribute as any).description).toBe("\u000D");
     });
 
     test.each(proprietaryAttributeTypes)("description is considered as invalid for type $type", ({ type, value }) => {
