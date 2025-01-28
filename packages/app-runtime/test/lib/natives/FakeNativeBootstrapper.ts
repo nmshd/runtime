@@ -1,6 +1,5 @@
-import { SimpleLoggerFactory } from "@js-soft/simple-logger";
+import { NodeLoggerFactory } from "@js-soft/node-logger";
 import { EventBus, EventEmitter2EventBus, Result } from "@js-soft/ts-utils";
-import { LogLevel } from "typescript-logging";
 import { INativeBootstrapper, INativeEnvironment } from "../../../src";
 import { FakeNativeConfigAccess } from "./FakeNativeConfigAccess";
 import { FakeNativeDatabaseFactory } from "./FakeNativeDatabaseFactory";
@@ -20,7 +19,27 @@ export class FakeNativeBootstrapper implements INativeBootstrapper {
     }
 
     public async init(): Promise<Result<void>> {
-        const loggerFactory = new SimpleLoggerFactory(LogLevel.Warn);
+        const loggerFactory = new NodeLoggerFactory({
+            appenders: {
+                consoleAppender: {
+                    type: "stdout",
+                    layout: { type: "pattern", pattern: "%[[%p] %c - %m%]" }
+                },
+                console: {
+                    type: "logLevelFilter",
+                    level: "Warn",
+                    appender: "consoleAppender"
+                }
+            },
+
+            categories: {
+                default: {
+                    appenders: ["console"],
+                    level: "TRACE"
+                }
+            }
+        });
+
         const nativeLogger = loggerFactory.getLogger("FakeNatives");
 
         this._nativeEnvironment = {
