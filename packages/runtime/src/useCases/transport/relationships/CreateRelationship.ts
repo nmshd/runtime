@@ -81,11 +81,9 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
 
     private async validateRelationshipCreationContent(templateId: RelationshipTemplateIdString, relationshipCreationContent: RelationshipCreationContent) {
         const acceptedIncomingRequests = await this.incomingRequestsController.getIncomingRequests({
-            query: {
-                source: { reference: templateId },
-                status: [LocalRequestStatus.Decided],
-                response: { content: { result: "Accepted" } }
-            }
+            status: LocalRequestStatus.Decided,
+            "source.reference": templateId,
+            "response.content.result": "Accepted"
         });
 
         if (acceptedIncomingRequests.length === 0) {
