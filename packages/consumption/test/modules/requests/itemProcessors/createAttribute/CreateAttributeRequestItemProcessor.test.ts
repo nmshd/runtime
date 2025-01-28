@@ -315,21 +315,21 @@ describe("CreateAttributeRequestItemProcessor", function () {
     });
 
     describe("accept", function () {
-        test("in case of a RelationshipAttribute: creates a LocalAttribute with shareInfo for the peer of the Request", async function () {
+        test("in case of a RelationshipAttribute: creates an own shared RelationshipAttribute", async function () {
             await Given.aRequestItemWithARelationshipAttribute({
                 attributeOwner: TestIdentity.SENDER
             });
             await When.iCallAccept();
-            await Then.aLocalRelationshipAttributeWithShareInfoForThePeerIsCreated();
+            await Then.anOwnSharedRelationshipAttributeIsCreated();
         });
 
-        test("in case of an IdentityAttribute: creates a Repository Attribute and a copy of it with shareInfo for the peer of the Request", async function () {
+        test("in case of an IdentityAttribute: creates a RepositoryAttribute and an own shared IdentityAttribute", async function () {
             await Given.aRequestItemWithAnIdentityAttribute({
                 attributeOwner: TestIdentity.SENDER
             });
             await When.iCallAccept();
-            await Then.aLocalRepositoryAttributeIsCreated();
-            await Then.aLocalIdentityAttributeWithShareInfoForThePeerIsCreated();
+            await Then.aRepositoryAttributeIsCreated();
+            await Then.anOwnSharedIdentityAttributeIsCreated();
         });
     });
 
