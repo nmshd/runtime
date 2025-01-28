@@ -124,6 +124,7 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
                 throw new Error(`The Attribute ${repositoryAttribute} is not a RepositoryAttribute.`);
             }
 
+            let succeededRepositoryAttribute: LocalAttribute | undefined;
             const newTags = requestItem.attribute.tags?.filter((tag) => !repositoryAttribute.content.tags?.includes(tag));
             if (newTags && newTags.length > 0) {
                 const successorParams = {
@@ -134,13 +135,13 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
                     succeeds: repositoryAttribute.id.toString()
                 };
                 const attributesAfterSuccession = await this.consumptionController.attributes.succeedRepositoryAttribute(repositoryAttribute.id, successorParams);
-                repositoryAttribute = attributesAfterSuccession.successor;
+                succeededRepositoryAttribute = attributesAfterSuccession.successor;
             }
 
             sharedAttribute = await this.consumptionController.attributes.createSharedLocalAttributeCopy({
                 peer: requestInfo.peer,
                 requestReference: requestInfo.id,
-                sourceAttributeId: repositoryAttribute.id
+                sourceAttributeId: succeededRepositoryAttribute?.id ?? repositoryAttribute.id
             });
         } else {
             sharedAttribute = await this.consumptionController.attributes.createSharedLocalAttribute({
