@@ -60,7 +60,7 @@ export class CanCreateRelationshipUseCase extends UseCase<CanCreateRelationshipR
                 return Result.ok({ isSuccess: false, code: error.code, message: error.message });
             }
 
-            const transformedTemplateContent = Serializable.fromUnknown(template.cache.content);
+            const transformedTemplateContent = template.cache.content;
             if (transformedCreationContent instanceof ArbitraryRelationshipCreationContent && !(transformedTemplateContent instanceof ArbitraryRelationshipTemplateContent)) {
                 const error = RuntimeErrors.general.invalidPropertyValue(
                     "The creationContent of a Relationship must be an ArbitraryRelationshipCreationContent if the content of the Relationship is an ArbitraryRelationshipTemplateContent."
