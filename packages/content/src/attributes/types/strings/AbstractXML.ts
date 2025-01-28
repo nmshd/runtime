@@ -9,8 +9,9 @@ export abstract class AbstractXML extends AbstractString {
     public override value: string;
 
     public static override get valueHints(): ValueHints {
-        return ValueHints.from({
-            max: 50000
+        return super.valueHints.copyWith({
+            max: 50000,
+            pattern: characterSets.din91379DatatypeC.toString().slice(1, -1).replaceAll("/", "\\/")
         });
     }
 

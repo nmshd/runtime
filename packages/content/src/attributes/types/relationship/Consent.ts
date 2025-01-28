@@ -42,7 +42,10 @@ export class Consent extends AbstractAttributeValue implements IConsent {
     public static get valueHints(): ValueHints {
         return ValueHints.from({
             propertyHints: {
-                consent: { max: 2000 },
+                consent: {
+                    max: 2000,
+                    pattern: characterSets.din91379DatatypeC.toString().slice(1, -1).replaceAll("/", "\\/")
+                },
                 link: {
                     min: 3,
                     max: 1024

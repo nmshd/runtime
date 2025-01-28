@@ -20,7 +20,9 @@ export abstract class AbstractAddress extends AbstractComplexValue implements IA
     public static get valueHints(): ValueHints {
         return ValueHints.from({
             propertyHints: {
-                [nameof<AbstractAddress>((a) => a.recipient)]: ValueHints.from({})
+                [nameof<AbstractAddress>((a) => a.recipient)]: ValueHints.from({
+                    pattern: characterSets.din91379DatatypeB.toString().slice(1, -1).replaceAll("/", "\\/")
+                })
             }
         });
     }
