@@ -1,6 +1,7 @@
 import { Event, EventBus, Result, sleep, SubscriptionTarget } from "@js-soft/ts-utils";
 import {
     AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON,
+    AcceptRequestItemParametersJSON,
     ConsumptionIds,
     DecideRequestItemGroupParametersJSON,
     DecideRequestItemParametersJSON
@@ -12,7 +13,7 @@ import {
     ArbitraryRelationshipTemplateContentJSON,
     INotificationItem,
     Notification,
-    RelationshipCreationContentJSON,
+    RelationshipCreationContent,
     RelationshipTemplateContentJSON,
     Request,
     RequestItemGroupJSON,
@@ -394,13 +395,39 @@ export async function establishRelationship(transportServices1: TransportService
 
 export async function establishRelationshipWithContents(
     transportServices1: TransportServices,
-    transportServices2: TransportServices,
+    runtimeServices2: TestRuntimeServices,
     templateContent?: RelationshipTemplateContentJSON,
-    creationContent?: RelationshipCreationContentJSON
+    acceptRequestItemsParameters?: (AcceptRequestItemParametersJSON | DecideRequestItemGroupParametersJSON)[]
 ): Promise<void> {
-    const template = await exchangeTemplate(transportServices1, transportServices2, templateContent);
+    const template = await exchangeTemplate(transportServices1, runtimeServices2.transport, templateContent);
+    let creationContent;
 
-    const createRelationshipResponse = await transportServices2.relationships.createRelationship({
+    if (templateContent && acceptRequestItemsParameters) {
+        const receivedRequest = (
+            await runtimeServices2.consumption.incomingRequests.received({
+                receivedRequest: templateContent.onNewRelationship,
+                requestSourceId: template.id
+            })
+        ).value;
+
+        const checkedRequest = (
+            await runtimeServices2.consumption.incomingRequests.checkPrerequisites({
+                requestId: receivedRequest.id
+            })
+        ).value;
+
+        const manualDecisionRequiredRequest = (
+            await runtimeServices2.consumption.incomingRequests.requireManualDecision({
+                requestId: checkedRequest.id
+            })
+        ).value;
+
+        const acceptedRequest = await runtimeServices2.consumption.incomingRequests.accept({ requestId: manualDecisionRequiredRequest.id, items: acceptRequestItemsParameters });
+
+        creationContent = RelationshipCreationContent.from({ response: acceptedRequest.value.response!.content }).toJSON();
+    }
+
+    const createRelationshipResponse = await runtimeServices2.transport.relationships.createRelationship({
         templateId: template.id,
         creationContent: creationContent ?? emptyRelationshipCreationContent
     });
@@ -414,7 +441,7 @@ export async function establishRelationshipWithContents(
     });
     expect(acceptResponse).toBeSuccessful();
 
-    const relationships2 = await syncUntilHasRelationships(transportServices2);
+    const relationships2 = await syncUntilHasRelationships(runtimeServices2.transport);
     expect(relationships2).toHaveLength(1);
 }
 
