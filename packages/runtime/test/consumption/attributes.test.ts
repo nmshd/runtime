@@ -1269,7 +1269,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
             content: {
                 value: {
                     "@type": "GivenName",
-                    value: "aGivenName2"
+                    value: "anotherGivenName"
                 },
                 tags: ["tag1", "tag2"],
                 validFrom,
@@ -1432,7 +1432,7 @@ describe(ShareRepositoryAttributeUseCase.name, () => {
             content: {
                 value: {
                     "@type": "Surname",
-                    value: "Name 1"
+                    value: "aSurname"
                 }
             }
         });
@@ -1443,7 +1443,7 @@ describe(ShareRepositoryAttributeUseCase.name, () => {
                 successorContent: {
                     value: {
                         "@type": "Surname",
-                        value: "Name 2"
+                        value: "anotherSurname"
                     }
                 }
             })

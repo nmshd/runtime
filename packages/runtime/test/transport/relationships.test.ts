@@ -1012,7 +1012,7 @@ describe("RelationshipDecomposition", () => {
 
         await sendAndReceiveNotification(services1.transport, services2.transport, services2.consumption);
 
-        const randomName1 = await Random.string(7);
+        const randomName1 = await Random.string(7, "qwertzuiop");
         await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
             content: {
                 value: {
@@ -1022,7 +1022,7 @@ describe("RelationshipDecomposition", () => {
             }
         });
 
-        const randomName2 = await Random.string(7);
+        const randomName2 = await Random.string(7, "asdfghjkl");
         await executeFullCreateAndShareRepositoryAttributeFlow(services2, services1, {
             content: {
                 value: {
