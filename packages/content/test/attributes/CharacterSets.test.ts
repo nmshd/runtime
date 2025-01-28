@@ -66,17 +66,15 @@ test.each(identityAttributeTestParameters)("$type is considered as invalid", ({ 
 });
 
 const relationshipAttributeValueTestParameters = [
-    { type: "ProprietaryString", propertyInErrorMessage: "value" },
-    { type: "ProprietaryJSON", propertyInErrorMessage: "value:Object", noValueHints: true },
-    { type: "ProprietaryXML", propertyInErrorMessage: "value" }
+    { type: "ProprietaryString", propertyInErrorMessage: "value", valueHintsPattern: characterSets.din91379DatatypeC.toString().slice(1, -1).replaceAll("/", "\\/") },
+    { type: "ProprietaryJSON", propertyInErrorMessage: "value:Object", valueHintsPattern: undefined },
+    { type: "ProprietaryXML", propertyInErrorMessage: "value", valueHintsPattern: characterSets.din91379DatatypeC.toString().slice(1, -1).replaceAll("/", "\\/") }
 ];
 
-test.each(relationshipAttributeValueTestParameters)("value of $type is considered as valid", ({ type, noValueHints }) => {
+test.each(relationshipAttributeValueTestParameters)("value of $type is considered as valid", ({ type, valueHintsPattern }) => {
     const attribute = Serializable.fromUnknown({ "@type": type, value: "z-\u000D", title: "aTitle" }) as any;
     expect(attribute.value).toBe("z-\u000D");
-    if (!noValueHints) {
-        expect(attribute.valueHints.pattern).toBe(characterSets.din91379DatatypeC.toString().slice(1, -1).replaceAll("/", "\\/"));
-    }
+    expect(attribute.valueHints.pattern).toBe(valueHintsPattern);
 });
 
 test.each(relationshipAttributeValueTestParameters)("value of $type is considered as invalid", ({ type, propertyInErrorMessage }) => {
