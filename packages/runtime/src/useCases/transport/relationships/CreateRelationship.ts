@@ -50,7 +50,7 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
             );
         }
 
-        const transformedTemplateContent = Serializable.fromUnknown(template.cache?.content);
+        const transformedTemplateContent = template.cache?.content;
         if (transformedCreationContent instanceof ArbitraryRelationshipCreationContent && !(transformedTemplateContent instanceof ArbitraryRelationshipTemplateContent)) {
             return Result.fail(
                 RuntimeErrors.general.invalidPropertyValue(
