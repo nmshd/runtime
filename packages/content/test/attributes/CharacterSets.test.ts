@@ -27,7 +27,7 @@ const restrictedIdentityAttributeTypesB = ["City", "HouseNumber", "State", "Stre
 const restrictedIdentityAttributeTypesC = ["AffiliationRole", "AffiliationUnit", "StatementPredicate"];
 
 const identityAttributeTestParameters = restrictedIdentityAttributeTypesA
-    .map((type) => ({ type, testValue: "Gräf", wrongTestValue: "€", errorMessage: errorMessageA }))
+    .map((type) => ({ type, testValue: "Ä", wrongTestValue: "€", errorMessage: errorMessageA }))
     .concat(restrictedIdentityAttributeTypesB.map((type) => ({ type, testValue: "€", wrongTestValue: "z-\u000D", errorMessage: errorMessageB })))
     .concat(restrictedIdentityAttributeTypesC.map((type) => ({ type, testValue: "z-\u000D", wrongTestValue: "\u0012", errorMessage: errorMessageC })));
 
