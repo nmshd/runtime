@@ -2,6 +2,7 @@ import { serialize, type, validate } from "@js-soft/ts-serval";
 import { AbstractAttribute, AbstractAttributeJSON, IAbstractAttribute } from "./AbstractAttribute";
 import { AttributeValues } from "./AttributeValueTypes";
 import { RelationshipAttributeConfidentiality } from "./RelationshipAttributeConfidentiality";
+import { characterSets } from "./constants/CharacterSets";
 
 export interface RelationshipAttributeJSON<TValueJSONInterface extends AttributeValues.Relationship.Json = AttributeValues.Relationship.Json> extends AbstractAttributeJSON {
     "@type": "RelationshipAttribute";
@@ -28,7 +29,7 @@ export class RelationshipAttribute<TValueClass extends AttributeValues.Relations
     public value: TValueClass;
 
     @serialize()
-    @validate({ max: 100 })
+    @validate({ max: 100, regExp: characterSets.din91379DatatypeC })
     public key: string;
 
     @serialize()

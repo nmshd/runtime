@@ -1,5 +1,5 @@
 import { ParsingError, Serializable } from "@js-soft/ts-serval";
-import { Consent } from "../../src";
+import { Consent, RelationshipAttribute, RelationshipAttributeConfidentiality } from "../../src";
 
 const errorMessageA =
     "Value does not match regular expression /^( |'|[,-.]|[A-Z]|[`-z]|~|¨|´|·|[À-Ö]|[Ø-ö]|[ø-ž]|[Ƈ-ƈ]|Ə|Ɨ|[Ơ-ơ]|[Ư-ư]|Ʒ|[Ǎ-ǜ]|[Ǟ-ǟ]|[Ǣ-ǰ]|[Ǵ-ǵ]|[Ǹ-ǿ]|[Ȓ-ȓ]|[Ș-ț]|[Ȟ-ȟ]|[ȧ-ȳ]|ə|ɨ|ʒ|[ʹ-ʺ]|[ʾ-ʿ]|ˈ|ˌ|[Ḃ-ḃ]|[Ḇ-ḇ]|[Ḋ-ḑ]|ḗ|[Ḝ-ḫ]|[ḯ-ḷ]|[Ḻ-ḻ]|[Ṁ-ṉ]|[Ṓ-ṛ]|[Ṟ-ṣ]|[Ṫ-ṯ]|[Ẁ-ẇ]|[Ẍ-ẗ]|ẞ|[Ạ-ỹ]|’|‡|A̋|C(̀|̄|̆|̈|̕|̣|̦|̨̆)|D̂|F(̀|̄)|G̀|H(̄|̦|̱)|J(́|̌)|K(̀|̂|̄|̇|̕|̛|̦|͟H|͟h)|L(̂|̥|̥̄|̦)|M(̀|̂|̆|̐)|N(̂|̄|̆|̦)|P(̀|̄|̕|̣)|R(̆|̥|̥̄)|S(̀|̄|̛̄|̱)|T(̀|̄|̈|̕|̛)|U̇|Z(̀|̄|̆|̈|̧)|a̋|c(̀|̄|̆|̈|̕|̣|̦|̨̆)|d̂|f(̀|̄)|g̀|h(̄|̦)|j́|k(̀|̂|̄|̇|̕|̛|̦|͟h)|l(̂|̥|̥̄|̦)|m(̀|̂|̆|̐)|n(̂|̄|̆|̦)|p(̀|̄|̕|̣)|r(̆|̥|̥̄)|s(̀|̄|̛̄|̱)|t(̀|̄|̕|̛)|u̇|z(̀|̄|̆|̈|̧)|Ç̆|Û̄|ç̆|û̄|ÿ́|Č(̕|̣)|č(̕|̣)|ē̍|Ī́|ī́|ō̍|Ž(̦|̧)|ž(̦|̧)|Ḳ̄|ḳ̄|Ṣ̄|ṣ̄|Ṭ̄|ṭ̄|Ạ̈|ạ̈|Ọ̈|ọ̈|Ụ(̄|̈)|ụ(̄|̈))*$/";
@@ -97,4 +97,36 @@ test.each(proprietaryAttributeTypes)("description of $type is considered as inva
         Serializable.fromUnknown({ "@type": type, value, title: "aTitle", description: "\u0012" });
     };
     expect(invalidCall).toThrow(new ParsingError(type, "description", errorMessageC));
+});
+
+test("Key of RelationshipAttribute is valid", () => {
+    const attribute = RelationshipAttribute.from({
+        key: "\u000D",
+        confidentiality: RelationshipAttributeConfidentiality.Private,
+        value: {
+            "@type": "ProprietaryBoolean",
+            value: true,
+            title: "aTitle"
+        },
+        "@type": "RelationshipAttribute",
+        owner: "theOwner"
+    });
+    expect(attribute.key).toBe("\u000D");
+});
+
+test("Key of RelationshipAttribute is invalid", () => {
+    const invalidCall = () => {
+        RelationshipAttribute.from({
+            key: "\u0012",
+            confidentiality: RelationshipAttributeConfidentiality.Private,
+            value: {
+                "@type": "ProprietaryBoolean",
+                value: true,
+                title: "aTitle"
+            },
+            "@type": "RelationshipAttribute",
+            owner: "theOwner"
+        });
+    };
+    expect(invalidCall).toThrow(new ParsingError("RelationshipAttribute", "key", errorMessageC));
 });
