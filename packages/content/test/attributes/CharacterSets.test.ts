@@ -1,5 +1,6 @@
 import { ParsingError, Serializable } from "@js-soft/ts-serval";
-import { Consent, RelationshipAttribute, RelationshipAttributeConfidentiality } from "../../src";
+import { Consent, RelationshipAttribute, RelationshipAttributeConfidentiality, ValueHints, ValueHintsValue } from "../../src";
+import { characterSets } from "../../src/attributes/constants/CharacterSets";
 
 const errorMessageA =
     "Value does not match regular expression /^( |'|[,-.]|[A-Z]|[`-z]|~|¨|´|·|[À-Ö]|[Ø-ö]|[ø-ž]|[Ƈ-ƈ]|Ə|Ɨ|[Ơ-ơ]|[Ư-ư]|Ʒ|[Ǎ-ǜ]|[Ǟ-ǟ]|[Ǣ-ǰ]|[Ǵ-ǵ]|[Ǹ-ǿ]|[Ȓ-ȓ]|[Ș-ț]|[Ȟ-ȟ]|[ȧ-ȳ]|ə|ɨ|ʒ|[ʹ-ʺ]|[ʾ-ʿ]|ˈ|ˌ|[Ḃ-ḃ]|[Ḇ-ḇ]|[Ḋ-ḑ]|ḗ|[Ḝ-ḫ]|[ḯ-ḷ]|[Ḻ-ḻ]|[Ṁ-ṉ]|[Ṓ-ṛ]|[Ṟ-ṣ]|[Ṫ-ṯ]|[Ẁ-ẇ]|[Ẍ-ẗ]|ẞ|[Ạ-ỹ]|’|‡|A̋|C(̀|̄|̆|̈|̕|̣|̦|̨̆)|D̂|F(̀|̄)|G̀|H(̄|̦|̱)|J(́|̌)|K(̀|̂|̄|̇|̕|̛|̦|͟H|͟h)|L(̂|̥|̥̄|̦)|M(̀|̂|̆|̐)|N(̂|̄|̆|̦)|P(̀|̄|̕|̣)|R(̆|̥|̥̄)|S(̀|̄|̛̄|̱)|T(̀|̄|̈|̕|̛)|U̇|Z(̀|̄|̆|̈|̧)|a̋|c(̀|̄|̆|̈|̕|̣|̦|̨̆)|d̂|f(̀|̄)|g̀|h(̄|̦)|j́|k(̀|̂|̄|̇|̕|̛|̦|͟h)|l(̂|̥|̥̄|̦)|m(̀|̂|̆|̐)|n(̂|̄|̆|̦)|p(̀|̄|̕|̣)|r(̆|̥|̥̄)|s(̀|̄|̛̄|̱)|t(̀|̄|̕|̛)|u̇|z(̀|̄|̆|̈|̧)|Ç̆|Û̄|ç̆|û̄|ÿ́|Č(̕|̣)|č(̕|̣)|ē̍|Ī́|ī́|ō̍|Ž(̦|̧)|ž(̦|̧)|Ḳ̄|ḳ̄|Ṣ̄|ṣ̄|Ṭ̄|ṭ̄|Ạ̈|ạ̈|Ọ̈|ọ̈|Ụ(̄|̈)|ụ(̄|̈))*$/";
@@ -27,13 +28,36 @@ const restrictedIdentityAttributeTypesB = ["City", "HouseNumber", "State", "Stre
 const restrictedIdentityAttributeTypesC = ["AffiliationRole", "AffiliationUnit", "StatementPredicate"];
 
 const identityAttributeTestParameters = restrictedIdentityAttributeTypesA
-    .map((type) => ({ type, testValue: "Ä", wrongTestValue: "€", errorMessage: errorMessageA }))
-    .concat(restrictedIdentityAttributeTypesB.map((type) => ({ type, testValue: "€", wrongTestValue: "z-\u000D", errorMessage: errorMessageB })))
-    .concat(restrictedIdentityAttributeTypesC.map((type) => ({ type, testValue: "z-\u000D", wrongTestValue: "\u0012", errorMessage: errorMessageC })));
+    .map((type) => ({
+        type,
+        testValue: "Ä",
+        wrongTestValue: "€",
+        errorMessage: errorMessageA,
+        valueHintsPattern: characterSets.din91379DatatypeA.toString().slice(1, -1).replaceAll("/", "\\/")
+    }))
+    .concat(
+        restrictedIdentityAttributeTypesB.map((type) => ({
+            type,
+            testValue: "€",
+            wrongTestValue: "z-\u000D",
+            errorMessage: errorMessageB,
+            valueHintsPattern: characterSets.din91379DatatypeB.toString().slice(1, -1).replaceAll("/", "\\/")
+        }))
+    )
+    .concat(
+        restrictedIdentityAttributeTypesC.map((type) => ({
+            type,
+            testValue: "z-\u000D",
+            wrongTestValue: "\u0012",
+            errorMessage: errorMessageC,
+            valueHintsPattern: characterSets.din91379DatatypeC.toString().slice(1, -1).replaceAll("/", "\\/")
+        }))
+    );
 
-test.each(identityAttributeTestParameters)("$type is considered as valid", ({ type, testValue }) => {
-    const attribute = Serializable.fromUnknown({ "@type": type, value: testValue });
-    expect((attribute as any).value).toBe(testValue);
+test.each(identityAttributeTestParameters)("$type is considered as valid", ({ type, testValue, valueHintsPattern }) => {
+    const attribute = Serializable.fromUnknown({ "@type": type, value: testValue }) as any;
+    expect(attribute.value).toBe(testValue);
+    expect(attribute.valueHints.pattern).toBe(valueHintsPattern);
 });
 
 test.each(identityAttributeTestParameters)("$type is considered as invalid", ({ type, wrongTestValue, errorMessage }) => {
@@ -43,13 +67,16 @@ test.each(identityAttributeTestParameters)("$type is considered as invalid", ({ 
 
 const relationshipAttributeValueTestParameters = [
     { type: "ProprietaryString", propertyInErrorMessage: "value" },
-    { type: "ProprietaryJSON", propertyInErrorMessage: "value:Object" },
+    { type: "ProprietaryJSON", propertyInErrorMessage: "value:Object", noValueHints: true },
     { type: "ProprietaryXML", propertyInErrorMessage: "value" }
 ];
 
-test.each(relationshipAttributeValueTestParameters)("value of $type is considered as valid", ({ type }) => {
-    const attribute = Serializable.fromUnknown({ "@type": type, value: "z-\u000D", title: "aTitle" });
-    expect((attribute as any).value).toBe("z-\u000D");
+test.each(relationshipAttributeValueTestParameters)("value of $type is considered as valid", ({ type, noValueHints }) => {
+    const attribute = Serializable.fromUnknown({ "@type": type, value: "z-\u000D", title: "aTitle" }) as any;
+    expect(attribute.value).toBe("z-\u000D");
+    if (!noValueHints) {
+        expect(attribute.valueHints.pattern).toBe(characterSets.din91379DatatypeC.toString().slice(1, -1).replaceAll("/", "\\/"));
+    }
 });
 
 test.each(relationshipAttributeValueTestParameters)("value of $type is considered as invalid", ({ type, propertyInErrorMessage }) => {
@@ -129,4 +156,48 @@ test("Key of RelationshipAttribute is invalid", () => {
         });
     };
     expect(invalidCall).toThrow(new ParsingError("RelationshipAttribute", "key", errorMessageC));
+});
+
+test("ValueHints is valid", () => {
+    const validCall = () => {
+        ValueHints.from({
+            defaultValue: "\u000D",
+            editHelp: "\u000D",
+            values: [
+                {
+                    key: "\u000D",
+                    displayName: "\u000D"
+                }
+            ]
+        });
+    };
+    expect(validCall).not.toThrow();
+});
+
+test("defaultValue of ValueHints is invalid", () => {
+    const invalidCall = () => {
+        ValueHints.from({ defaultValue: "\u0012" });
+    };
+    expect(invalidCall).toThrow(new ParsingError("ValueHints", "defaultValue:Object", errorMessageC));
+});
+
+test("editHelp of ValueHints is invalid", () => {
+    const invalidCall = () => {
+        ValueHints.from({ editHelp: "\u0012" });
+    };
+    expect(invalidCall).toThrow(new ParsingError("ValueHints", "editHelp", errorMessageC));
+});
+
+test("key of ValueHintsValue is invalid", () => {
+    const invalidCall = () => {
+        ValueHintsValue.from({ key: "\u0012", displayName: "aDisplayName" });
+    };
+    expect(invalidCall).toThrow(new ParsingError("ValueHintsValue", "key:Object", errorMessageC));
+});
+
+test("displayName of ValueHintsValue is invalid", () => {
+    const invalidCall = () => {
+        ValueHintsValue.from({ key: "aKey", displayName: "\u0012" });
+    };
+    expect(invalidCall).toThrow(new ParsingError("ValueHintsValue", "displayName", errorMessageC));
 });
