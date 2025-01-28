@@ -6,10 +6,14 @@ import { AccountSelectedEvent } from "../events";
 import { LocalAccountSession } from "../multiAccount";
 import { AppRuntimeModule } from "./AppRuntimeModule";
 
-export class SSEModule extends AppRuntimeModule {
-    private eventSource: Record<string, EventSource | undefined>;
+export interface SSEModuleConfiguration extends ModuleConfiguration {
+    baseUrlOverride?: string;
+}
 
-    public constructor(runtime: AppRuntime, configuration: ModuleConfiguration, logger: ILogger) {
+export class SSEModule extends AppRuntimeModule<SSEModuleConfiguration> {
+    private eventSource: Record<string, EventSource | undefined> = {};
+
+    public constructor(runtime: AppRuntime, configuration: SSEModuleConfiguration, logger: ILogger) {
         super(runtime, configuration, logger);
     }
 
@@ -45,7 +49,7 @@ export class SSEModule extends AppRuntimeModule {
             }
         }
 
-        const baseUrl = this.runtime["runtimeConfig"].transportLibrary.baseUrl;
+        const baseUrl = this.configuration.baseUrlOverride ?? this.runtime["runtimeConfig"].transportLibrary.baseUrl;
         const sseUrl = `${baseUrl}/api/v1/sse`;
 
         this.logger.info(`Connecting to SSE endpoint: ${sseUrl}`);
