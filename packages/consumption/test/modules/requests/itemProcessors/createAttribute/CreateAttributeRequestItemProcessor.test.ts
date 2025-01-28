@@ -315,7 +315,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
     });
 
     describe("accept", function () {
-        test("in case of a RelationshipAttribute: creates a LocalAttribute with shareInfo for the peer of the Request", async function () {
+        test("in case of a RelationshipAttribute: creates an own shared RelationshipAttribute", async function () {
             await Given.aRequestItemWithARelationshipAttribute({
                 attributeOwner: TestIdentity.SENDER
             });
@@ -323,13 +323,34 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await Then.aLocalRelationshipAttributeWithShareInfoForThePeerIsCreated();
         });
 
-        test("in case of an IdentityAttribute: creates a Repository Attribute and a copy of it with shareInfo for the peer of the Request", async function () {
+        test("in case of an IdentityAttribute: creates a RepositoryAttribute and an own shared IdentityAttribute", async function () {
             await Given.aRequestItemWithAnIdentityAttribute({
                 attributeOwner: TestIdentity.SENDER
             });
             await When.iCallAccept();
             await Then.aLocalRepositoryAttributeIsCreated();
             await Then.aLocalIdentityAttributeWithShareInfoForThePeerIsCreated();
+        });
+
+        test("in case of an IdentityAttribute that already exists as RepositoryAttribute: creates an own shared IdentityAttribute that links to the existing RepositoryAttribute", async function () {
+            const repositoryAttribute = await Given.aRepositoryAttribute({ attributeOwner: TestIdentity.SENDER });
+            await Given.aRequestItemWithAnIdentityAttribute({
+                attributeOwner: TestIdentity.SENDER
+            });
+            await When.iCallAccept();
+            await Then.aLocalIdentityAttributeWithShareInfoForThePeerIsCreated();
+            await Then.theSourceAttributeIdOfTheOwnSharedIdentityAttributeMatches(repositoryAttribute.id);
+        });
+
+        test("in case of an IdentityAttribute that already exists as RepositoryAttribute: merge tags", async function () {
+            await Given.aRepositoryAttribute({ attributeOwner: TestIdentity.SENDER, tags: ["tag1", "tag2"] });
+            await Given.aRequestItemWithAnIdentityAttribute({
+                attributeOwner: TestIdentity.SENDER,
+                tags: ["tag1", "tag3"]
+            });
+            await When.iCallAccept();
+            await Then.aLocalIdentityAttributeWithShareInfoForThePeerIsCreated();
+            await Then.theTagsOfTheRepositoryAttributeMatch(["tag1", "tag2", "tag3"]);
         });
     });
 

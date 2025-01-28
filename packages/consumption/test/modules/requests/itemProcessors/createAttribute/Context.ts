@@ -1,5 +1,5 @@
 /* eslint-disable jest/no-standalone-expect */
-import { CreateAttributeAcceptResponseItem, CreateAttributeRequestItem, RelationshipAttribute, ResponseItemResult } from "@nmshd/content";
+import { CreateAttributeAcceptResponseItem, CreateAttributeRequestItem, IdentityAttribute, RelationshipAttribute, ResponseItemResult } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { AccountController, Transport } from "@nmshd/transport";
 import {
@@ -102,9 +102,10 @@ export class GivenSteps {
         return Promise.resolve();
     }
 
-    public aRequestItemWithAnIdentityAttribute(params: { attributeOwner: CoreAddress }): Promise<void> {
+    public aRequestItemWithAnIdentityAttribute(params: { attributeOwner: CoreAddress; tags?: string[] }): Promise<void> {
         const attribute = TestObjectFactory.createIdentityAttribute({
-            owner: this.context.translateTestIdentity(params.attributeOwner)
+            owner: this.context.translateTestIdentity(params.attributeOwner),
+            tags: params.tags
         });
         this.context.fillTestIdentitiesOfObject(attribute);
 
@@ -120,6 +121,18 @@ export class GivenSteps {
             attributeId: await ConsumptionIds.attribute.generate(),
             result: ResponseItemResult.Accepted
         });
+    }
+
+    public async aRepositoryAttribute(params: { attributeOwner: CoreAddress; tags?: string[] }): Promise<LocalAttribute> {
+        const attribute = TestObjectFactory.createIdentityAttribute({
+            owner: this.context.translateTestIdentity(params.attributeOwner),
+            tags: params.tags
+        });
+        this.context.fillTestIdentitiesOfObject(attribute);
+
+        const createdRepositoryAttribute = await this.context.consumptionController.attributes.createRepositoryAttribute({ content: attribute });
+
+        return createdRepositoryAttribute;
     }
 }
 
@@ -177,6 +190,18 @@ export class ThenSteps {
         expect(createdAttribute!.shareInfo).toBeDefined();
         expect(createdAttribute!.shareInfo!.peer.toString()).toStrictEqual(this.context.peerAddress.toString());
         expect(createdAttribute!.shareInfo!.sourceAttribute).toBeUndefined();
+    }
+
+    public async theSourceAttributeIdOfTheOwnSharedIdentityAttributeMatches(id: CoreId): Promise<void> {
+        const ownSharedIdentityAttribute = await this.context.consumptionController.attributes.getLocalAttribute(this.context.responseItemAfterAction.attributeId);
+        expect(ownSharedIdentityAttribute!.shareInfo!.sourceAttribute).toStrictEqual(id);
+    }
+
+    public async theTagsOfTheRepositoryAttributeMatch(tags: string[]): Promise<void> {
+        const ownSharedIdentityAttribute = await this.context.consumptionController.attributes.getLocalAttribute(this.context.responseItemAfterAction.attributeId);
+
+        const repositoryAttribute = await this.context.consumptionController.attributes.getLocalAttribute(ownSharedIdentityAttribute!.shareInfo!.sourceAttribute!);
+        expect((repositoryAttribute!.content as IdentityAttribute).tags?.sort()).toStrictEqual(tags.sort());
     }
 
     public theCreatedAttributeHasTheAttributeIdFromTheResponseItem(): Promise<void> {
