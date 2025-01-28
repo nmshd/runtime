@@ -1,5 +1,18 @@
 import { ApplicationError, Result, sleep } from "@js-soft/ts-utils";
-import { ReadAttributeRequestItemJSON, RelationshipAttributeConfidentiality, RelationshipTemplateContentJSON } from "@nmshd/content";
+import {
+    GivenName,
+    IdentityAttribute,
+    ReadAttributeAcceptResponseItem,
+    ReadAttributeRequestItem,
+    ReadAttributeRequestItemJSON,
+    RelationshipAttributeConfidentiality,
+    RelationshipCreationContent,
+    RelationshipTemplateContent,
+    RelationshipTemplateContentJSON,
+    ResponseItemResult,
+    ResponseResult
+} from "@nmshd/content";
+import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { IdentityDeletionProcessStatus, Random } from "@nmshd/transport";
 import assert from "assert";
 import { DateTime } from "luxon";
@@ -44,12 +57,14 @@ const serviceProvider = new RuntimeServiceProvider();
 let services1: TestRuntimeServices;
 let services2: TestRuntimeServices;
 let services3: TestRuntimeServices;
+let services4: TestRuntimeServices;
 
 beforeAll(async () => {
-    const runtimeServices = await serviceProvider.launch(3, { enableRequestModule: true, enableDeciderModule: true, enableNotificationModule: true });
+    const runtimeServices = await serviceProvider.launch(4, { enableRequestModule: true, enableDeciderModule: true, enableNotificationModule: true });
     services1 = runtimeServices[0];
     services2 = runtimeServices[1];
     services3 = runtimeServices[2];
+    services4 = runtimeServices[3];
 }, 30000);
 
 afterEach(async () => {
@@ -71,39 +86,130 @@ afterAll(() => serviceProvider.stop());
 describe("Can Create / Create Relationship", () => {
     let relationshipId: string;
 
+    describe("tests on creationContent of Relationship", () => {
+        const relationshipCreationContent = RelationshipCreationContent.from({
+            response: {
+                "@type": "Response",
+                result: ResponseResult.Accepted,
+                requestId: "RequestId",
+                items: [
+                    ReadAttributeAcceptResponseItem.from({
+                        result: ResponseItemResult.Accepted,
+                        attributeId: CoreId.from("AttributeId"),
+                        attribute: IdentityAttribute.from({
+                            owner: CoreAddress.from("addressOfServices4"),
+                            value: GivenName.from("aGivenName")
+                        })
+                    }).toJSON()
+                ]
+            }
+        }).toJSON();
+
+        const relationshipTemplateContent = RelationshipTemplateContent.from({
+            onNewRelationship: {
+                "@type": "Request",
+                items: [
+                    ReadAttributeRequestItem.from({
+                        mustBeAccepted: true,
+                        query: {
+                            "@type": "IdentityAttributeQuery",
+                            valueType: "GivenName"
+                        }
+                    })
+                ]
+            }
+        }).toJSON();
+
+        test("should not create a Relationship with a false creationContent type", async () => {
+            const templateId = (await exchangeTemplate(services1.transport, services4.transport)).id;
+
+            const canCreateRelationshipResponse = (
+                await services4.transport.relationships.canCreateRelationship({
+                    templateId: templateId,
+                    creationContent: {}
+                })
+            ).value;
+
+            assert(!canCreateRelationshipResponse.isSuccess);
+
+            expect(canCreateRelationshipResponse.isSuccess).toBe(false);
+            expect(canCreateRelationshipResponse.message).toBe(
+                "The creationContent of a Relationship must either be an ArbitraryRelationshipCreationContent or a RelationshipCreationContent."
+            );
+            expect(canCreateRelationshipResponse.code).toBe("error.runtime.validation.invalidPropertyValue");
+
+            const createRelationshipResponse = await services4.transport.relationships.createRelationship({
+                templateId: templateId,
+                creationContent: {}
+            });
+            expect(createRelationshipResponse).toBeAnError(
+                "The creationContent of a Relationship must either be an ArbitraryRelationshipCreationContent or a RelationshipCreationContent.",
+                "error.runtime.validation.invalidPropertyValue"
+            );
+        });
+
+        test("should not create a Relationship with a RelationshipCreationContent if an ArbitraryRelationshipTemplateContent is used", async () => {
+            const templateId = (await exchangeTemplate(services1.transport, services4.transport)).id;
+
+            const canCreateRelationshipResponse = (
+                await services4.transport.relationships.canCreateRelationship({
+                    templateId: templateId,
+                    creationContent: relationshipCreationContent
+                })
+            ).value;
+
+            assert(!canCreateRelationshipResponse.isSuccess);
+
+            expect(canCreateRelationshipResponse.isSuccess).toBe(false);
+            expect(canCreateRelationshipResponse.message).toBe(
+                "The creationContent of a Relationship must be an ArbitraryRelationshipCreationContent if the content of the Relationship is an ArbitraryRelationshipTemplateContent."
+            );
+            expect(canCreateRelationshipResponse.code).toBe("error.runtime.validation.invalidPropertyValue");
+
+            const createRelationshipResponse = await services4.transport.relationships.createRelationship({
+                templateId: templateId,
+                creationContent: relationshipCreationContent
+            });
+            expect(createRelationshipResponse).toBeAnError(
+                "The creationContent of a Relationship must be an ArbitraryRelationshipCreationContent if the content of the Relationship is an ArbitraryRelationshipTemplateContent.",
+                "error.runtime.validation.invalidPropertyValue"
+            );
+        });
+
+        test("should not create a Relationship with an ArbitraryRelationshipCreationContent if a RelationshipTemplateContent is used", async () => {
+            const templateId = (await exchangeTemplate(services1.transport, services4.transport, relationshipTemplateContent)).id;
+
+            const canCreateRelationshipResponse = (
+                await services4.transport.relationships.canCreateRelationship({
+                    templateId: templateId,
+                    creationContent: emptyRelationshipCreationContent
+                })
+            ).value;
+
+            assert(!canCreateRelationshipResponse.isSuccess);
+
+            expect(canCreateRelationshipResponse.isSuccess).toBe(false);
+            expect(canCreateRelationshipResponse.message).toBe(
+                "The creationContent of a Relationship must be a RelationshipCreationContent if the content of the Relationship is a RelationshipTemplateContent."
+            );
+            expect(canCreateRelationshipResponse.code).toBe("error.runtime.validation.invalidPropertyValue");
+
+            const createRelationshipResponse = await services4.transport.relationships.createRelationship({
+                templateId: templateId,
+                creationContent: emptyRelationshipCreationContent
+            });
+            expect(createRelationshipResponse).toBeAnError(
+                "The creationContent of a Relationship must be a RelationshipCreationContent if the content of the Relationship is a RelationshipTemplateContent.",
+                "error.runtime.validation.invalidPropertyValue"
+            );
+        });
+    });
+
     test("load relationship Template in connector 2", async () => {
         const template = await createTemplate(services1.transport);
 
         const response = await services2.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
         expect(response).toBeSuccessful();
-    });
-
-    test("should not create a relationship with a false creation content type", async () => {
-        const templateId = (await exchangeTemplate(services1.transport, services2.transport)).id;
-
-        const canCreateRelationshipResponse = (
-            await services2.transport.relationships.canCreateRelationship({
-                templateId: templateId,
-                creationContent: {}
-            })
-        ).value;
-
-        assert(!canCreateRelationshipResponse.isSuccess);
-
-        expect(canCreateRelationshipResponse.isSuccess).toBe(false);
-        expect(canCreateRelationshipResponse.message).toBe(
-            "The creationContent of a Relationship must either be an ArbitraryRelationshipCreationContent or a RelationshipCreationContent."
-        );
-        expect(canCreateRelationshipResponse.code).toBe("error.runtime.validation.invalidPropertyValue");
-
-        const createRelationshipResponse = await services2.transport.relationships.createRelationship({
-            templateId: templateId,
-            creationContent: {}
-        });
-        expect(createRelationshipResponse).toBeAnError(
-            "The creationContent of a Relationship must either be an ArbitraryRelationshipCreationContent or a RelationshipCreationContent.",
-            "error.runtime.validation.invalidPropertyValue"
-        );
     });
 
     test("should not create Relationship if RelationshipTemplate is already expired", async () => {
