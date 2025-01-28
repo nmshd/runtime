@@ -58,7 +58,7 @@
         "lodash": "^4.17.21"
     },
     "devDependencies": {
-        "@js-soft/web-logger": "^1.0.4",
+        "@js-soft/simple-logger": "^1.0.5",
         "@types/lodash": "^4.17.15",
         "@types/lokijs": "^1.5.14",
         "@types/luxon": "^3.4.2"
