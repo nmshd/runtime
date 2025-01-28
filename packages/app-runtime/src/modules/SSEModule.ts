@@ -58,10 +58,14 @@ export class SSEModule extends AppRuntimeModule<SSEModuleConfiguration> {
             fetch: async (url, options) => {
                 const token = await session.accountController.authenticator.getToken();
 
-                return await fetch(url, {
+                const result = await fetch(url, {
                     ...options,
                     headers: { ...options?.headers, authorization: `Bearer ${token}` }
                 });
+
+                this.logger.info(`SSE fetch result: ${result.status}`);
+
+                return result;
             }
         });
 
@@ -90,8 +94,6 @@ export class SSEModule extends AppRuntimeModule<SSEModuleConfiguration> {
     }
 
     private async runSync(session: LocalAccountSession): Promise<void> {
-        this.logger.info("Running sync");
-
         const syncResult = await session.transportServices.account.syncEverything();
         if (syncResult.isError) {
             this.logger.error(syncResult);
