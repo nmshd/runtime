@@ -31,7 +31,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
     });
 
     describe("canCreateOutgoingRequestItem", function () {
-        test("returns Success when passing an Identity Attribute with owner={{Recipient}}", async function () {
+        test("returns Success when passing an Identity Attribute with owner={{Peer}}", async function () {
             const identityAttributeOfRecipient = TestObjectFactory.createIdentityAttribute({
                 owner: TestIdentity.PEER
             });
@@ -40,7 +40,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await Then.theCanCreateResultShouldBeASuccess();
         });
 
-        test("returns an Error when passing an Identity Attribute with owner={{Sender}}", async function () {
+        test("returns an Error when passing an Identity Attribute with owner={{CurrentIdentity}}", async function () {
             const identityAttributeOfSender = TestObjectFactory.createIdentityAttribute({
                 owner: TestIdentity.CURRENT_IDENTITY
             });
@@ -84,7 +84,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             });
         });
 
-        test("returns Success when passing a Relationship Attribute with owner={{Recipient}}", async function () {
+        test("returns Success when passing a Relationship Attribute with owner={{Peer}}", async function () {
             const relationshipAttributeOfRecipient = TestObjectFactory.createRelationshipAttribute({
                 owner: TestIdentity.PEER
             });
@@ -93,7 +93,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await Then.theCanCreateResultShouldBeASuccess();
         });
 
-        test("returns Success when passing a Relationship Attribute with owner={{Sender}}", async function () {
+        test("returns Success when passing a Relationship Attribute with owner={{CurrentIdentity}}", async function () {
             const relationshipAttributeOfSender = TestObjectFactory.createRelationshipAttribute({
                 owner: TestIdentity.CURRENT_IDENTITY
             });
