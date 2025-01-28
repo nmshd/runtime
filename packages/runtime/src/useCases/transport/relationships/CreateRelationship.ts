@@ -51,7 +51,7 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
         }
 
         const transformedTemplateContent = template.cache?.content;
-        if (transformedCreationContent instanceof ArbitraryRelationshipCreationContent && !(transformedTemplateContent instanceof ArbitraryRelationshipTemplateContent)) {
+        if (transformedTemplateContent instanceof ArbitraryRelationshipTemplateContent && !(transformedCreationContent instanceof ArbitraryRelationshipCreationContent)) {
             return Result.fail(
                 RuntimeErrors.general.invalidPropertyValue(
                     "The creationContent of a Relationship must be an ArbitraryRelationshipCreationContent if the content of the Relationship is an ArbitraryRelationshipTemplateContent."
@@ -59,8 +59,8 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
             );
         }
 
-        if (transformedCreationContent instanceof RelationshipCreationContent) {
-            if (!(transformedTemplateContent instanceof RelationshipTemplateContent)) {
+        if (transformedTemplateContent instanceof RelationshipTemplateContent) {
+            if (!(transformedCreationContent instanceof RelationshipCreationContent)) {
                 return Result.fail(
                     RuntimeErrors.general.invalidPropertyValue(
                         "The creationContent of a Relationship must be a RelationshipCreationContent if the content of the Relationship is a RelationshipTemplateContent."
