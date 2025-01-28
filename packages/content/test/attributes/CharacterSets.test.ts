@@ -30,16 +30,16 @@ const restrictedIdentityAttributeTypesC = ["AffiliationRole", "AffiliationUnit",
 const identityAttributeTestParameters = restrictedIdentityAttributeTypesA
     .map((type) => ({
         type,
-        testValue: "Ä",
-        wrongTestValue: "€",
+        positiveTestValue: "Ä",
+        negativeTestValue: "€",
         errorMessage: errorMessageA,
         valueHintsPattern: characterSets.din91379DatatypeA.toString().slice(1, -1).replaceAll("/", "\\/")
     }))
     .concat(
         restrictedIdentityAttributeTypesB.map((type) => ({
             type,
-            testValue: "€",
-            wrongTestValue: "z-\u000D",
+            positiveTestValue: "€",
+            negativeTestValue: "z-\u000D",
             errorMessage: errorMessageB,
             valueHintsPattern: characterSets.din91379DatatypeB.toString().slice(1, -1).replaceAll("/", "\\/")
         }))
@@ -47,21 +47,21 @@ const identityAttributeTestParameters = restrictedIdentityAttributeTypesA
     .concat(
         restrictedIdentityAttributeTypesC.map((type) => ({
             type,
-            testValue: "z-\u000D",
-            wrongTestValue: "\u0012",
+            positiveTestValue: "z-\u000D",
+            negativeTestValue: "\u0012",
             errorMessage: errorMessageC,
             valueHintsPattern: characterSets.din91379DatatypeC.toString().slice(1, -1).replaceAll("/", "\\/")
         }))
     );
 
-test.each(identityAttributeTestParameters)("$type is considered as valid", ({ type, testValue, valueHintsPattern }) => {
-    const attribute = Serializable.fromUnknown({ "@type": type, value: testValue }) as any;
-    expect(attribute.value).toBe(testValue);
+test.each(identityAttributeTestParameters)("$type is considered as valid", ({ type, positiveTestValue, valueHintsPattern }) => {
+    const attribute = Serializable.fromUnknown({ "@type": type, value: positiveTestValue }) as any;
+    expect(attribute.value).toBe(positiveTestValue);
     expect(attribute.valueHints.pattern).toBe(valueHintsPattern);
 });
 
-test.each(identityAttributeTestParameters)("$type is considered as invalid", ({ type, wrongTestValue, errorMessage }) => {
-    const invalidCall = () => Serializable.fromUnknown({ "@type": type, value: wrongTestValue });
+test.each(identityAttributeTestParameters)("$type is considered as invalid", ({ type, negativeTestValue, errorMessage }) => {
+    const invalidCall = () => Serializable.fromUnknown({ "@type": type, value: negativeTestValue });
     expect(invalidCall).toThrow(new ParsingError(type, "value", errorMessage));
 });
 
