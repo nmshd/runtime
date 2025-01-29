@@ -65,20 +65,13 @@ export class SSEModule extends AppRuntimeModule<SSEModuleConfiguration> {
 
                 this.logger.info(`SSE fetch result: ${result.status}`);
 
-                this.logger.error("SSE fetch", result, sseUrl);
-                this.logger.error("SSE status", result.status);
-                this.logger.error("SSE URL", sseUrl);
-
                 return result;
             }
         });
 
         this.eventSource[session.account.id] = eventSource;
 
-        eventSource.addEventListener("ExternalEventCreated", async () => {
-            console.error("ExternalEventCreated");
-            await this.runSync(session);
-        });
+        eventSource.addEventListener("ExternalEventCreated", async () => await this.runSync(session));
 
         await new Promise<void>((resolve, reject) => {
             eventSource.onopen = () => {
