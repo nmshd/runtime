@@ -1,5 +1,14 @@
 import { ParsingError, Serializable } from "@js-soft/ts-serval";
-import { Consent, RelationshipAttribute, RelationshipAttributeConfidentiality, ValueHintsValue } from "../../src";
+import {
+    Consent,
+    DeliveryBoxAddress,
+    IDeliveryBoxAddress,
+    IPostOfficeBoxAddress,
+    PostOfficeBoxAddress,
+    RelationshipAttribute,
+    RelationshipAttributeConfidentiality,
+    ValueHintsValue
+} from "../../src";
 import { characterSets } from "../../src/attributes/constants/CharacterSets";
 
 const errorMessageA =
@@ -21,6 +30,57 @@ test("Consent is considered as invalid", () => {
         });
     };
     expect(invalidCall).toThrow(new ParsingError("Consent", "consent", errorMessageC));
+});
+
+const correctDeliveryBoxAddress: IDeliveryBoxAddress = {
+    city: "aCity",
+    country: "DE",
+    deliveryBoxId: "aBoxId~0",
+    recipient: "aRecipient@7",
+    userId: "aUserId<6",
+    zipCode: "aZipCode"
+};
+
+test("DeliveryBoxAddress is considered as valid", () => {
+    const deliveryBoxAddress = DeliveryBoxAddress.from(correctDeliveryBoxAddress);
+    expect(deliveryBoxAddress.valueHints.propertyHints.deliveryBoxId.pattern).toBe(characterSets.din91379DatatypeB.toString().slice(1, -1).replaceAll("/", "\\/"));
+    expect(deliveryBoxAddress.valueHints.propertyHints.recipient.pattern).toBe(characterSets.din91379DatatypeB.toString().slice(1, -1).replaceAll("/", "\\/"));
+    expect(deliveryBoxAddress.valueHints.propertyHints.userId.pattern).toBe(characterSets.din91379DatatypeB.toString().slice(1, -1).replaceAll("/", "\\/"));
+});
+
+test.each(["recipient", "userId", "deliveryBoxId"])("%s of DeliveryBoxAddress is considered as invalid", (propertyName) => {
+    const invalidCall = () => {
+        DeliveryBoxAddress.from({
+            ...correctDeliveryBoxAddress,
+            [propertyName]: "invalidValue≥"
+        });
+    };
+
+    expect(invalidCall).toThrow(new ParsingError("DeliveryBoxAddress", propertyName, errorMessageB));
+});
+
+const correctPostOfficeBoxAddress: IPostOfficeBoxAddress = {
+    city: "aCity",
+    country: "DE",
+    boxId: "aBoxId#",
+    recipient: "aRecipient_",
+    zipCode: "aZipCode"
+};
+
+test("PostOfficeBoxAddress is considered as valid", () => {
+    const postOfficeBoxAddress = PostOfficeBoxAddress.from(correctPostOfficeBoxAddress);
+    expect(postOfficeBoxAddress.valueHints.propertyHints.boxId.pattern).toBe(characterSets.din91379DatatypeB.toString().slice(1, -1).replaceAll("/", "\\/"));
+    expect(postOfficeBoxAddress.valueHints.propertyHints.recipient.pattern).toBe(characterSets.din91379DatatypeB.toString().slice(1, -1).replaceAll("/", "\\/"));
+});
+
+test.each(["boxId", "recipient"])("%s of PostOfficeBoxAddress is considered as invalid", (propertyName) => {
+    const invalidCall = () => {
+        PostOfficeBoxAddress.from({
+            ...correctPostOfficeBoxAddress,
+            [propertyName]: "invalidValue≤"
+        });
+    };
+    expect(invalidCall).toThrow(new ParsingError("PostOfficeBoxAddress", propertyName, errorMessageB));
 });
 
 const restrictedIdentityAttributeTypesA = ["BirthName", "GivenName", "HonorificPrefix", "HonorificSuffix", "MiddleName", "Pseudonym", "Surname"];

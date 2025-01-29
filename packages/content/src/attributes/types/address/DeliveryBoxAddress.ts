@@ -2,6 +2,7 @@ import { serialize, type, validate } from "@js-soft/ts-serval";
 import { nameof } from "ts-simple-nameof";
 import { AbstractAttributeValue } from "../../AbstractAttributeValue";
 import { COUNTRIES_ALPHA2_TO_ENGLISH_NAME } from "../../constants";
+import { characterSets } from "../../constants/CharacterSets";
 import { RenderHints, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../../hints";
 import { IPhoneNumber, PhoneNumber } from "../communication";
 import { AbstractAddress, AbstractAddressJSON, IAbstractAddress } from "./AbstractAddress";
@@ -34,11 +35,11 @@ export interface IDeliveryBoxAddress extends IAbstractAddress {
 @type("DeliveryBoxAddress")
 export class DeliveryBoxAddress extends AbstractAddress implements IDeliveryBoxAddress {
     @serialize()
-    @validate({ max: 100 })
+    @validate({ max: 100, regExp: characterSets.din91379DatatypeB })
     public userId: string;
 
     @serialize()
-    @validate({ max: 100 })
+    @validate({ max: 100, regExp: characterSets.din91379DatatypeB })
     public deliveryBoxId: string;
 
     @serialize({ customGenerator: AbstractAttributeValue.valueGenerator })
@@ -64,8 +65,8 @@ export class DeliveryBoxAddress extends AbstractAddress implements IDeliveryBoxA
     public static override get valueHints(): ValueHints {
         return super.valueHints.copyWith({
             propertyHints: {
-                [nameof<DeliveryBoxAddress>((d) => d.userId)]: ValueHints.from({}),
-                [nameof<DeliveryBoxAddress>((d) => d.deliveryBoxId)]: ValueHints.from({}),
+                [nameof<DeliveryBoxAddress>((d) => d.userId)]: ValueHints.from({ pattern: characterSets.din91379DatatypeB.toString().slice(1, -1).replaceAll("/", "\\/") }),
+                [nameof<DeliveryBoxAddress>((d) => d.deliveryBoxId)]: ValueHints.from({ pattern: characterSets.din91379DatatypeB.toString().slice(1, -1).replaceAll("/", "\\/") }),
                 [nameof<DeliveryBoxAddress>((d) => d.zipCode)]: ZipCode.valueHints,
                 [nameof<DeliveryBoxAddress>((d) => d.city)]: City.valueHints,
                 [nameof<DeliveryBoxAddress>((d) => d.country)]: Country.valueHints,
