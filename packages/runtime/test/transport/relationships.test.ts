@@ -349,8 +349,6 @@ describe("Can Create / Create Relationship", () => {
                 })
             ).value;
 
-            assert(canCreateRelationshipResponse.isSuccess);
-
             expect(canCreateRelationshipResponse.isSuccess).toBe(true);
 
             const createRelationshipResponse = await services5.transport.relationships.createRelationship({
