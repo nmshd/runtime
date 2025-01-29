@@ -384,8 +384,6 @@ export class MessageController extends TransportController {
         });
         const value = result.value;
 
-        this.log.error(result.correlationId);
-
         const recipients = envelopeRecipients.map((r) =>
             CachedMessageRecipient.from({
                 address: r.address,
