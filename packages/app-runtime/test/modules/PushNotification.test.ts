@@ -10,7 +10,7 @@ describe("PushNotificationModuleTest", function () {
     let devicePushIdentifier = "dummy value";
 
     beforeAll(async function () {
-        runtime = await TestUtil.createRuntime({ modules: { pushNotification: { enabled: true } } }, undefined, eventBus);
+        runtime = await TestUtil.createRuntime({ pushService: "dummy", modules: { pushNotification: { enabled: true } } }, undefined, eventBus);
         await runtime.start();
 
         const accounts = await TestUtil.provideAccounts(runtime, 1);
