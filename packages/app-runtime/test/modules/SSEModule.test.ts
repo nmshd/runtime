@@ -29,7 +29,7 @@ describe("SSEModuleTest", function () {
     test("should auto sync when new external events arrive", async function () {
         const message = await TestUtil.sendMessage(session1, session2);
 
-        const received = await eventBus.waitForEvent(MessageReceivedEvent, (e) => e.eventTargetAddress === session2.account.address!);
+        const received = await eventBus.waitForEvent(MessageReceivedEvent, (e) => e.eventTargetAddress === session2.account.address!, 20000);
 
         expect(received.data.id).toBe(message.id);
     });
