@@ -38,15 +38,6 @@ jobs:
         env:
           fail_ci_if_error: true
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-      - name: Save Backbone Logs
-        if: failure()
-        run: docker compose -p runtime-test-backbone --env-file .dev/compose.backbone.env  -f .dev/compose.backbone.yml logs consumer-api event-handler-service sse-server > logs.txt
-      - name: Archive Backbone Logs
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: logs.txt
-          path: logs.txt
 
   test-consumption-mongodb:
     runs-on: ubuntu-latest
