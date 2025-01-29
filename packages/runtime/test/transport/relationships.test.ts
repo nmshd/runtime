@@ -1,4 +1,5 @@
 import { ApplicationError, Result, sleep } from "@js-soft/ts-utils";
+import { AcceptReadAttributeRequestItemParametersJSON } from "@nmshd/consumption";
 import {
     GivenName,
     IdentityAttribute,
@@ -246,6 +247,63 @@ describe("Can Create / Create Relationship", () => {
                 creationContent: relationshipCreationContent
             });
             expect(createRelationshipResponse).toBeAnError("There is no accepted incoming Request associated with the RelationshipTemplate.", "error.runtime.unknown");
+        });
+
+        test("should not create a Relationship if the Response of the accepted Request of the RelationshipTemplateContent is not provided with the creationContent", async () => {
+            const templateId = (await exchangeTemplate(services1.transport, services4.transport, relationshipTemplateContent)).id;
+
+            const receivedRequest = (
+                await services4.consumption.incomingRequests.received({
+                    receivedRequest: relationshipTemplateContent.onNewRelationship,
+                    requestSourceId: templateId
+                })
+            ).value;
+
+            const checkedRequest = (
+                await services4.consumption.incomingRequests.checkPrerequisites({
+                    requestId: receivedRequest.id
+                })
+            ).value;
+
+            await services4.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
+            await services4.eventBus.waitForRunningEventHandlers();
+
+            await services4.consumption.incomingRequests.accept({
+                requestId: checkedRequest.id,
+                items: [
+                    {
+                        accept: true,
+                        newAttribute: IdentityAttribute.from({
+                            owner: CoreAddress.from(services4.address),
+                            value: GivenName.from("aGivenName")
+                        }).toJSON()
+                    } as AcceptReadAttributeRequestItemParametersJSON
+                ]
+            });
+
+            const canCreateRelationshipResponse = (
+                await services4.transport.relationships.canCreateRelationship({
+                    templateId: templateId,
+                    creationContent: relationshipCreationContent
+                })
+            ).value;
+
+            assert(!canCreateRelationshipResponse.isSuccess);
+
+            expect(canCreateRelationshipResponse.isSuccess).toBe(false);
+            expect(canCreateRelationshipResponse.message).toBe(
+                "The Response of the accepted incoming Request associated with the RelationshipTemplate must be provided as the response of the RelationshipCreationContent."
+            );
+            expect(canCreateRelationshipResponse.code).toBe("error.runtime.unknown");
+
+            const createRelationshipResponse = await services4.transport.relationships.createRelationship({
+                templateId: templateId,
+                creationContent: relationshipCreationContent
+            });
+            expect(createRelationshipResponse).toBeAnError(
+                "The Response of the accepted incoming Request associated with the RelationshipTemplate must be provided as the response of the RelationshipCreationContent.",
+                "error.runtime.unknown"
+            );
         });
     });
 
