@@ -377,13 +377,14 @@ export class MessageController extends TransportController {
             };
         });
 
-        const response = (
-            await this.client.createMessage({
-                attachments: fileIds,
-                body: cipher.toBase64(),
-                recipients: platformRecipients
-            })
-        ).value;
+        const result = await this.client.createMessage({
+            attachments: fileIds,
+            body: cipher.toBase64(),
+            recipients: platformRecipients
+        });
+        const value = result.value;
+
+        this.log.error(result.correlationId);
 
         const recipients = envelopeRecipients.map((r) =>
             CachedMessageRecipient.from({
@@ -397,7 +398,7 @@ export class MessageController extends TransportController {
 
         const cachedMessage = CachedMessage.from({
             content: parsedParams.content,
-            createdAt: CoreDate.from(response.createdAt),
+            createdAt: CoreDate.from(value.createdAt),
             createdBy: this.parent.identity.identity.address,
             createdByDevice: this.parent.activeDevice.id,
             recipients,
@@ -406,7 +407,7 @@ export class MessageController extends TransportController {
         });
 
         const message = Message.from({
-            id: CoreId.from(response.id),
+            id: CoreId.from(value.id),
             secretKey: secret,
             cache: cachedMessage,
             cachedAt: CoreDate.utc(),
