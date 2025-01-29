@@ -3,7 +3,6 @@ import { Result } from "@js-soft/ts-utils";
 import { INativeBootstrapper, INativeEnvironment } from "../../../src";
 import { FakeNativeConfigAccess } from "./FakeNativeConfigAccess";
 import { FakeNativeDatabaseFactory } from "./FakeNativeDatabaseFactory";
-import { FakeNativeDeviceInfoAccess } from "./FakeNativeDeviceInfoAccess";
 import { FakeNativeNotificationAccess } from "./FakeNativeNotificationAccess";
 
 export class FakeNativeBootstrapper implements INativeBootstrapper {
@@ -43,12 +42,10 @@ export class FakeNativeBootstrapper implements INativeBootstrapper {
         this._nativeEnvironment = {
             configAccess: new FakeNativeConfigAccess(),
             databaseFactory: new FakeNativeDatabaseFactory(),
-            deviceInfoAccess: new FakeNativeDeviceInfoAccess(),
             loggerFactory,
             notificationAccess: new FakeNativeNotificationAccess(nativeLogger)
         };
 
-        await this._nativeEnvironment.deviceInfoAccess.init();
         await this._nativeEnvironment.notificationAccess.init();
 
         return Result.ok(undefined);

@@ -24,7 +24,7 @@ describe("PushNotificationModuleTest", function () {
     afterEach(() => eventBus.reset());
 
     test("should persist push identifier", async function () {
-        runtime.nativeEnvironment.eventBus.publish(new RemoteNotificationRegistrationEvent("handleLongerThan10Characters"));
+        runtime.eventBus.publish(new RemoteNotificationRegistrationEvent("handleLongerThan10Characters"));
 
         await eventBus.waitForRunningEventHandlers();
 
@@ -35,7 +35,7 @@ describe("PushNotificationModuleTest", function () {
     });
 
     test("should do a datawallet sync when DatawalletModificationsCreated is received", async function () {
-        runtime.nativeEnvironment.eventBus.publish(
+        runtime.eventBus.publish(
             new RemoteNotificationEvent({
                 content: {
                     devicePushIdentifier: devicePushIdentifier,
@@ -50,7 +50,7 @@ describe("PushNotificationModuleTest", function () {
     });
 
     test("should do a sync everything when ExternalEventCreated is received", async function () {
-        runtime.nativeEnvironment.eventBus.publish(
+        runtime.eventBus.publish(
             new RemoteNotificationEvent({
                 content: {
                     devicePushIdentifier: devicePushIdentifier,

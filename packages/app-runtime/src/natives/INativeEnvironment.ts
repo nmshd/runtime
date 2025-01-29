@@ -8,5 +8,4 @@ export interface INativeEnvironment {
     configAccess: INativeConfigAccess;
     loggerFactory: ILoggerFactory;
     notificationAccess: INativeNotificationAccess;
-    deviceInfoAccess: INativeDeviceInfoAccess;
 }
