@@ -75,7 +75,10 @@ export class SSEModule extends AppRuntimeModule<SSEModuleConfiguration> {
 
         this.eventSource[session.account.id] = eventSource;
 
-        eventSource.addEventListener("ExternalEventCreated", async () => await this.runSync(session));
+        eventSource.addEventListener("ExternalEventCreated", async () => {
+            console.error("ExternalEventCreated");
+            await this.runSync(session);
+        });
 
         await new Promise<void>((resolve, reject) => {
             eventSource.onopen = () => {
