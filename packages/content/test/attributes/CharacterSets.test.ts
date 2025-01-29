@@ -7,6 +7,8 @@ import {
     PostOfficeBoxAddress,
     RelationshipAttribute,
     RelationshipAttributeConfidentiality,
+    RelationshipAttributeQuery,
+    ThirdPartyRelationshipAttributeQuery,
     ValueHintsValue
 } from "../../src";
 import { characterSets } from "../../src/attributes/constants/CharacterSets";
@@ -144,7 +146,7 @@ test.each(relationshipAttributeValueTestParameters)("value of $type is considere
     expect(invalidCall).toThrow(new ParsingError(type, propertyInErrorMessage, errorMessageC));
 });
 
-const proprietaryAttributeTypes = [
+const proprietaryAttributeTestParameters = [
     { type: "ProprietaryBoolean", value: true },
     { type: "ProprietaryCountry", value: "DE" },
     { type: "ProprietaryEMailAddress", value: "email@email.de" },
@@ -157,29 +159,30 @@ const proprietaryAttributeTypes = [
     { type: "ProprietaryString", value: "aString" },
     { type: "ProprietaryURL", value: "mail.de" },
     { type: "ProprietaryJSON", value: "aString" },
-    { type: "ProprietaryXML", value: "aString" }
+    { type: "ProprietaryXML", value: "aString" },
+    { type: "RelationshipAttributeCreationHints", valueType: "ProprietaryBoolean", confidentiality: RelationshipAttributeConfidentiality.Private }
 ];
 
-test.each(proprietaryAttributeTypes)("title of $type is considered as valid", ({ type, value }) => {
-    const attribute = Serializable.fromUnknown({ "@type": type, value, title: "\u000D¾£()," });
+test.each(proprietaryAttributeTestParameters)("title of $type is considered as valid", ({ type, value, valueType, confidentiality }) => {
+    const attribute = Serializable.fromUnknown({ "@type": type, value, valueType, confidentiality, title: "\u000D¾£()," });
     expect((attribute as any).title).toBe("\u000D¾£(),");
 });
 
-test.each(proprietaryAttributeTypes)("title of $type is considered as invalid", ({ type, value }) => {
+test.each(proprietaryAttributeTestParameters)("title of $type is considered as invalid", ({ type, value, valueType, confidentiality }) => {
     const invalidCall = () => {
-        Serializable.fromUnknown({ "@type": type, value, title: "Ω" });
+        Serializable.fromUnknown({ "@type": type, value, valueType, confidentiality, title: "Ω" });
     };
     expect(invalidCall).toThrow(new ParsingError(type, "title", errorMessageC));
 });
 
-test.each(proprietaryAttributeTypes)("description of $type is considered as valid", ({ type, value }) => {
-    const attribute = Serializable.fromUnknown({ "@type": type, value, title: "aTitle", description: "\u000D¾£()," });
+test.each(proprietaryAttributeTestParameters)("description of $type is considered as valid", ({ type, value, valueType, confidentiality }) => {
+    const attribute = Serializable.fromUnknown({ "@type": type, value, valueType, confidentiality, title: "aTitle", description: "\u000D¾£()," });
     expect((attribute as any).description).toBe("\u000D¾£(),");
 });
 
-test.each(proprietaryAttributeTypes)("description of $type is considered as invalid", ({ type, value }) => {
+test.each(proprietaryAttributeTestParameters)("description of $type is considered as invalid", ({ type, value, valueType, confidentiality }) => {
     const invalidCall = () => {
-        Serializable.fromUnknown({ "@type": type, value, title: "aTitle", description: "Ω" });
+        Serializable.fromUnknown({ "@type": type, value, valueType, confidentiality, title: "aTitle", description: "Ω" });
     };
     expect(invalidCall).toThrow(new ParsingError(type, "description", errorMessageC));
 });
@@ -214,6 +217,46 @@ test("Key of RelationshipAttribute is invalid", () => {
         });
     };
     expect(invalidCall).toThrow(new ParsingError("RelationshipAttribute", "key", errorMessageC));
+});
+
+test("Key of RelationshipAttributeQuery is valid", () => {
+    const attribute = RelationshipAttributeQuery.from({
+        owner: "theOwner",
+        attributeCreationHints: { confidentiality: RelationshipAttributeConfidentiality.Private, title: "aTitle", valueType: "ProprietaryBoolean" },
+        key: "\u000D¾£(),"
+    });
+    expect(attribute.key).toBe("\u000D¾£(),");
+});
+
+test("Key of RelationshipAttributeQuery is invalid", () => {
+    const invalidCall = () => {
+        RelationshipAttributeQuery.from({
+            owner: "theOwner",
+            attributeCreationHints: { confidentiality: RelationshipAttributeConfidentiality.Private, title: "aTitle", valueType: "ProprietaryBoolean" },
+            key: "Б"
+        });
+    };
+    expect(invalidCall).toThrow(new ParsingError("RelationshipAttributeQuery", "key", errorMessageC));
+});
+
+test("Key of ThirdPartyRelationshipAttributeQuery is valid", () => {
+    const attribute = ThirdPartyRelationshipAttributeQuery.from({
+        owner: "",
+        thirdParty: ["aThirdParty"],
+        key: "\u000D¾£(),"
+    });
+    expect(attribute.key).toBe("\u000D¾£(),");
+});
+
+test("Key of ThirdPartyRelationshipAttributeQuery is invalid", () => {
+    const invalidCall = () => {
+        ThirdPartyRelationshipAttributeQuery.from({
+            owner: "",
+            thirdParty: ["aThirdParty"],
+            key: "Б"
+        });
+    };
+    expect(invalidCall).toThrow(new ParsingError("ThirdPartyRelationshipAttributeQuery", "key", errorMessageC));
 });
 
 describe.each(["ValueHints", "ValueHintsOverride"])("%s tests", (type) => {

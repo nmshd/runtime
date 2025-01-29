@@ -1,6 +1,7 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreAddress, CoreDate, ICoreAddress, ICoreDate } from "@nmshd/core-types";
 import { AbstractAttributeQuery, AbstractAttributeQueryJSON, IAbstractAttributeQuery } from "./AbstractAttributeQuery";
+import { characterSets } from "./constants/CharacterSets";
 export interface ThirdPartyRelationshipAttributeQueryJSON extends AbstractAttributeQueryJSON {
     "@type": "ThirdPartyRelationshipAttributeQuery";
     key: string;
@@ -27,7 +28,7 @@ export enum ThirdPartyRelationshipAttributeQueryOwner {
 @type("ThirdPartyRelationshipAttributeQuery")
 export class ThirdPartyRelationshipAttributeQuery extends AbstractAttributeQuery implements IThirdPartyRelationshipAttributeQuery {
     @serialize()
-    @validate({ max: 100 })
+    @validate({ max: 100, regExp: characterSets.din91379DatatypeC })
     public key: string;
 
     @serialize()

@@ -2,6 +2,7 @@ import { ISerializable, Serializable, serialize, type, validate } from "@js-soft
 import { CoreAddress, CoreDate, ICoreAddress, ICoreDate } from "@nmshd/core-types";
 import { AbstractAttributeQuery, AbstractAttributeQueryJSON, IAbstractAttributeQuery } from "./AbstractAttributeQuery";
 import { AttributeValues } from "./AttributeValueTypes";
+import { characterSets } from "./constants/CharacterSets";
 import { IValueHints, ValueHints, ValueHintsJSON } from "./hints";
 import { RelationshipAttributeConfidentiality } from "./RelationshipAttributeConfidentiality";
 import { PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH, PROPRIETARY_ATTRIBUTE_MAX_TITLE_LENGTH } from "./types/proprietary/ProprietaryAttributeValue";
@@ -30,7 +31,7 @@ export interface IRelationshipAttributeCreationHints extends ISerializable {
 @type("RelationshipAttributeCreationHints")
 export class RelationshipAttributeCreationHints extends Serializable implements IRelationshipAttributeCreationHints {
     @serialize()
-    @validate({ max: PROPRIETARY_ATTRIBUTE_MAX_TITLE_LENGTH })
+    @validate({ max: PROPRIETARY_ATTRIBUTE_MAX_TITLE_LENGTH, regExp: characterSets.din91379DatatypeC })
     public title: string;
 
     @serialize()
@@ -40,7 +41,7 @@ export class RelationshipAttributeCreationHints extends Serializable implements 
     public valueType: AttributeValues.Relationship.TypeName;
 
     @serialize()
-    @validate({ nullable: true, max: PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH })
+    @validate({ nullable: true, max: PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH, regExp: characterSets.din91379DatatypeC })
     public description?: string;
 
     @serialize()
@@ -85,7 +86,7 @@ export interface IRelationshipAttributeQuery extends IAbstractAttributeQuery {
 @type("RelationshipAttributeQuery")
 export class RelationshipAttributeQuery extends AbstractAttributeQuery implements IRelationshipAttributeQuery {
     @serialize()
-    @validate({ max: 100 })
+    @validate({ max: 100, regExp: characterSets.din91379DatatypeC })
     public key: string;
 
     @serialize()
