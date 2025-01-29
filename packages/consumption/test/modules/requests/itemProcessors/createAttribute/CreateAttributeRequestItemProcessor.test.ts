@@ -72,7 +72,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             });
         });
 
-        test("returns Success when passing an IdentityAttribute with owner={{SomeoneElse}}, but no Recipient", async function () {
+        test("returns Success when passing an IdentityAttribute with owner={{SomeoneElse}}, but no recipient", async function () {
             const identityAttributeOfSomeoneElse = TestObjectFactory.createIdentityAttribute({
                 owner: TestIdentity.SOMEONE_ELSE
             });
@@ -123,7 +123,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             });
         });
 
-        test("returns Success when passing a RelationshipAttribute with owner={{SomeoneElse}}, but no Recipient", async function () {
+        test("returns Success when passing a RelationshipAttribute with owner={{SomeoneElse}}, but no recipient", async function () {
             const relationshipAttributeOfSomeoneElse = TestObjectFactory.createRelationshipAttribute({
                 owner: TestIdentity.SOMEONE_ELSE
             });
@@ -157,7 +157,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             });
         });
 
-        test("returns Error on violation of key uniqueness even if the owner of the provided RelationshipAttribute is an empty string as long as the Recipient is known", async function () {
+        test("returns Error on violation of key uniqueness even if the owner of the provided RelationshipAttribute is an empty string as long as the recipient is known", async function () {
             const relationshipAttributeOfRecipient = TestObjectFactory.createRelationshipAttribute({
                 owner: TestIdentity.PEER,
                 key: "uniqueKey"
