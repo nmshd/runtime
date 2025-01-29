@@ -34,7 +34,7 @@ export class TestUtil {
 
         const config = this.createAppConfig(configOverride);
 
-        const nativeBootstrapper = new FakeNativeBootstrapper(eventBus);
+        const nativeBootstrapper = new FakeNativeBootstrapper();
         await nativeBootstrapper.init();
         const runtime = await AppRuntime.create(nativeBootstrapper, config, eventBus);
         runtime.registerUIBridge(uiBridge);

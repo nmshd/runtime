@@ -24,8 +24,8 @@ export class PushNotificationModule extends AppRuntimeModule<PushNotificationMod
     }
 
     public start(): void {
-        this.subscribeToNativeEvent(RemoteNotificationEvent, this.handleRemoteNotification.bind(this));
-        this.subscribeToNativeEvent(RemoteNotificationRegistrationEvent, this.handleTokenRegistration.bind(this));
+        this.subscribeToEvent(RemoteNotificationEvent, this.handleRemoteNotification.bind(this));
+        this.subscribeToEvent(RemoteNotificationRegistrationEvent, this.handleTokenRegistration.bind(this));
         this.subscribeToEvent(AccountSelectedEvent, this.handleAccountSelected.bind(this));
     }
 
@@ -102,9 +102,9 @@ export class PushNotificationModule extends AppRuntimeModule<PushNotificationMod
             throw AppRuntimeErrors.modules.pushNotificationModule.tokenRegistrationNotPossible("No device for this account found", deviceResult.error).logWith(this.logger);
         }
 
-        const platform = this.runtime.nativeEnvironment.deviceInfoAccess.deviceInfo.pushService;
         const appId = this.runtime.config.applicationId;
         const handle = token;
+        const platform = this.runtime.config.pushService;
         const environment = this.runtime.config.applePushEnvironment;
 
         const result = await services.transportServices.account.registerPushNotificationToken({
