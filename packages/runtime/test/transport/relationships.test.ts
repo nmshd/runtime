@@ -60,14 +60,16 @@ let services1: TestRuntimeServices;
 let services2: TestRuntimeServices;
 let services3: TestRuntimeServices;
 let services4: TestRuntimeServices;
+let services5: TestRuntimeServices;
 
 beforeAll(async () => {
-    const runtimeServices = await serviceProvider.launch(3, { enableRequestModule: true, enableDeciderModule: true, enableNotificationModule: true });
+    const runtimeServices = await serviceProvider.launch(4, { enableRequestModule: true, enableDeciderModule: true, enableNotificationModule: true });
     const runtimeServicesWithDisabledRequestModule = await serviceProvider.launch(1, { enableRequestModule: false, enableDeciderModule: true, enableNotificationModule: true });
     services1 = runtimeServices[0];
     services2 = runtimeServices[1];
     services3 = runtimeServices[2];
-    services4 = runtimeServicesWithDisabledRequestModule[0];
+    services4 = runtimeServices[3];
+    services5 = runtimeServicesWithDisabledRequestModule[0];
 }, 30000);
 
 afterEach(async () => {
@@ -104,7 +106,7 @@ describe("Can Create / Create Relationship", () => {
                             result: ResponseItemResult.Accepted,
                             attributeId: CoreId.from("anAttributeId"),
                             attribute: IdentityAttribute.from({
-                                owner: CoreAddress.from(services4.address),
+                                owner: CoreAddress.from(services5.address),
                                 value: GivenName.from("aGivenName")
                             })
                         }).toJSON()
@@ -129,10 +131,10 @@ describe("Can Create / Create Relationship", () => {
         }, 30000);
 
         test("should not create a Relationship with a false creationContent type", async () => {
-            const templateId = (await exchangeTemplate(services1.transport, services4.transport)).id;
+            const templateId = (await exchangeTemplate(services4.transport, services5.transport)).id;
 
             const canCreateRelationshipResponse = (
-                await services4.transport.relationships.canCreateRelationship({
+                await services5.transport.relationships.canCreateRelationship({
                     templateId: templateId,
                     creationContent: {}
                 })
@@ -146,7 +148,7 @@ describe("Can Create / Create Relationship", () => {
             );
             expect(canCreateRelationshipResponse.code).toBe("error.runtime.validation.invalidPropertyValue");
 
-            const createRelationshipResponse = await services4.transport.relationships.createRelationship({
+            const createRelationshipResponse = await services5.transport.relationships.createRelationship({
                 templateId: templateId,
                 creationContent: {}
             });
@@ -157,10 +159,10 @@ describe("Can Create / Create Relationship", () => {
         });
 
         test("should not create a Relationship with a RelationshipCreationContent if an ArbitraryRelationshipTemplateContent is used", async () => {
-            const templateId = (await exchangeTemplate(services1.transport, services4.transport)).id;
+            const templateId = (await exchangeTemplate(services4.transport, services5.transport)).id;
 
             const canCreateRelationshipResponse = (
-                await services4.transport.relationships.canCreateRelationship({
+                await services5.transport.relationships.canCreateRelationship({
                     templateId: templateId,
                     creationContent: relationshipCreationContent
                 })
@@ -174,7 +176,7 @@ describe("Can Create / Create Relationship", () => {
             );
             expect(canCreateRelationshipResponse.code).toBe("error.runtime.validation.invalidPropertyValue");
 
-            const createRelationshipResponse = await services4.transport.relationships.createRelationship({
+            const createRelationshipResponse = await services5.transport.relationships.createRelationship({
                 templateId: templateId,
                 creationContent: relationshipCreationContent
             });
@@ -185,10 +187,10 @@ describe("Can Create / Create Relationship", () => {
         });
 
         test("should not create a Relationship with an ArbitraryRelationshipCreationContent if a RelationshipTemplateContent is used", async () => {
-            const templateId = (await exchangeTemplate(services1.transport, services4.transport, relationshipTemplateContent)).id;
+            const templateId = (await exchangeTemplate(services4.transport, services5.transport, relationshipTemplateContent)).id;
 
             const canCreateRelationshipResponse = (
-                await services4.transport.relationships.canCreateRelationship({
+                await services5.transport.relationships.canCreateRelationship({
                     templateId: templateId,
                     creationContent: emptyRelationshipCreationContent
                 })
@@ -202,7 +204,7 @@ describe("Can Create / Create Relationship", () => {
             );
             expect(canCreateRelationshipResponse.code).toBe("error.runtime.validation.invalidPropertyValue");
 
-            const createRelationshipResponse = await services4.transport.relationships.createRelationship({
+            const createRelationshipResponse = await services5.transport.relationships.createRelationship({
                 templateId: templateId,
                 creationContent: emptyRelationshipCreationContent
             });
@@ -213,24 +215,24 @@ describe("Can Create / Create Relationship", () => {
         });
 
         test("should not create a Relationship if the Request of the RelationshipTemplateContent is not accepted", async () => {
-            const templateId = (await exchangeTemplate(services1.transport, services4.transport, relationshipTemplateContent)).id;
+            const templateId = (await exchangeTemplate(services4.transport, services5.transport, relationshipTemplateContent)).id;
 
             const receivedRequest = (
-                await services4.consumption.incomingRequests.received({
+                await services5.consumption.incomingRequests.received({
                     receivedRequest: relationshipTemplateContent.onNewRelationship,
                     requestSourceId: templateId
                 })
             ).value;
 
-            await services4.consumption.incomingRequests.checkPrerequisites({
+            await services5.consumption.incomingRequests.checkPrerequisites({
                 requestId: receivedRequest.id
             });
 
-            await services4.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
-            await services4.eventBus.waitForRunningEventHandlers();
+            await services5.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
+            await services5.eventBus.waitForRunningEventHandlers();
 
             const canCreateRelationshipResponse = (
-                await services4.transport.relationships.canCreateRelationship({
+                await services5.transport.relationships.canCreateRelationship({
                     templateId: templateId,
                     creationContent: relationshipCreationContent
                 })
@@ -242,7 +244,7 @@ describe("Can Create / Create Relationship", () => {
             expect(canCreateRelationshipResponse.message).toBe("There is no accepted incoming Request associated with the RelationshipTemplate.");
             expect(canCreateRelationshipResponse.code).toBe("error.runtime.unknown");
 
-            const createRelationshipResponse = await services4.transport.relationships.createRelationship({
+            const createRelationshipResponse = await services5.transport.relationships.createRelationship({
                 templateId: templateId,
                 creationContent: relationshipCreationContent
             });
@@ -250,31 +252,31 @@ describe("Can Create / Create Relationship", () => {
         });
 
         test("should not create a Relationship if the Response of the accepted Request of the RelationshipTemplateContent is not provided with the creationContent", async () => {
-            const templateId = (await exchangeTemplate(services1.transport, services4.transport, relationshipTemplateContent)).id;
+            const templateId = (await exchangeTemplate(services4.transport, services5.transport, relationshipTemplateContent)).id;
 
             const receivedRequest = (
-                await services4.consumption.incomingRequests.received({
+                await services5.consumption.incomingRequests.received({
                     receivedRequest: relationshipTemplateContent.onNewRelationship,
                     requestSourceId: templateId
                 })
             ).value;
 
             const checkedRequest = (
-                await services4.consumption.incomingRequests.checkPrerequisites({
+                await services5.consumption.incomingRequests.checkPrerequisites({
                     requestId: receivedRequest.id
                 })
             ).value;
 
-            await services4.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
-            await services4.eventBus.waitForRunningEventHandlers();
+            await services5.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
+            await services5.eventBus.waitForRunningEventHandlers();
 
-            await services4.consumption.incomingRequests.accept({
+            await services5.consumption.incomingRequests.accept({
                 requestId: checkedRequest.id,
                 items: [
                     {
                         accept: true,
                         newAttribute: IdentityAttribute.from({
-                            owner: CoreAddress.from(services4.address),
+                            owner: CoreAddress.from(services5.address),
                             value: GivenName.from("aGivenName")
                         }).toJSON()
                     } as AcceptReadAttributeRequestItemParametersJSON
@@ -282,7 +284,7 @@ describe("Can Create / Create Relationship", () => {
             });
 
             const canCreateRelationshipResponse = (
-                await services4.transport.relationships.canCreateRelationship({
+                await services5.transport.relationships.canCreateRelationship({
                     templateId: templateId,
                     creationContent: relationshipCreationContent
                 })
@@ -296,7 +298,7 @@ describe("Can Create / Create Relationship", () => {
             );
             expect(canCreateRelationshipResponse.code).toBe("error.runtime.unknown");
 
-            const createRelationshipResponse = await services4.transport.relationships.createRelationship({
+            const createRelationshipResponse = await services5.transport.relationships.createRelationship({
                 templateId: templateId,
                 creationContent: relationshipCreationContent
             });
@@ -304,6 +306,58 @@ describe("Can Create / Create Relationship", () => {
                 "The Response of the accepted incoming Request associated with the RelationshipTemplate must be provided as the response of the RelationshipCreationContent.",
                 "error.runtime.unknown"
             );
+        });
+
+        test("can create a Relationship if the Response of the accepted Request of the RelationshipTemplateContent is provided with the creationContent", async () => {
+            const templateId = (await exchangeTemplate(services4.transport, services5.transport, relationshipTemplateContent)).id;
+
+            const receivedRequest = (
+                await services5.consumption.incomingRequests.received({
+                    receivedRequest: relationshipTemplateContent.onNewRelationship,
+                    requestSourceId: templateId
+                })
+            ).value;
+
+            const checkedRequest = (
+                await services5.consumption.incomingRequests.checkPrerequisites({
+                    requestId: receivedRequest.id
+                })
+            ).value;
+
+            await services5.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
+            await services5.eventBus.waitForRunningEventHandlers();
+
+            const acceptedRequest = (
+                await services5.consumption.incomingRequests.accept({
+                    requestId: checkedRequest.id,
+                    items: [
+                        {
+                            accept: true,
+                            newAttribute: IdentityAttribute.from({
+                                owner: CoreAddress.from(services5.address),
+                                value: GivenName.from("aGivenName")
+                            }).toJSON()
+                        } as AcceptReadAttributeRequestItemParametersJSON
+                    ]
+                })
+            ).value;
+
+            const canCreateRelationshipResponse = (
+                await services5.transport.relationships.canCreateRelationship({
+                    templateId: templateId,
+                    creationContent: RelationshipCreationContent.from({ response: acceptedRequest.response!.content }).toJSON()
+                })
+            ).value;
+
+            assert(canCreateRelationshipResponse.isSuccess);
+
+            expect(canCreateRelationshipResponse.isSuccess).toBe(true);
+
+            const createRelationshipResponse = await services5.transport.relationships.createRelationship({
+                templateId: templateId,
+                creationContent: RelationshipCreationContent.from({ response: acceptedRequest.response!.content }).toJSON()
+            });
+            expect(createRelationshipResponse).toBeSuccessful();
         });
     });
 
