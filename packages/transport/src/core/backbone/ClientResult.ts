@@ -12,6 +12,7 @@ export class ClientResult<T> {
     public readonly responseDuration?: number;
     public readonly responseTime?: CoreDate;
     public readonly traceId?: string;
+    public readonly correlationId?: string;
 
     protected constructor(isSuccess: boolean, value?: T, error?: ApplicationError, platformParameters?: PlatformParameters) {
         if (isSuccess && error) {
@@ -37,6 +38,8 @@ export class ClientResult<T> {
             this.responseTime = platformParameters.responseTime ? CoreDate.from(platformParameters.responseTime) : undefined;
 
             this.traceId = platformParameters.traceId;
+
+            this.correlationId = platformParameters.correlationId;
         }
     }
 
