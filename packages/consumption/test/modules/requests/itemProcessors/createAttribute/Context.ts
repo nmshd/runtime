@@ -146,7 +146,7 @@ export class ThenSteps {
         return Promise.resolve();
     }
 
-    public async aLocalRepositoryAttributeIsCreated(): Promise<void> {
+    public async aRepositoryAttributeIsCreated(): Promise<void> {
         expect(this.context.responseItemAfterAction.attributeId).toBeDefined();
 
         const createdSharedAttribute = await this.context.consumptionController.attributes.getLocalAttribute(this.context.responseItemAfterAction.attributeId);
@@ -157,7 +157,7 @@ export class ThenSteps {
         expect(createdRepositoryAttribute!.shareInfo).toBeUndefined();
     }
 
-    public async aLocalIdentityAttributeWithShareInfoForThePeerIsCreated(): Promise<void> {
+    public async anOwnSharedIdentityAttributeIsCreated(): Promise<void> {
         expect(this.context.responseItemAfterAction.attributeId).toBeDefined();
 
         const createdAttribute = await this.context.consumptionController.attributes.getLocalAttribute(this.context.responseItemAfterAction.attributeId);
@@ -168,7 +168,7 @@ export class ThenSteps {
         expect(createdAttribute!.shareInfo!.sourceAttribute).toBeDefined();
     }
 
-    public async aLocalRelationshipAttributeWithShareInfoForThePeerIsCreated(): Promise<void> {
+    public async anOwnSharedRelationshipAttributeIsCreated(): Promise<void> {
         expect(this.context.responseItemAfterAction.attributeId).toBeDefined();
 
         const createdAttribute = await this.context.consumptionController.attributes.getLocalAttribute(this.context.responseItemAfterAction.attributeId);
