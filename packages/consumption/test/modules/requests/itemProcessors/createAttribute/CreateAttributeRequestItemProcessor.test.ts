@@ -1,5 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { ProprietaryInteger, ProprietaryString } from "@nmshd/content";
+import { GivenName, ProprietaryInteger, ProprietaryString } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { Transport } from "@nmshd/transport";
 import { TestUtil } from "../../../../core/TestUtil";
@@ -324,31 +324,36 @@ describe("CreateAttributeRequestItemProcessor", function () {
         });
 
         test("in case of an IdentityAttribute: creates a RepositoryAttribute and an own shared IdentityAttribute", async function () {
-            await Given.aRequestItemWithAnIdentityAttribute({
-                attributeOwner: TestIdentity.SENDER
-            });
+            await Given.aRequestItemWithAnIdentityAttribute({ attributeOwner: TestIdentity.SENDER, value: GivenName.from("aGivenName1") });
             await When.iCallAccept();
+            await Then.theResponseItemShouldBeOfType("CreateAttributeAcceptResponseItem");
             await Then.aLocalRepositoryAttributeIsCreated();
             await Then.aLocalIdentityAttributeWithShareInfoForThePeerIsCreated();
         });
 
         test("in case of an IdentityAttribute that already exists as RepositoryAttribute: creates an own shared IdentityAttribute that links to the existing RepositoryAttribute", async function () {
-            const repositoryAttribute = await Given.aRepositoryAttribute({ attributeOwner: TestIdentity.SENDER });
-            await Given.aRequestItemWithAnIdentityAttribute({
-                attributeOwner: TestIdentity.SENDER
-            });
+            const repositoryAttribute = await Given.aRepositoryAttribute({ attributeOwner: TestIdentity.SENDER, value: GivenName.from("aGivenName2") });
+            await Given.aRequestItemWithAnIdentityAttribute({ attributeOwner: TestIdentity.SENDER, value: GivenName.from("aGivenName2") });
             await When.iCallAccept();
+            await Then.theResponseItemShouldBeOfType("CreateAttributeAcceptResponseItem");
             await Then.aLocalIdentityAttributeWithShareInfoForThePeerIsCreated();
             await Then.theSourceAttributeIdOfTheOwnSharedIdentityAttributeMatches(repositoryAttribute.id);
         });
 
+        // test("in case of an IdentityAttribute that already exists as own shared IdentityAttribute: returns an AttributeAlreadySharedAcceptResponseItem", async function () {
+        //     const repositoryAttribute = await Given.aRepositoryAttribute({ attributeOwner: TestIdentity.SENDER });
+        //     await Given.aRequestItemWithAnIdentityAttribute({
+        //         attributeOwner: TestIdentity.SENDER
+        //     });
+        //     await When.iCallAccept();
+        //     await Then.theResponseItemShouldBeOfType("AttributeAlreadySharedAcceptResponseItem");
+        // });
+
         test("in case of an IdentityAttribute that already exists as RepositoryAttribute: merge tags", async function () {
-            await Given.aRepositoryAttribute({ attributeOwner: TestIdentity.SENDER, tags: ["tag1", "tag2"] });
-            await Given.aRequestItemWithAnIdentityAttribute({
-                attributeOwner: TestIdentity.SENDER,
-                tags: ["tag1", "tag3"]
-            });
+            await Given.aRepositoryAttribute({ attributeOwner: TestIdentity.SENDER, tags: ["tag1", "tag2"], value: GivenName.from("aGivenName3") });
+            await Given.aRequestItemWithAnIdentityAttribute({ attributeOwner: TestIdentity.SENDER, tags: ["tag1", "tag3"], value: GivenName.from("aGivenName3") });
             await When.iCallAccept();
+            await Then.theResponseItemShouldBeOfType("CreateAttributeAcceptResponseItem");
             await Then.aLocalIdentityAttributeWithShareInfoForThePeerIsCreated();
             await Then.theTagsOfTheRepositoryAttributeMatch(["tag1", "tag2", "tag3"]);
         });
