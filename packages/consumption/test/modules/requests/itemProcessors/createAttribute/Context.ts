@@ -142,7 +142,6 @@ export class GivenSteps {
         this.context.fillTestIdentitiesOfObject(attribute);
 
         const createdRepositoryAttribute = await this.context.consumptionController.attributes.createRepositoryAttribute({ content: attribute });
-
         return createdRepositoryAttribute;
     }
 
@@ -152,7 +151,6 @@ export class GivenSteps {
             peer: this.context.translateTestIdentity(params.peer)!,
             requestReference: CoreId.from("reqRef")
         });
-
         return createdOwnSharedIdentityAttribute;
     }
 }

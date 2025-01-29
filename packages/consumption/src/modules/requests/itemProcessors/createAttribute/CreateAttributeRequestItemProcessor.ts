@@ -161,7 +161,6 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
                             sourceAttribute: succeededRepositoryAttribute.id
                         })
                     };
-
                     const ownSharedIdentityAttributesAfterSuccession = await this.consumptionController.attributes.succeedOwnSharedIdentityAttribute(
                         existingOwnSharedIdentityAttribute.id,
                         ownSharedIdentityAttributeSuccessorParams
