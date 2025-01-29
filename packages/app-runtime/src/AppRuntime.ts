@@ -203,7 +203,7 @@ export class AppRuntime extends Runtime<AppConfig> {
         this._accountServices = new AccountServices(this._multiAccountController);
     }
 
-    public static async create(nativeBootstrapper: INativeBootstrapper, appConfig?: AppConfigOverwrite, eventBus?: EventBus): Promise<AppRuntime> {
+    public static async create(nativeBootstrapper: INativeBootstrapper, appConfig?: AppConfigOverwrite | AppConfig, eventBus?: EventBus): Promise<AppRuntime> {
         // TODO: JSSNMSHDD-2524 (validate app config)
 
         if (!nativeBootstrapper.isInitialized) {
@@ -219,22 +219,18 @@ export class AppRuntime extends Runtime<AppConfig> {
         const applicationId = nativeBootstrapper.nativeEnvironment.configAccess.get("applicationId").value;
         const transportConfig = nativeBootstrapper.nativeEnvironment.configAccess.get("transport").value;
         const databaseFolder = nativeBootstrapper.nativeEnvironment.configAccess.get("databaseFolder").value;
+        const modules = nativeBootstrapper.nativeEnvironment.configAccess.get("modules").value;
 
-        const mergedConfig = appConfig
-            ? createAppConfig(
-                  {
-                      transportLibrary: transportConfig,
-                      applicationId: applicationId,
-                      applePushEnvironment: applePushEnvironment
-                  },
-                  appConfig
-              )
-            : createAppConfig({
-                  transportLibrary: transportConfig,
-                  applicationId: applicationId,
-                  applePushEnvironment: applePushEnvironment,
-                  databaseFolder: databaseFolder
-              });
+        const mergedConfig = createAppConfig(
+            {
+                transportLibrary: transportConfig,
+                applicationId: applicationId,
+                applePushEnvironment: applePushEnvironment,
+                databaseFolder: databaseFolder,
+                modules: modules
+            },
+            appConfig
+        );
 
         const runtime = new AppRuntime(nativeBootstrapper.nativeEnvironment, mergedConfig, eventBus);
         await runtime.init();

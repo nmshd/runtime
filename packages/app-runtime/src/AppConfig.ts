@@ -13,13 +13,14 @@ export interface AppConfig extends RuntimeConfig {
 export interface AppConfigOverwrite {
     transportLibrary?: Omit<IConfigOverwrite, "supportedIdentityVersion">;
     accountsDbName?: string;
-    applicationId: string;
+    applicationId?: string;
     applePushEnvironment?: "Development" | "Production";
     allowMultipleAccountsWithSameAddress?: boolean;
     databaseFolder?: string;
+    modules?: Record<string, { enabled?: boolean; [x: string | number | symbol]: unknown }>;
 }
 
-export function createAppConfig(...configs: AppConfigOverwrite[]): AppConfig {
+export function createAppConfig(...configs: (AppConfigOverwrite | AppConfig | undefined)[]): AppConfig {
     const appConfig: Omit<AppConfig, "transportLibrary" | "applicationId"> & {
         transportLibrary: Omit<IConfigOverwrite, "supportedIdentityVersion" | "platformClientId" | "platformClientSecret" | "baseUrl">;
     } = {
