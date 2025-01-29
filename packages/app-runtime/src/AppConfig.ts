@@ -20,7 +20,7 @@ export interface AppConfigOverwrite {
     modules?: Record<string, { enabled?: boolean; [x: string | number | symbol]: unknown }>;
 }
 
-export function createAppConfig(...configs: (AppConfigOverwrite | AppConfig | undefined)[]): AppConfig {
+export function createAppConfig(...configs: (AppConfigOverwrite | AppConfig)[]): AppConfig {
     const appConfig: Omit<AppConfig, "transportLibrary" | "applicationId"> & {
         transportLibrary: Omit<IConfigOverwrite, "supportedIdentityVersion" | "platformClientId" | "platformClientSecret" | "baseUrl">;
     } = {
