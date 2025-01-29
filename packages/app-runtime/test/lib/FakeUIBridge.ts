@@ -3,34 +3,34 @@ import { IUIBridge, LocalAccountDTO } from "../../src";
 
 export class FakeUIBridge implements IUIBridge {
     public showMessage(): Promise<Result<void, ApplicationError>> {
-        throw new Error("Method not implemented.");
+        return Promise.resolve(Result.ok(undefined));
     }
 
     public showRelationship(): Promise<Result<void, ApplicationError>> {
-        throw new Error("Method not implemented.");
+        return Promise.resolve(Result.ok(undefined));
     }
 
     public showFile(): Promise<Result<void, ApplicationError>> {
-        throw new Error("Method not implemented.");
+        return Promise.resolve(Result.ok(undefined));
     }
 
     public showDeviceOnboarding(): Promise<Result<void, ApplicationError>> {
-        throw new Error("Method not implemented.");
+        return Promise.resolve(Result.ok(undefined));
     }
 
     public showRequest(): Promise<Result<void>> {
-        throw new Error("Method not implemented.");
+        return Promise.resolve(Result.ok(undefined));
     }
 
     public showError(): Promise<Result<void, ApplicationError>> {
-        throw new Error("Method not implemented.");
+        return Promise.resolve(Result.ok(undefined));
     }
 
     public requestAccountSelection(): Promise<Result<LocalAccountDTO | undefined, ApplicationError>> {
-        throw new Error("Method not implemented.");
+        return Promise.resolve(Result.fail(new ApplicationError("not implemented", "not implemented")));
     }
 
     public enterPassword(_passwordType: "pw" | "pin", _pinLength?: number, _attempt?: number): Promise<Result<string>> {
-        throw new Error("Method not implemented.");
+        return Promise.resolve(Result.fail(new ApplicationError("not implemented", "not implemented")));
     }
 }

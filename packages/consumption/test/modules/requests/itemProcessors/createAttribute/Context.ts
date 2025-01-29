@@ -66,9 +66,9 @@ export class Context {
 
     public translateTestIdentity(testIdentity: CoreAddress): CoreAddress | undefined {
         switch (testIdentity.toString()) {
-            case TestIdentity.SENDER.toString():
+            case TestIdentity.CURRENT_IDENTITY.toString():
                 return this.accountController.identity.address;
-            case TestIdentity.RECIPIENT.toString():
+            case TestIdentity.PEER.toString():
                 return this.peerAddress;
             case TestIdentity.EMPTY.toString():
                 return CoreAddress.from("");
@@ -146,7 +146,7 @@ export class ThenSteps {
         return Promise.resolve();
     }
 
-    public async aLocalRepositoryAttributeIsCreated(): Promise<void> {
+    public async aRepositoryAttributeIsCreated(): Promise<void> {
         expect(this.context.responseItemAfterAction.attributeId).toBeDefined();
 
         const createdSharedAttribute = await this.context.consumptionController.attributes.getLocalAttribute(this.context.responseItemAfterAction.attributeId);
@@ -157,7 +157,7 @@ export class ThenSteps {
         expect(createdRepositoryAttribute!.shareInfo).toBeUndefined();
     }
 
-    public async aLocalIdentityAttributeWithShareInfoForThePeerIsCreated(): Promise<void> {
+    public async anOwnSharedIdentityAttributeIsCreated(): Promise<void> {
         expect(this.context.responseItemAfterAction.attributeId).toBeDefined();
 
         const createdAttribute = await this.context.consumptionController.attributes.getLocalAttribute(this.context.responseItemAfterAction.attributeId);
@@ -168,7 +168,7 @@ export class ThenSteps {
         expect(createdAttribute!.shareInfo!.sourceAttribute).toBeDefined();
     }
 
-    public async aLocalRelationshipAttributeWithShareInfoForThePeerIsCreated(): Promise<void> {
+    public async anOwnSharedRelationshipAttributeIsCreated(): Promise<void> {
         expect(this.context.responseItemAfterAction.attributeId).toBeDefined();
 
         const createdAttribute = await this.context.consumptionController.attributes.getLocalAttribute(this.context.responseItemAfterAction.attributeId);
@@ -230,7 +230,7 @@ export class WhenSteps {
         await this.context.consumptionController.attributes.updateAttributeUnsafe(attribute);
     }
 
-    public async iCallCanCreateOutgoingRequestItemWith(partialRequestItem: Partial<CreateAttributeRequestItem>, recipient: CoreAddress = TestIdentity.RECIPIENT): Promise<void> {
+    public async iCallCanCreateOutgoingRequestItemWith(partialRequestItem: Partial<CreateAttributeRequestItem>, recipient: CoreAddress = TestIdentity.PEER): Promise<void> {
         partialRequestItem.mustBeAccepted ??= true;
         partialRequestItem.attribute ??= TestObjectFactory.createIdentityAttribute({
             owner: this.context.accountController.identity.address
