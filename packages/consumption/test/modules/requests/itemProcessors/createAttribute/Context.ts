@@ -66,9 +66,9 @@ export class Context {
 
     public translateTestIdentity(testIdentity: CoreAddress): CoreAddress | undefined {
         switch (testIdentity.toString()) {
-            case TestIdentity.SENDER.toString():
+            case TestIdentity.CURRENT_IDENTITY.toString():
                 return this.accountController.identity.address;
-            case TestIdentity.RECIPIENT.toString():
+            case TestIdentity.PEER.toString():
                 return this.peerAddress;
             case TestIdentity.EMPTY.toString():
                 return CoreAddress.from("");
@@ -230,7 +230,7 @@ export class WhenSteps {
         await this.context.consumptionController.attributes.updateAttributeUnsafe(attribute);
     }
 
-    public async iCallCanCreateOutgoingRequestItemWith(partialRequestItem: Partial<CreateAttributeRequestItem>, recipient: CoreAddress = TestIdentity.RECIPIENT): Promise<void> {
+    public async iCallCanCreateOutgoingRequestItemWith(partialRequestItem: Partial<CreateAttributeRequestItem>, recipient: CoreAddress = TestIdentity.PEER): Promise<void> {
         partialRequestItem.mustBeAccepted ??= true;
         partialRequestItem.attribute ??= TestObjectFactory.createIdentityAttribute({
             owner: this.context.accountController.identity.address
