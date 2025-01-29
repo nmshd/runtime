@@ -145,6 +145,16 @@ export class GivenSteps {
 
         return createdRepositoryAttribute;
     }
+
+    public async anOwnSharedIdentityAttribute(params: { sourceAttributeId: CoreId; peer: CoreAddress }): Promise<LocalAttribute> {
+        const createdOwnSharedIdentityAttribute = await this.context.consumptionController.attributes.createSharedLocalAttributeCopy({
+            sourceAttributeId: params.sourceAttributeId,
+            peer: this.context.translateTestIdentity(params.peer)!,
+            requestReference: CoreId.from("reqRef")
+        });
+
+        return createdOwnSharedIdentityAttribute;
+    }
 }
 
 export class ThenSteps {
@@ -216,16 +226,32 @@ export class ThenSteps {
         expect(createdAttribute!.shareInfo!.sourceAttribute).toBeUndefined();
     }
 
-    public async theSourceAttributeIdOfTheOwnSharedIdentityAttributeMatches(id: CoreId): Promise<void> {
+    public async theSourceAttributeIdOfTheCreatedOwnSharedIdentityAttributeMatches(id: CoreId): Promise<void> {
         const ownSharedIdentityAttribute = await this.context.consumptionController.attributes.getLocalAttribute(
             (this.context.responseItemAfterAction as CreateAttributeAcceptResponseItem).attributeId
         );
         expect(ownSharedIdentityAttribute!.shareInfo!.sourceAttribute).toStrictEqual(id);
     }
 
+    public async theIdOfTheAlreadySharedAttributeMatches(id: CoreId): Promise<void> {
+        const alreadySharedAttribute = await this.context.consumptionController.attributes.getLocalAttribute(
+            (this.context.responseItemAfterAction as AttributeAlreadySharedAcceptResponseItem).attributeId
+        );
+        expect(alreadySharedAttribute!.id).toStrictEqual(id);
+    }
+
     public async theTagsOfTheRepositoryAttributeMatch(tags: string[]): Promise<void> {
         const ownSharedIdentityAttribute = await this.context.consumptionController.attributes.getLocalAttribute(
             (this.context.responseItemAfterAction as CreateAttributeAcceptResponseItem).attributeId
+        );
+
+        const repositoryAttribute = await this.context.consumptionController.attributes.getLocalAttribute(ownSharedIdentityAttribute!.shareInfo!.sourceAttribute!);
+        expect((repositoryAttribute!.content as IdentityAttribute).tags?.sort()).toStrictEqual(tags.sort());
+    }
+
+    public async theTagsOfTheSucceededRepositoryAttributeMatch(tags: string[]): Promise<void> {
+        const ownSharedIdentityAttribute = await this.context.consumptionController.attributes.getLocalAttribute(
+            (this.context.responseItemAfterAction as AttributeSuccessionAcceptResponseItem).successorId
         );
 
         const repositoryAttribute = await this.context.consumptionController.attributes.getLocalAttribute(ownSharedIdentityAttribute!.shareInfo!.sourceAttribute!);

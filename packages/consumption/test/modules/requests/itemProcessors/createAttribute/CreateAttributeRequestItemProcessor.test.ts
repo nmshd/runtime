@@ -337,25 +337,42 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await When.iCallAccept();
             await Then.theResponseItemShouldBeOfType("CreateAttributeAcceptResponseItem");
             await Then.anOwnSharedIdentityAttributeIsCreated();
-            await Then.theSourceAttributeIdOfTheOwnSharedIdentityAttributeMatches(repositoryAttribute.id);
+            await Then.theSourceAttributeIdOfTheCreatedOwnSharedIdentityAttributeMatches(repositoryAttribute.id);
         });
 
-        // test("in case of an IdentityAttribute that already exists as own shared IdentityAttribute: returns an AttributeAlreadySharedAcceptResponseItem", async function () {
-        //     const repositoryAttribute = await Given.aRepositoryAttribute({ attributeOwner: TestIdentity.SENDER });
-        //     await Given.aRequestItemWithAnIdentityAttribute({
-        //         attributeOwner: TestIdentity.SENDER
-        //     });
-        //     await When.iCallAccept();
-        //     await Then.theResponseItemShouldBeOfType("AttributeAlreadySharedAcceptResponseItem");
-        // });
-
-        test("in case of an IdentityAttribute that already exists as RepositoryAttribute: merge tags", async function () {
+        test("in case of an IdentityAttribute that already exists as RepositoryAttribute with different tags: merges tags", async function () {
             await Given.aRepositoryAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, tags: ["tag1", "tag2"], value: GivenName.from("aGivenName3") });
             await Given.aRequestItemWithAnIdentityAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, tags: ["tag1", "tag3"], value: GivenName.from("aGivenName3") });
             await When.iCallAccept();
             await Then.theResponseItemShouldBeOfType("CreateAttributeAcceptResponseItem");
             await Then.anOwnSharedIdentityAttributeIsCreated();
             await Then.theTagsOfTheRepositoryAttributeMatch(["tag1", "tag2", "tag3"]);
+        });
+
+        test("in case of an IdentityAttribute that already exists as own shared IdentityAttribute: returns an AttributeAlreadySharedAcceptResponseItem", async function () {
+            const repositoryAttribute = await Given.aRepositoryAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, value: GivenName.from("aGivenName4") });
+            const ownSharedIdentityAttribute = await Given.anOwnSharedIdentityAttribute({ sourceAttributeId: repositoryAttribute.id, peer: TestIdentity.PEER });
+            await Given.aRequestItemWithAnIdentityAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, value: GivenName.from("aGivenName4") });
+            await When.iCallAccept();
+            await Then.theResponseItemShouldBeOfType("AttributeAlreadySharedAcceptResponseItem");
+            await Then.theIdOfTheAlreadySharedAttributeMatches(ownSharedIdentityAttribute.id);
+        });
+
+        test("in case of an IdentityAttribute that already exists as own shared IdentityAttribute with different tags: returns an AttributeSuccessionAcceptResponseItem", async function () {
+            const repositoryAttribute = await Given.aRepositoryAttribute({
+                attributeOwner: TestIdentity.CURRENT_IDENTITY,
+                tags: ["tag1", "tag2"],
+                value: GivenName.from("aGivenName5")
+            });
+            await Given.anOwnSharedIdentityAttribute({ sourceAttributeId: repositoryAttribute.id, peer: TestIdentity.PEER });
+            await Given.aRequestItemWithAnIdentityAttribute({
+                attributeOwner: TestIdentity.CURRENT_IDENTITY,
+                tags: ["tag1", "tag3"],
+                value: GivenName.from("aGivenName5")
+            });
+            await When.iCallAccept();
+            await Then.theResponseItemShouldBeOfType("AttributeSuccessionAcceptResponseItem");
+            await Then.theTagsOfTheSucceededRepositoryAttributeMatch(["tag1", "tag2", "tag3"]);
         });
     });
 
