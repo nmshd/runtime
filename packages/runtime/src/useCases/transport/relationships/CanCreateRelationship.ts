@@ -88,11 +88,9 @@ export class CanCreateRelationshipUseCase extends UseCase<CanCreateRelationshipR
 
     private async validateRelationshipCreationContent(templateId: RelationshipTemplateIdString, relationshipCreationContent: RelationshipCreationContent) {
         const acceptedIncomingRequests = await this.incomingRequestsController.getIncomingRequests({
-            query: {
-                status: LocalRequestStatus.Decided,
-                "source.reference": templateId,
-                "response.content.result": "Accepted"
-            }
+            status: LocalRequestStatus.Decided,
+            "source.reference": templateId,
+            "response.content.result": "Accepted"
         });
 
         if (acceptedIncomingRequests.length === 0) {
@@ -100,7 +98,9 @@ export class CanCreateRelationshipUseCase extends UseCase<CanCreateRelationshipR
         }
 
         if (JSON.stringify(acceptedIncomingRequests[0].response!.content) !== JSON.stringify(relationshipCreationContent.response)) {
-            return RuntimeErrors.general.unknown("The Response of the accepted incoming Request must be provided as the response of the RelationshipCreationContent.");
+            return RuntimeErrors.general.unknown(
+                "The Response of the accepted incoming Request associated with the RelationshipTemplate must be provided as the response of the RelationshipCreationContent."
+            );
         }
 
         return;
