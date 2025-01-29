@@ -1,4 +1,6 @@
 import {
+    AttributeAlreadySharedAcceptResponseItem,
+    AttributeSuccessionAcceptResponseItem,
     CreateAttributeAcceptResponseItem,
     CreateAttributeRequestItem,
     IdentityAttribute,
@@ -9,7 +11,7 @@ import {
 } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { LocalAttribute } from "../../../attributes";
+import { LocalAttribute, LocalAttributeShareInfo } from "../../../attributes";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
@@ -21,7 +23,6 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
         const senderIsAttributeOwner = requestItem.attribute.owner.equals(this.currentIdentityAddress);
         const ownerIsEmptyString = requestItem.attribute.owner.toString() === "";
 
-        // TODO: add check for shared duplicate -> return error
         // TODO: check that not two Items of same Request will create same Attribute (see key uniqueness)
 
         if (requestItem.attribute instanceof IdentityAttribute) {
@@ -105,55 +106,105 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
         requestItem: CreateAttributeRequestItem,
         _params: AcceptRequestItemParametersJSON,
         requestInfo: LocalRequestInfo
-    ): Promise<CreateAttributeAcceptResponseItem> {
+    ): Promise<CreateAttributeAcceptResponseItem | AttributeAlreadySharedAcceptResponseItem | AttributeSuccessionAcceptResponseItem> {
         if (requestItem.attribute.owner.toString() === "") {
             requestItem.attribute.owner = this.currentIdentityAddress;
         }
 
-        let sharedAttribute: LocalAttribute;
-        if (requestItem.attribute instanceof IdentityAttribute) {
-            let repositoryAttribute = await this.consumptionController.attributes.getRepositoryAttributeWithSameValue((requestItem.attribute.value as any).toJSON());
-
-            if (!repositoryAttribute) {
-                repositoryAttribute = await this.consumptionController.attributes.createRepositoryAttribute({
-                    content: requestItem.attribute
-                });
-            }
-
-            if (!repositoryAttribute.isRepositoryAttribute(this.currentIdentityAddress)) {
-                throw new Error(`The Attribute ${repositoryAttribute} is not a RepositoryAttribute.`);
-            }
-
-            let succeededRepositoryAttribute: LocalAttribute | undefined;
-            const newTags = requestItem.attribute.tags?.filter((tag) => !repositoryAttribute.content.tags?.includes(tag));
-            if (newTags && newTags.length > 0) {
-                const successorParams = {
-                    content: {
-                        ...repositoryAttribute.content.toJSON(),
-                        tags: [...(repositoryAttribute.content.tags ?? []), ...newTags]
-                    },
-                    succeeds: repositoryAttribute.id.toString()
-                };
-                const attributesAfterSuccession = await this.consumptionController.attributes.succeedRepositoryAttribute(repositoryAttribute.id, successorParams);
-                succeededRepositoryAttribute = attributesAfterSuccession.successor;
-            }
-
-            sharedAttribute = await this.consumptionController.attributes.createSharedLocalAttributeCopy({
-                peer: requestInfo.peer,
-                requestReference: requestInfo.id,
-                sourceAttributeId: succeededRepositoryAttribute?.id ?? repositoryAttribute.id
-            });
-        } else {
-            sharedAttribute = await this.consumptionController.attributes.createSharedLocalAttribute({
+        if (requestItem.attribute instanceof RelationshipAttribute) {
+            const sharedRelationshipAttribute = await this.consumptionController.attributes.createSharedLocalAttribute({
                 content: requestItem.attribute,
                 peer: requestInfo.peer,
                 requestReference: requestInfo.id
             });
+
+            return CreateAttributeAcceptResponseItem.from({
+                result: ResponseItemResult.Accepted,
+                attributeId: sharedRelationshipAttribute.id
+            });
         }
+
+        let newRepositoryAttribute: LocalAttribute | undefined;
+        let succeededRepositoryAttribute: LocalAttribute | undefined;
+        const existingRepositoryAttribute = await this.consumptionController.attributes.getRepositoryAttributeWithSameValue((requestItem.attribute.value as any).toJSON());
+
+        if (existingRepositoryAttribute) {
+            if (!existingRepositoryAttribute.isRepositoryAttribute(this.currentIdentityAddress)) {
+                throw new Error(`The Attribute ${existingRepositoryAttribute} is not a RepositoryAttribute.`);
+            }
+
+            const existingOwnSharedIdentityAttributes = await this.consumptionController.attributes.getLocalAttributes({
+                "shareInfo.sourceAttribute": existingRepositoryAttribute.id.toString(),
+                "shareInfo.peer": requestInfo.peer.toString()
+            });
+            const existingOwnSharedIdentityAttribute = existingOwnSharedIdentityAttributes.length > 0 ? existingOwnSharedIdentityAttributes[0] : undefined;
+
+            const newTags = requestItem.attribute.tags?.filter((tag) => !existingRepositoryAttribute.content.tags?.includes(tag));
+            if (newTags && newTags.length > 0) {
+                const repositoryAttributeSuccessorParams = {
+                    content: {
+                        ...existingRepositoryAttribute.content.toJSON(),
+                        tags: [...(existingRepositoryAttribute.content.tags ?? []), ...newTags]
+                    },
+                    succeeds: existingRepositoryAttribute.id.toString()
+                };
+                const repositoryAttributesAfterSuccession = await this.consumptionController.attributes.succeedRepositoryAttribute(
+                    existingRepositoryAttribute.id,
+                    repositoryAttributeSuccessorParams
+                );
+                succeededRepositoryAttribute = repositoryAttributesAfterSuccession.successor;
+
+                if (existingOwnSharedIdentityAttribute) {
+                    const ownSharedIdentityAttributeSuccessorParams = {
+                        content: succeededRepositoryAttribute.content,
+                        shareInfo: LocalAttributeShareInfo.from({
+                            peer: requestInfo.peer,
+                            requestReference: requestInfo.id,
+                            sourceAttribute: succeededRepositoryAttribute.id
+                        })
+                    };
+
+                    const ownSharedIdentityAttributesAfterSuccession = await this.consumptionController.attributes.succeedOwnSharedIdentityAttribute(
+                        existingOwnSharedIdentityAttribute.id,
+                        ownSharedIdentityAttributeSuccessorParams
+                    );
+                    const succeededOwnSharedIdentityAttribute = ownSharedIdentityAttributesAfterSuccession.successor;
+
+                    return AttributeSuccessionAcceptResponseItem.from({
+                        result: ResponseItemResult.Accepted,
+                        successorId: succeededOwnSharedIdentityAttribute.id,
+                        successorContent: succeededOwnSharedIdentityAttribute.content,
+                        predecessorId: existingOwnSharedIdentityAttribute.id
+                    });
+                }
+            }
+
+            if (existingOwnSharedIdentityAttribute) {
+                return AttributeAlreadySharedAcceptResponseItem.from({
+                    result: ResponseItemResult.Accepted,
+                    attributeId: existingOwnSharedIdentityAttribute.id
+                });
+            }
+        } else {
+            newRepositoryAttribute = await this.consumptionController.attributes.createRepositoryAttribute({
+                content: requestItem.attribute
+            });
+        }
+
+        const sourceAttribute = succeededRepositoryAttribute ?? existingRepositoryAttribute ?? newRepositoryAttribute;
+        if (!sourceAttribute) {
+            throw new Error("No sourceAttribute was found.");
+        }
+
+        const newOwnSharedIdentityAttribute = await this.consumptionController.attributes.createSharedLocalAttributeCopy({
+            peer: requestInfo.peer,
+            requestReference: requestInfo.id,
+            sourceAttributeId: sourceAttribute.id
+        });
 
         return CreateAttributeAcceptResponseItem.from({
             result: ResponseItemResult.Accepted,
-            attributeId: sharedAttribute.id
+            attributeId: newOwnSharedIdentityAttribute.id
         });
     }
 
