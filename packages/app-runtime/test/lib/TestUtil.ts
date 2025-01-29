@@ -16,6 +16,7 @@ import {
 } from "@nmshd/runtime";
 import { IConfigOverwrite, TransportLoggerFactory } from "@nmshd/transport";
 import fs from "fs";
+import { defaultsDeep } from "lodash";
 import path from "path";
 import { GenericContainer, Wait } from "testcontainers";
 import { LogLevel } from "typescript-logging";
@@ -25,6 +26,12 @@ import { FakeNativeBootstrapper } from "./natives/FakeNativeBootstrapper";
 
 export class TestUtil {
     public static async createRuntime(configOverride?: any, uiBridge: IUIBridge = new FakeUIBridge(), eventBus?: EventBus): Promise<AppRuntime> {
+        configOverride = defaultsDeep(configOverride, {
+            modules: {
+                pushNotification: { enabled: false }
+            }
+        });
+
         const config = this.createAppConfig(configOverride);
 
         const nativeBootstrapper = new FakeNativeBootstrapper(eventBus);
