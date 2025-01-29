@@ -22,7 +22,8 @@ import {
     OnboardingChangeReceivedModule,
     PushNotificationModule,
     RelationshipChangedModule,
-    RelationshipTemplateProcessedModule
+    RelationshipTemplateProcessedModule,
+    SSEModule
 } from "./modules";
 import { AccountServices, LocalAccountMapper, LocalAccountSession, MultiAccountController } from "./multiAccount";
 import { INativeBootstrapper, INativeEnvironment, INativeTranslationProvider } from "./natives";
@@ -260,13 +261,14 @@ export class AppRuntime extends Runtime<AppConfig> {
     private static moduleRegistry: Record<string, IAppRuntimeModuleConstructor | undefined> = {
         appLaunch: AppLaunchModule,
         appSync: AppSyncModule,
-        pushNotification: PushNotificationModule,
-        mailReceived: MailReceivedModule,
-        onboardingChangeReceived: OnboardingChangeReceivedModule,
         identityDeletionProcessStatusChanged: IdentityDeletionProcessStatusChangedModule,
+        mailReceived: MailReceivedModule,
         messageReceived: MessageReceivedModule,
+        onboardingChangeReceived: OnboardingChangeReceivedModule,
+        pushNotification: PushNotificationModule,
         relationshipChanged: RelationshipChangedModule,
-        relationshipTemplateProcessed: RelationshipTemplateProcessedModule
+        relationshipTemplateProcessed: RelationshipTemplateProcessedModule,
+        sse: SSEModule
     };
 
     public static registerModule(moduleName: string, ctor: IAppRuntimeModuleConstructor): void {
@@ -317,7 +319,7 @@ export class AppRuntime extends Runtime<AppConfig> {
                 await session.accountController.authenticator.getToken();
                 continue;
             } catch (error) {
-                this.logger.error(error);
+                this.logger.info(error);
 
                 if (!(typeof error === "object" && error !== null && "code" in error)) {
                     continue;
