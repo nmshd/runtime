@@ -98,7 +98,7 @@ export class MultiAccountController {
         this._log.trace(`Selecting LocalAccount with id ${id}...`);
         const account = await this._localAccounts.read(id.toString());
         if (!account) {
-            throw TransportCoreErrors.general.recordNotFound(LocalAccount, id.toString()).logWith(this._log);
+            throw TransportCoreErrors.general.recordNotFound(LocalAccount, id.toString());
         }
         let localAccount: LocalAccount = LocalAccount.from(account);
 
@@ -167,7 +167,7 @@ export class MultiAccountController {
             throw new CoreError(
                 "error.app-runtime.onboardedAccountAlreadyExists",
                 `An account with the address '${deviceSharedSecret.identity.address.toString()}' already exists in this app-runtime instance.`
-            ).logWith(this._log);
+            );
         }
 
         this._log.trace(`Onboarding device ${deviceSharedSecret.id} for identity ${deviceSharedSecret.identity.address}...`);

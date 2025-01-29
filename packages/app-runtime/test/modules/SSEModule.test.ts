@@ -10,16 +10,7 @@ describe("SSEModuleTest", function () {
     let session2: LocalAccountSession;
 
     beforeAll(async function () {
-        runtime = await TestUtil.createRuntime(
-            {
-                modules: {
-                    sse: { enabled: true, baseUrlOverride: process.env.NMSHD_TEST_BASEURL_SSE_SERVER },
-                    pushNotification: { enabled: false }
-                }
-            },
-            undefined,
-            eventBus
-        );
+        runtime = await TestUtil.createRuntime({ modules: { sse: { enabled: true, baseUrlOverride: process.env.NMSHD_TEST_BASEURL_SSE_SERVER } } }, undefined, eventBus);
         await runtime.start();
 
         const accounts = await TestUtil.provideAccounts(runtime, 2);

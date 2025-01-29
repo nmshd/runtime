@@ -88,11 +88,10 @@ export class PushNotificationModule extends AppRuntimeModule<PushNotificationMod
         await this.registerPushTokenForLocalAccount(event.data.address, tokenResult.value);
     }
 
-    public async registerPushTokenForLocalAccount(address: string, token: string): Promise<void> {
+    private async registerPushTokenForLocalAccount(address: string, token: string): Promise<void> {
         if (!token) {
-            throw AppRuntimeErrors.modules.pushNotificationModule
-                .tokenRegistrationNotPossible("The registered token was empty. This might be the case if you did not allow push notifications.")
-                .logWith(this.logger);
+            this.logger.info("The registered token was empty. This might be the case if you did not allow push notifications.");
+            return;
         }
 
         const services = await this.runtime.getServices(address);

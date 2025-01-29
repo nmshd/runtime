@@ -319,7 +319,7 @@ export class AppRuntime extends Runtime<AppConfig> {
                 await session.accountController.authenticator.getToken();
                 continue;
             } catch (error) {
-                this.logger.error(error);
+                this.logger.info(error);
 
                 if (!(typeof error === "object" && error !== null && "code" in error)) {
                     continue;
