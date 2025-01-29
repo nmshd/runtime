@@ -22,7 +22,7 @@
         "cdep": "tsc && madge --circular dist",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
         "test": "jest --forceExit",
-        "test:ci": "jest -i --forceExit --coverage SSEModule"
+        "test:ci": "jest -i --forceExit --coverage"
     },
     "jest": {
         "collectCoverageFrom": [
