@@ -65,6 +65,10 @@ export class SSEModule extends AppRuntimeModule<SSEModuleConfiguration> {
 
                 this.logger.info(`SSE fetch result: ${result.status}`);
 
+                this.logger.error("SSE fetch", result, sseUrl);
+                this.logger.error("SSE status", result.status);
+                this.logger.error("SSE URL", sseUrl);
+
                 return result;
             }
         });
