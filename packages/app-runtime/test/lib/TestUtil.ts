@@ -20,12 +20,12 @@ import { defaultsDeep } from "lodash";
 import path from "path";
 import { GenericContainer, Wait } from "testcontainers";
 import { LogLevel } from "typescript-logging";
-import { AppConfig, AppRuntime, IUIBridge, LocalAccountDTO, LocalAccountSession, createAppConfig as runtime_createAppConfig } from "../../src";
+import { AppConfig, AppConfigOverwrite, AppRuntime, IUIBridge, LocalAccountDTO, LocalAccountSession, createAppConfig as runtime_createAppConfig } from "../../src";
 import { FakeUIBridge } from "./FakeUIBridge";
 import { FakeNativeBootstrapper } from "./natives/FakeNativeBootstrapper";
 
 export class TestUtil {
-    public static async createRuntime(configOverride?: any, uiBridge: IUIBridge = new FakeUIBridge(), eventBus?: EventBus): Promise<AppRuntime> {
+    public static async createRuntime(configOverride?: AppConfigOverwrite, uiBridge: IUIBridge = new FakeUIBridge(), eventBus?: EventBus): Promise<AppRuntime> {
         configOverride = defaultsDeep(configOverride, {
             modules: {
                 pushNotification: { enabled: false }
@@ -42,7 +42,7 @@ export class TestUtil {
         return runtime;
     }
 
-    public static async createRuntimeWithoutInit(configOverride?: any): Promise<AppRuntime> {
+    public static async createRuntimeWithoutInit(configOverride?: AppConfigOverwrite): Promise<AppRuntime> {
         const config = this.createAppConfig(configOverride);
 
         const nativeBootstrapper = new FakeNativeBootstrapper();
