@@ -1,5 +1,5 @@
 import { ParsingError, Serializable } from "@js-soft/ts-serval";
-import { Consent, RelationshipAttribute, RelationshipAttributeConfidentiality, ValueHints, ValueHintsValue } from "../../src";
+import { Consent, RelationshipAttribute, RelationshipAttributeConfidentiality, ValueHintsValue } from "../../src";
 import { characterSets } from "../../src/attributes/constants/CharacterSets";
 
 const errorMessageA =
@@ -30,7 +30,7 @@ const restrictedIdentityAttributeTypesC = ["AffiliationRole", "AffiliationUnit",
 const identityAttributeTestParameters = restrictedIdentityAttributeTypesA
     .map((type) => ({
         type,
-        positiveTestValue: "ÄĞǼẌ",
+        positiveTestValue: "ÄĞǼẌ\u0041\u0308",
         negativeTestValue: "€",
         errorMessage: errorMessageA,
         valueHintsPattern: characterSets.din91379DatatypeA.toString().slice(1, -1).replaceAll("/", "\\/")
@@ -156,34 +156,37 @@ test("Key of RelationshipAttribute is invalid", () => {
     expect(invalidCall).toThrow(new ParsingError("RelationshipAttribute", "key", errorMessageC));
 });
 
-test("ValueHints is valid", () => {
-    const validCall = () => {
-        ValueHints.from({
-            defaultValue: "\u000D¾£(),",
-            editHelp: "\u000D¾£(),",
-            values: [
-                {
-                    key: "\u000D¾£(),",
-                    displayName: "\u000D¾£(),"
-                }
-            ]
-        });
-    };
-    expect(validCall).not.toThrow();
-});
+describe.each(["ValueHints", "ValueHintsOverride"])("%s tests", (type) => {
+    test("is valid", () => {
+        const validCall = () => {
+            Serializable.fromUnknown({
+                "@type": type,
+                defaultValue: "\u000D¾£(),",
+                editHelp: "\u000D¾£(),",
+                values: [
+                    {
+                        key: "\u000D¾£(),",
+                        displayName: "\u000D¾£(),"
+                    }
+                ]
+            });
+        };
+        expect(validCall).not.toThrow();
+    });
 
-test("defaultValue of ValueHints is invalid", () => {
-    const invalidCall = () => {
-        ValueHints.from({ defaultValue: "™" });
-    };
-    expect(invalidCall).toThrow(new ParsingError("ValueHints", "defaultValue:Object", errorMessageC));
-});
+    test("defaultValue is invalid", () => {
+        const invalidCall = () => {
+            Serializable.fromUnknown({ "@type": type, defaultValue: "™" });
+        };
+        expect(invalidCall).toThrow(new ParsingError(type, "defaultValue:Object", errorMessageC));
+    });
 
-test("editHelp of ValueHints is invalid", () => {
-    const invalidCall = () => {
-        ValueHints.from({ editHelp: "™" });
-    };
-    expect(invalidCall).toThrow(new ParsingError("ValueHints", "editHelp", errorMessageC));
+    test("editHelp is invalid", () => {
+        const invalidCall = () => {
+            Serializable.fromUnknown({ "@type": type, editHelp: "™" });
+        };
+        expect(invalidCall).toThrow(new ParsingError(type, "editHelp", errorMessageC));
+    });
 });
 
 test("key of ValueHintsValue is invalid", () => {
