@@ -94,13 +94,11 @@ export class CanCreateRelationshipUseCase extends UseCase<CanCreateRelationshipR
         });
 
         if (acceptedIncomingRequests.length === 0) {
-            return RuntimeErrors.general.unknown("There is no accepted incoming Request associated with the RelationshipTemplate.");
+            return RuntimeErrors.relationships.requestOfRelationshipTemplateContentNotAccepted();
         }
 
         if (JSON.stringify(acceptedIncomingRequests[0].response!.content) !== JSON.stringify(relationshipCreationContent.response)) {
-            return RuntimeErrors.general.unknown(
-                "The Response of the accepted incoming Request associated with the RelationshipTemplate must be provided as the response of the RelationshipCreationContent."
-            );
+            return RuntimeErrors.relationships.nonMatchingResponseOfCreationContent();
         }
 
         return;

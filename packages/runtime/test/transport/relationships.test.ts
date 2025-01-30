@@ -242,13 +242,16 @@ describe("Can Create / Create Relationship", () => {
 
             expect(canCreateRelationshipResponse.isSuccess).toBe(false);
             expect(canCreateRelationshipResponse.message).toBe("There is no accepted incoming Request associated with the RelationshipTemplate.");
-            expect(canCreateRelationshipResponse.code).toBe("error.runtime.unknown");
+            expect(canCreateRelationshipResponse.code).toBe("error.runtime.relationships.requestOfRelationshipTemplateContentNotAccepted");
 
             const createRelationshipResponse = await services5.transport.relationships.createRelationship({
                 templateId: templateId,
                 creationContent: relationshipCreationContent
             });
-            expect(createRelationshipResponse).toBeAnError("There is no accepted incoming Request associated with the RelationshipTemplate.", "error.runtime.unknown");
+            expect(createRelationshipResponse).toBeAnError(
+                "There is no accepted incoming Request associated with the RelationshipTemplate.",
+                "error.runtime.relationships.requestOfRelationshipTemplateContentNotAccepted"
+            );
         });
 
         test("should not create a Relationship if the Response of the accepted Request of the RelationshipTemplateContent is not provided with the creationContent", async () => {
@@ -296,7 +299,7 @@ describe("Can Create / Create Relationship", () => {
             expect(canCreateRelationshipResponse.message).toBe(
                 "The Response of the accepted incoming Request associated with the RelationshipTemplate must be provided as the response of the RelationshipCreationContent."
             );
-            expect(canCreateRelationshipResponse.code).toBe("error.runtime.unknown");
+            expect(canCreateRelationshipResponse.code).toBe("error.runtime.relationships.nonMatchingResponseOfCreationContent");
 
             const createRelationshipResponse = await services5.transport.relationships.createRelationship({
                 templateId: templateId,
@@ -304,7 +307,7 @@ describe("Can Create / Create Relationship", () => {
             });
             expect(createRelationshipResponse).toBeAnError(
                 "The Response of the accepted incoming Request associated with the RelationshipTemplate must be provided as the response of the RelationshipCreationContent.",
-                "error.runtime.unknown"
+                "error.runtime.relationships.nonMatchingResponseOfCreationContent"
             );
         });
 
