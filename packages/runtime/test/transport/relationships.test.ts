@@ -364,7 +364,7 @@ describe("Can Create / Create Relationship", () => {
         });
     });
 
-    test("load relationship Template in connector 2", async () => {
+    test("load RelationshipTemplate in Connector 2", async () => {
         const template = await createTemplate(services1.transport);
 
         const response = await services2.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
