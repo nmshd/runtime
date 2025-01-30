@@ -54,7 +54,7 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
         if (transformedTemplateContent instanceof ArbitraryRelationshipTemplateContent && !(transformedCreationContent instanceof ArbitraryRelationshipCreationContent)) {
             return Result.fail(
                 RuntimeErrors.general.invalidPropertyValue(
-                    "The creationContent of a Relationship must be an ArbitraryRelationshipCreationContent if the content of the Relationship is an ArbitraryRelationshipTemplateContent."
+                    "The creationContent of a Relationship must be an ArbitraryRelationshipCreationContent if the content of the RelationshipTemplate is an ArbitraryRelationshipTemplateContent."
                 )
             );
         }
@@ -63,7 +63,7 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
             if (!(transformedCreationContent instanceof RelationshipCreationContent)) {
                 return Result.fail(
                     RuntimeErrors.general.invalidPropertyValue(
-                        "The creationContent of a Relationship must be a RelationshipCreationContent if the content of the Relationship is a RelationshipTemplateContent."
+                        "The creationContent of a Relationship must be a RelationshipCreationContent if the content of the RelationshipTemplate is a RelationshipTemplateContent."
                     )
                 );
             }

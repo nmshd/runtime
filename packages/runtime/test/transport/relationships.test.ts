@@ -172,7 +172,7 @@ describe("Can Create / Create Relationship", () => {
 
             expect(canCreateRelationshipResponse.isSuccess).toBe(false);
             expect(canCreateRelationshipResponse.message).toBe(
-                "The creationContent of a Relationship must be an ArbitraryRelationshipCreationContent if the content of the Relationship is an ArbitraryRelationshipTemplateContent."
+                "The creationContent of a Relationship must be an ArbitraryRelationshipCreationContent if the content of the RelationshipTemplate is an ArbitraryRelationshipTemplateContent."
             );
             expect(canCreateRelationshipResponse.code).toBe("error.runtime.validation.invalidPropertyValue");
 
@@ -181,7 +181,7 @@ describe("Can Create / Create Relationship", () => {
                 creationContent: relationshipCreationContent
             });
             expect(createRelationshipResponse).toBeAnError(
-                "The creationContent of a Relationship must be an ArbitraryRelationshipCreationContent if the content of the Relationship is an ArbitraryRelationshipTemplateContent.",
+                "The creationContent of a Relationship must be an ArbitraryRelationshipCreationContent if the content of the RelationshipTemplate is an ArbitraryRelationshipTemplateContent.",
                 "error.runtime.validation.invalidPropertyValue"
             );
         });
@@ -200,7 +200,7 @@ describe("Can Create / Create Relationship", () => {
 
             expect(canCreateRelationshipResponse.isSuccess).toBe(false);
             expect(canCreateRelationshipResponse.message).toBe(
-                "The creationContent of a Relationship must be a RelationshipCreationContent if the content of the Relationship is a RelationshipTemplateContent."
+                "The creationContent of a Relationship must be a RelationshipCreationContent if the content of the RelationshipTemplate is a RelationshipTemplateContent."
             );
             expect(canCreateRelationshipResponse.code).toBe("error.runtime.validation.invalidPropertyValue");
 
@@ -209,7 +209,7 @@ describe("Can Create / Create Relationship", () => {
                 creationContent: emptyRelationshipCreationContent
             });
             expect(createRelationshipResponse).toBeAnError(
-                "The creationContent of a Relationship must be a RelationshipCreationContent if the content of the Relationship is a RelationshipTemplateContent.",
+                "The creationContent of a Relationship must be a RelationshipCreationContent if the content of the RelationshipTemplate is a RelationshipTemplateContent.",
                 "error.runtime.validation.invalidPropertyValue"
             );
         });
