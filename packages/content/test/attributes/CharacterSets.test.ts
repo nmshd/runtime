@@ -92,7 +92,7 @@ const restrictedIdentityAttributeTypesC = ["AffiliationRole", "AffiliationUnit",
 const identityAttributeTestParameters = restrictedIdentityAttributeTypesA
     .map((type) => ({
         type,
-        positiveTestValue: "ÄĞǼẌ\u0041\u0308",
+        positiveTestValue: "ÄĞǼẌ ",
         negativeTestValue: "€",
         errorMessage: errorMessageA,
         valueHintsPattern: characterSets.din91379DatatypeA.toString().slice(1, -1).replaceAll("/", "\\/")
