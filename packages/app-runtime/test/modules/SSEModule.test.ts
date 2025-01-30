@@ -2,8 +2,7 @@ import { MessageReceivedEvent } from "@nmshd/runtime";
 import { AppRuntime, LocalAccountSession } from "../../src";
 import { MockEventBus, TestUtil } from "../lib";
 
-// eslint-disable-next-line jest/no-disabled-tests -- disabled because the backbone currently isn't performant enough in the CI
-describe.skip("SSEModuleTest", function () {
+describe("SSEModuleTest", function () {
     const eventBus = new MockEventBus();
 
     let runtime: AppRuntime;
