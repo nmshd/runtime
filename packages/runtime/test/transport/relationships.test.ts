@@ -241,16 +241,18 @@ describe("Can Create / Create Relationship", () => {
             assert(!canCreateRelationshipResponse.isSuccess);
 
             expect(canCreateRelationshipResponse.isSuccess).toBe(false);
-            expect(canCreateRelationshipResponse.message).toBe("There is no accepted incoming Request associated with the RelationshipTemplate.");
-            expect(canCreateRelationshipResponse.code).toBe("error.runtime.relationships.requestOfRelationshipTemplateContentNotAccepted");
+            expect(canCreateRelationshipResponse.message).toBe(
+                "There is no accepted incoming Request associated with the RelationshipTemplateContent of the RelationshipTemplate."
+            );
+            expect(canCreateRelationshipResponse.code).toBe("error.runtime.relationships.noAcceptedIncomingRequest");
 
             const createRelationshipResponse = await services5.transport.relationships.createRelationship({
                 templateId: templateId,
                 creationContent: relationshipCreationContent
             });
             expect(createRelationshipResponse).toBeAnError(
-                "There is no accepted incoming Request associated with the RelationshipTemplate.",
-                "error.runtime.relationships.requestOfRelationshipTemplateContentNotAccepted"
+                "There is no accepted incoming Request associated with the RelationshipTemplateContent of the RelationshipTemplate.",
+                "error.runtime.relationships.noAcceptedIncomingRequest"
             );
         });
 
@@ -297,17 +299,17 @@ describe("Can Create / Create Relationship", () => {
 
             expect(canCreateRelationshipResponse.isSuccess).toBe(false);
             expect(canCreateRelationshipResponse.message).toBe(
-                "The Response of the accepted incoming Request associated with the RelationshipTemplate must be provided as the response of the RelationshipCreationContent."
+                "The Response of the accepted incoming Request associated with the RelationshipTemplateContent must be provided as the response of the RelationshipCreationContent."
             );
-            expect(canCreateRelationshipResponse.code).toBe("error.runtime.relationships.nonMatchingResponseOfCreationContent");
+            expect(canCreateRelationshipResponse.code).toBe("error.runtime.relationships.wrongResponseProvidedAsCreationContent");
 
             const createRelationshipResponse = await services5.transport.relationships.createRelationship({
                 templateId: templateId,
                 creationContent: relationshipCreationContent
             });
             expect(createRelationshipResponse).toBeAnError(
-                "The Response of the accepted incoming Request associated with the RelationshipTemplate must be provided as the response of the RelationshipCreationContent.",
-                "error.runtime.relationships.nonMatchingResponseOfCreationContent"
+                "The Response of the accepted incoming Request associated with the RelationshipTemplateContent must be provided as the response of the RelationshipCreationContent.",
+                "error.runtime.relationships.wrongResponseProvidedAsCreationContent"
             );
         });
 

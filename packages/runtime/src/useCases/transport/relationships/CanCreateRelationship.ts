@@ -94,11 +94,11 @@ export class CanCreateRelationshipUseCase extends UseCase<CanCreateRelationshipR
         });
 
         if (acceptedIncomingRequests.length === 0) {
-            return RuntimeErrors.relationships.requestOfRelationshipTemplateContentNotAccepted();
+            return RuntimeErrors.relationships.noAcceptedIncomingRequest();
         }
 
         if (JSON.stringify(acceptedIncomingRequests[0].response!.content) !== JSON.stringify(relationshipCreationContent.response)) {
-            return RuntimeErrors.relationships.nonMatchingResponseOfCreationContent();
+            return RuntimeErrors.relationships.wrongResponseProvidedAsCreationContent();
         }
 
         return;
