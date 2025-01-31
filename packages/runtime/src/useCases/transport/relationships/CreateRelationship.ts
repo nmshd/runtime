@@ -1,13 +1,14 @@
 import { Serializable } from "@js-soft/ts-serval";
-import { Result } from "@js-soft/ts-utils";
+import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { IncomingRequestsController, LocalRequestStatus } from "@nmshd/consumption";
-import { ArbitraryRelationshipCreationContent, ArbitraryRelationshipTemplateContent, RelationshipCreationContent, RelationshipTemplateContent } from "@nmshd/content";
+import { RelationshipCreationContent } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
 import { AccountController, RelationshipTemplate, RelationshipTemplateController, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { RelationshipDTO } from "../../../types";
 import { RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { RelationshipMapper } from "./RelationshipMapper";
+import { validateTypeOfCreationContentOfRelationship } from "./utility/validateTypeOfCreationContentOfRelationship";
 
 export interface CreateRelationshipRequest {
     templateId: RelationshipTemplateIdString;
@@ -41,33 +42,12 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
         const canSendRelationship = await this.relationshipsController.canSendRelationship({ creationContent: request.creationContent, template });
         if (!canSendRelationship.isSuccess) throw canSendRelationship.error;
 
+        const typeOfCreationContentOfRelationshipValidationError = validateTypeOfCreationContentOfRelationship(template, request.creationContent);
+        if (typeOfCreationContentOfRelationshipValidationError) return Result.fail(typeOfCreationContentOfRelationshipValidationError);
+
         const transformedCreationContent = Serializable.fromUnknown(request.creationContent);
-        if (!(transformedCreationContent instanceof ArbitraryRelationshipCreationContent || transformedCreationContent instanceof RelationshipCreationContent)) {
-            return Result.fail(
-                RuntimeErrors.general.invalidPropertyValue(
-                    "The creationContent of a Relationship must either be an ArbitraryRelationshipCreationContent or a RelationshipCreationContent."
-                )
-            );
-        }
 
-        const transformedTemplateContent = template.cache?.content;
-        if (transformedTemplateContent instanceof ArbitraryRelationshipTemplateContent && !(transformedCreationContent instanceof ArbitraryRelationshipCreationContent)) {
-            return Result.fail(
-                RuntimeErrors.general.invalidPropertyValue(
-                    "The creationContent of a Relationship must be an ArbitraryRelationshipCreationContent if the content of the RelationshipTemplate is an ArbitraryRelationshipTemplateContent."
-                )
-            );
-        }
-
-        if (transformedTemplateContent instanceof RelationshipTemplateContent) {
-            if (!(transformedCreationContent instanceof RelationshipCreationContent)) {
-                return Result.fail(
-                    RuntimeErrors.general.invalidPropertyValue(
-                        "The creationContent of a Relationship must be a RelationshipCreationContent if the content of the RelationshipTemplate is a RelationshipTemplateContent."
-                    )
-                );
-            }
-
+        if (transformedCreationContent instanceof RelationshipCreationContent) {
             const responseToRequestOfTemplateValidationError = await this.validateResponseToRequestOfTemplate(request.templateId, transformedCreationContent);
             if (responseToRequestOfTemplateValidationError) return Result.fail(responseToRequestOfTemplateValidationError);
         }
@@ -79,7 +59,10 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
         return Result.ok(RelationshipMapper.toRelationshipDTO(sendRelationshipResult));
     }
 
-    private async validateResponseToRequestOfTemplate(templateId: RelationshipTemplateIdString, relationshipCreationContent: RelationshipCreationContent) {
+    private async validateResponseToRequestOfTemplate(
+        templateId: RelationshipTemplateIdString,
+        relationshipCreationContent: RelationshipCreationContent
+    ): Promise<ApplicationError | undefined> {
         const acceptedIncomingRequests = await this.incomingRequestsController.getIncomingRequests({
             status: LocalRequestStatus.Decided,
             "source.reference": templateId,

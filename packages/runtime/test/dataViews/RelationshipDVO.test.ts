@@ -14,7 +14,7 @@ beforeAll(async () => {
     runtimeServices2 = runtimeServices[1];
 
     await establishRelationshipWithContents(
-        runtimeServices1.transport,
+        runtimeServices1,
         runtimeServices2,
         RelationshipTemplateContent.from({
             onNewRelationship: {

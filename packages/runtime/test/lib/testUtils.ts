@@ -394,12 +394,12 @@ export async function establishRelationship(transportServices1: TransportService
 }
 
 export async function establishRelationshipWithContents(
-    transportServices1: TransportServices,
+    runtimeServices1: TestRuntimeServices,
     runtimeServices2: TestRuntimeServices,
     templateContent?: RelationshipTemplateContentJSON,
     acceptRequestItemsParameters?: (AcceptRequestItemParametersJSON | DecideRequestItemGroupParametersJSON)[]
 ): Promise<void> {
-    const template = await exchangeTemplate(transportServices1, runtimeServices2.transport, templateContent);
+    const template = await exchangeTemplate(runtimeServices1.transport, runtimeServices2.transport, templateContent);
     let creationContent;
 
     if (templateContent && acceptRequestItemsParameters) {
@@ -433,10 +433,10 @@ export async function establishRelationshipWithContents(
     });
     expect(createRelationshipResponse).toBeSuccessful();
 
-    const relationships = await syncUntilHasRelationships(transportServices1);
+    const relationships = await syncUntilHasRelationships(runtimeServices1.transport);
     expect(relationships).toHaveLength(1);
 
-    const acceptResponse = await transportServices1.relationships.acceptRelationship({
+    const acceptResponse = await runtimeServices1.transport.relationships.acceptRelationship({
         relationshipId: relationships[0].id
     });
     expect(acceptResponse).toBeSuccessful();
