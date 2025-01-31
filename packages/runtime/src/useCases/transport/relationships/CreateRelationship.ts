@@ -68,8 +68,8 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
                 );
             }
 
-            const relationshipCreationContentValidationError = await this.validateRelationshipCreationContent(request.templateId, transformedCreationContent);
-            if (relationshipCreationContentValidationError) return Result.fail(relationshipCreationContentValidationError);
+            const responseToRequestOfTemplateValidationError = await this.validateResponseToRequestOfTemplate(request.templateId, transformedCreationContent);
+            if (responseToRequestOfTemplateValidationError) return Result.fail(responseToRequestOfTemplateValidationError);
         }
 
         const sendRelationshipResult = await this.relationshipsController.sendRelationship({ template, creationContent: transformedCreationContent.toJSON() });
@@ -79,7 +79,7 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
         return Result.ok(RelationshipMapper.toRelationshipDTO(sendRelationshipResult));
     }
 
-    private async validateRelationshipCreationContent(templateId: RelationshipTemplateIdString, relationshipCreationContent: RelationshipCreationContent) {
+    private async validateResponseToRequestOfTemplate(templateId: RelationshipTemplateIdString, relationshipCreationContent: RelationshipCreationContent) {
         const acceptedIncomingRequests = await this.incomingRequestsController.getIncomingRequests({
             status: LocalRequestStatus.Decided,
             "source.reference": templateId,
@@ -90,7 +90,7 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
             return RuntimeErrors.relationships.noAcceptedIncomingRequest();
         }
 
-        if (JSON.stringify(acceptedIncomingRequests[0].response!.content) !== JSON.stringify(relationshipCreationContent.response)) {
+        if (acceptedIncomingRequests[0].response!.content.serialize() !== relationshipCreationContent.response.serialize()) {
             return RuntimeErrors.relationships.wrongResponseProvidedAsCreationContent();
         }
 

@@ -76,9 +76,9 @@ export class CanCreateRelationshipUseCase extends UseCase<CanCreateRelationshipR
                     return Result.ok({ isSuccess: false, code: error.code, message: error.message });
                 }
 
-                const relationshipCreationContentValidationError = await this.validateRelationshipCreationContent(request.templateId, transformedCreationContent);
-                if (relationshipCreationContentValidationError) {
-                    return Result.ok({ isSuccess: false, code: relationshipCreationContentValidationError.code, message: relationshipCreationContentValidationError.message });
+                const responseToRequestOfTemplateValidationError = await this.validateResponseToRequestOfTemplate(request.templateId, transformedCreationContent);
+                if (responseToRequestOfTemplateValidationError) {
+                    return Result.ok({ isSuccess: false, code: responseToRequestOfTemplateValidationError.code, message: responseToRequestOfTemplateValidationError.message });
                 }
             }
         }
@@ -86,7 +86,7 @@ export class CanCreateRelationshipUseCase extends UseCase<CanCreateRelationshipR
         return Result.ok({ isSuccess: true });
     }
 
-    private async validateRelationshipCreationContent(templateId: RelationshipTemplateIdString, relationshipCreationContent: RelationshipCreationContent) {
+    private async validateResponseToRequestOfTemplate(templateId: RelationshipTemplateIdString, relationshipCreationContent: RelationshipCreationContent) {
         const acceptedIncomingRequests = await this.incomingRequestsController.getIncomingRequests({
             status: LocalRequestStatus.Decided,
             "source.reference": templateId,
@@ -97,7 +97,7 @@ export class CanCreateRelationshipUseCase extends UseCase<CanCreateRelationshipR
             return RuntimeErrors.relationships.noAcceptedIncomingRequest();
         }
 
-        if (JSON.stringify(acceptedIncomingRequests[0].response!.content) !== JSON.stringify(relationshipCreationContent.response)) {
+        if (acceptedIncomingRequests[0].response!.content.serialize() !== relationshipCreationContent.response.serialize()) {
             return RuntimeErrors.relationships.wrongResponseProvidedAsCreationContent();
         }
 
