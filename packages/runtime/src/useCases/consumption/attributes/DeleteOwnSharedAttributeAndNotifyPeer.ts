@@ -2,8 +2,9 @@ import { Result } from "@js-soft/ts-utils";
 import { AttributesController, ConsumptionIds, LocalAttribute } from "@nmshd/consumption";
 import { Notification, OwnSharedAttributeDeletedByOwnerNotificationItem } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
-import { AccountController, MessageController, RelationshipsController, RelationshipStatus } from "@nmshd/transport";
+import { AccountController, MessageController, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
+import { RelationshipStatus } from "../../../types";
 import { AttributeIdString, NotificationIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
 export interface DeleteOwnSharedAttributeAndNotifyPeerRequest {
@@ -40,19 +41,18 @@ export class DeleteOwnSharedAttributeAndNotifyPeerUseCase extends UseCase<Delete
             return Result.fail(RuntimeErrors.attributes.isNotOwnSharedAttribute(ownSharedAttributeId));
         }
 
+        const relationship = await this.relationshipsController.getRelationshipToIdentity(ownSharedAttribute.shareInfo.peer);
+
+        if (relationship && relationship.status === RelationshipStatus.Pending) {
+            return Result.fail(RuntimeErrors.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending());
+        }
+
         const validationResult = await this.attributesController.validateFullAttributeDeletionProcess(ownSharedAttribute);
         if (validationResult.isError()) {
             return Result.fail(validationResult.error);
         }
 
         await this.attributesController.executeFullAttributeDeletionProcess(ownSharedAttribute);
-
-        const relationship = await this.relationshipsController.getRelationshipToIdentity(ownSharedAttribute.shareInfo.peer);
-
-        if (relationship && relationship.status === RelationshipStatus.Pending) {
-            await this.relationshipsController.revoke(relationship.id);
-            return Result.ok({ notificationId: "" });
-        }
 
         const notificationId = await ConsumptionIds.notification.generate();
         const notificationItem = OwnSharedAttributeDeletedByOwnerNotificationItem.from({ attributeId: ownSharedAttributeId });
