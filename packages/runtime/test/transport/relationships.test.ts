@@ -89,11 +89,11 @@ describe("Can Create / Create Relationship", () => {
     let relationshipId: string;
 
     describe("tests on creationContent of Relationship", () => {
-        let relationshipCreationContentDummy: RelationshipCreationContentJSON;
+        let invalidRelationshipCreationContent: RelationshipCreationContentJSON;
         let relationshipTemplateContent: RelationshipTemplateContentJSON;
 
         beforeAll(() => {
-            relationshipCreationContentDummy = RelationshipCreationContent.from({
+            invalidRelationshipCreationContent = RelationshipCreationContent.from({
                 response: {
                     "@type": "Response",
                     result: ResponseResult.Accepted,
@@ -161,7 +161,7 @@ describe("Can Create / Create Relationship", () => {
             const canCreateRelationshipResponse = (
                 await services4.transport.relationships.canCreateRelationship({
                     templateId: templateId,
-                    creationContent: relationshipCreationContentDummy
+                    creationContent: invalidRelationshipCreationContent
                 })
             ).value;
 
@@ -175,7 +175,7 @@ describe("Can Create / Create Relationship", () => {
 
             const createRelationshipResponse = await services4.transport.relationships.createRelationship({
                 templateId: templateId,
-                creationContent: relationshipCreationContentDummy
+                creationContent: invalidRelationshipCreationContent
             });
             expect(createRelationshipResponse).toBeAnError(
                 "The creationContent of a Relationship must be an ArbitraryRelationshipCreationContent if the content of the RelationshipTemplate is an ArbitraryRelationshipTemplateContent.",
@@ -231,7 +231,7 @@ describe("Can Create / Create Relationship", () => {
             const canCreateRelationshipResponse = (
                 await services4.transport.relationships.canCreateRelationship({
                     templateId: templateId,
-                    creationContent: relationshipCreationContentDummy
+                    creationContent: invalidRelationshipCreationContent
                 })
             ).value;
 
@@ -245,7 +245,7 @@ describe("Can Create / Create Relationship", () => {
 
             const createRelationshipResponse = await services4.transport.relationships.createRelationship({
                 templateId: templateId,
-                creationContent: relationshipCreationContentDummy
+                creationContent: invalidRelationshipCreationContent
             });
             expect(createRelationshipResponse).toBeAnError(
                 "There is no accepted incoming Request associated with the RelationshipTemplateContent of the RelationshipTemplate.",
@@ -288,7 +288,7 @@ describe("Can Create / Create Relationship", () => {
             const canCreateRelationshipResponse = (
                 await services4.transport.relationships.canCreateRelationship({
                     templateId: templateId,
-                    creationContent: relationshipCreationContentDummy
+                    creationContent: invalidRelationshipCreationContent
                 })
             ).value;
 
@@ -302,7 +302,7 @@ describe("Can Create / Create Relationship", () => {
 
             const createRelationshipResponse = await services4.transport.relationships.createRelationship({
                 templateId: templateId,
-                creationContent: relationshipCreationContentDummy
+                creationContent: invalidRelationshipCreationContent
             });
             expect(createRelationshipResponse).toBeAnError(
                 "The Response of the accepted incoming Request associated with the RelationshipTemplateContent must be provided as the response of the RelationshipCreationContent.",
