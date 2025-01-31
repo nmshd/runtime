@@ -29,7 +29,7 @@ export class Context {
     public consumptionController: ConsumptionController;
     public processor: CreateAttributeRequestItemProcessor;
 
-    public givenResponseItem: CreateAttributeAcceptResponseItem;
+    public givenResponseItem: CreateAttributeAcceptResponseItem | AttributeAlreadySharedAcceptResponseItem | AttributeSuccessionAcceptResponseItem;
     public givenRequestItem: CreateAttributeRequestItem;
     public canCreateResult: ValidationResult;
     public canAcceptResult: ValidationResult;
@@ -126,9 +126,18 @@ export class GivenSteps {
         return Promise.resolve();
     }
 
-    public async aResponseItem(): Promise<void> {
+    public async aCreateAttributeAcceptResponseItem(): Promise<void> {
         this.context.givenResponseItem = CreateAttributeAcceptResponseItem.from({
             attributeId: await ConsumptionIds.attribute.generate(),
+            result: ResponseItemResult.Accepted
+        });
+    }
+
+    public async anAttributeSuccessionAcceptResponseItem(params: { predecessorId: CoreId }): Promise<void> {
+        this.context.givenResponseItem = AttributeSuccessionAcceptResponseItem.from({
+            predecessorId: params.predecessorId,
+            successorId: await ConsumptionIds.attribute.generate(),
+            successorContent: TestObjectFactory.createIdentityAttribute({ owner: this.context.translateTestIdentity(TestIdentity.PEER), tags: ["succeededTag"] }),
             result: ResponseItemResult.Accepted
         });
     }
@@ -152,6 +161,15 @@ export class GivenSteps {
             requestReference: CoreId.from("reqRef")
         });
         return createdOwnSharedIdentityAttribute;
+    }
+
+    public async aPeerSharedIdentityAttribute(params: { peer: CoreAddress }): Promise<LocalAttribute> {
+        const createdPeerSharedIdentityAttribute = await this.context.consumptionController.attributes.createSharedLocalAttribute({
+            peer: this.context.translateTestIdentity(params.peer)!,
+            requestReference: CoreId.from("reqRef"),
+            content: TestObjectFactory.createIdentityAttribute({ owner: this.context.translateTestIdentity(params.peer) })
+        });
+        return createdPeerSharedIdentityAttribute;
     }
 }
 
@@ -256,7 +274,7 @@ export class ThenSteps {
     }
 
     public theCreatedAttributeHasTheAttributeIdFromTheResponseItem(): Promise<void> {
-        expect(this.context.createdAttributeAfterAction.id.toString()).toStrictEqual(this.context.givenResponseItem.attributeId.toString());
+        expect(this.context.createdAttributeAfterAction.id.toString()).toStrictEqual((this.context.givenResponseItem as CreateAttributeAcceptResponseItem).attributeId.toString());
 
         return Promise.resolve();
     }
@@ -265,6 +283,11 @@ export class ThenSteps {
         expect(this.context.createdAttributeAfterAction.content.toJSON()).toStrictEqual(this.context.givenRequestItem.attribute.toJSON());
 
         return Promise.resolve();
+    }
+
+    public async thePeerSharedIdentityAttributeWasSucceeded(params: { predecessorId: CoreId }): Promise<void> {
+        const peerSharedIdentityAttributePredecessor = await this.context.consumptionController.attributes.getLocalAttribute(params.predecessorId);
+        expect(peerSharedIdentityAttributePredecessor!.succeededBy).toBeDefined();
     }
 }
 
@@ -341,6 +364,8 @@ export class WhenSteps {
             peer: this.context.peerAddress
         });
 
-        this.context.createdAttributeAfterAction = (await this.context.consumptionController.attributes.getLocalAttribute(this.context.givenResponseItem.attributeId))!;
+        if (this.context.givenResponseItem instanceof CreateAttributeAcceptResponseItem) {
+            this.context.createdAttributeAfterAction = (await this.context.consumptionController.attributes.getLocalAttribute(this.context.givenResponseItem.attributeId))!;
+        }
     }
 }

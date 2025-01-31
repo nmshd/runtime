@@ -381,7 +381,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             "in case of an IdentityAttribute with owner=${value.toString()}: creates a LocalAttribute with the Attribute from the RequestItem and the attributeId from the ResponseItem for the peer of the request ",
             async function (attributeOwner: CoreAddress) {
                 await Given.aRequestItemWithAnIdentityAttribute({ attributeOwner });
-                await Given.aResponseItem();
+                await Given.aCreateAttributeAcceptResponseItem();
                 await When.iCallApplyIncomingResponseItem();
                 await Then.theCreatedAttributeHasTheSameContentAsTheAttributeFromTheRequestItem();
                 await Then.theCreatedAttributeHasTheAttributeIdFromTheResponseItem();
@@ -392,11 +392,19 @@ describe("CreateAttributeRequestItemProcessor", function () {
             "in case of a RelationshipAttribute with owner=${value.toString()}: creates a LocalAttribute with the Attribute from the RequestItem and the attributeId from the ResponseItem for the peer of the request ",
             async function (attributeOwner: CoreAddress) {
                 await Given.aRequestItemWithARelationshipAttribute({ attributeOwner });
-                await Given.aResponseItem();
+                await Given.aCreateAttributeAcceptResponseItem();
                 await When.iCallApplyIncomingResponseItem();
                 await Then.theCreatedAttributeHasTheSameContentAsTheAttributeFromTheRequestItem();
                 await Then.theCreatedAttributeHasTheAttributeIdFromTheResponseItem();
             }
         );
+
+        test("in case of an AttributeSuccessionAcceptResponseItem succeed the peer shared IdentityAttribute", async function () {
+            const peerSharedIdentityAttribute = await Given.aPeerSharedIdentityAttribute({ peer: TestIdentity.PEER });
+            await Given.aRequestItemWithAnIdentityAttribute({ attributeOwner: TestIdentity.PEER });
+            await Given.anAttributeSuccessionAcceptResponseItem({ predecessorId: peerSharedIdentityAttribute.id });
+            await When.iCallApplyIncomingResponseItem();
+            await Then.thePeerSharedIdentityAttributeWasSucceeded({ predecessorId: peerSharedIdentityAttribute.id });
+        });
     });
 });
