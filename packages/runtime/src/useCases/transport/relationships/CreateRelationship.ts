@@ -39,8 +39,8 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
             return Result.fail(RuntimeErrors.general.recordNotFound(RelationshipTemplate));
         }
 
-        const canSendRelationship = await this.relationshipsController.canSendRelationship({ creationContent: request.creationContent, template });
-        if (!canSendRelationship.isSuccess) throw canSendRelationship.error;
+        const canSendRelationshipResult = await this.relationshipsController.canSendRelationship({ creationContent: request.creationContent, template });
+        if (!canSendRelationshipResult.isSuccess) throw canSendRelationshipResult.error;
 
         const typeOfCreationContentOfRelationshipValidationError = validateTypeOfCreationContentOfRelationship(template, request.creationContent);
         if (typeOfCreationContentOfRelationshipValidationError) return Result.fail(typeOfCreationContentOfRelationshipValidationError);

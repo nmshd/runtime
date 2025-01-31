@@ -49,8 +49,8 @@ export class CanCreateRelationshipUseCase extends UseCase<CanCreateRelationshipR
             return Result.ok({ isSuccess: false, code: error.code, message: error.message });
         }
 
-        const canSendRelationship = await this.relationshipsController.canSendRelationship({ creationContent: request.creationContent, template });
-        if (canSendRelationship.isError) return Result.ok({ isSuccess: false, code: canSendRelationship.error.code, message: canSendRelationship.error.reason });
+        const canSendRelationshipResult = await this.relationshipsController.canSendRelationship({ creationContent: request.creationContent, template });
+        if (canSendRelationshipResult.isError) return Result.ok({ isSuccess: false, code: canSendRelationshipResult.error.code, message: canSendRelationshipResult.error.reason });
 
         if (request.creationContent) {
             const typeOfCreationContentOfRelationshipValidationError = validateTypeOfCreationContentOfRelationship(template, request.creationContent);
