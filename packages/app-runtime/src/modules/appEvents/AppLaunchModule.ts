@@ -12,7 +12,7 @@ export class AppLaunchModule extends AppRuntimeModule<AppLaunchModuleConfig> {
     }
 
     public start(): void {
-        this.subscribeToNativeEvent(UrlOpenEvent, this.handleUrlOpen.bind(this));
+        this.subscribeToEvent(UrlOpenEvent, this.handleUrlOpen.bind(this));
     }
 
     private async handleUrlOpen(event: UrlOpenEvent) {

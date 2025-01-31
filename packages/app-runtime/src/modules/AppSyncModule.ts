@@ -1,4 +1,4 @@
-import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "../AppRuntimeModule";
+import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "./AppRuntimeModule";
 
 export interface AppSyncModuleConfiguration extends AppRuntimeModuleConfiguration {
     interval: number;
