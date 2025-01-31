@@ -4,7 +4,6 @@ import { Notification, OwnSharedAttributeDeletedByOwnerNotificationItem } from "
 import { CoreId } from "@nmshd/core-types";
 import { AccountController, MessageController, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { RelationshipStatus } from "../../../types";
 import { AttributeIdString, NotificationIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
 export interface DeleteOwnSharedAttributeAndNotifyPeerRequest {
@@ -41,9 +40,9 @@ export class DeleteOwnSharedAttributeAndNotifyPeerUseCase extends UseCase<Delete
             return Result.fail(RuntimeErrors.attributes.isNotOwnSharedAttribute(ownSharedAttributeId));
         }
 
-        const relationship = await this.relationshipsController.getRelationshipToIdentity(ownSharedAttribute.shareInfo.peer);
+        const canSendMessageResult = await this.relationshipsController.canSendMessage(ownSharedAttribute.shareInfo.peer);
 
-        if (relationship && relationship.status === RelationshipStatus.Pending) {
+        if (canSendMessageResult.isError) {
             return Result.fail(RuntimeErrors.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending());
         }
 

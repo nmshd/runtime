@@ -4,7 +4,6 @@ import { Notification, ThirdPartyRelationshipAttributeDeletedByPeerNotificationI
 import { CoreId } from "@nmshd/core-types";
 import { AccountController, MessageController, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { RelationshipStatus } from "../../../types";
 import { AttributeIdString, NotificationIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
 export interface DeleteThirdPartyRelationshipAttributeAndNotifyPeerRequest {
@@ -46,9 +45,9 @@ export class DeleteThirdPartyRelationshipAttributeAndNotifyPeerUseCase extends U
             return Result.fail(RuntimeErrors.attributes.isNotThirdPartyRelationshipAttribute(thirdPartyRelationshipAttributeId));
         }
 
-        const relationship = await this.relationshipsController.getRelationshipToIdentity(thirdPartyRelationshipAttribute.shareInfo.peer);
+        const canSendMessageResult = await this.relationshipsController.canSendMessage(thirdPartyRelationshipAttribute.shareInfo.peer);
 
-        if (relationship && relationship.status === RelationshipStatus.Pending) {
+        if (canSendMessageResult.isError) {
             return Result.fail(RuntimeErrors.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending());
         }
 

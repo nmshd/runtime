@@ -2690,9 +2690,8 @@ describe("DeleteAttributeUseCases", () => {
 
             const content: CreateOwnRelationshipTemplateRequest["content"] = {
                 "@type": "RelationshipTemplateContent",
-                title: "Connect to HCM",
+                title: "aTitle",
                 onNewRelationship: {
-                    title: "Connect to HCM2",
                     items: [item],
                     "@type": "Request"
                 }
@@ -2715,7 +2714,7 @@ describe("DeleteAttributeUseCases", () => {
                 content: {
                     value: {
                         "@type": "GivenName",
-                        value: "123qwe"
+                        value: "aGivenName"
                     }
                 }
             });
@@ -2728,7 +2727,7 @@ describe("DeleteAttributeUseCases", () => {
                 }
             });
 
-            const acceptRequest = await services2.consumption.incomingRequests.accept({
+            const acceptedRequest = await services2.consumption.incomingRequests.accept({
                 requestId: requestsForRelationship.value[0].id,
                 items: [
                     {
@@ -2738,7 +2737,7 @@ describe("DeleteAttributeUseCases", () => {
                 ]
             });
 
-            expect(acceptRequest).toBeSuccessful();
+            expect(acceptedRequest).toBeSuccessful();
 
             const relationships = await syncUntilHasRelationships(services1.transport);
             expect(relationships).toHaveLength(1);
@@ -2872,7 +2871,7 @@ describe("DeleteAttributeUseCases", () => {
             expect(CoreDate.from(updatedPredecessor.deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))).toBe(true);
         });
 
-        test("should throw an error when deleting an OwnSharedAttribute when the Relationship is in status Pending", async () => {
+        test("should throw an error when deleting an PeerSharedAttribute when the Relationship is in status Pending", async () => {
             const [services1, services2] = await runtimeServiceProvider.launch(2, {
                 enableRequestModule: true,
                 enableDeciderModule: true,
@@ -2883,7 +2882,7 @@ describe("DeleteAttributeUseCases", () => {
                 content: {
                     value: {
                         "@type": "GivenName",
-                        value: "123qwe"
+                        value: "aGivenName"
                     }
                 }
             });
@@ -2897,9 +2896,8 @@ describe("DeleteAttributeUseCases", () => {
 
             const content: CreateOwnRelationshipTemplateRequest["content"] = {
                 "@type": "RelationshipTemplateContent",
-                title: "Connect to HCM",
+                title: "aTitle",
                 onNewRelationship: {
-                    title: "Connect to HCM2",
                     items: [item],
                     "@type": "Request"
                 }
@@ -2926,7 +2924,7 @@ describe("DeleteAttributeUseCases", () => {
                 }
             });
 
-            const acceptRequest = await services2.consumption.incomingRequests.accept({
+            const acceptedRequest = await services2.consumption.incomingRequests.accept({
                 requestId: requestsForRelationship.value[0].id,
                 items: [
                     {
@@ -2935,7 +2933,7 @@ describe("DeleteAttributeUseCases", () => {
                 ]
             });
 
-            expect(acceptRequest).toBeSuccessful();
+            expect(acceptedRequest).toBeSuccessful();
 
             const relationships = await syncUntilHasRelationships(services1.transport);
             expect(relationships).toHaveLength(1);
@@ -3099,9 +3097,8 @@ describe("DeleteAttributeUseCases", () => {
 
             const content: CreateOwnRelationshipTemplateRequest["content"] = {
                 "@type": "RelationshipTemplateContent",
-                title: "Connect to HCM",
+                title: "aTitle",
                 onNewRelationship: {
-                    title: "Connect to HCM2",
                     items: [item],
                     "@type": "Request"
                 }
@@ -3126,7 +3123,7 @@ describe("DeleteAttributeUseCases", () => {
                 }
             });
 
-            const acceptRequest = await services3.consumption.incomingRequests.accept({
+            const acceptedRequest = await services3.consumption.incomingRequests.accept({
                 requestId: requestsForRelationship.value[0].id,
                 items: [
                     {
@@ -3135,7 +3132,7 @@ describe("DeleteAttributeUseCases", () => {
                 ]
             });
 
-            expect(acceptRequest).toBeSuccessful();
+            expect(acceptedRequest).toBeSuccessful();
 
             const relationships = await syncUntilHasRelationships(services2.transport);
             expect(relationships).toHaveLength(1);
