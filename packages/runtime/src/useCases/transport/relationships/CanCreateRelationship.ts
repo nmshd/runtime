@@ -1,12 +1,10 @@
-import { Serializable } from "@js-soft/ts-serval";
-import { ApplicationError, Result } from "@js-soft/ts-utils";
-import { IncomingRequestsController, LocalRequestStatus } from "@nmshd/consumption";
-import { RelationshipCreationContent } from "@nmshd/content";
+import { Result } from "@js-soft/ts-utils";
+import { IncomingRequestsController } from "@nmshd/consumption";
 import { CoreId } from "@nmshd/core-types";
 import { RelationshipsController, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
-import { validateTypeOfCreationContentOfRelationship } from "./utility/validateTypeOfCreationContentOfRelationship";
+import { validateCreationContentOfRelationship } from "./utility/validateCreationContentOfRelationship";
 
 export interface CanCreateRelationshipRequest {
     templateId: RelationshipTemplateIdString;
@@ -53,46 +51,16 @@ export class CanCreateRelationshipUseCase extends UseCase<CanCreateRelationshipR
         if (canSendRelationshipResult.isError) return Result.ok({ isSuccess: false, code: canSendRelationshipResult.error.code, message: canSendRelationshipResult.error.reason });
 
         if (request.creationContent) {
-            const typeOfCreationContentOfRelationshipValidationError = validateTypeOfCreationContentOfRelationship(template, request.creationContent);
-            if (typeOfCreationContentOfRelationshipValidationError) {
+            const creationContentOfRelationshipValidationError = await validateCreationContentOfRelationship(this.incomingRequestsController, template, request.creationContent);
+            if (creationContentOfRelationshipValidationError) {
                 return Result.ok({
                     isSuccess: false,
-                    code: typeOfCreationContentOfRelationshipValidationError.code,
-                    message: typeOfCreationContentOfRelationshipValidationError.message
+                    code: creationContentOfRelationshipValidationError.code,
+                    message: creationContentOfRelationshipValidationError.message
                 });
-            }
-
-            const transformedCreationContent = Serializable.fromUnknown(request.creationContent);
-
-            if (transformedCreationContent instanceof RelationshipCreationContent) {
-                const responseToRequestOfTemplateValidationError = await this.validateResponseToRequestOfTemplate(request.templateId, transformedCreationContent);
-                if (responseToRequestOfTemplateValidationError) {
-                    return Result.ok({ isSuccess: false, code: responseToRequestOfTemplateValidationError.code, message: responseToRequestOfTemplateValidationError.message });
-                }
             }
         }
 
         return Result.ok({ isSuccess: true });
-    }
-
-    private async validateResponseToRequestOfTemplate(
-        templateId: RelationshipTemplateIdString,
-        relationshipCreationContent: RelationshipCreationContent
-    ): Promise<ApplicationError | undefined> {
-        const acceptedIncomingRequests = await this.incomingRequestsController.getIncomingRequests({
-            status: LocalRequestStatus.Decided,
-            "source.reference": templateId,
-            "response.content.result": "Accepted"
-        });
-
-        if (acceptedIncomingRequests.length === 0) {
-            return RuntimeErrors.relationships.noAcceptedIncomingRequest();
-        }
-
-        if (acceptedIncomingRequests[0].response!.content.serialize() !== relationshipCreationContent.response.serialize()) {
-            return RuntimeErrors.relationships.wrongResponseProvidedAsCreationContent();
-        }
-
-        return;
     }
 }
