@@ -231,11 +231,10 @@ export class ThenSteps {
         expect(ownSharedIdentityAttribute!.shareInfo!.sourceAttribute).toStrictEqual(id);
     }
 
-    public async theIdOfTheAlreadySharedAttributeMatches(id: CoreId): Promise<void> {
-        const alreadySharedAttribute = await this.context.consumptionController.attributes.getLocalAttribute(
-            (this.context.responseItemAfterAction as AttributeAlreadySharedAcceptResponseItem).attributeId
-        );
-        expect(alreadySharedAttribute!.id).toStrictEqual(id);
+    public theIdOfTheAlreadySharedAttributeMatches(id: CoreId): Promise<void> {
+        expect((this.context.responseItemAfterAction as AttributeAlreadySharedAcceptResponseItem).attributeId).toStrictEqual(id);
+
+        return Promise.resolve();
     }
 
     public async theTagsOfTheRepositoryAttributeMatch(tags: string[]): Promise<void> {

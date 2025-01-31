@@ -128,7 +128,7 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
 
         if (existingRepositoryAttribute) {
             if (!existingRepositoryAttribute.isRepositoryAttribute(this.currentIdentityAddress)) {
-                throw new Error(`The Attribute ${existingRepositoryAttribute} is not a RepositoryAttribute.`);
+                throw new Error(`The Attribute ${existingRepositoryAttribute.id} is not a RepositoryAttribute.`);
             }
 
             const existingOwnSharedIdentityAttributes = await this.consumptionController.attributes.getLocalAttributes({
@@ -190,7 +190,7 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
 
         const sourceAttribute = succeededRepositoryAttribute ?? existingRepositoryAttribute ?? newRepositoryAttribute;
         if (!sourceAttribute) {
-            throw new Error("No sourceAttribute was found.");
+            throw new Error("No RepositoryAttribute as source for creating an own shared IdentityAttribute was found.");
         }
 
         const newOwnSharedIdentityAttribute = await this.consumptionController.attributes.createSharedLocalAttributeCopy({
