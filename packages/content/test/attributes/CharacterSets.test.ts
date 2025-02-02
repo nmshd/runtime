@@ -187,7 +187,7 @@ test.each(proprietaryAttributeTestParameters)("description of $type is considere
     expect(invalidCall).toThrow(new ParsingError(type, "description", errorMessageDatatypeC));
 });
 
-test("Key of RelationshipAttribute is considered as valid", () => {
+test("key of RelationshipAttribute is considered as valid", () => {
     const attribute = RelationshipAttribute.from({
         key: "validValue\u000D¾£(),",
         confidentiality: RelationshipAttributeConfidentiality.Private,
@@ -202,7 +202,7 @@ test("Key of RelationshipAttribute is considered as valid", () => {
     expect(attribute.key).toBe("validValue\u000D¾£(),");
 });
 
-test("Key of RelationshipAttribute is considered as invalid", () => {
+test("key of RelationshipAttribute is considered as invalid", () => {
     const invalidCall = () => {
         RelationshipAttribute.from({
             key: "invalidValueБ",
@@ -219,7 +219,7 @@ test("Key of RelationshipAttribute is considered as invalid", () => {
     expect(invalidCall).toThrow(new ParsingError("RelationshipAttribute", "key", errorMessageDatatypeC));
 });
 
-test("Key of RelationshipAttributeQuery is considered as valid", () => {
+test("key of RelationshipAttributeQuery is considered as valid", () => {
     const attribute = RelationshipAttributeQuery.from({
         owner: "theOwner",
         attributeCreationHints: { confidentiality: RelationshipAttributeConfidentiality.Private, title: "aTitle", valueType: "ProprietaryBoolean" },
@@ -228,7 +228,7 @@ test("Key of RelationshipAttributeQuery is considered as valid", () => {
     expect(attribute.key).toBe("validValue\u000D¾£(),");
 });
 
-test("Key of RelationshipAttributeQuery is considered as invalid", () => {
+test("key of RelationshipAttributeQuery is considered as invalid", () => {
     const invalidCall = () => {
         RelationshipAttributeQuery.from({
             owner: "theOwner",
@@ -239,7 +239,7 @@ test("Key of RelationshipAttributeQuery is considered as invalid", () => {
     expect(invalidCall).toThrow(new ParsingError("RelationshipAttributeQuery", "key", errorMessageDatatypeC));
 });
 
-test("Key of ThirdPartyRelationshipAttributeQuery is considered as valid", () => {
+test("key of ThirdPartyRelationshipAttributeQuery is considered as valid", () => {
     const attribute = ThirdPartyRelationshipAttributeQuery.from({
         owner: "",
         thirdParty: ["aThirdParty"],
@@ -248,7 +248,7 @@ test("Key of ThirdPartyRelationshipAttributeQuery is considered as valid", () =>
     expect(attribute.key).toBe("validValue\u000D¾£(),");
 });
 
-test("Key of ThirdPartyRelationshipAttributeQuery is considered as invalid", () => {
+test("key of ThirdPartyRelationshipAttributeQuery is considered as invalid", () => {
     const invalidCall = () => {
         ThirdPartyRelationshipAttributeQuery.from({
             owner: "",

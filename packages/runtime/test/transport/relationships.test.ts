@@ -1,6 +1,6 @@
 import { ApplicationError, Result, sleep } from "@js-soft/ts-utils";
 import { ReadAttributeRequestItemJSON, RelationshipAttributeConfidentiality, RelationshipTemplateContentJSON } from "@nmshd/content";
-import { IdentityDeletionProcessStatus, Random } from "@nmshd/transport";
+import { IdentityDeletionProcessStatus, Random, RandomCharacterRange } from "@nmshd/transport";
 import assert from "assert";
 import { DateTime } from "luxon";
 import {
@@ -1012,7 +1012,7 @@ describe("RelationshipDecomposition", () => {
 
         await sendAndReceiveNotification(services1.transport, services2.transport, services2.consumption);
 
-        const randomName1 = await Random.string(7, "qwertzuiop");
+        const randomName1 = await Random.string(7, RandomCharacterRange.Alphabet);
         await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
             content: {
                 value: {
@@ -1022,7 +1022,7 @@ describe("RelationshipDecomposition", () => {
             }
         });
 
-        const randomName2 = await Random.string(7, "asdfghjkl");
+        const randomName2 = await Random.string(7, RandomCharacterRange.Alphabet);
         await executeFullCreateAndShareRepositoryAttributeFlow(services2, services1, {
             content: {
                 value: {
