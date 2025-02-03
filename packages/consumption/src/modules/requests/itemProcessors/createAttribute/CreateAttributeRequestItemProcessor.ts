@@ -11,7 +11,7 @@ import {
 } from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { LocalAttributeShareInfo } from "../../../attributes";
+import { LocalAttribute, LocalAttributeShareInfo } from "../../../attributes";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
@@ -122,14 +122,14 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
             });
         }
 
-        const toBeSharedRepositoryAttribute = await this.createOrFindExistingUnsucceededRepositoryAttribute(requestItem.attribute);
-        const lastSharedVersion = await this.getLastSharedVersionOfUnsucceededRepositoryAttribute(toBeSharedRepositoryAttribute.id, requestInfo.peer);
+        const repositoryAttribute = await this.getSourceRepositoryAttribute(requestItem.attribute);
+        const lastestSharedVersion = await this.getLastestSharedVersionOfRepositoryAttribute(repositoryAttribute.id, requestInfo.peer);
 
-        if (!lastSharedVersion) {
+        if (!lastestSharedVersion) {
             const newOwnSharedIdentityAttribute = await this.consumptionController.attributes.createSharedLocalAttributeCopy({
                 peer: requestInfo.peer,
                 requestReference: requestInfo.id,
-                sourceAttributeId: toBeSharedRepositoryAttribute.id
+                sourceAttributeId: repositoryAttribute.id
             });
 
             return CreateAttributeAcceptResponseItem.from({
@@ -138,23 +138,23 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
             });
         }
 
-        if (lastSharedVersion.shareInfo!.sourceAttribute!.equals(toBeSharedRepositoryAttribute.id)) {
+        if (lastestSharedVersion.shareInfo!.sourceAttribute!.equals(repositoryAttribute.id)) {
             return AttributeAlreadySharedAcceptResponseItem.from({
                 result: ResponseItemResult.Accepted,
-                attributeId: lastSharedVersion.id
+                attributeId: lastestSharedVersion.id
             });
         }
 
         const ownSharedIdentityAttributeSuccessorParams = {
-            content: toBeSharedRepositoryAttribute.content,
+            content: repositoryAttribute.content,
             shareInfo: LocalAttributeShareInfo.from({
                 peer: requestInfo.peer,
                 requestReference: requestInfo.id,
-                sourceAttribute: toBeSharedRepositoryAttribute.id
+                sourceAttribute: repositoryAttribute.id
             })
         };
         const ownSharedIdentityAttributesAfterSuccession = await this.consumptionController.attributes.succeedOwnSharedIdentityAttribute(
-            lastSharedVersion.id,
+            lastestSharedVersion.id,
             ownSharedIdentityAttributeSuccessorParams
         );
         const succeededOwnSharedIdentityAttribute = ownSharedIdentityAttributesAfterSuccession.successor;
@@ -163,17 +163,11 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
             result: ResponseItemResult.Accepted,
             successorId: succeededOwnSharedIdentityAttribute.id,
             successorContent: succeededOwnSharedIdentityAttribute.content,
-            predecessorId: lastSharedVersion.id
+            predecessorId: lastestSharedVersion.id
         });
     }
 
-    private async getLastSharedVersionOfUnsucceededRepositoryAttribute(attributeId: CoreId, peer: CoreAddress) {
-        const sharedVersions = await this.consumptionController.attributes.getSharedVersionsOfAttribute(attributeId, [peer]);
-        if (sharedVersions.length === 0) return;
-        return sharedVersions[0];
-    }
-
-    private async createOrFindExistingUnsucceededRepositoryAttribute(attribute: IdentityAttribute<import("@nmshd/content").AttributeValues.Identity.Class>) {
+    private async getSourceRepositoryAttribute(attribute: IdentityAttribute): Promise<LocalAttribute> {
         const existingRepositoryAttribute = await this.consumptionController.attributes.getRepositoryAttributeWithSameValue((attribute.value as any).toJSON());
 
         if (!existingRepositoryAttribute) {
@@ -185,6 +179,11 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
         const newTags = attribute.tags?.filter((tag) => !(existingRepositoryAttribute.content as IdentityAttribute).tags?.includes(tag));
         if (!newTags || newTags.length === 0) return existingRepositoryAttribute;
 
+        const succeededRepositoryAttribute = await this.mergeTagsOfRespositoryAttribute(existingRepositoryAttribute, newTags);
+        return succeededRepositoryAttribute;
+    }
+
+    private async mergeTagsOfRespositoryAttribute(existingRepositoryAttribute: LocalAttribute, newTags: string[]): Promise<LocalAttribute> {
         const repositoryAttributeSuccessorParams = {
             content: {
                 ...existingRepositoryAttribute.content.toJSON(),
@@ -192,7 +191,19 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
             },
             succeeds: existingRepositoryAttribute.id.toString()
         };
-        return (await this.consumptionController.attributes.succeedRepositoryAttribute(existingRepositoryAttribute.id, repositoryAttributeSuccessorParams)).successor;
+
+        const repositoryAttributesAfterSuccession = await this.consumptionController.attributes.succeedRepositoryAttribute(
+            existingRepositoryAttribute.id,
+            repositoryAttributeSuccessorParams
+        );
+
+        return repositoryAttributesAfterSuccession.successor;
+    }
+
+    private async getLastestSharedVersionOfRepositoryAttribute(attributeId: CoreId, peer: CoreAddress): Promise<LocalAttribute | undefined> {
+        const sharedVersions = await this.consumptionController.attributes.getSharedVersionsOfAttribute(attributeId, [peer]);
+        if (sharedVersions.length === 0) return;
+        return sharedVersions[0];
     }
 
     public override async applyIncomingResponseItem(
