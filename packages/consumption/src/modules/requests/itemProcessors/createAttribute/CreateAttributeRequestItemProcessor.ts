@@ -9,7 +9,7 @@ import {
     Request,
     ResponseItemResult
 } from "@nmshd/content";
-import { CoreAddress, CoreId } from "@nmshd/core-types";
+import { CoreAddress } from "@nmshd/core-types";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import { AttributeSuccessorParams, LocalAttribute, LocalAttributeShareInfo, PeerSharedAttributeSucceededEvent } from "../../../attributes";
 import { ValidationResult } from "../../../common/ValidationResult";
@@ -123,9 +123,11 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
         }
 
         const repositoryAttribute = await this.getSourceRepositoryAttribute(requestItem.attribute);
-        const lastestSharedVersion = await this.getLastestSharedVersionOfRepositoryAttribute(repositoryAttribute.id, requestInfo.peer);
 
-        if (!lastestSharedVersion) {
+        const latestSharedVersions = await this.consumptionController.attributes.getSharedVersionsOfAttribute(repositoryAttribute.id, [requestInfo.peer]);
+        const latestSharedVersion = latestSharedVersions.length > 0 ? latestSharedVersions[0] : undefined;
+
+        if (!latestSharedVersion) {
             const newOwnSharedIdentityAttribute = await this.consumptionController.attributes.createSharedLocalAttributeCopy({
                 peer: requestInfo.peer,
                 requestReference: requestInfo.id,
@@ -138,10 +140,10 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
             });
         }
 
-        if (lastestSharedVersion.shareInfo!.sourceAttribute!.equals(repositoryAttribute.id)) {
+        if (latestSharedVersion.shareInfo!.sourceAttribute!.equals(repositoryAttribute.id)) {
             return AttributeAlreadySharedAcceptResponseItem.from({
                 result: ResponseItemResult.Accepted,
-                attributeId: lastestSharedVersion.id
+                attributeId: latestSharedVersion.id
             });
         }
 
@@ -154,7 +156,7 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
             })
         };
         const ownSharedIdentityAttributesAfterSuccession = await this.consumptionController.attributes.succeedOwnSharedIdentityAttribute(
-            lastestSharedVersion.id,
+            latestSharedVersion.id,
             ownSharedIdentityAttributeSuccessorParams
         );
         const succeededOwnSharedIdentityAttribute = ownSharedIdentityAttributesAfterSuccession.successor;
@@ -163,7 +165,7 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
             result: ResponseItemResult.Accepted,
             successorId: succeededOwnSharedIdentityAttribute.id,
             successorContent: succeededOwnSharedIdentityAttribute.content,
-            predecessorId: lastestSharedVersion.id
+            predecessorId: latestSharedVersion.id
         });
     }
 
@@ -198,12 +200,6 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
         );
 
         return repositoryAttributesAfterSuccession.successor;
-    }
-
-    private async getLastestSharedVersionOfRepositoryAttribute(attributeId: CoreId, peer: CoreAddress): Promise<LocalAttribute | undefined> {
-        const sharedVersions = await this.consumptionController.attributes.getSharedVersionsOfAttribute(attributeId, [peer]);
-        if (sharedVersions.length === 0) return;
-        return sharedVersions[0];
     }
 
     public override async applyIncomingResponseItem(
