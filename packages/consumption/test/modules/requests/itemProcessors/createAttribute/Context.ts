@@ -15,6 +15,7 @@ import {
     ConsumptionController,
     ConsumptionIds,
     CreateAttributeRequestItemProcessor,
+    IAttributeSuccessorParams,
     LocalAttribute,
     LocalAttributeDeletionInfo,
     LocalAttributeDeletionStatus,
@@ -154,6 +155,21 @@ export class GivenSteps {
         return createdRepositoryAttribute;
     }
 
+    public async aRepositoryAttributeSuccession(predecessorId: CoreId, params: { tags?: string[]; value?: AttributeValues.Identity.Interface }): Promise<LocalAttribute> {
+        const predecessor = await this.context.consumptionController.attributes.getLocalAttribute(predecessorId);
+
+        const repositorySuccessorParams: IAttributeSuccessorParams = {
+            content: IdentityAttribute.from({
+                value: params.value ?? (predecessor!.content as IdentityAttribute).value,
+                owner: this.context.consumptionController.accountController.identity.address,
+                tags: params.tags
+            })
+        };
+
+        const repositoryAttributesAfterSuccession = await this.context.consumptionController.attributes.succeedRepositoryAttribute(predecessorId, repositorySuccessorParams);
+        return repositoryAttributesAfterSuccession.successor;
+    }
+
     public async anOwnSharedIdentityAttribute(params: { sourceAttributeId: CoreId; peer: CoreAddress }): Promise<LocalAttribute> {
         const createdOwnSharedIdentityAttribute = await this.context.consumptionController.attributes.createSharedLocalAttributeCopy({
             sourceAttributeId: params.sourceAttributeId,
@@ -251,6 +267,12 @@ export class ThenSteps {
 
     public theIdOfTheAlreadySharedAttributeMatches(id: CoreId): Promise<void> {
         expect((this.context.responseItemAfterAction as AttributeAlreadySharedAcceptResponseItem).attributeId).toStrictEqual(id);
+
+        return Promise.resolve();
+    }
+
+    public thePredecessorIdOfTheSucceededAttributeMatches(id: CoreId): Promise<void> {
+        expect((this.context.responseItemAfterAction as AttributeSuccessionAcceptResponseItem).predecessorId).toStrictEqual(id);
 
         return Promise.resolve();
     }

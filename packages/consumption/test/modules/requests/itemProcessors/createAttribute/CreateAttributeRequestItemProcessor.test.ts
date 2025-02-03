@@ -374,6 +374,47 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await Then.theResponseItemShouldBeOfType("AttributeSuccessionAcceptResponseItem");
             await Then.theTagsOfTheSucceededRepositoryAttributeMatch(["tag1", "tag2", "tag3"]);
         });
+
+        test("in case of an IdentityAttribute whose predecessor was shared: returns an AttributeSuccessionAcceptResponseItem", async function () {
+            const repositoryAttributePredecessor = await Given.aRepositoryAttribute({
+                attributeOwner: TestIdentity.CURRENT_IDENTITY,
+                value: GivenName.from("aSixthGivenName")
+            });
+            const ownSharedIdentityAttributePredecessor = await Given.anOwnSharedIdentityAttribute({
+                sourceAttributeId: repositoryAttributePredecessor.id,
+                peer: TestIdentity.PEER
+            });
+            await Given.aRepositoryAttributeSuccession(repositoryAttributePredecessor.id, { value: GivenName.from("aSucceededSixthGivenName") });
+            await Given.aRequestItemWithAnIdentityAttribute({
+                attributeOwner: TestIdentity.CURRENT_IDENTITY,
+                value: GivenName.from("aSucceededSixthGivenName")
+            });
+            await When.iCallAccept();
+            await Then.theResponseItemShouldBeOfType("AttributeSuccessionAcceptResponseItem");
+            await Then.thePredecessorIdOfTheSucceededAttributeMatches(ownSharedIdentityAttributePredecessor.id);
+        });
+
+        test("in case of an IdentityAttribute whose predecessor was shared with different tags: returns an AttributeSuccessionAcceptResponseItem", async function () {
+            const repositoryAttributePredecessor = await Given.aRepositoryAttribute({
+                attributeOwner: TestIdentity.CURRENT_IDENTITY,
+                value: GivenName.from("aSeventhGivenName"),
+                tags: ["tag1", "tag2"]
+            });
+            const ownSharedIdentityAttributePredecessor = await Given.anOwnSharedIdentityAttribute({
+                sourceAttributeId: repositoryAttributePredecessor.id,
+                peer: TestIdentity.PEER
+            });
+            await Given.aRepositoryAttributeSuccession(repositoryAttributePredecessor.id, { value: GivenName.from("aSucceededSeventhGivenName"), tags: ["tag1", "tag2"] });
+            await Given.aRequestItemWithAnIdentityAttribute({
+                attributeOwner: TestIdentity.CURRENT_IDENTITY,
+                value: GivenName.from("aSucceededSeventhGivenName"),
+                tags: ["tag1", "tag3"]
+            });
+            await When.iCallAccept();
+            await Then.theTagsOfTheSucceededRepositoryAttributeMatch(["tag1", "tag2", "tag3"]);
+            await Then.theResponseItemShouldBeOfType("AttributeSuccessionAcceptResponseItem");
+            await Then.thePredecessorIdOfTheSucceededAttributeMatches(ownSharedIdentityAttributePredecessor.id);
+        });
     });
 
     describe("applyIncomingResponseItem", function () {
