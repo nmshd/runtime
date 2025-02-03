@@ -118,6 +118,20 @@ class Relationships {
     public isNeitherRejectedNorRevoked(): ApplicationError {
         return new ApplicationError("error.runtime.relationships.isNeitherRejectedNorRevoked", "The status of the Relationship is neither 'Rejected' nor 'Revoked'.");
     }
+
+    public noAcceptedIncomingRequest(): ApplicationError {
+        return new ApplicationError(
+            "error.runtime.relationships.noAcceptedIncomingRequest",
+            "There is no accepted incoming Request associated with the RelationshipTemplateContent of the RelationshipTemplate."
+        );
+    }
+
+    public wrongResponseProvidedAsCreationContent(): ApplicationError {
+        return new ApplicationError(
+            "error.runtime.relationships.wrongResponseProvidedAsCreationContent",
+            "The Response of the accepted incoming Request associated with the RelationshipTemplateContent must be provided as the response of the RelationshipCreationContent."
+        );
+    }
 }
 
 class Messages {
