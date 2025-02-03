@@ -174,6 +174,8 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 thirdPartyAddress: !(testParams.attribute instanceof IdentityAttribute) ? aThirdParty : undefined
             });
             const request = Request.from({ items: [requestItem] });
+            console.log(requestItem.getRequiredProperties());
+            console.log(request.getRequiredProperties());
 
             const result = await processor.canCreateOutgoingRequestItem(requestItem, request, recipient);
 

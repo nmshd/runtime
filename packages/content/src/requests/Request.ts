@@ -1,5 +1,6 @@
-import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
+import { ISerializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreDate, CoreId, ICoreDate } from "@nmshd/core-types";
+import { ExtendedSerializable } from "@nmshd/transport";
 import { ContentJSON } from "../ContentJSON";
 import { IRequestItemDerivations, RequestItemDerivations, RequestItemJSONDerivations } from "./RequestItem";
 import { IRequestItemGroup, RequestItemGroup, RequestItemGroupJSON } from "./RequestItemGroup";
@@ -75,7 +76,7 @@ export interface IRequest extends ISerializable {
 }
 
 @type("Request")
-export class Request extends Serializable implements IRequest {
+export class Request extends ExtendedSerializable implements IRequest {
     @serialize()
     @validate({ nullable: true })
     public id?: CoreId;

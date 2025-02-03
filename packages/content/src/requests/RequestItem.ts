@@ -1,4 +1,5 @@
-import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-serval";
+import { ISerializable, serialize, validate } from "@js-soft/ts-serval";
+import { ExtendedSerializable } from "@nmshd/transport";
 import { ContentJSON } from "../ContentJSON";
 import {
     AuthenticationRequestItem,
@@ -118,7 +119,7 @@ export type IRequestItemDerivations =
     | IFreeTextRequestItem
     | IRegisterAttributeListenerRequestItem;
 
-export abstract class RequestItem extends Serializable {
+export abstract class RequestItem extends ExtendedSerializable {
     @serialize()
     @validate({ nullable: true, max: 200 })
     public title?: string;
@@ -141,6 +142,12 @@ export abstract class RequestItem extends Serializable {
 
     public override toJSON(verbose?: boolean | undefined, serializeAsString?: boolean | undefined): RequestItemJSON {
         return super.toJSON(verbose, serializeAsString) as RequestItemJSON;
+    }
+
+    public override getRequiredProperties(): string[] {
+        const basicRequiredProperties = super.getRequiredProperties();
+        if (this.description) basicRequiredProperties.push("description");
+        return basicRequiredProperties;
     }
 }
 
