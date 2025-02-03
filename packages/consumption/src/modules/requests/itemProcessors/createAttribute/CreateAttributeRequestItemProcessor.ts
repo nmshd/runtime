@@ -11,7 +11,7 @@ import {
 } from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { LocalAttribute, LocalAttributeShareInfo } from "../../../attributes";
+import { AttributeSuccessorParams, LocalAttribute, LocalAttributeShareInfo, PeerSharedAttributeSucceededEvent } from "../../../attributes";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
@@ -207,23 +207,36 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
     }
 
     public override async applyIncomingResponseItem(
-        responseItem: CreateAttributeAcceptResponseItem | RejectResponseItem,
+        responseItem: CreateAttributeAcceptResponseItem | AttributeSuccessionAcceptResponseItem | AttributeAlreadySharedAcceptResponseItem | RejectResponseItem,
         requestItem: CreateAttributeRequestItem,
         requestInfo: LocalRequestInfo
-    ): Promise<void> {
-        if (!(responseItem instanceof CreateAttributeAcceptResponseItem)) {
-            return;
+    ): Promise<PeerSharedAttributeSucceededEvent | void> {
+        if (responseItem instanceof CreateAttributeAcceptResponseItem) {
+            if (requestItem.attribute.owner.toString() === "") {
+                requestItem.attribute.owner = requestInfo.peer;
+            }
+
+            await this.consumptionController.attributes.createSharedLocalAttribute({
+                id: responseItem.attributeId,
+                content: requestItem.attribute,
+                peer: requestInfo.peer,
+                requestReference: requestInfo.id
+            });
         }
 
-        if (requestItem.attribute.owner.toString() === "") {
-            requestItem.attribute.owner = requestInfo.peer;
+        if (responseItem instanceof AttributeSuccessionAcceptResponseItem && responseItem.successorContent instanceof IdentityAttribute) {
+            const successorParams = AttributeSuccessorParams.from({
+                id: responseItem.successorId,
+                content: responseItem.successorContent,
+                shareInfo: LocalAttributeShareInfo.from({
+                    peer: requestInfo.peer,
+                    requestReference: requestInfo.id
+                })
+            });
+            const { predecessor, successor } = await this.consumptionController.attributes.succeedPeerSharedIdentityAttribute(responseItem.predecessorId, successorParams);
+            return new PeerSharedAttributeSucceededEvent(this.currentIdentityAddress.toString(), predecessor, successor);
         }
 
-        await this.consumptionController.attributes.createSharedLocalAttribute({
-            id: responseItem.attributeId,
-            content: requestItem.attribute,
-            peer: requestInfo.peer,
-            requestReference: requestInfo.id
-        });
+        return;
     }
 }
