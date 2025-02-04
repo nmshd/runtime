@@ -307,6 +307,12 @@ export class MessageController extends TransportController {
                 throw new TransportError(`Due to the non-existence of a Relationship to the recipient with address '${recipient.toString()}', the Message cannot be sent.`);
             }
 
+            if (!parsedParams.content.getRequiredFeatures().every((v) => relationship.allowedFeatures?.includes(v))) {
+                throw new TransportError(
+                    `Due to the existence of a forbidden feature in the Relationship to the recipient with address '${recipient.toString()}', the Message cannot be sent.`
+                );
+            }
+
             const cipherForRecipient = await this.secrets.encrypt(relationship.relationshipSecretId, serializedSecret);
             envelopeRecipients.push(
                 MessageEnvelopeRecipient.from({

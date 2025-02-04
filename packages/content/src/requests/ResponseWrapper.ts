@@ -1,5 +1,6 @@
-import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
+import { ISerializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreId } from "@nmshd/core-types";
+import { ExtendedSerializable } from "@nmshd/transport";
 import { IResponse, Response, ResponseJSON } from "./response";
 
 export interface ResponseWrapperJSON {
@@ -18,7 +19,7 @@ export interface IResponseWrapper extends ISerializable {
 }
 
 @type("ResponseWrapper")
-export class ResponseWrapper extends Serializable implements IResponseWrapper {
+export class ResponseWrapper extends ExtendedSerializable implements IResponseWrapper {
     @serialize()
     @validate()
     public requestId: CoreId;

@@ -39,9 +39,10 @@ export class ShareAttributeRequestItem extends RequestItem implements IShareAttr
         return super.toJSON(verbose, serializeAsString) as ShareAttributeRequestItemJSON;
     }
 
-    public override getRequiredProperties(): string[] {
-        const basicRequiredProperties = super.getRequiredProperties();
+    public override getRequiredFeatures(): string[] {
+        const basicRequiredProperties = super.getRequiredFeatures();
         if (this.thirdPartyAddress) basicRequiredProperties.push("thirdParty");
+        basicRequiredProperties.push("ShareAttributeRequestItem");
         return basicRequiredProperties;
     }
 }

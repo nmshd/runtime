@@ -13,6 +13,7 @@ import { RelationshipAuditLog } from "./RelationshipAuditLog";
 export interface IRelationship extends ICoreSynchronizable {
     relationshipSecretId: ICoreId;
     peer: IIdentity;
+    allowedFeatures?: string[];
     peerDeletionInfo?: IPeerDeletionInfo;
     status: RelationshipStatus;
 
@@ -25,6 +26,11 @@ export interface IRelationship extends ICoreSynchronizable {
 
 @type("Relationship")
 export class Relationship extends CoreSynchronizable implements IRelationship {
+    public constructor() {
+        super();
+        this.allowedFeatures = ["thirdParty"];
+    }
+
     public override readonly technicalProperties = [
         "@type",
         "@context",
@@ -43,6 +49,10 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
     @validate()
     @serialize()
     public peer: Identity;
+
+    @validate({ nullable: true })
+    @serialize()
+    public allowedFeatures?: string[];
 
     @validate({ nullable: true })
     @serialize()

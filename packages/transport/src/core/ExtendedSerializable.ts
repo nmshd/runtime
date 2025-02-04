@@ -2,19 +2,19 @@ import { Serializable } from "@js-soft/ts-serval";
 import _ from "lodash";
 
 export class ExtendedSerializable extends Serializable {
-    public getRequiredProperties(): string[] {
+    public getRequiredFeatures(): string[] {
         let unionSet: string[] = [];
         for (const key in this) {
             if (Array.isArray(this[key])) {
                 this[key].forEach((v) => {
-                    if (typeof v.getRequiredProperties === "function") {
-                        const subSet = v.getRequiredProperties();
+                    if (typeof v.getRequiredFeatures === "function") {
+                        const subSet = v.getRequiredFeatures();
                         unionSet = _.union(unionSet, subSet);
                     }
                 });
             }
             if (this.hasOwnProperty(key)) {
-                if (typeof (this as any)[key].getRequiredProperties === "function") {
+                if (typeof (this as any)[key].getRequiredFeatures === "function") {
                     const subSet = (this as any)[key].getPropertySet();
                     unionSet = _.union(unionSet, subSet);
                 }
@@ -23,3 +23,5 @@ export class ExtendedSerializable extends Serializable {
         return unionSet;
     }
 }
+
+// alternative: helper function getRequiredFeatures(object/array) recursively calls itself for each property of the object/item of the array and forms the union of the results. If an object has the property "getRequiredFeatures", this property is called instead.

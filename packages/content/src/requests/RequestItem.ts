@@ -144,8 +144,8 @@ export abstract class RequestItem extends ExtendedSerializable {
         return super.toJSON(verbose, serializeAsString) as RequestItemJSON;
     }
 
-    public override getRequiredProperties(): string[] {
-        const basicRequiredProperties = super.getRequiredProperties();
+    public override getRequiredFeatures(): string[] {
+        const basicRequiredProperties = super.getRequiredFeatures();
         if (this.description) basicRequiredProperties.push("description");
         return basicRequiredProperties;
     }
