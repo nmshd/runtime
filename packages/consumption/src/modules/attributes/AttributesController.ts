@@ -1303,6 +1303,7 @@ export class AttributesController extends ConsumptionBaseController {
             }
         });
         queryForRepositoryAttributeDuplicates["succeededBy"] = { $exists: false };
+        queryForRepositoryAttributeDuplicates["shareInfo"] = { $exists: false };
 
         const matchingRepositoryAttributes = await this.getLocalAttributes(queryForRepositoryAttributeDuplicates);
 
