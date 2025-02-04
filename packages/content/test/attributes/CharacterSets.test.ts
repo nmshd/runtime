@@ -5,6 +5,7 @@ import {
     IDeliveryBoxAddress,
     IPostOfficeBoxAddress,
     PostOfficeBoxAddress,
+    ProprietaryString,
     RelationshipAttribute,
     RelationshipAttributeConfidentiality,
     RelationshipAttributeQuery,
@@ -124,23 +125,17 @@ test.each(identityAttributeTestParameters)("$type is considered as invalid", ({ 
     expect(invalidCall).toThrow(new ParsingError(type, "value", errorMessage));
 });
 
-const relationshipAttributeValueTestParameters = [
-    { type: "ProprietaryString", propertyInErrorMessage: "value", valueHintsPattern: characterSets.din91379DatatypeC.toString().slice(1, -1).replaceAll("/", "\\/") },
-    { type: "ProprietaryJSON", propertyInErrorMessage: "value:Object", valueHintsPattern: undefined },
-    { type: "ProprietaryXML", propertyInErrorMessage: "value", valueHintsPattern: characterSets.din91379DatatypeC.toString().slice(1, -1).replaceAll("/", "\\/") }
-];
-
-test.each(relationshipAttributeValueTestParameters)("value of $type is considered as valid", ({ type, valueHintsPattern }) => {
-    const attribute = Serializable.fromUnknown({ "@type": type, value: "z-validValue\u000D¾£(),", title: "aTitle" }) as any;
+test("value of ProprietaryString is considered as valid", () => {
+    const attribute = ProprietaryString.from({ value: "z-validValue\u000D¾£(),", title: "aTitle" }) as any;
     expect(attribute.value).toBe("z-validValue\u000D¾£(),");
-    expect(attribute.valueHints.pattern).toBe(valueHintsPattern);
+    expect(attribute.valueHints.pattern).toBe(characterSets.din91379DatatypeC.toString().slice(1, -1).replaceAll("/", "\\/"));
 });
 
-test.each(relationshipAttributeValueTestParameters)("value of $type is considered as invalid", ({ type, propertyInErrorMessage }) => {
+test("value of ProprietaryString is considered as invalid", () => {
     const invalidCall = () => {
-        Serializable.fromUnknown({ "@type": type, value: "z-invalidValue\u0012", title: "aTitle" });
+        ProprietaryString.from({ value: "z-invalidValue\u0012", title: "aTitle" });
     };
-    expect(invalidCall).toThrow(new ParsingError(type, propertyInErrorMessage, errorMessageDatatypeC));
+    expect(invalidCall).toThrow(new ParsingError("ProprietaryString", "value", errorMessageDatatypeC));
 });
 
 const proprietaryAttributeTestParameters = [
