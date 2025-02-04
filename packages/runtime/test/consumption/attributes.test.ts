@@ -2842,7 +2842,7 @@ describe("DeleteAttributeUseCases", () => {
             expect(CoreDate.from(updatedPredecessor.deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))).toBe(true);
         });
 
-        test("should throw an error trying to delete a PeerSharedAttribute when the Relationship is in status Pending", async () => {
+        test("should throw an error trying to delete a peer shared Attribute when the Relationship is in status Pending", async () => {
             const [services1, services2] = await runtimeServiceProvider.launch(2, {
                 enableRequestModule: true,
                 enableDeciderModule: true,
