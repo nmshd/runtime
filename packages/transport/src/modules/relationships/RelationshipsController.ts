@@ -655,13 +655,4 @@ export class RelationshipsController extends TransportController {
 
         return relationship;
     }
-
-    public async canSendMessage(recipient: CoreAddress): Promise<Result<void, CoreError>> {
-        const relationship = await this.getRelationshipToIdentity(recipient, RelationshipStatus.Pending);
-        if (relationship) {
-            Result.fail(TransportCoreErrors.messages.hasNeitherActiveNorTerminatedRelationship([recipient.address]));
-        }
-
-        return Result.ok(undefined);
-    }
 }

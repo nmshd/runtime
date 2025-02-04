@@ -7,6 +7,7 @@ import {
     ReadAttributeRequestItem,
     ReadAttributeRequestItemJSON,
     RelationshipAttributeConfidentiality,
+    RelationshipTemplateContentJSON,
     RequestItemJSONDerivations,
     ShareAttributeRequestItem,
     ShareAttributeRequestItemJSON,
@@ -47,7 +48,6 @@ import {
     NotifyPeerAboutRepositoryAttributeSuccessionUseCase,
     OwnSharedAttributeDeletedByOwnerEvent,
     PeerSharedAttributeDeletedByPeerEvent,
-    RelationshipTemplateProcessedEvent,
     RepositoryAttributeSucceededEvent,
     ShareRepositoryAttributeRequest,
     ShareRepositoryAttributeUseCase,
@@ -61,6 +61,7 @@ import {
     TestRuntimeServices,
     acceptIncomingShareAttributeRequest,
     cleanupAttributes,
+    createRelationshipInPendingState,
     establishRelationship,
     exchangeAndAcceptRequestByMessage,
     executeFullCreateAndShareRelationshipAttributeFlow,
@@ -71,7 +72,6 @@ import {
     executeFullShareRepositoryAttributeFlow,
     executeFullSucceedRepositoryAttributeAndNotifyPeerFlow,
     syncUntilHasMessageWithNotification,
-    syncUntilHasRelationships,
     waitForRecipientToReceiveNotification
 } from "../lib";
 
@@ -2672,7 +2672,7 @@ describe("DeleteAttributeUseCases", () => {
             expect(CoreDate.from(updatedPredecessor.deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))).toBe(true);
         });
 
-        test("should throw an error when deleting an OwnSharedAttribute when the Relationship is in status Pending", async () => {
+        test("should throw an error trying to delete an own shared Attribute when the Relationship is in status Pending", async () => {
             const [services1, services2] = await runtimeServiceProvider.launch(2, {
                 enableRequestModule: true,
                 enableDeciderModule: true,
@@ -2688,7 +2688,7 @@ describe("DeleteAttributeUseCases", () => {
                 }
             };
 
-            const content: CreateOwnRelationshipTemplateRequest["content"] = {
+            const content: RelationshipTemplateContentJSON = {
                 "@type": "RelationshipTemplateContent",
                 title: "aTitle",
                 onNewRelationship: {
@@ -2696,19 +2696,6 @@ describe("DeleteAttributeUseCases", () => {
                     "@type": "Request"
                 }
             };
-
-            const relationshipTemplateResult = await services1.transport.relationshipTemplates.createOwnRelationshipTemplate({
-                content,
-                expiresAt: CoreDate.utc().add({ day: 1 }).toISOString()
-            });
-
-            const loadedPeerTemplateResult = await services2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
-                reference: relationshipTemplateResult.value.truncatedReference
-            });
-
-            await services2.eventBus.waitForEvent(RelationshipTemplateProcessedEvent, (event) => {
-                return event.data.template.id === loadedPeerTemplateResult.value.id;
-            });
 
             const repositoryAttribute = await services2.consumption.attributes.createRepositoryAttribute({
                 content: {
@@ -2719,28 +2706,12 @@ describe("DeleteAttributeUseCases", () => {
                 }
             });
 
-            expect(repositoryAttribute).toBeSuccessful();
-
-            const requestsForRelationship = await services2.consumption.incomingRequests.getRequests({
-                query: {
-                    "source.reference": loadedPeerTemplateResult.value.id
-                }
-            });
-
-            const acceptedRequest = await services2.consumption.incomingRequests.accept({
-                requestId: requestsForRelationship.value[0].id,
-                items: [
-                    {
-                        accept: true,
-                        existingAttributeId: repositoryAttribute.value.id
-                    } as AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON
-                ]
-            });
-
-            expect(acceptedRequest).toBeSuccessful();
-
-            const relationships = await syncUntilHasRelationships(services1.transport);
-            expect(relationships).toHaveLength(1);
+            await createRelationshipInPendingState(services1, services2, content, [
+                {
+                    accept: true,
+                    existingAttributeId: repositoryAttribute.value.id
+                } as AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON
+            ]);
 
             const ownSharedAttribute = await services2.consumption.attributes.getAttributes({
                 query: {
@@ -2751,8 +2722,8 @@ describe("DeleteAttributeUseCases", () => {
             const attributeDeletion = await services2.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: ownSharedAttribute.value[0].id });
 
             expect(attributeDeletion).toBeAnError(
-                "The shared Attribute cannot be deleted while the Relationship to the Peer is in status Pending.",
-                "error.runtime.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending"
+                "The shared Attribute cannot be deleted because the peer cannot be notified about the deletion.",
+                "error.runtime.attributes.cannotDeleteSharedAttributeBecausePeerCannotBeNotified"
             );
         });
     });
@@ -2871,7 +2842,7 @@ describe("DeleteAttributeUseCases", () => {
             expect(CoreDate.from(updatedPredecessor.deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))).toBe(true);
         });
 
-        test("should throw an error when deleting an PeerSharedAttribute when the Relationship is in status Pending", async () => {
+        test("should throw an error trying to delete an PeerSharedAttribute when the Relationship is in status Pending", async () => {
             const [services1, services2] = await runtimeServiceProvider.launch(2, {
                 enableRequestModule: true,
                 enableDeciderModule: true,
@@ -2903,52 +2874,23 @@ describe("DeleteAttributeUseCases", () => {
                 }
             };
 
-            const relationshipTemplateResult = await services1.transport.relationshipTemplates.createOwnRelationshipTemplate({
-                content,
-                expiresAt: CoreDate.utc().add({ day: 1 }).toISOString()
-            });
-
-            const loadedPeerTemplateResult = await services2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
-                reference: relationshipTemplateResult.value.truncatedReference
-            });
-
-            await services2.eventBus.waitForEvent(RelationshipTemplateProcessedEvent, (event) => {
-                return event.data.template.id === loadedPeerTemplateResult.value.id;
-            });
-
-            expect(repositoryAttribute).toBeSuccessful();
-
-            const requestsForRelationship = await services2.consumption.incomingRequests.getRequests({
-                query: {
-                    "source.reference": loadedPeerTemplateResult.value.id
-                }
-            });
-
-            const acceptedRequest = await services2.consumption.incomingRequests.accept({
-                requestId: requestsForRelationship.value[0].id,
-                items: [
-                    {
-                        accept: true
-                    } as AcceptRequestItemParametersJSON
-                ]
-            });
-
-            expect(acceptedRequest).toBeSuccessful();
-
-            const relationships = await syncUntilHasRelationships(services1.transport);
-            expect(relationships).toHaveLength(1);
+            await createRelationshipInPendingState(services1, services2, content, [
+                {
+                    accept: true
+                } as AcceptRequestItemParametersJSON
+            ]);
 
             const peerSharedAttribute = await services2.consumption.attributes.getAttributes({
                 query: {
-                    "shareInfo.requestReference": requestsForRelationship.value[0].id
+                    "shareInfo.peer": services1.address
                 }
             });
 
             const attributeDeletion = await services2.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: peerSharedAttribute.value[0].id });
 
             expect(attributeDeletion).toBeAnError(
-                "The shared Attribute cannot be deleted while the Relationship to the Peer is in status Pending.",
-                "error.runtime.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending"
+                "The shared Attribute cannot be deleted because the peer cannot be notified about the deletion.",
+                "error.runtime.attributes.cannotDeleteSharedAttributeBecausePeerCannotBeNotified"
             );
         });
     });
@@ -3068,7 +3010,7 @@ describe("DeleteAttributeUseCases", () => {
             expect(getDeletedAttributeResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
         });
 
-        test("should throw an error when deleting a ThirdPartyRelationshipAttribute when the Relationship is in status Pending", async () => {
+        test("should throw an error trying to delete a ThirdPartyRelationshipAttribute when the Relationship is in status Pending", async () => {
             const [services1, services2, services3] = await runtimeServiceProvider.launch(3, {
                 enableRequestModule: true,
                 enableDeciderModule: true,
@@ -3104,49 +3046,22 @@ describe("DeleteAttributeUseCases", () => {
                 }
             };
 
-            const relationshipTemplateResult = await services2.transport.relationshipTemplates.createOwnRelationshipTemplate({
-                content,
-                expiresAt: CoreDate.utc().add({ day: 1 }).toISOString()
-            });
-
-            const loadedPeerTemplateResult = await services3.transport.relationshipTemplates.loadPeerRelationshipTemplate({
-                reference: relationshipTemplateResult.value.truncatedReference
-            });
-
-            await services3.eventBus.waitForEvent(RelationshipTemplateProcessedEvent, (event) => {
-                return event.data.template.id === loadedPeerTemplateResult.value.id;
-            });
-
-            const requestsForRelationship = await services3.consumption.incomingRequests.getRequests({
-                query: {
-                    "source.reference": loadedPeerTemplateResult.value.id
-                }
-            });
-
-            const acceptedRequest = await services3.consumption.incomingRequests.accept({
-                requestId: requestsForRelationship.value[0].id,
-                items: [
-                    {
-                        accept: true
-                    } as AcceptRequestItemParametersJSON
-                ]
-            });
-
-            expect(acceptedRequest).toBeSuccessful();
-
-            const relationships = await syncUntilHasRelationships(services2.transport);
-            expect(relationships).toHaveLength(1);
+            await createRelationshipInPendingState(services2, services3, content, [
+                {
+                    accept: true
+                } as AcceptRequestItemParametersJSON
+            ]);
 
             const thirdPartyRelationshipAttribute = await services3.consumption.attributes.getAttributes({
                 query: {
-                    "shareInfo.requestReference": requestsForRelationship.value[0].id
+                    "shareInfo.peer": services2.address
                 }
             });
             const attributeDeletion = await services3.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: thirdPartyRelationshipAttribute.value[0].id });
 
             expect(attributeDeletion).toBeAnError(
-                "The shared Attribute cannot be deleted while the Relationship to the Peer is in status Pending.",
-                "error.runtime.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending"
+                "The shared Attribute cannot be deleted because the peer cannot be notified about the deletion.",
+                "error.runtime.attributes.cannotDeleteSharedAttributeBecausePeerCannotBeNotified"
             );
         });
     });
