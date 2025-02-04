@@ -1,5 +1,5 @@
 import { ISerializable } from "@js-soft/ts-serval";
-import { log } from "@js-soft/ts-utils";
+import { log, Result } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreError, CoreId, ICoreAddress, ICoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
@@ -293,7 +293,7 @@ export class MessageController extends TransportController {
         if (!parsedParams.attachments) parsedParams.attachments = [];
 
         const validationError = await this.validateMessageRecipients(parsedParams.recipients);
-        if (validationError) throw validationError;
+        if (validationError.isError) throw validationError.error;
 
         const secret = await CoreCrypto.generateSecretKey();
         const serializedSecret = secret.serialize(false);
@@ -419,7 +419,7 @@ export class MessageController extends TransportController {
         return message;
     }
 
-    public async validateMessageRecipients(recipients: CoreAddress[]): Promise<CoreError | undefined> {
+    public async validateMessageRecipients(recipients: CoreAddress[]): Promise<Result<undefined, CoreError>> {
         const peersWithNeitherActiveNorTerminatedRelationship: string[] = [];
         const deletedPeers: string[] = [];
 
@@ -437,12 +437,12 @@ export class MessageController extends TransportController {
         }
 
         if (peersWithNeitherActiveNorTerminatedRelationship.length > 0) {
-            return TransportCoreErrors.messages.hasNeitherActiveNorTerminatedRelationship(peersWithNeitherActiveNorTerminatedRelationship);
+            return Result.fail(TransportCoreErrors.messages.hasNeitherActiveNorTerminatedRelationship(peersWithNeitherActiveNorTerminatedRelationship));
         }
 
-        if (deletedPeers.length > 0) return TransportCoreErrors.messages.peerIsDeleted(deletedPeers);
+        if (deletedPeers.length > 0) return Result.fail(TransportCoreErrors.messages.peerIsDeleted(deletedPeers));
 
-        return;
+        return Result.ok(undefined);
     }
 
     private async decryptOwnEnvelope(envelope: MessageEnvelope, secretKey: CryptoSecretKey): Promise<MessageContentWrapper> {
