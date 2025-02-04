@@ -2,7 +2,7 @@ import { Result } from "@js-soft/ts-utils";
 import { AttributesController, ConsumptionIds, LocalAttribute } from "@nmshd/consumption";
 import { Notification, OwnSharedAttributeDeletedByOwnerNotificationItem } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
-import { AccountController, MessageController, RelationshipsController } from "@nmshd/transport";
+import { AccountController, MessageController, RelationshipsController, RelationshipStatus } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { AttributeIdString, NotificationIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
@@ -40,9 +40,9 @@ export class DeleteOwnSharedAttributeAndNotifyPeerUseCase extends UseCase<Delete
             return Result.fail(RuntimeErrors.attributes.isNotOwnSharedAttribute(ownSharedAttributeId));
         }
 
-        const canSendMessageResult = await this.messageController.validateMessageRecipients([ownSharedAttribute.shareInfo.peer]);
+        const relationshipToPeer = await this.relationshipsController.getRelationshipToIdentity(ownSharedAttribute.shareInfo.peer, RelationshipStatus.Pending);
 
-        if (canSendMessageResult) {
+        if (relationshipToPeer) {
             return Result.fail(RuntimeErrors.attributes.cannotDeleteSharedAttributeBecausePeerCannotBeNotified());
         }
 
@@ -52,6 +52,12 @@ export class DeleteOwnSharedAttributeAndNotifyPeerUseCase extends UseCase<Delete
         }
 
         await this.attributesController.executeFullAttributeDeletionProcess(ownSharedAttribute);
+
+        const canSendMessageResult = await this.messageController.validateMessageRecipients([ownSharedAttribute.shareInfo.peer]);
+
+        if (canSendMessageResult) {
+            return Result.ok({ notificationId: "" });
+        }
 
         const notificationId = await ConsumptionIds.notification.generate();
         const notificationItem = OwnSharedAttributeDeletedByOwnerNotificationItem.from({ attributeId: ownSharedAttributeId });

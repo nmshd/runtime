@@ -2,8 +2,9 @@ import { Result } from "@js-soft/ts-utils";
 import { AttributesController, ConsumptionIds, LocalAttribute } from "@nmshd/consumption";
 import { Notification, PeerSharedAttributeDeletedByPeerNotificationItem } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
-import { AccountController, MessageController } from "@nmshd/transport";
+import { AccountController, MessageController, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
+import { RelationshipStatus } from "../../../types";
 import { AttributeIdString, NotificationIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
 export interface DeletePeerSharedAttributeAndNotifyOwnerRequest {
@@ -25,6 +26,7 @@ export class DeletePeerSharedAttributeAndNotifyOwnerUseCase extends UseCase<Dele
         @Inject private readonly attributesController: AttributesController,
         @Inject private readonly accountController: AccountController,
         @Inject private readonly messageController: MessageController,
+        @Inject private readonly relationshipsController: RelationshipsController,
         @Inject validator: Validator
     ) {
         super(validator);
@@ -39,9 +41,9 @@ export class DeletePeerSharedAttributeAndNotifyOwnerUseCase extends UseCase<Dele
             return Result.fail(RuntimeErrors.attributes.isNotPeerSharedAttribute(peerSharedAttributeId));
         }
 
-        const canSendMessageResult = await this.messageController.validateMessageRecipients([peerSharedAttribute.shareInfo.peer]);
+        const relationshipToPeer = await this.relationshipsController.getRelationshipToIdentity(peerSharedAttribute.shareInfo.peer, RelationshipStatus.Pending);
 
-        if (canSendMessageResult) {
+        if (relationshipToPeer) {
             return Result.fail(RuntimeErrors.attributes.cannotDeleteSharedAttributeBecausePeerCannotBeNotified());
         }
 
@@ -52,6 +54,12 @@ export class DeletePeerSharedAttributeAndNotifyOwnerUseCase extends UseCase<Dele
         }
 
         await this.attributesController.executeFullAttributeDeletionProcess(peerSharedAttribute);
+
+        const canSendMessageResult = await this.messageController.validateMessageRecipients([peerSharedAttribute.shareInfo.peer]);
+
+        if (canSendMessageResult) {
+            return Result.ok({ notificationId: "" });
+        }
 
         const notificationId = await ConsumptionIds.notification.generate();
         const notificationItem = PeerSharedAttributeDeletedByPeerNotificationItem.from({ attributeId: peerSharedAttributeId });

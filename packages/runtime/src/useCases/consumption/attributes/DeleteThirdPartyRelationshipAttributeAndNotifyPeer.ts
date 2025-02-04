@@ -2,7 +2,7 @@ import { Result } from "@js-soft/ts-utils";
 import { AttributesController, ConsumptionIds, LocalAttribute } from "@nmshd/consumption";
 import { Notification, ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
-import { AccountController, MessageController, RelationshipsController } from "@nmshd/transport";
+import { AccountController, MessageController, RelationshipsController, RelationshipStatus } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { AttributeIdString, NotificationIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
@@ -45,9 +45,9 @@ export class DeleteThirdPartyRelationshipAttributeAndNotifyPeerUseCase extends U
             return Result.fail(RuntimeErrors.attributes.isNotThirdPartyRelationshipAttribute(thirdPartyRelationshipAttributeId));
         }
 
-        const canSendMessageResult = await this.messageController.validateMessageRecipients([thirdPartyRelationshipAttribute.shareInfo.peer]);
+        const relationshipToPeer = await this.relationshipsController.getRelationshipToIdentity(thirdPartyRelationshipAttribute.shareInfo.peer, RelationshipStatus.Pending);
 
-        if (canSendMessageResult) {
+        if (relationshipToPeer) {
             return Result.fail(RuntimeErrors.attributes.cannotDeleteSharedAttributeBecausePeerCannotBeNotified());
         }
 
@@ -55,6 +55,12 @@ export class DeleteThirdPartyRelationshipAttributeAndNotifyPeerUseCase extends U
         if (validationResult.isError()) return Result.fail(validationResult.error);
 
         await this.attributesController.executeFullAttributeDeletionProcess(thirdPartyRelationshipAttribute);
+
+        const canSendMessageResult = await this.messageController.validateMessageRecipients([thirdPartyRelationshipAttribute.shareInfo.peer]);
+
+        if (canSendMessageResult) {
+            return Result.ok({ notificationId: "" });
+        }
 
         const notificationId = await ConsumptionIds.notification.generate();
         const notificationItem = ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem.from({ attributeId: thirdPartyRelationshipAttributeId });
