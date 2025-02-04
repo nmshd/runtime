@@ -924,31 +924,31 @@ export async function createRelationshipInPendingState(
     templateContent: RelationshipTemplateContentJSON,
     acceptItems: DecideRequestParametersJSON["items"]
 ): Promise<RelationshipDTO> {
-    const relationshipTemplateResult = await sender.transport.relationshipTemplates.createOwnRelationshipTemplate({
+    const relationshipTemplateResult = await templator.transport.relationshipTemplates.createOwnRelationshipTemplate({
         content: templateContent,
         expiresAt: CoreDate.utc().add({ day: 1 }).toISOString()
     });
 
-    const loadedPeerTemplateResult = await receiver.transport.relationshipTemplates.loadPeerRelationshipTemplate({
+    const loadedPeerTemplateResult = await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({
         reference: relationshipTemplateResult.value.truncatedReference
     });
 
-    await receiver.eventBus.waitForEvent(RelationshipTemplateProcessedEvent, (event) => {
+    await requestor.eventBus.waitForEvent(RelationshipTemplateProcessedEvent, (event) => {
         return event.data.template.id === loadedPeerTemplateResult.value.id;
     });
 
-    const requestsForRelationship = await receiver.consumption.incomingRequests.getRequests({
+    const requestsForRelationship = await requestor.consumption.incomingRequests.getRequests({
         query: {
             "source.reference": loadedPeerTemplateResult.value.id
         }
     });
 
-    await receiver.consumption.incomingRequests.accept({
+    await requestor.consumption.incomingRequests.accept({
         requestId: requestsForRelationship.value[0].id,
         items: acceptItems
     });
 
-    const relationships = await syncUntilHasRelationships(sender.transport);
+    const relationships = await syncUntilHasRelationships(templator.transport);
     expect(relationships).toHaveLength(1);
     return relationships[0];
 }
