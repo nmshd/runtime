@@ -2,7 +2,7 @@ import { Result } from "@js-soft/ts-utils";
 import { AttributesController, ConsumptionIds, LocalAttribute } from "@nmshd/consumption";
 import { Notification, PeerSharedAttributeDeletedByPeerNotificationItem } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
-import { AccountController, MessageController, RelationshipsController } from "@nmshd/transport";
+import { AccountController, MessageController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { AttributeIdString, NotificationIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
@@ -25,7 +25,6 @@ export class DeletePeerSharedAttributeAndNotifyOwnerUseCase extends UseCase<Dele
         @Inject private readonly attributesController: AttributesController,
         @Inject private readonly accountController: AccountController,
         @Inject private readonly messageController: MessageController,
-        @Inject private readonly relationshipsController: RelationshipsController,
         @Inject validator: Validator
     ) {
         super(validator);
