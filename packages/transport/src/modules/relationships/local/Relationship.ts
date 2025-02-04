@@ -1,4 +1,4 @@
-import { ISerializable, serialize, type, validate } from "@js-soft/ts-serval";
+import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreDate, CoreId, ICoreId } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
 import { CoreSynchronizable, ICoreSynchronizable, TransportError } from "../../../core";
@@ -51,7 +51,7 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
     public peer: Identity;
 
     @validate({ nullable: true })
-    @serialize()
+    @serialize({ type: String })
     public allowedFeatures?: string[];
 
     @validate({ nullable: true })
@@ -113,6 +113,12 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
 
     public static from(value: IRelationship): Relationship {
         return this.fromAny(value);
+    }
+
+    public static override postFrom<T extends Serializable>(value: T): T {
+        if (!(value instanceof Relationship)) throw new Error("Error");
+        value.allowedFeatures = ["thirdParty", "ShareAttributeRequestItem"];
+        return value;
     }
 
     public setCache(cache: CachedRelationship): this {
