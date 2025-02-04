@@ -15,7 +15,7 @@ export class ExtendedSerializable extends Serializable {
             }
             if (this.hasOwnProperty(key)) {
                 if (typeof (this as any)[key].getRequiredFeatures === "function") {
-                    const subSet = (this as any)[key].getPropertySet();
+                    const subSet = (this as any)[key].getRequiredFeatures();
                     unionSet = _.union(unionSet, subSet);
                 }
             }
