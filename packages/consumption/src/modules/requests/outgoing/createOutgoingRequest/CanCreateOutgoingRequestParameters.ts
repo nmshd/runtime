@@ -1,6 +1,7 @@
-import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
+import { ISerializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { Request } from "@nmshd/content";
 import { CoreAddress, ICoreAddress } from "@nmshd/core-types";
+import { ExtendedSerializable } from "@nmshd/transport";
 import { IRequestWithoutId, RequestJSONWithoutId } from "./CreateOutgoingRequestParameters";
 
 export interface ICanCreateOutgoingRequestParameters extends ISerializable {
@@ -9,7 +10,7 @@ export interface ICanCreateOutgoingRequestParameters extends ISerializable {
 }
 
 @type("CanCreateOutgoingRequestParameters")
-export class CanCreateOutgoingRequestParameters extends Serializable implements ICanCreateOutgoingRequestParameters {
+export class CanCreateOutgoingRequestParameters extends ExtendedSerializable implements ICanCreateOutgoingRequestParameters {
     @serialize()
     @validate()
     public content: Request;

@@ -79,6 +79,14 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
                     ConsumptionCoreErrors.requests.peerIsDeleted(`You cannot create a Request to peer '${parsedParams.peer.toString()}' since the peer is deleted.`)
                 );
             }
+
+            parsedParams.getRequiredFeatures().forEach((f) => {
+                if (!relationship.allowedFeatures?.includes(f)) {
+                    throw new ConsumptionError(
+                        `Due to the existence of the forbidden feature ${f} in the Relationship to the recipient with address '${parsedParams.peer!.toString()}', the Request cannot be created.`
+                    );
+                }
+            });
         }
 
         const innerResults = await this.canCreateItems(parsedParams.content, parsedParams.peer);
