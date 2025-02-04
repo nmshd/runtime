@@ -7,17 +7,15 @@ export class ExtendedSerializable extends Serializable {
         for (const key in this) {
             if (Array.isArray(this[key])) {
                 this[key].forEach((v) => {
-                    if (typeof v.getRequiredFeatures === "function") {
+                    if (v instanceof ExtendedSerializable) {
                         const subSet = v.getRequiredFeatures();
                         unionSet = _.union(unionSet, subSet);
                     }
                 });
             }
-            if (this.hasOwnProperty(key)) {
-                if (typeof (this as any)[key].getRequiredFeatures === "function") {
-                    const subSet = (this as any)[key].getRequiredFeatures();
-                    unionSet = _.union(unionSet, subSet);
-                }
+            if (this[key] instanceof ExtendedSerializable) {
+                const subSet = (this as any)[key].getRequiredFeatures();
+                unionSet = _.union(unionSet, subSet);
             }
         }
         return unionSet;
