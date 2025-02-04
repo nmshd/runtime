@@ -919,8 +919,8 @@ export async function cleanupAttributes(...services: TestRuntimeServices[]): Pro
 }
 
 export async function createRelationshipInPendingState(
-    sender: TestRuntimeServices,
-    receiver: TestRuntimeServices,
+    templator: TestRuntimeServices,
+    requestor: TestRuntimeServices,
     templateContent: RelationshipTemplateContentJSON,
     acceptItems: DecideRequestParametersJSON["items"]
 ): Promise<RelationshipDTO> {
