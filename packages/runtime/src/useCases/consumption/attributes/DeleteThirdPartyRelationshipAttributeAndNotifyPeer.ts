@@ -48,7 +48,7 @@ export class DeleteThirdPartyRelationshipAttributeAndNotifyPeerUseCase extends U
         const relationshipToPeer = await this.relationshipsController.getRelationshipToIdentity(thirdPartyRelationshipAttribute.shareInfo.peer, RelationshipStatus.Pending);
 
         if (relationshipToPeer) {
-            return Result.fail(RuntimeErrors.attributes.cannotDeleteSharedAttributeBecausePeerCannotBeNotified());
+            return Result.fail(RuntimeErrors.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending());
         }
 
         const validationResult = await this.attributesController.validateFullAttributeDeletionProcess(thirdPartyRelationshipAttribute);

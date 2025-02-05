@@ -2722,8 +2722,8 @@ describe("DeleteAttributeUseCases", () => {
             const attributeDeletion = await services2.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: ownSharedAttribute.value[0].id });
 
             expect(attributeDeletion).toBeAnError(
-                "The shared Attribute cannot be deleted because the peer cannot be notified about the deletion.",
-                "error.runtime.attributes.cannotDeleteSharedAttributeBecausePeerCannotBeNotified"
+                "The shared Attribute cannot be deleted while the Relationship to the peer is in status 'Pending'.",
+                "error.runtime.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending"
             );
         });
     });
@@ -2889,8 +2889,8 @@ describe("DeleteAttributeUseCases", () => {
             const attributeDeletion = await services2.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: peerSharedAttribute.value[0].id });
 
             expect(attributeDeletion).toBeAnError(
-                "The shared Attribute cannot be deleted because the peer cannot be notified about the deletion.",
-                "error.runtime.attributes.cannotDeleteSharedAttributeBecausePeerCannotBeNotified"
+                "The shared Attribute cannot be deleted while the Relationship to the peer is in status 'Pending'.",
+                "error.runtime.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending"
             );
         });
     });
@@ -3060,8 +3060,8 @@ describe("DeleteAttributeUseCases", () => {
             const attributeDeletion = await services3.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: thirdPartyRelationshipAttribute.value[0].id });
 
             expect(attributeDeletion).toBeAnError(
-                "The shared Attribute cannot be deleted because the peer cannot be notified about the deletion.",
-                "error.runtime.attributes.cannotDeleteSharedAttributeBecausePeerCannotBeNotified"
+                "The shared Attribute cannot be deleted while the Relationship to the peer is in status 'Pending'.",
+                "error.runtime.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending"
             );
         });
     });

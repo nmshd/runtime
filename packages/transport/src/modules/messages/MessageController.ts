@@ -292,8 +292,8 @@ export class MessageController extends TransportController {
         const parsedParams = SendMessageParameters.from(parameters);
         if (!parsedParams.attachments) parsedParams.attachments = [];
 
-        const validationError = await this.validateMessageRecipients(parsedParams.recipients);
-        if (validationError.isError) throw validationError.error;
+        const validationResult = await this.validateMessageRecipients(parsedParams.recipients);
+        if (validationResult.isError) throw validationResult.error;
 
         const secret = await CoreCrypto.generateSecretKey();
         const serializedSecret = secret.serialize(false);
