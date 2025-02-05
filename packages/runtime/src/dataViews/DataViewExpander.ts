@@ -1556,7 +1556,7 @@ export class DataViewExpander {
             type: "IdentityDVO",
             name: "i18n://dvo.identity.unknown",
             initials: "",
-            description: "i18n://dvo.identity.unknown.description",
+            description: "i18n://dvo.identity.unknown",
             publicKey: "i18n://dvo.identity.publicKey.unknown",
             isSelf: false,
             hasRelationship: false
