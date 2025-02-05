@@ -1620,7 +1620,7 @@ export class DataViewExpander {
             id: address,
             name: name ?? "i18n://dvo.identity.unknown",
             initials: name ? (name.match(/\b\w/g) ?? []).join("") : "",
-            description: "i18n://dvo.identity.unknown.description",
+            description: "i18n://dvo.identity.unknown",
             isSelf: false,
             hasRelationship: false
         };
