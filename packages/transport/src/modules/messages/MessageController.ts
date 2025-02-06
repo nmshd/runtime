@@ -419,7 +419,7 @@ export class MessageController extends TransportController {
         return message;
     }
 
-    public async validateMessageRecipients(recipients: CoreAddress[]): Promise<Result<undefined, CoreError>> {
+    public async validateMessageRecipients(recipients: CoreAddress[]): Promise<Result<void, CoreError>> {
         const peersWithNeitherActiveNorTerminatedRelationship: string[] = [];
         const deletedPeers: string[] = [];
 
