@@ -11,7 +11,7 @@ export interface DeleteOwnSharedAttributeAndNotifyPeerRequest {
 }
 
 export interface DeleteOwnSharedAttributeAndNotifyPeerResponse {
-    notificationId: NotificationIdString;
+    notificationId?: NotificationIdString;
 }
 
 class Validator extends SchemaValidator<DeleteOwnSharedAttributeAndNotifyPeerRequest> {
@@ -56,7 +56,7 @@ export class DeleteOwnSharedAttributeAndNotifyPeerUseCase extends UseCase<Delete
         const messageRecipientsValidationResult = await this.messageController.validateMessageRecipients([ownSharedAttribute.shareInfo.peer]);
 
         if (messageRecipientsValidationResult.isError) {
-            return Result.ok({ notificationId: "" });
+            return Result.ok({});
         }
 
         const notificationId = await ConsumptionIds.notification.generate();
