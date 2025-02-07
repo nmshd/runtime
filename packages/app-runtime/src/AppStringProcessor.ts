@@ -98,6 +98,11 @@ export class AppStringProcessor {
         }
 
         if (tokenContent instanceof TokenContentDeviceSharedSecret) {
+            if (tokenContent.sharedSecret.isBackupDevice) {
+                await uiBridge.showBackupDeviceOnboarding(DeviceMapper.toDeviceOnboardingInfoDTO(tokenContent.sharedSecret));
+                return UserfriendlyResult.ok(undefined);
+            }
+
             await uiBridge.showDeviceOnboarding(DeviceMapper.toDeviceOnboardingInfoDTO(tokenContent.sharedSecret));
             return UserfriendlyResult.ok(undefined);
         }

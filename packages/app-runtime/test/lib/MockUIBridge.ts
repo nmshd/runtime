@@ -7,6 +7,7 @@ export type MockUIBridgeCall =
     | { method: "showRelationship"; account: LocalAccountDTO; relationship: IdentityDVO }
     | { method: "showFile"; account: LocalAccountDTO; file: FileDVO }
     | { method: "showDeviceOnboarding"; deviceOnboardingInfo: DeviceOnboardingInfoDTO }
+    | { method: "showBackupDeviceOnboarding"; deviceOnboardingInfo: DeviceOnboardingInfoDTO }
     | { method: "showRequest"; account: LocalAccountDTO; request: LocalRequestDVO }
     | { method: "showError"; error: UserfriendlyApplicationError; account?: LocalAccountDTO }
     | { method: "requestAccountSelection"; possibleAccounts: LocalAccountDTO[]; title?: string; description?: string }
@@ -55,6 +56,12 @@ export class MockUIBridge implements IUIBridge {
 
     public showDeviceOnboarding(deviceOnboardingInfo: DeviceOnboardingInfoDTO): Promise<Result<void>> {
         this._calls.push({ method: "showDeviceOnboarding", deviceOnboardingInfo });
+
+        return Promise.resolve(Result.ok(undefined));
+    }
+
+    public showBackupDeviceOnboarding(deviceOnboardingInfo: DeviceOnboardingInfoDTO): Promise<Result<void>> {
+        this._calls.push({ method: "showBackupDeviceOnboarding", deviceOnboardingInfo });
 
         return Promise.resolve(Result.ok(undefined));
     }

@@ -8,6 +8,7 @@ export interface IUIBridge {
     showRelationship(account: LocalAccountDTO, relationship: IdentityDVO): Promise<Result<void>>;
     showFile(account: LocalAccountDTO, file: FileDVO): Promise<Result<void>>;
     showDeviceOnboarding(deviceOnboardingInfo: DeviceOnboardingInfoDTO): Promise<Result<void>>;
+    showBackupDeviceOnboarding(deviceOnboardingInfo: DeviceOnboardingInfoDTO): Promise<Result<void>>;
     showRequest(account: LocalAccountDTO, request: LocalRequestDVO): Promise<Result<void>>;
     showError(error: UserfriendlyApplicationError, account?: LocalAccountDTO): Promise<Result<void>>;
     requestAccountSelection(possibleAccounts: LocalAccountDTO[], title?: string, description?: string): Promise<Result<LocalAccountDTO | undefined>>;

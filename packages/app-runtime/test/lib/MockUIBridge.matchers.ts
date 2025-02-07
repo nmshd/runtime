@@ -1,6 +1,27 @@
 import { MockUIBridge } from "./MockUIBridge";
 
 expect.extend({
+    showBackupDeviceOnboardingCalled(mockUIBridge: unknown, deviceId: string) {
+        if (!(mockUIBridge instanceof MockUIBridge)) {
+            throw new Error("This method can only be used with expect(MockUIBridge).");
+        }
+
+        const calls = mockUIBridge.calls.filter((x) => x.method === "showBackupDeviceOnboarding");
+        if (calls.length === 0) {
+            return { pass: false, message: () => "The method showBackupDeviceOnboarding was not called." };
+        }
+
+        const matchingCalls = calls.filter((x) => x.deviceOnboardingInfo.id === deviceId);
+        if (matchingCalls.length === 0) {
+            return {
+                pass: false,
+                message: () =>
+                    `The method showBackupDeviceOnboarding was called, but not with the specified device id '${deviceId}', instead with ids '${calls.map((e) => e.deviceOnboardingInfo.id).join(", ")}'.`
+            };
+        }
+
+        return { pass: true, message: () => "" };
+    },
     showDeviceOnboardingCalled(mockUIBridge: unknown, deviceId: string) {
         if (!(mockUIBridge instanceof MockUIBridge)) {
             throw new Error("This method can only be used with expect(MockUIBridge).");
@@ -112,6 +133,7 @@ expect.extend({
 declare global {
     namespace jest {
         interface Matchers<R> {
+            showBackupDeviceOnboardingCalled(deviceId: string): R;
             showDeviceOnboardingCalled(deviceId: string): R;
             showDeviceOnboardingNotCalled(): R;
             requestAccountSelectionCalled(possibleAccountsLength: number): R;

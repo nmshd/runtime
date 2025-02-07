@@ -17,7 +17,7 @@ export interface IDeviceSharedSecret extends ISerializable {
     identity: IIdentity;
     password: string;
     username: string;
-    isBackupDevice?: boolean; // TODO: optional for backwards compatibility
+    isBackupDevice?: boolean;
 }
 
 @type("DeviceSharedSecret")
