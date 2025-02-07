@@ -219,10 +219,9 @@ describe("AppStringProcessor", function () {
             expect(mockUiBridge).showDeviceOnboardingCalled(deviceResult.value.id);
         });
 
-        test.only("backup device onboarding with a password protected Token", async function () {
-            const deviceResult = await runtime1Session.transportServices.devices.createDevice({});
+        test("backup device onboarding with a password protected Token", async function () {
             const tokenResult = await runtime1Session.transportServices.identityRecoveryKits.createIdentityRecoveryKit({
-                profileName: "profileName",
+                profileName: "profileNameForBackupDevice",
                 passwordProtection: { password: "password" }
             });
 
@@ -232,7 +231,7 @@ describe("AppStringProcessor", function () {
             expect(result).toBeSuccessful();
             expect(result.value).toBeUndefined();
 
-            expect(mockUiBridge).showBackupDeviceOnboardingCalled(deviceResult.value.id);
+            expect(mockUiBridge).showBackupDeviceOnboardingCalled("profileNameForBackupDevice");
         });
     });
 });
