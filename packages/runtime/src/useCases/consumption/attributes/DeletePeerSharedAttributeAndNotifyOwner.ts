@@ -12,7 +12,7 @@ export interface DeletePeerSharedAttributeAndNotifyOwnerRequest {
 }
 
 export interface DeletePeerSharedAttributeAndNotifyOwnerResponse {
-    notificationId: NotificationIdString;
+    notificationId?: NotificationIdString;
 }
 
 class Validator extends SchemaValidator<DeletePeerSharedAttributeAndNotifyOwnerRequest> {
@@ -58,7 +58,7 @@ export class DeletePeerSharedAttributeAndNotifyOwnerUseCase extends UseCase<Dele
         const messageRecipientsValidationResult = await this.messageController.validateMessageRecipients([peerSharedAttribute.shareInfo.peer]);
 
         if (messageRecipientsValidationResult.isError) {
-            return Result.ok({ notificationId: "" });
+            return Result.ok({});
         }
 
         const notificationId = await ConsumptionIds.notification.generate();

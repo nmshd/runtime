@@ -11,7 +11,7 @@ export interface DeleteThirdPartyRelationshipAttributeAndNotifyPeerRequest {
 }
 
 export interface DeleteThirdPartyRelationshipAttributeAndNotifyPeerResponse {
-    notificationId: NotificationIdString;
+    notificationId?: NotificationIdString;
 }
 
 class Validator extends SchemaValidator<DeleteThirdPartyRelationshipAttributeAndNotifyPeerRequest> {
@@ -59,7 +59,7 @@ export class DeleteThirdPartyRelationshipAttributeAndNotifyPeerUseCase extends U
         const messageRecipientsValidationResult = await this.messageController.validateMessageRecipients([thirdPartyRelationshipAttribute.shareInfo.peer]);
 
         if (messageRecipientsValidationResult.isError) {
-            return Result.ok({ notificationId: "" });
+            return Result.ok({});
         }
 
         const notificationId = await ConsumptionIds.notification.generate();
