@@ -133,8 +133,8 @@ expect.extend({
 declare global {
     namespace jest {
         interface Matchers<R> {
-            showBackupDeviceOnboardingCalled(deviceId: string): R;
-            showDeviceOnboardingCalled(profilenName: string): R;
+            showBackupDeviceOnboardingCalled(profilenName: string): R;
+            showDeviceOnboardingCalled(deviceId: string): R;
             showDeviceOnboardingNotCalled(): R;
             requestAccountSelectionCalled(possibleAccountsLength: number): R;
             requestAccountSelectionNotCalled(): R;
