@@ -17,7 +17,7 @@ expect.extend({
             return {
                 pass: false,
                 message: () =>
-                    `The method showDeviceOnboarding was called, but not with the specified predicate, instead with ids '${calls.map((e) => e.deviceOnboardingInfo.id).join(", ")}'.`
+                    `The method showDeviceOnboarding was called, but not with the specified predicate, instead with payloads '${calls.map((e) => JSON.stringify(e.deviceOnboardingInfo)).join(", ")}'.`
             };
         }
 
