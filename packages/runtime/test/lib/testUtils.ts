@@ -918,7 +918,7 @@ export async function cleanupAttributes(...services: TestRuntimeServices[]): Pro
     );
 }
 
-export async function createRelationshipInPendingState(
+export async function createRelationshipWithStatusPending(
     templator: TestRuntimeServices,
     requestor: TestRuntimeServices,
     templateContent: RelationshipTemplateContentJSON,

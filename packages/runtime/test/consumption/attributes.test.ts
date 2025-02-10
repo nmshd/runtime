@@ -61,7 +61,7 @@ import {
     TestRuntimeServices,
     acceptIncomingShareAttributeRequest,
     cleanupAttributes,
-    createRelationshipInPendingState,
+    createRelationshipWithStatusPending,
     establishRelationship,
     exchangeAndAcceptRequestByMessage,
     executeFullCreateAndShareRelationshipAttributeFlow,
@@ -2679,6 +2679,17 @@ describe("DeleteAttributeUseCases", () => {
                 enableNotificationModule: true
             });
 
+            const repositoryAttribute = (
+                await services2.consumption.attributes.createRepositoryAttribute({
+                    content: {
+                        value: {
+                            "@type": "GivenName",
+                            value: "aGivenName"
+                        }
+                    }
+                })
+            ).value;
+
             const item: ReadAttributeRequestItemJSON = {
                 "@type": "ReadAttributeRequestItem",
                 mustBeAccepted: true,
@@ -2688,7 +2699,7 @@ describe("DeleteAttributeUseCases", () => {
                 }
             };
 
-            const content: RelationshipTemplateContentJSON = {
+            const relationshipTemplateContent: RelationshipTemplateContentJSON = {
                 "@type": "RelationshipTemplateContent",
                 title: "aTitle",
                 onNewRelationship: {
@@ -2696,32 +2707,22 @@ describe("DeleteAttributeUseCases", () => {
                     "@type": "Request"
                 }
             };
-
-            const repositoryAttribute = await services2.consumption.attributes.createRepositoryAttribute({
-                content: {
-                    value: {
-                        "@type": "GivenName",
-                        value: "aGivenName"
-                    }
-                }
-            });
-
-            await createRelationshipInPendingState(services1, services2, content, [
+            await createRelationshipWithStatusPending(services1, services2, relationshipTemplateContent, [
                 {
                     accept: true,
-                    existingAttributeId: repositoryAttribute.value.id
+                    existingAttributeId: repositoryAttribute.id
                 } as AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON
             ]);
 
             const ownSharedAttribute = await services2.consumption.attributes.getAttributes({
                 query: {
-                    "shareInfo.sourceAttribute": repositoryAttribute.value.id
+                    "shareInfo.sourceAttribute": repositoryAttribute.id
                 }
             });
 
-            const attributeDeletion = await services2.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: ownSharedAttribute.value[0].id });
+            const attributeDeletionResult = await services2.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: ownSharedAttribute.value[0].id });
 
-            expect(attributeDeletion).toBeAnError(
+            expect(attributeDeletionResult).toBeAnError(
                 "The shared Attribute cannot be deleted while the Relationship to the peer is in status 'Pending'.",
                 "error.runtime.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending"
             );
@@ -2849,23 +2850,25 @@ describe("DeleteAttributeUseCases", () => {
                 enableNotificationModule: true
             });
 
-            const repositoryAttribute = await services1.consumption.attributes.createRepositoryAttribute({
-                content: {
-                    value: {
-                        "@type": "GivenName",
-                        value: "aGivenName"
+            const repositoryAttribute = (
+                await services1.consumption.attributes.createRepositoryAttribute({
+                    content: {
+                        value: {
+                            "@type": "GivenName",
+                            value: "aGivenName"
+                        }
                     }
-                }
-            });
+                })
+            ).value;
 
             const item: ShareAttributeRequestItemJSON = {
                 "@type": "ShareAttributeRequestItem",
                 mustBeAccepted: true,
-                attribute: repositoryAttribute.value.content,
-                sourceAttributeId: repositoryAttribute.value.id
+                attribute: repositoryAttribute.content,
+                sourceAttributeId: repositoryAttribute.id
             };
 
-            const content: CreateOwnRelationshipTemplateRequest["content"] = {
+            const relationshipTemplateContent: CreateOwnRelationshipTemplateRequest["content"] = {
                 "@type": "RelationshipTemplateContent",
                 title: "aTitle",
                 onNewRelationship: {
@@ -2874,7 +2877,7 @@ describe("DeleteAttributeUseCases", () => {
                 }
             };
 
-            await createRelationshipInPendingState(services1, services2, content, [
+            await createRelationshipWithStatusPending(services1, services2, relationshipTemplateContent, [
                 {
                     accept: true
                 } as AcceptRequestItemParametersJSON
@@ -2886,9 +2889,9 @@ describe("DeleteAttributeUseCases", () => {
                 }
             });
 
-            const attributeDeletion = await services2.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: peerSharedAttribute.value[0].id });
+            const attributeDeletionResult = await services2.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: peerSharedAttribute.value[0].id });
 
-            expect(attributeDeletion).toBeAnError(
+            expect(attributeDeletionResult).toBeAnError(
                 "The shared Attribute cannot be deleted while the Relationship to the peer is in status 'Pending'.",
                 "error.runtime.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending"
             );
@@ -3037,7 +3040,7 @@ describe("DeleteAttributeUseCases", () => {
                 thirdPartyAddress: services1.address
             };
 
-            const content: CreateOwnRelationshipTemplateRequest["content"] = {
+            const relationshipTemplateContent: CreateOwnRelationshipTemplateRequest["content"] = {
                 "@type": "RelationshipTemplateContent",
                 title: "aTitle",
                 onNewRelationship: {
@@ -3046,7 +3049,7 @@ describe("DeleteAttributeUseCases", () => {
                 }
             };
 
-            await createRelationshipInPendingState(services2, services3, content, [
+            await createRelationshipWithStatusPending(services2, services3, relationshipTemplateContent, [
                 {
                     accept: true
                 } as AcceptRequestItemParametersJSON
@@ -3057,9 +3060,11 @@ describe("DeleteAttributeUseCases", () => {
                     "shareInfo.peer": services2.address
                 }
             });
-            const attributeDeletion = await services3.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: thirdPartyRelationshipAttribute.value[0].id });
+            const attributeDeletionResult = await services3.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({
+                attributeId: thirdPartyRelationshipAttribute.value[0].id
+            });
 
-            expect(attributeDeletion).toBeAnError(
+            expect(attributeDeletionResult).toBeAnError(
                 "The shared Attribute cannot be deleted while the Relationship to the peer is in status 'Pending'.",
                 "error.runtime.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending"
             );
