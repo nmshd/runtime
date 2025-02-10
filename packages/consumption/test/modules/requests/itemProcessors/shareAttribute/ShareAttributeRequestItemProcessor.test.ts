@@ -135,7 +135,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                     message: "It doesn't make sense to share a RelationshipAttribute with its owner."
                 }
             }
-        ])("returns ${value.result} when passing ${value.scenario}", async function (testParams) {
+        ])("returns $result when passing $scenario", async function (testParams) {
             const sender = testAccount.identity.address;
             const recipient = CoreAddress.from("Recipient");
 
