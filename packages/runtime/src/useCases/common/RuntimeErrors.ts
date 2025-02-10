@@ -267,6 +267,13 @@ class Attributes {
     public setDefaultRepositoryAttributesIsDisabled(): ApplicationError {
         return new ApplicationError("error.runtime.attributes.setDefaultRepositoryAttributesIsDisabled", "Setting default RepositoryAttributes is disabled for this Account.");
     }
+
+    public cannotDeleteSharedAttributeWhileRelationshipIsPending(): ApplicationError {
+        return new ApplicationError(
+            "error.runtime.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending",
+            "The shared Attribute cannot be deleted while the Relationship to the peer is in status 'Pending'."
+        );
+    }
 }
 
 class IdentityDeletionProcess {
