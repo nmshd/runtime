@@ -45,9 +45,11 @@ export class DeleteThirdPartyRelationshipAttributeAndNotifyPeerUseCase extends U
             return Result.fail(RuntimeErrors.attributes.isNotThirdPartyRelationshipAttribute(thirdPartyRelationshipAttributeId));
         }
 
-        const relationshipToPeer = await this.relationshipsController.getRelationshipToIdentity(thirdPartyRelationshipAttribute.shareInfo.peer, RelationshipStatus.Pending);
-
-        if (relationshipToPeer) {
+        const relationshipWithStatusPending = await this.relationshipsController.getRelationshipToIdentity(
+            thirdPartyRelationshipAttribute.shareInfo.peer,
+            RelationshipStatus.Pending
+        );
+        if (relationshipWithStatusPending) {
             return Result.fail(RuntimeErrors.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending());
         }
 
@@ -57,7 +59,6 @@ export class DeleteThirdPartyRelationshipAttributeAndNotifyPeerUseCase extends U
         await this.attributesController.executeFullAttributeDeletionProcess(thirdPartyRelationshipAttribute);
 
         const messageRecipientsValidationResult = await this.messageController.validateMessageRecipients([thirdPartyRelationshipAttribute.shareInfo.peer]);
-
         if (messageRecipientsValidationResult.isError) {
             return Result.ok({});
         }

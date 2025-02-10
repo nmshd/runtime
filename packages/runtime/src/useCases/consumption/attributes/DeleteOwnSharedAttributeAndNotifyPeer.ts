@@ -40,9 +40,8 @@ export class DeleteOwnSharedAttributeAndNotifyPeerUseCase extends UseCase<Delete
             return Result.fail(RuntimeErrors.attributes.isNotOwnSharedAttribute(ownSharedAttributeId));
         }
 
-        const relationshipToPeer = await this.relationshipsController.getRelationshipToIdentity(ownSharedAttribute.shareInfo.peer, RelationshipStatus.Pending);
-
-        if (relationshipToPeer) {
+        const relationshipWithStatusPending = await this.relationshipsController.getRelationshipToIdentity(ownSharedAttribute.shareInfo.peer, RelationshipStatus.Pending);
+        if (relationshipWithStatusPending) {
             return Result.fail(RuntimeErrors.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending());
         }
 
@@ -54,7 +53,6 @@ export class DeleteOwnSharedAttributeAndNotifyPeerUseCase extends UseCase<Delete
         await this.attributesController.executeFullAttributeDeletionProcess(ownSharedAttribute);
 
         const messageRecipientsValidationResult = await this.messageController.validateMessageRecipients([ownSharedAttribute.shareInfo.peer]);
-
         if (messageRecipientsValidationResult.isError) {
             return Result.ok({});
         }
