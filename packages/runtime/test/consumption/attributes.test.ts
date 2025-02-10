@@ -2721,7 +2721,6 @@ describe("DeleteAttributeUseCases", () => {
             });
 
             const attributeDeletionResult = await services2.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: ownSharedAttribute.value[0].id });
-
             expect(attributeDeletionResult).toBeAnError(
                 "The shared Attribute cannot be deleted while the Relationship to the peer is in status 'Pending'.",
                 "error.runtime.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending"
@@ -2890,7 +2889,6 @@ describe("DeleteAttributeUseCases", () => {
             });
 
             const attributeDeletionResult = await services2.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: peerSharedAttribute.value[0].id });
-
             expect(attributeDeletionResult).toBeAnError(
                 "The shared Attribute cannot be deleted while the Relationship to the peer is in status 'Pending'.",
                 "error.runtime.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending"
@@ -3063,7 +3061,6 @@ describe("DeleteAttributeUseCases", () => {
             const attributeDeletionResult = await services3.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({
                 attributeId: thirdPartyRelationshipAttribute.value[0].id
             });
-
             expect(attributeDeletionResult).toBeAnError(
                 "The shared Attribute cannot be deleted while the Relationship to the peer is in status 'Pending'.",
                 "error.runtime.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending"
