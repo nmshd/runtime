@@ -142,7 +142,8 @@ export class DeviceSecretController extends TransportController {
             identityPrivateKey: identityPrivateKey?.secret as CryptoSignaturePrivateKey,
             username: device.username,
             password: device.initialPassword!,
-            identity: this.parent.identity.identity
+            identity: this.parent.identity.identity,
+            isBackupDevice: device.isBackupDevice
         });
 
         return deviceSharedSecret;
