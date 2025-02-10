@@ -419,7 +419,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
 
     describe("applyIncomingResponseItem", function () {
         test.each([TestIdentity.PEER, TestIdentity.EMPTY])(
-            "in case of an IdentityAttribute with owner=${value.toString()}: creates a LocalAttribute with the Attribute from the RequestItem and the attributeId from the ResponseItem for the peer of the request ",
+            "in case of an IdentityAttribute with owner=%s: creates a LocalAttribute with the Attribute from the RequestItem and the attributeId from the ResponseItem for the peer of the request ",
             async function (attributeOwner: CoreAddress) {
                 await Given.aRequestItemWithAnIdentityAttribute({ attributeOwner });
                 await Given.aCreateAttributeAcceptResponseItem();
@@ -430,7 +430,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
         );
 
         test.each([TestIdentity.PEER, TestIdentity.EMPTY, TestIdentity.CURRENT_IDENTITY])(
-            "in case of a RelationshipAttribute with owner=${value.toString()}: creates a LocalAttribute with the Attribute from the RequestItem and the attributeId from the ResponseItem for the peer of the request ",
+            "in case of a RelationshipAttribute with owner=%s: creates a LocalAttribute with the Attribute from the RequestItem and the attributeId from the ResponseItem for the peer of the request ",
             async function (attributeOwner: CoreAddress) {
                 await Given.aRequestItemWithARelationshipAttribute({ attributeOwner });
                 await Given.aCreateAttributeAcceptResponseItem();
