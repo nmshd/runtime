@@ -10,10 +10,10 @@ export class RelationshipTemplateProcessedModule extends AppRuntimeModule<Relati
     }
 
     public start(): void {
-        this.subscribeToEvent(RelationshipTemplateProcessedEvent, this.handleUrlOpen.bind(this));
+        this.subscribeToEvent(RelationshipTemplateProcessedEvent, this.handleRelationshipTemplateProcessed.bind(this));
     }
 
-    private async handleUrlOpen(event: RelationshipTemplateProcessedEvent) {
+    private async handleRelationshipTemplateProcessed(event: RelationshipTemplateProcessedEvent) {
         const services = await this.runtime.getServices(event.eventTargetAddress);
         const uiBridge = await this.runtime.uiBridge();
 
