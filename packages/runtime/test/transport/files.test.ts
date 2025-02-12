@@ -112,6 +112,13 @@ describe("File upload", () => {
         expect(CoreDate.from(file.expiresAt).isSame(defaultDate)).toBe(true);
     });
 
+    test("can upload a file with tags", async () => {
+        const response = await transportServices1.files.uploadOwnFile(await makeUploadRequest({ tags: ["tag1", "tag2"] }));
+        expect(response).toBeSuccessful();
+
+        expect(response.value.tags).toStrictEqual(["tag1", "tag2"]);
+    });
+
     test("cannot upload a file with expiry date in the past", async () => {
         const response = await transportServices1.files.uploadOwnFile(await makeUploadRequest({ expiresAt: "1970" }));
         expect(response).toBeAnError("'expiresAt' must be in the future", "error.runtime.validation.invalidPropertyValue");

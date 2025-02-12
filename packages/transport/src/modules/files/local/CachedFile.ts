@@ -8,6 +8,7 @@ import { FileMetadata } from "../transmission/FileMetadata";
 export interface ICachedFile extends ISerializable {
     title?: string;
     filename: string;
+    tags?: string[];
     filesize: number;
     filemodified?: CoreDate;
     mimetype: string;
@@ -36,6 +37,10 @@ export class CachedFile extends Serializable implements ICachedFile {
     @validate()
     @serialize()
     public filename: string;
+
+    @validate({ nullable: true })
+    @serialize({ type: String })
+    public tags?: string[];
 
     @validate()
     @serialize()
@@ -112,6 +117,7 @@ export class CachedFile extends Serializable implements ICachedFile {
             cipherKey: metadata.secretKey,
             filemodified: metadata.filemodified,
             filename: metadata.filename,
+            tags: metadata.tags,
             filesize: metadata.filesize,
             plaintextHash: metadata.plaintextHash,
             deletedAt: backboneResponse.deletedAt ? CoreDate.from(backboneResponse.deletedAt) : undefined,
