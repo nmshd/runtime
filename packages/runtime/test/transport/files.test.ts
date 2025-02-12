@@ -302,6 +302,18 @@ describe("Load peer file with token reference", () => {
         expect(response.value).toContainEqual({ ...file, isOwn: false });
     });
 
+    test("should load a peer file with its tags", async () => {
+        const uploadOwnFileResult = await transportServices1.files.uploadOwnFile(
+            await makeUploadRequest({
+                tags: ["tag1", "tag2"]
+            })
+        );
+        const token = (await transportServices1.files.createTokenForFile({ fileId: uploadOwnFileResult.value.id })).value;
+        const loadFileResult = await transportServices2.files.getOrLoadFile({ reference: token.truncatedReference });
+
+        expect(loadFileResult.value.tags).toStrictEqual(["tag1", "tag2"]);
+    });
+
     test("cannot pass token id as truncated token reference", async () => {
         const file = await uploadFile(transportServices1);
         const token = (await transportServices1.files.createTokenForFile({ fileId: file.id })).value;
