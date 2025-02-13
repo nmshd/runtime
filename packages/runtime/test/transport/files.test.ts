@@ -151,6 +151,13 @@ describe("Get file", () => {
         );
         const file = uploadFileResult.value;
 
+        const uploadFileResult2 = await transportServices1.files.uploadOwnFile(
+            await makeUploadRequest({
+                tags: ["aThirdTag", "aFourthTag"]
+            })
+        );
+        const file2 = uploadFileResult2.value;
+
         const getResult = await transportServices1.files.getFiles({ query: { tags: ["aTag"] } });
 
         expect(getResult).toBeSuccessful();
@@ -160,6 +167,13 @@ describe("Get file", () => {
 
         expect(getResult2).toBeSuccessful();
         expect(getResult2.value[0].id).toStrictEqual(file.id);
+
+        const getResult3 = await transportServices1.files.getFiles({ query: { tags: ["aTag", "aThirdTag"] } });
+
+        expect(getResult3).toBeSuccessful();
+        const result3Ids = getResult3.value.map((file) => file.id);
+        expect(result3Ids).toContain(file.id);
+        expect(result3Ids).toContain(file2.id);
     });
 
     test("accessing not existing file id causes an error", async () => {
