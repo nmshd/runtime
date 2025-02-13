@@ -20436,6 +20436,19 @@ export const GetFilesRequest: any = {
                             }
                         }
                     ]
+                },
+                "tags": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
                 }
             },
             "additionalProperties": false

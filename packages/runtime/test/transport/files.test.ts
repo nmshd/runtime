@@ -143,6 +143,25 @@ describe("Get file", () => {
         expect(response.value).toMatchObject(file);
     });
 
+    test("can get file by tags", async () => {
+        const uploadFileResult = await transportServices1.files.uploadOwnFile(
+            await makeUploadRequest({
+                tags: ["aTag", "anotherTag"]
+            })
+        );
+        const file = uploadFileResult.value;
+
+        const getResult = await transportServices1.files.getFiles({ query: { tags: ["aTag"] } });
+
+        expect(getResult).toBeSuccessful();
+        expect(getResult.value[0].id).toStrictEqual(file.id);
+
+        const getResult2 = await transportServices1.files.getFiles({ query: { tags: ["aTag", "anotherTag"] } });
+
+        expect(getResult2).toBeSuccessful();
+        expect(getResult2.value[0].id).toStrictEqual(file.id);
+    });
+
     test("accessing not existing file id causes an error", async () => {
         const response = await transportServices1.files.getFile({ id: UNKNOWN_FILE_ID });
         expect(response).toBeAnError("File not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
