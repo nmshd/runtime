@@ -1,6 +1,7 @@
 import { serialize, validate } from "@js-soft/ts-serval";
 import { nameof } from "ts-simple-nameof";
 import { AbstractComplexValue, AbstractComplexValueJSON, IAbstractComplexValue } from "../../AbstractComplexValue";
+import { characterSets } from "../../constants/CharacterSets";
 import { RenderHints, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../../hints";
 
 export interface AbstractAddressJSON extends AbstractComplexValueJSON {
@@ -13,13 +14,15 @@ export interface IAbstractAddress extends IAbstractComplexValue {
 
 export abstract class AbstractAddress extends AbstractComplexValue implements IAbstractAddress {
     @serialize()
-    @validate({ max: 100 })
+    @validate({ max: 100, regExp: characterSets.din91379DatatypeB })
     public recipient: string;
 
     public static get valueHints(): ValueHints {
         return ValueHints.from({
             propertyHints: {
-                [nameof<AbstractAddress>((a) => a.recipient)]: ValueHints.from({})
+                [nameof<AbstractAddress>((a) => a.recipient)]: ValueHints.from({
+                    pattern: characterSets.din91379DatatypeB.toString().slice(1, -1).replaceAll("/", "\\/")
+                })
             }
         });
     }
