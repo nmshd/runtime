@@ -214,8 +214,7 @@ export class IncomingRequestsController extends ConsumptionBaseController {
             );
         }
 
-        const validationResult = this.decideRequestParamsValidator.validate(params, request);
-        if (validationResult.isError()) return validationResult;
+        const validationResult = this.decideRequestParamsValidator.validateRequest(params, request);
 
         const itemResults = await this.canDecideItems(params.items, request.content.items, request);
 

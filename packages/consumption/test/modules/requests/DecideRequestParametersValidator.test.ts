@@ -290,7 +290,7 @@ describe("DecideRequestParametersValidator", function () {
             statusLog: []
         });
 
-        const validationResult = validator.validate(data.input.response, localRequest);
+        const validationResult = validator.validateRequest(data.input.response, localRequest);
 
         if (!data.expectedError) {
             // eslint-disable-next-line jest/no-conditional-expect
