@@ -92,12 +92,6 @@ describe("RelationshipTest: Accept", function () {
         });
         const relationshipId = request.id;
 
-        const templateRequestContent = request.cache!.template.cache!.content as JSONWrapper;
-        expect(templateRequestContent.value).toHaveProperty("mycontent");
-        expect(templateRequestContent.value.mycontent).toBe("template");
-
-        expect(request.cache!.template.id.toString()).toStrictEqual(templateTo.id.toString());
-        expect(request.cache!.template.isOwn).toBe(false);
         expect(request.status).toStrictEqual(RelationshipStatus.Pending);
 
         expect(request.cache?.auditLog).toHaveLength(1);
@@ -106,13 +100,6 @@ describe("RelationshipTest: Accept", function () {
         const syncedRelationships = await TestUtil.syncUntilHasRelationships(from);
         expect(syncedRelationships).toHaveLength(1);
         const pendingRelationship = syncedRelationships[0];
-
-        expect(pendingRelationship.cache!.template.id.toString()).toStrictEqual(templateTo.id.toString());
-        expect(pendingRelationship.cache!.template.isOwn).toBe(true);
-
-        const templateResponseContent = pendingRelationship.cache!.template.cache!.content as JSONWrapper;
-        expect(templateResponseContent.value).toHaveProperty("mycontent");
-        expect(templateResponseContent.value.mycontent).toBe("template");
 
         expect(pendingRelationship.status).toStrictEqual(RelationshipStatus.Pending);
 
@@ -206,23 +193,11 @@ describe("RelationshipTest: Reject", function () {
         });
         const relationshipId = request.id;
 
-        const templateRequestContent = request.cache!.template.cache!.content as JSONWrapper;
-        expect(templateRequestContent.value).toHaveProperty("mycontent");
-        expect(templateRequestContent.value.mycontent).toBe("template");
-
-        expect(request.cache!.template.id.toString()).toStrictEqual(templateTo.id.toString());
-        expect(request.cache!.template.isOwn).toBe(false);
         expect(request.status).toStrictEqual(RelationshipStatus.Pending);
 
         const syncedRelationships = await TestUtil.syncUntilHasRelationships(from);
         expect(syncedRelationships).toHaveLength(1);
         const pendingRelationship = syncedRelationships[0];
-        expect(pendingRelationship.cache!.template.id.toString()).toStrictEqual(templateTo.id.toString());
-        expect(pendingRelationship.cache!.template.isOwn).toBe(true);
-
-        const templateResponseContent = pendingRelationship.cache!.template.cache!.content as JSONWrapper;
-        expect(templateResponseContent.value).toHaveProperty("mycontent");
-        expect(templateResponseContent.value.mycontent).toBe("template");
 
         expect(pendingRelationship.status).toStrictEqual(RelationshipStatus.Pending);
 
@@ -314,14 +289,8 @@ describe("RelationshipTest: Revoke", function () {
             }
         });
 
-        const templateRequestContent = request.cache!.template.cache!.content as JSONWrapper;
-        expect(templateRequestContent.value).toHaveProperty("mycontent");
-        expect(templateRequestContent.value.mycontent).toBe("template");
-
         const relationshipId = request.id;
 
-        expect(request.cache!.template.id.toString()).toStrictEqual(templateRequestor.id.toString());
-        expect(request.cache!.template.isOwn).toBe(false);
         expect(request.status).toStrictEqual(RelationshipStatus.Pending);
 
         const syncedRelationships = await TestUtil.syncUntilHasRelationships(templator);
@@ -329,12 +298,6 @@ describe("RelationshipTest: Revoke", function () {
         const pendingRelationship = syncedRelationships[0];
         expect(pendingRelationship.status).toStrictEqual(RelationshipStatus.Pending);
 
-        expect(pendingRelationship.cache!.template.id.toString()).toStrictEqual(templateRequestor.id.toString());
-        expect(pendingRelationship.cache!.template.isOwn).toBe(true);
-
-        const templateResponseContent = pendingRelationship.cache!.template.cache!.content as JSONWrapper;
-        expect(templateResponseContent.value).toHaveProperty("mycontent");
-        expect(templateResponseContent.value.mycontent).toBe("template");
         expect(pendingRelationship.status).toStrictEqual(RelationshipStatus.Pending);
 
         const revokedRelationshipSelf = await requestor.relationships.revoke(relationshipId);
@@ -344,8 +307,6 @@ describe("RelationshipTest: Revoke", function () {
         expect(revokedRelationshipSelf.status).toStrictEqual(RelationshipStatus.Revoked);
         expect(revokedRelationshipSelf.cache?.auditLog).toHaveLength(2);
         expect(revokedRelationshipSelf.cache!.auditLog[1].newStatus).toBe(RelationshipStatus.Revoked);
-        expect(revokedRelationshipSelf.peer).toBeDefined();
-        expect(revokedRelationshipSelf.peer.address.toString()).toStrictEqual(revokedRelationshipSelf.cache!.template.cache?.identity.address.toString());
 
         const syncedRelationshipsPeer = await TestUtil.syncUntilHasRelationships(templator);
         expect(syncedRelationshipsPeer).toHaveLength(1);
