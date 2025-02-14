@@ -3,7 +3,6 @@ import { Result } from "@js-soft/ts-utils";
 import { AttributesController, LocalAttribute, LocalAttributeDeletionInfoJSON, LocalAttributeShareInfoJSON } from "@nmshd/consumption";
 import { AbstractAttributeJSON, IdentityAttribute, IdentityAttributeJSON, RelationshipAttributeJSON } from "@nmshd/content";
 import { Inject } from "@nmshd/typescript-ioc";
-import { DateTime } from "luxon";
 import { nameof } from "ts-simple-nameof";
 import { LocalAttributeDTO } from "../../../types";
 import { UseCase } from "../../common";
@@ -52,8 +51,6 @@ export class GetAttributesUseCase extends UseCase<GetAttributesRequest, LocalAtt
             [nameof<LocalAttributeDTO>((x) => x.isDefault)]: true,
 
             // content.abstractAttribute
-            [`${nameof<LocalAttributeDTO>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.validFrom)}`]: true,
-            [`${nameof<LocalAttributeDTO>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.validTo)}`]: true,
             [`${nameof<LocalAttributeDTO>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.owner)}`]: true,
             [`${nameof<LocalAttributeDTO>((x) => x.content)}.@type`]: true,
 
@@ -86,8 +83,6 @@ export class GetAttributesUseCase extends UseCase<GetAttributesRequest, LocalAtt
             [nameof<LocalAttributeDTO>((x) => x.isDefault)]: nameof<LocalAttribute>((x) => x.isDefault),
 
             // content.abstractAttribute
-            [`${nameof<LocalAttributeDTO>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.validFrom)}`]: `${nameof<LocalAttribute>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.validFrom)}`,
-            [`${nameof<LocalAttributeDTO>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.validTo)}`]: `${nameof<LocalAttribute>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.validTo)}`,
             [`${nameof<LocalAttributeDTO>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.owner)}`]: `${nameof<LocalAttribute>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.owner)}`,
             [`${nameof<LocalAttributeDTO>((x) => x.content)}.@type`]: `${nameof<LocalAttribute>((x) => x.content)}.@type`,
 
@@ -113,26 +108,6 @@ export class GetAttributesUseCase extends UseCase<GetAttributesRequest, LocalAtt
             [`${nameof<LocalAttributeDTO>((x) => x.deletionInfo)}.${nameof<LocalAttributeDeletionInfoJSON>((x) => x.deletionDate)}`]: `${nameof<LocalAttribute>((x) => x.deletionInfo)}.${nameof<LocalAttributeDeletionInfoJSON>((x) => x.deletionDate)}`
         },
         custom: {
-            // content.validFrom
-            [`${nameof<LocalAttributeDTO>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.validFrom)}`]: (query: any, input: any) => {
-                if (!input) {
-                    return;
-                }
-                const validFromUtcString = DateTime.fromISO(input).toUTC().toString();
-                query[`${nameof<LocalAttribute>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.validFrom)}`] = {
-                    $gte: validFromUtcString
-                };
-            },
-            // content.validTo
-            [`${nameof<LocalAttributeDTO>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.validTo)}`]: (query: any, input: any) => {
-                if (!input) {
-                    return;
-                }
-                const validToUtcString = DateTime.fromISO(input).toUTC().toString();
-                query[`${nameof<LocalAttribute>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.validTo)}`] = {
-                    $lte: validToUtcString
-                };
-            },
             // content.tags
             [`${nameof<LocalAttributeDTO>((x) => x.content)}.${nameof<IdentityAttribute>((x) => x.tags)}`]: (query: any, input: string | string[]) => {
                 if (typeof input === "string") {

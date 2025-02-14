@@ -1268,8 +1268,6 @@ describe("DeciderModule", () => {
                             attribute: {
                                 "@type": "IdentityAttribute",
                                 owner: recipient.address,
-                                validFrom: attributeValidFrom,
-                                validTo: attributeValidTo,
                                 tags: ["tag1", "tag3"],
                                 value: {
                                     "@type": "IdentityFileReference",
@@ -1348,8 +1346,6 @@ describe("DeciderModule", () => {
                             attribute: {
                                 "@type": "RelationshipAttribute",
                                 owner: sender.address,
-                                validFrom: attributeValidFrom,
-                                validTo: attributeValidTo,
                                 key: "A key",
                                 isTechnical: false,
                                 confidentiality: RelationshipAttributeConfidentiality.Public,
@@ -1531,8 +1527,6 @@ describe("DeciderModule", () => {
                             accept: true,
                             attribute: IdentityAttribute.from({
                                 owner: "",
-                                validFrom: attributeValidFrom,
-                                validTo: attributeValidTo,
                                 value: GivenName.from("Given name of recipient").toJSON(),
                                 tags: ["tag1"]
                             })
@@ -1553,8 +1547,6 @@ describe("DeciderModule", () => {
                             attribute: {
                                 "@type": "IdentityAttribute",
                                 owner: recipient.address,
-                                validFrom: attributeValidFrom,
-                                validTo: attributeValidTo,
                                 tags: ["tag1", "tag3"],
                                 value: {
                                     "@type": "GivenName",
@@ -1563,8 +1555,6 @@ describe("DeciderModule", () => {
                             },
                             query: {
                                 "@type": "IdentityAttributeQuery",
-                                validFrom: attributeValidFrom,
-                                validTo: attributeValidTo,
                                 valueType: "GivenName",
                                 tags: ["tag1", "tag3"]
                             },
@@ -1661,8 +1651,6 @@ describe("DeciderModule", () => {
                             attribute: {
                                 "@type": "RelationshipAttribute",
                                 owner: sender.address,
-                                validFrom: attributeValidFrom,
-                                validTo: attributeValidTo,
                                 key: "A key",
                                 isTechnical: false,
                                 confidentiality: RelationshipAttributeConfidentiality.Public,
@@ -1676,8 +1664,6 @@ describe("DeciderModule", () => {
                             query: {
                                 "@type": "RelationshipAttributeQuery",
                                 owner: "",
-                                validFrom: attributeValidFrom,
-                                validTo: attributeValidTo,
                                 key: "A key",
                                 attributeCreationHints: {
                                     valueType: "ProprietaryString",
@@ -1737,8 +1723,6 @@ describe("DeciderModule", () => {
                             accept: true,
                             newAttribute: IdentityAttribute.from({
                                 owner: "",
-                                validFrom: attributeValidFrom,
-                                validTo: attributeValidTo,
                                 value: GivenName.from("Given name of recipient").toJSON(),
                                 tags: ["tag1"]
                             })
@@ -1758,8 +1742,6 @@ describe("DeciderModule", () => {
                             "@type": "ReadAttributeRequestItem",
                             query: {
                                 "@type": "IdentityAttributeQuery",
-                                validFrom: attributeValidFrom,
-                                validTo: attributeValidTo,
                                 valueType: "GivenName",
                                 tags: ["tag1", "tag3"]
                             },
@@ -1847,8 +1829,6 @@ describe("DeciderModule", () => {
                             query: {
                                 "@type": "RelationshipAttributeQuery",
                                 owner: "",
-                                validFrom: attributeValidFrom,
-                                validTo: attributeValidTo,
                                 key: "A key",
                                 attributeCreationHints: {
                                     valueType: "ProprietaryString",
@@ -1994,8 +1974,6 @@ describe("DeciderModule", () => {
                             "@type": "RegisterAttributeListenerRequestItem",
                             query: {
                                 "@type": "IdentityAttributeQuery",
-                                validFrom: attributeValidFrom.toString(),
-                                validTo: attributeValidTo.toString(),
                                 valueType: "GivenName",
                                 tags: ["tag1", "tag3"]
                             },
@@ -2060,8 +2038,6 @@ describe("DeciderModule", () => {
                             attribute: {
                                 "@type": "IdentityAttribute",
                                 owner: sender.address,
-                                validFrom: attributeValidFrom.toString(),
-                                validTo: attributeValidTo.toString(),
                                 tags: ["tag1", "tag3"],
                                 value: {
                                     "@type": "IdentityFileReference",
@@ -2141,8 +2117,6 @@ describe("DeciderModule", () => {
                             attribute: {
                                 "@type": "RelationshipAttribute",
                                 owner: sender.address,
-                                validFrom: attributeValidFrom,
-                                validTo: attributeValidTo,
                                 key: "A key",
                                 isTechnical: false,
                                 confidentiality: RelationshipAttributeConfidentiality.Public,
