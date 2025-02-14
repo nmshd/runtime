@@ -1,5 +1,5 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreAddress, CoreDate, ICoreAddress, ICoreDate } from "@nmshd/core-types";
+import { CoreAddress, ICoreAddress } from "@nmshd/core-types";
 import { AbstractAttributeQuery, AbstractAttributeQueryJSON, IAbstractAttributeQuery } from "./AbstractAttributeQuery";
 import { AttributeValues } from "./AttributeValueTypes";
 import { IValueHints, ValueHints, ValueHintsJSON } from "./hints";
@@ -70,16 +70,12 @@ export interface RelationshipAttributeQueryJSON extends AbstractAttributeQueryJS
     key: string;
     owner: string;
     attributeCreationHints: RelationshipAttributeCreationHintsJSON;
-    validFrom?: string;
-    validTo?: string;
 }
 
 export interface IRelationshipAttributeQuery extends IAbstractAttributeQuery {
     key: string;
     owner: ICoreAddress;
     attributeCreationHints: IRelationshipAttributeCreationHints;
-    validFrom?: ICoreDate;
-    validTo?: ICoreDate;
 }
 
 @type("RelationshipAttributeQuery")
@@ -95,14 +91,6 @@ export class RelationshipAttributeQuery extends AbstractAttributeQuery implement
     @serialize()
     @validate()
     public attributeCreationHints: RelationshipAttributeCreationHints;
-
-    @serialize()
-    @validate({ nullable: true })
-    public validFrom?: CoreDate;
-
-    @serialize()
-    @validate({ nullable: true })
-    public validTo?: CoreDate;
 
     public static from(value: IRelationshipAttributeQuery | Omit<RelationshipAttributeQueryJSON, "@type">): RelationshipAttributeQuery {
         return this.fromAny(value);
