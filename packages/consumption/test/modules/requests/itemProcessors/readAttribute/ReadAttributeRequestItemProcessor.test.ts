@@ -972,8 +972,6 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     query: RelationshipAttributeQuery.from({
                         owner: sender.toString(),
                         key: "aKey",
-                        validFrom: "2024-02-14T08:47:35.077Z",
-                        validTo: "2024-02-14T09:35:12.824Z",
                         attributeCreationHints: {
                             valueType: "ProprietaryString",
                             title: "aTitle",
@@ -1002,8 +1000,6 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         key: "aKey",
                         confidentiality: RelationshipAttributeConfidentiality.Public,
                         owner: sender.toString(),
-                        validFrom: "2024-02-14T08:40:35.077Z",
-                        validTo: "2024-02-14T09:35:12.824Z",
                         value: {
                             "@type": "ProprietaryString",
                             title: "aTitle",

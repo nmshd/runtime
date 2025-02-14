@@ -66,31 +66,14 @@ export class AttributesController extends ConsumptionBaseController {
         return this;
     }
 
-    public checkValid(attribute: LocalAttribute): boolean {
-        const now = CoreDate.utc();
-        if (!attribute.content.validFrom && !attribute.content.validTo) {
-            return true;
-        } else if (attribute.content.validFrom && !attribute.content.validTo && attribute.content.validFrom.isSameOrBefore(now)) {
-            return true;
-        } else if (!attribute.content.validFrom && attribute.content.validTo?.isSameOrAfter(now)) {
-            return true;
-        } else if (attribute.content.validFrom && attribute.content.validTo && attribute.content.validFrom.isSameOrBefore(now) && attribute.content.validTo.isSameOrAfter(now)) {
-            return true;
-        }
-        return false;
-    }
-
     public findCurrent(attributes: LocalAttribute[]): LocalAttribute | undefined {
+        if (attributes.length === 0) return;
+
         const sorted = attributes.sort((a, b) => {
             return a.createdAt.compare(b.createdAt);
         });
-        let current: LocalAttribute | undefined;
-        for (const attribute of sorted) {
-            if (this.checkValid(attribute)) {
-                current = attribute;
-            }
-        }
-        return current;
+
+        return sorted[sorted.length - 1];
     }
 
     public filterCurrent(attributes: LocalAttribute[]): LocalAttribute[] {
@@ -98,13 +81,7 @@ export class AttributesController extends ConsumptionBaseController {
             return a.createdAt.compare(b.createdAt);
         });
 
-        const items = [];
-        for (const attribute of sorted) {
-            if (this.checkValid(attribute)) {
-                items.push(attribute);
-            }
-        }
-        return items;
+        return sorted;
     }
 
     public async getLocalAttribute(id: CoreId): Promise<LocalAttribute | undefined> {

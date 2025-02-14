@@ -308,7 +308,7 @@ describe("validateAttributeMatchesWithQuery", function () {
         test("returns an error when an IdentityAttribute is not valid in the queried time frame", async function () {
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
-                query: IdentityAttributeQuery.from({ validTo: "2024-02-14T09:35:12.824Z", valueType: "GivenName" })
+                query: IdentityAttributeQuery.from({ valueType: "GivenName" })
             });
             const requestId = await ConsumptionIds.request.generate();
             const request = LocalRequest.from({
@@ -329,8 +329,6 @@ describe("validateAttributeMatchesWithQuery", function () {
                 newAttribute: {
                     "@type": "IdentityAttribute",
                     owner: recipient.toString(),
-                    validFrom: "2024-02-14T08:47:35.077Z",
-                    validTo: "2024-02-14T09:35:12.824Z",
                     value: {
                         "@type": "GivenName",
                         value: "aGivenName"
@@ -847,8 +845,6 @@ describe("validateAttributeMatchesWithQuery", function () {
                 query: RelationshipAttributeQuery.from({
                     owner: sender.toString(),
                     key: "aKey",
-                    validFrom: "2024-02-14T08:47:35.077Z",
-                    validTo: "2024-02-14T09:35:12.824Z",
                     attributeCreationHints: {
                         valueType: "ProprietaryString",
                         title: "aTitle",
@@ -877,8 +873,6 @@ describe("validateAttributeMatchesWithQuery", function () {
                     key: "aKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public,
                     owner: sender.toString(),
-                    validFrom: "2024-02-14T08:47:35.077Z",
-                    validTo: "2024-02-14T09:30:00.000Z",
                     value: {
                         "@type": "ProprietaryString",
                         title: "aTitle",
@@ -1103,8 +1097,6 @@ describe("validateAttributeMatchesWithQuery", function () {
                 mustBeAccepted: true,
                 query: ThirdPartyRelationshipAttributeQuery.from({
                     owner: ThirdPartyRelationshipAttributeQueryOwner.Recipient,
-                    validFrom: "2024-02-14T08:47:35.077Z",
-                    validTo: "2024-02-14T09:35:12.824Z",
                     key: "aKey",
                     thirdParty: [aThirdParty.toString()]
                 })
@@ -1129,8 +1121,6 @@ describe("validateAttributeMatchesWithQuery", function () {
                     key: "aKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public,
                     owner: recipient,
-                    validFrom: CoreDate.from("2024-02-14T08:47:35.077Z"),
-                    validTo: CoreDate.from("2024-02-14T09:30:00.000Z"),
                     value: ProprietaryString.from({
                         title: "aTitle",
                         value: "aStringValue"
