@@ -442,12 +442,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "owner": {
                     "type": "string"
                 },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
-                },
                 "value": {
                     "$ref": "#/definitions/AttributeValues.Relationship.Json"
                 },
@@ -1107,12 +1101,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "owner": {
-                    "type": "string"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
                     "type": "string"
                 },
                 "value": {
@@ -2524,12 +2512,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "items": {
                         "type": "string"
                     }
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -2621,12 +2603,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "attributeCreationHints": {
                     "$ref": "#/definitions/RelationshipAttributeCreationHintsJSON"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -2823,12 +2799,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "items": {
                         "type": "string"
                     }
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -3436,12 +3406,6 @@ export const CompleteOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "owner": {
-                    "type": "string"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
                     "type": "string"
                 },
                 "value": {
@@ -4679,12 +4643,6 @@ export const CompleteOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "owner": {
-                    "type": "string"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
                     "type": "string"
                 },
                 "value": {
@@ -5871,12 +5829,6 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                 "owner": {
                     "type": "string"
                 },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
-                },
                 "value": {
                     "$ref": "#/definitions/AttributeValues.Identity.Json"
                 },
@@ -7112,12 +7064,6 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                     "type": "string"
                 },
                 "owner": {
-                    "type": "string"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
                     "type": "string"
                 },
                 "value": {
@@ -8269,12 +8215,6 @@ export const CreateOutgoingRequestRequest: any = {
                 "owner": {
                     "type": "string"
                 },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
-                },
                 "value": {
                     "$ref": "#/definitions/AttributeValues.Relationship.Json"
                 },
@@ -8934,12 +8874,6 @@ export const CreateOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "owner": {
-                    "type": "string"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
                     "type": "string"
                 },
                 "value": {
@@ -10351,12 +10285,6 @@ export const CreateOutgoingRequestRequest: any = {
                     "items": {
                         "type": "string"
                     }
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -10448,12 +10376,6 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 "attributeCreationHints": {
                     "$ref": "#/definitions/RelationshipAttributeCreationHintsJSON"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -10650,12 +10572,6 @@ export const CreateOutgoingRequestRequest: any = {
                     "items": {
                         "type": "string"
                     }
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -11601,12 +11517,6 @@ export const ReceivedIncomingRequestRequest: any = {
                 "owner": {
                     "type": "string"
                 },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
-                },
                 "value": {
                     "$ref": "#/definitions/AttributeValues.Relationship.Json"
                 },
@@ -12266,12 +12176,6 @@ export const ReceivedIncomingRequestRequest: any = {
                     "type": "string"
                 },
                 "owner": {
-                    "type": "string"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
                     "type": "string"
                 },
                 "value": {
@@ -13683,12 +13587,6 @@ export const ReceivedIncomingRequestRequest: any = {
                     "items": {
                         "type": "string"
                     }
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -13780,12 +13678,6 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "attributeCreationHints": {
                     "$ref": "#/definitions/RelationshipAttributeCreationHintsJSON"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -13982,12 +13874,6 @@ export const ReceivedIncomingRequestRequest: any = {
                     "items": {
                         "type": "string"
                     }
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -15165,12 +15051,6 @@ export const ExecuteIdentityAttributeQueryRequest: any = {
                     "items": {
                         "type": "string"
                     }
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -15402,12 +15282,6 @@ export const ExecuteRelationshipAttributeQueryRequest: any = {
                 },
                 "attributeCreationHints": {
                     "$ref": "#/definitions/RelationshipAttributeCreationHintsJSON"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -15600,12 +15474,6 @@ export const ExecuteThirdPartyRelationshipAttributeQueryRequest: any = {
                     "items": {
                         "type": "string"
                     }
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
