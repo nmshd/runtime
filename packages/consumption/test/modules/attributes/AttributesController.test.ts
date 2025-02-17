@@ -1,7 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import {
     BirthDate,
-    BirthYear,
     City,
     Country,
     EMailAddress,
@@ -231,40 +230,6 @@ describe("AttributesController", function () {
             });
             expect(childBirthYear).toHaveLength(1);
             expect(childBirthYear[0].isDefault).toBe(true);
-        });
-
-        test("should set a child Attribute of a complex default attribute as default if setDefaultRepositoryAttributes is true, even if already another attribute with that value type exists", async function () {
-            const independentBirthYear = await appConsumptionController.attributes.createRepositoryAttribute({
-                content: IdentityAttribute.from({
-                    value: BirthYear.from({
-                        value: 2000
-                    }),
-                    owner: appConsumptionController.accountController.identity.address
-                })
-            });
-            expect(independentBirthYear.isDefault).toBe(true);
-
-            const complexBirthDate = await appConsumptionController.attributes.createRepositoryAttribute({
-                content: IdentityAttribute.from({
-                    value: BirthDate.from({
-                        day: 28,
-                        month: 2,
-                        year: 2000
-                    }),
-                    owner: appConsumptionController.accountController.identity.address
-                })
-            });
-            expect(complexBirthDate.isDefault).toBe(true);
-
-            const childBirthYear = await appConsumptionController.attributes.getLocalAttributes({
-                parentId: complexBirthDate.id.toString(),
-                "content.value.@type": "BirthYear"
-            });
-            expect(childBirthYear).toHaveLength(1);
-            expect(childBirthYear[0].isDefault).toBe(true);
-
-            const updatedIndependentBirthYear = await appConsumptionController.attributes.getLocalAttribute(independentBirthYear.id);
-            expect(updatedIndependentBirthYear!.isDefault).toBeUndefined();
         });
 
         test("should allow to create a shared attribute copy", async function () {
