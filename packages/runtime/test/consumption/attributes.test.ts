@@ -784,16 +784,14 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
         expect(result.value.code).toBe("error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute");
     });
 
-    test("should not allow to create a duplicate RepositoryAttribute even if the tags/validFrom/validTo are different", async () => {
+    test("should not allow to create a duplicate RepositoryAttribute even if the tags are different", async () => {
         const createAttributeRequest: CreateRepositoryAttributeRequest = {
             content: {
                 value: {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["tag1", "tag2"],
-                validFrom: CoreDate.utc().subtract({ day: 1 }).toString(),
-                validTo: CoreDate.utc().add({ day: 1 }).toString()
+                tags: ["tag1", "tag2"]
             }
         };
         const repositoryAttribute = (await services1.consumption.attributes.createRepositoryAttribute(createAttributeRequest)).value;
@@ -819,19 +817,14 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
         expect(result.value.code).toBe("error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute");
     });
 
-    test("should allow to create another RepositoryAttribute even if the tags/validFrom/validTo are duplicates", async () => {
-        const validFrom = CoreDate.utc().subtract({ day: 1 }).toString();
-        const validTo = CoreDate.utc().add({ day: 1 }).toString();
-
+    test("should allow to create another RepositoryAttribute even if the tags are duplicates", async () => {
         const request: CreateRepositoryAttributeRequest = {
             content: {
                 value: {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["tag1", "tag2"],
-                validFrom,
-                validTo
+                tags: ["tag1", "tag2"]
             }
         };
         await services1.consumption.attributes.createRepositoryAttribute(request);
@@ -842,9 +835,7 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "anotherGivenName"
                 },
-                tags: ["tag1", "tag2"],
-                validFrom,
-                validTo
+                tags: ["tag1", "tag2"]
             }
         };
 
@@ -1183,18 +1174,14 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
         expect(result2).toBeSuccessful();
     });
 
-    test("should not create a duplicate RepositoryAttribute even if the tags/validFrom/validTo are different", async () => {
-        const validFrom = CoreDate.utc().subtract({ day: 1 }).toString();
-        const validTo = CoreDate.utc().add({ day: 1 }).toString();
+    test("should not create a duplicate RepositoryAttribute even if the tags are different", async () => {
         const request: CreateRepositoryAttributeRequest = {
             content: {
                 value: {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["tag1", "tag2"],
-                validFrom,
-                validTo
+                tags: ["tag1", "tag2"]
             }
         };
 
@@ -1207,8 +1194,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["tag1", "tag2"],
-                validFrom
+                tags: ["tag1", "tag2"]
             }
         };
 
@@ -1224,8 +1210,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["tag1", "tag2"],
-                validTo
+                tags: ["tag1", "tag2"]
             }
         };
 
@@ -1240,9 +1225,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                 value: {
                     "@type": "GivenName",
                     value: "aGivenName"
-                },
-                validFrom,
-                validTo
+                }
             }
         };
 
@@ -1253,18 +1236,14 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
         );
     });
 
-    test("should create a RepositoryAttribute even if the tags/validFrom/validTo are duplicates", async () => {
-        const validFrom = CoreDate.utc().subtract({ day: 1 }).toString();
-        const validTo = CoreDate.utc().add({ day: 1 }).toString();
+    test("should create a RepositoryAttribute even if the tags are duplicates", async () => {
         const request: CreateRepositoryAttributeRequest = {
             content: {
                 value: {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["tag1", "tag2"],
-                validFrom,
-                validTo
+                tags: ["tag1", "tag2"]
             }
         };
 
@@ -1277,9 +1256,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName2"
                 },
-                tags: ["tag1", "tag2"],
-                validFrom,
-                validTo
+                tags: ["tag1", "tag2"]
             }
         };
 
