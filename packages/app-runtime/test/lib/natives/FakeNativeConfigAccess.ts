@@ -21,12 +21,4 @@ export class FakeNativeConfigAccess implements INativeConfigAccess {
     public save(): Promise<Result<void>> {
         return Promise.resolve(Result.ok(undefined));
     }
-
-    public initRuntimeConfig(/* logger: ILogger, fileAccess: INativeFileAccess*/): Promise<Result<void>> {
-        return Promise.resolve(Result.ok(undefined));
-    }
-
-    public initDefaultConfig(): Promise<Result<void>> {
-        return Promise.resolve(Result.ok(undefined));
-    }
 }

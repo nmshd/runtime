@@ -28,7 +28,8 @@ export class MockEventBus extends EventEmitter2EventBus {
 
     public async waitForEvent<TEvent extends Event>(
         subscriptionTarget: SubscriptionTarget<TEvent> & { namespace: string },
-        predicate?: (event: TEvent) => boolean
+        predicate?: (event: TEvent) => boolean,
+        timeout = 5000
     ): Promise<TEvent> {
         const alreadyTriggeredEvents = this.publishedEvents.find(
             (e) =>
@@ -40,7 +41,7 @@ export class MockEventBus extends EventEmitter2EventBus {
             return alreadyTriggeredEvents;
         }
 
-        const event = await waitForEvent(this, subscriptionTarget, predicate);
+        const event = await waitForEvent(this, subscriptionTarget, predicate, timeout);
         return event;
     }
 

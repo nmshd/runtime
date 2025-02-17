@@ -52,13 +52,14 @@
         }
     },
     "dependencies": {
-        "@js-soft/docdb-access-loki": "^1.1.0",
+        "@js-soft/docdb-access-loki": "^1.2.0",
         "@nmshd/runtime": "*",
+        "eventsource": "^3.0.5",
         "lodash": "^4.17.21"
     },
     "devDependencies": {
-        "@js-soft/web-logger": "^1.0.4",
-        "@types/lodash": "^4.17.14",
+        "@js-soft/node-logger": "^1.2.0",
+        "@types/lodash": "^4.17.15",
         "@types/lokijs": "^1.5.14",
         "@types/luxon": "^3.4.2"
     },

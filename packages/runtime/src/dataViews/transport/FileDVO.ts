@@ -4,6 +4,7 @@ import { IdentityDVO } from "./IdentityDVO";
 export interface FileDVO extends DataViewObject {
     type: "FileDVO";
     filename: string;
+    tags?: string[];
     filesize: number;
     createdAt: string;
     createdBy: IdentityDVO;

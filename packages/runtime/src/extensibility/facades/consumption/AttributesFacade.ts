@@ -2,6 +2,9 @@ import { Result } from "@js-soft/ts-utils";
 import { Inject } from "@nmshd/typescript-ioc";
 import { AttributeTagCollectionDTO, LocalAttributeDTO, LocalRequestDTO } from "../../../types";
 import {
+    CanCreateRepositoryAttributeRequest,
+    CanCreateRepositoryAttributeResponse,
+    CanCreateRepositoryAttributeUseCase,
     ChangeDefaultRepositoryAttributeRequest,
     ChangeDefaultRepositoryAttributeUseCase,
     CreateAndShareRelationshipAttributeRequest,
@@ -62,6 +65,7 @@ import {
 
 export class AttributesFacade {
     public constructor(
+        @Inject private readonly canCreateRepositoryAttributeUseCase: CanCreateRepositoryAttributeUseCase,
         @Inject private readonly createRepositoryAttributeUseCase: CreateRepositoryAttributeUseCase,
         @Inject private readonly getPeerSharedAttributesUseCase: GetPeerSharedAttributesUseCase,
         @Inject private readonly getOwnSharedAttributesUseCase: GetOwnSharedAttributesUseCase,
@@ -88,6 +92,10 @@ export class AttributesFacade {
         @Inject private readonly deleteSharedAttributesForRejectedOrRevokedRelationshipUseCase: DeleteSharedAttributesForRejectedOrRevokedRelationshipUseCase,
         @Inject private readonly getAttributeTagCollectionUseCase: GetAttributeTagCollectionUseCase
     ) {}
+
+    public async canCreateRepositoryAttribute(request: CanCreateRepositoryAttributeRequest): Promise<Result<CanCreateRepositoryAttributeResponse>> {
+        return await this.canCreateRepositoryAttributeUseCase.execute(request);
+    }
 
     public async createRepositoryAttribute(request: CreateRepositoryAttributeRequest): Promise<Result<LocalAttributeDTO>> {
         return await this.createRepositoryAttributeUseCase.execute(request);

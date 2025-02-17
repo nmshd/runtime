@@ -1,12 +1,16 @@
+import { AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON, AcceptRequestItemParametersJSON } from "@nmshd/consumption";
 import {
     CityJSON,
     CountryJSON,
     DeleteAttributeRequestItem,
     HouseNumberJSON,
     ReadAttributeRequestItem,
+    ReadAttributeRequestItemJSON,
     RelationshipAttributeConfidentiality,
+    RelationshipTemplateContentJSON,
     RequestItemJSONDerivations,
     ShareAttributeRequestItem,
+    ShareAttributeRequestItemJSON,
     StreetJSON,
     ThirdPartyRelationshipAttributeQuery,
     ThirdPartyRelationshipAttributeQueryOwner,
@@ -14,11 +18,15 @@ import {
 } from "@nmshd/content";
 import { CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreIdHelper } from "@nmshd/transport";
+import assert from "assert";
 import {
     AttributeCreatedEvent,
+    CanCreateRepositoryAttributeRequest,
+    CanCreateRepositoryAttributeUseCase,
     ChangeDefaultRepositoryAttributeUseCase,
     CreateAndShareRelationshipAttributeRequest,
     CreateAndShareRelationshipAttributeUseCase,
+    CreateOwnRelationshipTemplateRequest,
     CreateRepositoryAttributeRequest,
     CreateRepositoryAttributeUseCase,
     DeleteOwnSharedAttributeAndNotifyPeerUseCase,
@@ -53,6 +61,7 @@ import {
     TestRuntimeServices,
     acceptIncomingShareAttributeRequest,
     cleanupAttributes,
+    createRelationshipWithStatusPending,
     establishRelationship,
     exchangeAndAcceptRequestByMessage,
     executeFullCreateAndShareRelationshipAttributeFlow,
@@ -627,6 +636,269 @@ describe("get repository, own shared and peer shared attributes", () => {
     });
 });
 
+describe(CanCreateRepositoryAttributeUseCase.name, () => {
+    const canCreateRepositoryAttributeRequest: CanCreateRepositoryAttributeRequest = {
+        content: {
+            value: {
+                "@type": "GivenName",
+                value: "aGivenName"
+            },
+            tags: ["tag1", "tag2"]
+        }
+    };
+
+    describe("validation errors for the attribute content", () => {
+        test("should not allow to create a number as GivenName", async () => {
+            const request: CanCreateRepositoryAttributeRequest = {
+                content: {
+                    value: {
+                        "@type": "GivenName",
+                        value: 5
+                    },
+                    tags: ["tag1", "tag2"]
+                } as any
+            };
+            const result = await services1.consumption.attributes.canCreateRepositoryAttribute(request);
+
+            assert(!result.value.isSuccess);
+
+            expect(result.value.isSuccess).toBe(false);
+            expect(result.value.message).toBe("GivenName :: value must be string");
+            expect(result.value.code).toBe("error.runtime.validation.invalidPropertyValue");
+        });
+
+        test("should not allow to create a string as year of BirthDate", async () => {
+            const request: CanCreateRepositoryAttributeRequest = {
+                content: {
+                    value: {
+                        "@type": "BirthDate",
+                        day: 5,
+                        month: 5,
+                        year: "a-string"
+                    },
+                    tags: ["tag1", "tag2"]
+                } as any
+            };
+            const result = await services1.consumption.attributes.canCreateRepositoryAttribute(request);
+
+            assert(!result.value.isSuccess);
+
+            expect(result.value.isSuccess).toBe(false);
+            expect(result.value.message).toBe("BirthDate :: year must be number");
+            expect(result.value.code).toBe("error.runtime.validation.invalidPropertyValue");
+        });
+
+        test("should not allow to create a BirthDate with a missing year", async () => {
+            const request: CanCreateRepositoryAttributeRequest = {
+                content: {
+                    value: {
+                        "@type": "BirthDate",
+                        day: 5,
+                        month: 5
+                    },
+                    tags: ["tag1", "tag2"]
+                } as any
+            };
+            const result = await services1.consumption.attributes.canCreateRepositoryAttribute(request);
+
+            assert(!result.value.isSuccess);
+
+            expect(result.value.isSuccess).toBe(false);
+            expect(result.value.message).toBe("BirthDate :: must have required property 'year'");
+            expect(result.value.code).toBe("error.runtime.validation.invalidPropertyValue");
+        });
+
+        test("should not allow to create 14 as BirthMonth", async () => {
+            const request: CanCreateRepositoryAttributeRequest = {
+                content: {
+                    value: {
+                        "@type": "BirthMonth",
+                        value: 14
+                    },
+                    tags: ["tag1", "tag2"]
+                } as any
+            };
+            const result = await services1.consumption.attributes.canCreateRepositoryAttribute(request);
+
+            assert(!result.value.isSuccess);
+
+            expect(result.value.isSuccess).toBe(false);
+            expect(result.value.message).toBe("BirthMonth :: value must be equal to one of the allowed values");
+            expect(result.value.code).toBe("error.runtime.validation.invalidPropertyValue");
+        });
+
+        test("should not allow to accept an additional property", async () => {
+            const request: CanCreateRepositoryAttributeRequest = {
+                content: {
+                    value: {
+                        "@type": "GivenName",
+                        value: "aGivenName",
+                        additionalProperty: 1
+                    },
+                    tags: ["tag1", "tag2"]
+                } as any
+            };
+            const result = await services1.consumption.attributes.canCreateRepositoryAttribute(request);
+
+            assert(!result.value.isSuccess);
+
+            expect(result.value.isSuccess).toBe(false);
+            expect(result.value.message).toBe("GivenName :: must NOT have additional properties");
+            expect(result.value.code).toBe("error.runtime.validation.invalidPropertyValue");
+        });
+
+        test("should not allow to accept an invalid @type", async () => {
+            const request: CanCreateRepositoryAttributeRequest = {
+                content: {
+                    value: {
+                        "@type": "invalid-type"
+                    }
+                }
+            } as any;
+            const result = await services1.consumption.attributes.canCreateRepositoryAttribute(request);
+
+            assert(!result.value.isSuccess);
+
+            expect(result.value.isSuccess).toBe(false);
+            expect(result.value.message).toBe("content.value.@type must match one of the allowed Attribute value types for IdentityAttributes");
+            expect(result.value.code).toBe("error.runtime.validation.invalidPropertyValue");
+        });
+    });
+
+    test("should allow to create a RepositoryAttribute", async () => {
+        const result = await services1.consumption.attributes.canCreateRepositoryAttribute(canCreateRepositoryAttributeRequest);
+        expect(result.value.isSuccess).toBe(true);
+    });
+
+    test("should not allow to create a RepositoryAttribute duplicate", async () => {
+        const repositoryAttribute = (await services1.consumption.attributes.createRepositoryAttribute(canCreateRepositoryAttributeRequest)).value;
+
+        const result = await services1.consumption.attributes.canCreateRepositoryAttribute(canCreateRepositoryAttributeRequest);
+
+        assert(!result.value.isSuccess);
+
+        expect(result.value.isSuccess).toBe(false);
+        expect(result.value.message).toBe(
+            `The RepositoryAttribute cannot be created because it has the same content.value as the already existing RepositoryAttribute with id '${repositoryAttribute.id.toString()}'.`
+        );
+        expect(result.value.code).toBe("error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute");
+    });
+
+    test("should not allow to create a duplicate RepositoryAttribute even if the tags/validFrom/validTo are different", async () => {
+        const createAttributeRequest: CreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "aGivenName"
+                },
+                tags: ["tag1", "tag2"],
+                validFrom: CoreDate.utc().subtract({ day: 1 }).toString(),
+                validTo: CoreDate.utc().add({ day: 1 }).toString()
+            }
+        };
+        const repositoryAttribute = (await services1.consumption.attributes.createRepositoryAttribute(createAttributeRequest)).value;
+
+        const canCreateAttributeRequest: CanCreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "aGivenName"
+                },
+                tags: ["tag3"]
+            }
+        };
+
+        const result = await services1.consumption.attributes.canCreateRepositoryAttribute(canCreateAttributeRequest);
+
+        assert(!result.value.isSuccess);
+
+        expect(result.value.isSuccess).toBe(false);
+        expect(result.value.message).toBe(
+            `The RepositoryAttribute cannot be created because it has the same content.value as the already existing RepositoryAttribute with id '${repositoryAttribute.id.toString()}'.`
+        );
+        expect(result.value.code).toBe("error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute");
+    });
+
+    test("should allow to create another RepositoryAttribute even if the tags/validFrom/validTo are duplicates", async () => {
+        const validFrom = CoreDate.utc().subtract({ day: 1 }).toString();
+        const validTo = CoreDate.utc().add({ day: 1 }).toString();
+
+        const request: CreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "aGivenName"
+                },
+                tags: ["tag1", "tag2"],
+                validFrom,
+                validTo
+            }
+        };
+        await services1.consumption.attributes.createRepositoryAttribute(request);
+
+        const request2: CanCreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "anotherGivenName"
+                },
+                tags: ["tag1", "tag2"],
+                validFrom,
+                validTo
+            }
+        };
+
+        const result = await services1.consumption.attributes.canCreateRepositoryAttribute(request2);
+        expect(result.value.isSuccess).toBe(true);
+    });
+
+    test("should allow to create a RepositoryAttribute duplicate of a predecessor", async () => {
+        const predecessor = await services1.consumption.attributes.createRepositoryAttribute(canCreateRepositoryAttributeRequest);
+        await services1.consumption.attributes.succeedRepositoryAttribute({
+            predecessorId: predecessor.value.id,
+            successorContent: {
+                value: {
+                    "@type": "GivenName",
+                    value: "anotherGivenName"
+                }
+            }
+        });
+
+        const result = await services1.consumption.attributes.canCreateRepositoryAttribute(canCreateRepositoryAttributeRequest);
+        expect(result.value.isSuccess).toBe(true);
+    });
+
+    test("should allow to create a RepositoryAttribute that is the same as an existing RepositoryAttribute without an optional property", async () => {
+        const createAttributeWithOptionalPropertyRequest: CreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "PersonName",
+                    givenName: "aGivenName",
+                    surname: "aSurname",
+                    middleName: "aMiddleName"
+                },
+                tags: ["tag1", "tag2"]
+            }
+        };
+
+        const canCreateAttributeWithoutOptionalPropertyRequest: CanCreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "PersonName",
+                    givenName: "aGivenName",
+                    surname: "aSurname"
+                },
+                tags: ["tag1", "tag2"]
+            }
+        };
+
+        await services1.consumption.attributes.createRepositoryAttribute(createAttributeWithOptionalPropertyRequest);
+
+        const result = await services1.consumption.attributes.canCreateRepositoryAttribute(canCreateAttributeWithoutOptionalPropertyRequest);
+        expect(result.value.isSuccess).toBe(true);
+    });
+});
+
 describe(CreateRepositoryAttributeUseCase.name, () => {
     test("should create a repository attribute", async () => {
         const request: CreateRepositoryAttributeRequest = {
@@ -1096,7 +1368,7 @@ describe(ShareRepositoryAttributeUseCase.name, () => {
 
         const rPeerSharedIdentityAttribute = (await services2.consumption.attributes.getAttribute({ id: sOwnSharedIdentityAttribute.id })).value;
         const deleteResult = await services2.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: rPeerSharedIdentityAttribute.id });
-        const notificationId = deleteResult.value.notificationId;
+        const notificationId = deleteResult.value.notificationId!;
 
         await syncUntilHasMessageWithNotification(services1.transport, notificationId);
         await services1.eventBus.waitForEvent(PeerSharedAttributeDeletedByPeerEvent, (e) => {
@@ -1450,7 +1722,7 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
         const rPeerSharedIdentityAttributeVersion1 = (await services2.consumption.attributes.getAttribute({ id: ownSharedIdentityAttributeVersion1.id })).value;
 
         const deleteResult = await services2.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: rPeerSharedIdentityAttributeVersion1.id });
-        const notificationId = deleteResult.value.notificationId;
+        const notificationId = deleteResult.value.notificationId!;
 
         await syncUntilHasMessageWithNotification(services1.transport, notificationId);
         await services1.eventBus.waitForEvent(PeerSharedAttributeDeletedByPeerEvent, (e) => {
@@ -1642,7 +1914,7 @@ describe(SucceedRelationshipAttributeAndNotifyPeerUseCase.name, () => {
         const rPeerSharedRelationshipAttribute = (await services2.consumption.attributes.getAttribute({ id: sOwnSharedRelationshipAttribute.id })).value;
 
         const deleteResult = await services2.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: rPeerSharedRelationshipAttribute.id });
-        const notificationId = deleteResult.value.notificationId;
+        const notificationId = deleteResult.value.notificationId!;
 
         await syncUntilHasMessageWithNotification(services1.transport, notificationId);
         await services1.eventBus.waitForEvent(PeerSharedAttributeDeletedByPeerEvent, (e) => {
@@ -2370,7 +2642,7 @@ describe("DeleteAttributeUseCases", () => {
 
         test("should notify about identity attribute deletion by owner", async () => {
             const notificationId = (await services1.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: ownSharedIdentityAttributeVersion0.id })).value
-                .notificationId;
+                .notificationId!;
             const timeBeforeUpdate = CoreDate.utc();
             await syncUntilHasMessageWithNotification(services2.transport, notificationId);
             await services2.eventBus.waitForEvent(OwnSharedAttributeDeletedByOwnerEvent, (e) => {
@@ -2387,7 +2659,7 @@ describe("DeleteAttributeUseCases", () => {
 
         test("should notify about identity attribute deletion of succeeded attribute by owner", async () => {
             const notificationId = (await services1.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: ownSharedIdentityAttributeVersion1.id })).value
-                .notificationId;
+                .notificationId!;
             const timeBeforeUpdate = CoreDate.utc();
             await syncUntilHasMessageWithNotification(services2.transport, notificationId);
             await services2.eventBus.waitForEvent(OwnSharedAttributeDeletedByOwnerEvent, (e) => {
@@ -2398,6 +2670,61 @@ describe("DeleteAttributeUseCases", () => {
             const updatedPredecessor = (await services2.consumption.attributes.getAttribute({ id: ownSharedIdentityAttributeVersion0.id })).value;
             expect(updatedPredecessor.deletionInfo?.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByOwner);
             expect(CoreDate.from(updatedPredecessor.deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))).toBe(true);
+        });
+
+        test("should throw an error trying to delete an own shared Attribute when the Relationship is in status Pending", async () => {
+            const [services1, services2] = await runtimeServiceProvider.launch(2, {
+                enableRequestModule: true,
+                enableDeciderModule: true,
+                enableNotificationModule: true
+            });
+
+            const repositoryAttribute = (
+                await services2.consumption.attributes.createRepositoryAttribute({
+                    content: {
+                        value: {
+                            "@type": "GivenName",
+                            value: "aGivenName"
+                        }
+                    }
+                })
+            ).value;
+
+            const item: ReadAttributeRequestItemJSON = {
+                "@type": "ReadAttributeRequestItem",
+                mustBeAccepted: true,
+                query: {
+                    "@type": "IdentityAttributeQuery",
+                    valueType: "GivenName"
+                }
+            };
+
+            const relationshipTemplateContent: RelationshipTemplateContentJSON = {
+                "@type": "RelationshipTemplateContent",
+                title: "aTitle",
+                onNewRelationship: {
+                    items: [item],
+                    "@type": "Request"
+                }
+            };
+            await createRelationshipWithStatusPending(services1, services2, relationshipTemplateContent, [
+                {
+                    accept: true,
+                    existingAttributeId: repositoryAttribute.id
+                } as AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON
+            ]);
+
+            const ownSharedAttribute = await services2.consumption.attributes.getAttributes({
+                query: {
+                    "shareInfo.sourceAttribute": repositoryAttribute.id
+                }
+            });
+
+            const attributeDeletionResult = await services2.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: ownSharedAttribute.value[0].id });
+            expect(attributeDeletionResult).toBeAnError(
+                "The shared Attribute cannot be deleted while the Relationship to the peer is in status 'Pending'.",
+                "error.runtime.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending"
+            );
         });
     });
 
@@ -2483,7 +2810,7 @@ describe("DeleteAttributeUseCases", () => {
 
         test("should notify about identity attribute deletion by peer", async () => {
             const notificationId = (await services2.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: ownSharedIdentityAttributeVersion0.id })).value
-                .notificationId;
+                .notificationId!;
             const timeBeforeUpdate = CoreDate.utc();
             await syncUntilHasMessageWithNotification(services1.transport, notificationId);
             await services1.eventBus.waitForEvent(PeerSharedAttributeDeletedByPeerEvent, (e) => {
@@ -2501,7 +2828,7 @@ describe("DeleteAttributeUseCases", () => {
 
         test("should notify about identity attribute deletion of succeeded attribute by peer", async () => {
             const notificationId = (await services2.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: ownSharedIdentityAttributeVersion1.id })).value
-                .notificationId;
+                .notificationId!;
             const timeBeforeUpdate = CoreDate.utc();
             await syncUntilHasMessageWithNotification(services1.transport, notificationId);
             await services1.eventBus.waitForEvent(PeerSharedAttributeDeletedByPeerEvent, (e) => {
@@ -2513,6 +2840,59 @@ describe("DeleteAttributeUseCases", () => {
             const updatedPredecessor = (await services1.consumption.attributes.getAttribute({ id: ownSharedIdentityAttributeVersion0.id })).value;
             expect(updatedPredecessor.deletionInfo?.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByPeer);
             expect(CoreDate.from(updatedPredecessor.deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))).toBe(true);
+        });
+
+        test("should throw an error trying to delete a peer shared Attribute when the Relationship is in status Pending", async () => {
+            const [services1, services2] = await runtimeServiceProvider.launch(2, {
+                enableRequestModule: true,
+                enableDeciderModule: true,
+                enableNotificationModule: true
+            });
+
+            const repositoryAttribute = (
+                await services1.consumption.attributes.createRepositoryAttribute({
+                    content: {
+                        value: {
+                            "@type": "GivenName",
+                            value: "aGivenName"
+                        }
+                    }
+                })
+            ).value;
+
+            const item: ShareAttributeRequestItemJSON = {
+                "@type": "ShareAttributeRequestItem",
+                mustBeAccepted: true,
+                attribute: repositoryAttribute.content,
+                sourceAttributeId: repositoryAttribute.id
+            };
+
+            const relationshipTemplateContent: CreateOwnRelationshipTemplateRequest["content"] = {
+                "@type": "RelationshipTemplateContent",
+                title: "aTitle",
+                onNewRelationship: {
+                    items: [item],
+                    "@type": "Request"
+                }
+            };
+
+            await createRelationshipWithStatusPending(services1, services2, relationshipTemplateContent, [
+                {
+                    accept: true
+                } as AcceptRequestItemParametersJSON
+            ]);
+
+            const peerSharedAttribute = await services2.consumption.attributes.getAttributes({
+                query: {
+                    "shareInfo.peer": services1.address
+                }
+            });
+
+            const attributeDeletionResult = await services2.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: peerSharedAttribute.value[0].id });
+            expect(attributeDeletionResult).toBeAnError(
+                "The shared Attribute cannot be deleted while the Relationship to the peer is in status 'Pending'.",
+                "error.runtime.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending"
+            );
         });
     });
 
@@ -2584,7 +2964,7 @@ describe("DeleteAttributeUseCases", () => {
         test("should notify about ThirdPartyRelationshipAttribute as the emitter of it", async () => {
             const notificationId = (
                 await services1.consumption.attributes.deleteThirdPartyRelationshipAttributeAndNotifyPeer({ attributeId: emittedThirdPartyRelationshipAttribute.id })
-            ).value.notificationId;
+            ).value.notificationId!;
             const timeBeforeUpdate = CoreDate.utc();
             await syncUntilHasMessageWithNotification(services2.transport, notificationId);
             await services2.eventBus.waitForEvent(ThirdPartyRelationshipAttributeDeletedByPeerEvent, (e) => {
@@ -2603,7 +2983,7 @@ describe("DeleteAttributeUseCases", () => {
         test("should notify about ThirdPartyRelationshipAttribute as the recipient of it", async () => {
             const notificationId = (
                 await services2.consumption.attributes.deleteThirdPartyRelationshipAttributeAndNotifyPeer({ attributeId: emittedThirdPartyRelationshipAttribute.id })
-            ).value.notificationId;
+            ).value.notificationId!;
             const timeBeforeUpdate = CoreDate.utc();
             await syncUntilHasMessageWithNotification(services1.transport, notificationId);
             await services1.eventBus.waitForEvent(ThirdPartyRelationshipAttributeDeletedByPeerEvent, (e) => {
@@ -2629,6 +3009,62 @@ describe("DeleteAttributeUseCases", () => {
 
             const getDeletedAttributeResult = await services1.consumption.attributes.getAttribute({ id: emittedThirdPartyRelationshipAttribute.id });
             expect(getDeletedAttributeResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
+        });
+
+        test("should throw an error trying to delete a ThirdPartyRelationshipAttribute when the Relationship is in status Pending", async () => {
+            const [services1, services2, services3] = await runtimeServiceProvider.launch(3, {
+                enableRequestModule: true,
+                enableDeciderModule: true,
+                enableNotificationModule: true
+            });
+            await establishRelationship(services1.transport, services2.transport);
+            const peerSharedRelationshipAttribute = await executeFullCreateAndShareRelationshipAttributeFlow(services2, services1, {
+                content: {
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "aString",
+                        title: "aTitle"
+                    },
+                    key: "aKey",
+                    confidentiality: RelationshipAttributeConfidentiality.Public
+                }
+            });
+
+            const item: ShareAttributeRequestItemJSON = {
+                "@type": "ShareAttributeRequestItem",
+                mustBeAccepted: true,
+                attribute: peerSharedRelationshipAttribute.content,
+                sourceAttributeId: peerSharedRelationshipAttribute.id,
+                thirdPartyAddress: services1.address
+            };
+
+            const relationshipTemplateContent: CreateOwnRelationshipTemplateRequest["content"] = {
+                "@type": "RelationshipTemplateContent",
+                title: "aTitle",
+                onNewRelationship: {
+                    items: [item],
+                    "@type": "Request"
+                }
+            };
+
+            await createRelationshipWithStatusPending(services2, services3, relationshipTemplateContent, [
+                {
+                    accept: true
+                } as AcceptRequestItemParametersJSON
+            ]);
+
+            const thirdPartyRelationshipAttribute = await services3.consumption.attributes.getAttributes({
+                query: {
+                    "shareInfo.peer": services2.address
+                }
+            });
+            const attributeDeletionResult = await services3.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({
+                attributeId: thirdPartyRelationshipAttribute.value[0].id
+            });
+            expect(attributeDeletionResult).toBeAnError(
+                "The shared Attribute cannot be deleted while the Relationship to the peer is in status 'Pending'.",
+                "error.runtime.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending"
+            );
         });
     });
 });

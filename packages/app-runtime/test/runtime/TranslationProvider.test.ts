@@ -10,6 +10,7 @@ describe("TranslationProvider", function () {
 
     beforeAll(async function () {
         runtime = await TestUtil.createRuntime();
+        await runtime.start();
 
         class SpecificTranslationProvider implements INativeTranslationProvider {
             public translate(key: string, ..._values: any[]): Promise<Result<string>> {

@@ -34,7 +34,7 @@ describe("ThirdPartyRelationshipAttributeQuery", function () {
         { in: { address: "test" }, out: ["test"] },
         { in: [{ address: "test" }], out: ["test"] },
         { in: [{ address: "test" }, { address: "test" }], out: ["test", "test"] }
-    ])("accepts '$in' as thirdParty", function (params) {
+    ])("accepts %j as thirdParty", function (params) {
         const serialized = ThirdPartyRelationshipAttributeQuery.from({
             key: "test",
             owner: "thirdParty",
@@ -64,7 +64,7 @@ describe("ThirdPartyRelationshipAttributeQuery", function () {
         { in: "test", out: ["test"] },
         { in: ["test"], out: ["test"] }
     ])(
-        "(de-)serialize ThirdPartyRelationshipAttributeQuery as a property with ${JSON.stringify(value)} as thirdParty",
+        "(de-)serialize ThirdPartyRelationshipAttributeQuery as a property with %j as thirdParty",
 
         function (params) {
             const test = TestTypeContainingThirdPartyRelationshipAttributeQueryTest.from({

@@ -41,7 +41,8 @@ export class DeviceMapper {
             },
             password: deviceSharedSecret.password,
             username: deviceSharedSecret.username,
-            profileName: deviceSharedSecret.profileName
+            profileName: deviceSharedSecret.profileName,
+            isBackupDevice: deviceSharedSecret.isBackupDevice
         };
     }
 
@@ -62,7 +63,8 @@ export class DeviceMapper {
             },
             password: deviceOnboardingDTO.password,
             username: deviceOnboardingDTO.username,
-            profileName: deviceOnboardingDTO.profileName
+            profileName: deviceOnboardingDTO.profileName,
+            isBackupDevice: deviceOnboardingDTO.isBackupDevice
         });
         return sharedSecret;
     }

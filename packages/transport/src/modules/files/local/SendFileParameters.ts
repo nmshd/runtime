@@ -10,6 +10,7 @@ export interface ISendFileParameters extends ISerializable {
     expiresAt: ICoreDate;
     filemodified?: ICoreDate;
     buffer: ICoreBuffer;
+    tags?: string[];
 }
 
 @type("SendFileParameters")
@@ -41,6 +42,10 @@ export class SendFileParameters extends Serializable implements ISendFileParamet
     @validate()
     @serialize()
     public buffer: CoreBuffer;
+
+    @validate({ nullable: true })
+    @serialize({ type: String })
+    public tags?: string[];
 
     public static from(value: ISendFileParameters): SendFileParameters {
         return this.fromAny(value);

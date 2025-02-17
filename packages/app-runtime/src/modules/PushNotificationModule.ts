@@ -1,9 +1,20 @@
 import { Result } from "@js-soft/ts-utils";
-import { AppRuntimeErrors } from "../../AppRuntimeErrors";
-import { AccountSelectedEvent, ExternalEventReceivedEvent } from "../../events";
-import { RemoteNotificationEvent, RemoteNotificationRegistrationEvent } from "../../natives";
-import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "../AppRuntimeModule";
-import { BackboneEventName, IBackboneEventContent } from "./IBackboneEventContent";
+import { AppRuntimeErrors } from "../AppRuntimeErrors";
+import { AccountSelectedEvent, ExternalEventReceivedEvent } from "../events";
+import { RemoteNotificationEvent, RemoteNotificationRegistrationEvent } from "../natives";
+import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "./AppRuntimeModule";
+
+enum BackboneEventName {
+    DatawalletModificationsCreated = "DatawalletModificationsCreated",
+    ExternalEventCreated = "ExternalEventCreated"
+}
+
+interface IBackboneEventContent {
+    devicePushIdentifier: string;
+    eventName: BackboneEventName;
+    sentAt: string;
+    payload: any;
+}
 
 export interface PushNotificationModuleConfig extends AppRuntimeModuleConfiguration {}
 
@@ -13,8 +24,8 @@ export class PushNotificationModule extends AppRuntimeModule<PushNotificationMod
     }
 
     public start(): void {
-        this.subscribeToNativeEvent(RemoteNotificationEvent, this.handleRemoteNotification.bind(this));
-        this.subscribeToNativeEvent(RemoteNotificationRegistrationEvent, this.handleTokenRegistration.bind(this));
+        this.subscribeToEvent(RemoteNotificationEvent, this.handleRemoteNotification.bind(this));
+        this.subscribeToEvent(RemoteNotificationRegistrationEvent, this.handleTokenRegistration.bind(this));
         this.subscribeToEvent(AccountSelectedEvent, this.handleAccountSelected.bind(this));
     }
 
@@ -77,11 +88,10 @@ export class PushNotificationModule extends AppRuntimeModule<PushNotificationMod
         await this.registerPushTokenForLocalAccount(event.data.address, tokenResult.value);
     }
 
-    public async registerPushTokenForLocalAccount(address: string, token: string): Promise<void> {
+    private async registerPushTokenForLocalAccount(address: string, token: string): Promise<void> {
         if (!token) {
-            throw AppRuntimeErrors.modules.pushNotificationModule
-                .tokenRegistrationNotPossible("The registered token was empty. This might be the case if you did not allow push notifications.")
-                .logWith(this.logger);
+            this.logger.info("The registered token was empty. This might be the case if you did not allow push notifications.");
+            return;
         }
 
         const services = await this.runtime.getServices(address);
@@ -92,9 +102,9 @@ export class PushNotificationModule extends AppRuntimeModule<PushNotificationMod
             throw AppRuntimeErrors.modules.pushNotificationModule.tokenRegistrationNotPossible("No device for this account found", deviceResult.error).logWith(this.logger);
         }
 
-        const platform = this.runtime.nativeEnvironment.deviceInfoAccess.deviceInfo.pushService;
         const appId = this.runtime.config.applicationId;
         const handle = token;
+        const platform = this.runtime.config.pushService;
         const environment = this.runtime.config.applePushEnvironment;
 
         const result = await services.transportServices.account.registerPushNotificationToken({
