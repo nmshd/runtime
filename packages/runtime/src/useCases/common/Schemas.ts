@@ -20436,6 +20436,19 @@ export const GetFilesRequest: any = {
                             }
                         }
                     ]
+                },
+                "tags": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
                 }
             },
             "additionalProperties": false
@@ -20548,6 +20561,12 @@ export const UploadOwnFileRequest: any = {
                 },
                 "description": {
                     "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             },
             "required": [
@@ -20586,6 +20605,12 @@ export const UploadOwnFileValidatableRequest: any = {
                 },
                 "description": {
                     "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "content": {
                     "type": "object"

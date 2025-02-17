@@ -12,7 +12,6 @@ import { AppStringProcessor } from "./AppStringProcessor";
 import { AccountSelectedEvent } from "./events";
 import { AppServices, IUIBridge } from "./extensibility";
 import {
-    AppLaunchModule,
     AppRuntimeModuleConfiguration,
     AppSyncModule,
     IAppRuntimeModuleConstructor,
@@ -238,7 +237,6 @@ export class AppRuntime extends Runtime<AppConfig> {
     }
 
     private static moduleRegistry: Record<string, IAppRuntimeModuleConstructor | undefined> = {
-        appLaunch: AppLaunchModule,
         appSync: AppSyncModule,
         identityDeletionProcessStatusChanged: IdentityDeletionProcessStatusChangedModule,
         mailReceived: MailReceivedModule,

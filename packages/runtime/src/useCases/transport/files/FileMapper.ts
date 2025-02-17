@@ -24,6 +24,7 @@ export class FileMapper {
         return {
             id: file.id.toString(),
             filename: file.cache.filename,
+            tags: file.cache.tags,
             filesize: file.cache.filesize,
             createdAt: file.cache.createdAt.toString(),
             createdBy: file.cache.createdBy.toString(),

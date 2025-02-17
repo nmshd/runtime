@@ -638,7 +638,8 @@ export class TestUtil {
             filename: "Test.bin",
             filemodified: CoreDate.from("2019-09-30T00:00:00.000Z"),
             mimetype: "application/json",
-            expiresAt: CoreDate.utc().add({ minutes: 5 })
+            expiresAt: CoreDate.utc().add({ minutes: 5 }),
+            tags: ["tag1", "tag2"]
         };
 
         const file = await from.files.sendFile(params);

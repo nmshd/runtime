@@ -1,5 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { ProprietaryInteger, ProprietaryString } from "@nmshd/content";
+import { GivenName, ProprietaryInteger, ProprietaryString } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { Transport } from "@nmshd/transport";
 import { TestUtil } from "../../../../core/TestUtil";
@@ -324,21 +324,105 @@ describe("CreateAttributeRequestItemProcessor", function () {
         });
 
         test("in case of an IdentityAttribute: creates a RepositoryAttribute and an own shared IdentityAttribute", async function () {
-            await Given.aRequestItemWithAnIdentityAttribute({
-                attributeOwner: TestIdentity.CURRENT_IDENTITY
-            });
+            await Given.aRequestItemWithAnIdentityAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, value: GivenName.from("aFirstGivenName") });
             await When.iCallAccept();
+            await Then.theResponseItemShouldBeOfType("CreateAttributeAcceptResponseItem");
             await Then.aRepositoryAttributeIsCreated();
             await Then.anOwnSharedIdentityAttributeIsCreated();
+        });
+
+        test("in case of an IdentityAttribute that already exists as RepositoryAttribute: creates an own shared IdentityAttribute that links to the existing RepositoryAttribute", async function () {
+            const repositoryAttribute = await Given.aRepositoryAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, value: GivenName.from("aSecondGivenName") });
+            await Given.aRequestItemWithAnIdentityAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, value: GivenName.from("aSecondGivenName") });
+            await When.iCallAccept();
+            await Then.theResponseItemShouldBeOfType("CreateAttributeAcceptResponseItem");
+            await Then.anOwnSharedIdentityAttributeIsCreated();
+            await Then.theSourceAttributeIdOfTheCreatedOwnSharedIdentityAttributeMatches(repositoryAttribute.id);
+        });
+
+        test("in case of an IdentityAttribute that already exists as RepositoryAttribute with different tags: merges tags", async function () {
+            await Given.aRepositoryAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, tags: ["tag1", "tag2"], value: GivenName.from("aThirdGivenName") });
+            await Given.aRequestItemWithAnIdentityAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, tags: ["tag1", "tag3"], value: GivenName.from("aThirdGivenName") });
+            await When.iCallAccept();
+            await Then.theResponseItemShouldBeOfType("CreateAttributeAcceptResponseItem");
+            await Then.anOwnSharedIdentityAttributeIsCreated();
+            await Then.theTagsOfTheRepositoryAttributeMatch(["tag1", "tag2", "tag3"]);
+        });
+
+        test("in case of an IdentityAttribute that already exists as own shared IdentityAttribute: returns an AttributeAlreadySharedAcceptResponseItem", async function () {
+            const repositoryAttribute = await Given.aRepositoryAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, value: GivenName.from("aForthGivenName") });
+            const ownSharedIdentityAttribute = await Given.anOwnSharedIdentityAttribute({ sourceAttributeId: repositoryAttribute.id, peer: TestIdentity.PEER });
+            await Given.aRequestItemWithAnIdentityAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, value: GivenName.from("aForthGivenName") });
+            await When.iCallAccept();
+            await Then.theResponseItemShouldBeOfType("AttributeAlreadySharedAcceptResponseItem");
+            await Then.theIdOfTheAlreadySharedAttributeMatches(ownSharedIdentityAttribute.id);
+        });
+
+        test("in case of an IdentityAttribute that already exists as own shared IdentityAttribute with different tags: returns an AttributeSuccessionAcceptResponseItem", async function () {
+            const repositoryAttribute = await Given.aRepositoryAttribute({
+                attributeOwner: TestIdentity.CURRENT_IDENTITY,
+                tags: ["tag1", "tag2"],
+                value: GivenName.from("aFifthGivenName")
+            });
+            await Given.anOwnSharedIdentityAttribute({ sourceAttributeId: repositoryAttribute.id, peer: TestIdentity.PEER });
+            await Given.aRequestItemWithAnIdentityAttribute({
+                attributeOwner: TestIdentity.CURRENT_IDENTITY,
+                tags: ["tag1", "tag3"],
+                value: GivenName.from("aFifthGivenName")
+            });
+            await When.iCallAccept();
+            await Then.theResponseItemShouldBeOfType("AttributeSuccessionAcceptResponseItem");
+            await Then.theTagsOfTheSucceededRepositoryAttributeMatch(["tag1", "tag2", "tag3"]);
+        });
+
+        test("in case of an IdentityAttribute whose predecessor was shared: returns an AttributeSuccessionAcceptResponseItem", async function () {
+            const repositoryAttributePredecessor = await Given.aRepositoryAttribute({
+                attributeOwner: TestIdentity.CURRENT_IDENTITY,
+                value: GivenName.from("aSixthGivenName")
+            });
+            const ownSharedIdentityAttributePredecessor = await Given.anOwnSharedIdentityAttribute({
+                sourceAttributeId: repositoryAttributePredecessor.id,
+                peer: TestIdentity.PEER
+            });
+            await Given.aRepositoryAttributeSuccession(repositoryAttributePredecessor.id, { value: GivenName.from("aSucceededSixthGivenName") });
+            await Given.aRequestItemWithAnIdentityAttribute({
+                attributeOwner: TestIdentity.CURRENT_IDENTITY,
+                value: GivenName.from("aSucceededSixthGivenName")
+            });
+            await When.iCallAccept();
+            await Then.theResponseItemShouldBeOfType("AttributeSuccessionAcceptResponseItem");
+            await Then.thePredecessorIdOfTheSucceededAttributeMatches(ownSharedIdentityAttributePredecessor.id);
+        });
+
+        test("in case of an IdentityAttribute whose predecessor was shared with different tags: returns an AttributeSuccessionAcceptResponseItem", async function () {
+            const repositoryAttributePredecessor = await Given.aRepositoryAttribute({
+                attributeOwner: TestIdentity.CURRENT_IDENTITY,
+                value: GivenName.from("aSeventhGivenName"),
+                tags: ["tag1", "tag2"]
+            });
+            const ownSharedIdentityAttributePredecessor = await Given.anOwnSharedIdentityAttribute({
+                sourceAttributeId: repositoryAttributePredecessor.id,
+                peer: TestIdentity.PEER
+            });
+            await Given.aRepositoryAttributeSuccession(repositoryAttributePredecessor.id, { value: GivenName.from("aSucceededSeventhGivenName"), tags: ["tag1", "tag2"] });
+            await Given.aRequestItemWithAnIdentityAttribute({
+                attributeOwner: TestIdentity.CURRENT_IDENTITY,
+                value: GivenName.from("aSucceededSeventhGivenName"),
+                tags: ["tag1", "tag3"]
+            });
+            await When.iCallAccept();
+            await Then.theTagsOfTheSucceededRepositoryAttributeMatch(["tag1", "tag2", "tag3"]);
+            await Then.theResponseItemShouldBeOfType("AttributeSuccessionAcceptResponseItem");
+            await Then.thePredecessorIdOfTheSucceededAttributeMatches(ownSharedIdentityAttributePredecessor.id);
         });
     });
 
     describe("applyIncomingResponseItem", function () {
         test.each([TestIdentity.PEER, TestIdentity.EMPTY])(
-            "in case of an IdentityAttribute with owner=${value.toString()}: creates a LocalAttribute with the Attribute from the RequestItem and the attributeId from the ResponseItem for the peer of the request ",
+            "in case of an IdentityAttribute with owner=%s: creates a LocalAttribute with the Attribute from the RequestItem and the attributeId from the ResponseItem for the peer of the request ",
             async function (attributeOwner: CoreAddress) {
                 await Given.aRequestItemWithAnIdentityAttribute({ attributeOwner });
-                await Given.aResponseItem();
+                await Given.aCreateAttributeAcceptResponseItem();
                 await When.iCallApplyIncomingResponseItem();
                 await Then.theCreatedAttributeHasTheSameContentAsTheAttributeFromTheRequestItem();
                 await Then.theCreatedAttributeHasTheAttributeIdFromTheResponseItem();
@@ -346,14 +430,22 @@ describe("CreateAttributeRequestItemProcessor", function () {
         );
 
         test.each([TestIdentity.PEER, TestIdentity.EMPTY, TestIdentity.CURRENT_IDENTITY])(
-            "in case of a RelationshipAttribute with owner=${value.toString()}: creates a LocalAttribute with the Attribute from the RequestItem and the attributeId from the ResponseItem for the peer of the request ",
+            "in case of a RelationshipAttribute with owner=%s: creates a LocalAttribute with the Attribute from the RequestItem and the attributeId from the ResponseItem for the peer of the request ",
             async function (attributeOwner: CoreAddress) {
                 await Given.aRequestItemWithARelationshipAttribute({ attributeOwner });
-                await Given.aResponseItem();
+                await Given.aCreateAttributeAcceptResponseItem();
                 await When.iCallApplyIncomingResponseItem();
                 await Then.theCreatedAttributeHasTheSameContentAsTheAttributeFromTheRequestItem();
                 await Then.theCreatedAttributeHasTheAttributeIdFromTheResponseItem();
             }
         );
+
+        test("in case of an AttributeSuccessionAcceptResponseItem succeed the peer shared IdentityAttribute", async function () {
+            const peerSharedIdentityAttribute = await Given.aPeerSharedIdentityAttribute({ peer: TestIdentity.PEER });
+            await Given.aRequestItemWithAnIdentityAttribute({ attributeOwner: TestIdentity.PEER });
+            await Given.anAttributeSuccessionAcceptResponseItem({ predecessorId: peerSharedIdentityAttribute.id });
+            await When.iCallApplyIncomingResponseItem();
+            await Then.thePeerSharedIdentityAttributeWasSucceeded({ predecessorId: peerSharedIdentityAttribute.id });
+        });
     });
 });

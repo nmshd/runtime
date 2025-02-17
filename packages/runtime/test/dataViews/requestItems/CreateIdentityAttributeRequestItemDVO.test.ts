@@ -14,6 +14,7 @@ import {
     TransportServices
 } from "../../../src";
 import {
+    cleanupAttributes,
     establishRelationship,
     exchangeAndAcceptRequestByMessage,
     exchangeMessageWithRequest,
@@ -80,7 +81,8 @@ beforeAll(async () => {
 
 afterAll(() => serviceProvider.stop());
 
-beforeEach(function () {
+beforeEach(async function () {
+    await cleanupAttributes(sRuntimeServices, rRuntimeServices);
     rEventBus.reset();
     sEventBus.reset();
 });

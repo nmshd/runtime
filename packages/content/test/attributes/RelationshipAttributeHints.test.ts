@@ -24,7 +24,7 @@ describe("RelationshipAttributeHints", function () {
         expect(creationHints).toBeInstanceOf(RelationshipAttributeCreationHints);
     });
 
-    test.each(["", "non-existing-value-type"])("should validate valueType ('${value}' should be invalid)", function (invalidValueType) {
+    test.each(["", "non-existing-value-type"])("should validate valueType ('%s' should be invalid)", function (invalidValueType) {
         expect(() =>
             RelationshipAttributeCreationHints.from({
                 // @ts-expect-error

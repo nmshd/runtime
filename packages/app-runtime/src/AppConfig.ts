@@ -34,12 +34,6 @@ export function createAppConfig(...configs: (AppConfigOverwrite | AppConfig)[]):
             datawalletEnabled: true
         },
         modules: {
-            appLaunch: {
-                name: "appLaunch",
-                displayName: "App Launch Module",
-                location: "appLaunch",
-                enabled: true
-            },
             pushNotification: {
                 name: "pushNotification",
                 displayName: "Push Notification Module",
