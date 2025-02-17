@@ -424,6 +424,107 @@ describe("IncomingRequestsController", function () {
             expect(validationResult.items[1].items[2].isError()).toBe(true);
         });
 
+        test("returns a validation result that merges the results from decideRequestParamsValidator and the RequestItemProcessor", async function () {
+            const request = {
+                items: [
+                    TestRequestItem.from({
+                        mustBeAccepted: true
+                    }),
+                    TestRequestItem.from({
+                        mustBeAccepted: true
+                    }),
+                    TestRequestItem.from({
+                        mustBeAccepted: true,
+                        shouldFailAtCanAccept: true
+                    }),
+                    TestRequestItem.from({
+                        mustBeAccepted: true,
+                        shouldFailAtCanReject: true
+                    }),
+                    RequestItemGroup.from({
+                        items: [
+                            TestRequestItem.from({
+                                mustBeAccepted: true
+                            }),
+                            TestRequestItem.from({
+                                mustBeAccepted: true
+                            }),
+                            TestRequestItem.from({
+                                mustBeAccepted: true,
+                                shouldFailAtCanAccept: true
+                            }),
+                            TestRequestItem.from({
+                                mustBeAccepted: true,
+                                shouldFailAtCanReject: true
+                            })
+                        ]
+                    })
+                ]
+            } as IRequest;
+
+            const acceptParams = {
+                items: [
+                    {
+                        accept: true
+                    },
+                    {
+                        accept: false
+                    },
+                    {
+                        accept: true
+                    },
+                    {
+                        accept: false
+                    },
+                    {
+                        items: [
+                            {
+                                accept: true
+                            },
+                            {
+                                accept: false
+                            },
+                            {
+                                accept: true
+                            },
+                            {
+                                accept: false
+                            }
+                        ]
+                    }
+                ]
+            } as Omit<DecideRequestParametersJSON, "requestId">;
+
+            await Given.anIncomingRequestWith({
+                content: request,
+                status: LocalRequestStatus.DecisionRequired
+            });
+
+            const validationResult = await When.iCallCanAcceptWith({
+                items: acceptParams.items
+            });
+
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.validation.inheritedFromItem",
+                message: "Some child items have errors."
+            });
+            expect(validationResult.items).toHaveLength(5);
+
+            expect(validationResult.items[0].isError()).toBe(false);
+            expect(validationResult.items[1].isError()).toBe(true);
+            expect(validationResult.items[2].isError()).toBe(true);
+            expect(validationResult.items[3].isError()).toBe(true);
+
+            expect(validationResult.items[4].isError()).toBe(true);
+            expect(validationResult.items[4]).errorValidationResult({ code: "error.consumption.requests.validation.inheritedFromItem" });
+
+            expect(validationResult.items[4].items).toHaveLength(4);
+            expect(validationResult.items[4].items[0].isError()).toBe(false);
+            expect(validationResult.items[4].items[1].isError()).toBe(true);
+            expect(validationResult.items[4].items[2].isError()).toBe(true);
+            expect(validationResult.items[4].items[3].isError()).toBe(true);
+        });
+
         test("throws error for requests whose acceptance always would lead to the creation of more than one RelationshipAttribute with the same key", async function () {
             await Given.anIncomingRequestWith({
                 content: {
