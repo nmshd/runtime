@@ -1,15 +1,6 @@
-import {
-    GivenName,
-    IdentityAttribute,
-    ReadAttributeAcceptResponseItem,
-    ReadAttributeRequestItem,
-    RelationshipCreationContent,
-    RelationshipTemplateContent,
-    ResponseItemResult,
-    ResponseResult
-} from "@nmshd/content";
+import { AcceptReadAttributeRequestItemParametersJSON } from "@nmshd/consumption";
+import { GivenName, IdentityAttribute, ReadAttributeRequestItem, RelationshipTemplateContent } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
-import { CoreIdHelper } from "@nmshd/transport";
 import { establishRelationshipWithContents, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
@@ -23,9 +14,8 @@ beforeAll(async () => {
     runtimeServices2 = runtimeServices[1];
 
     await establishRelationshipWithContents(
-        runtimeServices1.transport,
-        runtimeServices2.transport,
-
+        runtimeServices1,
+        runtimeServices2,
         RelationshipTemplateContent.from({
             onNewRelationship: {
                 "@type": "Request",
@@ -34,29 +24,21 @@ beforeAll(async () => {
                         mustBeAccepted: true,
                         query: {
                             "@type": "IdentityAttributeQuery",
-                            valueType: "CommunicationLanguage"
+                            valueType: "GivenName"
                         }
                     })
                 ]
             }
         }).toJSON(),
-        RelationshipCreationContent.from({
-            response: {
-                "@type": "Response",
-                result: ResponseResult.Accepted,
-                requestId: (await CoreIdHelper.notPrefixed.generate()).toString(),
-                items: [
-                    ReadAttributeAcceptResponseItem.from({
-                        result: ResponseItemResult.Accepted,
-                        attributeId: await CoreIdHelper.notPrefixed.generate(),
-                        attribute: IdentityAttribute.from({
-                            owner: CoreAddress.from((await runtimeServices1.transport.account.getIdentityInfo()).value.address),
-                            value: GivenName.from("aGivenName")
-                        })
-                    }).toJSON()
-                ]
-            }
-        }).toJSON()
+        [
+            {
+                accept: true,
+                newAttribute: IdentityAttribute.from({
+                    owner: CoreAddress.from((await runtimeServices2.transport.account.getIdentityInfo()).value.address),
+                    value: GivenName.from("aGivenName")
+                }).toJSON()
+            } as AcceptReadAttributeRequestItemParametersJSON
+        ]
     );
 }, 30000);
 

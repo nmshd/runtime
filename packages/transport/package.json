@@ -24,7 +24,7 @@
         "test:ci": "npm run test:ci:lokijs && npm run test:ci:mongodb",
         "test:ci:lokijs": "USE_LOKIJS=true jest -i --coverage",
         "test:ci:mongodb": "jest -i",
-        "test:local:ferretdb": "npm run test:local:start:ferretdb && CONNECTION_STRING='mongodb://localhost:27022' jest",
+        "test:local:ferretdb": "npm run test:local:start:ferretdb && CONNECTION_STRING='mongodb://root:example@localhost:27022' jest",
         "test:local:lokijs": "USE_LOKIJS=true jest",
         "test:local:mongodb": "npm run test:local:start:mongodb && CONNECTION_STRING='mongodb://root:example@localhost:27021' jest",
         "test:local:start:ferretdb": "docker compose -f ../../.dev/compose.yml up -d runtime-ferret",
@@ -96,7 +96,7 @@
         "@types/uuid": "^10.0.0",
         "correlation-id": "^5.2.0",
         "expect": "^29.7.0",
-        "testcontainers": "^10.14.0",
+        "testcontainers": "^10.18.0",
         "ts-mockito": "^2.6.1"
     },
     "publishConfig": {

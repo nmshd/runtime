@@ -10,13 +10,23 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
 
+  runtime-postgres:
+    image: ghcr.io/ferretdb/postgres-documentdb:16
+    container_name: runtime-postgres
+    hostname: postgres
+    # documentdb does currently not support arm64
+    platform: linux/amd64
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: example
+      POSTGRES_DB: postgres
+
   runtime-ferret:
-    image: ghcr.io/ferretdb/ferretdb:latest
+    image: ghcr.io/ferretdb/ferretdb:2
     container_name: runtime-ferretdb
     ports:
       - "27022:27017"
     environment:
-      FERRETDB_HANDLER: sqlite
-      FERRETDB_SQLITE_URL: file:./
-      FERRETDB_TELEMETRY: disable
-      FERRETDB_LOG_LEVEL: error
+      FERRETDB_POSTGRESQL_URL: postgres://root:example@postgres:5432/postgres
+    depends_on:
+      - runtime-postgres

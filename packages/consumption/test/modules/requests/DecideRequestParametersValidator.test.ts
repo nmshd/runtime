@@ -278,7 +278,7 @@ describe("DecideRequestParametersValidator", function () {
         }
     ];
 
-    test.each([...successParams, ...errorParams])("${value.description}", async function (data) {
+    test.each([...successParams, ...errorParams])("$description", async function (data) {
         const localRequest = LocalRequest.from({
             id: CoreId.from(requestId),
             content: data.input.request,

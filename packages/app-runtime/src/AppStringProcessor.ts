@@ -56,7 +56,7 @@ export class AppStringProcessor {
         if (truncatedReference.startsWith(Base64ForIdPrefix.File) || truncatedReference.startsWith(Base64ForIdPrefix.RelationshipTemplate)) {
             const result = await this.selectAccount(reference.forIdentityTruncated);
             if (result.isError) {
-                this.logger.error("Could not query account", result.error);
+                this.logger.info("Could not query account", result.error);
                 return UserfriendlyResult.fail(result.error);
             }
 

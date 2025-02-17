@@ -12,7 +12,6 @@ import { AppStringProcessor } from "./AppStringProcessor";
 import { AccountSelectedEvent } from "./events";
 import { AppServices, IUIBridge } from "./extensibility";
 import {
-    AppLaunchModule,
     AppRuntimeModuleConfiguration,
     AppSyncModule,
     IAppRuntimeModuleConstructor,
@@ -22,7 +21,8 @@ import {
     OnboardingChangeReceivedModule,
     PushNotificationModule,
     RelationshipChangedModule,
-    RelationshipTemplateProcessedModule
+    RelationshipTemplateProcessedModule,
+    SSEModule
 } from "./modules";
 import { AccountServices, LocalAccountMapper, LocalAccountSession, MultiAccountController } from "./multiAccount";
 import { INativeBootstrapper, INativeEnvironment, INativeTranslationProvider } from "./natives";
@@ -202,7 +202,7 @@ export class AppRuntime extends Runtime<AppConfig> {
         this._accountServices = new AccountServices(this._multiAccountController);
     }
 
-    public static async create(nativeBootstrapper: INativeBootstrapper, appConfig?: AppConfigOverwrite, eventBus?: EventBus): Promise<AppRuntime> {
+    public static async create(nativeBootstrapper: INativeBootstrapper, appConfig: AppConfigOverwrite | AppConfig = {}, eventBus?: EventBus): Promise<AppRuntime> {
         // TODO: JSSNMSHDD-2524 (validate app config)
 
         if (!nativeBootstrapper.isInitialized) {
@@ -212,28 +212,7 @@ export class AppRuntime extends Runtime<AppConfig> {
             }
         }
 
-        const applePushEnvironmentResult = nativeBootstrapper.nativeEnvironment.configAccess.get("applePushEnvironment");
-        const applePushEnvironment = applePushEnvironmentResult.isError ? undefined : applePushEnvironmentResult.value;
-
-        const applicationId = nativeBootstrapper.nativeEnvironment.configAccess.get("applicationId").value;
-        const transportConfig = nativeBootstrapper.nativeEnvironment.configAccess.get("transport").value;
-        const databaseFolder = nativeBootstrapper.nativeEnvironment.configAccess.get("databaseFolder").value;
-
-        const mergedConfig = appConfig
-            ? createAppConfig(
-                  {
-                      transportLibrary: transportConfig,
-                      applicationId: applicationId,
-                      applePushEnvironment: applePushEnvironment
-                  },
-                  appConfig
-              )
-            : createAppConfig({
-                  transportLibrary: transportConfig,
-                  applicationId: applicationId,
-                  applePushEnvironment: applePushEnvironment,
-                  databaseFolder: databaseFolder
-              });
+        const mergedConfig = createAppConfig(appConfig);
 
         const runtime = new AppRuntime(nativeBootstrapper.nativeEnvironment, mergedConfig, eventBus);
         await runtime.init();
@@ -258,15 +237,15 @@ export class AppRuntime extends Runtime<AppConfig> {
     }
 
     private static moduleRegistry: Record<string, IAppRuntimeModuleConstructor | undefined> = {
-        appLaunch: AppLaunchModule,
         appSync: AppSyncModule,
-        pushNotification: PushNotificationModule,
-        mailReceived: MailReceivedModule,
-        onboardingChangeReceived: OnboardingChangeReceivedModule,
         identityDeletionProcessStatusChanged: IdentityDeletionProcessStatusChangedModule,
+        mailReceived: MailReceivedModule,
         messageReceived: MessageReceivedModule,
+        onboardingChangeReceived: OnboardingChangeReceivedModule,
+        pushNotification: PushNotificationModule,
         relationshipChanged: RelationshipChangedModule,
-        relationshipTemplateProcessed: RelationshipTemplateProcessedModule
+        relationshipTemplateProcessed: RelationshipTemplateProcessedModule,
+        sse: SSEModule
     };
 
     public static registerModule(moduleName: string, ctor: IAppRuntimeModuleConstructor): void {
@@ -317,7 +296,7 @@ export class AppRuntime extends Runtime<AppConfig> {
                 await session.accountController.authenticator.getToken();
                 continue;
             } catch (error) {
-                this.logger.error(error);
+                this.logger.info(error);
 
                 if (!(typeof error === "object" && error !== null && "code" in error)) {
                     continue;

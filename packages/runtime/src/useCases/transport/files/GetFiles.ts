@@ -18,6 +18,7 @@ export interface GetFilesQuery {
     mimetype?: string | string[];
     title?: string | string[];
     isOwn?: string | string[];
+    tags?: string | string[];
 }
 
 export interface GetFilesRequest {
@@ -43,6 +44,7 @@ export class GetFilesUseCase extends UseCase<GetFilesRequest, FileDTO[]> {
             [nameof<FileDTO>((c) => c.filesize)]: true,
             [nameof<FileDTO>((c) => c.mimetype)]: true,
             [nameof<FileDTO>((c) => c.title)]: true,
+            [nameof<FileDTO>((c) => c.tags)]: true,
             [nameof<FileDTO>((c) => c.isOwn)]: true
         },
         alias: {
@@ -55,7 +57,23 @@ export class GetFilesUseCase extends UseCase<GetFilesRequest, FileDTO[]> {
             [nameof<FileDTO>((c) => c.filesize)]: `${nameof<File>((f) => f.cache)}.${nameof<CachedFile>((c) => c.filesize)}`,
             [nameof<FileDTO>((c) => c.mimetype)]: `${nameof<File>((f) => f.cache)}.${nameof<CachedFile>((c) => c.mimetype)}`,
             [nameof<FileDTO>((c) => c.title)]: `${nameof<File>((f) => f.cache)}.${nameof<CachedFile>((c) => c.title)}`,
+            [nameof<FileDTO>((c) => c.tags)]: `${nameof<File>((f) => f.cache)}.${nameof<CachedFile>((c) => c.tags)}`,
             [nameof<FileDTO>((c) => c.isOwn)]: nameof<File>((f) => f.isOwn)
+        },
+        custom: {
+            // content.tags
+            [`${nameof<FileDTO>((x) => x.tags)}`]: (query: any, input: string | string[]) => {
+                if (typeof input === "string") {
+                    query[`${nameof<FileDTO>((x) => x.tags)}`] = { $contains: input };
+                    return;
+                }
+                const allowedTags = [];
+                for (const tag of input) {
+                    const tagQuery = { [`${nameof<FileDTO>((x) => x.tags)}`]: { $contains: tag } };
+                    allowedTags.push(tagQuery);
+                }
+                query["$or"] = allowedTags;
+            }
         }
     });
 

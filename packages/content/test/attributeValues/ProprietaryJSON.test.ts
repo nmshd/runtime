@@ -24,7 +24,7 @@ describe("ProprietaryJSON", function () {
             }
         }
     ])(
-        "(de-)serialize %p",
+        "(de-)serialize %j",
 
         function (value: any) {
             const prop = ProprietaryJSON.from({ title: "a-title", value });

@@ -112,6 +112,13 @@ describe("File upload", () => {
         expect(CoreDate.from(file.expiresAt).isSame(defaultDate)).toBe(true);
     });
 
+    test("can upload a file with tags", async () => {
+        const response = await transportServices1.files.uploadOwnFile(await makeUploadRequest({ tags: ["tag1", "tag2"] }));
+        expect(response).toBeSuccessful();
+
+        expect(response.value.tags).toStrictEqual(["tag1", "tag2"]);
+    });
+
     test("cannot upload a file with expiry date in the past", async () => {
         const response = await transportServices1.files.uploadOwnFile(await makeUploadRequest({ expiresAt: "1970" }));
         expect(response).toBeAnError("'expiresAt' must be in the future", "error.runtime.validation.invalidPropertyValue");
@@ -134,6 +141,39 @@ describe("Get file", () => {
 
         expect(response).toBeSuccessful();
         expect(response.value).toMatchObject(file);
+    });
+
+    test("can get file by tags", async () => {
+        const uploadFileResult = await transportServices1.files.uploadOwnFile(
+            await makeUploadRequest({
+                tags: ["aTag", "anotherTag"]
+            })
+        );
+        const file = uploadFileResult.value;
+
+        const uploadFileResult2 = await transportServices1.files.uploadOwnFile(
+            await makeUploadRequest({
+                tags: ["aThirdTag", "aFourthTag"]
+            })
+        );
+        const file2 = uploadFileResult2.value;
+
+        const getResult = await transportServices1.files.getFiles({ query: { tags: ["aTag"] } });
+
+        expect(getResult).toBeSuccessful();
+        expect(getResult.value[0].id).toStrictEqual(file.id);
+
+        const getResult2 = await transportServices1.files.getFiles({ query: { tags: ["aTag", "anotherTag"] } });
+
+        expect(getResult2).toBeSuccessful();
+        expect(getResult2.value[0].id).toStrictEqual(file.id);
+
+        const getResult3 = await transportServices1.files.getFiles({ query: { tags: ["aTag", "aThirdTag"] } });
+
+        expect(getResult3).toBeSuccessful();
+        const result3Ids = getResult3.value.map((file) => file.id);
+        expect(result3Ids).toContain(file.id);
+        expect(result3Ids).toContain(file2.id);
     });
 
     test("accessing not existing file id causes an error", async () => {
@@ -293,6 +333,18 @@ describe("Load peer file with token reference", () => {
         const response = await transportServices2.files.getFiles({ query: { createdAt: file.createdAt } });
         expect(response).toBeSuccessful();
         expect(response.value).toContainEqual({ ...file, isOwn: false });
+    });
+
+    test("should load a peer file with its tags", async () => {
+        const uploadOwnFileResult = await transportServices1.files.uploadOwnFile(
+            await makeUploadRequest({
+                tags: ["tag1", "tag2"]
+            })
+        );
+        const token = (await transportServices1.files.createTokenForFile({ fileId: uploadOwnFileResult.value.id })).value;
+        const loadFileResult = await transportServices2.files.getOrLoadFile({ reference: token.truncatedReference });
+
+        expect(loadFileResult.value.tags).toStrictEqual(["tag1", "tag2"]);
     });
 
     test("cannot pass token id as truncated token reference", async () => {

@@ -1,10 +1,10 @@
-import { Serializable } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
-import { ArbitraryRelationshipCreationContent, RelationshipCreationContent } from "@nmshd/content";
+import { IncomingRequestsController } from "@nmshd/consumption";
 import { CoreId } from "@nmshd/core-types";
 import { RelationshipsController, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { validateCreationContentOfRelationship } from "./utility/validateCreationContentOfRelationship";
 
 export interface CanCreateRelationshipRequest {
     templateId: RelationshipTemplateIdString;
@@ -27,8 +27,9 @@ export type CanCreateRelationshipResponse =
 
 export class CanCreateRelationshipUseCase extends UseCase<CanCreateRelationshipRequest, CanCreateRelationshipResponse> {
     public constructor(
-        @Inject private readonly relationshipController: RelationshipsController,
+        @Inject private readonly relationshipsController: RelationshipsController,
         @Inject private readonly relationshipTemplateController: RelationshipTemplateController,
+        @Inject private readonly incomingRequestsController: IncomingRequestsController,
         @Inject validator: Validator
     ) {
         super(validator);
@@ -46,18 +47,19 @@ export class CanCreateRelationshipUseCase extends UseCase<CanCreateRelationshipR
             return Result.ok({ isSuccess: false, code: error.code, message: error.message });
         }
 
+        const canSendRelationshipResult = await this.relationshipsController.canSendRelationship({ creationContent: request.creationContent, template });
+        if (canSendRelationshipResult.isError) return Result.ok({ isSuccess: false, code: canSendRelationshipResult.error.code, message: canSendRelationshipResult.error.reason });
+
         if (request.creationContent) {
-            const transformedCreationContent = Serializable.fromUnknown(request.creationContent);
-            if (!(transformedCreationContent instanceof ArbitraryRelationshipCreationContent || transformedCreationContent instanceof RelationshipCreationContent)) {
-                const error = RuntimeErrors.general.invalidPropertyValue(
-                    "The creationContent of a Relationship must either be an ArbitraryRelationshipCreationContent or a RelationshipCreationContent."
-                );
-                return Result.ok({ isSuccess: false, code: error.code, message: error.message });
+            const creationContentOfRelationshipValidationError = await validateCreationContentOfRelationship(this.incomingRequestsController, template, request.creationContent);
+            if (creationContentOfRelationshipValidationError) {
+                return Result.ok({
+                    isSuccess: false,
+                    code: creationContentOfRelationshipValidationError.code,
+                    message: creationContentOfRelationshipValidationError.message
+                });
             }
         }
-
-        const canSendRelationship = await this.relationshipController.canSendRelationship({ creationContent: request.creationContent, template });
-        if (canSendRelationship.isError) return Result.ok({ isSuccess: false, code: canSendRelationship.error.code, message: canSendRelationship.error.reason });
 
         return Result.ok({ isSuccess: true });
     }
