@@ -9,6 +9,7 @@ import { ConsumptionControllerName } from "../../../consumption/ConsumptionContr
 import { ConsumptionCoreErrors } from "../../../consumption/ConsumptionCoreErrors";
 import { ConsumptionError } from "../../../consumption/ConsumptionError";
 import { ConsumptionIds } from "../../../consumption/ConsumptionIds";
+import { mergeResults } from "../../common";
 import { ValidationResult } from "../../common/ValidationResult";
 import { IncomingRequestReceivedEvent, IncomingRequestStatusChangedEvent } from "../events";
 import { RequestItemProcessorRegistry } from "../itemProcessors/RequestItemProcessorRegistry";
@@ -214,11 +215,18 @@ export class IncomingRequestsController extends ConsumptionBaseController {
             );
         }
 
-        const validationResult = this.decideRequestParamsValidator.validateRequest(params, request);
+        const validateRequestResult = this.decideRequestParamsValidator.validateRequest(params, request);
+        if (validateRequestResult.isError()) return validateRequestResult;
 
-        const itemResults = await this.canDecideItems(params.items, request.content.items, request);
+        const validateItemsResult = this.decideRequestParamsValidator.validateItems(params, request);
 
-        return ValidationResult.fromItems(itemResults);
+        const canDecideItemsResults = await this.canDecideItems(params.items, request.content.items, request);
+        const canDecideItemsResult = ValidationResult.fromItems(canDecideItemsResults);
+
+        const itemsResult = mergeResults(validateItemsResult, canDecideItemsResult);
+        if (itemsResult instanceof ValidationResult) return itemsResult;
+
+        return validateItemsResult.isError() ? validateItemsResult : canDecideItemsResult;
     }
 
     private async canDecideGroup(params: DecideRequestItemGroupParametersJSON, requestItemGroup: RequestItemGroup, request: LocalRequest) {
