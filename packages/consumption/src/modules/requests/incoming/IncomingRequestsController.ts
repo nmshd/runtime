@@ -223,10 +223,14 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         const canDecideItemsResults = await this.canDecideItems(params.items, request.content.items, request);
         const canDecideItemsResult = ValidationResult.fromItems(canDecideItemsResults);
 
-        const itemsResult = mergeResults(validateItemsResult, canDecideItemsResult);
-        if (itemsResult instanceof ValidationResult) return itemsResult;
-
-        return validateItemsResult.isError() ? validateItemsResult : canDecideItemsResult;
+        try {
+            return mergeResults(validateItemsResult, canDecideItemsResult);
+        } catch (_) {
+            this._log.error(
+                `Merging '${JSON.stringify(validateItemsResult)}' and '${JSON.stringify(canDecideItemsResult)}' was not possible because their dimensions don't match.`
+            );
+            return validateItemsResult.isError() ? validateItemsResult : canDecideItemsResult;
+        }
     }
 
     private async canDecideGroup(params: DecideRequestItemGroupParametersJSON, requestItemGroup: RequestItemGroup, request: LocalRequest) {
