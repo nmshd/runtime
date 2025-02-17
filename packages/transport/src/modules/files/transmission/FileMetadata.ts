@@ -7,6 +7,7 @@ export interface IFileMetadata extends ISerializable {
     title?: string;
     description?: string;
     filename: string;
+    tags?: string[];
 
     plaintextHash: ICoreHash;
     secretKey: ICryptoSecretKey;
@@ -29,6 +30,10 @@ export class FileMetadata extends Serializable implements IFileMetadata {
     @validate()
     @serialize()
     public filename: string;
+
+    @validate({ nullable: true })
+    @serialize({ type: String })
+    public tags?: string[];
 
     @validate()
     @serialize()

@@ -339,7 +339,7 @@ export class DataViewExpander {
 
         if (message.content["@type"] === "ResponseWrapper") {
             const query = { id: message.content.requestId };
-            const localRequestsResult = isOwn ? await this.consumption.outgoingRequests.getRequests({ query }) : await this.consumption.incomingRequests.getRequests({ query });
+            const localRequestsResult = isOwn ? await this.consumption.incomingRequests.getRequests({ query }) : await this.consumption.outgoingRequests.getRequests({ query });
 
             if (localRequestsResult.value.length === 0) throw new Error("No LocalRequest has been found for this message id.");
             if (localRequestsResult.value.length > 1) throw new Error("More than one LocalRequest has been found for this message id.");
@@ -1556,7 +1556,7 @@ export class DataViewExpander {
             type: "IdentityDVO",
             name: "i18n://dvo.identity.unknown",
             initials: "",
-            description: "i18n://dvo.identity.unknown.description",
+            description: "i18n://dvo.identity.unknown",
             publicKey: "i18n://dvo.identity.publicKey.unknown",
             isSelf: false,
             hasRelationship: false
@@ -1620,7 +1620,7 @@ export class DataViewExpander {
             id: address,
             name: name ?? "i18n://dvo.identity.unknown",
             initials: name ? (name.match(/\b\w/g) ?? []).join("") : "",
-            description: "i18n://dvo.identity.unknown.description",
+            description: "i18n://dvo.identity.unknown",
             isSelf: false,
             hasRelationship: false
         };

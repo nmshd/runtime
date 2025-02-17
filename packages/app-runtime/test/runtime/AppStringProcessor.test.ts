@@ -1,6 +1,6 @@
 import { ArbitraryRelationshipTemplateContentJSON } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
-import { PeerRelationshipTemplateLoadedEvent } from "@nmshd/runtime";
+import { DeviceOnboardingInfoDTO, PeerRelationshipTemplateLoadedEvent } from "@nmshd/runtime";
 import assert from "assert";
 import { AppRuntime, LocalAccountSession } from "../../src";
 import { MockEventBus, MockUIBridge, TestUtil } from "../lib";
@@ -216,7 +216,22 @@ describe("AppStringProcessor", function () {
             expect(result).toBeSuccessful();
             expect(result.value).toBeUndefined();
 
-            expect(mockUiBridge).showDeviceOnboardingCalled(deviceResult.value.id);
+            expect(mockUiBridge).showDeviceOnboardingCalled((deviceOnboardingInfo: DeviceOnboardingInfoDTO) => deviceOnboardingInfo.id === deviceResult.value.id);
+        });
+
+        test("backup device onboarding with a password protected Token", async function () {
+            const tokenResult = await runtime1Session.transportServices.identityRecoveryKits.createIdentityRecoveryKit({
+                profileName: "profileNameForBackupDevice",
+                passwordProtection: { password: "password" }
+            });
+
+            mockUiBridge.setPasswordToReturnForAttempt(1, "password");
+
+            const result = await runtime2.stringProcessor.processTruncatedReference(tokenResult.value.truncatedReference);
+            expect(result).toBeSuccessful();
+            expect(result.value).toBeUndefined();
+
+            expect(mockUiBridge).showDeviceOnboardingCalled((deviceOnboardingInfo: DeviceOnboardingInfoDTO) => deviceOnboardingInfo.isBackupDevice === true);
         });
     });
 });

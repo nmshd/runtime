@@ -1,7 +1,8 @@
+import { DeviceOnboardingInfoDTO } from "@nmshd/runtime";
 import { MockUIBridge } from "./MockUIBridge";
 
 expect.extend({
-    showDeviceOnboardingCalled(mockUIBridge: unknown, deviceId: string) {
+    showDeviceOnboardingCalled(mockUIBridge: unknown, predicate: (deviceOnboardingInfo: DeviceOnboardingInfoDTO) => boolean) {
         if (!(mockUIBridge instanceof MockUIBridge)) {
             throw new Error("This method can only be used with expect(MockUIBridge).");
         }
@@ -11,12 +12,12 @@ expect.extend({
             return { pass: false, message: () => "The method showDeviceOnboarding was not called." };
         }
 
-        const matchingCalls = calls.filter((x) => x.deviceOnboardingInfo.id === deviceId);
+        const matchingCalls = calls.filter((x) => predicate(x.deviceOnboardingInfo));
         if (matchingCalls.length === 0) {
             return {
                 pass: false,
                 message: () =>
-                    `The method showDeviceOnboarding was called, but not with the specified device id '${deviceId}', instead with ids '${calls.map((e) => e.deviceOnboardingInfo.id).join(", ")}'.`
+                    `The method showDeviceOnboarding was called, but not with the specified predicate, instead with payloads '${calls.map((e) => JSON.stringify(e.deviceOnboardingInfo)).join(", ")}'.`
             };
         }
 
@@ -112,7 +113,7 @@ expect.extend({
 declare global {
     namespace jest {
         interface Matchers<R> {
-            showDeviceOnboardingCalled(deviceId: string): R;
+            showDeviceOnboardingCalled(predicate: (deviceOnboardingInfo: DeviceOnboardingInfoDTO) => boolean): R;
             showDeviceOnboardingNotCalled(): R;
             requestAccountSelectionCalled(possibleAccountsLength: number): R;
             requestAccountSelectionNotCalled(): R;

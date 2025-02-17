@@ -15,6 +15,7 @@ export interface UploadOwnFileRequest {
     expiresAt?: ISO8601DateTimeString;
     title?: string;
     description?: string;
+    tags?: string[];
 }
 
 export interface UploadOwnFileValidatableRequest extends Omit<UploadOwnFileRequest, "content"> {
@@ -74,7 +75,8 @@ export class UploadOwnFileUseCase extends UseCase<UploadOwnFileRequest, FileDTO>
             description: request.description,
             filename: request.filename,
             mimetype: request.mimetype,
-            expiresAt: CoreDate.from(request.expiresAt ?? "9999-12-31T00:00:00.000Z")
+            expiresAt: CoreDate.from(request.expiresAt ?? "9999-12-31T00:00:00.000Z"),
+            tags: request.tags
         });
 
         await this.accountController.syncDatawallet();

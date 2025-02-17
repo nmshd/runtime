@@ -1,9 +1,11 @@
 import { Event, EventBus, Result, sleep, SubscriptionTarget } from "@js-soft/ts-utils";
 import {
     AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON,
+    AcceptRequestItemParametersJSON,
     ConsumptionIds,
     DecideRequestItemGroupParametersJSON,
-    DecideRequestItemParametersJSON
+    DecideRequestItemParametersJSON,
+    DecideRequestParametersJSON
 } from "@nmshd/consumption";
 import {
     ArbitraryRelationshipCreationContent,
@@ -12,7 +14,7 @@ import {
     ArbitraryRelationshipTemplateContentJSON,
     INotificationItem,
     Notification,
-    RelationshipCreationContentJSON,
+    RelationshipCreationContent,
     RelationshipTemplateContentJSON,
     Request,
     RequestItemGroupJSON,
@@ -22,7 +24,7 @@ import {
     ShareAttributeAcceptResponseItemJSON,
     ShareAttributeRequestItem
 } from "@nmshd/content";
-import { CoreAddress, CoreId } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
 import { IdentityUtil } from "@nmshd/transport";
 import fs from "fs";
@@ -53,6 +55,7 @@ import {
     RelationshipDTO,
     RelationshipStatus,
     RelationshipTemplateDTO,
+    RelationshipTemplateProcessedEvent,
     ShareRepositoryAttributeRequest,
     SucceedRepositoryAttributeRequest,
     SucceedRepositoryAttributeResponse,
@@ -393,28 +396,54 @@ export async function establishRelationship(transportServices1: TransportService
 }
 
 export async function establishRelationshipWithContents(
-    transportServices1: TransportServices,
-    transportServices2: TransportServices,
+    runtimeServices1: TestRuntimeServices,
+    runtimeServices2: TestRuntimeServices,
     templateContent?: RelationshipTemplateContentJSON,
-    creationContent?: RelationshipCreationContentJSON
+    acceptRequestItemsParameters?: (AcceptRequestItemParametersJSON | DecideRequestItemGroupParametersJSON)[]
 ): Promise<void> {
-    const template = await exchangeTemplate(transportServices1, transportServices2, templateContent);
+    const template = await exchangeTemplate(runtimeServices1.transport, runtimeServices2.transport, templateContent);
+    let creationContent;
 
-    const createRelationshipResponse = await transportServices2.relationships.createRelationship({
+    if (templateContent && acceptRequestItemsParameters) {
+        const receivedRequest = (
+            await runtimeServices2.consumption.incomingRequests.received({
+                receivedRequest: templateContent.onNewRelationship,
+                requestSourceId: template.id
+            })
+        ).value;
+
+        const checkedRequest = (
+            await runtimeServices2.consumption.incomingRequests.checkPrerequisites({
+                requestId: receivedRequest.id
+            })
+        ).value;
+
+        const manualDecisionRequiredRequest = (
+            await runtimeServices2.consumption.incomingRequests.requireManualDecision({
+                requestId: checkedRequest.id
+            })
+        ).value;
+
+        const acceptedRequest = await runtimeServices2.consumption.incomingRequests.accept({ requestId: manualDecisionRequiredRequest.id, items: acceptRequestItemsParameters });
+
+        creationContent = RelationshipCreationContent.from({ response: acceptedRequest.value.response!.content }).toJSON();
+    }
+
+    const createRelationshipResponse = await runtimeServices2.transport.relationships.createRelationship({
         templateId: template.id,
         creationContent: creationContent ?? emptyRelationshipCreationContent
     });
     expect(createRelationshipResponse).toBeSuccessful();
 
-    const relationships = await syncUntilHasRelationships(transportServices1);
+    const relationships = await syncUntilHasRelationships(runtimeServices1.transport);
     expect(relationships).toHaveLength(1);
 
-    const acceptResponse = await transportServices1.relationships.acceptRelationship({
+    const acceptResponse = await runtimeServices1.transport.relationships.acceptRelationship({
         relationshipId: relationships[0].id
     });
     expect(acceptResponse).toBeSuccessful();
 
-    const relationships2 = await syncUntilHasRelationships(transportServices2);
+    const relationships2 = await syncUntilHasRelationships(runtimeServices2.transport);
     expect(relationships2).toHaveLength(1);
 }
 
@@ -887,4 +916,39 @@ export async function cleanupAttributes(...services: TestRuntimeServices[]): Pro
             }
         })
     );
+}
+
+export async function createRelationshipWithStatusPending(
+    templator: TestRuntimeServices,
+    requestor: TestRuntimeServices,
+    templateContent: RelationshipTemplateContentJSON,
+    acceptItems: DecideRequestParametersJSON["items"]
+): Promise<RelationshipDTO> {
+    const relationshipTemplateResult = await templator.transport.relationshipTemplates.createOwnRelationshipTemplate({
+        content: templateContent,
+        expiresAt: CoreDate.utc().add({ day: 1 }).toISOString()
+    });
+
+    const loadedPeerTemplateResult = await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({
+        reference: relationshipTemplateResult.value.truncatedReference
+    });
+
+    await requestor.eventBus.waitForEvent(RelationshipTemplateProcessedEvent, (event) => {
+        return event.data.template.id === loadedPeerTemplateResult.value.id;
+    });
+
+    const requestsForRelationship = await requestor.consumption.incomingRequests.getRequests({
+        query: {
+            "source.reference": loadedPeerTemplateResult.value.id
+        }
+    });
+
+    await requestor.consumption.incomingRequests.accept({
+        requestId: requestsForRelationship.value[0].id,
+        items: acceptItems
+    });
+
+    const relationships = await syncUntilHasRelationships(templator.transport);
+    expect(relationships).toHaveLength(1);
+    return relationships[0];
 }

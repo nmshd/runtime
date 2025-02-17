@@ -192,7 +192,8 @@ export class FileController extends TransportController {
             plaintextHash: plaintextHash,
             secretKey: fileDownloadSecretKey,
             filemodified: input.filemodified,
-            mimetype: input.mimetype
+            mimetype: input.mimetype,
+            tags: input.tags
         });
 
         const serializedMetadata = metadata.serialize();
@@ -218,6 +219,7 @@ export class FileController extends TransportController {
             title: input.title,
             description: input.description,
             filename: input.filename,
+            tags: input.tags,
             filesize: fileSize,
             filemodified: input.filemodified,
             cipherKey: fileDownloadSecretKey,

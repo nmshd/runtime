@@ -1,5 +1,5 @@
 import { ISerializable } from "@js-soft/ts-serval";
-import { log } from "@js-soft/ts-utils";
+import { log, Result } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
@@ -292,8 +292,8 @@ export class MessageController extends TransportController {
         const parsedParams = SendMessageParameters.from(parameters);
         if (!parsedParams.attachments) parsedParams.attachments = [];
 
-        const validationError = await this.validateMessageRecipients(parsedParams.recipients);
-        if (validationError) throw validationError;
+        const validationResult = await this.validateMessageRecipients(parsedParams.recipients);
+        if (validationResult.isError) throw validationResult.error;
 
         const secret = await CoreCrypto.generateSecretKey();
         const serializedSecret = secret.serialize(false);
@@ -377,13 +377,12 @@ export class MessageController extends TransportController {
             };
         });
 
-        const response = (
-            await this.client.createMessage({
-                attachments: fileIds,
-                body: cipher.toBase64(),
-                recipients: platformRecipients
-            })
-        ).value;
+        const result = await this.client.createMessage({
+            attachments: fileIds,
+            body: cipher.toBase64(),
+            recipients: platformRecipients
+        });
+        const value = result.value;
 
         const recipients = envelopeRecipients.map((r) =>
             CachedMessageRecipient.from({
@@ -397,7 +396,7 @@ export class MessageController extends TransportController {
 
         const cachedMessage = CachedMessage.from({
             content: parsedParams.content,
-            createdAt: CoreDate.from(response.createdAt),
+            createdAt: CoreDate.from(value.createdAt),
             createdBy: this.parent.identity.identity.address,
             createdByDevice: this.parent.activeDevice.id,
             recipients,
@@ -406,7 +405,7 @@ export class MessageController extends TransportController {
         });
 
         const message = Message.from({
-            id: CoreId.from(response.id),
+            id: CoreId.from(value.id),
             secretKey: secret,
             cache: cachedMessage,
             cachedAt: CoreDate.utc(),
@@ -420,7 +419,7 @@ export class MessageController extends TransportController {
         return message;
     }
 
-    private async validateMessageRecipients(recipients: CoreAddress[]) {
+    public async validateMessageRecipients(recipients: CoreAddress[]): Promise<Result<void>> {
         const peersWithNeitherActiveNorTerminatedRelationship: string[] = [];
         const deletedPeers: string[] = [];
 
@@ -438,12 +437,12 @@ export class MessageController extends TransportController {
         }
 
         if (peersWithNeitherActiveNorTerminatedRelationship.length > 0) {
-            return TransportCoreErrors.messages.hasNeitherActiveNorTerminatedRelationship(peersWithNeitherActiveNorTerminatedRelationship);
+            return Result.fail(TransportCoreErrors.messages.hasNeitherActiveNorTerminatedRelationship(peersWithNeitherActiveNorTerminatedRelationship));
         }
 
-        if (deletedPeers.length > 0) return TransportCoreErrors.messages.peerIsDeleted(deletedPeers);
+        if (deletedPeers.length > 0) return Result.fail(TransportCoreErrors.messages.peerIsDeleted(deletedPeers));
 
-        return;
+        return Result.ok(undefined);
     }
 
     private async decryptOwnEnvelope(envelope: MessageEnvelope, secretKey: CryptoSecretKey): Promise<MessageContentWrapper> {

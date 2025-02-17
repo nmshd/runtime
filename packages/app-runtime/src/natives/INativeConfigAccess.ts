@@ -5,6 +5,4 @@ export interface INativeConfigAccess {
     set(key: string, value: any): Result<void>;
     remove(key: string): Result<void>;
     save(): Promise<Result<void>>;
-    initDefaultConfig(path: string): Promise<Result<void>>;
-    initRuntimeConfig(path: string): Promise<Result<void>>;
 }

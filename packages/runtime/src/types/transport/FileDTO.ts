@@ -1,6 +1,7 @@
 export interface FileDTO {
     id: string;
     filename: string;
+    tags?: string[];
     filesize: number;
     createdAt: string;
     createdBy: string;
