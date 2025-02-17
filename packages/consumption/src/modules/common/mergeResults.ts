@@ -2,7 +2,7 @@ import { ValidationResult } from "./ValidationResult";
 
 export function mergeResults(result1: ValidationResult, result2: ValidationResult): ValidationResult | Error {
     if (result1.items.length !== result2.items.length) {
-        return new Error("The dimensions of the validation results do not match.");
+        return new Error("The dimensions of the ValidationResults do not match.");
     }
 
     if (result1.items.length === 0) {
