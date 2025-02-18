@@ -3,6 +3,7 @@ import {
     AttributeSuccessionAcceptResponseItem,
     IdentityAttribute,
     IdentityAttributeQuery,
+    IQLQuery,
     ReadAttributeAcceptResponseItem,
     ReadAttributeRequestItem,
     RejectResponseItem,
@@ -99,8 +100,11 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
             attribute = foundLocalAttribute.content;
 
-            // TODO: could IQLQuery be added here?
-            if (requestItem.query instanceof IdentityAttributeQuery && attribute instanceof IdentityAttribute && this.accountController.identity.isMe(attribute.owner)) {
+            if (
+                (requestItem.query instanceof IdentityAttributeQuery || requestItem.query instanceof IQLQuery) &&
+                attribute instanceof IdentityAttribute &&
+                this.accountController.identity.isMe(attribute.owner)
+            ) {
                 if (foundLocalAttribute.isShared()) {
                     return ValidationResult.error(
                         ConsumptionCoreErrors.requests.attributeQueryMismatch(
