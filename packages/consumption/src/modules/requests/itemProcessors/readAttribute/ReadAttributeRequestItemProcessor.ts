@@ -99,6 +99,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
             attribute = foundLocalAttribute.content;
 
+            // TODO: could IQLQuery be added here?
             if (requestItem.query instanceof IdentityAttributeQuery && attribute instanceof IdentityAttribute && this.accountController.identity.isMe(attribute.owner)) {
                 if (foundLocalAttribute.isShared()) {
                     return ValidationResult.error(
@@ -131,6 +132,10 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                             `The provided IdentityAttribute is outdated. You have already shared the successor '${ownSharedIdentityAttributeSuccessors[0].shareInfo.sourceAttribute}' of it.`
                         )
                     );
+                }
+
+                if (parsedParams.tags && parsedParams.tags.length > 0) {
+                    attribute.tags = attribute.tags ? [...attribute.tags, ...parsedParams.tags] : parsedParams.tags;
                 }
             }
 
@@ -172,6 +177,12 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
                 if (nonPendingRelationshipsToPeer.length === 0) {
                     return ValidationResult.error(ConsumptionCoreErrors.requests.cannotShareRelationshipAttributeOfPendingRelationship());
+                }
+
+                if (parsedParams.tags && parsedParams.tags.length > 0) {
+                    return ValidationResult.error(
+                        ConsumptionCoreErrors.requests.invalidAcceptParameters("When responding to a ThirdPartyRelationshipAttributeQuery, no tags may be specified.")
+                    );
                 }
             }
         } else if (parsedParams.isWithNewAttribute()) {
