@@ -696,7 +696,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 });
             });
 
-            test("can be called with property tags used in the IdentityAttributeQuery", async function () {
+            test("returns success responding with a new Attribute that has additional tags than those requested by the IdentityAttributeQuery", async function () {
                 const sender = CoreAddress.from("Sender");
                 const recipient = accountController.identity.address;
 
@@ -729,6 +729,47 @@ describe("ReadAttributeRequestItemProcessor", function () {
                             value: "aGivenName"
                         }
                     }
+                };
+
+                const result = await processor.canAccept(requestItem, acceptParams, request);
+
+                expect(result).successfulValidationResult();
+            });
+
+            test("returns success responding with an existing Attribute and specifying additional tags that are requested by the IdentityAttributeQuery", async function () {
+                const sender = CoreAddress.from("Sender");
+                const recipient = accountController.identity.address;
+
+                const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                    content: TestObjectFactory.createIdentityAttribute({
+                        owner: recipient,
+                        value: GivenName.fromAny({ value: "aGivenName" }),
+                        tags: ["anExistingTag"]
+                    })
+                });
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: IdentityAttributeQuery.from({ tags: ["aNewTag", "anotherNewTag"], valueType: "GivenName" })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
+                    accept: true,
+                    existingAttributeId: repositoryAttribute.id.toString(),
+                    tags: ["aNewTag"]
                 };
 
                 const result = await processor.canAccept(requestItem, acceptParams, request);
