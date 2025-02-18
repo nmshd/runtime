@@ -476,4 +476,9 @@ export class TestUtil {
         const file = await from.files.sendFile(params);
         return file;
     }
+
+    public static async cleanupAttributes(consumptionController: ConsumptionController): Promise<void> {
+        const attributes = await consumptionController.attributes.getLocalAttributes({});
+        await Promise.all(attributes.map((attribute) => consumptionController.attributes.deleteAttributeUnsafe(attribute.id)));
+    }
 }

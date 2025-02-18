@@ -62,6 +62,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
         aThirdParty = thirdPartyAccountController.identity.address;
     });
 
+    beforeEach(async () => await TestUtil.cleanupAttributes(consumptionController));
+
     afterAll(async function () {
         await connection.close();
     });
