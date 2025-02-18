@@ -1469,6 +1469,49 @@ describe("ReadAttributeRequestItemProcessor", function () {
             expect(createdAttribute!.shareInfo!.peer.toString()).toStrictEqual(incomingRequest.peer.toString());
         });
 
+        test("accept with existing RepositoryAttribute and new tags", async function () {
+            const sender = CoreAddress.from("Sender");
+
+            const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                content: TestObjectFactory.createIdentityAttribute({
+                    owner: accountController.identity.address,
+                    tags: ["anExistingTag"]
+                })
+            });
+
+            const requestItem = ReadAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: IdentityAttributeQuery.from({ tags: ["aNewTag", "anotherNewTag"], valueType: "GivenName" })
+            });
+            const requestId = await ConsumptionIds.request.generate();
+            const incomingRequest = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
+                accept: true,
+                existingAttributeId: repositoryAttribute.id.toString(),
+                tags: ["aNewTag"]
+            };
+
+            const result = await processor.accept(requestItem, acceptParams, incomingRequest);
+            expect(result).toBeInstanceOf(ReadAttributeAcceptResponseItem);
+
+            const ownSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute((result as ReadAttributeAcceptResponseItem).attributeId);
+            const sourceAttribute = await consumptionController.attributes.getLocalAttribute(ownSharedIdentityAttribute!.shareInfo!.sourceAttribute!);
+            expect(sourceAttribute!.succeeds).toBeDefined();
+            expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["anExistingTag", "aNewTag"]);
+        });
+
         test("accept with new IdentityAttribute", async function () {
             const sender = CoreAddress.from("Sender");
             const recipient = accountController.identity.address;
@@ -1630,6 +1673,64 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             const updatedPredecessorOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute(predecessorOwnSharedIdentityAttribute.id);
             expect(updatedPredecessorOwnSharedIdentityAttribute!.succeededBy).toStrictEqual(successorOwnSharedIdentityAttribute!.id);
+        });
+
+        test("accept with existing IdentityAttribute whose predecessor was already shared and new tags", async function () {
+            const sender = CoreAddress.from("Sender");
+
+            const predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                content: TestObjectFactory.createIdentityAttribute({
+                    owner: accountController.identity.address,
+                    value: GivenName.fromAny({ value: "aGivenName" }),
+                    tags: ["anExistingTag"]
+                })
+            });
+
+            await consumptionController.attributes.createSharedLocalAttributeCopy({
+                sourceAttributeId: predecessorRepositoryAttribute.id,
+                peer: sender,
+                requestReference: CoreId.from("initialRequest")
+            });
+
+            const { successor: successorRepositoryAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(predecessorRepositoryAttribute.id, {
+                content: IdentityAttribute.from({
+                    owner: accountController.identity.address,
+                    value: GivenName.fromAny({ value: "aNewGivenName" }),
+                    tags: ["anExistingTag"]
+                })
+            });
+
+            const requestItem = ReadAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: IdentityAttributeQuery.from({ tags: ["aNewTag", "anotherNewTag"], valueType: "GivenName" })
+            });
+            const requestId = await ConsumptionIds.request.generate();
+            const incomingRequest = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
+                accept: true,
+                existingAttributeId: successorRepositoryAttribute.id.toString(),
+                tags: ["aNewTag"]
+            };
+
+            const result = await processor.accept(requestItem, acceptParams, incomingRequest);
+            expect(result).toBeInstanceOf(AttributeSuccessionAcceptResponseItem);
+
+            const successorOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute((result as AttributeSuccessionAcceptResponseItem).successorId);
+            const sourceAttribute = await consumptionController.attributes.getLocalAttribute(successorOwnSharedIdentityAttribute!.shareInfo!.sourceAttribute!);
+            expect(sourceAttribute!.succeeds).toStrictEqual(successorRepositoryAttribute.id);
+            expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["anExistingTag", "aNewTag"]);
         });
 
         test("accept with existing IdentityAttribute whose predecessor was already shared but is DeletedByPeer", async function () {
@@ -1805,6 +1906,55 @@ describe("ReadAttributeRequestItemProcessor", function () {
             const result = await processor.accept(requestItem, acceptParams, incomingRequest);
             expect(result).toBeInstanceOf(AttributeAlreadySharedAcceptResponseItem);
             expect((result as AttributeAlreadySharedAcceptResponseItem).attributeId).toStrictEqual(alreadySharedAttribute.id);
+        });
+
+        test("accept with existing IdentityAttribute that is already shared and the latest shared version and new tags", async function () {
+            const sender = CoreAddress.from("Sender");
+
+            const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                content: TestObjectFactory.createIdentityAttribute({
+                    owner: accountController.identity.address,
+                    tags: ["anExistingTag"]
+                })
+            });
+
+            await consumptionController.attributes.createSharedLocalAttributeCopy({
+                sourceAttributeId: repositoryAttribute.id,
+                peer: sender,
+                requestReference: await CoreIdHelper.notPrefixed.generate()
+            });
+
+            const requestItem = ReadAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: IdentityAttributeQuery.from({ tags: ["aNewTag", "anotherNewTag"], valueType: "GivenName" })
+            });
+            const requestId = await ConsumptionIds.request.generate();
+            const incomingRequest = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
+                accept: true,
+                existingAttributeId: repositoryAttribute.id.toString(),
+                tags: ["aNewTag"]
+            };
+
+            const result = await processor.accept(requestItem, acceptParams, incomingRequest);
+            expect(result).toBeInstanceOf(AttributeSuccessionAcceptResponseItem);
+
+            const successorOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute((result as AttributeSuccessionAcceptResponseItem).successorId);
+            const sourceAttribute = await consumptionController.attributes.getLocalAttribute(successorOwnSharedIdentityAttribute!.shareInfo!.sourceAttribute!);
+            expect(sourceAttribute!.succeeds).toStrictEqual(repositoryAttribute.id);
+            expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["anExistingTag", "aNewTag"]);
         });
 
         test("accept with existing IdentityAttribute that is already shared and the latest shared version but is DeletedByPeer", async function () {
