@@ -288,11 +288,11 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             }
 
             if (parsedParams.tags && parsedParams.tags.length > 0 && existingSourceAttribute.content instanceof IdentityAttribute) {
+                const mergedTags = existingSourceAttribute.content.tags ? [...existingSourceAttribute.content.tags, ...parsedParams.tags] : parsedParams.tags;
+                existingSourceAttribute.content.tags = mergedTags;
+
                 const successorParams: IAttributeSuccessorParams = {
-                    content: {
-                        ...existingSourceAttribute.content,
-                        tags: existingSourceAttribute.content.tags ? [...existingSourceAttribute.content.tags, ...parsedParams.tags] : parsedParams.tags
-                    }
+                    content: existingSourceAttribute.content
                 };
                 const attributesAfterSuccession = await this.consumptionController.attributes.succeedRepositoryAttribute(parsedParams.existingAttributeId, successorParams);
                 existingSourceAttribute = attributesAfterSuccession.successor;
