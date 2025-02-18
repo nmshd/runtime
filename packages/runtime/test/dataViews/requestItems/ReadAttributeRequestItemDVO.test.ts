@@ -25,6 +25,7 @@ import {
     TransportServices
 } from "../../../src";
 import {
+    cleanupAttributes,
     establishRelationship,
     exchangeAndAcceptRequestByMessage,
     exchangeMessageWithRequest,
@@ -55,9 +56,10 @@ let responseItems: DecideRequestItemParametersJSON[];
 
 afterAll(() => serviceProvider.stop());
 
-beforeEach(function () {
+beforeEach(async function () {
     eventBus1.reset();
     eventBus2.reset();
+    await cleanupAttributes([runtimeServices1, runtimeServices2], true);
 });
 
 describe("ReadAttributeRequestItemDVO with IdentityAttributeQuery", () => {
@@ -77,14 +79,16 @@ describe("ReadAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         await establishRelationship(transportServices1, transportServices2);
         address2 = (await transportServices2.account.getIdentityInfo()).value.address;
 
-        const attribute = await consumptionServices2.attributes.createRepositoryAttribute({
-            content: {
-                value: {
-                    "@type": "GivenName",
-                    value: "Theodor"
+        const repositoryAttribute = (
+            await consumptionServices2.attributes.createRepositoryAttribute({
+                content: {
+                    value: {
+                        "@type": "GivenName",
+                        value: "Theodor"
+                    }
                 }
-            }
-        });
+            })
+        ).value;
 
         requestContent = {
             content: {
@@ -100,7 +104,7 @@ describe("ReadAttributeRequestItemDVO with IdentityAttributeQuery", () => {
             peer: address2
         };
 
-        responseItems = [{ accept: true, newAttribute: attribute.value.content } as AcceptReadAttributeRequestItemParametersWithNewAttributeJSON];
+        responseItems = [{ accept: true, existingAttributeId: repositoryAttribute.id } as AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON];
     }, 30000);
 
     test("check the MessageDVO for the sender", async () => {

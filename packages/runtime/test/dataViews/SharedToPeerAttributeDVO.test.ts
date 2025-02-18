@@ -7,7 +7,7 @@ let services1: TestRuntimeServices;
 let services2: TestRuntimeServices;
 
 beforeEach(async () => {
-    await cleanupAttributes(services1, services2);
+    await cleanupAttributes([services1, services2]);
 });
 
 beforeAll(async () => {
