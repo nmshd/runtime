@@ -18,7 +18,7 @@ import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { RelationshipStatus, TransportCoreErrors } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { AttributeSuccessorParams, LocalAttributeDeletionStatus, LocalAttributeShareInfo, PeerSharedAttributeSucceededEvent } from "../../../attributes";
+import { AttributeSuccessorParams, IAttributeSuccessorParams, LocalAttributeDeletionStatus, LocalAttributeShareInfo, PeerSharedAttributeSucceededEvent } from "../../../attributes";
 import { LocalAttribute } from "../../../attributes/local/LocalAttribute";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
@@ -282,9 +282,20 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         let sharedLocalAttribute;
 
         if (parsedParams.isWithExistingAttribute()) {
-            const existingSourceAttribute = await this.consumptionController.attributes.getLocalAttribute(parsedParams.existingAttributeId);
+            let existingSourceAttribute = await this.consumptionController.attributes.getLocalAttribute(parsedParams.existingAttributeId);
             if (!existingSourceAttribute) {
                 throw TransportCoreErrors.general.recordNotFound(LocalAttribute, parsedParams.existingAttributeId.toString());
+            }
+
+            if (parsedParams.tags && parsedParams.tags.length > 0 && existingSourceAttribute.content instanceof IdentityAttribute) {
+                const successorParams: IAttributeSuccessorParams = {
+                    content: {
+                        ...existingSourceAttribute.content,
+                        tags: existingSourceAttribute.content.tags ? [...existingSourceAttribute.content.tags, ...parsedParams.tags] : parsedParams.tags
+                    }
+                };
+                const attributesAfterSuccession = await this.consumptionController.attributes.succeedRepositoryAttribute(parsedParams.existingAttributeId, successorParams);
+                existingSourceAttribute = attributesAfterSuccession.successor;
             }
 
             const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfAttribute(parsedParams.existingAttributeId, [requestInfo.peer], true);
