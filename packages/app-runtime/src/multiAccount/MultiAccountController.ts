@@ -197,6 +197,18 @@ export class MultiAccountController {
 
         const updatedLocalAccount = await this.updateLocalAccountAddress(localAccount.id, accountController.identity.address);
 
+        if (deviceSharedSecret.isBackupDevice) {
+            const tokens = await accountController.tokens.getTokens({
+                "cache.content.@type": "TokenContentDeviceSharedSecret",
+                "cache.content.sharedSecret.id": deviceSharedSecret.id.toString(),
+                "cache.content.sharedSecret.isBackupDevice": true
+            });
+
+            for (const token of tokens) {
+                await accountController.tokens.delete(token);
+            }
+        }
+
         return [updatedLocalAccount, accountController];
     }
 
