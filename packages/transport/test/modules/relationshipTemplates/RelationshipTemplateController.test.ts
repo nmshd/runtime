@@ -243,7 +243,7 @@ describe("RelationshipTemplateController", function () {
 
         await sender.relationshipTemplates.cleanupTemplatesOfDecomposedRelationship(relationship);
 
-        const templateForRelationship = await sender.relationshipTemplates.getRelationshipTemplate(relationship.cache!.template.id);
+        const templateForRelationship = await sender.relationshipTemplates.getRelationshipTemplate(relationship.cache!.templateId);
         const otherTemplate = await sender.relationshipTemplates.getRelationshipTemplate(templateId);
         expect(templateForRelationship).toBeUndefined();
         expect(otherTemplate).toBeUndefined();
