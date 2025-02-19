@@ -32,6 +32,25 @@ describe("Onboarding", function () {
         await expect(() => runtime.accountServices.onboardAccount(onboardingInfoResult.value)).rejects.toThrow("error.app-runtime.onboardedAccountAlreadyExists");
     });
 
+    test("should onboard with a recovery kit and meanwhile delete the token", async () => {
+        const recoveryKitResponse = await services1.transportServices.identityRecoveryKits.createIdentityRecoveryKit({
+            profileName: "profileName",
+            passwordProtection: { password: "aPassword" }
+        });
+
+        const token = await runtime2.anonymousServices.tokens.loadPeerToken({ reference: recoveryKitResponse.value.truncatedReference, password: "aPassword" });
+        const deviceOnboardingDTO = DeviceMapper.toDeviceOnboardingInfoDTO(DeviceSharedSecret.from(token.value.content.sharedSecret));
+
+        const result = await runtime2.accountServices.onboardAccount(deviceOnboardingDTO);
+        expect(result.address!).toBe((await services1.transportServices.account.getIdentityInfo()).value.address);
+
+        const anonymousTokenResponse = await runtime2.anonymousServices.tokens.loadPeerToken({ reference: recoveryKitResponse.value.truncatedReference, password: "aPassword" });
+        expect(anonymousTokenResponse).toBeAnError(
+            "Token not found. Make sure the ID exists and the record is not expired. If a password is required to fetch the record, make sure you passed the correct one.",
+            "error.runtime.recordNotFound"
+        );
+    });
+
     test("should onboard with a recovery kit and be able to create a new recovery kit", async () => {
         const recoveryKitResponse = await services1.transportServices.identityRecoveryKits.createIdentityRecoveryKit({
             profileName: "profileName",
