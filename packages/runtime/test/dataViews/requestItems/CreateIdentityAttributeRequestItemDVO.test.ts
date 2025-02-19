@@ -82,7 +82,7 @@ beforeAll(async () => {
 afterAll(() => serviceProvider.stop());
 
 beforeEach(async function () {
-    await cleanupAttributes(sRuntimeServices, rRuntimeServices);
+    await cleanupAttributes([sRuntimeServices, rRuntimeServices]);
     rEventBus.reset();
     sEventBus.reset();
 });
