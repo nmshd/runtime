@@ -110,7 +110,7 @@ beforeEach(async () => {
     services1.eventBus.reset();
     services2.eventBus.reset();
     services3.eventBus.reset();
-    await cleanupAttributes(services1, services2, services3, appService);
+    await cleanupAttributes([services1, services2, services3, appService]);
 });
 
 describe("get attribute(s)", () => {
@@ -1859,10 +1859,6 @@ describe(SucceedRelationshipAttributeAndNotifyPeerUseCase.name, () => {
         });
     });
 
-    afterEach(async () => {
-        await cleanupAttributes();
-    });
-
     test("should succeed a relationship attribute and notify peer", async () => {
         const result = await services1.consumption.attributes.succeedRelationshipAttributeAndNotifyPeer({
             predecessorId: sOwnSharedRelationshipAttribute.id,
@@ -2216,10 +2212,6 @@ describe("Get (shared) versions of attribute", () => {
     }
 
     describe(GetVersionsOfAttributeUseCase.name, () => {
-        afterEach(async () => {
-            await cleanupAttributes();
-        });
-
         test("should get all versions of a repository attribute", async () => {
             await setUpRepositoryAttributeVersions();
             for (const version of sRepositoryAttributeVersions) {
@@ -2303,10 +2295,6 @@ describe("Get (shared) versions of attribute", () => {
     describe(GetSharedVersionsOfAttributeUseCase.name, () => {
         beforeEach(async () => {
             await setUpIdentityAttributeVersions();
-        });
-
-        afterEach(async () => {
-            await cleanupAttributes();
         });
 
         test("should get only latest shared version per peer of a repository attribute", async () => {
@@ -2458,10 +2446,6 @@ describe("DeleteAttributeUseCases", () => {
             }
         ));
         repositoryAttributeVersion1 = (await services1.consumption.attributes.getAttribute({ id: ownSharedIdentityAttributeVersion1.shareInfo!.sourceAttribute! })).value;
-    });
-
-    afterEach(async () => {
-        await cleanupAttributes();
     });
 
     describe(DeleteRepositoryAttributeUseCase.name, () => {
