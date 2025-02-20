@@ -1,6 +1,5 @@
 import { DecideRequestItemParametersJSON } from "@nmshd/consumption";
 import { AbstractStringJSON, ProprietaryStringJSON, RelationshipAttributeConfidentiality } from "@nmshd/content";
-import { CoreId } from "@nmshd/core-types";
 import {
     ConsumptionServices,
     CreateAttributeAcceptResponseItemDVO,
@@ -15,6 +14,7 @@ import {
     TransportServices
 } from "../../../src";
 import {
+    cleanupAttributes,
     establishRelationship,
     exchangeAndAcceptRequestByMessage,
     exchangeMessageWithRequest,
@@ -89,28 +89,10 @@ afterAll(() => serviceProvider.stop());
 beforeEach(async () => {
     rEventBus.reset();
     sEventBus.reset();
-
-    await cleanupAttributes();
+    await cleanupAttributes([sRuntimeServices, rRuntimeServices]);
 });
 
-async function cleanupAttributes() {
-    await Promise.all(
-        [sRuntimeServices, rRuntimeServices].map(async (services) => {
-            const servicesAttributeController = services.consumption.attributes["getAttributeUseCase"]["attributeController"];
-
-            const servicesAttributesResult = await services.consumption.attributes.getAttributes({});
-            for (const attribute of servicesAttributesResult.value) {
-                await servicesAttributeController.deleteAttributeUnsafe(CoreId.from(attribute.id));
-            }
-        })
-    );
-}
-
 describe("CreateRelationshipAttributeRequestItemDVO", () => {
-    afterEach(async () => {
-        await cleanupAttributes();
-    });
-
     test("check the MessageDVO for the sender", async () => {
         const senderMessage = await sendMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
         await syncUntilHasMessageWithRequest(rTransportServices, senderMessage.content.id!);
@@ -242,11 +224,9 @@ describe("CreateRelationshipAttributeRequestItemDVO", () => {
     });
 
     test("check the sender's dvo for the recipient", async () => {
-        const baselineNumberOfItems = (await rExpander.expandAddress(sAddress)).items!.length;
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
         const dvo = await rExpander.expandAddress(senderMessage.createdBy);
-        const numberOfItems = dvo.items!.length;
-        expect(numberOfItems - baselineNumberOfItems).toBe(1);
+        expect(dvo.items).toHaveLength(1);
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
