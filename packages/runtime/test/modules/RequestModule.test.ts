@@ -1,3 +1,4 @@
+import { sleep } from "@js-soft/ts-utils";
 import { DecideRequestItemParametersJSON } from "@nmshd/consumption";
 import {
     GivenName,
@@ -11,7 +12,7 @@ import {
     ResponseResult,
     ResponseWrapperJSON
 } from "@nmshd/content";
-import { CoreAddress } from "@nmshd/core-types";
+import { CoreAddress, CoreDate } from "@nmshd/core-types";
 import {
     CreateOutgoingRequestRequest,
     IncomingRequestReceivedEvent,
@@ -256,6 +257,24 @@ describe("RequestModule", () => {
             await expect(rRuntimeServices.eventBus).toHavePublished(
                 RelationshipTemplateProcessedEvent,
                 (e) => e.data.result === RelationshipTemplateProcessedResult.RelationshipExists
+            );
+        });
+
+        test.only("triggers RelationshipTemplateProcessedEvent if the Request is expired", async () => {
+            const templateContent = RelationshipTemplateContent.from({
+                onNewRelationship: { "@type": "Request", items: [{ "@type": "TestRequestItem", mustBeAccepted: false }], expiresAt: CoreDate.utc().add({ seconds: 2 }).toString() },
+                metadata
+            }).toJSON();
+            const template = await exchangeTemplate(sRuntimeServices.transport, rRuntimeServices.transport, templateContent);
+
+            await sleep(3000);
+            await rRuntimeServices.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
+
+            await rRuntimeServices.eventBus.waitForRunningEventHandlers();
+
+            await expect(rRuntimeServices.eventBus).toHavePublished(
+                RelationshipTemplateProcessedEvent,
+                (e) => e.data.result === RelationshipTemplateProcessedResult.RequestExpired
             );
         });
     });
