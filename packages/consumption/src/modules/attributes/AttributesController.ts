@@ -35,10 +35,10 @@ import {
     ThirdPartyRelationshipAttributeSucceededEvent
 } from "./events";
 import { AttributeSuccessorParams, AttributeSuccessorParamsJSON, IAttributeSuccessorParams } from "./local/AttributeSuccessorParams";
-import { AttributeTagCollection } from "./local/AttributeTagCollection";
+import { AttributeTagCollection, IAttributeTag } from "./local/AttributeTagCollection";
 import { CreateRepositoryAttributeParams, ICreateRepositoryAttributeParams } from "./local/CreateRepositoryAttributeParams";
 import { CreateSharedLocalAttributeCopyParams, ICreateSharedLocalAttributeCopyParams } from "./local/CreateSharedLocalAttributeCopyParams";
-import { ICreateSharedLocalAttributeParams } from "./local/CreateSharedLocalAttributeParams";
+import { CreateSharedLocalAttributeParams, ICreateSharedLocalAttributeParams } from "./local/CreateSharedLocalAttributeParams";
 import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./local/LocalAttribute";
 import { LocalAttributeDeletionStatus } from "./local/LocalAttributeDeletionInfo";
 import { LocalAttributeShareInfo } from "./local/LocalAttributeShareInfo";
@@ -244,6 +244,14 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         const parsedParams = CreateRepositoryAttributeParams.from(params);
+
+        if (parsedParams.content.tags) {
+            const tagValidationResult = await this.validateTags(parsedParams.content.tags, parsedParams.content.toJSON().value["@type"]);
+            if (tagValidationResult.isError()) {
+                throw tagValidationResult.error;
+            }
+        }
+
         let localAttribute = LocalAttribute.from({
             id: parsedParams.id ?? (await ConsumptionIds.attribute.generate()),
             createdAt: CoreDate.utc(),
@@ -355,6 +363,14 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async createSharedLocalAttribute(params: ICreateSharedLocalAttributeParams): Promise<LocalAttribute> {
+        const parsedParams = CreateSharedLocalAttributeParams.from(params);
+        if ("tags" in parsedParams.content && parsedParams.content.tags) {
+            const tagValidationResult = await this.validateTags(parsedParams.content.tags, parsedParams.content.toJSON().value["@type"]);
+            if (tagValidationResult.isError()) {
+                throw tagValidationResult.error;
+            }
+        }
+
         const shareInfo = LocalAttributeShareInfo.from({
             peer: params.peer,
             requestReference: params.requestReference,
@@ -944,6 +960,13 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successorIsNotAValidAttribute(e));
         }
 
+        if ("tags" in parsedSuccessorParams.content && parsedSuccessorParams.content.tags) {
+            const tagValidationResult = await this.validateTags(parsedSuccessorParams.content.tags, parsedSuccessorParams.content.toJSON().value["@type"]);
+            if (tagValidationResult.isError()) {
+                throw tagValidationResult.error;
+            }
+        }
+
         const successor = LocalAttribute.from({
             id: CoreId.from(parsedSuccessorParams.id ?? "dummy"),
             content: parsedSuccessorParams.content,
@@ -1333,5 +1356,53 @@ export class AttributesController extends ConsumptionBaseController {
     public async getAttributeTagCollection(): Promise<AttributeTagCollection> {
         const backboneTagCollection = (await this.attributeTagClient.getTagCollection()).value;
         return AttributeTagCollection.from(backboneTagCollection);
+    }
+
+    public async validateTags(tags: string[], attributeValueType: string): Promise<ValidationResult> {
+        const invalidTags = [];
+        for (const tag of tags) {
+            if (!(await this.validateTag(tag, attributeValueType))) {
+                invalidTags.push(tag);
+            }
+        }
+        if (invalidTags.length > 0) {
+            if (invalidTags.length === 1) {
+                return ValidationResult.error(ConsumptionCoreErrors.attributes.invalidTag(invalidTags[0]));
+            }
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.invalidTags(invalidTags));
+        }
+
+        return ValidationResult.success();
+    }
+
+    public async validateTag(tag: string, attributeValueType: string): Promise<boolean> {
+        if (tag.toLowerCase().startsWith("x+%+")) {
+            return true;
+        }
+
+        const tagCollection = await this.getAttributeTagCollection();
+        let tagLevel: Record<string, IAttributeTag> | undefined = tagCollection.tagsForAttributeValueTypes[attributeValueType];
+
+        const tagParts = tag.split("+%+");
+        let tagPart = tagParts.shift() ?? "";
+
+        do {
+            if (tagPart && !tagLevel) {
+                return false;
+            }
+
+            if (!tagLevel?.[tagPart]) {
+                return false;
+            }
+
+            tagLevel = tagLevel[tagPart].children;
+            tagPart = tagParts.shift() ?? "";
+        } while (tagPart);
+
+        if (tagLevel) {
+            return false;
+        }
+
+        return true;
     }
 }

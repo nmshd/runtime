@@ -20,9 +20,12 @@ import {
 } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { AccountController, Transport } from "@nmshd/transport";
+import { reset, spy, when } from "ts-mockito";
 import {
     AttributeCreatedEvent,
     AttributeDeletedEvent,
+    AttributesController,
+    AttributeTagCollection,
     ConsumptionController,
     IAttributeSuccessorParams,
     ICreateRepositoryAttributeParams,
@@ -1196,7 +1199,7 @@ describe("AttributesController", function () {
                             value: "DE"
                         },
                         owner: consumptionController.accountController.identity.address,
-                        tags: ["aTag"]
+                        tags: ["x+%+aTag"]
                     })
                 });
 
@@ -1207,7 +1210,7 @@ describe("AttributesController", function () {
                             value: "DE"
                         },
                         owner: consumptionController.accountController.identity.address,
-                        tags: ["aTag"]
+                        tags: ["x+%+aTag"]
                     })
                 };
 
@@ -1785,7 +1788,7 @@ describe("AttributesController", function () {
                             value: "DE"
                         },
                         owner: consumptionController.accountController.identity.address,
-                        tags: ["aTag"]
+                        tags: ["x+%+aTag"]
                     })
                 });
 
@@ -1796,7 +1799,7 @@ describe("AttributesController", function () {
                             value: "DE"
                         },
                         owner: consumptionController.accountController.identity.address,
-                        tags: ["aTag", "anotherTag"]
+                        tags: ["x+%+aTag", "x+%+anotherTag"]
                     })
                 };
 
@@ -1808,8 +1811,8 @@ describe("AttributesController", function () {
                 expect(successor.succeeds!.equals(updatedPredecessor.id)).toBe(true);
                 expect((updatedPredecessor.content.value.toJSON() as any).value).toBe("DE");
                 expect((successor.content.value.toJSON() as any).value).toBe("DE");
-                expect((updatedPredecessor.content as IdentityAttribute).tags).toStrictEqual(["aTag"]);
-                expect((successor.content as IdentityAttribute).tags).toStrictEqual(["aTag", "anotherTag"]);
+                expect((updatedPredecessor.content as IdentityAttribute).tags).toStrictEqual(["x+%+aTag"]);
+                expect((successor.content as IdentityAttribute).tags).toStrictEqual(["x+%+aTag", "x+%+anotherTag"]);
             });
 
             test("should make successor default succeeding a default repository attribute", async function () {
@@ -3245,5 +3248,66 @@ describe("AttributesController", function () {
         const peerAttribute = await consumptionController.attributes.getLocalAttribute(peerRelationshipAttribute.id);
         expect(ownAttribute).toBeUndefined();
         expect(peerAttribute).toBeUndefined();
+    });
+
+    describe("validate tags", function () {
+        let mockedAttributesController: AttributesController;
+        /* eslint-disable @typescript-eslint/naming-convention */
+        const mockedTagCollection = {
+            supportedLanguages: ["de", "en"],
+            tagsForAttributeValueTypes: {
+                PhoneNumber: {
+                    emergency: {
+                        displayNames: {
+                            de: "Notfallkontakt",
+                            en: "Emergency Contact"
+                        },
+                        children: {
+                            first: {
+                                displayNames: {
+                                    de: "Erster Notfallkontakt",
+                                    en: "First Emergency Contact"
+                                }
+                            },
+                            second: {
+                                displayNames: {
+                                    de: "Zweiter Notfallkontakt",
+                                    en: "Second Emergency Contact"
+                                }
+                            }
+                        }
+                    },
+                    private: {
+                        displayNames: {
+                            de: "Privat",
+                            en: "Private"
+                        }
+                    }
+                }
+            }
+        };
+        /* eslint-enable @typescript-eslint/naming-convention */
+
+        beforeAll(function () {
+            mockedAttributesController = spy(consumptionController.attributes);
+            when(mockedAttributesController.getAttributeTagCollection()).thenResolve(AttributeTagCollection.from(mockedTagCollection));
+        });
+        afterAll(function () {
+            reset(mockedAttributesController);
+        });
+        test("should validate valid tags", async function () {
+            expect(await consumptionController.attributes.validateTag("private", "PhoneNumber")).toBe(true);
+            expect(await consumptionController.attributes.validateTag("emergency+%+first", "PhoneNumber")).toBe(true);
+            expect(await consumptionController.attributes.validateTag("emergency+%+second", "PhoneNumber")).toBe(true);
+            expect(await consumptionController.attributes.validateTag("x+%+my+%+custom+%+tag", "PhoneNumber")).toBe(true);
+            expect(await consumptionController.attributes.validateTag("X+%+my+%+custom+%+tag", "PhoneNumber")).toBe(true);
+        });
+
+        test("should validate invalid tags", async function () {
+            expect(await consumptionController.attributes.validateTag("privates", "PhoneNumber")).toBe(false);
+            expect(await consumptionController.attributes.validateTag("emergency", "PhoneNumber")).toBe(false);
+            expect(await consumptionController.attributes.validateTag("emergency+%+nonexisting", "PhoneNumber")).toBe(false);
+            expect(await consumptionController.attributes.validateTag("emergency+%+first+%+nonexisting", "PhoneNumber")).toBe(false);
+        });
     });
 });

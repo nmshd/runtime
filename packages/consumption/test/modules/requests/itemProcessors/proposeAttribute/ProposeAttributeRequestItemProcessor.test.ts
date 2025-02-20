@@ -1454,7 +1454,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 successorId: successorId,
                 successorContent: TestObjectFactory.createIdentityAttribute({
                     owner: sender,
-                    tags: ["aNewTag"]
+                    tags: ["x+%+aNewTag"]
                 })
             });
 
