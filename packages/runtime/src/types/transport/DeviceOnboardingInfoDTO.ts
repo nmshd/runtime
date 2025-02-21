@@ -14,5 +14,5 @@ export interface DeviceOnboardingInfoDTO {
     identity: IdentityDTO;
     password: string;
     username: string;
-    isBackupDevice?: boolean;
+    isBackupDevice: boolean;
 }
