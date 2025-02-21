@@ -224,6 +224,9 @@ describe("CreateRelationshipAttributeRequestItemDVO", () => {
     });
 
     test("check the sender's dvo for the recipient", async () => {
+        const createRequestResult = await sRuntimeServices.consumption.outgoingRequests.canCreate(requestContent);
+        expect(createRequestResult.value.message).toBe("");
+
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
         const dvo = await rExpander.expandAddress(senderMessage.createdBy);
         expect(dvo.items).toHaveLength(1);
