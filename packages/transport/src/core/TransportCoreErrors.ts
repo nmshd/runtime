@@ -220,10 +220,6 @@ class General {
         );
     }
 
-    onlyAllowedForOwner(id: string) {
-        return new CoreError("error.transport.general.onlyAllowedForOwner", `You must own the resource '${id}' to perform this operation.`);
-    }
-
     public accountControllerInitialSyncFailed() {
         return new CoreError("error.transport.accountControllerInitialSyncFailed", "The initial sync of the AccountController failed.");
     }
