@@ -42,10 +42,7 @@ export interface DraftRelationshipAttributeDVO extends DataViewObject {
     confidentiality: string;
 }
 
-export interface AttributeQueryDVO extends DataViewObject {
-    validFrom?: string;
-    validTo?: string;
-}
+export interface AttributeQueryDVO extends DataViewObject {}
 
 export interface IdentityAttributeQueryDVO extends AttributeQueryDVO {
     type: "IdentityAttributeQueryDVO";
