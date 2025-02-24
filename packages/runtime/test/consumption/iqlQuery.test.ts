@@ -48,7 +48,7 @@ describe("IQL Query", () => {
                 content: {
                     value: {
                         "@type": "GivenName",
-                        value: "aGivenName1"
+                        value: "aGivenName"
                     },
                     tags: ["language:de"]
                 }
@@ -60,7 +60,7 @@ describe("IQL Query", () => {
                 content: {
                     value: {
                         "@type": "GivenName",
-                        value: "aGivenName2"
+                        value: "aSecondGivenName"
                     },
                     tags: ["language:en"]
                 }
@@ -71,7 +71,7 @@ describe("IQL Query", () => {
             content: {
                 value: {
                     "@type": "GivenName",
-                    value: "aGivenName3"
+                    value: "aThirdGivenName"
                 },
                 tags: ["content:someContent"]
             }
