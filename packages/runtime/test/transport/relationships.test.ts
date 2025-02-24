@@ -337,7 +337,7 @@ describe("Can Create / Create Relationship", () => {
                             accept: true,
                             newAttribute: IdentityAttribute.from({
                                 owner: CoreAddress.from(services4.address),
-                                value: GivenName.from("aGivenName")
+                                value: GivenName.from("aNewGivenName")
                             }).toJSON()
                         } as AcceptReadAttributeRequestItemParametersJSON
                     ]

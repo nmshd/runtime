@@ -17,7 +17,7 @@ export interface IDeviceSharedSecret extends ISerializable {
     identity: IIdentity;
     password: string;
     username: string;
-    isBackupDevice?: boolean;
+    isBackupDevice: boolean;
 }
 
 @type("DeviceSharedSecret")
@@ -75,8 +75,13 @@ export class DeviceSharedSecret extends Serializable implements IDeviceSharedSec
     public password: string;
 
     @serialize()
-    @validate({ nullable: true })
-    public isBackupDevice?: boolean;
+    @validate()
+    public isBackupDevice: boolean;
+
+    public static override preFrom(value: any): any {
+        if (!("isBackupDevice" in value)) value.isBackupDevice = false;
+        return value;
+    }
 
     public static from(value: IDeviceSharedSecret): DeviceSharedSecret {
         return this.fromAny(value);

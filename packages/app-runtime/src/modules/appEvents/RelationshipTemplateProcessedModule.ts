@@ -70,6 +70,16 @@ export class RelationshipTemplateProcessedModule extends AppRuntimeModule<Relati
                 break;
             }
 
+            case RelationshipTemplateProcessedResult.RequestExpired: {
+                await uiBridge.showError(
+                    new UserfriendlyApplicationError(
+                        "error.relationshipTemplateProcessedModule.requestExpired",
+                        "No incoming Request could be created because the Request in the RelationshipTemplate is already expired."
+                    )
+                );
+                break;
+            }
+
             case RelationshipTemplateProcessedResult.RequestAutomaticallyDecided: {
                 break;
             }

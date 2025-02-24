@@ -3,6 +3,7 @@ import {
     AttributeSuccessionAcceptResponseItem,
     IdentityAttribute,
     IdentityAttributeQuery,
+    IQLQuery,
     ReadAttributeAcceptResponseItem,
     ReadAttributeRequestItem,
     RejectResponseItem,
@@ -17,7 +18,7 @@ import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { RelationshipStatus, TransportCoreErrors } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { AttributeSuccessorParams, LocalAttributeDeletionStatus, LocalAttributeShareInfo, PeerSharedAttributeSucceededEvent } from "../../../attributes";
+import { AttributeSuccessorParams, IAttributeSuccessorParams, LocalAttributeDeletionStatus, LocalAttributeShareInfo, PeerSharedAttributeSucceededEvent } from "../../../attributes";
 import { LocalAttribute } from "../../../attributes/local/LocalAttribute";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
@@ -99,7 +100,11 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
             attribute = foundLocalAttribute.content;
 
-            if (requestItem.query instanceof IdentityAttributeQuery && attribute instanceof IdentityAttribute && this.accountController.identity.isMe(attribute.owner)) {
+            if (
+                (requestItem.query instanceof IdentityAttributeQuery || requestItem.query instanceof IQLQuery) &&
+                attribute instanceof IdentityAttribute &&
+                this.accountController.identity.isMe(attribute.owner)
+            ) {
                 if (foundLocalAttribute.isShared()) {
                     return ValidationResult.error(
                         ConsumptionCoreErrors.requests.attributeQueryMismatch(
@@ -131,6 +136,10 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                             `The provided IdentityAttribute is outdated. You have already shared the successor '${ownSharedIdentityAttributeSuccessors[0].shareInfo.sourceAttribute}' of it.`
                         )
                     );
+                }
+
+                if (parsedParams.tags && parsedParams.tags.length > 0) {
+                    attribute.tags = attribute.tags ? [...attribute.tags, ...parsedParams.tags] : parsedParams.tags;
                 }
             }
 
@@ -173,6 +182,12 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 if (nonPendingRelationshipsToPeer.length === 0) {
                     return ValidationResult.error(ConsumptionCoreErrors.requests.cannotShareRelationshipAttributeOfPendingRelationship());
                 }
+
+                if (parsedParams.tags && parsedParams.tags.length > 0) {
+                    return ValidationResult.error(
+                        ConsumptionCoreErrors.requests.invalidAcceptParameters("When responding to a ThirdPartyRelationshipAttributeQuery, no tags may be specified.")
+                    );
+                }
             }
         } else if (parsedParams.isWithNewAttribute()) {
             if (requestItem.query instanceof ThirdPartyRelationshipAttributeQuery) {
@@ -181,6 +196,20 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                         "When responding to a ThirdPartyRelationshipAttributeQuery, only RelationshipAttributes that already exist may be provided."
                     )
                 );
+            }
+
+            if (requestItem.query instanceof IdentityAttributeQuery) {
+                const existingRepositoryAttribute = await this.consumptionController.attributes.getRepositoryAttributeWithSameValue(
+                    (parsedParams.newAttribute.value as any).toJSON()
+                );
+
+                if (existingRepositoryAttribute) {
+                    return ValidationResult.error(
+                        ConsumptionCoreErrors.requests.invalidAcceptParameters(
+                            `The new Attribute cannot be created because it has the same content.value as the already existing RepositoryAttribute with id '${existingRepositoryAttribute.id.toString()}'.`
+                        )
+                    );
+                }
             }
 
             attribute = parsedParams.newAttribute;
@@ -253,9 +282,20 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         let sharedLocalAttribute;
 
         if (parsedParams.isWithExistingAttribute()) {
-            const existingSourceAttribute = await this.consumptionController.attributes.getLocalAttribute(parsedParams.existingAttributeId);
+            let existingSourceAttribute = await this.consumptionController.attributes.getLocalAttribute(parsedParams.existingAttributeId);
             if (!existingSourceAttribute) {
                 throw TransportCoreErrors.general.recordNotFound(LocalAttribute, parsedParams.existingAttributeId.toString());
+            }
+
+            if (parsedParams.tags && parsedParams.tags.length > 0 && existingSourceAttribute.content instanceof IdentityAttribute) {
+                const mergedTags = existingSourceAttribute.content.tags ? [...existingSourceAttribute.content.tags, ...parsedParams.tags] : parsedParams.tags;
+                existingSourceAttribute.content.tags = mergedTags;
+
+                const successorParams: IAttributeSuccessorParams = {
+                    content: existingSourceAttribute.content
+                };
+                const attributesAfterSuccession = await this.consumptionController.attributes.succeedRepositoryAttribute(parsedParams.existingAttributeId, successorParams);
+                existingSourceAttribute = attributesAfterSuccession.successor;
             }
 
             const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfAttribute(parsedParams.existingAttributeId, [requestInfo.peer], true);

@@ -7,6 +7,7 @@ import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptReq
 
 export interface AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON extends AcceptRequestItemParametersJSON {
     existingAttributeId: string;
+    tags?: string[];
 }
 
 export interface AcceptReadAttributeRequestItemParametersWithNewAttributeJSON extends AcceptRequestItemParametersJSON {
@@ -22,6 +23,10 @@ export class AcceptReadAttributeRequestItemParameters extends Serializable {
     @serialize()
     @validate({ nullable: true })
     public existingAttributeId?: CoreId;
+
+    @serialize({ type: String })
+    @validate({ nullable: true, customValidator: IdentityAttribute.validateTags })
+    public tags?: string[];
 
     @serialize({ unionTypes: [IdentityAttribute, RelationshipAttribute] })
     @validate({ nullable: true })
@@ -51,6 +56,16 @@ export class AcceptReadAttributeRequestItemParameters extends Serializable {
                 `You cannot specify both ${nameof<AcceptReadAttributeRequestItemParameters>(
                     (x) => x.newAttribute
                 )} and ${nameof<AcceptReadAttributeRequestItemParameters>((x) => x.existingAttributeId)}.`
+            );
+        }
+
+        if (value.newAttribute && value.tags) {
+            throw new ValidationError(
+                AcceptReadAttributeRequestItemParameters.name,
+                nameof<AcceptReadAttributeRequestItemParameters>((x) => x.newAttribute),
+                `You cannot specify both ${nameof<AcceptReadAttributeRequestItemParameters>(
+                    (x) => x.newAttribute
+                )} and ${nameof<AcceptReadAttributeRequestItemParameters>((x) => x.tags)}.`
             );
         }
 

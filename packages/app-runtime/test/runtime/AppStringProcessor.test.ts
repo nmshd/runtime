@@ -231,7 +231,7 @@ describe("AppStringProcessor", function () {
             expect(result).toBeSuccessful();
             expect(result.value).toBeUndefined();
 
-            expect(mockUiBridge).showDeviceOnboardingCalled((deviceOnboardingInfo: DeviceOnboardingInfoDTO) => deviceOnboardingInfo.isBackupDevice === true);
+            expect(mockUiBridge).showDeviceOnboardingCalled((deviceOnboardingInfo: DeviceOnboardingInfoDTO) => deviceOnboardingInfo.isBackupDevice);
         });
     });
 });

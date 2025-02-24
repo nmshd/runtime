@@ -17,7 +17,8 @@ export enum RelationshipTemplateProcessedResult {
     NonCompletedRequestExists = "NonCompletedRequestExists",
     RelationshipExists = "RelationshipExists",
     NoRequest = "NoRequest",
-    Error = "Error"
+    Error = "Error",
+    RequestExpired = "RequestExpired"
 }
 
 export type RelationshipTemplateProcessedEventData =
@@ -48,4 +49,8 @@ export type RelationshipTemplateProcessedEventData =
     | {
           template: RelationshipTemplateDTO;
           result: RelationshipTemplateProcessedResult.Error;
+      }
+    | {
+          template: RelationshipTemplateDTO;
+          result: RelationshipTemplateProcessedResult.RequestExpired;
       };
