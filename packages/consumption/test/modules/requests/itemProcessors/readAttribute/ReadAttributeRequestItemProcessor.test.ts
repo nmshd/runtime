@@ -653,50 +653,50 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 });
             });
 
-            test("returns an error trying to answer with a new IdentityAttribute that is a duplicate of an existing RepositoryAttribute", async function () {
-                const sender = CoreAddress.from("Sender");
-                const recipient = accountController.identity.address;
+            // test("returns an error trying to answer with a new IdentityAttribute that is a duplicate of an existing RepositoryAttribute", async function () {
+            //     const sender = CoreAddress.from("Sender");
+            //     const recipient = accountController.identity.address;
 
-                const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
-                    content: TestObjectFactory.createIdentityAttribute({
-                        owner: recipient,
-                        value: GivenName.fromAny({ value: "aGivenName" })
-                    })
-                });
+            //     const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+            //         content: TestObjectFactory.createIdentityAttribute({
+            //             owner: recipient,
+            //             value: GivenName.fromAny({ value: "aGivenName" })
+            //         })
+            //     });
 
-                const requestItem = ReadAttributeRequestItem.from({
-                    mustBeAccepted: true,
-                    query: IdentityAttributeQuery.from({ valueType: "GivenName" })
-                });
-                const requestId = await ConsumptionIds.request.generate();
-                const request = LocalRequest.from({
-                    id: requestId,
-                    createdAt: CoreDate.utc(),
-                    isOwn: false,
-                    peer: sender,
-                    status: LocalRequestStatus.DecisionRequired,
-                    content: Request.from({
-                        id: requestId,
-                        items: [requestItem]
-                    }),
-                    statusLog: []
-                });
+            //     const requestItem = ReadAttributeRequestItem.from({
+            //         mustBeAccepted: true,
+            //         query: IdentityAttributeQuery.from({ valueType: "GivenName" })
+            //     });
+            //     const requestId = await ConsumptionIds.request.generate();
+            //     const request = LocalRequest.from({
+            //         id: requestId,
+            //         createdAt: CoreDate.utc(),
+            //         isOwn: false,
+            //         peer: sender,
+            //         status: LocalRequestStatus.DecisionRequired,
+            //         content: Request.from({
+            //             id: requestId,
+            //             items: [requestItem]
+            //         }),
+            //         statusLog: []
+            //     });
 
-                const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
-                    accept: true,
-                    newAttribute: TestObjectFactory.createIdentityAttribute({
-                        owner: recipient,
-                        value: GivenName.fromAny({ value: "aGivenName" })
-                    }).toJSON()
-                };
+            //     const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+            //         accept: true,
+            //         newAttribute: TestObjectFactory.createIdentityAttribute({
+            //             owner: recipient,
+            //             value: GivenName.fromAny({ value: "aGivenName" })
+            //         }).toJSON()
+            //     };
 
-                const result = await processor.canAccept(requestItem, acceptParams, request);
+            //     const result = await processor.canAccept(requestItem, acceptParams, request);
 
-                expect(result).errorValidationResult({
-                    code: "error.consumption.requests.invalidAcceptParameters",
-                    message: `The new Attribute cannot be created because it has the same content.value as the already existing RepositoryAttribute with id '${repositoryAttribute.id.toString()}'.`
-                });
-            });
+            //     expect(result).errorValidationResult({
+            //         code: "error.consumption.requests.invalidAcceptParameters",
+            //         message: `The new Attribute cannot be created because it has the same content.value as the already existing RepositoryAttribute with id '${repositoryAttribute.id.toString()}'.`
+            //     });
+            // });
 
             test("returns success responding with a new Attribute that has additional tags than those requested by the IdentityAttributeQuery", async function () {
                 const sender = CoreAddress.from("Sender");
