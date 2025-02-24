@@ -10,8 +10,8 @@ import {
     CreateTokenQRCodeForFileRequest,
     CreateTokenQRCodeForFileResponse,
     CreateTokenQRCodeForFileUseCase,
-    DeleteFileFromBackboneRequest,
-    DeleteFileFromBackboneUseCase,
+    DeleteFileRequest,
+    DeleteFileUseCase,
     DownloadFileRequest,
     DownloadFileResponse,
     DownloadFileUseCase,
@@ -32,7 +32,7 @@ export class FilesFacade {
         @Inject private readonly getFilesUseCase: GetFilesUseCase,
         @Inject private readonly downloadFileUseCase: DownloadFileUseCase,
         @Inject private readonly getFileUseCase: GetFileUseCase,
-        @Inject private readonly deleteFileFromBackboneUseCase: DeleteFileFromBackboneUseCase,
+        @Inject private readonly deleteFileUseCase: DeleteFileUseCase,
         @Inject private readonly createQRCodeForFileUseCase: CreateQRCodeForFileUseCase,
         @Inject private readonly createTokenForFileUseCase: CreateTokenForFileUseCase,
         @Inject private readonly createTokenQRCodeForFileUseCase: CreateTokenQRCodeForFileUseCase
@@ -58,8 +58,8 @@ export class FilesFacade {
         return await this.uploadOwnFileUseCase.execute(request);
     }
 
-    public async deleteFileFromBackbone(request: DeleteFileFromBackboneRequest): Promise<Result<void>> {
-        return await this.deleteFileFromBackboneUseCase.execute(request);
+    public async deleteFile(request: DeleteFileRequest): Promise<Result<void>> {
+        return await this.deleteFileUseCase.execute(request);
     }
 
     public async createQRCodeForFile(request: CreateQRCodeForFileRequest): Promise<Result<CreateQRCodeForFileResponse>> {
