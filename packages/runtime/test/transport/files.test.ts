@@ -197,15 +197,21 @@ describe("Upload big files", () => {
     });
 });
 
-test("delete file from backbone", async () => {
-    const uploadResponse = await transportServices1.files.uploadOwnFile(await makeUploadRequest());
-    expect(uploadResponse).toBeSuccessful();
+describe("delete file", () => {
+    test("accessing invalid file id causes an error", async () => {
+        const response = await transportServices1.files.deleteFile({ fileId: UNKNOWN_FILE_ID });
+        expect(response).toBeAnError("File not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
+    });
 
-    const file = uploadResponse.value;
-    expect(file).toBeDefined();
+    test("delete file", async () => {
+        const uploadResponse = await transportServices1.files.uploadOwnFile(await makeUploadRequest());
+        expect(uploadResponse).toBeSuccessful();
 
-    const response = await transportServices1.files.deleteFileFromBackbone({ id: file.id });
-    expect(response).toBeSuccessful();
+        const file = uploadResponse.value;
+        expect(file).toBeDefined();
+        const response = await transportServices1.files.deleteFile({ fileId: file.id });
+        expect(response).toBeSuccessful();
+    });
 });
 
 describe("Files query", () => {

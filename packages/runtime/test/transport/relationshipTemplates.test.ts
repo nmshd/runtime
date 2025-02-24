@@ -7,6 +7,8 @@ const serviceProvider = new RuntimeServiceProvider();
 let runtimeServices1: TestRuntimeServices;
 let runtimeServices2: TestRuntimeServices;
 
+const UNKNOWN_TEMPLATE_ID = "RLTXXXXXXXXXXXXXXXXX";
+
 beforeAll(async () => {
     const runtimeServices = await serviceProvider.launch(2);
     runtimeServices1 = runtimeServices[0];
@@ -245,6 +247,24 @@ describe("RelationshipTemplate Tests", () => {
                 templateId: createResult.value.id
             });
             expect(createQRCodeWithoutPersonalizationResult).toBeAnError(/.*/, "error.runtime.relationshipTemplates.personalizationMustBeInherited");
+        });
+    });
+
+    describe("delete template", () => {
+        test("accessing invalid template id causes an error", async () => {
+            const response = await runtimeServices1.transport.relationshipTemplates.deleteRelationshipTemplate({ templateId: UNKNOWN_TEMPLATE_ID });
+            expect(response).toBeAnError("RelationshipTemplate not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
+        });
+
+        test("delete template", async () => {
+            const template = (
+                await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                    content: emptyRelationshipTemplateContent,
+                    expiresAt: DateTime.utc().plus({ minutes: 1 }).toString()
+                })
+            ).value;
+            const response = await runtimeServices1.transport.relationshipTemplates.deleteRelationshipTemplate({ templateId: template.id });
+            expect(response).toBeSuccessful();
         });
     });
 });
