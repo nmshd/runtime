@@ -197,6 +197,23 @@ describe("Upload big files", () => {
     });
 });
 
+describe("delete file", () => {
+    test("accessing invalid file id causes an error", async () => {
+        const response = await transportServices1.files.deleteFile({ fileId: UNKNOWN_FILE_ID });
+        expect(response).toBeAnError("File not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
+    });
+
+    test("delete file", async () => {
+        const uploadResponse = await transportServices1.files.uploadOwnFile(await makeUploadRequest());
+        expect(uploadResponse).toBeSuccessful();
+
+        const file = uploadResponse.value;
+        expect(file).toBeDefined();
+        const response = await transportServices1.files.deleteFile({ fileId: file.id });
+        expect(response).toBeSuccessful();
+    });
+});
+
 describe("Files query", () => {
     test("files can be queried by their attributes", async () => {
         const file = await uploadFile(transportServices1);

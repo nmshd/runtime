@@ -396,19 +396,45 @@ describe("TokenController", function () {
         expect(fetchCachesResult).toHaveLength(2);
     });
 
-    test("should delete a token", async function () {
-        const expiresAt = CoreDate.utc().add({ minutes: 5 });
-        const content = Serializable.fromAny({ content: "TestToken" });
-        const sentToken = await recipient.tokens.sendToken({
-            content,
-            expiresAt,
-            ephemeral: false
-        });
-        const reference = sentToken.toTokenReference().truncate();
-        const tokenId = (await sender.tokens.loadPeerTokenByTruncated(reference, false)).id;
+    describe("token deletion", function () {
+        let sentToken: Token;
+        let receivedToken: Token;
 
-        await sender.tokens.cleanupTokensOfDecomposedRelationship(recipient.identity.address);
-        const token = await sender.tokens.getToken(tokenId);
-        expect(token).toBeUndefined();
+        beforeEach(async function () {
+            const expiresAt = CoreDate.utc().add({ minutes: 5 });
+            const content = Serializable.fromAny({ content: "TestToken" });
+            sentToken = await sender.tokens.sendToken({
+                content,
+                expiresAt,
+                ephemeral: false
+            });
+
+            const reference = sentToken.toTokenReference().truncate();
+            receivedToken = await recipient.tokens.loadPeerTokenByTruncated(reference, false);
+        });
+
+        test("should delete own token locally and from the backbone", async function () {
+            await sender.tokens.delete(sentToken);
+            const tokenOnBackbone = await recipient.tokens.fetchCaches([sentToken.id]);
+            expect(tokenOnBackbone).toHaveLength(0);
+
+            const localToken = await sender.tokens.getToken(sentToken.id);
+            expect(localToken).toBeUndefined();
+        });
+
+        test("should delete a not owned token only locally", async function () {
+            await recipient.tokens.delete(receivedToken);
+            const tokenOnBackbone = await sender.tokens.fetchCaches([sentToken.id]);
+            expect(tokenOnBackbone).toHaveLength(1);
+
+            const localToken = await recipient.tokens.getToken(sentToken.id);
+            expect(localToken).toBeUndefined();
+        });
+
+        test("should delete a token during decomposition", async function () {
+            await recipient.tokens.cleanupTokensOfDecomposedRelationship(sender.identity.address);
+            const token = await recipient.tokens.getToken(sentToken.id);
+            expect(token).toBeUndefined();
+        });
     });
 });

@@ -12,6 +12,8 @@ import {
     CreateTokenQRCodeForOwnTemplateRequest,
     CreateTokenQRCodeForOwnTemplateResponse,
     CreateTokenQRCodeForOwnTemplateUseCase,
+    DeleteRelationshipTemplateRequest,
+    DeleteRelationshipTemplateUseCase,
     GetRelationshipTemplateRequest,
     GetRelationshipTemplateUseCase,
     GetRelationshipTemplatesRequest,
@@ -26,6 +28,7 @@ export class RelationshipTemplatesFacade {
         @Inject private readonly loadPeerRelationshipTemplateUseCase: LoadPeerRelationshipTemplateUseCase,
         @Inject private readonly getRelationshipTemplatesUseCase: GetRelationshipTemplatesUseCase,
         @Inject private readonly getRelationshipTemplateUseCase: GetRelationshipTemplateUseCase,
+        @Inject private readonly deleteRelationshipTemplateUseCase: DeleteRelationshipTemplateUseCase,
         @Inject private readonly createQRCodeForOwnTemplateUseCase: CreateQRCodeForOwnTemplateUseCase,
         @Inject private readonly createTokenQRCodeForOwnTemplateUseCase: CreateTokenQRCodeForOwnTemplateUseCase,
         @Inject private readonly createTokenForOwnTemplateUseCase: CreateTokenForOwnTemplateUseCase
@@ -45,6 +48,10 @@ export class RelationshipTemplatesFacade {
 
     public async getRelationshipTemplate(request: GetRelationshipTemplateRequest): Promise<Result<RelationshipTemplateDTO>> {
         return await this.getRelationshipTemplateUseCase.execute(request);
+    }
+
+    public async deleteRelationshipTemplate(request: DeleteRelationshipTemplateRequest): Promise<Result<void>> {
+        return await this.deleteRelationshipTemplateUseCase.execute(request);
     }
 
     public async createQRCodeForOwnTemplate(request: CreateQRCodeForOwnTemplateRequest): Promise<Result<CreateQRCodeForOwnTemplateResponse>> {
