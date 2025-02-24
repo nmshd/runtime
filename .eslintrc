@@ -24,6 +24,7 @@
             }
         ],
         "jest/max-nested-describe": ["error", { "max": 4 }],
-        "jest/no-conditional-in-test": "warn"
+        "jest/no-conditional-in-test": "warn",
+        "@typescript-eslint/switch-exhaustiveness-check": ["error", { "allowDefaultCaseForExhaustiveSwitch": true, "considerDefaultExhaustiveForUnions": true }]
     }
 }

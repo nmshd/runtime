@@ -372,7 +372,7 @@ export class AccountController {
 
         const device = Device.from({
             id: deviceSharedSecret.id,
-            name: deviceSharedSecret.name ? deviceSharedSecret.name : "",
+            name: deviceSharedSecret.name ?? "",
             description: deviceSharedSecret.description,
             lastLoginAt: CoreDate.utc(),
             createdAt: deviceSharedSecret.createdAt,
