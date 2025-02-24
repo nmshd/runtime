@@ -1,6 +1,7 @@
 export * from "./CreateQRCodeForFile";
 export * from "./CreateTokenForFile";
 export * from "./CreateTokenQRCodeForFile";
+export * from "./DeleteFileFromBackbone";
 export * from "./DownloadFile";
 export * from "./FileMapper";
 export * from "./GetFile";

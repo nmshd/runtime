@@ -197,6 +197,17 @@ describe("Upload big files", () => {
     });
 });
 
+test("delete file from backbone", async () => {
+    const uploadResponse = await transportServices1.files.uploadOwnFile(await makeUploadRequest());
+    expect(uploadResponse).toBeSuccessful();
+
+    const file = uploadResponse.value;
+    expect(file).toBeDefined();
+
+    const response = await transportServices1.files.deleteFileFromBackbone({ id: file.id });
+    expect(response).toBeSuccessful();
+});
+
 describe("Files query", () => {
     test("files can be queried by their attributes", async () => {
         const file = await uploadFile(transportServices1);

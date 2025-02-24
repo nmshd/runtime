@@ -123,4 +123,30 @@ describe("FileController", function () {
         expect(file.metadataModifiedAt!.isSameOrBefore(creationTime.add({ seconds: 1 }))).toBe(true);
         expect(file.metadataModifiedAt!.isSameOrAfter(creationTime.subtract({ seconds: 2 }))).toBe(true);
     });
+
+    describe.only("file deletion", function () {
+        let file: File;
+
+        beforeEach(async function () {
+            const content = CoreBuffer.fromUtf8("Test");
+            file = await TestUtil.uploadFile(sender, content);
+        });
+
+        test("should delete an own file from the backbone", async function () {
+            await sender.files.deleteFileFromBackbone(file.id);
+            const filesOnBackboneWithId = await sender.files.fetchCaches([file.id]);
+            expect(filesOnBackboneWithId).toHaveLength(0);
+        });
+
+        test("should not delete a not owned file from the backbone", async function () {
+            const reference = file.toFileReference().truncate();
+            await recipient.files.getOrLoadFileByTruncated(reference);
+            expect(recipient.files.deleteFileFromBackbone(file.id)).rejects.toThrow("error.transport.general.onlyAllowedForOwner");
+        });
+
+        test("should throw if the file is not found", async function () {
+            expect(sender.files.deleteFileFromBackbone(CoreId.from("invalid-id"))).rejects.toThrow("error.transport.recordNotFound");
+            // TODO: maybe add a test for file only missing on backbone
+        });
+    });
 });

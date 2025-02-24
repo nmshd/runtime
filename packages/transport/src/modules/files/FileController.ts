@@ -42,6 +42,20 @@ export class FileController extends TransportController {
         return doc ? File.from(doc) : undefined;
     }
 
+    public async deleteFileFromBackbone(id: CoreId): Promise<void> {
+        const localFile = await this.getFile(id); // TODO: this assumes that the file is not deleted locally before it's deleted from the backbone
+        if (!localFile) {
+            throw TransportCoreErrors.general.recordNotFound(File, id.toString());
+        }
+        if (!localFile.isOwn) {
+            throw TransportCoreErrors.general.onlyAllowedForOwner(id.toString());
+        }
+
+        const deletionResult = await this.client.deleteFile(id.toString());
+        if (deletionResult.isSuccess) return;
+        throw deletionResult.error; // TODO: the errors for file missing locally and file missing on backbone are very similar
+    }
+
     public async fetchCaches(ids: CoreId[]): Promise<{ id: CoreId; cache: CachedFile }[]> {
         if (ids.length === 0) return [];
 
