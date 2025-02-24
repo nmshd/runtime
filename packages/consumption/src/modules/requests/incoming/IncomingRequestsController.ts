@@ -452,8 +452,6 @@ export class IncomingRequestsController extends ConsumptionBaseController {
     }
 
     public async delete(request: LocalRequest): Promise<void> {
-        // TODO: throw if not Expired (for now)
-
         if (request.status !== LocalRequestStatus.Expired) {
             throw ConsumptionCoreErrors.requests.cannotDeleteIncomingRequestThatIsNotExpired(request.id.toString(), request.status);
         }
