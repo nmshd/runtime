@@ -451,6 +451,16 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         await this.localRequests.update(requestDoc, request);
     }
 
+    public async delete(request: LocalRequest): Promise<void> {
+        // TODO: throw if not Expired (for now)
+
+        if (request.status !== LocalRequestStatus.Expired) {
+            throw ConsumptionCoreErrors.requests.cannotDeleteIncomingRequestThatIsNotExpired(request.id.toString(), request.status);
+        }
+
+        await this.localRequests.delete(request);
+    }
+
     public async deleteRequestsFromPeer(peer: CoreAddress): Promise<void> {
         const requests = await this.getIncomingRequests({ peer: peer.toString() });
         for (const request of requests) {
