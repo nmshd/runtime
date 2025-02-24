@@ -678,7 +678,7 @@ describe("Requests", () => {
 
             await expect(rConsumptionServices.incomingRequests.delete({ requestId: request.id })).resolves.toBeAnError(
                 "is in status 'ManualDecisionRequired'. At the moment, you can only delete incoming Requests that are expired.",
-                "error.consumption.requests.cannotDeleteIncomingRequestThatIsNotExpired"
+                "error.consumption.requests.canOnlyDeleteIncomingRequestThatIsExpired"
             );
         });
 

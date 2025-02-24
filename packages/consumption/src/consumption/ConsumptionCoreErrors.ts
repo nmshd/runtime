@@ -340,9 +340,9 @@ class Requests {
         return new CoreError("error.consumption.requests.cannotCreateRequestWithExpirationDateInPast", "You cannot create a Request with an expiration date that is in the past.");
     }
 
-    public cannotDeleteIncomingRequestThatIsNotExpired(id: string, status: string) {
+    public canOnlyDeleteIncomingRequestThatIsExpired(id: string, status: string) {
         return new CoreError(
-            "error.consumption.requests.cannotDeleteIncomingRequestThatIsNotExpired",
+            "error.consumption.requests.canOnlyDeleteIncomingRequestThatIsExpired",
             `The incoming Request '${id}' is in status '${status}'. At the moment, you can only delete incoming Requests that are expired.`
         );
     }

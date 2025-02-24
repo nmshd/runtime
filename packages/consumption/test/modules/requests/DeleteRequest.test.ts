@@ -98,6 +98,6 @@ describe("Delete requests", function () {
             requestSourceObject: rMessageWithRequest
         });
 
-        await expect(rConsumptionController.incomingRequests.delete(rLocalRequest)).rejects.toThrow("error.consumption.requests.cannotDeleteIncomingRequestThatIsNotExpired");
+        await expect(rConsumptionController.incomingRequests.delete(rLocalRequest)).rejects.toThrow("error.consumption.requests.canOnlyDeleteIncomingRequestThatIsExpired");
     });
 });
