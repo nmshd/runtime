@@ -61,8 +61,6 @@ describe("IdentityAttributeQueryExpanded", () => {
         expect(expandedQuery.name).toBe("i18n://dvo.attribute.name.GivenName");
         expect(expandedQuery.description).toBe("i18n://dvo.attribute.description.GivenName");
         expect(expandedQuery.valueType).toBe("GivenName");
-        expect(expandedQuery.validFrom).toBeUndefined();
-        expect(expandedQuery.validTo).toBeUndefined();
         expect(expandedQuery.renderHints["@type"]).toBe("RenderHints");
         expect(expandedQuery.renderHints.technicalType).toBe("String");
         expect(expandedQuery.renderHints.editType).toBe("InputLike");

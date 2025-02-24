@@ -14,8 +14,6 @@ export interface CreateAndShareRelationshipAttributeRequest {
         key: string;
         confidentiality: RelationshipAttributeConfidentiality;
         isTechnical?: boolean;
-        validFrom?: ISO8601DateTimeString;
-        validTo?: ISO8601DateTimeString;
     };
     peer: AddressString;
     requestMetadata?: {
