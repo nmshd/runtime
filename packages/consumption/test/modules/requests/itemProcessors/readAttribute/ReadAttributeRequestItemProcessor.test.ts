@@ -406,7 +406,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         "@type": "GivenName",
                         value: "aGivenName"
                     },
-                    tags: ["aTag"]
+                    tags: ["x+%+aTag"]
                 }
             };
 
@@ -773,7 +773,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     newAttribute: {
                         "@type": "IdentityAttribute",
                         owner: recipient.toString(),
-                        tags: ["aTag", "AnotherTag"],
+                        tags: ["x+%+aTag", "x+%+AnotherTag"],
                         value: {
                             "@type": "GivenName",
                             value: "aGivenName"
@@ -816,7 +816,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
                     accept: true,
                     existingAttributeId: repositoryAttribute.id.toString(),
-                    tags: ["aNewTag"]
+                    tags: ["x+%+aNewTag"]
                 };
 
                 const result = await processor.canAccept(requestItem, acceptParams, request);
@@ -850,7 +850,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     newAttribute: {
                         "@type": "IdentityAttribute",
                         owner: recipient.toString(),
-                        tags: ["tagA", "tagD", "tagE"],
+                        tags: ["x+%+tagA", "x+%+tagD", "x+%+tagE"],
                         value: {
                             "@type": "GivenName",
                             value: "aGivenName"
