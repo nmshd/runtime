@@ -180,6 +180,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
         if (requestItem.attribute instanceof IdentityAttribute && requestItem.attribute.tags) {
             return await this.consumptionController.attributes.validateTags(requestItem.attribute.tags, requestItem.attribute.toJSON().value["@type"]);
         }
+
         return ValidationResult.success();
     }
 
