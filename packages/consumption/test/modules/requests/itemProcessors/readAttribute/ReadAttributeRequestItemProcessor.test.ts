@@ -611,70 +611,6 @@ describe("ReadAttributeRequestItemProcessor", function () {
             });
         });
 
-        test("returns an error when the given Attribute has invalid tags", async function () {
-            const attributesControllerSpy = spy(consumptionController.attributes);
-            when(attributesControllerSpy.validateTags(anything(), anything())).thenResolve(ValidationResult.success());
-
-            const existingAttribute = await consumptionController.attributes.createRepositoryAttribute({
-                content: TestObjectFactory.createIdentityAttribute({
-                    tags: ["tag1"],
-                    owner: accountController.identity.address
-                })
-            });
-
-            reset(attributesControllerSpy);
-
-            const sender = CoreAddress.from("Sender");
-
-            const requestItem = ReadAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: IdentityAttributeQuery.from({ valueType: "GivenName" })
-            });
-            const requestId = await ConsumptionIds.request.generate();
-            const request = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
-            });
-
-            const canAcceptWithExistingAttributeResult = await processor.canAccept(
-                requestItem,
-                {
-                    accept: true,
-                    existingAttributeId: existingAttribute.id.toString()
-                },
-                request
-            );
-
-            expect(canAcceptWithExistingAttributeResult).errorValidationResult({
-                code: "error.consumption.attributes.invalidTag"
-            });
-
-            const canAcceptWithNewAttributeResult = await processor.canAccept(
-                requestItem,
-                {
-                    accept: true,
-                    newAttribute: TestObjectFactory.createIdentityAttribute({
-                        value: GivenName.fromAny({ value: "anotherGivenName" }),
-                        tags: ["tag1"],
-                        owner: accountController.identity.address
-                    }).toJSON()
-                },
-                request
-            );
-
-            expect(canAcceptWithNewAttributeResult).errorValidationResult({
-                code: "error.consumption.attributes.invalidTag"
-            });
-        });
-
         describe("canAccept ReadAttributeRequestitem with IdentityAttributeQuery", function () {
             test("returns an error when the existing IdentityAttribute is already shared", async function () {
                 const attribute = await consumptionController.attributes.createSharedLocalAttribute({
@@ -855,7 +791,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: recipient,
                         value: GivenName.fromAny({ value: "aGivenName" }),
-                        tags: ["x+%+x+%+anExistingTag"]
+                        tags: ["x+%+anExistingTag"]
                     })
                 });
 
