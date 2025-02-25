@@ -2296,13 +2296,241 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 expect(result).toBeInstanceOf(ReadAttributeAcceptResponseItem);
 
                 const createdSharedAttribute = await consumptionController.attributes.getLocalAttribute((result as ReadAttributeAcceptResponseItem).attributeId);
-                expect(createdSharedAttribute!.shareInfo!.sourceAttribute).toStrictEqual(existingRepositoryAttribute.id);
-
-                const updatedRepositoryAttribute = await consumptionController.attributes.getLocalAttribute(existingRepositoryAttribute.id);
-                expect((updatedRepositoryAttribute!.content as IdentityAttribute).tags).toStrictEqual(["tag1", "tag2"]);
+                const sourceAttribute = await consumptionController.attributes.getLocalAttribute(createdSharedAttribute!.shareInfo!.sourceAttribute!);
+                expect(sourceAttribute!.succeeds).toStrictEqual(existingRepositoryAttribute.id);
+                expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["tag1", "tag2"]);
             });
 
-            // TODO: add more tests
+            test("accept with new IdentityAttribute that is already shared", async function () {
+                const existingRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                    content: TestObjectFactory.createIdentityAttribute({
+                        owner: recipient,
+                        value: GivenName.fromAny({ value: "aGivenName" })
+                    })
+                });
+
+                const existingOwnSharedIdentityAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
+                    sourceAttributeId: existingRepositoryAttribute.id,
+                    peer: sender,
+                    requestReference: CoreId.from("reqRef")
+                });
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: IdentityAttributeQuery.from({ valueType: "GivenName" })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const incomingRequest = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                    accept: true,
+                    newAttribute: {
+                        "@type": "IdentityAttribute",
+                        owner: recipient.toString(),
+                        value: {
+                            "@type": "GivenName",
+                            value: "aGivenName"
+                        }
+                    }
+                };
+
+                const result = await processor.accept(requestItem, acceptParams, incomingRequest);
+                expect(result).toBeInstanceOf(AttributeAlreadySharedAcceptResponseItem);
+                expect((result as AttributeAlreadySharedAcceptResponseItem).attributeId).toStrictEqual(existingOwnSharedIdentityAttribute.id);
+            });
+
+            test("accept with new IdentityAttribute that is already shared with different tags", async function () {
+                const existingRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                    content: TestObjectFactory.createIdentityAttribute({
+                        owner: recipient,
+                        value: GivenName.fromAny({ value: "aGivenName" }),
+                        tags: ["tag1"]
+                    })
+                });
+
+                const existingOwnSharedIdentityAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
+                    sourceAttributeId: existingRepositoryAttribute.id,
+                    peer: sender,
+                    requestReference: CoreId.from("reqRef")
+                });
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: IdentityAttributeQuery.from({ valueType: "GivenName" })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const incomingRequest = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                    accept: true,
+                    newAttribute: {
+                        "@type": "IdentityAttribute",
+                        owner: recipient.toString(),
+                        value: {
+                            "@type": "GivenName",
+                            value: "aGivenName"
+                        },
+                        tags: ["tag2"]
+                    }
+                };
+
+                const result = await processor.accept(requestItem, acceptParams, incomingRequest);
+                expect(result).toBeInstanceOf(AttributeSuccessionAcceptResponseItem);
+                expect((result as AttributeSuccessionAcceptResponseItem).predecessorId).toStrictEqual(existingOwnSharedIdentityAttribute.id);
+
+                const succeededOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute((result as AttributeSuccessionAcceptResponseItem).successorId);
+                const sourceAttribute = await consumptionController.attributes.getLocalAttribute(succeededOwnSharedIdentityAttribute!.shareInfo!.sourceAttribute!);
+                expect(sourceAttribute!.succeeds).toStrictEqual(existingRepositoryAttribute.id);
+                expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["tag1", "tag2"]);
+            });
+
+            test("accept with new IdentityAttribute whose predecessor is already shared", async function () {
+                const existingRepositoryAttributePredecessor = await consumptionController.attributes.createRepositoryAttribute({
+                    content: TestObjectFactory.createIdentityAttribute({
+                        owner: recipient,
+                        value: GivenName.fromAny({ value: "aGivenName" })
+                    })
+                });
+
+                const existingOwnSharedIdentityAttributePredecessor = await consumptionController.attributes.createSharedLocalAttributeCopy({
+                    sourceAttributeId: existingRepositoryAttributePredecessor.id,
+                    peer: sender,
+                    requestReference: CoreId.from("reqRef")
+                });
+
+                const existingRepositoryAttributeSuccessor = (
+                    await consumptionController.attributes.succeedRepositoryAttribute(existingRepositoryAttributePredecessor.id, {
+                        content: IdentityAttribute.from({
+                            value: GivenName.fromAny({ value: "aSucceededGivenName" }),
+                            owner: recipient
+                        })
+                    })
+                ).successor;
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: IdentityAttributeQuery.from({ valueType: "GivenName" })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const incomingRequest = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                    accept: true,
+                    newAttribute: {
+                        "@type": "IdentityAttribute",
+                        owner: recipient.toString(),
+                        value: {
+                            "@type": "GivenName",
+                            value: "aSucceededGivenName"
+                        }
+                    }
+                };
+
+                const result = await processor.accept(requestItem, acceptParams, incomingRequest);
+                expect(result).toBeInstanceOf(AttributeSuccessionAcceptResponseItem);
+                expect((result as AttributeSuccessionAcceptResponseItem).predecessorId).toStrictEqual(existingOwnSharedIdentityAttributePredecessor.id);
+
+                const succeededOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute((result as AttributeSuccessionAcceptResponseItem).successorId);
+                expect(succeededOwnSharedIdentityAttribute!.shareInfo!.sourceAttribute).toStrictEqual(existingRepositoryAttributeSuccessor.id);
+            });
+
+            test("accept with new IdentityAttribute whose predecessor is already shared with different tags", async function () {
+                const existingRepositoryAttributePredecessor = await consumptionController.attributes.createRepositoryAttribute({
+                    content: TestObjectFactory.createIdentityAttribute({
+                        owner: recipient,
+                        value: GivenName.fromAny({ value: "aGivenName" })
+                    })
+                });
+
+                const existingOwnSharedIdentityAttributePredecessor = await consumptionController.attributes.createSharedLocalAttributeCopy({
+                    sourceAttributeId: existingRepositoryAttributePredecessor.id,
+                    peer: sender,
+                    requestReference: CoreId.from("reqRef")
+                });
+
+                const existingRepositoryAttributeSuccessor = (
+                    await consumptionController.attributes.succeedRepositoryAttribute(existingRepositoryAttributePredecessor.id, {
+                        content: IdentityAttribute.from({
+                            value: GivenName.fromAny({ value: "aSucceededGivenName" }),
+                            owner: recipient,
+                            tags: ["tag1"]
+                        })
+                    })
+                ).successor;
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: IdentityAttributeQuery.from({ valueType: "GivenName" })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const incomingRequest = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                    accept: true,
+                    newAttribute: {
+                        "@type": "IdentityAttribute",
+                        owner: recipient.toString(),
+                        value: {
+                            "@type": "GivenName",
+                            value: "aSucceededGivenName"
+                        },
+                        tags: ["tag2"]
+                    }
+                };
+
+                const result = await processor.accept(requestItem, acceptParams, incomingRequest);
+                expect(result).toBeInstanceOf(AttributeSuccessionAcceptResponseItem);
+                expect((result as AttributeSuccessionAcceptResponseItem).predecessorId).toStrictEqual(existingOwnSharedIdentityAttributePredecessor.id);
+
+                const succeededOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute((result as AttributeSuccessionAcceptResponseItem).successorId);
+                const sourceAttribute = await consumptionController.attributes.getLocalAttribute(succeededOwnSharedIdentityAttribute!.shareInfo!.sourceAttribute!);
+                expect(sourceAttribute!.succeeds).toStrictEqual(existingRepositoryAttributeSuccessor.id);
+                expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["tag1", "tag2"]);
+            });
         });
     });
 
