@@ -23,6 +23,7 @@ import { LocalAttribute } from "../../../attributes/local/LocalAttribute";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 import { LocalRequestInfo } from "../IRequestItemProcessor";
+import { getSourceRepositoryAttribute } from "../utility/createAppropriateResponseItem";
 import validateAttributeMatchesWithQuery from "../utility/validateAttributeMatchesWithQuery";
 import validateQuery from "../utility/validateQuery";
 import { AcceptReadAttributeRequestItemParameters, AcceptReadAttributeRequestItemParametersJSON } from "./AcceptReadAttributeRequestItemParameters";
@@ -383,7 +384,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 });
             }
 
-            const repositoryAttribute = await this.getSourceRepositoryAttribute(parsedParams.newAttribute);
+            const repositoryAttribute = await getSourceRepositoryAttribute(parsedParams.newAttribute, this.consumptionController.attributes);
 
             const latestSharedVersions = await this.consumptionController.attributes.getSharedVersionsOfAttribute(repositoryAttribute.id, [requestInfo.peer]);
             const latestSharedVersion = latestSharedVersions.length > 0 ? latestSharedVersions[0] : undefined;
@@ -465,59 +466,6 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         };
         const { successor } = await this.consumptionController.attributes.succeedThirdPartyRelationshipAttribute(sharedPredecessorId, successorParams);
         return successor;
-    }
-
-    private async createNewAttribute(attribute: IdentityAttribute | RelationshipAttribute, requestInfo: LocalRequestInfo) {
-        if (attribute instanceof IdentityAttribute) {
-            const repositoryAttribute = await this.consumptionController.attributes.createRepositoryAttribute({
-                content: attribute
-            });
-
-            return await this.consumptionController.attributes.createSharedLocalAttributeCopy({
-                sourceAttributeId: CoreId.from(repositoryAttribute.id),
-                peer: CoreAddress.from(requestInfo.peer),
-                requestReference: CoreId.from(requestInfo.id)
-            });
-        }
-
-        return await this.consumptionController.attributes.createSharedLocalAttribute({
-            content: attribute,
-            peer: requestInfo.peer,
-            requestReference: CoreId.from(requestInfo.id)
-        });
-    }
-
-    private async getSourceRepositoryAttribute(attribute: IdentityAttribute): Promise<LocalAttribute> {
-        const existingRepositoryAttribute = await this.consumptionController.attributes.getRepositoryAttributeWithSameValue((attribute.value as any).toJSON());
-
-        if (!existingRepositoryAttribute) {
-            return await this.consumptionController.attributes.createRepositoryAttribute({
-                content: attribute
-            });
-        }
-
-        const newTags = attribute.tags?.filter((tag) => !(existingRepositoryAttribute.content as IdentityAttribute).tags?.includes(tag));
-        if (!newTags || newTags.length === 0) return existingRepositoryAttribute;
-
-        const succeededRepositoryAttribute = await this.mergeTagsOfRepositoryAttribute(existingRepositoryAttribute, newTags);
-        return succeededRepositoryAttribute;
-    }
-
-    private async mergeTagsOfRepositoryAttribute(existingRepositoryAttribute: LocalAttribute, newTags: string[]): Promise<LocalAttribute> {
-        const repositoryAttributeSuccessorParams = {
-            content: {
-                ...existingRepositoryAttribute.content.toJSON(),
-                tags: [...((existingRepositoryAttribute.content as IdentityAttribute).tags ?? []), ...newTags]
-            },
-            succeeds: existingRepositoryAttribute.id.toString()
-        };
-
-        const repositoryAttributesAfterSuccession = await this.consumptionController.attributes.succeedRepositoryAttribute(
-            existingRepositoryAttribute.id,
-            repositoryAttributeSuccessorParams
-        );
-
-        return repositoryAttributesAfterSuccession.successor;
     }
 
     public override async applyIncomingResponseItem(

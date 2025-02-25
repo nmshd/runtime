@@ -1,66 +1,8 @@
-import {
-    AttributeAlreadySharedAcceptResponseItem,
-    AttributeSuccessionAcceptResponseItem,
-    CreateAttributeAcceptResponseItem,
-    IdentityAttribute,
-    ReadAttributeAcceptResponseItem,
-    ResponseItemResult
-} from "@nmshd/content";
-import { CoreId } from "@nmshd/core-types";
+import { AttributeAlreadySharedAcceptResponseItem, AttributeSuccessionAcceptResponseItem, IdentityAttribute, ResponseItemResult } from "@nmshd/content";
 import { AttributesController, LocalAttribute, LocalAttributeShareInfo } from "../../../attributes";
 import { LocalRequestInfo } from "../IRequestItemProcessor";
 
-export default async function createAppropriateResponseItem(
-    attribute: IdentityAttribute,
-    requestInfo: LocalRequestInfo,
-    attributesController: AttributesController,
-    requestItemKind: "Create" | "Read"
-): Promise<CreateAttributeAcceptResponseItem | ReadAttributeAcceptResponseItem | AttributeAlreadySharedAcceptResponseItem | AttributeSuccessionAcceptResponseItem> {
-    const repositoryAttribute = await getSourceRepositoryAttribute(attribute, attributesController);
-
-    const latestSharedVersions = await attributesController.getSharedVersionsOfAttribute(repositoryAttribute.id, [requestInfo.peer]);
-    const latestSharedVersion = latestSharedVersions.length > 0 ? latestSharedVersions[0] : undefined;
-
-    if (!latestSharedVersion) {
-        const newOwnSharedIdentityAttribute = await attributesController.createSharedLocalAttributeCopy({
-            peer: requestInfo.peer,
-            requestReference: requestInfo.id,
-            sourceAttributeId: repositoryAttribute.id
-        });
-
-        return getNativeAcceptResponseItem(requestItemKind, newOwnSharedIdentityAttribute.id, newOwnSharedIdentityAttribute.content as IdentityAttribute);
-    }
-
-    if (latestSharedVersion.shareInfo!.sourceAttribute!.equals(repositoryAttribute.id)) {
-        return AttributeAlreadySharedAcceptResponseItem.from({
-            result: ResponseItemResult.Accepted,
-            attributeId: latestSharedVersion.id
-        });
-    }
-
-    const ownSharedIdentityAttributeSuccessorParams = {
-        content: repositoryAttribute.content,
-        shareInfo: LocalAttributeShareInfo.from({
-            peer: requestInfo.peer,
-            requestReference: requestInfo.id,
-            sourceAttribute: repositoryAttribute.id
-        })
-    };
-    const ownSharedIdentityAttributesAfterSuccession = await attributesController.succeedOwnSharedIdentityAttribute(
-        latestSharedVersion.id,
-        ownSharedIdentityAttributeSuccessorParams
-    );
-    const succeededOwnSharedIdentityAttribute = ownSharedIdentityAttributesAfterSuccession.successor;
-
-    return AttributeSuccessionAcceptResponseItem.from({
-        result: ResponseItemResult.Accepted,
-        successorId: succeededOwnSharedIdentityAttribute.id,
-        successorContent: succeededOwnSharedIdentityAttribute.content,
-        predecessorId: latestSharedVersion.id
-    });
-}
-
-async function getSourceRepositoryAttribute(attribute: IdentityAttribute, attributesController: AttributesController): Promise<LocalAttribute> {
+export async function getSourceRepositoryAttribute(attribute: IdentityAttribute, attributesController: AttributesController): Promise<LocalAttribute> {
     const existingRepositoryAttribute = await attributesController.getRepositoryAttributeWithSameValue((attribute.value as any).toJSON());
 
     if (!existingRepositoryAttribute) {
@@ -90,27 +32,37 @@ async function mergeTagsOfRepositoryAttribute(existingRepositoryAttribute: Local
     return repositoryAttributesAfterSuccession.successor;
 }
 
-function getNativeAcceptResponseItem(requestItemKind: "Create", attributeId: CoreId, attribute: IdentityAttribute): CreateAttributeAcceptResponseItem;
-function getNativeAcceptResponseItem(requestItemKind: "Read", attributeId: CoreId, attribute: IdentityAttribute): ReadAttributeAcceptResponseItem;
-function getNativeAcceptResponseItem(
-    requestItemKind: "Create" | "Read",
-    attributeId: CoreId,
-    attribute: IdentityAttribute
-): CreateAttributeAcceptResponseItem | ReadAttributeAcceptResponseItem {
-    switch (requestItemKind) {
-        case "Create":
-            return CreateAttributeAcceptResponseItem.from({
-                result: ResponseItemResult.Accepted,
-                attributeId
-            });
-        case "Read":
-            return ReadAttributeAcceptResponseItem.from({
-                result: ResponseItemResult.Accepted,
-                attributeId,
-                attribute
-            });
-        default:
-            // TODO:
-            throw new Error();
+export async function foo(
+    repositoryAttribute: LocalAttribute,
+    latestSharedVersion: LocalAttribute,
+    requestInfo: LocalRequestInfo,
+    attributesController: AttributesController
+): Promise<AttributeAlreadySharedAcceptResponseItem | AttributeSuccessionAcceptResponseItem> {
+    if (latestSharedVersion.shareInfo!.sourceAttribute!.equals(repositoryAttribute.id)) {
+        return AttributeAlreadySharedAcceptResponseItem.from({
+            result: ResponseItemResult.Accepted,
+            attributeId: latestSharedVersion.id
+        });
     }
+
+    const ownSharedIdentityAttributeSuccessorParams = {
+        content: repositoryAttribute.content,
+        shareInfo: LocalAttributeShareInfo.from({
+            peer: requestInfo.peer,
+            requestReference: requestInfo.id,
+            sourceAttribute: repositoryAttribute.id
+        })
+    };
+    const ownSharedIdentityAttributesAfterSuccession = await attributesController.succeedOwnSharedIdentityAttribute(
+        latestSharedVersion.id,
+        ownSharedIdentityAttributeSuccessorParams
+    );
+    const succeededOwnSharedIdentityAttribute = ownSharedIdentityAttributesAfterSuccession.successor;
+
+    return AttributeSuccessionAcceptResponseItem.from({
+        result: ResponseItemResult.Accepted,
+        successorId: succeededOwnSharedIdentityAttribute.id,
+        successorContent: succeededOwnSharedIdentityAttribute.content,
+        predecessorId: latestSharedVersion.id
+    });
 }
