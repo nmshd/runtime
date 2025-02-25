@@ -176,6 +176,13 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
         return ValidationResult.success();
     }
 
+    public override async canAccept(requestItem: ShareAttributeRequestItem, _params: AcceptRequestItemParametersJSON, _requestInfo: LocalRequestInfo): Promise<ValidationResult> {
+        if (requestItem.attribute instanceof IdentityAttribute && requestItem.attribute.tags) {
+            return await this.consumptionController.attributes.validateTags(requestItem.attribute.tags, requestItem.attribute.toJSON().value["@type"]);
+        }
+        return ValidationResult.success();
+    }
+
     public override async accept(
         requestItem: ShareAttributeRequestItem,
         _params: AcceptRequestItemParametersJSON,

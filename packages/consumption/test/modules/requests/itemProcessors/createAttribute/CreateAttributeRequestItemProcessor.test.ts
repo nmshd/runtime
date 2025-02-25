@@ -312,6 +312,20 @@ describe("CreateAttributeRequestItemProcessor", function () {
                     "This CreateAttributeRequestItem cannot be accepted as the provided RelationshipAttribute cannot be created because there is already a RelationshipAttribute in the context of this Relationship with the same key 'aKey', owner and value type."
             });
         });
+
+        test("cannot accept because the attribute has invalid tags", async function () {
+            await Given.aRequestItemWithAnIdentityAttribute({
+                tags: ["tag1"],
+                attributeOwner: TestIdentity.CURRENT_IDENTITY
+            });
+
+            await When.iCallCanAccept();
+
+            await Then.theCanAcceptResultShouldBeAnErrorWith({
+                code: "error.consumption.attributes.invalidTag",
+                message: "The tag 'tag1' is invalid."
+            });
+        });
     });
 
     describe("accept", function () {

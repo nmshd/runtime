@@ -15,6 +15,7 @@ import {
 } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { AccountController, Transport } from "@nmshd/transport";
+import { anything, reset, spy, when } from "ts-mockito";
 import {
     ConsumptionController,
     ConsumptionIds,
@@ -23,7 +24,8 @@ import {
     LocalAttributeShareInfo,
     LocalRequest,
     LocalRequestStatus,
-    ShareAttributeRequestItemProcessor
+    ShareAttributeRequestItemProcessor,
+    ValidationResult
 } from "../../../../../src";
 import { TestUtil } from "../../../../core/TestUtil";
 import { TestObjectFactory } from "../../testHelpers/TestObjectFactory";
@@ -1034,6 +1036,93 @@ describe("ShareAttributeRequestItemProcessor", function () {
             expect(createdAttribute!.shareInfo!.peer.toString()).toStrictEqual(sender.toString());
             expect(createdAttribute!.shareInfo!.sourceAttribute).toBeUndefined();
             expect(createdAttribute!.content.owner.toString()).toStrictEqual(sender.toString());
+        });
+    });
+
+    describe("canAccept", function () {
+        test("returns an success when sharing a valid attribute", async function () {
+            const existingAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                content: TestObjectFactory.createIdentityAttribute({
+                    owner: testAccount.identity.address
+                })
+            });
+
+            const sender = CoreAddress.from("Sender");
+
+            const requestItem = ShareAttributeRequestItem.from({
+                mustBeAccepted: true,
+                attribute: existingAttribute.content,
+                sourceAttributeId: existingAttribute.id
+            });
+            const requestId = await ConsumptionIds.request.generate();
+            const request = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const canAcceptWithExistingAttributeResult = await processor.canAccept(
+                requestItem,
+                {
+                    accept: true
+                },
+                request
+            );
+
+            expect(canAcceptWithExistingAttributeResult).successfulValidationResult();
+        });
+        test("returns an error when sharing an attribute with invalid tags", async function () {
+            const attributesControllerSpy = spy(consumptionController.attributes);
+            when(attributesControllerSpy.validateTags(anything(), anything())).thenResolve(ValidationResult.success());
+
+            const existingAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                content: TestObjectFactory.createIdentityAttribute({
+                    tags: ["tag1"],
+                    owner: testAccount.identity.address
+                })
+            });
+
+            reset(attributesControllerSpy);
+
+            const sender = CoreAddress.from("Sender");
+
+            const requestItem = ShareAttributeRequestItem.from({
+                mustBeAccepted: true,
+                attribute: existingAttribute.content,
+                sourceAttributeId: existingAttribute.id
+            });
+            const requestId = await ConsumptionIds.request.generate();
+            const request = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const canAcceptWithExistingAttributeResult = await processor.canAccept(
+                requestItem,
+                {
+                    accept: true
+                },
+                request
+            );
+
+            expect(canAcceptWithExistingAttributeResult).errorValidationResult({
+                code: "error.consumption.attributes.invalidTag"
+            });
         });
     });
 

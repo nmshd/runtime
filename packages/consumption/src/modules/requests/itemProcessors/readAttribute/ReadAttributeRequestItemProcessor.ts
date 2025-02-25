@@ -270,6 +270,10 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             );
         }
 
+        if (attribute instanceof IdentityAttribute && attribute.tags) {
+            return await this.consumptionController.attributes.validateTags(attribute.tags, attribute.toJSON().value["@type"]);
+        }
+
         return ValidationResult.success();
     }
 

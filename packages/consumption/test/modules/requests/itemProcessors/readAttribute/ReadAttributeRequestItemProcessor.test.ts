@@ -19,6 +19,7 @@ import {
 } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { AccountController, CoreIdHelper, Transport } from "@nmshd/transport";
+import { anything, reset, spy, when } from "ts-mockito";
 import {
     AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON,
     AcceptReadAttributeRequestItemParametersWithNewAttributeJSON,
@@ -30,7 +31,8 @@ import {
     LocalRequest,
     LocalRequestStatus,
     PeerSharedAttributeSucceededEvent,
-    ReadAttributeRequestItemProcessor
+    ReadAttributeRequestItemProcessor,
+    ValidationResult
 } from "../../../../../src";
 import { TestUtil } from "../../../../core/TestUtil";
 import { TestObjectFactory } from "../../testHelpers/TestObjectFactory";
@@ -548,6 +550,70 @@ describe("ReadAttributeRequestItemProcessor", function () {
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.attributeQueryMismatch",
                 message: `The provided IdentityAttribute is outdated. You have already shared the successor '${successorRepositoryAttribute.id}' of it.`
+            });
+        });
+
+        test("returns an error when the given Attribute has invalid tags", async function () {
+            const attributesControllerSpy = spy(consumptionController.attributes);
+            when(attributesControllerSpy.validateTags(anything(), anything())).thenResolve(ValidationResult.success());
+
+            const existingAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                content: TestObjectFactory.createIdentityAttribute({
+                    tags: ["tag1"],
+                    owner: accountController.identity.address
+                })
+            });
+
+            reset(attributesControllerSpy);
+
+            const sender = CoreAddress.from("Sender");
+
+            const requestItem = ReadAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: IdentityAttributeQuery.from({ valueType: "GivenName" })
+            });
+            const requestId = await ConsumptionIds.request.generate();
+            const request = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const canAcceptWithExistingAttributeResult = await processor.canAccept(
+                requestItem,
+                {
+                    accept: true,
+                    existingAttributeId: existingAttribute.id.toString()
+                },
+                request
+            );
+
+            expect(canAcceptWithExistingAttributeResult).errorValidationResult({
+                code: "error.consumption.attributes.invalidTag"
+            });
+
+            const canAcceptWithNewAttributeResult = await processor.canAccept(
+                requestItem,
+                {
+                    accept: true,
+                    newAttribute: TestObjectFactory.createIdentityAttribute({
+                        value: GivenName.fromAny({ value: "anotherGivenName" }),
+                        tags: ["tag1"],
+                        owner: accountController.identity.address
+                    }).toJSON()
+                },
+                request
+            );
+
+            expect(canAcceptWithNewAttributeResult).errorValidationResult({
+                code: "error.consumption.attributes.invalidTag"
             });
         });
 
