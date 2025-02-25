@@ -26,7 +26,7 @@ export class RelationshipTemplateController extends TransportController {
     protected readonly secrets: RelationshipSecretController;
 
     public constructor(parent: AccountController, secrets: RelationshipSecretController, controllerName?: ControllerName) {
-        super(controllerName ? controllerName : ControllerName.RelationshipTemplate, parent);
+        super(controllerName ?? ControllerName.RelationshipTemplate, parent);
         this.secrets = secrets;
         this.client = new RelationshipTemplateClient(this.config, this.parent.authenticator, this.transport.correlator);
     }
