@@ -51,11 +51,40 @@ describe("RelationshipTemplateProcessedModule", function () {
         expect(uiBridge).showRequestCalled();
     });
 
-    test("should show an error when RelationshipTemplateProcessedEvent is received with an expired Request", async function () {
+    test("should show an error when RelationshipTemplateProcessedEvent is received with an expired Request on new Relationship", async function () {
         const templateFrom = (
             await session1.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
                 content: RelationshipTemplateContent.from({
                     onNewRelationship: { expiresAt: CoreDate.utc().add({ seconds: 2 }), items: [AuthenticationRequestItem.from({ mustBeAccepted: false })] }
+                }).toJSON(),
+                expiresAt: CoreDate.utc().add({ minutes: 5 }).toString(),
+                maxNumberOfAllocations: 1
+            })
+        ).value;
+
+        await sleep(3000);
+        await session2.transportServices.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templateFrom.truncatedReference });
+        await eventBus.waitForRunningEventHandlers();
+
+        expect(uiBridge).showRequestNotCalled();
+        expect(uiBridge).showErrorCalled("error.relationshipTemplateProcessedModule.requestExpired");
+    });
+
+    test("should show an error when RelationshipTemplateProcessedEvent is received with an expired Request on existing Relationship", async function () {
+        await TestUtil.addRelationship(session1, session2);
+
+        const templateFrom = (
+            await session1.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
+                content: RelationshipTemplateContent.from({
+                    onNewRelationship: {
+                        "@type": "Request",
+                        items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }]
+                    },
+                    onExistingRelationship: {
+                        "@type": "Request",
+                        items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }],
+                        expiresAt: CoreDate.utc().add({ seconds: 2 }).toString()
+                    }
                 }).toJSON(),
                 expiresAt: CoreDate.utc().add({ minutes: 5 }).toString(),
                 maxNumberOfAllocations: 1

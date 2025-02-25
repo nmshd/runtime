@@ -185,11 +185,11 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
         const newTags = attribute.tags?.filter((tag) => !(existingRepositoryAttribute.content as IdentityAttribute).tags?.includes(tag));
         if (!newTags || newTags.length === 0) return existingRepositoryAttribute;
 
-        const succeededRepositoryAttribute = await this.mergeTagsOfRespositoryAttribute(existingRepositoryAttribute, newTags);
+        const succeededRepositoryAttribute = await this.mergeTagsOfRepositoryAttribute(existingRepositoryAttribute, newTags);
         return succeededRepositoryAttribute;
     }
 
-    private async mergeTagsOfRespositoryAttribute(existingRepositoryAttribute: LocalAttribute, newTags: string[]): Promise<LocalAttribute> {
+    private async mergeTagsOfRepositoryAttribute(existingRepositoryAttribute: LocalAttribute, newTags: string[]): Promise<LocalAttribute> {
         const repositoryAttributeSuccessorParams = {
             content: {
                 ...existingRepositoryAttribute.content.toJSON(),
