@@ -356,7 +356,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                             peer: requestInfo.peer,
                             requestReference: requestInfo.id,
                             sourceAttribute: existingSourceAttribute.id,
-                            thirdPartyAddress: sharedPredecessor?.shareInfo?.thirdPartyAddress
+                            thirdPartyAddress: sharedPredecessor.shareInfo.thirdPartyAddress
                         })
                     };
                     successorSharedAttribute = (await this.consumptionController.attributes.succeedThirdPartyRelationshipAttribute(sharedPredecessor.id, successorParams))
