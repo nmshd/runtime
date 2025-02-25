@@ -752,7 +752,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             test("returns success responding with a new Attribute that has additional tags than those requested by the IdentityAttributeQuery", async function () {
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
-                    query: IdentityAttributeQuery.from({ tags: ["aTag"], valueType: "GivenName" })
+                    query: IdentityAttributeQuery.from({ tags: ["x+%+aTag"], valueType: "GivenName" })
                 });
                 const requestId = await ConsumptionIds.request.generate();
                 const request = LocalRequest.from({
@@ -797,7 +797,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
-                    query: IdentityAttributeQuery.from({ tags: ["aNewTag", "anotherNewTag"], valueType: "GivenName" })
+                    query: IdentityAttributeQuery.from({ tags: ["x+%+aNewTag", "x+%+anotherNewTag"], valueType: "GivenName" })
                 });
                 const requestId = await ConsumptionIds.request.generate();
                 const request = LocalRequest.from({
