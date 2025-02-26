@@ -250,21 +250,25 @@ describe("RelationshipTemplate Tests", () => {
         });
     });
 
-    describe("delete template", () => {
+    describe("Delete template", () => {
         test("accessing invalid template id causes an error", async () => {
             const response = await runtimeServices1.transport.relationshipTemplates.deleteRelationshipTemplate({ templateId: UNKNOWN_TEMPLATE_ID });
             expect(response).toBeAnError("RelationshipTemplate not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
         });
 
-        test("delete template", async () => {
+        test("successfully delete template", async () => {
             const template = (
                 await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
                     content: emptyRelationshipTemplateContent,
                     expiresAt: DateTime.utc().plus({ minutes: 1 }).toString()
                 })
             ).value;
-            const response = await runtimeServices1.transport.relationshipTemplates.deleteRelationshipTemplate({ templateId: template.id });
-            expect(response).toBeSuccessful();
+
+            const deleteTemplateResponse = await runtimeServices1.transport.relationshipTemplates.deleteRelationshipTemplate({ templateId: template.id });
+            expect(deleteTemplateResponse).toBeSuccessful();
+
+            const getTemplateResponse = await runtimeServices1.transport.relationshipTemplates.getRelationshipTemplate({ id: template.id });
+            expect(getTemplateResponse).toBeAnError("RelationshipTemplate not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
         });
     });
 });

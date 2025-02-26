@@ -125,31 +125,32 @@ describe("FileController", function () {
     });
 
     describe("file deletion", function () {
-        let file: File;
+        let sentFile: File;
+        let receivedFile: File;
 
         beforeEach(async function () {
             const content = CoreBuffer.fromUtf8("Test");
-            file = await TestUtil.uploadFile(sender, content);
+            sentFile = await TestUtil.uploadFile(sender, content);
+
+            const reference = sentFile.toFileReference().truncate();
+            receivedFile = await recipient.files.getOrLoadFileByTruncated(reference);
         });
 
         test("should delete own file locally and from the backbone", async function () {
-            await sender.files.deleteFile(file);
-            const fileOnBackbone = await recipient.files.fetchCaches([file.id]);
+            await sender.files.deleteFile(sentFile);
+            const fileOnBackbone = await recipient.files.fetchCaches([sentFile.id]);
             expect(fileOnBackbone).toHaveLength(0);
 
-            const localFile = await sender.files.getFile(file.id);
+            const localFile = await sender.files.getFile(sentFile.id);
             expect(localFile).toBeUndefined();
         });
 
         test("should delete a not owned file only locally", async function () {
-            const reference = file.toFileReference().truncate();
-            const receivedFile = await recipient.files.getOrLoadFileByTruncated(reference);
-
             await recipient.files.deleteFile(receivedFile);
-            const fileOnBackbone = await sender.files.fetchCaches([file.id]);
+            const fileOnBackbone = await sender.files.fetchCaches([sentFile.id]);
             expect(fileOnBackbone).toHaveLength(1);
 
-            const localFile = await recipient.files.getFile(file.id);
+            const localFile = await recipient.files.getFile(sentFile.id);
             expect(localFile).toBeUndefined();
         });
     });

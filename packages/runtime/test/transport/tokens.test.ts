@@ -37,16 +37,20 @@ describe("Tokens", () => {
         expect(getTokenResponse).toBeAnError("Token not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
     });
 
-    describe("delete token", () => {
-        test("accessing invalid token id causes an error", async () => {
+    describe("Delete Token", () => {
+        test("accessing invalid Token id causes an error", async () => {
             const response = await runtimeServices1.transport.tokens.deleteToken({ tokenId: UNKNOWN_TOKEN_ID });
             expect(response).toBeAnError("Token not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
         });
 
-        test("delete token", async () => {
+        test("successfully delete Token", async () => {
             const token = await uploadOwnToken(runtimeServices1.transport);
-            const response = await runtimeServices1.transport.tokens.deleteToken({ tokenId: token.id });
-            expect(response).toBeSuccessful();
+
+            const deleteTokenResponse = await runtimeServices1.transport.tokens.deleteToken({ tokenId: token.id });
+            expect(deleteTokenResponse).toBeSuccessful();
+
+            const getTokenResponse = await runtimeServices1.transport.tokens.getToken({ id: token.id });
+            expect(getTokenResponse).toBeAnError("Token not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
         });
     });
 });
