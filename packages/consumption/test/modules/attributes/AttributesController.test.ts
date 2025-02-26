@@ -3252,6 +3252,7 @@ describe("AttributesController", function () {
 
     describe("validate tags", function () {
         let mockedAttributesController: AttributesController;
+        /* eslint-disable @typescript-eslint/naming-convention */
         const mockedTagCollection = {
             supportedLanguages: ["de", "en"],
             tagsForAttributeValueTypes: {
@@ -3285,6 +3286,7 @@ describe("AttributesController", function () {
                 }
             }
         };
+        /* eslint-enable @typescript-eslint/naming-convention */
 
         beforeAll(function () {
             mockedAttributesController = spy(consumptionController.attributes);
