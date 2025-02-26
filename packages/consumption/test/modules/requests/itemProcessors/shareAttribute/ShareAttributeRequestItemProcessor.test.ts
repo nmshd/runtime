@@ -1040,7 +1040,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
     });
 
     describe("canAccept", function () {
-        test("returns an success when sharing a valid attribute", async function () {
+        test("returns a success when sharing a valid attribute", async function () {
             const existingAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: testAccount.identity.address,
