@@ -243,7 +243,7 @@ export class AttributesController extends ConsumptionBaseController {
             throw ConsumptionCoreErrors.attributes.wrongOwnerOfRepositoryAttribute();
         }
 
-        params.content.value = this.trimAttributeValue(params.content.value);
+        this.trimAttributeValue(params.content.value);
         const parsedParams = CreateRepositoryAttributeParams.from(params);
         let localAttribute = LocalAttribute.from({
             id: parsedParams.id ?? (await ConsumptionIds.attribute.generate()),
@@ -405,7 +405,7 @@ export class AttributesController extends ConsumptionBaseController {
         successorParams: IAttributeSuccessorParams | AttributeSuccessorParamsJSON,
         validate = true
     ): Promise<{ predecessor: LocalAttribute; successor: LocalAttribute }> {
-        successorParams.content.value = this.trimAttributeValue(successorParams.content.value as AttributeValues.Identity.Json | AttributeValues.Identity.Interface);
+        this.trimAttributeValue(successorParams.content.value as AttributeValues.Identity.Json | AttributeValues.Identity.Interface);
         const parsedSuccessorParams = AttributeSuccessorParams.from(successorParams);
 
         if (validate) {
@@ -1332,9 +1332,10 @@ export class AttributesController extends ConsumptionBaseController {
         });
     }
 
-    private trimAttributeValue(value: AttributeValues.Identity.Json | AttributeValues.Identity.Interface): AttributeValues.Identity.Json | AttributeValues.Identity.Interface {
-        const entries = Object.entries(value).map((entry) => (typeof entry[1] === "string" ? [entry[0], entry[1].trim()] : entry));
-        return Object.fromEntries(entries);
+    private trimAttributeValue(value: AttributeValues.Identity.Json | AttributeValues.Identity.Interface): void {
+        Object.entries(value)
+            .filter((entry) => typeof entry[1] === "string")
+            .forEach((entry) => Object.assign(value, { [entry[0]]: entry[1].trim() }));
     }
 
     public async getAttributeTagCollection(): Promise<AttributeTagCollection> {
