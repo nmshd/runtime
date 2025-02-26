@@ -422,7 +422,7 @@ describe("TokenController", function () {
             expect(localToken).toBeUndefined();
         });
 
-        test("should delete a not owned token only locally", async function () {
+        test("should delete a peer owned token only locally", async function () {
             await recipient.tokens.delete(receivedToken);
             const tokenOnBackbone = await sender.tokens.fetchCaches([sentToken.id]);
             expect(tokenOnBackbone).toHaveLength(1);

@@ -269,7 +269,7 @@ describe("RelationshipTemplateController", function () {
             expect(localTemplate).toBeUndefined();
         });
 
-        test("should delete a not owned relationshipTemplate only locally", async function () {
+        test("should delete a peer owned relationshipTemplate only locally", async function () {
             await recipient.relationshipTemplates.deleteRelationshipTemplate(peerTemplate);
             const templateOnBackbone = await sender.relationshipTemplates.fetchCaches([ownTemplate.id]);
             expect(templateOnBackbone).toHaveLength(1);

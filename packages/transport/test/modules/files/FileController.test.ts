@@ -145,7 +145,7 @@ describe("FileController", function () {
             expect(localFile).toBeUndefined();
         });
 
-        test("should delete a not owned file only locally", async function () {
+        test("should delete a peer owned file only locally", async function () {
             await recipient.files.deleteFile(receivedFile);
             const fileOnBackbone = await sender.files.fetchCaches([sentFile.id]);
             expect(fileOnBackbone).toHaveLength(1);
