@@ -160,7 +160,7 @@ export class SecretController extends TransportController {
 
     private async decryptSecret(secret: SecretContainerCipher): Promise<SecretContainerPlain> {
         const baseKey = await this.getBaseKey();
-        const decryptionKey = await CoreCrypto.deriveKeyFromBase(baseKey, secret.nonce ? secret.nonce : 0, SecretController.secretContext);
+        const decryptionKey = await CoreCrypto.deriveKeyFromBase(baseKey, secret.nonce ?? 0, SecretController.secretContext);
         const plainBuffer = await CoreCrypto.decrypt(secret.cipher, decryptionKey);
         const plainString = plainBuffer.toUtf8();
         const decryptedSecret = Serializable.deserializeUnknown(plainString);
