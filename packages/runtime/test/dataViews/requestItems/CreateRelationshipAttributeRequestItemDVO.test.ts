@@ -87,10 +87,9 @@ beforeAll(async () => {
 afterAll(() => serviceProvider.stop());
 
 beforeEach(async () => {
-    await cleanupAttributes([sRuntimeServices, rRuntimeServices]);
-
-    sEventBus.reset();
     rEventBus.reset();
+    sEventBus.reset();
+    await cleanupAttributes([sRuntimeServices, rRuntimeServices]);
 });
 
 describe("CreateRelationshipAttributeRequestItemDVO", () => {
