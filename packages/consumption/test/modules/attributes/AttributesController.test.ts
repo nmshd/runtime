@@ -3136,6 +3136,18 @@ describe("AttributesController", function () {
             }
         });
 
+        test("should return all shared versions that match query", async function () {
+            const query = { "content.value.value": "US" };
+            const ownSharedAttributeVersionsWithValueMathingQuery = [ownSharedIdentityAttributeV1PeerA, ownSharedIdentityAttributeV1PeerB];
+
+            const allRepositoryAttributeVersions = [repositoryAttributeV0, repositoryAttributeV1, repositoryAttributeV2];
+            for (const repositoryAttributeVersion of allRepositoryAttributeVersions) {
+                const result = await consumptionController.attributes.getSharedVersionsOfAttribute(repositoryAttributeVersion.id, undefined, false, query);
+                expect(result).toHaveLength(2);
+                expect(result).toStrictEqual(expect.arrayContaining(ownSharedAttributeVersionsWithValueMathingQuery));
+            }
+        });
+
         test("should return all shared versions for a single peer", async function () {
             const allRepositoryAttributeVersions = [repositoryAttributeV0, repositoryAttributeV1, repositoryAttributeV2];
             const allOwnSharedAttributeVersionsPeerB = [ownSharedIdentityAttributeV2PeerB, ownSharedIdentityAttributeV1PeerB];
