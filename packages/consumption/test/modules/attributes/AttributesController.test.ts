@@ -188,7 +188,7 @@ describe("AttributesController", function () {
                     houseNo: " aHouseNo\u00a0",
                     zipCode: "  aZipCode\u2028",
                     city: " aCity  ",
-                    country: "  DE "
+                    country: "DE"
                 },
                 validTo: CoreDate.utc(),
                 owner: consumptionController.accountController.identity.address
@@ -201,11 +201,11 @@ describe("AttributesController", function () {
             expect(address).toBeInstanceOf(LocalAttribute);
             expect(address.content).toBeInstanceOf(IdentityAttribute);
             expect((address.content.value as StreetAddress).recipient).toBe("aRecipient");
-            expect((address.content.value as StreetAddress).street).toBe("aStreet");
-            expect((address.content.value as StreetAddress).houseNo).toBe("aHouseNo");
-            expect((address.content.value as StreetAddress).zipCode).toBe("aZipCode");
-            expect((address.content.value as StreetAddress).city).toBe("aCity");
-            expect((address.content.value as StreetAddress).country).toBe("DE");
+            expect((address.content.value as StreetAddress).street.value).toBe("aStreet");
+            expect((address.content.value as StreetAddress).houseNo.value).toBe("aHouseNo");
+            expect((address.content.value as StreetAddress).zipCode.value).toBe("aZipCode");
+            expect((address.content.value as StreetAddress).city.value).toBe("aCity");
+            expect((address.content.value as StreetAddress).country.value).toBe("DE");
 
             const childAttributes = await consumptionController.attributes.getLocalAttributes({
                 parentId: address.id.toString()
@@ -1836,8 +1836,8 @@ describe("AttributesController", function () {
                 const predecessor = await consumptionController.attributes.createRepositoryAttribute({
                     content: IdentityAttribute.from({
                         value: {
-                            "@type": "Nationality",
-                            value: "DE"
+                            "@type": "GivenName",
+                            value: "    aGivenName  "
                         },
                         owner: consumptionController.accountController.identity.address
                     })
@@ -1845,8 +1845,8 @@ describe("AttributesController", function () {
                 const successorParams: IAttributeSuccessorParams = {
                     content: IdentityAttribute.from({
                         value: {
-                            "@type": "Nationality",
-                            value: "  US  "
+                            "@type": "GivenName",
+                            value: "    anotherGivenName    "
                         },
                         owner: consumptionController.accountController.identity.address
                     })
@@ -1854,7 +1854,7 @@ describe("AttributesController", function () {
 
                 const { predecessor: _updatedPredecessor, successor } = await consumptionController.attributes.succeedRepositoryAttribute(predecessor.id, successorParams);
                 expect(successor).toBeDefined();
-                expect((successor.content.value.toJSON() as any).value).toBe("US");
+                expect((successor.content.value.toJSON() as any).value).toBe("anotherGivenName");
             });
 
             test("should succeed a repository attribute updating tags but not the value", async function () {
@@ -2112,7 +2112,7 @@ describe("AttributesController", function () {
                 });
 
                 test("should trim whitespace when succeeding a complex repository attribute", async function () {
-                    const version1ChildValues = ["  aNewStreet  ", "  aNewHouseNo ", "    aNewZipCode ", "    aNewCity    ", "    DE  "];
+                    const version1ChildValues = ["  aNewStreet  ", "  aNewHouseNo ", "    aNewZipCode ", "    aNewCity    ", "DE"];
 
                     const repoVersion1Params = {
                         content: IdentityAttribute.from({
