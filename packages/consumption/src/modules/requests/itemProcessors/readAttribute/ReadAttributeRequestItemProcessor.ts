@@ -199,20 +199,6 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 );
             }
 
-            // if (requestItem.query instanceof IdentityAttributeQuery || requestItem.query instanceof IQLQuery) {
-            //     const existingRepositoryAttribute = await this.consumptionController.attributes.getRepositoryAttributeWithSameValue(
-            //         (parsedParams.newAttribute.value as any).toJSON()
-            //     );
-
-            //     if (existingRepositoryAttribute) {
-            //         return ValidationResult.error(
-            //             ConsumptionCoreErrors.requests.invalidAcceptParameters(
-            //                 `The new Attribute cannot be created because it has the same content.value as the already existing RepositoryAttribute with id '${existingRepositoryAttribute.id.toString()}'.`
-            //             )
-            //         );
-            //     }
-            // }
-
             attribute = parsedParams.newAttribute;
 
             const ownerIsEmptyString = attribute.owner.equals("");
