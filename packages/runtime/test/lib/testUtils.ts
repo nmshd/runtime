@@ -909,8 +909,6 @@ export async function cleanupAttributes(services: TestRuntimeServices[], onlySha
     const query = onlyShared ? { "shareInfo.sourceAttribute": "" } : {};
     await Promise.all(
         services.map(async (services) => {
-            await services.eventBus.waitForRunningEventHandlers();
-
             const servicesAttributeController = services.consumption.attributes["getAttributeUseCase"]["attributeController"];
 
             const servicesAttributesResult = await services.consumption.attributes.getAttributes({ query });
