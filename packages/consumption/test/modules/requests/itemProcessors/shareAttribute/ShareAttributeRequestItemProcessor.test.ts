@@ -1123,7 +1123,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             );
 
             expect(canAcceptWithExistingAttributeResult).errorValidationResult({
-                code: "error.consumption.attributes.invalidTag"
+                code: "error.consumption.requests.invalidRequestItem"
             });
         });
     });

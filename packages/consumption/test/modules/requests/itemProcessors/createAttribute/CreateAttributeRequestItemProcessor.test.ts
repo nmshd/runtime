@@ -313,7 +313,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             });
         });
 
-        test("cannot accept because the attribute has invalid tags", async function () {
+        test("cannot accept because the attribute has an invalid tag", async function () {
             await Given.aRequestItemWithAnIdentityAttribute({
                 tags: ["tag1"],
                 attributeOwner: TestIdentity.CURRENT_IDENTITY
@@ -322,8 +322,22 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await When.iCallCanAccept();
 
             await Then.theCanAcceptResultShouldBeAnErrorWith({
-                code: "error.consumption.attributes.invalidTag",
-                message: "The tag(s) 'tag1' is/are invalid."
+                code: "error.consumption.requests.invalidRequestItem",
+                message: /The provided IdentityAttribute is invalid: The tag\(s\) 'tag1' is\/are invalid\./
+            });
+        });
+
+        test("cannot accept because the attribute has invalid tags", async function () {
+            await Given.aRequestItemWithAnIdentityAttribute({
+                tags: ["tag1", "tag2"],
+                attributeOwner: TestIdentity.CURRENT_IDENTITY
+            });
+
+            await When.iCallCanAccept();
+
+            await Then.theCanAcceptResultShouldBeAnErrorWith({
+                code: "error.consumption.requests.invalidRequestItem",
+                message: /The provided IdentityAttribute is invalid: The tag\(s\) 'tag1', 'tag2' is\/are invalid\./
             });
         });
     });

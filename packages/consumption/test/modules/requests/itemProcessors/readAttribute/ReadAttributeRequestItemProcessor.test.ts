@@ -590,7 +590,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             );
 
             expect(canAcceptWithExistingAttributeResult).errorValidationResult({
-                code: "error.consumption.attributes.invalidTag"
+                code: "error.consumption.requests.invalidAcceptParameters"
             });
 
             const canAcceptWithNewAttributeResult = await processor.canAccept(
@@ -607,7 +607,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             );
 
             expect(canAcceptWithNewAttributeResult).errorValidationResult({
-                code: "error.consumption.attributes.invalidTag"
+                code: "error.consumption.requests.invalidAcceptParameters"
             });
         });
 
