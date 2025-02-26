@@ -10863,6 +10863,25 @@ export const CreateOutgoingRequestRequest: any = {
     }
 }
 
+export const DeleteIncomingRequestRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/DeleteIncomingRequestRequest",
+    "definitions": {
+        "DeleteIncomingRequestRequest": {
+            "type": "object",
+            "properties": {
+                "requestId": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "requestId"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
 export const DiscardOutgoingRequestRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/DiscardOutgoingRequestRequest",
