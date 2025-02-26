@@ -87,6 +87,8 @@ beforeAll(async () => {
 afterAll(() => serviceProvider.stop());
 
 beforeEach(async () => {
+    await Promise.all([sEventBus.waitForRunningEventHandlers(), rEventBus.waitForRunningEventHandlers()]);
+
     rEventBus.reset();
     sEventBus.reset();
     await cleanupAttributes([sRuntimeServices, rRuntimeServices]);
