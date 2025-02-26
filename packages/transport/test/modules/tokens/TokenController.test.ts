@@ -432,8 +432,8 @@ describe("TokenController", function () {
         });
 
         test("should delete a token during decomposition", async function () {
-            await sender.tokens.cleanupTokensOfDecomposedRelationship(recipient.identity.address);
-            const token = await sender.tokens.getToken(sentToken.id);
+            await recipient.tokens.cleanupTokensOfDecomposedRelationship(sender.identity.address);
+            const token = await recipient.tokens.getToken(sentToken.id);
             expect(token).toBeUndefined();
         });
     });
