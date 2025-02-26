@@ -323,7 +323,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
 
             await Then.theCanAcceptResultShouldBeAnErrorWith({
                 code: "error.consumption.attributes.invalidTag",
-                message: "The tag 'tag1' is invalid."
+                message: "The tag(s) 'tag1' is/are invalid."
             });
         });
     });

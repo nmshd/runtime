@@ -839,7 +839,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             reset(attributesControllerSpy);
 
             const sender = CoreAddress.from("Sender");
-            const identityAttribute = TestObjectFactory.createIdentityAttribute({
+            const newAttribute = TestObjectFactory.createIdentityAttribute({
                 tags: ["tag1"],
                 owner: accountController.identity.address
             });
@@ -847,7 +847,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const proposeAttributeRequestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
-                attribute: identityAttribute
+                attribute: newAttribute
             });
 
             const requestId = await ConsumptionIds.request.generate();
@@ -868,7 +868,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 proposeAttributeRequestItem,
                 {
                     accept: true,
-                    attribute: identityAttribute.toJSON()
+                    attribute: newAttribute.toJSON()
                 },
                 request
             );

@@ -3252,7 +3252,6 @@ describe("AttributesController", function () {
 
     describe("validate tags", function () {
         let mockedAttributesController: AttributesController;
-        /* eslint-disable @typescript-eslint/naming-convention */
         const mockedTagCollection = {
             supportedLanguages: ["de", "en"],
             tagsForAttributeValueTypes: {
@@ -3286,7 +3285,6 @@ describe("AttributesController", function () {
                 }
             }
         };
-        /* eslint-enable @typescript-eslint/naming-convention */
 
         beforeAll(function () {
             mockedAttributesController = spy(consumptionController.attributes);
@@ -3296,18 +3294,18 @@ describe("AttributesController", function () {
             reset(mockedAttributesController);
         });
         test("should validate valid tags", async function () {
-            expect(await consumptionController.attributes.validateTag("private", "PhoneNumber")).toBe(true);
-            expect(await consumptionController.attributes.validateTag("emergency+%+first", "PhoneNumber")).toBe(true);
-            expect(await consumptionController.attributes.validateTag("emergency+%+second", "PhoneNumber")).toBe(true);
-            expect(await consumptionController.attributes.validateTag("x+%+my+%+custom+%+tag", "PhoneNumber")).toBe(true);
-            expect(await consumptionController.attributes.validateTag("X+%+my+%+custom+%+tag", "PhoneNumber")).toBe(true);
+            expect(await consumptionController.attributes["validateTag"]("private", "PhoneNumber")).toBe(true);
+            expect(await consumptionController.attributes["validateTag"]("emergency+%+first", "PhoneNumber")).toBe(true);
+            expect(await consumptionController.attributes["validateTag"]("emergency+%+second", "PhoneNumber")).toBe(true);
+            expect(await consumptionController.attributes["validateTag"]("x+%+my+%+custom+%+tag", "PhoneNumber")).toBe(true);
+            expect(await consumptionController.attributes["validateTag"]("X+%+my+%+custom+%+tag", "PhoneNumber")).toBe(true);
         });
 
         test("should validate invalid tags", async function () {
-            expect(await consumptionController.attributes.validateTag("privates", "PhoneNumber")).toBe(false);
-            expect(await consumptionController.attributes.validateTag("emergency", "PhoneNumber")).toBe(false);
-            expect(await consumptionController.attributes.validateTag("emergency+%+nonexisting", "PhoneNumber")).toBe(false);
-            expect(await consumptionController.attributes.validateTag("emergency+%+first+%+nonexisting", "PhoneNumber")).toBe(false);
+            expect(await consumptionController.attributes["validateTag"]("privates", "PhoneNumber")).toBe(false);
+            expect(await consumptionController.attributes["validateTag"]("emergency", "PhoneNumber")).toBe(false);
+            expect(await consumptionController.attributes["validateTag"]("emergency+%+nonexistent", "PhoneNumber")).toBe(false);
+            expect(await consumptionController.attributes["validateTag"]("emergency+%+first+%+nonexistent", "PhoneNumber")).toBe(false);
         });
     });
 });

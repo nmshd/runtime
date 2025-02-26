@@ -364,7 +364,7 @@ export class AttributesController extends ConsumptionBaseController {
 
     public async createSharedLocalAttribute(params: ICreateSharedLocalAttributeParams): Promise<LocalAttribute> {
         const parsedParams = CreateSharedLocalAttributeParams.from(params);
-        if ("tags" in parsedParams.content && parsedParams.content.tags) {
+        if (parsedParams.content instanceof IdentityAttribute && parsedParams.content.tags) {
             const tagValidationResult = await this.validateTags(parsedParams.content.tags, parsedParams.content.toJSON().value["@type"]);
             if (tagValidationResult.isError()) {
                 throw tagValidationResult.error;
@@ -960,7 +960,7 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successorIsNotAValidAttribute(e));
         }
 
-        if ("tags" in parsedSuccessorParams.content && parsedSuccessorParams.content.tags) {
+        if (parsedSuccessorParams.content instanceof IdentityAttribute && parsedSuccessorParams.content.tags) {
             const tagValidationResult = await this.validateTags(parsedSuccessorParams.content.tags, parsedSuccessorParams.content.toJSON().value["@type"]);
             if (tagValidationResult.isError()) {
                 throw tagValidationResult.error;
@@ -1366,16 +1366,13 @@ export class AttributesController extends ConsumptionBaseController {
             }
         }
         if (invalidTags.length > 0) {
-            if (invalidTags.length === 1) {
-                return ValidationResult.error(ConsumptionCoreErrors.attributes.invalidTag(invalidTags[0]));
-            }
             return ValidationResult.error(ConsumptionCoreErrors.attributes.invalidTags(invalidTags));
         }
 
         return ValidationResult.success();
     }
 
-    public async validateTag(tag: string, attributeValueType: string): Promise<boolean> {
+    private async validateTag(tag: string, attributeValueType: string): Promise<boolean> {
         if (tag.toLowerCase().startsWith("x+%+")) {
             return true;
         }

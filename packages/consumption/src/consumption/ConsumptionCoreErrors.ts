@@ -267,12 +267,8 @@ class Attributes {
         return new CoreError("error.consumption.attributes.setDefaultRepositoryAttributesIsDisabled", "Setting default RepositoryAttributes is disabled for this Account.");
     }
 
-    public invalidTag(tag: string): ApplicationError {
-        return new ApplicationError("error.consumption.attributes.invalidTag", `The tag '${tag}' is invalid.`);
-    }
-
     public invalidTags(tags: string[]): ApplicationError {
-        return new ApplicationError("error.consumption.attributes.invalidTags", `The tags '${tags.join(", ")}' is invalid.`);
+        return new ApplicationError("error.consumption.attributes.invalidTags", `The tag(s) '${tags.join("', '")}' is/are invalid.`);
     }
 }
 
