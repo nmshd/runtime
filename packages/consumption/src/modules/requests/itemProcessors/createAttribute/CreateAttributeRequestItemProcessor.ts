@@ -128,6 +128,8 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
         const latestSharedVersions = await this.consumptionController.attributes.getSharedVersionsOfAttribute(repositoryAttribute.id, [requestInfo.peer]);
         const latestSharedVersion = latestSharedVersions.length > 0 ? latestSharedVersions[0] : undefined;
 
+        // TODO: check if deleted by peer (not owner)
+
         if (!latestSharedVersion) {
             const newOwnSharedIdentityAttribute = await this.consumptionController.attributes.createSharedLocalAttributeCopy({
                 peer: requestInfo.peer,
