@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
 import { CoreId } from "@nmshd/core-types";
-import { Token, TokenController } from "@nmshd/transport";
+import { AccountController, Token, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { RuntimeErrors, SchemaRepository, SchemaValidator, TokenIdString, UseCase } from "../../common";
 
@@ -17,6 +17,7 @@ class Validator extends SchemaValidator<DeleteTokenRequest> {
 export class DeleteTokenUseCase extends UseCase<DeleteTokenRequest, void> {
     public constructor(
         @Inject private readonly tokenController: TokenController,
+        @Inject private readonly accountController: AccountController,
         @Inject validator: Validator
     ) {
         super(validator);
@@ -29,6 +30,7 @@ export class DeleteTokenUseCase extends UseCase<DeleteTokenRequest, void> {
         }
 
         await this.tokenController.delete(token);
+        await this.accountController.syncDatawallet();
 
         return Result.ok(undefined);
     }

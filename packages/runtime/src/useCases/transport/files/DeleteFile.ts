@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
 import { CoreId } from "@nmshd/core-types";
-import { File, FileController } from "@nmshd/transport";
+import { AccountController, File, FileController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { FileIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
@@ -17,6 +17,7 @@ class Validator extends SchemaValidator<DeleteFileRequest> {
 export class DeleteFileUseCase extends UseCase<DeleteFileRequest, void> {
     public constructor(
         @Inject private readonly fileController: FileController,
+        @Inject private readonly accountController: AccountController,
         @Inject validator: Validator
     ) {
         super(validator);
@@ -29,6 +30,7 @@ export class DeleteFileUseCase extends UseCase<DeleteFileRequest, void> {
         }
 
         await this.fileController.deleteFile(file);
+        await this.accountController.syncDatawallet();
 
         return Result.ok(undefined);
     }
