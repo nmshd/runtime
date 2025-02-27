@@ -9,13 +9,14 @@ import {
     RelationshipAttribute,
     ResponseItemResult
 } from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId, ICoreDate, ICoreId } from "@nmshd/core-types";
 import { AccountController, Transport } from "@nmshd/transport";
 import {
     ConsumptionController,
     ConsumptionIds,
     CreateAttributeRequestItemProcessor,
     IAttributeSuccessorParams,
+    ILocalAttribute,
     LocalAttribute,
     LocalAttributeDeletionInfo,
     LocalAttributeDeletionStatus,
@@ -186,6 +187,11 @@ export class GivenSteps {
             content: TestObjectFactory.createIdentityAttribute({ owner: this.context.translateTestIdentity(params.peer) })
         });
         return createdPeerSharedIdentityAttribute;
+    }
+
+    public async anAttribute(attributeData: Omit<ILocalAttribute, "id" | "createdAt"> & { id?: ICoreId; createdAt?: ICoreDate }): Promise<LocalAttribute> {
+        const createdAttribute = await this.context.consumptionController.attributes.createAttributeUnsafe(attributeData);
+        return createdAttribute;
     }
 }
 

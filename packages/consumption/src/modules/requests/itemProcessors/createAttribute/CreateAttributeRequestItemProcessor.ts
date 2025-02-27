@@ -126,12 +126,7 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
 
         const query = {
             "deletionInfo.deletionStatus": {
-                $nin: [
-                    LocalAttributeDeletionStatus.DeletedByPeer,
-                    LocalAttributeDeletionStatus.DeletedByOwner,
-                    LocalAttributeDeletionStatus.ToBeDeletedByPeer,
-                    LocalAttributeDeletionStatus.ToBeDeleted
-                ]
+                $nin: [LocalAttributeDeletionStatus.DeletedByPeer, LocalAttributeDeletionStatus.ToBeDeletedByPeer]
             }
         };
         const latestSharedVersions = await this.consumptionController.attributes.getSharedVersionsOfAttribute(repositoryAttribute.id, [requestInfo.peer], true, query);

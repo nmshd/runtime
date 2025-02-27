@@ -1,7 +1,8 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { GivenName, ProprietaryInteger, ProprietaryString } from "@nmshd/content";
-import { CoreAddress } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { Transport } from "@nmshd/transport";
+import { LocalAttributeDeletionStatus } from "../../../../../src";
 import { TestUtil } from "../../../../core/TestUtil";
 import { TestObjectFactory } from "../../testHelpers/TestObjectFactory";
 import { Context, GivenSteps, ThenSteps, WhenSteps } from "./Context";
@@ -356,6 +357,34 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await When.iCallAccept();
             await Then.theResponseItemShouldBeOfType("AttributeAlreadySharedAcceptResponseItem");
             await Then.theIdOfTheAlreadySharedAttributeMatches(ownSharedIdentityAttribute.id);
+        });
+
+        test("in case of an IdentityAttribute that already exists as own shared IdentityAttribute but is deleted by peer: creates a new own shared IdentityAttribute", async function () {
+            const repositoryAttribute = await Given.aRepositoryAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, value: GivenName.from("aForthGivenName") });
+            await Given.anAttribute({
+                content: repositoryAttribute.content,
+                shareInfo: { sourceAttribute: repositoryAttribute.id, peer: TestIdentity.PEER, requestReference: CoreId.from("reqRef") },
+                deletionInfo: { deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer, deletionDate: CoreDate.utc().subtract({ days: 1 }) }
+            });
+            await Given.aRequestItemWithAnIdentityAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, value: GivenName.from("anotherGivenName") });
+            await When.iCallAccept();
+            await Then.theResponseItemShouldBeOfType("CreateAttributeAcceptResponseItem");
+            await Then.aRepositoryAttributeIsCreated();
+            await Then.anOwnSharedIdentityAttributeIsCreated();
+        });
+
+        test("in case of an IdentityAttribute that already exists as own shared IdentityAttribute but is deleted by peer: creates a new own shared IdentityAttribute", async function () {
+            const repositoryAttribute = await Given.aRepositoryAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, value: GivenName.from("aForthGivenName") });
+            await Given.anAttribute({
+                content: repositoryAttribute.content,
+                shareInfo: { sourceAttribute: repositoryAttribute.id, peer: TestIdentity.PEER, requestReference: CoreId.from("reqRef") },
+                deletionInfo: { deletionStatus: LocalAttributeDeletionStatus.ToBeDeletedByPeer, deletionDate: CoreDate.utc().subtract({ days: 1 }) }
+            });
+            await Given.aRequestItemWithAnIdentityAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, value: GivenName.from("anotherFGivenName") });
+            await When.iCallAccept();
+            await Then.theResponseItemShouldBeOfType("CreateAttributeAcceptResponseItem");
+            await Then.aRepositoryAttributeIsCreated();
+            await Then.anOwnSharedIdentityAttributeIsCreated();
         });
 
         test("in case of an IdentityAttribute that already exists as own shared IdentityAttribute with different tags: returns an AttributeSuccessionAcceptResponseItem", async function () {
