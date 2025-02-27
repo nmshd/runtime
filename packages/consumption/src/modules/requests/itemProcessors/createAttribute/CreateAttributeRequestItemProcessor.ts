@@ -11,7 +11,7 @@ import {
 } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { AttributeSuccessorParams, LocalAttribute, LocalAttributeShareInfo, PeerSharedAttributeSucceededEvent } from "../../../attributes";
+import { AttributeSuccessorParams, LocalAttribute, LocalAttributeDeletionStatus, LocalAttributeShareInfo, PeerSharedAttributeSucceededEvent } from "../../../attributes";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
@@ -124,7 +124,17 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
 
         const repositoryAttribute = await this.getSourceRepositoryAttribute(requestItem.attribute);
 
-        const latestSharedVersions = await this.consumptionController.attributes.getSharedVersionsOfAttribute(repositoryAttribute.id, [requestInfo.peer]);
+        const query = {
+            "deletionInfo.deletionStatus": {
+                $nin: [
+                    LocalAttributeDeletionStatus.DeletedByPeer,
+                    LocalAttributeDeletionStatus.DeletedByOwner,
+                    LocalAttributeDeletionStatus.ToBeDeletedByPeer,
+                    LocalAttributeDeletionStatus.ToBeDeleted
+                ]
+            }
+        };
+        const latestSharedVersions = await this.consumptionController.attributes.getSharedVersionsOfAttribute(repositoryAttribute.id, [requestInfo.peer], true, query);
         const latestSharedVersion = latestSharedVersions.length > 0 ? latestSharedVersions[0] : undefined;
 
         if (!latestSharedVersion) {
