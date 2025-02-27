@@ -2113,6 +2113,7 @@ describe("AttributesController", function () {
 
                 test("should trim whitespace when succeeding a complex repository attribute", async function () {
                     const version1ChildValues = ["  aNewStreet  ", "  aNewHouseNo ", "    aNewZipCode ", "    aNewCity    ", "DE"];
+                    const trimmedVersion1ChildValues = version1ChildValues.map((value) => value.trim());
 
                     const repoVersion1Params = {
                         content: IdentityAttribute.from({
@@ -2140,7 +2141,7 @@ describe("AttributesController", function () {
                     expect(repoVersion1ChildAttributes).toHaveLength(numberOfChildAttributes);
 
                     for (let i = 0; i < numberOfChildAttributes; i++) {
-                        expect(repoVersion1ChildAttributes[i].content.value.toString()).toStrictEqual(version1ChildValues[i]);
+                        expect(repoVersion1ChildAttributes[i].content.value.toString()).toStrictEqual(trimmedVersion1ChildValues[i]);
                     }
                 });
 
