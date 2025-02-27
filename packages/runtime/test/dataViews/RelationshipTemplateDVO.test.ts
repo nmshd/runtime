@@ -167,7 +167,7 @@ describe("RelationshipTemplateDVO", () => {
         expect(dvo.date).toStrictEqual(dto.createdAt);
         expect(dvo.expiresAt).toStrictEqual(dto.expiresAt);
         expect(dvo.createdBy.id).toStrictEqual(dto.createdBy);
-        expect(dvo.name).toStrictEqual(dto.content.title ? dto.content.title : "i18n://dvo.template.outgoing.name");
+        expect(dvo.name).toStrictEqual(dto.content.title ?? "i18n://dvo.template.outgoing.name");
         expect(dvo.isOwn).toBe(true);
         expect(dvo.maxNumberOfAllocations).toBe(1);
         expect(dvo.forIdentity).toBe(requestor.address);
@@ -209,7 +209,7 @@ describe("RelationshipTemplateDVO", () => {
         expect(dvo.date).toStrictEqual(dto.createdAt);
         expect(dvo.expiresAt).toStrictEqual(dto.expiresAt);
         expect(dvo.createdBy.id).toStrictEqual(dto.createdBy);
-        expect(dvo.name).toStrictEqual(dto.content.title ? dto.content.title : "i18n://dvo.template.incoming.name");
+        expect(dvo.name).toStrictEqual(dto.content.title ?? "i18n://dvo.template.incoming.name");
         expect(dvo.isOwn).toBe(false);
         expect(dvo.maxNumberOfAllocations).toBe(1);
         expect(dvo.forIdentity).toBe(requestor.address);
@@ -320,7 +320,7 @@ describe("RelationshipTemplateDVO", () => {
         expect(dvo.date).toStrictEqual(dto.createdAt);
         expect(dvo.expiresAt).toStrictEqual(dto.expiresAt);
         expect(dvo.createdBy.id).toStrictEqual(dto.createdBy);
-        expect(dvo.name).toStrictEqual(dto.content.title ? dto.content.title : "i18n://dvo.template.incoming.name");
+        expect(dvo.name).toStrictEqual(dto.content.title ?? "i18n://dvo.template.incoming.name");
         expect(dvo.isOwn).toBe(false);
         expect(dvo.maxNumberOfAllocations).toBe(1);
 

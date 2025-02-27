@@ -113,7 +113,7 @@ export class DeliveryBoxAddress extends AbstractAddress implements IDeliveryBoxA
             value.push(this.state.toString());
         }
         const countryName = COUNTRIES_ALPHA2_TO_ENGLISH_NAME.get(this.country.value);
-        value.push(countryName ? countryName : this.country.toString());
+        value.push(countryName ?? this.country.toString());
 
         return value.join("\n");
     }
