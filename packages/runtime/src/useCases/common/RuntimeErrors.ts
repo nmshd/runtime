@@ -228,13 +228,6 @@ class Attributes {
         );
     }
 
-    public cannotSucceedAttributesWithDeletionInfo(ownSharedIdentityAttributeIds: CoreId[] | string[]): ApplicationError {
-        return new ApplicationError(
-            "error.runtime.attributes.cannotSucceedAttributesWithDeletionInfo",
-            `The own shared IdentityAttribute predecessor(s) ${ownSharedIdentityAttributeIds.map((ownSharedIdentityAttributeId) => `'${ownSharedIdentityAttributeId.toString()}'`).join(", ")} can't be succeeded, since they have a deletionInfo.`
-        );
-    }
-
     public isNotOwnSharedAttribute(attributeId: CoreId | string): ApplicationError {
         return new ApplicationError("error.runtime.attributes.isNotOwnSharedAttribute", `Attribute '${attributeId.toString()}' is not an own shared Attribute.`);
     }
@@ -254,6 +247,13 @@ class Attributes {
         return new ApplicationError(
             "error.runtime.attributes.hasSuccessor",
             `Attribute '${predecessor.id.toString()}' already has a successor ${predecessor.succeededBy?.toString()}.`
+        );
+    }
+
+    public cannotSucceedAttributesWithDeletionInfo(ownSharedIdentityAttributeIds: CoreId[] | string[]): ApplicationError {
+        return new ApplicationError(
+            "error.runtime.attributes.cannotSucceedAttributesWithDeletionInfo",
+            `The own shared IdentityAttribute predecessor(s) ${ownSharedIdentityAttributeIds.map((ownSharedIdentityAttributeId) => `'${ownSharedIdentityAttributeId.toString()}'`).join(", ")} can't be succeeded due to set deletionInfo.`
         );
     }
 
