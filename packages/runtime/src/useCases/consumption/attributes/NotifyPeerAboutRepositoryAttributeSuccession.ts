@@ -54,18 +54,11 @@ export class NotifyPeerAboutRepositoryAttributeSuccessionUseCase extends UseCase
             return Result.fail(RuntimeErrors.attributes.noPreviousVersionOfRepositoryAttributeHasBeenSharedWithPeerBefore(repositoryAttributeSuccessorId, request.peer));
         }
 
-        let ownSharedIdentityAttributePredecessor: LocalAttribute | undefined;
-        for (const candidatePredecessor of candidatePredecessors) {
-            if (
-                !(
-                    candidatePredecessor.deletionInfo?.deletionStatus === LocalAttributeDeletionStatus.DeletedByPeer ||
-                    candidatePredecessor.deletionInfo?.deletionStatus === LocalAttributeDeletionStatus.ToBeDeletedByPeer
-                )
-            ) {
-                ownSharedIdentityAttributePredecessor = candidatePredecessor;
-                break;
-            }
-        }
+        const ownSharedIdentityAttributePredecessor = candidatePredecessors.find(
+            (attribute) =>
+                attribute.deletionInfo?.deletionStatus !== LocalAttributeDeletionStatus.DeletedByPeer &&
+                attribute.deletionInfo?.deletionStatus !== LocalAttributeDeletionStatus.ToBeDeletedByPeer
+        );
 
         if (!ownSharedIdentityAttributePredecessor) {
             return Result.fail(RuntimeErrors.attributes.cannotSucceedAttributesWithDeletionInfo(candidatePredecessors.map((attribute) => attribute.id)));
