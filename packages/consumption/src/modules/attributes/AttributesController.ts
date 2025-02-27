@@ -1248,6 +1248,8 @@ export class AttributesController extends ConsumptionBaseController {
         const sourceAttribute = await this.getLocalAttribute(id);
         if (!sourceAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, id.toString());
 
+        if (!query) query = {};
+
         query["shareInfo.sourceAttribute"] = sourceAttribute.id.toString();
         if (peers) query["shareInfo.peer"] = { $in: peers.map((address) => address.toString()) };
         if (onlyLatestVersions) query["succeededBy"] = { $exists: false };
