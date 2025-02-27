@@ -243,8 +243,13 @@ export class AttributesController extends ConsumptionBaseController {
             throw ConsumptionCoreErrors.attributes.wrongOwnerOfRepositoryAttribute();
         }
 
-        this.trimAttributeValue(params.content.value);
         const parsedParams = CreateRepositoryAttributeParams.from(params);
+        const trimmedAttributeJSON = {
+            ...parsedParams.content.toJSON(),
+            value: this.trimAttributeValue(parsedParams.content.value.toJSON() as AttributeValues.Identity.Json)
+        };
+        parsedParams.content = IdentityAttribute.from(trimmedAttributeJSON);
+
         let localAttribute = LocalAttribute.from({
             id: parsedParams.id ?? (await ConsumptionIds.attribute.generate()),
             createdAt: CoreDate.utc(),
@@ -405,8 +410,12 @@ export class AttributesController extends ConsumptionBaseController {
         successorParams: IAttributeSuccessorParams | AttributeSuccessorParamsJSON,
         validate = true
     ): Promise<{ predecessor: LocalAttribute; successor: LocalAttribute }> {
-        this.trimAttributeValue(successorParams.content.value as AttributeValues.Identity.Json | AttributeValues.Identity.Interface);
         const parsedSuccessorParams = AttributeSuccessorParams.from(successorParams);
+        const trimmedAttributeJSON = {
+            ...parsedSuccessorParams.content.toJSON(),
+            value: this.trimAttributeValue(parsedSuccessorParams.content.value.toJSON() as AttributeValues.Identity.Json)
+        };
+        parsedSuccessorParams.content = IdentityAttribute.from(trimmedAttributeJSON);
 
         if (validate) {
             const validationResult = await this.validateRepositoryAttributeSuccession(predecessorId, parsedSuccessorParams);
@@ -1332,10 +1341,12 @@ export class AttributesController extends ConsumptionBaseController {
         });
     }
 
-    private trimAttributeValue(value: AttributeValues.Identity.Json | AttributeValues.Identity.Interface): void {
+    private trimAttributeValue(value: AttributeValues.Identity.Json): AttributeValues.Identity.Json {
         Object.entries(value)
             .filter((entry) => typeof entry[1] === "string")
             .forEach((entry) => Object.assign(value, { [entry[0]]: entry[1].trim() }));
+
+        return value;
     }
 
     public async getAttributeTagCollection(): Promise<AttributeTagCollection> {
