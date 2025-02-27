@@ -3304,8 +3304,9 @@ describe("AttributesController", function () {
         });
 
         test("should validate invalid tags", async function () {
-            expect(await consumptionController.attributes["validateTag"]("privates", "PhoneNumber")).toBe(false);
+            expect(await consumptionController.attributes["validateTag"]("nonexistent", "PhoneNumber")).toBe(false);
             expect(await consumptionController.attributes["validateTag"]("emergency", "PhoneNumber")).toBe(false);
+            expect(await consumptionController.attributes["validateTag"]("private", "nonexistent")).toBe(false);
             expect(await consumptionController.attributes["validateTag"]("emergency+%+nonexistent", "PhoneNumber")).toBe(false);
             expect(await consumptionController.attributes["validateTag"]("emergency+%+first+%+nonexistent", "PhoneNumber")).toBe(false);
         });

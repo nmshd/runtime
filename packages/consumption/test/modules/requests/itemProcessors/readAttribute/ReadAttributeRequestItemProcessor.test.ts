@@ -590,7 +590,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
             );
 
             expect(canAcceptWithExistingAttributeResult).errorValidationResult({
-                code: "error.consumption.requests.invalidAcceptParameters"
+                code: "error.consumption.requests.invalidAcceptParameters",
+                message: /The provided IdentityAttribute is invalid: The tag\(s\) 'tag1' is\/are invalid./
             });
 
             const canAcceptWithNewAttributeResult = await processor.canAccept(
@@ -607,7 +608,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
             );
 
             expect(canAcceptWithNewAttributeResult).errorValidationResult({
-                code: "error.consumption.requests.invalidAcceptParameters"
+                code: "error.consumption.requests.invalidAcceptParameters",
+                message: /The provided IdentityAttribute is invalid: The tag\(s\) 'tag1' is\/are invalid./
             });
         });
 
