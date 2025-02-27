@@ -3,6 +3,7 @@ import {
     CityJSON,
     CountryJSON,
     DeleteAttributeRequestItem,
+    GivenNameJSON,
     HouseNumberJSON,
     ReadAttributeRequestItem,
     ReadAttributeRequestItemJSON,
@@ -956,7 +957,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
         const result = await services1.consumption.attributes.createRepositoryAttribute(request);
         expect(result).toBeSuccessful();
         const attribute = result.value;
-        expect(attribute.content.value).toBe("aGivenName");
+        expect((attribute.content.value as GivenNameJSON).value).toBe("aGivenName");
         await services1.eventBus.waitForEvent(AttributeCreatedEvent, (e) => e.data.id === attribute.id);
     });
 
