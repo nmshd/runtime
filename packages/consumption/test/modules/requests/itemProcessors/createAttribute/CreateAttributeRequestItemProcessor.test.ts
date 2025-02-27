@@ -375,7 +375,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await Then.anOwnSharedIdentityAttributeIsCreated();
         });
 
-        test("in case of an IdentityAttribute that already exists as own shared IdentityAttribute but is deleted by peer: creates a new own shared IdentityAttribute", async function () {
+        test("in case of an IdentityAttribute that already exists as own shared IdentityAttribute but is to be deleted by peer: creates a new own shared IdentityAttribute", async function () {
             const repositoryAttribute = await Given.aRepositoryAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, value: GivenName.from("aForthGivenName") });
             await Given.anAttribute({
                 content: repositoryAttribute.content,
