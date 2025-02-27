@@ -1735,7 +1735,7 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
             attributeId: repositoryAttributeVersion2.id,
             peer: services2.address
         });
-        expect(notificationResult).toBeAnError(/.*/, "error.consumption.attributes.cannotSucceedAttributesWithDeletionInfo");
+        expect(notificationResult).toBeAnError(/.*/, "error.runtime.attributes.cannotSucceedAttributesWithDeletionInfo");
     });
 
     test("should throw if the same version of the attribute has been notified about already", async () => {
