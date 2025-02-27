@@ -955,6 +955,55 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             expect(createdRepositoryAttribute).toBeDefined();
         });
 
+        test("in case of accepting with a new IdentityAttribute, trim the newly created RepositoryAttribute as well as the copy for the Recipient", async function () {
+            const sender = CoreAddress.from("Sender");
+            const recipient = accountController.identity.address;
+
+            const requestItem = ProposeAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
+                attribute: TestObjectFactory.createIdentityAttribute()
+            });
+            const requestId = await ConsumptionIds.request.generate();
+            const incomingRequest = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const acceptParams: AcceptProposeAttributeRequestItemParametersWithNewAttributeJSON = {
+                accept: true,
+                attribute: {
+                    "@type": "IdentityAttribute",
+                    owner: recipient.toString(),
+                    value: {
+                        "@type": "GivenName",
+                        value: "    aGivenName  "
+                    }
+                }
+            };
+
+            const result = await processor.accept(requestItem, acceptParams, incomingRequest);
+            const createdSharedAttribute = await consumptionController.attributes.getLocalAttribute((result as ProposeAttributeAcceptResponseItem).attributeId);
+
+            expect(createdSharedAttribute).toBeDefined();
+            expect(createdSharedAttribute!.shareInfo).toBeDefined();
+            expect(createdSharedAttribute!.shareInfo!.peer.toString()).toStrictEqual(incomingRequest.peer.toString());
+            expect(createdSharedAttribute!.shareInfo!.sourceAttribute).toBeDefined();
+            expect(createdSharedAttribute!.content.value.toJSON()).toStrictEqual(GivenName.from({ value: "aGivenName" }).toJSON());
+
+            const createdRepositoryAttribute = await consumptionController.attributes.getLocalAttribute(createdSharedAttribute!.shareInfo!.sourceAttribute!);
+            expect(createdRepositoryAttribute).toBeDefined();
+            expect(createdRepositoryAttribute!.content.value.toJSON()).toStrictEqual(GivenName.from({ value: "aGivenName" }).toJSON());
+        });
+
         test("accept with new RelationshipAttribute", async function () {
             const sender = CoreAddress.from("Sender");
             const recipient = accountController.identity.address;
