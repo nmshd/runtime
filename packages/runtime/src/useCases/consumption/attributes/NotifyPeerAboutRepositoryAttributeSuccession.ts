@@ -59,8 +59,7 @@ export class NotifyPeerAboutRepositoryAttributeSuccessionUseCase extends UseCase
             if (
                 !(
                     candidatePredecessor.deletionInfo?.deletionStatus === LocalAttributeDeletionStatus.DeletedByPeer ||
-                    candidatePredecessor.deletionInfo?.deletionStatus === LocalAttributeDeletionStatus.ToBeDeletedByPeer ||
-                    candidatePredecessor.deletionInfo?.deletionStatus === LocalAttributeDeletionStatus.DeletionRequestSent
+                    candidatePredecessor.deletionInfo?.deletionStatus === LocalAttributeDeletionStatus.ToBeDeletedByPeer
                 )
             ) {
                 ownSharedIdentityAttributePredecessor = candidatePredecessor;
