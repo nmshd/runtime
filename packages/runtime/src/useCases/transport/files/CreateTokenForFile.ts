@@ -6,6 +6,10 @@ import { TokenDTO } from "../../../types";
 import { AddressString, FileIdString, ISO8601DateTimeString, RuntimeErrors, SchemaRepository, TokenAndTemplateCreationValidator, UseCase } from "../../common";
 import { TokenMapper } from "../tokens/TokenMapper";
 
+type Enumerate<N extends number, Acc extends number[] = []> = Acc["length"] extends N ? Acc[number] : Enumerate<N, [...Acc, Acc["length"]]>;
+
+type IntRange<F extends number, T extends number> = Exclude<Enumerate<T>, Enumerate<F>>;
+
 export interface CreateTokenForFileRequest {
     fileId: FileIdString;
     expiresAt?: ISO8601DateTimeString;
@@ -17,6 +21,7 @@ export interface CreateTokenForFileRequest {
          */
         password: string;
         passwordIsPin?: true;
+        passwordCreationType?: "email" | "sms" | IntRange<50, 99>;
     };
 }
 
