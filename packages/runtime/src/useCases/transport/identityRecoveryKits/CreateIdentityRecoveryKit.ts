@@ -47,7 +47,7 @@ export class CreateIdentityRecoveryKitUseCase extends UseCase<CreateIdentityReco
             content: TokenContentDeviceSharedSecret.from({ sharedSecret }),
             expiresAt: CoreDate.from("9999-12-31"),
             ephemeral: false,
-            passwordProtection: PasswordProtectionCreationParameters.create(request.passwordProtection)
+            passwordProtection: PasswordProtectionCreationParameters.create({ ...request.passwordProtection, passwordCreationType: 1 })
         });
 
         await this.accountController.syncDatawallet();

@@ -5,6 +5,7 @@ import { TransportCoreErrors } from "../TransportCoreErrors";
 export interface ISharedPasswordProtection extends ISerializable {
     passwordType: "pw" | `pin${number}`;
     salt: ICoreBuffer;
+    passwordCreationType?: number;
 }
 
 export class SharedPasswordProtection extends Serializable implements ISharedPasswordProtection {
@@ -15,6 +16,10 @@ export class SharedPasswordProtection extends Serializable implements ISharedPas
     @validate({ customValidator: (v: ICoreBuffer) => (v.buffer.byteLength === 16 ? undefined : "must be 16 bytes long") })
     @serialize()
     public salt: CoreBuffer;
+
+    @validate({ nullable: true })
+    @serialize()
+    public passwordCreationType?: number;
 
     public static from(value: ISharedPasswordProtection): SharedPasswordProtection {
         return this.fromAny(value);
@@ -38,6 +43,9 @@ export class SharedPasswordProtection extends Serializable implements ISharedPas
     }
 
     public truncate(): string {
-        return `${this.passwordType}&${this.salt.toBase64()}`;
+        const result = `${this.passwordType}&${this.salt.toBase64()}`;
+        if (!this.passwordCreationType) return result;
+
+        return `${result}&${this.passwordCreationType}`;
     }
 }
