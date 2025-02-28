@@ -1375,30 +1375,18 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     private isValidTag(tag: string, validTags: Record<string, IAttributeTag> | undefined): boolean {
-        if (tag.toLowerCase().startsWith("x+%+")) {
-            return true;
+        const tagSeparator = "+%+";
+        const customTagPrefix = `x${tagSeparator}`;
+
+        if (tag.toLowerCase().startsWith(customTagPrefix)) return true;
+
+        const tagParts = tag.split(tagSeparator);
+
+        for (const part of tagParts) {
+            if (!validTags?.[part]) return false;
+            validTags = validTags[part].children;
         }
 
-        const tagParts = tag.split("+%+");
-        let currentTagPart = tagParts.shift() ?? "";
-
-        do {
-            if (currentTagPart && !validTags) {
-                return false;
-            }
-
-            if (!validTags?.[currentTagPart]) {
-                return false;
-            }
-
-            validTags = validTags[currentTagPart].children;
-            currentTagPart = tagParts.shift() ?? "";
-        } while (currentTagPart);
-
-        if (validTags) {
-            return false;
-        }
-
-        return true;
+        return !validTags;
     }
 }
