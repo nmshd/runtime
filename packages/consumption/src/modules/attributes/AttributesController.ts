@@ -1359,12 +1359,14 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async validateTags(tags: string[], attributeValueType: string): Promise<ValidationResult> {
+        const tagCollection = await this.getAttributeTagCollection();
         const invalidTags = [];
         for (const tag of tags) {
-            if (!(await this.validateTag(tag, attributeValueType))) {
+            if (!this.isValidTag(tag, tagCollection.tagsForAttributeValueTypes[attributeValueType])) {
                 invalidTags.push(tag);
             }
         }
+
         if (invalidTags.length > 0) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.invalidTags(invalidTags));
         }
@@ -1372,31 +1374,28 @@ export class AttributesController extends ConsumptionBaseController {
         return ValidationResult.success();
     }
 
-    private async validateTag(tag: string, attributeValueType: string): Promise<boolean> {
+    private isValidTag(tag: string, validTags: Record<string, IAttributeTag> | undefined): boolean {
         if (tag.toLowerCase().startsWith("x+%+")) {
             return true;
         }
 
-        const tagCollection = await this.getAttributeTagCollection();
-        let tagLevel: Record<string, IAttributeTag> | undefined = tagCollection.tagsForAttributeValueTypes[attributeValueType];
-
         const tagParts = tag.split("+%+");
-        let tagPart = tagParts.shift() ?? "";
+        let currentTagPart = tagParts.shift() ?? "";
 
         do {
-            if (tagPart && !tagLevel) {
+            if (currentTagPart && !validTags) {
                 return false;
             }
 
-            if (!tagLevel?.[tagPart]) {
+            if (!validTags?.[currentTagPart]) {
                 return false;
             }
 
-            tagLevel = tagLevel[tagPart].children;
-            tagPart = tagParts.shift() ?? "";
-        } while (tagPart);
+            validTags = validTags[currentTagPart].children;
+            currentTagPart = tagParts.shift() ?? "";
+        } while (currentTagPart);
 
-        if (tagLevel) {
+        if (validTags) {
             return false;
         }
 

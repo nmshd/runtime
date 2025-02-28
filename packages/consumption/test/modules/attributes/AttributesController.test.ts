@@ -20,11 +20,9 @@ import {
 } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { AccountController, Transport } from "@nmshd/transport";
-import { reset, spy, when } from "ts-mockito";
 import {
     AttributeCreatedEvent,
     AttributeDeletedEvent,
-    AttributesController,
     AttributeTagCollection,
     ConsumptionController,
     IAttributeSuccessorParams,
@@ -3251,9 +3249,8 @@ describe("AttributesController", function () {
     });
 
     describe("validate tags", function () {
-        let mockedAttributesController: AttributesController;
         /* eslint-disable @typescript-eslint/naming-convention */
-        const mockedTagCollection = {
+        const mockedTagCollection: AttributeTagCollection = AttributeTagCollection.from({
             supportedLanguages: ["de", "en"],
             tagsForAttributeValueTypes: {
                 PhoneNumber: {
@@ -3285,30 +3282,23 @@ describe("AttributesController", function () {
                     }
                 }
             }
-        };
+        });
         /* eslint-enable @typescript-eslint/naming-convention */
 
-        beforeAll(function () {
-            mockedAttributesController = spy(consumptionController.attributes);
-            when(mockedAttributesController.getAttributeTagCollection()).thenResolve(AttributeTagCollection.from(mockedTagCollection));
-        });
-        afterAll(function () {
-            reset(mockedAttributesController);
-        });
-        test("should validate valid tags", async function () {
-            expect(await consumptionController.attributes["validateTag"]("private", "PhoneNumber")).toBe(true);
-            expect(await consumptionController.attributes["validateTag"]("emergency+%+first", "PhoneNumber")).toBe(true);
-            expect(await consumptionController.attributes["validateTag"]("emergency+%+second", "PhoneNumber")).toBe(true);
-            expect(await consumptionController.attributes["validateTag"]("x+%+my+%+custom+%+tag", "PhoneNumber")).toBe(true);
-            expect(await consumptionController.attributes["validateTag"]("X+%+my+%+custom+%+tag", "PhoneNumber")).toBe(true);
+        test("should validate valid tags", function () {
+            expect(consumptionController.attributes["isValidTag"]("private", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(true);
+            expect(consumptionController.attributes["isValidTag"]("emergency+%+first", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(true);
+            expect(consumptionController.attributes["isValidTag"]("emergency+%+second", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(true);
+            expect(consumptionController.attributes["isValidTag"]("x+%+my+%+custom+%+tag", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(true);
+            expect(consumptionController.attributes["isValidTag"]("X+%+my+%+custom+%+tag", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(true);
         });
 
-        test("should validate invalid tags", async function () {
-            expect(await consumptionController.attributes["validateTag"]("nonexistent", "PhoneNumber")).toBe(false);
-            expect(await consumptionController.attributes["validateTag"]("emergency", "PhoneNumber")).toBe(false);
-            expect(await consumptionController.attributes["validateTag"]("private", "nonexistent")).toBe(false);
-            expect(await consumptionController.attributes["validateTag"]("emergency+%+nonexistent", "PhoneNumber")).toBe(false);
-            expect(await consumptionController.attributes["validateTag"]("emergency+%+first+%+nonexistent", "PhoneNumber")).toBe(false);
+        test("should validate invalid tags", function () {
+            expect(consumptionController.attributes["isValidTag"]("nonexistent", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(false);
+            expect(consumptionController.attributes["isValidTag"]("emergency", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(false);
+            expect(consumptionController.attributes["isValidTag"]("private", mockedTagCollection.tagsForAttributeValueTypes["nonexistent"])).toBe(false);
+            expect(consumptionController.attributes["isValidTag"]("emergency+%+nonexistent", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(false);
+            expect(consumptionController.attributes["isValidTag"]("emergency+%+first+%+nonexistent", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(false);
         });
     });
 });
