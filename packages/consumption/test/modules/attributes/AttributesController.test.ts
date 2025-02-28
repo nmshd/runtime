@@ -2132,10 +2132,10 @@ describe("AttributesController", function () {
 
                     const { successor: repoVersion1 } = await consumptionController.attributes.succeedRepositoryAttribute(repoVersion0.id, repoVersion1Params);
                     expect((repoVersion1.content.value as StreetAddress).recipient).toBe("aNewRecipient");
-                    expect((repoVersion1.content.value as StreetAddress).street.value).toBe("aStreet");
-                    expect((repoVersion1.content.value as StreetAddress).houseNo.value).toBe("aHouseNo");
-                    expect((repoVersion1.content.value as StreetAddress).zipCode.value).toBe("aZipCode");
-                    expect((repoVersion1.content.value as StreetAddress).city.value).toBe("aCity");
+                    expect((repoVersion1.content.value as StreetAddress).street.value).toBe("aNewStreet");
+                    expect((repoVersion1.content.value as StreetAddress).houseNo.value).toBe("aNewHouseNo");
+                    expect((repoVersion1.content.value as StreetAddress).zipCode.value).toBe("aNewZipCode");
+                    expect((repoVersion1.content.value as StreetAddress).city.value).toBe("aNewCity");
                     expect((repoVersion1.content.value as StreetAddress).country.value).toBe("DE");
 
                     const repoVersion1ChildAttributes = await consumptionController.attributes.getLocalAttributes({

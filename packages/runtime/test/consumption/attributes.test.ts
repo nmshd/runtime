@@ -1697,6 +1697,37 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
         });
     });
 
+    test("should trim the successor of a repository attribute", async () => {
+        const createAttributeRequest: CreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "aGivenName"
+                },
+                tags: ["tag1", "tag2"]
+            }
+        };
+        const predecessor = (await services1.consumption.attributes.createRepositoryAttribute(createAttributeRequest)).value;
+
+        const succeedAttributeRequest: SucceedRepositoryAttributeRequest = {
+            predecessorId: predecessor.id.toString(),
+            successorContent: {
+                value: {
+                    "@type": "GivenName",
+                    value: "    anotherGivenName    "
+                },
+                tags: ["tag1", "tag2"]
+            }
+        };
+        const result = await services1.consumption.attributes.succeedRepositoryAttribute(succeedAttributeRequest);
+        expect(result.isError).toBe(false);
+        const { predecessor: updatedPredecessor, successor } = result.value;
+        expect((successor as any).content.value.value).toBe("anotherGivenName");
+        await services1.eventBus.waitForEvent(RepositoryAttributeSucceededEvent, (e) => {
+            return e.data.predecessor.id === updatedPredecessor.id && e.data.successor.id === successor.id;
+        });
+    });
+
     test("should throw if predecessor id is invalid", async () => {
         const succeedAttributeRequest: SucceedRepositoryAttributeRequest = {
             predecessorId: CoreId.from("faulty").toString(),
