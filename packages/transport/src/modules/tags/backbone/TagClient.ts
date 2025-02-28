@@ -5,11 +5,12 @@ import { BackboneGetTagCollection } from "./BackboneGetTagCollection";
 export class TagClient extends RESTClientAuthenticate {
     private tagCollectionETag: string | undefined;
 
-    public async getTagCollection(): Promise<ClientResult<BackboneGetTagCollection> | undefined> {
+    public async getTagCollection(forceUpdate?: true): Promise<ClientResult<BackboneGetTagCollection>>;
+    public async getTagCollection(forceUpdate?: boolean): Promise<ClientResult<BackboneGetTagCollection> | undefined> {
         const result = await this.get<BackboneGetTagCollection>("/api/v1/Tags", undefined, {
             headers: {
                 // eslint-disable-next-line @typescript-eslint/naming-convention
-                "if-none-match": this.tagCollectionETag
+                "if-none-match": forceUpdate ? "" : this.tagCollectionETag
             }
         });
         if (result.responseStatus === 304) {

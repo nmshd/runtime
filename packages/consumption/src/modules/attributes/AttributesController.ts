@@ -47,8 +47,8 @@ import { IdentityAttributeQueryTranslator, RelationshipAttributeQueryTranslator,
 export class AttributesController extends ConsumptionBaseController {
     private attributes: SynchronizedCollection;
     private attributeTagClient: TagClient;
-    private cachedAttributeTagCollection: AttributeTagCollection;
-    private cachedAttributeTagCollectionTimestamp: CoreDate;
+    private cachedAttributeTagCollection?: AttributeTagCollection;
+    private cachedAttributeTagCollectionTimestamp?: CoreDate;
 
     public constructor(
         parent: ConsumptionController,
@@ -1333,15 +1333,21 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async getAttributeTagCollection(): Promise<AttributeTagCollection> {
-        const isCacheValid = this.cachedAttributeTagCollectionTimestamp.isBefore(CoreDate.utc().subtract({ minutes: 5 }));
-        if (isCacheValid) {
+        const isCacheValid = this.cachedAttributeTagCollectionTimestamp?.isSameOrAfter(
+            CoreDate.utc().subtract({ minutes: this.parent.accountController.config.tagCachingDurationInMinutes })
+        );
+        if (isCacheValid && this.cachedAttributeTagCollection) {
             return this.cachedAttributeTagCollection;
         }
-        const backboneTagCollection = await this.attributeTagClient.getTagCollection();
-        if (backboneTagCollection) {
-            this.cachedAttributeTagCollectionTimestamp = CoreDate.utc();
-            this.cachedAttributeTagCollection = AttributeTagCollection.from(backboneTagCollection.value);
+        let backboneTagCollection = await this.attributeTagClient.getTagCollection();
+        if (!backboneTagCollection && this.cachedAttributeTagCollection) {
+            return this.cachedAttributeTagCollection;
         }
+        if (!backboneTagCollection) {
+            backboneTagCollection = await this.attributeTagClient.getTagCollection(true);
+        }
+        this.cachedAttributeTagCollectionTimestamp = CoreDate.utc();
+        this.cachedAttributeTagCollection = AttributeTagCollection.from(backboneTagCollection.value);
         return this.cachedAttributeTagCollection;
     }
 }

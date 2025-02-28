@@ -1,4 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
+import { sleep } from "@js-soft/ts-utils";
 import {
     BirthDate,
     BirthYear,
@@ -19,10 +20,12 @@ import {
     ZipCode
 } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
-import { AccountController, Transport } from "@nmshd/transport";
+import { AccountController, ClientResult, TagClient, Transport } from "@nmshd/transport";
+import { anything, reset, spy, verify, when } from "ts-mockito";
 import {
     AttributeCreatedEvent,
     AttributeDeletedEvent,
+    AttributeTagCollection,
     ConsumptionController,
     IAttributeSuccessorParams,
     ICreateRepositoryAttributeParams,
@@ -3245,5 +3248,57 @@ describe("AttributesController", function () {
         const peerAttribute = await consumptionController.attributes.getLocalAttribute(peerRelationshipAttribute.id);
         expect(ownAttribute).toBeUndefined();
         expect(peerAttribute).toBeUndefined();
+    });
+
+    describe("tag definition caching", function () {
+        let connection: IDatabaseConnection;
+        let transport: Transport;
+        let testAccount: AccountController;
+        let consumptionController: ConsumptionController;
+        let tagClientSpy: TagClient;
+        beforeEach(async function () {
+            connection = await TestUtil.createConnection();
+            transport = TestUtil.createTransport(connection, mockEventBus, {
+                tagCachingDurationInMinutes: 1 / 60
+            });
+            await transport.init();
+
+            const connectorAccount = (await TestUtil.provideAccounts(transport, 1))[0];
+            ({ accountController: testAccount, consumptionController } = connectorAccount);
+            const tagClient = consumptionController.attributes["attributeTagClient"];
+
+            tagClientSpy = spy(tagClient);
+            when(tagClientSpy.get("/api/v1/Tags", anything(), anything())).thenResolve(
+                ClientResult.ok(
+                    AttributeTagCollection.from({
+                        supportedLanguages: ["en"],
+                        tagsForAttributeValueTypes: {}
+                    }).toJSON()
+                )
+            );
+        });
+
+        afterEach(async function () {
+            await testAccount.close();
+            await connection.close();
+            reset(tagClientSpy);
+        });
+
+        test("should cache the tag definitions", async function () {
+            await consumptionController.attributes.getAttributeTagCollection();
+            await consumptionController.attributes.getAttributeTagCollection();
+
+            verify(tagClientSpy.getTagCollection()).once();
+            reset(tagClientSpy);
+        });
+
+        test("should not cache the tag definitions when the tagCachingDurationInMinutes was reached", async function () {
+            await consumptionController.attributes.getAttributeTagCollection();
+            await sleep(1100);
+            await consumptionController.attributes.getAttributeTagCollection();
+
+            verify(tagClientSpy.getTagCollection()).twice();
+            reset(tagClientSpy);
+        });
     });
 });
