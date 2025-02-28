@@ -495,7 +495,9 @@ export class RESTClient {
             responseDuration: response.headers["x-response-duration-ms"],
             responseTime: response.headers["x-response-time"],
             traceId: response.headers["x-trace-id"],
-            correlationId: response.headers["x-correlation-id"]
+            correlationId: response.headers["x-correlation-id"],
+            responseStatus: response.status,
+            etag: response.headers["etag"]
         };
     }
 

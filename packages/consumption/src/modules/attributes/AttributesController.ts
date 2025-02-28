@@ -1337,10 +1337,10 @@ export class AttributesController extends ConsumptionBaseController {
         if (isCacheValid) {
             return this.cachedAttributeTagCollection;
         }
-        const backboneTagCollection = (await this.attributeTagClient.getTagCollection()).value;
+        const backboneTagCollection = await this.attributeTagClient.getTagCollection();
         if (backboneTagCollection) {
             this.cachedAttributeTagCollectionTimestamp = CoreDate.utc();
-            this.cachedAttributeTagCollection = AttributeTagCollection.from(backboneTagCollection);
+            this.cachedAttributeTagCollection = AttributeTagCollection.from(backboneTagCollection.value);
         }
         return this.cachedAttributeTagCollection;
     }
