@@ -9,6 +9,7 @@ import {
     IIQLQuery,
     IRelationshipAttributeQuery,
     IThirdPartyRelationshipAttributeQuery,
+    RelationshipAttribute,
     RelationshipAttributeJSON,
     RelationshipAttributeQuery,
     ThirdPartyRelationshipAttributeQuery,
@@ -247,11 +248,9 @@ export class AttributesController extends ConsumptionBaseController {
 
         const parsedParams = CreateRepositoryAttributeParams.from(params);
 
-        if (parsedParams.content.tags) {
-            const tagValidationResult = await this.validateTags(parsedParams.content.tags, parsedParams.content.toJSON().value["@type"]);
-            if (tagValidationResult.isError()) {
-                throw tagValidationResult.error;
-            }
+        const tagValidationResult = await this.validateTags(parsedParams.content);
+        if (tagValidationResult.isError()) {
+            throw tagValidationResult.error;
         }
 
         let localAttribute = LocalAttribute.from({
@@ -366,11 +365,9 @@ export class AttributesController extends ConsumptionBaseController {
 
     public async createSharedLocalAttribute(params: ICreateSharedLocalAttributeParams): Promise<LocalAttribute> {
         const parsedParams = CreateSharedLocalAttributeParams.from(params);
-        if (parsedParams.content instanceof IdentityAttribute && parsedParams.content.tags) {
-            const tagValidationResult = await this.validateTags(parsedParams.content.tags, parsedParams.content.toJSON().value["@type"]);
-            if (tagValidationResult.isError()) {
-                throw tagValidationResult.error;
-            }
+        const tagValidationResult = await this.validateTags(parsedParams.content);
+        if (tagValidationResult.isError()) {
+            throw tagValidationResult.error;
         }
 
         const shareInfo = LocalAttributeShareInfo.from({
@@ -962,11 +959,9 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successorIsNotAValidAttribute(e));
         }
 
-        if (parsedSuccessorParams.content instanceof IdentityAttribute && parsedSuccessorParams.content.tags) {
-            const tagValidationResult = await this.validateTags(parsedSuccessorParams.content.tags, parsedSuccessorParams.content.toJSON().value["@type"]);
-            if (tagValidationResult.isError()) {
-                throw tagValidationResult.error;
-            }
+        const tagValidationResult = await this.validateTags(parsedSuccessorParams.content);
+        if (tagValidationResult.isError()) {
+            throw tagValidationResult.error;
         }
 
         const successor = LocalAttribute.from({
@@ -1360,7 +1355,13 @@ export class AttributesController extends ConsumptionBaseController {
         return AttributeTagCollection.from(backboneTagCollection);
     }
 
-    public async validateTags(tags: string[], attributeValueType: string): Promise<ValidationResult> {
+    public async validateTags(attribute: IdentityAttribute | RelationshipAttribute): Promise<ValidationResult> {
+        if (attribute instanceof RelationshipAttribute) return ValidationResult.success();
+        if (!attribute.tags || attribute.tags.length === 0) return ValidationResult.success();
+
+        const tags = attribute.tags;
+        const attributeValueType = attribute.toJSON().value["@type"];
+
         const tagCollection = await this.getAttributeTagCollection();
         const invalidTags = [];
         for (const tag of tags) {

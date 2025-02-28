@@ -1082,7 +1082,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
         test("returns an error when sharing an attribute with invalid tags", async function () {
             const attributesControllerSpy = spy(consumptionController.attributes);
-            when(attributesControllerSpy.validateTags(anything(), anything())).thenResolve(ValidationResult.success());
+            when(attributesControllerSpy.validateTags(anything())).thenResolve(ValidationResult.success());
 
             const existingAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: TestObjectFactory.createIdentityAttribute({

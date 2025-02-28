@@ -197,13 +197,11 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             }
         }
 
-        if (attribute instanceof IdentityAttribute && attribute.tags) {
-            const tagValidationResult = await this.consumptionController.attributes.validateTags(attribute.tags, attribute.toJSON().value["@type"]);
-            if (tagValidationResult.isError()) {
-                return ValidationResult.error(
-                    ConsumptionCoreErrors.requests.invalidAcceptParameters(`The provided IdentityAttribute is invalid: ${tagValidationResult.error.message}`)
-                );
-            }
+        const tagValidationResult = await this.consumptionController.attributes.validateTags(attribute);
+        if (tagValidationResult.isError()) {
+            return ValidationResult.error(
+                ConsumptionCoreErrors.requests.invalidAcceptParameters(`The provided IdentityAttribute is invalid: ${tagValidationResult.error.message}`)
+            );
         }
 
         return ValidationResult.success();
