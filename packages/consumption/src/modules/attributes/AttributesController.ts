@@ -244,6 +244,12 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         const parsedParams = CreateRepositoryAttributeParams.from(params);
+        const trimmedAttribute = {
+            ...parsedParams.content.toJSON(),
+            value: this.trimAttributeValue(parsedParams.content.value.toJSON() as AttributeValues.Identity.Json)
+        };
+        parsedParams.content = IdentityAttribute.from(trimmedAttribute);
+
         let localAttribute = LocalAttribute.from({
             id: parsedParams.id ?? (await ConsumptionIds.attribute.generate()),
             createdAt: CoreDate.utc(),
@@ -405,6 +411,11 @@ export class AttributesController extends ConsumptionBaseController {
         validate = true
     ): Promise<{ predecessor: LocalAttribute; successor: LocalAttribute }> {
         const parsedSuccessorParams = AttributeSuccessorParams.from(successorParams);
+        const trimmedAttribute = {
+            ...parsedSuccessorParams.content.toJSON(),
+            value: this.trimAttributeValue(parsedSuccessorParams.content.value.toJSON() as AttributeValues.Identity.Json)
+        };
+        parsedSuccessorParams.content = IdentityAttribute.from(trimmedAttribute);
 
         if (validate) {
             const validationResult = await this.validateRepositoryAttributeSuccession(predecessorId, parsedSuccessorParams);
@@ -1301,11 +1312,12 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async getRepositoryAttributeWithSameValue(value: AttributeValues.Identity.Json): Promise<LocalAttribute | undefined> {
+        const trimmedValue = this.trimAttributeValue(value);
         const queryForRepositoryAttributeDuplicates = flattenObject({
             content: {
                 "@type": "IdentityAttribute",
                 owner: this.identity.address.toString(),
-                value: value
+                value: trimmedValue
             }
         });
         queryForRepositoryAttributeDuplicates["succeededBy"] = { $exists: false };
@@ -1313,7 +1325,7 @@ export class AttributesController extends ConsumptionBaseController {
 
         const matchingRepositoryAttributes = await this.getLocalAttributes(queryForRepositoryAttributeDuplicates);
 
-        const repositoryAttributeDuplicate = matchingRepositoryAttributes.find((duplicate) => _.isEqual(duplicate.content.value.toJSON(), value));
+        const repositoryAttributeDuplicate = matchingRepositoryAttributes.find((duplicate) => _.isEqual(duplicate.content.value.toJSON(), trimmedValue));
         return repositoryAttributeDuplicate;
     }
 
@@ -1334,6 +1346,11 @@ export class AttributesController extends ConsumptionBaseController {
                 ]
             }
         });
+    }
+
+    private trimAttributeValue(value: AttributeValues.Identity.Json): AttributeValues.Identity.Json {
+        const trimmedEntries = Object.entries(value).map((entry) => (typeof entry[1] === "string" ? [entry[0], entry[1].trim()] : entry));
+        return Object.fromEntries(trimmedEntries) as AttributeValues.Identity.Json;
     }
 
     public async getAttributeTagCollection(): Promise<AttributeTagCollection> {
