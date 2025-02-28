@@ -1000,7 +1000,13 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedChildOfComplexAttribute(predecessorId.toString()));
         }
 
-        if (predecessor.hasDeletionInfo() && predecessor.deletionInfo.deletionStatus !== LocalAttributeDeletionStatus.DeletionRequestRejected) {
+        if (
+            predecessor.hasDeletionInfo() &&
+            !(
+                predecessor.deletionInfo.deletionStatus === LocalAttributeDeletionStatus.DeletionRequestRejected ||
+                predecessor.deletionInfo.deletionStatus === LocalAttributeDeletionStatus.DeletionRequestSent
+            )
+        ) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedAttributesWithDeletionInfo());
         }
 
