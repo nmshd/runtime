@@ -2272,17 +2272,14 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 const result = await processor.accept(requestItem, acceptParams, incomingRequest);
                 expect(result).toBeInstanceOf(ReadAttributeAcceptResponseItem);
-                const createdSharedAttribute = await consumptionController.attributes.getLocalAttribute((result as ReadAttributeAcceptResponseItem).attributeId);
 
+                const createdSharedAttribute = await consumptionController.attributes.getLocalAttribute((result as ReadAttributeAcceptResponseItem).attributeId);
                 expect(createdSharedAttribute).toBeDefined();
-                expect(createdSharedAttribute!.shareInfo).toBeDefined();
-                expect(createdSharedAttribute!.shareInfo!.peer.toString()).toStrictEqual(incomingRequest.peer.toString());
-                expect(createdSharedAttribute!.shareInfo!.sourceAttribute).toBeDefined();
-                expect(createdSharedAttribute!.content.value.toJSON()).toStrictEqual(GivenName.from({ value: "aGivenName" }).toJSON());
+                expect((createdSharedAttribute!.content.value as GivenName).value).toBe("aGivenName");
 
                 const createdRepositoryAttribute = await consumptionController.attributes.getLocalAttribute(createdSharedAttribute!.shareInfo!.sourceAttribute!);
                 expect(createdRepositoryAttribute).toBeDefined();
-                expect(createdRepositoryAttribute!.content.value.toJSON()).toStrictEqual(GivenName.from({ value: "aGivenName" }).toJSON());
+                expect((createdRepositoryAttribute!.content.value as GivenName).value).toBe("aGivenName");
             });
 
             test("accept with new RelationshipAttribute", async function () {

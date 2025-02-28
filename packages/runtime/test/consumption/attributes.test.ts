@@ -1036,7 +1036,6 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
         const complexRepoAttribute = createRepositoryAttributeResult.value;
 
         expect((complexRepoAttribute.content.value as StreetAddressJSON).recipient).toBe("aRecipient");
-        expect((complexRepoAttribute.content.value as StreetAddressJSON).recipient).toBe("aRecipient");
         expect((complexRepoAttribute.content.value as StreetAddressJSON).street).toBe("aStreet");
         expect((complexRepoAttribute.content.value as StreetAddressJSON).houseNo).toBe("aHouseNo");
         expect((complexRepoAttribute.content.value as StreetAddressJSON).zipCode).toBe("aZipCode");

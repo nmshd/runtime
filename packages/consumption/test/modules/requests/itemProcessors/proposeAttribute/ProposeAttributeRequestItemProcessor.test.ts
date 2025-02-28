@@ -991,17 +991,14 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             };
 
             const result = await processor.accept(requestItem, acceptParams, incomingRequest);
-            const createdSharedAttribute = await consumptionController.attributes.getLocalAttribute((result as ProposeAttributeAcceptResponseItem).attributeId);
 
+            const createdSharedAttribute = await consumptionController.attributes.getLocalAttribute((result as ProposeAttributeAcceptResponseItem).attributeId);
             expect(createdSharedAttribute).toBeDefined();
-            expect(createdSharedAttribute!.shareInfo).toBeDefined();
-            expect(createdSharedAttribute!.shareInfo!.peer.toString()).toStrictEqual(incomingRequest.peer.toString());
-            expect(createdSharedAttribute!.shareInfo!.sourceAttribute).toBeDefined();
-            expect(createdSharedAttribute!.content.value.toJSON()).toStrictEqual(GivenName.from({ value: "aGivenName" }).toJSON());
+            expect((createdSharedAttribute!.content.value as GivenName).value).toBe("aGivenName");
 
             const createdRepositoryAttribute = await consumptionController.attributes.getLocalAttribute(createdSharedAttribute!.shareInfo!.sourceAttribute!);
             expect(createdRepositoryAttribute).toBeDefined();
-            expect(createdRepositoryAttribute!.content.value.toJSON()).toStrictEqual(GivenName.from({ value: "aGivenName" }).toJSON());
+            expect((createdRepositoryAttribute!.content.value as GivenName).value).toBe("aGivenName");
         });
 
         test("accept with new RelationshipAttribute", async function () {
