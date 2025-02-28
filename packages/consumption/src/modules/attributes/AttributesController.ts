@@ -47,6 +47,8 @@ import { IdentityAttributeQueryTranslator, RelationshipAttributeQueryTranslator,
 export class AttributesController extends ConsumptionBaseController {
     private attributes: SynchronizedCollection;
     private attributeTagClient: TagClient;
+    private cachedAttributeTagCollection: AttributeTagCollection;
+    private cachedAttributeTagCollectionTimestamp: CoreDate;
 
     public constructor(
         parent: ConsumptionController,
@@ -1331,7 +1333,15 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async getAttributeTagCollection(): Promise<AttributeTagCollection> {
+        const isCacheValid = this.cachedAttributeTagCollectionTimestamp.isBefore(CoreDate.utc().subtract({ minutes: 5 }));
+        if (isCacheValid) {
+            return this.cachedAttributeTagCollection;
+        }
         const backboneTagCollection = (await this.attributeTagClient.getTagCollection()).value;
-        return AttributeTagCollection.from(backboneTagCollection);
+        if (backboneTagCollection) {
+            this.cachedAttributeTagCollectionTimestamp = CoreDate.utc();
+            this.cachedAttributeTagCollection = AttributeTagCollection.from(backboneTagCollection);
+        }
+        return this.cachedAttributeTagCollection;
     }
 }

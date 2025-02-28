@@ -3,7 +3,7 @@ import { RESTClientAuthenticate } from "../../../core/backbone/RESTClientAuthent
 import { BackboneGetTagCollection } from "./BackboneGetTagCollection";
 
 export class TagClient extends RESTClientAuthenticate {
-    public async getTagCollection(): Promise<ClientResult<BackboneGetTagCollection>> {
+    public async getTagCollection(): Promise<ClientResult<BackboneGetTagCollection | undefined>> {
         return await this.get<BackboneGetTagCollection>("/api/v1/Tags");
     }
 }
