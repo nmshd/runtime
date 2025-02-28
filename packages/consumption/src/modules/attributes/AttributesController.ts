@@ -45,6 +45,8 @@ import { LocalAttributeShareInfo } from "./local/LocalAttributeShareInfo";
 import { IdentityAttributeQueryTranslator, RelationshipAttributeQueryTranslator, ThirdPartyRelationshipAttributeQueryTranslator } from "./local/QueryTranslator";
 
 export class AttributesController extends ConsumptionBaseController {
+    private static readonly TAG_SEPARATOR = "+%+";
+
     private attributes: SynchronizedCollection;
     private attributeTagClient: TagClient;
 
@@ -1375,12 +1377,11 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     private isValidTag(tag: string, validTags: Record<string, IAttributeTag> | undefined): boolean {
-        const tagSeparator = "+%+";
-        const customTagPrefix = `x${tagSeparator}`;
+        const customTagPrefix = `x${AttributesController.TAG_SEPARATOR}`;
 
         if (tag.toLowerCase().startsWith(customTagPrefix)) return true;
 
-        const tagParts = tag.split(tagSeparator);
+        const tagParts = tag.split(AttributesController.TAG_SEPARATOR);
 
         for (const part of tagParts) {
             if (!validTags?.[part]) return false;
