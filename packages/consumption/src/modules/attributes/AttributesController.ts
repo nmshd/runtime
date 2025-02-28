@@ -411,11 +411,11 @@ export class AttributesController extends ConsumptionBaseController {
         validate = true
     ): Promise<{ predecessor: LocalAttribute; successor: LocalAttribute }> {
         const parsedSuccessorParams = AttributeSuccessorParams.from(successorParams);
-        const trimmedAttributeJSON = {
+        const trimmedAttribute = {
             ...parsedSuccessorParams.content.toJSON(),
             value: this.trimAttributeValue(parsedSuccessorParams.content.value.toJSON() as AttributeValues.Identity.Json)
         };
-        parsedSuccessorParams.content = IdentityAttribute.from(trimmedAttributeJSON);
+        parsedSuccessorParams.content = IdentityAttribute.from(trimmedAttribute);
 
         if (validate) {
             const validationResult = await this.validateRepositoryAttributeSuccession(predecessorId, parsedSuccessorParams);
