@@ -36,7 +36,7 @@ new GenericValueTest().runParametrized({
     typeClass: PersonName,
     expectedJSON: {
         "@type": "PersonName",
-        givenName: "TestGivenName1 TestGivenName2",
+        givenName: "aTestGivenName anotherTestGivenName",
         middleName: "Middler",
         surname: "TestSurname",
         honorificPrefix: "Dr. Dr. rer. nat.",
@@ -44,7 +44,7 @@ new GenericValueTest().runParametrized({
     },
     valueJSON: {
         "@type": "PersonName",
-        givenName: "TestGivenName1 TestGivenName2",
+        givenName: "aTestGivenName anotherTestGivenName",
         middleName: "Middler",
         surname: "TestSurname",
         honorificPrefix: "Dr. Dr. rer. nat.",
@@ -54,7 +54,7 @@ new GenericValueTest().runParametrized({
         "@type": "PersonName",
         givenName: {
             "@type": "GivenName",
-            value: "TestGivenName1 TestGivenName2"
+            value: "aTestGivenName anotherTestGivenName"
         },
         middleName: {
             "@type": "MiddleName",
@@ -74,11 +74,11 @@ new GenericValueTest().runParametrized({
         }
     },
     valueInterface: {
-        givenName: GivenName.fromAny("TestGivenName1 TestGivenName2"),
+        givenName: GivenName.fromAny("aTestGivenName anotherTestGivenName"),
         middleName: MiddleName.fromAny("Middler"),
         surname: Surname.fromAny("TestSurname"),
         honorificPrefix: HonorificPrefix.fromAny("Dr. Dr. rer. nat."),
         honorificSuffix: HonorificSuffix.fromAny("M.Sc.")
     },
-    valueString: "Dr. Dr. rer. nat. TestGivenName1 TestGivenName2 Middler TestSurname M.Sc."
+    valueString: "Dr. Dr. rer. nat. aTestGivenName anotherTestGivenName Middler TestSurname M.Sc."
 });

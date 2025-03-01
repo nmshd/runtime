@@ -2,6 +2,7 @@ import { serialize, type, validate } from "@js-soft/ts-serval";
 import { nameof } from "ts-simple-nameof";
 import { AbstractAttributeValue } from "../../AbstractAttributeValue";
 import { COUNTRIES_ALPHA2_TO_ENGLISH_NAME } from "../../constants";
+import { characterSets } from "../../constants/CharacterSets";
 import { RenderHints, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../../hints";
 import { AbstractAddress, AbstractAddressJSON, IAbstractAddress } from "./AbstractAddress";
 import { City, ICity } from "./City";
@@ -29,7 +30,7 @@ export interface IPostOfficeBoxAddress extends IAbstractAddress {
 @type("PostOfficeBoxAddress")
 export class PostOfficeBoxAddress extends AbstractAddress implements IPostOfficeBoxAddress {
     @serialize()
-    @validate({ max: 100 })
+    @validate({ max: 100, regExp: characterSets.din91379DatatypeB })
     public boxId: string;
 
     @serialize({ customGenerator: AbstractAttributeValue.valueGenerator })
@@ -51,7 +52,7 @@ export class PostOfficeBoxAddress extends AbstractAddress implements IPostOffice
     public static override get valueHints(): ValueHints {
         return super.valueHints.copyWith({
             propertyHints: {
-                [nameof<PostOfficeBoxAddress>((p) => p.boxId)]: ValueHints.from({}),
+                [nameof<PostOfficeBoxAddress>((p) => p.boxId)]: ValueHints.from({ pattern: characterSets.din91379DatatypeB.toString().slice(1, -1).replaceAll("/", "\\/") }),
                 [nameof<PostOfficeBoxAddress>((p) => p.zipCode)]: ZipCode.valueHints,
                 [nameof<PostOfficeBoxAddress>((p) => p.city)]: City.valueHints,
                 [nameof<PostOfficeBoxAddress>((p) => p.country)]: Country.valueHints,
