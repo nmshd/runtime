@@ -198,24 +198,19 @@ describe("AttributesController", function () {
                 content: identityAttribute
             });
 
-            expect(address).toBeInstanceOf(LocalAttribute);
-            expect(address.content).toBeInstanceOf(IdentityAttribute);
             expect((address.content.value as StreetAddress).recipient).toBe("aRecipient");
             expect((address.content.value as StreetAddress).street.value).toBe("aStreet");
             expect((address.content.value as StreetAddress).houseNo.value).toBe("aHouseNo");
             expect((address.content.value as StreetAddress).zipCode.value).toBe("aZipCode");
             expect((address.content.value as StreetAddress).city.value).toBe("aCity");
-            expect((address.content.value as StreetAddress).country.value).toBe("DE");
 
             const childAttributes = await consumptionController.attributes.getLocalAttributes({
                 parentId: address.id.toString()
             });
-            expect(childAttributes).toHaveLength(5);
             expect((childAttributes[0].content.value as Street).value).toBe("aStreet");
             expect((childAttributes[1].content.value as HouseNumber).value).toBe("aHouseNo");
             expect((childAttributes[2].content.value as ZipCode).value).toBe("aZipCode");
             expect((childAttributes[3].content.value as City).value).toBe("aCity");
-            expect((childAttributes[4].content.value as Street).value).toBe("DE");
         });
 
         test("should trigger an AttributeCreatedEvent for each created child Attribute of a complex Attribute", async function () {

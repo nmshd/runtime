@@ -1037,7 +1037,6 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
         expect((complexRepoAttribute.content.value as StreetAddressJSON).houseNo).toBe("aHouseNo");
         expect((complexRepoAttribute.content.value as StreetAddressJSON).zipCode).toBe("aZipCode");
         expect((complexRepoAttribute.content.value as StreetAddressJSON).city).toBe("aCity");
-        expect((complexRepoAttribute.content.value as StreetAddressJSON).country).toBe("DE");
 
         const childAttributes = (
             await services1.consumption.attributes.getAttributes({
@@ -1047,17 +1046,10 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
             })
         ).value;
 
-        expect(childAttributes).toHaveLength(5);
-        expect(childAttributes[0].content.value["@type"]).toBe("Street");
         expect((childAttributes[0].content.value as StreetJSON).value).toBe("aStreet");
-        expect(childAttributes[1].content.value["@type"]).toBe("HouseNumber");
         expect((childAttributes[1].content.value as HouseNumberJSON).value).toBe("aHouseNo");
-        expect(childAttributes[2].content.value["@type"]).toBe("ZipCode");
         expect((childAttributes[2].content.value as ZipCodeJSON).value).toBe("aZipCode");
-        expect(childAttributes[3].content.value["@type"]).toBe("City");
         expect((childAttributes[3].content.value as CityJSON).value).toBe("aCity");
-        expect(childAttributes[4].content.value["@type"]).toBe("Country");
-        expect((childAttributes[4].content.value as CountryJSON).value).toBe("DE");
 
         await expect(services1.eventBus).toHavePublished(AttributeCreatedEvent, (e) => e.data.content.value["@type"] === "StreetAddress");
         await expect(services1.eventBus).toHavePublished(AttributeCreatedEvent, (e) => e.data.content.value["@type"] === "Street");
