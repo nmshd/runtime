@@ -249,7 +249,7 @@ describe("RelationshipTemplateController", function () {
         expect(otherTemplate).toBeUndefined();
     });
 
-    describe("relationshipTemplate deletion", function () {
+    describe("RelationshipTemplate deletion", function () {
         let ownTemplate: RelationshipTemplate;
         let peerTemplate: RelationshipTemplate;
 

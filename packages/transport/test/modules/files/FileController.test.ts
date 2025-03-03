@@ -124,7 +124,7 @@ describe("FileController", function () {
         expect(file.metadataModifiedAt!.isSameOrAfter(creationTime.subtract({ seconds: 2 }))).toBe(true);
     });
 
-    describe("file deletion", function () {
+    describe("File deletion", function () {
         let sentFile: File;
         let receivedFile: File;
 
