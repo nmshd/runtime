@@ -10,18 +10,18 @@ import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { buildCredential } from "../verifiableCredentials/core";
 import { AttributeMapper } from "./AttributeMapper";
 
-export interface CreateVerifiableAttributeRequest {
+export interface CreateSelfSignedVerifiableAttributeRequest {
     content: IdentityAttributeJSON;
     subjectDid: string;
 }
 
-class Validator extends SchemaValidator<CreateVerifiableAttributeRequest> {
+class Validator extends SchemaValidator<CreateSelfSignedVerifiableAttributeRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
         super(schemaRepository.getSchema("CreateVerifiableAttributeRequest"));
     }
 }
 
-export class CreateVerifiableAttributeUseCase extends UseCase<CreateVerifiableAttributeRequest, LocalAttributeDTO> {
+export class CreateSelfSignedVerifiableAttributeUseCase extends UseCase<CreateSelfSignedVerifiableAttributeRequest, LocalAttributeDTO> {
     public constructor(
         @Inject private readonly attributeController: AttributesController,
         @Inject private readonly accountController: AccountController,
@@ -30,7 +30,7 @@ export class CreateVerifiableAttributeUseCase extends UseCase<CreateVerifiableAt
         super(validator);
     }
 
-    protected async executeInternal(request: CreateVerifiableAttributeRequest): Promise<Result<LocalAttributeDTO>> {
+    protected async executeInternal(request: CreateSelfSignedVerifiableAttributeRequest): Promise<Result<LocalAttributeDTO>> {
         const parsedRequestAttribute = JSON.parse(JSON.stringify(request.content));
         const multikeyPublic = `z${CoreBuffer.from([0xed, 0x01]).append(this["accountController"].identity.identity.publicKey.publicKey).toBase58()}`;
         const identityPrivateKey = ((await this["accountController"].activeDevice.secrets.loadSecret(DeviceSecretType.IdentitySignature)) as any)!.secret["privateKey"];
