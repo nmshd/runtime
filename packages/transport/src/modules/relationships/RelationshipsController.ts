@@ -173,7 +173,7 @@ export class RelationshipsController extends TransportController {
 
         const backboneResponse = result.value;
 
-        const newRelationship = Relationship.fromBackboneAndCreationContent(backboneResponse, template, template.cache.identity, parameters.creationContent, secretId);
+        const newRelationship = Relationship.fromBackboneAndCreationContent(backboneResponse, template.cache.identity, parameters.creationContent, secretId);
 
         await this.relationships.create(newRelationship);
 
@@ -400,19 +400,13 @@ export class RelationshipsController extends TransportController {
 
         const templateId = CoreId.from(response.relationshipTemplateId);
 
-        this._log.trace(`Parsing relationship template ${templateId} for ${response.id}...`);
-        const template = await this.parent.relationshipTemplates.getRelationshipTemplate(templateId);
-        if (!template) {
-            throw TransportCoreErrors.general.recordNotFound(RelationshipTemplate, templateId.toString());
-        }
-
         this._log.trace(`Parsing relationship creation content of ${response.id}...`);
 
         const creationContent = await this.decryptCreationContent(response.creationContent, CoreAddress.from(response.from), relationshipSecretId);
 
         const cachedRelationship = CachedRelationship.from({
             creationContent: creationContent.content,
-            template,
+            templateId,
             auditLog: RelationshipAuditLog.fromBackboneAuditLog(response.auditLog)
         });
 
@@ -518,7 +512,7 @@ export class RelationshipsController extends TransportController {
         await this.secrets.createTemplatorSecrets(secretId, template.cache, creationContentCipher.publicCreationContentCrypto);
 
         const creationContent = await this.decryptCreationContent(backboneRelationship.creationContent, CoreAddress.from(backboneRelationship.from), secretId);
-        const relationship = Relationship.fromBackboneAndCreationContent(backboneRelationship, template, creationContent.identity, creationContent.content, secretId);
+        const relationship = Relationship.fromBackboneAndCreationContent(backboneRelationship, creationContent.identity, creationContent.content, secretId);
 
         await this.relationships.create(relationship);
         return relationship;
