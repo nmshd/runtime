@@ -42,6 +42,15 @@ export class FileController extends TransportController {
         return doc ? File.from(doc) : undefined;
     }
 
+    public async deleteFile(file: File): Promise<void> {
+        if (file.isOwn) {
+            const response = await this.client.deleteFile(file.id.toString());
+            if (response.isError) throw response.error;
+        }
+
+        await this.files.delete(file);
+    }
+
     public async fetchCaches(ids: CoreId[]): Promise<{ id: CoreId; cache: CachedFile }[]> {
         if (ids.length === 0) return [];
 
