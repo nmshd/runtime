@@ -1852,7 +1852,7 @@ describe("AttributesController", function () {
                     })
                 };
 
-                const { predecessor: _updatedPredecessor, successor } = await consumptionController.attributes.succeedRepositoryAttribute(predecessor.id, successorParams);
+                const { successor } = await consumptionController.attributes.succeedRepositoryAttribute(predecessor.id, successorParams);
                 expect(successor).toBeDefined();
                 expect((successor.content.value.toJSON() as any).value).toBe("anotherGivenName");
             });

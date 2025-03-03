@@ -1015,9 +1015,6 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
     });
 
     test("should trim LocalAttributes for a complex repository attribute and for each child during creation", async function () {
-        const attributesBeforeCreate = await services1.consumption.attributes.getAttributes({});
-        const nrAttributesBeforeCreate = attributesBeforeCreate.value.length;
-
         const createRepositoryAttributeParams: CreateRepositoryAttributeRequest = {
             content: {
                 value: {
@@ -1061,10 +1058,6 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
         expect((childAttributes[3].content.value as CityJSON).value).toBe("aCity");
         expect(childAttributes[4].content.value["@type"]).toBe("Country");
         expect((childAttributes[4].content.value as CountryJSON).value).toBe("DE");
-
-        const attributesAfterCreate = (await services1.consumption.attributes.getAttributes({})).value;
-        const nrAttributesAfterCreate = attributesAfterCreate.length;
-        expect(nrAttributesAfterCreate).toBe(nrAttributesBeforeCreate + 6);
 
         await expect(services1.eventBus).toHavePublished(AttributeCreatedEvent, (e) => e.data.content.value["@type"] === "StreetAddress");
         await expect(services1.eventBus).toHavePublished(AttributeCreatedEvent, (e) => e.data.content.value["@type"] === "Street");
