@@ -396,7 +396,7 @@ describe("TokenController", function () {
         expect(fetchCachesResult).toHaveLength(2);
     });
 
-    describe("token deletion", function () {
+    describe("Token deletion", function () {
         let sentToken: Token;
         let receivedToken: Token;
 
