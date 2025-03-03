@@ -197,6 +197,13 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             }
         }
 
+        const tagValidationResult = await this.consumptionController.attributes.validateTags(attribute);
+        if (tagValidationResult.isError()) {
+            return ValidationResult.error(
+                ConsumptionCoreErrors.requests.invalidAcceptParameters(`The provided IdentityAttribute is invalid: ${tagValidationResult.error.message}`)
+            );
+        }
+
         return ValidationResult.success();
     }
 
