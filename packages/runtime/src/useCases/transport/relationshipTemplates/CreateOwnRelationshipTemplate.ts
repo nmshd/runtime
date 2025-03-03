@@ -1,13 +1,12 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
 import { OutgoingRequestsController } from "@nmshd/consumption";
-import { RelationshipTemplateContent } from "@nmshd/content";
-import { AccountController, CoreDate, RelationshipTemplateController } from "@nmshd/transport";
-import { DateTime } from "luxon";
-import { nameof } from "ts-simple-nameof";
-import { Inject } from "typescript-ioc";
+import { ArbitraryRelationshipTemplateContent, RelationshipTemplateContent } from "@nmshd/content";
+import { CoreAddress, CoreDate } from "@nmshd/core-types";
+import { AccountController, PasswordProtectionCreationParameters, RelationshipTemplateController } from "@nmshd/transport";
+import { Inject } from "@nmshd/typescript-ioc";
 import { RelationshipTemplateDTO } from "../../../types";
-import { ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationFailure, ValidationResult } from "../../common";
+import { AddressString, ISO8601DateTimeString, RuntimeErrors, SchemaRepository, TokenAndTemplateCreationValidator, UseCase } from "../../common";
 import { RelationshipTemplateMapper } from "./RelationshipTemplateMapper";
 
 export interface CreateOwnRelationshipTemplateRequest {
@@ -17,27 +16,19 @@ export interface CreateOwnRelationshipTemplateRequest {
      * @minimum 1
      */
     maxNumberOfAllocations?: number;
+    forIdentity?: AddressString;
+    passwordProtection?: {
+        /**
+         * @minLength 1
+         */
+        password: string;
+        passwordIsPin?: true;
+    };
 }
 
-class Validator extends SchemaValidator<CreateOwnRelationshipTemplateRequest> {
+class Validator extends TokenAndTemplateCreationValidator<CreateOwnRelationshipTemplateRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
         super(schemaRepository.getSchema("CreateOwnRelationshipTemplateRequest"));
-    }
-
-    public override validate(input: CreateOwnRelationshipTemplateRequest): ValidationResult {
-        const validationResult = super.validate(input);
-        if (!validationResult.isValid()) return validationResult;
-
-        if (DateTime.fromISO(input.expiresAt) <= DateTime.utc()) {
-            validationResult.addFailure(
-                new ValidationFailure(
-                    RuntimeErrors.general.invalidPropertyValue(`'${nameof<CreateOwnRelationshipTemplateRequest>((r) => r.expiresAt)}' must be in the future`),
-                    nameof<CreateOwnRelationshipTemplateRequest>((r) => r.expiresAt)
-                )
-            );
-        }
-
-        return validationResult;
     }
 }
 
@@ -52,13 +43,21 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
     }
 
     protected async executeInternal(request: CreateOwnRelationshipTemplateRequest): Promise<Result<RelationshipTemplateDTO>> {
-        const validationError = await this.validateRelationshipTemplateContent(request.content);
+        const content = request.content;
+
+        const validationError = await this.validateRelationshipTemplateContent(content, CoreDate.from(request.expiresAt));
         if (validationError) return Result.fail(validationError);
 
+        if (Serializable.fromUnknown(content) instanceof RelationshipTemplateContent && !content.onNewRelationship.expiresAt) {
+            content.onNewRelationship.expiresAt = CoreDate.from(request.expiresAt);
+        }
+
         const relationshipTemplate = await this.templateController.sendRelationshipTemplate({
-            content: request.content,
+            content: content,
             expiresAt: CoreDate.from(request.expiresAt),
-            maxNumberOfAllocations: request.maxNumberOfAllocations
+            maxNumberOfAllocations: request.maxNumberOfAllocations,
+            forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
+            passwordProtection: PasswordProtectionCreationParameters.create(request.passwordProtection)
         });
 
         await this.accountController.syncDatawallet();
@@ -66,9 +65,20 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
         return Result.ok(RelationshipTemplateMapper.toRelationshipTemplateDTO(relationshipTemplate));
     }
 
-    private async validateRelationshipTemplateContent(content: any) {
+    private async validateRelationshipTemplateContent(content: any, templateExpiresAt: CoreDate) {
         const transformedContent = Serializable.fromUnknown(content);
+
+        if (!(transformedContent instanceof RelationshipTemplateContent || transformedContent instanceof ArbitraryRelationshipTemplateContent)) {
+            return RuntimeErrors.general.invalidPropertyValue(
+                "The content of a RelationshipTemplate must either be a RelationshipTemplateContent or an ArbitraryRelationshipTemplateContent."
+            );
+        }
+
         if (!(transformedContent instanceof RelationshipTemplateContent)) return;
+
+        if (transformedContent.onNewRelationship.expiresAt?.isAfter(templateExpiresAt)) {
+            return RuntimeErrors.relationshipTemplates.requestCannotExpireAfterRelationshipTemplate();
+        }
 
         const validationResult = await this.outgoingRequestsController.canCreate({ content: transformedContent.onNewRelationship });
         if (validationResult.isError()) return validationResult.error;

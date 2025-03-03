@@ -1,19 +1,22 @@
 import { ServalError } from "@js-soft/ts-serval";
 import { EventBus } from "@js-soft/ts-utils";
 import { RequestItem, RequestItemGroup, Response, ResponseItemDerivations, ResponseItemGroup, ResponseResult } from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreId, Message, RelationshipTemplate, SynchronizedCollection, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreId } from "@nmshd/core-types";
+import { Message, PeerDeletionStatus, Relationship, RelationshipStatus, RelationshipTemplate, SynchronizedCollection, TransportCoreErrors } from "@nmshd/transport";
 import { ConsumptionBaseController } from "../../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../../consumption/ConsumptionController";
 import { ConsumptionControllerName } from "../../../consumption/ConsumptionControllerName";
+import { ConsumptionCoreErrors } from "../../../consumption/ConsumptionCoreErrors";
 import { ConsumptionError } from "../../../consumption/ConsumptionError";
 import { ConsumptionIds } from "../../../consumption/ConsumptionIds";
-import { CoreErrors } from "../../../consumption/CoreErrors";
+import { mergeResults } from "../../common";
 import { ValidationResult } from "../../common/ValidationResult";
 import { IncomingRequestReceivedEvent, IncomingRequestStatusChangedEvent } from "../events";
 import { RequestItemProcessorRegistry } from "../itemProcessors/RequestItemProcessorRegistry";
 import { ILocalRequestSource, LocalRequest } from "../local/LocalRequest";
 import { LocalRequestStatus } from "../local/LocalRequestStatus";
 import { LocalResponse, LocalResponseSource } from "../local/LocalResponse";
+import { validateKeyUniquenessOfRelationshipAttributesWithinIncomingRequest } from "../utility/validateRelationshipAttributesWithinRequest";
 import { DecideRequestParametersValidator } from "./DecideRequestParametersValidator";
 import { CheckPrerequisitesOfIncomingRequestParameters, ICheckPrerequisitesOfIncomingRequestParameters } from "./checkPrerequisites/CheckPrerequisitesOfIncomingRequestParameters";
 import { CompleteIncomingRequestParameters, ICompleteIncomingRequestParameters } from "./complete/CompleteIncomingRequestParameters";
@@ -35,7 +38,11 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         private readonly processorRegistry: RequestItemProcessorRegistry,
         parent: ConsumptionController,
         private readonly eventBus: EventBus,
-        private readonly identity: { address: CoreAddress }
+        private readonly identity: { address: CoreAddress },
+        private readonly relationshipResolver: {
+            getRelationshipToIdentity(id: CoreAddress): Promise<Relationship | undefined>;
+            getExistingRelationshipToIdentity(id: CoreAddress): Promise<Relationship | undefined>;
+        }
     ) {
         super(ConsumptionControllerName.RequestsController, parent);
     }
@@ -55,6 +62,11 @@ export class IncomingRequestsController extends ConsumptionBaseController {
             source: infoFromSource.source,
             statusLog: []
         });
+
+        if (!(await this.relationshipResolver.getExistingRelationshipToIdentity(CoreAddress.from(infoFromSource.peer))) && infoFromSource.expiresAt) {
+            request.content.expiresAt = CoreDate.min(infoFromSource.expiresAt, request.content.expiresAt);
+            request.updateStatusBasedOnExpiration();
+        }
 
         await this.localRequests.create(request);
 
@@ -91,7 +103,8 @@ export class IncomingRequestsController extends ConsumptionBaseController {
             source: {
                 reference: template.id,
                 type: "RelationshipTemplate"
-            }
+            },
+            expiresAt: template.cache!.expiresAt
         };
     }
 
@@ -155,7 +168,15 @@ export class IncomingRequestsController extends ConsumptionBaseController {
     }
 
     public async canAccept(params: DecideRequestParametersJSON): Promise<ValidationResult> {
-        return await this.canDecide({ ...params, accept: true });
+        const canDecideResult = await this.canDecide({ ...params, accept: true });
+
+        if (canDecideResult.isError()) return canDecideResult;
+
+        const request = await this.getOrThrow(params.requestId);
+        const keyUniquenessValidationResult = validateKeyUniquenessOfRelationshipAttributesWithinIncomingRequest(request.content.items, params.items, this.identity.address);
+        if (keyUniquenessValidationResult.isError()) return keyUniquenessValidationResult;
+
+        return canDecideResult;
     }
 
     public async canReject(params: DecideRequestParametersJSON): Promise<ValidationResult> {
@@ -165,17 +186,51 @@ export class IncomingRequestsController extends ConsumptionBaseController {
     private async canDecide(params: InternalDecideRequestParametersJSON): Promise<ValidationResult> {
         // syntactic validation
         InternalDecideRequestParameters.from(params);
-
         const request = await this.getOrThrow(params.requestId);
+
+        const relationship = await this.relationshipResolver.getRelationshipToIdentity(request.peer);
+        // It is safe to decide an incoming Request when no Relationship is found as this is the case when the Request origins from onNewRelationship of the RelationshipTemplateContent
+        const possibleStatuses =
+            request.source?.type === "RelationshipTemplate" ? [RelationshipStatus.Active, RelationshipStatus.Rejected, RelationshipStatus.Revoked] : [RelationshipStatus.Active];
+
+        if (relationship && !possibleStatuses.includes(relationship.status)) {
+            return ValidationResult.error(
+                ConsumptionCoreErrors.requests.wrongRelationshipStatus(
+                    `You cannot decide a request from '${request.peer.toString()}' since the relationship is in status '${relationship.status}'.`
+                )
+            );
+        }
 
         this.assertRequestStatus(request, LocalRequestStatus.DecisionRequired, LocalRequestStatus.ManualDecisionRequired);
 
-        const validationResult = this.decideRequestParamsValidator.validate(params, request);
-        if (validationResult.isError()) return validationResult;
+        if (relationship?.peerDeletionInfo?.deletionStatus === PeerDeletionStatus.ToBeDeleted) {
+            return ValidationResult.error(
+                ConsumptionCoreErrors.requests.peerIsInDeletion(`You cannot decide a Request from peer '${request.peer.toString()}' since the peer is in deletion.`)
+            );
+        }
 
-        const itemResults = await this.canDecideItems(params.items, request.content.items, request);
+        if (relationship?.peerDeletionInfo?.deletionStatus === PeerDeletionStatus.Deleted) {
+            return ValidationResult.error(
+                ConsumptionCoreErrors.requests.peerIsDeleted(`You cannot decide a Request from peer '${request.peer.toString()}' since the peer is deleted.`)
+            );
+        }
 
-        return ValidationResult.fromItems(itemResults);
+        const validateRequestResult = this.decideRequestParamsValidator.validateRequest(params, request);
+        if (validateRequestResult.isError()) return validateRequestResult;
+
+        const validateItemsResult = this.decideRequestParamsValidator.validateItems(params, request);
+
+        const canDecideItemsResults = await this.canDecideItems(params.items, request.content.items, request);
+        const canDecideItemsResult = ValidationResult.fromItems(canDecideItemsResults);
+
+        try {
+            return mergeResults(validateItemsResult, canDecideItemsResult);
+        } catch (_) {
+            this._log.error(
+                `Merging '${JSON.stringify(validateItemsResult)}' and '${JSON.stringify(canDecideItemsResult)}' was not possible because their dimensions don't match.`
+            );
+            return validateItemsResult.isError() ? validateItemsResult : canDecideItemsResult;
+        }
     }
 
     private async canDecideGroup(params: DecideRequestItemGroupParametersJSON, requestItemGroup: RequestItemGroup, request: LocalRequest) {
@@ -215,10 +270,10 @@ export class IncomingRequestsController extends ConsumptionBaseController {
             return await processor.canReject(requestItem, params, request);
         } catch (e) {
             if (e instanceof ServalError) {
-                return ValidationResult.error(CoreErrors.requests.servalErrorDuringRequestItemProcessing(e));
+                return ValidationResult.error(ConsumptionCoreErrors.requests.servalErrorDuringRequestItemProcessing(e));
             }
 
-            return ValidationResult.error(CoreErrors.requests.unexpectedErrorDuringRequestItemProcessing(e));
+            return ValidationResult.error(ConsumptionCoreErrors.requests.unexpectedErrorDuringRequestItemProcessing(e));
         }
     }
 
@@ -339,7 +394,7 @@ export class IncomingRequestsController extends ConsumptionBaseController {
 
         if (parsedParams.responseSourceObject) {
             request.response!.source = LocalResponseSource.from({
-                type: parsedParams.responseSourceObject instanceof Message ? "Message" : "RelationshipChange",
+                type: parsedParams.responseSourceObject instanceof Message ? "Message" : "Relationship",
                 reference: parsedParams.responseSourceObject.id
             });
         } else if (!requestIsRejected || !requestIsFromTemplate) {
@@ -376,6 +431,7 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         if (!requestDoc) return;
 
         const localRequest = LocalRequest.from(requestDoc);
+
         return await this.updateRequestExpiry(localRequest);
     }
 
@@ -395,6 +451,21 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         await this.localRequests.update(requestDoc, request);
     }
 
+    public async delete(request: LocalRequest): Promise<void> {
+        if (request.status !== LocalRequestStatus.Expired) {
+            throw ConsumptionCoreErrors.requests.canOnlyDeleteIncomingRequestThatIsExpired(request.id.toString(), request.status);
+        }
+
+        await this.localRequests.delete(request);
+    }
+
+    public async deleteRequestsFromPeer(peer: CoreAddress): Promise<void> {
+        const requests = await this.getIncomingRequests({ peer: peer.toString() });
+        for (const request of requests) {
+            await this.localRequests.delete(request);
+        }
+    }
+
     private assertRequestStatus(request: LocalRequest, ...status: LocalRequestStatus[]) {
         if (!status.includes(request.status)) {
             throw new ConsumptionError(`Local Request has to be in status '${status.join("/")}'.`);
@@ -411,4 +482,5 @@ export class IncomingRequestsController extends ConsumptionBaseController {
 interface InfoFromSource {
     peer: ICoreAddress;
     source: ILocalRequestSource;
+    expiresAt?: CoreDate;
 }

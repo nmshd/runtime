@@ -1,8 +1,10 @@
-import { RandomCharacterRange } from "../util/Random";
+import { CoreId } from "@nmshd/core-types";
+import { Random, RandomCharacterRange } from "../util";
 import { TransportError } from "./TransportError";
-import { CoreId } from "./types/CoreId";
 
 export class CoreIdHelper {
+    public static notPrefixed = new CoreIdHelper("");
+
     private readonly coreIdRegex: RegExp;
 
     public constructor(
@@ -17,11 +19,16 @@ export class CoreIdHelper {
             throw new TransportError("This CoreIdHelper is set up for validation only.");
         }
 
-        return await CoreId.generate(this.prefix);
+        return await this.generateUnsafe();
     }
 
     public async generateUnsafe(): Promise<CoreId> {
-        return await CoreId.generate(this.prefix);
+        if (this.prefix.length > 6) {
+            throw new Error(`The prefix "${this.prefix}" is too long. It must not be longer than 6 characters.`);
+        }
+
+        const random = await Random.string(20 - this.prefix.length, RandomCharacterRange.Alphanumeric);
+        return CoreId.from(this.prefix.toUpperCase() + random);
     }
 
     public validate(id: string | CoreId): boolean {

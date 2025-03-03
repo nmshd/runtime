@@ -1,4 +1,4 @@
-import { CoreId } from "@nmshd/transport";
+import { CoreId } from "@nmshd/core-types";
 import { Response, ResponseItemJSON, ResponseItemResult, ResponseJSON, ResponseResult, ResponseWrapper } from "../../src";
 
 describe("ResponseWrapper", function () {

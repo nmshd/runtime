@@ -20,7 +20,7 @@ abstract class SerializableHelperStatic {
 export class GenericValueTest {
     public runParametrized(testParameters: GenericValueTestParameters): void {
         describe(`${testParameters.testName}`, function () {
-            if (typeof testParameters.valueString !== "undefined") {
+            if (testParameters.valueString) {
                 test("serializes as String", function () {
                     const deserialized = testParameters.typeClass.fromAny(testParameters.valueJSON);
                     expect(deserialized).toBeInstanceOf(AbstractAttributeValue);

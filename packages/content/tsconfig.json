@@ -6,5 +6,5 @@
     },
     "include": ["src/**/*.ts"],
     "exclude": [],
-    "references": [{ "path": "../transport" }]
+    "references": [{ "path": "../core-types" }]
 }

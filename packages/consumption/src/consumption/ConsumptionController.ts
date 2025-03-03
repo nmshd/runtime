@@ -11,8 +11,9 @@ import {
     ReadAttributeRequestItem,
     RegisterAttributeListenerRequestItem,
     ShareAttributeRequestItem,
-    ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem
+    ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem
 } from "@nmshd/content";
+import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { AccountController, Transport } from "@nmshd/transport";
 import {
     AttributeListenersController,
@@ -22,6 +23,7 @@ import {
     DraftsController,
     FreeTextRequestItemProcessor,
     GenericRequestItemProcessor,
+    IdentityMetadataController,
     IncomingRequestsController,
     NotificationItemConstructor,
     NotificationItemProcessorConstructor,
@@ -39,13 +41,15 @@ import {
     RequestItemProcessorRegistry,
     SettingsController,
     ShareAttributeRequestItemProcessor,
-    ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemProcessor
+    ThirdPartyRelationshipAttributeDeletedByPeerNotificationItemProcessor
 } from "../modules";
+import { ConsumptionConfig } from "./ConsumptionConfig";
 
 export class ConsumptionController {
     public constructor(
         public readonly transport: Transport,
-        public readonly accountController: AccountController
+        public readonly accountController: AccountController,
+        public readonly consumptionConfig: ConsumptionConfig
     ) {}
 
     private _attributes: AttributesController;
@@ -83,11 +87,21 @@ export class ConsumptionController {
         return this._notifications;
     }
 
+    private _identityMetadata: IdentityMetadataController;
+    public get identityMetadata(): IdentityMetadataController {
+        return this._identityMetadata;
+    }
+
     public async init(
         requestItemProcessorOverrides = new Map<RequestItemConstructor, RequestItemProcessorConstructor>(),
         notificationItemProcessorOverrides = new Map<NotificationItemConstructor, NotificationItemProcessorConstructor>()
     ): Promise<ConsumptionController> {
-        this._attributes = await new AttributesController(this, this.transport.eventBus, this.accountController.identity).init();
+        this._attributes = await new AttributesController(
+            this,
+            this.transport.eventBus,
+            this.accountController.identity,
+            this.consumptionConfig.setDefaultRepositoryAttributes
+        ).init();
         this._drafts = await new DraftsController(this).init();
 
         const requestItemProcessorRegistry = new RequestItemProcessorRegistry(this, this.getDefaultRequestItemProcessors());
@@ -109,7 +123,8 @@ export class ConsumptionController {
             requestItemProcessorRegistry,
             this,
             this.transport.eventBus,
-            this.accountController.identity
+            this.accountController.identity,
+            this.accountController.relationships
         ).init();
 
         const notificationItemProcessorRegistry = new NotificationItemProcessorRegistry(this, this.getDefaultNotificationItemProcessors());
@@ -125,6 +140,8 @@ export class ConsumptionController {
             this.transport.eventBus,
             this.accountController.activeDevice
         ).init();
+
+        this._identityMetadata = await new IdentityMetadataController(this).init();
 
         this._settings = await new SettingsController(this).init();
         this._attributeListeners = await new AttributeListenersController(this, this.transport.eventBus, this.accountController.identity).init();
@@ -150,7 +167,17 @@ export class ConsumptionController {
             [PeerSharedAttributeSucceededNotificationItem, PeerSharedAttributeSucceededNotificationItemProcessor],
             [OwnSharedAttributeDeletedByOwnerNotificationItem, OwnSharedAttributeDeletedByOwnerNotificationItemProcessor],
             [PeerSharedAttributeDeletedByPeerNotificationItem, PeerSharedAttributeDeletedByPeerNotificationItemProcessor],
-            [ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem, ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItemProcessor]
+            [ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem, ThirdPartyRelationshipAttributeDeletedByPeerNotificationItemProcessor]
         ]);
+    }
+
+    public async cleanupDataOfDecomposedRelationship(peer: CoreAddress, relationshipId: CoreId): Promise<void> {
+        await this.attributes.deleteAttributesExchangedWithPeer(peer);
+        await this.outgoingRequests.deleteRequestsToPeer(peer);
+        await this.incomingRequests.deleteRequestsFromPeer(peer);
+        await this.settings.deleteSettingsForRelationship(relationshipId);
+        await this.attributeListeners.deletePeerAttributeListeners(peer);
+        await this.notifications.deleteNotificationsExchangedWithPeer(peer);
+        await this.identityMetadata.deleteIdentityMetadataReferencedWithPeer(peer);
     }
 }

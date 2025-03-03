@@ -1,6 +1,8 @@
 import { Serializable } from "@js-soft/ts-serval";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
-import { CoreAddress, CoreCrypto, CoreDate, CoreErrors, CoreId, CoreSerializable, IConfig } from "../../core";
+import { CoreCrypto, IConfig, ICorrelator, TransportCoreErrors } from "../../core";
+import { PasswordProtection } from "../../core/types/PasswordProtection";
 import { AnonymousTokenClient } from "./backbone/AnonymousTokenClient";
 import { CachedToken } from "./local/CachedToken";
 import { Token } from "./local/Token";
@@ -8,33 +10,45 @@ import { TokenReference } from "./transmission/TokenReference";
 
 export class AnonymousTokenController {
     private readonly client: AnonymousTokenClient;
-    public constructor(config: IConfig) {
-        this.client = new AnonymousTokenClient(config);
+    public constructor(config: IConfig, correlator?: ICorrelator) {
+        this.client = new AnonymousTokenClient(config, correlator);
     }
 
-    public async loadPeerTokenByTruncated(truncated: string): Promise<Token> {
+    public async loadPeerTokenByTruncated(truncated: string, password?: string): Promise<Token> {
         const reference = TokenReference.fromTruncated(truncated);
-        return await this.loadPeerTokenByReference(reference);
+
+        if (reference.passwordProtection && !password) throw TransportCoreErrors.general.noPasswordProvided();
+        const passwordProtection = reference.passwordProtection
+            ? PasswordProtection.from({
+                  salt: reference.passwordProtection.salt,
+                  passwordType: reference.passwordProtection.passwordType,
+                  password: password!
+              })
+            : undefined;
+
+        return await this.loadPeerToken(reference.id, reference.key, reference.forIdentityTruncated, passwordProtection);
     }
 
-    public async loadPeerTokenByReference(tokenReference: TokenReference): Promise<Token> {
-        return await this.loadPeerToken(tokenReference.id, tokenReference.key);
-    }
+    private async loadPeerToken(id: CoreId, secretKey: CryptoSecretKey, forIdentityTruncated?: string, passwordProtection?: PasswordProtection): Promise<Token> {
+        if (forIdentityTruncated) {
+            throw TransportCoreErrors.general.notIntendedForYou(id.toString());
+        }
 
-    public async loadPeerToken(id: CoreId, secretKey: CryptoSecretKey): Promise<Token> {
-        const response = (await this.client.getToken(id.toString())).value;
+        const hashedPassword = passwordProtection ? (await CoreCrypto.deriveHashOutOfPassword(passwordProtection.password, passwordProtection.salt)).toBase64() : undefined;
+        const response = (await this.client.getToken(id.toString(), hashedPassword)).value;
 
         const cipher = CryptoCipher.fromBase64(response.content);
         const plaintextTokenBuffer = await CoreCrypto.decrypt(cipher, secretKey);
-        const plaintextTokenContent = CoreSerializable.deserializeUnknown(plaintextTokenBuffer.toUtf8());
+        const plaintextTokenContent = Serializable.deserializeUnknown(plaintextTokenBuffer.toUtf8());
 
         if (!(plaintextTokenContent instanceof Serializable)) {
-            throw CoreErrors.tokens.invalidTokenContent(id.toString());
+            throw TransportCoreErrors.tokens.invalidTokenContent(id.toString());
         }
         const token = Token.from({
             id: id,
             secretKey: secretKey,
-            isOwn: false
+            isOwn: false,
+            passwordProtection
         });
 
         const cachedToken = CachedToken.from({

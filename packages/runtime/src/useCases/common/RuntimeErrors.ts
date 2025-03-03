@@ -1,5 +1,6 @@
 import { ApplicationError } from "@js-soft/ts-utils";
-import { CoreAddress, CoreId } from "@nmshd/transport";
+import { LocalAttribute } from "@nmshd/consumption";
+import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { Base64ForIdPrefix } from "./Base64ForIdPrefix";
 
 class General {
@@ -44,7 +45,7 @@ class General {
     }
 
     public invalidTokenContent() {
-        return new ApplicationError("error.runtime.invalidTokenContent", "The given token has an invalid content for this route.");
+        return new ApplicationError("error.runtime.invalidTokenContent", "The given Token has an invalid content for this route.");
     }
 
     public cacheEmpty(entityName: string | Function, id: string) {
@@ -70,31 +71,93 @@ class Files {
     public invalidReference(reference: string): ApplicationError {
         return new ApplicationError(
             "error.runtime.files.invalidReference",
-            `The given reference '${reference}' is not valid. The reference for a file must start with '${Base64ForIdPrefix.Token}' or '${Base64ForIdPrefix.File}'.`
+            `The given reference '${reference}' is not valid. The reference for a File must start with '${Base64ForIdPrefix.Token}' or '${Base64ForIdPrefix.File}'.`
         );
     }
 }
 
 class RelationshipTemplates {
+    public personalizationMustBeInherited(): ApplicationError {
+        return new ApplicationError(
+            "error.runtime.relationshipTemplates.personalizationMustBeInherited",
+            "If a RelationshipTemplate is personalized, Tokens created from it must have the same personalization."
+        );
+    }
+
+    public passwordProtectionMustBeInherited(): ApplicationError {
+        return new ApplicationError(
+            "error.runtime.relationshipTemplates.passwordProtectionMustBeInherited",
+            "If a RelationshipTemplate has password protection, Tokens created from it must have the same password protection."
+        );
+    }
+
     public cannotCreateTokenForPeerTemplate(): ApplicationError {
-        return new ApplicationError("error.runtime.relationshipTemplates.cannotCreateTokenForPeerTemplate", "You cannot create a token for a peer template.");
+        return new ApplicationError("error.runtime.relationshipTemplates.cannotCreateTokenForPeerTemplate", "You cannot create a Token for a peer RelationshipTemplate.");
     }
 
     public cannotCreateQRCodeForPeerTemplate(): ApplicationError {
-        return new ApplicationError("error.runtime.relationshipTemplates.cannotCreateQRCodeForPeerTemplate", "You cannot create a QRCode for a peer template.");
+        return new ApplicationError("error.runtime.relationshipTemplates.cannotCreateQRCodeForPeerTemplate", "You cannot create a QR code for a peer RelationshipTemplate.");
     }
 
     public invalidReference(reference: string): ApplicationError {
         return new ApplicationError(
             "error.runtime.relationshipTemplates.invalidReference",
-            `The given reference '${reference}' is not valid. The reference for a relationship template must start with '${Base64ForIdPrefix.Token}' or '${Base64ForIdPrefix.RelationshipTemplate}'.`
+            `The given reference '${reference}' is not valid. The reference for a RelationshipTemplate must start with '${Base64ForIdPrefix.Token}' or '${Base64ForIdPrefix.RelationshipTemplate}'.`
+        );
+    }
+
+    public requestCannotExpireAfterRelationshipTemplate(): ApplicationError {
+        return new ApplicationError(
+            "error.runtime.relationshipTemplates.requestCannotExpireAfterRelationshipTemplate",
+            "The expiration date of the Request within the onNewRelationship property of the RelationshipTemplateContent must be set such that the expiration date of the RelationshipTemplate is not exceeded."
+        );
+    }
+}
+
+class Relationships {
+    public isNeitherRejectedNorRevoked(): ApplicationError {
+        return new ApplicationError("error.runtime.relationships.isNeitherRejectedNorRevoked", "The status of the Relationship is neither 'Rejected' nor 'Revoked'.");
+    }
+
+    public noAcceptedIncomingRequest(): ApplicationError {
+        return new ApplicationError(
+            "error.runtime.relationships.noAcceptedIncomingRequest",
+            "There is no accepted incoming Request associated with the RelationshipTemplateContent of the RelationshipTemplate."
+        );
+    }
+
+    public wrongResponseProvidedAsCreationContent(): ApplicationError {
+        return new ApplicationError(
+            "error.runtime.relationships.wrongResponseProvidedAsCreationContent",
+            "The Response of the accepted incoming Request associated with the RelationshipTemplateContent must be provided as the response of the RelationshipCreationContent."
         );
     }
 }
 
 class Messages {
+    public hasNoActiveRelationship(addresses: string[]) {
+        return new ApplicationError(
+            "error.runtime.messages.hasNoActiveRelationship",
+            `The Message cannot be sent as there is no active Relationship to the recipient(s) with the following address(es): ${addresses.map((address) => `'${address}'`).join(", ")}. However, please note that Messages whose content is a Notification can be sent on terminated Relationships as well.`
+        );
+    }
+
+    public cannotSendMessageWithExpiredRequest() {
+        return new ApplicationError(
+            "error.runtime.messages.cannotSendMessageWithExpiredRequest",
+            "The Message cannot be sent as the contained Request is already expired. Please create a new Request and try again."
+        );
+    }
+
+    public peerIsInDeletion(addresses: string[]) {
+        return new ApplicationError(
+            "error.runtime.messages.peerIsInDeletion",
+            `The Message cannot be sent as the recipient(s) with the following address(es) being in deletion: ${addresses.map((address) => `'${address}'`).join(", ")}. However, please note that Messages whose content is a Notification can be sent to recipients in deletion.`
+        );
+    }
+
     public fileNotFoundInMessage(attachmentId: string) {
-        return new ApplicationError("error.runtime.messages.fileNotFoundInMessage", `The requested file '${attachmentId}' was not found in the given message.`);
+        return new ApplicationError("error.runtime.messages.fileNotFoundInMessage", `The requested File '${attachmentId}' was not found in the given Message.`);
     }
 }
 
@@ -124,11 +187,14 @@ class Challenges {
 
 class Notifications {
     public cannotReceiveNotificationFromOwnMessage(): ApplicationError {
-        return new ApplicationError("error.runtime.notifications.cannotReceiveNotificationFromOwnMessage", "Cannot receive Notification from own message.");
+        return new ApplicationError("error.runtime.notifications.cannotReceiveNotificationFromOwnMessage", "Cannot receive Notification from own Message.");
     }
 
-    public cannotSaveSentNotificationFromPeerMessage(): ApplicationError {
-        return new ApplicationError("error.runtime.notifications.cannotSaveSendNotificationFromPeerMessage", "Cannot send Notification from peer message.");
+    public cannotSaveSentNotificationFromPeerMessage(messageId: CoreId): ApplicationError {
+        return new ApplicationError(
+            "error.runtime.notifications.cannotSaveSentNotificationFromPeerMessage",
+            `The Message '${messageId}' was received from a peer, but an own Message is expected here to save its Notification content.`
+        );
     }
 
     public messageDoesNotContainNotification(messageId: CoreId): ApplicationError {
@@ -141,7 +207,7 @@ class Notifications {
 
 class Attributes {
     public isNotRepositoryAttribute(attributeId: CoreId | string): ApplicationError {
-        return new ApplicationError("error.runtime.attributes.isNotRepositoryAttribute", `Attribute '${attributeId.toString()}' is not a repository attribute.`);
+        return new ApplicationError("error.runtime.attributes.isNotRepositoryAttribute", `Attribute '${attributeId.toString()}' is not a RepositoryAttribute.`);
     }
 
     public repositoryAttributeHasAlreadyBeenSharedWithPeer(
@@ -151,40 +217,61 @@ class Attributes {
     ): ApplicationError {
         return new ApplicationError(
             "error.runtime.attributes.repositoryAttributeHasAlreadyBeenSharedWithPeer",
-            `Repository attribute '${repositoryAttributeId.toString()}' has already been shared with peer '${peer.toString()}'. ID of own shared identity attribute: ${ownSharedIdentityAttributeId.toString()}.`
-        );
-    }
-
-    public anotherVersionOfRepositoryAttributeHasAlreadyBeenSharedWithPeer(
-        repositoryAttributeId: CoreId | string,
-        peer: CoreAddress | string,
-        ownSharedIdentityAttributeId: CoreId | string
-    ): ApplicationError {
-        return new ApplicationError(
-            "error.runtime.attributes.anotherVersionOfRepositoryAttributeHasAlreadyBeenSharedWithPeer",
-            `Another version of repository attribute '${repositoryAttributeId.toString()}' has already been shared with peer '${peer.toString()}'. ID of previous own shared identity attribute: ${ownSharedIdentityAttributeId.toString()}.`
+            `RepositoryAttribute '${repositoryAttributeId.toString()}' has already been shared with peer '${peer.toString()}'. ID of own shared IdentityAttribute: '${ownSharedIdentityAttributeId.toString()}'.`
         );
     }
 
     public noPreviousVersionOfRepositoryAttributeHasBeenSharedWithPeerBefore(repositoryAttributeId: CoreId | string, peer: CoreAddress | string): ApplicationError {
         return new ApplicationError(
             "error.runtime.attributes.noPreviousVersionOfRepositoryAttributeHasBeenSharedWithPeerBefore",
-            `No previous version of repository attribute '${repositoryAttributeId.toString()}' has been shared with peer '${peer.toString()}' before. If you wish to execute an initial sharing of this attribute, use 'ShareRepositoryAttribute'.`
+            `No previous version of the RepositoryAttribute '${repositoryAttributeId.toString()}' has been shared with peer '${peer.toString()}' before. If you wish to execute an initial sharing of this Attribute, use the ShareRepositoryAttributeUseCase instead.`
         );
     }
 
     public isNotOwnSharedAttribute(attributeId: CoreId | string): ApplicationError {
-        return new ApplicationError("error.runtime.attributes.isNotOwnSharedAttribute", `Attribute '${attributeId.toString()}' is not an own shared attribute.`);
+        return new ApplicationError("error.runtime.attributes.isNotOwnSharedAttribute", `Attribute '${attributeId.toString()}' is not an own shared Attribute.`);
     }
 
     public isNotPeerSharedAttribute(attributeId: CoreId | string): ApplicationError {
-        return new ApplicationError("error.runtime.attributes.isNotPeerSharedAttribute", `Attribute '${attributeId.toString()}' is not a peer shared attribute.`);
+        return new ApplicationError("error.runtime.attributes.isNotPeerSharedAttribute", `Attribute '${attributeId.toString()}' is not a peer shared Attribute.`);
     }
 
-    public isNotThirdPartyOwnedRelationshipAttribute(attributeId: CoreId | string): ApplicationError {
+    public isNotThirdPartyRelationshipAttribute(attributeId: CoreId | string): ApplicationError {
         return new ApplicationError(
-            "error.runtime.attributes.isNotThirdPartyOwnedRelationshipAttribute",
-            `Attribute '${attributeId.toString()}' is not a third party owned relationship attribute.`
+            "error.runtime.attributes.isNotThirdPartyRelationshipAttribute",
+            `Attribute '${attributeId.toString()}' is not a ThirdPartyRelationshipAttribute.`
+        );
+    }
+
+    public hasSuccessor(predecessor: LocalAttribute): ApplicationError {
+        return new ApplicationError(
+            "error.runtime.attributes.hasSuccessor",
+            `Attribute '${predecessor.id.toString()}' already has a successor ${predecessor.succeededBy?.toString()}.`
+        );
+    }
+
+    public cannotSeparatelyDeleteChildOfComplexAttribute(attributeId: CoreId | string): ApplicationError {
+        return new ApplicationError(
+            "error.runtime.attributes.cannotSeparatelyDeleteChildOfComplexAttribute",
+            `Attribute '${attributeId.toString()}' is a child of a complex Attribute. If you want to delete it, you must delete its parent.`
+        );
+    }
+
+    public cannotCreateDuplicateRepositoryAttribute(attributeId: CoreId | string): ApplicationError {
+        return new ApplicationError(
+            "error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute",
+            `The RepositoryAttribute cannot be created because it has the same content.value as the already existing RepositoryAttribute with id '${attributeId.toString()}'.`
+        );
+    }
+
+    public setDefaultRepositoryAttributesIsDisabled(): ApplicationError {
+        return new ApplicationError("error.runtime.attributes.setDefaultRepositoryAttributesIsDisabled", "Setting default RepositoryAttributes is disabled for this Account.");
+    }
+
+    public cannotDeleteSharedAttributeWhileRelationshipIsPending(): ApplicationError {
+        return new ApplicationError(
+            "error.runtime.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending",
+            "The shared Attribute cannot be deleted while the Relationship to the peer is in status 'Pending'."
         );
     }
 }
@@ -210,15 +297,47 @@ class IdentityDeletionProcess {
     }
 }
 
+class IdentityMetadata {
+    public notFound() {
+        return new ApplicationError("error.runtime.identityMetadata.notFound", "There is no stored IdentityMetadata for the specified combination of reference and key.");
+    }
+
+    public unfamiliarReferencedIdentity() {
+        return new ApplicationError(
+            "error.runtime.identityMetadata.unfamiliarReferencedIdentity",
+            "The reference of the IdentityMetadata resolves neither to the address of a peer of a Relationship nor the address of the own Identity."
+        );
+    }
+}
+
+class IdentityRecoveryKits {
+    public datawalletDisabled() {
+        return new ApplicationError(
+            "error.runtime.identityRecoveryKits.datawalletDisabled",
+            "The Datawallet is disabled. IdentityRecoveryKits will only work if the Datawallet is enabled."
+        );
+    }
+}
+
+class DeciderModule {
+    public requestConfigDoesNotMatchResponseConfig() {
+        return new ApplicationError("error.runtime.decide.requestConfigDoesNotMatchResponseConfig", "The RequestConfig does not match the ResponseConfig.");
+    }
+}
+
 export class RuntimeErrors {
     public static readonly general = new General();
     public static readonly serval = new Serval();
     public static readonly startup = new Startup();
     public static readonly files = new Files();
     public static readonly relationshipTemplates = new RelationshipTemplates();
+    public static readonly relationships = new Relationships();
     public static readonly messages = new Messages();
     public static readonly challenges = new Challenges();
     public static readonly notifications = new Notifications();
     public static readonly attributes = new Attributes();
     public static readonly identityDeletionProcess = new IdentityDeletionProcess();
+    public static readonly identityMetadata = new IdentityMetadata();
+    public static readonly identityRecoveryKits = new IdentityRecoveryKits();
+    public static readonly deciderModule = new DeciderModule();
 }

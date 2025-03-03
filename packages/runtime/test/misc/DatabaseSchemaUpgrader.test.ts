@@ -3,9 +3,11 @@ import { LokiJsConnection } from "@js-soft/docdb-access-loki";
 import { MongoDbConnection } from "@js-soft/docdb-access-mongo";
 import { NodeLoggerFactory } from "@js-soft/node-logger";
 import { EventEmitter2EventBus } from "@js-soft/ts-utils";
-import { ConsumptionController, LocalAttribute, LocalRequest, LocalRequestStatus } from "@nmshd/consumption";
+import { ConsumptionController, LocalAttribute, LocalRequest } from "@nmshd/consumption";
 import { DisplayName, IdentityAttribute } from "@nmshd/content";
-import { AccountController, CoreAddress, CoreDate, CoreId, Transport } from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { AccountController, Transport } from "@nmshd/transport";
+import { LocalRequestStatus } from "../../src";
 import { DatabaseSchemaUpgrader, UPGRADE_LOGIC } from "../../src/DatabaseSchemaUpgrader";
 import { RuntimeServiceProvider, TestRequestItem } from "../lib";
 
@@ -56,7 +58,7 @@ beforeAll(async () => {
     const db = await transport.createDatabase(`acc-${randomAccountName}`);
 
     accountController = await new AccountController(transport, db, transport.config).init();
-    consumptionController = await new ConsumptionController(transport, accountController).init();
+    consumptionController = await new ConsumptionController(transport, accountController, { setDefaultRepositoryAttributes: false }).init();
 }, 30000);
 
 afterAll(async () => {

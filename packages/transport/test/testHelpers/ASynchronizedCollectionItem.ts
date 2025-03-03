@@ -1,10 +1,8 @@
 import { serialize, validate } from "@js-soft/ts-serval";
 import { nameof } from "ts-simple-nameof";
-import { CoreId, CoreSynchronizable, ICoreSerializable } from "../../src";
+import { CoreSynchronizable, ICoreSynchronizable } from "../../src";
 
-interface IASynchronizedCollectionItem extends ICoreSerializable {
-    id: CoreId;
-
+interface IASynchronizedCollectionItem extends ICoreSynchronizable {
     someTechnicalStringProperty?: string;
     someTechnicalNumberProperty?: number;
     someTechnicalBooleanProperty?: boolean;

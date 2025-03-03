@@ -1,6 +1,6 @@
 import { Serializable, serialize, type, validate, ValidationError } from "@js-soft/ts-serval";
 import { IdentityAttribute, IdentityAttributeJSON, RelationshipAttribute, RelationshipAttributeJSON } from "@nmshd/content";
-import { CoreId } from "@nmshd/transport";
+import { CoreId } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionError } from "../../../../consumption/ConsumptionError";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
@@ -34,11 +34,11 @@ export class AcceptProposeAttributeRequestItemParameters extends Serializable {
     public attribute?: IdentityAttribute | RelationshipAttribute;
 
     public isWithExistingAttribute(): this is { attributeId: CoreId } {
-        return typeof this.attributeId !== "undefined";
+        return !!this.attributeId;
     }
 
     public isWithNewAttribute(): this is { attribute: IdentityAttribute | RelationshipAttribute } {
-        return typeof this.attribute !== "undefined";
+        return !!this.attribute;
     }
 
     public static from(value: AcceptProposeAttributeRequestItemParametersJSON): AcceptProposeAttributeRequestItemParameters {

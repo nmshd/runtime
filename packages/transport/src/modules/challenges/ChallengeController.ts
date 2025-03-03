@@ -1,9 +1,11 @@
 import { log } from "@js-soft/ts-utils";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoSignatureKeypair } from "@nmshd/crypto";
-import { CoreAddress, CoreCrypto, CoreDate, CoreErrors, CoreId } from "../../core";
+import { CoreCrypto, TransportCoreErrors } from "../../core";
 import { ControllerName, TransportController } from "../../core/TransportController";
 import { AccountController } from "../accounts/AccountController";
 import { Relationship } from "../relationships/local/Relationship";
+import { RelationshipStatus } from "../relationships/transmission/RelationshipStatus";
 import { ChallengeAuthClient } from "./backbone/ChallengeAuthClient";
 import { ChallengeClient } from "./backbone/ChallengeClient";
 import { Challenge, ChallengeType } from "./data/Challenge";
@@ -20,8 +22,8 @@ export class ChallengeController extends TransportController {
     public override async init(): Promise<this> {
         await super.init();
 
-        this.client = new ChallengeClient(this.config);
-        this.authClient = new ChallengeAuthClient(this.config, this.parent.authenticator);
+        this.client = new ChallengeClient(this.config, this.transport.correlator);
+        this.authClient = new ChallengeAuthClient(this.config, this.parent.authenticator, this.transport.correlator);
         return this;
     }
 
@@ -31,7 +33,7 @@ export class ChallengeController extends TransportController {
 
         const relationship = await this.parent.relationships.getActiveRelationshipToIdentity(challenge.createdBy);
         if (!relationship) {
-            throw CoreErrors.general.recordNotFound(Relationship, challenge.createdBy.toString());
+            throw TransportCoreErrors.general.recordNotFound(Relationship, challenge.createdBy.toString());
         }
         const challengeBuffer = CoreBuffer.fromUtf8(signedChallenge.challenge);
         let isValid = false;
@@ -40,7 +42,7 @@ export class ChallengeController extends TransportController {
                 isValid = await this.parent.relationships.verifyIdentity(relationship, challengeBuffer, signedChallenge.signature);
                 break;
             case ChallengeType.Device:
-                throw CoreErrors.general.notSupported();
+                throw TransportCoreErrors.general.notSupported();
             case ChallengeType.Relationship:
                 isValid = await this.parent.relationships.verify(relationship, challengeBuffer, signedChallenge.signature);
                 break;
@@ -87,8 +89,8 @@ export class ChallengeController extends TransportController {
 
     @log()
     public async createChallenge(type: ChallengeType = ChallengeType.Identity, relationship?: Relationship): Promise<ChallengeSigned> {
-        if (type === ChallengeType.Relationship && !relationship) {
-            throw CoreErrors.challenges.challengeTypeRequiresRelationship();
+        if (type === ChallengeType.Relationship && relationship?.status !== RelationshipStatus.Active) {
+            throw TransportCoreErrors.challenges.challengeTypeRequiresActiveRelationship();
         }
 
         const backboneResponse = (await this.authClient.createChallenge()).value;

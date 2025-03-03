@@ -8,4 +8,5 @@ export class ConsumptionIds {
     public static readonly request = new CoreIdHelper("REQ");
     public static readonly attributeListener = new CoreIdHelper("ATL");
     public static readonly notification = new CoreIdHelper("NOT");
+    public static readonly identityMetadata = new CoreIdHelper("IDM");
 }

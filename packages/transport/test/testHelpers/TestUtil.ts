@@ -7,21 +7,24 @@ import { NodeLoggerFactory } from "@js-soft/node-logger";
 import { SimpleLoggerFactory } from "@js-soft/simple-logger";
 import { ISerializable, Serializable } from "@js-soft/ts-serval";
 import { EventEmitter2EventBus, sleep } from "@js-soft/ts-utils";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
+import fs from "fs";
 import { DurationLike } from "luxon";
+import path from "path";
+import { GenericContainer, Wait } from "testcontainers";
 import { LogLevel } from "typescript-logging";
 import {
     AccountController,
     ChangedItems,
-    CoreAddress,
-    CoreDate,
-    CoreId,
     DependencyOverrides,
     DeviceSharedSecret,
     File,
     IChangedItems,
     IConfigOverwrite,
+    ICorrelator,
     IdentityDeletionProcess,
+    IdentityUtil,
     ISendFileParameters,
     Message,
     Relationship,
@@ -121,44 +124,25 @@ export class TestUtil {
         return { winner: syncWinner, looser: syncLooser, thrownError: thrownError };
     }
 
-    public static async expectThrowsRequestErrorAsync(method: Function | Promise<any>, errorMessageRegexp?: RegExp | string, status?: number): Promise<void> {
-        return await this.expectThrowsAsync(method, (error: Error) => {
-            if (errorMessageRegexp) {
-                expect(error.message).toMatch(new RegExp(errorMessageRegexp));
-            }
-
-            expect(error).toBeInstanceOf(RequestError);
-
-            const requestError = error as RequestError;
-
-            expect(requestError.status).toStrictEqual(status);
-        });
-    }
-
-    public static async expectThrowsAsync(method: Function | Promise<any>, customExceptionMatcher: (e: Error) => void): Promise<void>;
-
-    public static async expectThrowsAsync(method: Function | Promise<any>, errorMessageRegexp: RegExp | string): Promise<void>;
-
-    public static async expectThrowsAsync(method: Function | Promise<any>, errorMessageRegexp: RegExp | string | ((e: Error) => void)): Promise<void> {
+    public static async expectThrowsRequestErrorAsync(promise: Promise<any>, errorMessageRegexp?: RegExp | string, status?: number): Promise<void> {
         let error: Error | undefined;
-        try {
-            if (typeof method === "function") {
-                await method();
-            } else {
-                await method;
-            }
-        } catch (err: any) {
-            error = err;
-        }
-        expect(error).toBeInstanceOf(Error);
 
-        if (typeof errorMessageRegexp === "function") {
-            errorMessageRegexp(error!);
-            return;
+        try {
+            await promise;
+        } catch (e) {
+            error = e as Error;
         }
+
+        expect(error).toBeInstanceOf(RequestError);
+
+        const requestError = error as RequestError;
 
         if (errorMessageRegexp) {
-            expect(error!.message).toMatch(new RegExp(errorMessageRegexp));
+            expect(requestError.message).toMatch(new RegExp(errorMessageRegexp));
+        }
+
+        if (status) {
+            expect(requestError.status).toStrictEqual(status);
         }
     }
 
@@ -173,12 +157,12 @@ export class TestUtil {
         return dbConnection;
     }
 
-    public static createTransport(connection: IDatabaseConnection, configOverwrite: Partial<IConfigOverwrite> = {}): Transport {
+    public static createTransport(connection: IDatabaseConnection, configOverwrite: Partial<IConfigOverwrite> = {}, correlator?: ICorrelator): Transport {
         const eventBus = TestUtil.createEventBus();
 
         const config = TestUtil.createConfig();
 
-        return new Transport(connection, { ...config, ...configOverwrite }, eventBus, TestUtil.loggerFactory);
+        return new Transport(connection, { ...config, ...configOverwrite }, eventBus, TestUtil.loggerFactory, correlator);
     }
 
     public static createEventBus(): EventEmitter2EventBus {
@@ -198,6 +182,7 @@ export class TestUtil {
             baseUrl: globalThis.process.env.NMSHD_TEST_BASEURL!,
             platformClientId: globalThis.process.env.NMSHD_TEST_CLIENTID!,
             platformClientSecret: globalThis.process.env.NMSHD_TEST_CLIENTSECRET!,
+            addressGenerationHostnameOverride: globalThis.process.env.NMSHD_TEST_ADDRESS_GENERATION_HOSTNAME_OVERRIDE,
             debug: true,
             supportedIdentityVersion: 1
         };
@@ -305,7 +290,7 @@ export class TestUtil {
         return accountController;
     }
 
-    public static async addRejectedRelationship(from: AccountController, to: AccountController): Promise<void> {
+    public static async exchangeTemplate(from: AccountController, to: AccountController): Promise<RelationshipTemplate> {
         const templateFrom = await from.relationshipTemplates.sendRelationshipTemplate({
             content: {
                 mycontent: "template"
@@ -314,11 +299,27 @@ export class TestUtil {
             maxNumberOfAllocations: 1
         });
 
-        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplate(templateFrom.id, templateFrom.secretKey);
+        const templateReference = templateFrom.toRelationshipTemplateReference().truncate();
+        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(templateReference);
+
+        return templateTo;
+    }
+
+    public static async addRejectedRelationship(from: AccountController, to: AccountController): Promise<Relationship> {
+        const templateFrom = await from.relationshipTemplates.sendRelationshipTemplate({
+            content: {
+                mycontent: "template"
+            },
+            expiresAt: CoreDate.utc().add({ minutes: 5 }),
+            maxNumberOfAllocations: 1
+        });
+
+        const reference = templateFrom.toRelationshipTemplateReference().truncate();
+        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(reference);
 
         await to.relationships.sendRelationship({
             template: templateTo,
-            content: {
+            creationContent: {
                 mycontent: "request"
             }
         });
@@ -329,17 +330,51 @@ export class TestUtil {
         const pendingRelationship = syncedRelationships[0];
         expect(pendingRelationship.status).toStrictEqual(RelationshipStatus.Pending);
 
-        const rejectedRelationshipFromSelf = await from.relationships.rejectChange(pendingRelationship.cache!.creationChange, {});
+        const rejectedRelationshipFromSelf = await from.relationships.reject(pendingRelationship.id);
         expect(rejectedRelationshipFromSelf.status).toStrictEqual(RelationshipStatus.Rejected);
 
-        // Get accepted relationship
+        // Get rejected relationship
         const syncedRelationshipsPeer = await TestUtil.syncUntilHasRelationships(to);
         expect(syncedRelationshipsPeer).toHaveLength(1);
-        const acceptedRelationshipPeer = syncedRelationshipsPeer[0];
-        expect(acceptedRelationshipPeer.status).toStrictEqual(RelationshipStatus.Rejected);
+        const rejectedRelationshipPeer = syncedRelationshipsPeer[0];
+        expect(rejectedRelationshipPeer.status).toStrictEqual(RelationshipStatus.Rejected);
+
+        return rejectedRelationshipFromSelf;
     }
 
-    public static async addRelationship(from: AccountController, to: AccountController): Promise<Relationship[]> {
+    public static async addPendingRelationship(from: AccountController, to: AccountController, template?: RelationshipTemplate): Promise<Relationship> {
+        const templateFrom =
+            template ??
+            (await from.relationshipTemplates.sendRelationshipTemplate({
+                content: {
+                    mycontent: "template"
+                },
+                expiresAt: CoreDate.utc().add({ minutes: 5 }),
+                maxNumberOfAllocations: 1
+            }));
+
+        const templateReference = templateFrom.toRelationshipTemplateReference().truncate();
+        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(templateReference);
+
+        await to.relationships.sendRelationship({
+            template: templateTo,
+            creationContent: {
+                mycontent: "request"
+            }
+        });
+
+        const syncedRelationshipsFromSelf = await TestUtil.syncUntilHasRelationships(from);
+        expect(syncedRelationshipsFromSelf).toHaveLength(1);
+        const pendingRelationshipFromSelf = syncedRelationshipsFromSelf[0];
+        expect(pendingRelationshipFromSelf.status).toStrictEqual(RelationshipStatus.Pending);
+
+        return pendingRelationshipFromSelf;
+    }
+
+    public static async addRelationship(
+        from: AccountController,
+        to: AccountController
+    ): Promise<{ acceptedRelationshipFromSelf: Relationship; acceptedRelationshipPeer: Relationship }> {
         const templateFrom = await from.relationshipTemplates.sendRelationshipTemplate({
             content: {
                 mycontent: "template"
@@ -348,22 +383,17 @@ export class TestUtil {
             maxNumberOfAllocations: 1
         });
 
-        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplate(templateFrom.id, templateFrom.secretKey);
+        return await this.addRelationshipWithExistingTemplate(from, to, templateFrom);
+    }
 
-        const relRequest = await to.relationships.sendRelationship({
-            template: templateTo,
-            content: {
-                mycontent: "request"
-            }
-        });
+    public static async addRelationshipWithExistingTemplate(
+        from: AccountController,
+        to: AccountController,
+        template: RelationshipTemplate
+    ): Promise<{ acceptedRelationshipFromSelf: Relationship; acceptedRelationshipPeer: Relationship }> {
+        const pendingRelationshipFromSelf = await TestUtil.addPendingRelationship(from, to, template);
 
-        // Accept relationship
-        const syncedRelationships = await TestUtil.syncUntilHasRelationships(from);
-        expect(syncedRelationships).toHaveLength(1);
-        const pendingRelationship = syncedRelationships[0];
-        expect(pendingRelationship.status).toStrictEqual(RelationshipStatus.Pending);
-
-        const acceptedRelationshipFromSelf = await from.relationships.acceptChange(pendingRelationship.cache!.creationChange, {});
+        const acceptedRelationshipFromSelf = await from.relationships.accept(pendingRelationshipFromSelf.id);
         expect(acceptedRelationshipFromSelf.status).toStrictEqual(RelationshipStatus.Active);
 
         // Get accepted relationship
@@ -375,10 +405,69 @@ export class TestUtil {
         expect(syncedRelationshipsPeer).toHaveLength(1);
         const acceptedRelationshipPeer = syncedRelationshipsPeer[0];
         expect(acceptedRelationshipPeer.status).toStrictEqual(RelationshipStatus.Active);
-        expect(relRequest.id.toString()).toBe(acceptedRelationshipFromSelf.id.toString());
-        expect(relRequest.id.toString()).toBe(acceptedRelationshipPeer.id.toString());
+        expect(acceptedRelationshipFromSelf.id.toString()).toBe(acceptedRelationshipPeer.id.toString());
 
-        return [acceptedRelationshipFromSelf, acceptedRelationshipPeer];
+        return { acceptedRelationshipFromSelf, acceptedRelationshipPeer };
+    }
+
+    public static async revokeRelationship(
+        from: AccountController,
+        to: AccountController
+    ): Promise<{ revokedRelationshipFromSelf: Relationship; revokedRelationshipPeer: Relationship }> {
+        const relationshipId = (await to.relationships.getRelationshipToIdentity(from.identity.address))!.id;
+        const revokedRelationshipPeer = await to.relationships.revoke(relationshipId);
+        const revokedRelationshipFromSelf = (await TestUtil.syncUntil(from, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
+
+        return { revokedRelationshipFromSelf, revokedRelationshipPeer };
+    }
+
+    public static async terminateRelationship(
+        from: AccountController,
+        to: AccountController
+    ): Promise<{ terminatedRelationshipFromSelf: Relationship; terminatedRelationshipPeer: Relationship }> {
+        const relationshipId = (await from.relationships.getRelationshipToIdentity(to.identity.address))!.id;
+        const terminatedRelationshipFromSelf = await from.relationships.terminate(relationshipId);
+        const terminatedRelationshipPeer = (await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
+
+        return { terminatedRelationshipFromSelf, terminatedRelationshipPeer };
+    }
+
+    public static async reactivateRelationship(
+        from: AccountController,
+        to: AccountController
+    ): Promise<{ reactivatedRelationshipFromSelf: Relationship; reactivatedRelationshipPeer: Relationship }> {
+        const relationshipId = (await from.relationships.getRelationshipToIdentity(to.identity.address))!.id;
+        await from.relationships.requestReactivation(relationshipId);
+        await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0);
+        const reactivatedRelationshipFromSelf = await to.relationships.acceptReactivation(relationshipId);
+        const reactivatedRelationshipPeer = (await TestUtil.syncUntil(from, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
+
+        return { reactivatedRelationshipFromSelf, reactivatedRelationshipPeer };
+    }
+
+    public static async decomposeRelationship(from: AccountController, to: AccountController): Promise<Relationship> {
+        const relationship = (await from.relationships.getRelationshipToIdentity(to.identity.address))!;
+        await from.relationships.decompose(relationship.id);
+        await from.cleanupDataOfDecomposedRelationship(relationship);
+        const decomposedRelationshipPeer = (await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
+
+        return decomposedRelationshipPeer;
+    }
+
+    public static async terminateAndDecomposeRelationshipMutually(from: AccountController, to: AccountController): Promise<void> {
+        await TestUtil.terminateRelationship(from, to);
+        await TestUtil.decomposeRelationship(from, to);
+
+        const relationship = (await to.relationships.getRelationshipToIdentity(from.identity.address))!;
+        await to.relationships.decompose(relationship.id);
+        await to.cleanupDataOfDecomposedRelationship(relationship);
+    }
+
+    public static async generateAddressPseudonym(backboneBaseUrl: string): Promise<CoreAddress> {
+        const pseudoPublicKey = CoreBuffer.fromUtf8("deleted identity");
+        const pseudonym = await IdentityUtil.createAddress({ algorithm: 1, publicKey: pseudoPublicKey }, new URL(backboneBaseUrl).hostname);
+
+        return pseudonym;
     }
 
     /**
@@ -412,8 +501,8 @@ export class TestUtil {
         return syncResult[key];
     }
 
-    public static async syncUntilHasMany<T extends keyof IChangedItems>(accountController: AccountController, key: T, expectedNumberOfMessages = 1): Promise<ChangedItems[T]> {
-        const syncResult = await TestUtil.syncUntil(accountController, (syncResult) => syncResult[key].length >= expectedNumberOfMessages);
+    public static async syncUntilHasMany<T extends keyof IChangedItems>(accountController: AccountController, key: T, expectedNumberOfItems = 1): Promise<ChangedItems[T]> {
+        const syncResult = await TestUtil.syncUntil(accountController, (syncResult) => syncResult[key].length >= expectedNumberOfItems);
 
         return syncResult[key];
     }
@@ -426,8 +515,8 @@ export class TestUtil {
         return await TestUtil.syncUntilHasMany(accountController, "identityDeletionProcesses");
     }
 
-    public static async syncUntilHasRelationships(accountController: AccountController): Promise<Relationship[]> {
-        return await TestUtil.syncUntilHasMany(accountController, "relationships");
+    public static async syncUntilHasRelationships(accountController: AccountController, expectedNumberOfRelationships?: number): Promise<Relationship[]> {
+        return await TestUtil.syncUntilHasMany(accountController, "relationships", expectedNumberOfRelationships);
     }
 
     public static async syncUntilHasRelationship(accountController: AccountController, id: CoreId): Promise<Relationship[]> {
@@ -499,7 +588,7 @@ export class TestUtil {
         }
         return await account.relationships.sendRelationship({
             template: template,
-            content: body
+            creationContent: body
         });
     }
 
@@ -510,12 +599,12 @@ export class TestUtil {
             throw new Error("token content not instanceof TokenContentRelationshipTemplate");
         }
 
-        const template = await account.relationshipTemplates.loadPeerRelationshipTemplate(receivedToken.cache!.content.templateId, receivedToken.cache!.content.secretKey);
+        const template = await account.relationshipTemplates.loadPeerRelationshipTemplateByTokenContent(receivedToken.cache!.content);
         return template;
     }
 
-    public static async sendMessage(from: AccountController, to: AccountController, content?: Serializable): Promise<Message> {
-        return await this.sendMessagesWithFiles(from, [to], [], content);
+    public static async sendMessage(from: AccountController, to: AccountController | AccountController[], content?: Serializable): Promise<Message> {
+        return await this.sendMessagesWithFiles(from, Array.isArray(to) ? to : [to], [], content);
     }
 
     public static async sendMessageWithFile(from: AccountController, to: AccountController, file: File, content?: Serializable): Promise<Message> {
@@ -549,7 +638,8 @@ export class TestUtil {
             filename: "Test.bin",
             filemodified: CoreDate.from("2019-09-30T00:00:00.000Z"),
             mimetype: "application/json",
-            expiresAt: CoreDate.utc().add({ minutes: 5 })
+            expiresAt: CoreDate.utc().add({ minutes: 5 }),
+            tags: ["tag1", "tag2"]
         };
 
         const file = await from.files.sendFile(params);
@@ -564,5 +654,30 @@ export class TestUtil {
                 resolve();
             }, ms);
         });
+    }
+
+    public static async runDeletionJob(): Promise<void> {
+        const backboneVersion = this.getBackboneVersion();
+        const appsettingsOverrideLocation = process.env.APPSETTINGS_OVERRIDE_LOCATION ?? `${__dirname}/../../../../.dev/appsettings.override.json`;
+
+        await new GenericContainer(`ghcr.io/nmshd/backbone-identity-deletion-jobs:${backboneVersion}`)
+            .withWaitStrategy(Wait.forOneShotStartup())
+            .withCommand(["--Worker", "ActualDeletionWorker"])
+            .withNetworkMode("backbone")
+            .withCopyFilesToContainer([{ source: appsettingsOverrideLocation, target: "/app/appsettings.override.json" }])
+            .start();
+    }
+
+    private static getBackboneVersion() {
+        if (process.env.BACKBONE_VERSION) return process.env.BACKBONE_VERSION;
+
+        const envFile = fs.readFileSync(path.resolve(`${__dirname}/../../../../.dev/compose.backbone.env`));
+        const env = envFile
+            .toString()
+            .split("\n")
+            .map((line) => line.split("="))
+            .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {} as Record<string, string>);
+
+        return env["BACKBONE_VERSION"];
     }
 }

@@ -7,7 +7,8 @@ import {
     ThirdPartyRelationshipAttributeQuery,
     ThirdPartyRelationshipAttributeQueryJSON
 } from "@nmshd/content";
-import { CoreAddress, CoreSynchronizable, ICoreAddress, ICoreSynchronizable } from "@nmshd/transport";
+import { CoreAddress, ICoreAddress } from "@nmshd/core-types";
+import { CoreSynchronizable, ICoreSynchronizable } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
 
 export interface LocalAttributeListenerJSON {

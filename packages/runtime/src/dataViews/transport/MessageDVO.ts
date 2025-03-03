@@ -1,3 +1,4 @@
+import { MessageContentDerivation } from "../../types/transport/MessageDTO";
 import { DataViewObject } from "../DataViewObject";
 import { FileDVO } from "./FileDVO";
 import { IdentityDVO } from "./IdentityDVO";
@@ -82,7 +83,7 @@ export interface MessageDVO extends DataViewObject {
     /**
      * The content of the message.
      */
-    content: unknown;
+    content: MessageContentDerivation;
 
     /**
      * The read indicator of the message

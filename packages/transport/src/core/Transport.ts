@@ -6,17 +6,19 @@ import { SodiumWrapper } from "@nmshd/crypto";
 import { AgentOptions } from "http";
 import { AgentOptions as HTTPSAgentOptions } from "https";
 import _ from "lodash";
-import { Realm } from "../modules/accounts/data/Realm";
-import { CoreErrors } from "./CoreErrors";
-import { TransportContext } from "./TransportContext";
+import { ICorrelator } from "./ICorrelator";
+import { TransportCoreErrors } from "./TransportCoreErrors";
 import { TransportError } from "./TransportError";
 import { TransportLoggerFactory } from "./TransportLoggerFactory";
 
 let log: ILogger;
 
 export interface IConfig {
+    allowIdentityCreation: boolean;
     supportedDatawalletVersion: number;
     supportedIdentityVersion: number;
+    supportedMinBackboneVersion: number;
+    supportedMaxBackboneVersion: number;
     debug: boolean;
     platformClientId: string;
     platformClientSecret: string;
@@ -25,13 +27,14 @@ export interface IConfig {
     platformMaxUnencryptedFileSize: number;
     platformAdditionalHeaders?: Record<string, string>;
     baseUrl: string;
-    realm: Realm;
+    addressGenerationHostnameOverride?: string;
     datawalletEnabled: boolean;
-    httpAgent: AgentOptions;
-    httpsAgent: HTTPSAgentOptions;
+    httpAgentOptions: AgentOptions;
+    httpsAgentOptions: HTTPSAgentOptions;
 }
 
 export interface IConfigOverwrite {
+    allowIdentityCreation?: boolean;
     debug?: boolean;
     platformClientId: string;
     platformClientSecret: string;
@@ -41,10 +44,10 @@ export interface IConfigOverwrite {
     platformMaxUnencryptedFileSize?: number;
     platformAdditionalHeaders?: Record<string, string>;
     baseUrl: string;
-    realm?: Realm;
+    addressGenerationHostnameOverride?: string;
     datawalletEnabled?: boolean;
-    httpAgent?: AgentOptions;
-    httpsAgent?: HTTPSAgentOptions;
+    httpAgentOptions?: AgentOptions;
+    httpsAgentOptions?: HTTPSAgentOptions;
 }
 
 export class Transport {
@@ -56,8 +59,11 @@ export class Transport {
     }
 
     private static readonly defaultConfig: IConfig = {
+        allowIdentityCreation: true,
         supportedDatawalletVersion: 1,
         supportedIdentityVersion: -1,
+        supportedMinBackboneVersion: 6,
+        supportedMaxBackboneVersion: 6,
         debug: false,
         platformClientId: "",
         platformClientSecret: "",
@@ -65,16 +71,13 @@ export class Transport {
         platformMaxRedirects: 10,
         platformMaxUnencryptedFileSize: 10 * 1024 * 1024,
         baseUrl: "",
-        realm: Realm.Prod,
         datawalletEnabled: false,
-        httpAgent: {
+        httpAgentOptions: {
             keepAlive: true,
-            maxSockets: 5,
             maxFreeSockets: 2
         },
-        httpsAgent: {
+        httpsAgentOptions: {
             keepAlive: true,
-            maxSockets: 5,
             maxFreeSockets: 2
         }
     };
@@ -83,7 +86,8 @@ export class Transport {
         databaseConnection: IDatabaseConnection,
         customConfig: IConfigOverwrite,
         public readonly eventBus: EventBus,
-        loggerFactory: ILoggerFactory = new SimpleLoggerFactory()
+        loggerFactory: ILoggerFactory = new SimpleLoggerFactory(),
+        public readonly correlator?: ICorrelator
     ) {
         this.databaseConnection = databaseConnection;
         this._config = _.defaultsDeep({}, customConfig, Transport.defaultConfig);
@@ -92,15 +96,19 @@ export class Transport {
         log = TransportLoggerFactory.getLogger(Transport);
 
         if (!this._config.platformClientId) {
-            throw CoreErrors.general.platformClientIdNotSet().logWith(log);
+            throw TransportCoreErrors.general.platformClientIdNotSet().logWith(log);
         }
 
         if (!this._config.platformClientSecret) {
-            throw CoreErrors.general.platformClientSecretNotSet().logWith(log);
+            throw TransportCoreErrors.general.platformClientSecretNotSet().logWith(log);
         }
 
         if (!this._config.baseUrl) {
-            throw CoreErrors.general.baseUrlNotSet().logWith(log);
+            throw TransportCoreErrors.general.baseUrlNotSet().logWith(log);
+        }
+
+        if (this._config.baseUrl.includes("|")) {
+            throw TransportCoreErrors.general.invalidBaseUrl().logWith(log);
         }
 
         if (this._config.supportedDatawalletVersion < 1) {
@@ -109,10 +117,6 @@ export class Transport {
 
         if (this._config.supportedIdentityVersion < 1) {
             throw new TransportError("The given supported identity version is invalid. The value must be 1 or higher.");
-        }
-
-        if (this._config.realm.length !== 3) {
-            throw CoreErrors.general.realmLength();
         }
     }
 
@@ -128,9 +132,5 @@ export class Transport {
 
     public async createDatabase(name: string): Promise<IDatabaseCollectionProvider> {
         return await this.databaseConnection.getDatabase(name);
-    }
-
-    public static get context(): TransportContext {
-        return TransportContext.currentContext();
     }
 }

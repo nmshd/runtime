@@ -1,14 +1,14 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreId, CoreSerializable, ICoreId } from "../../../core";
+import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
+import { CoreId, ICoreId } from "@nmshd/core-types";
 
-export interface IDeviceSecretCredentials {
+export interface IDeviceSecretCredentials extends ISerializable {
     id: ICoreId;
     password?: string;
     username?: string;
 }
 
 @type("DeviceSecretCredentials")
-export class DeviceSecretCredentials extends CoreSerializable implements IDeviceSecretCredentials {
+export class DeviceSecretCredentials extends Serializable implements IDeviceSecretCredentials {
     @serialize()
     @validate()
     public id: CoreId;

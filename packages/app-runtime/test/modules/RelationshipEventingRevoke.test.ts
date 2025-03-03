@@ -1,4 +1,4 @@
-import { RelationshipChangedEvent, RelationshipChangeStatus, RelationshipStatus } from "@nmshd/runtime";
+import { RelationshipChangedEvent, RelationshipStatus } from "@nmshd/runtime";
 import { AppRuntime, LocalAccountSession, OnboardingChangeReceivedEvent } from "../../src";
 import { EventListener, TestUtil } from "../lib";
 
@@ -43,11 +43,10 @@ describe("RelationshipEventingRevokeTest", function () {
         const onboardingChangeReceivedEvent = events[1].instance as OnboardingChangeReceivedEvent;
         expect(onboardingChangeReceivedEvent).toBeInstanceOf(OnboardingChangeReceivedEvent);
         expect(onboardingChangeReceivedEvent.data).toBeDefined();
-        expect(onboardingChangeReceivedEvent.data.change.status).toBe(RelationshipChangeStatus.Pending);
-        expect(onboardingChangeReceivedEvent.data.change).toBe(relationshipChangedEvent.data.changes[0]);
+        expect(onboardingChangeReceivedEvent.data.auditLogEntry.newStatus).toBe(RelationshipStatus.Pending);
         expect(onboardingChangeReceivedEvent.data.identity).toBeDefined();
 
-        expect(onboardingChangeReceivedEvent.data.identity.name).toBe(sessionB.accountController.identity.address.toString().substring(3, 9));
+        expect(onboardingChangeReceivedEvent.data.identity.name).toBe("i18n://dvo.identity.unknown");
         expect(onboardingChangeReceivedEvent.data.identity.id).toBe(sessionB.accountController.identity.address.toString());
 
         expect(onboardingChangeReceivedEvent.data.identity.hasRelationship).toBe(true);
@@ -86,11 +85,10 @@ describe("RelationshipEventingRevokeTest", function () {
         const onboardingChangeReceivedEvent = events[1].instance as OnboardingChangeReceivedEvent;
         expect(onboardingChangeReceivedEvent).toBeInstanceOf(OnboardingChangeReceivedEvent);
         expect(onboardingChangeReceivedEvent.data).toBeDefined();
-        expect(onboardingChangeReceivedEvent.data.change.status).toBe(RelationshipChangeStatus.Revoked);
-        expect(onboardingChangeReceivedEvent.data.change).toBe(relationshipChangedEvent.data.changes[0]);
+        expect(onboardingChangeReceivedEvent.data.auditLogEntry.newStatus).toBe(RelationshipStatus.Revoked);
         expect(onboardingChangeReceivedEvent.data.identity).toBeDefined();
 
-        expect(onboardingChangeReceivedEvent.data.identity.name).toBe(sessionB.accountController.identity.address.toString().substring(3, 9));
+        expect(onboardingChangeReceivedEvent.data.identity.name).toBe("i18n://dvo.identity.unknown");
         expect(onboardingChangeReceivedEvent.data.identity.id).toBe(sessionB.accountController.identity.address.toString());
         expect(onboardingChangeReceivedEvent.data.identity.hasRelationship).toBe(true);
         expect(onboardingChangeReceivedEvent.data.identity.relationship?.id).toBe(relationshipChangedEvent.data.id);

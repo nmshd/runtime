@@ -2,6 +2,7 @@ import {
     CoreBuffer,
     CryptoCipher,
     CryptoDerivation,
+    CryptoDerivationAlgorithm,
     CryptoEncryption,
     CryptoEncryptionAlgorithm,
     CryptoExchange,
@@ -20,7 +21,7 @@ import {
     CryptoSignatures,
     Encoding
 } from "@nmshd/crypto";
-import { PasswordGenerator } from "../util/PasswordGenerator";
+import { PasswordGenerator } from "../util";
 import { TransportError } from "./TransportError";
 import { TransportVersion } from "./types/TransportVersion";
 
@@ -35,6 +36,7 @@ export abstract class CoreCrypto {
      */
     public static async generateSignatureKeypair(version: TransportVersion = TransportVersion.Latest): Promise<CryptoSignatureKeypair> {
         switch (version) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             case TransportVersion.V1:
                 return await CryptoSignatures.generateKeypair(CryptoSignatureAlgorithm.ECDSA_ED25519);
             default:
@@ -53,6 +55,7 @@ export abstract class CoreCrypto {
      */
     public static async generateExchangeKeypair(version: TransportVersion = TransportVersion.Latest): Promise<CryptoExchangeKeypair> {
         switch (version) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             case TransportVersion.V1:
                 return await CryptoExchange.generateKeypair(CryptoExchangeAlgorithm.ECDH_X25519);
             default:
@@ -70,6 +73,7 @@ export abstract class CoreCrypto {
      */
     public static async generateSecretKey(version: TransportVersion = TransportVersion.Latest): Promise<CryptoSecretKey> {
         switch (version) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             case TransportVersion.V1:
                 return await CryptoEncryption.generateKey(CryptoEncryptionAlgorithm.XCHACHA20_POLY1305);
             default:
@@ -78,31 +82,47 @@ export abstract class CoreCrypto {
     }
 
     /**
-     * Generates a password derived from a human readable/memorable master password, a unique salt, the given symmetric
-     * algorithm and the version. Depending on the given version, different key derivation algorithms are used.
+     * Generates a high entropy key / hash derived from a low entropy human readable/memorable master password, a unique salt,
+     * the given symmetric algorithm and the version. Depending on the given version, different key derivation algorithms are used.
      * Careful, the symmetric algorithm possibly needs to be manually changed depending on the version in addition to
      * the version.
      *
-     * v1: blake2b with 150000 iterations
-     *
-     * @param master The master password as utf-8 encoded string
-     * @param salt A salt which is unique to this user/password instance.
-     * @param keyAlgorithm The [[CryptoSymmetricAlgorithm]] for which the key should be generated.
-     *                     Default is AES256_GCM.
+     * @param password The master password as utf-8 encoded string
+     * @param salt A salt which is unique to this user/password instance, needs to by 16 byte long.
+     * @param algorithm The CryptoEncryptionAlgorithm for which the secret needs to be created
      * @param version The version which should be used, "latest" is the default.
      * @returns A Promise object resolving in a [[CryptoSecretKey]].
      */
-    public static async generatePassword(
-        master: string,
-        salt = "enmeshed",
-        keyAlgorithm: CryptoEncryptionAlgorithm = CryptoEncryptionAlgorithm.XCHACHA20_POLY1305,
+    public static async deriveKeyFromPassword(
+        password: string,
+        salt: CoreBuffer,
+        algorithm: CryptoEncryptionAlgorithm = CryptoEncryptionAlgorithm.XCHACHA20_POLY1305,
         version: TransportVersion = TransportVersion.Latest
     ): Promise<CryptoSecretKey> {
-        const masterBuffer = CoreBuffer.fromString(master, Encoding.Utf8);
-        const saltBuffer = CoreBuffer.fromString(salt, Encoding.Utf8);
+        const passwordBuffer = CoreBuffer.fromString(password, Encoding.Utf8);
+
         switch (version) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             case TransportVersion.V1:
-                return await CryptoDerivation.deriveKeyFromMaster(masterBuffer, 150000, keyAlgorithm, saltBuffer);
+                // See https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html for recommendations of default values
+                // Libsodium uses Argon2id as the pwhash function, we need to look at the minimum setup for Apps (smartphones) and virtualized
+                // environments like Connectors. Thus, we cannot expect high end pcs to make the pw derivation.
+                const opslimit = 3;
+                const memlimit = 20 * 1024 * 1024; // 20MB
+                return await CryptoDerivation.deriveKeyFromPassword(passwordBuffer, salt, algorithm, CryptoDerivationAlgorithm.ARGON2ID, opslimit, memlimit);
+            default:
+                throw this.invalidVersion(version);
+        }
+    }
+
+    public static async deriveHashOutOfPassword(password: string, salt: CoreBuffer, version: TransportVersion = TransportVersion.Latest): Promise<CoreBuffer> {
+        switch (version) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+            case TransportVersion.V1:
+                const pwhash = await this.deriveKeyFromPassword(password, salt);
+
+                // No pepper required, as even the salt is not stored in the Backbone
+                return pwhash.secretKey;
             default:
                 throw this.invalidVersion(version);
         }
@@ -132,6 +152,7 @@ export abstract class CoreCrypto {
         version: TransportVersion = TransportVersion.Latest
     ): Promise<CryptoExchangeSecrets> {
         switch (version) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             case TransportVersion.V1:
                 const base: CryptoExchangeSecrets = await CryptoExchange.deriveTemplator(client, serverPublicKey, keyAlgorithm);
                 return base;
@@ -147,6 +168,7 @@ export abstract class CoreCrypto {
         version: TransportVersion = TransportVersion.Latest
     ): Promise<CryptoExchangeSecrets> {
         switch (version) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             case TransportVersion.V1:
                 const base = await CryptoExchange.deriveRequestor(server, clientPublicKey, keyAlgorithm);
                 return base;
@@ -167,6 +189,7 @@ export abstract class CoreCrypto {
      */
     public static async sign(content: CoreBuffer, privateKey: CryptoSignaturePrivateKey, version: TransportVersion = TransportVersion.Latest): Promise<CryptoSignature> {
         switch (version) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             case TransportVersion.V1:
                 return await CryptoSignatures.sign(content, privateKey, CryptoHashAlgorithm.SHA512);
             default:
@@ -192,6 +215,7 @@ export abstract class CoreCrypto {
         version: TransportVersion = TransportVersion.Latest
     ): Promise<boolean> {
         switch (version) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             case TransportVersion.V1:
                 return await CryptoSignatures.verify(content, signature, publicKey);
             default:
@@ -213,6 +237,7 @@ export abstract class CoreCrypto {
      */
     public static async encrypt(content: CoreBuffer, secretKey: CryptoSecretKey, version: TransportVersion = TransportVersion.Latest): Promise<CryptoCipher> {
         switch (version) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             case TransportVersion.V1:
                 return await CryptoEncryption.encrypt(content, secretKey);
             default:
@@ -234,6 +259,7 @@ export abstract class CoreCrypto {
      */
     public static async decrypt(cipher: CryptoCipher, secretKey: CryptoSecretKey, version: TransportVersion = TransportVersion.Latest): Promise<CoreBuffer> {
         switch (version) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             case TransportVersion.V1:
                 return await CryptoEncryption.decrypt(cipher, secretKey);
             default:

@@ -1,5 +1,5 @@
 export interface BackboneGetTokensRequest {
-    ids: string[];
+    tokens: { id: string; password?: string }[];
 }
 
 export interface BackboneGetTokensResponse {
@@ -9,4 +9,5 @@ export interface BackboneGetTokensResponse {
     createdBy: string;
     createdByDevice: string;
     expiresAt: string;
+    forIdentity?: string;
 }

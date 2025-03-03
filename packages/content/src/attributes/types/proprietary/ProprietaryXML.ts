@@ -30,6 +30,7 @@ export class ProprietaryXML extends AbstractXML {
 
     @serialize()
     @validate({
+        nullable: true,
         min: 3,
         max: 1024,
         regExp: new RegExp(

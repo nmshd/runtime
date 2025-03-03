@@ -1,11 +1,27 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { IRequest, IRequestItemGroup, Request, RequestItemGroup, ResponseItem, ResponseItemGroup, ResponseItemResult } from "@nmshd/content";
-import { CoreDate, CoreId, RelationshipChangeType, TransportLoggerFactory } from "@nmshd/transport";
 import {
+    CreateAttributeRequestItem,
+    IRequest,
+    IRequestItemGroup,
+    ProprietaryString,
+    ReadAttributeRequestItem,
+    RejectResponseItem,
+    RelationshipAttribute,
+    RelationshipAttributeConfidentiality,
+    RelationshipAttributeQuery,
+    Request,
+    RequestItemGroup,
+    ResponseItem,
+    ResponseItemGroup,
+    ResponseItemResult
+} from "@nmshd/content";
+import { CoreDate, CoreId } from "@nmshd/core-types";
+import { CoreIdHelper, TransportLoggerFactory } from "@nmshd/transport";
+import {
+    AcceptReadAttributeRequestItemParametersWithNewAttributeJSON,
     ConsumptionIds,
     DecideRequestItemGroupParametersJSON,
     DecideRequestParametersJSON,
-    ErrorValidationResult,
     IncomingRequestReceivedEvent,
     IncomingRequestStatusChangedEvent,
     LocalRequestStatus
@@ -65,8 +81,36 @@ describe("IncomingRequestsController", function () {
             await Then.eventHasBeenPublished(IncomingRequestReceivedEvent);
         });
 
+        test("takes the expiration date from the Template if the Request has no expiration date", async function () {
+            const timestamp = CoreDate.utc().subtract({ second: 1 });
+            const incomingTemplate = TestObjectFactory.createIncomingRelationshipTemplate(timestamp);
+            await When.iCreateAnIncomingRequestWith({ requestSourceObject: incomingTemplate });
+            await Then.theRequestHasExpirationDate(timestamp);
+            await Then.theRequestIsInStatus(LocalRequestStatus.Expired);
+        });
+
+        test("takes the expiration date from the Template if the Request has a later expiration date", async function () {
+            const timestamp = CoreDate.utc().add({ days: 1 });
+            const incomingTemplate = TestObjectFactory.createIncomingRelationshipTemplate(timestamp);
+            await When.iCreateAnIncomingRequestWith({
+                requestSourceObject: incomingTemplate,
+                receivedRequest: TestObjectFactory.createRequestWithOneItem({ expiresAt: timestamp.add({ days: 1 }) })
+            });
+            await Then.theRequestHasExpirationDate(timestamp);
+        });
+
+        test("takes the expiration date from the Request if the Template has a later expiration date", async function () {
+            const timestamp = CoreDate.utc().add({ days: 1 });
+            const incomingTemplate = TestObjectFactory.createIncomingRelationshipTemplate(timestamp.add({ days: 1 }));
+            await When.iCreateAnIncomingRequestWith({
+                requestSourceObject: incomingTemplate,
+                receivedRequest: TestObjectFactory.createRequestWithOneItem({ expiresAt: timestamp })
+            });
+            await Then.theRequestHasExpirationDate(timestamp);
+        });
+
         test("uses the ID of the given Request if it exists", async function () {
-            const request = TestObjectFactory.createRequestWithOneItem({ id: await CoreId.generate() });
+            const request = TestObjectFactory.createRequestWithOneItem({ id: await CoreIdHelper.notPrefixed.generate() });
 
             await When.iCreateAnIncomingRequestWith({ receivedRequest: request });
             await Then.theRequestHasTheId(request.id!);
@@ -133,7 +177,6 @@ describe("IncomingRequestsController", function () {
                     items: [
                         {
                             "@type": "RequestItemGroup",
-                            mustBeAccepted: false,
                             items: [
                                 {
                                     "@type": "TestRequestItem",
@@ -261,7 +304,6 @@ describe("IncomingRequestsController", function () {
                     items: [
                         {
                             "@type": "RequestItemGroup",
-                            mustBeAccepted: false,
                             items: [
                                 {
                                     "@type": "TestRequestItem",
@@ -318,7 +360,6 @@ describe("IncomingRequestsController", function () {
                         mustBeAccepted: false
                     }),
                     RequestItemGroup.from({
-                        mustBeAccepted: false,
                         items: [
                             TestRequestItem.from({
                                 mustBeAccepted: false,
@@ -367,7 +408,7 @@ describe("IncomingRequestsController", function () {
             });
 
             expect(validationResult).errorValidationResult({
-                code: "inheritedFromItem",
+                code: "error.consumption.requests.validation.inheritedFromItem",
                 message: "Some child items have errors."
             });
             expect(validationResult.items).toHaveLength(2);
@@ -375,13 +416,277 @@ describe("IncomingRequestsController", function () {
             expect(validationResult.items[0].isError()).toBe(false);
 
             expect(validationResult.items[1].isError()).toBe(true);
-            expect((validationResult.items[1] as ErrorValidationResult).error.code).toBe("inheritedFromItem");
-            expect((validationResult.items[1] as ErrorValidationResult).error.message).toBe("Some child items have errors.");
+            expect(validationResult.items[1]).errorValidationResult({ code: "error.consumption.requests.validation.inheritedFromItem" });
 
             expect(validationResult.items[1].items).toHaveLength(3);
             expect(validationResult.items[1].items[0].isError()).toBe(true);
             expect(validationResult.items[1].items[1].isError()).toBe(false);
             expect(validationResult.items[1].items[2].isError()).toBe(true);
+        });
+
+        test("returns a validation result that merges the results from decideRequestParamsValidator and the RequestItemProcessor", async function () {
+            const request = {
+                items: [
+                    TestRequestItem.from({
+                        mustBeAccepted: true
+                    }),
+                    TestRequestItem.from({
+                        mustBeAccepted: true
+                    }),
+                    TestRequestItem.from({
+                        mustBeAccepted: true,
+                        shouldFailAtCanAccept: true
+                    }),
+                    TestRequestItem.from({
+                        mustBeAccepted: true,
+                        shouldFailAtCanReject: true
+                    }),
+                    RequestItemGroup.from({
+                        items: [
+                            TestRequestItem.from({
+                                mustBeAccepted: true
+                            }),
+                            TestRequestItem.from({
+                                mustBeAccepted: true
+                            }),
+                            TestRequestItem.from({
+                                mustBeAccepted: true,
+                                shouldFailAtCanAccept: true
+                            }),
+                            TestRequestItem.from({
+                                mustBeAccepted: true,
+                                shouldFailAtCanReject: true
+                            })
+                        ]
+                    })
+                ]
+            } as IRequest;
+
+            const acceptParams = {
+                items: [
+                    {
+                        accept: true
+                    },
+                    {
+                        accept: false
+                    },
+                    {
+                        accept: true
+                    },
+                    {
+                        accept: false
+                    },
+                    {
+                        items: [
+                            {
+                                accept: true
+                            },
+                            {
+                                accept: false
+                            },
+                            {
+                                accept: true
+                            },
+                            {
+                                accept: false
+                            }
+                        ]
+                    }
+                ]
+            } as Omit<DecideRequestParametersJSON, "requestId">;
+
+            await Given.anIncomingRequestWith({
+                content: request,
+                status: LocalRequestStatus.DecisionRequired
+            });
+
+            const validationResult = await When.iCallCanAcceptWith({
+                items: acceptParams.items
+            });
+
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.validation.inheritedFromItem",
+                message: "Some child items have errors."
+            });
+            expect(validationResult.items).toHaveLength(5);
+
+            expect(validationResult.items[0].isError()).toBe(false);
+            expect(validationResult.items[1].isError()).toBe(true);
+            expect(validationResult.items[2].isError()).toBe(true);
+            expect(validationResult.items[3].isError()).toBe(true);
+
+            expect(validationResult.items[4].isError()).toBe(true);
+            expect(validationResult.items[4]).errorValidationResult({ code: "error.consumption.requests.validation.inheritedFromItem" });
+
+            expect(validationResult.items[4].items).toHaveLength(4);
+            expect(validationResult.items[4].items[0].isError()).toBe(false);
+            expect(validationResult.items[4].items[1].isError()).toBe(true);
+            expect(validationResult.items[4].items[2].isError()).toBe(true);
+            expect(validationResult.items[4].items[3].isError()).toBe(true);
+        });
+
+        test("throws error for requests whose acceptance always would lead to the creation of more than one RelationshipAttribute with the same key", async function () {
+            await Given.anIncomingRequestWith({
+                content: {
+                    items: [
+                        CreateAttributeRequestItem.from({
+                            mustBeAccepted: true,
+                            attribute: RelationshipAttribute.from({
+                                "@type": "RelationshipAttribute",
+                                owner: context.currentIdentity.toString(),
+                                key: "uniqueKey",
+                                confidentiality: RelationshipAttributeConfidentiality.Public,
+                                value: ProprietaryString.from({ title: "aTitle", value: "aStringValue" }).toJSON()
+                            })
+                        }),
+                        {
+                            "@type": "RequestItemGroup",
+                            items: [
+                                ReadAttributeRequestItem.from({
+                                    mustBeAccepted: true,
+                                    query: RelationshipAttributeQuery.from({
+                                        owner: context.currentIdentity.toString(),
+                                        key: "uniqueKey",
+                                        attributeCreationHints: {
+                                            valueType: "ProprietaryString",
+                                            title: "aTitle",
+                                            confidentiality: RelationshipAttributeConfidentiality.Public
+                                        }
+                                    })
+                                })
+                            ]
+                        } as IRequestItemGroup
+                    ]
+                },
+                status: LocalRequestStatus.DecisionRequired
+            });
+            await expect(
+                When.iCallCanAcceptWith({
+                    items: [
+                        {
+                            accept: true
+                        },
+                        {
+                            items: [
+                                {
+                                    accept: true,
+                                    newAttribute: RelationshipAttribute.from({
+                                        "@type": "RelationshipAttribute",
+                                        owner: context.currentIdentity.toString(),
+                                        key: "uniqueKey",
+                                        confidentiality: RelationshipAttributeConfidentiality.Public,
+                                        value: ProprietaryString.from({ title: "aTitle", value: "aStringValue" }).toJSON()
+                                    }).toJSON()
+                                } as AcceptReadAttributeRequestItemParametersWithNewAttributeJSON
+                            ]
+                        }
+                    ]
+                })
+            ).rejects.toThrow(
+                `error.consumption.requests.violatedKeyUniquenessOfRelationshipAttributes: 'The Request can never be accepted because it would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key 'uniqueKey', owner and value type.'`
+            );
+        });
+
+        test("returns 'error' on requests whose acceptance only would lead to the creation of more than one RelationshipAttribute with the same key with some parameters", async function () {
+            await Given.anIncomingRequestWith({
+                content: {
+                    items: [
+                        CreateAttributeRequestItem.from({
+                            mustBeAccepted: true,
+                            attribute: RelationshipAttribute.from({
+                                "@type": "RelationshipAttribute",
+                                owner: context.currentIdentity.toString(),
+                                key: "uniqueKey",
+                                confidentiality: RelationshipAttributeConfidentiality.Public,
+                                value: ProprietaryString.from({ title: "aTitle", value: "aStringValue" }).toJSON()
+                            })
+                        }),
+                        {
+                            "@type": "RequestItemGroup",
+                            items: [
+                                ReadAttributeRequestItem.from({
+                                    mustBeAccepted: false,
+                                    query: RelationshipAttributeQuery.from({
+                                        owner: context.currentIdentity.toString(),
+                                        key: "uniqueKey",
+                                        attributeCreationHints: {
+                                            valueType: "ProprietaryString",
+                                            title: "aTitle",
+                                            confidentiality: RelationshipAttributeConfidentiality.Public
+                                        }
+                                    })
+                                })
+                            ]
+                        } as IRequestItemGroup
+                    ]
+                },
+                status: LocalRequestStatus.DecisionRequired
+            });
+            const validationResult = await When.iCallCanAcceptWith({
+                items: [
+                    {
+                        accept: true
+                    },
+                    {
+                        items: [
+                            {
+                                accept: true,
+                                newAttribute: RelationshipAttribute.from({
+                                    "@type": "RelationshipAttribute",
+                                    owner: context.currentIdentity.toString(),
+                                    key: "uniqueKey",
+                                    confidentiality: RelationshipAttributeConfidentiality.Public,
+                                    value: ProprietaryString.from({ title: "aTitle", value: "aStringValue" }).toJSON()
+                                }).toJSON()
+                            } as AcceptReadAttributeRequestItemParametersWithNewAttributeJSON
+                        ]
+                    }
+                ]
+            });
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.invalidAcceptParameters",
+                message: `The Request cannot be accepted with these parameters because it would lead to the creation of more than one RelationshipAttribute in the context of this Relationship with the same key 'uniqueKey', owner and value type.`
+            });
+        });
+
+        test("returns 'error' on terminated relationship", async function () {
+            await Given.aTerminatedRelationshipToIdentity();
+            await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
+            const validationResult = await When.iCallCanAccept();
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.wrongRelationshipStatus",
+                message: "You cannot decide a request from 'did:e:a-domain:dids:anidentity' since the relationship is in status 'Terminated'."
+            });
+        });
+
+        test("returns 'error' on relationship whose deletion is proposed", async function () {
+            await Given.aDeletionProposedRelationshipToIdentity();
+            await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
+            const validationResult = await When.iCallCanAccept();
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.wrongRelationshipStatus",
+                message: "You cannot decide a request from 'did:e:a-domain:dids:anidentity' since the relationship is in status 'DeletionProposed'."
+            });
+        });
+
+        test("returns 'error' on relationship with peer which is in deletion", async function () {
+            await Given.aRelationshipToPeerInDeletion();
+            await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
+            const validationResult = await When.iCallCanAccept();
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.peerIsInDeletion",
+                message: "You cannot decide a Request from peer 'did:e:a-domain:dids:anidentity' since the peer is in deletion."
+            });
+        });
+
+        test("returns 'error' on relationship with peer which is deleted", async function () {
+            await Given.aRelationshipToDeletedPeer();
+            await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
+            const validationResult = await When.iCallCanAccept();
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.wrongRelationshipStatus",
+                message: "You cannot decide a request from 'did:e:a-domain:dids:anidentity' since the relationship is in status 'DeletionProposed'."
+            });
         });
     });
 
@@ -443,7 +748,6 @@ describe("IncomingRequestsController", function () {
                     items: [
                         {
                             "@type": "RequestItemGroup",
-                            mustBeAccepted: false,
                             items: [
                                 {
                                     "@type": "TestRequestItem",
@@ -498,7 +802,6 @@ describe("IncomingRequestsController", function () {
                         mustBeAccepted: false
                     }),
                     RequestItemGroup.from({
-                        mustBeAccepted: false,
                         items: [
                             TestRequestItem.from({
                                 mustBeAccepted: false,
@@ -546,7 +849,7 @@ describe("IncomingRequestsController", function () {
             const validationResult = await When.iCallCanRejectWith(rejectParams);
 
             expect(validationResult).errorValidationResult({
-                code: "inheritedFromItem",
+                code: "error.consumption.requests.validation.inheritedFromItem",
                 message: "Some child items have errors."
             });
             expect(validationResult.items).toHaveLength(2);
@@ -554,13 +857,52 @@ describe("IncomingRequestsController", function () {
             expect(validationResult.items[0].isError()).toBe(false);
 
             expect(validationResult.items[1].isError()).toBe(true);
-            expect((validationResult.items[1] as ErrorValidationResult).error.code).toBe("inheritedFromItem");
-            expect((validationResult.items[1] as ErrorValidationResult).error.message).toBe("Some child items have errors.");
+            expect(validationResult.items[1]).errorValidationResult({ code: "error.consumption.requests.validation.inheritedFromItem" });
 
             expect(validationResult.items[1].items).toHaveLength(3);
             expect(validationResult.items[1].items[0].isError()).toBe(true);
             expect(validationResult.items[1].items[1].isError()).toBe(false);
             expect(validationResult.items[1].items[2].isError()).toBe(true);
+        });
+
+        test("returns 'error' on terminated relationship", async function () {
+            await Given.aTerminatedRelationshipToIdentity();
+            await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
+            const validationResult = await When.iCallCanReject();
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.wrongRelationshipStatus",
+                message: "You cannot decide a request from 'did:e:a-domain:dids:anidentity' since the relationship is in status 'Terminated'."
+            });
+        });
+
+        test("returns 'error' on relationship whose deletion is proposed", async function () {
+            await Given.aDeletionProposedRelationshipToIdentity();
+            await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
+            const validationResult = await When.iCallCanReject();
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.wrongRelationshipStatus",
+                message: "You cannot decide a request from 'did:e:a-domain:dids:anidentity' since the relationship is in status 'DeletionProposed'."
+            });
+        });
+
+        test("returns 'error' on relationship with peer which is in deletion", async function () {
+            await Given.aRelationshipToPeerInDeletion();
+            await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
+            const validationResult = await When.iCallCanReject();
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.peerIsInDeletion",
+                message: "You cannot decide a Request from peer 'did:e:a-domain:dids:anidentity' since the peer is in deletion."
+            });
+        });
+
+        test("returns 'error' on relationship with peer which is deleted", async function () {
+            await Given.aRelationshipToDeletedPeer();
+            await Given.anIncomingRequestInStatus(LocalRequestStatus.DecisionRequired);
+            const validationResult = await When.iCallCanReject();
+            expect(validationResult).errorValidationResult({
+                code: "error.consumption.requests.wrongRelationshipStatus",
+                message: "You cannot decide a request from 'did:e:a-domain:dids:anidentity' since the relationship is in status 'DeletionProposed'."
+            });
         });
     });
 
@@ -689,12 +1031,16 @@ describe("IncomingRequestsController", function () {
             await When.iRejectTheRequest({
                 items: [
                     {
-                        accept: false
+                        accept: false,
+                        code: "a.requestitem.error.code",
+                        message: "A RequestItem error message"
                     },
                     {
                         items: [
                             {
-                                accept: false
+                                accept: false,
+                                code: "a.requestitemgroup.error.code",
+                                message: "A RequestItemGroup error message"
                             }
                         ]
                     }
@@ -702,9 +1048,14 @@ describe("IncomingRequestsController", function () {
             });
             await Then.iExpectTheResponseContent((responseContent) => {
                 expect(responseContent.items).toHaveLength(2);
-                expect(responseContent.items[0]).toBeInstanceOf(ResponseItem);
+                expect(responseContent.items[0]).toBeInstanceOf(RejectResponseItem);
+                expect((responseContent.items[0] as RejectResponseItem).code).toBe("a.requestitem.error.code");
+                expect((responseContent.items[0] as RejectResponseItem).message).toBe("A RequestItem error message");
                 expect(responseContent.items[1]).toBeInstanceOf(ResponseItemGroup);
-                expect((responseContent.items[1] as ResponseItemGroup).items[0]).toBeInstanceOf(ResponseItem);
+                expect((responseContent.items[1] as ResponseItemGroup).items).toHaveLength(1);
+                expect((responseContent.items[1] as ResponseItemGroup).items[0]).toBeInstanceOf(RejectResponseItem);
+                expect(((responseContent.items[1] as ResponseItemGroup).items[0] as RejectResponseItem).code).toBe("a.requestitemgroup.error.code");
+                expect(((responseContent.items[1] as ResponseItemGroup).items[0] as RejectResponseItem).message).toBe("A RequestItemGroup error message");
             });
             await Then.eventHasBeenPublished(IncomingRequestStatusChangedEvent, {
                 newStatus: LocalRequestStatus.Decided
@@ -794,14 +1145,14 @@ describe("IncomingRequestsController", function () {
             });
         });
 
-        test("can handle valid input with a RelationshipChange as responseSource", async function () {
+        test("can handle valid input with a Relationship as responseSource", async function () {
             await Given.anIncomingRequestInStatus(LocalRequestStatus.Decided);
-            const outgoingRelationshipCreationChange = TestObjectFactory.createOutgoingIRelationshipChange(RelationshipChangeType.Creation, context.currentIdentity);
+            const outgoingRelationship = TestObjectFactory.createPendingRelationship();
             await When.iCompleteTheIncomingRequestWith({
-                responseSourceObject: outgoingRelationshipCreationChange
+                responseSourceObject: outgoingRelationship
             });
             await Then.theRequestMovesToStatus(LocalRequestStatus.Completed);
-            await Then.theResponseHasItsSourcePropertySetCorrectly({ responseSourceType: "RelationshipChange" });
+            await Then.theResponseHasItsSourcePropertySetCorrectly({ responseSourceType: "Relationship" });
             await Then.theChangesArePersistedInTheDatabase();
             await Then.eventHasBeenPublished(IncomingRequestStatusChangedEvent, {
                 newStatus: LocalRequestStatus.Completed
@@ -847,6 +1198,7 @@ describe("IncomingRequestsController", function () {
         });
 
         test("returns undefined when the given id belongs to an outgoing Request", async function () {
+            await Given.anActiveRelationshipToIdentity();
             const outgoingRequest = await Given.anOutgoingRequest();
             await When.iGetTheIncomingRequestWith(outgoingRequest.id);
             await Then.iExpectUndefinedToBeReturned();
@@ -900,6 +1252,7 @@ describe("IncomingRequestsController", function () {
         });
 
         test("does not return outgoing Requests", async function () {
+            await Given.anActiveRelationshipToIdentity();
             await Given.anIncomingRequest();
             await Given.anOutgoingRequest();
             await When.iGetIncomingRequestsWithTheQuery({});
@@ -981,11 +1334,11 @@ describe("IncomingRequestsController", function () {
                 ]
             });
 
-            const relationshipChange = TestObjectFactory.createOutgoingIRelationshipChange(RelationshipChangeType.Creation, context.currentIdentity);
+            const relationship = TestObjectFactory.createPendingRelationship();
 
             cnsRequest = await context.incomingRequestsController.complete({
                 requestId: cnsRequest.id,
-                responseSourceObject: relationshipChange
+                responseSourceObject: relationship
             });
 
             expect(cnsRequest).toBeDefined();
@@ -1001,7 +1354,7 @@ describe("IncomingRequestsController", function () {
 
         test("Incoming Request via Message", async function () {
             const request = Request.from({
-                id: await CoreId.generate(),
+                id: await CoreIdHelper.notPrefixed.generate(),
                 items: [TestRequestItem.from({ mustBeAccepted: false })]
             });
             const incomingMessage = TestObjectFactory.createIncomingIMessage(context.currentIdentity);

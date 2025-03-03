@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
 import { AccountController, IdentityDeletionProcessController, IdentityDeletionProcessStatus } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { IdentityDeletionProcessDTO } from "../../../types/transport/IdentityDeletionProcessDTO";
 import { RuntimeErrors, UseCase } from "../../common";
 import { IdentityDeletionProcessMapper } from "./IdentityDeletionProcessMapper";
@@ -15,10 +15,7 @@ export class ApproveIdentityDeletionProcessUseCase extends UseCase<void, Identit
 
     protected async executeInternal(): Promise<Result<IdentityDeletionProcessDTO>> {
         const identityDeletionProcess = await this.identityDeletionProcessController.getIdentityDeletionProcessByStatus(IdentityDeletionProcessStatus.WaitingForApproval);
-
-        if (typeof identityDeletionProcess === "undefined") {
-            return Result.fail(RuntimeErrors.identityDeletionProcess.noWaitingForApprovalIdentityDeletionProcess());
-        }
+        if (!identityDeletionProcess) return Result.fail(RuntimeErrors.identityDeletionProcess.noWaitingForApprovalIdentityDeletionProcess());
 
         const approvedIdentityDeletionProcess = await this.identityDeletionProcessController.approveIdentityDeletionProcess(identityDeletionProcess.id.toString());
         await this.accountController.syncDatawallet();

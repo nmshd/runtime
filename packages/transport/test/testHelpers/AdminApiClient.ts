@@ -1,5 +1,6 @@
+import { CoreId } from "@nmshd/core-types";
 import axios, { Axios } from "axios";
-import { AccountController, CoreId, IdentityDeletionProcess, IdentityDeletionProcessStatus } from "../../src";
+import { AccountController, IdentityDeletionProcess, IdentityDeletionProcessStatus } from "../../src";
 import { TestUtil } from "./TestUtil";
 
 export class AdminApiClient {
@@ -37,9 +38,7 @@ export class AdminApiClient {
         await TestUtil.syncUntilHasIdentityDeletionProcess(account, CoreId.from(deletionProcess.data.result.id));
 
         const activeIdentityDeletionProcess = await account.identityDeletionProcess.getIdentityDeletionProcessByStatus(IdentityDeletionProcessStatus.WaitingForApproval);
-        if (typeof activeIdentityDeletionProcess === "undefined") {
-            throw new Error("IdentityDeletionProcess not found.");
-        }
+        if (!activeIdentityDeletionProcess) throw new Error("IdentityDeletionProcess not found.");
 
         return activeIdentityDeletionProcess;
     }

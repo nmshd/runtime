@@ -5,3 +5,4 @@ export * from "./GetSettingByKey";
 export * from "./GetSettings";
 export * from "./SettingMapper";
 export * from "./UpdateSetting";
+export * from "./UpsertSettingByKey";

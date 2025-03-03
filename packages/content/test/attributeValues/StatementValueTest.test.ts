@@ -8,13 +8,13 @@ new GenericValueTest().runParametrized({
     expectedJSON: {
         "@type": "Statement",
         subject: {
-            address: "id1234"
+            address: "did:e:a-domain:dids:anidentity"
         },
         predicate: {
             value: "hasAttribute"
         },
         object: {
-            address: "id1235",
+            address: "did:e:a-domain:dids:anidentity",
             attributes: [
                 {
                     givenName: "Max",
@@ -23,7 +23,7 @@ new GenericValueTest().runParametrized({
             ]
         },
         issuer: {
-            address: "id1236"
+            address: "did:e:a-domain:dids:anidentity"
         },
         issuerConditions: {
             validFrom: "2023-06-01T00:00:00.000Z",
@@ -39,11 +39,11 @@ new GenericValueTest().runParametrized({
     valueJSON: {
         "@type": "Statement",
         subject: {
-            address: "id1234"
+            address: "did:e:a-domain:dids:anidentity"
         },
         predicate: "hasAttribute",
         object: {
-            address: "id1235",
+            address: "did:e:a-domain:dids:anidentity",
             attributes: [
                 {
                     givenName: "Max",
@@ -52,7 +52,7 @@ new GenericValueTest().runParametrized({
             ]
         },
         issuer: {
-            address: "id1236"
+            address: "did:e:a-domain:dids:anidentity"
         },
         issuerConditions: {
             validFrom: "2023-06-01T00:00:00.000Z",
@@ -68,11 +68,11 @@ new GenericValueTest().runParametrized({
     valueVerboseJSON: {
         "@type": "Statement",
         subject: {
-            address: "id1234"
+            address: "did:e:a-domain:dids:anidentity"
         },
         predicate: "hasAttribute",
         object: {
-            address: "id1235",
+            address: "did:e:a-domain:dids:anidentity",
             attributes: [
                 {
                     givenName: "Max",
@@ -81,7 +81,7 @@ new GenericValueTest().runParametrized({
             ]
         },
         issuer: {
-            address: "id1236"
+            address: "did:e:a-domain:dids:anidentity"
         },
         issuerConditions: {
             validFrom: "2023-06-01T00:00:00.000Z",
@@ -97,10 +97,10 @@ new GenericValueTest().runParametrized({
         }
     },
     valueInterface: {
-        subject: StatementSubject.fromAny({ address: "id1234" }),
+        subject: StatementSubject.fromAny({ address: "did:e:a-domain:dids:anidentity" }),
         predicate: StatementPredicate.fromAny("hasAttribute"),
         object: StatementObject.fromAny({
-            address: "id1235",
+            address: "did:e:a-domain:dids:anidentity",
             attributes: [
                 {
                     givenName: "Max",
@@ -108,7 +108,7 @@ new GenericValueTest().runParametrized({
                 }
             ]
         }),
-        issuer: DigitalIdentityDescriptor.fromAny({ address: "id1236" }),
+        issuer: DigitalIdentityDescriptor.fromAny({ address: "did:e:a-domain:dids:anidentity" }),
         issuerConditions: StatementIssuerConditions.fromAny({
             validTo: "2023-06-01T00:00:00.000Z",
             validFrom: "2023-06-01T00:00:00.000Z",
@@ -130,16 +130,16 @@ new GenericValueTest().runParametrized({
     expectedJSON: {
         "@type": "Statement",
         subject: {
-            address: "id1234"
+            address: "did:e:a-domain:dids:anidentity"
         },
         predicate: {
             value: "z-isTeacher"
         },
         object: {
-            address: "id1235"
+            address: "did:e:a-domain:dids:anidentity"
         },
         issuer: {
-            address: "id1236"
+            address: "did:e:a-domain:dids:anidentity"
         },
         issuerConditions: {
             validFrom: "2023-06-01T00:00:00.000Z",
@@ -155,14 +155,14 @@ new GenericValueTest().runParametrized({
     valueJSON: {
         "@type": "Statement",
         subject: {
-            address: "id1234"
+            address: "did:e:a-domain:dids:anidentity"
         },
         predicate: "z-isTeacher",
         object: {
-            address: "id1235"
+            address: "did:e:a-domain:dids:anidentity"
         },
         issuer: {
-            address: "id1236"
+            address: "did:e:a-domain:dids:anidentity"
         },
         issuerConditions: {
             validFrom: "2023-06-01T00:00:00.000Z",
@@ -178,14 +178,14 @@ new GenericValueTest().runParametrized({
     valueVerboseJSON: {
         "@type": "Statement",
         subject: {
-            address: "id1234"
+            address: "did:e:a-domain:dids:anidentity"
         },
         predicate: "z-isTeacher",
         object: {
-            address: "id1235"
+            address: "did:e:a-domain:dids:anidentity"
         },
         issuer: {
-            address: "id1236"
+            address: "did:e:a-domain:dids:anidentity"
         },
         issuerConditions: {
             validFrom: "2023-06-01T00:00:00.000Z",
@@ -201,10 +201,10 @@ new GenericValueTest().runParametrized({
         }
     },
     valueInterface: {
-        subject: StatementSubject.fromAny({ address: "id1234" }),
+        subject: StatementSubject.fromAny({ address: "did:e:a-domain:dids:anidentity" }),
         predicate: StatementPredicate.fromAny("z-isTeacher"),
-        object: StatementObject.fromAny({ address: "id1235" }),
-        issuer: DigitalIdentityDescriptor.fromAny({ address: "id1236" }),
+        object: StatementObject.fromAny({ address: "did:e:a-domain:dids:anidentity" }),
+        issuer: DigitalIdentityDescriptor.fromAny({ address: "did:e:a-domain:dids:anidentity" }),
         issuerConditions: StatementIssuerConditions.fromAny({
             validTo: "2023-06-01T00:00:00.000Z",
             validFrom: "2023-06-01T00:00:00.000Z",
@@ -224,22 +224,22 @@ describe("Statement negative Test", function () {
     describe("Statement set to 'hasPredicate'", function () {
         test.each([
             {
-                address: "id1235",
+                address: "did:e:a-domain:dids:anidentity",
                 attributes: []
             },
             {
-                address: "id1235"
+                address: "did:e:a-domain:dids:anidentity"
             }
         ])("should throw ValidationError for invalid input", function (value: any) {
             const invalidStatement = {
                 "@type": "Statement",
                 subject: {
-                    address: "id1234"
+                    address: "did:e:a-domain:dids:anidentity"
                 },
                 predicate: "hasAttribute",
                 object: value,
                 issuer: {
-                    address: "id1236"
+                    address: "did:e:a-domain:dids:anidentity"
                 },
                 issuerConditions: {
                     validFrom: "2023-06-01T00:00:00.000Z",

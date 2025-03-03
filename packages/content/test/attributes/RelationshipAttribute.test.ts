@@ -1,4 +1,4 @@
-import { CoreAddress } from "@nmshd/transport";
+import { CoreAddress } from "@nmshd/core-types";
 import { ProprietaryURL, RelationshipAttribute, RelationshipAttributeConfidentiality } from "../../src";
 
 describe("RelationshipAttribute", function () {

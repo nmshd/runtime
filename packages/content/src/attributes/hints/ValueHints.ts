@@ -28,7 +28,7 @@ export interface IValueHints extends ISerializable {
 export interface IValueHintsOverride extends Partial<IValueHints> {}
 
 function deserializePropertyHints(value: ValueHints | ValueHintsOverride): void {
-    if (typeof value.propertyHints === "undefined") return;
+    if (!value.propertyHints) return;
 
     value.propertyHints = Object.entries(value.propertyHints)
         .map((k) => {
@@ -123,8 +123,8 @@ export class ValueHintsOverride extends Serializable implements IValueHintsOverr
     @validate({ nullable: true })
     public values?: ValueHintsValue[];
 
-    @serialize({ unionTypes: [Boolean, Number, String] })
-    @validate({ nullable: true })
+    @serialize()
+    @validate({ nullable: true, allowedTypes: [PrimitiveType.Number, PrimitiveType.String, PrimitiveType.Boolean] })
     public defaultValue?: boolean | number | string;
 
     @serialize()

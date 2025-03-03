@@ -1,6 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
+import { CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
-import { AccountController, CoreDate, CoreId, File, Transport } from "../../../src";
+import { AccountController, File, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("FileController", function () {
@@ -28,6 +29,7 @@ describe("FileController", function () {
         expect(receivedFile.cache?.expiresAt).toStrictEqual(sentFile.cache!.expiresAt);
         expect(sentFile.cache!.description).toBe(receivedFile.cache!.description);
         expect(sentFile.cache!.title).toBe(receivedFile.cache!.title);
+        expect(sentFile.cache!.tags).toStrictEqual(receivedFile.cache!.tags);
         expect(sentFile.cache!.filemodified?.toString()).toBe(receivedFile.cache!.filemodified?.toString());
         expect(sentFile.cache!.filename).toBe(receivedFile.cache!.filename);
         expect(sentFile.cache!.filesize).toBe(receivedFile.cache!.filesize);

@@ -1,5 +1,5 @@
 /**
- * @pattern id1[A-Za-z0-9]{32,33}
+ * @pattern did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}
  */
 export type AddressString = string;
 
@@ -32,11 +32,6 @@ export type LocalDraftIdString = string;
  * @pattern LCLSET[A-Za-z0-9]{14}
  */
 export type LocalSettingIdString = string;
-
-/**
- * @pattern RCH[A-Za-z0-9]{17}
- */
-export type RelationshipChangeIdString = string;
 
 /**
  * @pattern MSG[A-Za-z0-9]{17}

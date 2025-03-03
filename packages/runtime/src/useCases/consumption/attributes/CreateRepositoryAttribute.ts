@@ -1,30 +1,43 @@
 import { Result } from "@js-soft/ts-utils";
-import { AttributesController, CreateLocalAttributeParams } from "@nmshd/consumption";
+import { AttributesController, CreateRepositoryAttributeParams } from "@nmshd/consumption";
 import { AttributeValues } from "@nmshd/content";
 import { AccountController } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { LocalAttributeDTO } from "../../../types";
-import { ISO8601DateTimeString, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationResult } from "../../common";
+import { IValidator } from "../../common/validation/IValidator";
 import { AttributeMapper } from "./AttributeMapper";
+import { IdentityAttributeValueValidator } from "./IdentityAttributeValueValidator";
 
-export interface CreateRepositoryAttributeRequest {
+interface AbstractCreateRepositoryAttributeRequest<T> {
     content: {
-        value: AttributeValues.Identity.Json;
+        value: T;
         tags?: string[];
         validFrom?: ISO8601DateTimeString;
         validTo?: ISO8601DateTimeString;
     };
 }
 
-class Validator extends SchemaValidator<CreateRepositoryAttributeRequest> {
-    public constructor(@Inject schemaRepository: SchemaRepository) {
-        super(schemaRepository.getSchema("CreateRepositoryAttributeRequest"));
+export interface CreateRepositoryAttributeRequest extends AbstractCreateRepositoryAttributeRequest<AttributeValues.Identity.Json> {}
+
+export interface SchemaValidatableCreateRepositoryAttributeRequest extends AbstractCreateRepositoryAttributeRequest<unknown> {}
+
+class Validator implements IValidator<CreateRepositoryAttributeRequest> {
+    public constructor(@Inject private readonly schemaRepository: SchemaRepository) {}
+
+    public validate(request: CreateRepositoryAttributeRequest): Promise<ValidationResult> | ValidationResult {
+        const requestSchemaValidator = new SchemaValidator(this.schemaRepository.getSchema("CreateRepositoryAttributeRequest"));
+        const requestValidationResult = requestSchemaValidator.validate(request);
+        if (requestValidationResult.isInvalid()) return requestValidationResult;
+
+        const identityAttributeValueValidator = new IdentityAttributeValueValidator(this.schemaRepository);
+        return identityAttributeValueValidator.validate(request.content.value);
     }
 }
 
 export class CreateRepositoryAttributeUseCase extends UseCase<CreateRepositoryAttributeRequest, LocalAttributeDTO> {
     public constructor(
-        @Inject private readonly attributeController: AttributesController,
+        @Inject private readonly attributesController: AttributesController,
         @Inject private readonly accountController: AccountController,
         @Inject validator: Validator
     ) {
@@ -32,16 +45,22 @@ export class CreateRepositoryAttributeUseCase extends UseCase<CreateRepositoryAt
     }
 
     protected async executeInternal(request: CreateRepositoryAttributeRequest): Promise<Result<LocalAttributeDTO>> {
-        const params = CreateLocalAttributeParams.from({
+        const repositoryAttributeDuplicate = await this.attributesController.getRepositoryAttributeWithSameValue(request.content.value);
+        if (repositoryAttributeDuplicate) {
+            return Result.fail(RuntimeErrors.attributes.cannotCreateDuplicateRepositoryAttribute(repositoryAttributeDuplicate.id));
+        }
+
+        const params = CreateRepositoryAttributeParams.from({
             content: {
                 "@type": "IdentityAttribute",
                 owner: this.accountController.identity.address.toString(),
                 ...request.content
             }
         });
-        const createdAttribute = await this.attributeController.createLocalAttribute(params);
+        const createdLocalAttribute = await this.attributesController.createRepositoryAttribute(params);
+
         await this.accountController.syncDatawallet();
 
-        return Result.ok(AttributeMapper.toAttributeDTO(createdAttribute));
+        return Result.ok(AttributeMapper.toAttributeDTO(createdLocalAttribute));
     }
 }

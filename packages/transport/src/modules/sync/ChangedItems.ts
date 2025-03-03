@@ -12,7 +12,8 @@ export class ChangedItems implements IChangedItems {
     public constructor(
         public readonly relationships: Relationship[] = [],
         public readonly messages: Message[] = [],
-        public readonly identityDeletionProcesses: IdentityDeletionProcess[] = []
+        public readonly identityDeletionProcesses: IdentityDeletionProcess[] = [],
+        public readonly changedObjectIdentifiersDuringDatawalletSync: string[] = []
     ) {}
 
     public addItem(item: Relationship | Message | IdentityDeletionProcess): void {
@@ -23,5 +24,9 @@ export class ChangedItems implements IChangedItems {
         } else if (item instanceof IdentityDeletionProcess) {
             this.identityDeletionProcesses.push(item);
         }
+    }
+
+    public addChangedObjectsIdentifiersDuringDatawalletSync(identifiers: string[]): void {
+        this.changedObjectIdentifiersDuringDatawalletSync.push(...identifiers);
     }
 }

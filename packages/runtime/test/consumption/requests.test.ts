@@ -1,12 +1,13 @@
-import { EventBus } from "@js-soft/ts-utils";
-import { LocalRequestStatus } from "@nmshd/consumption";
-import { RelationshipCreationChangeRequestContentJSON } from "@nmshd/content";
-import { CoreDate } from "@nmshd/transport";
+import { EventBus, sleep } from "@js-soft/ts-utils";
+import { TestRequestItemJSON } from "@nmshd/consumption/test/modules/requests/testHelpers/TestRequestItem";
+import { RelationshipCreationContentJSON, RelationshipTemplateContentJSON } from "@nmshd/content";
+import { CoreDate } from "@nmshd/core-types";
+import { DateTime } from "luxon";
 import {
     ConsumptionServices,
     CreateOutgoingRequestRequest,
+    LocalRequestStatus,
     OutgoingRequestCreatedEvent,
-    OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent,
     OutgoingRequestStatusChangedEvent,
     TransportServices
 } from "../../src";
@@ -71,7 +72,7 @@ describe("Requests", () => {
                             mustBeAccepted: false
                         }
                     ],
-                    expiresAt: CoreDate.utc().add({ hour: 1 }).toISOString()
+                    expiresAt: CoreDate.utc().add({ minute: 10 }).toISOString()
                 },
                 peer: (await rTransportServices.account.getIdentityInfo()).value.address
             };
@@ -97,7 +98,7 @@ describe("Requests", () => {
             expect(sLocalRequest.status).toBe(LocalRequestStatus.Draft);
             expect(sLocalRequest.content.items).toHaveLength(1);
             expect(sLocalRequest.content.items[0]["@type"]).toBe("TestRequestItem");
-            expect(sLocalRequest.content.items[0].mustBeAccepted).toBe(false);
+            expect((sLocalRequest.content.items[0] as TestRequestItemJSON).mustBeAccepted).toBe(false);
         });
 
         // eslint-disable-next-line jest/expect-expect
@@ -111,7 +112,7 @@ describe("Requests", () => {
                 triggeredEvent = event;
             });
             const sRequestMessage = await sendMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
-            const result = await sConsumptionServices.outgoingRequests.sent({ requestId: sRequestMessage.content.id, messageId: sRequestMessage.id });
+            const result = await sConsumptionServices.outgoingRequests.sent({ requestId: sRequestMessage.content.id!, messageId: sRequestMessage.id });
 
             expect(result).toBeSuccessful();
             expect(result.value.status).toBe(LocalRequestStatus.Open);
@@ -138,7 +139,7 @@ describe("Requests", () => {
 
             expect(rLocalRequest).toBeDefined();
             expect(rLocalRequest.status).toBe(LocalRequestStatus.Open);
-            expect(rLocalRequest.id).toBe(rRequestMessage.content.id);
+            expect(rLocalRequest.id).toBe(rRequestMessage.content.id!);
 
             expect(triggeredEvent).toBeDefined();
             expect(triggeredEvent!.data).toBeDefined();
@@ -157,7 +158,7 @@ describe("Requests", () => {
             });
 
             const result = await rConsumptionServices.incomingRequests.checkPrerequisites({
-                requestId: message.content.id
+                requestId: message.content.id!
             });
 
             expect(result).toBeSuccessful();
@@ -180,7 +181,7 @@ describe("Requests", () => {
                 requestSourceId: message.id
             });
             await rConsumptionServices.incomingRequests.checkPrerequisites({
-                requestId: message.content.id
+                requestId: message.content.id!
             });
             let triggeredEvent: IncomingRequestStatusChangedEvent | undefined;
             rEventBus.subscribeOnce(IncomingRequestStatusChangedEvent, (event) => {
@@ -188,7 +189,7 @@ describe("Requests", () => {
             });
 
             const result = await rConsumptionServices.incomingRequests.requireManualDecision({
-                requestId: message.content.id
+                requestId: message.content.id!
             });
 
             expect(result).toBeSuccessful();
@@ -355,9 +356,8 @@ describe("Requests", () => {
         let sTransportServices: TransportServices;
         let rTransportServices: TransportServices;
         let rEventBus: EventBus;
-        let sEventBus: EventBus;
 
-        const templateContent = {
+        const templateContent: RelationshipTemplateContentJSON = {
             "@type": "RelationshipTemplateContent",
             onNewRelationship: {
                 "@type": "Request",
@@ -367,7 +367,7 @@ describe("Requests", () => {
                         mustBeAccepted: false
                     }
                 ],
-                expiresAt: CoreDate.utc().add({ hour: 1 }).toISOString()
+                expiresAt: CoreDate.utc().add({ minute: 10 }).toISOString()
             }
         };
 
@@ -379,7 +379,6 @@ describe("Requests", () => {
             rTransportServices = rRuntimeServices.transport;
             sConsumptionServices = sRuntimeServices.consumption;
             rConsumptionServices = rRuntimeServices.consumption;
-            sEventBus = sRuntimeServices.eventBus;
             rEventBus = rRuntimeServices.eventBus;
         }, 30000);
         afterAll(async () => await runtimeServiceProvider.stop());
@@ -387,7 +386,7 @@ describe("Requests", () => {
         test("sender: create a Relationship Template with the Request", async () => {
             const result = await sTransportServices.relationshipTemplates.createOwnRelationshipTemplate({
                 content: templateContent,
-                expiresAt: CoreDate.utc().add({ hour: 1 }).toISOString()
+                expiresAt: CoreDate.utc().add({ minute: 10 }).toISOString()
             });
 
             expect(result).toBeSuccessful();
@@ -405,7 +404,7 @@ describe("Requests", () => {
             });
 
             const result = await rConsumptionServices.incomingRequests.received({
-                receivedRequest: rRelationshipTemplate.content.onNewRelationship,
+                receivedRequest: (rRelationshipTemplate.content as RelationshipTemplateContentJSON).onNewRelationship,
                 requestSourceId: rRelationshipTemplate.id
             });
 
@@ -426,7 +425,7 @@ describe("Requests", () => {
             const rRelationshipTemplate = await exchangeTemplate(sTransportServices, rTransportServices, templateContent);
             const incomingRequest = (
                 await rConsumptionServices.incomingRequests.received({
-                    receivedRequest: rRelationshipTemplate.content.onNewRelationship,
+                    receivedRequest: (rRelationshipTemplate.content as RelationshipTemplateContentJSON).onNewRelationship,
                     requestSourceId: rRelationshipTemplate.id
                 })
             ).value;
@@ -456,7 +455,7 @@ describe("Requests", () => {
             const rRelationshipTemplate = await exchangeTemplate(sTransportServices, rTransportServices, templateContent);
             const incomingRequest = (
                 await rConsumptionServices.incomingRequests.received({
-                    receivedRequest: rRelationshipTemplate.content.onNewRelationship,
+                    receivedRequest: (rRelationshipTemplate.content as RelationshipTemplateContentJSON).onNewRelationship,
                     requestSourceId: rRelationshipTemplate.id
                 })
             ).value;
@@ -556,7 +555,7 @@ describe("Requests", () => {
 
             const result = await rConsumptionServices.incomingRequests.complete({
                 requestId: request.id,
-                responseSourceId: action === "Accept" ? relationship?.changes[0].id : undefined
+                responseSourceId: action === "Accept" ? relationship?.id : undefined
             });
 
             expect(result).toBeSuccessful();
@@ -577,17 +576,11 @@ describe("Requests", () => {
 
             expect(syncResult).toHaveLength(1);
 
-            const sRelationshipChange = syncResult[0].changes[0];
-
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            let triggeredCompletionEvent: OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent | undefined;
-            sEventBus.subscribeOnce(OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent, (event) => {
-                triggeredCompletionEvent = event;
-            });
+            const sRelationship = syncResult[0];
 
             const completionResult = await sConsumptionServices.outgoingRequests.createAndCompleteFromRelationshipTemplateResponse({
-                responseSourceId: sRelationshipChange.id,
-                response: (sRelationshipChange.request.content as RelationshipCreationChangeRequestContentJSON).response,
+                responseSourceId: sRelationship.id,
+                response: (sRelationship.creationContent as RelationshipCreationContentJSON).response,
                 templateId: relationship!.template.id
             });
 
@@ -603,6 +596,147 @@ describe("Requests", () => {
 
             expect(triggeredEvent).toBeDefined();
             expect(triggeredEvent!.data).toBeDefined();
+        });
+    });
+
+    describe("Request expired due to expired RelationshipTemplate", () => {
+        const runtimeServiceProvider = new RuntimeServiceProvider();
+        let sRuntimeServices: TestRuntimeServices;
+        let rRuntimeServices: TestRuntimeServices;
+        let rConsumptionServices: ConsumptionServices;
+        let rEventBus: EventBus;
+
+        const templateContent = {
+            "@type": "RelationshipTemplateContent",
+            onNewRelationship: {
+                "@type": "Request",
+                items: [
+                    {
+                        "@type": "TestRequestItem",
+                        mustBeAccepted: false
+                    }
+                ]
+            }
+        };
+
+        beforeAll(async () => {
+            const runtimeServices = await runtimeServiceProvider.launch(2);
+            sRuntimeServices = runtimeServices[0];
+            rRuntimeServices = runtimeServices[1];
+            rConsumptionServices = rRuntimeServices.consumption;
+            rEventBus = rRuntimeServices.eventBus;
+        }, 30000);
+
+        afterAll(async () => await runtimeServiceProvider.stop());
+
+        test("change status of Request when querying it if the underlying RelationshipTemplate is expired", async () => {
+            const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent, DateTime.utc().plus({ seconds: 3 })))
+                .request;
+
+            let triggeredEvent: IncomingRequestStatusChangedEvent | undefined;
+            rEventBus.subscribeOnce(IncomingRequestStatusChangedEvent, (event) => {
+                triggeredEvent = event;
+            });
+
+            expect(request.status).not.toBe(LocalRequestStatus.Expired);
+
+            await sleep(3000);
+
+            const rLocalRequest = (await rConsumptionServices.incomingRequests.getRequest({ id: request.id })).value;
+
+            expect(rLocalRequest).toBeDefined();
+            expect(rLocalRequest.status).toBe(LocalRequestStatus.Expired);
+            expect(rLocalRequest.response).toBeUndefined();
+
+            expect(triggeredEvent).toBeUndefined();
+        });
+
+        test("change status of Request when querying Requests if the underlying RelationshipTemplate is expired", async () => {
+            const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent, DateTime.utc().plus({ seconds: 3 })))
+                .request;
+
+            let triggeredEvent: IncomingRequestStatusChangedEvent | undefined;
+            rEventBus.subscribeOnce(IncomingRequestStatusChangedEvent, (event) => {
+                triggeredEvent = event;
+            });
+
+            expect(request.status).not.toBe(LocalRequestStatus.Expired);
+
+            await sleep(3000);
+
+            const rLocalRequest = (await rConsumptionServices.incomingRequests.getRequests({})).value[0];
+
+            expect(rLocalRequest).toBeDefined();
+            expect(rLocalRequest.status).toBe(LocalRequestStatus.Expired);
+            expect(rLocalRequest.response).toBeUndefined();
+
+            expect(triggeredEvent).toBeUndefined();
+        });
+
+        test("can not delete a Request when it is not expired", async () => {
+            const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent)).request;
+
+            await expect(rConsumptionServices.incomingRequests.delete({ requestId: request.id })).resolves.toBeAnError(
+                "is in status 'ManualDecisionRequired'. At the moment, you can only delete incoming Requests that are expired.",
+                "error.consumption.requests.canOnlyDeleteIncomingRequestThatIsExpired"
+            );
+        });
+
+        test("can delete a Request when it is expired", async () => {
+            const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent, DateTime.utc().plus({ seconds: 3 })))
+                .request;
+
+            await sleep(3000);
+
+            const rLocalRequest = (await rConsumptionServices.incomingRequests.getRequest({ id: request.id })).value;
+            expect(rLocalRequest.status).toBe(LocalRequestStatus.Expired);
+
+            await expect(rConsumptionServices.incomingRequests.delete({ requestId: request.id })).resolves.toBeSuccessful();
+
+            const rLocalRequestAfterDelete = await rConsumptionServices.incomingRequests.getRequest({ id: request.id });
+            expect(rLocalRequestAfterDelete).toBeAnError("LocalRequest not found.", "error.runtime.recordNotFound");
+        });
+
+        describe.each([
+            {
+                action: "Accept"
+            },
+            {
+                action: "Reject"
+            }
+        ] as TestCase[])("Cannot respond to Request of expired RelationshipTemplate: $action Request throws error", ({ action }) => {
+            const actionLowerCase = action.toLowerCase() as "accept" | "reject";
+
+            test(`recipient: cannot ${actionLowerCase} incoming Request`, async () => {
+                const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent, DateTime.utc().plus({ seconds: 3 })))
+                    .request;
+
+                let triggeredEvent: IncomingRequestStatusChangedEvent | undefined;
+                rEventBus.subscribeOnce(IncomingRequestStatusChangedEvent, (event) => {
+                    triggeredEvent = event;
+                });
+
+                await sleep(3000);
+
+                const result = await rConsumptionServices.incomingRequests[actionLowerCase]({
+                    requestId: request.id,
+                    items: [
+                        {
+                            accept: action === "Accept"
+                        }
+                    ]
+                });
+
+                expect(result).toBeAnError("Local Request has to be in status 'DecisionRequired/ManualDecisionRequired", "error.runtime.unknown");
+
+                const rLocalRequest = (await rConsumptionServices.incomingRequests.getRequest({ id: request.id })).value;
+
+                expect(rLocalRequest).toBeDefined();
+                expect(rLocalRequest.status).toBe(LocalRequestStatus.Expired);
+                expect(rLocalRequest.response).toBeUndefined();
+
+                expect(triggeredEvent).toBeUndefined();
+            });
         });
     });
 });

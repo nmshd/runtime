@@ -1,6 +1,9 @@
 import { LocalAttributeDTO } from "../../types";
 import { DataEvent } from "../DataEvent";
 
+/**
+ * @deprecated Use ThirdPartyRelationshipAttributeDeletedByPeerEvent instead.
+ */
 export class ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent extends DataEvent<LocalAttributeDTO> {
     public static readonly namespace = "consumption.thirdPartyOwnedRelationshipAttributeDeletedByPeer";
 

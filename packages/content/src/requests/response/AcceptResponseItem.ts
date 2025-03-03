@@ -1,9 +1,15 @@
 import { type } from "@js-soft/ts-serval";
 import {
+    AttributeAlreadySharedAcceptResponseItem,
+    AttributeAlreadySharedAcceptResponseItemJSON,
+    AttributeSuccessionAcceptResponseItem,
+    AttributeSuccessionAcceptResponseItemJSON,
     CreateAttributeAcceptResponseItem,
     CreateAttributeAcceptResponseItemJSON,
     FreeTextAcceptResponseItem,
     FreeTextAcceptResponseItemJSON,
+    IAttributeAlreadySharedAcceptResponseItem,
+    IAttributeSuccessionAcceptResponseItem,
     ICreateAttributeAcceptResponseItem,
     IFreeTextAcceptResponseItem,
     IProposeAttributeAcceptResponseItem,
@@ -28,6 +34,8 @@ export interface AcceptResponseItemJSON extends ResponseItemJSON {
 
 export type AcceptResponseItemJSONDerivations =
     | AcceptResponseItemJSON
+    | AttributeAlreadySharedAcceptResponseItemJSON
+    | AttributeSuccessionAcceptResponseItemJSON
     | CreateAttributeAcceptResponseItemJSON
     | ShareAttributeAcceptResponseItemJSON
     | ProposeAttributeAcceptResponseItemJSON
@@ -41,6 +49,8 @@ export interface IAcceptResponseItem extends IResponseItem {
 
 export type IAcceptResponseItemDerivations =
     | IAcceptResponseItem
+    | IAttributeAlreadySharedAcceptResponseItem
+    | IAttributeSuccessionAcceptResponseItem
     | ICreateAttributeAcceptResponseItem
     | IShareAttributeAcceptResponseItem
     | IProposeAttributeAcceptResponseItem
@@ -63,6 +73,8 @@ export class AcceptResponseItem extends ResponseItem implements IAcceptResponseI
 
 export type AcceptResponseItemDerivations =
     | AcceptResponseItem
+    | AttributeAlreadySharedAcceptResponseItem
+    | AttributeSuccessionAcceptResponseItem
     | CreateAttributeAcceptResponseItem
     | ShareAttributeAcceptResponseItem
     | ProposeAttributeAcceptResponseItem

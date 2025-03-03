@@ -1,13 +1,17 @@
+import { Serializable } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
-import { AccountController, CoreId, RelationshipsController, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { IncomingRequestsController } from "@nmshd/consumption";
+import { CoreId } from "@nmshd/core-types";
+import { AccountController, RelationshipTemplate, RelationshipTemplateController, RelationshipsController } from "@nmshd/transport";
+import { Inject } from "@nmshd/typescript-ioc";
 import { RelationshipDTO } from "../../../types";
 import { RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { RelationshipMapper } from "./RelationshipMapper";
+import { validateCreationContentOfRelationship } from "./utility/validateCreationContentOfRelationship";
 
 export interface CreateRelationshipRequest {
     templateId: RelationshipTemplateIdString;
-    content: any;
+    creationContent: any;
 }
 
 class Validator extends SchemaValidator<CreateRelationshipRequest> {
@@ -20,6 +24,7 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
     public constructor(
         @Inject private readonly relationshipsController: RelationshipsController,
         @Inject private readonly relationshipTemplateController: RelationshipTemplateController,
+        @Inject private readonly incomingRequestsController: IncomingRequestsController,
         @Inject private readonly accountController: AccountController,
         @Inject validator: Validator
     ) {
@@ -28,17 +33,23 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
 
     protected async executeInternal(request: CreateRelationshipRequest): Promise<Result<RelationshipDTO>> {
         const template = await this.relationshipTemplateController.getRelationshipTemplate(CoreId.from(request.templateId));
+
         if (!template) {
             return Result.fail(RuntimeErrors.general.recordNotFound(RelationshipTemplate));
         }
 
-        const relationship = await this.relationshipsController.sendRelationship({
-            template: template,
-            content: request.content
-        });
+        const canSendRelationshipResult = await this.relationshipsController.canSendRelationship({ creationContent: request.creationContent, template });
+        if (!canSendRelationshipResult.isSuccess) throw canSendRelationshipResult.error;
+
+        const creationContentOfRelationshipValidationError = await validateCreationContentOfRelationship(this.incomingRequestsController, template, request.creationContent);
+        if (creationContentOfRelationshipValidationError) return Result.fail(creationContentOfRelationshipValidationError);
+
+        const transformedCreationContent = Serializable.fromUnknown(request.creationContent);
+
+        const sendRelationshipResult = await this.relationshipsController.sendRelationship({ template, creationContent: transformedCreationContent.toJSON() });
 
         await this.accountController.syncDatawallet();
 
-        return Result.ok(RelationshipMapper.toRelationshipDTO(relationship));
+        return Result.ok(RelationshipMapper.toRelationshipDTO(sendRelationshipResult));
     }
 }

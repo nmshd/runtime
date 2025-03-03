@@ -24,7 +24,7 @@ export interface IRenderHints extends ISerializable {
 export interface IRenderHintsOverride extends Partial<IRenderHints> {}
 
 function deserializePropertyHints(value: RenderHints | RenderHintsOverride): void {
-    if (typeof value.propertyHints === "undefined") return;
+    if (!value.propertyHints) return;
 
     value.propertyHints = Object.entries(value.propertyHints)
         .map((k) => {

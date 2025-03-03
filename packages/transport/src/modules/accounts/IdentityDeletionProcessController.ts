@@ -1,5 +1,6 @@
 import { log } from "@js-soft/ts-utils";
-import { ClientResult, ControllerName, CoreId, DbCollectionName, TransportController } from "../../core";
+import { CoreId } from "@nmshd/core-types";
+import { ClientResult, ControllerName, DbCollectionName, TransportController } from "../../core";
 import { IdentityDeletionProcessStatusChangedEvent } from "../../events";
 import { AccountController } from "../accounts/AccountController";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
@@ -16,7 +17,7 @@ export class IdentityDeletionProcessController extends TransportController {
     public constructor(parent: AccountController) {
         super(ControllerName.Identity, parent);
 
-        this.identityDeletionProcessClient = new IdentityDeletionProcessClient(this.config, this.parent.authenticator);
+        this.identityDeletionProcessClient = new IdentityDeletionProcessClient(this.config, this.parent.authenticator, this.transport.correlator);
     }
 
     @log()
@@ -73,8 +74,8 @@ export class IdentityDeletionProcessController extends TransportController {
         return identityDeletionProcess;
     }
 
-    public async initiateIdentityDeletionProcess(): Promise<IdentityDeletionProcess> {
-        const identityDeletionProcessResponse = await this.identityDeletionProcessClient.initiateIdentityDeletionProcess();
+    public async initiateIdentityDeletionProcess(lengthOfGracePeriodInDays?: number): Promise<IdentityDeletionProcess> {
+        const identityDeletionProcessResponse = await this.identityDeletionProcessClient.initiateIdentityDeletionProcess({ lengthOfGracePeriodInDays });
 
         const identityDeletionProcess = this.createIdentityDeletionProcessFromBackboneResponse(identityDeletionProcessResponse);
 
@@ -99,7 +100,7 @@ export class IdentityDeletionProcessController extends TransportController {
     public async getIdentityDeletionProcesses(): Promise<IdentityDeletionProcess[]> {
         return (await this.identityDeletionProcessCollection.find())
             .map((identityDeletionProcess) => (identityDeletionProcess ? IdentityDeletionProcess.from(identityDeletionProcess) : undefined))
-            .filter((identityDeletionProcess) => !!identityDeletionProcess) as IdentityDeletionProcess[];
+            .filter((identityDeletionProcess) => !!identityDeletionProcess);
     }
 
     public async getIdentityDeletionProcessByStatus(...identityDeletionProcessStatus: IdentityDeletionProcessStatus[]): Promise<IdentityDeletionProcess | undefined> {
@@ -116,7 +117,9 @@ export class IdentityDeletionProcessController extends TransportController {
         const getIdentityDeletionPromises = ids.map((id) => this.identityDeletionProcessClient.getIdentityDeletionProcess(id.toString()));
         const backboneTokens: { id: CoreId; cache: CachedIdentityDeletionProcess }[] = [];
 
-        for await (const identityDeletionProcess of getIdentityDeletionPromises) {
+        const identityDeletionProcesses = await Promise.all(getIdentityDeletionPromises);
+
+        for (const identityDeletionProcess of identityDeletionProcesses) {
             const { id, ...cache } = identityDeletionProcess.value;
             backboneTokens.push({ id: CoreId.from(id), cache: CachedIdentityDeletionProcess.from(cache) });
         }

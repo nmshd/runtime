@@ -1,10 +1,11 @@
 import { ILogger } from "@js-soft/logging-abstractions";
 import { PeerSharedAttributeDeletedByPeerNotificationItem } from "@nmshd/content";
-import { CoreDate, TransportLoggerFactory } from "@nmshd/transport";
+import { CoreDate } from "@nmshd/core-types";
+import { TransportLoggerFactory } from "@nmshd/transport";
 import { ConsumptionController } from "../../../../consumption/ConsumptionController";
-import { CoreErrors } from "../../../../consumption/CoreErrors";
+import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import { PeerSharedAttributeDeletedByPeerEvent } from "../../../attributes";
-import { DeletionStatus, LocalAttributeDeletionInfo } from "../../../attributes/local/LocalAttributeDeletionInfo";
+import { LocalAttributeDeletionInfo, LocalAttributeDeletionStatus } from "../../../attributes/local/LocalAttributeDeletionInfo";
 import { ValidationResult } from "../../../common";
 import { LocalNotification } from "../../local/LocalNotification";
 import { AbstractNotificationItemProcessor } from "../AbstractNotificationItemProcessor";
@@ -23,16 +24,14 @@ export class PeerSharedAttributeDeletedByPeerNotificationItemProcessor extends A
     ): Promise<ValidationResult> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
 
-        if (typeof attribute === "undefined") {
-            return ValidationResult.success();
-        }
+        if (!attribute) return ValidationResult.success();
 
         if (!attribute.isOwnSharedAttribute(this.currentIdentityAddress)) {
-            return ValidationResult.error(CoreErrors.attributes.isNotOwnSharedAttribute(notificationItem.attributeId));
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.isNotOwnSharedAttribute(notificationItem.attributeId));
         }
 
         if (!notification.peer.equals(attribute.shareInfo.peer)) {
-            return ValidationResult.error(CoreErrors.attributes.senderIsNotPeerOfSharedAttribute(notification.peer, notificationItem.attributeId));
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.senderIsNotPeerOfSharedAttribute(notification.peer, notificationItem.attributeId));
         }
 
         return ValidationResult.success();
@@ -43,11 +42,11 @@ export class PeerSharedAttributeDeletedByPeerNotificationItemProcessor extends A
         _notification: LocalNotification
     ): Promise<PeerSharedAttributeDeletedByPeerEvent | void> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
-        if (typeof attribute === "undefined") return;
+        if (!attribute) return;
 
         const deletionDate = CoreDate.utc();
         const deletionInfo = LocalAttributeDeletionInfo.from({
-            deletionStatus: DeletionStatus.DeletedByPeer,
+            deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
             deletionDate: deletionDate
         });
 
@@ -63,7 +62,7 @@ export class PeerSharedAttributeDeletedByPeerNotificationItemProcessor extends A
 
     public override async rollback(notificationItem: PeerSharedAttributeDeletedByPeerNotificationItem, _notification: LocalNotification): Promise<void> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
-        if (typeof attribute === "undefined") return;
+        if (!attribute) return;
 
         const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute.id);
 

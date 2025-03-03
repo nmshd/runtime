@@ -1,7 +1,6 @@
 import { Serializable, type } from "@js-soft/ts-serval";
-import { CoreDate, CoreId } from "@nmshd/transport";
+import { CoreDate, CoreId } from "@nmshd/core-types";
 import { IRequest, IRequestItem, IRequestItemGroup, Request, RequestItem, RequestItemGroup, RequestItemGroupJSON, RequestItemJSON, RequestJSON } from "../../src";
-import { expectThrowsAsync } from "../testUtils";
 
 interface TestRequestItemJSON extends RequestItemJSON {
     "@type": "TestRequestItem";
@@ -24,7 +23,6 @@ describe("Request", function () {
                 } as TestRequestItemJSON,
                 {
                     "@type": "RequestItemGroup",
-                    mustBeAccepted: true,
                     items: [
                         {
                             "@type": "TestRequestItem",
@@ -48,10 +46,10 @@ describe("Request", function () {
         expect(requestItemGroup.items).toHaveLength(1);
     });
 
-    test("creates a Request and items from serval interface", async function () {
+    test("creates a Request and items from serval interface", function () {
         const requestInterface = {
             "@type": "Request",
-            id: await CoreId.generate(),
+            id: CoreId.from("REQ1"),
             items: [
                 {
                     "@type": "TestRequestItem",
@@ -60,7 +58,6 @@ describe("Request", function () {
                 } as ITestRequestItem,
                 {
                     "@type": "RequestItemGroup",
-                    mustBeAccepted: true,
                     items: [
                         {
                             "@type": "TestRequestItem",
@@ -102,7 +99,6 @@ describe("Request", function () {
                 } as TestRequestItemJSON,
                 {
                     "@type": "RequestItemGroup",
-                    mustBeAccepted: true,
                     title: "item group - title",
                     description: "item group - description",
                     metadata: {
@@ -130,16 +126,19 @@ describe("Request", function () {
         expect(serializedRequest).toStrictEqual(requestJSON);
     });
 
-    test("must have at least one item", async function () {
+    test("must have at least one item", function () {
         const requestJSON = {
             "@type": "Request",
             items: []
         } as RequestJSON;
 
-        await expectThrowsAsync(() => Request.from(requestJSON), "*Request.items*may not be empty");
+        const errorMessage = "*Request.items*may not be empty";
+        const regex = new RegExp(errorMessage.replace(/\*/g, ".*"));
+
+        expect(() => Request.from(requestJSON)).toThrow(regex);
     });
 
-    test("groups must have at least one item", async function () {
+    test("groups must have at least one item", function () {
         const requestJSON = {
             "@type": "Request",
             id: "CNSREQ1",
@@ -147,16 +146,18 @@ describe("Request", function () {
             items: [
                 {
                     "@type": "RequestItemGroup",
-                    mustBeAccepted: true,
                     items: []
                 } as RequestItemGroupJSON
             ]
         } as RequestJSON;
 
-        await expectThrowsAsync(() => Request.from(requestJSON), "*RequestItemGroup.items*may not be empty*");
+        const errorMessage = "*RequestItemGroup.items*may not be empty*";
+        const regex = new RegExp(errorMessage.replace(/\*/g, ".*"));
+
+        expect(() => Request.from(requestJSON)).toThrow(regex);
     });
 
-    test("mustBeAccepted is mandatory", async function () {
+    test("mustBeAccepted is mandatory", function () {
         const requestJSON = {
             "@type": "Request",
             items: [
@@ -166,39 +167,9 @@ describe("Request", function () {
             ]
         } as RequestJSON;
 
-        await expectThrowsAsync(() => Serializable.fromUnknown(requestJSON), "TestRequestItem.mustBeAccepted*Value is not defined");
-    });
+        const errorMessage = "TestRequestItem.mustBeAccepted*Value is not defined";
+        const regex = new RegExp(errorMessage.replace(/\*/g, ".*"));
 
-    test("should validate the RequestItemGroups mustBeAccepted flag inside a Request", async function () {
-        const requestJSON = {
-            "@type": "Request",
-            items: [
-                {
-                    "@type": "RequestItemGroup",
-                    mustBeAccepted: true,
-                    items: [
-                        {
-                            "@type": "TestRequestItem",
-                            mustBeAccepted: false
-                        }
-                    ]
-                }
-            ]
-        } as RequestJSON;
-
-        await expectThrowsAsync(() => Serializable.fromUnknown(requestJSON), "mustBeAccepted can only be true if at least one item is flagged as mustBeAccepted");
-    });
-});
-
-describe("RequestItemGroup", function () {
-    test("should validate the RequestItemGroups mustBeAccepted flag", async function () {
-        await expectThrowsAsync(
-            () =>
-                RequestItemGroup.from({
-                    mustBeAccepted: true,
-                    items: [TestRequestItem.fromAny({ mustBeAccepted: false })]
-                }),
-            "mustBeAccepted can only be true if at least one item is flagged as mustBeAccepted"
-        );
+        expect(() => Serializable.fromUnknown(requestJSON)).toThrow(regex);
     });
 });

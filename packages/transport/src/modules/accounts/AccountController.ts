@@ -1,42 +1,43 @@
 import { IDatabaseCollection, IDatabaseCollectionProvider, IDatabaseMap } from "@js-soft/docdb-access-abstractions";
 import { ILogger } from "@js-soft/logging-abstractions";
 import { log } from "@js-soft/ts-utils";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CryptoSecretKey } from "@nmshd/crypto";
-import { ControllerName, CoreAddress, CoreDate, CoreErrors, CoreId, IConfig, Transport, TransportError } from "../../core";
-import { AbstractAuthenticator, Authenticator } from "../../core/backbone/Authenticator";
+import { AbstractAuthenticator, Authenticator, ControllerName, IConfig, Transport, TransportCoreErrors, TransportError } from "../../core";
 import { CoreCrypto } from "../../core/CoreCrypto";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { DependencyOverrides } from "../../core/DependencyOverrides";
 import { TransportLoggerFactory } from "../../core/TransportLoggerFactory";
+import { IdentityDeletionProcessStatusChangedEvent } from "../../events/IdentityDeletionProcessStatusChangedEvent";
 import { PasswordGenerator } from "../../util";
 import { CertificateController } from "../certificates/CertificateController";
 import { CertificateIssuer } from "../certificates/CertificateIssuer";
 import { CertificateValidator } from "../certificates/CertificateValidator";
 import { ChallengeController } from "../challenges/ChallengeController";
-import { BackbonePutDevicesPushNotificationRequest, DeviceAuthClient } from "../devices/backbone/DeviceAuthClient";
-import { DeviceClient } from "../devices/backbone/DeviceClient";
 import { DeviceController } from "../devices/DeviceController";
-import { DevicesController } from "../devices/DevicesController";
 import { DeviceSecretType } from "../devices/DeviceSecretController";
+import { DevicesController } from "../devices/DevicesController";
+import { BackbonePutDevicesPushNotificationRequest, DeviceAuthClient } from "../devices/backbone/DeviceAuthClient";
 import { Device, DeviceInfo, DeviceType } from "../devices/local/Device";
 import { DeviceSecretCredentials } from "../devices/local/DeviceSecretCredentials";
 import { DeviceSharedSecret } from "../devices/transmission/DeviceSharedSecret";
 import { FileController } from "../files/FileController";
 import { MessageController } from "../messages/MessageController";
-import { RelationshipsController } from "../relationships/RelationshipsController";
-import { RelationshipSecretController } from "../relationships/RelationshipSecretController";
+import { PublicRelationshipTemplateReferencesController } from "../publicRelationshipTemplateReferences/PublicRelationshipTemplateReferencesController";
 import { RelationshipTemplateController } from "../relationshipTemplates/RelationshipTemplateController";
+import { RelationshipSecretController } from "../relationships/RelationshipSecretController";
+import { RelationshipsController } from "../relationships/RelationshipsController";
+import { Relationship } from "../relationships/local/Relationship";
 import { SecretController } from "../secrets/SecretController";
 import { ChangedItems } from "../sync/ChangedItems";
-import { SyncProgressCallback, SyncProgressReporter } from "../sync/SyncCallback";
 import { SyncController } from "../sync/SyncController";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
 import { TokenController } from "../tokens/TokenController";
-import { IdentityClient } from "./backbone/IdentityClient";
-import { Identity } from "./data/Identity";
 import { IdentityController } from "./IdentityController";
 import { IdentityDeletionProcessController } from "./IdentityDeletionProcessController";
 import { IdentityUtil } from "./IdentityUtil";
+import { IdentityClient } from "./backbone/IdentityClient";
+import { Identity } from "./data/Identity";
 
 export class AccountController {
     private readonly _authenticator: AbstractAuthenticator;
@@ -46,7 +47,6 @@ export class AccountController {
         return this._authenticator;
     }
 
-    public deviceClient: DeviceClient;
     public deviceAuthClient: DeviceAuthClient;
     public identityClient: IdentityClient;
 
@@ -59,6 +59,7 @@ export class AccountController {
     public devices: DevicesController;
     public files: FileController;
     public messages: MessageController;
+    public publicRelationshipTemplateReferences: PublicRelationshipTemplateReferencesController;
     public relationships: RelationshipsController;
     public relationshipTemplates: RelationshipTemplateController;
     private synchronization: SyncController;
@@ -111,7 +112,7 @@ export class AccountController {
         private readonly _config: IConfig,
         private readonly dependencyOverrides: DependencyOverrides = {}
     ) {
-        this._authenticator = new Authenticator(this);
+        this._authenticator = new Authenticator(this, _transport.correlator);
         this._log = TransportLoggerFactory.getLogger(ControllerName.Account);
     }
 
@@ -120,8 +121,7 @@ export class AccountController {
         this.info = await this.db.getMap("AccountInfo");
         this.unpushedDatawalletModifications = await this.db.getCollection(DbCollectionName.UnpushedDatawalletModifications);
 
-        this.deviceClient = new DeviceClient(this.config);
-        this.identityClient = new IdentityClient(this.config);
+        this.identityClient = new IdentityClient(this.config, this._transport.correlator);
 
         this._identity = new IdentityController(this);
         this._identityDeletionProcess = new IdentityDeletionProcessController(this);
@@ -136,13 +136,17 @@ export class AccountController {
 
         if (!availableIdentityDoc && !availableDeviceDoc) {
             if (!deviceSharedSecret) {
+                if (!this.config.allowIdentityCreation) {
+                    throw new TransportError("No Identity found and identity creation is not allowed.");
+                }
+
                 // Identity creation
                 this._log.trace("No account information found. Creating new account...");
                 const result = await this.createIdentityAndDevice();
 
                 identityCreated = true;
                 device = result.device;
-                this.deviceAuthClient = new DeviceAuthClient(this.config, this.authenticator);
+                this.deviceAuthClient = new DeviceAuthClient(this.config, this.authenticator, this.transport.correlator);
             } else {
                 // Device Onboarding
                 device = await this.onboardDevice(deviceSharedSecret);
@@ -151,7 +155,7 @@ export class AccountController {
         } else if (!deviceSharedSecret && availableIdentityDoc && availableDeviceDoc) {
             // Login
             if (!availableBaseKeyDoc) {
-                throw CoreErrors.secrets.secretNotFound("BaseKey");
+                throw TransportCoreErrors.secrets.secretNotFound("BaseKey");
             }
 
             const availableIdentity = Identity.from(availableIdentityDoc);
@@ -162,7 +166,7 @@ export class AccountController {
             await this.identityDeletionProcess.init();
             await this.activeDevice.init(availableBaseKey, availableDevice);
 
-            this.deviceAuthClient = new DeviceAuthClient(this.config, this.authenticator);
+            this.deviceAuthClient = new DeviceAuthClient(this.config, this.authenticator, this.transport.correlator);
         } else {
             throw new TransportError("The combination of deviceSharedSecret, existing identity or device is not allowed.");
         }
@@ -178,7 +182,10 @@ export class AccountController {
             await this.syncDatawallet();
             await this.devices.update(device!);
         }
-        await this.syncDatawallet();
+
+        await this.syncDatawallet().catch(() => {
+            throw TransportCoreErrors.general.accountControllerInitialSyncFailed();
+        });
 
         return this;
     }
@@ -206,6 +213,7 @@ export class AccountController {
         this.relationshipTemplates = await new RelationshipTemplateController(this, this.relationshipSecrets).init();
         this.messages = await new MessageController(this).init();
         this.tokens = await new TokenController(this).init();
+        this.publicRelationshipTemplateReferences = await new PublicRelationshipTemplateReferencesController(this).init();
 
         this.synchronization = await new SyncController(this, this.dependencyOverrides, this.unpushedDatawalletModifications, this.config.datawalletEnabled).init();
 
@@ -222,18 +230,24 @@ export class AccountController {
         await this.syncDatawallet();
     }
 
-    public async syncDatawallet(force = false, syncProgressCallback?: SyncProgressCallback): Promise<void> {
-        if (!force && !this.autoSync) {
-            return;
-        }
+    public async syncDatawallet(force = false): Promise<void> {
+        if (!force && !this.autoSync) return;
 
-        const reporter = SyncProgressReporter.fromCallback(syncProgressCallback);
-        return await this.synchronization.sync("OnlyDatawallet", reporter);
+        const changedItems = await this.synchronization.sync("OnlyDatawallet");
+        this.triggerEventsForChangedItems(changedItems);
     }
 
-    public async syncEverything(syncProgressCallback?: SyncProgressCallback): Promise<ChangedItems> {
-        const reporter = SyncProgressReporter.fromCallback(syncProgressCallback);
-        return await this.synchronization.sync("Everything", reporter);
+    public async syncEverything(): Promise<ChangedItems> {
+        const changedItems = await this.synchronization.sync("Everything");
+        this.triggerEventsForChangedItems(changedItems);
+
+        return changedItems;
+    }
+
+    private triggerEventsForChangedItems(changedItems: ChangedItems) {
+        if (changedItems.changedObjectIdentifiersDuringDatawalletSync.some((x) => x.startsWith("IDP"))) {
+            this.transport.eventBus.publish(new IdentityDeletionProcessStatusChangedEvent(this.identity.address.toString()));
+        }
     }
 
     public async getLastCompletedSyncTime(): Promise<CoreDate | undefined> {
@@ -264,7 +278,7 @@ export class AccountController {
         const signedChallenge = await this.challenges.createAccountCreationChallenge(identityKeypair);
         this._log.trace("Challenge signed. Creating device...");
 
-        const [deviceResponseResult, privSync, localAddress, deviceInfo] = await Promise.all([
+        const [createIdentityResponse, privSync, localAddress, deviceInfo] = await Promise.all([
             // Register first device (and identity) on backbone
             this.identityClient.createIdentity({
                 devicePassword: devicePwdD1,
@@ -278,35 +292,34 @@ export class AccountController {
             CoreCrypto.generateSecretKey(),
 
             // Generate address locally
-            IdentityUtil.createAddress(identityKeypair.publicKey, this._config.realm),
+            IdentityUtil.createAddress(identityKeypair.publicKey, this._config.addressGenerationHostnameOverride ?? new URL(this._config.baseUrl).hostname),
             this.fetchDeviceInfo()
         ]);
 
-        if (deviceResponseResult.isError) {
-            const error = deviceResponseResult.error;
+        if (createIdentityResponse.isError) {
+            const error = createIdentityResponse.error;
             if (error.code === "error.platform.unauthorized") {
-                throw CoreErrors.general.platformClientInvalid();
+                throw TransportCoreErrors.general.platformClientInvalid();
             }
         }
 
-        const deviceResponse = deviceResponseResult.value;
+        const createdIdentity = createIdentityResponse.value;
 
-        this._log.trace(`Registered identity with address ${deviceResponse.address}, device id is ${deviceResponse.device.id}.`);
+        this._log.trace(`Registered identity with address ${createdIdentity.address}, device id is ${createdIdentity.device.id}.`);
 
-        if (!localAddress.equals(deviceResponse.address)) {
-            throw new TransportError("The backbone address does not match the local address.");
+        if (!localAddress.equals(createdIdentity.address)) {
+            throw new TransportError(`The backbone address '${createdIdentity.address}' does not match the local address '${localAddress.toString()}'.`);
         }
 
         const identity = Identity.from({
-            address: CoreAddress.from(deviceResponse.address),
-            realm: this._config.realm,
+            address: CoreAddress.from(createdIdentity.address),
             publicKey: identityKeypair.publicKey
         });
 
-        const deviceId = CoreId.from(deviceResponse.device.id);
+        const deviceId = CoreId.from(createdIdentity.device.id);
 
         const device = Device.from({
-            createdAt: CoreDate.from(deviceResponse.createdAt),
+            createdAt: CoreDate.from(createdIdentity.createdAt),
             createdByDevice: deviceId,
             id: deviceId,
             name: "Device 1",
@@ -315,8 +328,9 @@ export class AccountController {
             publicKey: deviceKeypair.publicKey,
             type: deviceInfo.type,
             certificate: "",
-            username: deviceResponse.device.username,
-            datawalletVersion: this._config.supportedDatawalletVersion
+            username: createdIdentity.device.username,
+            datawalletVersion: this._config.supportedDatawalletVersion,
+            isBackupDevice: false
         });
 
         // Initialize required controllers
@@ -326,7 +340,7 @@ export class AccountController {
 
         const deviceCredentials = DeviceSecretCredentials.from({
             id: device.id,
-            username: deviceResponse.device.username,
+            username: createdIdentity.device.username,
             password: devicePwdD1
         });
 
@@ -358,7 +372,7 @@ export class AccountController {
 
         const device = Device.from({
             id: deviceSharedSecret.id,
-            name: deviceSharedSecret.name ? deviceSharedSecret.name : "",
+            name: deviceSharedSecret.name ?? "",
             description: deviceSharedSecret.description,
             lastLoginAt: CoreDate.utc(),
             createdAt: deviceSharedSecret.createdAt,
@@ -368,7 +382,8 @@ export class AccountController {
             publicKey: deviceKeypair.publicKey,
             username: deviceSharedSecret.username,
             initialPassword: undefined,
-            isAdmin: deviceSharedSecret.identityPrivateKey ? true : false
+            isAdmin: deviceSharedSecret.identityPrivateKey ? true : false,
+            isBackupDevice: false
         });
 
         // Initialize required controllers
@@ -397,15 +412,16 @@ export class AccountController {
             await this.activeDevice.secrets.storeSecret(deviceSharedSecret.identityPrivateKey, DeviceSecretType.IdentitySignature);
         }
 
-        this.deviceAuthClient = new DeviceAuthClient(this.config, this.authenticator);
+        this.deviceAuthClient = new DeviceAuthClient(this.config, this.authenticator, this.transport.correlator);
 
         await this.activeDevice.changePassword(devicePwdDn);
 
         return device;
     }
 
-    public async registerPushNotificationToken(token: BackbonePutDevicesPushNotificationRequest): Promise<void> {
-        await this.deviceAuthClient.registerPushNotificationToken(token);
+    public async registerPushNotificationToken(token: BackbonePutDevicesPushNotificationRequest): Promise<{ devicePushIdentifier: string }> {
+        const result = await this.deviceAuthClient.registerPushNotificationToken(token);
+        return result.value;
     }
 
     public async unregisterPushNotificationToken(): Promise<void> {
@@ -426,5 +442,11 @@ export class AccountController {
         }
 
         return new SynchronizedCollection(collection, this.config.supportedDatawalletVersion, this.unpushedDatawalletModifications);
+    }
+
+    public async cleanupDataOfDecomposedRelationship(relationship: Relationship): Promise<void> {
+        await this.messages.cleanupMessagesOfDecomposedRelationship(relationship);
+        await this.relationshipTemplates.cleanupTemplatesOfDecomposedRelationship(relationship);
+        await this.tokens.cleanupTokensOfDecomposedRelationship(relationship.peer.address);
     }
 }

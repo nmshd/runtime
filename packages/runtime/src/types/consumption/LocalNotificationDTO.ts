@@ -1,5 +1,11 @@
-import { LocalNotificationStatus } from "@nmshd/consumption";
 import { NotificationJSON } from "@nmshd/content";
+
+export enum LocalNotificationStatus {
+    Open = "Open",
+    Sent = "Sent",
+    Completed = "Completed",
+    Error = "Error"
+}
 
 export interface LocalNotificationDTO {
     id: string;

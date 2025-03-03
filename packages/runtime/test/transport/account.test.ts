@@ -1,17 +1,24 @@
-import { CoreDate } from "@nmshd/transport";
+import { CoreDate } from "@nmshd/core-types";
 import { DateTime } from "luxon";
-import { DeviceDTO, DeviceOnboardingInfoDTO, TransportServices } from "../../src";
-import { RuntimeServiceProvider, uploadFile } from "../lib";
+import { DatawalletSynchronizedEvent, DeviceDTO, DeviceOnboardingInfoDTO, TransportServices } from "../../src";
+import { emptyRelationshipTemplateContent, MockEventBus, RuntimeServiceProvider, uploadFile } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let sTransportServices: TransportServices;
 let rTransportServices: TransportServices;
 
+let sEventBus: MockEventBus;
+
 beforeAll(async () => {
     const runtimeServices = await serviceProvider.launch(2, { enableDatawallet: true });
     sTransportServices = runtimeServices[0].transport;
     rTransportServices = runtimeServices[1].transport;
+
+    sEventBus = runtimeServices[0].eventBus;
 }, 30000);
+
+beforeEach(() => sEventBus.reset());
+
 afterAll(async () => await serviceProvider.stop());
 
 describe("Sync", () => {
@@ -49,6 +56,12 @@ describe("Automatic Datawallet Sync", () => {
         expect(oldSyncTime).not.toStrictEqual(newSyncTime);
     });
 
+    test("should receive a DatawalletSynchronizedEvent", async () => {
+        await sTransportServices.account.syncDatawallet();
+
+        await expect(sEventBus).toHavePublished(DatawalletSynchronizedEvent);
+    });
+
     test("should not run an automatic datawallet sync", async () => {
         const disableResult = await sTransportServices.account.disableAutoSync();
         expect(disableResult).toBeSuccessful();
@@ -72,9 +85,7 @@ describe("IdentityInfo", () => {
         expect(identityInfoResult).toBeSuccessful();
 
         const identityInfo = identityInfoResult.value;
-        expect(identityInfo.address.length).toBeLessThanOrEqual(36);
-        expect(identityInfo.address.length).toBeGreaterThanOrEqual(35);
-        expect(identityInfo.address).toMatch(/^id1/);
+        expect(identityInfo.address).toMatch(/^did:e:[a-zA-Z0-9.-]+:dids:[0-9a-f]{22}$/);
         expect(identityInfo.publicKey).toHaveLength(82);
     });
 });
@@ -110,7 +121,7 @@ describe("LoadItemFromTruncatedReference", () => {
         beforeAll(async () => {
             const relationshipTemplate = (
                 await sTransportServices.relationshipTemplates.createOwnRelationshipTemplate({
-                    content: {},
+                    content: emptyRelationshipTemplateContent,
                     expiresAt: CoreDate.utc().add({ days: 1 }).toISOString()
                 })
             ).value;
@@ -155,7 +166,7 @@ describe("LoadItemFromTruncatedReference", () => {
         });
 
         test("loads the DeviceOnboardingInfo with the truncated reference", async () => {
-            const deviceOnboardingInfoReference = (await sTransportServices.devices.getDeviceOnboardingToken({ id: device.id })).value.truncatedReference;
+            const deviceOnboardingInfoReference = (await sTransportServices.devices.createDeviceOnboardingToken({ id: device.id })).value.truncatedReference;
 
             const result = await sTransportServices.account.loadItemFromTruncatedReference({ reference: deviceOnboardingInfoReference });
 
@@ -165,7 +176,7 @@ describe("LoadItemFromTruncatedReference", () => {
 
         test("loads the DeviceOnboardingInfo with the truncated reference including a profile name", async () => {
             const profileName = "aProfileName";
-            const deviceOnboardingInfoReference = (await sTransportServices.devices.getDeviceOnboardingToken({ id: device.id, profileName })).value.truncatedReference;
+            const deviceOnboardingInfoReference = (await sTransportServices.devices.createDeviceOnboardingToken({ id: device.id, profileName })).value.truncatedReference;
 
             const result = await sTransportServices.account.loadItemFromTruncatedReference({ reference: deviceOnboardingInfoReference });
 
@@ -191,18 +202,37 @@ describe("Un-/RegisterPushNotificationToken", () => {
 
     test.each(["Development", "Production"])("register with valid enviroment", async (environment: any) => {
         const result = await sTransportServices.account.registerPushNotificationToken({
-            handle: "handle",
-            platform: "platform",
+            handle: "handleLongerThan10Characters",
+            platform: "dummy",
             appId: "appId",
             environment: environment
         });
 
         expect(result).toBeSuccessful();
+        expect(result.value.devicePushIdentifier).toMatch(/^DPI[a-zA-Z0-9]{17}$/);
     });
 
     test("unregister", async () => {
         const result = await sTransportServices.account.unregisterPushNotificationToken();
 
         expect(result).toBeSuccessful();
+    });
+});
+
+describe("CheckIfIdentityIsDeleted", () => {
+    test("check deletion of Identity that is not deleted", async () => {
+        const result = await sTransportServices.account.checkIfIdentityIsDeleted();
+        expect(result.isSuccess).toBe(true);
+        expect(result.value.isDeleted).toBe(false);
+        expect(result.value.deletionDate).toBeUndefined();
+    });
+
+    test("check deletion of Identity that has IdentityDeletionProcess with expired grace period", async () => {
+        const identityDeletionProcess = await sTransportServices.identityDeletionProcesses.initiateIdentityDeletionProcess({ lengthOfGracePeriodInDays: 0 });
+
+        const result = await sTransportServices.account.checkIfIdentityIsDeleted();
+        expect(result.isSuccess).toBe(true);
+        expect(result.value.isDeleted).toBe(true);
+        expect(result.value.deletionDate).toBe(identityDeletionProcess.value.gracePeriodEndsAt!.toString());
     });
 });

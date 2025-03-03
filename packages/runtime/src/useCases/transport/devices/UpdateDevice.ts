@@ -1,6 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
-import { AccountController, CoreId, Device, DeviceController, DevicesController } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { CoreId } from "@nmshd/core-types";
+import { AccountController, Device, DeviceController, DevicesController } from "@nmshd/transport";
+import { Inject } from "@nmshd/typescript-ioc";
 import { DeviceDTO } from "../../../types";
 import { DeviceIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { DeviceMapper } from "./DeviceMapper";
@@ -34,10 +35,7 @@ export class UpdateDeviceUseCase extends UseCase<UpdateDeviceRequest, DeviceDTO>
             return Result.fail(RuntimeErrors.general.recordNotFound(Device));
         }
 
-        if (typeof request.name !== "undefined") {
-            device.name = request.name;
-        }
-
+        if (request.name) device.name = request.name;
         device.description = request.description;
 
         await this.devicesController.update(device);

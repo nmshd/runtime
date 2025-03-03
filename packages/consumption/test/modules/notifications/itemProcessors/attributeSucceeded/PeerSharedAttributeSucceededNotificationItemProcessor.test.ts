@@ -1,6 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { IdentityAttribute, Notification, PeerSharedAttributeSucceededNotificationItem, RelationshipAttribute, RelationshipAttributeConfidentiality } from "@nmshd/content";
-import { AccountController, CoreAddress, CoreDate, CoreId, Transport } from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { AccountController, Transport } from "@nmshd/transport";
 import {
     ConsumptionController,
     LocalNotification,
@@ -24,7 +25,6 @@ describe("PeerSharedAttributeSucceededNotificationItemProcessor", function () {
     beforeAll(async function () {
         connection = await TestUtil.createConnection();
         transport = TestUtil.createTransport(connection, mockEventBus);
-
         await transport.init();
 
         const account = (await TestUtil.provideAccounts(transport, 1))[0];
@@ -243,7 +243,7 @@ describe("PeerSharedAttributeSucceededNotificationItemProcessor", function () {
         const checkResult = await processor.checkPrerequisitesOfIncomingNotificationItem(notificationItem, notification);
         expect(checkResult).errorValidationResult({
             code: "error.consumption.attributes.successionPeerIsNotOwner",
-            message: "The peer of the succeeded attribute is not its owner. This may be an attempt of spoofing."
+            message: "The peer of the succeeded Attribute is not its owner. This may be an attempt of spoofing."
         });
     });
 });

@@ -10,23 +10,33 @@ import {
     IncomingRequestStatusChangedEvent,
     OutgoingRequestCreatedAndCompletedEvent,
     OutgoingRequestCreatedEvent,
-    OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent,
+    OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent,
     OutgoingRequestStatusChangedEvent,
     OwnSharedAttributeDeletedByOwnerEvent,
     OwnSharedAttributeSucceededEvent,
     PeerSharedAttributeDeletedByPeerEvent,
     PeerSharedAttributeSucceededEvent,
     RepositoryAttributeSucceededEvent,
-    ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent
+    ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent,
+    ThirdPartyOwnedRelationshipAttributeSucceededEvent,
+    ThirdPartyRelationshipAttributeDeletedByPeerEvent,
+    ThirdPartyRelationshipAttributeSucceededEvent
 } from "./consumption";
 import {
+    DatawalletSynchronizedEvent,
     IdentityDeletionProcessStatusChangedEvent,
     MessageDeliveredEvent,
     MessageReceivedEvent,
     MessageSentEvent,
     MessageWasReadAtChangedEvent,
+    PeerDeletedEvent,
+    PeerDeletionCancelledEvent,
     PeerRelationshipTemplateLoadedEvent,
-    RelationshipChangedEvent
+    PeerToBeDeletedEvent,
+    RelationshipChangedEvent,
+    RelationshipDecomposedBySelfEvent,
+    RelationshipReactivationCompletedEvent,
+    RelationshipReactivationRequestedEvent
 } from "./transport";
 
 export class EventProxy {
@@ -70,10 +80,41 @@ export class EventProxy {
             this.targetEventBus.publish(new RelationshipChangedEvent(event.eventTargetAddress, RelationshipMapper.toRelationshipDTO(event.data)));
         });
 
+        this.subscribeToSourceEvent(transport.RelationshipReactivationRequestedEvent, (event) => {
+            this.targetEventBus.publish(new RelationshipReactivationRequestedEvent(event.eventTargetAddress, RelationshipMapper.toRelationshipDTO(event.data)));
+        });
+
+        this.subscribeToSourceEvent(transport.RelationshipReactivationCompletedEvent, (event) => {
+            this.targetEventBus.publish(new RelationshipReactivationCompletedEvent(event.eventTargetAddress, RelationshipMapper.toRelationshipDTO(event.data)));
+        });
+
+        this.subscribeToSourceEvent(transport.RelationshipDecomposedBySelfEvent, (event) => {
+            this.targetEventBus.publish(new RelationshipDecomposedBySelfEvent(event.eventTargetAddress, { relationshipId: event.data.relationshipId.toString() }));
+        });
+
         this.subscribeToSourceEvent(transport.IdentityDeletionProcessStatusChangedEvent, (event) => {
             this.targetEventBus.publish(
-                new IdentityDeletionProcessStatusChangedEvent(event.eventTargetAddress, IdentityDeletionProcessMapper.toIdentityDeletionProcessDTO(event.data))
+                new IdentityDeletionProcessStatusChangedEvent(
+                    event.eventTargetAddress,
+                    event.data ? IdentityDeletionProcessMapper.toIdentityDeletionProcessDTO(event.data) : undefined
+                )
             );
+        });
+
+        this.subscribeToSourceEvent(transport.PeerDeletedEvent, (event) => {
+            this.targetEventBus.publish(new PeerDeletedEvent(event.eventTargetAddress, RelationshipMapper.toRelationshipDTO(event.data)));
+        });
+
+        this.subscribeToSourceEvent(transport.PeerToBeDeletedEvent, (event) => {
+            this.targetEventBus.publish(new PeerToBeDeletedEvent(event.eventTargetAddress, RelationshipMapper.toRelationshipDTO(event.data)));
+        });
+
+        this.subscribeToSourceEvent(transport.PeerDeletionCancelledEvent, (event) => {
+            this.targetEventBus.publish(new PeerDeletionCancelledEvent(event.eventTargetAddress, RelationshipMapper.toRelationshipDTO(event.data)));
+        });
+
+        this.subscribeToSourceEvent(transport.DatawalletSynchronizedEvent, (event) => {
+            this.targetEventBus.publish(new DatawalletSynchronizedEvent(event.eventTargetAddress));
         });
     }
 
@@ -94,7 +135,8 @@ export class EventProxy {
             this.targetEventBus.publish(new PeerSharedAttributeDeletedByPeerEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
         });
 
-        this.subscribeToSourceEvent(consumption.ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent, (event) => {
+        this.subscribeToSourceEvent(consumption.ThirdPartyRelationshipAttributeDeletedByPeerEvent, (event) => {
+            this.targetEventBus.publish(new ThirdPartyRelationshipAttributeDeletedByPeerEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
             this.targetEventBus.publish(new ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
         });
 
@@ -110,6 +152,21 @@ export class EventProxy {
         this.subscribeToSourceEvent(consumption.PeerSharedAttributeSucceededEvent, (event) => {
             this.targetEventBus.publish(
                 new PeerSharedAttributeSucceededEvent(event.eventTargetAddress, {
+                    predecessor: AttributeMapper.toAttributeDTO(event.data.predecessor),
+                    successor: AttributeMapper.toAttributeDTO(event.data.successor)
+                })
+            );
+        });
+
+        this.subscribeToSourceEvent(consumption.ThirdPartyRelationshipAttributeSucceededEvent, (event) => {
+            this.targetEventBus.publish(
+                new ThirdPartyRelationshipAttributeSucceededEvent(event.eventTargetAddress, {
+                    predecessor: AttributeMapper.toAttributeDTO(event.data.predecessor),
+                    successor: AttributeMapper.toAttributeDTO(event.data.successor)
+                })
+            );
+            this.targetEventBus.publish(
+                new ThirdPartyOwnedRelationshipAttributeSucceededEvent(event.eventTargetAddress, {
                     predecessor: AttributeMapper.toAttributeDTO(event.data.predecessor),
                     successor: AttributeMapper.toAttributeDTO(event.data.successor)
                 })
@@ -148,8 +205,8 @@ export class EventProxy {
 
             this.targetEventBus.publish(new OutgoingRequestCreatedAndCompletedEvent(event.eventTargetAddress, mappedRequest));
 
-            if (event.data.response?.source?.type === "RelationshipChange") {
-                this.targetEventBus.publish(new OutgoingRequestFromRelationshipCreationChangeCreatedAndCompletedEvent(event.eventTargetAddress, mappedRequest));
+            if (event.data.response?.source?.type === "Relationship") {
+                this.targetEventBus.publish(new OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent(event.eventTargetAddress, mappedRequest));
             }
         });
 

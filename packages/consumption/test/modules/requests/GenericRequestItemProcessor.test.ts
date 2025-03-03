@@ -1,5 +1,6 @@
 import { AcceptResponseItem, RejectResponseItem, ResponseItemResult } from "@nmshd/content";
-import { AccountController, CoreAddress, IdentityController } from "@nmshd/transport";
+import { CoreAddress } from "@nmshd/core-types";
+import { AccountController, IdentityController } from "@nmshd/transport";
 import { ConsumptionController, GenericRequestItemProcessor } from "../../../src";
 import { TestRequestItem } from "./testHelpers/TestRequestItem";
 
@@ -79,12 +80,16 @@ describe("RequestItemProcessor", function () {
             const result = processor.reject(
                 TestRequestItem.from({ mustBeAccepted: false }),
                 {
-                    accept: false
+                    accept: false,
+                    code: "an.error.code",
+                    message: "An error message"
                 },
                 localRequest
             );
 
             expect(result).toBeInstanceOf(RejectResponseItem);
+            expect((result as RejectResponseItem).code).toBe("an.error.code");
+            expect((result as RejectResponseItem).message).toBe("An error message");
         });
     });
 

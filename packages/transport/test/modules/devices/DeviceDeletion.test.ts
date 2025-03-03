@@ -46,7 +46,7 @@ describe("Device Deletion", function () {
         await accountController.syncDatawallet();
         await deviceTest.onboardDevice(await accountController.devices.getSharedSecret(newDevice.id));
 
-        await expect(accountController.devices.delete(newDevice)).rejects.toThrow("Could not delete device: Backbone did not authorize deletion.");
+        await expect(accountController.devices.delete(newDevice)).rejects.toThrow("Could not delete device: 'Backbone did not authorize deletion.'");
 
         const devices = await accountController.devices.list();
         const deviceIds = devices.map((d) => d.id.toString());
@@ -60,7 +60,7 @@ describe("Device Deletion", function () {
         await accountController.syncDatawallet();
 
         const deviceToDelete = await accountController.devices.get(newDevice.id);
-        await expect(accountController.devices.delete(deviceToDelete!)).rejects.toThrow("Could not delete device: Device is already onboarded.");
+        await expect(accountController.devices.delete(deviceToDelete!)).rejects.toThrow("Could not delete device: 'Device is already onboarded.'");
 
         const devices = await accountController.devices.list();
         const deviceIds = devices.map((d) => d.id.toString());

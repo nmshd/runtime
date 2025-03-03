@@ -2,9 +2,11 @@ import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { LokiJsConnection } from "@js-soft/docdb-access-loki";
 import { MongoDbConnection } from "@js-soft/docdb-access-mongo";
 import { NodeLoggerFactory } from "@js-soft/node-logger";
-import { ConsumptionController, GenericRequestItemProcessor } from "@nmshd/consumption";
-import { AccountController, ICoreAddress } from "@nmshd/transport";
+import { ConsumptionConfig, ConsumptionController, GenericRequestItemProcessor } from "@nmshd/consumption";
+import { ICoreAddress } from "@nmshd/core-types";
+import { AccountController } from "@nmshd/transport";
 import { ConsumptionServices, DataViewExpander, ModuleConfiguration, Runtime, RuntimeConfig, RuntimeHealth, RuntimeServices, TransportServices } from "../../src";
+import { AbstractCorrelator } from "../../src/useCases/common/AbstractCorrelator";
 import { MockEventBus } from "./MockEventBus";
 import { TestNotificationItem, TestNotificationItemProcessor } from "./TestNotificationItem";
 import { TestRequestItem } from "./TestRequestItem";
@@ -16,7 +18,11 @@ export class TestRuntime extends Runtime {
     private _consumptionServices: ConsumptionServices;
     private _dataViewExpander: DataViewExpander;
 
-    public constructor(runtimeConfig: RuntimeConfig) {
+    public constructor(
+        runtimeConfig: RuntimeConfig,
+        private readonly consumptionConfig: ConsumptionConfig,
+        correlator?: AbstractCorrelator
+    ) {
         super(
             runtimeConfig,
             new NodeLoggerFactory({
@@ -39,7 +45,8 @@ export class TestRuntime extends Runtime {
                     }
                 }
             }),
-            new MockEventBus()
+            new MockEventBus(),
+            correlator
         );
     }
 
@@ -88,7 +95,10 @@ export class TestRuntime extends Runtime {
 
         const requestItemProcessorOverrides = new Map([[TestRequestItem, GenericRequestItemProcessor]]);
         const notificationItemProcessorOverrides = new Map([[TestNotificationItem, TestNotificationItemProcessor]]);
-        const consumptionController = await new ConsumptionController(this.transport, accountController).init(requestItemProcessorOverrides, notificationItemProcessorOverrides);
+        const consumptionController = await new ConsumptionController(this.transport, accountController, this.consumptionConfig).init(
+            requestItemProcessorOverrides,
+            notificationItemProcessorOverrides
+        );
 
         ({
             transportServices: this._transportServices,
@@ -119,6 +129,10 @@ export class TestRuntime extends Runtime {
 }
 
 export class NoLoginTestRuntime extends TestRuntime {
+    public constructor(runtimeConfig: RuntimeConfig) {
+        super(runtimeConfig, { setDefaultRepositoryAttributes: false });
+    }
+
     protected override async initAccount(): Promise<void> {
         // Do not login
     }

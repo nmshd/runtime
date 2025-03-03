@@ -1,74 +1,23 @@
 import { Result } from "@js-soft/ts-utils";
+import { CoreId } from "@nmshd/core-types";
 import { CryptoSecretKey } from "@nmshd/crypto";
-import { AccountController, CoreId, FileController, Token, TokenContentFile, TokenController } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { AccountController, FileController, Token, TokenContentFile, TokenController } from "@nmshd/transport";
+import { Inject } from "@nmshd/typescript-ioc";
 import { FileDTO } from "../../../types";
-import {
-    Base64ForIdPrefix,
-    FileIdString,
-    FileReferenceString,
-    JsonSchema,
-    RuntimeErrors,
-    SchemaRepository,
-    SchemaValidator,
-    TokenReferenceString,
-    UseCase,
-    ValidationFailure,
-    ValidationResult
-} from "../../common";
+import { Base64ForIdPrefix, FileReferenceString, RuntimeErrors, SchemaRepository, SchemaValidator, TokenReferenceString, UseCase } from "../../common";
 import { FileMapper } from "./FileMapper";
-
-export interface GetOrLoadFileViaSecretRequest {
-    id: FileIdString;
-    /**
-     * @minLength 10
-     */
-    secretKey: string;
-}
 
 /**
  * @errorMessage token / file reference invalid
  */
-export interface GetOrLoadFileViaReferenceRequest {
+export interface GetOrLoadFileRequest {
     reference: TokenReferenceString | FileReferenceString;
-}
-
-export type GetOrLoadFileRequest = GetOrLoadFileViaSecretRequest | GetOrLoadFileViaReferenceRequest;
-
-function isViaSecret(request: GetOrLoadFileRequest): request is GetOrLoadFileViaSecretRequest {
-    return "id" in request && "secretKey" in request;
-}
-
-function isViaReference(request: GetOrLoadFileRequest): request is GetOrLoadFileViaSecretRequest {
-    return "reference" in request;
+    password?: string;
 }
 
 class Validator extends SchemaValidator<GetOrLoadFileRequest> {
-    private readonly loadViaSecretSchema: JsonSchema;
-    private readonly loadViaReferenceSchema: JsonSchema;
-
     public constructor(@Inject schemaRepository: SchemaRepository) {
         super(schemaRepository.getSchema("GetOrLoadFileRequest"));
-        this.loadViaSecretSchema = schemaRepository.getSchema("GetOrLoadFileViaSecretRequest");
-        this.loadViaReferenceSchema = schemaRepository.getSchema("GetOrLoadFileViaReferenceRequest");
-    }
-
-    public override validate(input: GetOrLoadFileRequest): ValidationResult {
-        if (this.schema.validate(input).isValid) return new ValidationResult();
-
-        // any-of in combination with missing properties is a bit weird
-        // when { reference: null | undefined } is passed, it ignores reference
-        // and treats it like a GetOrLoadFileViaSecret.
-        // That's why we validate with the specific schema afterwards
-        if (isViaReference(input)) {
-            return this.convertValidationResult(this.loadViaReferenceSchema.validate(input));
-        } else if (isViaSecret(input)) {
-            return this.convertValidationResult(this.loadViaSecretSchema.validate(input));
-        }
-
-        const result = new ValidationResult();
-        result.addFailure(new ValidationFailure(RuntimeErrors.general.invalidPayload()));
-        return result;
     }
 }
 
@@ -83,29 +32,20 @@ export class GetOrLoadFileUseCase extends UseCase<GetOrLoadFileRequest, FileDTO>
     }
 
     protected async executeInternal(request: GetOrLoadFileRequest): Promise<Result<FileDTO>> {
-        let createdFileResult: Result<FileDTO>;
-
-        if (isViaSecret(request)) {
-            const key = CryptoSecretKey.fromBase64(request.secretKey);
-            createdFileResult = await this.loadFile(CoreId.from(request.id), key);
-        } else if (isViaReference(request)) {
-            createdFileResult = await this.loadFileFromReference(request.reference);
-        } else {
-            throw new Error("Invalid request format.");
-        }
+        const result = await this.loadFileFromReference(request.reference, request.password);
 
         await this.accountController.syncDatawallet();
 
-        return createdFileResult;
+        return result;
     }
 
-    private async loadFileFromReference(reference: string): Promise<Result<FileDTO>> {
+    private async loadFileFromReference(reference: string, password?: string): Promise<Result<FileDTO>> {
         if (reference.startsWith(Base64ForIdPrefix.File)) {
             return await this.loadFileFromFileReference(reference);
         }
 
         if (reference.startsWith(Base64ForIdPrefix.Token)) {
-            return await this.loadFileFromTokenReference(reference);
+            return await this.loadFileFromTokenReference(reference, password);
         }
 
         throw RuntimeErrors.files.invalidReference(reference);
@@ -116,8 +56,8 @@ export class GetOrLoadFileUseCase extends UseCase<GetOrLoadFileRequest, FileDTO>
         return Result.ok(FileMapper.toFileDTO(file));
     }
 
-    private async loadFileFromTokenReference(truncatedReference: string): Promise<Result<FileDTO>> {
-        const token = await this.tokenController.loadPeerTokenByTruncated(truncatedReference, true);
+    private async loadFileFromTokenReference(truncatedReference: string, password?: string): Promise<Result<FileDTO>> {
+        const token = await this.tokenController.loadPeerTokenByTruncated(truncatedReference, true, password);
 
         if (!token.cache) {
             throw RuntimeErrors.general.cacheEmpty(Token, token.id.toString());

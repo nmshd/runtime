@@ -1,5 +1,5 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { DeviceDTO, DeviceOnboardingInfoDTO, TokenDTO } from "../../..";
 import {
     CreateDeviceOnboardingTokenRequest,
@@ -11,8 +11,10 @@ import {
     GetDeviceOnboardingInfoRequest,
     GetDeviceOnboardingInfoUseCase,
     GetDeviceRequest,
-    GetDeviceUseCase,
     GetDevicesUseCase,
+    GetDeviceUseCase,
+    SetCommunicationLanguageRequest,
+    SetCommunicationLanguageUseCase,
     UpdateDeviceRequest,
     UpdateDeviceUseCase
 } from "../../../useCases";
@@ -25,7 +27,8 @@ export class DevicesFacade {
         @Inject private readonly updateDeviceUseCase: UpdateDeviceUseCase,
         @Inject private readonly deleteDeviceUseCase: DeleteDeviceUseCase,
         @Inject private readonly getDeviceOnboardingInfoUseCase: GetDeviceOnboardingInfoUseCase,
-        @Inject private readonly getDeviceOnboardingTokenUseCase: CreateDeviceOnboardingTokenUseCase
+        @Inject private readonly createDeviceOnboardingTokenUseCase: CreateDeviceOnboardingTokenUseCase,
+        @Inject private readonly setCommunicationLanguageUseCase: SetCommunicationLanguageUseCase
     ) {}
 
     public async getDevice(request: GetDeviceRequest): Promise<Result<DeviceDTO, ApplicationError>> {
@@ -44,8 +47,8 @@ export class DevicesFacade {
         return await this.getDeviceOnboardingInfoUseCase.execute(request);
     }
 
-    public async getDeviceOnboardingToken(request: CreateDeviceOnboardingTokenRequest): Promise<Result<TokenDTO, ApplicationError>> {
-        return await this.getDeviceOnboardingTokenUseCase.execute(request);
+    public async createDeviceOnboardingToken(request: CreateDeviceOnboardingTokenRequest): Promise<Result<TokenDTO, ApplicationError>> {
+        return await this.createDeviceOnboardingTokenUseCase.execute(request);
     }
 
     public async updateDevice(request: UpdateDeviceRequest): Promise<Result<DeviceDTO, ApplicationError>> {
@@ -54,5 +57,9 @@ export class DevicesFacade {
 
     public async deleteDevice(request: DeleteDeviceRequest): Promise<Result<void, ApplicationError>> {
         return await this.deleteDeviceUseCase.execute(request);
+    }
+
+    public async setCommunicationLanguage(request: SetCommunicationLanguageRequest): Promise<Result<void, ApplicationError>> {
+        return await this.setCommunicationLanguageUseCase.execute(request);
     }
 }

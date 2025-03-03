@@ -1,8 +1,8 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
+import { CoreDate, ICoreDate } from "@nmshd/core-types";
 import { CryptoCipher, ICryptoCipher } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
 import { CoreSynchronizable, ICoreSynchronizable } from "../../../core/CoreSynchronizable";
-import { CoreDate, ICoreDate } from "../../../core/types/CoreDate";
 
 export interface ISecretContainerCipher extends ICoreSynchronizable {
     name: string;

@@ -1,25 +1,46 @@
-import { ISerializable, Serializable, serialize, validate, ValidationError } from "@js-soft/ts-serval";
+import { ISerializable, Serializable, serialize, type, validate, ValidationError } from "@js-soft/ts-serval";
+import { CoreId, ICoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoSecretKey, ICryptoSecretKey } from "@nmshd/crypto";
-import { CoreErrors } from "./CoreErrors";
 import { CoreIdHelper } from "./CoreIdHelper";
-import { CoreId, ICoreId } from "./types/CoreId";
+import { TransportCoreErrors } from "./TransportCoreErrors";
+import { ISharedPasswordProtection, SharedPasswordProtection } from "./types";
 
 export interface IReference extends ISerializable {
     id: ICoreId;
+    backboneBaseUrl?: string;
     key: ICryptoSecretKey;
+    forIdentityTruncated?: string;
+    passwordProtection?: ISharedPasswordProtection;
 }
 
+@type("Reference")
 export class Reference extends Serializable implements IReference {
-    @validate()
+    @validate({ regExp: new RegExp("^[A-Za-z0-9]{20}$") })
     @serialize()
     public id: CoreId;
+
+    @validate({ nullable: true })
+    @serialize()
+    public backboneBaseUrl?: string;
 
     @validate()
     @serialize()
     public key: CryptoSecretKey;
 
+    @validate({ nullable: true, regExp: new RegExp("^[0-9a-f]{4}$") })
+    @serialize()
+    public forIdentityTruncated?: string;
+
+    @validate({ nullable: true })
+    @serialize()
+    public passwordProtection?: SharedPasswordProtection;
+
     public truncate(): string {
-        const truncatedReference = CoreBuffer.fromUtf8(`${this.id.toString()}|${this.key.algorithm}|${this.key.secretKey.toBase64URL()}`);
+        const idPart = this.backboneBaseUrl ? `${this.id.toString()}@${this.backboneBaseUrl}` : this.id.toString();
+
+        const truncatedReference = CoreBuffer.fromUtf8(
+            `${idPart}|${this.key.algorithm}|${this.key.secretKey.toBase64URL()}|${this.forIdentityTruncated ?? ""}|${this.passwordProtection?.truncate() ?? ""}`
+        );
         return truncatedReference.toBase64URL();
     }
 
@@ -27,26 +48,46 @@ export class Reference extends Serializable implements IReference {
         const truncatedBuffer = CoreBuffer.fromBase64URL(value);
         const splitted = truncatedBuffer.toUtf8().split("|");
 
-        if (splitted.length !== 3) {
-            throw CoreErrors.general.invalidTruncatedReference();
+        if (![3, 5].includes(splitted.length)) {
+            throw TransportCoreErrors.general.invalidTruncatedReference(
+                `A truncated reference must consist of either exactly 3 or exactly 5 components, but it consists of '${splitted.length}' components.`
+            );
         }
+
+        const idPart = splitted[0];
+        const [id, backboneBaseUrl] = idPart.split("@");
+
+        const secretKey = this.parseSecretKey(splitted[1], splitted[2]);
+        const forIdentityTruncated = splitted[3] ? splitted[3] : undefined;
+
+        const passwordProtection = SharedPasswordProtection.fromTruncated(splitted[4]);
+
+        return this.from({
+            id: CoreId.from(id),
+            backboneBaseUrl,
+            key: secretKey,
+            forIdentityTruncated,
+            passwordProtection
+        });
+    }
+
+    private static parseSecretKey(alg: string, secretKey: string): CryptoSecretKey {
+        let algorithm: number;
 
         try {
-            const id = CoreId.from(splitted[0]);
-            const alg = parseInt(splitted[1]);
-            const key = splitted[2];
-            const secretKey = CryptoSecretKey.from({
-                algorithm: alg,
-                secretKey: CoreBuffer.fromBase64URL(key)
-            });
-
-            return this.from({
-                id: CoreId.from(id),
-                key: secretKey
-            });
-        } catch (e) {
-            throw CoreErrors.general.invalidTruncatedReference();
+            algorithm = parseInt(alg);
+        } catch (_) {
+            throw TransportCoreErrors.general.invalidTruncatedReference("The encryption algorithm must be indicated by an integer in the TruncatedReference.");
         }
+
+        if (Number.isNaN(algorithm) || typeof algorithm === "undefined") {
+            throw TransportCoreErrors.general.invalidTruncatedReference("The encryption algorithm must be indicated by an integer in the TruncatedReference.");
+        }
+
+        return CryptoSecretKey.from({
+            algorithm,
+            secretKey: CoreBuffer.fromBase64URL(secretKey)
+        });
     }
 
     protected static validateId(value: any, helper: CoreIdHelper): void {

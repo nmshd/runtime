@@ -1,11 +1,10 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
+import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreDate, ICoreId } from "@nmshd/core-types";
 import { ICryptoExchangePublicKey } from "@nmshd/crypto";
-import { CoreAddress, CoreDate, CoreSerializable, ICoreAddress, ICoreDate, ICoreSerializable } from "../../../core";
-import { CoreId, ICoreId } from "../../../core/types/CoreId";
 import { IIdentity, Identity } from "../../accounts/data/Identity";
 import { RelationshipTemplatePublicKey } from "../transmission/RelationshipTemplatePublicKey";
 
-export interface ICachedRelationshipTemplate extends ICoreSerializable {
+export interface ICachedRelationshipTemplate extends ISerializable {
     identity: IIdentity;
     createdBy: ICoreAddress;
     createdByDevice: ICoreId;
@@ -14,10 +13,11 @@ export interface ICachedRelationshipTemplate extends ICoreSerializable {
     createdAt: ICoreDate;
     expiresAt?: ICoreDate;
     maxNumberOfAllocations?: number;
+    forIdentity?: ICoreAddress;
 }
 
 @type("CachedRelationshipTemplate")
-export class CachedRelationshipTemplate extends CoreSerializable implements ICachedRelationshipTemplate {
+export class CachedRelationshipTemplate extends Serializable implements ICachedRelationshipTemplate {
     @validate()
     @serialize()
     public identity: Identity;
@@ -49,6 +49,10 @@ export class CachedRelationshipTemplate extends CoreSerializable implements ICac
     @validate({ nullable: true, customValidator: validateMaxNumberOfAllocations })
     @serialize()
     public maxNumberOfAllocations?: number;
+
+    @validate({ nullable: true })
+    @serialize()
+    public forIdentity?: CoreAddress;
 
     public static from(value: ICachedRelationshipTemplate): CachedRelationshipTemplate {
         return this.fromAny(value);

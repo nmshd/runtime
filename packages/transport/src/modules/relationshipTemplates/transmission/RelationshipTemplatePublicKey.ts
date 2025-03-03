@@ -1,10 +1,11 @@
 import { ISerialized, serialize, type, validate } from "@js-soft/ts-serval";
+import { CoreId, ICoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoExchangePublicKey, ICryptoExchangePublicKey, ICryptoExchangePublicKeySerialized } from "@nmshd/crypto";
-import { CoreId, ICoreId } from "../../../core";
 
 export interface IRelationshipTemplatePublicKey extends ICryptoExchangePublicKey {
     id: ICoreId;
 }
+
 export interface IRelationshipTemplatePublicKeySerialized extends ICryptoExchangePublicKeySerialized, ISerialized {
     id: string;
 }

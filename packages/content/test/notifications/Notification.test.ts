@@ -1,5 +1,5 @@
 import { Serializable } from "@js-soft/ts-serval";
-import { CoreAddress, CoreId } from "@nmshd/transport";
+import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { IdentityAttribute, Notification, PeerSharedAttributeSucceededNotificationItem, Surname } from "../../src";
 
 describe("Notification", function () {

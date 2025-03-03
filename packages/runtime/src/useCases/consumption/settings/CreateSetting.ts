@@ -1,7 +1,8 @@
 import { Result } from "@js-soft/ts-utils";
 import { SettingsController, SettingScope } from "@nmshd/consumption";
-import { AccountController, CoreDate, CoreId } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { CoreDate, CoreId } from "@nmshd/core-types";
+import { AccountController } from "@nmshd/transport";
+import { Inject } from "@nmshd/typescript-ioc";
 import { SettingDTO } from "../../../types";
 import { GenericIdString, ISO8601DateTimeString, LocalSettingIdString, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { SettingMapper } from "./SettingMapper";

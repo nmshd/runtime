@@ -9,7 +9,6 @@ export interface RequestItemGroupDVO {
     title?: string;
     description?: string;
     isDecidable: boolean;
-    mustBeAccepted: boolean;
     response?: ResponseItemGroupDVO;
 }
 
@@ -47,6 +46,7 @@ export interface DeleteAttributeRequestItemDVO extends RequestItemDVO {
 export interface ShareAttributeRequestItemDVO extends RequestItemDVO {
     type: "ShareAttributeRequestItemDVO";
     sourceAttributeId: string;
+    thirdPartyAddress?: string;
     attribute: DraftIdentityAttributeDVO;
 }
 

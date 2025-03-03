@@ -1,7 +1,8 @@
 import { ISerializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoCipher, CryptoHash, CryptoHashAlgorithm, CryptoSecretKey, Encoding } from "@nmshd/crypto";
-import { CoreAddress, CoreCrypto, CoreDate, CoreErrors, CoreHash, CoreId } from "../../core";
+import { CoreCrypto, CoreHash, TransportCoreErrors } from "../../core";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { ControllerName, TransportController } from "../../core/TransportController";
 import { AccountController } from "../accounts/AccountController";
@@ -26,7 +27,7 @@ export class FileController extends TransportController {
     public override async init(): Promise<this> {
         await super.init();
 
-        this.client = new FileClient(this.config, this.parent.authenticator);
+        this.client = new FileClient(this.config, this.parent.authenticator, this.transport.correlator);
         this.files = await this.parent.getSynchronizedCollection(DbCollectionName.Files);
         return this;
     }
@@ -48,12 +49,20 @@ export class FileController extends TransportController {
 
         const decryptionPromises = backboneFiles.map(async (f) => {
             const fileDoc = await this.files.read(f.id);
+            if (!fileDoc) {
+                this._log.error(
+                    `File '${f.id}' not found in local database and the cache fetching was therefore skipped. This should not happen and might be a bug in the application logic.`
+                );
+                return;
+            }
+
             const file = File.from(fileDoc);
 
             return { id: CoreId.from(f.id), cache: await this.decryptFile(f, file.secretKey) };
         });
 
-        return await Promise.all(decryptionPromises);
+        const caches = await Promise.all(decryptionPromises);
+        return caches.filter((c) => c !== undefined);
     }
 
     public async updateCache(ids: string[]): Promise<File[]> {
@@ -74,7 +83,7 @@ export class FileController extends TransportController {
     private async updateCacheOfExistingFileInDb(id: string, response?: BackboneGetFilesResponse) {
         const fileDoc = await this.files.read(id);
         if (!fileDoc) {
-            throw CoreErrors.general.recordNotFound(File, id);
+            throw TransportCoreErrors.general.recordNotFound(File, id);
         }
 
         const file = File.from(fileDoc);
@@ -104,7 +113,7 @@ export class FileController extends TransportController {
         const plaintextMetadata = FileMetadata.deserialize(plaintextMetadataBuffer.toUtf8());
 
         if (!(plaintextMetadata instanceof FileMetadata)) {
-            throw CoreErrors.files.invalidMetadata(response.id);
+            throw TransportCoreErrors.files.invalidMetadata(response.id);
         }
 
         const cachedFile = CachedFile.fromBackbone(response, plaintextMetadata);
@@ -144,7 +153,7 @@ export class FileController extends TransportController {
         const id = idOrFile instanceof CoreId ? idOrFile.toString() : idOrFile.id.toString();
         const fileDoc = await this.files.read(id);
         if (!fileDoc) {
-            throw CoreErrors.general.recordNotFound(File, id.toString());
+            throw TransportCoreErrors.general.recordNotFound(File, id.toString());
         }
 
         const file = File.from(fileDoc);
@@ -160,7 +169,7 @@ export class FileController extends TransportController {
         const fileSize = content.length;
 
         if (fileSize > this.config.platformMaxUnencryptedFileSize) {
-            throw CoreErrors.files.maxFileSizeExceeded(fileSize, this.config.platformMaxUnencryptedFileSize);
+            throw TransportCoreErrors.files.maxFileSizeExceeded(fileSize, this.config.platformMaxUnencryptedFileSize);
         }
 
         const plaintextHashBuffer = await CryptoHash.hash(content, CryptoHashAlgorithm.SHA512);
@@ -183,7 +192,8 @@ export class FileController extends TransportController {
             plaintextHash: plaintextHash,
             secretKey: fileDownloadSecretKey,
             filemodified: input.filemodified,
-            mimetype: input.mimetype
+            mimetype: input.mimetype,
+            tags: input.tags
         });
 
         const serializedMetadata = metadata.serialize();
@@ -209,6 +219,7 @@ export class FileController extends TransportController {
             title: input.title,
             description: input.description,
             filename: input.filename,
+            tags: input.tags,
             filesize: fileSize,
             filemodified: input.filemodified,
             cipherKey: fileDownloadSecretKey,
@@ -239,7 +250,7 @@ export class FileController extends TransportController {
     public async downloadFileContent(idOrFile: CoreId | File): Promise<CoreBuffer> {
         const file = idOrFile instanceof File ? idOrFile : await this.getFile(idOrFile);
         if (!file) {
-            throw CoreErrors.general.recordNotFound(File, idOrFile.toString());
+            throw TransportCoreErrors.general.recordNotFound(File, idOrFile.toString());
         }
 
         if (!file.cache) throw this.newCacheEmptyError(File, file.id.toString());
@@ -251,7 +262,7 @@ export class FileController extends TransportController {
         const hashb64 = hash.toBase64URL();
 
         if (hashb64 !== file.cache.cipherHash.hash) {
-            throw CoreErrors.files.cipherMismatch();
+            throw TransportCoreErrors.files.cipherMismatch();
         }
 
         const cipher = CryptoCipher.fromBase64(buffer.toBase64URL());
@@ -259,7 +270,7 @@ export class FileController extends TransportController {
         const plaintextHashesMatch = await file.cache.plaintextHash.verify(decrypt, CryptoHashAlgorithm.SHA512);
 
         if (!plaintextHashesMatch) {
-            throw CoreErrors.files.plaintextHashMismatch();
+            throw TransportCoreErrors.files.plaintextHashMismatch();
         }
 
         return decrypt;

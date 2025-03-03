@@ -1,5 +1,6 @@
 import { EventBus } from "@js-soft/ts-utils";
-import { CoreAddress, CoreId, SynchronizedCollection } from "@nmshd/transport";
+import { CoreAddress, CoreId } from "@nmshd/core-types";
+import { SynchronizedCollection } from "@nmshd/transport";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../consumption/ConsumptionController";
 import { ConsumptionControllerName } from "../../consumption/ConsumptionControllerName";
@@ -52,5 +53,14 @@ export class AttributeListenersController extends ConsumptionBaseController {
         this.eventBus.publish(new AttributeListenerCreatedEvent(this.identity.address.toString(), listener));
 
         return listener;
+    }
+
+    public async deletePeerAttributeListeners(peerAddress: CoreAddress): Promise<void> {
+        const listenerDocs = await this.attributeListeners.find({ peer: peerAddress.toString() });
+        const listeners = this.parseArray(listenerDocs, LocalAttributeListener);
+
+        for (const listener of listeners) {
+            await this.attributeListeners.delete(listener);
+        }
     }
 }

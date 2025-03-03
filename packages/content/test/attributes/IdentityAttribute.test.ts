@@ -1,4 +1,4 @@
-import { CoreAddress, CoreDate } from "@nmshd/transport";
+import { CoreAddress, CoreDate } from "@nmshd/core-types";
 import {
     Affiliation,
     AffiliationOrganization,
@@ -239,9 +239,9 @@ describe("IdentityAttribute", function () {
     test("should allow the creation of nested attributes", function () {
         const affiliation = {
             "@type": "Affiliation",
-            organization: "j&s-soft GmbH",
+            organization: "j&s-soft AG",
             role: "Developer",
-            unit: "Enmeshed"
+            unit: "enmeshed"
         };
         const affiliationInstance = Affiliation.fromAny(affiliation);
         expect(affiliationInstance).toBeInstanceOf(Affiliation);

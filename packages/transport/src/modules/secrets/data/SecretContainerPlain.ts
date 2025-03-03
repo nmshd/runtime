@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-inferrable-types */
-import { Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreDate, CoreId, CoreSerializable, ICoreDate, ICoreId, ICoreSerializable } from "../../../core";
+import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
+import { CoreDate, CoreId, ICoreDate, ICoreId } from "@nmshd/core-types";
 
-export interface ISecretContainerPlain extends ICoreSerializable {
+export interface ISecretContainerPlain extends ISerializable {
     id: ICoreId;
     name: string;
     description?: string;
@@ -11,11 +11,11 @@ export interface ISecretContainerPlain extends ICoreSerializable {
     validFrom: ICoreDate;
     validTo?: ICoreDate;
     active: boolean;
-    secret: ICoreSerializable;
+    secret: ISerializable;
 }
 
 @type("SecretContainerPlain")
-export class SecretContainerPlain extends CoreSerializable implements ISecretContainerPlain {
+export class SecretContainerPlain extends Serializable implements ISecretContainerPlain {
     @serialize()
     @validate()
     public id: CoreId;

@@ -1,15 +1,18 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreDate, CoreSerializable, ICoreSerializable } from "../../../core";
+import { CoreAddress, CoreDate, ICoreAddress, ICoreDate } from "@nmshd/core-types";
+import { IPasswordProtectionCreationParameters, PasswordProtectionCreationParameters } from "../../../core/types/PasswordProtectionCreationParameters";
 import { validateMaxNumberOfAllocations } from "./CachedRelationshipTemplate";
 
-export interface ISendRelationshipTemplateParameters extends ICoreSerializable {
+export interface ISendRelationshipTemplateParameters extends ISerializable {
     content: ISerializable;
-    expiresAt: CoreDate;
+    expiresAt: ICoreDate;
     maxNumberOfAllocations?: number;
+    forIdentity?: ICoreAddress;
+    passwordProtection?: IPasswordProtectionCreationParameters;
 }
 
 @type("SendRelationshipTemplateParameters")
-export class SendRelationshipTemplateParameters extends CoreSerializable implements ISendRelationshipTemplateParameters {
+export class SendRelationshipTemplateParameters extends Serializable implements ISendRelationshipTemplateParameters {
     @validate()
     @serialize()
     public content: Serializable;
@@ -21,6 +24,14 @@ export class SendRelationshipTemplateParameters extends CoreSerializable impleme
     @validate({ nullable: true, customValidator: validateMaxNumberOfAllocations })
     @serialize()
     public maxNumberOfAllocations?: number;
+
+    @validate({ nullable: true })
+    @serialize()
+    public forIdentity?: CoreAddress;
+
+    @validate({ nullable: true })
+    @serialize()
+    public passwordProtection?: PasswordProtectionCreationParameters;
 
     public static from(value: ISendRelationshipTemplateParameters): SendRelationshipTemplateParameters {
         return this.fromAny(value);

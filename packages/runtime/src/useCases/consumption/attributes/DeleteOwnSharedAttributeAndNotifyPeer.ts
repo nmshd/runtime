@@ -1,8 +1,9 @@
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController, ConsumptionIds, LocalAttribute } from "@nmshd/consumption";
 import { Notification, OwnSharedAttributeDeletedByOwnerNotificationItem } from "@nmshd/content";
-import { AccountController, CoreId, MessageController } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { CoreId } from "@nmshd/core-types";
+import { AccountController, MessageController, RelationshipsController, RelationshipStatus } from "@nmshd/transport";
+import { Inject } from "@nmshd/typescript-ioc";
 import { AttributeIdString, NotificationIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
 export interface DeleteOwnSharedAttributeAndNotifyPeerRequest {
@@ -10,7 +11,7 @@ export interface DeleteOwnSharedAttributeAndNotifyPeerRequest {
 }
 
 export interface DeleteOwnSharedAttributeAndNotifyPeerResponse {
-    notificationId: NotificationIdString;
+    notificationId?: NotificationIdString;
 }
 
 class Validator extends SchemaValidator<DeleteOwnSharedAttributeAndNotifyPeerRequest> {
@@ -24,6 +25,7 @@ export class DeleteOwnSharedAttributeAndNotifyPeerUseCase extends UseCase<Delete
         @Inject private readonly attributesController: AttributesController,
         @Inject private readonly accountController: AccountController,
         @Inject private readonly messageController: MessageController,
+        @Inject private readonly relationshipsController: RelationshipsController,
         @Inject validator: Validator
     ) {
         super(validator);
@@ -32,13 +34,15 @@ export class DeleteOwnSharedAttributeAndNotifyPeerUseCase extends UseCase<Delete
     protected async executeInternal(request: DeleteOwnSharedAttributeAndNotifyPeerRequest): Promise<Result<DeleteOwnSharedAttributeAndNotifyPeerResponse>> {
         const ownSharedAttributeId = CoreId.from(request.attributeId);
         const ownSharedAttribute = await this.attributesController.getLocalAttribute(ownSharedAttributeId);
-
-        if (typeof ownSharedAttribute === "undefined") {
-            return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
-        }
+        if (!ownSharedAttribute) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
 
         if (!ownSharedAttribute.isOwnSharedAttribute(this.accountController.identity.address)) {
             return Result.fail(RuntimeErrors.attributes.isNotOwnSharedAttribute(ownSharedAttributeId));
+        }
+
+        const relationshipWithStatusPending = await this.relationshipsController.getRelationshipToIdentity(ownSharedAttribute.shareInfo.peer, RelationshipStatus.Pending);
+        if (relationshipWithStatusPending) {
+            return Result.fail(RuntimeErrors.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending());
         }
 
         const validationResult = await this.attributesController.validateFullAttributeDeletionProcess(ownSharedAttribute);
@@ -47,6 +51,11 @@ export class DeleteOwnSharedAttributeAndNotifyPeerUseCase extends UseCase<Delete
         }
 
         await this.attributesController.executeFullAttributeDeletionProcess(ownSharedAttribute);
+
+        const messageRecipientsValidationResult = await this.messageController.validateMessageRecipients([ownSharedAttribute.shareInfo.peer]);
+        if (messageRecipientsValidationResult.isError) {
+            return Result.ok({});
+        }
 
         const notificationId = await ConsumptionIds.notification.generate();
         const notificationItem = OwnSharedAttributeDeletedByOwnerNotificationItem.from({ attributeId: ownSharedAttributeId });

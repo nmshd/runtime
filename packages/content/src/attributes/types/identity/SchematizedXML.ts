@@ -15,6 +15,7 @@ export interface ISchematizedXML extends IAbstractString {
 export class SchematizedXML extends AbstractXML implements ISchematizedXML {
     @serialize()
     @validate({
+        nullable: true,
         min: 3,
         max: 1024,
         regExp: new RegExp(

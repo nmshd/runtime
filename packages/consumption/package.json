@@ -1,6 +1,5 @@
 {
     "name": "@nmshd/consumption",
-    "version": "3.10.0",
     "description": "The consumption library extends the transport library.",
     "homepage": "https://enmeshed.eu",
     "repository": {
@@ -9,7 +8,7 @@
         "directory": "packages/consumption"
     },
     "license": "MIT",
-    "author": "j&s-soft GmbH",
+    "author": "j&s-soft AG",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "files": [
@@ -23,9 +22,9 @@
         "cdep": "tsc && madge --circular dist",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
         "test:ci": "npm run test",
-        "test:ci:lokijs": "USE_LOKIJS=true jest -i",
+        "test:ci:lokijs": "USE_LOKIJS=true jest -i --coverage",
         "test:ci:mongodb": "jest -i",
-        "test:local:ferretdb": "npm run test:local:start:ferretdb && CONNECTION_STRING='mongodb://localhost:27022' jest",
+        "test:local:ferretdb": "npm run test:local:start:ferretdb && CONNECTION_STRING='mongodb://root:example@localhost:27022' jest",
         "test:local:lokijs": "USE_LOKIJS=true jest",
         "test:local:mongodb": "npm run test:local:start:mongodb && CONNECTION_STRING='mongodb://root:example@localhost:27021' jest",
         "test:local:start:ferretdb": "docker compose -f ../../.dev/compose.yml up -d runtime-ferret",
@@ -33,6 +32,15 @@
         "test:local:teardown": "docker compose -f ../../.dev/compose.yml rm -fsv"
     },
     "jest": {
+        "collectCoverageFrom": [
+            "./src/**"
+        ],
+        "coverageProvider": "v8",
+        "coverageReporters": [
+            "text-summary",
+            "cobertura",
+            "lcov"
+        ],
         "maxWorkers": 1,
         "preset": "ts-jest",
         "setupFilesAfterEnv": [
@@ -52,21 +60,22 @@
     },
     "dependencies": {
         "@blubi/vc": "^1",
-        "@js-soft/docdb-querytranslator": "^1.1.4",
+        "@js-soft/docdb-querytranslator": "^1.1.5",
+        "@js-soft/ts-serval": "2.0.11",
+        "@js-soft/ts-utils": "2.3.3",
+        "@nmshd/content": "*",
+        "@nmshd/core-types": "*",
         "@nmshd/iql": "^1.0.2",
+        "@nmshd/transport": "*",
+        "lodash": "^4.17.21",
         "ts-simple-nameof": "^1.3.1"
     },
     "devDependencies": {
-        "@js-soft/docdb-access-loki": "1.1.0",
-        "@js-soft/docdb-access-mongo": "1.1.8",
-        "@js-soft/node-logger": "1.1.1",
-        "@js-soft/ts-serval": "2.0.10",
-        "@js-soft/ts-utils": "2.3.3",
-        "@js-soft/web-logger": "^1.0.4",
-        "@nmshd/crypto": "2.0.6",
-        "@types/lodash": "^4.17.1",
-        "@types/luxon": "^3.4.2",
-        "leaked-handles": "^5.2.0"
+        "@js-soft/docdb-access-loki": "1.2.0",
+        "@js-soft/docdb-access-mongo": "1.2.0",
+        "@js-soft/node-logger": "1.2.0",
+        "@nmshd/crypto": "2.1.0",
+        "@types/lodash": "^4.17.14"
     },
     "publishConfig": {
         "access": "public",

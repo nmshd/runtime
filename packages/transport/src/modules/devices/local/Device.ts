@@ -1,9 +1,8 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
+import { CoreDate, CoreId } from "@nmshd/core-types";
 import { CryptoSignaturePublicKey, ICryptoSignaturePublicKey } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
 import { CoreSynchronizable, ICoreSynchronizable } from "../../../core";
-import { CoreDate } from "../../../core/types/CoreDate";
-import { CoreId } from "../../../core/types/CoreId";
 
 export enum DeviceType {
     "Unknown",
@@ -33,6 +32,7 @@ export interface IDevice extends ICoreSynchronizable {
     initialPassword?: string;
     datawalletVersion?: number;
     isOffboarded?: boolean;
+    isBackupDevice: boolean;
 }
 
 @type("Device")
@@ -51,7 +51,8 @@ export class Device extends CoreSynchronizable implements IDevice {
         nameof<Device>((d) => d.username),
         nameof<Device>((d) => d.initialPassword),
         nameof<Device>((d) => d.datawalletVersion),
-        nameof<Device>((d) => d.isOffboarded)
+        nameof<Device>((d) => d.isOffboarded),
+        nameof<Device>((d) => d.isBackupDevice)
     ];
 
     public override readonly userdataProperties = [nameof<Device>((d) => d.name), nameof<Device>((d) => d.description)];
@@ -88,7 +89,9 @@ export class Device extends CoreSynchronizable implements IDevice {
     @serialize()
     public lastLoginAt?: CoreDate;
 
-    @validate()
+    @validate({
+        customValidator: (v) => (!Object.values(DeviceType).includes(v) ? `must be one of: ${Object.values(DeviceType)}` : undefined)
+    })
     @serialize()
     public type: DeviceType;
 
@@ -111,6 +114,16 @@ export class Device extends CoreSynchronizable implements IDevice {
     @validate({ nullable: true })
     @serialize()
     public isOffboarded?: boolean;
+
+    @validate()
+    @serialize()
+    public isBackupDevice: boolean;
+
+    protected static override preFrom(value: any): any {
+        if (value.isBackupDevice === undefined) value.isBackupDevice = false;
+
+        return value;
+    }
 
     public static from(value: IDevice): Device {
         return this.fromAny(value);

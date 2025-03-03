@@ -5,8 +5,9 @@ import formDataLib from "form-data";
 import { AgentOptions } from "http";
 import { AgentOptions as HTTPSAgentOptions } from "https";
 import _ from "lodash";
+import { CoreIdHelper } from "../CoreIdHelper";
+import { ICorrelator } from "../ICorrelator";
 import { TransportLoggerFactory } from "../TransportLoggerFactory";
-import { CoreId } from "../types";
 import { ClientResult } from "./ClientResult";
 import { IPaginationDataSource, Paginator, PaginatorPercentageCallback } from "./Paginator";
 import { PlatformParameters } from "./PlatformParameters";
@@ -39,8 +40,8 @@ export interface IRESTClientConfig {
     platformTimeout: number;
     platformMaxRedirects: number;
     platformAdditionalHeaders?: Record<string, string>;
-    httpAgent: AgentOptions;
-    httpsAgent: HTTPSAgentOptions;
+    httpAgentOptions: AgentOptions;
+    httpsAgentOptions: HTTPSAgentOptions;
     debug: boolean;
     baseUrl: string;
 }
@@ -48,6 +49,7 @@ export interface IRESTClientConfig {
 export class RESTClient {
     protected _logger: ILogger;
     protected _logDirective = RESTClientLogDirective.LogAll;
+    protected axiosInstance: AxiosInstance;
 
     public logRequest(): boolean {
         return this._logDirective === RESTClientLogDirective.LogRequest || this._logDirective === RESTClientLogDirective.LogAll;
@@ -58,13 +60,14 @@ export class RESTClient {
     }
 
     private async generateRequestId(): Promise<string> {
-        const id = await CoreId.generate("HTTP");
+        const id = await new CoreIdHelper("HTTP").generate();
         return id.toString();
     }
 
     public constructor(
         protected readonly config: IRESTClientConfig,
-        protected requestConfig: AxiosRequestConfig = {}
+        private readonly correlator?: ICorrelator,
+        requestConfig: AxiosRequestConfig = {}
     ) {
         const defaults: AxiosRequestConfig = {
             baseURL: config.baseUrl,
@@ -74,40 +77,58 @@ export class RESTClient {
             maxContentLength: Infinity,
             maxBodyLength: Infinity,
             validateStatus: (status) => status < 300 || status === 400 || status === 404 || status === 500,
-            paramsSerializer: { dots: true, indexes: null }
+            paramsSerializer: { dots: true, indexes: null },
+            headers: this.config.platformAdditionalHeaders,
+            proxy: false
         };
 
-        if (this.config.platformAdditionalHeaders) {
-            defaults.headers = _.defaultsDeep({}, defaults.headers, this.config.platformAdditionalHeaders);
+        const resultingRequestConfig = _.defaultsDeep(defaults, requestConfig);
+
+        if (typeof window === "undefined" && (process.env.https_proxy ?? process.env.HTTPS_PROXY)) {
+            try {
+                const httpsProxy = (process.env.https_proxy ?? process.env.HTTPS_PROXY)!;
+                // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/naming-convention
+                const HttpsProxyAgent = require("https-proxy-agent").HttpsProxyAgent;
+                resultingRequestConfig.httpsAgent = new HttpsProxyAgent(httpsProxy, this.config.httpsAgentOptions);
+            } catch (_) {
+                // ignore
+            }
+        } else {
+            try {
+                // eslint-disable-next-line @typescript-eslint/no-require-imports
+                const httpsAgent = require("https")?.Agent;
+
+                if (httpsAgent) resultingRequestConfig.httpsAgent = new httpsAgent(this.config.httpsAgentOptions);
+            } catch (_) {
+                // ignore
+            }
         }
 
         try {
             // eslint-disable-next-line @typescript-eslint/no-require-imports
             const agent = require("http")?.Agent;
 
-            // eslint-disable-next-line @typescript-eslint/no-require-imports
-            const httpsAgent = require("https")?.Agent;
-
-            if (typeof agent !== "undefined" && typeof httpsAgent !== "undefined") {
-                defaults.httpAgent = new agent(this.config.httpAgent);
-                defaults.httpsAgent = new httpsAgent(this.config.httpsAgent);
-            }
-        } catch (e) {
+            if (agent) resultingRequestConfig.httpAgent = new agent(this.config.httpAgentOptions);
+        } catch (_) {
             // ignore
         }
 
-        this.requestConfig = _.defaultsDeep(this.requestConfig, defaults);
-
         this._logger = TransportLoggerFactory.getLogger(RESTClient);
-    }
 
-    protected createAxios(): AxiosInstance {
-        const axiosInstance = axios.create(this.requestConfig);
+        this.axiosInstance = axios.create(resultingRequestConfig);
+
+        if (this.correlator) {
+            const correlator = this.correlator;
+            this.axiosInstance.interceptors.request.use((config) => {
+                const correlationId = correlator.getId();
+                config.headers["x-correlation-id"] = correlationId;
+                return config;
+            });
+        }
 
         if (this.config.debug) {
-            this.addAxiosLoggingInterceptors(axiosInstance);
+            this.addAxiosLoggingInterceptors(this.axiosInstance);
         }
-        return axiosInstance;
     }
 
     private addAxiosLoggingInterceptors(axiosInstance: AxiosInstance) {
@@ -163,7 +184,7 @@ export class RESTClient {
             try {
                 const errorText = CoreBuffer.from(response.data).toUtf8();
                 response.data = JSON.parse(errorText);
-            } catch (e) {
+            } catch (_) {
                 // Do nothing here: Error is handled below
             }
         }
@@ -286,7 +307,7 @@ export class RESTClient {
 
     public async get<T>(path: string, params: any = {}, config?: AxiosRequestConfig): Promise<ClientResult<T>> {
         const id = await this.generateRequestId();
-        const conf = _.defaultsDeep({ params: params }, config, this.requestConfig);
+        const conf = _.defaultsDeep({ params: params }, config);
         if (this.logRequest()) {
             const anyThis = this as any;
             if (anyThis._username) {
@@ -297,7 +318,7 @@ export class RESTClient {
         }
 
         try {
-            const response = await this.createAxios().get<PlatformResponse<T>>(path, conf);
+            const response = await this.axiosInstance.get<PlatformResponse<T>>(path, conf);
             return this.getResult("GET", path, response, id);
         } catch (e: any) {
             const err = RequestError.fromAxiosError("GET", path, e, id);
@@ -308,10 +329,10 @@ export class RESTClient {
 
     public async getPaged<T>(path: string, params: any = {}, config?: AxiosRequestConfig, progessCallback?: PaginatorPercentageCallback): Promise<ClientResult<Paginator<T>>> {
         const id = await this.generateRequestId();
-        const conf = _.defaultsDeep({ params: params }, config, this.requestConfig);
+        const conf = _.defaultsDeep({ params: params }, config);
 
         try {
-            const response = await this.createAxios().get<PlatformResponse<T[]>>(path, conf);
+            const response = await this.axiosInstance.get<PlatformResponse<T[]>>(path, conf);
             return this.getPaginator(path, response, id, params, progessCallback);
         } catch (e: any) {
             const err = RequestError.fromAxiosError("GET", path, e, id);
@@ -322,7 +343,7 @@ export class RESTClient {
 
     public async post<T>(path: string, data: any, params: any = {}, config?: AxiosRequestConfig): Promise<ClientResult<T>> {
         const id = await this.generateRequestId();
-        const conf = _.defaultsDeep({ params: params }, config, this.requestConfig);
+        const conf = _.defaultsDeep({ params: params }, config);
 
         if (this.logRequest()) {
             const anyThis = this as any;
@@ -334,7 +355,7 @@ export class RESTClient {
         }
 
         try {
-            const response = await this.createAxios().post<PlatformResponse<T>>(path, data, conf);
+            const response = await this.axiosInstance.post<PlatformResponse<T>>(path, data, conf);
             return this.getResult("POST", path, response, id);
         } catch (e: any) {
             const err = RequestError.fromAxiosError("POST", path, e, id);
@@ -368,7 +389,7 @@ export class RESTClient {
             }
         }
 
-        const conf = _.defaultsDeep({}, config, this.requestConfig);
+        const conf = _.defaultsDeep({}, config);
         let sendData = formData;
         if (typeof formData.getHeaders !== "undefined") {
             const h = formData.getHeaders();
@@ -388,7 +409,7 @@ export class RESTClient {
         }
 
         try {
-            const response = await this.createAxios().post<PlatformResponse<T>>(path, sendData, conf);
+            const response = await this.axiosInstance.post<PlatformResponse<T>>(path, sendData, conf);
             return this.getResult("POST-Upload", path, response, id);
         } catch (e: any) {
             const err = RequestError.fromAxiosError("POST-Upload", path, e, id);
@@ -399,7 +420,7 @@ export class RESTClient {
 
     public async put<T>(path: string, data: any, config?: AxiosRequestConfig): Promise<ClientResult<T>> {
         const id = await this.generateRequestId();
-        const conf = _.defaultsDeep({}, config, this.requestConfig);
+        const conf = _.defaultsDeep({}, config);
         if (this.logRequest()) {
             const anyThis = this as any;
             if (anyThis._username) {
@@ -410,7 +431,7 @@ export class RESTClient {
         }
 
         try {
-            const response = await this.createAxios().put<PlatformResponse<T>>(path, data, conf);
+            const response = await this.axiosInstance.put<PlatformResponse<T>>(path, data, conf);
             return this.getResult("PUT", path, response, id);
         } catch (e: any) {
             const err = RequestError.fromAxiosError("PUT", path, e, id);
@@ -421,7 +442,7 @@ export class RESTClient {
 
     public async delete<T>(path: string, config?: AxiosRequestConfig): Promise<ClientResult<T>> {
         const id = await this.generateRequestId();
-        const conf = _.defaultsDeep({}, config, this.requestConfig);
+        const conf = _.defaultsDeep({}, config);
         if (this.logRequest()) {
             const anyThis = this as any;
             if (anyThis._username) {
@@ -432,7 +453,7 @@ export class RESTClient {
         }
 
         try {
-            const response = await this.createAxios().delete<PlatformResponse<T>>(path, conf);
+            const response = await this.axiosInstance.delete<PlatformResponse<T>>(path, conf);
             return this.getResult("DELETE", path, response, id);
         } catch (e: any) {
             const err = RequestError.fromAxiosError("DELETE", path, e, id);
@@ -443,7 +464,7 @@ export class RESTClient {
 
     public async download(path: string, config?: AxiosRequestConfig): Promise<ClientResult<Buffer | ArrayBuffer>> {
         const id = await this.generateRequestId();
-        const conf = _.defaultsDeep({}, config, this.requestConfig);
+        const conf = _.defaultsDeep({}, config);
         conf.responseType = "arraybuffer";
         if (this.logRequest()) {
             const anyThis = this as any;
@@ -455,7 +476,7 @@ export class RESTClient {
         }
 
         try {
-            const response = await this.createAxios().get<Buffer | ArrayBuffer>(path, conf);
+            const response = await this.axiosInstance.get<Buffer | ArrayBuffer>(path, conf);
             const platformParameters = this.extractPlatformParameters(response);
 
             this._logResponse(response, platformParameters, id, "GET-Download", path);
@@ -473,7 +494,8 @@ export class RESTClient {
             requestTime: response.headers["x-request-time"],
             responseDuration: response.headers["x-response-duration-ms"],
             responseTime: response.headers["x-response-time"],
-            traceId: response.headers["x-trace-id"]
+            traceId: response.headers["x-trace-id"],
+            correlationId: response.headers["x-correlation-id"]
         };
     }
 
@@ -482,7 +504,7 @@ export class RESTClient {
             const message = `Response ${requestId}: ${method} ${path} | TraceId: '${platformParameters.traceId}' | PlatformDuration: ${platformParameters.responseDuration}`;
             try {
                 this._logger.trace(message, JSON.stringify(response.data, undefined, 2));
-            } catch (e) {
+            } catch (_) {
                 this._logger.trace(message);
             }
         }

@@ -7,6 +7,7 @@ export * from "./CompleteIncomingRequest";
 export * from "./CompleteOutgoingRequest";
 export * from "./CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponse";
 export * from "./CreateOutgoingRequest";
+export * from "./DeleteIncomingRequest";
 export * from "./DiscardOutgoingRequest";
 export * from "./GetIncomingRequest";
 export * from "./GetIncomingRequests";

@@ -1,6 +1,8 @@
+import { Serializable } from "@js-soft/ts-serval";
+import { ArbitraryMessageContent, Mail, Notification, Request, ResponseWrapper } from "@nmshd/content";
 import { CoreBuffer } from "@nmshd/crypto";
-import { CoreId, File, Message, MessageEnvelopeRecipient } from "@nmshd/transport";
-import { MessageDTO, MessageWithAttachmentsDTO, RecipientDTO } from "../../../types";
+import { CachedMessageRecipient, File, Message } from "@nmshd/transport";
+import { MessageDTO, MessageWithAttachmentsDTO } from "../../../types";
 import { RuntimeErrors } from "../../common";
 import { FileMapper } from "../files/FileMapper";
 import { DownloadAttachmentResponse } from "./DownloadAttachment";
@@ -25,10 +27,10 @@ export class MessageMapper {
 
         return {
             id: message.id.toString(),
-            content: message.cache.content.toJSON(),
+            content: this.toMessageContent(message.cache.content),
             createdBy: message.cache.createdBy.toString(),
             createdByDevice: message.cache.createdByDevice.toString(),
-            recipients: message.cache.recipients.map((r, i) => this.toRecipient(r, message.relationshipIds[i])),
+            recipients: this.toRecipients(message.cache.recipients),
             createdAt: message.cache.createdAt.toString(),
             attachments: attachments.map((f) => FileMapper.toFileDTO(f)),
             isOwn: message.isOwn,
@@ -43,10 +45,10 @@ export class MessageMapper {
 
         return {
             id: message.id.toString(),
-            content: message.cache.content.toJSON(),
+            content: this.toMessageContent(message.cache.content),
             createdBy: message.cache.createdBy.toString(),
             createdByDevice: message.cache.createdByDevice.toString(),
-            recipients: message.cache.recipients.map((r, i) => this.toRecipient(r, message.relationshipIds[i])),
+            recipients: this.toRecipients(message.cache.recipients),
             createdAt: message.cache.createdAt.toString(),
             attachments: message.cache.attachments.map((a) => a.toString()),
             isOwn: message.isOwn,
@@ -58,12 +60,30 @@ export class MessageMapper {
         return messages.map((message) => this.toMessageDTO(message));
     }
 
-    private static toRecipient(recipient: MessageEnvelopeRecipient, relationshipId: CoreId): RecipientDTO {
-        return {
-            address: recipient.address.toString(),
-            receivedAt: recipient.receivedAt?.toString(),
-            receivedByDevice: recipient.receivedByDevice?.toString(),
-            relationshipId: relationshipId.toString()
-        };
+    private static toRecipients(recipients: CachedMessageRecipient[]) {
+        return recipients.map((r) => {
+            return {
+                address: r.address.toString(),
+                receivedAt: r.receivedAt?.toString(),
+                receivedByDevice: r.receivedByDevice?.toString(),
+                relationshipId: r.relationshipId?.toString()
+            };
+        });
+    }
+
+    private static toMessageContent(content: Serializable) {
+        if (
+            !(
+                content instanceof Mail ||
+                content instanceof Request ||
+                content instanceof ResponseWrapper ||
+                content instanceof Notification ||
+                content instanceof ArbitraryMessageContent
+            )
+        ) {
+            return ArbitraryMessageContent.from({ value: content }).toJSON();
+        }
+
+        return content.toJSON();
     }
 }

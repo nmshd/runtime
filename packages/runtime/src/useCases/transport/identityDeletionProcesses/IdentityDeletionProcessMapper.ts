@@ -12,14 +12,15 @@ export class IdentityDeletionProcessMapper {
             id: identityDeletionProcess.id.toString(),
             createdAt: identityDeletionProcess.cache.createdAt?.toString(),
             createdByDevice: identityDeletionProcess.cache.createdByDevice?.toString(),
+            approvalPeriodEndsAt: identityDeletionProcess.cache.approvalPeriodEndsAt?.toString(),
+            rejectedAt: identityDeletionProcess.cache.rejectedAt?.toString(),
+            rejectedByDevice: identityDeletionProcess.cache.rejectedByDevice?.toString(),
             approvedAt: identityDeletionProcess.cache.approvedAt?.toString(),
             approvedByDevice: identityDeletionProcess.cache.approvedByDevice?.toString(),
             gracePeriodEndsAt: identityDeletionProcess.cache.gracePeriodEndsAt?.toString(),
             status: identityDeletionProcess.cache.status,
             cancelledAt: identityDeletionProcess.cache.cancelledAt?.toString(),
-            cancelledByDevice: identityDeletionProcess.cache.cancelledByDevice?.toString(),
-            rejectedAt: identityDeletionProcess.cache.rejectedAt?.toString(),
-            rejectedByDevice: identityDeletionProcess.cache.rejectedByDevice?.toString()
+            cancelledByDevice: identityDeletionProcess.cache.cancelledByDevice?.toString()
         };
     }
 

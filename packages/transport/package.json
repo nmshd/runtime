@@ -1,6 +1,5 @@
 {
     "name": "@nmshd/transport",
-    "version": "2.6.0",
     "description": "The transport library handles backbone communication and content encryption.",
     "homepage": "https://enmeshed.eu",
     "repository": {
@@ -9,7 +8,7 @@
         "directory": "packages/transport"
     },
     "license": "MIT",
-    "author": "j&s-soft GmbH",
+    "author": "j&s-soft AG",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "files": [
@@ -23,9 +22,9 @@
         "cdep": "tsc && madge --circular dist",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
         "test:ci": "npm run test:ci:lokijs && npm run test:ci:mongodb",
-        "test:ci:lokijs": "USE_LOKIJS=true jest -i",
+        "test:ci:lokijs": "USE_LOKIJS=true jest -i --coverage",
         "test:ci:mongodb": "jest -i",
-        "test:local:ferretdb": "npm run test:local:start:ferretdb && CONNECTION_STRING='mongodb://localhost:27022' jest",
+        "test:local:ferretdb": "npm run test:local:start:ferretdb && CONNECTION_STRING='mongodb://root:example@localhost:27022' jest",
         "test:local:lokijs": "USE_LOKIJS=true jest",
         "test:local:mongodb": "npm run test:local:start:mongodb && CONNECTION_STRING='mongodb://root:example@localhost:27021' jest",
         "test:local:start:ferretdb": "docker compose -f ../../.dev/compose.yml up -d runtime-ferret",
@@ -36,6 +35,15 @@
         "test:performance:kube:stop": "kubectl delete -f ./test/performance/k8s.yaml"
     },
     "jest": {
+        "collectCoverageFrom": [
+            "./src/**"
+        ],
+        "coverageProvider": "v8",
+        "coverageReporters": [
+            "text-summary",
+            "cobertura",
+            "lcov"
+        ],
         "maxWorkers": 5,
         "preset": "ts-jest",
         "setupFilesAfterEnv": [
@@ -58,34 +66,37 @@
         }
     },
     "dependencies": {
-        "@js-soft/docdb-access-abstractions": "1.0.4",
+        "@js-soft/docdb-access-abstractions": "1.1.0",
         "@js-soft/logging-abstractions": "^1.0.1",
-        "@js-soft/simple-logger": "1.0.4",
+        "@js-soft/simple-logger": "1.0.5",
         "@js-soft/ts-utils": "^2.3.3",
-        "axios": "^1.6.8",
+        "@nmshd/core-types": "*",
+        "@nmshd/crypto": "2.1.0",
+        "axios": "^1.7.9",
         "fast-json-patch": "^3.1.1",
-        "form-data": "^4.0.0",
+        "form-data": "^4.0.2",
+        "https-proxy-agent": "^7.0.6",
         "json-stringify-safe": "^5.0.1",
         "lodash": "^4.17.21",
-        "luxon": "^3.4.4",
-        "qs": "^6.12.1",
+        "luxon": "^3.5.0",
+        "qs": "^6.14.0",
         "reflect-metadata": "^0.2.2",
         "ts-simple-nameof": "^1.3.1",
-        "uuid": "^9.0.1"
+        "uuid": "^11.1.0"
     },
     "devDependencies": {
-        "@js-soft/docdb-access-loki": "1.1.0",
-        "@js-soft/docdb-access-mongo": "1.1.8",
-        "@js-soft/node-logger": "1.1.1",
-        "@js-soft/ts-serval": "2.0.10",
-        "@js-soft/web-logger": "^1.0.4",
-        "@nmshd/crypto": "2.0.6",
+        "@js-soft/docdb-access-loki": "1.2.0",
+        "@js-soft/docdb-access-mongo": "1.2.0",
+        "@js-soft/node-logger": "1.2.0",
+        "@js-soft/ts-serval": "2.0.11",
         "@types/json-stringify-safe": "^5.0.3",
-        "@types/lodash": "^4.17.1",
+        "@types/lodash": "^4.17.14",
         "@types/luxon": "^3.4.2",
-        "@types/qs": "^6.9.15",
-        "@types/uuid": "^9.0.8",
+        "@types/qs": "^6.9.18",
+        "@types/uuid": "^10.0.0",
+        "correlation-id": "^5.2.0",
         "expect": "^29.7.0",
+        "testcontainers": "^10.18.0",
         "ts-mockito": "^2.6.1"
     },
     "publishConfig": {

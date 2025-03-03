@@ -1,5 +1,4 @@
-import { Realm } from "@nmshd/transport";
-import { AppRuntime, LocalAccountDTO } from "../../src";
+import { AppRuntime, LocalAccountDTO, LocalAccountSession } from "../../src";
 import { EventListener, TestUtil } from "../lib";
 
 describe("Runtime Startup", function () {
@@ -54,7 +53,7 @@ describe("Runtime Startup", function () {
     });
 
     test("should create an account", async function () {
-        localAccount = await runtime.accountServices.createAccount(Realm.Prod, "Profil 1");
+        localAccount = await runtime.accountServices.createAccount("Profil 1");
 
         expect(localAccount).toBeDefined();
     });
@@ -63,5 +62,42 @@ describe("Runtime Startup", function () {
         const selectedAccount = await runtime.selectAccount(localAccount.id);
         expect(selectedAccount).toBeDefined();
         expect(selectedAccount.account.id.toString()).toBe(localAccount.id.toString());
+    });
+});
+
+describe("Start Accounts", function () {
+    let runtime: AppRuntime;
+    let session: LocalAccountSession;
+
+    beforeAll(async function () {
+        runtime = await TestUtil.createRuntime();
+        await runtime.start();
+    });
+
+    beforeEach(async function () {
+        const accounts = await TestUtil.provideAccounts(runtime, 1);
+        session = await runtime.selectAccount(accounts[0].id);
+    });
+
+    afterAll(async () => await runtime.stop());
+
+    test("should not delete Account running startAccounts for an active Identity", async function () {
+        await runtime["startAccounts"]();
+        await expect(runtime.selectAccount(session.account.id)).resolves.not.toThrow();
+    });
+
+    test("should delete Account running startAccounts for an Identity with expired grace period", async function () {
+        await session.transportServices.identityDeletionProcesses.initiateIdentityDeletionProcess({ lengthOfGracePeriodInDays: 0 });
+
+        await runtime["startAccounts"]();
+        await expect(runtime.selectAccount(session.account.id)).rejects.toThrow("error.transport.recordNotFound");
+    });
+
+    test("should delete Account running startAccounts for a deleted Identity", async function () {
+        await session.transportServices.identityDeletionProcesses.initiateIdentityDeletionProcess({ lengthOfGracePeriodInDays: 0 });
+        await TestUtil.runDeletionJob();
+
+        await runtime["startAccounts"]();
+        await expect(runtime.selectAccount(session.account.id)).rejects.toThrow("error.transport.recordNotFound");
     });
 });

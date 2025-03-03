@@ -1,5 +1,6 @@
 import { ILogger } from "@js-soft/logging-abstractions";
-import { CoreSerializable, TransportLoggerFactory } from "@nmshd/transport";
+import { Serializable } from "@js-soft/ts-serval";
+import { TransportLoggerFactory } from "@nmshd/transport";
 import { ConsumptionController } from "./ConsumptionController";
 import { ConsumptionControllerName } from "./ConsumptionControllerName";
 
@@ -24,7 +25,7 @@ export class ConsumptionBaseController {
         return Promise.resolve(this);
     }
 
-    protected parseArray<T extends CoreSerializable>(values: Object[], type: new () => T): T[] {
+    protected parseArray<T extends Serializable>(values: Object[], type: new () => T): T[] {
         return values.map((v) => (type as any).fromAny(v));
     }
 }

@@ -10,6 +10,7 @@ export class MessageProcessedEvent extends DataEvent<MessageProcessedEventData> 
 }
 
 export enum MessageProcessedResult {
+    RequestAutomaticallyDecided = "RequestAutomaticallyDecided",
     ManualRequestDecisionRequired = "ManualRequestDecisionRequired",
     NoRequest = "NoRequest",
     Error = "Error"

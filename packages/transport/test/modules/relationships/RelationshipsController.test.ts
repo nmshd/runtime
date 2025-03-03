@@ -1,19 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import {
-    AccountController,
-    CachedRelationship,
-    CoreDate,
-    CoreId,
-    Identity,
-    Relationship,
-    RelationshipChangeRequest,
-    RelationshipChangeResponse,
-    RelationshipChangeStatus,
-    RelationshipChangeType,
-    RelationshipStatus,
-    RelationshipTemplate,
-    Transport
-} from "../../../src";
+import { CoreDate, CoreId } from "@nmshd/core-types";
+import { AccountController, CachedRelationship, Identity, Relationship, RelationshipStatus, RelationshipTemplate, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("RelationshipsController", function () {
@@ -30,36 +17,18 @@ describe("RelationshipsController", function () {
     let recipientRel: Relationship;
     let tempDate: CoreDate;
 
-    function expectValidActiveFreshRelationship(relationship: Relationship, ownAccount: AccountController, peerAccount: AccountController, creationTime: CoreDate) {
+    function expectValidActiveFreshRelationship(relationship: Relationship, _: AccountController, peerAccount: AccountController, creationTime: CoreDate) {
         expect(relationship.id).toBeInstanceOf(CoreId);
         expect(relationship.status).toStrictEqual(RelationshipStatus.Active);
         expect(relationship.peer).toBeInstanceOf(Identity);
         expect(relationship.peer.address).toStrictEqual(peerAccount.identity.address);
 
         expect(relationship.cache!.template).toBeInstanceOf(RelationshipTemplate);
-        expect(relationship.cache!.changes).toHaveLength(1);
 
         expect(relationship.cache).toBeInstanceOf(CachedRelationship);
         expect(relationship.cachedAt).toBeInstanceOf(CoreDate);
         expect(relationship.cachedAt!.isWithin(TestUtil.tempDateThreshold, TestUtil.tempDateThreshold, creationTime)).toBe(true);
-
-        const creation = relationship.cache!.changes[0];
-        expect(creation.relationshipId.toString()).toBe(relationship.id.toString());
-        expect(creation.status).toStrictEqual(RelationshipChangeStatus.Accepted);
-        expect(creation.type).toStrictEqual(RelationshipChangeType.Creation);
-
-        expect(creation.request).toBeInstanceOf(RelationshipChangeRequest);
-        expect(creation.request.createdAt.isWithin(TestUtil.tempDateThreshold, TestUtil.tempDateThreshold, creationTime)).toBe(true);
-        if (creation.request.createdBy.equals(ownAccount.identity.address)) {
-            expect(creation.request.createdBy.toString()).toBe(ownAccount.identity.address.toString());
-            expect(creation.response?.createdBy.toString()).toBe(peerAccount.identity.address.toString());
-        } else {
-            expect(creation.response?.createdBy.toString()).toBe(ownAccount.identity.address.toString());
-            expect(creation.request.createdBy.toString()).toBe(peerAccount.identity.address.toString());
-        }
-
-        expect(creation.response).toBeInstanceOf(RelationshipChangeResponse);
-        expect(creation.response!.createdAt.isWithin(TestUtil.tempDateThreshold, TestUtil.tempDateThreshold, creationTime)).toBe(true);
+        expect(relationship.cache!.creationContent).toBeDefined();
 
         expect(relationship.cache!.lastMessageReceivedAt).toBeUndefined();
         expect(relationship.cache!.lastMessageSentAt).toBeUndefined();
@@ -141,6 +110,36 @@ describe("RelationshipsController", function () {
             await TestUtil.addRelationship(sender, recipient2);
             senderRel = (await sender.relationships.getActiveRelationshipToIdentity(recipient2.identity.address))!;
             expectValidActiveFreshRelationship(senderRel, sender, recipient2, tempDate);
+        });
+
+        test("should not create new relationship if templator has been deleted after requestor has loaded the template", async function () {
+            const loadedTemplate = await TestUtil.exchangeTemplate(recipient3, sender);
+
+            await recipient3.identityDeletionProcess.initiateIdentityDeletionProcess(0);
+            await TestUtil.runDeletionJob();
+
+            await sender.syncEverything();
+
+            const canSendRelationshipResult = await sender.relationships.canSendRelationship({
+                template: loadedTemplate,
+                creationContent: {
+                    mycontent: "request"
+                }
+            });
+            expect(canSendRelationshipResult.isSuccess).toBe(false);
+            expect(canSendRelationshipResult.error.code).toBe("error.transport.relationships.deletedOwnerOfRelationshipTemplate");
+            expect(canSendRelationshipResult.error.message).toContain(
+                "The Identity that created the RelationshipTemplate has been deleted in the meantime. Thus, it is not possible to establish a Relationship to it."
+            );
+
+            await expect(
+                sender.relationships.sendRelationship({
+                    template: loadedTemplate,
+                    creationContent: {
+                        mycontent: "request"
+                    }
+                })
+            ).rejects.toThrow("error.transport.relationships.deletedOwnerOfRelationshipTemplate");
         });
     });
 

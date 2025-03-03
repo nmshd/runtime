@@ -1,6 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
-import { CoreId, File, FileController } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { CoreId } from "@nmshd/core-types";
+import { File, FileController } from "@nmshd/transport";
+import { Inject } from "@nmshd/typescript-ioc";
 import { FileIdString, QRCode, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
 export interface CreateQRCodeForFileRequest {

@@ -1,19 +1,10 @@
-import { RelationshipStatus } from "../transmission/RelationshipStatus";
-import { BackboneGetRelationshipsChangesResponse } from "./BackboneGetRelationshipsChanges";
+import { BackboneRelationship } from "./BackboneRelationship";
 
 export interface BackboneGetRelationshipsRequest {
     ids: string[];
 }
 
-export interface BackboneGetRelationshipsResponse {
-    id: string;
-    relationshipTemplateId: string;
-    from: string;
-    to: string;
-    changes: BackboneGetRelationshipsChangesResponse[];
-    createdAt: string;
-    status: RelationshipStatus;
-}
+export type BackboneGetRelationshipResponse = BackboneRelationship;
 
 export interface BackboneGetRelationshipsDateRange<T> {
     from?: T;

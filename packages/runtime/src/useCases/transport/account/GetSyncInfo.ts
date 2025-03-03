@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
 import { AccountController } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { UseCase } from "../../common";
 
 export interface SyncInfo {

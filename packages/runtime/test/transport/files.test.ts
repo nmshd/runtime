@@ -1,3 +1,4 @@
+import { CoreDate } from "@nmshd/core-types";
 import fs from "fs";
 import { DateTime } from "luxon";
 import { FileDTO, GetFilesQuery, OwnerRestriction, TransportServices } from "../../src";
@@ -66,13 +67,19 @@ describe("File upload", () => {
         expect(file).toBeDefined();
 
         const response = await transportServices1.files.downloadFile({ id: file.id });
-        expect(response.isSuccess).toBeTruthy();
+        expect(response).toBeSuccessful();
+
         expect(response.value.content.byteLength).toBe(4);
     });
 
-    test("cannot upload an empty file", async () => {
+    test("can exchange an empty file", async () => {
         const response = await transportServices1.files.uploadOwnFile(await makeUploadRequest({ content: Buffer.of() }));
-        expect(response).toBeAnError("'content' is empty", "error.runtime.validation.invalidPropertyValue");
+        expect(response).toBeSuccessful();
+
+        const downloadResponse = await transportServices1.files.downloadFile({ id: response.value.id });
+        expect(downloadResponse).toBeSuccessful();
+
+        expect(downloadResponse.value.content.byteLength).toBe(0);
     });
 
     test("cannot upload a file that is null", async () => {
@@ -81,6 +88,7 @@ describe("File upload", () => {
 
         expect(response).toBeAnError("content must be object", "error.runtime.validation.invalidPropertyValue");
     });
+
     test("can upload same file twice", async () => {
         const request = await makeUploadRequest({ content: await fs.promises.readFile(`${__dirname}/../__assets__/test.txt`) });
 
@@ -95,6 +103,22 @@ describe("File upload", () => {
         expect(response).toBeSuccessful();
     });
 
+    test("uploading a file without expiry date will use the default", async () => {
+        const response = await transportServices1.files.uploadOwnFile(await makeUploadRequest({ expiresAt: undefined as unknown as string }));
+        expect(response).toBeSuccessful();
+
+        const file = response.value;
+        const defaultDate = CoreDate.from("9999-12-31T00:00:00.000Z");
+        expect(CoreDate.from(file.expiresAt).isSame(defaultDate)).toBe(true);
+    });
+
+    test("can upload a file with tags", async () => {
+        const response = await transportServices1.files.uploadOwnFile(await makeUploadRequest({ tags: ["tag1", "tag2"] }));
+        expect(response).toBeSuccessful();
+
+        expect(response.value.tags).toStrictEqual(["tag1", "tag2"]);
+    });
+
     test("cannot upload a file with expiry date in the past", async () => {
         const response = await transportServices1.files.uploadOwnFile(await makeUploadRequest({ expiresAt: "1970" }));
         expect(response).toBeAnError("'expiresAt' must be in the future", "error.runtime.validation.invalidPropertyValue");
@@ -104,11 +128,6 @@ describe("File upload", () => {
         const response = await transportServices1.files.uploadOwnFile(await makeUploadRequest({ expiresAt: "" }));
         expect(response).toBeAnError("expiresAt must match ISO8601 datetime format", "error.runtime.validation.invalidPropertyValue");
     });
-
-    test("cannot upload a file with undefined as expiry date", async () => {
-        const response = await transportServices1.files.uploadOwnFile(await makeUploadRequest({ expiresAt: undefined as unknown as string }));
-        expect(response).toBeAnError("must have required property 'expiresAt'", "error.runtime.validation.invalidPropertyValue");
-    });
 });
 
 describe("Get file", () => {
@@ -116,11 +135,45 @@ describe("Get file", () => {
     beforeAll(async () => {
         file = await uploadFile(transportServices1);
     });
+
     test("can get file by id", async () => {
         const response = await transportServices1.files.getFile({ id: file.id });
 
         expect(response).toBeSuccessful();
         expect(response.value).toMatchObject(file);
+    });
+
+    test("can get file by tags", async () => {
+        const uploadFileResult = await transportServices1.files.uploadOwnFile(
+            await makeUploadRequest({
+                tags: ["aTag", "anotherTag"]
+            })
+        );
+        const file = uploadFileResult.value;
+
+        const uploadFileResult2 = await transportServices1.files.uploadOwnFile(
+            await makeUploadRequest({
+                tags: ["aThirdTag", "aFourthTag"]
+            })
+        );
+        const file2 = uploadFileResult2.value;
+
+        const getResult = await transportServices1.files.getFiles({ query: { tags: ["aTag"] } });
+
+        expect(getResult).toBeSuccessful();
+        expect(getResult.value[0].id).toStrictEqual(file.id);
+
+        const getResult2 = await transportServices1.files.getFiles({ query: { tags: ["aTag", "anotherTag"] } });
+
+        expect(getResult2).toBeSuccessful();
+        expect(getResult2.value[0].id).toStrictEqual(file.id);
+
+        const getResult3 = await transportServices1.files.getFiles({ query: { tags: ["aTag", "aThirdTag"] } });
+
+        expect(getResult3).toBeSuccessful();
+        const result3Ids = getResult3.value.map((file) => file.id);
+        expect(result3Ids).toContain(file.id);
+        expect(result3Ids).toContain(file2.id);
     });
 
     test("accessing not existing file id causes an error", async () => {
@@ -282,6 +335,18 @@ describe("Load peer file with token reference", () => {
         expect(response.value).toContainEqual({ ...file, isOwn: false });
     });
 
+    test("should load a peer file with its tags", async () => {
+        const uploadOwnFileResult = await transportServices1.files.uploadOwnFile(
+            await makeUploadRequest({
+                tags: ["tag1", "tag2"]
+            })
+        );
+        const token = (await transportServices1.files.createTokenForFile({ fileId: uploadOwnFileResult.value.id })).value;
+        const loadFileResult = await transportServices2.files.getOrLoadFile({ reference: token.truncatedReference });
+
+        expect(loadFileResult.value.tags).toStrictEqual(["tag1", "tag2"]);
+    });
+
     test("cannot pass token id as truncated token reference", async () => {
         const file = await uploadFile(transportServices1);
         const token = (await transportServices1.files.createTokenForFile({ fileId: file.id })).value;
@@ -308,11 +373,11 @@ describe("Load peer file with token reference", () => {
 
     test("passing empty object causes an error", async () => {
         const response = await transportServices2.files.getOrLoadFile({} as any);
-        expect(response).toBeAnError("The given combination of properties in the payload is not supported.", "error.runtime.validation.invalidPayload");
+        expect(response).toBeAnError("token / file reference invalid", "error.runtime.validation.invalidPropertyValue");
     });
 });
 
-describe("Load peer file with file id and secret", () => {
+describe("Load peer file with the FileReference", () => {
     let file: FileDTO;
 
     beforeAll(async () => {
@@ -326,13 +391,9 @@ describe("Load peer file with file id and secret", () => {
         expect(response).toBeAnError("File not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
     });
 
-    test("peer file can be loaded with file id and secret key", async () => {
-        expect(file).toBeDefined();
-
-        const response = await transportServices2.files.getOrLoadFile({ id: file.id, secretKey: file.secretKey });
-
-        expect(response).toBeSuccessful();
-        expect(response.value).toMatchObject({ ...file, isOwn: false });
+    test("load the file using the FileReference", async () => {
+        const fileResult = await transportServices2.files.getOrLoadFile({ reference: file.truncatedReference });
+        expect(fileResult).toBeSuccessful();
     });
 
     test("after peer file is loaded the file can be accessed under /Files/{id}", async () => {
@@ -349,54 +410,5 @@ describe("Load peer file with file id and secret", () => {
         const response = await transportServices2.files.getFiles({ query: { createdAt: file.createdAt } });
         expect(response).toBeSuccessful();
         expect(response.value).toContainEqual({ ...file, isOwn: false });
-    });
-
-    test("cannot pass an unkown file id", async () => {
-        expect(file).toBeDefined();
-
-        const response = await transportServices2.files.getOrLoadFile({ id: UNKNOWN_FILE_ID, secretKey: file.secretKey });
-
-        expect(response).toBeAnError("File not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
-    });
-
-    test("cannot pass an unkown token id as file id", async () => {
-        expect(file).toBeDefined();
-
-        const response = await transportServices2.files.getOrLoadFile({ id: UNKNOWN_TOKEN_ID, secretKey: file.secretKey });
-
-        expect(response).toBeAnError("id must match pattern FIL.*", "error.runtime.validation.invalidPropertyValue");
-    });
-
-    test.each([
-        [null, "secretKey must be string"],
-        [undefined, "must have required property 'secretKey'"],
-        ["", "secretKey must NOT have fewer than 10 characters"]
-    ])("cannot pass %p as secret key", async (secretKey, expectedMessage) => {
-        const response = await transportServices2.files.getOrLoadFile({ id: file.id, secretKey: secretKey! });
-
-        expect(response).toBeAnError(expectedMessage, "error.runtime.validation.invalidPropertyValue");
-    });
-
-    test.each([
-        [null, "id must be string"],
-        [undefined, "must have required property 'id'"],
-        ["", "id must match pattern FIL.*"]
-    ])("cannot pass %p as file id", async (fileId, expectedMessage) => {
-        const response = await transportServices2.files.getOrLoadFile({ id: fileId!, secretKey: file.secretKey });
-
-        expect(response).toBeAnError(expectedMessage, "error.runtime.validation.invalidPropertyValue");
-    });
-});
-
-describe("Load peer file with the FileReference", () => {
-    let file: FileDTO;
-
-    beforeAll(async () => {
-        file = await uploadFile(transportServices1);
-    });
-
-    test("load the file using the FileReference", async () => {
-        const fileResult = await transportServices2.files.getOrLoadFile({ reference: file.truncatedReference });
-        expect(fileResult).toBeSuccessful();
     });
 });

@@ -1,5 +1,5 @@
 import { Event } from "@js-soft/ts-utils";
-import { Mail } from "@nmshd/content";
+import { Mail, MailJSON } from "@nmshd/content";
 import { MailReceivedEvent, MessageReceivedEvent, RelationshipEvent } from "../events";
 import { ModuleConfiguration, RuntimeModule } from "../extensibility/modules/RuntimeModule";
 
@@ -23,7 +23,7 @@ export class MessageModule extends RuntimeModule<MessageModuleConfiguration> {
         let event: Event | undefined;
         switch (type) {
             case "Mail":
-                const mail = Mail.from(message.content);
+                const mail = Mail.from(message.content as MailJSON);
                 event = new MailReceivedEvent(messageReceivedEvent.eventTargetAddress, mail, message);
                 this.runtime.eventBus.publish(event);
                 this.logger.trace(`Published MailReceivedEvent for ${message.id}`);

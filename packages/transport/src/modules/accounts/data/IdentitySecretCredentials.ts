@@ -1,21 +1,14 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
+import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { CryptoSecretKey, CryptoSignaturePrivateKey, CryptoSignaturePublicKey, ICryptoSecretKey, ICryptoSignaturePrivateKey, ICryptoSignaturePublicKey } from "@nmshd/crypto";
-import { CoreSerializable, ICoreSerializable } from "../../../core";
-import { Realm } from "./Realm";
 
-export interface IIdentitySecretCredentials extends ICoreSerializable {
+export interface IIdentitySecretCredentials extends ISerializable {
     publicKey?: ICryptoSignaturePublicKey;
-    realm: Realm;
     synchronizationKey: ICryptoSecretKey;
     privateKey?: ICryptoSignaturePrivateKey;
 }
 
 @type("IdentitySecretCredentials")
-export class IdentitySecretCredentials extends CoreSerializable implements IIdentitySecretCredentials {
-    @validate()
-    @serialize()
-    public realm: Realm;
-
+export class IdentitySecretCredentials extends Serializable implements IIdentitySecretCredentials {
     @validate({ nullable: true })
     @serialize()
     public publicKey?: CryptoSignaturePublicKey;

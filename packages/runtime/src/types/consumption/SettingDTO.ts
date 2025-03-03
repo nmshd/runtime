@@ -1,4 +1,8 @@
-import { SettingScope } from "@nmshd/consumption";
+export enum SettingScope {
+    Identity = "Identity",
+    Device = "Device",
+    Relationship = "Relationship"
+}
 
 export interface SettingDTO {
     id: string;

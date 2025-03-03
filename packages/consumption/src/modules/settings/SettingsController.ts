@@ -1,5 +1,6 @@
 import { log } from "@js-soft/ts-utils";
-import { CoreDate, CoreId, SynchronizedCollection, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
+import { CoreDate, CoreId } from "@nmshd/core-types";
+import { SynchronizedCollection, TransportCoreErrors } from "@nmshd/transport";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../consumption/ConsumptionController";
 import { ConsumptionControllerName } from "../../consumption/ConsumptionControllerName";
@@ -55,5 +56,12 @@ export class SettingsController extends ConsumptionBaseController {
 
     public async deleteSetting(setting: Setting): Promise<void> {
         await this.settings.delete(setting);
+    }
+
+    public async deleteSettingsForRelationship(relationshipId: CoreId): Promise<void> {
+        const settings = await this.getSettings({ reference: relationshipId.toString(), scope: SettingScope.Relationship });
+        for (const setting of settings) {
+            await this.deleteSetting(setting);
+        }
     }
 }

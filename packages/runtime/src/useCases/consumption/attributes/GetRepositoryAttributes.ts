@@ -1,9 +1,10 @@
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController } from "@nmshd/consumption";
-import { Inject } from "typescript-ioc";
-import { AttributeMapper, GetAttributesRequestQuery, GetAttributesUseCase } from "..";
+import { Inject } from "@nmshd/typescript-ioc";
 import { LocalAttributeDTO } from "../../../types";
-import { flattenObject, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { SchemaRepository, SchemaValidator, UseCase, flattenObject } from "../../common";
+import { AttributeMapper } from "./AttributeMapper";
+import { GetAttributesRequestQuery, GetAttributesUseCase } from "./GetAttributes";
 
 export interface GetRepositoryAttributesRequest {
     /**
@@ -15,13 +16,11 @@ export interface GetRepositoryAttributesRequest {
 
 export interface GetRepositoryAttributesRequestQuery {
     createdAt?: string;
+    isDefault?: string;
     "content.tags"?: string | string[];
     "content.validFrom"?: string | string[];
     "content.validTo"?: string | string[];
     "content.value.@type"?: string | string[];
-    deletionInfo?: string | string[];
-    "deletionInfo.deletionStatus"?: string | string[];
-    "deletionInfo.deletionDate"?: string | string[];
 }
 
 export interface GetRepositoryAttributesResponse extends Array<LocalAttributeDTO> {}
@@ -46,9 +45,7 @@ export class GetRepositoryAttributesUseCase extends UseCase<GetRepositoryAttribu
         const dbQuery = GetAttributesUseCase.queryTranslator.parse(flattenedQuery);
         dbQuery.shareInfo = { $exists: false };
 
-        if (typeof request.onlyLatestVersions === "undefined" || request.onlyLatestVersions) {
-            dbQuery["succeededBy"] = { $exists: false };
-        }
+        if (request.onlyLatestVersions ?? true) dbQuery["succeededBy"] = { $exists: false };
 
         const attributes = await this.attributesController.getLocalAttributes(dbQuery);
 

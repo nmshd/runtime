@@ -1,6 +1,7 @@
 import { Event, EventBus } from "@js-soft/ts-utils";
 import { Notification, NotificationItem } from "@nmshd/content";
-import { CoreId, Message, SynchronizedCollection, CoreErrors as TransportCoreErrors } from "@nmshd/transport";
+import { CoreAddress, CoreId } from "@nmshd/core-types";
+import { Message, SynchronizedCollection, TransportCoreErrors } from "@nmshd/transport";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../consumption/ConsumptionController";
 import { ConsumptionControllerName } from "../../consumption/ConsumptionControllerName";
@@ -34,7 +35,7 @@ export class NotificationsController extends ConsumptionBaseController {
     }
 
     public async sent(message: Message): Promise<LocalNotification> {
-        if (!message.isOwn) throw new Error("Cannot send a Notification from a foreign message.");
+        if (!message.isOwn) throw new Error("Cannot mark a LocalNotification as sent from a received Message.");
 
         const content = this.extractNotificationFromMessage(message);
 
@@ -155,5 +156,12 @@ export class NotificationsController extends ConsumptionBaseController {
         for (const event of events) this.eventBus.publish(event);
 
         return notification;
+    }
+
+    public async deleteNotificationsExchangedWithPeer(peer: CoreAddress): Promise<void> {
+        const notifications = await this.getNotifications({ peer: peer.toString() });
+        for (const notification of notifications) {
+            await this.localNotifications.delete(notification);
+        }
     }
 }

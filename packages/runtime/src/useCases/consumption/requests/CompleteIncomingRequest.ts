@@ -1,21 +1,16 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { IncomingRequestsController } from "@nmshd/consumption";
-import { CoreId, IMessage, IRelationshipChange, Message, MessageController, RelationshipChange, RelationshipsController } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { CoreId } from "@nmshd/core-types";
+import { IMessage, IRelationship, Message, MessageController, Relationship, RelationshipsController } from "@nmshd/transport";
+import { Inject } from "@nmshd/typescript-ioc";
 import { LocalRequestDTO } from "../../../types";
-import { MessageIdString, RelationshipChangeIdString, RequestIdString, RuntimeErrors, UseCase } from "../../common";
+import { MessageIdString, RelationshipIdString, RequestIdString, RuntimeErrors, UseCase } from "../../common";
 import { RequestMapper } from "./RequestMapper";
 
 export interface CompleteIncomingRequestRequest {
     requestId: RequestIdString;
-    responseSourceId?: MessageIdString | RelationshipChangeIdString;
+    responseSourceId?: MessageIdString | RelationshipIdString;
 }
-
-// class Validator extends SchemaValidator<CompleteIncomingRequestRequest> {
-//     public constructor(@Inject schemaRepository: SchemaRepository) {
-//         super(schemaRepository.getSchema("CompleteIncomingRequestRequest"));
-//     }
-// }
 
 export class CompleteIncomingRequestUseCase extends UseCase<CompleteIncomingRequestRequest, LocalRequestDTO> {
     public constructor(
@@ -33,7 +28,7 @@ export class CompleteIncomingRequestUseCase extends UseCase<CompleteIncomingRequ
         return Result.ok(RequestMapper.toLocalRequestDTO(localRequest));
     }
 
-    private async getResponseSourceObject(request: CompleteIncomingRequestRequest): Promise<IMessage | IRelationshipChange | undefined> {
+    private async getResponseSourceObject(request: CompleteIncomingRequestRequest): Promise<IMessage | IRelationship | undefined> {
         if (!request.responseSourceId) return;
 
         if (request.responseSourceId.startsWith("MSG")) {
@@ -43,11 +38,11 @@ export class CompleteIncomingRequestUseCase extends UseCase<CompleteIncomingRequ
             return message;
         }
 
-        const relationships = await this.relationshipController.getRelationships({ "cache.changes.id": request.responseSourceId });
-        if (relationships.length === 0) {
-            throw RuntimeErrors.general.recordNotFound(RelationshipChange);
+        const relationship = await this.relationshipController.getRelationship(CoreId.from(request.responseSourceId));
+        if (!relationship) {
+            throw RuntimeErrors.general.recordNotFound(Relationship);
         }
 
-        return relationships[0].cache!.creationChange;
+        return relationship;
     }
 }

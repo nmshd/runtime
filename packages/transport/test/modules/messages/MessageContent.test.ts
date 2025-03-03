@@ -1,6 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { ISerializable, JSONWrapper, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { AccountController, CoreAddress, ICoreAddress, Transport } from "../../../src";
+import { CoreAddress, ICoreAddress } from "@nmshd/core-types";
+import { AccountController, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("MessageContent", function () {
@@ -40,6 +41,7 @@ describe("MessageContent", function () {
             expect(value).toBeInstanceOf(JSONWrapper);
             await TestUtil.sendMessage(sender, recipient1, value);
         });
+
         test("should correctly store the message (sender)", async function () {
             const messages = await sender.messages.getMessagesByAddress(recipient1.identity.address);
             expect(messages).toHaveLength(1);
@@ -94,7 +96,8 @@ describe("MessageContent", function () {
 
             expect(message).toBeDefined();
         });
-        test("should correctly store the me4ssage (sender)", async function () {
+
+        test("should correctly store the message (sender)", async function () {
             const messages = await sender.messages.getMessagesByAddress(recipient1.identity.address);
             expect(messages).toHaveLength(2);
             const message = messages[1];
@@ -149,10 +152,9 @@ class Mail extends Serializable implements IMail {
     public body: string;
 
     protected static override preFrom(value: any): any {
-        if (typeof value.cc === "undefined") {
-            value.cc = [];
-        }
-        if (typeof value.body === "undefined" && value.content) {
+        if (!value.cc) value.cc = [];
+
+        if (!value.body && value.content) {
             value.body = value.content;
             delete value.content;
         }

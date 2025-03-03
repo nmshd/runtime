@@ -20,6 +20,18 @@ describe("LocalAttributeShareInfo", function () {
         {
             notificationReference: "notificationReferenceId",
             peer: "peerAddress"
+        },
+        {
+            notificationReference: "notificationReferenceId",
+            peer: "peerAddress",
+            sourceAttribute: "sourceAttributeId",
+            thirdPartyAddress: "thirdPartyAddress"
+        },
+        {
+            requestReference: "requestReferenceId",
+            peer: "peerAddress",
+            sourceAttribute: "sourceAttributeId",
+            thirdPartyAddress: "thirdPartyAddress"
         }
     ];
     test.each(validShareInfoJsonParams)("should create objects from valid parameters using from()", function (shareInfoParams: LocalAttributeShareInfoJSON) {
@@ -28,6 +40,7 @@ describe("LocalAttributeShareInfo", function () {
         expect(shareInfo.notificationReference?.toJSON()).toStrictEqual(shareInfoParams.notificationReference);
         expect(shareInfo.peer.toJSON()).toStrictEqual(shareInfoParams.peer);
         expect(shareInfo.sourceAttribute?.toJSON()).toStrictEqual(shareInfoParams.sourceAttribute);
+        expect(shareInfo.thirdPartyAddress?.toJSON()).toStrictEqual(shareInfoParams.thirdPartyAddress);
     });
 
     const invalidShareInfoJsonParams: LocalAttributeShareInfoJSON[] = [

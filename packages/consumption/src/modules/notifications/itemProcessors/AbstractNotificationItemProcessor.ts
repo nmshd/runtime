@@ -1,6 +1,7 @@
 import { Event } from "@js-soft/ts-utils";
 import { NotificationItem } from "@nmshd/content";
-import { AccountController, CoreAddress } from "@nmshd/transport";
+import { CoreAddress } from "@nmshd/core-types";
+import { AccountController } from "@nmshd/transport";
 import { ConsumptionController } from "../../../consumption/ConsumptionController";
 import { ValidationResult } from "../../common";
 import { LocalNotification } from "../local/LocalNotification";

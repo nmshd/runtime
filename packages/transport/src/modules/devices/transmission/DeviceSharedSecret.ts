@@ -1,9 +1,9 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
+import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
+import { CoreDate, CoreId, ICoreId } from "@nmshd/core-types";
 import { CryptoSecretKey, CryptoSignaturePrivateKey, ICryptoSecretKey, ICryptoSignaturePrivateKey } from "@nmshd/crypto";
-import { CoreDate, CoreId, CoreSerializable, ICoreId } from "../../../core";
 import { Identity, IIdentity } from "../../accounts/data/Identity";
 
-export interface IDeviceSharedSecret {
+export interface IDeviceSharedSecret extends ISerializable {
     id: ICoreId;
     createdAt: CoreDate;
     createdByDevice: CoreId;
@@ -17,10 +17,11 @@ export interface IDeviceSharedSecret {
     identity: IIdentity;
     password: string;
     username: string;
+    isBackupDevice: boolean;
 }
 
 @type("DeviceSharedSecret")
-export class DeviceSharedSecret extends CoreSerializable implements IDeviceSharedSecret {
+export class DeviceSharedSecret extends Serializable implements IDeviceSharedSecret {
     @serialize()
     @validate()
     public id: CoreId;
@@ -72,6 +73,15 @@ export class DeviceSharedSecret extends CoreSerializable implements IDeviceShare
     @serialize()
     @validate()
     public password: string;
+
+    @serialize()
+    @validate()
+    public isBackupDevice: boolean;
+
+    public static override preFrom(value: any): any {
+        if (!("isBackupDevice" in value)) value.isBackupDevice = false;
+        return value;
+    }
 
     public static from(value: IDeviceSharedSecret): DeviceSharedSecret {
         return this.fromAny(value);

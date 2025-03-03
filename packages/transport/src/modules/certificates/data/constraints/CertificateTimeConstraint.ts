@@ -1,5 +1,5 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreDate, ICoreDate } from "../../../../core";
+import { CoreDate, ICoreDate } from "@nmshd/core-types";
 import { CertificateConstraint, ICertificateConstraint } from "../CertificateConstraint";
 
 export interface ICertificateTimeConstraint extends ICertificateConstraint {

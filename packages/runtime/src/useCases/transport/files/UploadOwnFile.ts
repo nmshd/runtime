@@ -1,9 +1,9 @@
 import { Result } from "@js-soft/ts-utils";
+import { CoreDate } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
-import { AccountController, CoreDate, FileController } from "@nmshd/transport";
-import { DateTime } from "luxon";
+import { AccountController, FileController } from "@nmshd/transport";
+import { Inject } from "@nmshd/typescript-ioc";
 import { nameof } from "ts-simple-nameof";
-import { Inject } from "typescript-ioc";
 import { FileDTO } from "../../../types";
 import { ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationFailure, ValidationResult } from "../../common";
 import { FileMapper } from "./FileMapper";
@@ -12,9 +12,10 @@ export interface UploadOwnFileRequest {
     content: Uint8Array;
     filename: string;
     mimetype: string;
-    expiresAt: ISO8601DateTimeString;
-    title: string;
+    expiresAt?: ISO8601DateTimeString;
+    title?: string;
     description?: string;
+    tags?: string[];
 }
 
 export interface UploadOwnFileValidatableRequest extends Omit<UploadOwnFileRequest, "content"> {
@@ -44,16 +45,7 @@ class Validator extends SchemaValidator<UploadOwnFileValidatableRequest> {
             );
         }
 
-        if (input.content.length === 0) {
-            validationResult.addFailure(
-                new ValidationFailure(
-                    RuntimeErrors.general.invalidPropertyValue(`'${nameof<UploadOwnFileValidatableRequest>((r) => r.content)}' is empty`),
-                    nameof<UploadOwnFileValidatableRequest>((r) => r.content)
-                )
-            );
-        }
-
-        if (DateTime.fromISO(input.expiresAt) <= DateTime.utc()) {
+        if (input.expiresAt && CoreDate.from(input.expiresAt).isSameOrBefore(CoreDate.utc())) {
             validationResult.addFailure(
                 new ValidationFailure(
                     RuntimeErrors.general.invalidPropertyValue(`'${nameof<UploadOwnFileValidatableRequest>((r) => r.expiresAt)}' must be in the future`),
@@ -80,10 +72,11 @@ export class UploadOwnFileUseCase extends UseCase<UploadOwnFileRequest, FileDTO>
         const file = await this.fileController.sendFile({
             buffer: CoreBuffer.from(request.content),
             title: request.title,
-            description: request.description ?? "",
+            description: request.description,
             filename: request.filename,
             mimetype: request.mimetype,
-            expiresAt: CoreDate.from(request.expiresAt)
+            expiresAt: CoreDate.from(request.expiresAt ?? "9999-12-31T00:00:00.000Z"),
+            tags: request.tags
         });
 
         await this.accountController.syncDatawallet();

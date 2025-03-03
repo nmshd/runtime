@@ -1,33 +1,53 @@
 /* eslint-disable jest/no-standalone-expect */
 import { ILoggerFactory } from "@js-soft/logging-abstractions";
 import { SimpleLoggerFactory } from "@js-soft/simple-logger";
-import { Serializable } from "@js-soft/ts-serval";
-import { Result, sleep, SubscriptionTarget } from "@js-soft/ts-utils";
-import { FileDTO, MessageDTO, RelationshipDTO, RelationshipTemplateDTO, SyncEverythingResponse } from "@nmshd/runtime";
-import { CoreDate, IConfigOverwrite, Realm, TransportLoggerFactory } from "@nmshd/transport";
+import { EventBus, Result, sleep } from "@js-soft/ts-utils";
+import { ArbitraryMessageContent, ArbitraryRelationshipCreationContent, ArbitraryRelationshipTemplateContent } from "@nmshd/content";
+import { CoreDate } from "@nmshd/core-types";
+import {
+    FileDTO,
+    MessageContentDerivation,
+    MessageDTO,
+    RelationshipCreationContentDerivation,
+    RelationshipDTO,
+    RelationshipTemplateContentDerivation,
+    RelationshipTemplateDTO,
+    SyncEverythingResponse
+} from "@nmshd/runtime";
+import { IConfigOverwrite, TransportLoggerFactory } from "@nmshd/transport";
+import fs from "fs";
+import { defaultsDeep } from "lodash";
+import path from "path";
+import { GenericContainer, Wait } from "testcontainers";
 import { LogLevel } from "typescript-logging";
-import { AppConfig, AppRuntime, LocalAccountDTO, LocalAccountSession, createAppConfig as runtime_createAppConfig } from "../../src";
-import { NativeBootstrapperMock } from "../mocks/NativeBootstrapperMock";
+import { AppConfig, AppConfigOverwrite, AppRuntime, IUIBridge, LocalAccountDTO, LocalAccountSession, createAppConfig as runtime_createAppConfig } from "../../src";
 import { FakeUIBridge } from "./FakeUIBridge";
+import { FakeNativeBootstrapper } from "./natives/FakeNativeBootstrapper";
 
 export class TestUtil {
-    public static async createRuntime(configOverride?: any): Promise<AppRuntime> {
+    public static async createRuntime(configOverride?: AppConfigOverwrite, uiBridge: IUIBridge = new FakeUIBridge(), eventBus?: EventBus): Promise<AppRuntime> {
+        configOverride = defaultsDeep(configOverride, {
+            modules: {
+                pushNotification: { enabled: false }
+            }
+        });
+
         const config = this.createAppConfig(configOverride);
 
-        const nativeBootstrapperMock = new NativeBootstrapperMock();
-        await nativeBootstrapperMock.init();
-        const runtime = await AppRuntime.create(nativeBootstrapperMock, config);
-        runtime.registerUIBridge(new FakeUIBridge());
+        const nativeBootstrapper = new FakeNativeBootstrapper();
+        await nativeBootstrapper.init();
+        const runtime = await AppRuntime.create(nativeBootstrapper, config, eventBus);
+        runtime.registerUIBridge(uiBridge);
 
         return runtime;
     }
 
-    public static async createRuntimeWithoutInit(configOverride?: any): Promise<AppRuntime> {
+    public static async createRuntimeWithoutInit(configOverride?: AppConfigOverwrite): Promise<AppRuntime> {
         const config = this.createAppConfig(configOverride);
 
-        const nativeBootstrapperMock = new NativeBootstrapperMock();
-        await nativeBootstrapperMock.init();
-        const runtime = new AppRuntime(nativeBootstrapperMock.nativeEnvironment, config);
+        const nativeBootstrapper = new FakeNativeBootstrapper();
+        await nativeBootstrapper.init();
+        const runtime = new AppRuntime(nativeBootstrapper.nativeEnvironment, config);
 
         return runtime;
     }
@@ -43,19 +63,19 @@ export class TestUtil {
             baseUrl: globalThis.process.env.NMSHD_TEST_BASEURL!,
             platformClientId: globalThis.process.env.NMSHD_TEST_CLIENTID!,
             platformClientSecret: globalThis.process.env.NMSHD_TEST_CLIENTSECRET!,
+            addressGenerationHostnameOverride: globalThis.process.env.NMSHD_TEST_ADDRESS_GENERATION_HOSTNAME_OVERRIDE,
             debug: true
         };
 
         return runtime_createAppConfig({
             transportLibrary: transportOverride,
-            logging: {},
             applicationId: "eu.enmeshed.test",
             ...configOverride
         });
     }
 
     public static async createSession(runtime: AppRuntime): Promise<LocalAccountSession> {
-        const localAccount1 = await runtime.accountServices.createAccount(Realm.Prod, "Profil 1");
+        const localAccount1 = await runtime.accountServices.createAccount("Profil 1");
         return await runtime.selectAccount(localAccount1.id);
     }
 
@@ -69,46 +89,6 @@ export class TestUtil {
 
     public static useTestLoggerFactory(): void {
         TransportLoggerFactory.init(this.oldLogger);
-    }
-
-    public static async awaitEvent<TEvent>(
-        runtime: AppRuntime,
-        subscriptionTarget: SubscriptionTarget<TEvent>,
-        timeout?: number,
-        assertionFunction?: (t: TEvent) => boolean
-    ): Promise<TEvent> {
-        const eventBus = runtime.eventBus;
-        let subscriptionId: number;
-
-        const eventPromise = new Promise<TEvent>((resolve) => {
-            subscriptionId = eventBus.subscribe(subscriptionTarget, (event: TEvent) => {
-                if (assertionFunction && !assertionFunction(event)) return;
-
-                resolve(event);
-            });
-        });
-        if (!timeout) {
-            return await eventPromise.finally(() => eventBus.unsubscribe(subscriptionId));
-        }
-
-        let timeoutId: NodeJS.Timeout;
-        const timeoutPromise = new Promise<TEvent>((_resolve, reject) => {
-            timeoutId = setTimeout(
-                () => reject(new Error(`timeout exceeded for waiting for event ${typeof subscriptionTarget === "string" ? subscriptionTarget : subscriptionTarget.name}`)),
-                timeout
-            );
-        });
-
-        return await Promise.race([eventPromise, timeoutPromise]).finally(() => {
-            eventBus.unsubscribe(subscriptionId);
-            clearTimeout(timeoutId);
-        });
-    }
-
-    public static async expectEvent<T>(runtime: AppRuntime, subscriptionTarget: SubscriptionTarget<T>, timeoutInMS = 1000): Promise<T> {
-        const eventInstance: T = await this.awaitEvent(runtime, subscriptionTarget, timeoutInMS);
-        expect(eventInstance, "Event received").toBeDefined();
-        return eventInstance;
     }
 
     public static expectThrows(method: Function | Promise<any>, errorMessageRegexp: RegExp | string): void {
@@ -126,38 +106,11 @@ export class TestUtil {
         }
     }
 
-    public static async expectThrowsAsync(method: Function | Promise<any>, customExceptionMatcher: (e: Error) => void): Promise<void>;
-
-    public static async expectThrowsAsync(method: Function | Promise<any>, errorMessageRegexp: RegExp | string): Promise<void>;
-
-    public static async expectThrowsAsync(method: Function | Promise<any>, errorMessageRegexp: RegExp | string | ((e: Error) => void)): Promise<void> {
-        let error: Error | undefined;
-        try {
-            if (typeof method === "function") {
-                await method();
-            } else {
-                await method;
-            }
-        } catch (err: any) {
-            error = err;
-        }
-        expect(error).toBeInstanceOf(Error);
-
-        if (typeof errorMessageRegexp === "function") {
-            errorMessageRegexp(error!);
-            return;
-        }
-
-        if (errorMessageRegexp) {
-            expect(error!.message).toMatch(new RegExp(errorMessageRegexp));
-        }
-    }
-
     public static async provideAccounts(runtime: AppRuntime, count: number): Promise<LocalAccountDTO[]> {
         const accounts: LocalAccountDTO[] = [];
 
         for (let i = 0; i < count; i++) {
-            accounts.push(await runtime.accountServices.createAccount(Realm.Prod, `Account ${i}`));
+            accounts.push(await runtime.accountServices.createAccount(`Account ${i}`));
         }
 
         return accounts;
@@ -166,9 +119,7 @@ export class TestUtil {
     public static async createAndLoadPeerTemplate(
         from: LocalAccountSession,
         to: LocalAccountSession,
-        content: any = {
-            mycontent: "template"
-        }
+        content: RelationshipTemplateContentDerivation = ArbitraryRelationshipTemplateContent.from({ value: {} }).toJSON()
     ): Promise<RelationshipTemplateDTO> {
         const templateFrom = (
             await from.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
@@ -178,120 +129,54 @@ export class TestUtil {
             })
         ).value;
 
-        const tokenFrom = (
-            await from.transportServices.relationshipTemplates.createTokenForOwnTemplate({
-                templateId: templateFrom.id,
-                ephemeral: true,
-                expiresAt: CoreDate.utc().add({ minutes: 5 }).toString()
-            })
-        ).value;
-
-        const templateTo = await to.transportServices.relationshipTemplates.loadPeerRelationshipTemplate({
-            reference: tokenFrom.truncatedReference
-        });
+        const templateTo = await to.transportServices.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templateFrom.truncatedReference });
         return templateTo.value;
     }
 
     public static async requestRelationshipForTemplate(
         from: LocalAccountSession,
         templateId: string,
-        content: any = {
-            mycontent: "request"
-        }
+        content: RelationshipCreationContentDerivation = ArbitraryRelationshipCreationContent.from({ value: {} }).toJSON()
     ): Promise<RelationshipDTO> {
-        const relRequest = await from.transportServices.relationships.createRelationship({ templateId, content });
+        const relRequest = await from.transportServices.relationships.createRelationship({ templateId, creationContent: content });
         return relRequest.value;
     }
 
-    public static async acceptRelationship(
-        session: LocalAccountSession,
-        relationshipId: string,
-        content: any = {
-            mycontent: "response"
-        }
-    ): Promise<RelationshipDTO> {
-        const relationship = (
-            await session.transportServices.relationships.getRelationship({
-                id: relationshipId
-            })
-        ).value;
-
-        const acceptedRelationship = (
-            await session.transportServices.relationships.acceptRelationshipChange({
-                changeId: relationship.changes[0].id,
-                content,
-                relationshipId
-            })
-        ).value;
+    public static async acceptRelationship(session: LocalAccountSession, relationshipId: string): Promise<RelationshipDTO> {
+        const acceptedRelationship = (await session.transportServices.relationships.acceptRelationship({ relationshipId })).value;
         return acceptedRelationship;
     }
 
-    public static async rejectRelationship(
-        session: LocalAccountSession,
-        relationshipId: string,
-        content: any = {
-            mycontent: "rejection"
-        }
-    ): Promise<RelationshipDTO> {
-        const relationship = (
-            await session.transportServices.relationships.getRelationship({
-                id: relationshipId
-            })
-        ).value;
-
-        const rejectedRelationship = (
-            await session.transportServices.relationships.rejectRelationshipChange({
-                changeId: relationship.changes[0].id,
-                content,
-                relationshipId
-            })
-        ).value;
+    public static async rejectRelationship(session: LocalAccountSession, relationshipId: string): Promise<RelationshipDTO> {
+        const rejectedRelationship = (await session.transportServices.relationships.rejectRelationship({ relationshipId })).value;
         return rejectedRelationship;
     }
 
-    public static async revokeRelationship(
-        session: LocalAccountSession,
-        relationshipId: string,
-        content: any = {
-            mycontent: "revokation"
-        }
-    ): Promise<RelationshipDTO> {
-        const relationship = (
-            await session.transportServices.relationships.getRelationship({
-                id: relationshipId
-            })
-        ).value;
-
-        const rejectedRelationship = (
-            await session.transportServices.relationships.revokeRelationshipChange({
-                changeId: relationship.changes[0].id,
-                content,
-                relationshipId
-            })
-        ).value;
+    public static async revokeRelationship(session: LocalAccountSession, relationshipId: string): Promise<RelationshipDTO> {
+        const rejectedRelationship = (await session.transportServices.relationships.revokeRelationship({ relationshipId })).value;
         return rejectedRelationship;
     }
 
     public static async addRelationship(from: LocalAccountSession, to: LocalAccountSession): Promise<{ from: RelationshipDTO; to: RelationshipDTO }> {
         const templateTo = await TestUtil.createAndLoadPeerTemplate(from, to);
-        const relationshipRequestTo = await TestUtil.requestRelationshipForTemplate(to, templateTo.id);
-        let relationshipFrom = await TestUtil.syncUntilHasRelationship(from, relationshipRequestTo.id);
+        const relationshipTo = await TestUtil.requestRelationshipForTemplate(to, templateTo.id);
+        let relationshipFrom = await TestUtil.syncUntilHasRelationship(from, relationshipTo.id);
         relationshipFrom = await TestUtil.acceptRelationship(from, relationshipFrom.id);
 
-        const relationshipTo = await TestUtil.syncUntilHasRelationship(to, relationshipRequestTo.id);
+        const syncedRelationshipTo = await TestUtil.syncUntilHasRelationship(to, relationshipTo.id);
 
-        return { from: relationshipFrom, to: relationshipTo };
+        return { from: relationshipFrom, to: syncedRelationshipTo };
     }
 
     public static async addRejectedRelationship(from: LocalAccountSession, to: LocalAccountSession): Promise<{ from: RelationshipDTO; to: RelationshipDTO }> {
         const templateTo = await TestUtil.createAndLoadPeerTemplate(from, to);
-        const relationshipRequestTo = await TestUtil.requestRelationshipForTemplate(to, templateTo.id);
-        let relationshipFrom = await TestUtil.syncUntilHasRelationship(from, relationshipRequestTo.id);
+        const relationshipTo = await TestUtil.requestRelationshipForTemplate(to, templateTo.id);
+        let relationshipFrom = await TestUtil.syncUntilHasRelationship(from, relationshipTo.id);
         relationshipFrom = await TestUtil.rejectRelationship(from, relationshipFrom.id);
 
-        const relationshipTo = await TestUtil.syncUntilHasRelationship(to, relationshipRequestTo.id);
+        const syncedRelationshipTo = await TestUtil.syncUntilHasRelationship(to, relationshipTo.id);
 
-        return { from: relationshipFrom, to: relationshipTo };
+        return { from: relationshipFrom, to: syncedRelationshipTo };
     }
 
     /**
@@ -339,13 +224,18 @@ export class TestUtil {
         return syncResult.messages[0];
     }
 
-    public static async sendMessage(from: LocalAccountSession, to: LocalAccountSession, content?: any): Promise<MessageDTO> {
+    public static async sendMessage(from: LocalAccountSession, to: LocalAccountSession, content?: MessageContentDerivation): Promise<MessageDTO> {
         return await this.sendMessagesWithAttachments(from, [to], [], content);
     }
 
-    public static async sendMessagesWithAttachments(from: LocalAccountSession, recipients: LocalAccountSession[], attachments: string[], content?: any): Promise<MessageDTO> {
+    public static async sendMessagesWithAttachments(
+        from: LocalAccountSession,
+        recipients: LocalAccountSession[],
+        attachments: string[],
+        content?: MessageContentDerivation
+    ): Promise<MessageDTO> {
         if (!content) {
-            content = Serializable.fromUnknown({ content: "TestContent" });
+            content = ArbitraryMessageContent.from({ value: "TestContent" }).toJSON();
         }
 
         const result = await from.transportServices.messages.sendMessage({
@@ -362,7 +252,7 @@ export class TestUtil {
             expiresAt: CoreDate.utc().add({ minutes: 5 }).toString(),
             filename: "Test.bin",
             mimetype: "application/json",
-            title: "Test",
+            title: "aFileName",
             content: fileContent
         });
         return file.value;
@@ -371,5 +261,30 @@ export class TestUtil {
     public static expectSuccess<T>(result: Result<T>): void {
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         expect(result.isSuccess, `${result.error?.code} | ${result.error?.message}`).toBe(true);
+    }
+
+    public static async runDeletionJob(): Promise<void> {
+        const backboneVersion = this.getBackboneVersion();
+        const appsettingsOverrideLocation = process.env.APPSETTINGS_OVERRIDE_LOCATION ?? `${__dirname}/../../../../.dev/appsettings.override.json`;
+
+        await new GenericContainer(`ghcr.io/nmshd/backbone-identity-deletion-jobs:${backboneVersion}`)
+            .withWaitStrategy(Wait.forOneShotStartup())
+            .withCommand(["--Worker", "ActualDeletionWorker"])
+            .withNetworkMode("backbone")
+            .withCopyFilesToContainer([{ source: appsettingsOverrideLocation, target: "/app/appsettings.override.json" }])
+            .start();
+    }
+
+    private static getBackboneVersion() {
+        if (process.env.BACKBONE_VERSION) return process.env.BACKBONE_VERSION;
+
+        const envFile = fs.readFileSync(path.resolve(`${__dirname}/../../../../.dev/compose.backbone.env`));
+        const env = envFile
+            .toString()
+            .split("\n")
+            .map((line) => line.split("="))
+            .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {} as Record<string, string>);
+
+        return env["BACKBONE_VERSION"];
     }
 }

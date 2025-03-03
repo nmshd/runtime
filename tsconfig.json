@@ -1,7 +1,6 @@
 {
     "files": [],
     "references": [
-        { "path": "packages/iql" },
         { "path": "packages/transport" },
         { "path": "packages/content" },
         { "path": "packages/consumption" },

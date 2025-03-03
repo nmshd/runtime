@@ -33,13 +33,17 @@ export interface AcceptResponseItemDVO extends ResponseItemDVO {
         | "CreateAttributeAcceptResponseItemDVO"
         | "DeleteAttributeAcceptResponseItemDVO"
         | "ShareAttributeAcceptResponseItemDVO"
-        | "RegisterAttributeListenerAcceptResponseItemDVO";
+        | "FreeTextAcceptResponseItemDVO"
+        | "RegisterAttributeListenerAcceptResponseItemDVO"
+        | "AttributeSuccessionAcceptResponseItemDVO"
+        | "AttributeAlreadySharedAcceptResponseItemDVO";
     result: ResponseItemResult.Accepted;
 }
 
 export interface ReadAttributeAcceptResponseItemDVO extends AcceptResponseItemDVO {
     type: "ReadAttributeAcceptResponseItemDVO";
     attributeId: string;
+    thirdPartyAddress?: string;
     attribute: LocalAttributeDVO;
 }
 
@@ -66,8 +70,27 @@ export interface ShareAttributeAcceptResponseItemDVO extends AcceptResponseItemD
     attribute: LocalAttributeDVO;
 }
 
+export interface FreeTextAcceptResponseItemDVO extends AcceptResponseItemDVO {
+    type: "FreeTextAcceptResponseItemDVO";
+    freeText: string;
+}
+
 export interface RegisterAttributeListenerAcceptResponseItemDVO extends AcceptResponseItemDVO {
     type: "RegisterAttributeListenerAcceptResponseItemDVO";
     listenerId: string;
     listener: LocalAttributeListenerDVO;
+}
+
+export interface AttributeSuccessionAcceptResponseItemDVO extends AcceptResponseItemDVO {
+    type: "AttributeSuccessionAcceptResponseItemDVO";
+    predecessorId: string;
+    successorId: string;
+    predecessor: LocalAttributeDVO;
+    successor: LocalAttributeDVO;
+}
+
+export interface AttributeAlreadySharedAcceptResponseItemDVO extends AcceptResponseItemDVO {
+    type: "AttributeAlreadySharedAcceptResponseItemDVO";
+    attributeId: string;
+    attribute: LocalAttributeDVO;
 }

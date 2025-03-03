@@ -1,13 +1,12 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreSerializable, ICoreSerializable } from "../../../core";
+import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { DeviceSharedSecret } from "../../devices/transmission/DeviceSharedSecret";
 
-export interface ITokenContentDeviceSharedSecret extends ICoreSerializable {
+export interface ITokenContentDeviceSharedSecret extends ISerializable {
     sharedSecret: DeviceSharedSecret;
 }
 
 @type("TokenContentDeviceSharedSecret")
-export class TokenContentDeviceSharedSecret extends CoreSerializable implements ITokenContentDeviceSharedSecret {
+export class TokenContentDeviceSharedSecret extends Serializable implements ITokenContentDeviceSharedSecret {
     @validate()
     @serialize()
     public sharedSecret: DeviceSharedSecret;

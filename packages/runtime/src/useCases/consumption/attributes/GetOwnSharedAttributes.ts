@@ -1,7 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController } from "@nmshd/consumption";
 import { IdentityController } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { LocalAttributeDTO } from "../../../types";
 import { AddressString, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { flattenObject } from "../../common/flattenObject";
@@ -26,13 +26,14 @@ export interface GetOwnSharedAttributeRequestQuery {
     "content.validFrom"?: string | string[];
     "content.validTo"?: string | string[];
     "content.key"?: string | string[];
-    "content.isTechnical"?: string | string[];
+    "content.isTechnical"?: string;
     "content.confidentiality"?: string | string[];
     "content.value.@type"?: string | string[];
     shareInfo?: string | string[];
     "shareInfo.requestReference"?: string | string[];
     "shareInfo.notificationReference"?: string | string[];
     "shareInfo.sourceAttribute"?: string | string[];
+    "shareInfo.thirdPartyAddress"?: string | string[];
     deletionInfo?: string | string[];
     "deletionInfo.deletionStatus"?: string | string[];
     "deletionInfo.deletionDate"?: string | string[];

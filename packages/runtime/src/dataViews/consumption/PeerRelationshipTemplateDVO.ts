@@ -1,3 +1,4 @@
+import { PasswordProtectionDTO } from "../../types";
 import { RequestDVO } from "../content";
 import { DataViewObject } from "../DataViewObject";
 import { IdentityDVO } from "../transport";
@@ -11,6 +12,8 @@ export interface PeerRelationshipTemplateDVO extends DataViewObject {
     createdAt: string;
     expiresAt?: string;
     maxNumberOfAllocations?: number;
+    forIdentity?: string;
+    passwordProtection?: PasswordProtectionDTO;
 
     /**
      * Is optional, as there can be RelationshipTemplates without actual requests in it

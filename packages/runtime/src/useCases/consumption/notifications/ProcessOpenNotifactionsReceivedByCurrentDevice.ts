@@ -1,6 +1,6 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { NotificationsController } from "@nmshd/consumption";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { UseCase } from "../../common";
 
 export class ProcessOpenNotifactionsReceivedByCurrentDeviceUseCase extends UseCase<void, void> {

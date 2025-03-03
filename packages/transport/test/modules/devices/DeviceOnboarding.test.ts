@@ -1,6 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
+import { CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoSecretKey, CryptoSignaturePrivateKey } from "@nmshd/crypto";
-import { AccountController, CoreDate, CoreId, Device, DeviceSecretCredentials, DeviceSecretType, DeviceSharedSecret } from "../../../src";
+import { AccountController, Device, DeviceSecretCredentials, DeviceSecretType, DeviceSharedSecret } from "../../../src";
 import { AppDeviceTest } from "../../testHelpers/AppDeviceTest";
 import { DeviceTestParameters } from "../../testHelpers/DeviceTestParameters";
 import { TestUtil } from "../../testHelpers/TestUtil";
@@ -34,10 +35,10 @@ describe("Device Onboarding", function () {
     });
 
     test("should create correct device", async function () {
-        newDevice = await device1Account.devices.sendDevice({ name: "Test", isAdmin: true });
+        newDevice = await device1Account.devices.sendDevice({ name: "aDeviceName", isAdmin: true });
         await device1Account.syncDatawallet();
         expect(newDevice).toBeInstanceOf(Device);
-        expect(newDevice.name).toBe("Test");
+        expect(newDevice.name).toBe("aDeviceName");
         expect(newDevice.publicKey).toBeUndefined();
         expect(newDevice.operatingSystem).toBeUndefined();
         expect(newDevice.lastLoginAt).toBeUndefined();
@@ -102,7 +103,7 @@ describe("Device Onboarding", function () {
     });
 
     test("should own the same identity", function () {
-        expect(device1Account.identity.identity.toBase64()).toBe(device2Account.identity.identity.toBase64());
+        expect(device1Account.identity.identity.toJSON()).toStrictEqual(device2Account.identity.identity.toJSON());
     });
 
     test("should be able to sign for the existing identity", async function () {
@@ -168,8 +169,8 @@ describe("Device Onboarding", function () {
     test("should have changed the password of the created device (backbone)", async function () {
         TestUtil.useFatalLoggerFactory();
 
-        await TestUtil.expectThrowsAsync(async () => {
+        await expect(async () => {
             await deviceTest.onboardDevice(sharedSecret);
-        }, "error.transport.request.noAuthGrant");
+        }).rejects.toThrow("error.transport.request.noAuthGrant");
     });
 });

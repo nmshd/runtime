@@ -34,10 +34,10 @@ describe("ThirdPartyRelationshipAttributeQuery", function () {
         { in: { address: "test" }, out: ["test"] },
         { in: [{ address: "test" }], out: ["test"] },
         { in: [{ address: "test" }, { address: "test" }], out: ["test", "test"] }
-    ])("accepts '$in' as thirdParty", function (params) {
+    ])("accepts %j as thirdParty", function (params) {
         const serialized = ThirdPartyRelationshipAttributeQuery.from({
             key: "test",
-            owner: "test",
+            owner: "thirdParty",
 
             // casting as any to test backwards compatibility
             thirdParty: params.in as unknown as any
@@ -53,7 +53,7 @@ describe("ThirdPartyRelationshipAttributeQuery", function () {
         expect(() => {
             ThirdPartyRelationshipAttributeQuery.from({
                 key: "test",
-                owner: "test",
+                owner: "",
                 thirdParty: thirdParty
             });
             // eslint-disable-next-line jest/require-to-throw-message
@@ -64,14 +64,14 @@ describe("ThirdPartyRelationshipAttributeQuery", function () {
         { in: "test", out: ["test"] },
         { in: ["test"], out: ["test"] }
     ])(
-        "(de-)serialize ThirdPartyRelationshipAttributeQuery as a property with ${JSON.stringify(value)} as thirdParty",
+        "(de-)serialize ThirdPartyRelationshipAttributeQuery as a property with %j as thirdParty",
 
         function (params) {
             const test = TestTypeContainingThirdPartyRelationshipAttributeQueryTest.from({
                 query: {
                     "@type": "ThirdPartyRelationshipAttributeQuery",
                     key: "test",
-                    owner: "test",
+                    owner: "thirdParty",
 
                     // casting as any to test backwards compatibility
                     thirdParty: params.in as unknown as any
@@ -81,7 +81,7 @@ describe("ThirdPartyRelationshipAttributeQuery", function () {
             const json = test.toJSON();
             expect(json.query).toStrictEqual({
                 key: "test",
-                owner: "test",
+                owner: "thirdParty",
                 thirdParty: params.out
             });
         }

@@ -1,5 +1,6 @@
 import { AxiosRequestConfig } from "axios";
 import _ from "lodash";
+import { ICorrelator } from "../ICorrelator";
 import { AbstractAuthenticator } from "./Authenticator";
 import { ClientResult } from "./ClientResult";
 import { Paginator, PaginatorPercentageCallback } from "./Paginator";
@@ -15,9 +16,10 @@ export class RESTClientAuthenticate extends RESTClient {
     public constructor(
         config: IRESTClientConfig,
         private readonly authenticator: AbstractAuthenticator,
+        correlator?: ICorrelator,
         requestConfig: AxiosRequestConfig = {}
     ) {
-        super(config, requestConfig);
+        super(config, correlator, requestConfig);
     }
 
     private async runAuthenticated<T>(restCall: (token: string) => Promise<ClientResult<T>>) {

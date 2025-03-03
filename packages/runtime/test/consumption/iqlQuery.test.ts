@@ -1,10 +1,17 @@
 import { EventBus } from "@js-soft/ts-utils";
-import { LocalRequestStatus } from "@nmshd/consumption";
 import { IQLQueryJSON, ReadAttributeRequestItemJSON } from "@nmshd/content";
 import { DateTime } from "luxon";
-import { ConsumptionServices, CreateOutgoingRequestRequest, LocalAttributeDTO, OutgoingRequestCreatedEvent, OutgoingRequestStatusChangedEvent, TransportServices } from "../../src";
+import {
+    ConsumptionServices,
+    CreateOutgoingRequestRequest,
+    LocalAttributeDTO,
+    LocalRequestStatus,
+    OutgoingRequestCreatedEvent,
+    OutgoingRequestStatusChangedEvent,
+    TransportServices
+} from "../../src";
 import { IncomingRequestReceivedEvent, IncomingRequestStatusChangedEvent } from "../../src/events";
-import { establishRelationship, exchangeMessageWithRequest, RuntimeServiceProvider, sendMessageWithRequest, TestRuntimeServices } from "../lib";
+import { RuntimeServiceProvider, TestRuntimeServices, establishRelationship, exchangeMessageWithRequest, sendMessageWithRequest } from "../lib";
 import { exchangeMessageWithRequestAndRequireManualDecision, exchangeMessageWithRequestAndSendResponse } from "../lib/testUtilsWithInactiveModules";
 
 describe("IQL Query", () => {
@@ -19,7 +26,8 @@ describe("IQL Query", () => {
     let sEventBus: EventBus;
     let rEventBus: EventBus;
 
-    let rLocalAttribute: LocalAttributeDTO;
+    let rLocalAttribute1: LocalAttributeDTO;
+    let rLocalAttribute2: LocalAttributeDTO;
     let requestContent: CreateOutgoingRequestRequest;
 
     beforeAll(async () => {
@@ -35,33 +43,35 @@ describe("IQL Query", () => {
 
         await establishRelationship(sTransportServices, rTransportServices);
 
-        const response = await rConsumptionServices.attributes.createRepositoryAttribute({
-            content: {
-                value: {
-                    "@type": "GivenName",
-                    value: "AGivenName1"
-                },
-                tags: ["language:de"]
-            }
-        });
+        rLocalAttribute1 = (
+            await rConsumptionServices.attributes.createRepositoryAttribute({
+                content: {
+                    value: {
+                        "@type": "GivenName",
+                        value: "aGivenName1"
+                    },
+                    tags: ["language:de"]
+                }
+            })
+        ).value;
 
-        rLocalAttribute = response.value;
+        rLocalAttribute2 = (
+            await rConsumptionServices.attributes.createRepositoryAttribute({
+                content: {
+                    value: {
+                        "@type": "GivenName",
+                        value: "aGivenName2"
+                    },
+                    tags: ["language:en"]
+                }
+            })
+        ).value;
 
         await rConsumptionServices.attributes.createRepositoryAttribute({
             content: {
                 value: {
                     "@type": "GivenName",
-                    value: "AGivenName2"
-                },
-                tags: ["language:en"]
-            }
-        });
-
-        await rConsumptionServices.attributes.createRepositoryAttribute({
-            content: {
-                value: {
-                    "@type": "GivenName",
-                    value: "AGivenName3"
+                    value: "aGivenName3"
                 },
                 tags: ["content:someContent"]
             }
@@ -107,7 +117,7 @@ describe("IQL Query", () => {
         expect(sLocalRequest.status).toBe(LocalRequestStatus.Draft);
         expect(sLocalRequest.content.items).toHaveLength(1);
         expect(sLocalRequest.content.items[0]["@type"]).toBe("ReadAttributeRequestItem");
-        expect(sLocalRequest.content.items[0].mustBeAccepted).toBe(false);
+        expect((sLocalRequest.content.items[0] as ReadAttributeRequestItemJSON).mustBeAccepted).toBe(false);
     });
 
     test("sender: send the outgoing IQL Request via Message", async () => {
@@ -120,7 +130,7 @@ describe("IQL Query", () => {
             triggeredEvent = event;
         });
         const sRequestMessage = await sendMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
-        const result = await sConsumptionServices.outgoingRequests.sent({ requestId: sRequestMessage.content.id, messageId: sRequestMessage.id });
+        const result = await sConsumptionServices.outgoingRequests.sent({ requestId: sRequestMessage.content.id!, messageId: sRequestMessage.id });
 
         expect(result).toBeSuccessful();
 
@@ -167,7 +177,7 @@ describe("IQL Query", () => {
         });
 
         const result = await rConsumptionServices.incomingRequests.checkPrerequisites({
-            requestId: message.content.id
+            requestId: message.content.id!
         });
 
         expect(result).toBeSuccessful();
@@ -190,7 +200,7 @@ describe("IQL Query", () => {
             requestSourceId: message.id
         });
         await rConsumptionServices.incomingRequests.checkPrerequisites({
-            requestId: message.content.id
+            requestId: message.content.id!
         });
         let triggeredEvent: IncomingRequestStatusChangedEvent | undefined;
         rEventBus.subscribeOnce(IncomingRequestStatusChangedEvent, (event) => {
@@ -198,7 +208,7 @@ describe("IQL Query", () => {
         });
 
         const result = await rConsumptionServices.incomingRequests.requireManualDecision({
-            requestId: message.content.id
+            requestId: message.content.id!
         });
 
         expect(result).toBeSuccessful();
@@ -236,7 +246,7 @@ describe("IQL Query", () => {
             items: [
                 {
                     accept: true,
-                    existingAttributeId: rLocalAttribute.id
+                    existingAttributeId: rLocalAttribute1.id
                 }
             ] as any // bug in runtime
         });
@@ -260,7 +270,7 @@ describe("IQL Query", () => {
             items: [
                 {
                     accept: true,
-                    existingAttributeId: rLocalAttribute.id
+                    existingAttributeId: rLocalAttribute1.id
                 }
             ] as any // bug in runtime
         });
@@ -286,7 +296,7 @@ describe("IQL Query", () => {
             items: [
                 {
                     accept: true,
-                    existingAttributeId: rLocalAttribute.id
+                    existingAttributeId: rLocalAttribute2.id
                 }
             ] as any // bug in runtime
         });

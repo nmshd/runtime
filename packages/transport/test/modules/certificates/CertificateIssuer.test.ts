@@ -1,5 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { AccountController, Certificate, CertificatePublicAttributeItem, CertificateTimeConstraint, CoreDate, ICertificateContent, Transport } from "../../../src";
+import { CoreDate } from "@nmshd/core-types";
+import { AccountController, Certificate, CertificatePublicAttributeItem, CertificateTimeConstraint, ICertificateContent, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("CertificateIssuer", function () {

@@ -7,7 +7,9 @@ let consumptionServices1: ConsumptionServices;
 let expander1: DataViewExpander;
 
 beforeAll(async () => {
-    const runtimeServices = await serviceProvider.launch(1);
+    const runtimeServices = await serviceProvider.launch(1, {
+        enableDefaultRepositoryAttributes: true
+    });
     consumptionServices1 = runtimeServices[0].consumption;
     expander1 = runtimeServices[0].expander;
 }, 30000);
@@ -18,33 +20,37 @@ describe("IdentityAttributeQueryExpanded", () => {
     const attributes: LocalAttributeDTO[] = [];
 
     beforeAll(async () => {
-        attributes.push(
-            (
-                await consumptionServices1.attributes.createRepositoryAttribute({
-                    content: {
-                        value: {
-                            "@type": "GivenName",
-                            value: "Hugo"
-                        }
-                    }
-                })
-            ).value
-        );
-        attributes.push(
-            (
-                await consumptionServices1.attributes.createRepositoryAttribute({
-                    content: {
-                        value: {
-                            "@type": "GivenName",
-                            value: "Egon"
-                        }
-                    }
-                })
-            ).value
-        );
+        const firstlyCreatedGivenName = (
+            await consumptionServices1.attributes.createRepositoryAttribute({
+                content: {
+                    value: {
+                        "@type": "GivenName",
+                        value: "A first given name"
+                    },
+                    tags: ["notDefault"]
+                }
+            })
+        ).value;
+
+        const secondlyCreatedGivenName = (
+            await consumptionServices1.attributes.createRepositoryAttribute({
+                content: {
+                    value: {
+                        "@type": "GivenName",
+                        value: "A second given name"
+                    },
+                    tags: ["default"]
+                }
+            })
+        ).value;
+
+        const updatedSecondlyCreatedGivenName = (await consumptionServices1.attributes.changeDefaultRepositoryAttribute({ attributeId: secondlyCreatedGivenName.id })).value;
+        const updatedFirstlyCreatedGivenName = (await consumptionServices1.attributes.getAttribute({ id: firstlyCreatedGivenName.id })).value;
+
+        attributes.push(updatedSecondlyCreatedGivenName, updatedFirstlyCreatedGivenName);
     });
 
-    test("check the GivenName", async () => {
+    test("check the order and content of the expanded LocalAttributes that match the query", async () => {
         const query: IdentityAttributeQueryJSON = {
             "@type": "IdentityAttributeQuery",
             valueType: "GivenName"
@@ -75,7 +81,9 @@ describe("IdentityAttributeQueryExpanded", () => {
         expect(dvo.content).toStrictEqual(attribute.content);
         const givenName = dvo.value as AbstractStringJSON;
         expect(givenName["@type"]).toBe("GivenName");
-        expect(givenName.value).toBe("Hugo");
+        expect(givenName.value).toBe("A second given name");
+        expect(dvo.tags).toStrictEqual(["default"]);
+        expect(dvo.isDefault).toBe(true);
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
         expect(dvo.isValid).toBe(true);
@@ -98,7 +106,9 @@ describe("IdentityAttributeQueryExpanded", () => {
         expect(dvo.content).toStrictEqual(attribute.content);
         const value = dvo.value as AbstractStringJSON;
         expect(value["@type"]).toBe("GivenName");
-        expect(value.value).toBe("Egon");
+        expect(value.value).toBe("A first given name");
+        expect(dvo.tags).toStrictEqual(["notDefault"]);
+        expect(dvo.isDefault).toBeUndefined();
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
         expect(dvo.isValid).toBe(true);

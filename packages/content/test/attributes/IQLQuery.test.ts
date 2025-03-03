@@ -11,7 +11,7 @@ describe("IQLQuery", function () {
         });
     }
 
-    test.each(["Döner", "$", "( foo "])("can't be created from invalid query string '%p'", function (q) {
+    test.each(["aRandomString", "$", "( foo "])("can't be created from invalid query string '%p'", function (q) {
         expect(() => {
             IQLQuery.from({
                 queryString: q

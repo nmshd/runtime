@@ -1,6 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { Notification } from "@nmshd/content";
-import { AccountController, CoreAddress, CoreDate, CoreId, Message, SynchronizedCollection, Transport } from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { AccountController, Message, SynchronizedCollection, Transport } from "@nmshd/transport";
 import { ConsumptionController, ConsumptionIds, LocalNotification, LocalNotificationSource, LocalNotificationStatus } from "../../../src";
 import { TestUtil } from "../../core/TestUtil";
 import { TestNotificationItem, TestNotificationItemProcessor } from "./testHelpers/TestNotificationItem";
@@ -66,7 +67,7 @@ describe("End2End Notification via Messages", function () {
         TestNotificationItemProcessor.reset();
     });
 
-    test("sender: sent Notification", async function () {
+    test("sender: mark LocalNotification as sent", async function () {
         const localNotification = await sConsumptionController.notifications.sent(sMessageWithNotification);
         expect(localNotification.status).toStrictEqual(LocalNotificationStatus.Sent);
         expect(localNotification.content.items[0]).toBeInstanceOf(TestNotificationItem);
@@ -149,5 +150,15 @@ describe("End2End Notification via Messages", function () {
 
         await rConsumptionController.notifications.processOpenNotifactionsReceivedByCurrentDevice();
         expect(TestNotificationItemProcessor.processedItems).toHaveLength(0);
+    });
+
+    test("recipient: delete notification while decomposing relationship", async function () {
+        await TestUtil.terminateRelationship(rAccountController, sAccountController);
+        await TestUtil.decomposeRelationship(rAccountController, rConsumptionController, sAccountController);
+
+        const notification = await rNotificationsCollection.findOne({
+            id: rLocalNotification.id.toString()
+        });
+        expect(notification).toBeFalsy();
     });
 });

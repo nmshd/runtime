@@ -1,8 +1,8 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreDate, CoreSerializable, ICoreDate, ICoreSerializable } from "@nmshd/transport";
+import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
+import { CoreDate, ICoreDate } from "@nmshd/core-types";
 import { LocalRequestStatus } from "./LocalRequestStatus";
 
-export interface ILocalRequestStatusLogEntry extends ICoreSerializable {
+export interface ILocalRequestStatusLogEntry extends ISerializable {
     createdAt: ICoreDate;
     oldStatus: LocalRequestStatus;
     newStatus: LocalRequestStatus;
@@ -11,7 +11,7 @@ export interface ILocalRequestStatusLogEntry extends ICoreSerializable {
 }
 
 @type("LocalRequestStatusLogEntry")
-export class LocalRequestStatusLogEntry extends CoreSerializable implements ILocalRequestStatusLogEntry {
+export class LocalRequestStatusLogEntry extends Serializable implements ILocalRequestStatusLogEntry {
     @serialize()
     @validate()
     public createdAt: CoreDate;

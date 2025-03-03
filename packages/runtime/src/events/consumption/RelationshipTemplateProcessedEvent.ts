@@ -12,14 +12,21 @@ export class RelationshipTemplateProcessedEvent extends DataEvent<RelationshipTe
 }
 
 export enum RelationshipTemplateProcessedResult {
+    RequestAutomaticallyDecided = "RequestAutomaticallyDecided",
     ManualRequestDecisionRequired = "ManualRequestDecisionRequired",
     NonCompletedRequestExists = "NonCompletedRequestExists",
     RelationshipExists = "RelationshipExists",
     NoRequest = "NoRequest",
-    Error = "Error"
+    Error = "Error",
+    RequestExpired = "RequestExpired"
 }
 
 export type RelationshipTemplateProcessedEventData =
+    | {
+          template: RelationshipTemplateDTO;
+          result: RelationshipTemplateProcessedResult.RequestAutomaticallyDecided;
+          requestId: string;
+      }
     | {
           template: RelationshipTemplateDTO;
           result: RelationshipTemplateProcessedResult.ManualRequestDecisionRequired;
@@ -42,4 +49,8 @@ export type RelationshipTemplateProcessedEventData =
     | {
           template: RelationshipTemplateDTO;
           result: RelationshipTemplateProcessedResult.Error;
+      }
+    | {
+          template: RelationshipTemplateDTO;
+          result: RelationshipTemplateProcessedResult.RequestExpired;
       };

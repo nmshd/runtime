@@ -1,5 +1,5 @@
 import { Serializable, serialize, validate } from "@js-soft/ts-serval";
-import { CoreId } from "../../../core";
+import { CoreId } from "@nmshd/core-types";
 import { MessageReceivedEvent } from "../../../events";
 import { Message } from "../../messages/local/Message";
 import { ExternalEvent } from "../data/ExternalEvent";

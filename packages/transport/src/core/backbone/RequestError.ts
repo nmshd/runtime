@@ -1,7 +1,7 @@
 import { ApplicationError } from "@js-soft/ts-utils";
+import { CoreDate } from "@nmshd/core-types";
 import { AxiosError } from "axios";
 import stringify from "json-stringify-safe";
-import { CoreDate } from "../types/CoreDate";
 import { PlatformError } from "./PlatformError";
 import { PlatformParameters } from "./PlatformParameters";
 
@@ -48,8 +48,8 @@ export class RequestError extends ApplicationError {
         delete errorCopy.config.adapter;
         delete errorCopy.config.data;
         delete errorCopy.config.headers["Authorization"];
-        delete errorCopy.config.httpAgent;
-        delete errorCopy.config.httpsAgent;
+        delete errorCopy.config.httpAgentOptions;
+        delete errorCopy.config.httpsAgentOptions;
         delete errorCopy.config.transformRequest;
         delete errorCopy.config.transformResponse;
         delete errorCopy.config.validateStatus;

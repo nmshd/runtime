@@ -1,16 +1,18 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
+import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
+import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreDate, ICoreId } from "@nmshd/core-types";
 import { CryptoSecretKey, CryptoSignature, ICryptoSecretKey, ICryptoSignature } from "@nmshd/crypto";
-import { CoreAddress, CoreDate, CoreHash, CoreId, CoreSerializable, ICoreAddress, ICoreDate, ICoreHash, ICoreId, ICoreSerializable } from "../../../core";
+import { CoreHash, ICoreHash } from "../../../core";
 import { BackboneGetFilesResponse } from "../backbone/BackboneGetFiles";
 import { FileMetadata } from "../transmission/FileMetadata";
 
-export interface ICachedFile extends ICoreSerializable {
+export interface ICachedFile extends ISerializable {
     title?: string;
     filename: string;
+    tags?: string[];
     filesize: number;
     filemodified?: CoreDate;
     mimetype: string;
-    cipherHash: CoreHash;
+    cipherHash: ICoreHash;
     createdAt: ICoreDate;
     expiresAt: ICoreDate;
     cipherKey: ICryptoSecretKey;
@@ -27,7 +29,7 @@ export interface ICachedFile extends ICoreSerializable {
 }
 
 @type("CachedFile")
-export class CachedFile extends CoreSerializable implements ICachedFile {
+export class CachedFile extends Serializable implements ICachedFile {
     @validate({ nullable: true })
     @serialize()
     public title?: string;
@@ -35,6 +37,10 @@ export class CachedFile extends CoreSerializable implements ICachedFile {
     @validate()
     @serialize()
     public filename: string;
+
+    @validate({ nullable: true })
+    @serialize({ type: String })
+    public tags?: string[];
 
     @validate()
     @serialize()
@@ -111,6 +117,7 @@ export class CachedFile extends CoreSerializable implements ICachedFile {
             cipherKey: metadata.secretKey,
             filemodified: metadata.filemodified,
             filename: metadata.filename,
+            tags: metadata.tags,
             filesize: metadata.filesize,
             plaintextHash: metadata.plaintextHash,
             deletedAt: backboneResponse.deletedAt ? CoreDate.from(backboneResponse.deletedAt) : undefined,

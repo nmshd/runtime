@@ -24,6 +24,7 @@ export class FileMapper {
         return {
             id: file.id.toString(),
             filename: file.cache.filename,
+            tags: file.cache.tags,
             filesize: file.cache.filesize,
             createdAt: file.cache.createdAt.toString(),
             createdBy: file.cache.createdBy.toString(),
@@ -32,7 +33,6 @@ export class FileMapper {
             mimetype: file.cache.mimetype,
             isOwn: file.isOwn,
             title: file.cache.title ?? "",
-            secretKey: file.secretKey.toBase64(false),
             description: file.cache.description,
             truncatedReference: file.truncate()
         };

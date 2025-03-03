@@ -1,5 +1,5 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreId, ICoreId } from "@nmshd/transport";
+import { CoreId, ICoreId } from "@nmshd/core-types";
 import { INotificationItem, NotificationItem, NotificationItemJSON } from "./NotificationItem";
 
 export interface NotificationJSON {
@@ -34,5 +34,9 @@ export class Notification extends Serializable implements INotification {
 
     public static from(value: INotification): Notification {
         return this.fromAny(value);
+    }
+
+    public override toJSON(verbose?: boolean | undefined, serializeAsString?: boolean | undefined): NotificationJSON {
+        return super.toJSON(verbose, serializeAsString) as NotificationJSON;
     }
 }

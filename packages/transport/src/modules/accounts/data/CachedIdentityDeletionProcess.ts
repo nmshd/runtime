@@ -1,11 +1,12 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreDate, CoreId, CoreSerializable } from "../../../core";
+import { Serializable, serialize, type, validate } from "@js-soft/ts-serval";
+import { CoreDate, CoreId } from "@nmshd/core-types";
 import { IdentityDeletionProcessStatus } from "./IdentityDeletionProcessStatus";
 
 export interface CachedIdentityDeletionProcessJSON {
     status: IdentityDeletionProcessStatus;
     createdAt?: string;
     createdByDevice?: string;
+    approvalPeriodEndsAt?: string;
     rejectedAt?: string;
     rejectedByDevice?: string;
     approvedAt?: string;
@@ -19,6 +20,7 @@ export interface ICachedIdentityDeletionProcess {
     status: IdentityDeletionProcessStatus;
     createdAt?: CoreDate;
     createdByDevice?: CoreId;
+    approvalPeriodEndsAt?: CoreDate;
     rejectedAt?: CoreDate;
     rejectedByDevice?: CoreId;
     approvedAt?: CoreDate;
@@ -29,7 +31,7 @@ export interface ICachedIdentityDeletionProcess {
 }
 
 @type("CachedIdentityDeletionProcess")
-export class CachedIdentityDeletionProcess extends CoreSerializable implements ICachedIdentityDeletionProcess {
+export class CachedIdentityDeletionProcess extends Serializable implements ICachedIdentityDeletionProcess {
     @validate()
     @serialize()
     public status: IdentityDeletionProcessStatus;
@@ -41,6 +43,18 @@ export class CachedIdentityDeletionProcess extends CoreSerializable implements I
     @validate({ nullable: true })
     @serialize()
     public createdByDevice?: CoreId;
+
+    @validate({ nullable: true })
+    @serialize()
+    public approvalPeriodEndsAt?: CoreDate;
+
+    @validate({ nullable: true })
+    @serialize()
+    public rejectedAt?: CoreDate;
+
+    @validate({ nullable: true })
+    @serialize()
+    public rejectedByDevice?: CoreId;
 
     @validate({ nullable: true })
     @serialize()
@@ -61,14 +75,6 @@ export class CachedIdentityDeletionProcess extends CoreSerializable implements I
     @validate({ nullable: true })
     @serialize()
     public cancelledByDevice?: CoreId;
-
-    @validate({ nullable: true })
-    @serialize()
-    public rejectedAt?: CoreDate;
-
-    @validate({ nullable: true })
-    @serialize()
-    public rejectedByDevice?: CoreId;
 
     public static from(value: ICachedIdentityDeletionProcess | CachedIdentityDeletionProcessJSON): CachedIdentityDeletionProcess {
         return this.fromAny(value);

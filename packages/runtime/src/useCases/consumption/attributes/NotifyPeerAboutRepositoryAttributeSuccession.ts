@@ -1,8 +1,9 @@
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController, ConsumptionIds, IAttributeSuccessorParams, LocalAttribute } from "@nmshd/consumption";
 import { Notification, PeerSharedAttributeSucceededNotificationItem } from "@nmshd/content";
-import { AccountController, CoreAddress, CoreId, MessageController } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { CoreAddress, CoreId } from "@nmshd/core-types";
+import { AccountController, MessageController } from "@nmshd/transport";
+import { Inject } from "@nmshd/typescript-ioc";
 import { LocalAttributeDTO } from "../../../types";
 import { AddressString, AttributeIdString, NotificationIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { AttributeMapper } from "./AttributeMapper";
@@ -41,15 +42,13 @@ export class NotifyPeerAboutRepositoryAttributeSuccessionUseCase extends UseCase
         const repositoryAttributeSuccessorId = CoreId.from(request.attributeId);
         const repositoryAttributeSuccessor = await this.attributeController.getLocalAttribute(repositoryAttributeSuccessorId);
 
-        if (typeof repositoryAttributeSuccessor === "undefined") {
-            return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute.name));
-        }
+        if (!repositoryAttributeSuccessor) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute.name));
 
         if (!repositoryAttributeSuccessor.isRepositoryAttribute(this.accountController.identity.address)) {
             return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(repositoryAttributeSuccessorId));
         }
 
-        const candidatePredecessors = await this.attributeController.getSharedVersionsOfRepositoryAttribute(repositoryAttributeSuccessorId, [CoreAddress.from(request.peer)]);
+        const candidatePredecessors = await this.attributeController.getSharedVersionsOfAttribute(repositoryAttributeSuccessorId, [CoreAddress.from(request.peer)]);
 
         if (candidatePredecessors.length === 0) {
             return Result.fail(RuntimeErrors.attributes.noPreviousVersionOfRepositoryAttributeHasBeenSharedWithPeerBefore(repositoryAttributeSuccessorId, request.peer));

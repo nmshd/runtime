@@ -1,7 +1,8 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { JSONWrapper, Serializable } from "@js-soft/ts-serval";
-import { CryptoEncryption, CryptoSecretKey } from "@nmshd/crypto";
-import { AccountController, CoreDate, CoreId, Token, TokenContentFile, TokenContentRelationshipTemplate, Transport } from "../../../src";
+import { CoreDate, CoreId } from "@nmshd/core-types";
+import { CoreBuffer, CryptoEncryption, CryptoSecretKey } from "@nmshd/crypto";
+import { AccountController, CoreCrypto, CoreIdHelper, Token, TokenContentFile, TokenContentRelationshipTemplate, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("TokenController", function () {
@@ -58,8 +59,8 @@ describe("TokenController", function () {
             expiresAt,
             ephemeral: false
         });
-        const reference = sentToken.toTokenReference().truncate();
-        const receivedToken = await recipient.tokens.loadPeerTokenByTruncated(reference, false);
+        const reference = sentToken.toTokenReference();
+        const receivedToken = await recipient.tokens.loadPeerTokenByTruncated(reference.truncate(), false);
         tempId1 = sentToken.id;
 
         testTokens(sentToken, receivedToken, tempDate);
@@ -81,7 +82,7 @@ describe("TokenController", function () {
     test("should send and receive a TokenContentFile", async function () {
         const expiresAt = CoreDate.utc().add({ minutes: 5 });
         const content = TokenContentFile.from({
-            fileId: await CoreId.generate(),
+            fileId: await CoreIdHelper.notPrefixed.generate(),
             secretKey: await CryptoEncryption.generateKey()
         });
         const sentToken = await sender.tokens.sendToken({
@@ -96,21 +97,23 @@ describe("TokenController", function () {
         testTokens(sentToken, receivedToken, tempDate);
         expect(sentToken.cache?.expiresAt.toISOString()).toBe(expiresAt.toISOString());
         expect(sentToken.cache?.content).toBeInstanceOf(TokenContentFile);
-        expect((sentToken.cache?.content as TokenContentFile).fileId).toBeInstanceOf(CoreId);
-        expect((sentToken.cache?.content as TokenContentFile).secretKey).toBeInstanceOf(CryptoSecretKey);
+        const sentTokenContent = sentToken.cache?.content as TokenContentFile;
+        expect(sentTokenContent.fileId).toBeInstanceOf(CoreId);
+        expect(sentTokenContent.secretKey).toBeInstanceOf(CryptoSecretKey);
         expect(receivedToken.cache?.content).toBeInstanceOf(TokenContentFile);
-        expect((receivedToken.cache?.content as TokenContentFile).fileId).toBeInstanceOf(CoreId);
-        expect((receivedToken.cache?.content as TokenContentFile).secretKey).toBeInstanceOf(CryptoSecretKey);
-        expect((sentToken.cache?.content as TokenContentFile).fileId.toString()).toBe(content.fileId.toString());
-        expect((sentToken.cache?.content as TokenContentFile).secretKey.toBase64()).toBe(content.secretKey.toBase64());
-        expect((receivedToken.cache?.content as TokenContentFile).fileId.toString()).toBe((sentToken.cache?.content as TokenContentFile).fileId.toString());
-        expect((receivedToken.cache?.content as TokenContentFile).secretKey.toBase64()).toBe((sentToken.cache?.content as TokenContentFile).secretKey.toBase64());
+        const receivedTokenContent = receivedToken.cache?.content as TokenContentFile;
+        expect(receivedTokenContent.fileId).toBeInstanceOf(CoreId);
+        expect(receivedTokenContent.secretKey).toBeInstanceOf(CryptoSecretKey);
+        expect(sentTokenContent.fileId.toString()).toBe(content.fileId.toString());
+        expect(sentTokenContent.secretKey.toBase64()).toBe(content.secretKey.toBase64());
+        expect(receivedTokenContent.fileId.toString()).toBe(sentTokenContent.fileId.toString());
+        expect(receivedTokenContent.secretKey.toBase64()).toBe(sentTokenContent.secretKey.toBase64());
     });
 
     test("should send and receive a TokenContentRelationshipTemplate", async function () {
         const expiresAt = CoreDate.utc().add({ minutes: 5 });
         const content = TokenContentRelationshipTemplate.from({
-            templateId: await CoreId.generate(),
+            templateId: await CoreIdHelper.notPrefixed.generate(),
             secretKey: await CryptoEncryption.generateKey()
         });
         const sentToken = await sender.tokens.sendToken({
@@ -124,29 +127,288 @@ describe("TokenController", function () {
         testTokens(sentToken, receivedToken, tempDate);
         expect(sentToken.cache?.expiresAt.toISOString()).toBe(expiresAt.toISOString());
         expect(sentToken.cache?.content).toBeInstanceOf(TokenContentRelationshipTemplate);
-        expect((sentToken.cache?.content as TokenContentRelationshipTemplate).templateId).toBeInstanceOf(CoreId);
-        expect((sentToken.cache?.content as TokenContentRelationshipTemplate).secretKey).toBeInstanceOf(CryptoSecretKey);
+        const sentTokenContent = sentToken.cache?.content as TokenContentRelationshipTemplate;
+        expect(sentTokenContent.templateId).toBeInstanceOf(CoreId);
+        expect(sentTokenContent.secretKey).toBeInstanceOf(CryptoSecretKey);
         expect(receivedToken.cache?.content).toBeInstanceOf(TokenContentRelationshipTemplate);
-        expect((receivedToken.cache?.content as TokenContentRelationshipTemplate).templateId).toBeInstanceOf(CoreId);
-        expect((receivedToken.cache?.content as TokenContentRelationshipTemplate).secretKey).toBeInstanceOf(CryptoSecretKey);
-        expect((sentToken.cache?.content as TokenContentRelationshipTemplate).templateId.toString()).toBe(content.templateId.toString());
-        expect((sentToken.cache?.content as TokenContentRelationshipTemplate).secretKey.toBase64()).toBe(content.secretKey.toBase64());
-        expect((receivedToken.cache?.content as TokenContentRelationshipTemplate).templateId.toString()).toBe(
-            (sentToken.cache?.content as TokenContentRelationshipTemplate).templateId.toString()
-        );
-        expect((receivedToken.cache?.content as TokenContentRelationshipTemplate).secretKey.toBase64()).toBe(
-            (sentToken.cache?.content as TokenContentRelationshipTemplate).secretKey.toBase64()
-        );
+        const receivedTokenContent = receivedToken.cache?.content as TokenContentRelationshipTemplate;
+        expect(receivedTokenContent.templateId).toBeInstanceOf(CoreId);
+        expect(receivedTokenContent.secretKey).toBeInstanceOf(CryptoSecretKey);
+        expect(sentTokenContent.templateId.toString()).toBe(content.templateId.toString());
+        expect(sentTokenContent.secretKey.toBase64()).toBe(content.secretKey.toBase64());
+        expect(receivedTokenContent.templateId.toString()).toBe(sentTokenContent.templateId.toString());
+        expect(receivedTokenContent.secretKey.toBase64()).toBe(sentTokenContent.secretKey.toBase64());
+    });
+
+    test("should send and receive a personalized TokenContentRelationshipTemplate", async function () {
+        const expiresAt = CoreDate.utc().add({ minutes: 5 });
+        const content = TokenContentRelationshipTemplate.from({
+            templateId: await CoreIdHelper.notPrefixed.generate(),
+            secretKey: await CryptoEncryption.generateKey(),
+            forIdentity: recipient.identity.address
+        });
+        const sentToken = await sender.tokens.sendToken({
+            content,
+            expiresAt,
+            ephemeral: false
+        });
+        const reference = sentToken.toTokenReference().truncate();
+        const receivedToken = await recipient.tokens.loadPeerTokenByTruncated(reference, false);
+
+        testTokens(sentToken, receivedToken, tempDate);
+        expect(sentToken.cache?.expiresAt.toISOString()).toBe(expiresAt.toISOString());
+        expect(sentToken.cache?.content).toBeInstanceOf(TokenContentRelationshipTemplate);
+        const sentTokenContent = sentToken.cache?.content as TokenContentRelationshipTemplate;
+        expect(sentTokenContent.templateId).toBeInstanceOf(CoreId);
+        expect(sentTokenContent.secretKey).toBeInstanceOf(CryptoSecretKey);
+        expect(receivedToken.cache?.content).toBeInstanceOf(TokenContentRelationshipTemplate);
+        const receivedTokenContent = receivedToken.cache?.content as TokenContentRelationshipTemplate;
+        expect(receivedTokenContent.templateId).toBeInstanceOf(CoreId);
+        expect(receivedTokenContent.secretKey).toBeInstanceOf(CryptoSecretKey);
+        expect(sentTokenContent.templateId.toString()).toBe(content.templateId.toString());
+        expect(sentTokenContent.secretKey.toBase64()).toBe(content.secretKey.toBase64());
+        expect(receivedTokenContent.templateId.toString()).toBe(sentTokenContent.templateId.toString());
+        expect(receivedTokenContent.secretKey.toBase64()).toBe(sentTokenContent.secretKey.toBase64());
+        expect(receivedTokenContent.forIdentity!.toString()).toBe(sentTokenContent.forIdentity!.toString());
+    });
+
+    test("should send and receive a password-protected TokenContentRelationshipTemplate", async function () {
+        const expiresAt = CoreDate.utc().add({ minutes: 5 });
+        const content = TokenContentRelationshipTemplate.from({
+            templateId: await CoreIdHelper.notPrefixed.generate(),
+            secretKey: await CryptoEncryption.generateKey(),
+            passwordProtection: {
+                passwordType: "pw",
+                salt: await CoreCrypto.random(16)
+            }
+        });
+        const sentToken = await sender.tokens.sendToken({
+            content,
+            expiresAt,
+            ephemeral: false
+        });
+        const reference = sentToken.toTokenReference().truncate();
+        const receivedToken = await recipient.tokens.loadPeerTokenByTruncated(reference, false);
+
+        testTokens(sentToken, receivedToken, tempDate);
+        expect(sentToken.cache?.expiresAt.toISOString()).toBe(expiresAt.toISOString());
+        expect(sentToken.cache?.content).toBeInstanceOf(TokenContentRelationshipTemplate);
+        const sentTokenContent = sentToken.cache?.content as TokenContentRelationshipTemplate;
+        expect(sentTokenContent.templateId).toBeInstanceOf(CoreId);
+        expect(sentTokenContent.secretKey).toBeInstanceOf(CryptoSecretKey);
+        expect(sentTokenContent.passwordProtection!.salt).toBeInstanceOf(CoreBuffer);
+        expect(sentTokenContent.passwordProtection!.passwordType).toBe("pw");
+        expect(receivedToken.cache?.content).toBeInstanceOf(TokenContentRelationshipTemplate);
+        const receivedTokenContent = receivedToken.cache?.content as TokenContentRelationshipTemplate;
+        expect(receivedTokenContent.templateId).toBeInstanceOf(CoreId);
+        expect(receivedTokenContent.secretKey).toBeInstanceOf(CryptoSecretKey);
+        expect(receivedTokenContent.passwordProtection!.salt).toBeInstanceOf(CoreBuffer);
+        expect(sentTokenContent.templateId.toString()).toBe(content.templateId.toString());
+        expect(sentTokenContent.secretKey.toBase64()).toBe(content.secretKey.toBase64());
+        expect(receivedTokenContent.templateId.toString()).toBe(sentTokenContent.templateId.toString());
+        expect(receivedTokenContent.secretKey.toBase64()).toBe(sentTokenContent.secretKey.toBase64());
+        expect(receivedTokenContent.passwordProtection!.passwordType).toBe(sentTokenContent.passwordProtection!.passwordType);
+        expect(receivedTokenContent.passwordProtection!.salt.toBase64URL()).toBe(sentTokenContent.passwordProtection!.salt.toBase64URL());
+    });
+
+    test("should send and receive a password-protected and personalized TokenContentRelationshipTemplate", async function () {
+        const expiresAt = CoreDate.utc().add({ minutes: 5 });
+        const content = TokenContentRelationshipTemplate.from({
+            templateId: await CoreIdHelper.notPrefixed.generate(),
+            secretKey: await CryptoEncryption.generateKey(),
+            forIdentity: recipient.identity.address,
+            passwordProtection: {
+                passwordType: "pw",
+                salt: await CoreCrypto.random(16)
+            }
+        });
+        const sentToken = await sender.tokens.sendToken({
+            content,
+            expiresAt,
+            ephemeral: false
+        });
+        const reference = sentToken.toTokenReference().truncate();
+        const receivedToken = await recipient.tokens.loadPeerTokenByTruncated(reference, false);
+
+        testTokens(sentToken, receivedToken, tempDate);
+        expect(sentToken.cache?.expiresAt.toISOString()).toBe(expiresAt.toISOString());
+        expect(sentToken.cache?.content).toBeInstanceOf(TokenContentRelationshipTemplate);
+        const sentTokenContent = sentToken.cache?.content as TokenContentRelationshipTemplate;
+        expect(sentTokenContent.templateId).toBeInstanceOf(CoreId);
+        expect(sentTokenContent.secretKey).toBeInstanceOf(CryptoSecretKey);
+        expect(sentTokenContent.passwordProtection!.salt).toBeInstanceOf(CoreBuffer);
+        expect(sentTokenContent.passwordProtection!.passwordType).toBe("pw");
+        expect(receivedToken.cache?.content).toBeInstanceOf(TokenContentRelationshipTemplate);
+        const receivedTokenContent = receivedToken.cache?.content as TokenContentRelationshipTemplate;
+        expect(receivedTokenContent.templateId).toBeInstanceOf(CoreId);
+        expect(receivedTokenContent.secretKey).toBeInstanceOf(CryptoSecretKey);
+        expect(receivedTokenContent.passwordProtection!.salt).toBeInstanceOf(CoreBuffer);
+        expect(sentTokenContent.templateId.toString()).toBe(content.templateId.toString());
+        expect(sentTokenContent.secretKey.toBase64()).toBe(content.secretKey.toBase64());
+        expect(receivedTokenContent.templateId.toString()).toBe(sentTokenContent.templateId.toString());
+        expect(receivedTokenContent.secretKey.toBase64()).toBe(sentTokenContent.secretKey.toBase64());
+        expect(sentTokenContent.forIdentity!.toString()).toBe(sentTokenContent.forIdentity!.toString());
+        expect(receivedTokenContent.forIdentity!.toString()).toBe(sentTokenContent.forIdentity!.toString());
+        expect(receivedTokenContent.passwordProtection!.passwordType).toBe(sentTokenContent.passwordProtection!.passwordType);
+        expect(receivedTokenContent.passwordProtection!.salt.toBase64URL()).toBe(sentTokenContent.passwordProtection!.salt.toBase64URL());
     });
 
     test("should get the cached tokens", async function () {
         const sentTokens = await sender.tokens.getTokens();
         const receivedTokens = await recipient.tokens.getTokens();
-        expect(sentTokens).toHaveLength(3);
-        expect(receivedTokens).toHaveLength(3);
+        expect(sentTokens).toHaveLength(6);
+        expect(receivedTokens).toHaveLength(6);
         expect(sentTokens[0].id.toString()).toBe(tempId1.toString());
         expect(sentTokens[1].id.toString()).toBe(tempId2.toString());
         testTokens(sentTokens[0], receivedTokens[0], tempDate);
         testTokens(sentTokens[1], receivedTokens[1], tempDate);
+    });
+
+    test("should send and receive a personalized Token", async function () {
+        tempDate = CoreDate.utc().subtract(TestUtil.tempDateThreshold);
+        const expiresAt = CoreDate.utc().add({ minutes: 5 });
+        const content = Serializable.fromAny({ content: "TestToken" });
+        const sentToken = await sender.tokens.sendToken({
+            content,
+            expiresAt,
+            ephemeral: false,
+            forIdentity: recipient.identity.address
+        });
+        const reference = sentToken.toTokenReference().truncate();
+        const receivedToken = await recipient.tokens.loadPeerTokenByTruncated(reference, false);
+        tempId1 = sentToken.id;
+
+        testTokens(sentToken, receivedToken, tempDate);
+        expect(sentToken.cache?.expiresAt.toISOString()).toBe(expiresAt.toISOString());
+        expect(sentToken.cache?.content).toBeInstanceOf(Serializable);
+        expect(sentToken.cache?.forIdentity).toBe(recipient.identity.address);
+        expect(receivedToken.cache?.content).toBeInstanceOf(JSONWrapper);
+        expect((sentToken.cache?.content.toJSON() as any).content).toBe("TestToken");
+        expect((receivedToken.cache?.content as any).content).toBe((sentToken.cache?.content as any).content);
+        expect(receivedToken.cache?.forIdentity?.toString()).toBe(recipient.identity.address.toString());
+    });
+
+    test("should throw if a personalized token is not loaded by the right identity", async function () {
+        const expiresAt = CoreDate.utc().add({ minutes: 5 });
+        const content = Serializable.fromAny({ content: "TestToken" });
+        const sentToken = await sender.tokens.sendToken({
+            content,
+            expiresAt,
+            ephemeral: false,
+            forIdentity: sender.identity.address
+        });
+
+        await expect(async () => {
+            await recipient.tokens.loadPeerTokenByTruncated(sentToken.toTokenReference().truncate(), true);
+        }).rejects.toThrow("transport.general.notIntendedForYou");
+    });
+
+    test("should throw if a personalized token is not loaded by the right identity and it's uncaught before reaching the Backbone", async function () {
+        const expiresAt = CoreDate.utc().add({ minutes: 5 });
+        const content = Serializable.fromAny({ content: "TestToken" });
+        const sentToken = await sender.tokens.sendToken({
+            content,
+            expiresAt,
+            ephemeral: false,
+            forIdentity: sender.identity.address
+        });
+
+        const reference = sentToken.toTokenReference();
+        reference.forIdentityTruncated = undefined;
+        const truncatedReference = reference.truncate();
+
+        await expect(async () => {
+            await recipient.tokens.loadPeerTokenByTruncated(truncatedReference, true);
+        }).rejects.toThrow("error.platform.recordNotFound");
+    });
+
+    test("should create and load a password-protected token", async function () {
+        tempDate = CoreDate.utc().subtract(TestUtil.tempDateThreshold);
+        const expiresAt = CoreDate.utc().add({ minutes: 5 });
+        const content = Serializable.fromAny({ content: "TestToken" });
+        const sentToken = await sender.tokens.sendToken({
+            content,
+            expiresAt,
+            ephemeral: false,
+            passwordProtection: { password: "password", passwordType: "pw" }
+        });
+        const reference = sentToken.toTokenReference();
+        const receivedToken = await recipient.tokens.loadPeerTokenByTruncated(reference.truncate(), false, "password");
+        tempId1 = sentToken.id;
+
+        testTokens(sentToken, receivedToken, tempDate);
+        expect(sentToken.cache?.expiresAt.toISOString()).toBe(expiresAt.toISOString());
+        expect(sentToken.cache?.content).toBeInstanceOf(Serializable);
+        expect(sentToken.passwordProtection!.password).toBe("password");
+        expect(sentToken.passwordProtection!.salt).toBeDefined();
+        expect(sentToken.passwordProtection!.salt).toHaveLength(16);
+        expect(sentToken.passwordProtection!.passwordType).toBe("pw");
+
+        expect(reference.passwordProtection!.passwordType).toBe("pw");
+        expect(reference.passwordProtection!.salt).toStrictEqual(sentToken.passwordProtection!.salt);
+
+        expect(receivedToken.cache?.content).toBeInstanceOf(JSONWrapper);
+        expect((receivedToken.cache?.content as any).content).toBe((sentToken.cache?.content as any).content);
+        expect(receivedToken.passwordProtection!.password).toBe("password");
+        expect(receivedToken.passwordProtection!.salt).toStrictEqual(sentToken.passwordProtection!.salt);
+        expect(receivedToken.passwordProtection!.passwordType).toBe("pw");
+    });
+
+    test("should throw an error if loaded with a wrong or missing password", async function () {
+        tempDate = CoreDate.utc().subtract(TestUtil.tempDateThreshold);
+        const expiresAt = CoreDate.utc().add({ minutes: 5 });
+        const content = Serializable.fromAny({ content: "TestToken" });
+        const sentToken = await sender.tokens.sendToken({
+            content,
+            expiresAt,
+            ephemeral: false,
+            passwordProtection: { password: "password", passwordType: "pw" }
+        });
+        const reference = sentToken.toTokenReference().truncate();
+
+        await expect(recipient.tokens.loadPeerTokenByTruncated(reference, true, "wrongPassword")).rejects.toThrow("error.platform.recordNotFound");
+        await expect(recipient.tokens.loadPeerTokenByTruncated(reference, true)).rejects.toThrow("error.transport.noPasswordProvided");
+    });
+
+    test("should fetch multiple password-protected tokens", async function () {
+        tempDate = CoreDate.utc().subtract(TestUtil.tempDateThreshold);
+        const expiresAt = CoreDate.utc().add({ minutes: 5 });
+        const content = Serializable.fromAny({ content: "TestToken" });
+        const sentToken1 = await sender.tokens.sendToken({
+            content,
+            expiresAt,
+            ephemeral: false,
+            passwordProtection: { password: "password", passwordType: "pw" }
+        });
+        const reference1 = sentToken1.toTokenReference().truncate();
+
+        const sentToken2 = await sender.tokens.sendToken({
+            content,
+            expiresAt,
+            ephemeral: false,
+            passwordProtection: { password: "1234", passwordType: "pin4" }
+        });
+        const reference2 = sentToken2.toTokenReference().truncate();
+
+        const receivedToken1 = await recipient.tokens.loadPeerTokenByTruncated(reference1, false, "password");
+        const receivedToken2 = await recipient.tokens.loadPeerTokenByTruncated(reference2, false, "1234");
+        const fetchCachesResult = await recipient.tokens.fetchCaches([receivedToken1.id, receivedToken2.id]);
+        expect(fetchCachesResult).toHaveLength(2);
+    });
+
+    test("should delete a token", async function () {
+        const expiresAt = CoreDate.utc().add({ minutes: 5 });
+        const content = Serializable.fromAny({ content: "TestToken" });
+        const sentToken = await recipient.tokens.sendToken({
+            content,
+            expiresAt,
+            ephemeral: false
+        });
+        const reference = sentToken.toTokenReference().truncate();
+        const tokenId = (await sender.tokens.loadPeerTokenByTruncated(reference, false)).id;
+
+        await sender.tokens.cleanupTokensOfDecomposedRelationship(recipient.identity.address);
+        const token = await sender.tokens.getToken(tokenId);
+        expect(token).toBeUndefined();
     });
 });

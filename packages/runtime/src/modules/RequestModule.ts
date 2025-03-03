@@ -1,14 +1,6 @@
 import { LocalRequestStatus } from "@nmshd/consumption";
-import {
-    RelationshipCreationChangeRequestContent,
-    RelationshipCreationChangeRequestContentJSON,
-    RelationshipTemplateContentJSON,
-    RequestJSON,
-    ResponseJSON,
-    ResponseResult,
-    ResponseWrapper,
-    ResponseWrapperJSON
-} from "@nmshd/content";
+import { RelationshipCreationContent, RequestJSON, ResponseJSON, ResponseResult, ResponseWrapper } from "@nmshd/content";
+import { CoreDate } from "@nmshd/core-types";
 import {
     IncomingRequestStatusChangedEvent,
     MessageProcessedEvent,
@@ -47,7 +39,7 @@ export class RequestModule extends RuntimeModule {
             return;
         }
 
-        const body = template.content as RelationshipTemplateContentJSON;
+        const body = template.content;
 
         const services = await this.runtime.getServices(event.eventTargetAddress);
 
@@ -70,7 +62,7 @@ export class RequestModule extends RuntimeModule {
 
         const pendingRelationships = relationshipsToPeer.filter((r) => r.status === RelationshipStatus.Pending);
         if (pendingRelationships.length !== 0) {
-            this.logger.info(`There is already a pending Relationship for the RelationshipTemplate '${template.id}'. Skipping creation of a new request.`);
+            this.logger.info(`There is already a pending Relationship to the creator of the RelationshipTemplate '${template.id}'. Skipping creation of a new Request.`);
             this.runtime.eventBus.publish(
                 new RelationshipTemplateProcessedEvent(event.eventTargetAddress, {
                     template,
@@ -81,9 +73,34 @@ export class RequestModule extends RuntimeModule {
             return;
         }
 
+        const terminatedOrDeletionProposedRelationships = relationshipsToPeer.filter(
+            (r) => r.status === RelationshipStatus.Terminated || r.status === RelationshipStatus.DeletionProposed
+        );
+        if (terminatedOrDeletionProposedRelationships.length !== 0) {
+            this.logger.info(
+                `There is still a Relationship with status 'Terminated' or 'DeletionProposed' to the creator of the RelationshipTemplate '${template.id}'. Skipping creation of a new Request.`
+            );
+            this.runtime.eventBus.publish(
+                new RelationshipTemplateProcessedEvent(event.eventTargetAddress, {
+                    template,
+                    result: RelationshipTemplateProcessedResult.RelationshipExists,
+                    relationshipId: terminatedOrDeletionProposedRelationships[0].id
+                })
+            );
+            return;
+        }
+
         const activeRelationships = relationshipsToPeer.filter((r) => r.status === RelationshipStatus.Active);
         if (activeRelationships.length !== 0) {
             if (body.onExistingRelationship) {
+                if (body.onExistingRelationship.expiresAt && CoreDate.from(body.onExistingRelationship.expiresAt).isExpired()) {
+                    this.runtime.eventBus.publish(
+                        new RelationshipTemplateProcessedEvent(event.eventTargetAddress, { template, result: RelationshipTemplateProcessedResult.RequestExpired })
+                    );
+
+                    return;
+                }
+
                 const requestCreated = await this.createIncomingRequest(services, body.onExistingRelationship, template.id);
                 if (!requestCreated) {
                     this.runtime.eventBus.publish(
@@ -94,7 +111,7 @@ export class RequestModule extends RuntimeModule {
             }
 
             this.logger.info(
-                `There is already an open Relationship for the RelationshipTemplate '${template.id}' and onExistingRelationship is not defined. Skipping creation of a new request.`
+                `There is already an active Relationship to the creator of the RelationshipTemplate '${template.id}' and an onExistingRelationship Request is not defined. Skipping creation of a new Request.`
             );
             this.runtime.eventBus.publish(
                 new RelationshipTemplateProcessedEvent(event.eventTargetAddress, {
@@ -103,6 +120,37 @@ export class RequestModule extends RuntimeModule {
                     relationshipId: activeRelationships[0].id
                 })
             );
+            return;
+        }
+
+        const otherRequestsThatWouldLeadToARelationship = (
+            await services.consumptionServices.incomingRequests.getRequests({
+                query: {
+                    "source.type": "RelationshipTemplate",
+                    status: [LocalRequestStatus.Open, LocalRequestStatus.DecisionRequired, LocalRequestStatus.ManualDecisionRequired, LocalRequestStatus.Decided],
+                    peer: template.createdBy
+                }
+            })
+        ).value;
+        if (otherRequestsThatWouldLeadToARelationship.length !== 0) {
+            this.logger.info(
+                `There is already an open Request for a RelationshipTemplate that would lead to a Relationship with the creator of the RelationshipTemplate '${template.id}'. Skipping creation of a new Request.`
+            );
+            this.runtime.eventBus.publish(
+                new RelationshipTemplateProcessedEvent(event.eventTargetAddress, {
+                    template,
+                    result: RelationshipTemplateProcessedResult.NonCompletedRequestExists,
+                    requestId: otherRequestsThatWouldLeadToARelationship[0].id
+                })
+            );
+            return;
+        }
+
+        if (body.onNewRelationship.expiresAt && CoreDate.from(body.onNewRelationship.expiresAt).isExpired()) {
+            this.runtime.eventBus.publish(
+                new RelationshipTemplateProcessedEvent(event.eventTargetAddress, { template, result: RelationshipTemplateProcessedResult.RequestExpired })
+            );
+
             return;
         }
 
@@ -120,17 +168,11 @@ export class RequestModule extends RuntimeModule {
         const messageContentType = message.content["@type"];
         switch (messageContentType) {
             case "Request":
-                await this.createIncomingRequest(services, message.content as RequestJSON, message.id);
-                break;
-
-            // Handle responses directly sent via messages. This is only for backwards compatibility and
-            // not viable for responding to Requests from RelationshipTemplates' onExistingRelationship.
-            case "Response":
-                await this.completeExistingRequestWithResponseReceivedByMessage(services, message.id, message.content as ResponseJSON);
+                await this.createIncomingRequest(services, message.content, message.id);
                 break;
 
             case "ResponseWrapper":
-                const responseWrapper = message.content as ResponseWrapperJSON;
+                const responseWrapper = message.content;
 
                 if (responseWrapper.requestSourceType === "Message") {
                     await this.completeExistingRequestWithResponseReceivedByMessage(services, message.id, responseWrapper.response);
@@ -142,6 +184,8 @@ export class RequestModule extends RuntimeModule {
                     templateId: responseWrapper.requestSourceReference,
                     response: responseWrapper.response
                 });
+                break;
+            default:
                 break;
         }
 
@@ -162,7 +206,7 @@ export class RequestModule extends RuntimeModule {
         if (message.content["@type"] !== "Request") return;
 
         const services = await this.runtime.getServices(event.eventTargetAddress);
-        const request = message.content as RequestJSON;
+        const request = message.content;
 
         const requestResult = await services.consumptionServices.outgoingRequests.sent({ requestId: request.id!, messageId: message.id });
         if (requestResult.isError) {
@@ -226,8 +270,8 @@ export class RequestModule extends RuntimeModule {
             return;
         }
 
-        const creationChangeContent = RelationshipCreationChangeRequestContent.from({ response: request.response!.content });
-        const createRelationshipResult = await services.transportServices.relationships.createRelationship({ templateId, content: creationChangeContent });
+        const creationContent = RelationshipCreationContent.from({ response: request.response!.content }).toJSON();
+        const createRelationshipResult = await services.transportServices.relationships.createRelationship({ templateId, creationContent });
         if (createRelationshipResult.isError) {
             this.logger.error(`Could not create relationship for templateId '${templateId}'. Root error:`, createRelationshipResult.error);
             return;
@@ -236,7 +280,7 @@ export class RequestModule extends RuntimeModule {
         const requestId = request.id;
         const completeRequestResult = await services.consumptionServices.incomingRequests.complete({
             requestId,
-            responseSourceId: createRelationshipResult.value.changes[0].id
+            responseSourceId: createRelationshipResult.value.id
         });
         if (completeRequestResult.isError) {
             this.logger.error(`Could not complete the request '${requestId}'. Root error:`, completeRequestResult.error);
@@ -280,30 +324,33 @@ export class RequestModule extends RuntimeModule {
     }
 
     private async handleRelationshipChangedEvent(event: RelationshipChangedEvent) {
-        // only trigger for new relationships that were created from an own template
         const createdRelationship = event.data;
-        if (createdRelationship.status !== RelationshipStatus.Pending || !createdRelationship.template.isOwn) return;
-
         const services = await this.runtime.getServices(event.eventTargetAddress);
+
+        if (createdRelationship.status === RelationshipStatus.Rejected || createdRelationship.status === RelationshipStatus.Revoked) {
+            await services.consumptionServices.attributes.deleteSharedAttributesForRejectedOrRevokedRelationship({ relationshipId: createdRelationship.id });
+            return;
+        }
+
+        // only trigger for new relationships that were created from an own template
+        if (createdRelationship.status !== RelationshipStatus.Pending || !createdRelationship.template.isOwn) return;
 
         const template = createdRelationship.template;
         const templateId = template.id;
         // do not trigger for templates without the correct content type
         if (template.content["@type"] !== "RelationshipTemplateContent") return;
+        if (createdRelationship.creationContent["@type"] !== "RelationshipCreationContent") {
+            this.logger.error(`The creation content of relationshipId ${createdRelationship.id} is not of type RelationshipCreationContent.`);
+            return;
+        }
 
-        const relationshipCreationChange = createdRelationship.changes[0];
-        const relationshipChangeId = relationshipCreationChange.id;
-        // do not trigger for creation changes without the correct content type
-        if (relationshipCreationChange.request.content["@type"] !== "RelationshipCreationChangeRequestContent") return;
-
-        const relationshipCreationChangeContent = relationshipCreationChange.request.content as RelationshipCreationChangeRequestContentJSON;
         const result = await services.consumptionServices.outgoingRequests.createAndCompleteFromRelationshipTemplateResponse({
             templateId,
-            responseSourceId: relationshipChangeId,
-            response: relationshipCreationChangeContent.response
+            responseSourceId: createdRelationship.id,
+            response: createdRelationship.creationContent.response
         });
         if (result.isError) {
-            this.logger.error(`Could not create and complete request for templateId '${templateId}' and changeId '${relationshipChangeId}'. Root error:`, result.error);
+            this.logger.error(`Could not create and complete request for templateId '${templateId}' and relationshipId '${createdRelationship.id}'. Root error:`, result.error);
             return;
         }
     }

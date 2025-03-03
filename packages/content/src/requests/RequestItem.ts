@@ -7,11 +7,14 @@ import {
     ConsentRequestItemJSON,
     CreateAttributeRequestItem,
     CreateAttributeRequestItemJSON,
+    DeleteAttributeRequestItem,
+    DeleteAttributeRequestItemJSON,
     FreeTextRequestItem,
     FreeTextRequestItemJSON,
     IAuthenticationRequestItem,
     IConsentRequestItem,
     ICreateAttributeRequestItem,
+    IDeleteAttributeRequestItem,
     IFreeTextRequestItem,
     IProposeAttributeRequestItem,
     IReadAttributeRequestItem,
@@ -44,19 +47,14 @@ export interface RequestItemJSON extends ContentJSON {
     /**
      * This property can be used to add some arbitrary metadata to this item. The content
      * of this property will be copied into the response on the side of the recipient, so
-     * the sender can use it to identify the group content as they receive the response.
+     * the sender can use it to identify the item as they receive the response.
      */
     metadata?: object;
 
     /**
-     * If set to `true`, the recipient has to accept this group if he wants to accept the
+     * If set to `true`, the recipient has to accept this item if they want to accept the
      * Request.
-     * If set to `false`, the recipient can decide whether he wants to accept it or not.
-     *
-     * Caution: this setting does not take effect in case it is inside of a
-     * {@link RequestItemGroupJSON RequestItemGroup}, which is not accepted by the recipient,
-     * since a {@link RequestItemJSON RequestItem} can only be accepted if the parent group
-     * is accepted as well.
+     * If set to `false`, the recipient can decide whether they want to accept it or not.
      */
     mustBeAccepted: boolean;
 
@@ -70,6 +68,7 @@ export interface RequestItemJSON extends ContentJSON {
 export type RequestItemJSONDerivations =
     | RequestItemJSON
     | CreateAttributeRequestItemJSON
+    | DeleteAttributeRequestItemJSON
     | ShareAttributeRequestItemJSON
     | ProposeAttributeRequestItemJSON
     | ReadAttributeRequestItemJSON
@@ -93,19 +92,14 @@ export interface IRequestItem extends ISerializable {
     /**
      * This property can be used to add some arbitrary metadata to this item. The content
      * of this property will be copied into the response on the side of the recipient, so
-     * the sender can use it to identify the group content as they receive the response.
+     * the sender can use it to identify the item as they receive the response.
      */
     metadata?: object;
 
     /**
-     * If set to `true`, the recipient has to accept this group if he wants to accept the
+     * If set to `true`, the recipient has to accept this item if they want to accept the
      * Request.
-     * If set to `false`, the recipient can decide whether he wants to accept it or not.
-     *
-     * Caution: this setting does not take effect in case it is inside of a
-     * {@link RequestItemGroup RequestItemGroup}, which is not accepted by the recipient,
-     * since a {@link RequestItem RequestItem} can only be accepted if the parent group
-     * is accepted as well.
+     * If set to `false`, the recipient can decide whether they want to accept it or not.
      */
     mustBeAccepted: boolean;
 
@@ -119,6 +113,7 @@ export interface IRequestItem extends ISerializable {
 export type IRequestItemDerivations =
     | IRequestItem
     | ICreateAttributeRequestItem
+    | IDeleteAttributeRequestItem
     | IShareAttributeRequestItem
     | IProposeAttributeRequestItem
     | IReadAttributeRequestItem
@@ -157,6 +152,7 @@ export abstract class RequestItem extends Serializable {
 export type RequestItemDerivations =
     | RequestItem
     | CreateAttributeRequestItem
+    | DeleteAttributeRequestItem
     | ShareAttributeRequestItem
     | ProposeAttributeRequestItem
     | ReadAttributeRequestItem
@@ -165,3 +161,18 @@ export type RequestItemDerivations =
     | FreeTextRequestItem
     | RegisterAttributeListenerRequestItem
     | RequestVerifiableAttributeRequestItem;
+
+export function isRequestItemDerivation(input: any): input is RequestItemDerivations {
+    return (
+        input["@type"] === "RequestItem" ||
+        input["@type"] === "CreateAttributeRequestItem" ||
+        input["@type"] === "DeleteAttributeRequestItem" ||
+        input["@type"] === "ShareAttributeRequestItem" ||
+        input["@type"] === "ProposeAttributeRequestItem" ||
+        input["@type"] === "ReadAttributeRequestItem" ||
+        input["@type"] === "ConsentRequestItem" ||
+        input["@type"] === "AuthenticationRequestItem" ||
+        input["@type"] === "FreeTextRequestItem" ||
+        input["@type"] === "RegisterAttributeListenerRequestItem"
+    );
+}

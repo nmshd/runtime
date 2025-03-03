@@ -1,5 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { CoreDate } from "../../../src";
+import { CoreDate } from "@nmshd/core-types";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("SyncController.error", function () {
@@ -28,14 +28,12 @@ describe("SyncController.error", function () {
         // in the ExternalEventsProcessor of templatorDevice2, because the template
         // doesn't exist on templatorDevice2
 
-        const templateOnRequestorDevice = await requestorDevice.relationshipTemplates.loadPeerRelationshipTemplate(
-            templateOnTemplatorDevice.id,
-            templateOnTemplatorDevice.secretKey
-        );
+        const reference = templateOnTemplatorDevice.toRelationshipTemplateReference().truncate();
+        const templateOnRequestorDevice = await requestorDevice.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(reference);
 
         await requestorDevice.relationships.sendRelationship({
             template: templateOnRequestorDevice,
-            content: { someMessageContent: "someMessageContent" }
+            creationContent: { someMessageContent: "someMessageContent" }
         });
 
         const error = await TestUtil.syncUntilHasError(templatorDevice2);

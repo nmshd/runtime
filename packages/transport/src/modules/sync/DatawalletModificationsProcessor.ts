@@ -1,8 +1,10 @@
 import { IDatabaseCollectionProvider } from "@js-soft/docdb-access-abstractions";
 import { ILogger } from "@js-soft/logging-abstractions";
+import { Serializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
+import { CoreId } from "@nmshd/core-types";
 import _ from "lodash";
-import { CoreErrors, CoreId, CoreSerializable, TransportError, TransportIds } from "../../core";
+import { TransportCoreErrors, TransportError, TransportIds } from "../../core";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { ICacheable } from "../../core/ICacheable";
 import { CachedIdentityDeletionProcess } from "../accounts/data/CachedIdentityDeletionProcess";
@@ -24,14 +26,16 @@ import { CachedToken } from "../tokens/local/CachedToken";
 import { Token } from "../tokens/local/Token";
 import { TokenController } from "../tokens/TokenController";
 import { DatawalletModification, DatawalletModificationType } from "./local/DatawalletModification";
-import { SyncProgressReporter, SyncProgressReporterStep, SyncStep } from "./SyncCallback";
 
 export class DatawalletModificationsProcessor {
-    private readonly creates: DatawalletModification[];
-    private readonly updates: DatawalletModification[];
-    private readonly deletes: DatawalletModification[];
+    private readonly modificationsWithoutCacheChanges: DatawalletModification[];
     private readonly cacheChanges: DatawalletModification[];
-    private readonly syncStep: SyncProgressReporterStep;
+    private readonly deletedObjectIdentifiers: string[] = [];
+
+    private readonly _changedObjectIdentifiers: Set<string> = new Set();
+    public get changedObjectIdentifiers(): string[] {
+        return Array.from(this._changedObjectIdentifiers);
+    }
 
     public get log(): ILogger {
         return this.logger;
@@ -41,18 +45,10 @@ export class DatawalletModificationsProcessor {
         modifications: DatawalletModification[],
         private readonly cacheFetcher: CacheFetcher,
         private readonly collectionProvider: IDatabaseCollectionProvider,
-        private readonly logger: ILogger,
-        reporter: SyncProgressReporter
+        private readonly logger: ILogger
     ) {
-        const modificationsGroupedByType = _.groupBy(modifications, (m) => m.type);
-
-        this.creates = modificationsGroupedByType[DatawalletModificationType.Create] ?? [];
-        this.updates = modificationsGroupedByType[DatawalletModificationType.Update] ?? [];
-        this.deletes = modificationsGroupedByType[DatawalletModificationType.Delete] ?? [];
-        this.cacheChanges = modificationsGroupedByType[DatawalletModificationType.CacheChanged] ?? [];
-
-        const totalItems = this.creates.length + this.updates.length + this.deletes.length + this.cacheChanges.length;
-        this.syncStep = reporter.createStep(SyncStep.DatawalletSyncProcessing, totalItems);
+        this.modificationsWithoutCacheChanges = modifications.filter((m) => m.type !== DatawalletModificationType.CacheChanged);
+        this.cacheChanges = modifications.filter((m) => m.type === DatawalletModificationType.CacheChanged);
     }
 
     private readonly collectionsWithCacheableItems: string[] = [
@@ -65,48 +61,61 @@ export class DatawalletModificationsProcessor {
     ];
 
     public async execute(): Promise<void> {
-        await this.applyCreates();
-        await this.applyUpdates();
+        await this.applyModifications();
         await this.applyCacheChanges();
-        await this.applyDeletes();
-
-        // cache-fills are optimized by the backbone, so it is possible that the processedItemCount is
-        // lower than the total number of items - in this case the 100% callback is triggered here
-        this.syncStep.finish();
     }
 
-    private async applyCreates() {
-        if (this.creates.length === 0) {
-            return;
-        }
+    private async applyModifications() {
+        const modificationsGroupedByObjectIdentifier = _.groupBy(this.modificationsWithoutCacheChanges, (m) => m.objectIdentifier);
 
-        const createsGroupedByObjectIdentifier = _.groupBy(this.creates, (c) => c.objectIdentifier);
+        for (const objectIdentifier in modificationsGroupedByObjectIdentifier) {
+            this._changedObjectIdentifiers.add(objectIdentifier);
 
-        for (const objectIdentifier in createsGroupedByObjectIdentifier) {
-            const currentCreates = createsGroupedByObjectIdentifier[objectIdentifier];
+            const currentModifications = modificationsGroupedByObjectIdentifier[objectIdentifier];
 
-            const targetCollectionName = currentCreates[0].collection;
+            const targetCollectionName = currentModifications[0].collection;
             const targetCollection = await this.collectionProvider.getCollection(targetCollectionName);
 
-            let mergedPayload = { id: objectIdentifier };
+            const lastModification = currentModifications.at(-1)!;
+            if (lastModification.type === DatawalletModificationType.Delete) {
+                await targetCollection.delete({ id: objectIdentifier });
+                this.deletedObjectIdentifiers.push(objectIdentifier);
 
-            for (const create of currentCreates) {
-                mergedPayload = { ...mergedPayload, ...create.payload };
+                continue;
             }
 
-            const newObject = CoreSerializable.fromUnknown(mergedPayload);
+            let resultingObject: any = {};
+            for (const modification of currentModifications) {
+                switch (modification.type) {
+                    case DatawalletModificationType.Create:
+                    case DatawalletModificationType.Update:
+                        resultingObject = { ...resultingObject, ...modification.payload };
+                        break;
+                    case DatawalletModificationType.Delete:
+                        resultingObject = {};
+                        break;
+                    case DatawalletModificationType.CacheChanged:
+                        throw new TransportError("CacheChanged modifications are not allowed in this context.");
+                }
+            }
 
             const oldDoc = await targetCollection.read(objectIdentifier);
             if (oldDoc) {
-                const oldObject = CoreSerializable.fromUnknown(oldDoc);
-                const updatedObject = { ...oldObject.toJSON(), ...newObject.toJSON() };
-                await targetCollection.update(oldDoc, updatedObject);
+                const oldObject = Serializable.fromUnknown(oldDoc);
+
+                const newObject = {
+                    ...oldObject.toJSON(),
+                    ...resultingObject
+                };
+
+                await targetCollection.update(oldDoc, newObject);
             } else {
                 await this.simulateCacheChangeForCreate(targetCollectionName, objectIdentifier);
-                await targetCollection.create(newObject);
+                await targetCollection.create({
+                    id: objectIdentifier,
+                    ...resultingObject
+                });
             }
-
-            this.syncStep.progress();
         }
     }
 
@@ -125,28 +134,6 @@ export class DatawalletModificationsProcessor {
         });
 
         this.cacheChanges.push(modification);
-        this.syncStep.incrementTotalNumberOfItems();
-    }
-
-    private async applyUpdates() {
-        if (this.updates.length === 0) {
-            return;
-        }
-
-        for (const updateModification of this.updates) {
-            const targetCollection = await this.collectionProvider.getCollection(updateModification.collection);
-            const oldDoc = await targetCollection.read(updateModification.objectIdentifier.toString());
-
-            if (!oldDoc) {
-                throw new TransportError("Document to update was not found.");
-            }
-
-            const oldObject = CoreSerializable.fromUnknown(oldDoc);
-            const newObject = { ...oldObject.toJSON(), ...updateModification.payload };
-
-            await targetCollection.update(oldDoc, newObject);
-            this.syncStep.progress();
-        }
     }
 
     private async applyCacheChanges() {
@@ -156,29 +143,33 @@ export class DatawalletModificationsProcessor {
 
         this.ensureAllItemsAreCacheable();
 
-        const cacheChangesGroupedByCollection = this.groupCacheChangesByCollection(this.cacheChanges);
+        const cacheChangesWithoutDeletes = this.cacheChanges.filter((c) => !this.deletedObjectIdentifiers.some((d) => c.objectIdentifier.equals(d)));
+
+        for (const objectIdentifier of cacheChangesWithoutDeletes.map((c) => c.objectIdentifier.toString())) {
+            this._changedObjectIdentifiers.add(objectIdentifier);
+        }
+
+        const cacheChangesGroupedByCollection = this.groupCacheChangesByCollection(cacheChangesWithoutDeletes);
 
         const caches = await this.cacheFetcher.fetchCacheFor({
             files: cacheChangesGroupedByCollection.fileIds,
-            messages: cacheChangesGroupedByCollection.messageIds,
             relationshipTemplates: cacheChangesGroupedByCollection.relationshipTemplateIds,
             tokens: cacheChangesGroupedByCollection.tokenIds,
             identityDeletionProcesses: cacheChangesGroupedByCollection.identityDeletionProcessIds
         });
 
         await this.saveNewCaches(caches.files, DbCollectionName.Files, File);
-        await this.saveNewCaches(caches.messages, DbCollectionName.Messages, Message);
         await this.saveNewCaches(caches.relationshipTemplates, DbCollectionName.RelationshipTemplates, RelationshipTemplate);
         await this.saveNewCaches(caches.tokens, DbCollectionName.Tokens, Token);
         await this.saveNewCaches(caches.identityDeletionProcesses, DbCollectionName.IdentityDeletionProcess, IdentityDeletionProcess);
 
-        // Need to fetch the cache for relationships after the cache for relationship templates was fetched,
-        // because when building the relationship cache, the cache of thecorresponding relationship template
-        // is needed
-        const relationshipCaches = await this.cacheFetcher.fetchCacheFor({
-            relationships: cacheChangesGroupedByCollection.relationshipIds
-        });
+        // Need to fetch the cache for relationships after the cache for relationship templates was fetched, because when building the relationship cache, the cache of thecorresponding relationship template is needed
+        const relationshipCaches = await this.cacheFetcher.fetchCacheFor({ relationships: cacheChangesGroupedByCollection.relationshipIds });
         await this.saveNewCaches(relationshipCaches.relationships, DbCollectionName.Relationships, Relationship);
+
+        // Need to fetch the cache for messages after the cache for relationships was fetched, because when building the message cache, the cache of thecorresponding relationship is needed
+        const messageCaches = await this.cacheFetcher.fetchCacheFor({ messages: cacheChangesGroupedByCollection.messageIds });
+        await this.saveNewCaches(messageCaches.messages, DbCollectionName.Messages, Message);
     }
 
     @log()
@@ -188,7 +179,9 @@ export class DatawalletModificationsProcessor {
         const collectionsWithUncacheableItems = uniqueCollections.filter((c) => !this.collectionsWithCacheableItems.includes(c));
 
         if (collectionsWithUncacheableItems.length > 0) {
-            throw CoreErrors.datawallet.unsupportedModification("unsupportedCacheChangedModificationCollection", collectionsWithUncacheableItems);
+            throw TransportCoreErrors.datawallet.unsupportedModification(
+                `The following collections were received in CacheChanged datawallet modifications but are not supported by the current version of this library: '${collectionsWithUncacheableItems.join(", ")}'.`
+            );
         }
     }
 
@@ -198,11 +191,11 @@ export class DatawalletModificationsProcessor {
         const fileIds = (groups[DbCollectionName.Files] ?? []).map((m) => m.objectIdentifier);
         const messageIds = (groups[DbCollectionName.Messages] ?? []).map((m) => m.objectIdentifier);
         const relationshipIds = (groups[DbCollectionName.Relationships] ?? []).map((m) => m.objectIdentifier);
-        const templateIds = (groups[DbCollectionName.RelationshipTemplates] ?? []).map((m) => m.objectIdentifier);
+        const relationshipTemplateIds = (groups[DbCollectionName.RelationshipTemplates] ?? []).map((m) => m.objectIdentifier);
         const tokenIds = (groups[DbCollectionName.Tokens] ?? []).map((m) => m.objectIdentifier);
         const identityDeletionProcessIds = (groups[DbCollectionName.IdentityDeletionProcess] ?? []).map((m) => m.objectIdentifier);
 
-        return { fileIds, messageIds, relationshipTemplateIds: templateIds, tokenIds, relationshipIds, identityDeletionProcessIds };
+        return { fileIds, messageIds, relationshipTemplateIds, tokenIds, relationshipIds, identityDeletionProcessIds };
     }
 
     private async saveNewCaches<T extends ICacheable>(caches: FetchCacheOutputItem<any>[], collectionName: DbCollectionName, constructorOfT: new () => T) {
@@ -216,21 +209,8 @@ export class DatawalletModificationsProcessor {
                 const item = (constructorOfT as any).from(itemDoc);
                 item.setCache(c.cache);
                 await collection.update(itemDoc, item);
-                this.syncStep.progress();
             })
         );
-    }
-
-    private async applyDeletes() {
-        if (this.deletes.length === 0) {
-            return;
-        }
-
-        for (const deleteModification of this.deletes) {
-            const targetCollection = await this.collectionProvider.getCollection(deleteModification.collection);
-            await targetCollection.delete({ id: deleteModification.objectIdentifier.toString() });
-            this.syncStep.progress();
-        }
     }
 }
 

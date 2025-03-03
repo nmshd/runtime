@@ -18,7 +18,7 @@ describe("Test setting the account name", function () {
     });
 
     test("should set the account name", async function () {
-        const accountName = "test";
+        const accountName = "anAccountName";
 
         expect(localAccount).toBeDefined();
 

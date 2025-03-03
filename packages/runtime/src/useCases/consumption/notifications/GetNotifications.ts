@@ -1,7 +1,7 @@
 import { QueryTranslator } from "@js-soft/docdb-querytranslator";
 import { Result } from "@js-soft/ts-utils";
 import { NotificationsController } from "@nmshd/consumption";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { LocalNotificationDTO } from "../../../types";
 import { UseCase } from "../../common";
 import { NotificationMapper } from "./NotificationMapper";

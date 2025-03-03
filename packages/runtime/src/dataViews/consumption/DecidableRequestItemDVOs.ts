@@ -31,6 +31,7 @@ export interface DecidableDeleteAttributeRequestItemDVO extends DecidableRequest
 export interface DecidableShareAttributeRequestItemDVO extends DecidableRequestItemDVO {
     type: "DecidableShareAttributeRequestItemDVO";
     sourceAttributeId: string;
+    thirdPartyAddress?: string;
     attribute: DraftIdentityAttributeDVO;
 }
 

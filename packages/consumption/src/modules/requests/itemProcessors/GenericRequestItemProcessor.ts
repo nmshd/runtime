@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { Event } from "@js-soft/ts-utils";
 import { AcceptResponseItem, RejectResponseItem, Request, RequestItem, ResponseItem, ResponseItemResult } from "@nmshd/content";
-import { CoreAddress } from "@nmshd/transport";
+import { CoreAddress } from "@nmshd/core-types";
 import { ValidationResult } from "../../common/ValidationResult";
 import { AcceptRequestItemParametersJSON } from "../incoming/decide/AcceptRequestItemParameters";
 import { RejectRequestItemParametersJSON } from "../incoming/decide/RejectRequestItemParameters";
@@ -29,7 +30,7 @@ export class GenericRequestItemProcessor<
     }
 
     public reject(requestItem: TRequestItem, params: TRejectParams, requestInfo: LocalRequestInfo): RejectResponseItem | Promise<RejectResponseItem> {
-        return RejectResponseItem.from({ result: ResponseItemResult.Rejected });
+        return RejectResponseItem.from({ result: ResponseItemResult.Rejected, code: params.code, message: params.message });
     }
 
     public canCreateOutgoingRequestItem(requestItem: TRequestItem, request: Request, recipient?: CoreAddress): Promise<ValidationResult> | ValidationResult {
@@ -40,7 +41,7 @@ export class GenericRequestItemProcessor<
         return ValidationResult.success();
     }
 
-    public applyIncomingResponseItem(responseItem: ResponseItem, requestItem: TRequestItem, requestInfo: LocalRequestInfo): Promise<void> | void {
+    public applyIncomingResponseItem(responseItem: ResponseItem, requestItem: TRequestItem, requestInfo: LocalRequestInfo): Event | void | Promise<Event | void> {
         // do nothing
     }
 }

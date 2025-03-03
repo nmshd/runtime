@@ -1,24 +1,22 @@
-import { GivenName, IdentityAttribute, ReadAttributeAcceptResponseItem, ReadAttributeRequestItem, ResponseItemResult, ResponseResult } from "@nmshd/content";
-import { CoreAddress, CoreId } from "@nmshd/transport";
-import { DataViewExpander, TransportServices } from "../../src";
-import { establishRelationshipWithContents, RuntimeServiceProvider } from "../lib";
+import { AcceptReadAttributeRequestItemParametersJSON } from "@nmshd/consumption";
+import { GivenName, IdentityAttribute, ReadAttributeRequestItem, RelationshipTemplateContent } from "@nmshd/content";
+import { CoreAddress } from "@nmshd/core-types";
+import { establishRelationshipWithContents, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
-let transportServices1: TransportServices;
-let transportServices2: TransportServices;
-let expander1: DataViewExpander;
-let expander2: DataViewExpander;
+
+let runtimeServices1: TestRuntimeServices;
+let runtimeServices2: TestRuntimeServices;
 
 beforeAll(async () => {
     const runtimeServices = await serviceProvider.launch(2);
-    transportServices1 = runtimeServices[0].transport;
-    transportServices2 = runtimeServices[1].transport;
-    expander1 = runtimeServices[0].expander;
-    expander2 = runtimeServices[1].expander;
+    runtimeServices1 = runtimeServices[0];
+    runtimeServices2 = runtimeServices[1];
+
     await establishRelationshipWithContents(
-        transportServices1,
-        transportServices2,
-        {
+        runtimeServices1,
+        runtimeServices2,
+        RelationshipTemplateContent.from({
             onNewRelationship: {
                 "@type": "Request",
                 items: [
@@ -26,29 +24,21 @@ beforeAll(async () => {
                         mustBeAccepted: true,
                         query: {
                             "@type": "IdentityAttributeQuery",
-                            valueType: "CommunicationLanguage"
+                            valueType: "GivenName"
                         }
                     })
                 ]
             }
-        },
-        {
-            response: {
-                "@type": "Response",
-                result: ResponseResult.Accepted,
-                requestId: await CoreId.generate(),
-                items: [
-                    ReadAttributeAcceptResponseItem.from({
-                        result: ResponseItemResult.Accepted,
-                        attributeId: await CoreId.generate(),
-                        attribute: IdentityAttribute.from({
-                            owner: CoreAddress.from((await transportServices1.account.getIdentityInfo()).value.address),
-                            value: GivenName.from("AGivenName")
-                        })
-                    })
-                ]
-            }
-        }
+        }).toJSON(),
+        [
+            {
+                accept: true,
+                newAttribute: IdentityAttribute.from({
+                    owner: CoreAddress.from((await runtimeServices2.transport.account.getIdentityInfo()).value.address),
+                    value: GivenName.from("aGivenName")
+                }).toJSON()
+            } as AcceptReadAttributeRequestItemParametersJSON
+        ]
     );
 }, 30000);
 
@@ -56,75 +46,62 @@ afterAll(() => serviceProvider.stop());
 
 describe("RelationshipDVO", () => {
     test("check the relationship dvo for the templator", async () => {
-        const dtos = (await transportServices1.relationships.getRelationships({})).value;
-        const dvos = await expander1.expandRelationshipDTOs(dtos);
+        const dtos = (await runtimeServices1.transport.relationships.getRelationships({})).value;
+        const dvos = await runtimeServices1.expander.expandRelationshipDTOs(dtos);
         const dto = dtos[0];
         const dvo = dvos[0];
         expect(dvo).toBeDefined();
         expect(dvo.id).toBe(dto.peer);
-        expect(dvo.name).toBe(dto.peer.substring(3, 9));
+        expect(dvo.name).toBe("i18n://dvo.identity.unknown");
         expect(dvo.description).toBe("i18n://dvo.relationship.Active");
         expect(dvo.type).toBe("IdentityDVO");
-        expect(dvo.date).toBe(dto.changes[0].request.createdAt);
+
         expect(dvo.isSelf).toBe(false);
         expect(dvo.relationship!.id).toBe(dto.id);
         expect(dvo.relationship!.direction).toBe("Incoming");
         expect(dvo.relationship!.status).toBe("Active");
         expect(dvo.relationship!.statusText).toBe("i18n://dvo.relationship.Active");
-        expect(dvo.relationship!.changeCount).toBe(1);
-        const change = dvo.relationship!.changes[0];
-        expect(change.id).toBe(dto.changes[0].id);
-        expect(change.type).toBe("RelationshipChangeDVO");
-        expect(change.status).toBe(dto.changes[0].status);
-        expect(change.statusText).toBe("i18n://dvo.relationshipChange.Accepted");
-        expect(change.request.type).toBe("RelationshipChangeRequestDVO");
-        expect(change.request.createdAt).toBe(dto.changes[0].request.createdAt);
-        expect(change.request.createdBy).toBe(dto.changes[0].request.createdBy);
-        expect(change.request.createdByDevice).toBe(dto.changes[0].request.createdByDevice);
-        expect(change.request.content).toBe(dto.changes[0].request.content);
-        expect(change.isOwn).toBe(false);
-        expect(change.response!.type).toBe("RelationshipChangeResponseDVO");
-        expect(change.response!.createdAt).toBe(dto.changes[0].response!.createdAt);
-        expect(change.response!.createdBy).toBe(dto.changes[0].response!.createdBy);
-        expect(change.response!.createdByDevice).toBe(dto.changes[0].response!.createdByDevice);
-        expect(change.response!.content).toBe(dto.changes[0].response!.content);
-        expect(change.date).toBe(dto.changes[0].response!.createdAt);
+
         expect(dvo.relationship!.templateId).toBe(dto.template.id);
     });
+
     test("check the relationship dvo for the requestor", async () => {
-        const dtos = (await transportServices2.relationships.getRelationships({})).value;
-        const dvos = await expander2.expandRelationshipDTOs(dtos);
+        const dtos = (await runtimeServices2.transport.relationships.getRelationships({})).value;
+        const dvos = await runtimeServices2.expander.expandRelationshipDTOs(dtos);
         const dto = dtos[0];
         const dvo = dvos[0];
         expect(dvo).toBeDefined();
         expect(dvo.id).toBe(dto.peer);
-        expect(dvo.name).toBe(dto.peer.substring(3, 9));
+        expect(dvo.name).toBe("i18n://dvo.identity.unknown");
         expect(dvo.description).toBe("i18n://dvo.relationship.Active");
         expect(dvo.type).toBe("IdentityDVO");
-        expect(dvo.date).toBe(dto.changes[0].request.createdAt);
+
         expect(dvo.isSelf).toBe(false);
         expect(dvo.relationship!.id).toBe(dto.id);
         expect(dvo.relationship!.direction).toBe("Outgoing");
         expect(dvo.relationship!.status).toBe("Active");
         expect(dvo.relationship!.statusText).toBe("i18n://dvo.relationship.Active");
-        expect(dvo.relationship!.changeCount).toBe(1);
-        const change = dvo.relationship!.changes[0];
-        expect(change.id).toBe(dto.changes[0].id);
-        expect(change.type).toBe("RelationshipChangeDVO");
-        expect(change.status).toBe(dto.changes[0].status);
-        expect(change.statusText).toBe("i18n://dvo.relationshipChange.Accepted");
-        expect(change.request.type).toBe("RelationshipChangeRequestDVO");
-        expect(change.request.createdAt).toBe(dto.changes[0].request.createdAt);
-        expect(change.request.createdBy).toBe(dto.changes[0].request.createdBy);
-        expect(change.request.createdByDevice).toBe(dto.changes[0].request.createdByDevice);
-        expect(change.request.content).toBe(dto.changes[0].request.content);
-        expect(change.isOwn).toBe(true);
-        expect(change.response!.type).toBe("RelationshipChangeResponseDVO");
-        expect(change.response!.createdAt).toBe(dto.changes[0].response!.createdAt);
-        expect(change.response!.createdBy).toBe(dto.changes[0].response!.createdBy);
-        expect(change.response!.createdByDevice).toBe(dto.changes[0].response!.createdByDevice);
-        expect(change.response!.content).toBe(dto.changes[0].response!.content);
-        expect(change.date).toBe(dto.changes[0].response!.createdAt);
+
         expect(dvo.relationship!.templateId).toBe(dto.template.id);
+    });
+
+    test("check the relationship dvo for the templator with active relationshipSetting", async () => {
+        const dtos = (await runtimeServices1.transport.relationships.getRelationships({})).value;
+        const dto = dtos[0];
+
+        await runtimeServices1.consumption.settings.upsertSettingByKey({
+            key: "relationshipSetting",
+            value: { userTitle: "aTitle", userDescription: "aDescription" },
+            scope: "Relationship",
+            reference: dto.id
+        });
+
+        const dvos = await runtimeServices1.expander.expandRelationshipDTOs(dtos);
+        const dvo = dvos[0];
+
+        expect(dvo).toBeDefined();
+        expect(dvo.name).toBe("aTitle");
+        expect(dvo.originalName).toBe("i18n://dvo.identity.unknown");
+        expect(dvo.description).toBe("aDescription");
     });
 });

@@ -1,7 +1,8 @@
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController, LocalAttribute } from "@nmshd/consumption";
-import { AccountController, CoreId } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { CoreId } from "@nmshd/core-types";
+import { AccountController } from "@nmshd/transport";
+import { Inject } from "@nmshd/typescript-ioc";
 import { AttributeIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
 export interface DeleteRepositoryAttributeRequest {
@@ -25,13 +26,14 @@ export class DeleteRepositoryAttributeUseCase extends UseCase<DeleteRepositoryAt
 
     protected async executeInternal(request: DeleteRepositoryAttributeRequest): Promise<Result<void>> {
         const repositoryAttribute = await this.attributesController.getLocalAttribute(CoreId.from(request.attributeId));
-
-        if (typeof repositoryAttribute === "undefined") {
-            return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
-        }
+        if (!repositoryAttribute) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
 
         if (!repositoryAttribute.isRepositoryAttribute(this.accountController.identity.address)) {
-            return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(CoreId.from(request.attributeId)));
+            return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(request.attributeId));
+        }
+
+        if (repositoryAttribute.parentId) {
+            return Result.fail(RuntimeErrors.attributes.cannotSeparatelyDeleteChildOfComplexAttribute(request.attributeId));
         }
 
         const validationResult = await this.attributesController.validateFullAttributeDeletionProcess(repositoryAttribute);

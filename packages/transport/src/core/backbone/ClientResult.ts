@@ -1,6 +1,6 @@
 import { ApplicationError } from "@js-soft/ts-utils";
+import { CoreDate } from "@nmshd/core-types";
 import { TransportError } from "../TransportError";
-import { CoreDate } from "../types/CoreDate";
 import { PlatformParameters } from "./PlatformParameters";
 
 export class ClientResult<T> {
@@ -12,6 +12,7 @@ export class ClientResult<T> {
     public readonly responseDuration?: number;
     public readonly responseTime?: CoreDate;
     public readonly traceId?: string;
+    public readonly correlationId?: string;
 
     protected constructor(isSuccess: boolean, value?: T, error?: ApplicationError, platformParameters?: PlatformParameters) {
         if (isSuccess && error) {
@@ -37,6 +38,8 @@ export class ClientResult<T> {
             this.responseTime = platformParameters.responseTime ? CoreDate.from(platformParameters.responseTime) : undefined;
 
             this.traceId = platformParameters.traceId;
+
+            this.correlationId = platformParameters.correlationId;
         }
     }
 
@@ -57,9 +60,7 @@ export class ClientResult<T> {
     }
 
     public get value(): T {
-        if (!this._isSuccess) {
-            throw this.error;
-        }
+        if (!this._isSuccess) throw this.error;
 
         return this._value!;
     }

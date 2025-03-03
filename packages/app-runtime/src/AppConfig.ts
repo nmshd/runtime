@@ -1,38 +1,39 @@
 import { RuntimeConfig } from "@nmshd/runtime";
-import { IConfigOverwrite, Realm } from "@nmshd/transport";
+import { IConfigOverwrite } from "@nmshd/transport";
 import { defaultsDeep } from "lodash";
 
 export interface AppConfig extends RuntimeConfig {
-    logging: any;
     accountsDbName: string;
     applicationId: string;
+    pushService: "apns" | "fcm" | "none" | "dummy";
     applePushEnvironment?: "Development" | "Production";
     allowMultipleAccountsWithSameAddress: boolean;
+    databaseFolder: string;
 }
 
 export interface AppConfigOverwrite {
     transportLibrary?: Omit<IConfigOverwrite, "supportedIdentityVersion">;
-    logging?: any;
     accountsDbName?: string;
-    applicationId: string;
+    applicationId?: string;
+    pushService?: "apns" | "fcm" | "none" | "dummy";
     applePushEnvironment?: "Development" | "Production";
     allowMultipleAccountsWithSameAddress?: boolean;
+    databaseFolder?: string;
+    modules?: Record<string, { enabled?: boolean; [x: string | number | symbol]: unknown }>;
 }
 
-export function createAppConfig(...configs: AppConfigOverwrite[]): AppConfig {
-    const appConfig = {
+export function createAppConfig(...configs: (AppConfigOverwrite | AppConfig)[]): AppConfig {
+    const appConfig: Omit<AppConfig, "transportLibrary" | "applicationId"> & {
+        transportLibrary: Omit<IConfigOverwrite, "supportedIdentityVersion" | "platformClientId" | "platformClientSecret" | "baseUrl">;
+    } = {
         accountsDbName: "accounts",
+        pushService: "none",
+        allowMultipleAccountsWithSameAddress: false,
+        databaseFolder: "./data",
         transportLibrary: {
-            realm: Realm.Prod,
             datawalletEnabled: true
         },
         modules: {
-            appLaunch: {
-                name: "appLaunch",
-                displayName: "App Launch Module",
-                location: "appLaunch",
-                enabled: true
-            },
             pushNotification: {
                 name: "pushNotification",
                 displayName: "Push Notification Module",
@@ -49,6 +50,12 @@ export function createAppConfig(...configs: AppConfigOverwrite[]): AppConfig {
                 name: "onboardingChangeReceived",
                 displayName: "Onboarding Change Received Module",
                 location: "onboardingChangeReceived",
+                enabled: true
+            },
+            identityDeletionProcessStatusChanged: {
+                name: "identityDeletionProcessStatusChanged",
+                displayName: "Identity Deletion Process Status Changed Module",
+                location: "identityDeletionProcessStatusChanged",
                 enabled: true
             },
             messageReceived: {
@@ -68,6 +75,12 @@ export function createAppConfig(...configs: AppConfigOverwrite[]): AppConfig {
                 displayName: "Relationship Template Processed",
                 location: "relationshipTemplateProcessed",
                 enabled: true
+            },
+            sse: {
+                name: "SSEModule",
+                displayName: "SSE Module",
+                location: "sse",
+                enabled: false
             },
             decider: {
                 displayName: "Decider Module",
@@ -93,8 +106,7 @@ export function createAppConfig(...configs: AppConfigOverwrite[]): AppConfig {
                 displayName: "Notification Module",
                 location: "@nmshd/runtime:NotificationModule"
             }
-        },
-        allowMultipleAccountsWithSameAddress: false
+        }
     };
 
     const mergedConfig = defaultsDeep({}, ...configs, appConfig);

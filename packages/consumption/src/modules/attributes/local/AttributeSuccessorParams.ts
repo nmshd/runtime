@@ -1,6 +1,6 @@
 import { Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { IdentityAttribute, RelationshipAttribute } from "@nmshd/content";
-import { CoreDate, CoreId, ICoreDate, ICoreId } from "@nmshd/transport";
+import { CoreDate, CoreId, ICoreDate, ICoreId } from "@nmshd/core-types";
 import { ILocalAttribute, LocalAttributeJSON } from "./LocalAttribute";
 import { LocalAttributeShareInfo } from "./LocalAttributeShareInfo";
 

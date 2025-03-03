@@ -1,13 +1,16 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
+import { CoreDate, ICoreDate } from "@nmshd/core-types";
 import { CryptoSecretKey, ICryptoSecretKey } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
-import { CoreDate, CoreSynchronizable, ICoreDate, ICoreSynchronizable } from "../../../core";
+import { CoreSynchronizable, ICoreSynchronizable } from "../../../core";
+import { IPasswordProtection, PasswordProtection } from "../../../core/types/PasswordProtection";
 import { TokenReference } from "../transmission/TokenReference";
 import { CachedToken, ICachedToken } from "./CachedToken";
 
 export interface IToken extends ICoreSynchronizable {
     secretKey: ICryptoSecretKey;
     isOwn: boolean;
+    passwordProtection?: IPasswordProtection;
     cache?: ICachedToken;
     cachedAt?: ICoreDate;
     metadata?: any;
@@ -17,7 +20,7 @@ export interface IToken extends ICoreSynchronizable {
 @type("Token")
 export class Token extends CoreSynchronizable implements IToken {
     public override readonly technicalProperties = ["@type", "@context", nameof<Token>((r) => r.secretKey), nameof<Token>((r) => r.isOwn)];
-
+    public override readonly userdataProperties = [nameof<Token>((r) => r.passwordProtection)];
     public override readonly metadataProperties = [nameof<Token>((r) => r.metadata), nameof<Token>((r) => r.metadataModifiedAt)];
 
     @validate()
@@ -27,6 +30,10 @@ export class Token extends CoreSynchronizable implements IToken {
     @validate()
     @serialize()
     public isOwn: boolean;
+
+    @validate({ nullable: true })
+    @serialize()
+    public passwordProtection?: PasswordProtection;
 
     @validate({ nullable: true })
     @serialize()
@@ -49,7 +56,12 @@ export class Token extends CoreSynchronizable implements IToken {
     }
 
     public toTokenReference(): TokenReference {
-        return TokenReference.from({ id: this.id, key: this.secretKey });
+        return TokenReference.from({
+            id: this.id,
+            key: this.secretKey,
+            forIdentityTruncated: this.cache!.forIdentity?.toString().slice(-4),
+            passwordProtection: this.passwordProtection?.toSharedPasswordProtection()
+        });
     }
 
     public truncate(): string {

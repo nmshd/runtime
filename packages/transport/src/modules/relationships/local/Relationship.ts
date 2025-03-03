@@ -1,17 +1,19 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
+import { ISerializable, serialize, type, validate } from "@js-soft/ts-serval";
+import { CoreDate, CoreId, ICoreId } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
-import { CoreDate, CoreId, CoreSynchronizable, ICoreId, ICoreSynchronizable, TransportError } from "../../../core";
-import { IIdentity, Identity } from "../../accounts/data/Identity";
+import { CoreSynchronizable, ICoreSynchronizable, TransportError } from "../../../core";
+import { Identity, IIdentity } from "../../accounts/data/Identity";
 import { IRelationshipTemplate } from "../../relationshipTemplates/local/RelationshipTemplate";
-import { BackboneGetRelationshipsResponse } from "../backbone/BackboneGetRelationships";
+import { BackboneGetRelationshipResponse } from "../backbone/BackboneGetRelationships";
 import { RelationshipStatus } from "../transmission/RelationshipStatus";
-import { IRelationshipChange } from "../transmission/changes/RelationshipChange";
-import { RelationshipChangeResponse } from "../transmission/changes/RelationshipChangeResponse";
 import { CachedRelationship, ICachedRelationship } from "./CachedRelationship";
+import { IPeerDeletionInfo, PeerDeletionInfo } from "./PeerDeletionInfo";
+import { RelationshipAuditLog } from "./RelationshipAuditLog";
 
 export interface IRelationship extends ICoreSynchronizable {
     relationshipSecretId: ICoreId;
     peer: IIdentity;
+    peerDeletionInfo?: IPeerDeletionInfo;
     status: RelationshipStatus;
 
     cache?: ICachedRelationship;
@@ -28,7 +30,8 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
         "@context",
         nameof<Relationship>((r) => r.relationshipSecretId),
         nameof<Relationship>((r) => r.peer),
-        nameof<Relationship>((r) => r.status)
+        nameof<Relationship>((r) => r.status),
+        nameof<Relationship>((r) => r.peerDeletionInfo)
     ];
 
     public override readonly metadataProperties = [nameof<Relationship>((r) => r.metadata), nameof<Relationship>((r) => r.metadataModifiedAt)];
@@ -40,6 +43,10 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
     @validate()
     @serialize()
     public peer: Identity;
+
+    @validate({ nullable: true })
+    @serialize()
+    public peerDeletionInfo?: PeerDeletionInfo;
 
     @validate()
     @serialize()
@@ -72,32 +79,17 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
         return json;
     }
 
-    public static fromRequestSent(id: CoreId, template: IRelationshipTemplate, peer: IIdentity, creationChange: IRelationshipChange, relationshipSecretId: CoreId): Relationship {
-        const cache = CachedRelationship.from({
-            changes: [creationChange],
-            template: template
-        });
-
-        return Relationship.from({
-            id: id,
-            peer: peer,
-            status: RelationshipStatus.Pending,
-            cache: cache,
-            cachedAt: CoreDate.utc(),
-            relationshipSecretId: relationshipSecretId
-        });
-    }
-
-    public static fromCreationChangeReceived(
-        response: BackboneGetRelationshipsResponse,
+    public static fromBackboneAndCreationContent(
+        response: BackboneGetRelationshipResponse,
         template: IRelationshipTemplate,
         peer: IIdentity,
-        creationChange: IRelationshipChange,
+        creationContent: ISerializable,
         relationshipSecretId: CoreId
     ): Relationship {
         const cache = CachedRelationship.from({
-            changes: [creationChange],
-            template: template
+            creationContent,
+            template: template,
+            auditLog: RelationshipAuditLog.fromBackboneAuditLog(response.auditLog)
         });
         return Relationship.from({
             id: CoreId.from(response.id),
@@ -107,27 +99,6 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
             cache: cache,
             cachedAt: CoreDate.utc()
         });
-    }
-
-    public toActive(response: RelationshipChangeResponse): void {
-        if (!this.cache) throw this.newCacheEmptyError();
-
-        this.cache.changes[0].response = response;
-        this.status = RelationshipStatus.Active;
-    }
-
-    public toRejected(response: RelationshipChangeResponse): void {
-        if (!this.cache) throw this.newCacheEmptyError();
-
-        this.cache.changes[0].response = response;
-        this.status = RelationshipStatus.Rejected;
-    }
-
-    public toRevoked(response: RelationshipChangeResponse): void {
-        if (!this.cache) throw this.newCacheEmptyError();
-
-        this.cache.changes[0].response = response;
-        this.status = RelationshipStatus.Revoked;
     }
 
     public static from(value: IRelationship): Relationship {

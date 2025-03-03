@@ -7,13 +7,11 @@ import { NodeLoggerFactory } from "@js-soft/node-logger";
 import { SimpleLoggerFactory } from "@js-soft/simple-logger";
 import { ISerializable, Serializable } from "@js-soft/ts-serval";
 import { EventBus, EventEmitter2EventBus, sleep } from "@js-soft/ts-utils";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
 import {
     AccountController,
     ChangedItems,
-    CoreAddress,
-    CoreDate,
-    CoreId,
     File,
     IConfigOverwrite,
     ISendFileParameters,
@@ -26,7 +24,14 @@ import {
     TransportLoggerFactory
 } from "@nmshd/transport";
 import { LogLevel } from "typescript-logging";
-import { ConsumptionController, NotificationItemConstructor, NotificationItemProcessorConstructor, RequestItemConstructor, RequestItemProcessorConstructor } from "../../src";
+import {
+    ConsumptionConfig,
+    ConsumptionController,
+    NotificationItemConstructor,
+    NotificationItemProcessorConstructor,
+    RequestItemConstructor,
+    RequestItemProcessorConstructor
+} from "../../src";
 
 export const loggerFactory = new NodeLoggerFactory({
     appenders: {
@@ -84,50 +89,7 @@ export class TestUtil {
 
         expect(error).toBeInstanceOf(Error);
 
-        if (typeof errorMessageRegexp === "undefined") {
-            return;
-        }
-
-        if (typeof errorMessageRegexp === "function") {
-            errorMessageRegexp(error!);
-            return;
-        }
-
-        if (typeof errorMessageRegexp === "string") {
-            errorMessageRegexp = new RegExp(errorMessageRegexp.replaceAll("*", ".*"));
-        }
-
-        expect(error!.message).toMatch(new RegExp(errorMessageRegexp));
-    }
-
-    public static async expectThrowsAsync(method: Function | Promise<any>, customExceptionMatcher?: (e: Error) => void): Promise<void>;
-    public static async expectThrowsAsync(method: Function | Promise<any>, errorMessagePatternOrRegexp: RegExp): Promise<void>;
-    /**
-     *
-     * @param method The function which should throw the exception
-     * @param errorMessagePattern the pattern the error message should match (asterisks ('\*') are wildcards that correspond to '.\*' in regex)
-     */
-    public static async expectThrowsAsync(method: Function | Promise<any>, errorMessagePattern: string): Promise<void>;
-
-    public static async expectThrowsAsync(method: Function | Promise<any>, errorMessageRegexp: RegExp | string | ((e: Error) => void) | undefined): Promise<void> {
-        let error: Error | undefined;
-        try {
-            if (typeof method === "function") {
-                await method();
-            } else {
-                await method;
-            }
-        } catch (err: unknown) {
-            if (!(err instanceof Error)) throw err;
-
-            error = err;
-        }
-
-        expect(error).toBeInstanceOf(Error);
-
-        if (typeof errorMessageRegexp === "undefined") {
-            return;
-        }
+        if (!errorMessageRegexp) return;
 
         if (typeof errorMessageRegexp === "function") {
             errorMessageRegexp(error!);
@@ -163,6 +125,7 @@ export class TestUtil {
             baseUrl: globalThis.process.env.NMSHD_TEST_BASEURL!,
             platformClientId: globalThis.process.env.NMSHD_TEST_CLIENTID!,
             platformClientSecret: globalThis.process.env.NMSHD_TEST_CLIENTSECRET!,
+            addressGenerationHostnameOverride: globalThis.process.env.NMSHD_TEST_ADDRESS_GENERATION_HOSTNAME_OVERRIDE,
             debug: true,
             supportedIdentityVersion: 1
         };
@@ -181,12 +144,13 @@ export class TestUtil {
         transport: Transport,
         count: number,
         requestItemProcessors = new Map<RequestItemConstructor, RequestItemProcessorConstructor>(),
-        notificationItemProcessors = new Map<NotificationItemConstructor, NotificationItemProcessorConstructor>()
+        notificationItemProcessors = new Map<NotificationItemConstructor, NotificationItemProcessorConstructor>(),
+        customConsumptionConfig?: ConsumptionConfig
     ): Promise<{ accountController: AccountController; consumptionController: ConsumptionController }[]> {
         const accounts = [];
 
         for (let i = 0; i < count; i++) {
-            const account = await this.createAccount(transport, requestItemProcessors, notificationItemProcessors);
+            const account = await this.createAccount(transport, requestItemProcessors, notificationItemProcessors, customConsumptionConfig);
             accounts.push(account);
         }
 
@@ -196,15 +160,52 @@ export class TestUtil {
     private static async createAccount(
         transport: Transport,
         requestItemProcessors = new Map<RequestItemConstructor, RequestItemProcessorConstructor>(),
-        notificationItemProcessors = new Map<NotificationItemConstructor, NotificationItemProcessorConstructor>()
+        notificationItemProcessors = new Map<NotificationItemConstructor, NotificationItemProcessorConstructor>(),
+        customConsumptionConfig?: ConsumptionConfig
     ): Promise<{ accountController: AccountController; consumptionController: ConsumptionController }> {
         const db = await transport.createDatabase(`x${Math.random().toString(36).substring(7)}`);
         const accountController = new AccountController(transport, db, transport.config);
         await accountController.init();
 
-        const consumptionController = await new ConsumptionController(transport, accountController).init(requestItemProcessors, notificationItemProcessors);
+        const consumptionController = await new ConsumptionController(transport, accountController, customConsumptionConfig ?? { setDefaultRepositoryAttributes: false }).init(
+            requestItemProcessors,
+            notificationItemProcessors
+        );
 
         return { accountController, consumptionController };
+    }
+
+    public static async addPendingRelationship(
+        from: AccountController,
+        to: AccountController
+    ): Promise<{ pendingRelationshipFromSelf: Relationship; pendingRelationshipPeer: Relationship }> {
+        const templateFrom = await from.relationshipTemplates.sendRelationshipTemplate({
+            content: {
+                mycontent: "template"
+            },
+            expiresAt: CoreDate.utc().add({ minutes: 5 }),
+            maxNumberOfAllocations: 1
+        });
+
+        const reference = templateFrom.toRelationshipTemplateReference().truncate();
+        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(reference);
+
+        await to.relationships.sendRelationship({
+            template: templateTo,
+            creationContent: {
+                mycontent: "request"
+            }
+        });
+
+        const pendingRelationshipPeer = (await to.relationships.getRelationshipToIdentity(from.identity.address))!;
+        expect(pendingRelationshipPeer.status).toStrictEqual(RelationshipStatus.Pending);
+
+        const syncedRelationships = await TestUtil.syncUntilHasRelationships(from);
+        expect(syncedRelationships).toHaveLength(1);
+        const pendingRelationshipFromSelf = syncedRelationships[0];
+        expect(pendingRelationshipFromSelf.status).toStrictEqual(RelationshipStatus.Pending);
+
+        return { pendingRelationshipFromSelf, pendingRelationshipPeer };
     }
 
     public static async addRelationship(from: AccountController, to: AccountController, templateContent?: any, requestContent?: any): Promise<Relationship[]> {
@@ -241,11 +242,11 @@ export class TestUtil {
             throw new Error("token content not instanceof TokenContentRelationshipTemplate");
         }
 
-        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplate(receivedToken.cache!.content.templateId, receivedToken.cache!.content.secretKey);
+        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByTokenContent(receivedToken.cache!.content);
 
         const relRequest = await to.relationships.sendRelationship({
             template: templateTo,
-            content: requestContent ?? {
+            creationContent: requestContent ?? {
                 metadata: { mycontent: "request" }
             }
         });
@@ -256,7 +257,7 @@ export class TestUtil {
         const pendingRelationship = syncedRelationships[0];
         expect(pendingRelationship.status).toStrictEqual(RelationshipStatus.Pending);
 
-        const acceptedRelationshipFromSelf = await from.relationships.acceptChange(pendingRelationship.cache!.creationChange, {});
+        const acceptedRelationshipFromSelf = await from.relationships.accept(pendingRelationship.id);
         expect(acceptedRelationshipFromSelf.status).toStrictEqual(RelationshipStatus.Active);
 
         // Get accepted relationship
@@ -272,6 +273,77 @@ export class TestUtil {
         expect(relRequest.id.toString()).toStrictEqual(acceptedRelationshipPeer.id.toString());
 
         return [acceptedRelationshipFromSelf, acceptedRelationshipPeer];
+    }
+
+    public static async ensureActiveRelationship(from: AccountController, to: AccountController): Promise<void> {
+        const toAddress = to.identity.address.toString();
+
+        const queryForPendingRelationships = {
+            "peer.address": toAddress,
+            status: RelationshipStatus.Pending
+        };
+        const pendingRelationships = await from.relationships.getRelationships(queryForPendingRelationships);
+
+        if (pendingRelationships.length !== 0) {
+            await from.relationships.accept(pendingRelationships[0].id);
+            await TestUtil.syncUntilHasRelationships(to);
+            return;
+        }
+
+        const queryForActiveRelationships = {
+            "peer.address": toAddress,
+            status: RelationshipStatus.Active
+        };
+        const activeRelationships = await from.relationships.getRelationships(queryForActiveRelationships);
+
+        if (activeRelationships.length === 0) {
+            await TestUtil.addRelationship(from, to);
+            return;
+        }
+
+        return;
+    }
+
+    public static async terminateRelationship(
+        from: AccountController,
+        to: AccountController
+    ): Promise<{ terminatedRelationshipFromSelf: Relationship; terminatedRelationshipPeer: Relationship }> {
+        const relationshipId = (await from.relationships.getRelationshipToIdentity(to.identity.address))!.id;
+        const terminatedRelationshipFromSelf = await from.relationships.terminate(relationshipId);
+        const terminatedRelationshipPeer = (await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
+
+        return { terminatedRelationshipFromSelf, terminatedRelationshipPeer };
+    }
+
+    public static async decomposeRelationship(fromAccount: AccountController, fromConsumption: ConsumptionController, to: AccountController): Promise<Relationship> {
+        const relationship = (await fromAccount.relationships.getRelationshipToIdentity(to.identity.address))!;
+        await fromAccount.relationships.decompose(relationship.id);
+        await fromAccount.cleanupDataOfDecomposedRelationship(relationship);
+        await fromConsumption.cleanupDataOfDecomposedRelationship(to.identity.address, relationship.id);
+        const decomposedRelationshipPeer = (await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
+
+        return decomposedRelationshipPeer;
+    }
+
+    public static async mutualDecomposeIfActiveRelationshipExists(
+        fromAccount: AccountController,
+        fromConsumption: ConsumptionController,
+        toAccount: AccountController,
+        toConsumption: ConsumptionController
+    ): Promise<void> {
+        const queryForActiveRelationships = {
+            "peer.address": toAccount.identity.address.toString(),
+            status: RelationshipStatus.Active
+        };
+        const activeRelationshipsToPeer = await fromAccount.relationships.getRelationships(queryForActiveRelationships);
+
+        if (activeRelationshipsToPeer.length !== 0) {
+            await TestUtil.terminateRelationship(fromAccount, toAccount);
+            await TestUtil.decomposeRelationship(fromAccount, fromConsumption, toAccount);
+            await TestUtil.decomposeRelationship(toAccount, toConsumption, fromAccount);
+        }
+
+        return;
     }
 
     /**
@@ -351,7 +423,7 @@ export class TestUtil {
             content: "request"
         };
 
-        return await account.relationships.sendRelationship({ template, content });
+        return await account.relationships.sendRelationship({ template, creationContent: content });
     }
 
     public static async fetchRelationshipTemplateFromTokenReference(account: AccountController, tokenReference: string): Promise<RelationshipTemplate> {
@@ -361,7 +433,7 @@ export class TestUtil {
             throw new Error("token content not instanceof TokenContentRelationshipTemplate");
         }
 
-        const template = await account.relationshipTemplates.loadPeerRelationshipTemplate(receivedToken.cache!.content.templateId, receivedToken.cache!.content.secretKey);
+        const template = await account.relationshipTemplates.loadPeerRelationshipTemplateByTokenContent(receivedToken.cache!.content);
         return template;
     }
 
@@ -393,7 +465,7 @@ export class TestUtil {
     public static async uploadFile(from: AccountController, fileContent: CoreBuffer): Promise<File> {
         const params: ISendFileParameters = {
             buffer: fileContent,
-            title: "Test",
+            title: "aFileName",
             description: "Dies ist eine Beschreibung",
             filename: "Test.bin",
             filemodified: CoreDate.from("2019-09-30T00:00:00.000Z"),
@@ -403,5 +475,10 @@ export class TestUtil {
 
         const file = await from.files.sendFile(params);
         return file;
+    }
+
+    public static async cleanupAttributes(consumptionController: ConsumptionController): Promise<void> {
+        const attributes = await consumptionController.attributes.getLocalAttributes({});
+        await Promise.all(attributes.map((attribute) => consumptionController.attributes.deleteAttributeUnsafe(attribute.id)));
     }
 }

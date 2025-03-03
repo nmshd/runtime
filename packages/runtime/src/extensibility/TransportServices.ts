@@ -1,12 +1,13 @@
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import {
     AccountFacade,
     ChallengesFacade,
     DevicesFacade,
     FilesFacade,
     IdentityDeletionProcessesFacade,
-    IdentityFacade,
+    IdentityRecoveryKitsFacade,
     MessagesFacade,
+    PublicRelationshipTemplateReferencesFacade,
     RelationshipsFacade,
     RelationshipTemplatesFacade,
     TokensFacade
@@ -14,15 +15,16 @@ import {
 
 export class TransportServices {
     public constructor(
+        @Inject public readonly account: AccountFacade,
+        @Inject public readonly challenges: ChallengesFacade,
+        @Inject public readonly devices: DevicesFacade,
         @Inject public readonly files: FilesFacade,
+        @Inject public readonly identityDeletionProcesses: IdentityDeletionProcessesFacade,
+        @Inject public readonly identityRecoveryKits: IdentityRecoveryKitsFacade,
         @Inject public readonly messages: MessagesFacade,
+        @Inject public readonly publicRelationshipTemplateReferences: PublicRelationshipTemplateReferencesFacade,
         @Inject public readonly relationships: RelationshipsFacade,
         @Inject public readonly relationshipTemplates: RelationshipTemplatesFacade,
-        @Inject public readonly tokens: TokensFacade,
-        @Inject public readonly account: AccountFacade,
-        @Inject public readonly devices: DevicesFacade,
-        @Inject public readonly challenges: ChallengesFacade,
-        @Inject public readonly identity: IdentityFacade,
-        @Inject public readonly identityDeletionProcesses: IdentityDeletionProcessesFacade
+        @Inject public readonly tokens: TokensFacade
     ) {}
 }

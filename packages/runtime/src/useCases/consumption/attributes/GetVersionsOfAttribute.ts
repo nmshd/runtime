@@ -1,7 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController, LocalAttribute } from "@nmshd/consumption";
-import { CoreId } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { CoreId } from "@nmshd/core-types";
+import { Inject } from "@nmshd/typescript-ioc";
 import { LocalAttributeDTO } from "../../../types";
 import { AttributeIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { AttributeMapper } from "./AttributeMapper";
@@ -26,9 +26,7 @@ export class GetVersionsOfAttributeUseCase extends UseCase<GetVersionsOfAttribut
 
     protected async executeInternal(request: GetVersionsOfAttributeRequest): Promise<Result<LocalAttributeDTO[]>> {
         const attribute = await this.attributeController.getLocalAttribute(CoreId.from(request.attributeId));
-        if (typeof attribute === "undefined") {
-            throw RuntimeErrors.general.recordNotFound(LocalAttribute);
-        }
+        if (!attribute) throw RuntimeErrors.general.recordNotFound(LocalAttribute);
 
         const allVersions = await this.attributeController.getVersionsOfAttribute(CoreId.from(request.attributeId));
 

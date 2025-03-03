@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { LocalAttributeListenerDTO } from "../../../types";
 import { GetAttributeListenerRequest, GetAttributeListenersUseCase, GetAttributeListenerUseCase } from "../../../useCases";
 

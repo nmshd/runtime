@@ -1,5 +1,7 @@
+import { Event } from "@js-soft/ts-utils";
 import { AcceptResponseItem, RejectResponseItem, Request, RequestItem, ResponseItem } from "@nmshd/content";
-import { AccountController, CoreAddress } from "@nmshd/transport";
+import { CoreAddress } from "@nmshd/core-types";
+import { AccountController } from "@nmshd/transport";
 import { ConsumptionController } from "../../../consumption/ConsumptionController";
 import { ValidationResult } from "../../common/ValidationResult";
 import { AcceptRequestItemParametersJSON } from "../incoming/decide/AcceptRequestItemParameters";
@@ -31,5 +33,5 @@ export abstract class AbstractRequestItemProcessor<
         requestItem: TRequestItem,
         requestInfo: LocalRequestInfo
     ): ValidationResult | Promise<ValidationResult>;
-    public abstract applyIncomingResponseItem(responseItem: ResponseItem, requestItem: TRequestItem, requestInfo: LocalRequestInfo): void | Promise<void>;
+    public abstract applyIncomingResponseItem(responseItem: ResponseItem, requestItem: TRequestItem, requestInfo: LocalRequestInfo): Event | void | Promise<Event | void>;
 }

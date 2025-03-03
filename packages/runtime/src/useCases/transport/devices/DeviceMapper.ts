@@ -1,5 +1,6 @@
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CryptoSecretKey, CryptoSignaturePrivateKey, CryptoSignaturePublicKey } from "@nmshd/crypto";
-import { CoreAddress, CoreDate, CoreId, Device, DeviceSharedSecret, Realm } from "@nmshd/transport";
+import { Device, DeviceSharedSecret } from "@nmshd/transport";
 import { DeviceDTO, DeviceOnboardingInfoDTO } from "../../../types";
 
 export class DeviceMapper {
@@ -18,7 +19,8 @@ export class DeviceMapper {
             operatingSystem: device.operatingSystem,
             publicKey: device.publicKey?.toBase64(false),
             isCurrentDevice: isCurrentDevice,
-            isOffboarded: device.isOffboarded
+            isOffboarded: device.isOffboarded,
+            isBackupDevice: device.isBackupDevice
         };
     }
 
@@ -35,12 +37,12 @@ export class DeviceMapper {
             identityPrivateKey: deviceSharedSecret.identityPrivateKey ? deviceSharedSecret.identityPrivateKey.toBase64(false) : undefined,
             identity: {
                 address: deviceSharedSecret.identity.address.toString(),
-                publicKey: deviceSharedSecret.identity.publicKey.toBase64(false),
-                realm: deviceSharedSecret.identity.realm.toString()
+                publicKey: deviceSharedSecret.identity.publicKey.toBase64(false)
             },
             password: deviceSharedSecret.password,
             username: deviceSharedSecret.username,
-            profileName: deviceSharedSecret.profileName
+            profileName: deviceSharedSecret.profileName,
+            isBackupDevice: deviceSharedSecret.isBackupDevice
         };
     }
 
@@ -57,12 +59,12 @@ export class DeviceMapper {
             identityPrivateKey: deviceOnboardingDTO.identityPrivateKey ? CryptoSignaturePrivateKey.fromBase64(deviceOnboardingDTO.identityPrivateKey) : undefined,
             identity: {
                 address: CoreAddress.from(deviceOnboardingDTO.identity.address),
-                publicKey: CryptoSignaturePublicKey.fromBase64(deviceOnboardingDTO.identity.publicKey),
-                realm: deviceOnboardingDTO.identity.realm as Realm
+                publicKey: CryptoSignaturePublicKey.fromBase64(deviceOnboardingDTO.identity.publicKey)
             },
             password: deviceOnboardingDTO.password,
             username: deviceOnboardingDTO.username,
-            profileName: deviceOnboardingDTO.profileName
+            profileName: deviceOnboardingDTO.profileName,
+            isBackupDevice: deviceOnboardingDTO.isBackupDevice
         });
         return sharedSecret;
     }

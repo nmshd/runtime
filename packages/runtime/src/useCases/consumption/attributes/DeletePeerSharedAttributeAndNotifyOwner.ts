@@ -1,8 +1,10 @@
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController, ConsumptionIds, LocalAttribute } from "@nmshd/consumption";
 import { Notification, PeerSharedAttributeDeletedByPeerNotificationItem } from "@nmshd/content";
-import { AccountController, CoreId, MessageController } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { CoreId } from "@nmshd/core-types";
+import { AccountController, MessageController, RelationshipsController } from "@nmshd/transport";
+import { Inject } from "@nmshd/typescript-ioc";
+import { RelationshipStatus } from "../../../types";
 import { AttributeIdString, NotificationIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
 export interface DeletePeerSharedAttributeAndNotifyOwnerRequest {
@@ -10,7 +12,7 @@ export interface DeletePeerSharedAttributeAndNotifyOwnerRequest {
 }
 
 export interface DeletePeerSharedAttributeAndNotifyOwnerResponse {
-    notificationId: NotificationIdString;
+    notificationId?: NotificationIdString;
 }
 
 class Validator extends SchemaValidator<DeletePeerSharedAttributeAndNotifyOwnerRequest> {
@@ -24,6 +26,7 @@ export class DeletePeerSharedAttributeAndNotifyOwnerUseCase extends UseCase<Dele
         @Inject private readonly attributesController: AttributesController,
         @Inject private readonly accountController: AccountController,
         @Inject private readonly messageController: MessageController,
+        @Inject private readonly relationshipsController: RelationshipsController,
         @Inject validator: Validator
     ) {
         super(validator);
@@ -32,13 +35,15 @@ export class DeletePeerSharedAttributeAndNotifyOwnerUseCase extends UseCase<Dele
     protected async executeInternal(request: DeletePeerSharedAttributeAndNotifyOwnerRequest): Promise<Result<DeletePeerSharedAttributeAndNotifyOwnerResponse>> {
         const peerSharedAttributeId = CoreId.from(request.attributeId);
         const peerSharedAttribute = await this.attributesController.getLocalAttribute(peerSharedAttributeId);
-
-        if (typeof peerSharedAttribute === "undefined") {
-            return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
-        }
+        if (!peerSharedAttribute) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
 
         if (!peerSharedAttribute.isPeerSharedAttribute(peerSharedAttribute.shareInfo?.peer)) {
             return Result.fail(RuntimeErrors.attributes.isNotPeerSharedAttribute(peerSharedAttributeId));
+        }
+
+        const relationshipWithStatusPending = await this.relationshipsController.getRelationshipToIdentity(peerSharedAttribute.shareInfo.peer, RelationshipStatus.Pending);
+        if (relationshipWithStatusPending) {
+            return Result.fail(RuntimeErrors.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending());
         }
 
         const validationResult = await this.attributesController.validateFullAttributeDeletionProcess(peerSharedAttribute);
@@ -47,6 +52,11 @@ export class DeletePeerSharedAttributeAndNotifyOwnerUseCase extends UseCase<Dele
         }
 
         await this.attributesController.executeFullAttributeDeletionProcess(peerSharedAttribute);
+
+        const messageRecipientsValidationResult = await this.messageController.validateMessageRecipients([peerSharedAttribute.shareInfo.peer]);
+        if (messageRecipientsValidationResult.isError) {
+            return Result.ok({});
+        }
 
         const notificationId = await ConsumptionIds.notification.generate();
         const notificationItem = PeerSharedAttributeDeletedByPeerNotificationItem.from({ attributeId: peerSharedAttributeId });

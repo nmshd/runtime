@@ -15,4 +15,5 @@ export interface LocalAccountSession {
     consumptionController: ConsumptionController;
     selectedRelationship?: IdentityDVO;
     expiresAt?: string;
+    devicePushIdentifier?: string;
 }

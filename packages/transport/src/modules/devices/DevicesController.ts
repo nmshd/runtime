@@ -1,4 +1,5 @@
-import { CoreDate, CoreErrors, CoreId } from "../../core";
+import { CoreDate, CoreId } from "@nmshd/core-types";
+import { TransportCoreErrors } from "../../core";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { ControllerName, TransportController } from "../../core/TransportController";
 import { PasswordGenerator } from "../../util";
@@ -21,7 +22,7 @@ export class DevicesController extends TransportController {
     public override async init(): Promise<DevicesController> {
         await super.init();
 
-        this.client = new DeviceAuthClient(this.config, this.parent.authenticator);
+        this.client = new DeviceAuthClient(this.config, this.parent.authenticator, this.transport.correlator);
         this.devices = await this.parent.getSynchronizedCollection(DbCollectionName.Devices);
         return this;
     }
@@ -39,7 +40,21 @@ export class DevicesController extends TransportController {
         await this.devices.create(device);
     }
 
-    private async createDevice(name = "", description?: string, isAdmin = false): Promise<Device> {
+    public async sendDevice(parameters: ISendDeviceParameters): Promise<Device> {
+        if (!parameters.name) {
+            const devices = await this.parent.devices.list();
+            parameters.name = `Device ${devices.length + 1}`;
+        }
+
+        const parsedParams = SendDeviceParameters.from(parameters);
+        const device = await this.createDevice(parsedParams);
+
+        await this.devices.create(device);
+
+        return device;
+    }
+
+    private async createDevice(params: SendDeviceParameters): Promise<Device> {
         const [signedChallenge, devicePwdDn] = await Promise.all([this.parent.challenges.createChallenge(ChallengeType.Identity), PasswordGenerator.createStrongPassword(45, 50)]);
 
         this.log.trace("Device Creation Challenge signed. Creating device on backbone...");
@@ -47,7 +62,8 @@ export class DevicesController extends TransportController {
         const response = (
             await this.client.createDevice({
                 signedChallenge: signedChallenge.toJSON(),
-                devicePassword: devicePwdDn
+                devicePassword: devicePwdDn,
+                isBackupDevice: params.isBackupDevice
             })
         ).value;
 
@@ -57,28 +73,14 @@ export class DevicesController extends TransportController {
             createdAt: CoreDate.from(response.createdAt),
             createdByDevice: CoreId.from(response.createdByDevice),
             id: CoreId.from(response.id),
-            name: name,
-            description: description,
+            name: params.name,
+            description: params.description,
             type: DeviceType.Unknown,
             username: response.username,
             initialPassword: devicePwdDn,
-            isAdmin: isAdmin
+            isAdmin: params.isAdmin,
+            isBackupDevice: response.isBackupDevice
         });
-
-        return device;
-    }
-
-    public async sendDevice(parameters: ISendDeviceParameters): Promise<Device> {
-        parameters = SendDeviceParameters.from(parameters);
-
-        if (!parameters.name) {
-            const devices = await this.parent.devices.list();
-            parameters.name = `Device ${devices.length + 1}`;
-        }
-
-        const device = await this.createDevice(parameters.name, parameters.description, parameters.isAdmin);
-
-        await this.devices.create(device);
 
         return device;
     }
@@ -86,15 +88,13 @@ export class DevicesController extends TransportController {
     public async getSharedSecret(id: CoreId, profileName?: string): Promise<DeviceSharedSecret> {
         const deviceDoc = await this.devices.read(id.toString());
         if (!deviceDoc) {
-            throw CoreErrors.general.recordNotFound(Device, id.toString());
+            throw TransportCoreErrors.general.recordNotFound(Device, id.toString());
         }
 
         const count = await this.devices.count();
         const device = Device.from(deviceDoc);
 
-        if (typeof device.publicKey !== "undefined") {
-            throw CoreErrors.device.alreadyOnboarded();
-        }
+        if (device.publicKey) throw TransportCoreErrors.device.alreadyOnboarded();
 
         const isAdmin = device.isAdmin === true;
 
@@ -105,19 +105,17 @@ export class DevicesController extends TransportController {
     public async update(device: Device): Promise<void> {
         const deviceDoc = await this.devices.read(device.id.toString());
         if (!deviceDoc) {
-            throw CoreErrors.general.recordNotFound(Device, device.id.toString());
+            throw TransportCoreErrors.general.recordNotFound(Device, device.id.toString());
         }
         await this.devices.update(deviceDoc, device);
     }
 
     public async delete(device: Device): Promise<void> {
-        if (typeof device.publicKey !== "undefined") {
-            throw CoreErrors.device.couldNotDeleteDevice("Device is already onboarded.");
-        }
+        if (device.publicKey) throw TransportCoreErrors.device.couldNotDeleteDevice("Device is already onboarded.");
 
         const result = await this.client.deleteDevice(device.id.toString());
         if (result.isError) {
-            throw CoreErrors.device.couldNotDeleteDevice("Backbone did not authorize deletion.", result.error);
+            throw TransportCoreErrors.device.couldNotDeleteDevice("Backbone did not authorize deletion.", result.error);
         }
 
         await this.devices.delete(device);

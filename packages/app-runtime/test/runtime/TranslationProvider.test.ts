@@ -1,6 +1,5 @@
-import { INativeTranslationProvider } from "@js-soft/native-abstractions";
 import { Result } from "@js-soft/ts-utils";
-import { AppRuntime } from "../../src";
+import { AppRuntime, INativeTranslationProvider } from "../../src";
 import { TestUtil } from "../lib";
 
 describe("TranslationProvider", function () {
@@ -11,6 +10,7 @@ describe("TranslationProvider", function () {
 
     beforeAll(async function () {
         runtime = await TestUtil.createRuntime();
+        await runtime.start();
 
         class SpecificTranslationProvider implements INativeTranslationProvider {
             public translate(key: string, ..._values: any[]): Promise<Result<string>> {
@@ -38,7 +38,7 @@ describe("TranslationProvider", function () {
     });
 
     test("should translate 'test' to the default message", async function () {
-        const translation = await runtime.translate("test");
+        const translation = await runtime.translate("aKeyWithoutAvailableTranslation");
         expect(translation).toBeInstanceOf(Result);
         expect(translation.isSuccess).toBe(true);
         expect(translation.value).toBe(noTranslationAvailable);

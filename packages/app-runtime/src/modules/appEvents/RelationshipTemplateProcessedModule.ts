@@ -10,10 +10,10 @@ export class RelationshipTemplateProcessedModule extends AppRuntimeModule<Relati
     }
 
     public start(): void {
-        this.subscribeToEvent(RelationshipTemplateProcessedEvent, this.handleUrlOpen.bind(this));
+        this.subscribeToEvent(RelationshipTemplateProcessedEvent, this.handleRelationshipTemplateProcessed.bind(this));
     }
 
-    private async handleUrlOpen(event: RelationshipTemplateProcessedEvent) {
+    private async handleRelationshipTemplateProcessed(event: RelationshipTemplateProcessedEvent) {
         const services = await this.runtime.getServices(event.eventTargetAddress);
         const uiBridge = await this.runtime.uiBridge();
 
@@ -67,6 +67,20 @@ export class RelationshipTemplateProcessedModule extends AppRuntimeModule<Relati
                         "An error occurred while processing the relationship template."
                     )
                 );
+                break;
+            }
+
+            case RelationshipTemplateProcessedResult.RequestExpired: {
+                await uiBridge.showError(
+                    new UserfriendlyApplicationError(
+                        "error.relationshipTemplateProcessedModule.requestExpired",
+                        "No incoming Request could be created because the Request in the RelationshipTemplate is already expired."
+                    )
+                );
+                break;
+            }
+
+            case RelationshipTemplateProcessedResult.RequestAutomaticallyDecided: {
                 break;
             }
         }

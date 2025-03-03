@@ -1,7 +1,8 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { ISentOutgoingRequestParameters, OutgoingRequestsController } from "@nmshd/consumption";
-import { CoreId, Message, MessageController } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { CoreId } from "@nmshd/core-types";
+import { Message, MessageController } from "@nmshd/transport";
+import { Inject } from "@nmshd/typescript-ioc";
 import { LocalRequestDTO } from "../../../types";
 import { MessageIdString, RequestIdString, RuntimeErrors, UseCase } from "../../common";
 import { RequestMapper } from "./RequestMapper";

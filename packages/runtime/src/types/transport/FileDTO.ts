@@ -1,6 +1,7 @@
 export interface FileDTO {
     id: string;
     filename: string;
+    tags?: string[];
     filesize: number;
     createdAt: string;
     createdBy: string;
@@ -9,7 +10,6 @@ export interface FileDTO {
     mimetype: string;
     isOwn: boolean;
     title: string;
-    secretKey: string;
     description?: string;
     truncatedReference: string;
 }

@@ -1,9 +1,8 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
+import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
+import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreDate, ICoreId } from "@nmshd/core-types";
 import { CryptoCipher, ICryptoCipher } from "@nmshd/crypto";
-import { CoreDate, CoreId, CoreSerializable, ICoreDate, ICoreId, ICoreSerializable } from "../../../core";
-import { CoreAddress, ICoreAddress } from "../../../core/types/CoreAddress";
 
-export interface IMessageEnvelopeRecipient extends ICoreSerializable {
+export interface IMessageEnvelopeRecipient extends ISerializable {
     address: ICoreAddress;
     encryptedKey: ICryptoCipher;
     receivedAt?: ICoreDate;
@@ -11,7 +10,7 @@ export interface IMessageEnvelopeRecipient extends ICoreSerializable {
 }
 
 @type("MessageEnvelopeRecipient")
-export class MessageEnvelopeRecipient extends CoreSerializable implements IMessageEnvelopeRecipient {
+export class MessageEnvelopeRecipient extends Serializable implements IMessageEnvelopeRecipient {
     @validate()
     @serialize()
     public address: CoreAddress;

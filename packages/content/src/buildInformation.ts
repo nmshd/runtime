@@ -1,6 +1,4 @@
 import { buildInformation as servalBuildInformation } from "@js-soft/ts-serval";
-import { buildInformation as cryptoBuildInformation } from "@nmshd/crypto";
-import { buildInformation as transportBuildInformation } from "@nmshd/transport";
 
 export const buildInformation = {
     version: "{{version}}",
@@ -8,9 +6,5 @@ export const buildInformation = {
     date: "{{date}}",
     commit: "{{commit}}",
     dependencies: "{{dependencies}}",
-    libraries: {
-        serval: servalBuildInformation,
-        crypto: cryptoBuildInformation,
-        transport: transportBuildInformation
-    }
+    libraries: { serval: servalBuildInformation }
 };

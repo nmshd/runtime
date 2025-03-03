@@ -30,6 +30,14 @@ class General {
             error
         );
     }
+
+    public noAccountAvailableForIdentityTruncated(): UserfriendlyApplicationError {
+        return new UserfriendlyApplicationError(
+            "error.appruntime.general.noAccountAvailableForIdentityTruncated",
+            "There is no account matching the given 'forIdentityTruncated'.",
+            "It seems no eligible account is available for this action, because the scanned code is intended for a specific Identity that is not available on this device."
+        );
+    }
 }
 
 class Startup {
@@ -83,12 +91,6 @@ class PushNotificationModule {
     }
 }
 
-class MultiAccount {
-    public wrongRealm(): UserfriendlyApplicationError {
-        return new UserfriendlyApplicationError("error.runtime.MultiAccount.WrongRealm", "The given realm is invalid.");
-    }
-}
-
 class Modules {
     public readonly pushNotificationModule = new PushNotificationModule();
 }
@@ -97,5 +99,4 @@ export class AppRuntimeErrors {
     public static readonly general = new General();
     public static readonly startup = new Startup();
     public static readonly modules = new Modules();
-    public static readonly multiAccount = new MultiAccount();
 }

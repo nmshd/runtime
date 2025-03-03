@@ -103,28 +103,29 @@ publicFunctions[RelationshipsController.name] = [
     nameof<RelationshipsController>((r) => r.getRelationships),
     nameof<RelationshipsController>((r) => r.getRelationshipToIdentity),
     nameof<RelationshipsController>((r) => r.getActiveRelationshipToIdentity),
+    nameof<RelationshipsController>((r) => r.getExistingRelationshipToIdentity),
     nameof<RelationshipsController>((r) => r.getRelationship),
     nameof<RelationshipsController>((r) => r.sign),
     nameof<RelationshipsController>((r) => r.verify),
     nameof<RelationshipsController>((r) => r.verifyIdentity),
     nameof<RelationshipsController>((r) => r.sendRelationship),
-    nameof<RelationshipsController>((r) => r.acceptChange),
-    nameof<RelationshipsController>((r) => r.rejectChange),
-    nameof<RelationshipsController>((r) => r.revokeChange),
+    nameof<RelationshipsController>((r) => r.accept),
+    nameof<RelationshipsController>((r) => r.reject),
+    nameof<RelationshipsController>((r) => r.revoke),
     nameof<FileController>((r) => r.updateCache)
 ];
 publicFunctions[RelationshipSecretController.name] = [
     nameof<RelationshipSecretController>((r) => r.init),
     nameof<RelationshipSecretController>((r) => r.createRequestorSecrets),
     nameof<RelationshipSecretController>((r) => r.createTemplatorSecrets),
-    nameof<RelationshipSecretController>((r) => r.getPublicResponse),
+    nameof<RelationshipSecretController>((r) => r.getPublicCreationResponseContentCrypto),
     nameof<RelationshipSecretController>((r) => r.convertSecrets),
-    nameof<RelationshipSecretController>((r) => r.deleteSecretForRequest),
+    nameof<RelationshipSecretController>((r) => r.deleteSecretForRelationship),
     nameof<RelationshipSecretController>((r) => r.decryptTemplate),
     nameof<RelationshipSecretController>((r) => r.verifyTemplate),
-    nameof<RelationshipSecretController>((r) => r.encryptRequest),
+    nameof<RelationshipSecretController>((r) => r.encryptCreationContent),
     nameof<RelationshipSecretController>((r) => r.encrypt),
-    nameof<RelationshipSecretController>((r) => r.decryptRequest),
+    nameof<RelationshipSecretController>((r) => r.decryptCreationContent),
     nameof<RelationshipSecretController>((r) => r.createTemplateKey),
     nameof<RelationshipSecretController>((r) => r.decryptPeer),
     nameof<RelationshipSecretController>((r) => r.verifyOwn),
@@ -154,16 +155,10 @@ publicFunctions[TokenController.name] = [
     nameof<TokenController>((r) => r.sendToken),
     nameof<TokenController>((r) => r.getToken),
     nameof<TokenController>((r) => r.updateCache),
-    nameof<TokenController>((r) => r.loadPeerTokenByTruncated),
-    nameof<TokenController>((r) => r.loadPeerTokenByReference),
-    nameof<TokenController>((r) => r.loadPeerToken)
+    nameof<TokenController>((r) => r.loadPeerTokenByTruncated)
 ];
 
-publicFunctions[AnonymousTokenController.name] = [
-    nameof<AnonymousTokenController>((r) => r.loadPeerToken),
-    nameof<AnonymousTokenController>((r) => r.loadPeerTokenByReference),
-    nameof<AnonymousTokenController>((r) => r.loadPeerTokenByTruncated)
-];
+publicFunctions[AnonymousTokenController.name] = [nameof<AnonymousTokenController>((r) => r.loadPeerTokenByTruncated)];
 
 let account: AccountController;
 const controllers: any = {};
@@ -173,7 +168,6 @@ function testPublicFunctions(controllerName: string) {
         let found = 0;
         for (const functionName of publicFunctions[controllerName]) {
             const item = controllers[controllerName][functionName];
-            // eslint-disable-next-line jest/no-if
             if (!item || typeof item !== "function") continue;
             found++;
         }

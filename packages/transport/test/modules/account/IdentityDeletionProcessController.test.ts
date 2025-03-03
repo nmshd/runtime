@@ -64,7 +64,7 @@ describe("IdentityDeletionProcessController", function () {
         await account.identityDeletionProcess.cancelIdentityDeletionProcess(cancelledIdentityDeletionProcess.id.toString());
         const activeIdentityDeletionProcess = await account.identityDeletionProcess.initiateIdentityDeletionProcess();
         const result = await account.identityDeletionProcess.getIdentityDeletionProcessByStatus(IdentityDeletionProcessStatus.Approved);
-        expect(activeIdentityDeletionProcess.toBase64()).toBe(result!.toBase64());
+        expect(activeIdentityDeletionProcess.toJSON()).toStrictEqual(result!.toJSON());
     });
 
     test("should get an IdentityDeletionProcess after it got updated by the Backbone", async function () {
@@ -121,7 +121,7 @@ describe("IdentityDeletionProcessController", function () {
         await account.identityDeletionProcess.cancelIdentityDeletionProcess(cancelledIdentityDeletionProcess.id.toString());
         const waitingForApprovalIdentityDeletionProcess = await AdminApiClient.startIdentityDeletionProcessFromBackboneAdminApi(account);
         const result = await account.identityDeletionProcess.getIdentityDeletionProcessByStatus(IdentityDeletionProcessStatus.WaitingForApproval);
-        expect(waitingForApprovalIdentityDeletionProcess.toBase64()).toBe(result!.toBase64());
+        expect(waitingForApprovalIdentityDeletionProcess.toJSON()).toStrictEqual(result!.toJSON());
         expect(waitingForApprovalIdentityDeletionProcess.cache!.status).toBe(IdentityDeletionProcessStatus.WaitingForApproval);
     });
 

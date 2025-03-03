@@ -1,5 +1,5 @@
+import { ArbitraryRelationshipCreationContentJSON, RelationshipCreationContentJSON } from "@nmshd/content";
 import { IdentityDTO } from "./IdentityDTO";
-import { RelationshipChangeDTO } from "./RelationshipChangeDTO";
 import { RelationshipTemplateDTO } from "./RelationshipTemplateDTO";
 
 export enum RelationshipStatus {
@@ -7,8 +7,45 @@ export enum RelationshipStatus {
     Active = "Active",
     Rejected = "Rejected",
     Revoked = "Revoked",
-    Terminating = "Terminating",
-    Terminated = "Terminated"
+    Terminated = "Terminated",
+    DeletionProposed = "DeletionProposed"
+}
+
+export enum RelationshipAuditLogEntryReason {
+    Creation = "Creation",
+    AcceptanceOfCreation = "AcceptanceOfCreation",
+    RejectionOfCreation = "RejectionOfCreation",
+    RevocationOfCreation = "RevocationOfCreation",
+    Termination = "Termination",
+    ReactivationRequested = "ReactivationRequested",
+    AcceptanceOfReactivation = "AcceptanceOfReactivation",
+    RejectionOfReactivation = "RejectionOfReactivation",
+    RevocationOfReactivation = "RevocationOfReactivation",
+    Decomposition = "Decomposition",
+    DecompositionDueToIdentityDeletion = "DecompositionDueToIdentityDeletion"
+}
+
+export interface RelationshipAuditLogEntryDTO {
+    createdAt: string;
+    createdBy: string;
+    createdByDevice?: string;
+    reason: RelationshipAuditLogEntryReason;
+    oldStatus?: RelationshipStatus;
+    newStatus: RelationshipStatus;
+}
+
+export interface RelationshipAuditLogDTO extends Array<RelationshipAuditLogEntryDTO> {}
+
+export type RelationshipCreationContentDerivation = RelationshipCreationContentJSON | ArbitraryRelationshipCreationContentJSON;
+
+export enum PeerDeletionStatus {
+    ToBeDeleted = "ToBeDeleted",
+    Deleted = "Deleted"
+}
+
+export interface PeerDeletionInfoDTO {
+    deletionStatus: PeerDeletionStatus;
+    deletionDate: string;
 }
 
 export interface RelationshipDTO {
@@ -17,5 +54,7 @@ export interface RelationshipDTO {
     status: RelationshipStatus;
     peer: string;
     peerIdentity: IdentityDTO;
-    changes: RelationshipChangeDTO[];
+    peerDeletionInfo?: PeerDeletionInfoDTO;
+    creationContent: RelationshipCreationContentDerivation;
+    auditLog: RelationshipAuditLogDTO;
 }

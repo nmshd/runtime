@@ -5,8 +5,8 @@ import { FakePaginationDataSource } from "../../testHelpers/FakePaginationDataSo
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 async function itereateThroughAllItemsAsynchronously<T>(paginator: Paginator<T>) {
-    // eslint-disable-next-line no-empty,@typescript-eslint/no-unused-vars
     for await (const _ of paginator) {
+        // noop
     }
 }
 

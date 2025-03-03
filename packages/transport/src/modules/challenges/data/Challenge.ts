@@ -1,7 +1,7 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreAddress, CoreDate, CoreId, CoreSerializable, ICoreId, ICoreSerializable } from "../../../core";
+import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
+import { CoreAddress, CoreDate, CoreId, ICoreId } from "@nmshd/core-types";
 
-export interface IChallenge extends ICoreSerializable {
+export interface IChallenge extends ISerializable {
     id: ICoreId;
     expiresAt: CoreDate;
     createdBy?: CoreAddress;
@@ -16,7 +16,7 @@ export enum ChallengeType {
 }
 
 @type("Challenge")
-export class Challenge extends CoreSerializable implements IChallenge {
+export class Challenge extends Serializable implements IChallenge {
     @validate()
     @serialize()
     public id: CoreId;

@@ -1,7 +1,7 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreId, CoreSerializable, ICoreId } from "../../../core";
+import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
+import { CoreId, ICoreId } from "@nmshd/core-types";
 
-export interface IDatawalletModification {
+export interface IDatawalletModification extends ISerializable {
     localId: ICoreId;
     objectIdentifier: ICoreId;
     payloadCategory?: DatawalletModificationCategory;
@@ -25,7 +25,7 @@ export enum DatawalletModificationCategory {
 }
 
 @type("DatawalletModification")
-export class DatawalletModification extends CoreSerializable implements IDatawalletModification {
+export class DatawalletModification extends Serializable implements IDatawalletModification {
     @validate()
     @serialize()
     public localId: CoreId;

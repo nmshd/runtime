@@ -6,6 +6,7 @@ export * from "./RuntimeErrors";
 export * from "./SchemaRepository";
 export * from "./UseCase";
 export * from "./validation/SchemaValidator";
+export * from "./validation/TokenAndTemplateCreationValidator";
 export * from "./validation/ValidatableStrings";
 export * from "./validation/ValidationFailure";
 export * from "./validation/ValidationResult";

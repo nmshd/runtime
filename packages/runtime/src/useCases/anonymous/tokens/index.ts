@@ -1,2 +1,1 @@
-export * from "./LoadPeerTokenAnonymousByIdAndKey";
-export * from "./LoadPeerTokenAnonymousByTruncatedReference";
+export * from "./LoadPeerTokenAnonymous";
