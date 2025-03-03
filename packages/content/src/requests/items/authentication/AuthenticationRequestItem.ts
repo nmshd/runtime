@@ -13,7 +13,7 @@ export interface IAuthenticationRequestItem extends IRequestItem {
 @type("AuthenticationRequestItem")
 export class AuthenticationRequestItem extends RequestItem implements IAuthenticationRequestItem {
     @serialize()
-    @validate({ nullable: true, max: 200 })
+    @validate({ max: 200 })
     public override title: string;
 
     public static from(value: IAuthenticationRequestItem | Omit<AuthenticationRequestItemJSON, "@type"> | AuthenticationRequestItemJSON): AuthenticationRequestItem {
