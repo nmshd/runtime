@@ -37,22 +37,6 @@ export default function validateAttributeMatchesWithQuery(
         );
     }
 
-    if (query instanceof IdentityAttributeQuery || query instanceof RelationshipAttributeQuery || query instanceof ThirdPartyRelationshipAttributeQuery) {
-        if (
-            (typeof query.validFrom === "undefined" && typeof attribute.validFrom !== "undefined") ||
-            (typeof query.validFrom !== "undefined" && typeof attribute.validFrom !== "undefined" && query.validFrom.isBefore(attribute.validFrom))
-        ) {
-            return ValidationResult.error(ConsumptionCoreErrors.requests.attributeQueryMismatch("The provided Attribute is not valid in the queried time frame."));
-        }
-
-        if (
-            (typeof query.validTo === "undefined" && typeof attribute.validTo !== "undefined") ||
-            (typeof query.validTo !== "undefined" && typeof attribute.validTo !== "undefined" && query.validTo.isAfter(attribute.validTo))
-        ) {
-            return ValidationResult.error(ConsumptionCoreErrors.requests.attributeQueryMismatch("The provided Attribute is not valid in the queried time frame."));
-        }
-    }
-
     return ValidationResult.success();
 }
 

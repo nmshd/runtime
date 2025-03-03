@@ -1017,57 +1017,6 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).successfulValidationResult();
             });
-
-            test("can be called with properties validFrom and validTo used in the query", async function () {
-                const requestItem = ReadAttributeRequestItem.from({
-                    mustBeAccepted: true,
-                    query: RelationshipAttributeQuery.from({
-                        owner: sender.toString(),
-                        key: "aKey",
-                        validFrom: "2024-02-14T08:47:35.077Z",
-                        validTo: "2024-02-14T09:35:12.824Z",
-                        attributeCreationHints: {
-                            valueType: "ProprietaryString",
-                            title: "aTitle",
-                            confidentiality: RelationshipAttributeConfidentiality.Public
-                        }
-                    })
-                });
-                const requestId = await ConsumptionIds.request.generate();
-                const request = LocalRequest.from({
-                    id: requestId,
-                    createdAt: CoreDate.utc(),
-                    isOwn: false,
-                    peer: sender,
-                    status: LocalRequestStatus.DecisionRequired,
-                    content: Request.from({
-                        id: requestId,
-                        items: [requestItem]
-                    }),
-                    statusLog: []
-                });
-
-                const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
-                    accept: true,
-                    newAttribute: {
-                        "@type": "RelationshipAttribute",
-                        key: "aKey",
-                        confidentiality: RelationshipAttributeConfidentiality.Public,
-                        owner: sender.toString(),
-                        validFrom: "2024-02-14T08:40:35.077Z",
-                        validTo: "2024-02-14T09:35:12.824Z",
-                        value: {
-                            "@type": "ProprietaryString",
-                            title: "aTitle",
-                            value: "aStringValue"
-                        }
-                    }
-                };
-
-                const result = await processor.canAccept(requestItem, acceptParams, request);
-
-                expect(result).successfulValidationResult();
-            });
         });
 
         describe("canAccept ReadAttributeRequestitem with ThirdPartyRelationshipAttributeQuery", function () {
