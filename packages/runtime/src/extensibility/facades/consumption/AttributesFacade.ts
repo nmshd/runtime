@@ -1,4 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
+import { CreateAttributeRequestItemJSON } from "@nmshd/content";
 import { Inject } from "@nmshd/typescript-ioc";
 import { AttributeTagCollectionDTO, LocalAttributeDTO, LocalRequestDTO } from "../../../types";
 import {
@@ -9,6 +10,8 @@ import {
     ChangeDefaultRepositoryAttributeUseCase,
     CreateAndShareRelationshipAttributeRequest,
     CreateAndShareRelationshipAttributeUseCase,
+    CreateCreateVerifiableAttributeRequestItemRequest,
+    CreateCreateVerifiableAttributeRequestItemUseCase,
     CreateRepositoryAttributeRequest,
     CreateRepositoryAttributeUseCase,
     DeleteOwnSharedAttributeAndNotifyPeerRequest,
@@ -90,7 +93,8 @@ export class AttributesFacade {
         @Inject private readonly deleteThirdPartyRelationshipAttributeAndNotifyPeerUseCase: DeleteThirdPartyRelationshipAttributeAndNotifyPeerUseCase,
         @Inject private readonly deleteRepositoryAttributeUseCase: DeleteRepositoryAttributeUseCase,
         @Inject private readonly deleteSharedAttributesForRejectedOrRevokedRelationshipUseCase: DeleteSharedAttributesForRejectedOrRevokedRelationshipUseCase,
-        @Inject private readonly getAttributeTagCollectionUseCase: GetAttributeTagCollectionUseCase
+        @Inject private readonly getAttributeTagCollectionUseCase: GetAttributeTagCollectionUseCase,
+        @Inject private readonly createCreateVerifiableAttributeRequestItemUseCase: CreateCreateVerifiableAttributeRequestItemUseCase
     ) {}
 
     public async canCreateRepositoryAttribute(request: CanCreateRepositoryAttributeRequest): Promise<Result<CanCreateRepositoryAttributeResponse>> {
@@ -212,5 +216,9 @@ export class AttributesFacade {
 
     public async getAttributeTagCollection(): Promise<Result<AttributeTagCollectionDTO>> {
         return await this.getAttributeTagCollectionUseCase.execute();
+    }
+
+    public async createCreateVerifiableAttributeRequestItem(request: CreateCreateVerifiableAttributeRequestItemRequest): Promise<Result<CreateAttributeRequestItemJSON>> {
+        return await this.createCreateVerifiableAttributeRequestItemUseCase.execute(request);
     }
 }

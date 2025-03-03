@@ -1,11 +1,11 @@
+import { VerifiableCredentialController } from "@blubi/vc";
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController } from "@nmshd/consumption";
+import { CoreBuffer } from "@nmshd/crypto";
 import { AccountController, DeviceSecretType } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { LocalAttributeDTO } from "../../../types";
 import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
-import { VerifiableCredentialController } from "@blubi/vc";
-import { CoreBuffer } from "@nmshd/crypto";
 import { buildCredential } from "../verifiableCredentials/core";
 
 export interface CreateVerifiableCredentialRequest {

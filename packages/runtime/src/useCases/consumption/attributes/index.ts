@@ -3,6 +3,7 @@ export * from "./AttributeTagCollectionMapper";
 export * from "./CanCreateRepositoryAttribute";
 export * from "./ChangeDefaultRepositoryAttribute";
 export * from "./CreateAndShareRelationshipAttribute";
+export * from "./CreateCreateVerifiableAttributeRequestItem";
 export * from "./CreateRepositoryAttribute";
 export * from "./DeleteOwnSharedAttributeAndNotifyPeer";
 export * from "./DeletePeerSharedAttributeAndNotifyOwner";

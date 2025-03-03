@@ -1,10 +1,10 @@
+import { VerifiableCredentialController } from "@blubi/vc";
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController } from "@nmshd/consumption";
-import { AccountController } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
-import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
-import { VerifiableCredentialController } from "@blubi/vc";
 import { IdentityAttributeJSON, RelationshipAttributeJSON } from "@nmshd/content";
+import { AccountController } from "@nmshd/transport";
+import { Inject } from "@nmshd/typescript-ioc";
+import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
 export interface VerifyVerifiableCredentialRequest {
     attribute: IdentityAttributeJSON | RelationshipAttributeJSON;

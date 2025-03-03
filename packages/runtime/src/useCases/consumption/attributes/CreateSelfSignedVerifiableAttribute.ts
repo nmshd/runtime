@@ -4,7 +4,7 @@ import { AttributesController, CreateRepositoryAttributeParams } from "@nmshd/co
 import { IdentityAttributeJSON } from "@nmshd/content";
 import { CoreBuffer } from "@nmshd/crypto";
 import { AccountController, DeviceSecretType } from "@nmshd/transport";
-import { Inject } from "typescript-ioc";
+import { Inject } from "@nmshd/typescript-ioc";
 import { LocalAttributeDTO } from "../../../types";
 import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { buildCredential } from "../verifiableCredentials/core";
