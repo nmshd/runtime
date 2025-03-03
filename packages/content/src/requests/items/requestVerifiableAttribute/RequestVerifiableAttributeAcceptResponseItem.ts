@@ -1,24 +1,24 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { IdentityAttribute, IdentityAttributeJSON, IIdentityAttribute, IRelationshipAttribute, RelationshipAttribute, RelationshipAttributeJSON } from "../../../attributes";
+import { CoreId, ICoreId } from "@nmshd/core-types";
+import { IdentityAttribute, IdentityAttributeJSON, IIdentityAttribute } from "../../../attributes";
 import { AcceptResponseItem, AcceptResponseItemJSON, IAcceptResponseItem } from "../../response";
-import { CoreId, ICoreId } from "@nmshd/transport";
 
 export interface RequestVerifiableAttributeAcceptResponseItemJSON extends AcceptResponseItemJSON {
     "@type": "RequestVerifiableAttributeAcceptResponseItem";
-    attribute: IdentityAttributeJSON | RelationshipAttributeJSON;
+    attribute: IdentityAttributeJSON;
     attributeId: string;
 }
 
 export interface IRequestVerifiableAttributeAcceptResponseItem extends IAcceptResponseItem {
-    attribute: IIdentityAttribute | IRelationshipAttribute;
+    attribute: IIdentityAttribute;
     attributeId: ICoreId;
 }
 
 @type("ProposeAttributeAcceptResponseItem")
 export class RequestVerifiableAttributeAcceptResponseItem extends AcceptResponseItem implements IRequestVerifiableAttributeAcceptResponseItem {
-    @serialize({ unionTypes: [IdentityAttribute, RelationshipAttribute] })
+    @serialize()
     @validate()
-    public attribute: IdentityAttribute | RelationshipAttribute;
+    public attribute: IdentityAttribute;
 
     @serialize()
     @validate()

@@ -1,19 +1,20 @@
+import { VerifiableCredentialController } from "@blubi/vc";
 import {
     IdentityAttribute,
-    RequestVerifiableAttributeAcceptResponseItem,
-    RequestVerifiableAttributeRequestItem,
     RelationshipAttribute,
     Request,
+    RequestVerifiableAttributeAcceptResponseItem,
+    RequestVerifiableAttributeRequestItem,
     ResponseItemResult
 } from "@nmshd/content";
-import { CoreAddress, DeviceSecretType } from "@nmshd/transport";
+import { CoreAddress } from "@nmshd/core-types";
+import { CoreBuffer } from "@nmshd/crypto";
+import { DeviceSecretType } from "@nmshd/transport";
+import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
+import { ValidationResult } from "../../../common";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 import { LocalRequestInfo } from "../IRequestItemProcessor";
-import { VerifiableCredentialController } from "@blubi/vc";
 import { AcceptVerifiableAttributeRequestItemParametersJSON } from "./AcceptVerifiableAttributeRequestItemParameters";
-import { CoreBuffer } from "@nmshd/crypto";
-import { ValidationResult } from "../../../common";
-import { CoreErrors } from "../../../../consumption/CoreErrors";
 
 export class RequestVerifiableAttributeRequestItemProcessor extends GenericRequestItemProcessor<
     RequestVerifiableAttributeRequestItem,
@@ -30,7 +31,7 @@ export class RequestVerifiableAttributeRequestItemProcessor extends GenericReque
 
     private validateAttribute(attribute: IdentityAttribute | RelationshipAttribute) {
         if (attribute.owner === this.currentIdentityAddress) {
-            return ValidationResult.error(CoreErrors.requests.invalidRequestItem("The owner has to be the requesting party."));
+            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("The owner has to be the requesting party."));
         }
 
         return ValidationResult.success();
@@ -58,7 +59,7 @@ export class RequestVerifiableAttributeRequestItemProcessor extends GenericReque
         const credential = buildCredential(parsedRequestAttribute.value, requestItem.did, multikeyPublic);
         const signedCredential = await vc.sign(credential, multikeyPublic, multikeyPrivate);
         requestItem.attribute.proof = signedCredential;
-        const peerAttribute = await this.consumptionController.attributes.createPeerLocalAttribute({
+        const peerAttribute = await this.consumptionController.attributes.createSharedLocalAttribute({
             content: requestItem.attribute,
             peer: requestInfo.peer,
             requestReference: requestInfo.id
@@ -76,7 +77,7 @@ export class RequestVerifiableAttributeRequestItemProcessor extends GenericReque
         _requestItem: RequestVerifiableAttributeRequestItem,
         requestInfo: LocalRequestInfo
     ): Promise<void> {
-        const creationResult = await this.consumptionController.attributes.createLocalAttribute({
+        const creationResult = await this.consumptionController.attributes.createRepositoryAttribute({
             content: responseItem.attribute
         });
         await this.consumptionController.attributes.createSharedLocalAttributeCopy({

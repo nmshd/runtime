@@ -1,17 +1,17 @@
+import { VerifiableCredentialController } from "@blubi/vc";
 import { Result } from "@js-soft/ts-utils";
-import { AttributesController, CreateLocalAttributeParams } from "@nmshd/consumption";
-import { IdentityAttributeJSON, RelationshipAttributeJSON } from "@nmshd/content";
+import { AttributesController, CreateRepositoryAttributeParams } from "@nmshd/consumption";
+import { IdentityAttributeJSON } from "@nmshd/content";
+import { CoreBuffer } from "@nmshd/crypto";
 import { AccountController, DeviceSecretType } from "@nmshd/transport";
 import { Inject } from "typescript-ioc";
 import { LocalAttributeDTO } from "../../../types";
 import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
-import { AttributeMapper } from "./AttributeMapper";
-import { VerifiableCredentialController } from "@blubi/vc";
 import { buildCredential } from "../verifiableCredentials/core";
-import { CoreBuffer } from "@nmshd/crypto";
+import { AttributeMapper } from "./AttributeMapper";
 
 export interface CreateVerifiableAttributeRequest {
-    content: IdentityAttributeJSON | RelationshipAttributeJSON;
+    content: IdentityAttributeJSON;
     subjectDid: string;
 }
 
@@ -35,7 +35,7 @@ export class CreateVerifiableAttributeUseCase extends UseCase<CreateVerifiableAt
         const multikeyPublic = `z${CoreBuffer.from([0xed, 0x01]).append(this["accountController"].identity.identity.publicKey.publicKey).toBase58()}`;
         const identityPrivateKey = ((await this["accountController"].activeDevice.secrets.loadSecret(DeviceSecretType.IdentitySignature)) as any)!.secret["privateKey"];
         const multikeyPrivate = `z${CoreBuffer.from([0x80, 0x26]).append(identityPrivateKey).toBase58()}`;
-        const params = CreateLocalAttributeParams.from({
+        const params = CreateRepositoryAttributeParams.from({
             content: request.content
         });
         const vc = await VerifiableCredentialController.initialize();
@@ -44,7 +44,7 @@ export class CreateVerifiableAttributeUseCase extends UseCase<CreateVerifiableAt
         const signedCredential = await vc.sign(credential, multikeyPublic, multikeyPrivate);
         params.content.proof = signedCredential;
 
-        const createdAttribute = await this.attributeController.createLocalAttribute(params);
+        const createdAttribute = await this.attributeController.createRepositoryAttribute(params);
         await this.accountController.syncDatawallet();
 
         return Result.ok(AttributeMapper.toAttributeDTO(createdAttribute));

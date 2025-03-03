@@ -1,23 +1,23 @@
 import { Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { IdentityAttribute, IdentityAttributeJSON, IIdentityAttribute, IRelationshipAttribute, RelationshipAttribute, RelationshipAttributeJSON } from "../../../attributes";
+import { IdentityAttribute, IdentityAttributeJSON, IIdentityAttribute } from "../../../attributes";
 import { IRequestItem, RequestItem, RequestItemJSON } from "../../RequestItem";
 
 export interface RequestVerifiableAttributeRequestItemJSON extends RequestItemJSON {
     "@type": "RequestVerifiableAttributeRequestItem";
-    attribute: IdentityAttributeJSON | RelationshipAttributeJSON;
+    attribute: IdentityAttributeJSON;
     did: string;
 }
 
 export interface IRequestVerifiableAttributeRequestItem extends IRequestItem {
-    attribute: IIdentityAttribute | IRelationshipAttribute;
+    attribute: IIdentityAttribute;
     did: string;
 }
 
 @type("RequestVerifiableAttributeRequestItem")
 export class RequestVerifiableAttributeRequestItem extends RequestItem implements IRequestVerifiableAttributeRequestItem {
-    @serialize({ unionTypes: [IdentityAttribute, RelationshipAttribute] })
+    @serialize()
     @validate()
-    public attribute: IdentityAttribute | RelationshipAttribute;
+    public attribute: IdentityAttribute;
 
     @validate()
     public did: string;

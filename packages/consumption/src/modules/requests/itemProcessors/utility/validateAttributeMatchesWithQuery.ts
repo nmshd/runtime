@@ -53,6 +53,10 @@ export default function validateAttributeMatchesWithQuery(
         }
     }
 
+    if (query.isVerified === !attribute.proof) {
+        return ValidationResult.error(ConsumptionCoreErrors.requests.attributeQueryMismatch("Accept with a verified attribute only if a verified attribute is requested."));
+    }
+
     return ValidationResult.success();
 }
 
