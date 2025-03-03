@@ -673,6 +673,30 @@ describe("Requests", () => {
             expect(triggeredEvent).toBeUndefined();
         });
 
+        test("can not delete a Request when it is not expired", async () => {
+            const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent)).request;
+
+            await expect(rConsumptionServices.incomingRequests.delete({ requestId: request.id })).resolves.toBeAnError(
+                "is in status 'ManualDecisionRequired'. At the moment, you can only delete incoming Requests that are expired.",
+                "error.consumption.requests.canOnlyDeleteIncomingRequestThatIsExpired"
+            );
+        });
+
+        test("can delete a Request when it is expired", async () => {
+            const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent, DateTime.utc().plus({ seconds: 3 })))
+                .request;
+
+            await sleep(3000);
+
+            const rLocalRequest = (await rConsumptionServices.incomingRequests.getRequest({ id: request.id })).value;
+            expect(rLocalRequest.status).toBe(LocalRequestStatus.Expired);
+
+            await expect(rConsumptionServices.incomingRequests.delete({ requestId: request.id })).resolves.toBeSuccessful();
+
+            const rLocalRequestAfterDelete = await rConsumptionServices.incomingRequests.getRequest({ id: request.id });
+            expect(rLocalRequestAfterDelete).toBeAnError("LocalRequest not found.", "error.runtime.recordNotFound");
+        });
+
         describe.each([
             {
                 action: "Accept"

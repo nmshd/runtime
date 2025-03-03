@@ -1,5 +1,6 @@
 import { LocalRequestStatus } from "@nmshd/consumption";
 import { RelationshipCreationContent, RequestJSON, ResponseJSON, ResponseResult, ResponseWrapper } from "@nmshd/content";
+import { CoreDate } from "@nmshd/core-types";
 import {
     IncomingRequestStatusChangedEvent,
     MessageProcessedEvent,
@@ -92,6 +93,14 @@ export class RequestModule extends RuntimeModule {
         const activeRelationships = relationshipsToPeer.filter((r) => r.status === RelationshipStatus.Active);
         if (activeRelationships.length !== 0) {
             if (body.onExistingRelationship) {
+                if (body.onExistingRelationship.expiresAt && CoreDate.from(body.onExistingRelationship.expiresAt).isExpired()) {
+                    this.runtime.eventBus.publish(
+                        new RelationshipTemplateProcessedEvent(event.eventTargetAddress, { template, result: RelationshipTemplateProcessedResult.RequestExpired })
+                    );
+
+                    return;
+                }
+
                 const requestCreated = await this.createIncomingRequest(services, body.onExistingRelationship, template.id);
                 if (!requestCreated) {
                     this.runtime.eventBus.publish(
@@ -134,6 +143,14 @@ export class RequestModule extends RuntimeModule {
                     requestId: otherRequestsThatWouldLeadToARelationship[0].id
                 })
             );
+            return;
+        }
+
+        if (body.onNewRelationship.expiresAt && CoreDate.from(body.onNewRelationship.expiresAt).isExpired()) {
+            this.runtime.eventBus.publish(
+                new RelationshipTemplateProcessedEvent(event.eventTargetAddress, { template, result: RelationshipTemplateProcessedResult.RequestExpired })
+            );
+
             return;
         }
 

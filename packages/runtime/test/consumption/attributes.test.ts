@@ -110,7 +110,7 @@ beforeEach(async () => {
     services1.eventBus.reset();
     services2.eventBus.reset();
     services3.eventBus.reset();
-    await cleanupAttributes(services1, services2, services3, appService);
+    await cleanupAttributes([services1, services2, services3, appService]);
 });
 
 describe("get attribute(s)", () => {
@@ -1696,6 +1696,31 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
         expect(ownSharedIdentityAttributeVersion2.succeeds).toStrictEqual(ownSharedIdentityAttributeVersion0.id);
     });
 
+    test("should allow to notify about successor if the predecessor was deleted by peer but additional predecessor exists", async () => {
+        const deleteResult = await services2.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: ownSharedIdentityAttributeVersion0.id });
+        const notificationId = deleteResult.value.notificationId!;
+
+        await syncUntilHasMessageWithNotification(services1.transport, notificationId);
+        await services1.eventBus.waitForEvent(PeerSharedAttributeDeletedByPeerEvent, (e) => {
+            return e.data.id === ownSharedIdentityAttributeVersion0.id;
+        });
+        const updatedOwnSharedIdentityAttribute = (await services1.consumption.attributes.getAttribute({ id: ownSharedIdentityAttributeVersion0.id })).value;
+        expect(updatedOwnSharedIdentityAttribute.deletionInfo?.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByPeer);
+
+        const ownSharedIdentityAttributeVersion0WithoutDeletionInfo = await executeFullShareRepositoryAttributeFlow(
+            services1,
+            services2,
+            ownSharedIdentityAttributeVersion0.shareInfo!.sourceAttribute!
+        );
+
+        const result = await services1.consumption.attributes.notifyPeerAboutRepositoryAttributeSuccession({
+            attributeId: repositoryAttributeVersion2.id,
+            peer: services2.address
+        });
+        expect(result).toBeSuccessful();
+        expect(result.value.predecessor.id).toBe(ownSharedIdentityAttributeVersion0WithoutDeletionInfo.id);
+    });
+
     test("should throw if the predecessor repository attribute was deleted", async () => {
         const repositoryAttributeVersion0 = (await services1.consumption.attributes.getAttribute({ id: ownSharedIdentityAttributeVersion0.shareInfo!.sourceAttribute! })).value;
         await services1.consumption.attributes.deleteRepositoryAttribute({ attributeId: repositoryAttributeVersion0.id });
@@ -1735,7 +1760,7 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
             attributeId: repositoryAttributeVersion2.id,
             peer: services2.address
         });
-        expect(notificationResult).toBeAnError(/.*/, "error.consumption.attributes.cannotSucceedAttributesWithDeletionInfo");
+        expect(notificationResult).toBeAnError(/.*/, "error.runtime.attributes.cannotSucceedAttributesWithDeletionInfo");
     });
 
     test("should throw if the same version of the attribute has been notified about already", async () => {
@@ -1857,10 +1882,6 @@ describe(SucceedRelationshipAttributeAndNotifyPeerUseCase.name, () => {
                 confidentiality: RelationshipAttributeConfidentiality.Public
             }
         });
-    });
-
-    afterEach(async () => {
-        await cleanupAttributes();
     });
 
     test("should succeed a relationship attribute and notify peer", async () => {
@@ -2216,10 +2237,6 @@ describe("Get (shared) versions of attribute", () => {
     }
 
     describe(GetVersionsOfAttributeUseCase.name, () => {
-        afterEach(async () => {
-            await cleanupAttributes();
-        });
-
         test("should get all versions of a repository attribute", async () => {
             await setUpRepositoryAttributeVersions();
             for (const version of sRepositoryAttributeVersions) {
@@ -2303,10 +2320,6 @@ describe("Get (shared) versions of attribute", () => {
     describe(GetSharedVersionsOfAttributeUseCase.name, () => {
         beforeEach(async () => {
             await setUpIdentityAttributeVersions();
-        });
-
-        afterEach(async () => {
-            await cleanupAttributes();
         });
 
         test("should get only latest shared version per peer of a repository attribute", async () => {
@@ -2458,10 +2471,6 @@ describe("DeleteAttributeUseCases", () => {
             }
         ));
         repositoryAttributeVersion1 = (await services1.consumption.attributes.getAttribute({ id: ownSharedIdentityAttributeVersion1.shareInfo!.sourceAttribute! })).value;
-    });
-
-    afterEach(async () => {
-        await cleanupAttributes();
     });
 
     describe(DeleteRepositoryAttributeUseCase.name, () => {

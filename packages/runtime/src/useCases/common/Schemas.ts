@@ -10863,6 +10863,25 @@ export const CreateOutgoingRequestRequest: any = {
     }
 }
 
+export const DeleteIncomingRequestRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/DeleteIncomingRequestRequest",
+    "definitions": {
+        "DeleteIncomingRequestRequest": {
+            "type": "object",
+            "properties": {
+                "requestId": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "requestId"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
 export const DiscardOutgoingRequestRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/DiscardOutgoingRequestRequest",
@@ -20265,6 +20284,29 @@ export const CreateTokenQRCodeForFileRequest: any = {
     }
 }
 
+export const DeleteFileRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/DeleteFileRequest",
+    "definitions": {
+        "DeleteFileRequest": {
+            "type": "object",
+            "properties": {
+                "fileId": {
+                    "$ref": "#/definitions/FileIdString"
+                }
+            },
+            "required": [
+                "fileId"
+            ],
+            "additionalProperties": false
+        },
+        "FileIdString": {
+            "type": "string",
+            "pattern": "FIL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
 export const GetFileRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/GetFileRequest",
@@ -21555,6 +21597,29 @@ export const CreateTokenQRCodeForOwnTemplateRequest: any = {
     }
 }
 
+export const DeleteRelationshipTemplateRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/DeleteRelationshipTemplateRequest",
+    "definitions": {
+        "DeleteRelationshipTemplateRequest": {
+            "type": "object",
+            "properties": {
+                "templateId": {
+                    "$ref": "#/definitions/RelationshipTemplateIdString"
+                }
+            },
+            "required": [
+                "templateId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipTemplateIdString": {
+            "type": "string",
+            "pattern": "RLT[A-Za-z0-9]{17}"
+        }
+    }
+}
+
 export const GetRelationshipTemplateRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/GetRelationshipTemplateRequest",
@@ -21816,6 +21881,29 @@ export const CreateOwnTokenRequest: any = {
         "AddressString": {
             "type": "string",
             "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
+        }
+    }
+}
+
+export const DeleteTokenRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/DeleteTokenRequest",
+    "definitions": {
+        "DeleteTokenRequest": {
+            "type": "object",
+            "properties": {
+                "tokenId": {
+                    "$ref": "#/definitions/TokenIdString"
+                }
+            },
+            "required": [
+                "tokenId"
+            ],
+            "additionalProperties": false
+        },
+        "TokenIdString": {
+            "type": "string",
+            "pattern": "TOK[A-Za-z0-9]{17}"
         }
     }
 }

@@ -107,6 +107,50 @@ expect.extend({
         }
 
         return { pass: true, message: () => "" };
+    },
+    showRequestCalled(mockUIBridge: unknown) {
+        if (!(mockUIBridge instanceof MockUIBridge)) {
+            throw new Error("This method can only be used with expect(MockUIBridge).");
+        }
+
+        const calls = mockUIBridge.calls.filter((x) => x.method === "showRequest");
+        if (calls.length === 0) {
+            return { pass: false, message: () => "The method showRequest was not called." };
+        }
+
+        return { pass: true, message: () => "" };
+    },
+    showRequestNotCalled(mockUIBridge: unknown) {
+        if (!(mockUIBridge instanceof MockUIBridge)) {
+            throw new Error("This method can only be used with expect(MockUIBridge).");
+        }
+
+        const calls = mockUIBridge.calls.filter((x) => x.method === "showRequest");
+        if (calls.length > 0) {
+            return { pass: false, message: () => `The method showRequest called: ${calls.map((c) => `'account id: ${c.account.id} - requestId: ${c.request.id}'`)}` };
+        }
+
+        return { pass: true, message: () => "" };
+    },
+    showErrorCalled(mockUIBridge: unknown, code: string) {
+        if (!(mockUIBridge instanceof MockUIBridge)) {
+            throw new Error("This method can only be used with expect(MockUIBridge).");
+        }
+
+        const errorCalls = mockUIBridge.calls.filter((x) => x.method === "showError");
+        if (errorCalls.length === 0) {
+            return { pass: false, message: () => "The method showError was not called." };
+        }
+
+        const errorCallsWithCode = errorCalls.filter((x) => x.error.code === code);
+        if (errorCallsWithCode.length === 0) {
+            return {
+                pass: false,
+                message: () => `The method showRequest was called but not with the code '${code}' instead with the codes: ${errorCalls.map((c) => `'${c.error.code}'`).join(", ")}`
+            };
+        }
+
+        return { pass: true, message: () => "" };
     }
 });
 
@@ -119,6 +163,9 @@ declare global {
             requestAccountSelectionNotCalled(): R;
             enterPasswordCalled(passwordType: "pw" | "pin", pinLength?: number, attempt?: number): R;
             enterPasswordNotCalled(): R;
+            showRequestCalled(): R;
+            showRequestNotCalled(): R;
+            showErrorCalled(code: string): R;
         }
     }
 }

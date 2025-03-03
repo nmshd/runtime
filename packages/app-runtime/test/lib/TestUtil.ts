@@ -129,17 +129,7 @@ export class TestUtil {
             })
         ).value;
 
-        const tokenFrom = (
-            await from.transportServices.relationshipTemplates.createTokenForOwnTemplate({
-                templateId: templateFrom.id,
-                ephemeral: true,
-                expiresAt: CoreDate.utc().add({ minutes: 5 }).toString()
-            })
-        ).value;
-
-        const templateTo = await to.transportServices.relationshipTemplates.loadPeerRelationshipTemplate({
-            reference: tokenFrom.truncatedReference
-        });
+        const templateTo = await to.transportServices.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templateFrom.truncatedReference });
         return templateTo.value;
     }
 
