@@ -44,7 +44,7 @@ describe("RelationshipTemplateProcessedModule", function () {
         await TestUtil.createAndLoadPeerTemplate(
             session1,
             session2,
-            RelationshipTemplateContent.from({ onNewRelationship: { items: [AuthenticationRequestItem.from({ mustBeAccepted: false })] } }).toJSON()
+            RelationshipTemplateContent.from({ onNewRelationship: { items: [AuthenticationRequestItem.from({ mustBeAccepted: false, title: "aTitle" })] } }).toJSON()
         );
         await eventBus.waitForRunningEventHandlers();
 
@@ -55,7 +55,7 @@ describe("RelationshipTemplateProcessedModule", function () {
         const templateFrom = (
             await session1.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
                 content: RelationshipTemplateContent.from({
-                    onNewRelationship: { expiresAt: CoreDate.utc().add({ seconds: 2 }), items: [AuthenticationRequestItem.from({ mustBeAccepted: false })] }
+                    onNewRelationship: { expiresAt: CoreDate.utc().add({ seconds: 2 }), items: [AuthenticationRequestItem.from({ mustBeAccepted: false, title: "aTitle" })] }
                 }).toJSON(),
                 expiresAt: CoreDate.utc().add({ minutes: 5 }).toString(),
                 maxNumberOfAllocations: 1
