@@ -249,7 +249,7 @@ describe("RelationshipTemplateController", function () {
         expect(otherTemplate).toBeUndefined();
     });
 
-    describe("relationshipTemplate deletion", function () {
+    describe("RelationshipTemplate deletion", function () {
         let ownTemplate: RelationshipTemplate;
         let peerTemplate: RelationshipTemplate;
 
@@ -260,7 +260,7 @@ describe("RelationshipTemplateController", function () {
             peerTemplate = await recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(reference);
         });
 
-        test("should delete own relationshipTemplate locally and from the backbone", async function () {
+        test("should delete own RelationshipTemplate locally and from the backbone", async function () {
             await sender.relationshipTemplates.deleteRelationshipTemplate(ownTemplate);
             const templateOnBackbone = await recipient.relationshipTemplates.fetchCaches([ownTemplate.id]);
             expect(templateOnBackbone).toHaveLength(0);
@@ -269,7 +269,7 @@ describe("RelationshipTemplateController", function () {
             expect(localTemplate).toBeUndefined();
         });
 
-        test("should delete a peer owned relationshipTemplate only locally", async function () {
+        test("should delete a peer owned RelationshipTemplate only locally", async function () {
             await recipient.relationshipTemplates.deleteRelationshipTemplate(peerTemplate);
             const templateOnBackbone = await sender.relationshipTemplates.fetchCaches([ownTemplate.id]);
             expect(templateOnBackbone).toHaveLength(1);
