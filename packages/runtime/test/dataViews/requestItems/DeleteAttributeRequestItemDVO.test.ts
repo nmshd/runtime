@@ -61,7 +61,7 @@ beforeAll(async () => {
 }, 30000);
 
 beforeEach(async () => {
-    await cleanupAttributes(sRuntimeServices, rRuntimeServices);
+    await cleanupAttributes([sRuntimeServices, rRuntimeServices]);
     const sOwnSharedIdentityAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(sRuntimeServices, rRuntimeServices, {
         content: {
             value: {

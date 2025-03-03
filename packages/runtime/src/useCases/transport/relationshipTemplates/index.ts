@@ -2,6 +2,7 @@ export * from "./CreateOwnRelationshipTemplate";
 export * from "./CreateQRCodeForOwnRelationshipTemplate";
 export * from "./CreateTokenForOwnRelationshipTemplate";
 export * from "./CreateTokenQRCodeForOwnRelationshipTemplate";
+export * from "./DeleteRelationshipTemplate";
 export * from "./GetRelationshipTemplate";
 export * from "./GetRelationshipTemplates";
 export * from "./LoadPeerRelationshipTemplate";

@@ -8,7 +8,7 @@ import { DecideRequestItemParametersJSON, isDecideRequestItemParametersJSON } fr
 import { InternalDecideRequestParametersJSON } from "./decide/InternalDecideRequestParameters";
 
 export class DecideRequestParametersValidator {
-    public validate(params: InternalDecideRequestParametersJSON, request: LocalRequest): ValidationResult {
+    public validateRequest(params: InternalDecideRequestParametersJSON, request: LocalRequest): ValidationResult {
         if (!request.id.equals(CoreId.from(params.requestId))) {
             throw new Error("The response is invalid because the id of the Request does not match the id of the Response.");
         }
@@ -19,6 +19,10 @@ export class DecideRequestParametersValidator {
             );
         }
 
+        return ValidationResult.success();
+    }
+
+    public validateItems(params: InternalDecideRequestParametersJSON, request: LocalRequest): ValidationResult {
         const validationResults = request.content.items.map((requestItem, index) => this.checkItemOrGroup(requestItem, params.items[index], params.accept));
         return ValidationResult.fromItems(validationResults);
     }

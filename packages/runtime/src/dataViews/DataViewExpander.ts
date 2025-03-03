@@ -428,7 +428,7 @@ export class DataViewExpander {
     }
 
     public async expandRequest(request: RequestJSON, localRequestDTO?: LocalRequestDTO, localResponseDVO?: LocalResponseDVO): Promise<RequestDVO> {
-        const id = request.id ? request.id : "";
+        const id = request.id ?? "";
         const itemDVOs = [];
         for (let i = 0; i < request.items.length; i++) {
             const requestItem = request.items[i];
@@ -488,7 +488,7 @@ export class DataViewExpander {
                         ...readAttributeRequestItem,
                         type: "DecidableReadAttributeRequestItemDVO",
                         id: "",
-                        name: requestItem.title ? requestItem.title : "i18n://dvo.requestItem.DecidableReadAttributeRequestItem.name",
+                        name: requestItem.title ?? "i18n://dvo.requestItem.DecidableReadAttributeRequestItem.name",
                         query: processedQuery,
                         isDecidable,
                         error,
@@ -500,7 +500,7 @@ export class DataViewExpander {
                     ...readAttributeRequestItem,
                     type: "ReadAttributeRequestItemDVO",
                     id: "",
-                    name: requestItem.title ? requestItem.title : "i18n://dvo.requestItem.ReadAttributeRequestItem.name",
+                    name: requestItem.title ?? "i18n://dvo.requestItem.ReadAttributeRequestItem.name",
                     query: await this.expandAttributeQuery(readAttributeRequestItem.query),
                     isDecidable,
                     response: responseItemDVO
@@ -558,7 +558,7 @@ export class DataViewExpander {
                         ...deleteAttributeRequestItem,
                         type: "DecidableDeleteAttributeRequestItemDVO",
                         id: "",
-                        name: requestItem.title ? requestItem.title : "i18n://dvo.requestItem.DecidableDeleteAttributeRequestItem.name",
+                        name: requestItem.title ?? "i18n://dvo.requestItem.DecidableDeleteAttributeRequestItem.name",
                         isDecidable,
                         response: responseItemDVO,
                         attribute: localAttributeDVOForDelete
@@ -568,7 +568,7 @@ export class DataViewExpander {
                     ...deleteAttributeRequestItem,
                     type: "DeleteAttributeRequestItemDVO",
                     id: "",
-                    name: requestItem.title ? requestItem.title : "i18n://dvo.requestItem.DeleteAttributeRequestItem.name",
+                    name: requestItem.title ?? "i18n://dvo.requestItem.DeleteAttributeRequestItem.name",
                     isDecidable,
                     response: responseItemDVO,
                     attribute: localAttributeDVOForDelete
@@ -599,7 +599,7 @@ export class DataViewExpander {
                         ...proposeAttributeRequestItem,
                         type: "DecidableProposeAttributeRequestItemDVO",
                         id: "",
-                        name: requestItem.title ? requestItem.title : "i18n://dvo.requestItem.DecidableProposeAttributeRequestItem.name",
+                        name: requestItem.title ?? "i18n://dvo.requestItem.DecidableProposeAttributeRequestItem.name",
                         attribute: await this.expandAttribute(proposeAttributeRequestItem.attribute),
                         query: await this.processAttributeQuery(proposeAttributeRequestItem.query),
                         isDecidable,
@@ -610,7 +610,7 @@ export class DataViewExpander {
                     ...proposeAttributeRequestItem,
                     type: "ProposeAttributeRequestItemDVO",
                     id: "",
-                    name: requestItem.title ? requestItem.title : "i18n://dvo.requestItem.ProposeAttributeRequestItem.name",
+                    name: requestItem.title ?? "i18n://dvo.requestItem.ProposeAttributeRequestItem.name",
                     attribute: await this.expandAttribute(proposeAttributeRequestItem.attribute),
                     query: await this.expandAttributeQuery(proposeAttributeRequestItem.query),
                     isDecidable,
@@ -626,7 +626,7 @@ export class DataViewExpander {
                         ...shareAttributeRequestItem,
                         type: "DecidableShareAttributeRequestItemDVO",
                         id: "",
-                        name: requestItem.title ? requestItem.title : "i18n://dvo.requestItem.DecidableProposeAttributeRequestItem.name",
+                        name: requestItem.title ?? "i18n://dvo.requestItem.DecidableProposeAttributeRequestItem.name",
                         attribute: attributeDVO,
                         isDecidable,
                         response: responseItemDVO
@@ -643,7 +643,7 @@ export class DataViewExpander {
                     ...shareAttributeRequestItem,
                     type: "ShareAttributeRequestItemDVO",
                     id: "",
-                    name: requestItem.title ? requestItem.title : "i18n://dvo.requestItem.ProposeAttributeRequestItem.name",
+                    name: requestItem.title ?? "i18n://dvo.requestItem.ProposeAttributeRequestItem.name",
                     attribute: attributeDVO,
                     isDecidable,
                     response: responseItemDVO
@@ -657,7 +657,7 @@ export class DataViewExpander {
                         ...authenticationRequestItem,
                         type: "DecidableAuthenticationRequestItemDVO",
                         id: "",
-                        name: requestItem.title ? requestItem.title : "i18n://dvo.requestItem.DecidableAuthenticationRequestItem.name",
+                        name: requestItem.title ?? "i18n://dvo.requestItem.DecidableAuthenticationRequestItem.name",
                         isDecidable,
                         response: responseItemDVO
                     } as DecidableAuthenticationRequestItemDVO;
@@ -666,7 +666,7 @@ export class DataViewExpander {
                     ...authenticationRequestItem,
                     type: "AuthenticationRequestItemDVO",
                     id: "",
-                    name: requestItem.title ? requestItem.title : "i18n://dvo.requestItem.AuthenticationRequestItem.name",
+                    name: requestItem.title ?? "i18n://dvo.requestItem.AuthenticationRequestItem.name",
                     isDecidable,
                     response: responseItemDVO
                 } as AuthenticationRequestItemDVO;
@@ -679,7 +679,7 @@ export class DataViewExpander {
                         ...consentRequestItem,
                         type: "DecidableConsentRequestItemDVO",
                         id: "",
-                        name: requestItem.title ? requestItem.title : "i18n://dvo.requestItem.DecidableConsentRequestItem.name",
+                        name: requestItem.title ?? "i18n://dvo.requestItem.DecidableConsentRequestItem.name",
                         isDecidable,
                         response: responseItemDVO
                     } as DecidableConsentRequestItemDVO;
@@ -688,7 +688,7 @@ export class DataViewExpander {
                     ...consentRequestItem,
                     type: "ConsentRequestItemDVO",
                     id: "",
-                    name: requestItem.title ? requestItem.title : "i18n://dvo.requestItem.ConsentRequestItem.name",
+                    name: requestItem.title ?? "i18n://dvo.requestItem.ConsentRequestItem.name",
                     isDecidable,
                     response: responseItemDVO
                 } as ConsentRequestItemDVO;
@@ -701,7 +701,7 @@ export class DataViewExpander {
                         ...freeTextRequestItem,
                         type: "DecidableFreeTextRequestItemDVO",
                         id: "",
-                        name: requestItem.title ? requestItem.title : "i18n://dvo.requestItem.DecidableFreeTextRequestItem.name",
+                        name: requestItem.title ?? "i18n://dvo.requestItem.DecidableFreeTextRequestItem.name",
                         isDecidable,
                         response: responseItemDVO
                     } as DecidableFreeTextRequestItemDVO;
@@ -710,7 +710,7 @@ export class DataViewExpander {
                     ...freeTextRequestItem,
                     type: "FreeTextRequestItemDVO",
                     id: "",
-                    name: requestItem.title ? requestItem.title : "i18n://dvo.requestItem.FreeTextRequestItem.name",
+                    name: requestItem.title ?? "i18n://dvo.requestItem.FreeTextRequestItem.name",
                     isDecidable,
                     response: responseItemDVO
                 } as FreeTextRequestItemDVO;
@@ -727,7 +727,7 @@ export class DataViewExpander {
                         type: "DecidableRegisterAttributeListenerRequestItemDVO",
                         id: "",
                         query: queryDVO,
-                        name: requestItem.title ? requestItem.title : "i18n://dvo.requestItem.DecidableRegisterAttributeListenerRequestItem.name",
+                        name: requestItem.title ?? "i18n://dvo.requestItem.DecidableRegisterAttributeListenerRequestItem.name",
                         isDecidable,
                         response: responseItemDVO
                     } as DecidableRegisterAttributeListenerRequestItemDVO;
@@ -737,7 +737,7 @@ export class DataViewExpander {
                     type: "RegisterAttributeListenerRequestItemDVO",
                     id: "",
                     query: queryDVO,
-                    name: requestItem.title ? requestItem.title : "i18n://dvo.requestItem.RegisterAttributeListenerRequestItem.name",
+                    name: requestItem.title ?? "i18n://dvo.requestItem.RegisterAttributeListenerRequestItem.name",
                     isDecidable,
                     response: responseItemDVO
                 } as RegisterAttributeListenerRequestItemDVO;
@@ -747,7 +747,7 @@ export class DataViewExpander {
                     ...requestItem,
                     type: "RequestItemDVO",
                     id: "",
-                    name: requestItem.title ? requestItem.title : "i18n://dvo.requestItem.name",
+                    name: requestItem.title ?? "i18n://dvo.requestItem.name",
                     isDecidable,
                     response: responseItemDVO
                 };
@@ -1483,7 +1483,7 @@ export class DataViewExpander {
             isDraft: true,
             isOwn: owner.isSelf,
             valueType,
-            tags: attributeInstance.tags ? attributeInstance.tags : []
+            tags: attributeInstance.tags ?? []
         };
     }
 
