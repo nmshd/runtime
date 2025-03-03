@@ -1329,6 +1329,11 @@ export class AttributesController extends ConsumptionBaseController {
         return repositoryAttributeDuplicate;
     }
 
+    private trimAttributeValue(value: AttributeValues.Identity.Json): AttributeValues.Identity.Json {
+        const trimmedEntries = Object.entries(value).map((entry) => (typeof entry[1] === "string" ? [entry[0], entry[1].trim()] : entry));
+        return Object.fromEntries(trimmedEntries) as AttributeValues.Identity.Json;
+    }
+
     public async getRelationshipAttributesOfValueTypeToPeerWithGivenKeyAndOwner(key: string, owner: CoreAddress, valueType: string, peer: CoreAddress): Promise<LocalAttribute[]> {
         return await this.getLocalAttributes({
             "content.@type": "RelationshipAttribute",
@@ -1346,11 +1351,6 @@ export class AttributesController extends ConsumptionBaseController {
                 ]
             }
         });
-    }
-
-    private trimAttributeValue(value: AttributeValues.Identity.Json): AttributeValues.Identity.Json {
-        const trimmedEntries = Object.entries(value).map((entry) => (typeof entry[1] === "string" ? [entry[0], entry[1].trim()] : entry));
-        return Object.fromEntries(trimmedEntries) as AttributeValues.Identity.Json;
     }
 
     public async getAttributeTagCollection(): Promise<AttributeTagCollection> {
