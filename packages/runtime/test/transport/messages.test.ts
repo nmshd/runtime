@@ -250,6 +250,7 @@ describe("Message errors", () => {
     test("should throw correct error for trying to send a Message with a Request content that doesn't match the content of the LocalRequest", async () => {
         const wrongRequestItem = {
             "@type": "AuthenticationRequestItem",
+            title: "A Title",
             mustBeAccepted: true
         };
         const result = await client1.transport.messages.sendMessage({
