@@ -297,7 +297,7 @@ export class ThenSteps {
         expect((repositoryAttribute!.content as IdentityAttribute).tags?.sort()).toStrictEqual(tags.sort());
     }
 
-    public async theSuccessorAttributeValueMatches(value: AttributeValues.Json): Promise<void> {
+    public async theSuccessorAttributeValueMatches(value: AttributeValues.Identity.Json): Promise<void> {
         const attribute = await this.context.consumptionController.attributes.getLocalAttribute(
             (this.context.responseItemAfterAction as AttributeSuccessionAcceptResponseItem).successorId
         );
