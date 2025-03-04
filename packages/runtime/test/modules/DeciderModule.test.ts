@@ -1121,7 +1121,7 @@ describe("DeciderModule", () => {
                     {
                         requestConfig: {
                             "content.item.@type": "AuthenticationRequestItem",
-                            "content.item.title": "Title of RequestItem"
+                            "content.item.description": "Description of RequestItem"
                         },
                         responseConfig: {
                             accept: true
