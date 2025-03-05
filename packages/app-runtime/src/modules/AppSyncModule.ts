@@ -36,7 +36,7 @@ export class AppSyncModule extends AppRuntimeModule<AppSyncModuleConfiguration> 
         }
     }
 
-    public stop(): void {
+    public override stop(): void {
         this.started = false;
         clearTimeout(this.syncTimeout);
     }

@@ -41,8 +41,4 @@ export class RelationshipChangedModule extends AppRuntimeModule<RelationshipChan
         const eventToPublish = new OnboardingChangeReceivedEvent(event.eventTargetAddress, relationship, lastAuditLogEntry, relationshipDVO);
         this.runtime.eventBus.publish(eventToPublish);
     }
-
-    public stop(): void {
-        this.unsubscribeFromAllEvents();
-    }
 }
