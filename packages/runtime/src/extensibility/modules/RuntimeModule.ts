@@ -14,7 +14,13 @@ export abstract class RuntimeModule<TConfig extends ModuleConfiguration = Module
         public readonly runtime: TRuntime,
         public readonly configuration: TConfig,
         public readonly logger: ILogger
-    ) {}
+    ) {
+        const originalStopMethod = this.stop;
+        this.stop = async () => {
+            await originalStopMethod.call(this);
+            this.#unsubscribeFromAllEvents();
+        };
+    }
 
     public get name(): string {
         return this.configuration.name;
@@ -26,7 +32,9 @@ export abstract class RuntimeModule<TConfig extends ModuleConfiguration = Module
 
     public abstract init(): Promise<void> | void;
     public abstract start(): Promise<void> | void;
-    public abstract stop(): Promise<void> | void;
+    public stop(): Promise<void> | void {
+        // Nothing to do here
+    }
 
     private readonly subscriptionIds: number[] = [];
 
@@ -35,7 +43,7 @@ export abstract class RuntimeModule<TConfig extends ModuleConfiguration = Module
         this.subscriptionIds.push(subscriptionId);
     }
 
-    protected unsubscribeFromAllEvents(): void {
+    #unsubscribeFromAllEvents(): void {
         this.subscriptionIds.forEach((id) => this.runtime.eventBus.unsubscribe(id));
         this.subscriptionIds.splice(0);
     }
