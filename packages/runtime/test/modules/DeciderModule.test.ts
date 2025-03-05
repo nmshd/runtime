@@ -1256,7 +1256,7 @@ describe("DeciderModule", () => {
                             "content.item.attribute.@type": "IdentityAttribute",
                             "content.item.attribute.validFrom": attributeValidFrom,
                             "content.item.attribute.validTo": attributeValidTo,
-                            "content.item.attribute.tags": ["tag1", "tag2"],
+                            "content.item.attribute.tags": ["x+%+tag1", "x+%+tag2"],
                             "content.item.attribute.value.@type": "IdentityFileReference",
                             "content.item.attribute.value.value": "A link to a file with more than 30 characters"
                         },
@@ -1281,7 +1281,7 @@ describe("DeciderModule", () => {
                                 owner: recipient.address,
                                 validFrom: attributeValidFrom,
                                 validTo: attributeValidTo,
-                                tags: ["tag1", "tag3"],
+                                tags: ["x+%+tag1", "x+%+tag3"],
                                 value: {
                                     "@type": "IdentityFileReference",
                                     value: "A link to a file with more than 30 characters"
@@ -1529,14 +1529,14 @@ describe("DeciderModule", () => {
                             "content.item.attribute.@type": "IdentityAttribute",
                             "content.item.attribute.validFrom": attributeValidFrom,
                             "content.item.attribute.validTo": attributeValidTo,
-                            "content.item.attribute.tags": ["tag1", "tag2"],
+                            "content.item.attribute.tags": ["x+%+tag1", "x+%+tag2"],
                             "content.item.attribute.value.@type": "GivenName",
                             "content.item.attribute.value.value": "Given name of recipient proposed by sender",
                             "content.item.query.@type": "IdentityAttributeQuery",
                             "content.item.query.validFrom": attributeValidFrom,
                             "content.item.query.validTo": attributeValidTo,
                             "content.item.query.valueType": "GivenName",
-                            "content.item.query.tags": ["tag1", "tag2"]
+                            "content.item.query.tags": ["x+%+tag1", "x+%+tag2"]
                         },
                         responseConfig: {
                             accept: true,
@@ -1545,7 +1545,7 @@ describe("DeciderModule", () => {
                                 validFrom: attributeValidFrom,
                                 validTo: attributeValidTo,
                                 value: GivenName.from("Given name of recipient").toJSON(),
-                                tags: ["tag1"]
+                                tags: ["x+%+tag1"]
                             })
                         }
                     }
@@ -1566,7 +1566,7 @@ describe("DeciderModule", () => {
                                 owner: recipient.address,
                                 validFrom: attributeValidFrom,
                                 validTo: attributeValidTo,
-                                tags: ["tag1", "tag3"],
+                                tags: ["x+%+tag1", "x+%+tag3"],
                                 value: {
                                     "@type": "GivenName",
                                     value: "Given name of recipient proposed by sender"
@@ -1577,7 +1577,7 @@ describe("DeciderModule", () => {
                                 validFrom: attributeValidFrom,
                                 validTo: attributeValidTo,
                                 valueType: "GivenName",
-                                tags: ["tag1", "tag3"]
+                                tags: ["x+%+tag1", "x+%+tag3"]
                             },
                             mustBeAccepted: true
                         }
@@ -1742,7 +1742,7 @@ describe("DeciderModule", () => {
                             "content.item.query.validFrom": attributeValidFrom,
                             "content.item.query.validTo": attributeValidTo,
                             "content.item.query.valueType": "GivenName",
-                            "content.item.query.tags": ["tag1", "tag2"]
+                            "content.item.query.tags": ["x+%+tag1", "x+%+tag2"]
                         },
                         responseConfig: {
                             accept: true,
@@ -1751,7 +1751,7 @@ describe("DeciderModule", () => {
                                 validFrom: attributeValidFrom,
                                 validTo: attributeValidTo,
                                 value: GivenName.from("Given name of recipient").toJSON(),
-                                tags: ["tag1"]
+                                tags: ["x+%+tag1"]
                             })
                         }
                     }
@@ -1772,7 +1772,7 @@ describe("DeciderModule", () => {
                                 validFrom: attributeValidFrom,
                                 validTo: attributeValidTo,
                                 valueType: "GivenName",
-                                tags: ["tag1", "tag3"]
+                                tags: ["x+%+tag1", "x+%+tag3"]
                             },
                             mustBeAccepted: true
                         }
@@ -1909,14 +1909,14 @@ describe("DeciderModule", () => {
                             "content.item.query.@type": "IQLQuery",
                             "content.item.query.queryString": "GivenName || LastName",
                             "content.item.query.attributeCreationHints.valueType": "GivenName",
-                            "content.item.query.attributeCreationHints.tags": ["tag1", "tag2"]
+                            "content.item.query.attributeCreationHints.tags": ["x+%+tag1", "x+%+tag2"]
                         },
                         responseConfig: {
                             accept: true,
                             newAttribute: IdentityAttribute.from({
                                 owner: "",
                                 value: GivenName.from("Given name of recipient").toJSON(),
-                                tags: ["tag1"]
+                                tags: ["x+%+tag1"]
                             })
                         }
                     }
@@ -1937,7 +1937,7 @@ describe("DeciderModule", () => {
                                 queryString: "GivenName || LastName",
                                 attributeCreationHints: {
                                     valueType: "GivenName",
-                                    tags: ["tag1", "tag3"]
+                                    tags: ["x+%+tag1", "x+%+tag3"]
                                 }
                             },
                             mustBeAccepted: true
@@ -1985,7 +1985,7 @@ describe("DeciderModule", () => {
                             "content.item.query.validFrom": `>${attributeValidFrom.subtract({ days: 1 }).toString()}`,
                             "content.item.query.validTo": `>${attributeValidTo.subtract({ days: 1 }).toString()}`,
                             "content.item.query.valueType": "GivenName",
-                            "content.item.query.tags": ["tag1", "tag2"]
+                            "content.item.query.tags": ["x+%+tag1", "x+%+tag2"]
                         },
                         responseConfig: {
                             accept: true
@@ -2008,7 +2008,7 @@ describe("DeciderModule", () => {
                                 validFrom: attributeValidFrom.toString(),
                                 validTo: attributeValidTo.toString(),
                                 valueType: "GivenName",
-                                tags: ["tag1", "tag3"]
+                                tags: ["x+%+tag1", "x+%+tag3"]
                             },
                             mustBeAccepted: true
                         }
@@ -2047,7 +2047,7 @@ describe("DeciderModule", () => {
                             "content.item.attribute.owner": sender.address,
                             "content.item.attribute.validFrom": `<${attributeValidFrom.add({ days: 1 }).toString()}`,
                             "content.item.attribute.validTo": `<${attributeValidTo.add({ days: 1 }).toString()}`,
-                            "content.item.attribute.tags": ["tag1", "tag2"],
+                            "content.item.attribute.tags": ["x+%+tag1", "x+%+tag2"],
                             "content.item.attribute.value.@type": "IdentityFileReference",
                             "content.item.attribute.value.value": "A link to a file with more than 30 characters"
                         },
@@ -2073,7 +2073,7 @@ describe("DeciderModule", () => {
                                 owner: sender.address,
                                 validFrom: attributeValidFrom.toString(),
                                 validTo: attributeValidTo.toString(),
-                                tags: ["tag1", "tag3"],
+                                tags: ["x+%+tag1", "x+%+tag3"],
                                 value: {
                                     "@type": "IdentityFileReference",
                                     value: "A link to a file with more than 30 characters"

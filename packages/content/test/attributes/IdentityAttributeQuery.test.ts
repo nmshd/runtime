@@ -4,7 +4,7 @@ describe("IdentityAttributeQuery", function () {
     test("should allow to create a new query", function () {
         const attributeQuery = IdentityAttributeQuery.from({
             valueType: "StreetAddress",
-            tags: ["Delivery"]
+            tags: ["x+%+Delivery"]
         });
         expect(attributeQuery).toBeInstanceOf(IdentityAttributeQuery);
 
@@ -15,7 +15,7 @@ describe("IdentityAttributeQuery", function () {
 
         const attributeQueryTags = IdentityAttributeQuery.from({
             valueType: "StreetAddress",
-            tags: ["Delivery"]
+            tags: ["x+%+Delivery"]
         });
         expect(attributeQueryTags).toBeInstanceOf(IdentityAttributeQuery);
     });

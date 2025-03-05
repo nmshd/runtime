@@ -793,7 +793,7 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["predecessor"]
+                tags: ["x+%+predecessor"]
             }
         });
         const predecessorRepositoryAttribute = (await consumptionServices2.attributes.getAttribute({ id: predecessorOwnSharedIdentityAttribute.shareInfo!.sourceAttribute! }))
@@ -807,7 +807,7 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
                         "@type": "GivenName",
                         value: "Franz"
                     },
-                    tags: ["successor"]
+                    tags: ["x+%+successor"]
                 }
             })
         ).value;
@@ -889,7 +889,7 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
         expect((responseItem.successor.content.value as GivenNameJSON).value).toBe("Franz");
 
         const predecessorResult = await consumptionServices2.attributes.getAttributes({
-            query: { "content.value.@type": "GivenName", "shareInfo.peer": dvo.createdBy.id, "content.tags": "predecessor" }
+            query: { "content.value.@type": "GivenName", "shareInfo.peer": dvo.createdBy.id, "content.tags": "x+%+predecessor" }
         });
         expect(predecessorResult).toBeSuccessful();
         expect(predecessorResult.value).toHaveLength(1);
@@ -900,7 +900,7 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
         expect(predecessorName.value).toStrictEqual((responseItem.predecessor.content.value as GivenNameJSON).value);
 
         const successorResult = await consumptionServices2.attributes.getAttributes({
-            query: { "content.value.@type": "GivenName", "shareInfo.peer": dvo.createdBy.id, "content.tags": "successor" }
+            query: { "content.value.@type": "GivenName", "shareInfo.peer": dvo.createdBy.id, "content.tags": "x+%+successor" }
         });
         expect(successorResult).toBeSuccessful();
         expect(successorResult.value).toHaveLength(1);
@@ -967,7 +967,7 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
         expect((responseItem.successor.content.value as GivenNameJSON).value).toBe("Franz");
 
         const predecessorResult = await consumptionServices1.attributes.getAttributes({
-            query: { "content.value.@type": "GivenName", "shareInfo.peer": dvo.request.peer.id, "content.tags": "predecessor" }
+            query: { "content.value.@type": "GivenName", "shareInfo.peer": dvo.request.peer.id, "content.tags": "x+%+predecessor" }
         });
         expect(predecessorResult).toBeSuccessful();
         expect(predecessorResult.value).toHaveLength(1);
@@ -978,7 +978,7 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
         expect(predecessorName.value).toStrictEqual((responseItem.predecessor.content.value as GivenNameJSON).value);
 
         const successorResult = await consumptionServices1.attributes.getAttributes({
-            query: { "content.value.@type": "GivenName", "shareInfo.peer": dvo.request.peer.id, "content.tags": "successor" }
+            query: { "content.value.@type": "GivenName", "shareInfo.peer": dvo.request.peer.id, "content.tags": "x+%+successor" }
         });
         expect(successorResult).toBeSuccessful();
         expect(successorResult.value).toHaveLength(1);
