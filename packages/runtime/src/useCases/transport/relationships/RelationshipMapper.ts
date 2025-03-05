@@ -3,7 +3,6 @@ import { ArbitraryRelationshipCreationContent, RelationshipCreationContent } fro
 import { Relationship, RelationshipAuditLogEntry } from "@nmshd/transport";
 import { RelationshipAuditLogEntryDTO, RelationshipDTO } from "../../../types";
 import { RuntimeErrors } from "../../common";
-import { RelationshipTemplateMapper } from "../relationshipTemplates/RelationshipTemplateMapper";
 
 export class RelationshipMapper {
     public static toRelationshipDTO(relationship: Relationship): RelationshipDTO {
@@ -13,7 +12,7 @@ export class RelationshipMapper {
 
         return {
             id: relationship.id.toString(),
-            template: RelationshipTemplateMapper.toRelationshipTemplateDTO(relationship.cache.template),
+            templateId: relationship.cache.templateId.toString(),
             status: relationship.status,
             peer: relationship.peer.address.toString(),
             peerDeletionInfo: relationship.peerDeletionInfo?.toJSON(),
