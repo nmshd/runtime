@@ -30,16 +30,14 @@ export class AppRelationshipFacade extends AppRuntimeFacade {
 
     public async renderRelationshipItems(id: string, limit: number): Promise<UserfriendlyResult<RelationshipItemsDVO>> {
         const messagesResult = await this.transportServices.messages.getMessages({
-            query: { "recipients.relationshipId": id }
+            query: { "recipients.relationshipId": id },
+            paginationOptions: { limit }
         });
         if (messagesResult.isError) {
             return await this.parseErrorResult<RelationshipItemsDVO>(messagesResult);
         }
 
-        const dvo: RelationshipItemsDVO = [...(await this.expander.expandMessageDTOs(messagesResult.value))]
-            .sort((m1, m2) => new Date(m2.date ?? 0).valueOf() - new Date(m1.date ?? 0).valueOf())
-            .slice(0, limit);
-
+        const dvo: RelationshipItemsDVO = await this.expander.expandMessageDTOs(messagesResult.value.messages);
         return UserfriendlyResult.ok<RelationshipItemsDVO, UserfriendlyApplicationError>(dvo);
     }
 

@@ -11,7 +11,7 @@ export class DeviceMigrations {
         const files = await this.accountController.files.getFiles(query);
         await this.accountController.files.updateCache(files.map(synchronizableToId));
 
-        const messages = await this.accountController.messages.getMessages(query);
+        const messages = (await this.accountController.messages.getMessages(query)).messages;
         await this.accountController.messages.updateCache(messages.map(synchronizableToId));
 
         const relationships = await this.accountController.relationships.getRelationships(query);
