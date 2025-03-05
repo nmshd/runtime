@@ -55,12 +55,19 @@ export class MessageController extends TransportController {
         return this;
     }
 
-    public async getMessages(query?: any, paginationOptions?: DatabasePaginationOptions): Promise<Message[]> {
+    public async getMessages(
+        query?: any,
+        paginationOptions?: DatabasePaginationOptions /* a default should be added here */
+    ): Promise<{ messages: Message[]; messageCount: number }> {
         const messages = await this.messages.find(query, paginationOptions, { sortBy: "cache.createdAt", sortOrder: "asc" }); // ascending to not destroy tests, recent messages should generally be prioritized though
-        return this.parseArray<Message>(messages, Message);
+        const messageCount = await this.messages.count(query); // there could be a more efficient way than a separate call for getting the count
+        return {
+            messages: this.parseArray<Message>(messages, Message),
+            messageCount
+        };
     }
 
-    public async getMessagesByRelationshipId(id: CoreId, paginationOptions?: DatabasePaginationOptions): Promise<Message[]> {
+    public async getMessagesByRelationshipId(id: CoreId, paginationOptions?: DatabasePaginationOptions): Promise<{ messages: Message[]; messageCount: number }> {
         return await this.getMessages(
             {
                 [`${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.recipients)}.${nameof<CachedMessageRecipient>((m) => m.relationshipId)}`]: id.toString()
@@ -70,7 +77,7 @@ export class MessageController extends TransportController {
     }
 
     public async cleanupMessagesOfDecomposedRelationship(relationship: Relationship): Promise<void> {
-        const messages = await this.getMessagesByRelationshipId(relationship.id);
+        const messages = (await this.getMessagesByRelationshipId(relationship.id)).messages;
         for (const message of messages) {
             await this.cleanupMessageOfDecomposedRelationship(message.id, relationship);
         }
@@ -107,7 +114,7 @@ export class MessageController extends TransportController {
     }
 
     @log()
-    public async getMessagesByAddress(address: CoreAddress, paginationOptions?: DatabasePaginationOptions): Promise<Message[]> {
+    public async getMessagesByAddress(address: CoreAddress, paginationOptions?: DatabasePaginationOptions): Promise<{ messages: Message[]; messageCount: number }> {
         const relationship = await this.parent.relationships.getExistingRelationshipToIdentity(address);
         if (!relationship || relationship.status === RelationshipStatus.Pending) {
             throw new TransportError(
@@ -117,7 +124,7 @@ export class MessageController extends TransportController {
         return await this.getMessagesByRelationshipId(relationship.id, paginationOptions);
     }
 
-    public async getReceivedMessages(paginationOptions?: DatabasePaginationOptions): Promise<Message[]> {
+    public async getReceivedMessages(paginationOptions?: DatabasePaginationOptions): Promise<{ messages: Message[]; messageCount: number }> {
         return await this.getMessages(
             {
                 [nameof<Message>((m) => m.isOwn)]: false

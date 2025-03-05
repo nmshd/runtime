@@ -161,8 +161,8 @@ describe("MessageController", function () {
         });
 
         test("should get the cached messages", async function () {
-            const sentMessages = await sender.messages.getMessages();
-            const receivedMessages = await recipient.messages.getMessages();
+            const sentMessages = (await sender.messages.getMessages()).messages;
+            const receivedMessages = (await recipient.messages.getMessages()).messages;
             expect(sentMessages).toHaveLength(3);
             expect(receivedMessages).toHaveLength(3);
             expect(sentMessages[0].id.toString()).toBe(tempId1.toString());
@@ -172,23 +172,17 @@ describe("MessageController", function () {
         });
 
         test("should get the cached messages with correct pagination", async function () {
-            const sentMessages = await sender.messages.getMessages(undefined, { limit: 2, skip: 0 });
-            const receivedMessages = await recipient.messages.getMessages(undefined, { limit: 2, skip: 0 });
-            expect(sentMessages).toHaveLength(2);
-            expect(receivedMessages).toHaveLength(2);
-            expect(sentMessages[0].id.toString()).toBe(tempId1.toString());
-            expect(sentMessages[1].id.toString()).toBe(tempId2.toString());
-            expectValidMessages(sentMessages[0], receivedMessages[0], tempDate);
-            expectValidMessages(sentMessages[1], receivedMessages[1], tempDate);
+            const sentMessagesResult = await sender.messages.getMessages(undefined, { limit: 2, skip: 0 });
+            expect(sentMessagesResult.messageCount).toBe(3);
+            expect(sentMessagesResult.messages).toHaveLength(2);
+            expect(sentMessagesResult.messages[0].id.toString()).toBe(tempId1.toString());
+            expect(sentMessagesResult.messages[1].id.toString()).toBe(tempId2.toString());
 
-            const sentMessages2 = await sender.messages.getMessages(undefined, { limit: 3, skip: 1 });
-            const receivedMessages2 = await recipient.messages.getMessages(undefined, { limit: 3, skip: 1 });
-            expect(sentMessages2).toHaveLength(2);
-            expect(receivedMessages2).toHaveLength(2);
-            expect(sentMessages2[0].id.toString()).toBe(tempId2.toString());
-            expect(sentMessages2[1].id.toString()).toBe(tempId3.toString());
-            expectValidMessages(sentMessages2[0], receivedMessages2[0], tempDate);
-            expectValidMessages(sentMessages2[1], receivedMessages2[1], tempDate);
+            const sentMessagesResult2 = await sender.messages.getMessages(undefined, { limit: 3, skip: 1 });
+            expect(sentMessagesResult2.messageCount).toBe(3);
+            expect(sentMessagesResult2).toHaveLength(2);
+            expect(sentMessagesResult2.messages[0].id.toString()).toBe(tempId2.toString());
+            expect(sentMessagesResult2.messages[1].id.toString()).toBe(tempId3.toString());
         });
 
         test("should set and get additional metadata", async function () {

@@ -112,15 +112,17 @@ describe("Messaging", () => {
             messageIds.push(result.value.id);
         }
 
-        const messages1 = (await client1.transport.messages.getMessages({ paginationOptions: { limit: 2, skip: 0 } })).value;
-        expect(messages1).toHaveLength(2);
-        expect(messages1[0].id).toBe(messageIds[0]);
-        expect(messages1[1].id).toBe(messageIds[1]);
+        const messagesResult1 = (await client1.transport.messages.getMessages({ paginationOptions: { limit: 2, skip: 0 } })).value;
+        expect(messagesResult1.messageCount).toBe(3);
+        expect(messagesResult1).toHaveLength(2);
+        expect(messagesResult1.messages[0].id).toBe(messageIds[0]);
+        expect(messagesResult1.messages[1].id).toBe(messageIds[1]);
 
-        const messages2 = (await client1.transport.messages.getMessages({ paginationOptions: { limit: 3, skip: 1 } })).value;
-        expect(messages2).toHaveLength(2);
-        expect(messages2[0].id).toBe(messageIds[1]);
-        expect(messages2[1].id).toBe(messageIds[2]);
+        const messagesResult2 = (await client1.transport.messages.getMessages({ paginationOptions: { limit: 3, skip: 1 } })).value;
+        expect(messagesResult2.messageCount).toBe(3);
+        expect(messagesResult2).toHaveLength(2);
+        expect(messagesResult2.messages[0].id).toBe(messageIds[1]);
+        expect(messagesResult2.messages[1].id).toBe(messageIds[2]);
     });
 
     test("receive the message in a sync run", async () => {
@@ -140,15 +142,15 @@ describe("Messaging", () => {
     });
 
     test("receive the message on TransportService2 in /Messages", async () => {
-        const baselineNumberOfMessages = (await client2.transport.messages.getMessages({})).value.length;
+        const baselineNumberOfMessages = (await client2.transport.messages.getMessages({})).value.messageCount;
         const messageId = (await exchangeMessage(client1.transport, client2.transport, [fileId])).id;
 
         const response = await client2.transport.messages.getMessages({});
         expect(response).toBeSuccessful();
-        const numberOfMessages = response.value.length;
+        const numberOfMessages = response.value.messageCount;
         expect(numberOfMessages - baselineNumberOfMessages).toBe(1);
 
-        const message = response.value[numberOfMessages - 1];
+        const message = response.value.messages[numberOfMessages - 1];
         expect(message.id).toStrictEqual(messageId);
         expect(message.content).toStrictEqual({
             "@type": "Mail",
@@ -776,9 +778,9 @@ describe("Message query", () => {
 
         const messages = await client2.transport.messages.getMessages({ query: { attachments: "+" } });
 
-        expect(messages.value.every((m) => m.attachments.length > 0)).toBe(true);
+        expect(messages.value.messages.every((m) => m.attachments.length > 0)).toBe(true);
 
-        const messageIds = messages.value.map((m) => m.id);
+        const messageIds = messages.value.messages.map((m) => m.id);
         expect(messageIds).toContain(messageWithAttachment.id);
         expect(messageIds).not.toContain(messageWithoutAttachment.id);
     });
