@@ -7,6 +7,7 @@ import {
     IdentityAttributeQuery,
     IIdentityAttributeQuery,
     IIQLQuery,
+    IQLQuery,
     IRelationshipAttributeQuery,
     IThirdPartyRelationshipAttributeQuery,
     RelationshipAttribute,
@@ -1369,6 +1370,36 @@ export class AttributesController extends ConsumptionBaseController {
         const invalidTags = [];
         for (const tag of attribute.tags) {
             if (!this.isValidTag(tag, tagCollection.tagsForAttributeValueTypes[attribute.toJSON().value["@type"]])) {
+                invalidTags.push(tag);
+            }
+        }
+
+        if (invalidTags.length > 0) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.invalidTags(invalidTags));
+        }
+
+        return ValidationResult.success();
+    }
+
+    public async validateAttributeQueryTags(
+        attributeQuery: IdentityAttributeQuery | IQLQuery | RelationshipAttributeQuery | ThirdPartyRelationshipAttributeQuery
+    ): Promise<ValidationResult> {
+        if (
+            (attributeQuery instanceof IQLQuery && !attributeQuery.attributeCreationHints) ||
+            attributeQuery instanceof RelationshipAttributeQuery ||
+            attributeQuery instanceof ThirdPartyRelationshipAttributeQuery
+        ) {
+            return ValidationResult.success();
+        }
+
+        const attributeTags = attributeQuery instanceof IdentityAttributeQuery ? attributeQuery.tags : attributeQuery.attributeCreationHints!.tags;
+        if (!attributeTags || attributeTags.length === 0) return ValidationResult.success();
+
+        const attributeValueType = attributeQuery instanceof IdentityAttributeQuery ? attributeQuery.valueType : attributeQuery.attributeCreationHints!.valueType;
+        const tagCollection = await this.getAttributeTagCollection();
+        const invalidTags = [];
+        for (const tag of attributeTags) {
+            if (!this.isValidTag(tag, tagCollection.tagsForAttributeValueTypes[attributeValueType])) {
                 invalidTags.push(tag);
             }
         }
