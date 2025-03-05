@@ -1365,13 +1365,10 @@ export class AttributesController extends ConsumptionBaseController {
         if (attribute instanceof RelationshipAttribute) return ValidationResult.success();
         if (!attribute.tags || attribute.tags.length === 0) return ValidationResult.success();
 
-        const tags = attribute.tags;
-        const attributeValueType = attribute.toJSON().value["@type"];
-
         const tagCollection = await this.getAttributeTagCollection();
         const invalidTags = [];
-        for (const tag of tags) {
-            if (!this.isValidTag(tag, tagCollection.tagsForAttributeValueTypes[attributeValueType])) {
+        for (const tag of attribute.tags) {
+            if (!this.isValidTag(tag, tagCollection.tagsForAttributeValueTypes[attribute.toJSON().value["@type"]])) {
                 invalidTags.push(tag);
             }
         }
