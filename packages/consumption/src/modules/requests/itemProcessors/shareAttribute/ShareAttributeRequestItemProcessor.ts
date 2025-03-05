@@ -179,7 +179,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
     public override async canAccept(requestItem: ShareAttributeRequestItem, _params: AcceptRequestItemParametersJSON, _requestInfo: LocalRequestInfo): Promise<ValidationResult> {
         const tagValidationResult = await this.consumptionController.attributes.validateTags(requestItem.attribute);
         if (tagValidationResult.isError()) {
-            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem(`${tagValidationResult.error.message}`));
+            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem(tagValidationResult.error.message));
         }
 
         return ValidationResult.success();
