@@ -1,5 +1,6 @@
 import { serialize, validate } from "@js-soft/ts-serval";
 import { AbstractAttributeValue, AbstractAttributeValueJSON, IAbstractAttributeValue } from "../AbstractAttributeValue";
+import { characterSets } from "../constants/CharacterSets";
 import { RenderHints, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../hints";
 
 export interface AbstractStringJSON extends AbstractAttributeValueJSON {
@@ -12,7 +13,7 @@ export interface IAbstractString extends IAbstractAttributeValue {
 
 export class AbstractString extends AbstractAttributeValue implements IAbstractString {
     @serialize()
-    @validate({ max: 100 })
+    @validate({ max: 100, regExp: characterSets.din91379DatatypeC })
     public value: string;
 
     public static override preFrom(value: any): any {
@@ -26,7 +27,8 @@ export class AbstractString extends AbstractAttributeValue implements IAbstractS
 
     public static get valueHints(): ValueHints {
         return ValueHints.from({
-            max: 100
+            max: 100,
+            pattern: characterSets.din91379DatatypeC.toString().slice(1, -1).replaceAll("/", "\\/")
         });
     }
 

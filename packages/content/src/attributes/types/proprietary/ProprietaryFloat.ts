@@ -1,4 +1,5 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
+import { characterSets } from "../../constants/CharacterSets";
 import { ValueHints, ValueHintsOverride } from "../../hints";
 import { AbstractFloat, AbstractFloatJSON, IAbstractFloat } from "../AbstractFloat";
 import {
@@ -17,11 +18,11 @@ export interface IProprietaryFloat extends IProprietaryAttributeValue, IAbstract
 @type("ProprietaryFloat")
 export class ProprietaryFloat extends AbstractFloat {
     @serialize()
-    @validate({ max: PROPRIETARY_ATTRIBUTE_MAX_TITLE_LENGTH })
+    @validate({ max: PROPRIETARY_ATTRIBUTE_MAX_TITLE_LENGTH, regExp: characterSets.din91379DatatypeC })
     public title: string;
 
     @serialize()
-    @validate({ nullable: true, max: PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH })
+    @validate({ nullable: true, max: PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH, regExp: characterSets.din91379DatatypeC })
     public description?: string;
 
     @serialize()
