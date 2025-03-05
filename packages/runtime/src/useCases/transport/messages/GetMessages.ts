@@ -1,3 +1,4 @@
+import { DatabasePaginationOptions } from "@js-soft/docdb-access-abstractions";
 import { QueryTranslator } from "@js-soft/docdb-querytranslator";
 import { Result } from "@js-soft/ts-utils";
 import { CachedMessage, CachedMessageRecipient, Message, MessageController, MessageEnvelopeRecipient } from "@nmshd/transport";
@@ -23,6 +24,7 @@ export interface GetMessagesQuery {
 
 export interface GetMessagesRequest {
     query?: GetMessagesQuery;
+    paginationOptions?: DatabasePaginationOptions;
 }
 
 class Validator extends SchemaValidator<GetMessagesRequest> {
@@ -121,7 +123,7 @@ export class GetMessagesUseCase extends UseCase<GetMessagesRequest, MessageDTO[]
     protected async executeInternal(request: GetMessagesRequest): Promise<Result<MessageDTO[]>> {
         const query = GetMessagesUseCase.queryTranslator.parse(request.query);
 
-        const messages = await this.messageController.getMessages(query);
+        const messages = await this.messageController.getMessages(query, request.paginationOptions);
 
         return Result.ok(MessageMapper.toMessageDTOList(messages));
     }

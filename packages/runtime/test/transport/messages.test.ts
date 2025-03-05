@@ -95,6 +95,26 @@ describe("Messaging", () => {
         await expect(client1.eventBus).toHavePublished(MessageSentEvent, (m) => m.data.id === result.value.id);
     });
 
+    test("pagination", async () => {
+        const messageIds = [];
+        for (let index = 0; index < 3; index++) {
+            const result = await client1.transport.messages.sendMessage({
+                recipients: [client2.address],
+                content: {
+                    "@type": "Mail",
+                    body: "b",
+                    cc: [],
+                    subject: "a",
+                    to: [client2.address]
+                },
+                attachments: [fileId]
+            });
+            messageIds.push(result.value.id);
+        }
+
+        const response = await client2.transport.messages.getMessages({});
+    });
+
     test("receive the message in a sync run", async () => {
         const messageId = (await sendMessage(client1.transport, client2.address, undefined, [fileId])).id;
 
