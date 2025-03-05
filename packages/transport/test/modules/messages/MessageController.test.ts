@@ -165,9 +165,9 @@ describe("MessageController", function () {
             const receivedMessages = (await recipient.messages.getMessages()).messages;
             expect(sentMessages).toHaveLength(3);
             expect(receivedMessages).toHaveLength(3);
-            expect(sentMessages[0].id.toString()).toBe(tempId1.toString());
+            expect(sentMessages[2].id.toString()).toBe(tempId1.toString());
             expect(sentMessages[1].id.toString()).toBe(tempId2.toString());
-            expectValidMessages(sentMessages[0], receivedMessages[0], tempDate);
+            expectValidMessages(sentMessages[2], receivedMessages[2], tempDate);
             expectValidMessages(sentMessages[1], receivedMessages[1], tempDate);
         });
 
@@ -175,14 +175,14 @@ describe("MessageController", function () {
             const sentMessagesResult = await sender.messages.getMessages(undefined, { limit: 2, skip: 0 });
             expect(sentMessagesResult.messageCount).toBe(3);
             expect(sentMessagesResult.messages).toHaveLength(2);
-            expect(sentMessagesResult.messages[0].id.toString()).toBe(tempId1.toString());
+            expect(sentMessagesResult.messages[0].id.toString()).toBe(tempId3.toString());
             expect(sentMessagesResult.messages[1].id.toString()).toBe(tempId2.toString());
 
             const sentMessagesResult2 = await sender.messages.getMessages(undefined, { limit: 3, skip: 1 });
             expect(sentMessagesResult2.messageCount).toBe(3);
-            expect(sentMessagesResult2).toHaveLength(2);
+            expect(sentMessagesResult2.messages).toHaveLength(2);
             expect(sentMessagesResult2.messages[0].id.toString()).toBe(tempId2.toString());
-            expect(sentMessagesResult2.messages[1].id.toString()).toBe(tempId3.toString());
+            expect(sentMessagesResult2.messages[1].id.toString()).toBe(tempId1.toString());
         });
 
         test("should set and get additional metadata", async function () {
@@ -199,22 +199,22 @@ describe("MessageController", function () {
 
         test("should get the messages by address (sender)", async function () {
             const messages = await sender.messages.getMessagesByAddress(recipient.identity.address);
-            expect(messages).toHaveLength(3);
+            expect(messages.messageCount).toBe(3);
         });
 
         test("should get the messages by relationship (sender)", async function () {
             const messages = await sender.messages.getMessagesByRelationshipId(relationshipId);
-            expect(messages).toHaveLength(3);
+            expect(messages.messageCount).toBe(3);
         });
 
         test("should get the messages by address (recipient)", async function () {
             const messages = await recipient.messages.getMessagesByAddress(sender.identity.address);
-            expect(messages).toHaveLength(3);
+            expect(messages.messageCount).toBe(3);
         });
 
         test("should get the messages by relationship (recipient)", async function () {
             const messages = await recipient.messages.getMessagesByRelationshipId(relationshipId);
-            expect(messages).toHaveLength(3);
+            expect(messages.messageCount).toBe(3);
         });
 
         test("should mark an unread message as read", async function () {

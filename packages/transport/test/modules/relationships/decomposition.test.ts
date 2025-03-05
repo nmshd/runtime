@@ -74,7 +74,7 @@ describe("Data cleanup after relationship decomposition", function () {
     });
 
     test("messages should be deleted/pseudonymized", async function () {
-        const messages = await sender.messages.getMessages();
+        const messages = (await sender.messages.getMessages()).messages;
         expect(messages).toHaveLength(1);
 
         expect(messages[0].cache!.recipients.map((r) => [r.address, r.relationshipId])).toStrictEqual(
@@ -109,7 +109,7 @@ describe("Data cleanup after relationship decomposition", function () {
         await sender1.syncDatawallet();
         await sender2.syncDatawallet();
 
-        const sender2Messages = await sender2.messages.getMessages();
+        const sender2Messages = (await sender2.messages.getMessages()).messages;
         expect(sender2Messages[0].cache?.recipients.map((r) => [r.address, r.relationshipId])).toStrictEqual(
             expect.arrayContaining([
                 [await TestUtil.generateAddressPseudonym(process.env.NMSHD_TEST_BASEURL!), undefined],

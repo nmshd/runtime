@@ -1185,22 +1185,22 @@ describe("RelationshipDecomposition", () => {
 
     test("messages should be deleted/anonymized", async () => {
         const messagesToPeer = (await services1.transport.messages.getMessages({ query: { "recipients.address": services2.address } })).value;
-        expect(messagesToPeer).toHaveLength(0);
+        expect(messagesToPeer.messageCount).toBe(0);
 
         const messagesFromPeer = (await services1.transport.messages.getMessages({ query: { createdBy: services2.address } })).value;
-        expect(messagesFromPeer).toHaveLength(0);
+        expect(messagesFromPeer.messageCount).toBe(0);
 
         const messagesToControlPeer = (await services1.transport.messages.getMessages({ query: { "recipients.address": services3.address } })).value;
-        expect(messagesToControlPeer).not.toHaveLength(0);
+        expect(messagesToControlPeer.messageCount).not.toBe(0);
 
         const messagesFromControlPeer = (await services1.transport.messages.getMessages({ query: { createdBy: services3.address } })).value;
-        expect(messagesFromControlPeer).not.toHaveLength(0);
+        expect(messagesFromControlPeer.messageCount).not.toBe(0);
 
         const addressPseudonym = (await generateAddressPseudonym(process.env.NMSHD_TEST_BASEURL!)).toString();
         const anonymizedMessages = (await services1.transport.messages.getMessages({ query: { "recipients.address": addressPseudonym } })).value;
-        expect(anonymizedMessages).toHaveLength(1);
+        expect(anonymizedMessages.messageCount).toBe(1);
 
-        const anonymizedMessage = anonymizedMessages[0];
+        const anonymizedMessage = anonymizedMessages.messages[0];
         expect(anonymizedMessage.id).toBe(multipleRecipientsMessageId);
         expect(anonymizedMessage.recipients.map((r) => r.address)).toStrictEqual([addressPseudonym, services3.address]);
     });
@@ -1208,7 +1208,7 @@ describe("RelationshipDecomposition", () => {
     test("messages with multiple recipients should be deleted if all its relationships are decomposed", async () => {
         await services1.transport.relationships.decomposeRelationship({ relationshipId: relationshipId2 });
         const messages = (await services1.transport.messages.getMessages({})).value;
-        expect(messages).toHaveLength(0);
+        expect(messages.messageCount).toBe(0);
     });
 
     test("should not be able to create a new relationship if a relationship whose deletion is proposed currently exists", async () => {

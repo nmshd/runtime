@@ -39,8 +39,8 @@ describe("List Relationship Messages", function () {
         const messageList = await TestUtil.syncUntilHasMessages(recipient, 2);
         expect(messageList).toHaveLength(2);
 
-        const messageListDb = await recipient.messages.getMessages();
-        expect(messageListDb).toHaveLength(2);
+        const messageCount = (await recipient.messages.getMessages()).messageCount;
+        expect(messageCount).toBe(2);
     });
 
     test("should sync messages over all relationships again and return 0 messages", async function () {
@@ -49,12 +49,12 @@ describe("List Relationship Messages", function () {
     });
 
     test("should list messages over all relationships", async function () {
-        const messageList = await recipient.messages.getReceivedMessages();
-        expect(messageList).toHaveLength(2);
+        const messageCount = (await recipient.messages.getReceivedMessages()).messageCount;
+        expect(messageCount).toBe(2);
     });
 
     test("sender messages should be 0", async function () {
-        const messageList = await sender1.messages.getReceivedMessages();
-        expect(messageList).toHaveLength(0);
+        const messageCount = (await sender1.messages.getReceivedMessages()).messageCount;
+        expect(messageCount).toBe(0);
     });
 });
