@@ -32,7 +32,7 @@ export class FileMapper {
             expiresAt: file.cache.expiresAt.toString(),
             mimetype: file.cache.mimetype,
             isOwn: file.isOwn,
-            title: file.cache.title ?? "",
+            title: file.cache.title,
             description: file.cache.description,
             truncatedReference: file.truncate()
         };

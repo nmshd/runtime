@@ -2930,7 +2930,8 @@ export const CanCreateOutgoingRequestRequest: any = {
             },
             "required": [
                 "@type",
-                "mustBeAccepted"
+                "mustBeAccepted",
+                "title"
             ],
             "additionalProperties": false
         },
@@ -10757,7 +10758,8 @@ export const CreateOutgoingRequestRequest: any = {
             },
             "required": [
                 "@type",
-                "mustBeAccepted"
+                "mustBeAccepted",
+                "title"
             ],
             "additionalProperties": false
         },
@@ -14108,7 +14110,8 @@ export const ReceivedIncomingRequestRequest: any = {
             },
             "required": [
                 "@type",
-                "mustBeAccepted"
+                "mustBeAccepted",
+                "title"
             ],
             "additionalProperties": false
         },
@@ -21250,7 +21253,7 @@ export const GetRelationshipsRequest: any = {
                         }
                     ]
                 },
-                "template.id": {
+                "templateId": {
                     "anyOf": [
                         {
                             "type": "string"
