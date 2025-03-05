@@ -28,8 +28,4 @@ export class MailReceivedModule extends AppRuntimeModule<MailReceivedModuleConfi
             }
         });
     }
-
-    public stop(): void {
-        this.unsubscribeFromAllEvents();
-    }
 }
