@@ -288,8 +288,8 @@ export async function sendMessage(transportServices: TransportServices, recipien
         recipients: [recipient],
         content: content ?? {
             "@type": "Mail",
-            subject: "This is the mail subject",
-            body: "This is the mail body",
+            subject: "aSubject",
+            body: "aBody",
             cc: [],
             to: [recipient]
         },
@@ -310,8 +310,8 @@ export async function sendMessageToMultipleRecipients(
         recipients,
         content: content ?? {
             "@type": "Mail",
-            subject: "This is the mail subject",
-            body: "This is the mail body",
+            subject: "aSubject",
+            body: "aBody",
             cc: [],
             to: recipients
         },
