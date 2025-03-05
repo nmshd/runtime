@@ -44,7 +44,7 @@ describe("RelationshipSync", function () {
         expect(relationshipOnRequestorDevice2).toBeDefined();
         expect(relationshipOnRequestorDevice2?.cache).toBeDefined();
 
-        expect(relationshipOnRequestorDevice2!.toJSON()).toStrictEqualExcluding(createdRelationship.toJSON(), "cachedAt", "cache.template.cachedAt");
+        expect(relationshipOnRequestorDevice2!.toJSON()).toStrictEqualExcluding(createdRelationship.toJSON(), "cachedAt");
 
         await TestUtil.syncUntilHasRelationships(templatorDevice);
 

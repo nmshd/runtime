@@ -3,7 +3,6 @@ import { CoreDate, CoreId, ICoreId } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
 import { CoreSynchronizable, ICoreSynchronizable, TransportError } from "../../../core";
 import { Identity, IIdentity } from "../../accounts/data/Identity";
-import { IRelationshipTemplate } from "../../relationshipTemplates/local/RelationshipTemplate";
 import { BackboneGetRelationshipResponse } from "../backbone/BackboneGetRelationships";
 import { RelationshipStatus } from "../transmission/RelationshipStatus";
 import { CachedRelationship, ICachedRelationship } from "./CachedRelationship";
@@ -74,23 +73,23 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
         // Adds flattened peerAddress and templateId to the JSON stored in the database.
         // This helps us to boost the performance of database queries that include these fields.
         json.peerAddress = this.peer.address.toString();
-        json.templateId = this.cache?.template.id.toString();
+        json.templateId = this.cache?.templateId.toString();
 
         return json;
     }
 
     public static fromBackboneAndCreationContent(
         response: BackboneGetRelationshipResponse,
-        template: IRelationshipTemplate,
         peer: IIdentity,
         creationContent: ISerializable,
         relationshipSecretId: CoreId
     ): Relationship {
         const cache = CachedRelationship.from({
             creationContent,
-            template: template,
+            templateId: CoreId.from(response.relationshipTemplateId),
             auditLog: RelationshipAuditLog.fromBackboneAuditLog(response.auditLog)
         });
+
         return Relationship.from({
             id: CoreId.from(response.id),
             relationshipSecretId: relationshipSecretId,
