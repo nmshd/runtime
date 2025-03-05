@@ -364,8 +364,4 @@ export class RequestModule extends RuntimeModule {
             return;
         }
     }
-
-    public stop(): void {
-        this.unsubscribeFromAllEvents();
-    }
 }
