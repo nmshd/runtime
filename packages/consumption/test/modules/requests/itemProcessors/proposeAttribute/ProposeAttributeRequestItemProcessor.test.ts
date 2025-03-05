@@ -5,6 +5,7 @@ import {
     GivenName,
     IdentityAttribute,
     IdentityAttributeQuery,
+    IQLQuery,
     ProposeAttributeAcceptResponseItem,
     ProposeAttributeRequestItem,
     ProprietaryInteger,
@@ -77,6 +78,29 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), recipient);
 
             expect(result).successfulValidationResult();
+        });
+
+        test("returns an error when proposing an Identity Attribute with invalid tag", async () => {
+            const recipient = CoreAddress.from("Recipient");
+
+            const requestItem = ProposeAttributeRequestItem.from({
+                mustBeAccepted: false,
+                attribute: TestObjectFactory.createIdentityAttribute({
+                    value: GivenName.fromAny({ value: "aGivenName" }),
+                    owner: CoreAddress.from(""),
+                    tags: ["invalidTag"]
+                }),
+                query: IdentityAttributeQuery.from({
+                    valueType: "GivenName"
+                })
+            });
+
+            const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), recipient);
+
+            expect(result).errorValidationResult({
+                code: "error.consumption.requests.invalidRequestItem",
+                message: "Detected invalidity of the following tags provided: 'invalidTag'."
+            });
         });
 
         test("returns success when proposing a Relationship Attribute", async () => {
@@ -160,9 +184,9 @@ describe("ProposeAttributeRequestItemProcessor", function () {
 
         describe("query", function () {
             describe("IdentityAttributeQuery", function () {
-                test("simple query", async () => {
-                    const recipient = CoreAddress.from("Recipient");
+                const recipient = CoreAddress.from("Recipient");
 
+                test("simple query", async () => {
                     const requestItem = ProposeAttributeRequestItem.from({
                         mustBeAccepted: false,
                         attribute: TestObjectFactory.createIdentityAttribute({
@@ -176,6 +200,61 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), recipient);
 
                     expect(result).successfulValidationResult();
+                });
+
+                test("cannot query invalid tag", async () => {
+                    const requestItem = ProposeAttributeRequestItem.from({
+                        mustBeAccepted: false,
+                        attribute: TestObjectFactory.createIdentityAttribute({
+                            owner: CoreAddress.from("")
+                        }),
+                        query: IdentityAttributeQuery.from({
+                            valueType: "GivenName",
+                            tags: ["invalidTag"]
+                        })
+                    });
+
+                    const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), recipient);
+
+                    expect(result).errorValidationResult({
+                        code: "error.consumption.requests.invalidRequestItem",
+                        message: "Detected invalidity of the following tags provided: 'invalidTag'."
+                    });
+                });
+            });
+
+            describe("IQLQuery", function () {
+                const recipient = CoreAddress.from("Recipient");
+
+                test("simple query", async () => {
+                    const requestItem = ProposeAttributeRequestItem.from({
+                        mustBeAccepted: false,
+                        attribute: TestObjectFactory.createIdentityAttribute({
+                            owner: CoreAddress.from("")
+                        }),
+                        query: IQLQuery.from({ queryString: "GivenName", attributeCreationHints: { valueType: "GivenName" } })
+                    });
+
+                    const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), recipient);
+
+                    expect(result).successfulValidationResult();
+                });
+
+                test("cannot query invalid tag", async () => {
+                    const requestItem = ProposeAttributeRequestItem.from({
+                        mustBeAccepted: false,
+                        attribute: TestObjectFactory.createIdentityAttribute({
+                            owner: CoreAddress.from("")
+                        }),
+                        query: IQLQuery.from({ queryString: "GivenName", attributeCreationHints: { valueType: "GivenName", tags: ["invalidTag"] } })
+                    });
+
+                    const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), recipient);
+
+                    expect(result).errorValidationResult({
+                        code: "error.consumption.requests.invalidRequestItem",
+                        message: "Detected invalidity of the following tags provided: 'invalidTag'."
+                    });
                 });
             });
 
