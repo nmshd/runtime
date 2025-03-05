@@ -650,7 +650,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     accept: true,
                     newAttribute: TestObjectFactory.createIdentityAttribute({
                         value: GivenName.fromAny({ value: "anotherGivenName" }),
-                        tags: ["tag1"],
+                        tags: ["invalidTag"],
                         owner: accountController.identity.address
                     }).toJSON()
                 },

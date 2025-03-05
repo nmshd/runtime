@@ -910,7 +910,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
 
             const existingAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
-                    tags: ["tag1"],
+                    tags: ["invalidTag"],
                     owner: accountController.identity.address
                 })
             });
