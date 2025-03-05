@@ -268,10 +268,7 @@ class Attributes {
     }
 
     public invalidTags(tags: string[]): ApplicationError {
-        return new ApplicationError(
-            "error.consumption.attributes.invalidTags",
-            `The provided IdentityAttribute is invalid due to the invalidity of the following tags: '${tags.join("', '")}'.`
-        );
+        return new ApplicationError("error.consumption.attributes.invalidTags", `Detected invalidity of the following tags provided: '${tags.join("', '")}'.`);
     }
 }
 

@@ -1124,7 +1124,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             expect(canAcceptWithExistingAttributeResult).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: "The provided IdentityAttribute is invalid due to the invalidity of the following tags: 'tag1'."
+                message: "Detected invalidity of the following tags provided: 'tag1'."
             });
         });
     });

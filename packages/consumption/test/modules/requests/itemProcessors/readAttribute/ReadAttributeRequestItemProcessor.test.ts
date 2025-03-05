@@ -591,7 +591,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             expect(canAcceptWithExistingAttributeResult).errorValidationResult({
                 code: "error.consumption.requests.invalidAcceptParameters",
-                message: "The provided IdentityAttribute is invalid due to the invalidity of the following tags: 'tag1'."
+                message: "Detected invalidity of the following tags provided: 'tag1'."
             });
 
             const canAcceptWithNewAttributeResult = await processor.canAccept(
@@ -609,7 +609,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             expect(canAcceptWithNewAttributeResult).errorValidationResult({
                 code: "error.consumption.requests.invalidAcceptParameters",
-                message: "The provided IdentityAttribute is invalid due to the invalidity of the following tags: 'tag1'."
+                message: "Detected invalidity of the following tags provided: 'tag1'."
             });
         });
 
