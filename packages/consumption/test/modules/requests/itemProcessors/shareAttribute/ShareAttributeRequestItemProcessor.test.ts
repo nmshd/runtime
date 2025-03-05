@@ -90,6 +90,19 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 })
             },
             {
+                scenario: "an Identity Attribute with invalid tag",
+                result: "error",
+                expectedError: {
+                    code: "error.consumption.requests.invalidRequestItem",
+                    message: "Detected invalidity of the following tags provided: 'invalidTag'."
+                },
+                attribute: IdentityAttribute.from({
+                    value: GivenName.fromAny({ value: "aGivenName" }),
+                    owner: CoreAddress.from("Sender"),
+                    tags: ["invalidTag"]
+                })
+            },
+            {
                 scenario: "a Relationship Attribute with owner=sender",
                 result: "success",
                 attribute: RelationshipAttribute.from({
