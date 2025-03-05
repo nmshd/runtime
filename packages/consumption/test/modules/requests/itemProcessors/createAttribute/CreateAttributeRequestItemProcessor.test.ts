@@ -138,6 +138,19 @@ describe("CreateAttributeRequestItemProcessor", function () {
             });
         });
 
+        test("returns Error when passing an IdentityAttribute with invalid tag", async function () {
+            const identityAttributeOfRecipient = TestObjectFactory.createIdentityAttribute({
+                owner: TestIdentity.PEER,
+                tags: ["tag1"]
+            });
+
+            await When.iCallCanCreateOutgoingRequestItemWith({ attribute: identityAttributeOfRecipient });
+            await Then.theCanCreateResultShouldBeAnErrorWith({
+                code: "error.consumption.requests.invalidRequestItem",
+                message: "Detected invalidity of the following tags provided: 'tag1'."
+            });
+        });
+
         test("returns Error when passing a RelationshipAttribute with same key as an already existing RelationshipAttribute of this Relationship", async function () {
             const relationshipAttributeOfSender = TestObjectFactory.createRelationshipAttribute({
                 owner: TestIdentity.CURRENT_IDENTITY,
