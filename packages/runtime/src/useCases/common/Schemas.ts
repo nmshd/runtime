@@ -64,12 +64,6 @@ export const CanCreateRepositoryAttributeRequest: any = {
                             "items": {
                                 "type": "string"
                             }
-                        },
-                        "validFrom": {
-                            "$ref": "#/definitions/ISO8601DateTimeString"
-                        },
-                        "validTo": {
-                            "$ref": "#/definitions/ISO8601DateTimeString"
                         }
                     },
                     "required": [
@@ -81,11 +75,6 @@ export const CanCreateRepositoryAttributeRequest: any = {
             "required": [
                 "content"
             ]
-        },
-        "ISO8601DateTimeString": {
-            "type": "string",
-            "errorMessage": "must match ISO8601 datetime format",
-            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
         }
     }
 }
@@ -440,12 +429,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "owner": {
-                    "type": "string"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
                     "type": "string"
                 },
                 "value": {
@@ -1107,12 +1090,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "owner": {
-                    "type": "string"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
                     "type": "string"
                 },
                 "value": {
@@ -2524,12 +2501,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "items": {
                         "type": "string"
                     }
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -2621,12 +2592,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "attributeCreationHints": {
                     "$ref": "#/definitions/RelationshipAttributeCreationHintsJSON"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -2823,12 +2788,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "items": {
                         "type": "string"
                     }
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -3437,12 +3396,6 @@ export const CompleteOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "owner": {
-                    "type": "string"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
                     "type": "string"
                 },
                 "value": {
@@ -4680,12 +4633,6 @@ export const CompleteOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "owner": {
-                    "type": "string"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
                     "type": "string"
                 },
                 "value": {
@@ -5872,12 +5819,6 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                 "owner": {
                     "type": "string"
                 },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
-                },
                 "value": {
                     "$ref": "#/definitions/AttributeValues.Identity.Json"
                 },
@@ -7113,12 +7054,6 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                     "type": "string"
                 },
                 "owner": {
-                    "type": "string"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
                     "type": "string"
                 },
                 "value": {
@@ -8270,12 +8205,6 @@ export const CreateOutgoingRequestRequest: any = {
                 "owner": {
                     "type": "string"
                 },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
-                },
                 "value": {
                     "$ref": "#/definitions/AttributeValues.Relationship.Json"
                 },
@@ -8935,12 +8864,6 @@ export const CreateOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "owner": {
-                    "type": "string"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
                     "type": "string"
                 },
                 "value": {
@@ -10352,12 +10275,6 @@ export const CreateOutgoingRequestRequest: any = {
                     "items": {
                         "type": "string"
                     }
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -10449,12 +10366,6 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 "attributeCreationHints": {
                     "$ref": "#/definitions/RelationshipAttributeCreationHintsJSON"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -10651,12 +10562,6 @@ export const CreateOutgoingRequestRequest: any = {
                     "items": {
                         "type": "string"
                     }
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -11622,12 +11527,6 @@ export const ReceivedIncomingRequestRequest: any = {
                 "owner": {
                     "type": "string"
                 },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
-                },
                 "value": {
                     "$ref": "#/definitions/AttributeValues.Relationship.Json"
                 },
@@ -12287,12 +12186,6 @@ export const ReceivedIncomingRequestRequest: any = {
                     "type": "string"
                 },
                 "owner": {
-                    "type": "string"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
                     "type": "string"
                 },
                 "value": {
@@ -13704,12 +13597,6 @@ export const ReceivedIncomingRequestRequest: any = {
                     "items": {
                         "type": "string"
                     }
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -13801,12 +13688,6 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "attributeCreationHints": {
                     "$ref": "#/definitions/RelationshipAttributeCreationHintsJSON"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -14003,12 +13884,6 @@ export const ReceivedIncomingRequestRequest: any = {
                     "items": {
                         "type": "string"
                     }
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -14296,12 +14171,6 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
                         },
                         "isTechnical": {
                             "type": "boolean"
-                        },
-                        "validFrom": {
-                            "$ref": "#/definitions/ISO8601DateTimeString"
-                        },
-                        "validTo": {
-                            "$ref": "#/definitions/ISO8601DateTimeString"
                         }
                     },
                     "required": [
@@ -14980,14 +14849,14 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
                 "protected"
             ]
         },
+        "AddressString": {
+            "type": "string",
+            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
+        },
         "ISO8601DateTimeString": {
             "type": "string",
             "errorMessage": "must match ISO8601 datetime format",
             "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
-        },
-        "AddressString": {
-            "type": "string",
-            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
         }
     }
 }
@@ -15009,12 +14878,6 @@ export const CreateRepositoryAttributeRequest: any = {
                             "items": {
                                 "type": "string"
                             }
-                        },
-                        "validFrom": {
-                            "$ref": "#/definitions/ISO8601DateTimeString"
-                        },
-                        "validTo": {
-                            "$ref": "#/definitions/ISO8601DateTimeString"
                         }
                     },
                     "required": [
@@ -15026,11 +14889,6 @@ export const CreateRepositoryAttributeRequest: any = {
             "required": [
                 "content"
             ]
-        },
-        "ISO8601DateTimeString": {
-            "type": "string",
-            "errorMessage": "must match ISO8601 datetime format",
-            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
         }
     }
 }
@@ -15187,12 +15045,6 @@ export const ExecuteIdentityAttributeQueryRequest: any = {
                     "items": {
                         "type": "string"
                     }
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -15424,12 +15276,6 @@ export const ExecuteRelationshipAttributeQueryRequest: any = {
                 },
                 "attributeCreationHints": {
                     "$ref": "#/definitions/RelationshipAttributeCreationHintsJSON"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -15622,12 +15468,6 @@ export const ExecuteThirdPartyRelationshipAttributeQueryRequest: any = {
                     "items": {
                         "type": "string"
                     }
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -15766,32 +15606,6 @@ export const GetAttributesRequest: any = {
                     ]
                 },
                 "content.owner": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.validFrom": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.validTo": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -16034,32 +15848,6 @@ export const GetOwnSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "content.validFrom": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.validTo": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
                 "content.key": {
                     "anyOf": [
                         {
@@ -16277,32 +16065,6 @@ export const GetPeerSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "content.validFrom": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.validTo": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
                 "content.key": {
                     "anyOf": [
                         {
@@ -16469,32 +16231,6 @@ export const GetRepositoryAttributesRequest: any = {
                     "type": "string"
                 },
                 "content.tags": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.validFrom": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.validTo": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -16704,12 +16440,6 @@ export const SucceedRelationshipAttributeAndNotifyPeerRequest: any = {
                     "properties": {
                         "value": {
                             "$ref": "#/definitions/AttributeValues.Relationship.Json"
-                        },
-                        "validFrom": {
-                            "$ref": "#/definitions/ISO8601DateTimeString"
-                        },
-                        "validTo": {
-                            "$ref": "#/definitions/ISO8601DateTimeString"
                         }
                     },
                     "required": [
@@ -17342,11 +17072,6 @@ export const SucceedRelationshipAttributeAndNotifyPeerRequest: any = {
                 "consent"
             ],
             "additionalProperties": false
-        },
-        "ISO8601DateTimeString": {
-            "type": "string",
-            "errorMessage": "must match ISO8601 datetime format",
-            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
         }
     }
 }
@@ -17372,12 +17097,6 @@ export const SucceedRepositoryAttributeRequest: any = {
                             "items": {
                                 "type": "string"
                             }
-                        },
-                        "validFrom": {
-                            "$ref": "#/definitions/ISO8601DateTimeString"
-                        },
-                        "validTo": {
-                            "$ref": "#/definitions/ISO8601DateTimeString"
                         }
                     },
                     "required": [
@@ -18595,11 +18314,6 @@ export const SucceedRepositoryAttributeRequest: any = {
                 "value"
             ],
             "additionalProperties": false
-        },
-        "ISO8601DateTimeString": {
-            "type": "string",
-            "errorMessage": "must match ISO8601 datetime format",
-            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
         }
     }
 }
