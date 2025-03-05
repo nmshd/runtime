@@ -99,7 +99,7 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
 
         const tagValidationResult = await this.consumptionController.attributes.validateTags(requestItem.attribute);
         if (tagValidationResult.isError()) {
-            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem(`The provided IdentityAttribute is invalid: ${tagValidationResult.error.message}`));
+            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem(`${tagValidationResult.error.message}`));
         }
 
         return ValidationResult.success();

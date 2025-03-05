@@ -325,7 +325,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
 
             await Then.theCanAcceptResultShouldBeAnErrorWith({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: /The provided IdentityAttribute is invalid: The tag\(s\) 'tag1' is\/are invalid\./
+                message: "The provided IdentityAttribute is invalid due to the invalidity of the following tags: 'tag1'."
             });
         });
 
@@ -339,7 +339,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
 
             await Then.theCanAcceptResultShouldBeAnErrorWith({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: /The provided IdentityAttribute is invalid: The tag\(s\) 'tag1', 'tag2' is\/are invalid\./
+                message: "The provided IdentityAttribute is invalid due to the invalidity of the following tags: 'tag1', 'tag2'."
             });
         });
     });
