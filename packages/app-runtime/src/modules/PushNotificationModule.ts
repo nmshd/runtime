@@ -141,8 +141,4 @@ export class PushNotificationModule extends AppRuntimeModule<PushNotificationMod
         }
         return Result.ok(pushTokenResult.value);
     }
-
-    public stop(): void {
-        this.unsubscribeFromAllEvents();
-    }
 }
