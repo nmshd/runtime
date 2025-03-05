@@ -181,8 +181,8 @@ describe("MessageController", function () {
             expectValidMessages(sentMessages[0], receivedMessages[0], tempDate);
             expectValidMessages(sentMessages[1], receivedMessages[1], tempDate);
 
-            const sentMessages2 = await sender.messages.getMessages(undefined, { limit: 2, skip: 1 });
-            const receivedMessages2 = await recipient.messages.getMessages(undefined, { limit: 2, skip: 1 });
+            const sentMessages2 = await sender.messages.getMessages(undefined, { limit: 3, skip: 1 });
+            const receivedMessages2 = await recipient.messages.getMessages(undefined, { limit: 3, skip: 1 });
             expect(sentMessages2).toHaveLength(2);
             expect(receivedMessages2).toHaveLength(2);
             expect(sentMessages2[0].id.toString()).toBe(tempId2.toString());

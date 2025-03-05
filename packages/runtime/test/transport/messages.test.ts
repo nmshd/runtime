@@ -112,7 +112,15 @@ describe("Messaging", () => {
             messageIds.push(result.value.id);
         }
 
-        const response = await client2.transport.messages.getMessages({});
+        const messages1 = (await client1.transport.messages.getMessages({ paginationOptions: { limit: 2, skip: 0 } })).value;
+        expect(messages1).toHaveLength(2);
+        expect(messages1[0].id).toBe(messageIds[0]);
+        expect(messages1[1].id).toBe(messageIds[1]);
+
+        const messages2 = (await client1.transport.messages.getMessages({ paginationOptions: { limit: 3, skip: 1 } })).value;
+        expect(messages2).toHaveLength(2);
+        expect(messages2[0].id).toBe(messageIds[1]);
+        expect(messages2[1].id).toBe(messageIds[2]);
     });
 
     test("receive the message in a sync run", async () => {
