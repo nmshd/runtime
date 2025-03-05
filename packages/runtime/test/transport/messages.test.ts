@@ -84,9 +84,9 @@ describe("Messaging", () => {
             recipients: [client2.address],
             content: {
                 "@type": "Mail",
-                body: "b",
+                body: "aBody",
                 cc: [],
-                subject: "a",
+                subject: "aSubject",
                 to: [client2.address]
             },
             attachments: [fileId]
@@ -104,8 +104,8 @@ describe("Messaging", () => {
         expect(message.id).toStrictEqual(messageId);
         expect(message.content).toStrictEqual({
             "@type": "Mail",
-            subject: "This is the mail subject",
-            body: "This is the mail body",
+            subject: "aSubject",
+            body: "aBody",
             cc: [],
             to: [client2.address]
         });
@@ -124,8 +124,8 @@ describe("Messaging", () => {
         expect(message.id).toStrictEqual(messageId);
         expect(message.content).toStrictEqual({
             "@type": "Mail",
-            subject: "This is the mail subject",
-            body: "This is the mail body",
+            subject: "aSubject",
+            body: "aBody",
             cc: [],
             to: [client2.address]
         });
@@ -145,9 +145,9 @@ describe("Messaging", () => {
             recipients: [client2.address, client3.address],
             content: {
                 "@type": "Mail",
-                body: "b",
+                body: "aBody",
                 cc: [client3.address],
-                subject: "a",
+                subject: "aSubject",
                 to: [client2.address]
             },
             attachments: [fileId]
@@ -185,8 +185,8 @@ describe("Message errors", () => {
             content: {
                 "@type": "Mail",
                 to: [],
-                subject: "A Subject",
-                body: "A Body"
+                subject: "aSubject",
+                body: "aBody"
             }
         });
         expect(result).toBeAnError("Mail.to:Array :: may not be empty", "error.runtime.requestDeserialization");
@@ -197,8 +197,8 @@ describe("Message errors", () => {
             recipients: [client2.address],
             content: {
                 "@type": "Mail",
-                subject: "A Subject",
-                body: "A Body"
+                subject: "aSubject",
+                body: "aBody"
             }
         });
         expect(result).toBeAnError("Mail.to :: Value is not defined", "error.runtime.requestDeserialization");
@@ -337,9 +337,9 @@ describe("Message errors", () => {
                 recipients: [client4.address, client5.address],
                 content: {
                     "@type": "Mail",
-                    body: "b",
+                    body: "aBody",
                     cc: [client4.address],
-                    subject: "a",
+                    subject: "aSubject",
                     to: [client5.address]
                 }
             });
@@ -364,9 +364,9 @@ describe("Message errors", () => {
                 recipients: [client2.address, client4.address],
                 content: {
                     "@type": "Mail",
-                    body: "b",
+                    body: "aBody",
                     cc: [client2.address],
-                    subject: "a",
+                    subject: "aSubject",
                     to: [client4.address]
                 }
             });
@@ -388,9 +388,9 @@ describe("Message errors", () => {
                 recipients: [client3.address],
                 content: {
                     "@type": "Mail",
-                    body: "b",
+                    body: "aBody",
                     cc: [],
-                    subject: "a",
+                    subject: "aSubject",
                     to: [client3.address]
                 }
             });
@@ -514,7 +514,7 @@ describe("Postponed Notifications via Messages", () => {
                 content: {
                     value: {
                         "@type": "GivenName",
-                        value: "A given name"
+                        value: "aGivenName"
                     }
                 }
             });
@@ -529,7 +529,7 @@ describe("Postponed Notifications via Messages", () => {
                     successorContent: {
                         value: {
                             "@type": "GivenName",
-                            value: "A new given name"
+                            value: "aNewGivenName"
                         }
                     }
                 })
@@ -645,9 +645,9 @@ describe("Mark Message as un-/read", () => {
             recipients: [client2.address],
             content: {
                 "@type": "Mail",
-                body: "A body",
+                body: "aBody",
                 cc: [],
-                subject: "A subject",
+                subject: "aSubject",
                 to: [client2.address]
             }
         });
