@@ -1093,7 +1093,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             expect(canAcceptWithExistingAttributeResult).successfulValidationResult();
         });
 
-        test("returns an error when sharing an attribute with invalid tags", async function () {
+        test("returns an error when sharing an attribute with an invalid tag", async function () {
             const attributesControllerSpy = spy(consumptionController.attributes);
             when(attributesControllerSpy.validateTags(anything())).thenResolve(ValidationResult.success());
 
