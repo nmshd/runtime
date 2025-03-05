@@ -1086,7 +1086,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             const existingAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
-                    tags: ["tag1"],
+                    tags: ["invalidTag"],
                     owner: testAccount.identity.address
                 })
             });
@@ -1124,7 +1124,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             expect(canAcceptWithExistingAttributeResult).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: "Detected invalidity of the following tags provided: 'tag1'."
+                message: "Detected invalidity of the following tags provided: 'invalidTag'."
             });
         });
     });

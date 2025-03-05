@@ -919,7 +919,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
 
             const sender = CoreAddress.from("Sender");
             const newAttribute = TestObjectFactory.createIdentityAttribute({
-                tags: ["tag1"],
+                tags: ["invalidTag"],
                 owner: accountController.identity.address
             });
 
@@ -954,7 +954,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
 
             expect(canAcceptWithNewAttributeResult).errorValidationResult({
                 code: "error.consumption.requests.invalidAcceptParameters",
-                message: "Detected invalidity of the following tags provided: 'tag1'."
+                message: "Detected invalidity of the following tags provided: 'invalidTag'."
             });
 
             const canAcceptWithExistingAttributeResult = await processor.canAccept(
@@ -968,7 +968,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
 
             expect(canAcceptWithExistingAttributeResult).errorValidationResult({
                 code: "error.consumption.requests.invalidAcceptParameters",
-                message: "Detected invalidity of the following tags provided: 'tag1'."
+                message: "Detected invalidity of the following tags provided: 'invalidTag'."
             });
         });
     });

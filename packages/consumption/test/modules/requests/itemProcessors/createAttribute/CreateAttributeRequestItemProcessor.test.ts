@@ -141,13 +141,13 @@ describe("CreateAttributeRequestItemProcessor", function () {
         test("returns Error when passing an IdentityAttribute with invalid tag", async function () {
             const identityAttributeOfRecipient = TestObjectFactory.createIdentityAttribute({
                 owner: TestIdentity.PEER,
-                tags: ["tag1"]
+                tags: ["invalidTag"]
             });
 
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: identityAttributeOfRecipient });
             await Then.theCanCreateResultShouldBeAnErrorWith({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: "Detected invalidity of the following tags provided: 'tag1'."
+                message: "Detected invalidity of the following tags provided: 'invalidTag'."
             });
         });
 
@@ -330,7 +330,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
 
         test("cannot accept because the attribute has an invalid tag", async function () {
             await Given.aRequestItemWithAnIdentityAttribute({
-                tags: ["tag1"],
+                tags: ["invalidTag"],
                 attributeOwner: TestIdentity.CURRENT_IDENTITY
             });
 
@@ -338,13 +338,13 @@ describe("CreateAttributeRequestItemProcessor", function () {
 
             await Then.theCanAcceptResultShouldBeAnErrorWith({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: "Detected invalidity of the following tags provided: 'tag1'."
+                message: "Detected invalidity of the following tags provided: 'invalidTag'."
             });
         });
 
         test("cannot accept because the attribute has invalid tags", async function () {
             await Given.aRequestItemWithAnIdentityAttribute({
-                tags: ["tag1", "tag2"],
+                tags: ["invalidTag1", "invalidTag2"],
                 attributeOwner: TestIdentity.CURRENT_IDENTITY
             });
 
@@ -352,7 +352,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
 
             await Then.theCanAcceptResultShouldBeAnErrorWith({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: "Detected invalidity of the following tags provided: 'tag1', 'tag2'."
+                message: "Detected invalidity of the following tags provided: 'invalidTag1', 'invalidTag2'."
             });
         });
     });

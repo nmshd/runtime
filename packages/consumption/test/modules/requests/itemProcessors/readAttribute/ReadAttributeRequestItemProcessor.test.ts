@@ -603,7 +603,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             const existingAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
-                    tags: ["tag1"],
+                    tags: ["invalidTag"],
                     owner: accountController.identity.address
                 })
             });
@@ -641,7 +641,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             expect(canAcceptWithExistingAttributeResult).errorValidationResult({
                 code: "error.consumption.requests.invalidAcceptParameters",
-                message: "Detected invalidity of the following tags provided: 'tag1'."
+                message: "Detected invalidity of the following tags provided: 'invalidTag'."
             });
 
             const canAcceptWithNewAttributeResult = await processor.canAccept(
@@ -659,7 +659,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             expect(canAcceptWithNewAttributeResult).errorValidationResult({
                 code: "error.consumption.requests.invalidAcceptParameters",
-                message: "Detected invalidity of the following tags provided: 'tag1'."
+                message: "Detected invalidity of the following tags provided: 'invalidTag'."
             });
         });
 
