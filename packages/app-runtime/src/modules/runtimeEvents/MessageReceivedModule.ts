@@ -28,8 +28,4 @@ export class MessageReceivedModule extends AppRuntimeModule<MessageReceivedModul
                 break;
         }
     }
-
-    public stop(): void {
-        this.unsubscribeFromAllEvents();
-    }
 }
