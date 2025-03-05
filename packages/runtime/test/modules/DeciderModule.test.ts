@@ -171,7 +171,7 @@ describe("DeciderModule", () => {
                 receivedRequest: {
                     "@type": "Request",
                     items: [
-                        { "@type": "AuthenticationRequestItem", mustBeAccepted: false },
+                        { "@type": "AuthenticationRequestItem", mustBeAccepted: false, title: "Title of RequestItem" },
                         { "@type": "FreeTextRequestItem", mustBeAccepted: false, freeText: "A free text" }
                     ]
                 },
@@ -216,7 +216,7 @@ describe("DeciderModule", () => {
                 receivedRequest: {
                     "@type": "Request",
                     items: [
-                        { "@type": "AuthenticationRequestItem", mustBeAccepted: false },
+                        { "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false },
                         { "@type": "ConsentRequestItem", consent: "A consent text", mustBeAccepted: false },
                         {
                             "@type": "CreateAttributeRequestItem",
@@ -306,7 +306,7 @@ describe("DeciderModule", () => {
                 title: "Title of Request",
                 description: "Description of Request",
                 metadata: { key: "value" },
-                items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }]
+                items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }]
             });
             const template = (
                 await sender.transport.relationshipTemplates.createOwnRelationshipTemplate({
@@ -361,7 +361,7 @@ describe("DeciderModule", () => {
                     title: "Title of Request",
                     description: "Description of Request",
                     metadata: { key: "value" },
-                    items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }]
+                    items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }]
                 },
                 requestSourceId: message.id
             });
@@ -394,7 +394,7 @@ describe("DeciderModule", () => {
                 receivedRequest: {
                     "@type": "Request",
                     title: "Title of Request",
-                    items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }]
+                    items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }]
                 },
                 requestSourceId: message.id
             });
@@ -425,7 +425,7 @@ describe("DeciderModule", () => {
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
             const receivedRequestResult = await recipient.consumption.incomingRequests.received({
-                receivedRequest: { "@type": "Request", items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }] },
+                receivedRequest: { "@type": "Request", items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }] },
                 requestSourceId: message.id
             });
             await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
@@ -455,7 +455,11 @@ describe("DeciderModule", () => {
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
             const receivedRequestResult = await recipient.consumption.incomingRequests.received({
-                receivedRequest: { "@type": "Request", items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }], expiresAt: requestExpirationDate },
+                receivedRequest: {
+                    "@type": "Request",
+                    items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }],
+                    expiresAt: requestExpirationDate
+                },
                 requestSourceId: message.id
             });
             await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
@@ -485,7 +489,11 @@ describe("DeciderModule", () => {
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
             const receivedRequestResult = await recipient.consumption.incomingRequests.received({
-                receivedRequest: { "@type": "Request", items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }], expiresAt: requestExpirationDate },
+                receivedRequest: {
+                    "@type": "Request",
+                    items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }],
+                    expiresAt: requestExpirationDate
+                },
                 requestSourceId: message.id
             });
             await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
@@ -515,7 +523,7 @@ describe("DeciderModule", () => {
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
             const receivedRequestResult = await recipient.consumption.incomingRequests.received({
-                receivedRequest: { "@type": "Request", items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }] },
+                receivedRequest: { "@type": "Request", items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }] },
                 requestSourceId: message.id
             });
             await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
@@ -545,7 +553,7 @@ describe("DeciderModule", () => {
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
             const receivedRequestResult = await recipient.consumption.incomingRequests.received({
-                receivedRequest: { "@type": "Request", items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }] },
+                receivedRequest: { "@type": "Request", items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }] },
                 requestSourceId: message.id
             });
             await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
@@ -606,7 +614,7 @@ describe("DeciderModule", () => {
             const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
 
             const request = Request.from({
-                items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }]
+                items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }]
             });
             const template = (
                 await sender.transport.relationshipTemplates.createOwnRelationshipTemplate({
@@ -649,7 +657,7 @@ describe("DeciderModule", () => {
             const receivedRequestResult = await recipient.consumption.incomingRequests.received({
                 receivedRequest: {
                     "@type": "Request",
-                    items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }]
+                    items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }]
                 },
                 requestSourceId: message.id
             });
@@ -677,7 +685,7 @@ describe("DeciderModule", () => {
             const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
 
             const request = Request.from({
-                items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }]
+                items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }]
             });
             const template = (
                 await sender.transport.relationshipTemplates.createOwnRelationshipTemplate({
@@ -720,7 +728,7 @@ describe("DeciderModule", () => {
             const receivedRequestResult = await recipient.consumption.incomingRequests.received({
                 receivedRequest: {
                     "@type": "Request",
-                    items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }]
+                    items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }]
                 },
                 requestSourceId: message.id
             });
@@ -914,10 +922,12 @@ describe("DeciderModule", () => {
                     items: [
                         {
                             "@type": "AuthenticationRequestItem",
+                            title: "Title of RequestItem",
                             mustBeAccepted: false
                         },
                         {
                             "@type": "AuthenticationRequestItem",
+                            title: "Title of RequestItem",
                             mustBeAccepted: false
                         }
                     ]
@@ -1111,7 +1121,7 @@ describe("DeciderModule", () => {
                     {
                         requestConfig: {
                             "content.item.@type": "AuthenticationRequestItem",
-                            "content.item.title": "Title of RequestItem"
+                            "content.item.description": "Description of RequestItem"
                         },
                         responseConfig: {
                             accept: true
@@ -1124,7 +1134,7 @@ describe("DeciderModule", () => {
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
             const receivedRequestResult = await recipient.consumption.incomingRequests.received({
-                receivedRequest: { "@type": "Request", items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }] },
+                receivedRequest: { "@type": "Request", items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }] },
                 requestSourceId: message.id
             });
             await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
@@ -1160,6 +1170,7 @@ describe("DeciderModule", () => {
                     items: [
                         {
                             "@type": "AuthenticationRequestItem",
+                            title: "Title of RequestItem",
                             mustBeAccepted: true
                         }
                     ]
@@ -2254,7 +2265,8 @@ describe("DeciderModule", () => {
                     items: [
                         {
                             "@type": "AuthenticationRequestItem",
-                            mustBeAccepted: false
+                            mustBeAccepted: false,
+                            title: "Title of RequestItem"
                         },
                         {
                             "@type": "ConsentRequestItem",
@@ -2303,6 +2315,7 @@ describe("DeciderModule", () => {
                             items: [
                                 {
                                     "@type": "AuthenticationRequestItem",
+                                    title: "Title of RequestItem",
                                     mustBeAccepted: false
                                 }
                             ]
@@ -2359,6 +2372,7 @@ describe("DeciderModule", () => {
                     items: [
                         {
                             "@type": "AuthenticationRequestItem",
+                            title: "Title of RequestItem",
                             mustBeAccepted: false
                         },
                         {
@@ -2366,10 +2380,12 @@ describe("DeciderModule", () => {
                             items: [
                                 {
                                     "@type": "AuthenticationRequestItem",
+                                    title: "Title of RequestItem",
                                     mustBeAccepted: false
                                 },
                                 {
                                     "@type": "AuthenticationRequestItem",
+                                    title: "Title of RequestItem",
                                     mustBeAccepted: false
                                 }
                             ]
@@ -2432,6 +2448,7 @@ describe("DeciderModule", () => {
                             items: [
                                 {
                                     "@type": "AuthenticationRequestItem",
+                                    title: "Title of RequestItem",
                                     mustBeAccepted: false
                                 }
                             ]
@@ -2488,6 +2505,7 @@ describe("DeciderModule", () => {
                     items: [
                         {
                             "@type": "AuthenticationRequestItem",
+                            title: "Title of RequestItem",
                             mustBeAccepted: false
                         },
                         {
@@ -2495,10 +2513,12 @@ describe("DeciderModule", () => {
                             items: [
                                 {
                                     "@type": "AuthenticationRequestItem",
+                                    title: "Title of RequestItem",
                                     mustBeAccepted: false
                                 },
                                 {
                                     "@type": "AuthenticationRequestItem",
+                                    title: "Title of RequestItem",
                                     mustBeAccepted: false
                                 }
                             ]
@@ -2556,7 +2576,8 @@ describe("DeciderModule", () => {
                     items: [
                         {
                             "@type": "AuthenticationRequestItem",
-                            mustBeAccepted: false
+                            mustBeAccepted: false,
+                            title: "Title of RequestItem"
                         },
                         {
                             "@type": "RequestItemGroup",
@@ -2613,7 +2634,8 @@ describe("DeciderModule", () => {
                     items: [
                         {
                             "@type": "AuthenticationRequestItem",
-                            mustBeAccepted: false
+                            mustBeAccepted: false,
+                            title: "Title of RequestItem"
                         },
                         {
                             "@type": "ConsentRequestItem",
@@ -2675,7 +2697,8 @@ describe("DeciderModule", () => {
                     items: [
                         {
                             "@type": "AuthenticationRequestItem",
-                            mustBeAccepted: false
+                            mustBeAccepted: false,
+                            title: "Title of RequestItem"
                         },
                         {
                             "@type": "RequestItemGroup",
@@ -2744,6 +2767,7 @@ describe("DeciderModule", () => {
                     items: [
                         {
                             "@type": "AuthenticationRequestItem",
+                            title: "Title of RequestItem",
                             mustBeAccepted: false
                         }
                     ]
@@ -2796,7 +2820,8 @@ describe("DeciderModule", () => {
                     items: [
                         {
                             "@type": "AuthenticationRequestItem",
-                            mustBeAccepted: true
+                            mustBeAccepted: true,
+                            title: "Title of RequestItem"
                         },
                         {
                             "@type": "ConsentRequestItem",
@@ -2859,7 +2884,8 @@ describe("DeciderModule", () => {
                     items: [
                         {
                             "@type": "AuthenticationRequestItem",
-                            mustBeAccepted: false
+                            mustBeAccepted: false,
+                            title: "Title of RequestItem"
                         },
                         {
                             "@type": "ConsentRequestItem",
@@ -2928,7 +2954,8 @@ describe("DeciderModule", () => {
                     items: [
                         {
                             "@type": "AuthenticationRequestItem",
-                            mustBeAccepted: false
+                            mustBeAccepted: false,
+                            title: "Title of RequestItem"
                         },
                         {
                             "@type": "ConsentRequestItem",
@@ -3001,7 +3028,8 @@ describe("DeciderModule", () => {
                     items: [
                         {
                             "@type": "AuthenticationRequestItem",
-                            mustBeAccepted: false
+                            mustBeAccepted: false,
+                            title: "Title of RequestItem"
                         },
                         {
                             "@type": "ConsentRequestItem",
@@ -3069,7 +3097,8 @@ describe("DeciderModule", () => {
                     items: [
                         {
                             "@type": "AuthenticationRequestItem",
-                            mustBeAccepted: true
+                            mustBeAccepted: true,
+                            title: "Title of RequestItem"
                         },
                         {
                             "@type": "ConsentRequestItem",
