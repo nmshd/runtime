@@ -145,18 +145,23 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
         }
 
         if (requestItem.attribute instanceof IdentityAttribute) {
-            return this.canCreateWithIdentityAttribute(requestItem);
+            return await this.canCreateWithIdentityAttribute(requestItem);
         }
 
         return ShareAttributeRequestItemProcessor.canCreateWithRelationshipAttribute(requestItem.attribute, recipient);
     }
 
-    private canCreateWithIdentityAttribute(requestItem: ShareAttributeRequestItem) {
+    private async canCreateWithIdentityAttribute(requestItem: ShareAttributeRequestItem) {
         const ownerIsCurrentIdentity = requestItem.attribute.owner.equals(this.currentIdentityAddress);
         if (!ownerIsCurrentIdentity) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidRequestItem("The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes.")
             );
+        }
+
+        const tagValidationResult = await this.consumptionController.attributes.validateTags(requestItem.attribute);
+        if (tagValidationResult.isError()) {
+            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem(tagValidationResult.error.message));
         }
 
         return ValidationResult.success();
