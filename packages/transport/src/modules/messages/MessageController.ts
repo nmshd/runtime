@@ -59,7 +59,7 @@ export class MessageController extends TransportController {
         query?: any,
         paginationOptions?: DatabasePaginationOptions /* a default should be added here */
     ): Promise<{ messages: Message[]; messageCount: number }> {
-        const messages = await this.messages.find(query, paginationOptions, { sortBy: "cache.createdAt", sortOrder: "asc" }); // ascending to not destroy tests, recent messages should generally be prioritized though
+        const messages = await this.messages.find(query, paginationOptions, { sortBy: "cache.createdAt", sortOrder: "desc" });
         const messageCount = await this.messages.count(query); // there could be a more efficient way than a separate call for getting the count
         return {
             messages: this.parseArray<Message>(messages, Message),
