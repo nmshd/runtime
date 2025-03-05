@@ -1053,7 +1053,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
     });
 
     describe("canAccept", function () {
-        test("returns a success when sharing a valid attribute", async function () {
+        test("returns success when sharing a valid IdentityAttribute", async function () {
             const existingAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: testAccount.identity.address,
@@ -1093,7 +1093,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             expect(canAcceptWithExistingAttributeResult).successfulValidationResult();
         });
 
-        test("returns an error when sharing an attribute with an invalid tag", async function () {
+        test("returns an error when sharing an IdentityAttribute with an invalid tag", async function () {
             const attributesControllerSpy = spy(consumptionController.attributes);
             when(attributesControllerSpy.validateTags(anything())).thenResolve(ValidationResult.success());
 
