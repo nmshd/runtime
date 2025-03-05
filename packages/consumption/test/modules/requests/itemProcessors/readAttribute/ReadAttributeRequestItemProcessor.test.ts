@@ -92,6 +92,56 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).successfulValidationResult();
             });
+
+            test("cannot query invalid tag", async () => {
+                const query = IdentityAttributeQuery.from({
+                    valueType: "GivenName",
+                    tags: ["invalidTag"]
+                });
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: false,
+                    query: query
+                });
+
+                const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), CoreAddress.from("recipient"));
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidRequestItem",
+                    message: "Detected invalidity of the following tags provided: 'invalidTag'."
+                });
+            });
+        });
+
+        describe("IQLQuery", function () {
+            test("simple query", async () => {
+                const query = IQLQuery.from({ queryString: "GivenName", attributeCreationHints: { valueType: "GivenName" } });
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: false,
+                    query: query
+                });
+
+                const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), CoreAddress.from("recipient"));
+
+                expect(result).successfulValidationResult();
+            });
+
+            test("cannot query invalid tag", async () => {
+                const query = IQLQuery.from({ queryString: "GivenName", attributeCreationHints: { valueType: "GivenName", tags: ["invalidTag"] } });
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: false,
+                    query: query
+                });
+
+                const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), CoreAddress.from("recipient"));
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidRequestItem",
+                    message: "Detected invalidity of the following tags provided: 'invalidTag'."
+                });
+            });
         });
 
         describe("RelationshipAttributeQuery", function () {
