@@ -95,6 +95,36 @@ describe("Messaging", () => {
         await expect(client1.eventBus).toHavePublished(MessageSentEvent, (m) => m.data.id === result.value.id);
     });
 
+    test("pagination", async () => {
+        const messageIds = [];
+        for (let index = 0; index < 3; index++) {
+            const result = await client1.transport.messages.sendMessage({
+                recipients: [client2.address],
+                content: {
+                    "@type": "Mail",
+                    body: "b",
+                    cc: [],
+                    subject: "a",
+                    to: [client2.address]
+                },
+                attachments: [fileId]
+            });
+            messageIds.push(result.value.id);
+        }
+
+        const messagesResult1 = (await client1.transport.messages.getMessages({ paginationOptions: { limit: 2, skip: 0 } })).value;
+        expect(messagesResult1.messageCount).toBe(3);
+        expect(messagesResult1).toHaveLength(2);
+        expect(messagesResult1.messages[0].id).toBe(messageIds[0]);
+        expect(messagesResult1.messages[1].id).toBe(messageIds[1]);
+
+        const messagesResult2 = (await client1.transport.messages.getMessages({ paginationOptions: { limit: 3, skip: 1 } })).value;
+        expect(messagesResult2.messageCount).toBe(3);
+        expect(messagesResult2).toHaveLength(2);
+        expect(messagesResult2.messages[0].id).toBe(messageIds[1]);
+        expect(messagesResult2.messages[1].id).toBe(messageIds[2]);
+    });
+
     test("receive the message in a sync run", async () => {
         const messageId = (await sendMessage(client1.transport, client2.address, undefined, [fileId])).id;
 
@@ -112,15 +142,15 @@ describe("Messaging", () => {
     });
 
     test("receive the message on TransportService2 in /Messages", async () => {
-        const baselineNumberOfMessages = (await client2.transport.messages.getMessages({})).value.length;
+        const baselineNumberOfMessages = (await client2.transport.messages.getMessages({})).value.messageCount;
         const messageId = (await exchangeMessage(client1.transport, client2.transport, [fileId])).id;
 
         const response = await client2.transport.messages.getMessages({});
         expect(response).toBeSuccessful();
-        const numberOfMessages = response.value.length;
+        const numberOfMessages = response.value.messageCount;
         expect(numberOfMessages - baselineNumberOfMessages).toBe(1);
 
-        const message = response.value[numberOfMessages - 1];
+        const message = response.value.messages[numberOfMessages - 1];
         expect(message.id).toStrictEqual(messageId);
         expect(message.content).toStrictEqual({
             "@type": "Mail",
@@ -748,9 +778,9 @@ describe("Message query", () => {
 
         const messages = await client2.transport.messages.getMessages({ query: { attachments: "+" } });
 
-        expect(messages.value.every((m) => m.attachments.length > 0)).toBe(true);
+        expect(messages.value.messages.every((m) => m.attachments.length > 0)).toBe(true);
 
-        const messageIds = messages.value.map((m) => m.id);
+        const messageIds = messages.value.messages.map((m) => m.id);
         expect(messageIds).toContain(messageWithAttachment.id);
         expect(messageIds).not.toContain(messageWithoutAttachment.id);
     });
