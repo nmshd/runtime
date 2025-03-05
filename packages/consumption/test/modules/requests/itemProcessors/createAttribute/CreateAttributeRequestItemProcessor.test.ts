@@ -362,7 +362,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
         });
 
         test("in case of an IdentityAttribute that already exists as own shared IdentityAttribute but is deleted by peer: creates a new own shared IdentityAttribute", async function () {
-            const repositoryAttribute = await Given.aRepositoryAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, value: GivenName.from("aForthGivenName") });
+            const repositoryAttribute = await Given.aRepositoryAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, value: GivenName.from("aGivenName") });
             await Given.anAttribute({
                 content: repositoryAttribute.content,
                 shareInfo: { sourceAttribute: repositoryAttribute.id, peer: TestIdentity.PEER, requestReference: CoreId.from("reqRef") },
@@ -376,11 +376,11 @@ describe("CreateAttributeRequestItemProcessor", function () {
         });
 
         test("in case of an IdentityAttribute that already exists as own shared IdentityAttribute but is to be deleted by peer: creates a new own shared IdentityAttribute", async function () {
-            const repositoryAttribute = await Given.aRepositoryAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, value: GivenName.from("aForthGivenName") });
+            const repositoryAttribute = await Given.aRepositoryAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, value: GivenName.from("aGivenName") });
             await Given.anAttribute({
                 content: repositoryAttribute.content,
                 shareInfo: { sourceAttribute: repositoryAttribute.id, peer: TestIdentity.PEER, requestReference: CoreId.from("reqRef") },
-                deletionInfo: { deletionStatus: LocalAttributeDeletionStatus.ToBeDeletedByPeer, deletionDate: CoreDate.utc().subtract({ days: 1 }) }
+                deletionInfo: { deletionStatus: LocalAttributeDeletionStatus.ToBeDeletedByPeer, deletionDate: CoreDate.utc().add({ days: 1 }) }
             });
             await Given.aRequestItemWithAnIdentityAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, value: GivenName.from("aGivenName") });
             await When.iCallAccept();
