@@ -66,24 +66,6 @@ export class AttributesController extends ConsumptionBaseController {
         return this;
     }
 
-    public findCurrent(attributes: LocalAttribute[]): LocalAttribute | undefined {
-        if (attributes.length === 0) return;
-
-        const sorted = attributes.sort((a, b) => {
-            return a.createdAt.compare(b.createdAt);
-        });
-
-        return sorted[sorted.length - 1];
-    }
-
-    public filterCurrent(attributes: LocalAttribute[]): LocalAttribute[] {
-        const sorted = attributes.sort((a, b) => {
-            return a.createdAt.compare(b.createdAt);
-        });
-
-        return sorted;
-    }
-
     public async getLocalAttribute(id: CoreId): Promise<LocalAttribute | undefined> {
         const result = await this.attributes.findOne({
             [nameof<LocalAttribute>((c) => c.id)]: id.toString()
@@ -99,7 +81,11 @@ export class AttributesController extends ConsumptionBaseController {
         const parsed = this.parseArray(attributes, LocalAttribute);
         if (!onlyValid) return parsed;
 
-        return this.filterCurrent(parsed);
+        const sorted = parsed.sort((a, b) => {
+            return a.createdAt.compare(b.createdAt);
+        });
+
+        return sorted;
     }
 
     private enrichQuery(query: any, hideTechnical: boolean) {
