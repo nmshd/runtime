@@ -40,7 +40,7 @@ new GenericValueTest().runParametrized({
         city: City.fromAny("aCity"),
         country: Country.fromAny(CountryAlpha2.DE)
     },
-    valueString: "aRecipient\naStreet 7\n12345 aCity\nGermany"
+    valueString: "aRecipient\naStreet 1\n12345 aCity\nGermany"
 });
 
 new GenericValueTest().runParametrized({
@@ -86,7 +86,7 @@ new GenericValueTest().runParametrized({
         country: Country.fromAny(CountryAlpha2.DE),
         state: State.fromAny("aState")
     },
-    valueString: "aRecipient\naStreet 7\n12345 aCity\naState\nGermany"
+    valueString: "aRecipient\naStreet 1\n12345 aCity\naState\nGermany"
 });
 
 new GenericValueTest().runParametrized({
