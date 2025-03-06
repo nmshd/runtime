@@ -79,11 +79,10 @@ export class AttributesController extends ConsumptionBaseController {
         return LocalAttribute.from(result);
     }
 
-    public async getLocalAttributes(query?: any, hideTechnical = false, onlyValid = false): Promise<LocalAttribute[]> {
+    public async getLocalAttributes(query?: any, hideTechnical = false): Promise<LocalAttribute[]> {
         const enrichedQuery = this.enrichQuery(query, hideTechnical);
         const attributes = await this.attributes.find(enrichedQuery);
         const parsed = this.parseArray(attributes, LocalAttribute);
-        if (!onlyValid) return parsed;
 
         const sorted = parsed.sort((a, b) => {
             return a.createdAt.compare(b.createdAt);
