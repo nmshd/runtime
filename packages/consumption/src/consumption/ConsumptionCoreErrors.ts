@@ -267,8 +267,8 @@ class Attributes {
         return new CoreError("error.consumption.attributes.setDefaultRepositoryAttributesIsDisabled", "Setting default RepositoryAttributes is disabled for this Account.");
     }
 
-    public invalidCharactersInAttribute(message: string) {
-        return new CoreError("error.consumption.attributes.invalidCharactersInAttribute", message);
+    public forbiddenCharactersInAttribute(message: string) {
+        return new CoreError("error.consumption.attributes.forbiddenCharactersInAttribute", message);
     }
 }
 

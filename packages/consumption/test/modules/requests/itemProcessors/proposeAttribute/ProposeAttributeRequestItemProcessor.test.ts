@@ -102,7 +102,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             expect(result).successfulValidationResult();
         });
 
-        test("returns an error when passing an invalid character", async () => {
+        test("returns an error when passing a forbidden character", async () => {
             const recipient = CoreAddress.from("Recipient");
 
             const requestItem = ProposeAttributeRequestItem.from({
@@ -120,7 +120,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: "The attribute contains invalid characters."
+                message: "The Attribute contains forbidden characters."
             });
         });
 
@@ -439,7 +439,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             expect(result).successfulValidationResult();
         });
 
-        test("returns an error when the attribute contains an invalid character", async function () {
+        test("returns an error when the attribute contains a forbidden character", async function () {
             const sender = CoreAddress.from("Sender");
             const recipient = accountController.identity.address;
 
@@ -478,7 +478,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidAcceptParameters",
-                message: "The attribute contains invalid characters."
+                message: "The Attribute contains forbidden characters."
             });
         });
 

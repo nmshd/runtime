@@ -491,7 +491,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             });
         });
 
-        test("returns an error when the attribute contains an invalid character", async function () {
+        test("returns an error when the attribute contains a forbidden character", async function () {
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: IdentityAttributeQuery.from({ valueType: "GivenName" })
@@ -527,7 +527,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidAcceptParameters",
-                message: "The attribute contains invalid characters."
+                message: "The Attribute contains forbidden characters."
             });
         });
 

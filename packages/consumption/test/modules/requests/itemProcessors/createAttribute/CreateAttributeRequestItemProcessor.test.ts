@@ -139,7 +139,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             });
         });
 
-        test("returns Error when passing an IdentityAttribute with an invalid character", async function () {
+        test("returns Error when passing an IdentityAttribute with a forbidden character", async function () {
             const identityAttributeOfRecipient = TestObjectFactory.createIdentityAttribute({
                 owner: TestIdentity.PEER,
                 value: GivenName.from({ value: "aGivenName😀" })
@@ -148,7 +148,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: identityAttributeOfRecipient });
             await Then.theCanCreateResultShouldBeAnErrorWith({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: "The attribute contains invalid characters."
+                message: "The Attribute contains forbidden characters."
             });
         });
 
@@ -276,14 +276,14 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await Then.theCanAcceptResultShouldBeASuccess();
         });
 
-        test("cannot create an IdentityAttribute with an invalid character", async function () {
+        test("cannot create an IdentityAttribute with a forbidden character", async function () {
             await Given.aRequestItemWithAnIdentityAttribute({
                 attributeOwner: TestIdentity.PEER,
                 value: GivenName.from({ value: "aGivenName😀" })
             });
 
             await expect(When.iCallCanAccept()).rejects.toThrow(
-                "error.consumption.attributes.invalidCharactersInAttribute: 'The RequestItem contains an attribute with invalid characters.'"
+                "error.consumption.attributes.forbiddenCharactersInAttribute: 'The RequestItem contains an Attribute with forbidden characters.'"
             );
         });
 

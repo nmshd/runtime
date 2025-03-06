@@ -107,7 +107,7 @@ describe("AttributesController", function () {
             mockEventBus.expectPublishedEvents(AttributeCreatedEvent);
         });
 
-        test("should not create a new attribute with an invalid character", async function () {
+        test("should not create a new attribute with a forbidden character", async function () {
             const params: ICreateRepositoryAttributeParams = {
                 content: IdentityAttribute.from({
                     value: {
@@ -119,7 +119,7 @@ describe("AttributesController", function () {
             };
 
             await expect(consumptionController.attributes.createRepositoryAttribute(params)).rejects.toThrow(
-                "error.consumption.attributes.invalidCharactersInAttribute: 'The repository attribute contains invalid characters.'"
+                "error.consumption.attributes.forbiddenCharactersInAttribute: 'The Attribute contains forbidden characters.'"
             );
         });
 
@@ -1255,7 +1255,7 @@ describe("AttributesController", function () {
 
     describe("succeed Attributes", function () {
         describe("Common validator", function () {
-            test("should catch an invalid character in the successor", async function () {
+            test("should catch a forbidden character in the successor", async function () {
                 const predecessor = await consumptionController.attributes.createRepositoryAttribute({
                     content: IdentityAttribute.from({
                         value: {
@@ -1280,7 +1280,7 @@ describe("AttributesController", function () {
 
                 const validationResult = await consumptionController.attributes.validateAttributeSuccessionCommon(predecessor.id, successorData);
                 expect(validationResult).errorValidationResult({
-                    code: "error.consumption.attributes.invalidCharactersInAttribute"
+                    code: "error.consumption.attributes.forbiddenCharactersInAttribute"
                 });
             });
 
@@ -3417,9 +3417,9 @@ describe("AttributesController", function () {
     });
 
     describe("validate attribute values", function () {
-        test("should catch invalid characters in an IdentityAttribute", function () {
+        test("should catch forbidden characters in an IdentityAttribute", function () {
             expect(
-                consumptionController.attributes.validateAttributeValues(
+                consumptionController.attributes.validateAttributeCharacters(
                     IdentityAttribute.from({
                         owner: CoreAddress.from("anAddress"),
                         value: City.from({ value: "aCity😀" })
@@ -3428,9 +3428,9 @@ describe("AttributesController", function () {
             ).toBe(false);
         });
 
-        test("should catch invalid characters in a RelationshipAttribute", function () {
+        test("should catch forbidden characters in a RelationshipAttribute", function () {
             expect(
-                consumptionController.attributes.validateAttributeValues(
+                consumptionController.attributes.validateAttributeCharacters(
                     RelationshipAttribute.from({
                         key: "aKey",
                         owner: CoreAddress.from("anAddress"),
@@ -3443,7 +3443,7 @@ describe("AttributesController", function () {
 
         test("should allow all characters in a RelationshipAttribute's title and description", function () {
             expect(
-                consumptionController.attributes.validateAttributeValues(
+                consumptionController.attributes.validateAttributeCharacters(
                     RelationshipAttribute.from({
                         key: "aKey",
                         owner: CoreAddress.from("anAddress"),
