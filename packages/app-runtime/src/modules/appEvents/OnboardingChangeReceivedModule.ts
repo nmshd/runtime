@@ -54,8 +54,4 @@ export class OnboardingChangeReceivedModule extends AppRuntimeModule<OnboardingC
             }
         });
     }
-
-    public stop(): void {
-        this.unsubscribeFromAllEvents();
-    }
 }

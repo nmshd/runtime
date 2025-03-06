@@ -160,8 +160,4 @@ export class AttributeListenerModule extends RuntimeModule {
             }
         }
     }
-
-    public stop(): void {
-        this.unsubscribeFromAllEvents();
-    }
 }

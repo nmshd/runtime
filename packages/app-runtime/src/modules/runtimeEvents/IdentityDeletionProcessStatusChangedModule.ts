@@ -58,8 +58,4 @@ export class IdentityDeletionProcessStatusChangedModule extends AppRuntimeModule
         if (!publishEvent) return;
         this.runtime.eventBus.publish(new LocalAccountDeletionDateChangedEvent(eventTargetAddress, LocalAccountMapper.toLocalAccountDTO(localAccount)));
     }
-
-    public override stop(): Promise<void> | void {
-        this.unsubscribeFromAllEvents();
-    }
 }
