@@ -4,6 +4,7 @@ import {
     BirthYear,
     City,
     Country,
+    DisplayName,
     EMailAddress,
     HouseNumber,
     IdentityAttribute,
@@ -106,6 +107,21 @@ describe("AttributesController", function () {
             mockEventBus.expectPublishedEvents(AttributeCreatedEvent);
         });
 
+        test("should trim whitespace for a RepositoryAttribute", async function () {
+            const params: ICreateRepositoryAttributeParams = {
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "DisplayName",
+                        value: "  aDisplayName\n"
+                    },
+                    owner: consumptionController.accountController.identity.address
+                })
+            };
+
+            const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute(params);
+            expect((repositoryAttribute.content.value as DisplayName).value).toBe("aDisplayName");
+        });
+
         test("should create a new attribute of type SchematizedXML", async function () {
             const params: ICreateRepositoryAttributeParams = {
                 content: IdentityAttribute.from({
@@ -161,6 +177,40 @@ describe("AttributesController", function () {
 
             const attributesAfterCreate = await consumptionController.attributes.getLocalAttributes();
             expect(attributesAfterCreate).toHaveLength(6);
+        });
+
+        test("should trim whitespace when creating a complex RepositoryAttribute and its children", async function () {
+            const identityAttribute = IdentityAttribute.from({
+                value: {
+                    "@type": "StreetAddress",
+                    recipient: "\taRecipient\r",
+                    street: "\vaStreet\f",
+                    houseNo: " aHouseNo\u00a0",
+                    zipCode: "  aZipCode\u2028",
+                    city: " aCity  ",
+                    country: "DE"
+                },
+                validTo: CoreDate.utc(),
+                owner: consumptionController.accountController.identity.address
+            });
+
+            const address = await consumptionController.attributes.createRepositoryAttribute({
+                content: identityAttribute
+            });
+
+            expect((address.content.value as StreetAddress).recipient).toBe("aRecipient");
+            expect((address.content.value as StreetAddress).street.value).toBe("aStreet");
+            expect((address.content.value as StreetAddress).houseNo.value).toBe("aHouseNo");
+            expect((address.content.value as StreetAddress).zipCode.value).toBe("aZipCode");
+            expect((address.content.value as StreetAddress).city.value).toBe("aCity");
+
+            const childAttributes = await consumptionController.attributes.getLocalAttributes({
+                parentId: address.id.toString()
+            });
+            expect((childAttributes[0].content.value as Street).value).toBe("aStreet");
+            expect((childAttributes[1].content.value as HouseNumber).value).toBe("aHouseNo");
+            expect((childAttributes[2].content.value as ZipCode).value).toBe("aZipCode");
+            expect((childAttributes[3].content.value as City).value).toBe("aCity");
         });
 
         test("should trigger an AttributeCreatedEvent for each created child Attribute of a complex Attribute", async function () {
@@ -1776,6 +1826,31 @@ describe("AttributesController", function () {
                 expect((successor.content.value.toJSON() as any).value).toBe("US");
             });
 
+            test("should trim whitespace when succeeding a repository attribute", async function () {
+                const predecessor = await consumptionController.attributes.createRepositoryAttribute({
+                    content: IdentityAttribute.from({
+                        value: {
+                            "@type": "GivenName",
+                            value: "    aGivenName  "
+                        },
+                        owner: consumptionController.accountController.identity.address
+                    })
+                });
+                const successorParams: IAttributeSuccessorParams = {
+                    content: IdentityAttribute.from({
+                        value: {
+                            "@type": "GivenName",
+                            value: "    anotherGivenName    "
+                        },
+                        owner: consumptionController.accountController.identity.address
+                    })
+                };
+
+                const { successor } = await consumptionController.attributes.succeedRepositoryAttribute(predecessor.id, successorParams);
+                expect(successor).toBeDefined();
+                expect((successor.content.value.toJSON() as any).value).toBe("anotherGivenName");
+            });
+
             test("should succeed a repository attribute updating tags but not the value", async function () {
                 const predecessor = await consumptionController.attributes.createRepositoryAttribute({
                     content: IdentityAttribute.from({
@@ -2027,6 +2102,45 @@ describe("AttributesController", function () {
 
                         expect(repoVersion0ChildAttributes[i].content.value.toString()).toStrictEqual(version0ChildValues[i]);
                         expect(repoVersion1ChildAttributes[i].content.value.toString()).toStrictEqual(version1ChildValues[i]);
+                    }
+                });
+
+                test("should trim whitespace when succeeding a complex repository attribute", async function () {
+                    const version1ChildValues = ["  aNewStreet  ", "  aNewHouseNo ", "    aNewZipCode ", "    aNewCity    ", "DE"];
+                    const trimmedVersion1ChildValues = version1ChildValues.map((value) => value.trim());
+
+                    const repoVersion1Params = {
+                        content: IdentityAttribute.from({
+                            value: {
+                                "@type": "StreetAddress",
+                                recipient: "    aNewRecipient   ",
+                                street: version1ChildValues[0],
+                                houseNo: version1ChildValues[1],
+                                zipCode: version1ChildValues[2],
+                                city: version1ChildValues[3],
+                                country: version1ChildValues[4]
+                            },
+                            owner: consumptionController.accountController.identity.address
+                        })
+                    };
+
+                    const { successor: repoVersion1 } = await consumptionController.attributes.succeedRepositoryAttribute(repoVersion0.id, repoVersion1Params);
+                    expect((repoVersion1.content.value as StreetAddress).recipient).toBe("aNewRecipient");
+                    expect((repoVersion1.content.value as StreetAddress).street.value).toBe("aNewStreet");
+                    expect((repoVersion1.content.value as StreetAddress).houseNo.value).toBe("aNewHouseNo");
+                    expect((repoVersion1.content.value as StreetAddress).zipCode.value).toBe("aNewZipCode");
+                    expect((repoVersion1.content.value as StreetAddress).city.value).toBe("aNewCity");
+                    expect((repoVersion1.content.value as StreetAddress).country.value).toBe("DE");
+
+                    const repoVersion1ChildAttributes = await consumptionController.attributes.getLocalAttributes({
+                        parentId: repoVersion1.id.toString()
+                    });
+
+                    const numberOfChildAttributes = version0ChildValues.length;
+                    expect(repoVersion1ChildAttributes).toHaveLength(numberOfChildAttributes);
+
+                    for (let i = 0; i < numberOfChildAttributes; i++) {
+                        expect(repoVersion1ChildAttributes[i].content.value.toString()).toStrictEqual(trimmedVersion1ChildValues[i]);
                     }
                 });
 
