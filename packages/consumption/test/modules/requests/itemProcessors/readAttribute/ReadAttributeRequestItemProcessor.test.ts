@@ -1397,6 +1397,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             recipient = accountController.identity.address;
         });
 
+        // TODO: mind trimming
         describe("accept with existing Attribute", function () {
             test("accept with existing RepositoryAttribute", async function () {
                 const attribute = await consumptionController.attributes.createRepositoryAttribute({
@@ -2153,6 +2154,49 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 const createdRepositoryAttribute = await consumptionController.attributes.getLocalAttribute(createdSharedAttribute!.shareInfo!.sourceAttribute!);
                 expect(createdRepositoryAttribute).toBeDefined();
+            });
+
+            test("trim the new IdentityAttribute", async function () {
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: IdentityAttributeQuery.from({ valueType: "GivenName" })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const incomingRequest = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                    accept: true,
+                    newAttribute: {
+                        "@type": "IdentityAttribute",
+                        owner: recipient.toString(),
+                        value: {
+                            "@type": "GivenName",
+                            value: "    aGivenName  "
+                        }
+                    }
+                };
+
+                const result = await processor.accept(requestItem, acceptParams, incomingRequest);
+                expect(result).toBeInstanceOf(ReadAttributeAcceptResponseItem);
+
+                const createdSharedAttribute = await consumptionController.attributes.getLocalAttribute((result as ReadAttributeAcceptResponseItem).attributeId);
+                expect(createdSharedAttribute).toBeDefined();
+                expect((createdSharedAttribute!.content.value as GivenName).value).toBe("aGivenName");
+
+                const createdRepositoryAttribute = await consumptionController.attributes.getLocalAttribute(createdSharedAttribute!.shareInfo!.sourceAttribute!);
+                expect(createdRepositoryAttribute).toBeDefined();
+                expect((createdRepositoryAttribute!.content.value as GivenName).value).toBe("aGivenName");
             });
 
             test("accept with new RelationshipAttribute", async function () {
