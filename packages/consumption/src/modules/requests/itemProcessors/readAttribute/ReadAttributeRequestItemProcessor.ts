@@ -230,6 +230,10 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             );
         }
 
+        if (!this.consumptionController.attributes.validateAttributeValues(attribute)) {
+            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters("The attribute contains invalid characters."));
+        }
+
         const answerToQueryValidationResult = validateAttributeMatchesWithQuery(requestItem.query, attribute, this.currentIdentityAddress, requestInfo.peer);
         if (answerToQueryValidationResult.isError()) return answerToQueryValidationResult;
 
