@@ -23,6 +23,6 @@ describe("MessageFacade", function () {
         const messages = await services.transportServices.messages.getMessages({ query: {} });
         expect(messages.isSuccess).toBeDefined();
         expect(messages.value.messages).toBeInstanceOf(Array);
-        expect(messages.value.messageCount).toBeInstanceOf(Number);
+        expect(typeof messages.value.messageCount).toBe("number");
     });
 });
