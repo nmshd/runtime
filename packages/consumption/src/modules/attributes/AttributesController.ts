@@ -70,47 +70,6 @@ export class AttributesController extends ConsumptionBaseController {
         return this;
     }
 
-    public checkValid(attribute: LocalAttribute): boolean {
-        const now = CoreDate.utc();
-        if (!attribute.content.validFrom && !attribute.content.validTo) {
-            return true;
-        } else if (attribute.content.validFrom && !attribute.content.validTo && attribute.content.validFrom.isSameOrBefore(now)) {
-            return true;
-        } else if (!attribute.content.validFrom && attribute.content.validTo?.isSameOrAfter(now)) {
-            return true;
-        } else if (attribute.content.validFrom && attribute.content.validTo && attribute.content.validFrom.isSameOrBefore(now) && attribute.content.validTo.isSameOrAfter(now)) {
-            return true;
-        }
-        return false;
-    }
-
-    public findCurrent(attributes: LocalAttribute[]): LocalAttribute | undefined {
-        const sorted = attributes.sort((a, b) => {
-            return a.createdAt.compare(b.createdAt);
-        });
-        let current: LocalAttribute | undefined;
-        for (const attribute of sorted) {
-            if (this.checkValid(attribute)) {
-                current = attribute;
-            }
-        }
-        return current;
-    }
-
-    public filterCurrent(attributes: LocalAttribute[]): LocalAttribute[] {
-        const sorted = attributes.sort((a, b) => {
-            return a.createdAt.compare(b.createdAt);
-        });
-
-        const items = [];
-        for (const attribute of sorted) {
-            if (this.checkValid(attribute)) {
-                items.push(attribute);
-            }
-        }
-        return items;
-    }
-
     public async getLocalAttribute(id: CoreId): Promise<LocalAttribute | undefined> {
         const result = await this.attributes.findOne({
             [nameof<LocalAttribute>((c) => c.id)]: id.toString()
@@ -126,7 +85,11 @@ export class AttributesController extends ConsumptionBaseController {
         const parsed = this.parseArray(attributes, LocalAttribute);
         if (!onlyValid) return parsed;
 
-        return this.filterCurrent(parsed);
+        const sorted = parsed.sort((a, b) => {
+            return a.createdAt.compare(b.createdAt);
+        });
+
+        return sorted;
     }
 
     private enrichQuery(query: any, hideTechnical: boolean) {

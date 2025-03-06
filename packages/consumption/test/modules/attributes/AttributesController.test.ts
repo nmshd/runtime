@@ -139,7 +139,6 @@ describe("AttributesController", function () {
                     city: "aCity",
                     country: "DE"
                 },
-                validTo: CoreDate.utc(),
                 owner: consumptionController.accountController.identity.address
             });
 
@@ -177,7 +176,6 @@ describe("AttributesController", function () {
                     city: "aCity",
                     country: "DE"
                 },
-                validTo: CoreDate.utc(),
                 owner: consumptionController.accountController.identity.address
             });
 
@@ -2087,7 +2085,6 @@ describe("AttributesController", function () {
                             country: version0ChildValues[4],
                             state: "Berlin"
                         },
-                        validTo: CoreDate.utc(),
                         owner: consumptionController.accountController.identity.address
                     });
 
@@ -2286,7 +2283,6 @@ describe("AttributesController", function () {
                             city: version0ChildValues[3],
                             country: version0ChildValues[4]
                         },
-                        validTo: CoreDate.utc(),
                         owner: CoreAddress.from("peer")
                     });
 
