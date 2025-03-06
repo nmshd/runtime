@@ -517,7 +517,8 @@ export async function ensureActiveRelationship(sTransportServices: TransportServ
         await rTransportServices.relationships.decomposeRelationship({ relationshipId: relationship.id });
         await establishRelationship(sTransportServices, rTransportServices);
     } else if (sRelationships[0].status === RelationshipStatus.Pending) {
-        if (sRelationships[0].template.isOwn) {
+        const sRelationshipTemplate = await sTransportServices.relationshipTemplates.getRelationshipTemplate({ id: sRelationships[0].templateId });
+        if (sRelationshipTemplate.value.isOwn) {
             const relationship = sRelationships[0];
             await sTransportServices.relationships.acceptRelationship({ relationshipId: relationship.id });
             await syncUntilHasRelationships(rTransportServices, 1);

@@ -5,7 +5,7 @@ import { CoreId } from "@nmshd/core-types";
 import { AccountController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { LocalAttributeDTO } from "../../../types";
-import { ISO8601DateTimeString, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { AttributeMapper } from "./AttributeMapper";
 
 export interface SucceedRepositoryAttributeResponse {
@@ -18,8 +18,6 @@ export interface SucceedRepositoryAttributeRequest {
     successorContent: {
         value: AttributeValues.Identity.Json;
         tags?: string[];
-        validFrom?: ISO8601DateTimeString;
-        validTo?: ISO8601DateTimeString;
     };
 }
 
