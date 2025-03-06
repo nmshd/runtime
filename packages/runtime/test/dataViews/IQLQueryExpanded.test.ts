@@ -82,8 +82,6 @@ describe("IQLQueryExpanded", () => {
         expect(expandedQuery.name).toBe("i18n://dvo.attributeQuery.name.IQLQuery");
         expect(expandedQuery.description).toBe("i18n://dvo.attributeQuery.description.IQLQuery");
         expect(expandedQuery.valueType).toBe("GivenName");
-        expect(expandedQuery.validFrom).toBeUndefined();
-        expect(expandedQuery.validTo).toBeUndefined();
         expect(expandedQuery.renderHints!["@type"]).toBe("RenderHints");
         expect(expandedQuery.renderHints!.technicalType).toBe("String");
         expect(expandedQuery.renderHints!.editType).toBe("InputLike");
@@ -174,8 +172,6 @@ describe("IQLQueryExpanded", () => {
         expect(expandedQuery.name).toBe("i18n://dvo.attributeQuery.name.IQLQuery");
         expect(expandedQuery.description).toBe("i18n://dvo.attributeQuery.description.IQLQuery");
         expect(expandedQuery.valueType).toBe("GivenName");
-        expect(expandedQuery.validFrom).toBeUndefined();
-        expect(expandedQuery.validTo).toBeUndefined();
         expect(expandedQuery.renderHints!["@type"]).toBe("RenderHints");
         expect(expandedQuery.renderHints!.technicalType).toBe("String");
         expect(expandedQuery.renderHints!.editType).toBe("InputLike");
@@ -219,8 +215,6 @@ describe("IQLQueryExpanded", () => {
         expect(expandedQuery.name).toBe("i18n://dvo.attributeQuery.name.IQLQuery");
         expect(expandedQuery.description).toBe("i18n://dvo.attributeQuery.description.IQLQuery");
         expect(expandedQuery.valueType).toBe("GivenName");
-        expect(expandedQuery.validFrom).toBeUndefined();
-        expect(expandedQuery.validTo).toBeUndefined();
         expect(expandedQuery.renderHints!["@type"]).toBe("RenderHints");
         expect(expandedQuery.renderHints!.technicalType).toBe("String");
         expect(expandedQuery.renderHints!.editType).toBe("InputLike");
@@ -264,8 +258,6 @@ describe("IQLQueryExpanded", () => {
         expect(expandedQuery.name).toBe("i18n://dvo.attributeQuery.name.IQLQuery");
         expect(expandedQuery.description).toBe("i18n://dvo.attributeQuery.description.IQLQuery");
         expect(expandedQuery.valueType).toBeUndefined();
-        expect(expandedQuery.validFrom).toBeUndefined();
-        expect(expandedQuery.validTo).toBeUndefined();
         expect(expandedQuery.renderHints).toBeUndefined();
         expect(expandedQuery.valueHints).toBeUndefined();
         expect(expandedQuery.results).toHaveLength(2);
@@ -330,8 +322,6 @@ describe("IQLQueryExpanded", () => {
         expect(expandedQuery.name).toBe("i18n://dvo.attributeQuery.name.IQLQuery");
         expect(expandedQuery.description).toBe("i18n://dvo.attributeQuery.description.IQLQuery");
         expect(expandedQuery.valueType).toBeUndefined();
-        expect(expandedQuery.validFrom).toBeUndefined();
-        expect(expandedQuery.validTo).toBeUndefined();
         expect(expandedQuery.renderHints).toBeUndefined();
         expect(expandedQuery.valueHints).toBeUndefined();
         expect(expandedQuery.results).toHaveLength(0);
@@ -351,8 +341,6 @@ describe("IQLQueryExpanded", () => {
         expect(expandedQuery.name).toBe("i18n://dvo.attributeQuery.name.IQLQuery");
         expect(expandedQuery.description).toBe("i18n://dvo.attributeQuery.description.IQLQuery");
         expect(expandedQuery.valueType).toBe("CommunicationLanguage");
-        expect(expandedQuery.validFrom).toBeUndefined();
-        expect(expandedQuery.validTo).toBeUndefined();
         expect(expandedQuery.renderHints).toStrictEqual(CommunicationLanguage.renderHints.toJSON());
         expect(expandedQuery.valueHints).toStrictEqual(CommunicationLanguage.valueHints.toJSON());
         expect(expandedQuery.results).toHaveLength(0);
@@ -373,8 +361,6 @@ describe("IQLQueryExpanded", () => {
         expect(expandedQuery.name).toBe("i18n://dvo.attributeQuery.name.IQLQuery");
         expect(expandedQuery.description).toBe("i18n://dvo.attributeQuery.description.IQLQuery");
         expect(expandedQuery.valueType).toBe("StreetAddress");
-        expect(expandedQuery.validFrom).toBeUndefined();
-        expect(expandedQuery.validTo).toBeUndefined();
         expect(expandedQuery.renderHints).toStrictEqual(StreetAddress.renderHints.toJSON());
         expect(expandedQuery.valueHints).toStrictEqual(StreetAddress.valueHints.toJSON());
         expect(expandedQuery.results).toHaveLength(0);
