@@ -1415,7 +1415,7 @@ describe(ShareRepositoryAttributeUseCase.name, () => {
                 content: {
                     value: {
                         "@type": "GivenName",
-                        value: "Petra Pan"
+                        value: "aGivenName"
                     },
                     tags: ["tag1", "tag2"]
                 }
@@ -1655,7 +1655,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
             content: {
                 value: {
                     "@type": "GivenName",
-                    value: "Petra Pan"
+                    value: "aGivenName"
                 },
                 tags: ["tag1", "tag2"]
             }
@@ -1667,7 +1667,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
             successorContent: {
                 value: {
                     "@type": "GivenName",
-                    value: "Tina Turner"
+                    value: "anotherGivenName"
                 },
                 tags: ["Bunsen", "Burner"]
             }
@@ -1676,7 +1676,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
         expect(result.isError).toBe(false);
         const { predecessor: updatedPredecessor, successor } = result.value;
         expect(updatedPredecessor.succeededBy).toStrictEqual(successor.id);
-        expect((successor as any).content.value.value).toBe("Tina Turner");
+        expect((successor as any).content.value.value).toBe("anotherGivenName");
         await services1.eventBus.waitForEvent(RepositoryAttributeSucceededEvent, (e) => {
             return e.data.predecessor.id === updatedPredecessor.id && e.data.successor.id === successor.id;
         });
@@ -1719,7 +1719,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
             successorContent: {
                 value: {
                     "@type": "GivenName",
-                    value: "Tina Turner"
+                    value: "aGivenName"
                 },
                 tags: ["Bunsen", "Burner"]
             }
@@ -1734,7 +1734,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
             successorContent: {
                 value: {
                     "@type": "GivenName",
-                    value: "Tina Turner"
+                    value: "aGivenName"
                 },
                 tags: ["Bunsen", "Burner"]
             }
@@ -1748,7 +1748,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
             content: {
                 value: {
                     "@type": "GivenName",
-                    value: "Petra Pan"
+                    value: "aGivenName"
                 },
                 tags: ["tag1", "tag2"]
             }
@@ -1781,7 +1781,7 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
             content: {
                 value: {
                     "@type": "GivenName",
-                    value: "Petra Pan"
+                    value: "aGivenName"
                 },
                 tags: ["tag1", "tag2"]
             }
@@ -1792,7 +1792,7 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
             successorContent: {
                 value: {
                     "@type": "GivenName",
-                    value: "Tina Turner"
+                    value: "anotherGivenName"
                 },
                 tags: ["Bunsen", "Burner"]
             }
@@ -1804,7 +1804,7 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
             successorContent: {
                 value: {
                     "@type": "GivenName",
-                    value: "Martina Mustermann"
+                    value: "aFurtherGivenName"
                 }
             }
         };
