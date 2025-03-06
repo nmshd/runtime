@@ -225,7 +225,7 @@ export class ThenSteps {
         return Promise.resolve();
     }
 
-    public async aRepositoryAttributeIsCreated(): Promise<void> {
+    public async aRepositoryAttributeIsCreated(value?: AttributeValues.Identity.Json): Promise<void> {
         expect((this.context.responseItemAfterAction as CreateAttributeAcceptResponseItem).attributeId).toBeDefined();
 
         const createdSharedAttribute = await this.context.consumptionController.attributes.getLocalAttribute(
@@ -236,9 +236,10 @@ export class ThenSteps {
 
         expect(createdRepositoryAttribute).toBeDefined();
         expect(createdRepositoryAttribute!.shareInfo).toBeUndefined();
+        if (value) expect(createdRepositoryAttribute!.content.value.toJSON()).toStrictEqual(value);
     }
 
-    public async anOwnSharedIdentityAttributeIsCreated(sourceAttribute?: CoreId): Promise<void> {
+    public async anOwnSharedIdentityAttributeIsCreated(params?: { sourceAttribute?: CoreId; value?: AttributeValues.Identity.Json }): Promise<void> {
         expect((this.context.responseItemAfterAction as CreateAttributeAcceptResponseItem).attributeId).toBeDefined();
 
         const createdAttribute = await this.context.consumptionController.attributes.getLocalAttribute(
@@ -249,9 +250,10 @@ export class ThenSteps {
         expect(createdAttribute!.shareInfo).toBeDefined();
         expect(createdAttribute!.shareInfo!.peer.toString()).toStrictEqual(this.context.peerAddress.toString());
         expect(createdAttribute!.shareInfo!.sourceAttribute).toBeDefined();
+        if (params?.value) expect(createdAttribute!.content.value.toJSON()).toStrictEqual(params.value);
 
-        if (sourceAttribute) {
-            expect(createdAttribute!.shareInfo!.sourceAttribute!.toString()).toStrictEqual(sourceAttribute.toString());
+        if (params?.sourceAttribute) {
+            expect(createdAttribute!.shareInfo!.sourceAttribute!.toString()).toStrictEqual(params.sourceAttribute.toString());
         }
     }
 
@@ -303,6 +305,14 @@ export class ThenSteps {
 
         const repositoryAttribute = await this.context.consumptionController.attributes.getLocalAttribute(ownSharedIdentityAttribute!.shareInfo!.sourceAttribute!);
         expect((repositoryAttribute!.content as IdentityAttribute).tags?.sort()).toStrictEqual(tags.sort());
+    }
+
+    public async theSuccessorAttributeValueMatches(value: AttributeValues.Identity.Json): Promise<void> {
+        const attribute = await this.context.consumptionController.attributes.getLocalAttribute(
+            (this.context.responseItemAfterAction as AttributeSuccessionAcceptResponseItem).successorId
+        );
+
+        expect(attribute!.content.value.toJSON()).toStrictEqual(value);
     }
 
     public theCreatedAttributeHasTheAttributeIdFromTheResponseItem(): Promise<void> {
