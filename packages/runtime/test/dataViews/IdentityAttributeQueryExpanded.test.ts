@@ -27,7 +27,7 @@ describe("IdentityAttributeQueryExpanded", () => {
                         "@type": "GivenName",
                         value: "A first given name"
                     },
-                    tags: ["notDefault"]
+                    tags: ["x+%+notDefault"]
                 }
             })
         ).value;
@@ -39,7 +39,7 @@ describe("IdentityAttributeQueryExpanded", () => {
                         "@type": "GivenName",
                         value: "A second given name"
                     },
-                    tags: ["default"]
+                    tags: ["x+%+default"]
                 }
             })
         ).value;
@@ -80,7 +80,7 @@ describe("IdentityAttributeQueryExpanded", () => {
         const givenName = dvo.value as AbstractStringJSON;
         expect(givenName["@type"]).toBe("GivenName");
         expect(givenName.value).toBe("A second given name");
-        expect(dvo.tags).toStrictEqual(["default"]);
+        expect(dvo.tags).toStrictEqual(["x+%+default"]);
         expect(dvo.isDefault).toBe(true);
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
@@ -105,7 +105,7 @@ describe("IdentityAttributeQueryExpanded", () => {
         const value = dvo.value as AbstractStringJSON;
         expect(value["@type"]).toBe("GivenName");
         expect(value.value).toBe("A first given name");
-        expect(dvo.tags).toStrictEqual(["notDefault"]);
+        expect(dvo.tags).toStrictEqual(["x+%+notDefault"]);
         expect(dvo.isDefault).toBeUndefined();
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);

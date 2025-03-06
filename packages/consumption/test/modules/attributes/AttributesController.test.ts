@@ -23,6 +23,7 @@ import { AccountController, Transport } from "@nmshd/transport";
 import {
     AttributeCreatedEvent,
     AttributeDeletedEvent,
+    AttributeTagCollection,
     ConsumptionController,
     IAttributeSuccessorParams,
     ICreateRepositoryAttributeParams,
@@ -1194,7 +1195,7 @@ describe("AttributesController", function () {
                             value: "DE"
                         },
                         owner: consumptionController.accountController.identity.address,
-                        tags: ["aTag"]
+                        tags: ["x+%+aTag"]
                     })
                 });
 
@@ -1205,7 +1206,7 @@ describe("AttributesController", function () {
                             value: "DE"
                         },
                         owner: consumptionController.accountController.identity.address,
-                        tags: ["aTag"]
+                        tags: ["x+%+aTag"]
                     })
                 };
 
@@ -1783,7 +1784,7 @@ describe("AttributesController", function () {
                             value: "DE"
                         },
                         owner: consumptionController.accountController.identity.address,
-                        tags: ["aTag"]
+                        tags: ["x+%+aTag"]
                     })
                 });
 
@@ -1794,7 +1795,7 @@ describe("AttributesController", function () {
                             value: "DE"
                         },
                         owner: consumptionController.accountController.identity.address,
-                        tags: ["aTag", "anotherTag"]
+                        tags: ["x+%+aTag", "x+%+anotherTag"]
                     })
                 };
 
@@ -1806,8 +1807,8 @@ describe("AttributesController", function () {
                 expect(successor.succeeds!.equals(updatedPredecessor.id)).toBe(true);
                 expect((updatedPredecessor.content.value.toJSON() as any).value).toBe("DE");
                 expect((successor.content.value.toJSON() as any).value).toBe("DE");
-                expect((updatedPredecessor.content as IdentityAttribute).tags).toStrictEqual(["aTag"]);
-                expect((successor.content as IdentityAttribute).tags).toStrictEqual(["aTag", "anotherTag"]);
+                expect((updatedPredecessor.content as IdentityAttribute).tags).toStrictEqual(["x+%+aTag"]);
+                expect((successor.content as IdentityAttribute).tags).toStrictEqual(["x+%+aTag", "x+%+anotherTag"]);
             });
 
             test("should make successor default succeeding a default repository attribute", async function () {
@@ -3250,5 +3251,59 @@ describe("AttributesController", function () {
         const peerAttribute = await consumptionController.attributes.getLocalAttribute(peerRelationshipAttribute.id);
         expect(ownAttribute).toBeUndefined();
         expect(peerAttribute).toBeUndefined();
+    });
+
+    describe("validate tags", function () {
+        /* eslint-disable @typescript-eslint/naming-convention */
+        const mockedTagCollection: AttributeTagCollection = AttributeTagCollection.from({
+            supportedLanguages: ["de", "en"],
+            tagsForAttributeValueTypes: {
+                PhoneNumber: {
+                    emergency: {
+                        displayNames: {
+                            de: "Notfallkontakt",
+                            en: "Emergency Contact"
+                        },
+                        children: {
+                            first: {
+                                displayNames: {
+                                    de: "Erster Notfallkontakt",
+                                    en: "First Emergency Contact"
+                                }
+                            },
+                            second: {
+                                displayNames: {
+                                    de: "Zweiter Notfallkontakt",
+                                    en: "Second Emergency Contact"
+                                }
+                            }
+                        }
+                    },
+                    private: {
+                        displayNames: {
+                            de: "Privat",
+                            en: "Private"
+                        }
+                    }
+                }
+            }
+        });
+        /* eslint-enable @typescript-eslint/naming-convention */
+
+        test("should validate valid tags", function () {
+            expect(consumptionController.attributes["isValidTag"]("private", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(true);
+            expect(consumptionController.attributes["isValidTag"]("emergency+%+first", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(true);
+            expect(consumptionController.attributes["isValidTag"]("emergency+%+second", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(true);
+            expect(consumptionController.attributes["isValidTag"]("x+%+my+%+custom+%+tag", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(true);
+            expect(consumptionController.attributes["isValidTag"]("X+%+my+%+custom+%+tag", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(true);
+        });
+
+        test("should validate invalid tags", function () {
+            expect(consumptionController.attributes["isValidTag"]("nonexistent", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(false);
+            expect(consumptionController.attributes["isValidTag"]("emergency", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(false);
+            expect(consumptionController.attributes["isValidTag"]("private", mockedTagCollection.tagsForAttributeValueTypes["nonexistent"])).toBe(false);
+            expect(consumptionController.attributes["isValidTag"]("emergency+%+nonexistent", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(false);
+            expect(consumptionController.attributes["isValidTag"]("emergency+%+first+%+nonexistent", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(false);
+        });
     });
 });
