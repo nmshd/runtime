@@ -941,7 +941,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "    aGivenName  "
                 },
-                tags: ["tag1", "tag2"]
+                tags: ["x+%+tag1", "x+%+tag2"]
             }
         };
 
@@ -1209,7 +1209,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["tag1", "tag2"]
+                tags: ["x+%+tag1", "x+%+tag2"]
             }
         };
 
@@ -1219,7 +1219,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "    aGivenName  "
                 },
-                tags: ["tag1", "tag2"]
+                tags: ["x+%+tag1", "x+%+tag2"]
             }
         };
 
@@ -1666,7 +1666,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["tag1", "tag2"]
+                tags: ["x+%+tag1", "x+%+tag2"]
             }
         };
         const predecessor = (await services1.consumption.attributes.createRepositoryAttribute(createAttributeRequest)).value;
@@ -1678,7 +1678,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "    anotherGivenName    "
                 },
-                tags: ["tag1", "tag2"]
+                tags: ["x+%+tag1", "x+%+tag2"]
             }
         };
         const result = await services1.consumption.attributes.succeedRepositoryAttribute(succeedAttributeRequest);

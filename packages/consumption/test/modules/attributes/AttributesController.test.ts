@@ -190,7 +190,6 @@ describe("AttributesController", function () {
                     city: " aCity  ",
                     country: "DE"
                 },
-                validTo: CoreDate.utc(),
                 owner: consumptionController.accountController.identity.address
             });
 
