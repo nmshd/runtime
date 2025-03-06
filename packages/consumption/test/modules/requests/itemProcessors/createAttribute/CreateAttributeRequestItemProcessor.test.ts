@@ -1,7 +1,8 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { GivenName, ProprietaryInteger, ProprietaryString } from "@nmshd/content";
-import { CoreAddress } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { Transport } from "@nmshd/transport";
+import { LocalAttributeDeletionStatus } from "../../../../../src";
 import { TestUtil } from "../../../../core/TestUtil";
 import { TestObjectFactory } from "../../testHelpers/TestObjectFactory";
 import { Context, GivenSteps, ThenSteps, WhenSteps } from "./Context";
@@ -338,7 +339,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await When.iCallAccept();
             await Then.theResponseItemShouldBeOfType("CreateAttributeAcceptResponseItem");
             await Then.aRepositoryAttributeIsCreated(GivenName.from("aGivenName").toJSON());
-            await Then.anOwnSharedIdentityAttributeIsCreated(GivenName.from("aGivenName").toJSON());
+            await Then.anOwnSharedIdentityAttributeIsCreated(undefined, GivenName.from("aGivenName").toJSON());
         });
 
         test("in case of an IdentityAttribute that already exists as RepositoryAttribute: creates an own shared IdentityAttribute that links to the existing RepositoryAttribute", async function () {
@@ -373,7 +374,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await Given.aRequestItemWithAnIdentityAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, tags: ["tag1", "tag3"], value: GivenName.from("    aGivenName  ") });
             await When.iCallAccept();
             await Then.theResponseItemShouldBeOfType("CreateAttributeAcceptResponseItem");
-            await Then.anOwnSharedIdentityAttributeIsCreated(GivenName.from("aGivenName").toJSON());
+            await Then.anOwnSharedIdentityAttributeIsCreated(undefined, GivenName.from("aGivenName").toJSON());
             await Then.theTagsOfTheRepositoryAttributeMatch(["tag1", "tag2", "tag3"]);
         });
 
@@ -393,6 +394,32 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await When.iCallAccept();
             await Then.theResponseItemShouldBeOfType("AttributeAlreadySharedAcceptResponseItem");
             await Then.theIdOfTheAlreadySharedAttributeMatches(ownSharedIdentityAttribute.id);
+        });
+
+        test("in case of an IdentityAttribute that already exists as own shared IdentityAttribute but is deleted by peer: creates a new own shared IdentityAttribute", async function () {
+            const repositoryAttribute = await Given.aRepositoryAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, value: GivenName.from("aGivenName") });
+            await Given.anAttribute({
+                content: repositoryAttribute.content,
+                shareInfo: { sourceAttribute: repositoryAttribute.id, peer: TestIdentity.PEER, requestReference: CoreId.from("reqRef") },
+                deletionInfo: { deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer, deletionDate: CoreDate.utc().subtract({ days: 1 }) }
+            });
+            await Given.aRequestItemWithAnIdentityAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, value: GivenName.from("aGivenName") });
+            await When.iCallAccept();
+            await Then.theResponseItemShouldBeOfType("CreateAttributeAcceptResponseItem");
+            await Then.anOwnSharedIdentityAttributeIsCreated(repositoryAttribute.id);
+        });
+
+        test("in case of an IdentityAttribute that already exists as own shared IdentityAttribute but is to be deleted by peer: creates a new own shared IdentityAttribute", async function () {
+            const repositoryAttribute = await Given.aRepositoryAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, value: GivenName.from("aGivenName") });
+            await Given.anAttribute({
+                content: repositoryAttribute.content,
+                shareInfo: { sourceAttribute: repositoryAttribute.id, peer: TestIdentity.PEER, requestReference: CoreId.from("reqRef") },
+                deletionInfo: { deletionStatus: LocalAttributeDeletionStatus.ToBeDeletedByPeer, deletionDate: CoreDate.utc().add({ days: 1 }) }
+            });
+            await Given.aRequestItemWithAnIdentityAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, value: GivenName.from("aGivenName") });
+            await When.iCallAccept();
+            await Then.theResponseItemShouldBeOfType("CreateAttributeAcceptResponseItem");
+            await Then.anOwnSharedIdentityAttributeIsCreated(repositoryAttribute.id);
         });
 
         test("in case of an IdentityAttribute that already exists as own shared IdentityAttribute with different tags: returns an AttributeSuccessionAcceptResponseItem", async function () {
