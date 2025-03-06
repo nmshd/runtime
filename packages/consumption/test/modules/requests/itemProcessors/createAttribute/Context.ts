@@ -9,13 +9,14 @@ import {
     RelationshipAttribute,
     ResponseItemResult
 } from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId, ICoreDate, ICoreId } from "@nmshd/core-types";
 import { AccountController, Transport } from "@nmshd/transport";
 import {
     ConsumptionController,
     ConsumptionIds,
     CreateAttributeRequestItemProcessor,
     IAttributeSuccessorParams,
+    ILocalAttribute,
     LocalAttribute,
     LocalAttributeDeletionInfo,
     LocalAttributeDeletionStatus,
@@ -187,6 +188,11 @@ export class GivenSteps {
         });
         return createdPeerSharedIdentityAttribute;
     }
+
+    public async anAttribute(attributeData: Omit<ILocalAttribute, "id" | "createdAt"> & { id?: ICoreId; createdAt?: ICoreDate }): Promise<LocalAttribute> {
+        const createdAttribute = await this.context.consumptionController.attributes.createAttributeUnsafe(attributeData);
+        return createdAttribute;
+    }
 }
 
 export class ThenSteps {
@@ -232,7 +238,7 @@ export class ThenSteps {
         expect(createdRepositoryAttribute!.shareInfo).toBeUndefined();
     }
 
-    public async anOwnSharedIdentityAttributeIsCreated(): Promise<void> {
+    public async anOwnSharedIdentityAttributeIsCreated(sourceAttribute?: CoreId): Promise<void> {
         expect((this.context.responseItemAfterAction as CreateAttributeAcceptResponseItem).attributeId).toBeDefined();
 
         const createdAttribute = await this.context.consumptionController.attributes.getLocalAttribute(
@@ -243,6 +249,10 @@ export class ThenSteps {
         expect(createdAttribute!.shareInfo).toBeDefined();
         expect(createdAttribute!.shareInfo!.peer.toString()).toStrictEqual(this.context.peerAddress.toString());
         expect(createdAttribute!.shareInfo!.sourceAttribute).toBeDefined();
+
+        if (sourceAttribute) {
+            expect(createdAttribute!.shareInfo!.sourceAttribute!.toString()).toStrictEqual(sourceAttribute.toString());
+        }
     }
 
     public async anOwnSharedRelationshipAttributeIsCreated(): Promise<void> {

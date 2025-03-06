@@ -1271,11 +1271,11 @@ export class AttributesController extends ConsumptionBaseController {
         return false;
     }
 
-    public async getSharedVersionsOfAttribute(id: CoreId, peers?: CoreAddress[], onlyLatestVersions = true): Promise<LocalAttribute[]> {
+    public async getSharedVersionsOfAttribute(id: CoreId, peers?: CoreAddress[], onlyLatestVersions = true, query: any = {}): Promise<LocalAttribute[]> {
         const sourceAttribute = await this.getLocalAttribute(id);
         if (!sourceAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, id.toString());
 
-        const query: any = { "shareInfo.sourceAttribute": sourceAttribute.id.toString() };
+        query["shareInfo.sourceAttribute"] = sourceAttribute.id.toString();
         if (peers) query["shareInfo.peer"] = { $in: peers.map((address) => address.toString()) };
         if (onlyLatestVersions) query["succeededBy"] = { $exists: false };
 
