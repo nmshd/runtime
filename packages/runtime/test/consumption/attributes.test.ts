@@ -645,7 +645,7 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
                 "@type": "GivenName",
                 value: "aGivenName"
             },
-            tags: ["tag1", "tag2"]
+            tags: ["x+%+tag1", "x+%+tag2"]
         }
     };
 
@@ -657,7 +657,7 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
                         "@type": "GivenName",
                         value: 5
                     },
-                    tags: ["tag1", "tag2"]
+                    tags: ["x+%+tag1", "x+%+tag2"]
                 } as any
             };
             const result = await services1.consumption.attributes.canCreateRepositoryAttribute(request);
@@ -678,7 +678,7 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
                         month: 5,
                         year: "a-string"
                     },
-                    tags: ["tag1", "tag2"]
+                    tags: ["x+%+tag1", "x+%+tag2"]
                 } as any
             };
             const result = await services1.consumption.attributes.canCreateRepositoryAttribute(request);
@@ -698,7 +698,7 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
                         day: 5,
                         month: 5
                     },
-                    tags: ["tag1", "tag2"]
+                    tags: ["x+%+tag1", "x+%+tag2"]
                 } as any
             };
             const result = await services1.consumption.attributes.canCreateRepositoryAttribute(request);
@@ -717,7 +717,7 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
                         "@type": "BirthMonth",
                         value: 14
                     },
-                    tags: ["tag1", "tag2"]
+                    tags: ["x+%+tag1", "x+%+tag2"]
                 } as any
             };
             const result = await services1.consumption.attributes.canCreateRepositoryAttribute(request);
@@ -737,7 +737,7 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
                         value: "aGivenName",
                         additionalProperty: 1
                     },
-                    tags: ["tag1", "tag2"]
+                    tags: ["x+%+tag1", "x+%+tag2"]
                 } as any
             };
             const result = await services1.consumption.attributes.canCreateRepositoryAttribute(request);
@@ -809,16 +809,14 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
         expect(result.value.code).toBe("error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute");
     });
 
-    test("should not allow to create a duplicate RepositoryAttribute even if the tags/validFrom/validTo are different", async () => {
+    test("should not allow to create a duplicate RepositoryAttribute even if the tags are different", async () => {
         const createAttributeRequest: CreateRepositoryAttributeRequest = {
             content: {
                 value: {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["tag1", "tag2"],
-                validFrom: CoreDate.utc().subtract({ day: 1 }).toString(),
-                validTo: CoreDate.utc().add({ day: 1 }).toString()
+                tags: ["x+%+tag1", "x+%+tag2"]
             }
         };
         const repositoryAttribute = (await services1.consumption.attributes.createRepositoryAttribute(createAttributeRequest)).value;
@@ -829,7 +827,7 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["tag3"]
+                tags: ["x+%+tag3"]
             }
         };
 
@@ -844,19 +842,14 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
         expect(result.value.code).toBe("error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute");
     });
 
-    test("should allow to create another RepositoryAttribute even if the tags/validFrom/validTo are duplicates", async () => {
-        const validFrom = CoreDate.utc().subtract({ day: 1 }).toString();
-        const validTo = CoreDate.utc().add({ day: 1 }).toString();
-
+    test("should allow to create another RepositoryAttribute even if the tags are duplicates", async () => {
         const request: CreateRepositoryAttributeRequest = {
             content: {
                 value: {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["tag1", "tag2"],
-                validFrom,
-                validTo
+                tags: ["x+%+tag1", "x+%+tag2"]
             }
         };
         await services1.consumption.attributes.createRepositoryAttribute(request);
@@ -867,9 +860,7 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "anotherGivenName"
                 },
-                tags: ["tag1", "tag2"],
-                validFrom,
-                validTo
+                tags: ["x+%+tag1", "x+%+tag2"]
             }
         };
 
@@ -902,7 +893,7 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
                     surname: "aSurname",
                     middleName: "aMiddleName"
                 },
-                tags: ["tag1", "tag2"]
+                tags: ["x+%+tag1", "x+%+tag2"]
             }
         };
 
@@ -913,7 +904,7 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
                     givenName: "aGivenName",
                     surname: "aSurname"
                 },
-                tags: ["tag1", "tag2"]
+                tags: ["x+%+tag1", "x+%+tag2"]
             }
         };
 
@@ -932,7 +923,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["tag1", "tag2"]
+                tags: ["x+%+tag1", "x+%+tag2"]
             }
         };
 
@@ -950,7 +941,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "    aGivenName  "
                 },
-                tags: ["tag1", "tag2"]
+                tags: ["x+%+tag1", "x+%+tag2"]
             }
         };
 
@@ -1104,7 +1095,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                         "@type": "GivenName",
                         value: 5
                     },
-                    tags: ["tag1", "tag2"]
+                    tags: ["x+%+tag1", "x+%+tag2"]
                 } as any
             };
             const result = await services1.consumption.attributes.createRepositoryAttribute(request);
@@ -1121,7 +1112,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                         month: 5,
                         year: "a-string"
                     },
-                    tags: ["tag1", "tag2"]
+                    tags: ["x+%+tag1", "x+%+tag2"]
                 } as any
             };
             const result = await services1.consumption.attributes.createRepositoryAttribute(request);
@@ -1137,7 +1128,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                         day: 5,
                         month: 5
                     },
-                    tags: ["tag1", "tag2"]
+                    tags: ["x+%+tag1", "x+%+tag2"]
                 } as any
             };
             const result = await services1.consumption.attributes.createRepositoryAttribute(request);
@@ -1152,7 +1143,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                         "@type": "BirthMonth",
                         value: 14
                     },
-                    tags: ["tag1", "tag2"]
+                    tags: ["x+%+tag1", "x+%+tag2"]
                 } as any
             };
             const result = await services1.consumption.attributes.createRepositoryAttribute(request);
@@ -1168,7 +1159,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                         value: "aGivenName",
                         additionalProperty: 1
                     },
-                    tags: ["tag1", "tag2"]
+                    tags: ["x+%+tag1", "x+%+tag2"]
                 } as any
             };
             const result = await services1.consumption.attributes.createRepositoryAttribute(request);
@@ -1197,7 +1188,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["tag1", "tag2"]
+                tags: ["x+%+tag1", "x+%+tag2"]
             }
         };
 
@@ -1218,7 +1209,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["tag1", "tag2"]
+                tags: ["x+%+tag1", "x+%+tag2"]
             }
         };
 
@@ -1228,7 +1219,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "    aGivenName  "
                 },
-                tags: ["tag1", "tag2"]
+                tags: ["x+%+tag1", "x+%+tag2"]
             }
         };
 
@@ -1249,7 +1240,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["tag1", "tag2"]
+                tags: ["x+%+tag1", "x+%+tag2"]
             }
         };
 
@@ -1280,7 +1271,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                     surname: "aSurname",
                     middleName: "aMiddleName"
                 },
-                tags: ["tag1", "tag2"]
+                tags: ["x+%+tag1", "x+%+tag2"]
             }
         };
 
@@ -1291,7 +1282,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                     givenName: "aGivenName",
                     surname: "aSurname"
                 },
-                tags: ["tag1", "tag2"]
+                tags: ["x+%+tag1", "x+%+tag2"]
             }
         };
 
@@ -1302,18 +1293,14 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
         expect(result2).toBeSuccessful();
     });
 
-    test("should not create a duplicate RepositoryAttribute even if the tags/validFrom/validTo are different", async () => {
-        const validFrom = CoreDate.utc().subtract({ day: 1 }).toString();
-        const validTo = CoreDate.utc().add({ day: 1 }).toString();
+    test("should not create a duplicate RepositoryAttribute even if the tags are different", async () => {
         const request: CreateRepositoryAttributeRequest = {
             content: {
                 value: {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["tag1", "tag2"],
-                validFrom,
-                validTo
+                tags: ["x+%+tag1", "x+%+tag2"]
             }
         };
 
@@ -1326,8 +1313,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["tag1", "tag2"],
-                validFrom
+                tags: ["x+%+tag1", "x+%+tag2"]
             }
         };
 
@@ -1343,8 +1329,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["tag1", "tag2"],
-                validTo
+                tags: ["x+%+tag1", "x+%+tag2"]
             }
         };
 
@@ -1359,9 +1344,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                 value: {
                     "@type": "GivenName",
                     value: "aGivenName"
-                },
-                validFrom,
-                validTo
+                }
             }
         };
 
@@ -1372,18 +1355,14 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
         );
     });
 
-    test("should create a RepositoryAttribute even if the tags/validFrom/validTo are duplicates", async () => {
-        const validFrom = CoreDate.utc().subtract({ day: 1 }).toString();
-        const validTo = CoreDate.utc().add({ day: 1 }).toString();
+    test("should create a RepositoryAttribute even if the tags are duplicates", async () => {
         const request: CreateRepositoryAttributeRequest = {
             content: {
                 value: {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["tag1", "tag2"],
-                validFrom,
-                validTo
+                tags: ["x+%+tag1", "x+%+tag2"]
             }
         };
 
@@ -1396,9 +1375,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName2"
                 },
-                tags: ["tag1", "tag2"],
-                validFrom,
-                validTo
+                tags: ["x+%+tag1", "x+%+tag2"]
             }
         };
 
@@ -1417,7 +1394,7 @@ describe(ShareRepositoryAttributeUseCase.name, () => {
                         "@type": "GivenName",
                         value: "aGivenName"
                     },
-                    tags: ["tag1", "tag2"]
+                    tags: ["x+%+tag1", "x+%+tag2"]
                 }
             })
         ).value;
@@ -1657,7 +1634,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["tag1", "tag2"]
+                tags: ["x+%+tag1", "x+%+tag2"]
             }
         };
         const predecessor = (await services1.consumption.attributes.createRepositoryAttribute(createAttributeRequest)).value;
@@ -1669,7 +1646,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "anotherGivenName"
                 },
-                tags: ["Bunsen", "Burner"]
+                tags: ["x+%+tag3", "x+%+tag4"]
             }
         };
         const result = await services1.consumption.attributes.succeedRepositoryAttribute(succeedAttributeRequest);
@@ -1689,7 +1666,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["tag1", "tag2"]
+                tags: ["x+%+tag1", "x+%+tag2"]
             }
         };
         const predecessor = (await services1.consumption.attributes.createRepositoryAttribute(createAttributeRequest)).value;
@@ -1701,7 +1678,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "    anotherGivenName    "
                 },
-                tags: ["tag1", "tag2"]
+                tags: ["x+%+tag1", "x+%+tag2"]
             }
         };
         const result = await services1.consumption.attributes.succeedRepositoryAttribute(succeedAttributeRequest);
@@ -1721,7 +1698,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["Bunsen", "Burner"]
+                tags: ["x+%+tag1", "x+%+tag2"]
             }
         };
         const result = await services1.consumption.attributes.succeedRepositoryAttribute(succeedAttributeRequest);
@@ -1736,7 +1713,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["Bunsen", "Burner"]
+                tags: ["x+%+tag1", "x+%+tag2"]
             }
         };
         const result = await services1.consumption.attributes.succeedRepositoryAttribute(succeedAttributeRequest);
@@ -1750,7 +1727,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["tag1", "tag2"]
+                tags: ["x+%+tag1", "x+%+tag2"]
             }
         };
         const predecessor = (await services1.consumption.attributes.createRepositoryAttribute(createAttributeRequest)).value;
@@ -1762,7 +1739,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
                     "@type": "PhoneNumber",
                     value: "+4915155253460"
                 },
-                tags: ["Bunsen", "Burner"]
+                tags: ["x+%+tag3", "x+%+tag4"]
             }
         };
         const result = await services1.consumption.attributes.succeedRepositoryAttribute(succeedAttributeRequest);
@@ -1783,7 +1760,7 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["tag1", "tag2"]
+                tags: ["x+%+tag1", "x+%+tag2"]
             }
         });
 
@@ -1794,7 +1771,7 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
                     "@type": "GivenName",
                     value: "anotherGivenName"
                 },
-                tags: ["Bunsen", "Burner"]
+                tags: ["x+%+tag3", "x+%+tag4"]
             }
         };
         ({ successor: repositoryAttributeVersion1 } = (await services1.consumption.attributes.succeedRepositoryAttribute(succeedRepositoryAttributeRequest1)).value);
@@ -2250,7 +2227,7 @@ describe("Get (shared) versions of attribute", () => {
                     "@type": "GivenName",
                     value: "Second Name"
                 },
-                tags: ["tag2"]
+                tags: ["x+%+tag2"]
             }
         };
         const sRepositoryAttributeSuccessionResult1 = await services1.consumption.attributes.succeedRepositoryAttribute(succeedRepositoryAttributeRequest1);
@@ -2265,7 +2242,7 @@ describe("Get (shared) versions of attribute", () => {
                     "@type": "GivenName",
                     value: "Third Name"
                 },
-                tags: ["tag3"]
+                tags: ["x+%+tag3"]
             }
         };
         const sRepositoryAttributeSuccessionResult2 = await services1.consumption.attributes.succeedRepositoryAttribute(succeedRepositoryAttributeRequest2);
@@ -2280,7 +2257,7 @@ describe("Get (shared) versions of attribute", () => {
                         "@type": "GivenName",
                         value: "First Name"
                     },
-                    tags: ["tag1"]
+                    tags: ["x+%+tag1"]
                 }
             })
         ).value;
@@ -2305,7 +2282,7 @@ describe("Get (shared) versions of attribute", () => {
                         "@type": "GivenName",
                         value: "First Name"
                     },
-                    tags: ["tag1"]
+                    tags: ["x+%+tag1"]
                 }
             });
 
@@ -2602,7 +2579,7 @@ describe("DeleteAttributeUseCases", () => {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["tag1", "tag2"]
+                tags: ["x+%+tag1", "x+%+tag2"]
             }
         });
         repositoryAttributeVersion0 = (await services1.consumption.attributes.getAttribute({ id: ownSharedIdentityAttributeVersion0.shareInfo!.sourceAttribute! })).value;
