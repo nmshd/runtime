@@ -502,7 +502,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             });
             await When.iCallAccept();
             await Then.theResponseItemShouldBeOfType("AttributeSuccessionAcceptResponseItem");
-            await Then.theTagsOfTheSucceededRepositoryAttributeMatch(["tag1", "tag2", "tag3"]);
+            await Then.theTagsOfTheSucceededRepositoryAttributeMatch(["x+%+tag1", "x+%+tag2", "x+%+tag3"]);
             await Then.theSuccessorAttributeValueMatches(GivenName.from("aGivenName").toJSON());
         });
 
