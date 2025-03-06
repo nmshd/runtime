@@ -22,6 +22,7 @@ describe("MessageFacade", function () {
         const services = await runtime.getServices(localAccount.address!);
         const messages = await services.transportServices.messages.getMessages({ query: {} });
         expect(messages.isSuccess).toBeDefined();
-        expect(messages.value).toBeInstanceOf(Array);
+        expect(messages.value.messages).toBeInstanceOf(Array);
+        expect(messages.value.messageCount).toBeInstanceOf(Number);
     });
 });

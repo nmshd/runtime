@@ -107,7 +107,7 @@ describe("MessageController", function () {
         });
     });
 
-    describe.only("Sending Messages for active Relationships", function () {
+    describe("Sending Messages for active Relationships", function () {
         beforeAll(async function () {
             relationship = (await TestUtil.addRelationship(sender, recipient)).acceptedRelationshipFromSelf;
             relationship2 = (await TestUtil.addRelationship(sender, recipient2)).acceptedRelationshipFromSelf;

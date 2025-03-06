@@ -77,24 +77,6 @@ describe("Messaging", () => {
         fileId = file.id;
     });
 
-    test("send a Message from client1.transport to client2.transport", async () => {
-        expect(fileId).toBeDefined();
-
-        const result = await client1.transport.messages.sendMessage({
-            recipients: [client2.address],
-            content: {
-                "@type": "Mail",
-                body: "b",
-                cc: [],
-                subject: "a",
-                to: [client2.address]
-            },
-            attachments: [fileId]
-        });
-        expect(result).toBeSuccessful();
-        await expect(client1.eventBus).toHavePublished(MessageSentEvent, (m) => m.data.id === result.value.id);
-    });
-
     test("pagination", async () => {
         const messageIds = [];
         for (let index = 0; index < 3; index++) {
@@ -125,6 +107,24 @@ describe("Messaging", () => {
         expect(messagesResult2.messages).toHaveLength(2);
         expect(messagesResult2.messages[0].id).toBe(messageIds[1]);
         expect(messagesResult2.messages[1].id).toBe(messageIds[0]);
+    });
+
+    test("send a Message from client1.transport to client2.transport", async () => {
+        expect(fileId).toBeDefined();
+
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client2.address],
+            content: {
+                "@type": "Mail",
+                body: "b",
+                cc: [],
+                subject: "a",
+                to: [client2.address]
+            },
+            attachments: [fileId]
+        });
+        expect(result).toBeSuccessful();
+        await expect(client1.eventBus).toHavePublished(MessageSentEvent, (m) => m.data.id === result.value.id);
     });
 
     test("receive the message in a sync run", async () => {
