@@ -102,6 +102,28 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             expect(result).successfulValidationResult();
         });
 
+        test("returns an error when passing an invalid character", async () => {
+            const recipient = CoreAddress.from("Recipient");
+
+            const requestItem = ProposeAttributeRequestItem.from({
+                mustBeAccepted: false,
+                attribute: TestObjectFactory.createIdentityAttribute({
+                    value: GivenName.fromAny({ value: "aGivenName😀" }),
+                    owner: CoreAddress.from("")
+                }),
+                query: IdentityAttributeQuery.from({
+                    valueType: "GivenName"
+                })
+            });
+
+            const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), recipient);
+
+            expect(result).errorValidationResult({
+                code: "error.consumption.requests.invalidRequestItem",
+                message: "The attribute contains invalid characters."
+            });
+        });
+
         test("returns an error when passing anything other than an empty string as an owner into 'attribute'", async () => {
             const recipient = CoreAddress.from("Recipient");
 
@@ -415,6 +437,49 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const result = await processor.canAccept(requestItem, acceptParams, request);
 
             expect(result).successfulValidationResult();
+        });
+
+        test("returns an error when the attribute contains an invalid character", async function () {
+            const sender = CoreAddress.from("Sender");
+            const recipient = accountController.identity.address;
+
+            const requestItem = ProposeAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
+                attribute: TestObjectFactory.createIdentityAttribute()
+            });
+            const requestId = await ConsumptionIds.request.generate();
+            const request = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const acceptParams: AcceptProposeAttributeRequestItemParametersWithNewAttributeJSON = {
+                accept: true,
+                attribute: {
+                    "@type": "IdentityAttribute",
+                    owner: recipient.toString(),
+                    value: {
+                        "@type": "GivenName",
+                        value: "aGivenName😀"
+                    }
+                }
+            };
+
+            const result = await processor.canAccept(requestItem, acceptParams, request);
+
+            expect(result).errorValidationResult({
+                code: "error.consumption.requests.invalidAcceptParameters",
+                message: "The attribute contains invalid characters."
+            });
         });
 
         test("returns an error when the given Attribute id does not exist", async function () {

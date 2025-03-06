@@ -11,6 +11,7 @@ import {
     IIQLQuery,
     IRelationshipAttributeQuery,
     Nationality,
+    ProprietaryString,
     RelationshipAttribute,
     RelationshipAttributeConfidentiality,
     Street,
@@ -103,6 +104,22 @@ describe("AttributesController", function () {
             expect(attributesAfterCreate).toHaveLength(1);
 
             mockEventBus.expectPublishedEvents(AttributeCreatedEvent);
+        });
+
+        test("should not create a new attribute with an invalid character", async function () {
+            const params: ICreateRepositoryAttributeParams = {
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "DisplayName",
+                        value: "aDisplayName😀"
+                    },
+                    owner: consumptionController.accountController.identity.address
+                })
+            };
+
+            await expect(consumptionController.attributes.createRepositoryAttribute(params)).rejects.toThrow(
+                "error.consumption.attributes.invalidCharactersInAttribute: 'The repository attribute contains invalid characters.'"
+            );
         });
 
         test("should create a new attribute of type SchematizedXML", async function () {
@@ -1188,6 +1205,35 @@ describe("AttributesController", function () {
 
     describe("succeed Attributes", function () {
         describe("Common validator", function () {
+            test("should catch an invalid character in the successor", async function () {
+                const predecessor = await consumptionController.attributes.createRepositoryAttribute({
+                    content: IdentityAttribute.from({
+                        value: {
+                            "@type": "GivenName",
+                            value: "aGivenName"
+                        },
+                        owner: consumptionController.accountController.identity.address,
+                        tags: ["aTag"]
+                    })
+                });
+
+                const successorData: IAttributeSuccessorParams = {
+                    content: IdentityAttribute.from({
+                        value: {
+                            "@type": "GivenName",
+                            value: "aGivenName😀"
+                        },
+                        owner: consumptionController.accountController.identity.address,
+                        tags: ["aTag"]
+                    })
+                };
+
+                const validationResult = await consumptionController.attributes.validateAttributeSuccessionCommon(predecessor.id, successorData);
+                expect(validationResult).errorValidationResult({
+                    code: "error.consumption.attributes.invalidCharactersInAttribute"
+                });
+            });
+
             test("should catch if content doesn't change", async function () {
                 const predecessor = await consumptionController.attributes.createRepositoryAttribute({
                     content: IdentityAttribute.from({
@@ -3245,5 +3291,44 @@ describe("AttributesController", function () {
         const peerAttribute = await consumptionController.attributes.getLocalAttribute(peerRelationshipAttribute.id);
         expect(ownAttribute).toBeUndefined();
         expect(peerAttribute).toBeUndefined();
+    });
+
+    describe("validate attribute values", function () {
+        test("should catch invalid characters in an IdentityAttribute", function () {
+            expect(
+                consumptionController.attributes.validateAttributeValues(
+                    IdentityAttribute.from({
+                        owner: CoreAddress.from("anAddress"),
+                        value: City.from({ value: "aCity😀" })
+                    })
+                )
+            ).toBe(false);
+        });
+
+        test("should catch invalid characters in a RelationshipAttribute", function () {
+            expect(
+                consumptionController.attributes.validateAttributeValues(
+                    RelationshipAttribute.from({
+                        key: "aKey",
+                        owner: CoreAddress.from("anAddress"),
+                        confidentiality: RelationshipAttributeConfidentiality.Public,
+                        value: ProprietaryString.from({ title: "aTitle", value: "aProprietaryStringValue😀" })
+                    })
+                )
+            ).toBe(false);
+        });
+
+        test("should allow all characters in a RelationshipAttribute's title and description", function () {
+            expect(
+                consumptionController.attributes.validateAttributeValues(
+                    RelationshipAttribute.from({
+                        key: "aKey",
+                        owner: CoreAddress.from("anAddress"),
+                        confidentiality: RelationshipAttributeConfidentiality.Public,
+                        value: ProprietaryString.from({ title: "aTitle😀", value: "aProprietaryStringValue", description: "aDescription😀" })
+                    })
+                )
+            ).toBe(true);
+        });
     });
 });

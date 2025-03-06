@@ -138,6 +138,19 @@ describe("CreateAttributeRequestItemProcessor", function () {
             });
         });
 
+        test("returns Error when passing an IdentityAttribute with an invalid character", async function () {
+            const identityAttributeOfRecipient = TestObjectFactory.createIdentityAttribute({
+                owner: TestIdentity.PEER,
+                value: GivenName.from({ value: "aGivenName😀" })
+            });
+
+            await When.iCallCanCreateOutgoingRequestItemWith({ attribute: identityAttributeOfRecipient });
+            await Then.theCanCreateResultShouldBeAnErrorWith({
+                code: "error.consumption.requests.invalidRequestItem",
+                message: "The attribute contains invalid characters."
+            });
+        });
+
         test("returns Error when passing a RelationshipAttribute with same key as an already existing RelationshipAttribute of this Relationship", async function () {
             const relationshipAttributeOfSender = TestObjectFactory.createRelationshipAttribute({
                 owner: TestIdentity.CURRENT_IDENTITY,
@@ -260,6 +273,17 @@ describe("CreateAttributeRequestItemProcessor", function () {
 
             await When.iCallCanAccept();
             await Then.theCanAcceptResultShouldBeASuccess();
+        });
+
+        test("cannot create an IdentityAttribute with an invalid character", async function () {
+            await Given.aRequestItemWithAnIdentityAttribute({
+                attributeOwner: TestIdentity.PEER,
+                value: GivenName.from({ value: "aGivenName😀" })
+            });
+
+            await expect(When.iCallCanAccept()).rejects.toThrow(
+                "error.consumption.attributes.invalidCharactersInAttribute: 'The RequestItem contains an attribute with invalid characters.'"
+            );
         });
 
         test("cannot create another RelationshipAttribute with same key", async function () {
