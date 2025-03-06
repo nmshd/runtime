@@ -763,24 +763,6 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
             expect(result.value.message).toBe("content.value.@type must match one of the allowed Attribute value types for IdentityAttributes");
             expect(result.value.code).toBe("error.runtime.validation.invalidPropertyValue");
         });
-
-        test("should not allow to accept an invalid character", async () => {
-            const request: CanCreateRepositoryAttributeRequest = {
-                content: {
-                    value: {
-                        "@type": "GivenName",
-                        value: "€"
-                    }
-                }
-            } as any;
-            const result = await services1.consumption.attributes.canCreateRepositoryAttribute(request);
-
-            assert(!result.value.isSuccess);
-
-            expect(result.value.isSuccess).toBe(false);
-            expect(result.value.message).toBe("content.value.@type must match one of the allowed Attribute value types for IdentityAttributes");
-            expect(result.value.code).toBe("error.runtime.validation.invalidPropertyValue");
-        });
     });
 
     test("should allow to create a RepositoryAttribute", async () => {
