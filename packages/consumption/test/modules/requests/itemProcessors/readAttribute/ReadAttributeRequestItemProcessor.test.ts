@@ -108,7 +108,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidRequestItem",
-                    message: "Detected invalidity of the following tags provided: 'invalidTag'."
+                    message: "Detected invalidity of the following tags: 'invalidTag'."
                 });
             });
         });
@@ -139,7 +139,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidRequestItem",
-                    message: "Detected invalidity of the following tags provided: 'invalidTag'."
+                    message: "Detected invalidity of the following tags: 'invalidTag'."
                 });
             });
         });
@@ -641,7 +641,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             expect(canAcceptWithExistingAttributeResult).errorValidationResult({
                 code: "error.consumption.requests.invalidAcceptParameters",
-                message: "Detected invalidity of the following tags provided: 'invalidTag'."
+                message: "Detected invalidity of the following tags: 'invalidTag'."
             });
 
             const canAcceptWithNewAttributeResult = await processor.canAccept(
@@ -659,7 +659,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             expect(canAcceptWithNewAttributeResult).errorValidationResult({
                 code: "error.consumption.requests.invalidAcceptParameters",
-                message: "Detected invalidity of the following tags provided: 'invalidTag'."
+                message: "Detected invalidity of the following tags: 'invalidTag'."
             });
         });
 

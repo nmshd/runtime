@@ -94,7 +94,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 result: "error",
                 expectedError: {
                     code: "error.consumption.requests.invalidRequestItem",
-                    message: "Detected invalidity of the following tags provided: 'invalidTag'."
+                    message: "Detected invalidity of the following tags: 'invalidTag'."
                 },
                 attribute: IdentityAttribute.from({
                     value: GivenName.fromAny({ value: "aGivenName" }),
@@ -1137,7 +1137,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             expect(canAcceptWithExistingAttributeResult).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: "Detected invalidity of the following tags provided: 'invalidTag'."
+                message: "Detected invalidity of the following tags: 'invalidTag'."
             });
         });
     });

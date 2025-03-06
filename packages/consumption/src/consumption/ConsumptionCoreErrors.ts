@@ -268,7 +268,7 @@ class Attributes {
     }
 
     public invalidTags(tags: string[]): ApplicationError {
-        return new ApplicationError("error.consumption.attributes.invalidTags", `Detected invalidity of the following tags provided: '${tags.join("', '")}'.`);
+        return new ApplicationError("error.consumption.attributes.invalidTags", `Detected invalidity of the following tags: '${tags.join("', '")}'.`);
     }
 }
 

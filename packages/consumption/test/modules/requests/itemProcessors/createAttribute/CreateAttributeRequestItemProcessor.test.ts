@@ -148,7 +148,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: identityAttributeOfRecipient });
             await Then.theCanCreateResultShouldBeAnErrorWith({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: "Detected invalidity of the following tags provided: 'invalidTag'."
+                message: "Detected invalidity of the following tags: 'invalidTag'."
             });
         });
 
@@ -339,7 +339,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
 
             await Then.theCanAcceptResultShouldBeAnErrorWith({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: "Detected invalidity of the following tags provided: 'invalidTag'."
+                message: "Detected invalidity of the following tags: 'invalidTag'."
             });
         });
 
@@ -353,7 +353,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
 
             await Then.theCanAcceptResultShouldBeAnErrorWith({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: "Detected invalidity of the following tags provided: 'invalidTag1', 'invalidTag2'."
+                message: "Detected invalidity of the following tags: 'invalidTag1', 'invalidTag2'."
             });
         });
     });

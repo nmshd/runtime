@@ -99,7 +99,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: "Detected invalidity of the following tags provided: 'invalidTag'."
+                message: "Detected invalidity of the following tags: 'invalidTag'."
             });
         });
 
@@ -218,7 +218,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
 
                     expect(result).errorValidationResult({
                         code: "error.consumption.requests.invalidRequestItem",
-                        message: "Detected invalidity of the following tags provided: 'invalidTag'."
+                        message: "Detected invalidity of the following tags: 'invalidTag'."
                     });
                 });
             });
@@ -253,7 +253,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
 
                     expect(result).errorValidationResult({
                         code: "error.consumption.requests.invalidRequestItem",
-                        message: "Detected invalidity of the following tags provided: 'invalidTag'."
+                        message: "Detected invalidity of the following tags: 'invalidTag'."
                     });
                 });
             });
@@ -954,7 +954,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
 
             expect(canAcceptWithNewAttributeResult).errorValidationResult({
                 code: "error.consumption.requests.invalidAcceptParameters",
-                message: "Detected invalidity of the following tags provided: 'invalidTag'."
+                message: "Detected invalidity of the following tags: 'invalidTag'."
             });
 
             const canAcceptWithExistingAttributeResult = await processor.canAccept(
@@ -968,7 +968,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
 
             expect(canAcceptWithExistingAttributeResult).errorValidationResult({
                 code: "error.consumption.requests.invalidAcceptParameters",
-                message: "Detected invalidity of the following tags provided: 'invalidTag'."
+                message: "Detected invalidity of the following tags: 'invalidTag'."
             });
         });
     });

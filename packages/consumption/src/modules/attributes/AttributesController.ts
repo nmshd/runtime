@@ -213,9 +213,7 @@ export class AttributesController extends ConsumptionBaseController {
         const parsedParams = CreateRepositoryAttributeParams.from(params);
 
         const tagValidationResult = await this.validateTags(parsedParams.content);
-        if (tagValidationResult.isError()) {
-            throw tagValidationResult.error;
-        }
+        if (tagValidationResult.isError()) throw tagValidationResult.error;
 
         let localAttribute = LocalAttribute.from({
             id: parsedParams.id ?? (await ConsumptionIds.attribute.generate()),
@@ -330,9 +328,7 @@ export class AttributesController extends ConsumptionBaseController {
     public async createSharedLocalAttribute(params: ICreateSharedLocalAttributeParams): Promise<LocalAttribute> {
         const parsedParams = CreateSharedLocalAttributeParams.from(params);
         const tagValidationResult = await this.validateTags(parsedParams.content);
-        if (tagValidationResult.isError()) {
-            throw tagValidationResult.error;
-        }
+        if (tagValidationResult.isError()) throw tagValidationResult.error;
 
         const shareInfo = LocalAttributeShareInfo.from({
             peer: params.peer,
@@ -924,9 +920,7 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         const tagValidationResult = await this.validateTags(parsedSuccessorParams.content);
-        if (tagValidationResult.isError()) {
-            throw tagValidationResult.error;
-        }
+        if (tagValidationResult.isError()) throw tagValidationResult.error;
 
         const successor = LocalAttribute.from({
             id: CoreId.from(parsedSuccessorParams.id ?? "dummy"),
@@ -1376,11 +1370,9 @@ export class AttributesController extends ConsumptionBaseController {
 
     private isValidTag(tag: string, validTags: Record<string, IAttributeTag> | undefined): boolean {
         const customTagPrefix = `x${AttributesController.TAG_SEPARATOR}`;
-
         if (tag.toLowerCase().startsWith(customTagPrefix)) return true;
 
         const tagParts = tag.split(AttributesController.TAG_SEPARATOR);
-
         for (const part of tagParts) {
             if (!validTags?.[part]) return false;
             validTags = validTags[part].children;
