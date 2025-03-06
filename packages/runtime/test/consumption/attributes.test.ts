@@ -793,7 +793,7 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "    aGivenName  "
                 },
-                tags: ["tag1", "tag2"]
+                tags: ["x+%+tag1", "x+%+tag2"]
             }
         };
         const repositoryAttribute = (await services1.consumption.attributes.createRepositoryAttribute(canCreateRepositoryAttributeRequest)).value;
