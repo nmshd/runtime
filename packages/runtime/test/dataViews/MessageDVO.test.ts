@@ -54,9 +54,9 @@ describe("Message with Mail", () => {
             recipients: [transportService2Address],
             content: {
                 "@type": "Mail",
-                body: "This is a Mail.",
+                body: "aBody",
                 cc: [],
-                subject: "Mail Subject",
+                subject: "aSubject",
                 to: [transportService2Address]
             },
             attachments: [fileId]
