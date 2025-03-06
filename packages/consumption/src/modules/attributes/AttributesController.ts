@@ -117,10 +117,6 @@ export class AttributesController extends ConsumptionBaseController {
         return { $and: [query, hideTechnicalQuery] };
     }
 
-    public async getValidLocalAttributes(query?: any, hideTechnical = false): Promise<LocalAttribute[]> {
-        return await this.getLocalAttributes(query, hideTechnical, true);
-    }
-
     public async executeIQLQuery(query: IIQLQuery): Promise<LocalAttribute[]> {
         /* Fetch subset of attributes relevant for IQL queries. We filter for
          * identity attributes which are not shared. */
