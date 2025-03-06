@@ -239,7 +239,7 @@ export class ThenSteps {
         if (value) expect(createdRepositoryAttribute!.content.value.toJSON()).toStrictEqual(value);
     }
 
-    public async anOwnSharedIdentityAttributeIsCreated(sourceAttribute?: CoreId, value?: AttributeValues.Identity.Json): Promise<void> {
+    public async anOwnSharedIdentityAttributeIsCreated(params?: { sourceAttribute?: CoreId; value?: AttributeValues.Identity.Json }): Promise<void> {
         expect((this.context.responseItemAfterAction as CreateAttributeAcceptResponseItem).attributeId).toBeDefined();
 
         const createdAttribute = await this.context.consumptionController.attributes.getLocalAttribute(
@@ -250,10 +250,10 @@ export class ThenSteps {
         expect(createdAttribute!.shareInfo).toBeDefined();
         expect(createdAttribute!.shareInfo!.peer.toString()).toStrictEqual(this.context.peerAddress.toString());
         expect(createdAttribute!.shareInfo!.sourceAttribute).toBeDefined();
-        if (value) expect(createdAttribute!.content.value.toJSON()).toStrictEqual(value);
+        if (params?.value) expect(createdAttribute!.content.value.toJSON()).toStrictEqual(params.value);
 
-        if (sourceAttribute) {
-            expect(createdAttribute!.shareInfo!.sourceAttribute!.toString()).toStrictEqual(sourceAttribute.toString());
+        if (params?.sourceAttribute) {
+            expect(createdAttribute!.shareInfo!.sourceAttribute!.toString()).toStrictEqual(params.sourceAttribute.toString());
         }
     }
 
