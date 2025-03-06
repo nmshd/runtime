@@ -3,6 +3,7 @@ import {
     CityJSON,
     CountryJSON,
     DeleteAttributeRequestItem,
+    GivenNameJSON,
     HouseNumberJSON,
     ReadAttributeRequestItem,
     ReadAttributeRequestItemJSON,
@@ -11,6 +12,7 @@ import {
     RequestItemJSONDerivations,
     ShareAttributeRequestItem,
     ShareAttributeRequestItemJSON,
+    StreetAddressJSON,
     StreetJSON,
     ThirdPartyRelationshipAttributeQuery,
     ThirdPartyRelationshipAttributeQueryOwner,
@@ -784,6 +786,29 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
         expect(result.value.code).toBe("error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute");
     });
 
+    test("should not allow to create a RepositoryAttribute if there exists a duplicate after trimming", async () => {
+        const canCreateUntrimmedRepositoryAttributeRequest: CanCreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "    aGivenName  "
+                },
+                tags: ["tag1", "tag2"]
+            }
+        };
+        const repositoryAttribute = (await services1.consumption.attributes.createRepositoryAttribute(canCreateRepositoryAttributeRequest)).value;
+
+        const result = await services1.consumption.attributes.canCreateRepositoryAttribute(canCreateUntrimmedRepositoryAttributeRequest);
+
+        assert(!result.value.isSuccess);
+
+        expect(result.value.isSuccess).toBe(false);
+        expect(result.value.message).toBe(
+            `The RepositoryAttribute cannot be created because it has the same content.value as the already existing RepositoryAttribute with id '${repositoryAttribute.id.toString()}'.`
+        );
+        expect(result.value.code).toBe("error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute");
+    });
+
     test("should not allow to create a duplicate RepositoryAttribute even if the tags/validFrom/validTo are different", async () => {
         const createAttributeRequest: CreateRepositoryAttributeRequest = {
             content: {
@@ -905,7 +930,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
             content: {
                 value: {
                     "@type": "GivenName",
-                    value: "Petra Pan"
+                    value: "aGivenName"
                 },
                 tags: ["tag1", "tag2"]
             }
@@ -915,6 +940,24 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
         expect(result).toBeSuccessful();
         const attribute = result.value;
         expect(attribute.content).toMatchObject(request.content);
+        await services1.eventBus.waitForEvent(AttributeCreatedEvent, (e) => e.data.id === attribute.id);
+    });
+
+    test("should trim a repository attribute before creation", async () => {
+        const request: CreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "    aGivenName  "
+                },
+                tags: ["tag1", "tag2"]
+            }
+        };
+
+        const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+        expect(result).toBeSuccessful();
+        const attribute = result.value;
+        expect((attribute.content.value as GivenNameJSON).value).toBe("aGivenName");
         await services1.eventBus.waitForEvent(AttributeCreatedEvent, (e) => e.data.id === attribute.id);
     });
 
@@ -962,6 +1005,51 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
         const attributesAfterCreate = (await services1.consumption.attributes.getAttributes({})).value;
         const nrAttributesAfterCreate = attributesAfterCreate.length;
         expect(nrAttributesAfterCreate).toBe(nrAttributesBeforeCreate + 6);
+
+        await expect(services1.eventBus).toHavePublished(AttributeCreatedEvent, (e) => e.data.content.value["@type"] === "StreetAddress");
+        await expect(services1.eventBus).toHavePublished(AttributeCreatedEvent, (e) => e.data.content.value["@type"] === "Street");
+        await expect(services1.eventBus).toHavePublished(AttributeCreatedEvent, (e) => e.data.content.value["@type"] === "HouseNumber");
+        await expect(services1.eventBus).toHavePublished(AttributeCreatedEvent, (e) => e.data.content.value["@type"] === "ZipCode");
+        await expect(services1.eventBus).toHavePublished(AttributeCreatedEvent, (e) => e.data.content.value["@type"] === "City");
+        await expect(services1.eventBus).toHavePublished(AttributeCreatedEvent, (e) => e.data.content.value["@type"] === "Country");
+    });
+
+    test("should trim LocalAttributes for a complex repository attribute and for each child during creation", async function () {
+        const createRepositoryAttributeParams: CreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "StreetAddress",
+                    recipient: "    aRecipient  ",
+                    street: "   aStreet ",
+                    houseNo: "  aHouseNo    ",
+                    zipCode: "  aZipCode    ",
+                    city: " aCity   ",
+                    country: "DE"
+                }
+            }
+        };
+        const createRepositoryAttributeResult = await services1.consumption.attributes.createRepositoryAttribute(createRepositoryAttributeParams);
+        expect(createRepositoryAttributeResult).toBeSuccessful();
+        const complexRepoAttribute = createRepositoryAttributeResult.value;
+
+        expect((complexRepoAttribute.content.value as StreetAddressJSON).recipient).toBe("aRecipient");
+        expect((complexRepoAttribute.content.value as StreetAddressJSON).street).toBe("aStreet");
+        expect((complexRepoAttribute.content.value as StreetAddressJSON).houseNo).toBe("aHouseNo");
+        expect((complexRepoAttribute.content.value as StreetAddressJSON).zipCode).toBe("aZipCode");
+        expect((complexRepoAttribute.content.value as StreetAddressJSON).city).toBe("aCity");
+
+        const childAttributes = (
+            await services1.consumption.attributes.getAttributes({
+                query: {
+                    parentId: complexRepoAttribute.id
+                }
+            })
+        ).value;
+
+        expect((childAttributes[0].content.value as StreetJSON).value).toBe("aStreet");
+        expect((childAttributes[1].content.value as HouseNumberJSON).value).toBe("aHouseNo");
+        expect((childAttributes[2].content.value as ZipCodeJSON).value).toBe("aZipCode");
+        expect((childAttributes[3].content.value as CityJSON).value).toBe("aCity");
 
         await expect(services1.eventBus).toHavePublished(AttributeCreatedEvent, (e) => e.data.content.value["@type"] === "StreetAddress");
         await expect(services1.eventBus).toHavePublished(AttributeCreatedEvent, (e) => e.data.content.value["@type"] === "Street");
@@ -1117,6 +1205,37 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
         expect(result).toBeSuccessful();
 
         const result2 = await services1.consumption.attributes.createRepositoryAttribute(request);
+        expect(result2).toBeAnError(
+            `The RepositoryAttribute cannot be created because it has the same content.value as the already existing RepositoryAttribute with id '${result.value.id.toString()}'.`,
+            "error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute"
+        );
+    });
+
+    test("should not create a RepositoryAttribute if there would be a duplicate after trimming", async () => {
+        const request: CreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "aGivenName"
+                },
+                tags: ["tag1", "tag2"]
+            }
+        };
+
+        const untrimmedRequest: CreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "    aGivenName  "
+                },
+                tags: ["tag1", "tag2"]
+            }
+        };
+
+        const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+        expect(result).toBeSuccessful();
+
+        const result2 = await services1.consumption.attributes.createRepositoryAttribute(untrimmedRequest);
         expect(result2).toBeAnError(
             `The RepositoryAttribute cannot be created because it has the same content.value as the already existing RepositoryAttribute with id '${result.value.id.toString()}'.`,
             "error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute"
@@ -1558,6 +1677,37 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
         const { predecessor: updatedPredecessor, successor } = result.value;
         expect(updatedPredecessor.succeededBy).toStrictEqual(successor.id);
         expect((successor as any).content.value.value).toBe("Tina Turner");
+        await services1.eventBus.waitForEvent(RepositoryAttributeSucceededEvent, (e) => {
+            return e.data.predecessor.id === updatedPredecessor.id && e.data.successor.id === successor.id;
+        });
+    });
+
+    test("should trim the successor of a repository attribute", async () => {
+        const createAttributeRequest: CreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "aGivenName"
+                },
+                tags: ["tag1", "tag2"]
+            }
+        };
+        const predecessor = (await services1.consumption.attributes.createRepositoryAttribute(createAttributeRequest)).value;
+
+        const succeedAttributeRequest: SucceedRepositoryAttributeRequest = {
+            predecessorId: predecessor.id.toString(),
+            successorContent: {
+                value: {
+                    "@type": "GivenName",
+                    value: "    anotherGivenName    "
+                },
+                tags: ["tag1", "tag2"]
+            }
+        };
+        const result = await services1.consumption.attributes.succeedRepositoryAttribute(succeedAttributeRequest);
+        expect(result.isError).toBe(false);
+        const { predecessor: updatedPredecessor, successor } = result.value;
+        expect((successor as any).content.value.value).toBe("anotherGivenName");
         await services1.eventBus.waitForEvent(RepositoryAttributeSucceededEvent, (e) => {
             return e.data.predecessor.id === updatedPredecessor.id && e.data.successor.id === successor.id;
         });
