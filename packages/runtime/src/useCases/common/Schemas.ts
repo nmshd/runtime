@@ -15522,9 +15522,6 @@ export const GetAttributesRequest: any = {
                 "query": {
                     "$ref": "#/definitions/GetAttributesRequestQuery"
                 },
-                "onlyValid": {
-                    "type": "boolean"
-                },
                 "hideTechnical": {
                     "type": "boolean"
                 }
@@ -15793,9 +15790,6 @@ export const GetOwnSharedAttributesRequest: any = {
                 "peer": {
                     "$ref": "#/definitions/AddressString"
                 },
-                "onlyValid": {
-                    "type": "boolean"
-                },
                 "query": {
                     "$ref": "#/definitions/GetOwnSharedAttributeRequestQuery"
                 },
@@ -16009,9 +16003,6 @@ export const GetPeerSharedAttributesRequest: any = {
             "properties": {
                 "peer": {
                     "$ref": "#/definitions/AddressString"
-                },
-                "onlyValid": {
-                    "type": "boolean"
                 },
                 "query": {
                     "$ref": "#/definitions/GetPeerSharedAttributesRequestQuery"

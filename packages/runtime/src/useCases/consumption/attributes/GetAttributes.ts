@@ -11,7 +11,6 @@ import { AttributeMapper } from "./AttributeMapper";
 
 export interface GetAttributesRequest {
     query?: GetAttributesRequestQuery;
-    onlyValid?: boolean;
     hideTechnical?: boolean;
 }
 
@@ -131,7 +130,7 @@ export class GetAttributesUseCase extends UseCase<GetAttributesRequest, LocalAtt
         const flattenedQuery = flattenObject(query);
         const dbQuery = GetAttributesUseCase.queryTranslator.parse(flattenedQuery);
 
-        const attributes = await this.attributeController.getLocalAttributes(dbQuery, request.hideTechnical, request.onlyValid);
+        const attributes = await this.attributeController.getLocalAttributes(dbQuery, request.hideTechnical);
 
         return Result.ok(AttributeMapper.toAttributeDTOList(attributes));
     }
