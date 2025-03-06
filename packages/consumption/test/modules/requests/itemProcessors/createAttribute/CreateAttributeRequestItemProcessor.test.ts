@@ -371,8 +371,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await Given.aRequestItemWithAnIdentityAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, value: GivenName.from("aGivenName") });
             await When.iCallAccept();
             await Then.theResponseItemShouldBeOfType("CreateAttributeAcceptResponseItem");
-            await Then.aRepositoryAttributeIsCreated();
-            await Then.anOwnSharedIdentityAttributeIsCreated();
+            await Then.anOwnSharedIdentityAttributeIsCreated(repositoryAttribute.id);
         });
 
         test("in case of an IdentityAttribute that already exists as own shared IdentityAttribute but is to be deleted by peer: creates a new own shared IdentityAttribute", async function () {
@@ -385,8 +384,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await Given.aRequestItemWithAnIdentityAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, value: GivenName.from("aGivenName") });
             await When.iCallAccept();
             await Then.theResponseItemShouldBeOfType("CreateAttributeAcceptResponseItem");
-            await Then.aRepositoryAttributeIsCreated();
-            await Then.anOwnSharedIdentityAttributeIsCreated();
+            await Then.anOwnSharedIdentityAttributeIsCreated(repositoryAttribute.id);
         });
 
         test("in case of an IdentityAttribute that already exists as own shared IdentityAttribute with different tags: returns an AttributeSuccessionAcceptResponseItem", async function () {
