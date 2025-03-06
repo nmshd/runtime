@@ -1668,7 +1668,7 @@ export class DataViewExpander {
         const relationshipSetting = await this.getRelationshipSettingDVO(relationship);
 
         const stringByType: Record<string, undefined | string> = {};
-        const relationshipAttributesResult = await this.consumption.attributes.getPeerSharedAttributes({ onlyValid: true, peer: relationship.peer });
+        const relationshipAttributesResult = await this.consumption.attributes.getPeerSharedAttributes({ peer: relationship.peer });
         const expandedAttributes = await this.expandLocalAttributeDTOs(relationshipAttributesResult.value);
         const attributesByType: Record<string, undefined | LocalAttributeDVO[]> = {};
         for (const attribute of expandedAttributes) {
