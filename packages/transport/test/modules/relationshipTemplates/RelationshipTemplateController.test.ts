@@ -248,4 +248,34 @@ describe("RelationshipTemplateController", function () {
         expect(templateForRelationship).toBeUndefined();
         expect(otherTemplate).toBeUndefined();
     });
+
+    describe("RelationshipTemplate deletion", function () {
+        let ownTemplate: RelationshipTemplate;
+        let peerTemplate: RelationshipTemplate;
+
+        beforeEach(async function () {
+            ownTemplate = await TestUtil.sendRelationshipTemplate(sender);
+
+            const reference = ownTemplate.toRelationshipTemplateReference().truncate();
+            peerTemplate = await recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(reference);
+        });
+
+        test("should delete own RelationshipTemplate locally and from the backbone", async function () {
+            await sender.relationshipTemplates.deleteRelationshipTemplate(ownTemplate);
+            const templateOnBackbone = await recipient.relationshipTemplates.fetchCaches([ownTemplate.id]);
+            expect(templateOnBackbone).toHaveLength(0);
+
+            const localTemplate = await sender.relationshipTemplates.getRelationshipTemplate(ownTemplate.id);
+            expect(localTemplate).toBeUndefined();
+        });
+
+        test("should delete a peer owned RelationshipTemplate only locally", async function () {
+            await recipient.relationshipTemplates.deleteRelationshipTemplate(peerTemplate);
+            const templateOnBackbone = await sender.relationshipTemplates.fetchCaches([ownTemplate.id]);
+            expect(templateOnBackbone).toHaveLength(1);
+
+            const localTemplate = await recipient.relationshipTemplates.getRelationshipTemplate(ownTemplate.id);
+            expect(localTemplate).toBeUndefined();
+        });
+    });
 });

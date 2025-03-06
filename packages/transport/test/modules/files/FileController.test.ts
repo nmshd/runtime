@@ -123,4 +123,35 @@ describe("FileController", function () {
         expect(file.metadataModifiedAt!.isSameOrBefore(creationTime.add({ seconds: 1 }))).toBe(true);
         expect(file.metadataModifiedAt!.isSameOrAfter(creationTime.subtract({ seconds: 2 }))).toBe(true);
     });
+
+    describe("File deletion", function () {
+        let sentFile: File;
+        let receivedFile: File;
+
+        beforeEach(async function () {
+            const content = CoreBuffer.fromUtf8("Test");
+            sentFile = await TestUtil.uploadFile(sender, content);
+
+            const reference = sentFile.toFileReference().truncate();
+            receivedFile = await recipient.files.getOrLoadFileByTruncated(reference);
+        });
+
+        test("should delete own file locally and from the backbone", async function () {
+            await sender.files.deleteFile(sentFile);
+            const fileOnBackbone = await recipient.files.fetchCaches([sentFile.id]);
+            expect(fileOnBackbone).toHaveLength(0);
+
+            const localFile = await sender.files.getFile(sentFile.id);
+            expect(localFile).toBeUndefined();
+        });
+
+        test("should delete a peer owned file only locally", async function () {
+            await recipient.files.deleteFile(receivedFile);
+            const fileOnBackbone = await sender.files.fetchCaches([sentFile.id]);
+            expect(fileOnBackbone).toHaveLength(1);
+
+            const localFile = await recipient.files.getFile(sentFile.id);
+            expect(localFile).toBeUndefined();
+        });
+    });
 });
