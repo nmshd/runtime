@@ -10,7 +10,7 @@ import { GetAttributesRequestQuery, GetAttributesUseCase } from "./GetAttributes
 
 export interface GetOwnSharedAttributesRequest {
     peer: AddressString;
-    onlyValid?: boolean;
+    sortedByCreationDate?: boolean;
     query?: GetOwnSharedAttributeRequestQuery;
     hideTechnical?: boolean;
     /**
@@ -65,7 +65,7 @@ export class GetOwnSharedAttributesUseCase extends UseCase<GetOwnSharedAttribute
             dbQuery["succeededBy"] = { $exists: false };
         }
 
-        const attributes = await this.attributeController.getLocalAttributes(dbQuery, request.hideTechnical, request.onlyValid);
+        const attributes = await this.attributeController.getLocalAttributes(dbQuery, request.hideTechnical, request.sortedByCreationDate);
 
         return Result.ok(AttributeMapper.toAttributeDTOList(attributes));
     }

@@ -15522,7 +15522,7 @@ export const GetAttributesRequest: any = {
                 "query": {
                     "$ref": "#/definitions/GetAttributesRequestQuery"
                 },
-                "onlyValid": {
+                "sortedByCreationDate": {
                     "type": "boolean"
                 },
                 "hideTechnical": {
@@ -15793,7 +15793,7 @@ export const GetOwnSharedAttributesRequest: any = {
                 "peer": {
                     "$ref": "#/definitions/AddressString"
                 },
-                "onlyValid": {
+                "sortedByCreationDate": {
                     "type": "boolean"
                 },
                 "query": {
@@ -16010,7 +16010,7 @@ export const GetPeerSharedAttributesRequest: any = {
                 "peer": {
                     "$ref": "#/definitions/AddressString"
                 },
-                "onlyValid": {
+                "sortedByCreationDate": {
                     "type": "boolean"
                 },
                 "query": {
