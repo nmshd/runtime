@@ -88,8 +88,8 @@ describe("MessageContent", function () {
     describe("Mail", function () {
         test("should send the message", async function () {
             const value = Mail.from({
-                body: "Test",
-                subject: "Test Subject",
+                body: "aBody",
+                subject: "aSubject",
                 to: [recipient1.identity.address]
             });
             const message = await TestUtil.sendMessage(sender, recipient1, value);

@@ -855,9 +855,9 @@ describe("RelationshipTermination", () => {
             recipients: [services2.address],
             content: {
                 "@type": "Mail",
-                body: "b",
+                body: "aBody",
                 cc: [],
-                subject: "a",
+                subject: "aSubject",
                 to: [services2.address]
             }
         });

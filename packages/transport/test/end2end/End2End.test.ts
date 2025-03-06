@@ -986,7 +986,7 @@ describe("MessageTest", function () {
     test("should send a message between the accounts", async function () {
         const message = await from.messages.sendMessage({
             recipients: [to.identity.address],
-            content: { body: "Test Body", subject: "Test Subject" }
+            content: { body: "aBody", subject: "aSubject" }
         });
 
         expect(message).toBeDefined();
