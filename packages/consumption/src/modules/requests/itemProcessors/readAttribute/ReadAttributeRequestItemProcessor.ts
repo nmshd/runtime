@@ -383,7 +383,17 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
             const repositoryAttribute = await getSourceRepositoryAttribute(parsedParams.newAttribute, this.consumptionController.attributes);
 
-            const latestSharedVersions = await this.consumptionController.attributes.getSharedVersionsOfAttribute(repositoryAttribute.id, [requestInfo.peer]);
+            const query = {
+                "deletionInfo.deletionStatus": {
+                    $nin: [
+                        LocalAttributeDeletionStatus.DeletedByPeer,
+                        LocalAttributeDeletionStatus.DeletedByOwner,
+                        LocalAttributeDeletionStatus.ToBeDeletedByPeer,
+                        LocalAttributeDeletionStatus.ToBeDeleted
+                    ]
+                }
+            };
+            const latestSharedVersions = await this.consumptionController.attributes.getSharedVersionsOfAttribute(repositoryAttribute.id, [requestInfo.peer], true, query);
             const latestSharedVersion = latestSharedVersions.length > 0 ? latestSharedVersions[0] : undefined;
 
             if (!latestSharedVersion) {
