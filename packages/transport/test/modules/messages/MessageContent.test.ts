@@ -103,8 +103,8 @@ describe("MessageContent", function () {
             const message = messages[1];
             expect(message.cache!.content).toBeInstanceOf(Mail);
             const content = message.cache!.content as Mail;
-            expect(content.body).toBe("Test");
-            expect(content.subject).toBe("Test Subject");
+            expect(content.body).toBe("aBody");
+            expect(content.subject).toBe("aSubject");
             expect(content.to).toBeInstanceOf(Array);
             expect(content.to[0]).toBeInstanceOf(CoreAddress);
             expect(content.to[0].toString()).toBe(recipient1.identity.address.toString());
@@ -117,8 +117,8 @@ describe("MessageContent", function () {
             expect(messages).toHaveLength(2);
             const message = messages[1];
             const content = message.cache!.content as Mail;
-            expect(content.body).toBe("Test");
-            expect(content.subject).toBe("Test Subject");
+            expect(content.body).toBe("aBody");
+            expect(content.subject).toBe("aSubject");
             expect(content.to).toBeInstanceOf(Array);
             expect(content.to[0]).toBeInstanceOf(CoreAddress);
             expect(content.to[0].toString()).toBe(recipient1.identity.address.toString());
