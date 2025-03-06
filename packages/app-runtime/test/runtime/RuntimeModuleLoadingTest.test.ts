@@ -29,7 +29,7 @@ describe("RuntimeModuleLoading", function () {
                 moduleStarted = true;
             }
 
-            public stop(): void {
+            public override stop(): void {
                 moduleStopped = true;
             }
         }
