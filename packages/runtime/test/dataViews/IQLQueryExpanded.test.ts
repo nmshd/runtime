@@ -24,7 +24,7 @@ describe("IQLQueryExpanded", () => {
                     content: {
                         value: {
                             "@type": "GivenName",
-                            value: "Hugo"
+                            value: "aGivenName"
                         },
                         tags: ["x+%+default"]
                     }
@@ -100,7 +100,7 @@ describe("IQLQueryExpanded", () => {
         expect(dvo.content).toStrictEqual(attribute.content);
         const givenName = dvo.value as AbstractStringJSON;
         expect(givenName["@type"]).toBe("GivenName");
-        expect(givenName.value).toBe("Hugo");
+        expect(givenName.value).toBe("aGivenName");
         expect(dvo.tags![0]).toBe("x+%+default");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
@@ -190,7 +190,7 @@ describe("IQLQueryExpanded", () => {
         expect(dvo.content).toStrictEqual(attribute.content);
         const givenName = dvo.value as AbstractStringJSON;
         expect(givenName["@type"]).toBe("GivenName");
-        expect(givenName.value).toBe("Hugo");
+        expect(givenName.value).toBe("aGivenName");
         expect(dvo.tags![0]).toBe("x+%+default");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);

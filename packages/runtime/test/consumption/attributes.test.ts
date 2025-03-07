@@ -793,7 +793,7 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "    aGivenName  "
                 },
-                tags: ["tag1", "tag2"]
+                tags: ["x+%+tag1", "x+%+tag2"]
             }
         };
         const repositoryAttribute = (await services1.consumption.attributes.createRepositoryAttribute(canCreateRepositoryAttributeRequest)).value;
@@ -1392,7 +1392,7 @@ describe(ShareRepositoryAttributeUseCase.name, () => {
                 content: {
                     value: {
                         "@type": "GivenName",
-                        value: "Petra Pan"
+                        value: "aGivenName"
                     },
                     tags: ["x+%+tag1", "x+%+tag2"]
                 }
@@ -1632,7 +1632,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
             content: {
                 value: {
                     "@type": "GivenName",
-                    value: "Petra Pan"
+                    value: "aGivenName"
                 },
                 tags: ["x+%+tag1", "x+%+tag2"]
             }
@@ -1644,7 +1644,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
             successorContent: {
                 value: {
                     "@type": "GivenName",
-                    value: "Tina Turner"
+                    value: "anotherGivenName"
                 },
                 tags: ["x+%+tag3", "x+%+tag4"]
             }
@@ -1653,7 +1653,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
         expect(result.isError).toBe(false);
         const { predecessor: updatedPredecessor, successor } = result.value;
         expect(updatedPredecessor.succeededBy).toStrictEqual(successor.id);
-        expect((successor as any).content.value.value).toBe("Tina Turner");
+        expect((successor as any).content.value.value).toBe("anotherGivenName");
         await services1.eventBus.waitForEvent(RepositoryAttributeSucceededEvent, (e) => {
             return e.data.predecessor.id === updatedPredecessor.id && e.data.successor.id === successor.id;
         });
@@ -1696,7 +1696,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
             successorContent: {
                 value: {
                     "@type": "GivenName",
-                    value: "Tina Turner"
+                    value: "aGivenName"
                 },
                 tags: ["x+%+tag1", "x+%+tag2"]
             }
@@ -1711,7 +1711,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
             successorContent: {
                 value: {
                     "@type": "GivenName",
-                    value: "Tina Turner"
+                    value: "aGivenName"
                 },
                 tags: ["x+%+tag1", "x+%+tag2"]
             }
@@ -1725,7 +1725,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
             content: {
                 value: {
                     "@type": "GivenName",
-                    value: "Petra Pan"
+                    value: "aGivenName"
                 },
                 tags: ["x+%+tag1", "x+%+tag2"]
             }
@@ -1758,7 +1758,7 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
             content: {
                 value: {
                     "@type": "GivenName",
-                    value: "Petra Pan"
+                    value: "aGivenName"
                 },
                 tags: ["x+%+tag1", "x+%+tag2"]
             }
@@ -1769,7 +1769,7 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
             successorContent: {
                 value: {
                     "@type": "GivenName",
-                    value: "Tina Turner"
+                    value: "anotherGivenName"
                 },
                 tags: ["x+%+tag3", "x+%+tag4"]
             }
@@ -1781,7 +1781,7 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
             successorContent: {
                 value: {
                     "@type": "GivenName",
-                    value: "Martina Mustermann"
+                    value: "aFurtherGivenName"
                 }
             }
         };
