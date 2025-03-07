@@ -1505,7 +1505,7 @@ describe("AttributesController", function () {
                     content: IdentityAttribute.from({
                         value: {
                             "@type": "BirthName",
-                            value: "Müller"
+                            value: "aBirthName"
                         },
                         owner: consumptionController.accountController.identity.address
                     })

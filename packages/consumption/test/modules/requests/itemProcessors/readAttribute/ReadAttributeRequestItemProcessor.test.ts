@@ -923,7 +923,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             test("can be called with property tags used in the IQLQuery", async function () {
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
-                    query: IQLQuery.from({ queryString: "GivenName", attributeCreationHints: { valueType: "GivenName", tags: ["tagA", "tagB", "tagC"] } })
+                    query: IQLQuery.from({ queryString: "GivenName", attributeCreationHints: { valueType: "GivenName", tags: ["x+%+tagA", "x+%+tagB", "x+%+tagC"] } })
                 });
                 const requestId = await ConsumptionIds.request.generate();
                 const request = LocalRequest.from({
