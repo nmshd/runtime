@@ -120,7 +120,7 @@ describe("Message with Mail", () => {
         expect(dto.content["@type"]).toBe("Mail");
         const mail = dto.content as MailJSON;
         expect(dvo).toBeDefined();
-        expect(dvo.name).toBe("Mail Subject");
+        expect(dvo.name).toBe("aSubject");
         expect(dvo.description).toBeUndefined();
         expect(dvo.type).toBe("MailDVO");
         expect(dvo.date).toStrictEqual(dto.createdAt);
@@ -163,7 +163,7 @@ describe("Message with Mail", () => {
         const mail = dto.content as MailJSON;
         expect(dvo).toBeDefined();
         expect(dvo.id).toStrictEqual(mailId);
-        expect(dvo.name).toBe("Mail Subject");
+        expect(dvo.name).toBe("aSubject");
         expect(dvo.description).toBeUndefined();
         expect(dvo.type).toBe("MailDVO");
         expect(dvo.date).toStrictEqual(dto.createdAt);
