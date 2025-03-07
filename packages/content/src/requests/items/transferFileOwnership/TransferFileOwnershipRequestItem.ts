@@ -1,31 +1,24 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
+import { FileReference, IFileReference } from "@nmshd/transport";
 import { RequestItemJSON } from "../..";
-import {
-    IdentityFileReference,
-    IdentityFileReferenceJSON,
-    IIdentityFileReference,
-    IProprietaryFileReference,
-    ProprietaryFileReference,
-    ProprietaryFileReferenceJSON
-} from "../../../attributes";
 import { IRequestItem, RequestItem } from "../../RequestItem";
 
 export interface TransferFileOwnershipRequestItemJSON extends RequestItemJSON {
     "@type": "TransferFileOwnershipRequestItem";
-    fileReference: IdentityFileReferenceJSON | ProprietaryFileReferenceJSON;
+    fileReference: string;
     denyAttributeCopy?: boolean;
 }
 
 export interface ITransferFileOwnershipRequestItem extends IRequestItem {
-    fileReference: IIdentityFileReference | IProprietaryFileReference;
+    fileReference: IFileReference;
     denyAttributeCopy?: boolean;
 }
 
 @type("TransferFileOwnershipRequestItem")
 export class TransferFileOwnershipRequestItem extends RequestItem implements ITransferFileOwnershipRequestItem {
-    @serialize({ unionTypes: [IdentityFileReference, ProprietaryFileReference] })
+    @serialize()
     @validate()
-    public fileReference: IdentityFileReference | ProprietaryFileReference;
+    public fileReference: FileReference;
 
     @serialize()
     @validate({ nullable: true })
