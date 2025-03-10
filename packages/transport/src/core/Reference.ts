@@ -35,6 +35,10 @@ export class Reference extends Serializable implements IReference {
     @serialize()
     public passwordProtection?: SharedPasswordProtection;
 
+    public override serialize(): string {
+        return this.truncate();
+    }
+
     public truncate(): string {
         const idPart = this.backboneBaseUrl ? `${this.id.toString()}@${this.backboneBaseUrl}` : this.id.toString();
 
