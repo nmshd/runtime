@@ -59,6 +59,8 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
             );
         }
 
+        // TODO: check explicitly if expired
+
         // TODO: Do we want to throw errors in these cases? If so should the code be invalidAcceptParameters?
 
         if (file.isOwn) {
@@ -83,6 +85,8 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
     ): Promise<TransferFileOwnershipAcceptResponseItem | AcceptResponseItem> {
         const peerFile = await this.accountController.files.getOrLoadFileByTruncated(requestItem.fileReference.truncate());
         const fileContent = await this.accountController.files.downloadFileContent(peerFile);
+
+        // TODO: set metadata such that expanding the ResponseItem can link to the file
 
         const ownFile = await this.accountController.files.sendFile({
             buffer: fileContent,

@@ -1,6 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { sleep } from "@js-soft/ts-utils";
-import { Request, TransferFileOwnershipRequestItem } from "@nmshd/content";
+import { AcceptResponseItem, IdentityAttribute, IdentityFileReference, Request, TransferFileOwnershipAcceptResponseItem, TransferFileOwnershipRequestItem } from "@nmshd/content";
 import { CoreAddress, CoreDate } from "@nmshd/core-types";
 import { AccountController, FileReference, Transport } from "@nmshd/transport";
 import { ConsumptionController, ConsumptionIds, LocalRequest, LocalRequestStatus, TransferFileOwnershipRequestItemProcessor } from "../../../../../src";
@@ -42,7 +42,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
 
         const thirdPartyAccountController = accounts[2].accountController;
 
-        const senderFile = await TestUtil.uploadFile(senderAccountController);
+        const senderFile = await TestUtil.uploadFile(senderAccountController, { tags: ["x+%+tag"] });
         senderTrucatedFileReference = senderFile.truncate();
 
         const senderExpiredFile = await TestUtil.uploadFile(senderAccountController, { expiredAt: CoreDate.utc().add({ seconds: 1 }) });
@@ -56,6 +56,11 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
         thirdPartyTrucatedFileReference = thirdPartyFile.truncate();
     });
 
+    beforeEach(async () => {
+        await TestUtil.cleanupAttributes(senderConsumptionController);
+        await TestUtil.cleanupAttributes(recipientConsumptionController);
+    });
+
     afterAll(async () => await connection.close());
 
     describe("canCreateOutgoingRequestItem", function () {
@@ -64,7 +69,6 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
                 mustBeAccepted: false,
                 fileReference: senderTrucatedFileReference
             });
-            const json = requestItem.toJSON(); // TODO: delete after testing
             const request = Request.from({ items: [requestItem] });
 
             const result = await senderProcessor.canCreateOutgoingRequestItem(requestItem, request, recipient);
@@ -76,7 +80,6 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
                 mustBeAccepted: false,
                 fileReference: FileReference.from(senderTrucatedFileReference)
             });
-            const json = requestItem.toJSON(); // TODO: delete after testing
             const request = Request.from({ items: [requestItem] });
 
             const result = await senderProcessor.canCreateOutgoingRequestItem(requestItem, request, recipient);
@@ -142,9 +145,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
                 isOwn: false,
                 peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    items: [requestItem]
-                }),
+                content: Request.from({ items: [requestItem] }),
                 statusLog: []
             });
 
@@ -165,9 +166,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
                 isOwn: false,
                 peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    items: [requestItem]
-                }),
+                content: Request.from({ items: [requestItem] }),
                 statusLog: []
             });
 
@@ -191,9 +190,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
                 isOwn: false,
                 peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    items: [requestItem]
-                }),
+                content: Request.from({ items: [requestItem] }),
                 statusLog: []
             });
 
@@ -217,9 +214,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
                 isOwn: false,
                 peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    items: [requestItem]
-                }),
+                content: Request.from({ items: [requestItem] }),
                 statusLog: []
             });
 
@@ -231,37 +226,70 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
         });
     });
 
-    // describe("accept", function () {
-    //     test("returns success when accepting a shared IdentityAttribute", async function () {
-    //         const requestItem = TransferFileOwnershipRequestItem.from({
-    //             mustBeAccepted: false,
-    //             fileReference: senderTrucatedFileReference,
-    //             denyAttributeCopy: true
-    //         });
-    //         const incomingRequest = LocalRequest.from({
-    //             id: await ConsumptionIds.request.generate(),
-    //             createdAt: CoreDate.utc(),
-    //             isOwn: false,
-    //             peer: sender,
-    //             status: LocalRequestStatus.DecisionRequired,
-    //             content: Request.from({
-    //                 items: [requestItem]
-    //             }),
-    //             statusLog: []
-    //         });
+    describe("accept", function () {
+        test("creates a RepositoryAttribute with tags and responds with an AcceptResponseItem if the sender denies an Attribute copy", async function () {
+            const requestItem = TransferFileOwnershipRequestItem.from({
+                mustBeAccepted: false,
+                fileReference: senderTrucatedFileReference,
+                denyAttributeCopy: true
+            });
 
-    //         const responseItem = await processor.accept(requestItem, { accept: true }, incomingRequest);
+            const incomingRequest = LocalRequest.from({
+                id: await ConsumptionIds.request.generate(),
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({ items: [requestItem] }),
+                statusLog: []
+            });
 
-    //         expect(responseItem).toBeInstanceOf(AcceptResponseItem);
+            const responseItem = await recipientProcessor.accept(requestItem, { accept: true }, incomingRequest);
+            expect(responseItem).toBeInstanceOf(AcceptResponseItem);
 
-    //         const createdAttribute = await consumptionController.attributes.getLocalAttribute(result.attributeId);
-    //         expect(createdAttribute).toBeDefined();
-    //         expect(createdAttribute!.shareInfo).toBeDefined();
-    //         expect(createdAttribute!.shareInfo!.peer.toString()).toStrictEqual(sender.toString());
-    //         expect(createdAttribute!.shareInfo!.sourceAttribute).toBeUndefined();
-    //         expect(createdAttribute!.content.owner.toString()).toStrictEqual(sender.toString());
-    //     });
-    // });
+            const repositoryAttributes = await recipientConsumptionController.attributes.getLocalAttributes({});
+            expect(repositoryAttributes).toHaveLength(1);
+
+            const repositoryAttribute = repositoryAttributes[0];
+            expect(repositoryAttribute.shareInfo).toBeUndefined();
+            expect(repositoryAttribute.content.value).toBeInstanceOf(IdentityFileReference);
+            expect((repositoryAttribute.content as IdentityAttribute).tags).toStrictEqual(["x+%+tag"]);
+
+            const fileReference = FileReference.from((repositoryAttribute.content.value as IdentityFileReference).value);
+            const file = await recipientAccountController.files.getFile(fileReference.id);
+            expect(file!.isOwn).toBe(true);
+            expect(file!.cache!.tags).toStrictEqual(["x+%+tag"]);
+        });
+
+        test("creates a RepositoryAttribute and an own shared IdentityAttribute and responds with a TransferFileOwnershipAcceptResponseItem if the sender requests an Attribute copy", async function () {
+            const requestItem = TransferFileOwnershipRequestItem.from({
+                mustBeAccepted: false,
+                fileReference: senderTrucatedFileReference
+            });
+
+            const incomingRequest = LocalRequest.from({
+                id: await ConsumptionIds.request.generate(),
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({ items: [requestItem] }),
+                statusLog: []
+            });
+
+            const responseItem = await recipientProcessor.accept(requestItem, { accept: true }, incomingRequest);
+            expect(responseItem).toBeInstanceOf(TransferFileOwnershipAcceptResponseItem);
+
+            const ownSharedIdentityAttribute = await recipientConsumptionController.attributes.getLocalAttribute(
+                (responseItem as TransferFileOwnershipAcceptResponseItem).attributeId
+            );
+            expect(ownSharedIdentityAttribute!.shareInfo!.peer).toStrictEqual(sender);
+            expect(ownSharedIdentityAttribute!.shareInfo!.requestReference).toStrictEqual(incomingRequest.id);
+
+            const repositoryAttribute = await recipientConsumptionController.attributes.getLocalAttribute(ownSharedIdentityAttribute!.shareInfo!.sourceAttribute!);
+            expect(repositoryAttribute).toBeDefined();
+        });
+    });
 
     // describe("applyIncomingResponseItem", function () {
     //     test("in case of an IdentityAttribute, creates a LocalAttribute with the Attribute from the RequestItem and the attributeId from the ResponseItem for the peer of the Request", async function () {
