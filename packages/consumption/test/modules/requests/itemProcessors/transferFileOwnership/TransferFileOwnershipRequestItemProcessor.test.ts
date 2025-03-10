@@ -1,6 +1,14 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { sleep } from "@js-soft/ts-utils";
-import { AcceptResponseItem, IdentityAttribute, IdentityFileReference, Request, TransferFileOwnershipAcceptResponseItem, TransferFileOwnershipRequestItem } from "@nmshd/content";
+import {
+    AcceptResponseItem,
+    IdentityAttribute,
+    IdentityFileReference,
+    Request,
+    ResponseItemResult,
+    TransferFileOwnershipAcceptResponseItem,
+    TransferFileOwnershipRequestItem
+} from "@nmshd/content";
 import { CoreAddress, CoreDate } from "@nmshd/core-types";
 import { AccountController, FileReference, Transport } from "@nmshd/transport";
 import { ConsumptionController, ConsumptionIds, LocalRequest, LocalRequestStatus, TransferFileOwnershipRequestItemProcessor } from "../../../../../src";
@@ -49,7 +57,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
         senderExpiredTrucatedFileReference = senderExpiredFile.truncate();
         await sleep(2000);
 
-        const recipientFile = await TestUtil.uploadFile(recipientAccountController);
+        const recipientFile = await TestUtil.uploadFile(recipientAccountController, { tags: ["x+%+tag"] });
         recipientTrucatedFileReference = recipientFile.truncate();
 
         const thirdPartyFile = await TestUtil.uploadFile(thirdPartyAccountController);
@@ -285,66 +293,48 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
             );
             expect(ownSharedIdentityAttribute!.shareInfo!.peer).toStrictEqual(sender);
             expect(ownSharedIdentityAttribute!.shareInfo!.requestReference).toStrictEqual(incomingRequest.id);
+            expect(ownSharedIdentityAttribute!.content.value).toBeInstanceOf(IdentityFileReference);
+            expect((ownSharedIdentityAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x+%+tag"]);
 
             const repositoryAttribute = await recipientConsumptionController.attributes.getLocalAttribute(ownSharedIdentityAttribute!.shareInfo!.sourceAttribute!);
             expect(repositoryAttribute).toBeDefined();
         });
     });
 
-    // describe("applyIncomingResponseItem", function () {
-    //     test("in case of an IdentityAttribute, creates a LocalAttribute with the Attribute from the RequestItem and the attributeId from the ResponseItem for the peer of the Request", async function () {
-    //         const attributeOwner = accountController.identity.address.toString();
+    describe("applyIncomingResponseItem", function () {
+        test("creates peer shared IdentityAttribute in case of a TransferFileOwnershipAcceptResponseItem", async function () {
+            const requestItem = TransferFileOwnershipRequestItem.from({
+                mustBeAccepted: false,
+                fileReference: senderTrucatedFileReference
+            });
 
-    //         const sourceAttributeContent = TestObjectFactory.createIdentityAttribute({ owner: CoreAddress.from(attributeOwner) });
+            const requestInfo = {
+                id: await ConsumptionIds.request.generate(),
+                peer: recipient
+            };
 
-    //         const sourceAttribute = await consumptionController.attributes.createAttributeUnsafe({
-    //             content: sourceAttributeContent
-    //         });
+            const responseItem = TransferFileOwnershipAcceptResponseItem.from({
+                result: ResponseItemResult.Accepted,
+                attributeId: await ConsumptionIds.attribute.generate(),
+                attribute: IdentityAttribute.from({
+                    value: IdentityFileReference.from({
+                        value: recipientTrucatedFileReference
+                    }),
+                    owner: recipient,
+                    tags: ["x+%+tag"]
+                })
+            });
 
-    //         const { localRequest, requestItem } = await createLocalRequest({ sourceAttribute });
+            await senderProcessor.applyIncomingResponseItem(responseItem, requestItem, requestInfo);
 
-    //         const responseItem = ShareAttributeAcceptResponseItem.from({
-    //             result: ResponseItemResult.Accepted,
-    //             attributeId: await ConsumptionIds.attribute.generate()
-    //         });
-    //         await processor.applyIncomingResponseItem(responseItem, requestItem, localRequest);
-    //         const createdAttribute = await consumptionController.attributes.getLocalAttribute(responseItem.attributeId);
-    //         expect(createdAttribute).toBeDefined();
-    //         expect(createdAttribute!.id.toString()).toBe(responseItem.attributeId.toString());
-    //         expect(createdAttribute!.shareInfo).toBeDefined();
-    //         expect(createdAttribute!.shareInfo!.peer.toString()).toStrictEqual(localRequest.peer.toString());
-    //         expect(createdAttribute!.shareInfo!.sourceAttribute?.toString()).toStrictEqual(sourceAttribute.id.toString());
-    //         expect(createdAttribute!.content.owner.toString()).toStrictEqual(accountController.identity.address.toString());
-    //     });
+            const peerSharedIdentityAttribute = await senderConsumptionController.attributes.getLocalAttribute(responseItem.attributeId);
+            expect(peerSharedIdentityAttribute!.shareInfo!.peer).toStrictEqual(recipient);
+            expect(peerSharedIdentityAttribute!.shareInfo!.sourceAttribute).toBeUndefined();
 
-    //     test("in case of a RelationshipAttribute, creates a LocalAttribute with the Attribute from the RequestItem and the attributeId from the ResponseItem for the peer of the Request", async function () {
-    //         const attributeOwner = accountController.identity.address.toString();
-
-    //         const sourceAttributeContent = TestObjectFactory.createRelationshipAttribute({ owner: CoreAddress.from(attributeOwner) });
-
-    //         const sourceAttribute = await consumptionController.attributes.createAttributeUnsafe({
-    //             content: sourceAttributeContent,
-    //             shareInfo: LocalAttributeShareInfo.from({
-    //                 requestReference: CoreId.from("REQ1"),
-    //                 peer: CoreAddress.from("thirdparty")
-    //             })
-    //         });
-
-    //         const { localRequest, requestItem } = await createLocalRequest({ sourceAttribute });
-
-    //         const responseItem = ShareAttributeAcceptResponseItem.from({
-    //             result: ResponseItemResult.Accepted,
-    //             attributeId: await ConsumptionIds.attribute.generate()
-    //         });
-    //         await processor.applyIncomingResponseItem(responseItem, requestItem, localRequest);
-    //         const createdAttribute = await consumptionController.attributes.getLocalAttribute(responseItem.attributeId);
-    //         expect(createdAttribute).toBeDefined();
-    //         expect(createdAttribute!.id.toString()).toBe(responseItem.attributeId.toString());
-    //         expect(createdAttribute!.shareInfo).toBeDefined();
-    //         expect(createdAttribute!.shareInfo!.peer.toString()).toStrictEqual(localRequest.peer.toString());
-    //         expect(createdAttribute!.shareInfo!.sourceAttribute?.toString()).toStrictEqual(sourceAttribute.id.toString());
-    //         expect(createdAttribute!.content.owner.toString()).toStrictEqual(accountController.identity.address.toString());
-    //         expect(createdAttribute!.shareInfo!.thirdPartyAddress?.toString()).toBe("thirdparty");
-    //     });
-    // });
+            const truncatedFileReference = (peerSharedIdentityAttribute!.content.value as IdentityFileReference).value;
+            const file = await senderAccountController.files.getOrLoadFileByTruncated(truncatedFileReference);
+            expect(file.isOwn).toBe(false);
+            expect(file.cache!.tags).toStrictEqual(["x+%+tag"]);
+        });
+    });
 });
