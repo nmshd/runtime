@@ -9,6 +9,7 @@ import {
     TransferFileOwnershipRequestItem
 } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { File } from "@nmshd/transport";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
@@ -21,14 +22,22 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
 
         if (typeof foundFile === "undefined") {
             return ValidationResult.error(
-                ConsumptionCoreErrors.requests.invalidRequestItem(`The File with the given fileReference '${requestItem.fileReference.id.toString()}' could not be found.`)
+                ConsumptionCoreErrors.requests.invalidRequestItem(`The File with the given ID '${requestItem.fileReference.id.toString()}' could not be found.`)
             );
         }
 
         if (!foundFile.isOwn) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidRequestItem(
-                    `The File with the given fileReference '${requestItem.fileReference.id.toString()}' is not owned by you. You can request the transfer of ownership of Files that you own.`
+                    `You cannot request the transfer of ownership of the File with ID '${requestItem.fileReference.id.toString()}' since it is not owned by you.`
+                )
+            );
+        }
+
+        if (foundFile.cache!.expiresAt.isExpired()) {
+            return ValidationResult.error(
+                ConsumptionCoreErrors.requests.invalidRequestItem(
+                    `You cannot request the transfer of ownership of the File with ID '${requestItem.fileReference.id.toString()}' since it is already expired.`
                 )
             );
         }
@@ -41,9 +50,16 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
         _params: AcceptRequestItemParametersJSON,
         requestInfo: LocalRequestInfo
     ): Promise<ValidationResult> {
-        const file = await this.accountController.files.getOrLoadFileByTruncated(requestItem.fileReference.truncate());
+        let file: File;
+        try {
+            file = await this.accountController.files.getOrLoadFileByTruncated(requestItem.fileReference.truncate());
+        } catch (_) {
+            return ValidationResult.error(
+                ConsumptionCoreErrors.requests.invalidRequestItem(`The File with the given ID '${requestItem.fileReference.id.toString()}' could not be found.`)
+            );
+        }
 
-        // TODO: Do we want to throw errors in these cases?
+        // TODO: Do we want to throw errors in these cases? If so should the code be invalidAcceptParameters?
 
         if (file.isOwn) {
             return ValidationResult.error(
@@ -51,13 +67,11 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
             );
         }
 
-        if (file.cache!.owner !== requestInfo.peer) {
+        if (file.cache!.owner.toString() !== requestInfo.peer.toString()) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidRequestItem(`The File with the given fileReference '${requestItem.fileReference.id.toString()}' is not owned by the peer.`)
             );
         }
-
-        // TODO: what if file is expired? -> won't be found in the first place
 
         return ValidationResult.success();
     }

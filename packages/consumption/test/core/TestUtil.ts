@@ -463,15 +463,15 @@ export class TestUtil {
         });
     }
 
-    public static async uploadFile(from: AccountController, fileContent?: CoreBuffer): Promise<File> {
+    public static async uploadFile(from: AccountController, parameters?: { fileContent?: CoreBuffer; expiredAt?: CoreDate }): Promise<File> {
         const params: ISendFileParameters = {
-            buffer: fileContent ?? CoreBuffer.from(await fs.promises.readFile(`${__dirname}/../__assets__/test.txt`)),
+            buffer: parameters?.fileContent ?? CoreBuffer.from(await fs.promises.readFile(`${__dirname}/../__assets__/test.txt`)),
             title: "aFileName",
             description: "This is a valid file description",
             filename: "test.txt",
             filemodified: CoreDate.from("2019-09-30T00:00:00.000Z"),
             mimetype: "test/plain",
-            expiresAt: CoreDate.utc().add({ minutes: 5 })
+            expiresAt: parameters?.expiredAt ?? CoreDate.utc().add({ minutes: 5 })
         };
 
         const file = await from.files.sendFile(params);
