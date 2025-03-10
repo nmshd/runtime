@@ -16,13 +16,19 @@ export interface ITransferFileOwnershipRequestItem extends IRequestItem {
 
 @type("TransferFileOwnershipRequestItem")
 export class TransferFileOwnershipRequestItem extends RequestItem implements ITransferFileOwnershipRequestItem {
-    @serialize()
+    @serialize({ enforceString: true, customSerializer: (value: FileReference) => value.truncate() })
     @validate()
     public fileReference: FileReference;
 
     @serialize()
     @validate({ nullable: true })
     public denyAttributeCopy?: boolean;
+
+    protected static override preFrom(value: any): any {
+        if (typeof value.fileReference === "string") value.fileReference = FileReference.from(value.fileReference);
+
+        return value;
+    }
 
     public static from(
         value: ITransferFileOwnershipRequestItem | Omit<TransferFileOwnershipRequestItemJSON, "@type"> | TransferFileOwnershipRequestItemJSON
