@@ -47,6 +47,7 @@ import {
     ShareAttributeRequestItemJSON,
     SurnameJSON,
     ThirdPartyRelationshipAttributeQueryJSON,
+    TransferFileOwnershipAcceptResponseItemJSON,
     TransferFileOwnershipRequestItemJSON,
     ValueHints,
     ValueHintsJSON,
@@ -140,6 +141,7 @@ import {
     ShareAttributeAcceptResponseItemDVO,
     ShareAttributeRequestItemDVO,
     ThirdPartyRelationshipAttributeQueryDVO,
+    TransferFileOwnershipAcceptResponseItemDVO,
     TransferFileOwnershipRequestItemDVO
 } from "./content";
 import { FileDVO, IdentityDVO, MessageDVO, MessageStatus, RecipientDVO, RelationshipDVO, RelationshipDirection, RelationshipTemplateDVO } from "./transport";
@@ -909,6 +911,19 @@ export class DataViewExpander {
                         name: name,
                         listener: localAttributeListener
                     } as RegisterAttributeListenerAcceptResponseItemDVO;
+
+                case "TransferFileOwnershipAcceptResponseItem":
+                    const transferFileOwnershipResponseItem = responseItem as TransferFileOwnershipAcceptResponseItemJSON;
+                    const localAttributeResultForTransfer = await this.consumption.attributes.getAttribute({ id: transferFileOwnershipResponseItem.attributeId });
+                    const localAttributeDVOForTransfer = await this.expandLocalAttributeDTO(localAttributeResultForTransfer.value);
+
+                    return {
+                        ...transferFileOwnershipResponseItem,
+                        type: "TransferFileOwnershipAcceptResponseItemDVO",
+                        id: transferFileOwnershipResponseItem.attributeId,
+                        name: name,
+                        attribute: localAttributeDVOForTransfer
+                    } as TransferFileOwnershipAcceptResponseItemDVO;
 
                 case "AttributeSuccessionAcceptResponseItem":
                     const attributeSuccessionResponseItem = responseItem as AttributeSuccessionAcceptResponseItemJSON;

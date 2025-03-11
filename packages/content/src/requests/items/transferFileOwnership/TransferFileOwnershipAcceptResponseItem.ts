@@ -1,17 +1,17 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreId, ICoreId } from "@nmshd/core-types";
-import { IdentityAttribute, IdentityAttributeJSON, IIdentityAttribute, IRelationshipAttribute, RelationshipAttribute, RelationshipAttributeJSON } from "../../../attributes";
+import { IdentityAttribute, IdentityAttributeJSON, IIdentityAttribute } from "../../../attributes";
 import { AcceptResponseItem, AcceptResponseItemJSON, IAcceptResponseItem } from "../../response";
 
 export interface TransferFileOwnershipAcceptResponseItemJSON extends AcceptResponseItemJSON {
     "@type": "TransferFileOwnershipAcceptResponseItem";
     attributeId: string;
-    attribute: IdentityAttributeJSON | RelationshipAttributeJSON;
+    attribute: IdentityAttributeJSON;
 }
 
 export interface ITransferFileOwnershipAcceptResponseItem extends IAcceptResponseItem {
     attributeId: ICoreId;
-    attribute: IIdentityAttribute | IRelationshipAttribute;
+    attribute: IIdentityAttribute;
 }
 
 @type("TransferFileOwnershipAcceptResponseItem")
@@ -20,9 +20,9 @@ export class TransferFileOwnershipAcceptResponseItem extends AcceptResponseItem 
     @validate()
     public attributeId: CoreId;
 
-    @serialize({ unionTypes: [IdentityAttribute, RelationshipAttribute] })
+    @serialize()
     @validate()
-    public attribute: IdentityAttribute | RelationshipAttribute;
+    public attribute: IdentityAttribute;
 
     public static override from(
         value: ITransferFileOwnershipAcceptResponseItem | Omit<TransferFileOwnershipAcceptResponseItemJSON, "@type"> | TransferFileOwnershipAcceptResponseItemJSON
