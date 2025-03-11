@@ -55,23 +55,27 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
             file = await this.accountController.files.getOrLoadFileByTruncated(requestItem.fileReference.truncate());
         } catch (_) {
             return ValidationResult.error(
-                ConsumptionCoreErrors.requests.invalidRequestItem(`The File with the given ID '${requestItem.fileReference.id.toString()}' could not be found.`)
+                ConsumptionCoreErrors.requests.invalidAcceptParameters(
+                    `You cannot accept this RequestItem, since the File with the given ID '${requestItem.fileReference.id.toString()}' could not be found.`
+                )
             );
         }
 
         // TODO: check explicitly if expired
 
-        // TODO: Do we want to throw errors in these cases? If so should the code be invalidAcceptParameters?
-
         if (file.isOwn) {
             return ValidationResult.error(
-                ConsumptionCoreErrors.requests.invalidRequestItem(`The File with the given fileReference '${requestItem.fileReference.id.toString()}' is already owned by you.`)
+                ConsumptionCoreErrors.requests.invalidAcceptParameters(
+                    `You cannot accept this RequestItem, since the File with the given fileReference '${requestItem.fileReference.id.toString()}' is already owned by you.`
+                )
             );
         }
 
         if (file.cache!.owner.toString() !== requestInfo.peer.toString()) {
             return ValidationResult.error(
-                ConsumptionCoreErrors.requests.invalidRequestItem(`The File with the given fileReference '${requestItem.fileReference.id.toString()}' is not owned by the peer.`)
+                ConsumptionCoreErrors.requests.invalidAcceptParameters(
+                    `You cannot accept this RequestItem, since the File with the given fileReference '${requestItem.fileReference.id.toString()}' is not owned by the peer.`
+                )
             );
         }
 
