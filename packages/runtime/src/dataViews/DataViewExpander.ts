@@ -1,6 +1,7 @@
 import { Serializable, SerializableBase } from "@js-soft/ts-serval";
 import { ConsumptionController, LocalRequestStatus } from "@nmshd/consumption";
 import {
+    AcceptResponseItemJSON,
     AttributeAlreadySharedAcceptResponseItemJSON,
     AttributeSuccessionAcceptResponseItemJSON,
     AuthenticationRequestItemJSON,
@@ -37,6 +38,7 @@ import {
     RenderHintsTechnicalType,
     RequestItemGroupJSON,
     RequestItemJSON,
+    RequestItemJSONDerivations,
     RequestJSON,
     ResponseItemGroupJSON,
     ResponseItemJSON,
@@ -822,7 +824,7 @@ export class DataViewExpander {
         return await this.expandRequestItem(requestGroupOrItem, localRequestDTO, responseGroupOrItemDVO as ResponseItemDVO);
     }
 
-    public async expandResponseItem(responseItem: ResponseItemJSON): Promise<ResponseItemDVO> {
+    public async expandResponseItem(responseItem: ResponseItemJSON, requestItem: RequestItemJSONDerivations): Promise<ResponseItemDVO> {
         if (responseItem.result === "Accepted") {
             const name = `i18n://dvo.responseItem.${responseItem["@type"]}.acceptedName`;
 
@@ -962,6 +964,30 @@ export class DataViewExpander {
                         attribute: localAttributeDVOResult
                     } as AttributeAlreadySharedAcceptResponseItemDVO;
 
+                case "AcceptResponseItem":
+                    if (!(requestItem["@type"] === "TransferFileOwnershipRequestItem")) {
+                        return {
+                            ...responseItem,
+                            type: "AcceptResponseItemDVO",
+                            id: "",
+                            name: name
+                        };
+                    }
+
+                    const acceptResponseItem = responseItem as AcceptResponseItemJSON;
+
+                    // TODO:
+                    const repositoryAttributeResultsForTransfer = await this.consumption.attributes.getAttributes({});
+                    const createdRepositoryAttributeDVO = await this.expandLocalAttributeDTO(repositoryAttributeResultsForTransfer.value);
+
+                    return {
+                        ...acceptResponseItem,
+                        type: "TransferFileOwnershipAcceptResponseItemDVO",
+                        id: createdRepositoryAttributeDVO.id,
+                        name: name,
+                        repositoryAttribute: createdRepositoryAttributeDVO
+                    } as TransferFileOwnershipAcceptResponseItemDVO;
+
                 default:
                     return {
                         ...responseItem,
@@ -1002,19 +1028,30 @@ export class DataViewExpander {
         };
     }
 
-    public async expandResponseGroupOrItem(responseGroupOrItem: ResponseItemGroupJSON | ResponseItemJSON): Promise<ResponseItemGroupDVO | ResponseItemDVO> {
+    public async expandResponseGroupOrItem(
+        responseGroupOrItem: ResponseItemGroupJSON | ResponseItemJSON,
+        requestGroupOrItem: RequestItemGroupJSON | RequestItemJSONDerivations
+    ): Promise<ResponseItemGroupDVO | ResponseItemDVO> {
         if (responseGroupOrItem["@type"] === "ResponseItemGroup") {
-            const group = responseGroupOrItem as ResponseItemGroupJSON;
-            const itemDVOs = [];
-            for (const requestItem of group.items) {
-                itemDVOs.push(await this.expandResponseItem(requestItem));
-            }
+            const responseGroup = responseGroupOrItem as ResponseItemGroupJSON;
+
+            // const itemDVOs = [];
+            // for (const requestItem of responseGroup.items) {
+            //     itemDVOs.push(await this.expandResponseItem(requestItem));
+            // }
+
+            const itemDVOs = await Promise.all(
+                responseGroup.items.map((responseItem, index) => {
+                    const requestItem = (requestGroupOrItem as RequestItemGroupJSON).items[index];
+                    return this.expandResponseItem(responseItem, requestItem);
+                })
+            );
             return {
                 type: "ResponseItemGroupDVO",
                 items: itemDVOs
             };
         }
-        return await this.expandResponseItem(responseGroupOrItem as ResponseItemJSON);
+        return await this.expandResponseItem(responseGroupOrItem as ResponseItemJSON, requestGroupOrItem as RequestItemJSONDerivations);
     }
 
     public async expandLocalRequestDTO(request: LocalRequestDTO): Promise<LocalRequestDVO> {
@@ -1057,10 +1094,18 @@ export class DataViewExpander {
     }
 
     public async expandResponse(response: ResponseJSON, request: LocalRequestDTO): Promise<ResponseDVO> {
-        const itemDVOs = [];
-        for (const responseItem of response.items) {
-            itemDVOs.push(await this.expandResponseGroupOrItem(responseItem));
-        }
+        // const itemDVOs = [];
+        // for (const responseItem of response.items) {
+        //     itemDVOs.push(await this.expandResponseGroupOrItem(responseItem));
+        // }
+
+        const itemDVOs = await Promise.all(
+            response.items.map((itemOfResponse, index) => {
+                const itemOfRequest = request.content.items[index];
+                return this.expandResponseGroupOrItem(itemOfResponse, itemOfRequest);
+            })
+        );
+
         return {
             id: request.id,
             name: "i18n://dvo.response.name",
