@@ -23,7 +23,6 @@ updates:
           - "*"
     reviewers:
       - "jkoenig134"
-      - "sebbi08"
       - "Milena-Czierlinski"
     labels:
       - "dependencies"
