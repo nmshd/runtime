@@ -181,7 +181,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
             const result = await recipientProcessor.canAccept(requestItem, { accept: true }, incomingRequest);
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidAcceptParameters",
-                message: `You cannot accept this RequestItem, since the File with the given ID '${requestItem.fileReference.id.toString()}' could not be found.`
+                message: `You cannot accept this RequestItem since the File with the given ID '${requestItem.fileReference.id.toString()}' could not be found.`
             });
         });
 
@@ -205,7 +205,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
             const result = await recipientProcessor.canAccept(requestItem, { accept: true }, incomingRequest);
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidAcceptParameters",
-                message: `You cannot accept this RequestItem, since the File with the given fileReference '${requestItem.fileReference.id.toString()}' is already owned by you.`
+                message: `You cannot accept this RequestItem since the File with the given fileReference '${requestItem.fileReference.id.toString()}' is already owned by you.`
             });
         });
 
@@ -229,7 +229,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
             const result = await recipientProcessor.canAccept(requestItem, { accept: true }, incomingRequest);
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidAcceptParameters",
-                message: `You cannot accept this RequestItem, since the File with the given fileReference '${requestItem.fileReference.id.toString()}' is not owned by the peer.`
+                message: `You cannot accept this RequestItem since the File with the given fileReference '${requestItem.fileReference.id.toString()}' is not owned by the peer.`
             });
         });
     });
