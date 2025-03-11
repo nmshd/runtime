@@ -914,15 +914,23 @@ export class DataViewExpander {
 
                 case "TransferFileOwnershipAcceptResponseItem":
                     const transferFileOwnershipResponseItem = responseItem as TransferFileOwnershipAcceptResponseItemJSON;
-                    const localAttributeResultForTransfer = await this.consumption.attributes.getAttribute({ id: transferFileOwnershipResponseItem.attributeId });
-                    const localAttributeDVOForTransfer = await this.expandLocalAttributeDTO(localAttributeResultForTransfer.value);
+
+                    const sharedAttributeResultForTransfer = await this.consumption.attributes.getAttribute({ id: transferFileOwnershipResponseItem.attributeId });
+                    const sharedAttributeDVOForTransfer = await this.expandLocalAttributeDTO(sharedAttributeResultForTransfer.value);
+
+                    const repositoryAttributeResultForTransfer = await this.consumption.attributes.getAttribute({
+                        id: sharedAttributeResultForTransfer.value.shareInfo!.sourceAttribute!
+                    });
+                    const repositoryAttributeDVOForTransfer = await this.expandLocalAttributeDTO(repositoryAttributeResultForTransfer.value);
 
                     return {
                         ...transferFileOwnershipResponseItem,
                         type: "TransferFileOwnershipAcceptResponseItemDVO",
-                        id: transferFileOwnershipResponseItem.attributeId,
+                        id: repositoryAttributeDVOForTransfer.id,
                         name: name,
-                        attribute: localAttributeDVOForTransfer
+                        repositoryAttribute: repositoryAttributeDVOForTransfer,
+                        sharedAttributeId: transferFileOwnershipResponseItem.attributeId,
+                        sharedAttribute: sharedAttributeDVOForTransfer
                     } as TransferFileOwnershipAcceptResponseItemDVO;
 
                 case "AttributeSuccessionAcceptResponseItem":
