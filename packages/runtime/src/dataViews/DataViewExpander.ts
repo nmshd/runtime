@@ -47,12 +47,13 @@ import {
     ShareAttributeRequestItemJSON,
     SurnameJSON,
     ThirdPartyRelationshipAttributeQueryJSON,
+    TransferFileOwnershipRequestItemJSON,
     ValueHints,
     ValueHintsJSON,
     isRequestItemDerivation
 } from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
-import { IdentityController } from "@nmshd/transport";
+import { FileReference, IdentityController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import _ from "lodash";
 import { ConsumptionServices, TransportServices } from "../extensibility";
@@ -84,6 +85,7 @@ import {
     DecidableReadAttributeRequestItemDVO,
     DecidableRegisterAttributeListenerRequestItemDVO,
     DecidableShareAttributeRequestItemDVO,
+    DecidableTransferFileOwnershipRequestItemDVO,
     LocalAttributeDVO,
     LocalAttributeListenerDVO,
     LocalRequestDVO,
@@ -137,7 +139,8 @@ import {
     ResponseItemGroupDVO,
     ShareAttributeAcceptResponseItemDVO,
     ShareAttributeRequestItemDVO,
-    ThirdPartyRelationshipAttributeQueryDVO
+    ThirdPartyRelationshipAttributeQueryDVO,
+    TransferFileOwnershipRequestItemDVO
 } from "./content";
 import { FileDVO, IdentityDVO, MessageDVO, MessageStatus, RecipientDVO, RelationshipDVO, RelationshipDirection, RelationshipTemplateDVO } from "./transport";
 
@@ -741,6 +744,33 @@ export class DataViewExpander {
                     isDecidable,
                     response: responseItemDVO
                 } as RegisterAttributeListenerRequestItemDVO;
+
+            case "TransferFileOwnershipRequestItem":
+                const transferFileOwnershipRequestItem = requestItem as TransferFileOwnershipRequestItemJSON;
+
+                const fileReference = FileReference.from(transferFileOwnershipRequestItem.fileReference);
+                const file = await this.expandFileId(fileReference.id.toString());
+
+                if (isDecidable) {
+                    return {
+                        ...transferFileOwnershipRequestItem,
+                        type: "DecidableTransferFileOwnershipRequestItemDVO",
+                        id: "",
+                        name: requestItem.title ?? "i18n://dvo.requestItem.DecidableTransferFileOwnershipRequestItem.name",
+                        isDecidable,
+                        response: responseItemDVO,
+                        file
+                    } as DecidableTransferFileOwnershipRequestItemDVO;
+                }
+                return {
+                    ...transferFileOwnershipRequestItem,
+                    type: "TransferFileOwnershipRequestItemDVO",
+                    id: "",
+                    name: requestItem.title ?? "i18n://dvo.requestItem.TransferFileOwnershipRequestItem.name",
+                    isDecidable,
+                    response: responseItemDVO,
+                    file
+                } as TransferFileOwnershipRequestItemDVO;
 
             default:
                 return {
