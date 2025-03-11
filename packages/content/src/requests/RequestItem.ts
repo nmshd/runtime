@@ -20,6 +20,7 @@ import {
     IReadAttributeRequestItem,
     IRegisterAttributeListenerRequestItem,
     IShareAttributeRequestItem,
+    ITransferFileOwnershipAcceptResponseItem,
     ProposeAttributeRequestItem,
     ProposeAttributeRequestItemJSON,
     ReadAttributeRequestItem,
@@ -27,7 +28,9 @@ import {
     RegisterAttributeListenerRequestItem,
     RegisterAttributeListenerRequestItemJSON,
     ShareAttributeRequestItem,
-    ShareAttributeRequestItemJSON
+    ShareAttributeRequestItemJSON,
+    TransferFileOwnershipAcceptResponseItem,
+    TransferFileOwnershipAcceptResponseItemJSON
 } from "./items";
 
 export interface RequestItemJSON extends ContentJSON {
@@ -72,7 +75,8 @@ export type RequestItemJSONDerivations =
     | ConsentRequestItemJSON
     | AuthenticationRequestItemJSON
     | FreeTextRequestItemJSON
-    | RegisterAttributeListenerRequestItemJSON;
+    | RegisterAttributeListenerRequestItemJSON
+    | TransferFileOwnershipAcceptResponseItemJSON;
 
 export interface IRequestItem extends ISerializable {
     /**
@@ -116,7 +120,8 @@ export type IRequestItemDerivations =
     | IConsentRequestItem
     | IAuthenticationRequestItem
     | IFreeTextRequestItem
-    | IRegisterAttributeListenerRequestItem;
+    | IRegisterAttributeListenerRequestItem
+    | ITransferFileOwnershipAcceptResponseItem;
 
 export abstract class RequestItem extends Serializable {
     @serialize()
@@ -154,7 +159,8 @@ export type RequestItemDerivations =
     | ConsentRequestItem
     | AuthenticationRequestItem
     | FreeTextRequestItem
-    | RegisterAttributeListenerRequestItem;
+    | RegisterAttributeListenerRequestItem
+    | TransferFileOwnershipAcceptResponseItem;
 
 export function isRequestItemDerivation(input: any): input is RequestItemDerivations {
     return (
@@ -167,6 +173,7 @@ export function isRequestItemDerivation(input: any): input is RequestItemDerivat
         input["@type"] === "ConsentRequestItem" ||
         input["@type"] === "AuthenticationRequestItem" ||
         input["@type"] === "FreeTextRequestItem" ||
-        input["@type"] === "RegisterAttributeListenerRequestItem"
+        input["@type"] === "RegisterAttributeListenerRequestItem" ||
+        input["@type"] === "TransferFileOwnershipRequestItem"
     );
 }
