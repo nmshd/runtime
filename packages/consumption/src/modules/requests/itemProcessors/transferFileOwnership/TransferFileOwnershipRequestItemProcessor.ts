@@ -133,7 +133,7 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
         return TransferFileOwnershipAcceptResponseItem.from({
             result: ResponseItemResult.Accepted,
             attributeId: ownSharedIdentityAttribute.id,
-            attribute: ownSharedIdentityAttribute.content
+            attribute: ownSharedIdentityAttribute.content as IdentityAttribute
         });
     }
 
