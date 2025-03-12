@@ -92,11 +92,9 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
         requestItem: TransferFileOwnershipRequestItem,
         _params: AcceptRequestItemParametersJSON,
         requestInfo: LocalRequestInfo
-    ): Promise<TransferFileOwnershipAcceptResponseItem | AcceptResponseItem> {
+    ): Promise<TransferFileOwnershipAcceptResponseItem> {
         const peerFile = await this.accountController.files.getOrLoadFileByTruncated(requestItem.fileReference.truncate());
         const fileContent = await this.accountController.files.downloadFileContent(peerFile);
-
-        // TODO: set metadata such that expanding the ResponseItem can link to the file
 
         const ownFile = await this.accountController.files.sendFile({
             buffer: fileContent,
@@ -117,12 +115,6 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
                 tags: peerFile.cache!.tags
             })
         });
-
-        if (requestItem.denyAttributeCopy) {
-            return AcceptResponseItem.from({
-                result: ResponseItemResult.Accepted
-            });
-        }
 
         const ownSharedIdentityAttribute = await this.consumptionController.attributes.createSharedLocalAttributeCopy({
             sourceAttributeId: repositoryAttribute.id,

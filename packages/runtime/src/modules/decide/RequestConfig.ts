@@ -129,7 +129,6 @@ export interface ShareAttributeRequestItemConfig extends RequestItemConfig {
 export interface TransferFileOwnershipRequestItemConfig extends RequestItemConfig {
     "content.item.@type": "TransferFileOwnershipRequestItem";
     "content.item.fileReference"?: string | string[];
-    "content.item.denyAttributeCopy"?: boolean;
 }
 
 export type RequestItemDerivationConfig =

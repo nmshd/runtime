@@ -1,14 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { sleep } from "@js-soft/ts-utils";
-import {
-    AcceptResponseItem,
-    IdentityAttribute,
-    IdentityFileReference,
-    Request,
-    ResponseItemResult,
-    TransferFileOwnershipAcceptResponseItem,
-    TransferFileOwnershipRequestItem
-} from "@nmshd/content";
+import { IdentityAttribute, IdentityFileReference, Request, ResponseItemResult, TransferFileOwnershipAcceptResponseItem, TransferFileOwnershipRequestItem } from "@nmshd/content";
 import { CoreAddress, CoreDate } from "@nmshd/core-types";
 import { AccountController, FileReference, Transport } from "@nmshd/transport";
 import { ConsumptionController, ConsumptionIds, LocalRequest, LocalRequestStatus, TransferFileOwnershipRequestItemProcessor } from "../../../../../src";
@@ -143,8 +135,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
         test("returns success when checking if the transfer of ownership of a File can be accepted that is owned by the peer ", async function () {
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
-                fileReference: senderTrucatedFileReference,
-                denyAttributeCopy: true
+                fileReference: senderTrucatedFileReference
             });
 
             const incomingRequest = LocalRequest.from({
@@ -164,8 +155,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
         test("returns error when checking if the transfer of ownership of a File can be accepted that is expired", async function () {
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
-                fileReference: senderExpiredTrucatedFileReference,
-                denyAttributeCopy: true
+                fileReference: senderExpiredTrucatedFileReference
             });
 
             const incomingRequest = LocalRequest.from({
@@ -188,8 +178,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
         test("returns error when checking if the transfer of ownership of a File can be accepted that is already owned by the recipient", async function () {
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
-                fileReference: recipientTrucatedFileReference,
-                denyAttributeCopy: true
+                fileReference: recipientTrucatedFileReference
             });
 
             const incomingRequest = LocalRequest.from({
@@ -212,8 +201,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
         test("returns error when checking if the transfer of ownership of a File can be accepted that is not owned by the sender", async function () {
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
-                fileReference: thirdPartyTrucatedFileReference,
-                denyAttributeCopy: true
+                fileReference: thirdPartyTrucatedFileReference
             });
 
             const incomingRequest = LocalRequest.from({
@@ -235,41 +223,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
     });
 
     describe("accept", function () {
-        test("creates a RepositoryAttribute with tags and responds with an AcceptResponseItem if the sender denies an Attribute copy", async function () {
-            const requestItem = TransferFileOwnershipRequestItem.from({
-                mustBeAccepted: false,
-                fileReference: senderTrucatedFileReference,
-                denyAttributeCopy: true
-            });
-
-            const incomingRequest = LocalRequest.from({
-                id: await ConsumptionIds.request.generate(),
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({ items: [requestItem] }),
-                statusLog: []
-            });
-
-            const responseItem = await recipientProcessor.accept(requestItem, { accept: true }, incomingRequest);
-            expect(responseItem).toBeInstanceOf(AcceptResponseItem);
-
-            const repositoryAttributes = await recipientConsumptionController.attributes.getLocalAttributes({});
-            expect(repositoryAttributes).toHaveLength(1);
-
-            const repositoryAttribute = repositoryAttributes[0];
-            expect(repositoryAttribute.shareInfo).toBeUndefined();
-            expect(repositoryAttribute.content.value).toBeInstanceOf(IdentityFileReference);
-            expect((repositoryAttribute.content as IdentityAttribute).tags).toStrictEqual(["x+%+tag"]);
-
-            const fileReference = FileReference.from((repositoryAttribute.content.value as IdentityFileReference).value);
-            const file = await recipientAccountController.files.getFile(fileReference.id);
-            expect(file!.isOwn).toBe(true);
-            expect(file!.cache!.tags).toStrictEqual(["x+%+tag"]);
-        });
-
-        test("creates a RepositoryAttribute and an own shared IdentityAttribute and responds with a TransferFileOwnershipAcceptResponseItem if the sender requests an Attribute copy", async function () {
+        test("creates a RepositoryAttribute with tags and an own shared IdentityAttribute and responds with a TransferFileOwnershipAcceptResponseItem if the sender requests an Attribute copy", async function () {
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
                 fileReference: senderTrucatedFileReference
@@ -288,9 +242,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
             const responseItem = await recipientProcessor.accept(requestItem, { accept: true }, incomingRequest);
             expect(responseItem).toBeInstanceOf(TransferFileOwnershipAcceptResponseItem);
 
-            const ownSharedIdentityAttribute = await recipientConsumptionController.attributes.getLocalAttribute(
-                (responseItem as TransferFileOwnershipAcceptResponseItem).attributeId
-            );
+            const ownSharedIdentityAttribute = await recipientConsumptionController.attributes.getLocalAttribute(responseItem.attributeId);
             expect(ownSharedIdentityAttribute!.shareInfo!.peer).toStrictEqual(sender);
             expect(ownSharedIdentityAttribute!.shareInfo!.requestReference).toStrictEqual(incomingRequest.id);
             expect(ownSharedIdentityAttribute!.content.value).toBeInstanceOf(IdentityFileReference);

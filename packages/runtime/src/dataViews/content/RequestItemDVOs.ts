@@ -75,5 +75,4 @@ export interface TransferFileOwnershipRequestItemDVO extends RequestItemDVO {
     type: "TransferFileOwnershipRequestItemDVO";
     fileReference: string;
     file: FileDVO;
-    denyAttributeCopy?: boolean;
 }

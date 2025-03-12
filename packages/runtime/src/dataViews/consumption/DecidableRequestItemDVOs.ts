@@ -60,5 +60,4 @@ export interface DecidableTransferFileOwnershipRequestItemDVO extends DecidableR
     type: "DecidableTransferFileOwnershipRequestItemDVO";
     fileReference: string;
     file: FileDVO;
-    denyAttributeCopy?: boolean;
 }
