@@ -87,7 +87,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
         test("returns error if the ownership of a File should be transferred that is not known by the sender", async function () {
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
-                fileReference: recipientTrucatedFileReference
+                fileReference: thirdPartyTrucatedFileReference
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -130,7 +130,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
     });
 
     describe("canAccept", function () {
-        test("returns success when checking if the transfer of ownership of a File can be accepted that is owned by the peer ", async function () {
+        test("returns success when checking if the transfer of ownership of a File can be accepted that is owned by the sender", async function () {
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
                 fileReference: senderTrucatedFileReference
@@ -247,7 +247,14 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
             expect((ownSharedIdentityAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x+%+tag"]);
 
             const repositoryAttribute = await recipientConsumptionController.attributes.getLocalAttribute(ownSharedIdentityAttribute!.shareInfo!.sourceAttribute!);
-            expect(repositoryAttribute).toBeDefined();
+            expect(repositoryAttribute!.shareInfo).toBeUndefined();
+            expect(repositoryAttribute!.content.value).toBeInstanceOf(IdentityFileReference);
+            expect((repositoryAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x+%+tag"]);
+
+            const fileReference = FileReference.from((repositoryAttribute!.content.value as IdentityFileReference).value);
+            const file = await recipientAccountController.files.getFile(fileReference.id);
+            expect(file!.isOwn).toBe(true);
+            expect(file!.cache!.tags).toStrictEqual(["x+%+tag"]);
         });
     });
 
@@ -279,6 +286,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
 
             const peerSharedIdentityAttribute = await senderConsumptionController.attributes.getLocalAttribute(responseItem.attributeId);
             expect(peerSharedIdentityAttribute!.shareInfo!.peer).toStrictEqual(recipient);
+            expect(peerSharedIdentityAttribute!.shareInfo!.requestReference).toStrictEqual(requestInfo.id);
             expect(peerSharedIdentityAttribute!.shareInfo!.sourceAttribute).toBeUndefined();
 
             const truncatedFileReference = (peerSharedIdentityAttribute!.content.value as IdentityFileReference).value;
