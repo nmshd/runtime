@@ -2,14 +2,12 @@ import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { sleep } from "@js-soft/ts-utils";
 import { IdentityAttribute, IdentityFileReference, Request, ResponseItemResult, TransferFileOwnershipAcceptResponseItem, TransferFileOwnershipRequestItem } from "@nmshd/content";
 import { CoreAddress, CoreDate } from "@nmshd/core-types";
-import { AccountController, FileReference, Transport } from "@nmshd/transport";
+import { AccountController, FileReference } from "@nmshd/transport";
 import { ConsumptionController, ConsumptionIds, LocalRequest, LocalRequestStatus, TransferFileOwnershipRequestItemProcessor } from "../../../../../src";
 import { TestUtil } from "../../../../core/TestUtil";
 
 describe("TransferFileOwnershipRequestItemProcessor", function () {
-    // TODO: check what is actually needed throughout this file
     let connection: IDatabaseConnection;
-    let transport: Transport;
 
     let sender: CoreAddress;
     let senderAccountController: AccountController;
@@ -28,7 +26,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createConnection();
-        transport = TestUtil.createTransport(connection);
+        const transport = TestUtil.createTransport(connection);
         await transport.init();
         const accounts = await TestUtil.provideAccounts(transport, 3);
 
