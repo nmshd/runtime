@@ -8,7 +8,7 @@ export abstract class AbstractXML extends AbstractString {
     public override value: string;
 
     public static override get valueHints(): ValueHints {
-        return ValueHints.from({
+        return super.valueHints.copyWith({
             max: 50000
         });
     }

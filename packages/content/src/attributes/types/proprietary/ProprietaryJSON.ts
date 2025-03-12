@@ -1,5 +1,6 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { AbstractAttributeValue, AbstractAttributeValueJSON, IAbstractAttributeValue } from "../../AbstractAttributeValue";
+import { characterSets } from "../../constants/CharacterSets";
 import { RenderHints, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../../hints";
 import { PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH, PROPRIETARY_ATTRIBUTE_MAX_TITLE_LENGTH } from "./ProprietaryAttributeValue";
 
@@ -19,11 +20,11 @@ export interface IProprietaryJSON extends IAbstractAttributeValue {
 @type("ProprietaryJSON")
 export class ProprietaryJSON extends AbstractAttributeValue {
     @serialize()
-    @validate({ max: PROPRIETARY_ATTRIBUTE_MAX_TITLE_LENGTH })
+    @validate({ max: PROPRIETARY_ATTRIBUTE_MAX_TITLE_LENGTH, regExp: characterSets.din91379DatatypeC })
     public title: string;
 
     @serialize()
-    @validate({ nullable: true, max: PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH })
+    @validate({ nullable: true, max: PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH, regExp: characterSets.din91379DatatypeC })
     public description?: string;
 
     @serialize({ any: true })
