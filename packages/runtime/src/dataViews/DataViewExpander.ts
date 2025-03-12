@@ -751,7 +751,7 @@ export class DataViewExpander {
                 const transferFileOwnershipRequestItem = requestItem as TransferFileOwnershipRequestItemJSON;
 
                 const fileReference = FileReference.from(transferFileOwnershipRequestItem.fileReference);
-                const file = await this.expandFileId(fileReference.id.toString());
+                const file = await this.expandFileId(fileReference.id.toString()); // TODO: the recipient doesn't have the File at this point in time yet -> should we get it for them automatically?
 
                 if (isDecidable) {
                     return {
@@ -921,12 +921,16 @@ export class DataViewExpander {
                     const repositoryAttributeResultForTransfer = await this.consumption.attributes.getAttribute({
                         id: sharedAttributeResultForTransfer.value.shareInfo!.sourceAttribute!
                     });
-                    const repositoryAttributeDVOForTransfer = await this.expandLocalAttributeDTO(repositoryAttributeResultForTransfer.value);
+
+                    let repositoryAttributeDVOForTransfer;
+                    if (repositoryAttributeResultForTransfer.isSuccess) {
+                        repositoryAttributeDVOForTransfer = await this.expandLocalAttributeDTO(repositoryAttributeResultForTransfer.value);
+                    }
 
                     return {
                         ...transferFileOwnershipResponseItem,
                         type: "TransferFileOwnershipAcceptResponseItemDVO",
-                        id: repositoryAttributeDVOForTransfer.id,
+                        id: repositoryAttributeDVOForTransfer?.id ?? transferFileOwnershipResponseItem.attributeId,
                         name: name,
                         repositoryAttribute: repositoryAttributeDVOForTransfer,
                         sharedAttributeId: transferFileOwnershipResponseItem.attributeId,
