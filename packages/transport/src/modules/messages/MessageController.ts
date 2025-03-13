@@ -1,3 +1,4 @@
+import { DatabasePaginationOptions } from "@js-soft/docdb-access-abstractions";
 import { ISerializable } from "@js-soft/ts-serval";
 import { log, Result } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId, FileReference, ICoreAddress, ICoreId } from "@nmshd/core-types";
@@ -53,19 +54,29 @@ export class MessageController extends TransportController {
         return this;
     }
 
-    public async getMessages(query?: any): Promise<Message[]> {
-        const messages = await this.messages.find(query);
-        return this.parseArray<Message>(messages, Message);
+    public async getMessages(
+        query?: any,
+        paginationOptions?: DatabasePaginationOptions /* a default should be added here */
+    ): Promise<{ messages: Message[]; messageCount: number }> {
+        const messages = await this.messages.find(query, paginationOptions, { sortBy: "cache.createdAt", sortOrder: "desc" });
+        const messageCount = await this.messages.count(query); // there could be a more efficient way than a separate call for getting the count
+        return {
+            messages: this.parseArray<Message>(messages, Message),
+            messageCount
+        };
     }
 
-    public async getMessagesByRelationshipId(id: CoreId): Promise<Message[]> {
-        return await this.getMessages({
-            [`${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.recipients)}.${nameof<CachedMessageRecipient>((m) => m.relationshipId)}`]: id.toString()
-        });
+    public async getMessagesByRelationshipId(id: CoreId, paginationOptions?: DatabasePaginationOptions): Promise<{ messages: Message[]; messageCount: number }> {
+        return await this.getMessages(
+            {
+                [`${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.recipients)}.${nameof<CachedMessageRecipient>((m) => m.relationshipId)}`]: id.toString()
+            },
+            paginationOptions
+        );
     }
 
     public async cleanupMessagesOfDecomposedRelationship(relationship: Relationship): Promise<void> {
-        const messages = await this.getMessagesByRelationshipId(relationship.id);
+        const messages = (await this.getMessagesByRelationshipId(relationship.id)).messages;
         for (const message of messages) {
             await this.cleanupMessageOfDecomposedRelationship(message.id, relationship);
         }
@@ -102,20 +113,23 @@ export class MessageController extends TransportController {
     }
 
     @log()
-    public async getMessagesByAddress(address: CoreAddress): Promise<Message[]> {
+    public async getMessagesByAddress(address: CoreAddress, paginationOptions?: DatabasePaginationOptions): Promise<{ messages: Message[]; messageCount: number }> {
         const relationship = await this.parent.relationships.getExistingRelationshipToIdentity(address);
         if (!relationship || relationship.status === RelationshipStatus.Pending) {
             throw new TransportError(
                 `Due to the non-existence of a Relationship with 'Active', 'Terminated' or 'DeletionProposed' as status, there are no Messages to the peer with address '${address.toString()}' that could be displayed.`
             );
         }
-        return await this.getMessagesByRelationshipId(relationship.id);
+        return await this.getMessagesByRelationshipId(relationship.id, paginationOptions);
     }
 
-    public async getReceivedMessages(): Promise<Message[]> {
-        return await this.getMessages({
-            [nameof<Message>((m) => m.isOwn)]: false
-        });
+    public async getReceivedMessages(paginationOptions?: DatabasePaginationOptions): Promise<{ messages: Message[]; messageCount: number }> {
+        return await this.getMessages(
+            {
+                [nameof<Message>((m) => m.isOwn)]: false
+            },
+            paginationOptions
+        );
     }
 
     public async getMessage(id: CoreId): Promise<Message | undefined> {
