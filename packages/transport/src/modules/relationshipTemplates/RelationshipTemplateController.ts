@@ -112,8 +112,10 @@ export class RelationshipTemplateController extends TransportController {
     }
 
     public async deleteRelationshipTemplate(template: RelationshipTemplate): Promise<void> {
-        const response = await this.client.deleteRelationshipTemplate(template.id.toString());
-        if (response.isError) throw response.error;
+        if (template.isOwn) {
+            const response = await this.client.deleteRelationshipTemplate(template.id.toString());
+            if (response.isError) throw response.error;
+        }
 
         await this.templates.delete(template);
     }

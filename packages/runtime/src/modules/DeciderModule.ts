@@ -239,10 +239,6 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
                 break;
         }
     }
-
-    public stop(): void {
-        this.unsubscribeFromAllEvents();
-    }
 }
 
 function containsItem(objectWithItems: { items: any[] }, callback: (element: any) => boolean): boolean {

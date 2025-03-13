@@ -250,6 +250,13 @@ class Attributes {
         );
     }
 
+    public cannotSucceedAttributesWithDeletionInfo(ownSharedIdentityAttributeIds: CoreId[] | string[]): ApplicationError {
+        return new ApplicationError(
+            "error.runtime.attributes.cannotSucceedAttributesWithDeletionInfo",
+            `The own shared IdentityAttribute predecessor(s) ${ownSharedIdentityAttributeIds.map((ownSharedIdentityAttributeId) => `'${ownSharedIdentityAttributeId.toString()}'`).join(", ")} can't be succeeded due to set deletionInfo.`
+        );
+    }
+
     public cannotSeparatelyDeleteChildOfComplexAttribute(attributeId: CoreId | string): ApplicationError {
         return new ApplicationError(
             "error.runtime.attributes.cannotSeparatelyDeleteChildOfComplexAttribute",

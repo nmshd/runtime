@@ -298,18 +298,23 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 existingSourceAttribute = attributesAfterSuccession.successor;
             }
 
-            const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfAttribute(parsedParams.existingAttributeId, [requestInfo.peer], true);
+            const query = {
+                "deletionInfo.deletionStatus": {
+                    $nin: [
+                        LocalAttributeDeletionStatus.DeletedByPeer,
+                        LocalAttributeDeletionStatus.DeletedByOwner,
+                        LocalAttributeDeletionStatus.ToBeDeletedByPeer,
+                        LocalAttributeDeletionStatus.ToBeDeleted
+                    ]
+                }
+            };
+            const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfAttribute(parsedParams.existingAttributeId, [requestInfo.peer], true, query);
 
             const wasSharedBefore = latestSharedVersion.length > 0;
-            const wasDeletedByPeerOrOwner =
-                latestSharedVersion[0]?.deletionInfo?.deletionStatus === LocalAttributeDeletionStatus.DeletedByPeer ||
-                latestSharedVersion[0]?.deletionInfo?.deletionStatus === LocalAttributeDeletionStatus.DeletedByOwner ||
-                latestSharedVersion[0]?.deletionInfo?.deletionStatus === LocalAttributeDeletionStatus.ToBeDeletedByPeer ||
-                latestSharedVersion[0]?.deletionInfo?.deletionStatus === LocalAttributeDeletionStatus.ToBeDeleted;
             const isLatestSharedVersion = latestSharedVersion[0]?.shareInfo?.sourceAttribute?.toString() === existingSourceAttribute.id.toString();
             const predecessorWasSharedBefore = wasSharedBefore && !isLatestSharedVersion;
 
-            if (!wasSharedBefore || wasDeletedByPeerOrOwner) {
+            if (!wasSharedBefore) {
                 sharedLocalAttribute = await this.consumptionController.attributes.createSharedLocalAttributeCopy({
                     sourceAttributeId: CoreId.from(existingSourceAttribute.id),
                     peer: CoreAddress.from(requestInfo.peer),

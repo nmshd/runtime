@@ -6,6 +6,8 @@ const serviceProvider = new RuntimeServiceProvider();
 let runtimeServices1: TestRuntimeServices;
 let runtimeServices2: TestRuntimeServices;
 
+const UNKNOWN_TOKEN_ID = "TOKXXXXXXXXXXXXXXXXX";
+
 beforeAll(async () => {
     const runtimeServices = await serviceProvider.launch(2);
     runtimeServices1 = runtimeServices[0];
@@ -33,6 +35,23 @@ describe("Tokens", () => {
 
         const getTokenResponse = await runtimeServices1.transport.tokens.getToken({ id: response.value.id });
         expect(getTokenResponse).toBeAnError("Token not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
+    });
+
+    describe("Delete Token", () => {
+        test("accessing invalid Token id causes an error", async () => {
+            const response = await runtimeServices1.transport.tokens.deleteToken({ tokenId: UNKNOWN_TOKEN_ID });
+            expect(response).toBeAnError("Token not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
+        });
+
+        test("successfully delete Token", async () => {
+            const token = await uploadOwnToken(runtimeServices1.transport);
+
+            const deleteTokenResponse = await runtimeServices1.transport.tokens.deleteToken({ tokenId: token.id });
+            expect(deleteTokenResponse).toBeSuccessful();
+
+            const getTokenResponse = await runtimeServices1.transport.tokens.getToken({ id: token.id });
+            expect(getTokenResponse).toBeAnError("Token not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
+        });
     });
 });
 

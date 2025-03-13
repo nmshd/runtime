@@ -45,8 +45,4 @@ export class MessageModule extends RuntimeModule<MessageModuleConfiguration> {
         this.runtime.eventBus.publish(new RelationshipEvent(messageReceivedEvent.eventTargetAddress, event, relationship));
         this.logger.trace(`Published RelationshipEvent for ${message.id} to ${relationship.id}`);
     }
-
-    public stop(): void {
-        this.unsubscribeFromAllEvents();
-    }
 }

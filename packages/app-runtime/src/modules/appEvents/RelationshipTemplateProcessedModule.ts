@@ -85,8 +85,4 @@ export class RelationshipTemplateProcessedModule extends AppRuntimeModule<Relati
             }
         }
     }
-
-    public stop(): void {
-        this.unsubscribeFromAllEvents();
-    }
 }

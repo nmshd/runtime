@@ -43,8 +43,4 @@ export class NotificationModule extends RuntimeModule {
             return;
         }
     }
-
-    public stop(): void {
-        this.unsubscribeFromAllEvents();
-    }
 }
