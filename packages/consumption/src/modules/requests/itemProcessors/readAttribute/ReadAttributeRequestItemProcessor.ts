@@ -23,7 +23,7 @@ import { LocalAttribute } from "../../../attributes/local/LocalAttribute";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 import { LocalRequestInfo } from "../IRequestItemProcessor";
-import { getSourceRepositoryAttribute } from "../utility/createAppropriateResponseItem";
+import createAppropriateResponseItem from "../utility/createAppropriateResponseItem";
 import validateAttributeMatchesWithQuery from "../utility/validateAttributeMatchesWithQuery";
 import validateQuery from "../utility/validateQuery";
 import { AcceptReadAttributeRequestItemParameters, AcceptReadAttributeRequestItemParametersJSON } from "./AcceptReadAttributeRequestItemParameters";
@@ -381,62 +381,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 });
             }
 
-            const repositoryAttribute = await getSourceRepositoryAttribute(parsedParams.newAttribute, this.consumptionController.attributes);
-
-            const query = {
-                "deletionInfo.deletionStatus": {
-                    $nin: [
-                        LocalAttributeDeletionStatus.DeletedByPeer,
-                        LocalAttributeDeletionStatus.DeletedByOwner,
-                        LocalAttributeDeletionStatus.ToBeDeletedByPeer,
-                        LocalAttributeDeletionStatus.ToBeDeleted
-                    ]
-                }
-            };
-            const latestSharedVersions = await this.consumptionController.attributes.getSharedVersionsOfAttribute(repositoryAttribute.id, [requestInfo.peer], true, query);
-            const latestSharedVersion = latestSharedVersions.length > 0 ? latestSharedVersions[0] : undefined;
-
-            if (!latestSharedVersion) {
-                const newOwnSharedIdentityAttribute = await this.consumptionController.attributes.createSharedLocalAttributeCopy({
-                    peer: requestInfo.peer,
-                    requestReference: requestInfo.id,
-                    sourceAttributeId: repositoryAttribute.id
-                });
-
-                return ReadAttributeAcceptResponseItem.from({
-                    result: ResponseItemResult.Accepted,
-                    attributeId: newOwnSharedIdentityAttribute.id,
-                    attribute: newOwnSharedIdentityAttribute.content
-                });
-            }
-
-            if (latestSharedVersion.shareInfo!.sourceAttribute!.equals(repositoryAttribute.id)) {
-                return AttributeAlreadySharedAcceptResponseItem.from({
-                    result: ResponseItemResult.Accepted,
-                    attributeId: latestSharedVersion.id
-                });
-            }
-
-            const ownSharedIdentityAttributeSuccessorParams = {
-                content: repositoryAttribute.content,
-                shareInfo: LocalAttributeShareInfo.from({
-                    peer: requestInfo.peer,
-                    requestReference: requestInfo.id,
-                    sourceAttribute: repositoryAttribute.id
-                })
-            };
-            const ownSharedIdentityAttributesAfterSuccession = await this.consumptionController.attributes.succeedOwnSharedIdentityAttribute(
-                latestSharedVersion.id,
-                ownSharedIdentityAttributeSuccessorParams
-            );
-            const succeededOwnSharedIdentityAttribute = ownSharedIdentityAttributesAfterSuccession.successor;
-
-            return AttributeSuccessionAcceptResponseItem.from({
-                result: ResponseItemResult.Accepted,
-                successorId: succeededOwnSharedIdentityAttribute.id,
-                successorContent: succeededOwnSharedIdentityAttribute.content,
-                predecessorId: latestSharedVersion.id
-            });
+            return await createAppropriateResponseItem(parsedParams.newAttribute, requestInfo, this.consumptionController.attributes, "Read");
         }
 
         throw new Error(
