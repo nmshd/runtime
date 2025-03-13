@@ -72,7 +72,7 @@
         "@js-soft/ts-utils": "^2.3.3",
         "@nmshd/core-types": "*",
         "@nmshd/crypto": "2.1.0",
-        "axios": "^1.8.2",
+        "axios": "^1.8.3",
         "fast-json-patch": "^3.1.1",
         "form-data": "^4.0.2",
         "https-proxy-agent": "^7.0.6",
@@ -88,7 +88,7 @@
         "@js-soft/docdb-access-loki": "1.2.0",
         "@js-soft/docdb-access-mongo": "1.2.0",
         "@js-soft/node-logger": "1.2.0",
-        "@js-soft/ts-serval": "2.0.11",
+        "@js-soft/ts-serval": "2.0.12",
         "@types/json-stringify-safe": "^5.0.3",
         "@types/lodash": "^4.17.16",
         "@types/luxon": "^3.4.2",
@@ -96,7 +96,7 @@
         "@types/uuid": "^10.0.0",
         "correlation-id": "^5.2.0",
         "expect": "^29.7.0",
-        "testcontainers": "^10.18.0",
+        "testcontainers": "^10.19.0",
         "ts-mockito": "^2.6.1"
     },
     "publishConfig": {

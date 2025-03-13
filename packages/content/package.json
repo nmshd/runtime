@@ -51,7 +51,7 @@
         }
     },
     "dependencies": {
-        "@js-soft/ts-serval": "2.0.11",
+        "@js-soft/ts-serval": "2.0.12",
         "@nmshd/core-types": "*",
         "@nmshd/iql": "^1.0.2",
         "luxon": "^3.5.0",
