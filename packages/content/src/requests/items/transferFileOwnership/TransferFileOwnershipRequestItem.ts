@@ -14,7 +14,7 @@ export interface ITransferFileOwnershipRequestItem extends IRequestItem {
 
 @type("TransferFileOwnershipRequestItem")
 export class TransferFileOwnershipRequestItem extends RequestItem implements ITransferFileOwnershipRequestItem {
-    @serialize({ enforceString: true, customDeserializer: (value: string) => FileReference.from(value) })
+    @serialize({ enforceString: true, customDeserializer: (value: string) => FileReference.from(value), customSerializer: (value: FileReference) => value.truncate()() })
     @validate()
     public fileReference: FileReference;
 
