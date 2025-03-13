@@ -1,6 +1,5 @@
-import { CoreId } from "@nmshd/core-types";
+import { CoreId, FileReference } from "@nmshd/core-types";
 import { CoreBuffer, CryptoEncryptionAlgorithm, CryptoSecretKey } from "@nmshd/crypto";
-import { FileReference } from "@nmshd/transport";
 import { TransferFileOwnershipRequestItem } from "../../../src";
 import { createConnection, createTransport } from "../../testUtils";
 
