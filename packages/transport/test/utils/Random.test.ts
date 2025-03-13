@@ -1,4 +1,4 @@
-import { Random, RandomCharacterRange } from "../../src";
+import { Random, RandomCharacterRange } from "@nmshd/core-types";
 
 describe("RandomTest", function () {
     describe("IntBetween", function () {
