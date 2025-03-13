@@ -1,5 +1,5 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { FileReference, IFileReference } from "@nmshd/transport";
+import { FileReference, IFileReference } from "@nmshd/core-types";
 import { RequestItemJSON } from "../..";
 import { IRequestItem, RequestItem } from "../../RequestItem";
 
@@ -14,7 +14,7 @@ export interface ITransferFileOwnershipRequestItem extends IRequestItem {
 
 @type("TransferFileOwnershipRequestItem")
 export class TransferFileOwnershipRequestItem extends RequestItem implements ITransferFileOwnershipRequestItem {
-    @serialize({ enforceString: true, customDeserializer: (value: string) => FileReference.from(value), customSerializer: (value: FileReference) => value.truncate()() })
+    @serialize({ enforceString: true, customDeserializer: (value: string) => FileReference.from(value), customSerializer: (value: FileReference) => value.truncate() })
     @validate()
     public fileReference: FileReference;
 
