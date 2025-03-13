@@ -1,15 +1,12 @@
 import { CoreId, FileReference } from "@nmshd/core-types";
-import { CoreBuffer, CryptoEncryptionAlgorithm, CryptoSecretKey } from "@nmshd/crypto";
+import { CoreBuffer, CryptoEncryptionAlgorithm, CryptoSecretKey, SodiumWrapper } from "@nmshd/crypto";
 import { TransferFileOwnershipRequestItem } from "../../../src";
-import { createConnection, createTransport } from "../../testUtils";
 
 describe("TransferFileOwnershipRequestItem", () => {
     let fileReference: FileReference;
 
     beforeAll(async function () {
-        const connection = await createConnection();
-        const transport = createTransport(connection);
-        await transport.init();
+        await SodiumWrapper.ready();
 
         fileReference = FileReference.from({
             id: CoreId.from("FILxxxxxxxxxxxxxxxxx"),
