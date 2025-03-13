@@ -1,7 +1,7 @@
 import { IDatabaseCollection } from "@js-soft/docdb-access-abstractions";
-import { CoreDate } from "@nmshd/core-types";
+import { CoreDate, CoreIdHelper } from "@nmshd/core-types";
 import { instance, mock, verify } from "ts-mockito";
-import { CoreIdHelper, DatawalletModification, DatawalletModificationCategory, DatawalletModificationType, SynchronizedCollection } from "../../../src";
+import { DatawalletModification, DatawalletModificationCategory, DatawalletModificationType, SynchronizedCollection } from "../../../src";
 import { ACacheableSynchronizedCollectionItem, CachedACacheableSynchronizedCollectionItem } from "../../testHelpers/ACacheableSynchronizedCollectionItem";
 import { ASynchronizedCollectionItem } from "../../testHelpers/ASynchronizedCollectionItem";
 import { FakeDatabaseCollection } from "../../testHelpers/FakeDatabaseCollection";

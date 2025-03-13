@@ -16,8 +16,8 @@ import {
     Request,
     ResponseItemResult
 } from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
-import { AccountController, CoreIdHelper, Transport } from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId, CoreIdHelper } from "@nmshd/core-types";
+import { AccountController, Transport } from "@nmshd/transport";
 import { anything, reset, spy, when } from "ts-mockito";
 import {
     AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON,

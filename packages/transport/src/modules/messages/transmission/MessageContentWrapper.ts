@@ -1,6 +1,5 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreAddress, CoreDate, ICoreAddress, ICoreDate } from "@nmshd/core-types";
-import { FileReference, IFileReference } from "../../files/transmission/FileReference";
+import { CoreAddress, CoreDate, FileReference, ICoreAddress, ICoreDate, IFileReference } from "@nmshd/core-types";
 
 export interface IMessageContentWrapper extends ISerializable {
     attachments?: IFileReference[];
