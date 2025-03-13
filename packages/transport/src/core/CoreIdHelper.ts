@@ -1,8 +1,8 @@
-import { CoreId } from "@nmshd/core-types";
+import { CoreId, ICoreIdHelper } from "@nmshd/core-types";
 import { Random, RandomCharacterRange } from "../util";
 import { TransportError } from "./TransportError";
 
-export class CoreIdHelper {
+export class CoreIdHelper implements ICoreIdHelper {
     public static notPrefixed = new CoreIdHelper("");
 
     private readonly coreIdRegex: RegExp;

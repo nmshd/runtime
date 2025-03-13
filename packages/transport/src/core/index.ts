@@ -6,7 +6,6 @@ export * from "./CoreUtil";
 export * from "./DbCollectionName";
 export * from "./DependencyOverrides";
 export * from "./ICorrelator";
-export * from "./Reference";
 export * from "./Transport";
 export * from "./TransportController";
 export * from "./TransportCoreErrors";

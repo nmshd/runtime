@@ -50,7 +50,6 @@ export * from "./files/local/CachedFile";
 export * from "./files/local/File";
 export * from "./files/local/SendFileParameters";
 export * from "./files/transmission/FileMetadata";
-export * from "./files/transmission/FileReference";
 export * from "./messages/backbone/BackboneGetMessages";
 export * from "./messages/backbone/BackbonePostMessages";
 export * from "./messages/backbone/MessageClient";

@@ -1,9 +1,9 @@
 import { ISerializable, Serializable, serialize, type, validate, ValidationError } from "@js-soft/ts-serval";
-import { CoreId, ICoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoSecretKey, ICryptoSecretKey } from "@nmshd/crypto";
-import { CoreIdHelper } from "./CoreIdHelper";
-import { TransportCoreErrors } from "./TransportCoreErrors";
-import { ISharedPasswordProtection, SharedPasswordProtection } from "./types";
+import { CoreError } from "../CoreError";
+import { CoreId, ICoreId } from "../CoreId";
+import { ICoreIdHelper } from "../ICoreIdHelper";
+import { ISharedPasswordProtection, SharedPasswordProtection } from "../SharedPasswordProtection";
 
 export interface IReference extends ISerializable {
     id: ICoreId;
@@ -49,7 +49,8 @@ export class Reference extends Serializable implements IReference {
         const splitted = truncatedBuffer.toUtf8().split("|");
 
         if (![3, 5].includes(splitted.length)) {
-            throw TransportCoreErrors.general.invalidTruncatedReference(
+            throw new CoreError(
+                "error.core-types.invalidTruncatedReference",
                 `A truncated reference must consist of either exactly 3 or exactly 5 components, but it consists of '${splitted.length}' components.`
             );
         }
@@ -77,11 +78,11 @@ export class Reference extends Serializable implements IReference {
         try {
             algorithm = parseInt(alg);
         } catch (_) {
-            throw TransportCoreErrors.general.invalidTruncatedReference("The encryption algorithm must be indicated by an integer in the TruncatedReference.");
+            throw new CoreError("error.core-types.invalidTruncatedReference", "The encryption algorithm must be indicated by an integer in the TruncatedReference.");
         }
 
         if (Number.isNaN(algorithm) || typeof algorithm === "undefined") {
-            throw TransportCoreErrors.general.invalidTruncatedReference("The encryption algorithm must be indicated by an integer in the TruncatedReference.");
+            throw new CoreError("error.core-types.invalidTruncatedReference", "The encryption algorithm must be indicated by an integer in the TruncatedReference.");
         }
 
         return CryptoSecretKey.from({
@@ -90,7 +91,7 @@ export class Reference extends Serializable implements IReference {
         });
     }
 
-    protected static validateId(value: any, helper: CoreIdHelper): void {
+    protected static validateId(value: any, helper: ICoreIdHelper): void {
         if (!value?.id) return;
 
         if (!helper.validate(value.id)) {
