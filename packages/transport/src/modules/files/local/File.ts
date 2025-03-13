@@ -1,9 +1,8 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreDate, ICoreDate } from "@nmshd/core-types";
+import { CoreDate, FileReference, ICoreDate } from "@nmshd/core-types";
 import { CryptoSecretKey, ICryptoSecretKey } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
 import { CoreSynchronizable, ICoreSynchronizable } from "../../../core";
-import { FileReference } from "../transmission/FileReference";
 import { CachedFile, ICachedFile } from "./CachedFile";
 
 export interface IFile extends ICoreSynchronizable {
