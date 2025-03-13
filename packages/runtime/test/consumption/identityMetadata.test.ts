@@ -1,5 +1,5 @@
 import { IdentityMetadata } from "@nmshd/consumption";
-import { Random, RandomCharacterRange } from "@nmshd/transport";
+import { Random, RandomCharacterRange } from "@nmshd/core-types";
 import { AddressString } from "src/useCases/common";
 import { ConsumptionServices, TransportServices } from "../../src";
 import { establishRelationship, RuntimeServiceProvider } from "../lib";

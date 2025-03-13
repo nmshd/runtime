@@ -1,11 +1,11 @@
 import { ILogger } from "@js-soft/logging-abstractions";
+import { CoreIdHelper } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import formDataLib from "form-data";
 import { AgentOptions } from "http";
 import { AgentOptions as HTTPSAgentOptions } from "https";
 import _ from "lodash";
-import { CoreIdHelper } from "../CoreIdHelper";
 import { ICorrelator } from "../ICorrelator";
 import { TransportLoggerFactory } from "../TransportLoggerFactory";
 import { ClientResult } from "./ClientResult";

@@ -1,13 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
-import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
-import {
-    PasswordProtectionCreationParameters,
-    RelationshipTemplate,
-    RelationshipTemplateController,
-    SharedPasswordProtection,
-    TokenContentRelationshipTemplate,
-    TokenController
-} from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId, SharedPasswordProtection } from "@nmshd/core-types";
+import { PasswordProtectionCreationParameters, RelationshipTemplate, RelationshipTemplateController, TokenContentRelationshipTemplate, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import {
     AddressString,
