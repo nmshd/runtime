@@ -2,7 +2,7 @@ import { ISerializable, Serializable, serialize, type, validate, ValidationError
 import { CoreBuffer, CryptoSecretKey, ICryptoSecretKey } from "@nmshd/crypto";
 import { CoreError } from "../CoreError";
 import { CoreId, ICoreId } from "../CoreId";
-import { ICoreIdHelper } from "../ICoreIdHelper";
+import { CoreIdHelper } from "../CoreIdHelper";
 import { ISharedPasswordProtection, SharedPasswordProtection } from "../SharedPasswordProtection";
 
 export interface IReference extends ISerializable {
@@ -91,7 +91,7 @@ export class Reference extends Serializable implements IReference {
         });
     }
 
-    protected static validateId(value: any, helper: ICoreIdHelper): void {
+    protected static validateId(value: any, helper: CoreIdHelper): void {
         if (!value?.id) return;
 
         if (!helper.validate(value.id)) {

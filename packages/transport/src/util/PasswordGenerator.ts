@@ -1,4 +1,4 @@
-import { Random, RandomCharacterRange } from "./Random";
+import { Random, RandomCharacterRange } from "@nmshd/core-types";
 
 const defaultPasswordRange = RandomCharacterRange.AlphanumericEase + RandomCharacterRange.SpecialCharacters;
 

@@ -1,4 +1,4 @@
-import { CoreIdHelper } from "./CoreIdHelper";
+import { CoreIdHelper } from "@nmshd/core-types";
 
 export class TransportIds {
     public static readonly generic = new CoreIdHelper("");

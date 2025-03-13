@@ -1,6 +1,5 @@
 export * from "./backbone";
 export * from "./CoreCrypto";
-export * from "./CoreIdHelper";
 export * from "./CoreSynchronizable";
 export * from "./CoreUtil";
 export * from "./DbCollectionName";
