@@ -1,30 +1,8 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { LokiJsConnection } from "@js-soft/docdb-access-loki";
 import { MongoDbConnection } from "@js-soft/docdb-access-mongo";
-import { NodeLoggerFactory } from "@js-soft/node-logger";
 import { EventBus, EventEmitter2EventBus } from "@js-soft/ts-utils";
 import { IConfigOverwrite, Transport } from "@nmshd/transport";
-
-export const loggerFactory = new NodeLoggerFactory({
-    appenders: {
-        consoleAppender: {
-            type: "stdout",
-            layout: { type: "pattern", pattern: "%[[%p] %c - %m%]" }
-        },
-        console: {
-            type: "logLevelFilter",
-            level: "Warn",
-            appender: "consoleAppender"
-        }
-    },
-
-    categories: {
-        default: {
-            appenders: ["console"],
-            level: "TRACE"
-        }
-    }
-});
 
 export async function createConnection(): Promise<IDatabaseConnection> {
     let dbConnection;
@@ -43,7 +21,7 @@ export function createTransport(
         // ignore errors
     })
 ): Transport {
-    return new Transport(connection, createConfig(), eventBus, loggerFactory);
+    return new Transport(connection, createConfig(), eventBus);
 }
 
 export function createConfig(): IConfigOverwrite {
