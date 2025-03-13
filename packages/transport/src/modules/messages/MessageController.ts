@@ -1,6 +1,6 @@
 import { ISerializable } from "@js-soft/ts-serval";
 import { log, Result } from "@js-soft/ts-utils";
-import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreId } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId, FileReference, ICoreAddress, ICoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
 import { CoreCrypto, TransportCoreErrors, TransportError } from "../../core";
@@ -10,7 +10,6 @@ import { MessageSentEvent, MessageWasReadAtChangedEvent } from "../../events";
 import { AccountController } from "../accounts/AccountController";
 import { IdentityUtil } from "../accounts/IdentityUtil";
 import { File } from "../files/local/File";
-import { FileReference } from "../files/transmission/FileReference";
 import { RelationshipSecretController } from "../relationships/RelationshipSecretController";
 import { RelationshipsController } from "../relationships/RelationshipsController";
 import { PeerDeletionStatus } from "../relationships/local/PeerDeletionInfo";
