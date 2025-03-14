@@ -15,6 +15,7 @@ import {
 } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { AccountController, Transport } from "@nmshd/transport";
+import { anything, reset, spy, when } from "ts-mockito";
 import {
     ConsumptionController,
     ConsumptionIds,
@@ -23,7 +24,8 @@ import {
     LocalAttributeShareInfo,
     LocalRequest,
     LocalRequestStatus,
-    ShareAttributeRequestItemProcessor
+    ShareAttributeRequestItemProcessor,
+    ValidationResult
 } from "../../../../../src";
 import { TestUtil } from "../../../../core/TestUtil";
 import { TestObjectFactory } from "../../testHelpers/TestObjectFactory";
@@ -85,6 +87,19 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 attribute: IdentityAttribute.from({
                     value: GivenName.fromAny({ value: "aGivenName" }),
                     owner: CoreAddress.from("someOtherOwner")
+                })
+            },
+            {
+                scenario: "an Identity Attribute with invalid tag",
+                result: "error",
+                expectedError: {
+                    code: "error.consumption.requests.invalidRequestItem",
+                    message: "Detected invalidity of the following tags: 'invalidTag'."
+                },
+                attribute: IdentityAttribute.from({
+                    value: GivenName.fromAny({ value: "aGivenName" }),
+                    owner: CoreAddress.from("Sender"),
+                    tags: ["invalidTag"]
                 })
             },
             {
@@ -1034,6 +1049,96 @@ describe("ShareAttributeRequestItemProcessor", function () {
             expect(createdAttribute!.shareInfo!.peer.toString()).toStrictEqual(sender.toString());
             expect(createdAttribute!.shareInfo!.sourceAttribute).toBeUndefined();
             expect(createdAttribute!.content.owner.toString()).toStrictEqual(sender.toString());
+        });
+    });
+
+    describe("canAccept", function () {
+        test("returns success when sharing a valid IdentityAttribute", async function () {
+            const existingAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                content: TestObjectFactory.createIdentityAttribute({
+                    owner: testAccount.identity.address,
+                    tags: ["x+%+tag1"]
+                })
+            });
+
+            const sender = CoreAddress.from("Sender");
+
+            const requestItem = ShareAttributeRequestItem.from({
+                mustBeAccepted: true,
+                attribute: existingAttribute.content,
+                sourceAttributeId: existingAttribute.id
+            });
+            const requestId = await ConsumptionIds.request.generate();
+            const request = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const canAcceptWithExistingAttributeResult = await processor.canAccept(
+                requestItem,
+                {
+                    accept: true
+                },
+                request
+            );
+
+            expect(canAcceptWithExistingAttributeResult).successfulValidationResult();
+        });
+
+        test("returns an error when sharing an IdentityAttribute with an invalid tag", async function () {
+            const attributesControllerSpy = spy(consumptionController.attributes);
+            when(attributesControllerSpy.validateTags(anything())).thenResolve(ValidationResult.success());
+
+            const existingAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                content: TestObjectFactory.createIdentityAttribute({
+                    tags: ["invalidTag"],
+                    owner: testAccount.identity.address
+                })
+            });
+
+            reset(attributesControllerSpy);
+
+            const sender = CoreAddress.from("Sender");
+
+            const requestItem = ShareAttributeRequestItem.from({
+                mustBeAccepted: true,
+                attribute: existingAttribute.content,
+                sourceAttributeId: existingAttribute.id
+            });
+            const requestId = await ConsumptionIds.request.generate();
+            const request = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const canAcceptWithExistingAttributeResult = await processor.canAccept(
+                requestItem,
+                {
+                    accept: true
+                },
+                request
+            );
+
+            expect(canAcceptWithExistingAttributeResult).errorValidationResult({
+                code: "error.consumption.requests.invalidRequestItem",
+                message: "Detected invalidity of the following tags: 'invalidTag'."
+            });
         });
     });
 

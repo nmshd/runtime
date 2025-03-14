@@ -38,6 +38,7 @@ export interface DecidableShareAttributeRequestItemDVO extends DecidableRequestI
 
 export interface DecidableAuthenticationRequestItemDVO extends DecidableRequestItemDVO {
     type: "DecidableAuthenticationRequestItemDVO";
+    title: string;
 }
 
 export interface DecidableConsentRequestItemDVO extends DecidableRequestItemDVO {
