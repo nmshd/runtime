@@ -465,11 +465,11 @@ export class TestUtil {
     public static async uploadFile(from: AccountController, fileContent: CoreBuffer): Promise<File> {
         const params: ISendFileParameters = {
             buffer: fileContent,
-            title: "aFileName",
-            description: "Dies ist eine Beschreibung",
-            filename: "Test.bin",
+            title: "aTitle",
+            description: "aDescription",
+            filename: "aFilename",
             filemodified: CoreDate.from("2019-09-30T00:00:00.000Z"),
-            mimetype: "application/json",
+            mimetype: "aMimetype",
             expiresAt: CoreDate.utc().add({ minutes: 5 })
         };
 
