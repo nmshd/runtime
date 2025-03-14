@@ -43,7 +43,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
         const senderFile = await TestUtil.uploadFile(senderAccountController, { tags: ["x+%+tag"] });
         senderTrucatedFileReference = senderFile.truncate();
 
-        const senderExpiredFile = await TestUtil.uploadFile(senderAccountController, { expiredAt: CoreDate.utc().add({ seconds: 1 }) });
+        const senderExpiredFile = await TestUtil.uploadFile(senderAccountController, { expiresAt: CoreDate.utc().add({ seconds: 1 }) });
         senderExpiredTrucatedFileReference = senderExpiredFile.truncate();
         await sleep(2000);
 

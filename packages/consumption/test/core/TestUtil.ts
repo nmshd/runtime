@@ -23,7 +23,6 @@ import {
     Transport,
     TransportLoggerFactory
 } from "@nmshd/transport";
-import fs from "fs";
 import { LogLevel } from "typescript-logging";
 import {
     ConsumptionConfig,
@@ -463,15 +462,15 @@ export class TestUtil {
         });
     }
 
-    public static async uploadFile(from: AccountController, parameters?: { fileContent?: CoreBuffer; expiredAt?: CoreDate; tags?: string[] }): Promise<File> {
+    public static async uploadFile(from: AccountController, parameters?: { fileContent?: CoreBuffer; expiresAt?: CoreDate; tags?: string[] }): Promise<File> {
         const params: ISendFileParameters = {
-            buffer: parameters?.fileContent ?? CoreBuffer.from(await fs.promises.readFile(`${__dirname}/../__assets__/test.txt`)),
+            buffer: parameters?.fileContent ?? CoreBuffer.from("test"),
             title: "aTitle",
             description: "aDescription",
             filename: "aFilename",
             filemodified: CoreDate.from("2019-09-30T00:00:00.000Z"),
             mimetype: "aMimetype",
-            expiresAt: parameters?.expiredAt ?? CoreDate.utc().add({ minutes: 5 }),
+            expiresAt: parameters?.expiresAt ?? CoreDate.utc().add({ minutes: 5 }),
             tags: parameters?.tags
         };
 
