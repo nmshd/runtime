@@ -462,15 +462,16 @@ export class TestUtil {
         });
     }
 
-    public static async uploadFile(from: AccountController, fileContent: CoreBuffer): Promise<File> {
+    public static async uploadFile(from: AccountController, parameters?: { fileContent?: CoreBuffer; expiresAt?: CoreDate; tags?: string[] }): Promise<File> {
         const params: ISendFileParameters = {
-            buffer: fileContent,
-            title: "aFileName",
-            description: "Dies ist eine Beschreibung",
-            filename: "Test.bin",
+            buffer: parameters?.fileContent ?? CoreBuffer.from("test"),
+            title: "aTitle",
+            description: "aDescription",
+            filename: "aFilename",
             filemodified: CoreDate.from("2019-09-30T00:00:00.000Z"),
-            mimetype: "application/json",
-            expiresAt: CoreDate.utc().add({ minutes: 5 })
+            mimetype: "aMimetype",
+            expiresAt: parameters?.expiresAt ?? CoreDate.utc().add({ minutes: 5 }),
+            tags: parameters?.tags
         };
 
         const file = await from.files.sendFile(params);

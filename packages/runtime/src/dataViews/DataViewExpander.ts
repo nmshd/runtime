@@ -47,11 +47,13 @@ import {
     ShareAttributeRequestItemJSON,
     SurnameJSON,
     ThirdPartyRelationshipAttributeQueryJSON,
+    TransferFileOwnershipAcceptResponseItemJSON,
+    TransferFileOwnershipRequestItemJSON,
     ValueHints,
     ValueHintsJSON,
     isRequestItemDerivation
 } from "@nmshd/content";
-import { CoreAddress, CoreId } from "@nmshd/core-types";
+import { CoreAddress, CoreId, FileReference } from "@nmshd/core-types";
 import { IdentityController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import _ from "lodash";
@@ -84,6 +86,7 @@ import {
     DecidableReadAttributeRequestItemDVO,
     DecidableRegisterAttributeListenerRequestItemDVO,
     DecidableShareAttributeRequestItemDVO,
+    DecidableTransferFileOwnershipRequestItemDVO,
     LocalAttributeDVO,
     LocalAttributeListenerDVO,
     LocalRequestDVO,
@@ -137,7 +140,9 @@ import {
     ResponseItemGroupDVO,
     ShareAttributeAcceptResponseItemDVO,
     ShareAttributeRequestItemDVO,
-    ThirdPartyRelationshipAttributeQueryDVO
+    ThirdPartyRelationshipAttributeQueryDVO,
+    TransferFileOwnershipAcceptResponseItemDVO,
+    TransferFileOwnershipRequestItemDVO
 } from "./content";
 import { FileDVO, IdentityDVO, MessageDVO, MessageStatus, RecipientDVO, RelationshipDVO, RelationshipDirection, RelationshipTemplateDVO } from "./transport";
 
@@ -742,6 +747,34 @@ export class DataViewExpander {
                     response: responseItemDVO
                 } as RegisterAttributeListenerRequestItemDVO;
 
+            case "TransferFileOwnershipRequestItem":
+                const transferFileOwnershipRequestItem = requestItem as TransferFileOwnershipRequestItemJSON;
+
+                await this.transport.files.getOrLoadFile({ reference: transferFileOwnershipRequestItem.fileReference });
+                const fileReference = FileReference.from(transferFileOwnershipRequestItem.fileReference);
+                const file = await this.expandFileId(fileReference.id.toString());
+
+                if (isDecidable) {
+                    return {
+                        ...transferFileOwnershipRequestItem,
+                        type: "DecidableTransferFileOwnershipRequestItemDVO",
+                        id: "",
+                        name: requestItem.title ?? "i18n://dvo.requestItem.DecidableTransferFileOwnershipRequestItem.name",
+                        isDecidable,
+                        response: responseItemDVO,
+                        file
+                    } as DecidableTransferFileOwnershipRequestItemDVO;
+                }
+                return {
+                    ...transferFileOwnershipRequestItem,
+                    type: "TransferFileOwnershipRequestItemDVO",
+                    id: "",
+                    name: requestItem.title ?? "i18n://dvo.requestItem.TransferFileOwnershipRequestItem.name",
+                    isDecidable,
+                    response: responseItemDVO,
+                    file
+                } as TransferFileOwnershipRequestItemDVO;
+
             default:
                 return {
                     ...requestItem,
@@ -879,6 +912,31 @@ export class DataViewExpander {
                         name: name,
                         listener: localAttributeListener
                     } as RegisterAttributeListenerAcceptResponseItemDVO;
+
+                case "TransferFileOwnershipAcceptResponseItem":
+                    const transferFileOwnershipResponseItem = responseItem as TransferFileOwnershipAcceptResponseItemJSON;
+
+                    const sharedAttributeResultForTransfer = await this.consumption.attributes.getAttribute({ id: transferFileOwnershipResponseItem.attributeId });
+                    const sharedAttributeDVOForTransfer = await this.expandLocalAttributeDTO(sharedAttributeResultForTransfer.value);
+
+                    const repositoryAttributeResultForTransfer = await this.consumption.attributes.getAttribute({
+                        id: sharedAttributeResultForTransfer.value.shareInfo!.sourceAttribute!
+                    });
+
+                    let repositoryAttributeDVOForTransfer;
+                    if (repositoryAttributeResultForTransfer.isSuccess) {
+                        repositoryAttributeDVOForTransfer = await this.expandLocalAttributeDTO(repositoryAttributeResultForTransfer.value);
+                    }
+
+                    return {
+                        ...transferFileOwnershipResponseItem,
+                        type: "TransferFileOwnershipAcceptResponseItemDVO",
+                        id: repositoryAttributeDVOForTransfer?.id ?? transferFileOwnershipResponseItem.attributeId,
+                        name: name,
+                        repositoryAttribute: repositoryAttributeDVOForTransfer,
+                        sharedAttributeId: transferFileOwnershipResponseItem.attributeId,
+                        sharedAttribute: sharedAttributeDVOForTransfer
+                    } as TransferFileOwnershipAcceptResponseItemDVO;
 
                 case "AttributeSuccessionAcceptResponseItem":
                     const attributeSuccessionResponseItem = responseItem as AttributeSuccessionAcceptResponseItemJSON;

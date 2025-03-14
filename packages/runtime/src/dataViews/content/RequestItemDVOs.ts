@@ -1,5 +1,6 @@
 import { LocalAttributeDVO } from "../consumption";
 import { DataViewObject } from "../DataViewObject";
+import { FileDVO } from "../transport";
 import { AttributeQueryDVO, DraftIdentityAttributeDVO, DraftRelationshipAttributeDVO, IdentityAttributeQueryDVO, ThirdPartyRelationshipAttributeQueryDVO } from "./AttributeDVOs";
 import { ResponseItemDVO, ResponseItemGroupDVO } from "./ResponseItemDVOs";
 
@@ -69,4 +70,10 @@ export interface RegisterAttributeListenerRequestItemDVO extends RequestItemDVO 
 export interface FreeTextRequestItemDVO extends RequestItemDVO {
     type: "FreeTextRequestItemDVO";
     freeText: string;
+}
+
+export interface TransferFileOwnershipRequestItemDVO extends RequestItemDVO {
+    type: "TransferFileOwnershipRequestItemDVO";
+    fileReference: string;
+    file: FileDVO;
 }

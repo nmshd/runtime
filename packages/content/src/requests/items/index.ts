@@ -16,3 +16,5 @@ export * from "./registerAttributeListener/RegisterAttributeListenerAcceptRespon
 export * from "./registerAttributeListener/RegisterAttributeListenerRequestItem";
 export * from "./shareAttribute/ShareAttributeAcceptResponseItem";
 export * from "./shareAttribute/ShareAttributeRequestItem";
+export * from "./transferFileOwnership/TransferFileOwnershipAcceptResponseItem";
+export * from "./transferFileOwnership/TransferFileOwnershipRequestItem";

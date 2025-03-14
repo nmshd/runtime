@@ -19,7 +19,8 @@ import {
     Request,
     ResponseItemGroupJSON,
     ResponseResult,
-    ShareAttributeAcceptResponseItemJSON
+    ShareAttributeAcceptResponseItemJSON,
+    TransferFileOwnershipAcceptResponseItemJSON
 } from "@nmshd/content";
 import { CoreAddress, CoreDate } from "@nmshd/core-types";
 import {
@@ -31,7 +32,15 @@ import {
     RelationshipTemplateProcessedEvent,
     RelationshipTemplateProcessedResult
 } from "../../src";
-import { RuntimeServiceProvider, TestRequestItem, TestRuntimeServices, establishRelationship, exchangeMessage, executeFullCreateAndShareRepositoryAttributeFlow } from "../lib";
+import {
+    RuntimeServiceProvider,
+    TestRequestItem,
+    TestRuntimeServices,
+    establishRelationship,
+    exchangeMessage,
+    executeFullCreateAndShareRepositoryAttributeFlow,
+    uploadFile
+} from "../lib";
 
 const runtimeServiceProvider = new RuntimeServiceProvider();
 
@@ -2115,6 +2124,62 @@ describe("DeciderModule", () => {
             expect(sharedAttribute.content.owner).toBe(sender.address);
             expect(sharedAttribute.content.value["@type"]).toBe("ProprietaryString");
             expect((sharedAttribute.content.value as ProprietaryStringJSON).value).toBe("A proprietary string");
+        });
+
+        test("accepts a TransferFileOwnershipRequestItem given a TransferFileOwnershipRequestItemConfig with all fields set", async () => {
+            const deciderConfig: DeciderModuleConfigurationOverwrite = {
+                automationConfig: [
+                    {
+                        requestConfig: {
+                            "content.item.@type": "TransferFileOwnershipRequestItem"
+                        },
+                        responseConfig: {
+                            accept: true
+                        }
+                    }
+                ]
+            };
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig, enableRequestModule: true }))[0];
+
+            await establishRelationship(sender.transport, recipient.transport);
+            const file = await uploadFile(sender.transport);
+
+            const message = await exchangeMessage(sender.transport, recipient.transport);
+            const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                receivedRequest: {
+                    "@type": "Request",
+                    items: [
+                        {
+                            "@type": "TransferFileOwnershipRequestItem",
+                            mustBeAccepted: true,
+                            fileReference: file.truncatedReference
+                        }
+                    ]
+                },
+                requestSourceId: message.id
+            });
+            await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+            await expect(recipient.eventBus).toHavePublished(
+                MessageProcessedEvent,
+                (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
+            );
+
+            const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
+            expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Decided);
+            expect(requestAfterAction.response).toBeDefined();
+
+            const responseContent = requestAfterAction.response!.content;
+            expect(responseContent.result).toBe(ResponseResult.Accepted);
+            expect(responseContent.items).toHaveLength(1);
+            expect(responseContent.items[0]["@type"]).toBe("TransferFileOwnershipAcceptResponseItem");
+
+            const sharedAttributeId = (responseContent.items[0] as TransferFileOwnershipAcceptResponseItemJSON).attributeId;
+            const sharedAttribute = (await recipient.consumption.attributes.getAttribute({ id: sharedAttributeId })).value;
+            expect(sharedAttribute.shareInfo).toBeDefined();
+
+            const repositoryAttribute = (await recipient.consumption.attributes.getAttribute({ id: sharedAttribute.shareInfo!.sourceAttribute! })).value;
+            expect(repositoryAttribute.content.value["@type"]).toBe("IdentityFileReference");
         });
     });
 

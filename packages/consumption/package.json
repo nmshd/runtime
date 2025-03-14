@@ -60,7 +60,7 @@
     },
     "dependencies": {
         "@js-soft/docdb-querytranslator": "^1.1.5",
-        "@js-soft/ts-serval": "2.0.11",
+        "@js-soft/ts-serval": "2.0.12",
         "@js-soft/ts-utils": "2.3.3",
         "@nmshd/content": "*",
         "@nmshd/core-types": "*",
