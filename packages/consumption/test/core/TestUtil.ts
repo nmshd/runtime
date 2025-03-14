@@ -466,11 +466,11 @@ export class TestUtil {
     public static async uploadFile(from: AccountController, parameters?: { fileContent?: CoreBuffer; expiredAt?: CoreDate; tags?: string[] }): Promise<File> {
         const params: ISendFileParameters = {
             buffer: parameters?.fileContent ?? CoreBuffer.from(await fs.promises.readFile(`${__dirname}/../__assets__/test.txt`)),
-            title: "aFileName",
-            description: "This is a valid file description",
-            filename: "test.txt",
+            title: "aTitle",
+            description: "aDescription",
+            filename: "aFilename",
             filemodified: CoreDate.from("2019-09-30T00:00:00.000Z"),
-            mimetype: "test/plain",
+            mimetype: "aMimetype",
             expiresAt: parameters?.expiredAt ?? CoreDate.utc().add({ minutes: 5 }),
             tags: parameters?.tags
         };
