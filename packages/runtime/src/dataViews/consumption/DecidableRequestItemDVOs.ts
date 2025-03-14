@@ -1,5 +1,6 @@
 import { RequestItemDVO } from "../content";
 import { DraftIdentityAttributeDVO, DraftRelationshipAttributeDVO, IdentityAttributeQueryDVO, ThirdPartyRelationshipAttributeQueryDVO } from "../content/AttributeDVOs";
+import { FileDVO } from "../transport";
 import { LocalAttributeDVO, ProcessedAttributeQueryDVO } from "./LocalAttributeDVO";
 
 export interface DecidableRequestItemDVO extends RequestItemDVO {
@@ -53,4 +54,10 @@ export interface DecidableFreeTextRequestItemDVO extends DecidableRequestItemDVO
 export interface DecidableRegisterAttributeListenerRequestItemDVO extends DecidableRequestItemDVO {
     type: "DecidableRegisterAttributeListenerRequestItemDVO";
     query: IdentityAttributeQueryDVO | ThirdPartyRelationshipAttributeQueryDVO;
+}
+
+export interface DecidableTransferFileOwnershipRequestItemDVO extends DecidableRequestItemDVO {
+    type: "DecidableTransferFileOwnershipRequestItemDVO";
+    fileReference: string;
+    file: FileDVO;
 }
