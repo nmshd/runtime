@@ -804,572 +804,576 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             recipient = accountController.identity.address;
         });
 
-        test("accept with existing RepositoryAttribute", async function () {
-            const attribute = await consumptionController.attributes.createRepositoryAttribute({
-                content: TestObjectFactory.createIdentityAttribute({
-                    owner: recipient
-                })
-            });
+        describe("accept with existing Attribute", function () {
+            test("accept with existing RepositoryAttribute", async function () {
+                const attribute = await consumptionController.attributes.createRepositoryAttribute({
+                    content: TestObjectFactory.createIdentityAttribute({
+                        owner: recipient
+                    })
+                });
 
-            const requestItem = ProposeAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
-                attribute: TestObjectFactory.createIdentityAttribute()
-            });
-            const requestId = await ConsumptionIds.request.generate();
-            const incomingRequest = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
+                const requestItem = ProposeAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
+                    attribute: TestObjectFactory.createIdentityAttribute()
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const incomingRequest = LocalRequest.from({
                     id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON = {
+                    accept: true,
+                    attributeId: attribute.id.toString()
+                };
+
+                const result = await processor.accept(requestItem, acceptParams, incomingRequest);
+
+                const createdAttribute = await consumptionController.attributes.getLocalAttribute((result as ProposeAttributeAcceptResponseItem).attributeId);
+                expect(createdAttribute).toBeDefined();
+                expect(createdAttribute!.shareInfo).toBeDefined();
+                expect(createdAttribute!.shareInfo!.peer.toString()).toStrictEqual(incomingRequest.peer.toString());
             });
 
-            const acceptParams: AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON = {
-                accept: true,
-                attributeId: attribute.id.toString()
-            };
+            test("accept with existing IdentityAttribute whose predecessor was already shared", async function () {
+                const predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                    content: TestObjectFactory.createIdentityAttribute({
+                        owner: accountController.identity.address
+                    })
+                });
 
-            const result = await processor.accept(requestItem, acceptParams, incomingRequest);
+                const predecessorOwnSharedIdentityAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
+                    sourceAttributeId: predecessorRepositoryAttribute.id,
+                    peer: sender,
+                    requestReference: CoreId.from("initialRequest")
+                });
 
-            const createdAttribute = await consumptionController.attributes.getLocalAttribute((result as ProposeAttributeAcceptResponseItem).attributeId);
-            expect(createdAttribute).toBeDefined();
-            expect(createdAttribute!.shareInfo).toBeDefined();
-            expect(createdAttribute!.shareInfo!.peer.toString()).toStrictEqual(incomingRequest.peer.toString());
-        });
+                const { successor: successorRepositoryAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(predecessorRepositoryAttribute.id, {
+                    content: IdentityAttribute.from({
+                        value: {
+                            "@type": "GivenName",
+                            value: "A new given name"
+                        },
+                        owner: accountController.identity.address
+                    })
+                });
 
-        test("accept proposed IdentityAttribute", async function () {
-            const requestItem = ProposeAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
-                attribute: IdentityAttribute.from({
-                    value: GivenName.fromAny({ value: "aGivenName" }),
-                    owner: CoreAddress.from("")
-                })
-            });
+                const requestItem = ProposeAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
+                    attribute: IdentityAttribute.from({
+                        value: GivenName.fromAny({ value: "aGivenName" }),
+                        owner: CoreAddress.from("")
+                    })
+                });
 
-            const requestId = await ConsumptionIds.request.generate();
-            const incomingRequest = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
+                const requestId = await ConsumptionIds.request.generate();
+                const incomingRequest = LocalRequest.from({
                     id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON = {
+                    accept: true,
+                    attributeId: successorRepositoryAttribute.id.toString()
+                };
+
+                const result = await processor.accept(requestItem, acceptParams, incomingRequest);
+                expect(result).toBeInstanceOf(AttributeSuccessionAcceptResponseItem);
+
+                const successorOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute((result as AttributeSuccessionAcceptResponseItem).successorId);
+                expect(successorOwnSharedIdentityAttribute).toBeDefined();
+                expect(successorOwnSharedIdentityAttribute!.shareInfo).toBeDefined();
+                expect(successorOwnSharedIdentityAttribute!.shareInfo!.peer.toString()).toStrictEqual(incomingRequest.peer.toString());
+                expect(successorOwnSharedIdentityAttribute!.shareInfo!.sourceAttribute).toStrictEqual(successorRepositoryAttribute.id);
+                expect(successorOwnSharedIdentityAttribute!.succeeds).toStrictEqual(predecessorOwnSharedIdentityAttribute.id);
+
+                const updatedPredecessorOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute(predecessorOwnSharedIdentityAttribute.id);
+                expect(updatedPredecessorOwnSharedIdentityAttribute!.succeededBy).toStrictEqual(successorOwnSharedIdentityAttribute!.id);
             });
 
-            const acceptParams: AcceptProposeAttributeRequestItemParametersWithNewAttributeJSON = {
-                accept: true,
-                attribute: requestItem.attribute.toJSON()
-            };
+            test("accept with existing IdentityAttribute whose predecessor was already shared but is DeletedByPeer", async function () {
+                const predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                    content: TestObjectFactory.createIdentityAttribute({
+                        owner: accountController.identity.address
+                    })
+                });
 
-            const result = await processor.accept(requestItem, acceptParams, incomingRequest);
+                const { successor: successorRepositoryAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(predecessorRepositoryAttribute.id, {
+                    content: IdentityAttribute.from({
+                        value: {
+                            "@type": "GivenName",
+                            value: "A succeeded given name"
+                        },
+                        owner: accountController.identity.address
+                    })
+                });
 
-            const createdAttribute = await consumptionController.attributes.getLocalAttribute((result as ProposeAttributeAcceptResponseItem).attributeId);
-            expect(createdAttribute).toBeDefined();
-            expect(createdAttribute!.shareInfo).toBeDefined();
-            expect(createdAttribute!.shareInfo!.peer.toString()).toStrictEqual(incomingRequest.peer.toString());
-            expect(createdAttribute!.content.owner.toString()).toStrictEqual(recipient.toString());
-        });
+                await consumptionController.attributes.createAttributeUnsafe({
+                    content: TestObjectFactory.createIdentityAttribute({
+                        owner: accountController.identity.address
+                    }),
+                    shareInfo: LocalAttributeShareInfo.from({
+                        sourceAttribute: predecessorRepositoryAttribute.id,
+                        peer: sender,
+                        requestReference: await CoreIdHelper.notPrefixed.generate()
+                    }),
+                    deletionInfo: LocalAttributeDeletionInfo.from({
+                        deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
+                        deletionDate: CoreDate.utc().subtract({ days: 1 })
+                    })
+                });
 
-        test("in case of accepting with a new IdentityAttribute, create a new RepositoryAttribute as well as a copy of it for the Recipient", async function () {
-            const requestItem = ProposeAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
-                attribute: TestObjectFactory.createIdentityAttribute()
-            });
-            const requestId = await ConsumptionIds.request.generate();
-            const incomingRequest = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
+                const requestItem = ProposeAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
+                    attribute: IdentityAttribute.from({
+                        value: GivenName.fromAny({ value: "aGivenName" }),
+                        owner: CoreAddress.from("")
+                    })
+                });
+
+                const requestId = await ConsumptionIds.request.generate();
+                const incomingRequest = LocalRequest.from({
                     id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON = {
+                    accept: true,
+                    attributeId: successorRepositoryAttribute.id.toString()
+                };
+
+                const result = await processor.accept(requestItem, acceptParams, incomingRequest);
+                expect(result).toBeInstanceOf(ProposeAttributeAcceptResponseItem);
+
+                const createdAttribute = await consumptionController.attributes.getLocalAttribute((result as ProposeAttributeAcceptResponseItem).attributeId);
+                expect(createdAttribute!.content).toStrictEqual(successorRepositoryAttribute.content);
+                expect(createdAttribute!.deletionInfo).toBeUndefined();
+                expect(createdAttribute!.succeeds).toBeUndefined();
             });
 
-            const acceptParams: AcceptProposeAttributeRequestItemParametersWithNewAttributeJSON = {
-                accept: true,
-                attribute: {
-                    "@type": "IdentityAttribute",
-                    owner: recipient.toString(),
-                    value: {
-                        "@type": "GivenName",
-                        value: "aGivenName"
-                    }
-                }
-            };
+            test("accept with existing IdentityAttribute whose predecessor was already shared but is ToBeDeletedByPeer", async function () {
+                const predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                    content: TestObjectFactory.createIdentityAttribute({
+                        owner: CoreAddress.from(accountController.identity.address)
+                    })
+                });
 
-            const result = await processor.accept(requestItem, acceptParams, incomingRequest);
-            const createdSharedAttribute = await consumptionController.attributes.getLocalAttribute((result as ProposeAttributeAcceptResponseItem).attributeId);
+                const { successor: successorRepositoryAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(predecessorRepositoryAttribute.id, {
+                    content: IdentityAttribute.from({
+                        value: {
+                            "@type": "GivenName",
+                            value: "A succeeded given name"
+                        },
+                        owner: CoreAddress.from(accountController.identity.address)
+                    })
+                });
 
-            expect(createdSharedAttribute).toBeDefined();
-            expect(createdSharedAttribute!.shareInfo).toBeDefined();
-            expect(createdSharedAttribute!.shareInfo!.peer.toString()).toStrictEqual(incomingRequest.peer.toString());
-            expect(createdSharedAttribute!.shareInfo!.sourceAttribute).toBeDefined();
+                await consumptionController.attributes.createAttributeUnsafe({
+                    content: TestObjectFactory.createIdentityAttribute({
+                        owner: CoreAddress.from(accountController.identity.address)
+                    }),
+                    shareInfo: LocalAttributeShareInfo.from({
+                        sourceAttribute: predecessorRepositoryAttribute.id,
+                        peer: sender,
+                        requestReference: await CoreIdHelper.notPrefixed.generate()
+                    }),
+                    deletionInfo: LocalAttributeDeletionInfo.from({ deletionStatus: LocalAttributeDeletionStatus.ToBeDeletedByPeer, deletionDate: CoreDate.utc().add({ days: 1 }) })
+                });
 
-            const createdRepositoryAttribute = await consumptionController.attributes.getLocalAttribute(createdSharedAttribute!.shareInfo!.sourceAttribute!);
-            expect(createdRepositoryAttribute).toBeDefined();
-        });
+                const requestItem = ProposeAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
+                    attribute: IdentityAttribute.from({
+                        value: GivenName.fromAny({ value: "aGivenName" }),
+                        owner: CoreAddress.from("")
+                    })
+                });
 
-        test("in case of accepting with a new IdentityAttribute, trim the newly created RepositoryAttribute as well as the copy for the Recipient", async function () {
-            const requestItem = ProposeAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
-                attribute: TestObjectFactory.createIdentityAttribute()
-            });
-            const requestId = await ConsumptionIds.request.generate();
-            const incomingRequest = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
+                const requestId = await ConsumptionIds.request.generate();
+                const incomingRequest = LocalRequest.from({
                     id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON = {
+                    accept: true,
+                    attributeId: successorRepositoryAttribute.id.toString()
+                };
+
+                const result = await processor.accept(requestItem, acceptParams, incomingRequest);
+                expect(result).toBeInstanceOf(ProposeAttributeAcceptResponseItem);
+
+                const createdAttribute = await consumptionController.attributes.getLocalAttribute((result as ProposeAttributeAcceptResponseItem).attributeId);
+                expect(createdAttribute!.content).toStrictEqual(successorRepositoryAttribute.content);
+                expect(createdAttribute!.deletionInfo).toBeUndefined();
+                expect(createdAttribute!.succeeds).toBeUndefined();
             });
 
-            const acceptParams: AcceptProposeAttributeRequestItemParametersWithNewAttributeJSON = {
-                accept: true,
-                attribute: {
-                    "@type": "IdentityAttribute",
-                    owner: recipient.toString(),
-                    value: {
-                        "@type": "GivenName",
-                        value: "    aGivenName  "
-                    }
-                }
-            };
+            test("accept with existing IdentityAttribute that is already shared and the latest shared version", async function () {
+                const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                    content: TestObjectFactory.createIdentityAttribute({
+                        owner: accountController.identity.address
+                    })
+                });
 
-            const result = await processor.accept(requestItem, acceptParams, incomingRequest);
-
-            const createdSharedAttribute = await consumptionController.attributes.getLocalAttribute((result as ProposeAttributeAcceptResponseItem).attributeId);
-            expect(createdSharedAttribute).toBeDefined();
-            expect((createdSharedAttribute!.content.value as GivenName).value).toBe("aGivenName");
-
-            const createdRepositoryAttribute = await consumptionController.attributes.getLocalAttribute(createdSharedAttribute!.shareInfo!.sourceAttribute!);
-            expect(createdRepositoryAttribute).toBeDefined();
-            expect((createdRepositoryAttribute!.content.value as GivenName).value).toBe("aGivenName");
-        });
-
-        test("accept with new RelationshipAttribute", async function () {
-            const requestItem = ProposeAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: RelationshipAttributeQuery.from({
-                    key: "aKey",
-                    owner: "",
-                    attributeCreationHints: {
-                        valueType: "ProprietaryString",
-                        title: "aTitle",
-                        confidentiality: RelationshipAttributeConfidentiality.Public
-                    }
-                }),
-                attribute: TestObjectFactory.createRelationshipAttribute()
-            });
-            const requestId = await ConsumptionIds.request.generate();
-            const incomingRequest = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
-            });
-
-            const acceptParams: AcceptProposeAttributeRequestItemParametersWithNewAttributeJSON = {
-                accept: true,
-                attribute: {
-                    "@type": "RelationshipAttribute",
-                    key: "aKey",
-                    confidentiality: RelationshipAttributeConfidentiality.Public,
-                    owner: "",
-                    value: {
-                        "@type": "ProprietaryString",
-                        title: "aTitle",
-                        value: "aStringValue"
-                    }
-                }
-            };
-
-            const result = await processor.accept(requestItem, acceptParams, incomingRequest);
-            const createdSharedAttribute = await consumptionController.attributes.getLocalAttribute((result as ProposeAttributeAcceptResponseItem).attributeId);
-
-            expect(createdSharedAttribute).toBeDefined();
-            expect(createdSharedAttribute!.shareInfo).toBeDefined();
-            expect(createdSharedAttribute!.shareInfo!.peer.toString()).toStrictEqual(incomingRequest.peer.toString());
-            expect(createdSharedAttribute!.shareInfo!.sourceAttribute).toBeUndefined();
-            expect(createdSharedAttribute!.content.owner.toString()).toStrictEqual(recipient.toString());
-        });
-
-        test("accept with existing IdentityAttribute whose predecessor was already shared", async function () {
-            const predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
-                content: TestObjectFactory.createIdentityAttribute({
-                    owner: accountController.identity.address
-                })
-            });
-
-            const predecessorOwnSharedIdentityAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
-                sourceAttributeId: predecessorRepositoryAttribute.id,
-                peer: sender,
-                requestReference: CoreId.from("initialRequest")
-            });
-
-            const { successor: successorRepositoryAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(predecessorRepositoryAttribute.id, {
-                content: IdentityAttribute.from({
-                    value: {
-                        "@type": "GivenName",
-                        value: "A new given name"
-                    },
-                    owner: accountController.identity.address
-                })
-            });
-
-            const requestItem = ProposeAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
-                attribute: IdentityAttribute.from({
-                    value: GivenName.fromAny({ value: "aGivenName" }),
-                    owner: CoreAddress.from("")
-                })
-            });
-
-            const requestId = await ConsumptionIds.request.generate();
-            const incomingRequest = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
-            });
-
-            const acceptParams: AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON = {
-                accept: true,
-                attributeId: successorRepositoryAttribute.id.toString()
-            };
-
-            const result = await processor.accept(requestItem, acceptParams, incomingRequest);
-            expect(result).toBeInstanceOf(AttributeSuccessionAcceptResponseItem);
-
-            const successorOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute((result as AttributeSuccessionAcceptResponseItem).successorId);
-            expect(successorOwnSharedIdentityAttribute).toBeDefined();
-            expect(successorOwnSharedIdentityAttribute!.shareInfo).toBeDefined();
-            expect(successorOwnSharedIdentityAttribute!.shareInfo!.peer.toString()).toStrictEqual(incomingRequest.peer.toString());
-            expect(successorOwnSharedIdentityAttribute!.shareInfo!.sourceAttribute).toStrictEqual(successorRepositoryAttribute.id);
-            expect(successorOwnSharedIdentityAttribute!.succeeds).toStrictEqual(predecessorOwnSharedIdentityAttribute.id);
-
-            const updatedPredecessorOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute(predecessorOwnSharedIdentityAttribute.id);
-            expect(updatedPredecessorOwnSharedIdentityAttribute!.succeededBy).toStrictEqual(successorOwnSharedIdentityAttribute!.id);
-        });
-
-        test("accept with existing IdentityAttribute whose predecessor was already shared but is DeletedByPeer", async function () {
-            const predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
-                content: TestObjectFactory.createIdentityAttribute({
-                    owner: accountController.identity.address
-                })
-            });
-
-            const { successor: successorRepositoryAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(predecessorRepositoryAttribute.id, {
-                content: IdentityAttribute.from({
-                    value: {
-                        "@type": "GivenName",
-                        value: "A succeeded given name"
-                    },
-                    owner: accountController.identity.address
-                })
-            });
-
-            await consumptionController.attributes.createAttributeUnsafe({
-                content: TestObjectFactory.createIdentityAttribute({
-                    owner: accountController.identity.address
-                }),
-                shareInfo: LocalAttributeShareInfo.from({
-                    sourceAttribute: predecessorRepositoryAttribute.id,
+                const alreadySharedAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
+                    sourceAttributeId: repositoryAttribute.id,
                     peer: sender,
                     requestReference: await CoreIdHelper.notPrefixed.generate()
-                }),
-                deletionInfo: LocalAttributeDeletionInfo.from({
-                    deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
-                    deletionDate: CoreDate.utc().subtract({ days: 1 })
-                })
-            });
+                });
 
-            const requestItem = ProposeAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
-                attribute: IdentityAttribute.from({
-                    value: GivenName.fromAny({ value: "aGivenName" }),
-                    owner: CoreAddress.from("")
-                })
-            });
+                const requestItem = ProposeAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
+                    attribute: IdentityAttribute.from({
+                        value: GivenName.fromAny({ value: "aGivenName" }),
+                        owner: CoreAddress.from("")
+                    })
+                });
 
-            const requestId = await ConsumptionIds.request.generate();
-            const incomingRequest = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
+                const requestId = await ConsumptionIds.request.generate();
+                const incomingRequest = LocalRequest.from({
                     id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
-            });
-
-            const acceptParams: AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON = {
-                accept: true,
-                attributeId: successorRepositoryAttribute.id.toString()
-            };
-
-            const result = await processor.accept(requestItem, acceptParams, incomingRequest);
-            expect(result).toBeInstanceOf(ProposeAttributeAcceptResponseItem);
-
-            const createdAttribute = await consumptionController.attributes.getLocalAttribute((result as ProposeAttributeAcceptResponseItem).attributeId);
-            expect(createdAttribute!.content).toStrictEqual(successorRepositoryAttribute.content);
-            expect(createdAttribute!.deletionInfo).toBeUndefined();
-            expect(createdAttribute!.succeeds).toBeUndefined();
-        });
-
-        test("accept with existing IdentityAttribute whose predecessor was already shared but is ToBeDeletedByPeer", async function () {
-            const predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
-                content: TestObjectFactory.createIdentityAttribute({
-                    owner: CoreAddress.from(accountController.identity.address)
-                })
-            });
-
-            const { successor: successorRepositoryAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(predecessorRepositoryAttribute.id, {
-                content: IdentityAttribute.from({
-                    value: {
-                        "@type": "GivenName",
-                        value: "A succeeded given name"
-                    },
-                    owner: CoreAddress.from(accountController.identity.address)
-                })
-            });
-
-            await consumptionController.attributes.createAttributeUnsafe({
-                content: TestObjectFactory.createIdentityAttribute({
-                    owner: CoreAddress.from(accountController.identity.address)
-                }),
-                shareInfo: LocalAttributeShareInfo.from({
-                    sourceAttribute: predecessorRepositoryAttribute.id,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
                     peer: sender,
-                    requestReference: await CoreIdHelper.notPrefixed.generate()
-                }),
-                deletionInfo: LocalAttributeDeletionInfo.from({ deletionStatus: LocalAttributeDeletionStatus.ToBeDeletedByPeer, deletionDate: CoreDate.utc().add({ days: 1 }) })
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON = {
+                    accept: true,
+                    attributeId: repositoryAttribute.id.toString()
+                };
+
+                const result = await processor.accept(requestItem, acceptParams, incomingRequest);
+                expect(result).toBeInstanceOf(AttributeAlreadySharedAcceptResponseItem);
+                expect((result as AttributeAlreadySharedAcceptResponseItem).attributeId).toStrictEqual(alreadySharedAttribute.id);
             });
 
-            const requestItem = ProposeAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
-                attribute: IdentityAttribute.from({
-                    value: GivenName.fromAny({ value: "aGivenName" }),
-                    owner: CoreAddress.from("")
-                })
-            });
+            test("accept with existing IdentityAttribute that is already shared and the latest shared version but is DeletedByPeer", async function () {
+                const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                    content: TestObjectFactory.createIdentityAttribute({
+                        owner: accountController.identity.address
+                    })
+                });
 
-            const requestId = await ConsumptionIds.request.generate();
-            const incomingRequest = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
+                const alreadySharedAttribute = await consumptionController.attributes.createAttributeUnsafe({
+                    content: TestObjectFactory.createIdentityAttribute({
+                        owner: accountController.identity.address
+                    }),
+                    shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: repositoryAttribute.id, peer: sender, requestReference: await CoreIdHelper.notPrefixed.generate() }),
+                    deletionInfo: LocalAttributeDeletionInfo.from({
+                        deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
+                        deletionDate: CoreDate.utc().subtract({ days: 1 })
+                    })
+                });
+
+                const requestItem = ProposeAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
+                    attribute: IdentityAttribute.from({
+                        value: GivenName.fromAny({ value: "aGivenName" }),
+                        owner: CoreAddress.from("")
+                    })
+                });
+
+                const requestId = await ConsumptionIds.request.generate();
+                const incomingRequest = LocalRequest.from({
                     id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON = {
+                    accept: true,
+                    attributeId: repositoryAttribute.id.toString()
+                };
+
+                const result = await processor.accept(requestItem, acceptParams, incomingRequest);
+                expect(result).toBeInstanceOf(ProposeAttributeAcceptResponseItem);
+
+                const createdAttribute = await consumptionController.attributes.getLocalAttribute((result as ProposeAttributeAcceptResponseItem).attributeId);
+                expect(createdAttribute!.content).toStrictEqual(alreadySharedAttribute.content);
+                expect(createdAttribute!.deletionInfo).toBeUndefined();
             });
 
-            const acceptParams: AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON = {
-                accept: true,
-                attributeId: successorRepositoryAttribute.id.toString()
-            };
+            test("accept with existing IdentityAttribute that is already shared and the latest shared version but is ToBeDeletedByPeer", async function () {
+                const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                    content: TestObjectFactory.createIdentityAttribute({
+                        owner: CoreAddress.from(accountController.identity.address)
+                    })
+                });
 
-            const result = await processor.accept(requestItem, acceptParams, incomingRequest);
-            expect(result).toBeInstanceOf(ProposeAttributeAcceptResponseItem);
+                const alreadySharedAttribute = await consumptionController.attributes.createAttributeUnsafe({
+                    content: TestObjectFactory.createIdentityAttribute({
+                        owner: CoreAddress.from(accountController.identity.address)
+                    }),
+                    shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: repositoryAttribute.id, peer: sender, requestReference: await CoreIdHelper.notPrefixed.generate() }),
+                    deletionInfo: LocalAttributeDeletionInfo.from({ deletionStatus: LocalAttributeDeletionStatus.ToBeDeletedByPeer, deletionDate: CoreDate.utc().add({ days: 1 }) })
+                });
 
-            const createdAttribute = await consumptionController.attributes.getLocalAttribute((result as ProposeAttributeAcceptResponseItem).attributeId);
-            expect(createdAttribute!.content).toStrictEqual(successorRepositoryAttribute.content);
-            expect(createdAttribute!.deletionInfo).toBeUndefined();
-            expect(createdAttribute!.succeeds).toBeUndefined();
+                const requestItem = ProposeAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
+                    attribute: IdentityAttribute.from({
+                        value: GivenName.fromAny({ value: "aGivenName" }),
+                        owner: CoreAddress.from("")
+                    })
+                });
+
+                const requestId = await ConsumptionIds.request.generate();
+                const incomingRequest = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON = {
+                    accept: true,
+                    attributeId: repositoryAttribute.id.toString()
+                };
+
+                const result = await processor.accept(requestItem, acceptParams, incomingRequest);
+                expect(result).toBeInstanceOf(ProposeAttributeAcceptResponseItem);
+
+                const createdAttribute = await consumptionController.attributes.getLocalAttribute((result as ProposeAttributeAcceptResponseItem).attributeId);
+                expect(createdAttribute!.content).toStrictEqual(alreadySharedAttribute.content);
+                expect(createdAttribute!.deletionInfo).toBeUndefined();
+            });
         });
 
-        test("accept with existing IdentityAttribute that is already shared and the latest shared version", async function () {
-            const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
-                content: TestObjectFactory.createIdentityAttribute({
-                    owner: accountController.identity.address
-                })
-            });
+        describe("accept with new Attribute", function () {
+            test("accept proposed IdentityAttribute", async function () {
+                const requestItem = ProposeAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
+                    attribute: IdentityAttribute.from({
+                        value: GivenName.fromAny({ value: "aGivenName" }),
+                        owner: CoreAddress.from("")
+                    })
+                });
 
-            const alreadySharedAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
-                sourceAttributeId: repositoryAttribute.id,
-                peer: sender,
-                requestReference: await CoreIdHelper.notPrefixed.generate()
-            });
-
-            const requestItem = ProposeAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
-                attribute: IdentityAttribute.from({
-                    value: GivenName.fromAny({ value: "aGivenName" }),
-                    owner: CoreAddress.from("")
-                })
-            });
-
-            const requestId = await ConsumptionIds.request.generate();
-            const incomingRequest = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
+                const requestId = await ConsumptionIds.request.generate();
+                const incomingRequest = LocalRequest.from({
                     id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptProposeAttributeRequestItemParametersWithNewAttributeJSON = {
+                    accept: true,
+                    attribute: requestItem.attribute.toJSON()
+                };
+
+                const result = await processor.accept(requestItem, acceptParams, incomingRequest);
+
+                const createdAttribute = await consumptionController.attributes.getLocalAttribute((result as ProposeAttributeAcceptResponseItem).attributeId);
+                expect(createdAttribute).toBeDefined();
+                expect(createdAttribute!.shareInfo).toBeDefined();
+                expect(createdAttribute!.shareInfo!.peer.toString()).toStrictEqual(incomingRequest.peer.toString());
+                expect(createdAttribute!.content.owner.toString()).toStrictEqual(recipient.toString());
             });
 
-            const acceptParams: AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON = {
-                accept: true,
-                attributeId: repositoryAttribute.id.toString()
-            };
-
-            const result = await processor.accept(requestItem, acceptParams, incomingRequest);
-            expect(result).toBeInstanceOf(AttributeAlreadySharedAcceptResponseItem);
-            expect((result as AttributeAlreadySharedAcceptResponseItem).attributeId).toStrictEqual(alreadySharedAttribute.id);
-        });
-
-        test("accept with existing IdentityAttribute that is already shared and the latest shared version but is DeletedByPeer", async function () {
-            const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
-                content: TestObjectFactory.createIdentityAttribute({
-                    owner: accountController.identity.address
-                })
-            });
-
-            const alreadySharedAttribute = await consumptionController.attributes.createAttributeUnsafe({
-                content: TestObjectFactory.createIdentityAttribute({
-                    owner: accountController.identity.address
-                }),
-                shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: repositoryAttribute.id, peer: sender, requestReference: await CoreIdHelper.notPrefixed.generate() }),
-                deletionInfo: LocalAttributeDeletionInfo.from({
-                    deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
-                    deletionDate: CoreDate.utc().subtract({ days: 1 })
-                })
-            });
-
-            const requestItem = ProposeAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
-                attribute: IdentityAttribute.from({
-                    value: GivenName.fromAny({ value: "aGivenName" }),
-                    owner: CoreAddress.from("")
-                })
-            });
-
-            const requestId = await ConsumptionIds.request.generate();
-            const incomingRequest = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
+            test("in case of accepting with a new IdentityAttribute, create a new RepositoryAttribute as well as a copy of it for the Recipient", async function () {
+                const requestItem = ProposeAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
+                    attribute: TestObjectFactory.createIdentityAttribute()
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const incomingRequest = LocalRequest.from({
                     id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptProposeAttributeRequestItemParametersWithNewAttributeJSON = {
+                    accept: true,
+                    attribute: {
+                        "@type": "IdentityAttribute",
+                        owner: recipient.toString(),
+                        value: {
+                            "@type": "GivenName",
+                            value: "aGivenName"
+                        }
+                    }
+                };
+
+                const result = await processor.accept(requestItem, acceptParams, incomingRequest);
+                const createdSharedAttribute = await consumptionController.attributes.getLocalAttribute((result as ProposeAttributeAcceptResponseItem).attributeId);
+
+                expect(createdSharedAttribute).toBeDefined();
+                expect(createdSharedAttribute!.shareInfo).toBeDefined();
+                expect(createdSharedAttribute!.shareInfo!.peer.toString()).toStrictEqual(incomingRequest.peer.toString());
+                expect(createdSharedAttribute!.shareInfo!.sourceAttribute).toBeDefined();
+
+                const createdRepositoryAttribute = await consumptionController.attributes.getLocalAttribute(createdSharedAttribute!.shareInfo!.sourceAttribute!);
+                expect(createdRepositoryAttribute).toBeDefined();
             });
 
-            const acceptParams: AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON = {
-                accept: true,
-                attributeId: repositoryAttribute.id.toString()
-            };
-
-            const result = await processor.accept(requestItem, acceptParams, incomingRequest);
-            expect(result).toBeInstanceOf(ProposeAttributeAcceptResponseItem);
-
-            const createdAttribute = await consumptionController.attributes.getLocalAttribute((result as ProposeAttributeAcceptResponseItem).attributeId);
-            expect(createdAttribute!.content).toStrictEqual(alreadySharedAttribute.content);
-            expect(createdAttribute!.deletionInfo).toBeUndefined();
-        });
-
-        test("accept with existing IdentityAttribute that is already shared and the latest shared version but is ToBeDeletedByPeer", async function () {
-            const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
-                content: TestObjectFactory.createIdentityAttribute({
-                    owner: CoreAddress.from(accountController.identity.address)
-                })
-            });
-
-            const alreadySharedAttribute = await consumptionController.attributes.createAttributeUnsafe({
-                content: TestObjectFactory.createIdentityAttribute({
-                    owner: CoreAddress.from(accountController.identity.address)
-                }),
-                shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: repositoryAttribute.id, peer: sender, requestReference: await CoreIdHelper.notPrefixed.generate() }),
-                deletionInfo: LocalAttributeDeletionInfo.from({ deletionStatus: LocalAttributeDeletionStatus.ToBeDeletedByPeer, deletionDate: CoreDate.utc().add({ days: 1 }) })
-            });
-
-            const requestItem = ProposeAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
-                attribute: IdentityAttribute.from({
-                    value: GivenName.fromAny({ value: "aGivenName" }),
-                    owner: CoreAddress.from("")
-                })
-            });
-
-            const requestId = await ConsumptionIds.request.generate();
-            const incomingRequest = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
+            test("in case of accepting with a new IdentityAttribute, trim the newly created RepositoryAttribute as well as the copy for the Recipient", async function () {
+                const requestItem = ProposeAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
+                    attribute: TestObjectFactory.createIdentityAttribute()
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const incomingRequest = LocalRequest.from({
                     id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptProposeAttributeRequestItemParametersWithNewAttributeJSON = {
+                    accept: true,
+                    attribute: {
+                        "@type": "IdentityAttribute",
+                        owner: recipient.toString(),
+                        value: {
+                            "@type": "GivenName",
+                            value: "    aGivenName  "
+                        }
+                    }
+                };
+
+                const result = await processor.accept(requestItem, acceptParams, incomingRequest);
+
+                const createdSharedAttribute = await consumptionController.attributes.getLocalAttribute((result as ProposeAttributeAcceptResponseItem).attributeId);
+                expect(createdSharedAttribute).toBeDefined();
+                expect((createdSharedAttribute!.content.value as GivenName).value).toBe("aGivenName");
+
+                const createdRepositoryAttribute = await consumptionController.attributes.getLocalAttribute(createdSharedAttribute!.shareInfo!.sourceAttribute!);
+                expect(createdRepositoryAttribute).toBeDefined();
+                expect((createdRepositoryAttribute!.content.value as GivenName).value).toBe("aGivenName");
             });
 
-            const acceptParams: AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON = {
-                accept: true,
-                attributeId: repositoryAttribute.id.toString()
-            };
+            test("accept with new RelationshipAttribute", async function () {
+                const requestItem = ProposeAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: RelationshipAttributeQuery.from({
+                        key: "aKey",
+                        owner: "",
+                        attributeCreationHints: {
+                            valueType: "ProprietaryString",
+                            title: "aTitle",
+                            confidentiality: RelationshipAttributeConfidentiality.Public
+                        }
+                    }),
+                    attribute: TestObjectFactory.createRelationshipAttribute()
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const incomingRequest = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
 
-            const result = await processor.accept(requestItem, acceptParams, incomingRequest);
-            expect(result).toBeInstanceOf(ProposeAttributeAcceptResponseItem);
+                const acceptParams: AcceptProposeAttributeRequestItemParametersWithNewAttributeJSON = {
+                    accept: true,
+                    attribute: {
+                        "@type": "RelationshipAttribute",
+                        key: "aKey",
+                        confidentiality: RelationshipAttributeConfidentiality.Public,
+                        owner: "",
+                        value: {
+                            "@type": "ProprietaryString",
+                            title: "aTitle",
+                            value: "aStringValue"
+                        }
+                    }
+                };
 
-            const createdAttribute = await consumptionController.attributes.getLocalAttribute((result as ProposeAttributeAcceptResponseItem).attributeId);
-            expect(createdAttribute!.content).toStrictEqual(alreadySharedAttribute.content);
-            expect(createdAttribute!.deletionInfo).toBeUndefined();
+                const result = await processor.accept(requestItem, acceptParams, incomingRequest);
+                const createdSharedAttribute = await consumptionController.attributes.getLocalAttribute((result as ProposeAttributeAcceptResponseItem).attributeId);
+
+                expect(createdSharedAttribute).toBeDefined();
+                expect(createdSharedAttribute!.shareInfo).toBeDefined();
+                expect(createdSharedAttribute!.shareInfo!.peer.toString()).toStrictEqual(incomingRequest.peer.toString());
+                expect(createdSharedAttribute!.shareInfo!.sourceAttribute).toBeUndefined();
+                expect(createdSharedAttribute!.content.owner.toString()).toStrictEqual(recipient.toString());
+            });
         });
     });
 
