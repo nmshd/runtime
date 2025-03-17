@@ -58,11 +58,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
     });
 
     describe("canCreateOutgoingRequestItem", function () {
-        let recipient: CoreAddress;
-
-        beforeAll(function () {
-            recipient = CoreAddress.from("recipient");
-        });
+        const recipient = CoreAddress.from("recipient");
 
         test("returns success when proposing an Identity Attribute", async () => {
             const requestItem = ProposeAttributeRequestItem.from({
@@ -287,11 +283,10 @@ describe("ProposeAttributeRequestItemProcessor", function () {
     });
 
     describe("canAccept", function () {
-        let sender: CoreAddress;
+        const sender = CoreAddress.from("Sender");
         let recipient: CoreAddress;
 
         beforeAll(function () {
-            sender = CoreAddress.from("Sender");
             recipient = accountController.identity.address;
         });
 
@@ -796,11 +791,10 @@ describe("ProposeAttributeRequestItemProcessor", function () {
     });
 
     describe("accept", function () {
-        let sender: CoreAddress;
+        const sender = CoreAddress.from("Sender");
         let recipient: CoreAddress;
 
         beforeAll(function () {
-            sender = CoreAddress.from("Sender");
             recipient = accountController.identity.address;
         });
 
