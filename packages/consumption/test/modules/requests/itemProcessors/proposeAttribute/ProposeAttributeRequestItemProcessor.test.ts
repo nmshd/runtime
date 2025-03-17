@@ -58,9 +58,13 @@ describe("ProposeAttributeRequestItemProcessor", function () {
     });
 
     describe("canCreateOutgoingRequestItem", function () {
-        test("returns success when proposing an Identity Attribute", async () => {
-            const recipient = CoreAddress.from("Recipient");
+        let recipient: CoreAddress;
 
+        beforeAll(function () {
+            recipient = CoreAddress.from("recipient");
+        });
+
+        test("returns success when proposing an Identity Attribute", async () => {
             const requestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: TestObjectFactory.createIdentityAttribute({
@@ -78,8 +82,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         });
 
         test("returns success when proposing a Relationship Attribute", async () => {
-            const recipient = CoreAddress.from("Recipient");
-
             const requestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: TestObjectFactory.createRelationshipAttribute({
@@ -103,8 +105,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         });
 
         test("returns an error when passing anything other than an empty string as an owner into 'attribute'", async () => {
-            const recipient = CoreAddress.from("Recipient");
-
             const requestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: TestObjectFactory.createRelationshipAttribute({
@@ -130,8 +130,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         });
 
         test("returns an error when passing anything other than an empty string as an owner into 'query'", async () => {
-            const recipient = CoreAddress.from("Recipient");
-
             const requestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: TestObjectFactory.createRelationshipAttribute({
@@ -159,8 +157,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         describe("query", function () {
             describe("IdentityAttributeQuery", function () {
                 test("simple query", async () => {
-                    const recipient = CoreAddress.from("Recipient");
-
                     const requestItem = ProposeAttributeRequestItem.from({
                         mustBeAccepted: false,
                         attribute: TestObjectFactory.createIdentityAttribute({
@@ -179,8 +175,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
 
             describe("RelationshipAttributeQuery", function () {
                 test("simple query", async () => {
-                    const recipient = CoreAddress.from("Recipient");
-
                     const query = RelationshipAttributeQuery.from({
                         owner: "",
                         key: "aKey",
@@ -206,8 +200,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 });
 
                 test("returns an error when proposing another RelationshipAttribute with same key", async () => {
-                    const recipient = CoreAddress.from("Recipient");
-
                     await consumptionController.attributes.createSharedLocalAttribute({
                         content: RelationshipAttribute.from({
                             key: "uniqueKey",
@@ -252,8 +244,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 });
 
                 test("returns success when proposing a RelationshipAttribute with same key but different value type", async () => {
-                    const recipient = CoreAddress.from("Recipient");
-
                     await consumptionController.attributes.createSharedLocalAttribute({
                         content: RelationshipAttribute.from({
                             key: "valueTypeSpecificUniqueKey",
@@ -297,10 +287,15 @@ describe("ProposeAttributeRequestItemProcessor", function () {
     });
 
     describe("canAccept", function () {
-        test("returns success when called with the id of an existing own LocalAttribute", async function () {
-            const sender = CoreAddress.from("Sender");
-            const recipient = accountController.identity.address;
+        let sender: CoreAddress;
+        let recipient: CoreAddress;
 
+        beforeAll(function () {
+            sender = CoreAddress.from("Sender");
+            recipient = accountController.identity.address;
+        });
+
+        test("returns success when called with the id of an existing own LocalAttribute", async function () {
             const existingLocalAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: recipient
@@ -342,9 +337,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         });
 
         test("returns success when called with a new own Attribute", async function () {
-            const sender = CoreAddress.from("Sender");
-            const recipient = accountController.identity.address;
-
             const requestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
@@ -382,8 +374,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         });
 
         test("returns success when called with the proposed Attribute", async function () {
-            const sender = CoreAddress.from("Sender");
-
             const requestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
@@ -418,8 +408,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         });
 
         test("returns an error when the given Attribute id does not exist", async function () {
-            const sender = CoreAddress.from("Sender");
-
             const requestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
@@ -452,9 +440,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         });
 
         test("returns an error when the existing IdentityAttribute is already shared", async function () {
-            const sender = CoreAddress.from("Sender");
-            const recipient = accountController.identity.address;
-
             const attribute = await consumptionController.attributes.createSharedLocalAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: recipient
@@ -498,9 +483,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         });
 
         test("returns an error when a successor of the existing IdentityAttribute is already shared", async function () {
-            const sender = CoreAddress.from("Sender");
-            const recipient = accountController.identity.address;
-
             const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: recipient
@@ -559,9 +541,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         });
 
         test("returns an error when a RelationshipAttribute was queried and the Recipient tries to respond with an existing RelationshipAttribute", async function () {
-            const sender = CoreAddress.from("Sender");
-            const recipient = accountController.identity.address;
-
             const requestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: RelationshipAttributeQuery.from({
@@ -625,9 +604,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         });
 
         test("throws an error when another RelationshipAttribute with same key was queried", async function () {
-            const sender = CoreAddress.from("Sender");
-            const recipient = accountController.identity.address;
-
             await consumptionController.attributes.createSharedLocalAttribute({
                 content: TestObjectFactory.createRelationshipAttribute({
                     key: "uniqueKey",
@@ -694,9 +670,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         });
 
         test("returns an error if accepting would lead to the creation of another RelationshipAttribute with same key but rejecting of the ProposeAttributeRequestItem would be permitted", async function () {
-            const sender = CoreAddress.from("Sender");
-            const recipient = accountController.identity.address;
-
             await consumptionController.attributes.createSharedLocalAttribute({
                 content: TestObjectFactory.createRelationshipAttribute({
                     key: "anotherUniqueKey",
@@ -767,8 +740,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         });
 
         test("returns an error trying to share the predecessor of an already shared Attribute", async function () {
-            const sender = CoreAddress.from("Sender");
-
             const predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: accountController.identity.address
@@ -825,10 +796,15 @@ describe("ProposeAttributeRequestItemProcessor", function () {
     });
 
     describe("accept", function () {
-        test("accept with existing RepositoryAttribute", async function () {
-            const sender = CoreAddress.from("Sender");
-            const recipient = accountController.identity.address;
+        let sender: CoreAddress;
+        let recipient: CoreAddress;
 
+        beforeAll(function () {
+            sender = CoreAddress.from("Sender");
+            recipient = accountController.identity.address;
+        });
+
+        test("accept with existing RepositoryAttribute", async function () {
             const attribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: recipient
@@ -868,9 +844,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         });
 
         test("accept proposed IdentityAttribute", async function () {
-            const sender = CoreAddress.from("Sender");
-            const recipient = accountController.identity.address;
-
             const requestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
@@ -909,9 +882,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         });
 
         test("in case of accepting with a new IdentityAttribute, create a new RepositoryAttribute as well as a copy of it for the Recipient", async function () {
-            const sender = CoreAddress.from("Sender");
-            const recipient = accountController.identity.address;
-
             const requestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
@@ -956,9 +926,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         });
 
         test("in case of accepting with a new IdentityAttribute, trim the newly created RepositoryAttribute as well as the copy for the Recipient", async function () {
-            const sender = CoreAddress.from("Sender");
-            const recipient = accountController.identity.address;
-
             const requestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
@@ -1002,9 +969,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         });
 
         test("accept with new RelationshipAttribute", async function () {
-            const sender = CoreAddress.from("Sender");
-            const recipient = accountController.identity.address;
-
             const requestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: RelationshipAttributeQuery.from({
@@ -1058,8 +1022,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         });
 
         test("accept with existing IdentityAttribute whose predecessor was already shared", async function () {
-            const sender = CoreAddress.from("Sender");
-
             const predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: accountController.identity.address
@@ -1125,8 +1087,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         });
 
         test("accept with existing IdentityAttribute whose predecessor was already shared but is DeletedByPeer", async function () {
-            const sender = CoreAddress.from("Sender");
-
             const predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: accountController.identity.address
@@ -1196,8 +1156,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         });
 
         test("accept with existing IdentityAttribute whose predecessor was already shared but is ToBeDeletedByPeer", async function () {
-            const sender = CoreAddress.from("Sender");
-
             const predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: CoreAddress.from(accountController.identity.address)
@@ -1264,8 +1222,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         });
 
         test("accept with existing IdentityAttribute that is already shared and the latest shared version", async function () {
-            const sender = CoreAddress.from("Sender");
-
             const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: accountController.identity.address
@@ -1312,8 +1268,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         });
 
         test("accept with existing IdentityAttribute that is already shared and the latest shared version but is DeletedByPeer", async function () {
-            const sender = CoreAddress.from("Sender");
-
             const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: accountController.identity.address
@@ -1368,8 +1322,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         });
 
         test("accept with existing IdentityAttribute that is already shared and the latest shared version but is ToBeDeletedByPeer", async function () {
-            const sender = CoreAddress.from("Sender");
-
             const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: CoreAddress.from(accountController.identity.address)
