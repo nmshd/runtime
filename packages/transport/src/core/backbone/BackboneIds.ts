@@ -1,4 +1,4 @@
-import { CoreIdHelper } from "../CoreIdHelper";
+import { CoreIdHelper } from "@nmshd/core-types";
 
 export class BackboneIds {
     public static readonly file = new CoreIdHelper("FIL", true);

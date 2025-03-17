@@ -1,6 +1,6 @@
 import { ISerializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
-import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId, FileReference } from "@nmshd/core-types";
 import { CoreBuffer, CryptoCipher, CryptoHash, CryptoHashAlgorithm, CryptoSecretKey, Encoding } from "@nmshd/crypto";
 import { CoreCrypto, CoreHash, TransportCoreErrors } from "../../core";
 import { DbCollectionName } from "../../core/DbCollectionName";
@@ -14,7 +14,6 @@ import { CachedFile } from "./local/CachedFile";
 import { File } from "./local/File";
 import { ISendFileParameters, SendFileParameters } from "./local/SendFileParameters";
 import { FileMetadata } from "./transmission/FileMetadata";
-import { FileReference } from "./transmission/FileReference";
 
 export class FileController extends TransportController {
     private client: FileClient;
@@ -40,6 +39,15 @@ export class FileController extends TransportController {
     public async getFile(id: CoreId): Promise<File | undefined> {
         const doc = await this.files.read(id.toString());
         return doc ? File.from(doc) : undefined;
+    }
+
+    public async deleteFile(file: File): Promise<void> {
+        if (file.isOwn) {
+            const response = await this.client.deleteFile(file.id.toString());
+            if (response.isError) throw response.error;
+        }
+
+        await this.files.delete(file);
     }
 
     public async fetchCaches(ids: CoreId[]): Promise<{ id: CoreId; cache: CachedFile }[]> {

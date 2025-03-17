@@ -23,8 +23,6 @@ updates:
           - "*"
     reviewers:
       - "jkoenig134"
-      - "slavistan"
-      - "sebbi08"
       - "Milena-Czierlinski"
     labels:
       - "dependencies"
