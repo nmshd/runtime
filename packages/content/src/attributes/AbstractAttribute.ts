@@ -2,16 +2,20 @@ import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-se
 import { CoreAddress, CoreDate, ICoreAddress, ICoreDate } from "@nmshd/core-types";
 import { ContentJSON } from "../ContentJSON";
 
+export enum SupportedVCTypes {
+    W3CVC = "W3CVC",
+    SdJwtVc = "SdJwtVc"
+}
 export interface AbstractAttributeJSON extends ContentJSON {
     owner: string;
-    proof?: VerifiableAttributeProof;
+    proof?: { credentialType: SupportedVCTypes; credential: unknown };
     validFrom?: string;
     validTo?: string;
 }
 
 export interface IAbstractAttribute extends ISerializable {
     owner: ICoreAddress;
-    proof?: VerifiableAttributeProof;
+    proof?: { credentialType: SupportedVCTypes; credential: unknown };
     validFrom?: ICoreDate;
     validTo?: ICoreDate;
 }
@@ -23,7 +27,7 @@ export abstract class AbstractAttribute extends Serializable implements IAbstrac
 
     @serialize()
     @validate({ nullable: true })
-    public proof?: VerifiableAttributeProof;
+    public proof?: { credentialType: SupportedVCTypes; credential: unknown };
 
     @serialize()
     @validate({ nullable: true })
@@ -32,23 +36,4 @@ export abstract class AbstractAttribute extends Serializable implements IAbstrac
     @serialize()
     @validate({ nullable: true })
     public validTo?: CoreDate;
-}
-
-interface VerifiableAttributeProof {
-    "@context": string | string[];
-    type: string | string[];
-    issuer: string;
-    issuanceDate: string;
-    expirationDate?: string;
-    credentialSubject: any;
-    proof: Proof;
-}
-
-interface Proof {
-    type: string;
-    created: string;
-    verificationMethod: string;
-    cryptosuite: string;
-    proofPurpose: string;
-    proofValue: string;
 }

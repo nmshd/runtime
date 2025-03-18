@@ -1,16 +1,15 @@
-import { VerifiableCredentialController } from "@blubi/vc";
 import {
     IdentityAttribute,
     RelationshipAttribute,
     Request,
     RequestVerifiableAttributeAcceptResponseItem,
     RequestVerifiableAttributeRequestItem,
-    ResponseItemResult
+    ResponseItemResult,
+    SupportedVCTypes
 } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
-import { CoreBuffer } from "@nmshd/crypto";
-import { DeviceSecretType } from "@nmshd/transport";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
+import { AbstractVCProcessor } from "../../../attributes";
 import { ValidationResult } from "../../../common";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 import { LocalRequestInfo } from "../IRequestItemProcessor";
@@ -51,14 +50,10 @@ export class RequestVerifiableAttributeRequestItemProcessor extends GenericReque
         requestInfo: LocalRequestInfo
     ): Promise<RequestVerifiableAttributeAcceptResponseItem> {
         const parsedRequestAttribute = JSON.parse(JSON.stringify(requestItem.attribute));
-        const multikeyPublic = `z${CoreBuffer.from([0xed, 0x01]).append(this["accountController"].identity.identity.publicKey.publicKey).toBase58()}`;
-        const identityPrivateKey = ((await this["accountController"].activeDevice.secrets.loadSecret(DeviceSecretType.IdentitySignature)) as any)!.secret["privateKey"];
-        const multikeyPrivate = `z${CoreBuffer.from([0x80, 0x26]).append(identityPrivateKey).toBase58()}`;
 
-        const vc = await VerifiableCredentialController.initialize();
-        const credential = buildCredential(parsedRequestAttribute.value, requestItem.did, multikeyPublic);
-        const signedCredential = await vc.sign(credential, multikeyPublic, multikeyPrivate);
-        requestItem.attribute.proof = signedCredential;
+        const vcProcessor = AbstractVCProcessor.getVCProcessor(SupportedVCTypes.SdJwtVc, this.accountController);
+        const signedCredential = await vcProcessor.sign(parsedRequestAttribute, requestItem.did);
+        requestItem.attribute.proof = { credential: signedCredential, credentialType: SupportedVCTypes.SdJwtVc };
         const peerAttribute = await this.consumptionController.attributes.createSharedLocalAttribute({
             content: requestItem.attribute,
             peer: requestInfo.peer,
@@ -87,18 +82,4 @@ export class RequestVerifiableAttributeRequestItemProcessor extends GenericReque
             attributeId: responseItem.attributeId
         });
     }
-}
-
-function buildCredential(data: any, subjectDid: string, publicKey: string) {
-    const now = new Date().toJSON();
-    const issuanceDate = `${now.substring(0, now.length - 5)}Z`;
-    const credentialSubject: any = data;
-    credentialSubject["id"] = subjectDid;
-    return {
-        "@context": ["https://www.w3.org/2018/credentials/v1", "https://www.w3.org/2018/credentials/examples/v1"],
-        type: ["VerifiableCredential"],
-        issuer: `did:key:${publicKey}`,
-        issuanceDate,
-        credentialSubject
-    };
 }

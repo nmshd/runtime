@@ -5,7 +5,6 @@
         { "path": "packages/content" },
         { "path": "packages/consumption" },
         { "path": "packages/runtime" },
-        { "path": "packages/app-runtime" },
-        { "path": "packages/vc" }
+        { "path": "packages/app-runtime" }
     ]
 }

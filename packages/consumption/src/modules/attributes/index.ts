@@ -8,3 +8,4 @@ export * from "./local/CreateSharedLocalAttributeParams";
 export * from "./local/LocalAttribute";
 export * from "./local/LocalAttributeDeletionInfo";
 export * from "./local/LocalAttributeShareInfo";
+export * from "./vc";

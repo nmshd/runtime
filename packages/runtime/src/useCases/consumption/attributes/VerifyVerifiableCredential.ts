@@ -1,6 +1,5 @@
-import { VerifiableCredentialController } from "@blubi/vc";
 import { Result } from "@js-soft/ts-utils";
-import { AttributesController } from "@nmshd/consumption";
+import { AbstractVCProcessor } from "@nmshd/consumption";
 import { IdentityAttributeJSON, RelationshipAttributeJSON } from "@nmshd/content";
 import { AccountController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
@@ -19,7 +18,6 @@ class Validator extends SchemaValidator<VerifyVerifiableCredentialRequest> {
 
 export class VerifyVerifiableCredentialUseCase extends UseCase<VerifyVerifiableCredentialRequest, VerifiableCredentialValidationResult> {
     public constructor(
-        @Inject private readonly attributeController: AttributesController,
         @Inject private readonly accountController: AccountController,
         @Inject validator: Validator
     ) {
@@ -34,28 +32,13 @@ export class VerifyVerifiableCredentialUseCase extends UseCase<VerifyVerifiableC
             });
         }
 
-        if (!(request.attribute.proof as any).issuer) {
-            return Result.ok({
-                success: false,
-                message: "No proof value"
-            });
-        }
+        const credentialType = request.attribute.proof.credentialType;
 
-        const vc = await VerifiableCredentialController.initialize();
+        const vc = AbstractVCProcessor.getVCProcessor(credentialType, this.accountController);
 
-        const validationResult = await vc.verify(request.attribute.proof);
-        if (request.validIssuers) {
-            if (!request.validIssuers.includes((request.attribute.proof as any).issuer)) {
-                return Result.ok({
-                    success: false,
-                    message: "The issuer is not trusted"
-                });
-            }
-        }
+        if (await vc.verify(request.attribute.proof)) return Result.ok({ success: true });
 
-        return Result.ok({
-            success: validationResult.verified
-        });
+        return Result.ok({ success: false, message: "Invalid proof value" });
     }
 }
 
