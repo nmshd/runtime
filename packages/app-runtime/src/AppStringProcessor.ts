@@ -1,9 +1,9 @@
 import { ILogger, ILoggerFactory } from "@js-soft/logging-abstractions";
 import { Serializable } from "@js-soft/ts-serval";
 import { EventBus, Result } from "@js-soft/ts-utils";
-import { ICoreAddress } from "@nmshd/core-types";
+import { ICoreAddress, Reference, SharedPasswordProtection } from "@nmshd/core-types";
 import { AnonymousServices, Base64ForIdPrefix, DeviceMapper } from "@nmshd/runtime";
-import { Reference, SharedPasswordProtection, TokenContentDeviceSharedSecret } from "@nmshd/transport";
+import { TokenContentDeviceSharedSecret } from "@nmshd/transport";
 import { AppRuntimeErrors } from "./AppRuntimeErrors";
 import { AppRuntimeServices } from "./AppRuntimeServices";
 import { IUIBridge } from "./extensibility";

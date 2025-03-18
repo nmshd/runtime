@@ -18,8 +18,7 @@ import {
     ThirdPartyRelationshipAttributeQueryOwner,
     ZipCodeJSON
 } from "@nmshd/content";
-import { CoreDate, CoreId } from "@nmshd/core-types";
-import { CoreIdHelper } from "@nmshd/transport";
+import { CoreDate, CoreId, CoreIdHelper } from "@nmshd/core-types";
 import assert from "assert";
 import {
     AttributeCreatedEvent,

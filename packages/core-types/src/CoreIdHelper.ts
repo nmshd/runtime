@@ -1,6 +1,5 @@
-import { CoreId } from "@nmshd/core-types";
-import { Random, RandomCharacterRange } from "../util";
-import { TransportError } from "./TransportError";
+import { CoreId } from "./CoreId";
+import { Random, RandomCharacterRange } from "./Random";
 
 export class CoreIdHelper {
     public static notPrefixed = new CoreIdHelper("");
@@ -16,7 +15,7 @@ export class CoreIdHelper {
 
     public async generate(): Promise<CoreId> {
         if (this.validateOnly) {
-            throw new TransportError("This CoreIdHelper is set up for validation only.");
+            throw new Error("This CoreIdHelper is set up for validation only.");
         }
 
         return await this.generateUnsafe();

@@ -16,7 +16,7 @@ This workspace provides two types of scripts:
 
     These can be run by `npm run <scriptname>` from the package directory or by `npm run -w packages/<package> <scriptname>` from the root of the project.
 
-    Additionally, you can run a script in all workspaces by `npm run -ws --if-present <scriptname>`.
+    Additionally, you can run a script in all workspaces by `npm run --workspaces --if-present <scriptname>`.
 
 ## Linting
 

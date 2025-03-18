@@ -205,11 +205,11 @@ export function createToken(
 // Override the default upload request with values
 export async function makeUploadRequest(values: object = {}): Promise<UploadOwnFileRequest> {
     return {
-        title: "File Title",
-        filename: "test.txt",
+        title: "aTitle",
+        filename: "aFileName",
         content: await fs.promises.readFile(`${__dirname}/../__assets__/test.txt`),
-        mimetype: "text/plain",
-        description: "This is a valid file description",
+        mimetype: "aMimetype",
+        description: "aDescription",
         expiresAt: DateTime.utc().plus({ minutes: 5 }).toString(),
         ...values
     };

@@ -1,7 +1,7 @@
 import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-serval";
+import { SharedPasswordProtection } from "@nmshd/core-types";
 import { CoreBuffer, ICoreBuffer } from "@nmshd/crypto";
 import { PasswordProtectionCreationParameters } from "./PasswordProtectionCreationParameters";
-import { SharedPasswordProtection } from "./SharedPasswordProtection";
 
 export interface IPasswordProtection extends ISerializable {
     passwordType: "pw" | `pin${number}`;

@@ -1,5 +1,6 @@
 import { type } from "@js-soft/ts-serval";
-import { BackboneIds, IReference, Reference } from "../../../core";
+import { IReference, Reference } from "@nmshd/core-types";
+import { BackboneIds } from "../../../core";
 
 export interface IRelationshipTemplateReference extends IReference {}
 

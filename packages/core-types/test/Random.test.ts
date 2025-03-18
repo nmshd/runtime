@@ -1,4 +1,4 @@
-import { Random, RandomCharacterRange } from "../../src";
+import { Random, RandomCharacterRange } from "../src";
 
 describe("RandomTest", function () {
     describe("IntBetween", function () {

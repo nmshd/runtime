@@ -1,7 +1,6 @@
 import { ConsumptionIds } from "@nmshd/consumption";
 import { Notification } from "@nmshd/content";
-import { CoreId } from "@nmshd/core-types";
-import { CoreIdHelper } from "@nmshd/transport";
+import { CoreId, CoreIdHelper } from "@nmshd/core-types";
 import { ConsumptionServices, LocalNotificationStatus, RuntimeErrors, TransportServices } from "../../src";
 import {
     establishRelationship,

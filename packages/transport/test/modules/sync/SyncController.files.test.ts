@@ -20,12 +20,12 @@ describe("FileSync", function () {
         });
 
         const fileOnDevice1 = await device1.files.sendFile({
-            description: "A description",
+            description: "aDescription",
             expiresAt: CoreDate.utc().add({ minutes: 2 }),
             filename: "aFilename.txt",
-            mimetype: "text/plain",
-            title: "A File Title",
-            buffer: CoreBuffer.fromUtf8("Some file content")
+            mimetype: "aMimetype",
+            title: "aTitle",
+            buffer: CoreBuffer.fromUtf8("test")
         });
         await device1.syncDatawallet();
 

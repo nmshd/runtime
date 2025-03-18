@@ -14,8 +14,8 @@ import {
     ResponseItemResult,
     ResponseResult
 } from "@nmshd/content";
-import { CoreAddress, CoreId } from "@nmshd/core-types";
-import { IdentityDeletionProcessStatus, Random } from "@nmshd/transport";
+import { CoreAddress, CoreId, Random } from "@nmshd/core-types";
+import { IdentityDeletionProcessStatus } from "@nmshd/transport";
 import assert from "assert";
 import { DateTime } from "luxon";
 import {

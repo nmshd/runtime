@@ -1,6 +1,6 @@
 import { ISerializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
-import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId, FileReference } from "@nmshd/core-types";
 import { CoreBuffer, CryptoCipher, CryptoHash, CryptoHashAlgorithm, CryptoSecretKey, Encoding } from "@nmshd/crypto";
 import { CoreCrypto, CoreHash, TransportCoreErrors } from "../../core";
 import { DbCollectionName } from "../../core/DbCollectionName";
@@ -14,7 +14,6 @@ import { CachedFile } from "./local/CachedFile";
 import { File } from "./local/File";
 import { ISendFileParameters, SendFileParameters } from "./local/SendFileParameters";
 import { FileMetadata } from "./transmission/FileMetadata";
-import { FileReference } from "./transmission/FileReference";
 
 export class FileController extends TransportController {
     private client: FileClient;

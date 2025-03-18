@@ -1,8 +1,8 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { JSONWrapper, Serializable } from "@js-soft/ts-serval";
-import { CoreDate, CoreId } from "@nmshd/core-types";
+import { CoreDate, CoreId, CoreIdHelper } from "@nmshd/core-types";
 import { CoreBuffer, CryptoEncryption, CryptoSecretKey } from "@nmshd/crypto";
-import { AccountController, CoreCrypto, CoreIdHelper, Token, TokenContentFile, TokenContentRelationshipTemplate, Transport } from "../../../src";
+import { AccountController, CoreCrypto, Token, TokenContentFile, TokenContentRelationshipTemplate, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("TokenController", function () {

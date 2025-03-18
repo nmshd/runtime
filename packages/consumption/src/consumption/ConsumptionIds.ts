@@ -1,4 +1,4 @@
-import { CoreIdHelper } from "@nmshd/transport";
+import { CoreIdHelper } from "@nmshd/core-types";
 
 export class ConsumptionIds {
     public static readonly draft = new CoreIdHelper("LCLDRF");

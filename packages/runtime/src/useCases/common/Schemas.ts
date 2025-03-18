@@ -335,7 +335,11 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/RegisterAttributeListenerRequestItemJSON"
                 },
                 {
+<<<<<<< HEAD
                     "$ref": "#/definitions/RequestVerifiableAttributeRequestItemJSON"
+=======
+                    "$ref": "#/definitions/TransferFileOwnershipRequestItemJSON"
+>>>>>>> main
                 }
             ]
         },
@@ -3212,12 +3216,20 @@ export const CanCreateOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
+<<<<<<< HEAD
         "RequestVerifiableAttributeRequestItemJSON": {
+=======
+        "TransferFileOwnershipRequestItemJSON": {
+>>>>>>> main
             "type": "object",
             "properties": {
                 "@type": {
                     "type": "string",
+<<<<<<< HEAD
                     "const": "RequestVerifiableAttributeRequestItem"
+=======
+                    "const": "TransferFileOwnershipRequestItem"
+>>>>>>> main
                 },
                 "@context": {
                     "type": "string"
@@ -3245,17 +3257,25 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "type": "boolean",
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
+<<<<<<< HEAD
                 "attribute": {
                     "$ref": "#/definitions/IdentityAttributeJSON"
                 },
                 "did": {
+=======
+                "fileReference": {
+>>>>>>> main
                     "type": "string"
                 }
             },
             "required": [
                 "@type",
+<<<<<<< HEAD
                 "attribute",
                 "did",
+=======
+                "fileReference",
+>>>>>>> main
                 "mustBeAccepted"
             ],
             "additionalProperties": false
@@ -8721,7 +8741,11 @@ export const CreateOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/RegisterAttributeListenerRequestItemJSON"
                 },
                 {
+<<<<<<< HEAD
                     "$ref": "#/definitions/RequestVerifiableAttributeRequestItemJSON"
+=======
+                    "$ref": "#/definitions/TransferFileOwnershipRequestItemJSON"
+>>>>>>> main
                 }
             ]
         },
@@ -11598,12 +11622,20 @@ export const CreateOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
+<<<<<<< HEAD
         "RequestVerifiableAttributeRequestItemJSON": {
+=======
+        "TransferFileOwnershipRequestItemJSON": {
+>>>>>>> main
             "type": "object",
             "properties": {
                 "@type": {
                     "type": "string",
+<<<<<<< HEAD
                     "const": "RequestVerifiableAttributeRequestItem"
+=======
+                    "const": "TransferFileOwnershipRequestItem"
+>>>>>>> main
                 },
                 "@context": {
                     "type": "string"
@@ -11631,17 +11663,25 @@ export const CreateOutgoingRequestRequest: any = {
                     "type": "boolean",
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
+<<<<<<< HEAD
                 "attribute": {
                     "$ref": "#/definitions/IdentityAttributeJSON"
                 },
                 "did": {
+=======
+                "fileReference": {
+>>>>>>> main
                     "type": "string"
                 }
             },
             "required": [
                 "@type",
+<<<<<<< HEAD
                 "attribute",
                 "did",
+=======
+                "fileReference",
+>>>>>>> main
                 "mustBeAccepted"
             ],
             "additionalProperties": false
@@ -12303,7 +12343,11 @@ export const ReceivedIncomingRequestRequest: any = {
                     "$ref": "#/definitions/RegisterAttributeListenerRequestItemJSON"
                 },
                 {
+<<<<<<< HEAD
                     "$ref": "#/definitions/RequestVerifiableAttributeRequestItemJSON"
+=======
+                    "$ref": "#/definitions/TransferFileOwnershipRequestItemJSON"
+>>>>>>> main
                 }
             ]
         },
@@ -15180,12 +15224,20 @@ export const ReceivedIncomingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
+<<<<<<< HEAD
         "RequestVerifiableAttributeRequestItemJSON": {
+=======
+        "TransferFileOwnershipRequestItemJSON": {
+>>>>>>> main
             "type": "object",
             "properties": {
                 "@type": {
                     "type": "string",
+<<<<<<< HEAD
                     "const": "RequestVerifiableAttributeRequestItem"
+=======
+                    "const": "TransferFileOwnershipRequestItem"
+>>>>>>> main
                 },
                 "@context": {
                     "type": "string"
@@ -15213,17 +15265,25 @@ export const ReceivedIncomingRequestRequest: any = {
                     "type": "boolean",
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
+<<<<<<< HEAD
                 "attribute": {
                     "$ref": "#/definitions/IdentityAttributeJSON"
                 },
                 "did": {
+=======
+                "fileReference": {
+>>>>>>> main
                     "type": "string"
                 }
             },
             "required": [
                 "@type",
+<<<<<<< HEAD
                 "attribute",
                 "did",
+=======
+                "fileReference",
+>>>>>>> main
                 "mustBeAccepted"
             ],
             "additionalProperties": false
