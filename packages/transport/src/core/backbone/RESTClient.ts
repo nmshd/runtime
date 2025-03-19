@@ -140,7 +140,7 @@ export class RESTClient {
     private addAxiosLoggingInterceptors(axiosInstance: AxiosInstance) {
         axiosInstance.interceptors.request.use((config) => {
             const requestAsAny = config as any;
-            requestAsAny.meta = (config as any).meta ?? {};
+            requestAsAny.meta = (config as any).meta || {};
             requestAsAny.meta.startTime = new Date().getTime();
             return config;
         });
@@ -403,7 +403,7 @@ export class RESTClient {
         let sendData = formData;
         if (typeof formData.getHeaders !== "undefined") {
             const h = formData.getHeaders();
-            conf["headers"] = conf["headers"] ?? {};
+            conf["headers"] = conf["headers"] || {};
             for (const key in h) {
                 conf["headers"][key] = h[key];
             }
