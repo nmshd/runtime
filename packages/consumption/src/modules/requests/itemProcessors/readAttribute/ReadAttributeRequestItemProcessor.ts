@@ -397,6 +397,8 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         requestInfo: LocalRequestInfo
     ): Promise<PeerSharedAttributeSucceededEvent | void> {
         if (responseItem instanceof ReadAttributeAcceptResponseItem) {
+            responseItem.attribute = await this.consumptionController.attributes.verifyAttribute(responseItem.attribute);
+
             await this.consumptionController.attributes.createSharedLocalAttribute({
                 id: responseItem.attributeId,
                 content: responseItem.attribute,
@@ -407,6 +409,8 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         }
 
         if (responseItem instanceof AttributeSuccessionAcceptResponseItem) {
+            responseItem.successorContent = await this.consumptionController.attributes.verifyAttribute(responseItem.successorContent);
+
             const successorParams = AttributeSuccessorParams.from({
                 id: responseItem.successorId,
                 content: responseItem.successorContent,

@@ -26,7 +26,7 @@ export class CreateVerifiableCredentialUseCase extends UseCase<CreateVerifiableC
     }
 
     protected async executeInternal(request: CreateVerifiableCredentialRequest): Promise<Result<any>> {
-        const vc = AbstractVCProcessor.getVCProcessor(SupportedVCTypes.SdJwtVc, this.accountController);
+        const vc = await AbstractVCProcessor.getVCProcessor(SupportedVCTypes.SdJwtVc, this.accountController);
 
         const signedCredential = await vc.sign(request.content, request.subjectDid);
 

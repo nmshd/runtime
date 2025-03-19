@@ -51,7 +51,7 @@ export class RequestVerifiableAttributeRequestItemProcessor extends GenericReque
     ): Promise<RequestVerifiableAttributeAcceptResponseItem> {
         const parsedRequestAttribute = JSON.parse(JSON.stringify(requestItem.attribute));
 
-        const vcProcessor = AbstractVCProcessor.getVCProcessor(SupportedVCTypes.SdJwtVc, this.accountController);
+        const vcProcessor = await AbstractVCProcessor.getVCProcessor(SupportedVCTypes.SdJwtVc, this.accountController);
         const signedCredential = await vcProcessor.sign(parsedRequestAttribute, requestItem.did);
         requestItem.attribute.proof = { credential: signedCredential, credentialType: SupportedVCTypes.SdJwtVc };
         const peerAttribute = await this.consumptionController.attributes.createSharedLocalAttribute({

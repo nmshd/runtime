@@ -34,7 +34,7 @@ export class VerifyVerifiableCredentialUseCase extends UseCase<VerifyVerifiableC
 
         const credentialType = request.attribute.proof.credentialType;
 
-        const vc = AbstractVCProcessor.getVCProcessor(credentialType, this.accountController);
+        const vc = await AbstractVCProcessor.getVCProcessor(credentialType, this.accountController);
 
         if (await vc.verify(request.attribute.proof)) return Result.ok({ success: true });
 

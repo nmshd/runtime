@@ -10,13 +10,15 @@ export abstract class AbstractVCProcessor<VCType> {
     public abstract sign(data: unknown, subjectDid: string): Promise<VCType>;
     public abstract verify(data: VCType): Promise<boolean>;
 
-    public static getVCProcessor(type: SupportedVCTypes, accountController: AccountController): AbstractVCProcessor<unknown> {
+    public static async getVCProcessor(type: SupportedVCTypes, accountController: AccountController): Promise<AbstractVCProcessor<unknown>> {
+        let vcProcessor: AbstractVCProcessor<unknown>;
         switch (type) {
             case SupportedVCTypes.W3CVC:
-                return new W3CVCProcessor(accountController);
+                vcProcessor = new W3CVCProcessor(accountController);
 
             case SupportedVCTypes.SdJwtVc:
-                return new SdJwtVcProcessor(accountController);
+                vcProcessor = new SdJwtVcProcessor(accountController);
         }
+        return await vcProcessor.init();
     }
 }

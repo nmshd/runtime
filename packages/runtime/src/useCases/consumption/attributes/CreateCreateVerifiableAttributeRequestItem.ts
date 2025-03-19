@@ -27,7 +27,7 @@ export class CreateCreateVerifiableAttributeRequestItemUseCase extends UseCase<C
 
     protected async executeInternal(request: CreateCreateVerifiableAttributeRequestItemRequest): Promise<Result<CreateAttributeRequestItemJSON>> {
         const parsedRequestAttribute = JSON.parse(JSON.stringify(request.content));
-        const vc = AbstractVCProcessor.getVCProcessor(SupportedVCTypes.SdJwtVc, this.accountController);
+        const vc = await AbstractVCProcessor.getVCProcessor(SupportedVCTypes.SdJwtVc, this.accountController);
 
         const signedCredential = await vc.sign(parsedRequestAttribute, request.peer);
         request.content.proof = { credential: signedCredential, credentialType: SupportedVCTypes.SdJwtVc };

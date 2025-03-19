@@ -9,6 +9,7 @@ import {
     IIQLQuery,
     IRelationshipAttributeQuery,
     IThirdPartyRelationshipAttributeQuery,
+    RelationshipAttribute,
     RelationshipAttributeJSON,
     RelationshipAttributeQuery,
     ThirdPartyRelationshipAttributeQuery,
@@ -43,6 +44,7 @@ import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./local/Loc
 import { LocalAttributeDeletionStatus } from "./local/LocalAttributeDeletionInfo";
 import { LocalAttributeShareInfo } from "./local/LocalAttributeShareInfo";
 import { IdentityAttributeQueryTranslator, RelationshipAttributeQueryTranslator, ThirdPartyRelationshipAttributeQueryTranslator } from "./local/QueryTranslator";
+import { AbstractVCProcessor } from "./vc";
 
 export class AttributesController extends ConsumptionBaseController {
     private attributes: SynchronizedCollection;
@@ -1356,5 +1358,13 @@ export class AttributesController extends ConsumptionBaseController {
     public async getAttributeTagCollection(): Promise<AttributeTagCollection> {
         const backboneTagCollection = (await this.attributeTagClient.getTagCollection()).value;
         return AttributeTagCollection.from(backboneTagCollection);
+    }
+
+    public async verifyAttribute(attribute: IdentityAttribute | RelationshipAttribute): Promise<IdentityAttribute | RelationshipAttribute> {
+        if (!attribute.proof) return attribute;
+        const vc = await AbstractVCProcessor.getVCProcessor(attribute.proof.credentialType, this.parent.accountController);
+        const verificationResult = await vc.verify(attribute.proof.credential);
+        attribute.proof.proofInvalid = verificationResult ? undefined : true;
+        return attribute;
     }
 }

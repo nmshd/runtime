@@ -8,14 +8,14 @@ export enum SupportedVCTypes {
 }
 export interface AbstractAttributeJSON extends ContentJSON {
     owner: string;
-    proof?: { credentialType: SupportedVCTypes; credential: unknown };
+    proof?: { credentialType: SupportedVCTypes; credential: unknown; proofInvalid?: true };
     validFrom?: string;
     validTo?: string;
 }
 
 export interface IAbstractAttribute extends ISerializable {
     owner: ICoreAddress;
-    proof?: { credentialType: SupportedVCTypes; credential: unknown };
+    proof?: { credentialType: SupportedVCTypes; credential: unknown; proofInvalid?: true };
     validFrom?: ICoreDate;
     validTo?: ICoreDate;
 }
@@ -27,7 +27,7 @@ export abstract class AbstractAttribute extends Serializable implements IAbstrac
 
     @serialize()
     @validate({ nullable: true })
-    public proof?: { credentialType: SupportedVCTypes; credential: unknown };
+    public proof?: { credentialType: SupportedVCTypes; credential: unknown; proofInvalid?: true };
 
     @serialize()
     @validate({ nullable: true })
