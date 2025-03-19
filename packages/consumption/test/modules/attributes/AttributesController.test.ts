@@ -3373,7 +3373,7 @@ describe("AttributesController", function () {
         expect(peerAttribute).toBeUndefined();
     });
 
-    describe("tag definition caching", function () {
+    describe("tag definition caching by time", function () {
         let connection: IDatabaseConnection;
         let transport: Transport;
         let testAccount: AccountController;
@@ -3407,7 +3407,7 @@ describe("AttributesController", function () {
             reset(tagClientSpy);
         });
 
-        test("should cache the tag definitions", async function () {
+        test("should cache the tag definitions when called twice within tagCachingDurationInMinutes", async function () {
             await consumptionController.attributes.getAttributeTagCollection();
             await consumptionController.attributes.getAttributeTagCollection();
 
@@ -3421,6 +3421,75 @@ describe("AttributesController", function () {
             await consumptionController.attributes.getAttributeTagCollection();
 
             verify(tagClientSpy.getTagCollection()).twice();
+            reset(tagClientSpy);
+        });
+    });
+
+    describe("tag definition caching by e-tag", function () {
+        let connection: IDatabaseConnection;
+        let transport: Transport;
+        let testAccount: AccountController;
+        let consumptionController: ConsumptionController;
+        let tagClientSpy: TagClient;
+        let etag: string;
+        beforeEach(async function () {
+            connection = await TestUtil.createConnection();
+            transport = TestUtil.createTransport(connection, mockEventBus, {
+                tagCachingDurationInMinutes: 0
+            });
+            await transport.init();
+
+            const connectorAccount = (await TestUtil.provideAccounts(transport, 1))[0];
+            ({ accountController: testAccount, consumptionController } = connectorAccount);
+            const tagClient = consumptionController.attributes["attributeTagClient"];
+
+            tagClientSpy = spy(tagClient);
+
+            etag = "some-e-tag";
+            when(tagClientSpy.get("/api/v1/Tags", anything(), anything())).thenCall((_path, _params, config) => {
+                const etagMatched = etag === config?.headers?.["if-none-match"];
+                const platformParameters = {
+                    etag,
+                    responseStatus: etagMatched ? 304 : 200
+                };
+                return Promise.resolve(
+                    ClientResult.ok(
+                        etagMatched
+                            ? undefined
+                            : AttributeTagCollection.from({
+                                  supportedLanguages: ["en"],
+                                  tagsForAttributeValueTypes: {}
+                              }).toJSON(),
+                        platformParameters
+                    )
+                );
+            });
+        });
+
+        afterEach(async function () {
+            await testAccount.close();
+            await connection.close();
+            reset(tagClientSpy);
+        });
+
+        test("should cache the tag definitions when called twice without new etag", async function () {
+            const tagCollection1 = await consumptionController.attributes.getAttributeTagCollection();
+            await sleep(100);
+            const tagCollection2 = await consumptionController.attributes.getAttributeTagCollection();
+
+            verify(tagClientSpy.getTagCollection()).twice();
+            expect(tagCollection1 === tagCollection2).toBeTruthy();
+            reset(tagClientSpy);
+        });
+
+        test("should not cache the tag definitions when called twice with new etag", async function () {
+            const tagCollection1 = await consumptionController.attributes.getAttributeTagCollection();
+            await sleep(100);
+            etag = "some-other-e-tag";
+            const tagCollection2 = await consumptionController.attributes.getAttributeTagCollection();
+
+            verify(tagClientSpy.getTagCollection()).twice();
+            expect(tagCollection1 === tagCollection2).toBeFalsy();
             reset(tagClientSpy);
         });
     });

@@ -1362,10 +1362,12 @@ export class AttributesController extends ConsumptionBaseController {
         if (isCacheValid && this.cachedAttributeTagCollection) {
             return this.cachedAttributeTagCollection;
         }
+
         let backboneTagCollection = await this.attributeTagClient.getTagCollection();
         if (!backboneTagCollection && this.cachedAttributeTagCollection) {
             return this.cachedAttributeTagCollection;
         }
+
         if (!backboneTagCollection) {
             backboneTagCollection = await this.attributeTagClient.getTagCollection(true);
         }
