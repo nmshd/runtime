@@ -18,6 +18,7 @@ export class TagClient extends RESTClientAuthenticate {
         if (result.responseStatus === 304) {
             return undefined;
         }
+
         return result;
     }
 }
