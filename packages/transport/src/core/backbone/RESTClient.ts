@@ -49,13 +49,7 @@ export interface IRESTClientConfig {
 export class RESTClient {
     protected _logger: ILogger;
     protected _logDirective = RESTClientLogDirective.LogAll;
-    private _axiosInstance: AxiosInstance;
-    protected get axiosInstance(): AxiosInstance {
-        return this._axiosInstance;
-    }
-    protected set axiosInstance(value: AxiosInstance) {
-        this._axiosInstance = value;
-    }
+    protected axiosInstance: AxiosInstance;
 
     public logRequest(): boolean {
         return this._logDirective === RESTClientLogDirective.LogRequest || this._logDirective === RESTClientLogDirective.LogAll;

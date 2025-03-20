@@ -13,13 +13,16 @@ export class TagClient extends RESTClientAuthenticate {
         if (!forceUpdate && this.tagCollectionETag) {
             headers["if-none-match"] = this.tagCollectionETag;
         }
+
         const result = await this.get<BackboneGetTagCollection>("/api/v1/Tags", undefined, {
             headers,
             validateStatus: (status) => status === 200 || status === 304
         });
+
         if (result.responseStatus === 304) {
             return undefined;
         }
+
         this.tagCollectionETag = result.etag;
         return result;
     }

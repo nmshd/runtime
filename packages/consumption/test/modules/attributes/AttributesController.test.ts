@@ -3478,7 +3478,8 @@ describe("AttributesController", function () {
             const tagCollection2 = await consumptionController.attributes.getAttributeTagCollection();
 
             verify(tagClientSpy.getTagCollection()).twice();
-            expect(tagCollection1 === tagCollection2).toBeTruthy();
+            const isSameObjectReturned = tagCollection1 === tagCollection2;
+            expect(isSameObjectReturned).toBeTruthy();
             reset(tagClientSpy);
         });
 
@@ -3489,7 +3490,8 @@ describe("AttributesController", function () {
             const tagCollection2 = await consumptionController.attributes.getAttributeTagCollection();
 
             verify(tagClientSpy.getTagCollection()).twice();
-            expect(tagCollection1 === tagCollection2).toBeFalsy();
+            const isSameObjectReturned = tagCollection1 === tagCollection2;
+            expect(isSameObjectReturned).toBeFalsy();
             reset(tagClientSpy);
         });
     });
