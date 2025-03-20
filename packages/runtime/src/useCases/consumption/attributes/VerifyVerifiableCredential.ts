@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { AbstractVCProcessor } from "@nmshd/consumption";
+import { getVCProcessor } from "@nmshd/consumption";
 import { IdentityAttributeJSON, RelationshipAttributeJSON } from "@nmshd/content";
 import { AccountController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
@@ -34,7 +34,7 @@ export class VerifyVerifiableCredentialUseCase extends UseCase<VerifyVerifiableC
 
         const credentialType = request.attribute.proof.credentialType;
 
-        const vc = await AbstractVCProcessor.getVCProcessor(credentialType, this.accountController);
+        const vc = await getVCProcessor(credentialType, this.accountController);
 
         if (await vc.verify(request.attribute.proof)) return Result.ok({ success: true });
 

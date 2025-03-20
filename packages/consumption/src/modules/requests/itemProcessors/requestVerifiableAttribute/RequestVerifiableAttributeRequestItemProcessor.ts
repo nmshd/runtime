@@ -9,7 +9,7 @@ import {
 } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { AbstractVCProcessor } from "../../../attributes";
+import { getVCProcessor } from "../../../attributes/vc";
 import { ValidationResult } from "../../../common";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 import { LocalRequestInfo } from "../IRequestItemProcessor";
@@ -51,7 +51,7 @@ export class RequestVerifiableAttributeRequestItemProcessor extends GenericReque
     ): Promise<RequestVerifiableAttributeAcceptResponseItem> {
         const parsedRequestAttribute = JSON.parse(JSON.stringify(requestItem.attribute));
 
-        const vcProcessor = await AbstractVCProcessor.getVCProcessor(SupportedVCTypes.SdJwtVc, this.accountController);
+        const vcProcessor = await getVCProcessor(SupportedVCTypes.SdJwtVc, this.accountController);
         const signedCredential = await vcProcessor.sign(parsedRequestAttribute, requestItem.did);
         requestItem.attribute.proof = { credential: signedCredential, credentialType: SupportedVCTypes.SdJwtVc };
         const peerAttribute = await this.consumptionController.attributes.createSharedLocalAttribute({

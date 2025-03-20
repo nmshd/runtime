@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { AbstractVCProcessor } from "@nmshd/consumption";
+import { getVCProcessor } from "@nmshd/consumption";
 import { SupportedVCTypes } from "@nmshd/content";
 import { AccountController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
@@ -26,7 +26,7 @@ export class CreateVerifiableCredentialUseCase extends UseCase<CreateVerifiableC
     }
 
     protected async executeInternal(request: CreateVerifiableCredentialRequest): Promise<Result<any>> {
-        const vc = await AbstractVCProcessor.getVCProcessor(SupportedVCTypes.SdJwtVc, this.accountController);
+        const vc = await getVCProcessor(SupportedVCTypes.SdJwtVc, this.accountController);
 
         const signedCredential = await vc.sign(request.content, request.subjectDid);
 
