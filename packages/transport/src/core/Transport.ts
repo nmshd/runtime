@@ -31,7 +31,7 @@ export interface IConfig {
     datawalletEnabled: boolean;
     httpAgentOptions: AgentOptions;
     httpsAgentOptions: HTTPSAgentOptions;
-    tagCachingDurationInMinutes?: number;
+    tagCacheLifetimeInMinutes: number;
 }
 
 export interface IConfigOverwrite {
@@ -49,7 +49,7 @@ export interface IConfigOverwrite {
     datawalletEnabled?: boolean;
     httpAgentOptions?: AgentOptions;
     httpsAgentOptions?: HTTPSAgentOptions;
-    tagCachingDurationInMinutes?: number;
+    tagCacheLifetimeInMinutes?: number;
 }
 
 export class Transport {
@@ -82,7 +82,7 @@ export class Transport {
             keepAlive: true,
             maxFreeSockets: 2
         },
-        tagCachingDurationInMinutes: 1
+        tagCacheLifetimeInMinutes: 5
     };
 
     public constructor(

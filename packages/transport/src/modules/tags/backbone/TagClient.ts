@@ -4,14 +4,10 @@ import { RESTClientAuthenticate } from "../../../core/backbone/RESTClientAuthent
 import { BackboneGetTagCollection } from "./BackboneGetTagCollection";
 
 export class TagClient extends RESTClientAuthenticate {
-    private tagCollectionETag: string | undefined;
-
-    public async getTagCollection(forceUpdate: true): Promise<ClientResult<BackboneGetTagCollection>>;
-    public async getTagCollection(forceUpdate?: false): Promise<ClientResult<BackboneGetTagCollection> | undefined>;
-    public async getTagCollection(forceUpdate?: boolean): Promise<ClientResult<BackboneGetTagCollection> | undefined> {
+    public async getTagCollection(etag?: string): Promise<ClientResult<BackboneGetTagCollection> | undefined> {
         const headers: AxiosRequestConfig["headers"] = {};
-        if (!forceUpdate && this.tagCollectionETag) {
-            headers["if-none-match"] = this.tagCollectionETag;
+        if (etag) {
+            headers["if-none-match"] = etag;
         }
 
         const result = await this.get<BackboneGetTagCollection>("/api/v1/Tags", undefined, {
@@ -22,8 +18,6 @@ export class TagClient extends RESTClientAuthenticate {
         if (result.responseStatus === 304) {
             return undefined;
         }
-
-        this.tagCollectionETag = result.etag;
         return result;
     }
 }

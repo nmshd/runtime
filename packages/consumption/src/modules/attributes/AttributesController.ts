@@ -16,7 +16,7 @@ import {
 } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId, ICoreDate, ICoreId } from "@nmshd/core-types";
 import * as iql from "@nmshd/iql";
-import { SynchronizedCollection, TagClient, TransportCoreErrors } from "@nmshd/transport";
+import { SynchronizedCollection, TransportCoreErrors } from "@nmshd/transport";
 import _ from "lodash";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
@@ -35,7 +35,6 @@ import {
     ThirdPartyRelationshipAttributeSucceededEvent
 } from "./events";
 import { AttributeSuccessorParams, AttributeSuccessorParamsJSON, IAttributeSuccessorParams } from "./local/AttributeSuccessorParams";
-import { AttributeTagCollection } from "./local/AttributeTagCollection";
 import { CreateRepositoryAttributeParams, ICreateRepositoryAttributeParams } from "./local/CreateRepositoryAttributeParams";
 import { CreateSharedLocalAttributeCopyParams, ICreateSharedLocalAttributeCopyParams } from "./local/CreateSharedLocalAttributeCopyParams";
 import { ICreateSharedLocalAttributeParams } from "./local/CreateSharedLocalAttributeParams";
@@ -46,9 +45,6 @@ import { IdentityAttributeQueryTranslator, RelationshipAttributeQueryTranslator,
 
 export class AttributesController extends ConsumptionBaseController {
     private attributes: SynchronizedCollection;
-    private attributeTagClient: TagClient;
-    private cachedAttributeTagCollection?: AttributeTagCollection;
-    private cachedAttributeTagCollectionTimestamp?: CoreDate;
 
     public constructor(
         parent: ConsumptionController,
@@ -63,7 +59,6 @@ export class AttributesController extends ConsumptionBaseController {
         await super.init();
 
         this.attributes = await this.parent.accountController.getSynchronizedCollection("Attributes");
-        this.attributeTagClient = new TagClient(this.parent.transport.config, this.parent.accountController.authenticator, this.parent.transport.correlator);
 
         return this;
     }
@@ -1353,26 +1348,5 @@ export class AttributesController extends ConsumptionBaseController {
                 ]
             }
         });
-    }
-
-    public async getAttributeTagCollection(): Promise<AttributeTagCollection> {
-        const isCacheValid = this.cachedAttributeTagCollectionTimestamp?.isSameOrAfter(
-            CoreDate.utc().subtract({ minutes: this.parent.accountController.config.tagCachingDurationInMinutes })
-        );
-        if (isCacheValid && this.cachedAttributeTagCollection) {
-            return this.cachedAttributeTagCollection;
-        }
-
-        let backboneTagCollection = await this.attributeTagClient.getTagCollection();
-        if (!backboneTagCollection && this.cachedAttributeTagCollection) {
-            return this.cachedAttributeTagCollection;
-        }
-
-        if (!backboneTagCollection) {
-            backboneTagCollection = await this.attributeTagClient.getTagCollection(true);
-        }
-        this.cachedAttributeTagCollectionTimestamp = CoreDate.utc();
-        this.cachedAttributeTagCollection = AttributeTagCollection.from(backboneTagCollection.value);
-        return this.cachedAttributeTagCollection;
     }
 }

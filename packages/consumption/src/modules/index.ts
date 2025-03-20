@@ -6,3 +6,4 @@ export * from "./identityMetadata";
 export * from "./notifications";
 export * from "./requests";
 export * from "./settings";
+export * from "./tags";
