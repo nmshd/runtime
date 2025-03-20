@@ -1,5 +1,5 @@
 import { AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON } from "@nmshd/consumption";
-import { GivenName, IdentityAttribute, IdentityAttributeQueryJSON, ReadAttributeRequestItem } from "@nmshd/content";
+import { GivenName, IdentityAttribute, ReadAttributeRequestItem } from "@nmshd/content";
 import { CreateOutgoingRequestRequest } from "src";
 import { establishRelationship, exchangeAndAcceptRequestByMessage, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 
@@ -59,8 +59,10 @@ test("issue a credential", async () => {
     const readAttributeRequestItem = ReadAttributeRequestItem.from({
         mustBeAccepted: false,
         query: {
+            "@type": "IdentityAttributeQuery",
+            valueType: "GivenName",
             isVerified: true
-        } as IdentityAttributeQueryJSON
+        }
     }).toJSON();
     const readAttributeRequest: CreateOutgoingRequestRequest = {
         peer: holderServices.address,
@@ -76,6 +78,7 @@ test("issue a credential", async () => {
 
     const verifierAttributes = (await verifierServices.consumption.attributes.getAttributes({})).value;
     expect(verifierAttributes).toHaveLength(1);
-    expect(attributes[0].content.proof).toBeDefined();
-    expect(attributes[0].shareInfo?.peer).toBe(holderServices.address);
+    expect(verifierAttributes[0].content.proof).toBeDefined();
+    expect(verifierAttributes[0].content.proof?.proofInvalid).toBeUndefined();
+    expect(verifierAttributes[0].shareInfo?.peer).toBe(holderServices.address);
 });

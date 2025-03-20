@@ -1,5 +1,7 @@
-import { CoreBuffer } from "@nmshd/crypto";
+import { CoreBuffer, CryptoHash, CryptoHashAlgorithm, Encoding } from "@nmshd/crypto";
+import { CoreCrypto } from "@nmshd/transport";
 import { SDJwtVcInstance } from "@sd-jwt/sd-jwt-vc";
+import { Hasher } from "@sd-jwt/types";
 import didJWT from "did-jwt";
 import { Resolver } from "did-resolver";
 import { getResolver } from "key-did-resolver";
@@ -14,7 +16,10 @@ export class SdJwtVcProcessor extends AbstractVCProcessor<any> {
         const multikeyPublic = `z${CoreBuffer.from([0xed, 0x01]).append(this.accountController.identity.identity.publicKey.publicKey).toBase58()}`;
 
         const agent = new SDJwtVcInstance({
-            signer: async (string: string) => (await this.accountController.identity.sign(CoreBuffer.fromUtf8(string))).signature.toUtf8(),
+            signer: async (string: string) => (await this.accountController.identity.sign(CoreBuffer.fromUtf8(string))).signature.toBase64URL(),
+            hasher: this.hasher,
+            saltGenerator: async (length: number) => (await CoreCrypto.random(length)).toString(Encoding.Hex),
+            hashAlg: "sha-512",
             signAlg: "EdDSA" // https://www.iana.org/assignments/jose/jose.xhtml#web-signature-encryption-algorithms
         });
 
@@ -34,20 +39,42 @@ export class SdJwtVcProcessor extends AbstractVCProcessor<any> {
         const didResolver = new Resolver(getResolver());
 
         const agent = new SDJwtVcInstance({
-            verifier: async (data: string, _signature: string) => {
+            verifier: async (data: string, signature: string) => {
                 try {
-                    await didJWT.verifyJWT(data, { resolver: didResolver });
+                    await didJWT.verifyJWT(`${data}.${signature}`, { resolver: didResolver, policies: { now: new Date().getTime() } });
                     return true;
                 } catch (_) {
                     return false;
                 }
-            }
+            },
+            hasher: this.hasher
         });
+
+        const claimKeys = await agent.keys(data);
         try {
-            await agent.verify(data);
+            await agent.verify(data, claimKeys); // check all claims sent in the credential
             return true;
         } catch (_) {
             return false;
         }
     }
+
+    private readonly hasher: Hasher = async (data: string | ArrayBuffer, alg: string) => {
+        let mappedAlg: CryptoHashAlgorithm;
+        switch (alg) {
+            case "sha-256":
+                mappedAlg = CryptoHashAlgorithm.SHA256;
+                break;
+            case "sha-512":
+                mappedAlg = CryptoHashAlgorithm.SHA512;
+                break;
+            case "blake2b-512":
+                mappedAlg = CryptoHashAlgorithm.BLAKE2B;
+                break;
+            default:
+                throw new Error("unsupported hash algorithm");
+        }
+
+        return (await CryptoHash.hash(CoreBuffer.from(data), mappedAlg)).buffer;
+    };
 }
