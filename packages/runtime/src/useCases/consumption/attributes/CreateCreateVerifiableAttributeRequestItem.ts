@@ -1,12 +1,12 @@
 import { Result } from "@js-soft/ts-utils";
 import { getVCProcessor } from "@nmshd/consumption";
-import { CreateAttributeRequestItem, CreateAttributeRequestItemJSON, IdentityAttributeJSON, SupportedVCTypes } from "@nmshd/content";
+import { CreateAttributeRequestItem, CreateAttributeRequestItemJSON, IdentityAttributeJSON, RelationshipAttributeJSON, SupportedVCTypes } from "@nmshd/content";
 import { AccountController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
 export interface CreateCreateVerifiableAttributeRequestItemRequest {
-    content: IdentityAttributeJSON;
+    content: IdentityAttributeJSON | RelationshipAttributeJSON;
     peer: string;
     credentialType: SupportedVCTypes;
     mustBeAccepted: boolean;
