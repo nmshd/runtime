@@ -73,6 +73,10 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
     }
 
     public override async canAccept(requestItem: CreateAttributeRequestItem, _params: AcceptRequestItemParametersJSON, requestInfo: LocalRequestInfo): Promise<ValidationResult> {
+        if ((await this.consumptionController.attributes.verifyAttribute(requestItem.attribute)).proof?.proofInvalid) {
+            throw new Error("invalid attribute proof");
+        }
+
         if (requestItem.attribute instanceof RelationshipAttribute) {
             const ownerIsEmptyString = requestItem.attribute.owner.toString() === "";
 
