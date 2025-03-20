@@ -5,5 +5,5 @@ export abstract class AbstractVCProcessor<VCType> {
 
     public abstract init(): Promise<this>;
     public abstract sign(data: unknown, subjectDid: string): Promise<VCType>;
-    public abstract verify(data: VCType): Promise<boolean>;
+    public abstract verify(data: VCType): Promise<{ isSuccess: false } | { isSuccess: true; payload: Record<string, unknown> }>;
 }

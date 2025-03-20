@@ -1364,7 +1364,16 @@ export class AttributesController extends ConsumptionBaseController {
         if (!attribute.proof) return attribute;
         const vc = await getVCProcessor(attribute.proof.credentialType, this.parent.accountController);
         const verificationResult = await vc.verify(attribute.proof.credential);
-        attribute.proof.proofInvalid = verificationResult ? undefined : true;
+        if (!verificationResult.isSuccess) {
+            attribute.proof.proofInvalid = true;
+            return attribute;
+        }
+
+        const attributeClaims = Object.entries(attribute.value.toJSON());
+        const credentialClaims = Object.entries(verificationResult.payload);
+        const credentialConfirmsAttribute = _.differenceWith(attributeClaims, credentialClaims, _.isEqual).length === 0;
+
+        attribute.proof.proofInvalid = credentialConfirmsAttribute ? undefined : true;
         return attribute;
     }
 }
