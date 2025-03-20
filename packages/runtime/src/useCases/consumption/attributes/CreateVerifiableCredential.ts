@@ -9,6 +9,7 @@ import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
 export interface CreateVerifiableCredentialRequest {
     content: any;
     subjectDid: string;
+    credentialType: SupportedVCTypes;
 }
 
 class Validator extends SchemaValidator<CreateVerifiableCredentialRequest> {
@@ -26,7 +27,7 @@ export class CreateVerifiableCredentialUseCase extends UseCase<CreateVerifiableC
     }
 
     protected async executeInternal(request: CreateVerifiableCredentialRequest): Promise<Result<any>> {
-        const vc = await getVCProcessor(SupportedVCTypes.SdJwtVc, this.accountController);
+        const vc = await getVCProcessor(request.credentialType, this.accountController);
 
         const signedCredential = await vc.sign(request.content, request.subjectDid);
 

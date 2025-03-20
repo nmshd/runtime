@@ -454,7 +454,11 @@ export const CanCreateOutgoingRequestRequest: any = {
                         "credentialType": {
                             "$ref": "#/definitions/SupportedVCTypes"
                         },
-                        "credential": {}
+                        "credential": {},
+                        "proofInvalid": {
+                            "type": "boolean",
+                            "const": true
+                        }
                     },
                     "required": [
                         "credentialType",
@@ -1142,7 +1146,11 @@ export const CanCreateOutgoingRequestRequest: any = {
                         "credentialType": {
                             "$ref": "#/definitions/SupportedVCTypes"
                         },
-                        "credential": {}
+                        "credential": {},
+                        "proofInvalid": {
+                            "type": "boolean",
+                            "const": true
+                        }
                     },
                     "required": [
                         "credentialType",
@@ -3593,7 +3601,11 @@ export const CompleteOutgoingRequestRequest: any = {
                         "credentialType": {
                             "$ref": "#/definitions/SupportedVCTypes"
                         },
-                        "credential": {}
+                        "credential": {},
+                        "proofInvalid": {
+                            "type": "boolean",
+                            "const": true
+                        }
                     },
                     "required": [
                         "credentialType",
@@ -4857,7 +4869,11 @@ export const CompleteOutgoingRequestRequest: any = {
                         "credentialType": {
                             "$ref": "#/definitions/SupportedVCTypes"
                         },
-                        "credential": {}
+                        "credential": {},
+                        "proofInvalid": {
+                            "type": "boolean",
+                            "const": true
+                        }
                     },
                     "required": [
                         "credentialType",
@@ -6061,7 +6077,11 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                         "credentialType": {
                             "$ref": "#/definitions/SupportedVCTypes"
                         },
-                        "credential": {}
+                        "credential": {},
+                        "proofInvalid": {
+                            "type": "boolean",
+                            "const": true
+                        }
                     },
                     "required": [
                         "credentialType",
@@ -7325,7 +7345,11 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                         "credentialType": {
                             "$ref": "#/definitions/SupportedVCTypes"
                         },
-                        "credential": {}
+                        "credential": {},
+                        "proofInvalid": {
+                            "type": "boolean",
+                            "const": true
+                        }
                     },
                     "required": [
                         "credentialType",
@@ -8500,7 +8524,11 @@ export const CreateOutgoingRequestRequest: any = {
                         "credentialType": {
                             "$ref": "#/definitions/SupportedVCTypes"
                         },
-                        "credential": {}
+                        "credential": {},
+                        "proofInvalid": {
+                            "type": "boolean",
+                            "const": true
+                        }
                     },
                     "required": [
                         "credentialType",
@@ -9188,7 +9216,11 @@ export const CreateOutgoingRequestRequest: any = {
                         "credentialType": {
                             "$ref": "#/definitions/SupportedVCTypes"
                         },
-                        "credential": {}
+                        "credential": {},
+                        "proofInvalid": {
+                            "type": "boolean",
+                            "const": true
+                        }
                     },
                     "required": [
                         "credentialType",
@@ -12000,7 +12032,11 @@ export const ReceivedIncomingRequestRequest: any = {
                         "credentialType": {
                             "$ref": "#/definitions/SupportedVCTypes"
                         },
-                        "credential": {}
+                        "credential": {},
+                        "proofInvalid": {
+                            "type": "boolean",
+                            "const": true
+                        }
                     },
                     "required": [
                         "credentialType",
@@ -12688,7 +12724,11 @@ export const ReceivedIncomingRequestRequest: any = {
                         "credentialType": {
                             "$ref": "#/definitions/SupportedVCTypes"
                         },
-                        "credential": {}
+                        "credential": {},
+                        "proofInvalid": {
+                            "type": "boolean",
+                            "const": true
+                        }
                     },
                     "required": [
                         "credentialType",
@@ -15519,6 +15559,9 @@ export const CreateCreateVerifiableAttributeRequestItemRequest: any = {
                 "peer": {
                     "type": "string"
                 },
+                "credentialType": {
+                    "$ref": "#/definitions/SupportedVCTypes"
+                },
                 "mustBeAccepted": {
                     "type": "boolean"
                 }
@@ -15526,6 +15569,7 @@ export const CreateCreateVerifiableAttributeRequestItemRequest: any = {
             "required": [
                 "content",
                 "peer",
+                "credentialType",
                 "mustBeAccepted"
             ],
             "additionalProperties": false
@@ -15552,7 +15596,11 @@ export const CreateCreateVerifiableAttributeRequestItemRequest: any = {
                         "credentialType": {
                             "$ref": "#/definitions/SupportedVCTypes"
                         },
-                        "credential": {}
+                        "credential": {},
+                        "proofInvalid": {
+                            "type": "boolean",
+                            "const": true
+                        }
                     },
                     "required": [
                         "credentialType",
@@ -23979,7 +24027,11 @@ export const CreateSelfSignedVerifiableAttributeRequest: any = {
                         "credentialType": {
                             "$ref": "#/definitions/SupportedVCTypes"
                         },
-                        "credential": {}
+                        "credential": {},
+                        "proofInvalid": {
+                            "type": "boolean",
+                            "const": true
+                        }
                     },
                     "required": [
                         "credentialType",
@@ -25234,13 +25286,24 @@ export const CreateVerifiableCredentialRequest: any = {
                 "content": {},
                 "subjectDid": {
                     "type": "string"
+                },
+                "credentialType": {
+                    "$ref": "#/definitions/SupportedVCTypes"
                 }
             },
             "required": [
                 "content",
-                "subjectDid"
+                "subjectDid",
+                "credentialType"
             ],
             "additionalProperties": false
+        },
+        "SupportedVCTypes": {
+            "type": "string",
+            "enum": [
+                "W3CVC",
+                "SdJwtVc"
+            ]
         }
     }
 }
@@ -25296,7 +25359,11 @@ export const VerifyVerifiableCredentialRequest: any = {
                         "credentialType": {
                             "$ref": "#/definitions/SupportedVCTypes"
                         },
-                        "credential": {}
+                        "credential": {},
+                        "proofInvalid": {
+                            "type": "boolean",
+                            "const": true
+                        }
                     },
                     "required": [
                         "credentialType",
@@ -26560,7 +26627,11 @@ export const VerifyVerifiableCredentialRequest: any = {
                         "credentialType": {
                             "$ref": "#/definitions/SupportedVCTypes"
                         },
-                        "credential": {}
+                        "credential": {},
+                        "proofInvalid": {
+                            "type": "boolean",
+                            "const": true
+                        }
                     },
                     "required": [
                         "credentialType",

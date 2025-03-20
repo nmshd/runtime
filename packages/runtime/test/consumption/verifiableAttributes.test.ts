@@ -1,7 +1,7 @@
 import { AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON } from "@nmshd/consumption";
-import { GivenName, IdentityAttribute, ReadAttributeRequestItem } from "@nmshd/content";
+import { GivenName, IdentityAttribute, ReadAttributeRequestItem, SupportedVCTypes } from "@nmshd/content";
 import { CreateOutgoingRequestRequest } from "src";
-import { establishRelationship, exchangeAndAcceptRequestByMessage, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
+import { cleanupAttributes, establishRelationship, exchangeAndAcceptRequestByMessage, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 
 const runtimeServiceProvider = new RuntimeServiceProvider();
 
@@ -21,9 +21,11 @@ beforeAll(async () => {
     await establishRelationship(verifierServices.transport, holderServices.transport);
 }, 30000);
 
+afterEach(async () => await cleanupAttributes([issuerServices, holderServices, verifierServices]));
+
 afterAll(async () => await runtimeServiceProvider.stop());
 
-test("issue a credential", async () => {
+test.each(Object.values(SupportedVCTypes))("issue and present a credential of type %s", async (credentialType) => {
     const unsignedAttribute = IdentityAttribute.from({
         owner: holderServices.address,
         value: GivenName.from({
@@ -34,7 +36,8 @@ test("issue a credential", async () => {
     const signingResult = await issuerServices.consumption.attributes.createCreateVerifiableAttributeRequestItem({
         content: unsignedAttribute,
         peer: holderServices.address,
-        mustBeAccepted: false
+        mustBeAccepted: false,
+        credentialType
     });
 
     expect(signingResult).toBeSuccessful();
