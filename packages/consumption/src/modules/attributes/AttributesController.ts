@@ -1335,7 +1335,7 @@ export class AttributesController extends ConsumptionBaseController {
                 value: trimmedValue
             },
             shareInfo: {
-                peer: peer
+                peer
             }
         });
         queryForPeerSharedAttributeDuplicates["succeededBy"] = { $exists: false };
