@@ -1,5 +1,5 @@
 import { ClientResult, TagClient } from "@nmshd/transport";
-import { reset, spy, when } from "ts-mockito";
+import { anything, reset, spy, when } from "ts-mockito";
 import { RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
@@ -57,7 +57,7 @@ describe("get attributeTagCollection", function () {
     /* eslint-enable @typescript-eslint/naming-convention */
 
     test("should receive the legal tags from the Backbone", async function () {
-        when(mockedRestClient.getTagCollection()).thenResolve(ClientResult.ok(mockTags));
+        when(mockedRestClient.getTagCollection(anything())).thenResolve(ClientResult.ok(mockTags));
         const tags = await runtimeService.consumption.attributes.getAttributeTagCollection();
 
         expect(tags.value).toStrictEqual(mockTags);

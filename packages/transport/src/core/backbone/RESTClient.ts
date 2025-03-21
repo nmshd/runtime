@@ -203,6 +203,10 @@ export class RESTClient {
             return ClientResult.ok<T>({} as T, platformParameters);
         }
 
+        if (response.status === 304) {
+            return ClientResult.ok<T>({} as T, platformParameters);
+        }
+
         if (response.status === 404) {
             const error = new RequestError(
                 method,
@@ -495,7 +499,9 @@ export class RESTClient {
             responseDuration: response.headers["x-response-duration-ms"],
             responseTime: response.headers["x-response-time"],
             traceId: response.headers["x-trace-id"],
-            correlationId: response.headers["x-correlation-id"]
+            correlationId: response.headers["x-correlation-id"],
+            responseStatus: response.status,
+            etag: response.headers["etag"]
         };
     }
 
