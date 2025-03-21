@@ -4,7 +4,7 @@ import { RESTClientAuthenticate } from "../../../core/backbone/RESTClientAuthent
 import { BackboneGetTagCollection } from "./BackboneGetTagCollection";
 
 export class TagClient extends RESTClientAuthenticate {
-    public async getTagCollection(etag?: string): Promise<ClientResult<BackboneGetTagCollection> | undefined> {
+    public async getTagCollection(etag: string): Promise<ClientResult<BackboneGetTagCollection> | undefined> {
         const headers: AxiosRequestConfig["headers"] = {};
         if (etag) {
             headers["if-none-match"] = etag;
