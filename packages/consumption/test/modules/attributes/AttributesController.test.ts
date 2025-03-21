@@ -3379,7 +3379,7 @@ describe("AttributesController", function () {
         let transport: Transport;
         let testAccount: AccountController;
         let consumptionController: ConsumptionController;
-        let tagClientSpy: TagClient;
+        let attributeTagClientSpy: TagClient;
         beforeEach(async function () {
             connection = await TestUtil.createConnection();
             transport = TestUtil.createTransport(connection, mockEventBus, {
@@ -3389,10 +3389,10 @@ describe("AttributesController", function () {
 
             const connectorAccount = (await TestUtil.provideAccounts(transport, 1))[0];
             ({ accountController: testAccount, consumptionController } = connectorAccount);
-            const tagClient = consumptionController.attributes["attributeTagClient"];
+            const attributeTagClient = consumptionController.attributes["attributeTagClient"];
 
-            tagClientSpy = spy(tagClient);
-            when(tagClientSpy.get("/api/v1/Tags", anything(), anything())).thenResolve(
+            attributeTagClientSpy = spy(attributeTagClient);
+            when(attributeTagClientSpy.get("/api/v1/Tags", anything(), anything())).thenResolve(
                 ClientResult.ok(
                     AttributeTagCollection.from({
                         supportedLanguages: ["en"],
@@ -3408,15 +3408,15 @@ describe("AttributesController", function () {
         afterEach(async function () {
             await testAccount.close();
             await connection.close();
-            reset(tagClientSpy);
+            reset(attributeTagClientSpy);
         });
 
         test("should cache the tag definitions when called twice within tagCachingDurationInMinutes", async function () {
             await consumptionController.attributes.getAttributeTagCollection();
             await consumptionController.attributes.getAttributeTagCollection();
 
-            verify(tagClientSpy.getTagCollection(anything())).once();
-            reset(tagClientSpy);
+            verify(attributeTagClientSpy.getTagCollection(anything())).once();
+            reset(attributeTagClientSpy);
         });
 
         test("should not cache the tag definitions when the tagCachingDurationInMinutes was reached", async function () {
@@ -3424,8 +3424,8 @@ describe("AttributesController", function () {
             await sleep(1100);
             await consumptionController.attributes.getAttributeTagCollection();
 
-            verify(tagClientSpy.getTagCollection(anything())).twice();
-            reset(tagClientSpy);
+            verify(attributeTagClientSpy.getTagCollection(anything())).twice();
+            reset(attributeTagClientSpy);
         });
     });
 
@@ -3434,7 +3434,7 @@ describe("AttributesController", function () {
         let transport: Transport;
         let testAccount: AccountController;
         let consumptionController: ConsumptionController;
-        let tagClientSpy: TagClient;
+        let attributeTagClientSpy: TagClient;
         let attributesControllerSpy: AttributesController;
         let etag: string;
         beforeEach(async function () {
@@ -3446,13 +3446,13 @@ describe("AttributesController", function () {
 
             const connectorAccount = (await TestUtil.provideAccounts(transport, 1))[0];
             ({ accountController: testAccount, consumptionController } = connectorAccount);
-            const tagClient = consumptionController.attributes["attributeTagClient"];
+            const attributeTagClient = consumptionController.attributes["attributeTagClient"];
 
-            tagClientSpy = spy(tagClient);
+            attributeTagClientSpy = spy(attributeTagClient);
             attributesControllerSpy = spy(consumptionController.attributes);
 
             etag = "some-e-tag";
-            when(tagClientSpy.get("/api/v1/Tags", anything(), anything())).thenCall((_path, _params, config) => {
+            when(attributeTagClientSpy.get("/api/v1/Tags", anything(), anything())).thenCall((_path, _params, config) => {
                 const etagMatched = etag === config?.headers?.["if-none-match"];
                 const platformParameters = {
                     etag,
@@ -3475,7 +3475,7 @@ describe("AttributesController", function () {
         afterEach(async function () {
             await testAccount.close();
             await connection.close();
-            reset(tagClientSpy);
+            reset(attributeTagClientSpy);
             reset(attributesControllerSpy);
         });
 
@@ -3484,7 +3484,7 @@ describe("AttributesController", function () {
             await sleep(100);
             await consumptionController.attributes.getAttributeTagCollection();
 
-            verify(tagClientSpy.getTagCollection(anything())).twice();
+            verify(attributeTagClientSpy.getTagCollection(anything())).twice();
             verify(attributesControllerSpy["setTagCollection"](anything())).once();
         });
 
@@ -3494,7 +3494,7 @@ describe("AttributesController", function () {
             etag = "some-other-e-tag";
             await consumptionController.attributes.getAttributeTagCollection();
 
-            verify(tagClientSpy.getTagCollection(anything())).twice();
+            verify(attributeTagClientSpy.getTagCollection(anything())).twice();
             verify(attributesControllerSpy["setTagCollection"](anything())).twice();
         });
     });
