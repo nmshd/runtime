@@ -1,3 +1,4 @@
+import { IDatabaseCollection } from "@js-soft/docdb-access-abstractions";
 import { EventBus } from "@js-soft/ts-utils";
 import {
     AbstractAttributeValue,
@@ -16,7 +17,7 @@ import {
 } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId, ICoreDate, ICoreId } from "@nmshd/core-types";
 import * as iql from "@nmshd/iql";
-import { SynchronizedCollection, TransportCoreErrors } from "@nmshd/transport";
+import { SynchronizedCollection, TagClient, TransportCoreErrors } from "@nmshd/transport";
 import _ from "lodash";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
@@ -35,6 +36,7 @@ import {
     ThirdPartyRelationshipAttributeSucceededEvent
 } from "./events";
 import { AttributeSuccessorParams, AttributeSuccessorParamsJSON, IAttributeSuccessorParams } from "./local/AttributeSuccessorParams";
+import { AttributeTagCollection } from "./local/AttributeTagCollection";
 import { CreateRepositoryAttributeParams, ICreateRepositoryAttributeParams } from "./local/CreateRepositoryAttributeParams";
 import { CreateSharedLocalAttributeCopyParams, ICreateSharedLocalAttributeCopyParams } from "./local/CreateSharedLocalAttributeCopyParams";
 import { ICreateSharedLocalAttributeParams } from "./local/CreateSharedLocalAttributeParams";
@@ -45,6 +47,12 @@ import { IdentityAttributeQueryTranslator, RelationshipAttributeQueryTranslator,
 
 export class AttributesController extends ConsumptionBaseController {
     private attributes: SynchronizedCollection;
+    private tagCollection: IDatabaseCollection;
+    private tagClient: TagClient;
+
+    private readonly ETAG_DB_KEY = "etag";
+    private readonly CACHE_TIMESTAMP_DB_KEY = "cacheTimestamp";
+    private readonly TAG_COLLECTION_DB_KEY = "tagCollection";
 
     public constructor(
         parent: ConsumptionController,
@@ -59,6 +67,18 @@ export class AttributesController extends ConsumptionBaseController {
         await super.init();
 
         this.attributes = await this.parent.accountController.getSynchronizedCollection("Attributes");
+        this.tagCollection = await this.parent.accountController.db.getCollection("TagCollection");
+        this.tagClient = new TagClient(this.parent.transport.config, this.parent.accountController.authenticator, this.parent.transport.correlator);
+
+        const tagDefinitionCacheExists = await this.tagCollection.exists({ name: this.TAG_COLLECTION_DB_KEY });
+        if (!tagDefinitionCacheExists) {
+            await this.tagCollection.create({
+                name: this.TAG_COLLECTION_DB_KEY,
+                value: AttributeTagCollection.from({ supportedLanguages: [], tagsForAttributeValueTypes: {} }).toJSON()
+            });
+        }
+        await this.tagCollection.create({ name: this.ETAG_DB_KEY, value: "" });
+        await this.tagCollection.create({ name: this.CACHE_TIMESTAMP_DB_KEY, value: undefined });
 
         return this;
     }
@@ -1348,5 +1368,58 @@ export class AttributesController extends ConsumptionBaseController {
                 ]
             }
         });
+    }
+
+    private async getTagCollection(): Promise<AttributeTagCollection> {
+        const newLocal = await this.tagCollection.findOne({ name: this.TAG_COLLECTION_DB_KEY });
+        return AttributeTagCollection.from(newLocal.value);
+    }
+
+    private async setTagCollection(tagCollection: AttributeTagCollection): Promise<void> {
+        await this.tagCollection.update(await this.tagCollection.findOne({ name: this.TAG_COLLECTION_DB_KEY }), {
+            name: this.TAG_COLLECTION_DB_KEY,
+            value: tagCollection.toJSON()
+        });
+    }
+
+    private async getETag(): Promise<string | undefined> {
+        return (await this.tagCollection.findOne({ name: this.ETAG_DB_KEY }))?.value;
+    }
+
+    private async setETag(etag: string): Promise<void> {
+        await this.tagCollection.update(await this.tagCollection.findOne({ name: this.ETAG_DB_KEY }), { name: this.ETAG_DB_KEY, value: etag });
+    }
+
+    private async getCacheTimestamp(): Promise<CoreDate | undefined> {
+        try {
+            return CoreDate.from((await this.tagCollection.findOne({ name: this.CACHE_TIMESTAMP_DB_KEY })).value);
+        } catch {
+            return undefined;
+        }
+    }
+    private async updateCacheTimestamp(): Promise<void> {
+        await this.tagCollection.update(await this.tagCollection.findOne({ name: this.CACHE_TIMESTAMP_DB_KEY }), {
+            name: this.CACHE_TIMESTAMP_DB_KEY,
+            value: CoreDate.utc().toJSON()
+        });
+    }
+    private async isTagCollectionCacheValid(): Promise<boolean> {
+        return (await this.getCacheTimestamp())?.isSameOrAfter(CoreDate.utc().subtract({ minutes: this.parent.accountController.config.tagCacheLifetimeInMinutes })) ?? false;
+    }
+
+    public async getAttributeTagCollection(): Promise<AttributeTagCollection> {
+        const isCacheValid = await this.isTagCollectionCacheValid();
+        if (isCacheValid) {
+            return await this.getTagCollection();
+        }
+
+        const backboneTagCollection = await this.tagClient.getTagCollection(await this.getETag());
+        if (!backboneTagCollection) return await this.getTagCollection();
+
+        await this.setETag(backboneTagCollection.etag ?? "");
+        await this.updateCacheTimestamp();
+        await this.setTagCollection(AttributeTagCollection.from(backboneTagCollection.value));
+
+        return await this.getTagCollection();
     }
 }

@@ -42,7 +42,6 @@ import {
     RequestItemProcessorRegistry,
     SettingsController,
     ShareAttributeRequestItemProcessor,
-    TagsController,
     ThirdPartyRelationshipAttributeDeletedByPeerNotificationItemProcessor,
     TransferFileOwnershipRequestItemProcessor
 } from "../modules";
@@ -63,11 +62,6 @@ export class ConsumptionController {
     private _drafts: DraftsController;
     public get drafts(): DraftsController {
         return this._drafts;
-    }
-
-    private _tags: TagsController;
-    public get tags(): TagsController {
-        return this._tags;
     }
 
     private _outgoingRequests: OutgoingRequestsController;
@@ -111,7 +105,6 @@ export class ConsumptionController {
             this.consumptionConfig.setDefaultRepositoryAttributes
         ).init();
         this._drafts = await new DraftsController(this).init();
-        this._tags = await new TagsController(this).init();
 
         const requestItemProcessorRegistry = new RequestItemProcessorRegistry(this, this.getDefaultRequestItemProcessors());
 
