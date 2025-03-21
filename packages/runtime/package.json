@@ -42,9 +42,9 @@
             "lcov"
         ],
         "moduleNameMapper": {
-            "^multiformats/bases/base58$": "/home/mkuhn/runtime/node_modules/multiformats/cjs/src/bases/base58.js",
-            "^multiformats/basics$": "/home/mkuhn/runtime/node_modules/multiformats/cjs/src/basics.js",
-            "^uint8arrays$": "/home/mkuhn/runtime/node_modules/uint8arrays/cjs/src/index.js"
+            "^multiformats/bases/base58$": "<rootDir>/../../node_modules/multiformats/cjs/src/bases/base58.js",
+            "^multiformats/basics$": "<rootDir>/../../node_modules/multiformats/cjs/src/basics.js",
+            "^uint8arrays$": "<rootDir>/../../node_modules/uint8arrays/cjs/src/index.js"
         },
         "maxWorkers": 1,
         "preset": "ts-jest",
