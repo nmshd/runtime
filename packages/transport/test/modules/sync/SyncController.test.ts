@@ -85,7 +85,7 @@ describe("SyncController", function () {
         expect(results[1].messages).toHaveLength(1);
         expect(results[2].messages).toHaveLength(1);
 
-        const messages = await recipient.messages.getMessages();
-        expect(messages).toHaveLength(1);
+        const messageCount = (await recipient.messages.getMessages()).messageCount;
+        expect(messageCount).toBe(1);
     });
 });
