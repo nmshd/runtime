@@ -1,7 +1,9 @@
+import { StatusListEntryCreationParameters, SupportedStatusListTypes } from "@nmshd/content";
 import { CoreBuffer, CryptoHash, CryptoHashAlgorithm, Encoding } from "@nmshd/crypto";
 import { CoreCrypto } from "@nmshd/transport";
 import { SDJwtVcInstance } from "@sd-jwt/sd-jwt-vc";
 import { Hasher } from "@sd-jwt/types";
+import axios from "axios";
 import didJWT from "did-jwt";
 import { Resolver } from "did-resolver";
 import { getResolver } from "key-did-resolver";
@@ -12,7 +14,9 @@ export class SdJwtVcProcessor extends AbstractVCProcessor<any> {
         return await Promise.resolve(this);
     }
 
-    public override async sign(data: object, subjectDid: string): Promise<unknown> {
+    public override async sign(data: object, subjectDid: string, statusList?: StatusListEntryCreationParameters): Promise<unknown> {
+        if (statusList && statusList.type !== SupportedStatusListTypes.TokenStatusList) throw new Error("unsupported status list");
+
         const multikeyPublic = `z${CoreBuffer.from([0xed, 0x01]).append(this.accountController.identity.identity.publicKey.publicKey).toBase58()}`;
 
         const agent = new SDJwtVcInstance({
@@ -29,6 +33,15 @@ export class SdJwtVcProcessor extends AbstractVCProcessor<any> {
             iss: `did:key:${multikeyPublic}`,
             sub: subjectDid,
             iat: issuanceDate,
+            status: statusList
+                ? {
+                      // eslint-disable-next-line @typescript-eslint/naming-convention
+                      status_list: {
+                          uri: statusList.uri,
+                          idx: 0
+                      }
+                  }
+                : undefined,
             ...data
         };
 
@@ -47,7 +60,14 @@ export class SdJwtVcProcessor extends AbstractVCProcessor<any> {
                     return false;
                 }
             },
-            hasher: this.hasher
+            hasher: this.hasher,
+            statusListFetcher: async (uri: string) => {
+                return (await axios.get(uri)).data;
+            },
+            statusValidator: (status: number) => {
+                if (status === 0) return Promise.resolve();
+                throw new Error("Status is not valid");
+            }
         });
 
         const claimKeys = await agent.keys(data);

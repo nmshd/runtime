@@ -1,6 +1,13 @@
 import { Result } from "@js-soft/ts-utils";
 import { getVCProcessor } from "@nmshd/consumption";
-import { CreateAttributeRequestItem, CreateAttributeRequestItemJSON, IdentityAttributeJSON, RelationshipAttributeJSON, SupportedVCTypes } from "@nmshd/content";
+import {
+    CreateAttributeRequestItem,
+    CreateAttributeRequestItemJSON,
+    IdentityAttributeJSON,
+    RelationshipAttributeJSON,
+    StatusListEntryCreationParameters,
+    SupportedVCTypes
+} from "@nmshd/content";
 import { AccountController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
@@ -10,6 +17,7 @@ export interface CreateCreateVerifiableAttributeRequestItemRequest {
     peer: string;
     credentialType: SupportedVCTypes;
     mustBeAccepted: boolean;
+    statusList?: StatusListEntryCreationParameters;
 }
 
 class Validator extends SchemaValidator<CreateCreateVerifiableAttributeRequestItemRequest> {
@@ -30,7 +38,7 @@ export class CreateCreateVerifiableAttributeRequestItemUseCase extends UseCase<C
         const attributeValue = request.content.value;
         const vc = await getVCProcessor(request.credentialType, this.accountController);
 
-        const signedCredential = await vc.sign(attributeValue, request.peer);
+        const signedCredential = await vc.sign(attributeValue, request.peer, request.statusList);
         request.content.proof = { credential: signedCredential, credentialType: request.credentialType };
 
         return Result.ok(

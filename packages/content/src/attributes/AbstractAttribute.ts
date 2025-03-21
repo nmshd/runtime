@@ -6,6 +6,7 @@ export enum SupportedVCTypes {
     W3CVC = "W3CVC",
     SdJwtVc = "SdJwtVc"
 }
+
 export interface AbstractAttributeJSON extends ContentJSON {
     owner: string;
     proof?: { credentialType: SupportedVCTypes; credential: unknown; proofInvalid?: true };
