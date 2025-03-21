@@ -48,7 +48,7 @@ import { IdentityAttributeQueryTranslator, RelationshipAttributeQueryTranslator,
 export class AttributesController extends ConsumptionBaseController {
     private attributes: SynchronizedCollection;
     private tagCollection: IDatabaseCollection;
-    private tagClient: TagClient;
+    private attributeTagClient: TagClient;
 
     private readonly ETAG_DB_KEY = "etag";
     private readonly CACHE_TIMESTAMP_DB_KEY = "cacheTimestamp";
@@ -68,7 +68,7 @@ export class AttributesController extends ConsumptionBaseController {
 
         this.attributes = await this.parent.accountController.getSynchronizedCollection("Attributes");
         this.tagCollection = await this.parent.accountController.db.getCollection("TagCollection");
-        this.tagClient = new TagClient(this.parent.transport.config, this.parent.accountController.authenticator, this.parent.transport.correlator);
+        this.attributeTagClient = new TagClient(this.parent.transport.config, this.parent.accountController.authenticator, this.parent.transport.correlator);
 
         const tagDefinitionCacheExists = await this.tagCollection.exists({ name: this.TAG_COLLECTION_DB_KEY });
         if (!tagDefinitionCacheExists) {
@@ -1413,7 +1413,7 @@ export class AttributesController extends ConsumptionBaseController {
             return await this.getTagCollection();
         }
 
-        const backboneTagCollection = await this.tagClient.getTagCollection(await this.getETag());
+        const backboneTagCollection = await this.attributeTagClient.getTagCollection(await this.getETag());
         if (!backboneTagCollection) return await this.getTagCollection();
 
         await this.setETag(backboneTagCollection.etag ?? "");
