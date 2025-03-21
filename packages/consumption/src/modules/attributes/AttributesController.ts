@@ -1360,11 +1360,11 @@ export class AttributesController extends ConsumptionBaseController {
         return AttributeTagCollection.from(backboneTagCollection);
     }
 
-    public async verifyAttribute(attribute: IdentityAttribute | RelationshipAttribute): Promise<IdentityAttribute | RelationshipAttribute> {
+    public async verifyAttribute(attribute: IdentityAttribute | RelationshipAttribute, intendedSubject: CoreAddress): Promise<IdentityAttribute | RelationshipAttribute> {
         if (!attribute.proof) return attribute;
         const vc = await getVCProcessor(attribute.proof.credentialType, this.parent.accountController);
         const verificationResult = await vc.verify(attribute.proof.credential);
-        if (!verificationResult.isSuccess) {
+        if (!verificationResult.isSuccess || !intendedSubject.equals(verificationResult.subject)) {
             attribute.proof.proofInvalid = true;
             return attribute;
         }

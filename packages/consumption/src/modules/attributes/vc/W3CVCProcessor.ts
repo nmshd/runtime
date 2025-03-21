@@ -30,12 +30,14 @@ export class W3CVCProcessor extends AbstractVCProcessor<any> {
         return await sign(enrichedData, multikeyPublic, multikeyPrivate);
     }
 
-    public override async verify(data: any): Promise<{ isSuccess: false } | { isSuccess: true; payload: Record<string, unknown> }> {
+    public override async verify(data: any): Promise<{ isSuccess: false } | { isSuccess: true; payload: Record<string, unknown>; subject?: string; issuer: string }> {
         const verificationSuccessful = await verify(data);
         if (verificationSuccessful) {
             return {
                 isSuccess: true,
-                payload: data.credentialSubject
+                payload: data.credentialSubject,
+                subject: data.credentialSubject.id,
+                issuer: data.issuer
             };
         }
 

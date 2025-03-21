@@ -35,7 +35,7 @@ export class SdJwtVcProcessor extends AbstractVCProcessor<any> {
         return await agent.issue(enrichedData);
     }
 
-    public override async verify(data: any): Promise<{ isSuccess: false } | { isSuccess: true; payload: Record<string, unknown> }> {
+    public override async verify(data: any): Promise<{ isSuccess: false } | { isSuccess: true; payload: Record<string, unknown>; subject?: string; issuer: string }> {
         const didResolver = new Resolver(getResolver());
 
         const agent = new SDJwtVcInstance({
@@ -53,7 +53,7 @@ export class SdJwtVcProcessor extends AbstractVCProcessor<any> {
         const claimKeys = await agent.keys(data);
         try {
             const payload = (await agent.verify(data, claimKeys)).payload; // check all claims sent in the credential
-            return { isSuccess: true, payload };
+            return { isSuccess: true, payload, subject: payload.sub, issuer: payload.iss };
         } catch (_) {
             return { isSuccess: false };
         }
