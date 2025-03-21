@@ -65,7 +65,7 @@
             "^.+\\.js$": "babel-jest"
         },
         "transformIgnorePatterns": [
-            "node_modules/(?!key-did-resolver|uint8arrays).+\\.js$"
+            "node_modules/(?!key-did-resolver|uint8arrays|@digitalbazaar).+\\.js$"
         ]
     },
     "dependencies": {

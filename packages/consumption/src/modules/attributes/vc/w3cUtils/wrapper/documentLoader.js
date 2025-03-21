@@ -2,7 +2,7 @@ const context = require("../context");
 
 const jsldsig = require("jsonld-signatures");
 
-const defaultDocumentLoader = require("vc-js").defaultDocumentLoader;
+const defaultDocumentLoader = require("@digitalbazaar/vc").defaultDocumentLoader;
 
 const { extendContextLoader } = jsldsig;
 
