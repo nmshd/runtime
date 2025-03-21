@@ -53,11 +53,13 @@ test.each(Object.values(SupportedVCTypes))("issue and present a credential of ty
     await exchangeAndAcceptRequestByMessage(issuerServices, holderServices, request, [{ accept: true }]);
 
     const attributes = (await holderServices.consumption.attributes.getAttributes({})).value;
-    expect(attributes).toHaveLength(2);
+    expect(attributes).toHaveLength(3);
     expect(attributes[0].content.proof).toBeDefined();
     expect(attributes[0].shareInfo).toBeUndefined();
-    expect(attributes[1].content.proof).toBeDefined();
-    expect(attributes[1].shareInfo?.peer).toBe(issuerServices.address);
+    expect(attributes[1].content.proof).toBeUndefined();
+    expect(attributes[1].shareInfo).toBeUndefined();
+    expect(attributes[2].content.proof).toBeDefined();
+    expect(attributes[2].shareInfo?.peer).toBe(issuerServices.address);
 
     const readAttributeRequestItem = ReadAttributeRequestItem.from({
         mustBeAccepted: false,

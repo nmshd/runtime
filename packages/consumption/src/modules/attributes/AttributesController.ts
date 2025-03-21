@@ -261,6 +261,12 @@ export class AttributesController extends ConsumptionBaseController {
 
         await this.attributes.create(localAttribute);
 
+        if (localAttribute.content.proof) {
+            await this.createRepositoryAttribute({
+                content: IdentityAttribute.from({ ...(localAttribute.content.toJSON() as IdentityAttributeJSON), proof: undefined })
+            });
+        }
+
         if (this.setDefaultRepositoryAttributes) {
             localAttribute = await this.setAsDefaultRepositoryAttribute(localAttribute, true);
         }
