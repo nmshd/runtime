@@ -20,13 +20,21 @@ export interface CreateCreateVerifiableAttributeRequestItemRequest {
     statusList?: StatusListEntryCreationParameters;
 }
 
+export interface CreateCreateVerifiableAttribueRequestItemResponse {
+    requestItem: CreateAttributeRequestItemJSON;
+    statusListCredential?: unknown;
+}
+
 class Validator extends SchemaValidator<CreateCreateVerifiableAttributeRequestItemRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
         super(schemaRepository.getSchema("CreateCreateVerifiableAttributeRequestItemRequest"));
     }
 }
 
-export class CreateCreateVerifiableAttributeRequestItemUseCase extends UseCase<CreateCreateVerifiableAttributeRequestItemRequest, CreateAttributeRequestItemJSON> {
+export class CreateCreateVerifiableAttributeRequestItemUseCase extends UseCase<
+    CreateCreateVerifiableAttributeRequestItemRequest,
+    CreateCreateVerifiableAttribueRequestItemResponse
+> {
     public constructor(
         @Inject private readonly accountController: AccountController,
         @Inject validator: Validator
@@ -34,18 +42,19 @@ export class CreateCreateVerifiableAttributeRequestItemUseCase extends UseCase<C
         super(validator);
     }
 
-    protected async executeInternal(request: CreateCreateVerifiableAttributeRequestItemRequest): Promise<Result<CreateAttributeRequestItemJSON>> {
+    protected async executeInternal(request: CreateCreateVerifiableAttributeRequestItemRequest): Promise<Result<CreateCreateVerifiableAttribueRequestItemResponse>> {
         const attributeValue = request.content.value;
         const vc = await getVCProcessor(request.credentialType, this.accountController);
 
-        const signedCredential = await vc.sign(attributeValue, request.peer, request.statusList);
+        const { credential: signedCredential, statusListCredential } = await vc.sign(attributeValue, request.peer, request.statusList);
         request.content.proof = { credential: signedCredential, credentialType: request.credentialType };
 
-        return Result.ok(
-            CreateAttributeRequestItem.from({
+        return Result.ok({
+            requestItem: CreateAttributeRequestItem.from({
                 attribute: request.content,
                 mustBeAccepted: request.mustBeAccepted
-            }).toJSON()
-        );
+            }).toJSON(),
+            statusListCredential
+        });
     }
 }

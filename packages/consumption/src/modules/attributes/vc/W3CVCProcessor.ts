@@ -1,3 +1,4 @@
+import { StatusListEntryCreationParameters, SupportedStatusListTypes } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
 import { DeviceSecretType } from "@nmshd/transport";
@@ -10,7 +11,9 @@ export class W3CVCProcessor extends AbstractVCProcessor<any> {
         return this;
     }
 
-    public override async sign(data: object, subjectDid: string): Promise<unknown> {
+    public override async sign(data: object, subjectDid: string, statusList?: StatusListEntryCreationParameters): Promise<{ credential: unknown; statusListCredential?: unknown }> {
+        if (statusList && statusList.type !== SupportedStatusListTypes.BitstringStatusList) throw new Error("unsupported status list");
+
         const multikeyPublic = `z${CoreBuffer.from([0xed, 0x01]).append(this.accountController.identity.identity.publicKey.publicKey).toBase58()}`;
         const privateKeyContainer = await this.accountController.activeDevice.secrets.loadSecret(DeviceSecretType.IdentitySignature);
         if (!privateKeyContainer) throw new Error("no private key"); // TODO: improve error
@@ -22,12 +25,21 @@ export class W3CVCProcessor extends AbstractVCProcessor<any> {
         const enrichedData = {
             "@context": ["https://www.w3.org/2018/credentials/v1", "https://www.w3.org/2018/credentials/examples/v1"],
             type: ["VerifiableCredential"],
-            issuer: `did:key:${multikeyPublic}`,
+            issuer: this.issuerId,
             issuanceDate,
-            credentialSubject: { ...data, id: subjectDid }
+            credentialSubject: { ...data, id: subjectDid },
+            credentialStatus: statusList
+                ? {
+                      type: "BitstringStatusListEntry",
+                      statusListIndex: "0",
+                      statusListCredential: statusList.uri
+                  }
+                : undefined
         };
 
-        return await sign(enrichedData, multikeyPublic, multikeyPrivate);
+        const credential = await sign(enrichedData, multikeyPublic, multikeyPrivate);
+
+        return { credential };
     }
 
     public override async verify(data: any): Promise<{ isSuccess: false } | { isSuccess: true; payload: Record<string, unknown>; subject?: string; issuer: string }> {

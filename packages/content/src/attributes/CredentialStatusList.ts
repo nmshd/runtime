@@ -1,5 +1,6 @@
 export enum SupportedStatusListTypes {
-    TokenStatusList = "TokenStatusList"
+    TokenStatusList = "TokenStatusList",
+    BitstringStatusList = "BitstringStatusList"
 }
 
 export interface TokenStatusListEntryCreationParameters {
@@ -7,4 +8,9 @@ export interface TokenStatusListEntryCreationParameters {
     uri: string;
 }
 
-export type StatusListEntryCreationParameters = TokenStatusListEntryCreationParameters;
+export interface BitstringStatusListEntryCreationParameters {
+    type: SupportedStatusListTypes.BitstringStatusList;
+    uri: string;
+}
+
+export type StatusListEntryCreationParameters = TokenStatusListEntryCreationParameters | BitstringStatusListEntryCreationParameters;

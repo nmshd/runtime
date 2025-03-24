@@ -1,5 +1,4 @@
 import { Result } from "@js-soft/ts-utils";
-import { CreateAttributeRequestItemJSON } from "@nmshd/content";
 import { Inject } from "@nmshd/typescript-ioc";
 import { AttributeTagCollectionDTO, LocalAttributeDTO, LocalRequestDTO } from "../../../types";
 import {
@@ -10,6 +9,7 @@ import {
     ChangeDefaultRepositoryAttributeUseCase,
     CreateAndShareRelationshipAttributeRequest,
     CreateAndShareRelationshipAttributeUseCase,
+    CreateCreateVerifiableAttribueRequestItemResponse,
     CreateCreateVerifiableAttributeRequestItemRequest,
     CreateCreateVerifiableAttributeRequestItemUseCase,
     CreateRepositoryAttributeRequest,
@@ -218,7 +218,9 @@ export class AttributesFacade {
         return await this.getAttributeTagCollectionUseCase.execute();
     }
 
-    public async createCreateVerifiableAttributeRequestItem(request: CreateCreateVerifiableAttributeRequestItemRequest): Promise<Result<CreateAttributeRequestItemJSON>> {
+    public async createCreateVerifiableAttributeRequestItem(
+        request: CreateCreateVerifiableAttributeRequestItemRequest
+    ): Promise<Result<CreateCreateVerifiableAttribueRequestItemResponse>> {
         return await this.createCreateVerifiableAttributeRequestItemUseCase.execute(request);
     }
 }

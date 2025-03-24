@@ -1,9 +1,12 @@
 import { AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON } from "@nmshd/consumption";
-import { GivenName, IdentityAttribute, ReadAttributeRequestItem, SupportedVCTypes } from "@nmshd/content";
+import { GivenName, IdentityAttribute, ReadAttributeRequestItem, SupportedStatusListTypes, SupportedVCTypes } from "@nmshd/content";
+import { http, HttpResponse } from "msw";
+import { setupServer } from "msw/node";
 import { CreateOutgoingRequestRequest } from "src";
 import { cleanupAttributes, establishRelationship, exchangeAndAcceptRequestByMessage, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 
 const runtimeServiceProvider = new RuntimeServiceProvider();
+const MOCK_STATUS_LIST_URI = "http://localhost:44444/status_list";
 
 let issuerServices: TestRuntimeServices;
 let holderServices: TestRuntimeServices;
@@ -41,7 +44,7 @@ test.each(Object.values(SupportedVCTypes))("issue and present a credential of ty
     });
 
     expect(signingResult).toBeSuccessful();
-    const requestItem = signingResult.value;
+    const requestItem = signingResult.value.requestItem;
     expect(requestItem.attribute.proof).toBeDefined();
 
     const request: CreateOutgoingRequestRequest = {
@@ -86,4 +89,78 @@ test.each(Object.values(SupportedVCTypes))("issue and present a credential of ty
     expect(verifierAttributes[0].content.proof).toBeDefined();
     expect(verifierAttributes[0].content.proof?.proofInvalid).toBeUndefined();
     expect(verifierAttributes[0].shareInfo?.peer).toBe(holderServices.address);
+});
+
+test("issue and present a credential of type SD-JWT with TokenStatusList", async () => {
+    const unsignedAttribute = IdentityAttribute.from({
+        owner: holderServices.address,
+        value: GivenName.from({
+            value: "aGivenName"
+        }).toJSON()
+    }).toJSON();
+
+    const signingResult = await issuerServices.consumption.attributes.createCreateVerifiableAttributeRequestItem({
+        content: unsignedAttribute,
+        peer: holderServices.address,
+        mustBeAccepted: false,
+        credentialType: SupportedVCTypes.SdJwtVc,
+        statusList: { uri: MOCK_STATUS_LIST_URI, type: SupportedStatusListTypes.TokenStatusList }
+    });
+
+    expect(signingResult).toBeSuccessful();
+    const requestItem = signingResult.value.requestItem;
+    expect(requestItem.attribute.proof).toBeDefined();
+    const statusListCredential = signingResult.value.statusListCredential as string;
+    expect(statusListCredential).toBeDefined();
+
+    const getStatusListHandler = http.get(MOCK_STATUS_LIST_URI, () => {
+        return HttpResponse.text(statusListCredential);
+    });
+    const getStatusListServer = setupServer(getStatusListHandler);
+    getStatusListServer.listen({ onUnhandledRequest: "bypass" });
+
+    const request: CreateOutgoingRequestRequest = {
+        peer: holderServices.address,
+        content: {
+            items: [requestItem]
+        }
+    };
+    await exchangeAndAcceptRequestByMessage(issuerServices, holderServices, request, [{ accept: true }]);
+
+    const attributes = (await holderServices.consumption.attributes.getAttributes({})).value;
+    expect(attributes).toHaveLength(3);
+    expect(attributes[0].content.proof).toBeDefined();
+    expect(attributes[0].shareInfo).toBeUndefined();
+    expect(attributes[1].content.proof).toBeUndefined();
+    expect(attributes[1].shareInfo).toBeUndefined();
+    expect(attributes[2].content.proof).toBeDefined();
+    expect(attributes[2].shareInfo?.peer).toBe(issuerServices.address);
+
+    const readAttributeRequestItem = ReadAttributeRequestItem.from({
+        mustBeAccepted: false,
+        query: {
+            "@type": "IdentityAttributeQuery",
+            valueType: "GivenName",
+            isVerified: true
+        }
+    }).toJSON();
+    const readAttributeRequest: CreateOutgoingRequestRequest = {
+        peer: holderServices.address,
+        content: {
+            items: [readAttributeRequestItem]
+        }
+    };
+    const readAttributeResponse: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
+        accept: true,
+        existingAttributeId: attributes[0].id
+    };
+    await exchangeAndAcceptRequestByMessage(verifierServices, holderServices, readAttributeRequest, [readAttributeResponse]);
+
+    const verifierAttributes = (await verifierServices.consumption.attributes.getAttributes({})).value;
+    expect(verifierAttributes).toHaveLength(1);
+    expect(verifierAttributes[0].content.proof).toBeDefined();
+    expect(verifierAttributes[0].content.proof?.proofInvalid).toBeUndefined();
+    expect(verifierAttributes[0].shareInfo?.peer).toBe(holderServices.address);
+
+    getStatusListServer.close();
 });

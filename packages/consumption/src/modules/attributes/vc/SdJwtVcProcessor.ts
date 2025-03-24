@@ -1,8 +1,10 @@
-import { StatusListEntryCreationParameters, SupportedStatusListTypes } from "@nmshd/content";
+import { StatusListEntryCreationParameters, SupportedStatusListTypes, TokenStatusListEntryCreationParameters } from "@nmshd/content";
 import { CoreBuffer, CryptoHash, CryptoHashAlgorithm, Encoding } from "@nmshd/crypto";
 import { CoreCrypto } from "@nmshd/transport";
+import { SDJwtInstance } from "@sd-jwt/core";
+import { createHeaderAndPayload, StatusList, StatusListJWTHeaderParameters } from "@sd-jwt/jwt-status-list";
 import { SDJwtVcInstance } from "@sd-jwt/sd-jwt-vc";
-import { Hasher } from "@sd-jwt/types";
+import { Hasher, JwtPayload } from "@sd-jwt/types";
 import axios from "axios";
 import didJWT from "did-jwt";
 import { Resolver } from "did-resolver";
@@ -14,10 +16,8 @@ export class SdJwtVcProcessor extends AbstractVCProcessor<any> {
         return await Promise.resolve(this);
     }
 
-    public override async sign(data: object, subjectDid: string, statusList?: StatusListEntryCreationParameters): Promise<unknown> {
+    public override async sign(data: object, subjectDid: string, statusList?: StatusListEntryCreationParameters): Promise<{ credential: unknown; statusListCredential?: unknown }> {
         if (statusList && statusList.type !== SupportedStatusListTypes.TokenStatusList) throw new Error("unsupported status list");
-
-        const multikeyPublic = `z${CoreBuffer.from([0xed, 0x01]).append(this.accountController.identity.identity.publicKey.publicKey).toBase58()}`;
 
         const agent = new SDJwtVcInstance({
             signer: async (string: string) => (await this.accountController.identity.sign(CoreBuffer.fromUtf8(string))).signature.toBase64URL(),
@@ -30,7 +30,7 @@ export class SdJwtVcProcessor extends AbstractVCProcessor<any> {
         const issuanceDate = new Date().getTime();
         const enrichedData = {
             vct: "placeholder",
-            iss: `did:key:${multikeyPublic}`,
+            iss: this.issuerId,
             sub: subjectDid,
             iat: issuanceDate,
             status: statusList
@@ -42,10 +42,41 @@ export class SdJwtVcProcessor extends AbstractVCProcessor<any> {
                       }
                   }
                 : undefined,
-            ...data
+            ...data // TODO: if the data already contains a status list, don't overwrite it
         };
 
-        return await agent.issue(enrichedData);
+        const statusListCredential = await this.createStatusList(statusList);
+        const credential = await agent.issue(enrichedData);
+
+        return { credential, statusListCredential };
+    }
+
+    private async createStatusList(statusList?: TokenStatusListEntryCreationParameters) {
+        if (!statusList) return undefined;
+
+        const statusListCredential = new StatusList([0], 1); // TODO: allow multiple credentials in a status list
+        const payload: JwtPayload = {
+            iss: this.issuerId,
+            sub: statusList.uri,
+            iat: new Date().getTime()
+        };
+
+        const header: StatusListJWTHeaderParameters = {
+            alg: "EdDSA",
+            typ: "statuslist+jwt"
+        };
+
+        const enrichedJWTContent = createHeaderAndPayload(statusListCredential, payload, header);
+        const agent = new SDJwtInstance({
+            signer: async (string: string) => (await this.accountController.identity.sign(CoreBuffer.fromUtf8(string))).signature.toBase64URL(),
+            signAlg: "EdDSA",
+            hasher: this.hasher,
+            hashAlg: "sha-512",
+            saltGenerator: async (length: number) => (await CoreCrypto.random(length)).toString(Encoding.Hex)
+        });
+
+        const signedCredential = await agent.issue(enrichedJWTContent.payload, undefined, { header: enrichedJWTContent.header });
+        return signedCredential.replaceAll("~", ""); // replace trailing ~
     }
 
     public override async verify(data: any): Promise<{ isSuccess: false } | { isSuccess: true; payload: Record<string, unknown>; subject?: string; issuer: string }> {

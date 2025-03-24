@@ -44,7 +44,8 @@
         "moduleNameMapper": {
             "^multiformats/bases/base58$": "<rootDir>/../../node_modules/multiformats/cjs/src/bases/base58.js",
             "^multiformats/basics$": "<rootDir>/../../node_modules/multiformats/cjs/src/basics.js",
-            "^uint8arrays$": "<rootDir>/../../node_modules/uint8arrays/cjs/src/index.js"
+            "^uint8arrays$": "<rootDir>/../../node_modules/uint8arrays/cjs/src/index.js",
+            "^msw/browser$": "<rootDir>/../../node_modules/msw/lib/browser/index.js"
         },
         "maxWorkers": 1,
         "preset": "ts-jest",
