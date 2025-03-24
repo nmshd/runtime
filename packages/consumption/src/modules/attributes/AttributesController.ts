@@ -1434,6 +1434,7 @@ export class AttributesController extends ConsumptionBaseController {
             return undefined;
         }
     }
+
     private async updateCacheTimestamp(): Promise<void> {
         await this.tagCollection.update(await this.tagCollection.findOne({ name: this.CACHE_TIMESTAMP_DB_KEY }), {
             name: this.CACHE_TIMESTAMP_DB_KEY,
