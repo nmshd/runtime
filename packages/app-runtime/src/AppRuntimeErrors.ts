@@ -18,7 +18,7 @@ class General {
     public appServicesUnavailable(): UserfriendlyApplicationError {
         return new UserfriendlyApplicationError(
             "error.appruntime.general.appServicesUnavailable",
-            "The app services are not available. Try to execute login before this operation."
+            "The App services are not available. Try to execute login before this operation."
         );
     }
 
@@ -67,7 +67,7 @@ class PushNotificationModule {
         return new UserfriendlyApplicationError(
             "error.runtime.module.PushNotificationModule.SubscriptionNotPossible",
             `Subscribing to the NativeEventBus was not possible. Root cause: '${details}'`,
-            "The backbone has no push connection with this app. You might have to refresh the app manually.",
+            "The Backbone has no push connection with this App. You might have to refresh the App manually.",
             rootError
         );
     }
@@ -76,7 +76,7 @@ class PushNotificationModule {
         return new UserfriendlyApplicationError(
             "error.runtime.module.PushNotificationModule.UnsubscriptionNotPossible",
             `Unsubscribing from the NativeEventBus was not possible. Root cause: '${details}'`,
-            "The backbone still might have a push connection with this app. You might receive some unwanted notifications.",
+            "The Backbone still might have a push connection with this App. You might receive some unwanted notifications.",
             rootError
         );
     }
@@ -85,7 +85,7 @@ class PushNotificationModule {
         return new UserfriendlyApplicationError(
             "error.runtime.module.PushNotificationModule.TokenRegistrationNotPossible",
             `Registering the Push Notification Token for the account was not possible. Root cause: '${details}'`,
-            "The backbone has no push connection with this app. You might have to refresh the app manually.",
+            "The Backbone has no push connection with this App. You might have to refresh the App manually.",
             rootError
         );
     }

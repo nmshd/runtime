@@ -203,7 +203,7 @@ export class AppRuntime extends Runtime<AppConfig> {
     }
 
     public static async create(nativeBootstrapper: INativeBootstrapper, appConfig: AppConfigOverwrite | AppConfig = {}, eventBus?: EventBus): Promise<AppRuntime> {
-        // TODO: JSSNMSHDD-2524 (validate app config)
+        // TODO: JSSNMSHDD-2524 (validate App config)
 
         if (!nativeBootstrapper.isInitialized) {
             const result = await nativeBootstrapper.init();

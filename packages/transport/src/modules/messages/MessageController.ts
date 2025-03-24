@@ -530,7 +530,7 @@ export class MessageController extends TransportController {
                 recipients.push(
                     CachedMessageRecipient.from({
                         // make sure to save the pseudonym instead of the real address if the relationship was removed
-                        // in cases the backbone did not already process the relationship termination
+                        // in cases the Backbone did not already process the relationship termination
                         address: relationship ? recipient.address : pseudonym,
                         encryptedKey: recipient.encryptedKey,
                         receivedAt: recipient.receivedAt,

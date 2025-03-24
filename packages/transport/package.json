@@ -1,6 +1,6 @@
 {
     "name": "@nmshd/transport",
-    "description": "The transport library handles backbone communication and content encryption.",
+    "description": "The transport library handles Backbone communication and content encryption.",
     "homepage": "https://enmeshed.eu",
     "repository": {
         "type": "git",

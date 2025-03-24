@@ -79,7 +79,7 @@ describe("AnonymousTokenController", function () {
         await expect(anonymousTokenController.loadPeerTokenByTruncated(sentToken.toTokenReference().truncate())).rejects.toThrow("transport.general.notIntendedForYou");
     });
 
-    test("should throw when loading a personalized token and it's uncaught before reaching the backbone", async function () {
+    test("should throw when loading a personalized token and it's uncaught before reaching the Backbone", async function () {
         const expiresAt = CoreDate.utc().add({ minutes: 5 });
         const content = Serializable.fromAny({ content: "TestToken" });
         const sentToken = await sender.tokens.sendToken({
