@@ -20,4 +20,6 @@ export abstract class AbstractVCProcessor<VCType> {
               issuer: string;
           }
     >;
+
+    public abstract revokeCredential(credential: unknown): Promise<unknown>;
 }

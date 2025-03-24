@@ -53,6 +53,8 @@ import {
     NotifyPeerAboutRepositoryAttributeSuccessionRequest,
     NotifyPeerAboutRepositoryAttributeSuccessionResponse,
     NotifyPeerAboutRepositoryAttributeSuccessionUseCase,
+    RevokeAttributeRequest,
+    RevokeAttributeUseCase,
     ShareRepositoryAttributeRequest,
     ShareRepositoryAttributeUseCase,
     SucceedRelationshipAttributeAndNotifyPeerRequest,
@@ -94,7 +96,8 @@ export class AttributesFacade {
         @Inject private readonly deleteRepositoryAttributeUseCase: DeleteRepositoryAttributeUseCase,
         @Inject private readonly deleteSharedAttributesForRejectedOrRevokedRelationshipUseCase: DeleteSharedAttributesForRejectedOrRevokedRelationshipUseCase,
         @Inject private readonly getAttributeTagCollectionUseCase: GetAttributeTagCollectionUseCase,
-        @Inject private readonly createCreateVerifiableAttributeRequestItemUseCase: CreateCreateVerifiableAttributeRequestItemUseCase
+        @Inject private readonly createCreateVerifiableAttributeRequestItemUseCase: CreateCreateVerifiableAttributeRequestItemUseCase,
+        @Inject private readonly revokeAttributeUseCase: RevokeAttributeUseCase
     ) {}
 
     public async canCreateRepositoryAttribute(request: CanCreateRepositoryAttributeRequest): Promise<Result<CanCreateRepositoryAttributeResponse>> {
@@ -222,5 +225,9 @@ export class AttributesFacade {
         request: CreateCreateVerifiableAttributeRequestItemRequest
     ): Promise<Result<CreateCreateVerifiableAttribueRequestItemResponse>> {
         return await this.createCreateVerifiableAttributeRequestItemUseCase.execute(request);
+    }
+
+    public async revokeAttribute(request: RevokeAttributeRequest): Promise<Result<unknown>> {
+        return await this.revokeAttributeUseCase.execute(request);
     }
 }

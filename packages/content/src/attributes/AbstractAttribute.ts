@@ -9,7 +9,11 @@ export enum SupportedVCTypes {
 
 export interface AbstractAttributeJSON extends ContentJSON {
     owner: string;
-    proof?: { credentialType: SupportedVCTypes; credential: unknown; proofInvalid?: true };
+    proof?: {
+        credentialType: SupportedVCTypes;
+        credential: unknown;
+        proofInvalid?: true;
+    };
     validFrom?: string;
     validTo?: string;
 }

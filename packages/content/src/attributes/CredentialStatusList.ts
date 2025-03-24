@@ -1,3 +1,5 @@
+import { StatusList } from "@sd-jwt/jwt-status-list";
+
 export enum SupportedStatusListTypes {
     TokenStatusList = "TokenStatusList",
     BitstringStatusList = "BitstringStatusList"
@@ -6,6 +8,7 @@ export enum SupportedStatusListTypes {
 export interface TokenStatusListEntryCreationParameters {
     type: SupportedStatusListTypes.TokenStatusList;
     uri: string;
+    data?: StatusList;
 }
 
 export interface BitstringStatusListEntryCreationParameters {

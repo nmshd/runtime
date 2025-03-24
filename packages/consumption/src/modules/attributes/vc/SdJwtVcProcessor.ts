@@ -2,8 +2,8 @@ import { StatusListEntryCreationParameters, SupportedStatusListTypes, TokenStatu
 import { CoreBuffer, CryptoHash, CryptoHashAlgorithm, Encoding } from "@nmshd/crypto";
 import { CoreCrypto } from "@nmshd/transport";
 import { SDJwtInstance } from "@sd-jwt/core";
-import { createHeaderAndPayload, StatusList, StatusListJWTHeaderParameters } from "@sd-jwt/jwt-status-list";
-import { SDJwtVcInstance } from "@sd-jwt/sd-jwt-vc";
+import { createHeaderAndPayload, getListFromStatusListJWT, StatusList, StatusListJWTHeaderParameters } from "@sd-jwt/jwt-status-list";
+import { SDJwtVcInstance, SdJwtVcPayload } from "@sd-jwt/sd-jwt-vc";
 import { Hasher, JwtPayload } from "@sd-jwt/types";
 import axios from "axios";
 import didJWT from "did-jwt";
@@ -51,10 +51,10 @@ export class SdJwtVcProcessor extends AbstractVCProcessor<any> {
         return { credential, statusListCredential };
     }
 
-    private async createStatusList(statusList?: TokenStatusListEntryCreationParameters) {
+    private async createStatusList(statusList?: TokenStatusListEntryCreationParameters): Promise<string | undefined> {
         if (!statusList) return undefined;
 
-        const statusListCredential = new StatusList([0], 1); // TODO: allow multiple credentials in a status list
+        const statusListCredential = statusList.data ?? new StatusList([0], 1); // TODO: allow multiple credentials in a status list
         const payload: JwtPayload = {
             iss: this.issuerId,
             sub: statusList.uri,
@@ -77,6 +77,29 @@ export class SdJwtVcProcessor extends AbstractVCProcessor<any> {
 
         const signedCredential = await agent.issue(enrichedJWTContent.payload, undefined, { header: enrichedJWTContent.header });
         return signedCredential.replaceAll("~", ""); // replace trailing ~
+    }
+
+    public async revokeCredential(credential: string): Promise<string> {
+        const agent = new SDJwtInstance({
+            hasher: this.hasher,
+            hashAlg: "sha-512"
+        });
+
+        const decodedCredential = (await agent.getClaims(credential)) as SdJwtVcPayload;
+        if (!decodedCredential.status) throw new Error("no status given");
+
+        const uri = decodedCredential.status.status_list.uri;
+        const index = decodedCredential.status.status_list.idx;
+
+        const statusList = (await axios.get(uri)).data;
+        const decodedStatusList = getListFromStatusListJWT(statusList);
+        decodedStatusList.setStatus(index, 1);
+
+        return (await this.createStatusList({
+            type: SupportedStatusListTypes.TokenStatusList,
+            uri,
+            data: decodedStatusList
+        }))!;
     }
 
     public override async verify(data: any): Promise<{ isSuccess: false } | { isSuccess: true; payload: Record<string, unknown>; subject?: string; issuer: string }> {

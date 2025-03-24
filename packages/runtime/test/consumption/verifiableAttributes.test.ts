@@ -1,5 +1,5 @@
 import { AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON } from "@nmshd/consumption";
-import { GivenName, IdentityAttribute, ReadAttributeRequestItem, SupportedStatusListTypes, SupportedVCTypes } from "@nmshd/content";
+import { GivenName, IdentityAttribute, IdentityAttributeJSON, ReadAttributeRequestItem, SupportedStatusListTypes, SupportedVCTypes } from "@nmshd/content";
 import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
 import { CreateOutgoingRequestRequest } from "src";
@@ -163,4 +163,85 @@ test("issue and present a credential of type SD-JWT with TokenStatusList", async
     expect(verifierAttributes[0].shareInfo?.peer).toBe(holderServices.address);
 
     getStatusListServer.close();
+});
+
+test.only("don't accept a revoked credential of type SD-JWT with TokenStatusList", async () => {
+    const unsignedAttribute = IdentityAttribute.from({
+        owner: holderServices.address,
+        value: GivenName.from({
+            value: "aGivenName"
+        }).toJSON()
+    }).toJSON();
+
+    const signingResult = await issuerServices.consumption.attributes.createCreateVerifiableAttributeRequestItem({
+        content: unsignedAttribute,
+        peer: holderServices.address,
+        mustBeAccepted: false,
+        credentialType: SupportedVCTypes.SdJwtVc,
+        statusList: { uri: MOCK_STATUS_LIST_URI, type: SupportedStatusListTypes.TokenStatusList }
+    });
+
+    expect(signingResult).toBeSuccessful();
+    const requestItem = signingResult.value.requestItem;
+    expect(requestItem.attribute.proof).toBeDefined();
+    const statusListCredential = signingResult.value.statusListCredential as string;
+    expect(statusListCredential).toBeDefined();
+    console.log(statusListCredential);
+
+    const getStatusListHandler = http.get(MOCK_STATUS_LIST_URI, () => {
+        return HttpResponse.text(statusListCredential);
+    });
+    const getStatusListServer = setupServer(getStatusListHandler);
+    getStatusListServer.listen({ onUnhandledRequest: "bypass" });
+
+    const request: CreateOutgoingRequestRequest = {
+        peer: holderServices.address,
+        content: {
+            items: [requestItem]
+        }
+    };
+    await exchangeAndAcceptRequestByMessage(issuerServices, holderServices, request, [{ accept: true }]);
+
+    const attributes = (await holderServices.consumption.attributes.getAttributes({})).value;
+    expect(attributes).toHaveLength(3);
+
+    const revocationResult = await issuerServices.consumption.attributes.revokeAttribute({ attribute: requestItem.attribute as IdentityAttributeJSON });
+    const revokedStatusCredential = revocationResult.value as string;
+    expect(revokedStatusCredential).toBeDefined();
+    console.log(revokedStatusCredential);
+
+    getStatusListServer.close();
+    const getRevokedStatusListHandler = http.get(MOCK_STATUS_LIST_URI, () => {
+        return HttpResponse.text(revokedStatusCredential);
+    });
+    const getRevokedStatusListServer = setupServer(getRevokedStatusListHandler);
+    getRevokedStatusListServer.listen({ onUnhandledRequest: "bypass" });
+
+    const readAttributeRequestItem = ReadAttributeRequestItem.from({
+        mustBeAccepted: false,
+        query: {
+            "@type": "IdentityAttributeQuery",
+            valueType: "GivenName",
+            isVerified: true
+        }
+    }).toJSON();
+    const readAttributeRequest: CreateOutgoingRequestRequest = {
+        peer: holderServices.address,
+        content: {
+            items: [readAttributeRequestItem]
+        }
+    };
+    const readAttributeResponse: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
+        accept: true,
+        existingAttributeId: attributes[0].id
+    };
+    await exchangeAndAcceptRequestByMessage(verifierServices, holderServices, readAttributeRequest, [readAttributeResponse]);
+
+    const verifierAttributes = (await verifierServices.consumption.attributes.getAttributes({})).value;
+    expect(verifierAttributes).toHaveLength(1);
+    expect(verifierAttributes[0].content.proof).toBeDefined();
+    expect(verifierAttributes[0].content.proof?.proofInvalid).toBe(true);
+    expect(verifierAttributes[0].shareInfo?.peer).toBe(holderServices.address);
+
+    getRevokedStatusListServer.close();
 });

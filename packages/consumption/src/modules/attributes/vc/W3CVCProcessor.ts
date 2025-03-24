@@ -6,6 +6,10 @@ import { AbstractVCProcessor } from "./AbstractVCProcessor";
 import { init, sign, verify } from "./w3cUtils/wrapper";
 
 export class W3CVCProcessor extends AbstractVCProcessor<any> {
+    public override revokeCredential(credential: unknown): Promise<unknown> {
+        throw new Error("Method not implemented.");
+    }
+
     public override async init(): Promise<this> {
         await init();
         return this;

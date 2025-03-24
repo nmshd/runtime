@@ -23,6 +23,7 @@ export * from "./GetRepositoryAttributes";
 export * from "./GetSharedVersionsOfAttribute";
 export * from "./GetVersionsOfAttribute";
 export * from "./NotifyPeerAboutRepositoryAttributeSuccession";
+export * from "./RevokeAttribute";
 export * from "./ShareRepositoryAttribute";
 export * from "./SucceedRelationshipAttributeAndNotifyPeer";
 export * from "./SucceedRepositoryAttribute";
