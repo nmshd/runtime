@@ -28,7 +28,7 @@ export enum SecretBaseKeyType {
 }
 
 /**
- * The SecretController which acts as a single touchpoint to access any secret within the runtime.
+ * The SecretController which acts as a single touchpoint to access any secret within the Runtime.
  * Each access can be audited.
  */
 export class SecretController extends TransportController {

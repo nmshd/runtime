@@ -50,7 +50,7 @@ class Startup {
     }
 
     public uiBridgeAlreadyRegistered(): UserfriendlyApplicationError {
-        return new UserfriendlyApplicationError("error.appruntime.startup.uiBridgeAlreadyRegistered", "The ui bridge was already registered for this runtime instance.");
+        return new UserfriendlyApplicationError("error.appruntime.startup.uiBridgeAlreadyRegistered", "The UI bridge was already registered for this Runtime instance.");
     }
 
     public wrongURL(): UserfriendlyApplicationError {
