@@ -91,7 +91,10 @@ test.each(Object.values(SupportedVCTypes))("issue and present a credential of ty
     expect(verifierAttributes[0].shareInfo?.peer).toBe(holderServices.address);
 });
 
-test("issue and present a credential of type SD-JWT with TokenStatusList", async () => {
+test.each([
+    [SupportedVCTypes.SdJwtVc, SupportedStatusListTypes.TokenStatusList],
+    [SupportedVCTypes.W3CVC, SupportedStatusListTypes.BitstringStatusList]
+])("issue and present a credential of type %s with %s", async (vcType, statusListType) => {
     const unsignedAttribute = IdentityAttribute.from({
         owner: holderServices.address,
         value: GivenName.from({
@@ -103,8 +106,8 @@ test("issue and present a credential of type SD-JWT with TokenStatusList", async
         content: unsignedAttribute,
         peer: holderServices.address,
         mustBeAccepted: false,
-        credentialType: SupportedVCTypes.SdJwtVc,
-        statusList: { uri: MOCK_STATUS_LIST_URI, type: SupportedStatusListTypes.TokenStatusList }
+        credentialType: vcType,
+        statusList: { uri: MOCK_STATUS_LIST_URI, type: statusListType }
     });
 
     expect(signingResult).toBeSuccessful();
@@ -186,7 +189,6 @@ test("don't accept a revoked credential of type SD-JWT with TokenStatusList", as
     expect(requestItem.attribute.proof).toBeDefined();
     const statusListCredential = signingResult.value.statusListCredential as string;
     expect(statusListCredential).toBeDefined();
-    console.log(statusListCredential);
 
     const getStatusListHandler = http.get(MOCK_STATUS_LIST_URI, () => {
         return HttpResponse.text(statusListCredential);
@@ -208,7 +210,6 @@ test("don't accept a revoked credential of type SD-JWT with TokenStatusList", as
     const revocationResult = await issuerServices.consumption.attributes.revokeAttribute({ attribute: requestItem.attribute as IdentityAttributeJSON });
     const revokedStatusCredential = revocationResult.value as string;
     expect(revokedStatusCredential).toBeDefined();
-    console.log(revokedStatusCredential);
 
     getStatusListServer.close();
     const getRevokedStatusListHandler = http.get(MOCK_STATUS_LIST_URI, () => {

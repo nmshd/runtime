@@ -5,12 +5,15 @@ import * as didKey from "@digitalbazaar/did-method-key";
 import * as ed25519Multikey from "@digitalbazaar/ed25519-multikey";
 import { securityLoader } from "@digitalbazaar/security-document-loader";
 import * as vc from "@digitalbazaar/vc";
+import { BitstringStatusList, createCredential, VC_BSL_VC_V2_CONTEXT } from "@digitalbazaar/vc-bitstring-status-list";
+import { contexts as bitstringStatusListContexts } from "@digitalbazaar/vc-bitstring-status-list-context";
 import { CoreBuffer } from "@nmshd/crypto";
 import * as jsonld from "jsonld";
 
 const resolver = new CachedResolver();
 const documentLoader = securityLoader();
 documentLoader.addDocuments({ documents: dataIntegrityContexts });
+documentLoader.addDocuments({ documents: bitstringStatusListContexts });
 let eddsa2022CryptoSuite;
 let loader;
 
@@ -79,8 +82,25 @@ function prepareSign(accountController) {
     return { suite, documentLoader: loader };
 }
 
+async function issueStatusList(uri, accountController, issuerId) {
+    const list = new BitstringStatusList({ length: 8 });
+    const statusPurpose = "revocation";
+
+    const credential = await createCredential({
+        id: uri,
+        list,
+        statusPurpose,
+        context: VC_BSL_VC_V2_CONTEXT
+    });
+
+    const completedCredential = { ...credential, issuer: issuerId };
+
+    return await issue(completedCredential, accountController);
+}
+
 module.exports = {
     sign: issue,
     verify,
-    init
+    init,
+    issueStatusList
 };

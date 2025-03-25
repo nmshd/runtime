@@ -1,7 +1,7 @@
-import { StatusListEntryCreationParameters, SupportedStatusListTypes } from "@nmshd/content";
+import { BitstringStatusListEntryCreationParameters, StatusListEntryCreationParameters, SupportedStatusListTypes } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
 import { AbstractVCProcessor } from "./AbstractVCProcessor";
-import { init, sign, verify } from "./w3cUtils/wrapper";
+import { init, issueStatusList, sign, verify } from "./w3cUtils/wrapper";
 
 export class W3CVCProcessor extends AbstractVCProcessor<any> {
     public override revokeCredential(credential: unknown): Promise<unknown> {
@@ -33,11 +33,18 @@ export class W3CVCProcessor extends AbstractVCProcessor<any> {
                     statusListCredential: statusList.uri
                 }
             });
+            enrichedData["@context"].push("https://www.w3.org/ns/credentials/status/v1");
         }
 
+        const statusListCredential = await this.createStatusList(statusList);
         const credential = await sign(enrichedData, this.accountController);
 
-        return { credential };
+        return { credential, statusListCredential };
+    }
+
+    private async createStatusList(statusList?: BitstringStatusListEntryCreationParameters): Promise<unknown> {
+        if (!statusList) return undefined;
+        return await issueStatusList(statusList.uri, this.accountController, this.issuerId);
     }
 
     public override async verify(data: any): Promise<{ isSuccess: false } | { isSuccess: true; payload: Record<string, unknown>; subject?: string; issuer: string }> {
