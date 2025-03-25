@@ -56,7 +56,7 @@ export class TestRuntime extends Runtime {
 
     public async getServices(address: string | ICoreAddress): Promise<RuntimeServices> {
         // allow empty address to be passed (this is used in the RuntimeServiceProvider to create the services)
-        // when an actual address is passed, it must match the current runtime's address
+        // when an actual address is passed, it must match the current Runtime's address
         if (address !== "") {
             const currentAddress = (await this._transportServices.account.getIdentityInfo()).value.address;
 
