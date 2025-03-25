@@ -1323,10 +1323,32 @@ export class AttributesController extends ConsumptionBaseController {
         queryForRepositoryAttributeDuplicates["succeededBy"] = { $exists: false };
         queryForRepositoryAttributeDuplicates["shareInfo"] = { $exists: false };
 
-        const matchingRepositoryAttributes = await this.getLocalAttributes(queryForRepositoryAttributeDuplicates);
+        return await this.getAttributeWithSameValue(trimmedValue, queryForRepositoryAttributeDuplicates);
+    }
 
-        const repositoryAttributeDuplicate = matchingRepositoryAttributes.find((duplicate) => _.isEqual(duplicate.content.value.toJSON(), trimmedValue));
-        return repositoryAttributeDuplicate;
+    public async getPeerSharedIdentityAttributeWithSameValue(value: AttributeValues.Identity.Json, peer: string): Promise<LocalAttribute | undefined> {
+        const trimmedValue = this.trimAttributeValue(value);
+        const queryForPeerSharedAttributeDuplicates = flattenObject({
+            content: {
+                "@type": "IdentityAttribute",
+                owner: peer,
+                value: trimmedValue
+            },
+            shareInfo: {
+                peer
+            }
+        });
+        queryForPeerSharedAttributeDuplicates["succeededBy"] = { $exists: false };
+        queryForPeerSharedAttributeDuplicates["shareInfo.sourceAttribute"] = { $exists: false };
+
+        return await this.getAttributeWithSameValue(trimmedValue, queryForPeerSharedAttributeDuplicates);
+    }
+
+    private async getAttributeWithSameValue(value: AttributeValues.Identity.Json, query: any): Promise<LocalAttribute | undefined> {
+        const matchingAttributes = await this.getLocalAttributes(query);
+
+        const attributeDuplicate = matchingAttributes.find((duplicate) => _.isEqual(duplicate.content.value.toJSON(), value));
+        return attributeDuplicate;
     }
 
     private trimAttributeValue(value: AttributeValues.Identity.Json): AttributeValues.Identity.Json {
