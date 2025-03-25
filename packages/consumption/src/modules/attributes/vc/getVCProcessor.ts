@@ -9,7 +9,7 @@ export async function getVCProcessor(type: SupportedVCTypes, accountController: 
     switch (type) {
         case SupportedVCTypes.W3CVC:
             vcProcessor = new W3CVCProcessor(accountController);
-
+            break;
         case SupportedVCTypes.SdJwtVc:
             vcProcessor = new SdJwtVcProcessor(accountController);
     }

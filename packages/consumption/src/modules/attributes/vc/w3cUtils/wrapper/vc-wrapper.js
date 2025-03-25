@@ -1,122 +1,82 @@
-const documentLoader = require("./documentLoader.js").documentLoader;
-let Ed25519Multikey;
-let DataIntegrityProof;
+import { DataIntegrityProof } from "@digitalbazaar/data-integrity";
+import { contexts as dataIntegrityContexts } from "@digitalbazaar/data-integrity-context";
+import { CachedResolver } from "@digitalbazaar/did-io";
+import * as didKey from "@digitalbazaar/did-method-key";
+import * as ed25519Multikey from "@digitalbazaar/ed25519-multikey";
+import { securityLoader } from "@digitalbazaar/security-document-loader";
+import * as vc from "@digitalbazaar/vc";
+import { CoreBuffer } from "@nmshd/crypto";
+import * as jsonld from "jsonld";
+
+const resolver = new CachedResolver();
+const documentLoader = securityLoader();
+documentLoader.addDocuments({ documents: dataIntegrityContexts });
 let eddsa2022CryptoSuite;
-let suiteContext;
-const { sign } = require("jsonld-signatures");
-const jsigs = require("jsonld-signatures");
-let driver;
-const {
-    purposes: { AssertionProofPurpose }
-} = jsigs;
-const jsonld = require("jsonld");
+let loader;
 
 let initialized = false;
 
 async function init() {
     if (initialized) {
-        throw new Error("The vc lib has allready been initialized");
+        return;
     }
-    Ed25519Multikey = await import("@digitalbazaar/ed25519-multikey");
-    const middle = await import("@digitalbazaar/data-integrity");
-    DataIntegrityProof = middle.DataIntegrityProof;
     const mod = await import("@digitalbazaar/eddsa-2022-cryptosuite");
     eddsa2022CryptoSuite = mod.cryptosuite;
     eddsa2022CryptoSuite.canonize = canonize;
-    suiteContext = await import("ed25519-signature-2020-context");
-    let driver_mod = await import("@digitalbazaar/did-method-key");
-    driver = driver_mod.driver();
+    const didKeyDriver = didKey.driver();
+
+    didKeyDriver.use({
+        multibaseMultikeyHeader: "z6Mk",
+        fromMultibase: ed25519Multikey.from
+    });
+    resolver.use(didKeyDriver);
+    documentLoader.setDidResolver(resolver);
+    loader = documentLoader.build();
     initialized = true;
 }
 
-async function issue(data, publicKey, privateKey) {
-    const { suite, loader } = await prepareSign(publicKey, privateKey);
+async function issue(data, accountController) {
+    const { suite, documentLoader } = prepareSign(accountController);
 
-    const signedCredential = jsigs.sign(data, {
-        suite,
-        purpose: new AssertionProofPurpose(),
-        documentLoader: loader
-    });
+    const signedCredential = await vc.issue({ credential: data, suite, documentLoader });
 
     return signedCredential;
 }
 
 async function verify(credential) {
-    const { suite, loader } = prepareVerify();
-    return await jsigs.verify(credential, {
+    const { suite, documentLoader } = prepareVerify();
+    return await vc.verifyCredential({
+        credential,
         suite,
-        purpose: new AssertionProofPurpose(),
-        documentLoader: loader
+        documentLoader
     });
 }
-// Disable safe mode of canonization
-function canonize(input, options) {
-    return jsonld.canonize(input, {
+// Disable safe mode of canonization - otherwise enmeshed's @type is misinterpreted as JSON-LD's @type causing an error because it's not a URL
+async function canonize(input, options) {
+    return await jsonld.canonize(input, {
+        ...options,
         algorithm: "URDNA2015",
         format: "application/n-quads",
-        safe: false,
-        ...options
+        safe: false
     });
 }
 
 function prepareVerify() {
     const suite = new DataIntegrityProof({ cryptosuite: eddsa2022CryptoSuite });
 
-    driver.use({
-        multibaseMultikeyHeader: "z6Mk",
-        fromMultibase: Ed25519Multikey.from
-    });
-
-    const loader = async (url) => {
-        if (url.startsWith("did:key:")) {
-            const document = await driver.get({ url });
-            return {
-                url,
-                document,
-                static: true
-            };
-        }
-
-        try {
-            const x = suiteContext.documentLoader(url);
-            return x;
-        } catch (e) {}
-        return documentLoader(url);
-    };
-    return { suite, loader };
+    return { suite, documentLoader: loader };
 }
 
-async function prepareSign(publicKey, privateKey) {
-    const keyPair = await Ed25519Multikey.from({
-        type: "Multikey",
-        id: `did:key:${publicKey}#${publicKey}`,
-        publicKeyMultibase: publicKey,
-        secretKeyMultibase: privateKey
-    });
-
-    const suite = new DataIntegrityProof({ signer: keyPair.signer(), cryptosuite: eddsa2022CryptoSuite });
-
-    driver.use({
-        multibaseMultikeyHeader: "z6Mk",
-        fromMultibase: Ed25519Multikey.from
-    });
-    const loader = async (url) => {
-        if (url.startsWith("did:key:")) {
-            const document = await driver.get({ url });
-            return {
-                url,
-                document,
-                static: true
-            };
-        }
-
-        try {
-            const x = suiteContext.documentLoader(url);
-            return x;
-        } catch (e) {}
-        return documentLoader(url);
+function prepareSign(accountController) {
+    const signer = {
+        sign: async (data) => (await accountController.identity.sign(CoreBuffer.from(data.data))).signature.buffer,
+        algorithm: "Ed25519",
+        id: "an-id"
     };
-    return { suite, loader };
+
+    const suite = new DataIntegrityProof({ signer, cryptosuite: eddsa2022CryptoSuite });
+
+    return { suite, documentLoader: loader };
 }
 
 module.exports = {

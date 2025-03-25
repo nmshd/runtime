@@ -165,7 +165,7 @@ test("issue and present a credential of type SD-JWT with TokenStatusList", async
     getStatusListServer.close();
 });
 
-test.only("don't accept a revoked credential of type SD-JWT with TokenStatusList", async () => {
+test("don't accept a revoked credential of type SD-JWT with TokenStatusList", async () => {
     const unsignedAttribute = IdentityAttribute.from({
         owner: holderServices.address,
         value: GivenName.from({
