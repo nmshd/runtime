@@ -1,8 +1,5 @@
 import { DataIntegrityProof } from "@digitalbazaar/data-integrity";
 import { contexts as dataIntegrityContexts } from "@digitalbazaar/data-integrity-context";
-import { CachedResolver } from "@digitalbazaar/did-io";
-import * as didKey from "@digitalbazaar/did-method-key";
-import * as ed25519Multikey from "@digitalbazaar/ed25519-multikey";
 import { securityLoader } from "@digitalbazaar/security-document-loader";
 import * as vc from "@digitalbazaar/vc";
 import { BitstringStatusList, createCredential, VC_BSL_VC_V2_CONTEXT } from "@digitalbazaar/vc-bitstring-status-list";
@@ -10,7 +7,6 @@ import { contexts as bitstringStatusListContexts } from "@digitalbazaar/vc-bitst
 import { CoreBuffer } from "@nmshd/crypto";
 import * as jsonld from "jsonld";
 
-const resolver = new CachedResolver();
 const documentLoader = securityLoader();
 documentLoader.addDocuments({ documents: dataIntegrityContexts });
 documentLoader.addDocuments({ documents: bitstringStatusListContexts });
@@ -26,14 +22,7 @@ async function init() {
     const mod = await import("@digitalbazaar/eddsa-2022-cryptosuite");
     eddsa2022CryptoSuite = mod.cryptosuite;
     eddsa2022CryptoSuite.canonize = canonize;
-    const didKeyDriver = didKey.driver();
 
-    didKeyDriver.use({
-        multibaseMultikeyHeader: "z6Mk",
-        fromMultibase: ed25519Multikey.from
-    });
-    resolver.use(didKeyDriver);
-    documentLoader.setDidResolver(resolver);
     loader = documentLoader.build();
     initialized = true;
 }
