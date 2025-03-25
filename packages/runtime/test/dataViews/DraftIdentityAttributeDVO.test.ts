@@ -236,11 +236,11 @@ describe("DraftIdentityAttributeDVO", () => {
         const attribute = IdentityAttribute.from<PersonName>({
             owner: transportService1Address,
             value: PersonName.from({
-                honorificPrefix: "Dr.",
-                givenName: "Heinz",
-                middleName: "Gerhard",
-                surname: "Ranzig",
-                honorificSuffix: "von Warnermünde"
+                honorificPrefix: "anHonorificPrefix",
+                givenName: "aGivenName",
+                middleName: "aMiddleName",
+                surname: "aSurname",
+                honorificSuffix: "anHonorificSuffix"
             })
         }).toJSON();
         const dvo = await expander1.expandAttribute(attribute);

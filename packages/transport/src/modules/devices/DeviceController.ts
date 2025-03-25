@@ -85,7 +85,7 @@ export class DeviceController extends TransportController {
 
             await this.secrets.storeSecret(credentials, DeviceSecretType.DeviceCredentials);
         } catch (e) {
-            this.log.warn(`We've changed the device password on the backbone but weren't able to store it to the database. The new password is '${newPassword}'.`);
+            this.log.warn(`We've changed the device password on the Backbone but weren't able to store it to the database. The new password is '${newPassword}'.`);
             throw e;
         }
     }

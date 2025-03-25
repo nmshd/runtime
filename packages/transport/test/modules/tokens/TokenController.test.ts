@@ -413,7 +413,7 @@ describe("TokenController", function () {
             receivedToken = await recipient.tokens.loadPeerTokenByTruncated(reference, false);
         });
 
-        test("should delete own token locally and from the backbone", async function () {
+        test("should delete own token locally and from the Backbone", async function () {
             await sender.tokens.delete(sentToken);
             const tokenOnBackbone = await recipient.tokens.fetchCaches([sentToken.id]);
             expect(tokenOnBackbone).toHaveLength(0);
