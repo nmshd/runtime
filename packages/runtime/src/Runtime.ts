@@ -121,7 +121,7 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
         this._eventBus =
             eventBus ??
             new EventEmitter2EventBus((error, namespace) => {
-                this.logger.error(`An error was thrown in an event handler of the runtime event bus (namespace: '${namespace}'). Root error: ${error}`);
+                this.logger.error(`An error was thrown in an event handler of the Runtime event bus (namespace: '${namespace}'). Root error: ${error}`);
             });
     }
 

@@ -21,7 +21,7 @@ describe("BackboneCompatibility", function () {
         await connection.close();
     });
 
-    test("should correctly check a valid backbone version with exact same min and max version of the backbone", async function () {
+    test("should correctly check a valid Backbone version with exact same min and max version of the Backbone", async function () {
         const versionController = new BackboneCompatibilityController({
             ...transport.config,
             supportedMinBackboneVersion: actualBackboneVersion,
@@ -33,7 +33,7 @@ describe("BackboneCompatibility", function () {
         expect(versionCheckResult.value.isCompatible).toBe(true);
     });
 
-    test("should correctly check a valid backbone version with version in bounds of min and max", async function () {
+    test("should correctly check a valid Backbone version with version in bounds of min and max", async function () {
         const versionController = new BackboneCompatibilityController({
             ...transport.config,
             supportedMinBackboneVersion: actualBackboneVersion - 1,
@@ -45,7 +45,7 @@ describe("BackboneCompatibility", function () {
         expect(versionCheckResult.value.isCompatible).toBe(true);
     });
 
-    test("should catch a too low backbone version", async function () {
+    test("should catch a too low Backbone version", async function () {
         const versionController = new BackboneCompatibilityController({
             ...transport.config,
             supportedMinBackboneVersion: actualBackboneVersion + 1,
@@ -57,7 +57,7 @@ describe("BackboneCompatibility", function () {
         expect(versionCheckResult.value.isCompatible).toBe(false);
     });
 
-    test("should catch a too high backbone version", async function () {
+    test("should catch a too high Backbone version", async function () {
         const versionController = new BackboneCompatibilityController({
             ...transport.config,
             supportedMinBackboneVersion: actualBackboneVersion - 1,
