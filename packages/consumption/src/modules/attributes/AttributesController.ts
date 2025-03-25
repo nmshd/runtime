@@ -1382,4 +1382,11 @@ export class AttributesController extends ConsumptionBaseController {
         attribute.proof.proofInvalid = credentialConfirmsAttribute ? undefined : true;
         return attribute;
     }
+
+    public async revokeAttribute(attribute: IdentityAttribute | RelationshipAttribute): Promise<unknown> {
+        if (!attribute.proof) throw new Error("Attribute must have proof to be revoked");
+
+        const vc = await getVCProcessor(attribute.proof.credentialType, this.parent.accountController);
+        return await vc.revokeCredential(attribute.proof.credential);
+    }
 }
