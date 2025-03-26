@@ -14,6 +14,7 @@ export interface TokenStatusListEntryCreationParameters {
 export interface BitstringStatusListEntryCreationParameters {
     type: SupportedStatusListTypes.BitstringStatusList;
     uri: string;
+    data?: any;
 }
 
 export type StatusListEntryCreationParameters = TokenStatusListEntryCreationParameters | BitstringStatusListEntryCreationParameters;
