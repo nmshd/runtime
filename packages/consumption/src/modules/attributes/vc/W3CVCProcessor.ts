@@ -13,7 +13,11 @@ export class W3CVCProcessor extends AbstractVCProcessor<any> {
         return this;
     }
 
-    public override async sign(data: object, subjectDid: string, statusList?: StatusListEntryCreationParameters): Promise<{ credential: unknown; statusListCredential?: unknown }> {
+    public override async issue(
+        data: object,
+        subjectDid: string,
+        statusList?: StatusListEntryCreationParameters
+    ): Promise<{ credential: unknown; statusListCredential?: unknown }> {
         if (statusList && statusList.type !== SupportedStatusListTypes.BitstringStatusList) throw new Error("unsupported status list");
 
         const issuanceDate = CoreDate.utc().toString();

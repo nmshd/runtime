@@ -29,7 +29,7 @@ export class CreateVerifiableCredentialUseCase extends UseCase<CreateVerifiableC
     protected async executeInternal(request: CreateVerifiableCredentialRequest): Promise<Result<any>> {
         const vc = await getVCProcessor(request.credentialType, this.accountController);
 
-        const signedCredential = await vc.sign(request.content, request.subjectDid);
+        const signedCredential = await vc.issue(request.content, request.subjectDid);
 
         return Result.ok(signedCredential);
     }

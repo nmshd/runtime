@@ -15,7 +15,7 @@ export abstract class AbstractVCProcessor<VCType> {
     }
 
     public abstract init(): Promise<this>;
-    public abstract sign(data: unknown, subjectDid: string, statusList?: StatusListEntryCreationParameters): Promise<{ credential: VCType; statusListCredential?: unknown }>;
+    public abstract issue(data: unknown, subjectDid: string, statusList?: StatusListEntryCreationParameters): Promise<{ credential: VCType; statusListCredential?: unknown }>;
     public abstract verify(data: VCType): Promise<
         | { isSuccess: false }
         | {

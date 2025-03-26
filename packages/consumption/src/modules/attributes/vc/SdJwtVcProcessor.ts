@@ -16,7 +16,11 @@ export class SdJwtVcProcessor extends AbstractVCProcessor<any> {
         return await Promise.resolve(this);
     }
 
-    public override async sign(data: object, subjectDid: string, statusList?: StatusListEntryCreationParameters): Promise<{ credential: unknown; statusListCredential?: unknown }> {
+    public override async issue(
+        data: object,
+        subjectDid: string,
+        statusList?: StatusListEntryCreationParameters
+    ): Promise<{ credential: unknown; statusListCredential?: unknown }> {
         if (statusList && statusList.type !== SupportedStatusListTypes.TokenStatusList) throw new Error("unsupported status list");
 
         const agent = new SDJwtVcInstance({

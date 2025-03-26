@@ -46,7 +46,7 @@ export class CreateCreateVerifiableAttributeRequestItemUseCase extends UseCase<
         const attributeValue = request.content.value;
         const vc = await getVCProcessor(request.credentialType, this.accountController);
 
-        const { credential: signedCredential, statusListCredential } = await vc.sign(attributeValue, request.peer, request.statusList);
+        const { credential: signedCredential, statusListCredential } = await vc.issue(attributeValue, request.peer, request.statusList);
         request.content.proof = { credential: signedCredential, credentialType: request.credentialType };
 
         return Result.ok({
