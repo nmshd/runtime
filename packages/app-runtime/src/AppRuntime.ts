@@ -256,7 +256,9 @@ export class AppRuntime extends Runtime<AppConfig> {
         const moduleConstructor = AppRuntime.moduleRegistry[moduleConfiguration.location];
         if (!moduleConstructor) {
             const error = new Error(
-                `Module '${this.getModuleName(moduleConfiguration)}' could not be loaded, because it was not registered. Please register all modules before running init.`
+                `Module '${moduleConfiguration.location}' could not be loaded, because it was not registered. Please register all modules before running init. Available modules: ${Object.keys(
+                    AppRuntime.moduleRegistry
+                ).join(", ")}`
             );
             this.logger.error(error);
             return Promise.reject(error);
@@ -268,7 +270,7 @@ export class AppRuntime extends Runtime<AppConfig> {
 
         this.modules.add(module);
 
-        this.logger.info(`Module '${this.getModuleName(moduleConfiguration)}' was loaded successfully.`);
+        this.logger.info(`Module '${module.displayName}' was loaded successfully.`);
         return Promise.resolve();
     }
 
