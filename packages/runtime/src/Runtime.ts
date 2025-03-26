@@ -37,7 +37,7 @@ import { DatabaseSchemaUpgrader } from "./DatabaseSchemaUpgrader";
 import { DataViewExpander } from "./dataViews";
 import { ModulesInitializedEvent, ModulesLoadedEvent, ModulesStartedEvent, RuntimeInitializedEvent, RuntimeInitializingEvent } from "./events";
 import { EventProxy } from "./events/EventProxy";
-import { AnonymousServices, ConsumptionServices, ModuleConfiguration, RuntimeModule, RuntimeModuleRegistry, TransportServices } from "./extensibility";
+import { AnonymousServices, ConsumptionServices, ModuleConfiguration, RuntimeModuleRegistry, TransportServices } from "./extensibility";
 import { AttributeListenerModule, DeciderModule, MessageModule, NotificationModule, RequestModule } from "./modules";
 import { RuntimeConfig } from "./RuntimeConfig";
 import { RuntimeLoggerFactory } from "./RuntimeLoggerFactory";
@@ -325,12 +325,12 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
             const moduleConfiguration = this.runtimeConfig.modules[moduleName];
 
             if (!moduleConfiguration.enabled) {
-                this.logger.debug(`Skip loading module '${this.getModuleName(moduleConfiguration)}' because it is not enabled.`);
+                this.logger.debug(`Skip loading module at location '${moduleConfiguration.location}' because it is not enabled.`);
                 continue;
             }
 
             if (!moduleConfiguration.location) {
-                this.logger.error(`Skip loading module '${this.getModuleName(moduleConfiguration)}' because has no location.`);
+                this.logger.error(`Skip loading module because the location '${moduleConfiguration.location}' is invalid.`);
                 continue;
             }
 
@@ -371,7 +371,7 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
                 this.modules.add(notificationModule);
                 break;
             default:
-                throw new Error(`Module ${moduleConfiguration.name} is not a builtin module.`);
+                throw new Error(`Module ${moduleConfiguration.location} is not a builtin module.`);
         }
     }
 
@@ -383,9 +383,9 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
         for (const module of this.modules.toArray()) {
             try {
                 await module.init();
-                this.logger.info(`Module '${this.getModuleName(module)}' was initialized successfully.`);
+                this.logger.info(`Module '${module.displayName}' was initialized successfully.`);
             } catch (e) {
-                this.logger.error(`Module '${this.getModuleName(module)}' could not be initialized.`, e);
+                this.logger.error(`Module '${module.displayName}' could not be initialized.`, e);
                 throw e;
             }
         }
@@ -452,9 +452,9 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
         for (const module of this.modules.toArray()) {
             try {
                 await module.stop();
-                this.logger.info(`Module '${this.getModuleName(module)}' was stopped successfully.`);
+                this.logger.info(`Module '${module.displayName}' was stopped successfully.`);
             } catch (e) {
-                this.logger.error(`An Error occured while stopping module '${this.getModuleName(module)}': `, e);
+                this.logger.error(`An Error occured while stopping module '${module.displayName}': `, e);
             }
         }
 
@@ -467,18 +467,14 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
         for (const module of this.modules.toArray()) {
             try {
                 await module.start();
-                this.logger.info(`Module '${this.getModuleName(module)}' was started successfully.`);
+                this.logger.info(`Module '${module.displayName}' was started successfully.`);
             } catch (e) {
-                this.logger.error(`Module '${this.getModuleName(module)}' could not be started.`, e);
+                this.logger.error(`Module '${module.displayName}' could not be started.`, e);
                 throw e;
             }
         }
 
         this.eventBus.publish(new ModulesStartedEvent());
         this.logger.info("Started all modules.");
-    }
-
-    protected getModuleName(moduleConfiguration: ModuleConfiguration | RuntimeModule): string {
-        return moduleConfiguration.displayName || moduleConfiguration.name || JSON.stringify(moduleConfiguration);
     }
 }
