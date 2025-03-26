@@ -256,7 +256,7 @@ export class AppRuntime extends Runtime<AppConfig> {
         const moduleConstructor = AppRuntime.moduleRegistry[moduleConfiguration.location];
         if (!moduleConstructor) {
             const error = new Error(
-                `Module '${moduleConfiguration.location}' could not be loaded, because it was not registered. Please register all modules before running init. Available modules: ${Object.keys(
+                `Module at location '${moduleConfiguration.location}' could not be loaded, because it was not registered. Please register all modules before running init. Available modules: ${Object.keys(
                     AppRuntime.moduleRegistry
                 ).join(", ")}`
             );
