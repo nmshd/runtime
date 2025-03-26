@@ -4,4 +4,6 @@ export interface PlatformParameters {
     responseTime?: string;
     traceId?: string;
     correlationId?: string;
+    etag?: string;
+    responseStatus?: number;
 }
