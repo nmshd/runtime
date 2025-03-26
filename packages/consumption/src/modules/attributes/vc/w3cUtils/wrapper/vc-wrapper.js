@@ -2,14 +2,24 @@ import { DataIntegrityProof } from "@digitalbazaar/data-integrity";
 import { contexts as dataIntegrityContexts } from "@digitalbazaar/data-integrity-context";
 import { securityLoader } from "@digitalbazaar/security-document-loader";
 import * as vc from "@digitalbazaar/vc";
-import { BitstringStatusList, createCredential, VC_BSL_VC_V2_CONTEXT } from "@digitalbazaar/vc-bitstring-status-list";
+import { BitstringStatusList, checkStatus, createCredential, VC_BSL_VC_V2_CONTEXT } from "@digitalbazaar/vc-bitstring-status-list";
 import { contexts as bitstringStatusListContexts } from "@digitalbazaar/vc-bitstring-status-list-context";
 import { CoreBuffer } from "@nmshd/crypto";
+import axios from "axios";
 import * as jsonld from "jsonld";
 
 const documentLoader = securityLoader();
 documentLoader.addDocuments({ documents: dataIntegrityContexts });
 documentLoader.addDocuments({ documents: bitstringStatusListContexts });
+documentLoader.setProtocolHandler({
+    protocol: "http",
+    handler: {
+        async get({ url }) {
+            return (await axios.get(url)).data;
+        }
+    }
+});
+
 let eddsa2022CryptoSuite;
 let loader;
 
@@ -27,8 +37,8 @@ async function init() {
     initialized = true;
 }
 
-async function issue(data, accountController) {
-    const { suite, documentLoader } = prepareSign(accountController);
+async function issue(data, accountController, verificationMethod) {
+    const { suite, documentLoader } = prepareSign(accountController, verificationMethod);
 
     const signedCredential = await vc.issue({ credential: data, suite, documentLoader });
 
@@ -40,9 +50,33 @@ async function verify(credential) {
     return await vc.verifyCredential({
         credential,
         suite,
-        documentLoader
+        documentLoader,
+        checkStatus: async ({ credential, documentLoader, suite, verifyBitstringStatusListCredential = true, verifyMatchingIssuers = true } = {}) => {
+            const statusResult = await checkStatus({
+                credential,
+                documentLoader,
+                suite,
+                verifyBitstringStatusListCredential,
+                verifyMatchingIssuers
+            });
+            if (statusResult.verified === false) return statusResult;
+            if (statusResult.results.some((result) => result.status === true)) statusResult.verified = false;
+
+            return statusResult;
+        }
     });
 }
+
+async function revokeCredential(credential, accountController) {
+    if (!credential.credentialStatus) throw new Error("Can't revoke credential without credential status");
+    if (credential.credentialStatus.type !== "BitstringStatusListEntry") throw new Error("unsupported status type");
+
+    const statusListCredential = (await axios.get(credential.credentialStatus.statusListCredential)).data;
+    const statusList = await BitstringStatusList.decode({ encodedList: statusListCredential.credentialSubject.encodedList });
+    statusList.setStatus(Number(credential.credentialStatus.statusListIndex), true);
+    return await issueStatusList(statusListCredential.id, accountController, statusListCredential.issuer, statusListCredential.proof.verificationMethod, statusList);
+}
+
 // Disable safe mode of canonization - otherwise enmeshed's @type is misinterpreted as JSON-LD's @type causing an error because it's not a URL
 async function canonize(input, options) {
     return await jsonld.canonize(input, {
@@ -59,11 +93,11 @@ function prepareVerify() {
     return { suite, documentLoader: loader };
 }
 
-function prepareSign(accountController) {
+function prepareSign(accountController, verificationMethod) {
     const signer = {
         sign: async (data) => (await accountController.identity.sign(CoreBuffer.from(data.data))).signature.buffer,
         algorithm: "Ed25519",
-        id: "an-id"
+        id: verificationMethod
     };
 
     const suite = new DataIntegrityProof({ signer, cryptosuite: eddsa2022CryptoSuite });
@@ -71,8 +105,8 @@ function prepareSign(accountController) {
     return { suite, documentLoader: loader };
 }
 
-async function issueStatusList(uri, accountController, issuerId) {
-    const list = new BitstringStatusList({ length: 8 });
+async function issueStatusList(uri, accountController, issuerId, verificationMethod, statusList = undefined) {
+    const list = statusList ?? new BitstringStatusList({ length: 8 });
     const statusPurpose = "revocation";
 
     const credential = await createCredential({
@@ -84,12 +118,13 @@ async function issueStatusList(uri, accountController, issuerId) {
 
     const completedCredential = { ...credential, issuer: issuerId };
 
-    return await issue(completedCredential, accountController);
+    return await issue(completedCredential, accountController, verificationMethod);
 }
 
 module.exports = {
     sign: issue,
     verify,
     init,
-    issueStatusList
+    issueStatusList,
+    revokeCredential
 };

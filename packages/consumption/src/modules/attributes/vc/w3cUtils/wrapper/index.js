@@ -4,5 +4,6 @@ module.exports = {
     init: wrapper.init,
     sign: wrapper.sign,
     verify: wrapper.verify,
-    issueStatusList: wrapper.issueStatusList
+    issueStatusList: wrapper.issueStatusList,
+    revokeCredential: wrapper.revokeCredential
 };

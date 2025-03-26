@@ -92,9 +92,9 @@ test.each(Object.values(SupportedVCTypes))("issue and present a credential of ty
 });
 
 test.each([
-    [SupportedVCTypes.SdJwtVc, SupportedStatusListTypes.TokenStatusList],
-    [SupportedVCTypes.W3CVC, SupportedStatusListTypes.BitstringStatusList]
-])("issue and present a credential of type %s with %s", async (vcType, statusListType) => {
+    [SupportedVCTypes.SdJwtVc, SupportedStatusListTypes.TokenStatusList, "text"],
+    [SupportedVCTypes.W3CVC, SupportedStatusListTypes.BitstringStatusList, "json"]
+])("issue and present a credential of type %s with %s", async (vcType, statusListType, mediaType) => {
     const unsignedAttribute = IdentityAttribute.from({
         owner: holderServices.address,
         value: GivenName.from({
@@ -117,7 +117,7 @@ test.each([
     expect(statusListCredential).toBeDefined();
 
     const getStatusListHandler = http.get(MOCK_STATUS_LIST_URI, () => {
-        return HttpResponse.text(statusListCredential);
+        return (HttpResponse as any)[mediaType](statusListCredential);
     });
     const getStatusListServer = setupServer(getStatusListHandler);
     getStatusListServer.listen({ onUnhandledRequest: "bypass" });
@@ -167,8 +167,10 @@ test.each([
 
     getStatusListServer.close();
 });
-
-test("don't accept a revoked credential of type SD-JWT with TokenStatusList", async () => {
+test.each([
+    [SupportedVCTypes.SdJwtVc, SupportedStatusListTypes.TokenStatusList, "text"],
+    [SupportedVCTypes.W3CVC, SupportedStatusListTypes.BitstringStatusList, "json"]
+])("don't accept a revoked credential of type %s with %s", async (vcType, statusListType, mediaType) => {
     const unsignedAttribute = IdentityAttribute.from({
         owner: holderServices.address,
         value: GivenName.from({
@@ -180,8 +182,8 @@ test("don't accept a revoked credential of type SD-JWT with TokenStatusList", as
         content: unsignedAttribute,
         peer: holderServices.address,
         mustBeAccepted: false,
-        credentialType: SupportedVCTypes.SdJwtVc,
-        statusList: { uri: MOCK_STATUS_LIST_URI, type: SupportedStatusListTypes.TokenStatusList }
+        credentialType: vcType,
+        statusList: { uri: MOCK_STATUS_LIST_URI, type: statusListType }
     });
 
     expect(signingResult).toBeSuccessful();
@@ -191,7 +193,7 @@ test("don't accept a revoked credential of type SD-JWT with TokenStatusList", as
     expect(statusListCredential).toBeDefined();
 
     const getStatusListHandler = http.get(MOCK_STATUS_LIST_URI, () => {
-        return HttpResponse.text(statusListCredential);
+        return (HttpResponse as any)[mediaType](statusListCredential);
     });
     const getStatusListServer = setupServer(getStatusListHandler);
     getStatusListServer.listen({ onUnhandledRequest: "bypass" });
@@ -213,7 +215,7 @@ test("don't accept a revoked credential of type SD-JWT with TokenStatusList", as
 
     getStatusListServer.close();
     const getRevokedStatusListHandler = http.get(MOCK_STATUS_LIST_URI, () => {
-        return HttpResponse.text(revokedStatusCredential);
+        return (HttpResponse as any)[mediaType](revokedStatusCredential);
     });
     const getRevokedStatusListServer = setupServer(getRevokedStatusListHandler);
     getRevokedStatusListServer.listen({ onUnhandledRequest: "bypass" });

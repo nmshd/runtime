@@ -9,6 +9,11 @@ export abstract class AbstractVCProcessor<VCType> {
         const multikeyPublic = `z${CoreBuffer.from([0xed, 0x01]).append(this.accountController.identity.identity.publicKey.publicKey).toBase58()}`;
         return `did:key:${multikeyPublic}`;
     }
+    protected get issuerVerificationMethod(): string {
+        const keyPart = this.issuerId.split(":").at(-1);
+        return `${this.issuerId}#${keyPart}`;
+    }
+
     public abstract init(): Promise<this>;
     public abstract sign(data: unknown, subjectDid: string, statusList?: StatusListEntryCreationParameters): Promise<{ credential: VCType; statusListCredential?: unknown }>;
     public abstract verify(data: VCType): Promise<
