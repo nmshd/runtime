@@ -30,58 +30,20 @@ export function createAppConfig(...configs: (AppConfigOverwrite | AppConfig)[]):
         pushService: "none",
         allowMultipleAccountsWithSameAddress: false,
         databaseFolder: "./data",
-        transportLibrary: {
-            datawalletEnabled: true
-        },
+        transportLibrary: { datawalletEnabled: true },
         modules: {
-            pushNotification: {
-                location: "pushNotification",
-                enabled: true
-            },
-            mailReceived: {
-                location: "mailReceived",
-                enabled: true
-            },
-            onboardingChangeReceived: {
-                location: "onboardingChangeReceived",
-                enabled: true
-            },
-            identityDeletionProcessStatusChanged: {
-                location: "identityDeletionProcessStatusChanged",
-                enabled: true
-            },
-            messageReceived: {
-                location: "messageReceived",
-                enabled: true
-            },
-            relationshipChanged: {
-                location: "relationshipChanged",
-                enabled: true
-            },
-            relationshipTemplateProcessed: {
-                location: "relationshipTemplateProcessed",
-                enabled: true
-            },
-            sse: {
-                location: "sse",
-                enabled: false
-            },
-            decider: {
-                location: "@nmshd/runtime:DeciderModule",
-                enabled: true
-            },
-            request: {
-                enabled: true,
-                location: "@nmshd/runtime:RequestModule"
-            },
-            attributeListener: {
-                enabled: true,
-                location: "@nmshd/runtime:AttributeListenerModule"
-            },
-            notification: {
-                enabled: true,
-                location: "@nmshd/runtime:NotificationModule"
-            }
+            pushNotification: { enabled: true, location: "pushNotification" },
+            mailReceived: { enabled: true, location: "mailReceived" },
+            onboardingChangeReceived: { enabled: true, location: "onboardingChangeReceived" },
+            identityDeletionProcessStatusChanged: { enabled: true, location: "identityDeletionProcessStatusChanged" },
+            messageReceived: { enabled: true, location: "messageReceived" },
+            relationshipChanged: { enabled: true, location: "relationshipChanged" },
+            relationshipTemplateProcessed: { enabled: true, location: "relationshipTemplateProcessed" },
+            sse: { enabled: false, location: "sse" },
+            decider: { enabled: true, location: "@nmshd/runtime:DeciderModule" },
+            request: { enabled: true, location: "@nmshd/runtime:RequestModule" },
+            attributeListener: { enabled: true, location: "@nmshd/runtime:AttributeListenerModule" },
+            notification: { enabled: true, location: "@nmshd/runtime:NotificationModule" }
         }
     };
 
