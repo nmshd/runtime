@@ -23,6 +23,7 @@ export abstract class RuntimeModule<TConfig extends ModuleConfiguration = Module
     public get name(): string {
         return this.constructor.name;
     }
+
     public get displayName(): string {
         return this.name.replace(/([a-z0-9])([A-Z])/g, "$1 $2");
     }
