@@ -4,6 +4,7 @@ import {
     AbstractComplexValue,
     AttributeValues,
     IdentityAttribute,
+    IdentityAttributeJSON,
     IdentityAttributeQuery,
     IIdentityAttributeQuery,
     IIQLQuery,
