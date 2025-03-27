@@ -1,5 +1,7 @@
+import { sleep } from "@js-soft/ts-utils";
 import { AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON } from "@nmshd/consumption";
 import { GivenName, IdentityAttribute, IdentityAttributeJSON, ReadAttributeRequestItem, SupportedStatusListTypes, SupportedVCTypes } from "@nmshd/content";
+import { CoreDate } from "@nmshd/core-types";
 import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
 import { CreateOutgoingRequestRequest } from "src";
@@ -247,4 +249,69 @@ test.each([
     expect(verifierAttributes[0].shareInfo?.peer).toBe(holderServices.address);
 
     getRevokedStatusListServer.close();
+});
+
+test.each(Object.values(SupportedVCTypes))("expiration of a credential of type %s", async (credentialType) => {
+    const unsignedAttribute = IdentityAttribute.from({
+        owner: holderServices.address,
+        value: GivenName.from({
+            value: "aGivenName"
+        }).toJSON()
+    }).toJSON();
+
+    const signingResult = await issuerServices.consumption.attributes.createCreateVerifiableAttributeRequestItem({
+        content: unsignedAttribute,
+        peer: holderServices.address,
+        mustBeAccepted: false,
+        credentialType,
+        expiresAt: CoreDate.utc().add({ seconds: 5 }).toString()
+    });
+
+    expect(signingResult).toBeSuccessful();
+    const requestItem = signingResult.value.requestItem;
+    expect(requestItem.attribute.proof).toBeDefined();
+
+    const request: CreateOutgoingRequestRequest = {
+        peer: holderServices.address,
+        content: {
+            items: [requestItem]
+        }
+    };
+    await exchangeAndAcceptRequestByMessage(issuerServices, holderServices, request, [{ accept: true }]);
+
+    const attributes = (await holderServices.consumption.attributes.getAttributes({})).value;
+    expect(attributes).toHaveLength(3);
+    expect(attributes[0].content.proof).toBeDefined();
+    expect(attributes[0].shareInfo).toBeUndefined();
+    expect(attributes[1].content.proof).toBeUndefined();
+    expect(attributes[1].shareInfo).toBeUndefined();
+    expect(attributes[2].content.proof).toBeDefined();
+    expect(attributes[2].shareInfo?.peer).toBe(issuerServices.address);
+
+    const readAttributeRequestItem = ReadAttributeRequestItem.from({
+        mustBeAccepted: false,
+        query: {
+            "@type": "IdentityAttributeQuery",
+            valueType: "GivenName",
+            isVerified: true
+        }
+    }).toJSON();
+    const readAttributeRequest: CreateOutgoingRequestRequest = {
+        peer: holderServices.address,
+        content: {
+            items: [readAttributeRequestItem]
+        }
+    };
+    const readAttributeResponse: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
+        accept: true,
+        existingAttributeId: attributes[0].id
+    };
+    await sleep(5000);
+    await exchangeAndAcceptRequestByMessage(verifierServices, holderServices, readAttributeRequest, [readAttributeResponse]);
+
+    const verifierAttributes = (await verifierServices.consumption.attributes.getAttributes({})).value;
+    expect(verifierAttributes).toHaveLength(1);
+    expect(verifierAttributes[0].content.proof).toBeDefined();
+    expect(verifierAttributes[0].content.proof?.proofInvalid).toBe(true);
+    expect(verifierAttributes[0].shareInfo?.peer).toBe(holderServices.address);
 });

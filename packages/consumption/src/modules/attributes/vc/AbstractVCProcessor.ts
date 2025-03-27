@@ -1,4 +1,5 @@
 import { StatusListEntryCreationParameters } from "@nmshd/content";
+import { CoreDate } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
 import { AccountController } from "@nmshd/transport";
 
@@ -15,7 +16,12 @@ export abstract class AbstractVCProcessor<VCType> {
     }
 
     public abstract init(): Promise<this>;
-    public abstract issue(data: unknown, subjectDid: string, statusList?: StatusListEntryCreationParameters): Promise<{ credential: VCType; statusListCredential?: unknown }>;
+    public abstract issue(
+        data: unknown,
+        subjectDid: string,
+        statusList?: StatusListEntryCreationParameters,
+        expiresAt?: CoreDate
+    ): Promise<{ credential: VCType; statusListCredential?: unknown }>;
     public abstract verify(data: VCType): Promise<
         | { isSuccess: false }
         | {
@@ -27,4 +33,5 @@ export abstract class AbstractVCProcessor<VCType> {
     >;
 
     public abstract revokeCredential(credential: unknown): Promise<unknown>;
+    public abstract getExpiration(credential: unknown): Promise<CoreDate | undefined>;
 }

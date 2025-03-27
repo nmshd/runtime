@@ -2,6 +2,7 @@ export * from "./AbstractAttribute";
 export * from "./AbstractAttributeQuery";
 export * from "./AbstractAttributeValue";
 export * from "./AbstractComplexValue";
+export * from "./AttributeProof";
 export * from "./AttributeValueTypes";
 export * from "./constants";
 export * from "./CredentialStatusList";

@@ -1,26 +1,18 @@
 import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-serval";
 import { CoreAddress, CoreDate, ICoreAddress, ICoreDate } from "@nmshd/core-types";
 import { ContentJSON } from "../ContentJSON";
-
-export enum SupportedVCTypes {
-    W3CVC = "W3CVC",
-    SdJwtVc = "SdJwtVc"
-}
+import { AttributeProof, AttributeProofJSON, IAttributeProof } from "./AttributeProof";
 
 export interface AbstractAttributeJSON extends ContentJSON {
     owner: string;
-    proof?: {
-        credentialType: SupportedVCTypes;
-        credential: unknown;
-        proofInvalid?: true;
-    };
+    proof?: AttributeProofJSON;
     validFrom?: string;
     validTo?: string;
 }
 
 export interface IAbstractAttribute extends ISerializable {
     owner: ICoreAddress;
-    proof?: { credentialType: SupportedVCTypes; credential: unknown; proofInvalid?: true };
+    proof?: IAttributeProof;
     validFrom?: ICoreDate;
     validTo?: ICoreDate;
 }
@@ -32,7 +24,7 @@ export abstract class AbstractAttribute extends Serializable implements IAbstrac
 
     @serialize()
     @validate({ nullable: true })
-    public proof?: { credentialType: SupportedVCTypes; credential: unknown; proofInvalid?: true };
+    public proof?: AttributeProof;
 
     @serialize()
     @validate({ nullable: true })

@@ -1,4 +1,5 @@
 import { StatusListEntryCreationParameters, SupportedStatusListTypes, TokenStatusListEntryCreationParameters } from "@nmshd/content";
+import { CoreDate } from "@nmshd/core-types";
 import { CoreBuffer, CryptoHash, CryptoHashAlgorithm, Encoding } from "@nmshd/crypto";
 import { CoreCrypto } from "@nmshd/transport";
 import { SDJwtInstance } from "@sd-jwt/core";
@@ -19,7 +20,8 @@ export class SdJwtVcProcessor extends AbstractVCProcessor<any> {
     public override async issue(
         data: object,
         subjectDid: string,
-        statusList?: StatusListEntryCreationParameters
+        statusList?: StatusListEntryCreationParameters,
+        expiresAt?: CoreDate
     ): Promise<{ credential: unknown; statusListCredential?: unknown }> {
         if (statusList && statusList.type !== SupportedStatusListTypes.TokenStatusList) throw new Error("unsupported status list");
 
@@ -31,12 +33,12 @@ export class SdJwtVcProcessor extends AbstractVCProcessor<any> {
             signAlg: "EdDSA" // https://www.iana.org/assignments/jose/jose.xhtml#web-signature-encryption-algorithms
         });
 
-        const issuanceDate = new Date().getTime();
         const enrichedData = {
             vct: "placeholder",
             iss: this.issuerId,
             sub: subjectDid,
-            iat: issuanceDate,
+            iat: new Date().getTime(),
+            exp: expiresAt ? new Date(expiresAt.toString()).getTime() : undefined,
             status: statusList
                 ? {
                       // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -85,6 +87,7 @@ export class SdJwtVcProcessor extends AbstractVCProcessor<any> {
 
     public async revokeCredential(credential: string): Promise<string> {
         const agent = new SDJwtInstance({
+            // TODO: read the hasher from the credential
             hasher: this.hasher,
             hashAlg: "sha-512"
         });
@@ -128,8 +131,8 @@ export class SdJwtVcProcessor extends AbstractVCProcessor<any> {
             }
         });
 
-        const claimKeys = await agent.keys(data);
         try {
+            const claimKeys = await agent.keys(data);
             const payload = (await agent.verify(data, claimKeys)).payload; // check all claims sent in the credential
             return { isSuccess: true, payload, subject: payload.sub, issuer: payload.iss };
         } catch (_) {
@@ -155,4 +158,17 @@ export class SdJwtVcProcessor extends AbstractVCProcessor<any> {
 
         return (await CryptoHash.hash(CoreBuffer.from(data), mappedAlg)).buffer;
     };
+
+    public override async getExpiration(credential: string): Promise<CoreDate | undefined> {
+        const agent = new SDJwtInstance({
+            hasher: this.hasher,
+            hashAlg: "sha-512"
+        });
+
+        const decodedCredential = (await agent.getClaims(credential)) as SdJwtVcPayload;
+        if (decodedCredential.exp) {
+            return CoreDate.from(decodedCredential.exp);
+        }
+        return undefined;
+    }
 }

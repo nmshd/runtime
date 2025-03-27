@@ -56,16 +56,16 @@ export class W3CVCProcessor extends AbstractVCProcessor<any> {
     public override async issue(
         data: object,
         subjectDid: string,
-        statusList?: StatusListEntryCreationParameters
+        statusList?: StatusListEntryCreationParameters,
+        expiresAt?: CoreDate
     ): Promise<{ credential: unknown; statusListCredential?: unknown }> {
         if (statusList && statusList.type !== SupportedStatusListTypes.BitstringStatusList) throw new Error("unsupported status list");
 
-        const issuanceDate = CoreDate.utc().toString();
         const enrichedData = {
             "@context": ["https://www.w3.org/2018/credentials/v1"],
             type: ["VerifiableCredential"],
             issuer: this.issuerId,
-            issuanceDate,
+            issuanceDate: CoreDate.utc().toString(),
             credentialSubject: { ...data, id: subjectDid }
         };
 
@@ -80,6 +80,8 @@ export class W3CVCProcessor extends AbstractVCProcessor<any> {
             });
             enrichedData["@context"].push("https://www.w3.org/ns/credentials/status/v1");
         }
+
+        if (expiresAt) Object.assign(enrichedData, { expirationDate: expiresAt.toString() });
 
         const statusListCredential = await this.createStatusList(statusList);
 
@@ -122,6 +124,7 @@ export class W3CVCProcessor extends AbstractVCProcessor<any> {
         const verificationResult = await vc.verifyCredential({
             credential: data,
             suite,
+            maxClockSkew: 0,
             documentLoader: this.documentLoader,
             checkStatus: async ({ credential, documentLoader, suite, verifyBitstringStatusListCredential = true, verifyMatchingIssuers = true }: any = {}) => {
                 const statusResult = await checkStatus({
@@ -159,5 +162,12 @@ export class W3CVCProcessor extends AbstractVCProcessor<any> {
             format: "application/n-quads",
             safe: false
         });
+    }
+
+    public override async getExpiration(credential: Record<string, any>): Promise<CoreDate | undefined> {
+        if (credential.expirationDate) {
+            return await Promise.resolve(CoreDate.from(credential.expirationDate));
+        }
+        return await Promise.resolve(undefined);
     }
 }

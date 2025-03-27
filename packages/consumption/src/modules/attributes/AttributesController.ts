@@ -1379,7 +1379,12 @@ export class AttributesController extends ConsumptionBaseController {
         const credentialClaims = Object.entries(verificationResult.payload);
         const credentialConfirmsAttribute = _.differenceWith(attributeClaims, credentialClaims, _.isEqual).length === 0;
 
-        attribute.proof.proofInvalid = credentialConfirmsAttribute ? undefined : true;
+        const attributeExpiration = attribute.proof.expiresAt;
+        const credentialExpiration = await vc.getExpiration(attribute.proof.credential);
+        const expirationMatches =
+            (!attributeExpiration && !credentialExpiration) || (attributeExpiration && credentialExpiration && attributeExpiration.isSame(credentialExpiration, "millisecond"));
+
+        attribute.proof.proofInvalid = credentialConfirmsAttribute && expirationMatches ? undefined : true;
         return attribute;
     }
 

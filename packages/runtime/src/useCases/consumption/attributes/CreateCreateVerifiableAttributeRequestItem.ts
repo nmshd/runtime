@@ -8,6 +8,7 @@ import {
     StatusListEntryCreationParameters,
     SupportedVCTypes
 } from "@nmshd/content";
+import { CoreDate } from "@nmshd/core-types";
 import { AccountController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
@@ -18,6 +19,7 @@ export interface CreateCreateVerifiableAttributeRequestItemRequest {
     credentialType: SupportedVCTypes;
     mustBeAccepted: boolean;
     statusList?: StatusListEntryCreationParameters;
+    expiresAt?: string;
 }
 
 export interface CreateCreateVerifiableAttribueRequestItemResponse {
@@ -46,8 +48,13 @@ export class CreateCreateVerifiableAttributeRequestItemUseCase extends UseCase<
         const attributeValue = request.content.value;
         const vc = await getVCProcessor(request.credentialType, this.accountController);
 
-        const { credential: signedCredential, statusListCredential } = await vc.issue(attributeValue, request.peer, request.statusList);
-        request.content.proof = { credential: signedCredential, credentialType: request.credentialType };
+        const expiresAt = request.expiresAt ? CoreDate.from(request.expiresAt) : undefined;
+        const { credential: signedCredential, statusListCredential } = await vc.issue(attributeValue, request.peer, request.statusList, expiresAt);
+        request.content.proof = {
+            credential: signedCredential,
+            credentialType: request.credentialType,
+            expiresAt: request.expiresAt
+        };
 
         return Result.ok({
             requestItem: CreateAttributeRequestItem.from({
