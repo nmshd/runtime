@@ -113,7 +113,7 @@ test.each([
     expect(signingResult).toBeSuccessful();
     const requestItem = signingResult.value.requestItem;
     expect(requestItem.attribute.proof).toBeDefined();
-    const statusListCredential = signingResult.value.statusListCredential as string;
+    const statusListCredential = signingResult.value.statusListCredential;
     expect(statusListCredential).toBeDefined();
 
     const getStatusListHandler = http.get(MOCK_STATUS_LIST_URI, () => {
@@ -189,7 +189,7 @@ test.each([
     expect(signingResult).toBeSuccessful();
     const requestItem = signingResult.value.requestItem;
     expect(requestItem.attribute.proof).toBeDefined();
-    const statusListCredential = signingResult.value.statusListCredential as string;
+    const statusListCredential = signingResult.value.statusListCredential;
     expect(statusListCredential).toBeDefined();
 
     const getStatusListHandler = http.get(MOCK_STATUS_LIST_URI, () => {
@@ -210,7 +210,7 @@ test.each([
     expect(attributes).toHaveLength(3);
 
     const revocationResult = await issuerServices.consumption.attributes.revokeAttribute({ attribute: requestItem.attribute as IdentityAttributeJSON });
-    const revokedStatusCredential = revocationResult.value as string;
+    const revokedStatusCredential = revocationResult.value;
     expect(revokedStatusCredential).toBeDefined();
 
     getStatusListServer.close();
