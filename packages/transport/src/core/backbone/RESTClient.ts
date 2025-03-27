@@ -179,7 +179,7 @@ export class RESTClient {
 
         this._logResponse(response, platformParameters, requestId, method, path);
 
-        // Rare case: We receive status 400 JSON error from backbone when downloading a file
+        // Rare case: We receive status 400 JSON error from Backbone when downloading a file
         if (response.status === 400 && !response.data?.error && response.headers["content-type"] === "application/json; charset=utf-8") {
             try {
                 const errorText = CoreBuffer.from(response.data).toUtf8();

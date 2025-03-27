@@ -32,7 +32,7 @@ afterAll(async () => {
 afterEach(() => reset(mockedClient));
 
 describe("PublicRelationshipTemplateReferencesController", () => {
-    test("should return the backbone defined PublicRelationshipTemplateReferences", async () => {
+    test("should return the Backbone defined PublicRelationshipTemplateReferences", async () => {
         const mockResponse = [{ title: "aTitle", description: "aDescription", truncatedReference: "aReference" }];
         when(mockedClient.getPublicRelationshipTemplateReferences()).thenResolve(ClientResult.ok(mockResponse));
 
@@ -41,7 +41,7 @@ describe("PublicRelationshipTemplateReferencesController", () => {
         expect(publicRelationshipTemplates.map((reference) => reference.toJSON())).toStrictEqual(mockResponse);
     });
 
-    test("should return an empty array if the backbone endpoint returns an empty array", async () => {
+    test("should return an empty array if the Backbone endpoint returns an empty array", async () => {
         when(mockedClient.getPublicRelationshipTemplateReferences()).thenResolve(ClientResult.ok([]));
 
         const publicRelationshipTemplates = await account.publicRelationshipTemplateReferences.getPublicRelationshipTemplateReferences();
@@ -49,7 +49,7 @@ describe("PublicRelationshipTemplateReferencesController", () => {
         expect(publicRelationshipTemplates).toStrictEqual([]);
     });
 
-    test("should return an empty array if the backbone endpoint is not available", async () => {
+    test("should return an empty array if the Backbone endpoint is not available", async () => {
         when(mockedClient.getPublicRelationshipTemplateReferences()).thenResolve(
             ClientResult.fail(new RequestError("some method", "some path", undefined, undefined, undefined, undefined, 404))
         );

@@ -57,7 +57,7 @@ export class DevicesController extends TransportController {
     private async createDevice(params: SendDeviceParameters): Promise<Device> {
         const [signedChallenge, devicePwdDn] = await Promise.all([this.parent.challenges.createChallenge(ChallengeType.Identity), PasswordGenerator.createStrongPassword(45, 50)]);
 
-        this.log.trace("Device Creation Challenge signed. Creating device on backbone...");
+        this.log.trace("Device Creation Challenge signed. Creating device on Backbone...");
 
         const response = (
             await this.client.createDevice({

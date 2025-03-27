@@ -279,7 +279,7 @@ export class AccountController {
         this._log.trace("Challenge signed. Creating device...");
 
         const [createIdentityResponse, privSync, localAddress, deviceInfo] = await Promise.all([
-            // Register first device (and identity) on backbone
+            // Register first device (and identity) on Backbone
             this.identityClient.createIdentity({
                 devicePassword: devicePwdD1,
                 identityPublicKey: identityKeypair.publicKey.toBase64(),
@@ -308,7 +308,7 @@ export class AccountController {
         this._log.trace(`Registered identity with address ${createdIdentity.address}, device id is ${createdIdentity.device.id}.`);
 
         if (!localAddress.equals(createdIdentity.address)) {
-            throw new TransportError(`The backbone address '${createdIdentity.address}' does not match the local address '${localAddress.toString()}'.`);
+            throw new TransportError(`The Backbone address '${createdIdentity.address}' does not match the local address '${localAddress.toString()}'.`);
         }
 
         const identity = Identity.from({

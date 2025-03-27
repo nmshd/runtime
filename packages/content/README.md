@@ -16,7 +16,7 @@ Share your feedback with the enmeshed team by contributing to the [discussions](
 
 ## Contribute
 
-Contribution to this project is highly apprecicated. Head over to our [contribution guide](https://github.com/nmshd/.github/blob/main/CONTRIBUTING.md) to learn more.
+Contribution to this project is highly appreciated. Head over to our [contribution guide](https://github.com/nmshd/.github/blob/main/CONTRIBUTING.md) to learn more.
 
 ## License
 

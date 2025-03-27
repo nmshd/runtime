@@ -3,10 +3,6 @@ import { RuntimeModule } from "./RuntimeModule";
 export class RuntimeModuleRegistry implements Iterable<RuntimeModule> {
     private readonly modules: RuntimeModule[] = [];
 
-    public getByName<T extends RuntimeModule>(name: string): T {
-        return this.modules.find((m) => m.name.toLowerCase() === name.toLowerCase()) as T;
-    }
-
     public add(module: RuntimeModule): void {
         this.modules.push(module);
     }

@@ -17,6 +17,7 @@ import { ILocalAttributeDeletionInfo, LocalAttributeDeletionInfo, LocalAttribute
 import { ILocalAttributeShareInfo, LocalAttributeShareInfo, LocalAttributeShareInfoJSON } from "./LocalAttributeShareInfo";
 
 export interface LocalAttributeJSON {
+    id: string;
     content: IdentityAttributeJSON | RelationshipAttributeJSON;
     createdAt: string;
     succeeds?: string;

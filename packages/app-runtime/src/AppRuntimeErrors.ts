@@ -50,11 +50,11 @@ class Startup {
     }
 
     public uiBridgeAlreadyRegistered(): UserfriendlyApplicationError {
-        return new UserfriendlyApplicationError("error.appruntime.startup.uiBridgeAlreadyRegistered", "The ui bridge was already registered for this runtime instance.");
+        return new UserfriendlyApplicationError("error.appruntime.startup.uiBridgeAlreadyRegistered", "The UI bridge was already registered for this Runtime instance.");
     }
 
     public wrongURL(): UserfriendlyApplicationError {
-        return new UserfriendlyApplicationError("error.appruntime.startup.WrongURL", "The given URL to start the App is in a wrong format.");
+        return new UserfriendlyApplicationError("error.appruntime.startup.WrongURL", "The given URL to start the app is in a wrong format.");
     }
 
     public wrongCode(): UserfriendlyApplicationError {
@@ -67,7 +67,7 @@ class PushNotificationModule {
         return new UserfriendlyApplicationError(
             "error.runtime.module.PushNotificationModule.SubscriptionNotPossible",
             `Subscribing to the NativeEventBus was not possible. Root cause: '${details}'`,
-            "The backbone has no push connection with this app. You might have to refresh the app manually.",
+            "The Backbone has no push connection with this app. You might have to refresh the app manually.",
             rootError
         );
     }
@@ -76,7 +76,7 @@ class PushNotificationModule {
         return new UserfriendlyApplicationError(
             "error.runtime.module.PushNotificationModule.UnsubscriptionNotPossible",
             `Unsubscribing from the NativeEventBus was not possible. Root cause: '${details}'`,
-            "The backbone still might have a push connection with this app. You might receive some unwanted notifications.",
+            "The Backbone still might have a push connection with this app. You might receive some unwanted notifications.",
             rootError
         );
     }
@@ -85,7 +85,7 @@ class PushNotificationModule {
         return new UserfriendlyApplicationError(
             "error.runtime.module.PushNotificationModule.TokenRegistrationNotPossible",
             `Registering the Push Notification Token for the account was not possible. Root cause: '${details}'`,
-            "The backbone has no push connection with this app. You might have to refresh the app manually.",
+            "The Backbone has no push connection with this app. You might have to refresh the app manually.",
             rootError
         );
     }

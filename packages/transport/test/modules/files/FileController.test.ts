@@ -136,7 +136,7 @@ describe("FileController", function () {
             receivedFile = await recipient.files.getOrLoadFileByTruncated(reference);
         });
 
-        test("should delete own file locally and from the backbone", async function () {
+        test("should delete own file locally and from the Backbone", async function () {
             await sender.files.deleteFile(sentFile);
             const fileOnBackbone = await recipient.files.fetchCaches([sentFile.id]);
             expect(fileOnBackbone).toHaveLength(0);

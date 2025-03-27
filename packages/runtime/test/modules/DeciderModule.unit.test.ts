@@ -30,13 +30,6 @@ describe("DeciderModule unit tests", () => {
     beforeAll(() => {
         const runtime = runtimeServiceProvider["runtimes"][0];
 
-        const deciderConfig = {
-            enabled: false,
-            displayName: "Decider Module",
-            name: "DeciderModule",
-            location: "@nmshd/runtime:DeciderModule"
-        };
-
         const loggerFactory = new NodeLoggerFactory({
             appenders: {
                 consoleAppender: {
@@ -59,7 +52,7 @@ describe("DeciderModule unit tests", () => {
         });
         const testLogger = loggerFactory.getLogger("DeciderModule.test");
 
-        deciderModule = new DeciderModule(runtime, deciderConfig, testLogger);
+        deciderModule = new DeciderModule(runtime, { enabled: false, location: "@nmshd/runtime:DeciderModule" }, testLogger);
     });
 
     describe("validateAutomationConfig", () => {

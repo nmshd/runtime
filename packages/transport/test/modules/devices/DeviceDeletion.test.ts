@@ -41,7 +41,7 @@ describe("Device Deletion", function () {
         expect(deviceIds).not.toContain(newDevice.id.toString());
     });
 
-    test("should not delete an already onboarded device rejected by backbone", async function () {
+    test("should not delete an already onboarded device rejected by Backbone", async function () {
         const newDevice = await accountController.devices.sendDevice({ name: "Test2", isAdmin: true });
         await accountController.syncDatawallet();
         await deviceTest.onboardDevice(await accountController.devices.getSharedSecret(newDevice.id));

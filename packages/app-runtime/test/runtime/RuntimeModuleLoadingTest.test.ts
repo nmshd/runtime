@@ -11,12 +11,7 @@ describe("RuntimeModuleLoading", function () {
     beforeAll(async function () {
         runtime = await TestUtil.createRuntimeWithoutInit({
             modules: {
-                testModule: {
-                    name: "testModule",
-                    displayName: "A Test Module",
-                    location: "testModule",
-                    enabled: true
-                }
+                testModule: { enabled: true, location: "testModule" }
             }
         });
 

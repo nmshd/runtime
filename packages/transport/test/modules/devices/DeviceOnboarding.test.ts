@@ -166,7 +166,7 @@ describe("Device Onboarding", function () {
         expect(dev1Key.password).not.toBe(newDevice.initialPassword);
     });
 
-    test("should have changed the password of the created device (backbone)", async function () {
+    test("should have changed the password of the created device (Backbone)", async function () {
         TestUtil.useFatalLoggerFactory();
 
         await expect(async () => {

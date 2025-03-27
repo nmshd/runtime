@@ -35,30 +35,10 @@ export class RuntimeServiceProvider {
             debug: true
         },
         modules: {
-            decider: {
-                enabled: false,
-                displayName: "Decider Module",
-                name: "DeciderModule",
-                location: "@nmshd/runtime:DeciderModule"
-            },
-            request: {
-                enabled: false,
-                displayName: "Request Module",
-                name: "RequestModule",
-                location: "@nmshd/runtime:RequestModule"
-            },
-            attributeListener: {
-                enabled: false,
-                displayName: "Attribute Listener Module",
-                name: "AttributeListenerModule",
-                location: "@nmshd/runtime:AttributeListenerModule"
-            },
-            notification: {
-                enabled: false,
-                displayName: "Notification Module",
-                name: "NotificationModule",
-                location: "@nmshd/runtime:NotificationModule"
-            }
+            decider: { enabled: false, location: "@nmshd/runtime:DeciderModule" },
+            request: { enabled: false, location: "@nmshd/runtime:RequestModule" },
+            attributeListener: { enabled: false, location: "@nmshd/runtime:AttributeListenerModule" },
+            notification: { enabled: false, location: "@nmshd/runtime:NotificationModule" }
         }
     };
 
