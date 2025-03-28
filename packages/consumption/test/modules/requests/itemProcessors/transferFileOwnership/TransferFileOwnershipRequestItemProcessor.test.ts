@@ -26,9 +26,9 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createConnection();
-        const transport = TestUtil.createTransport(connection);
+        const transport = TestUtil.createTransport();
         await transport.init();
-        const accounts = await TestUtil.provideAccounts(transport, 3);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 3);
 
         ({ accountController: senderAccountController, consumptionController: senderConsumptionController } = accounts[0]);
         sender = senderAccountController.identity.address;

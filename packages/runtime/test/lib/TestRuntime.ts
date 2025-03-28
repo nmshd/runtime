@@ -89,7 +89,7 @@ export class TestRuntime extends Runtime {
 
     protected async initAccount(): Promise<void> {
         const randomAccountName = Math.random().toString(36).substring(7);
-        const db = await this.transport.createDatabase(`acc-${randomAccountName}`);
+        const db = await this.dbConnection!.getDatabase(`acc-${randomAccountName}`);
 
         const accountController = await new AccountController(this.transport, db, this.transport.config).init();
 

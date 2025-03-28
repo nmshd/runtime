@@ -31,11 +31,11 @@ describe("AnonymousTokenController", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 1);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 1);
         sender = accounts[0];
 
         anonymousTokenController = new AnonymousTokenController(transport.config);

@@ -13,11 +13,11 @@ describe("TokenContent", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection, { datawalletEnabled: true });
+        transport = TestUtil.createTransport({ datawalletEnabled: true });
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 3);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 3);
 
         account = accounts[0];
     });
@@ -232,7 +232,7 @@ describe("TokenContent", function () {
             expect(deserialized).toBeInstanceOf(Serializable);
             expect(deserialized).toBeInstanceOf(TokenContentDeviceSharedSecret);
             expect(deserialized.sharedSecret).toBeInstanceOf(DeviceSharedSecret);
-            await TestUtil.onboardDevice(transport, deserialized.sharedSecret);
+            await TestUtil.onboardDevice(transport, connection, deserialized.sharedSecret);
         });
 
         test("should serialize and deserialize correctly (no type information)", async function () {
@@ -255,7 +255,7 @@ describe("TokenContent", function () {
             expect(deserialized).toBeInstanceOf(Serializable);
             expect(deserialized).toBeInstanceOf(TokenContentDeviceSharedSecret);
             expect(deserialized.sharedSecret).toBeInstanceOf(DeviceSharedSecret);
-            await TestUtil.onboardDevice(transport, deserialized.sharedSecret);
+            await TestUtil.onboardDevice(transport, connection, deserialized.sharedSecret);
         });
 
         test("should serialize and deserialize correctly (from unknown type)", async function () {
@@ -279,7 +279,7 @@ describe("TokenContent", function () {
             expect(deserialized).toBeInstanceOf(Serializable);
             expect(deserialized).toBeInstanceOf(TokenContentDeviceSharedSecret);
             expect(deserialized.sharedSecret).toBeInstanceOf(DeviceSharedSecret);
-            await TestUtil.onboardDevice(transport, deserialized.sharedSecret);
+            await TestUtil.onboardDevice(transport, connection, deserialized.sharedSecret);
         });
     });
 

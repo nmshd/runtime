@@ -15,7 +15,6 @@ export class AppDeviceTest {
     public constructor(parameters: DeviceTestParameters) {
         this.parameters = parameters;
         this.transport = new Transport(
-            this.parameters.connection,
             this.parameters.config,
             new EventEmitter2EventBus(() => {
                 // ignore errors
@@ -29,7 +28,7 @@ export class AppDeviceTest {
     }
 
     public async createAccount(): Promise<AccountController> {
-        const accounts = await TestUtil.provideAccounts(this.transport, 1);
+        const accounts = await TestUtil.provideAccounts(this.transport, this.parameters.connection, 1);
 
         const account = accounts[0];
 
@@ -38,7 +37,7 @@ export class AppDeviceTest {
     }
 
     public async onboardDevice(sharedSecret: DeviceSharedSecret): Promise<AccountController> {
-        const account = await TestUtil.onboardDevice(this.transport, sharedSecret);
+        const account = await TestUtil.onboardDevice(this.transport, this.parameters.connection, sharedSecret);
         this.createdAccounts.push(account);
         return account;
     }

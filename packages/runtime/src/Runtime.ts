@@ -58,6 +58,7 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
         return this._logger;
     }
 
+    protected databaseConnection: IDatabaseConnection;
     protected transport: Transport;
 
     private _anonymousServices: AnonymousServices;
@@ -139,6 +140,8 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
 
         await this.initDIContainer();
 
+        this.databaseConnection = await this.createDatabaseConnection();
+
         await this.initTransportLibrary();
         await this.initAccount();
 
@@ -176,8 +179,6 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
     private async initTransportLibrary() {
         this.logger.debug("Initializing Database connection... ");
 
-        const databaseConnection = await this.createDatabaseConnection();
-
         const transportConfig = this.createTransportConfigWithAdditionalHeaders({
             ...this.runtimeConfig.transportLibrary,
             supportedIdentityVersion: 1
@@ -187,7 +188,7 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
             this.logger.error(`An error was thrown in an event handler of the transport event bus (namespace: '${namespace}'). Root error: ${error}`);
         });
 
-        this.transport = new Transport(databaseConnection, transportConfig, eventBus, this.loggerFactory, this.correlator);
+        this.transport = new Transport(transportConfig, eventBus, this.loggerFactory, this.correlator);
 
         this.logger.debug("Initializing Transport Library...");
         await this.transport.init();
@@ -321,8 +322,8 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
     private async loadModules() {
         this.logger.info("Loading modules...");
 
-        for (const moduleName in this.runtimeConfig.modules) {
-            const moduleConfiguration = this.runtimeConfig.modules[moduleName];
+        for (const key in this.runtimeConfig.modules) {
+            const moduleConfiguration = this.runtimeConfig.modules[key];
 
             if (!moduleConfiguration.enabled) {
                 this.logger.debug(`Skip loading module at location '${moduleConfiguration.location}' because it is not enabled.`);
