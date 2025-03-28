@@ -3,6 +3,7 @@ import {
     AttributeSuccessionAcceptResponseItem,
     CreateAttributeAcceptResponseItem,
     IdentityAttribute,
+    ProposeAttributeAcceptResponseItem,
     ReadAttributeAcceptResponseItem,
     ResponseItemResult
 } from "@nmshd/content";
@@ -25,8 +26,20 @@ export default async function createAppropriateResponseItem(
     identityAttribute: IdentityAttribute,
     requestInfo: LocalRequestInfo,
     attributesController: AttributesController,
-    itemType: "Create" | "Read"
-): Promise<CreateAttributeAcceptResponseItem | ReadAttributeAcceptResponseItem | AttributeAlreadySharedAcceptResponseItem | AttributeSuccessionAcceptResponseItem> {
+    itemType: "Propose"
+): Promise<ProposeAttributeAcceptResponseItem | AttributeAlreadySharedAcceptResponseItem | AttributeSuccessionAcceptResponseItem>;
+export default async function createAppropriateResponseItem(
+    identityAttribute: IdentityAttribute,
+    requestInfo: LocalRequestInfo,
+    attributesController: AttributesController,
+    itemType: "Create" | "Read" | "Propose"
+): Promise<
+    | CreateAttributeAcceptResponseItem
+    | ReadAttributeAcceptResponseItem
+    | ProposeAttributeAcceptResponseItem
+    | AttributeAlreadySharedAcceptResponseItem
+    | AttributeSuccessionAcceptResponseItem
+> {
     const repositoryAttribute = await getSourceRepositoryAttribute(identityAttribute, attributesController);
 
     const query = {
@@ -57,6 +70,12 @@ export default async function createAppropriateResponseItem(
                 });
             case "Read":
                 return ReadAttributeAcceptResponseItem.from({
+                    result: ResponseItemResult.Accepted,
+                    attributeId: newOwnSharedIdentityAttribute.id,
+                    attribute: newOwnSharedIdentityAttribute.content
+                });
+            case "Propose":
+                return ProposeAttributeAcceptResponseItem.from({
                     result: ResponseItemResult.Accepted,
                     attributeId: newOwnSharedIdentityAttribute.id,
                     attribute: newOwnSharedIdentityAttribute.content

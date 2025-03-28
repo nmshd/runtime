@@ -43,11 +43,11 @@ describe("FileController", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 2);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 2);
         sender = accounts[0];
         recipient = accounts[1];
     });
@@ -136,7 +136,7 @@ describe("FileController", function () {
             receivedFile = await recipient.files.getOrLoadFileByTruncated(reference);
         });
 
-        test("should delete own file locally and from the backbone", async function () {
+        test("should delete own file locally and from the Backbone", async function () {
             await sender.files.deleteFile(sentFile);
             const fileOnBackbone = await recipient.files.fetchCaches([sentFile.id]);
             expect(fileOnBackbone).toHaveLength(0);

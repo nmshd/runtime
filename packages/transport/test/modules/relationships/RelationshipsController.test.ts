@@ -37,11 +37,11 @@ describe("RelationshipsController", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 4);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 4);
         sender = accounts[0];
         recipient1 = accounts[1];
         recipient2 = accounts[2];

@@ -35,11 +35,11 @@ describe("TokenController", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 2);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 2);
         sender = accounts[0];
         recipient = accounts[1];
     });
@@ -413,7 +413,7 @@ describe("TokenController", function () {
             receivedToken = await recipient.tokens.loadPeerTokenByTruncated(reference, false);
         });
 
-        test("should delete own token locally and from the backbone", async function () {
+        test("should delete own token locally and from the Backbone", async function () {
             await sender.tokens.delete(sentToken);
             const tokenOnBackbone = await recipient.tokens.fetchCaches([sentToken.id]);
             expect(tokenOnBackbone).toHaveLength(0);

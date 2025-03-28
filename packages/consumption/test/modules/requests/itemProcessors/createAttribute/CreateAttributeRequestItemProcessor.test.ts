@@ -19,9 +19,9 @@ describe("CreateAttributeRequestItemProcessor", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
-        context = await Context.init(transport);
+        context = await Context.init(transport, connection);
         Given = new GivenSteps(context);
         When = new WhenSteps(context);
         Then = new ThenSteps(context);

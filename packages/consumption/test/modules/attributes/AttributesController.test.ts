@@ -53,13 +53,13 @@ describe("AttributesController", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createConnection();
-        transport = TestUtil.createTransport(connection, mockEventBus);
+        transport = TestUtil.createTransport(mockEventBus);
         await transport.init();
 
-        const connectorAccount = (await TestUtil.provideAccounts(transport, 1))[0];
+        const connectorAccount = (await TestUtil.provideAccounts(transport, connection, 1))[0];
         ({ accountController: testAccount, consumptionController } = connectorAccount);
 
-        const appAccount = (await TestUtil.provideAccounts(transport, 1, undefined, undefined, { setDefaultRepositoryAttributes: true }))[0];
+        const appAccount = (await TestUtil.provideAccounts(transport, connection, 1, undefined, undefined, { setDefaultRepositoryAttributes: true }))[0];
         ({ accountController: appTestAccount, consumptionController: appConsumptionController } = appAccount);
     });
 
@@ -438,6 +438,7 @@ describe("AttributesController", function () {
             expect(thirdPartyLocalAttributeCopy.shareInfo?.thirdPartyAddress?.toString()).toBe(thirdPartyAddress.toString());
         });
     });
+
     describe("query Attributes", function () {
         test("should allow to query relationship attributes with empty owner", async function () {
             const relationshipAttributeParams: ICreateSharedLocalAttributeParams = {
@@ -2757,6 +2758,7 @@ describe("AttributesController", function () {
                 peer: CoreAddress.from("peer")
             });
         });
+
         test("should list all attributes", async function () {
             const attributes = await consumptionController.attributes.getLocalAttributes();
             expect(attributes).toHaveLength(3);
@@ -3325,6 +3327,94 @@ describe("AttributesController", function () {
 
             const result = await consumptionController.attributes.getSharedVersionsOfAttribute(relationshipAttribute.id);
             expect(result).toHaveLength(0);
+        });
+    });
+
+    describe("get Attribute with same value", function () {
+        test("should return an existing RepositoryAttribute duplicate", async function () {
+            const existingRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "GivenName",
+                        value: "aGivenName"
+                    },
+                    owner: testAccount.identity.address
+                })
+            });
+
+            const duplicate = await consumptionController.attributes.getRepositoryAttributeWithSameValue({
+                "@type": "GivenName",
+                value: "aGivenName"
+            });
+
+            expect(duplicate).toStrictEqual(existingRepositoryAttribute);
+        });
+
+        test("should return undefined if no RepositoryAttribute duplicate exists", async function () {
+            await consumptionController.attributes.createRepositoryAttribute({
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "GivenName",
+                        value: "aGivenName"
+                    },
+                    owner: testAccount.identity.address
+                })
+            });
+
+            const duplicate = await consumptionController.attributes.getRepositoryAttributeWithSameValue({
+                "@type": "GivenName",
+                value: "anotherGivenName"
+            });
+
+            expect(duplicate).toBeUndefined();
+        });
+
+        test("should return an existing peer shared IdentityAttribute duplicate", async function () {
+            const existingPeerSharedIdentityAttribute = await consumptionController.attributes.createSharedLocalAttribute({
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "GivenName",
+                        value: "aGivenName"
+                    },
+                    owner: CoreAddress.from("peer")
+                }),
+                requestReference: CoreId.from("reqRef"),
+                peer: CoreAddress.from("peer")
+            });
+
+            const duplicate = await consumptionController.attributes.getPeerSharedIdentityAttributeWithSameValue(
+                {
+                    "@type": "GivenName",
+                    value: "aGivenName"
+                },
+                "peer"
+            );
+
+            expect(duplicate).toStrictEqual(existingPeerSharedIdentityAttribute);
+        });
+
+        test("should return undefined if no peer shared IdentityAttribute duplicate exists", async function () {
+            await consumptionController.attributes.createSharedLocalAttribute({
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "GivenName",
+                        value: "aGivenName"
+                    },
+                    owner: CoreAddress.from("peer")
+                }),
+                requestReference: CoreId.from("reqRef"),
+                peer: CoreAddress.from("peer")
+            });
+
+            const duplicate = await consumptionController.attributes.getPeerSharedIdentityAttributeWithSameValue(
+                {
+                    "@type": "GivenName",
+                    value: "anotherGivenName"
+                },
+                "peer"
+            );
+
+            expect(duplicate).toBeUndefined();
         });
     });
 

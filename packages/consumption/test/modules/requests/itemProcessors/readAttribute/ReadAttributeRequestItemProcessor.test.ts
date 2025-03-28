@@ -52,10 +52,10 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 2);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 2);
         ({ accountController, consumptionController } = accounts[0]);
 
         processor = new ReadAttributeRequestItemProcessor(consumptionController);
@@ -69,12 +69,11 @@ describe("ReadAttributeRequestItemProcessor", function () {
     afterAll(async () => await connection.close());
 
     describe("canCreateOutgoingRequestItem", function () {
+        const recipient = CoreAddress.from("Recipient");
         let sender: CoreAddress;
-        let recipient: CoreAddress;
 
         beforeAll(function () {
             sender = accountController.identity.address;
-            recipient = CoreAddress.from("Recipient");
         });
 
         describe("IdentityAttributeQuery", function () {
@@ -383,11 +382,10 @@ describe("ReadAttributeRequestItemProcessor", function () {
     });
 
     describe("canAccept", function () {
-        let sender: CoreAddress;
+        const sender = CoreAddress.from("Sender");
         let recipient: CoreAddress;
 
         beforeAll(function () {
-            sender = CoreAddress.from("Sender");
             recipient = accountController.identity.address;
         });
 
@@ -1456,11 +1454,10 @@ describe("ReadAttributeRequestItemProcessor", function () {
     });
 
     describe("accept", function () {
-        let sender: CoreAddress;
+        const sender = CoreAddress.from("Sender");
         let recipient: CoreAddress;
 
         beforeAll(function () {
-            sender = CoreAddress.from("Sender");
             recipient = accountController.identity.address;
         });
 
@@ -2844,11 +2841,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
     });
 
     describe("applyIncomingResponseItem", function () {
-        let recipient: CoreAddress;
-
-        beforeAll(function () {
-            recipient = CoreAddress.from("Recipient");
-        });
+        const recipient = CoreAddress.from("Recipient");
 
         test("creates a new peer shared Attribute with the Attribute received in the ResponseItem", async function () {
             const requestItem = ReadAttributeRequestItem.from({

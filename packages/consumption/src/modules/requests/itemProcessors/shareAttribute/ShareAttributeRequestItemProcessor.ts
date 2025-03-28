@@ -1,4 +1,5 @@
 import {
+    AttributeAlreadySharedAcceptResponseItem,
     IdentityAttribute,
     RejectResponseItem,
     RelationshipAttribute,
@@ -194,7 +195,19 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
         requestItem: ShareAttributeRequestItem,
         _params: AcceptRequestItemParametersJSON,
         requestInfo: LocalRequestInfo
-    ): Promise<ShareAttributeAcceptResponseItem> {
+    ): Promise<ShareAttributeAcceptResponseItem | AttributeAlreadySharedAcceptResponseItem> {
+        const existingPeerSharedIdentityAttribute = await this.consumptionController.attributes.getPeerSharedIdentityAttributeWithSameValue(
+            (requestItem.attribute.value as any).toJSON(),
+            requestInfo.peer.toString()
+        );
+
+        if (existingPeerSharedIdentityAttribute && !existingPeerSharedIdentityAttribute.deletionInfo) {
+            return AttributeAlreadySharedAcceptResponseItem.from({
+                result: ResponseItemResult.Accepted,
+                attributeId: existingPeerSharedIdentityAttribute.id
+            });
+        }
+
         const localAttribute = await this.consumptionController.attributes.createSharedLocalAttribute({
             content: requestItem.attribute,
             peer: requestInfo.peer,
@@ -209,7 +222,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
     }
 
     public override async applyIncomingResponseItem(
-        responseItem: ShareAttributeAcceptResponseItem | RejectResponseItem,
+        responseItem: ShareAttributeAcceptResponseItem | AttributeAlreadySharedAcceptResponseItem | RejectResponseItem,
         requestItem: ShareAttributeRequestItem,
         requestInfo: LocalRequestInfo
     ): Promise<void> {

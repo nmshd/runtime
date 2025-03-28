@@ -1,6 +1,6 @@
 {
     "name": "@nmshd/transport",
-    "description": "The transport library handles backbone communication and content encryption.",
+    "description": "The transport library handles Backbone communication and content encryption.",
     "homepage": "https://enmeshed.eu",
     "repository": {
         "type": "git",
@@ -72,7 +72,7 @@
         "@js-soft/ts-utils": "^2.3.3",
         "@nmshd/core-types": "*",
         "@nmshd/crypto": "2.1.0",
-        "axios": "^1.8.3",
+        "axios": "^1.8.4",
         "fast-json-patch": "^3.1.1",
         "form-data": "^4.0.2",
         "https-proxy-agent": "^7.0.6",
@@ -96,7 +96,7 @@
         "@types/uuid": "^10.0.0",
         "correlation-id": "^5.2.0",
         "expect": "^29.7.0",
-        "testcontainers": "^10.19.0",
+        "testcontainers": "^10.22.0",
         "ts-mockito": "^2.6.1"
     },
     "publishConfig": {

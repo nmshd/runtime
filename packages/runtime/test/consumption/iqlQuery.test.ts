@@ -248,7 +248,7 @@ describe("IQL Query", () => {
                     accept: true,
                     existingAttributeId: rLocalAttribute1.id
                 }
-            ] as any // bug in runtime
+            ] as any // bug in Runtime
         });
 
         expect(result).toBeSuccessful();
@@ -272,7 +272,7 @@ describe("IQL Query", () => {
                     accept: true,
                     existingAttributeId: rLocalAttribute1.id
                 }
-            ] as any // bug in runtime
+            ] as any // bug in Runtime
         });
         expect(result).toBeSuccessful();
 
@@ -298,7 +298,7 @@ describe("IQL Query", () => {
                     accept: true,
                     existingAttributeId: rLocalAttribute2.id
                 }
-            ] as any // bug in runtime
+            ] as any // bug in Runtime
         });
         const result = await rTransportServices.messages.sendMessage({
             content: {

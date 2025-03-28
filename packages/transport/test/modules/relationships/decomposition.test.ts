@@ -21,11 +21,11 @@ describe("Data cleanup after relationship decomposition", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 3);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 3);
         sender = accounts[0];
         recipient1 = accounts[1];
         recipient2 = accounts[2];
@@ -90,7 +90,7 @@ describe("Data cleanup after relationship decomposition", function () {
             datawalletEnabled: true
         });
 
-        const accounts = await TestUtil.provideAccounts(transport, 2);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 2);
         const recipient1 = accounts[0];
         const recipient2 = accounts[1];
 
@@ -128,11 +128,11 @@ describe("Relationship decomposition due to Identity deletion", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 2);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 2);
         sender = accounts[0];
         recipient = accounts[1];
 

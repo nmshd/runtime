@@ -1,4 +1,5 @@
 /* eslint-disable jest/no-standalone-expect */
+import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import {
     AttributeAlreadySharedAcceptResponseItem,
     AttributeSuccessionAcceptResponseItem,
@@ -46,9 +47,9 @@ export class Context {
         this.processor = new CreateAttributeRequestItemProcessor(this.consumptionController);
     }
 
-    public static async init(transport: Transport): Promise<Context> {
+    public static async init(transport: Transport, connection: IDatabaseConnection): Promise<Context> {
         await transport.init();
-        const account = (await TestUtil.provideAccounts(transport, 1))[0];
+        const account = (await TestUtil.provideAccounts(transport, connection, 1))[0];
         return new Context(account.consumptionController);
     }
 

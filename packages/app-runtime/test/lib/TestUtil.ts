@@ -180,7 +180,7 @@ export class TestUtil {
     }
 
     /**
-     * SyncEvents in the backbone are only eventually consistent. This means that if you send a message now and
+     * SyncEvents in the Backbone are only eventually consistent. This means that if you send a message now and
      * get all SyncEvents right after, you cannot rely on getting a NewMessage SyncEvent right away. So instead
      * this method executes the syncEverything()-method of the synchronization controller until the condition
      * specified in the `until` callback is met.
