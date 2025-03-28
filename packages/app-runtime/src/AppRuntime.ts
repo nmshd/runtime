@@ -72,7 +72,7 @@ export class AppRuntime extends Runtime<AppConfig> {
         return UserfriendlyResult.ok(undefined);
     }
 
-    private lokiConnection: LokiJsConnection;
+    protected override readonly databaseConnection: LokiJsConnection;
     private _multiAccountController: MultiAccountController;
     public get multiAccountController(): MultiAccountController {
         return this._multiAccountController;
@@ -197,7 +197,7 @@ export class AppRuntime extends Runtime<AppConfig> {
     }
 
     protected async initAccount(): Promise<void> {
-        this._multiAccountController = new MultiAccountController(this.transport, this.runtimeConfig, this.lokiConnection, this.sessionStorage);
+        this._multiAccountController = new MultiAccountController(this.transport, this.runtimeConfig, this.databaseConnection, this.sessionStorage);
         await this._multiAccountController.init();
         this._accountServices = new AccountServices(this._multiAccountController);
     }
@@ -230,10 +230,10 @@ export class AppRuntime extends Runtime<AppConfig> {
 
     protected createDatabaseConnection(): Promise<IDatabaseConnection> {
         this.logger.trace("Creating DatabaseConnection to LokiJS");
-        this.lokiConnection = new LokiJsConnection(this.config.databaseFolder, this.nativeEnvironment.databaseFactory);
+        const lokiConnection = new LokiJsConnection(this.config.databaseFolder, this.nativeEnvironment.databaseFactory);
         this.logger.trace("Finished initialization of LokiJS connection.");
 
-        return Promise.resolve(this.lokiConnection);
+        return Promise.resolve(lokiConnection);
     }
 
     private static moduleRegistry: Record<string, IAppRuntimeModuleConstructor | undefined> = {
@@ -284,7 +284,7 @@ export class AppRuntime extends Runtime<AppConfig> {
         const logError = (e: any) => this.logger.error(e);
 
         await super.stop().catch(logError);
-        await this.lokiConnection.close().catch(logError);
+        await this.databaseConnection.close().catch(logError);
     }
 
     private async startAccounts(): Promise<void> {
