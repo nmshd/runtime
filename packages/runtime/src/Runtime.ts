@@ -343,6 +343,17 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
             await this.loadModule(moduleConfiguration);
         }
 
+        // iterate modules and check if they are allowed to be loaded multiple times
+        for (const module of this.modules.toArray()) {
+            if (!(module.constructor as Function & { denyMultipleInstances: boolean }).denyMultipleInstances) return;
+
+            const instances = this.modules.toArray().filter((m) => m.constructor === module.constructor);
+            if (instances.length === 1) continue;
+
+            // TODO: log the keys of the modules that cause the conflict
+            throw new Error(`Module ${module.displayName} is not allowed to be used multiple times, but has ${instances.length} instances.`);
+        }
+
         this.eventBus.publish(new ModulesLoadedEvent());
     }
 
