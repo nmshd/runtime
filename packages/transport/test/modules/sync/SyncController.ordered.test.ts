@@ -14,11 +14,11 @@ describe("SyncController.ordered", function () {
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
 
-        transport = TestUtil.createTransport(connection, { datawalletEnabled: true });
+        transport = TestUtil.createTransport({ datawalletEnabled: true });
         await transport.init();
 
-        sender = await TestUtil.createAccount(transport);
-        recipient = await TestUtil.createAccount(transport);
+        sender = await TestUtil.createAccount(transport, connection);
+        recipient = await TestUtil.createAccount(transport, connection);
     });
 
     afterAll(async () => {
@@ -43,6 +43,6 @@ describe("SyncController.ordered", function () {
         // onboard a second device for the recipient
         const newDevice = await recipient!.devices.sendDevice({ name: "Test2", isAdmin: true });
         await recipient!.syncDatawallet();
-        recipientSecondDevice = await TestUtil.onboardDevice(transport, await recipient!.devices.getSharedSecret(newDevice.id));
+        recipientSecondDevice = await TestUtil.onboardDevice(transport, connection, await recipient!.devices.getSharedSecret(newDevice.id));
     });
 });

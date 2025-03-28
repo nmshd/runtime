@@ -140,8 +140,8 @@ export class TestUtil {
     }
 
     public static async provideAccounts(
-        connection: IDatabaseConnection,
         transport: Transport,
+        connection: IDatabaseConnection,
         count: number,
         requestItemProcessors = new Map<RequestItemConstructor, RequestItemProcessorConstructor>(),
         notificationItemProcessors = new Map<NotificationItemConstructor, NotificationItemProcessorConstructor>(),

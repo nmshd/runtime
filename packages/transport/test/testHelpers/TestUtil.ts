@@ -214,7 +214,7 @@ export class TestUtil {
         device1: AccountController;
         device2: AccountController;
     }> {
-        // Create Device1 Controller    transport = TestUtil.createTransport(connection);
+        // Create Device1 Controller    transport = TestUtil.createTransport();
         const transport = TestUtil.createTransport(config);
 
         await transport.init();

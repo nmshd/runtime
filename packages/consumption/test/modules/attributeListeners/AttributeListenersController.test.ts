@@ -27,7 +27,7 @@ describe("AttributeListenersController", function () {
         transport = TestUtil.createTransport(mockEventBus);
         await transport.init();
 
-        const account = (await TestUtil.provideAccounts(connection, transport, 1))[0];
+        const account = (await TestUtil.provideAccounts(transport, connection, 1))[0];
         ({ accountController: testAccount, consumptionController } = account);
     });
 

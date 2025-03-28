@@ -14,10 +14,10 @@ describe("FreeTextRequestItemProcessor", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
         await transport.init();
 
-        const account = (await TestUtil.provideAccounts(transport, 1))[0];
+        const account = (await TestUtil.provideAccounts(transport, connection, 1))[0];
         consumptionController = account.consumptionController;
 
         processor = new FreeTextRequestItemProcessor(consumptionController);
