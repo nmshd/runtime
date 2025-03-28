@@ -28,12 +28,12 @@ import { AcceptProposeAttributeRequestItemParameters, AcceptProposeAttributeRequ
 
 export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProcessor<ProposeAttributeRequestItem, AcceptProposeAttributeRequestItemParametersJSON> {
     public override async canCreateOutgoingRequestItem(requestItem: ProposeAttributeRequestItem, _request: Request, recipient?: CoreAddress): Promise<ValidationResult> {
-        const queryValidationResult = this.validateQuery(requestItem, recipient);
+        const queryValidationResult = await this.validateQuery(requestItem, recipient);
         if (queryValidationResult.isError()) {
             return queryValidationResult;
         }
 
-        const attributeValidationResult = ProposeAttributeRequestItemProcessor.validateAttribute(requestItem.attribute);
+        const attributeValidationResult = await this.validateAttribute(requestItem.attribute);
         if (attributeValidationResult.isError()) {
             return attributeValidationResult;
         }
@@ -68,7 +68,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
         return ValidationResult.success();
     }
 
-    private static validateAttribute(attribute: IdentityAttribute | RelationshipAttribute) {
+    private async validateAttribute(attribute: IdentityAttribute | RelationshipAttribute) {
         if (attribute.owner.toString() !== "") {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidRequestItem(
@@ -77,10 +77,15 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             );
         }
 
+        const tagValidationResult = await this.consumptionController.attributes.validateTags(attribute);
+        if (tagValidationResult.isError()) {
+            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem(tagValidationResult.error.message));
+        }
+
         return ValidationResult.success();
     }
 
-    private validateQuery(requestItem: ProposeAttributeRequestItem, recipient?: CoreAddress) {
+    private async validateQuery(requestItem: ProposeAttributeRequestItem, recipient?: CoreAddress) {
         const commonQueryValidationResult = validateQuery(requestItem.query, this.currentIdentityAddress, recipient);
         if (commonQueryValidationResult.isError()) {
             return commonQueryValidationResult;
@@ -92,6 +97,11 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
                     "The owner of the given `query` can only be an empty string. This is because you can only propose Attributes where the Recipient of the Request is the owner anyway. And in order to avoid mistakes, the owner will be automatically filled for you."
                 )
             );
+        }
+
+        const tagValidationResult = await this.consumptionController.attributes.validateAttributeQueryTags(requestItem.query);
+        if (tagValidationResult.isError()) {
+            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem(tagValidationResult.error.message));
         }
 
         return ValidationResult.success();
@@ -205,6 +215,11 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
                     )
                 );
             }
+        }
+
+        const tagValidationResult = await this.consumptionController.attributes.validateTags(attribute);
+        if (tagValidationResult.isError()) {
+            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters(tagValidationResult.error.message));
         }
 
         return ValidationResult.success();

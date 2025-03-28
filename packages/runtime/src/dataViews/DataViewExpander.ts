@@ -1292,8 +1292,6 @@ export class DataViewExpander {
             name,
             description,
             valueType,
-            validFrom: query.validFrom,
-            validTo: query.validTo,
             renderHints: hints.renderHints,
             valueHints: hints.valueHints,
             isProcessed: false
@@ -1321,8 +1319,6 @@ export class DataViewExpander {
             id: "",
             name,
             description,
-            validFrom: query.validFrom,
-            validTo: query.validTo,
             owner: await this.expandAddress(query.owner),
             key: query.key,
             attributeCreationHints: query.attributeCreationHints,
@@ -1343,8 +1339,6 @@ export class DataViewExpander {
             id: "",
             name,
             description,
-            validFrom: query.validFrom,
-            validTo: query.validTo,
             owner: await this.expandAddress(query.owner),
             thirdParty,
             key: query.key,
@@ -1732,7 +1726,7 @@ export class DataViewExpander {
         const relationshipSetting = await this.getRelationshipSettingDVO(relationship);
 
         const stringByType: Record<string, undefined | string> = {};
-        const relationshipAttributesResult = await this.consumption.attributes.getPeerSharedAttributes({ onlyValid: true, peer: relationship.peer });
+        const relationshipAttributesResult = await this.consumption.attributes.getPeerSharedAttributes({ peer: relationship.peer });
         const expandedAttributes = await this.expandLocalAttributeDTOs(relationshipAttributesResult.value);
         const attributesByType: Record<string, undefined | LocalAttributeDVO[]> = {};
         for (const attribute of expandedAttributes) {
@@ -1756,10 +1750,7 @@ export class DataViewExpander {
             }
         }
 
-        let direction = RelationshipDirection.Incoming;
-        if (!relationship.template.isOwn) {
-            direction = RelationshipDirection.Outgoing;
-        }
+        const direction = this.identityController.isMe(CoreAddress.from(relationship.auditLog[0].createdBy)) ? RelationshipDirection.Outgoing : RelationshipDirection.Incoming;
 
         let statusText = "";
         switch (relationship.status) {
@@ -1818,7 +1809,7 @@ export class DataViewExpander {
             attributeMap: attributesByType,
             items: expandedAttributes,
             nameMap: stringByType,
-            templateId: relationship.template.id,
+            templateId: relationship.templateId,
             auditLog: relationship.auditLog,
             creationContent: relationship.creationContent
         };
@@ -1890,9 +1881,10 @@ export class DataViewExpander {
     public async expandFileDTO(file: FileDTO): Promise<FileDVO> {
         return {
             ...file,
+            title: file.title ?? file.filename,
             type: "FileDVO",
             id: file.id,
-            name: file.title ? file.title : file.filename,
+            name: file.title ?? file.filename,
             date: file.createdAt,
             image: "",
             filename: file.filename,
