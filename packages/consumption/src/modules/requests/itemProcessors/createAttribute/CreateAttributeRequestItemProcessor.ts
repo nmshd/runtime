@@ -24,6 +24,10 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
         const senderIsAttributeOwner = requestItem.attribute.owner.equals(this.currentIdentityAddress);
         const ownerIsEmptyString = requestItem.attribute.owner.toString() === "";
 
+        if (!this.consumptionController.attributes.validateAttributeCharacters(requestItem.attribute)) {
+            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("The Attribute contains forbidden characters."));
+        }
+
         if (requestItem.attribute instanceof IdentityAttribute) {
             if (recipientIsAttributeOwner || ownerIsEmptyString) {
                 return ValidationResult.success();
@@ -73,6 +77,10 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
     }
 
     public override async canAccept(requestItem: CreateAttributeRequestItem, _params: AcceptRequestItemParametersJSON, requestInfo: LocalRequestInfo): Promise<ValidationResult> {
+        if (!this.consumptionController.attributes.validateAttributeCharacters(requestItem.attribute)) {
+            throw ConsumptionCoreErrors.attributes.forbiddenCharactersInAttribute("The Attribute contains forbidden characters.");
+        }
+
         if (requestItem.attribute instanceof RelationshipAttribute) {
             const ownerIsEmptyString = requestItem.attribute.owner.toString() === "";
 
