@@ -44,8 +44,8 @@ describe("MessageContent", function () {
 
         test("should correctly store the message (sender)", async function () {
             const messages = await sender.messages.getMessagesByAddress(recipient1.identity.address);
-            expect(messages).toHaveLength(1);
-            const message = messages[0];
+            expect(messages.messageCount).toBe(1);
+            const message = messages.messages[0];
             const content = message.cache!.content as any;
             expect(content).toBeInstanceOf(JSONWrapper);
             expect(content.value.any).toBe("content");
@@ -54,8 +54,8 @@ describe("MessageContent", function () {
 
         test("should correctly serialize the message (sender)", async function () {
             const messages = await sender.messages.getMessagesByAddress(recipient1.identity.address);
-            expect(messages).toHaveLength(1);
-            const message = messages[0];
+            expect(messages.messageCount).toBe(1);
+            const message = messages.messages[0];
             const object = message.toJSON() as any;
             expect(object.cache.content).toBeDefined();
             expect(object.cache.content.any).toBe("content");
@@ -66,8 +66,8 @@ describe("MessageContent", function () {
             const messagesSync = await TestUtil.syncUntilHasMessages(recipient1);
             expect(messagesSync).toHaveLength(1);
             const messages = await recipient1.messages.getMessagesByAddress(sender.identity.address);
-            expect(messages).toHaveLength(1);
-            const message = messages[0];
+            expect(messages.messageCount).toBe(1);
+            const message = messages.messages[0];
             const content = message.cache!.content as any;
             expect(content).toBeInstanceOf(JSONWrapper);
             expect(content.value.any).toBe("content");
@@ -76,8 +76,8 @@ describe("MessageContent", function () {
 
         test("should correctly serialize the message (recipient)", async function () {
             const messages = await recipient1.messages.getMessagesByAddress(sender.identity.address);
-            expect(messages).toHaveLength(1);
-            const message = messages[0];
+            expect(messages.messageCount).toBe(1);
+            const message = messages.messages[0];
             const object = message.toJSON() as any;
             expect(object.cache.content).toBeDefined();
             expect(object.cache.content.any).toBe("content");
@@ -99,8 +99,8 @@ describe("MessageContent", function () {
 
         test("should correctly store the message (sender)", async function () {
             const messages = await sender.messages.getMessagesByAddress(recipient1.identity.address);
-            expect(messages).toHaveLength(2);
-            const message = messages[1];
+            expect(messages.messageCount).toBe(2);
+            const message = messages.messages[0];
             expect(message.cache!.content).toBeInstanceOf(Mail);
             const content = message.cache!.content as Mail;
             expect(content.body).toBe("Test");
@@ -114,8 +114,8 @@ describe("MessageContent", function () {
             const messagesSync = await TestUtil.syncUntilHasMessages(recipient1);
             expect(messagesSync).toHaveLength(1);
             const messages = await recipient1.messages.getMessagesByAddress(sender.identity.address);
-            expect(messages).toHaveLength(2);
-            const message = messages[1];
+            expect(messages.messageCount).toBe(2);
+            const message = messages.messages[0];
             const content = message.cache!.content as Mail;
             expect(content.body).toBe("Test");
             expect(content.subject).toBe("Test Subject");
