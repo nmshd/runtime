@@ -75,7 +75,6 @@ export class RequestsTestsContext {
         const context = new RequestsTestsContext();
 
         const transport = await new Transport(
-            dbConnection,
             config,
             new EventEmitter2EventBus(() => {
                 // noop
@@ -85,7 +84,7 @@ export class RequestsTestsContext {
         const database = await dbConnection.getDatabase(`x${Math.random().toString(36).substring(7)}`);
         const collection = new SynchronizedCollection(await database.getCollection("Requests"), 0);
 
-        const account = (await TestUtil.provideAccounts(transport, 1))[0];
+        const account = (await TestUtil.provideAccounts(dbConnection, transport, 1))[0];
         context.consumptionController = account.consumptionController;
 
         const processorRegistry = new RequestItemProcessorRegistry(

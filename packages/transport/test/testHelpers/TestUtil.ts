@@ -157,12 +157,12 @@ export class TestUtil {
         return dbConnection;
     }
 
-    public static createTransport(connection: IDatabaseConnection, configOverwrite: Partial<IConfigOverwrite> = {}, correlator?: ICorrelator): Transport {
+    public static createTransport(configOverwrite: Partial<IConfigOverwrite> = {}, correlator?: ICorrelator): Transport {
         const eventBus = TestUtil.createEventBus();
 
         const config = TestUtil.createConfig();
 
-        return new Transport(connection, { ...config, ...configOverwrite }, eventBus, TestUtil.loggerFactory, correlator);
+        return new Transport({ ...config, ...configOverwrite }, eventBus, TestUtil.loggerFactory, correlator);
     }
 
     public static createEventBus(): EventEmitter2EventBus {
@@ -188,9 +188,9 @@ export class TestUtil {
         };
     }
 
-    public static async createAccount(transport: Transport, dependencyOverrides?: DependencyOverrides): Promise<AccountController> {
+    public static async createAccount(transport: Transport, connection: IDatabaseConnection, dependencyOverrides?: DependencyOverrides): Promise<AccountController> {
         const randomAccountName = Math.random().toString(36).substring(7);
-        const db = await transport.createDatabase(`acc-${randomAccountName}`);
+        const db = await connection.getDatabase(`acc-${randomAccountName}`);
 
         const accountController = new AccountController(transport, db, transport.config, dependencyOverrides);
 
@@ -200,10 +200,10 @@ export class TestUtil {
     }
 
     public static async createIdentityWithOneDevice(connection: IDatabaseConnection, config: Partial<IConfigOverwrite>): Promise<AccountController> {
-        const transport = TestUtil.createTransport(connection, config);
+        const transport = TestUtil.createTransport(config);
 
         await transport.init();
-        const deviceAccount = await TestUtil.createAccount(transport);
+        const deviceAccount = await TestUtil.createAccount(transport, connection);
         return deviceAccount;
     }
 
@@ -215,10 +215,10 @@ export class TestUtil {
         device2: AccountController;
     }> {
         // Create Device1 Controller    transport = TestUtil.createTransport(connection);
-        const transport = TestUtil.createTransport(connection, config);
+        const transport = TestUtil.createTransport(config);
 
         await transport.init();
-        const device1Account = await TestUtil.createAccount(transport);
+        const device1Account = await TestUtil.createAccount(transport, connection);
 
         // Prepare Device2
         const device2 = await device1Account.devices.sendDevice({ name: "Device2" });
@@ -226,7 +226,7 @@ export class TestUtil {
         await device1Account.syncDatawallet();
 
         // Create Device2 Controller
-        const device2Account = await TestUtil.onboardDevice(transport, sharedSecret);
+        const device2Account = await TestUtil.onboardDevice(transport, connection, sharedSecret);
 
         await device1Account.syncEverything();
         await device2Account.syncEverything();
@@ -235,9 +235,9 @@ export class TestUtil {
     }
 
     public static async createIdentityWithNDevices(n: number, connection: IDatabaseConnection, config: Partial<IConfigOverwrite>): Promise<AccountController[]> {
-        const transport = TestUtil.createTransport(connection, config);
+        const transport = TestUtil.createTransport(config);
         await transport.init();
-        const device1Account = await TestUtil.createAccount(transport);
+        const device1Account = await TestUtil.createAccount(transport, connection);
 
         const devices = [device1Account];
 
@@ -247,7 +247,7 @@ export class TestUtil {
             await device1Account.syncDatawallet();
 
             // Create Device2 Controller
-            const device2Account = await TestUtil.onboardDevice(transport, sharedSecret);
+            const device2Account = await TestUtil.onboardDevice(transport, connection, sharedSecret);
 
             devices.push(device2Account);
         }
@@ -259,11 +259,11 @@ export class TestUtil {
         return devices;
     }
 
-    public static async provideAccounts(transport: Transport, count: number): Promise<AccountController[]> {
+    public static async provideAccounts(transport: Transport, connection: IDatabaseConnection, count: number): Promise<AccountController[]> {
         const accounts: AccountController[] = [];
 
         for (let i = 0; i < count; i++) {
-            accounts.push(await this.createAccount(transport));
+            accounts.push(await this.createAccount(transport, connection));
         }
 
         return accounts;
@@ -281,9 +281,9 @@ export class TestUtil {
         };
     }
 
-    public static async onboardDevice(transport: Transport, deviceSharedSecret: DeviceSharedSecret): Promise<AccountController> {
+    public static async onboardDevice(transport: Transport, connection: IDatabaseConnection, deviceSharedSecret: DeviceSharedSecret): Promise<AccountController> {
         const randomId = Math.random().toString(36).substring(7);
-        const db = await transport.createDatabase(`acc-${randomId}`);
+        const db = await connection.getDatabase(`acc-${randomId}`);
         const accountController = new AccountController(transport, db, transport.config);
         await accountController.init(deviceSharedSecret);
 
