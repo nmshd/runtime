@@ -54,7 +54,7 @@
     "dependencies": {
         "@js-soft/docdb-access-loki": "^1.2.0",
         "@nmshd/runtime": "*",
-        "eventsource": "^3.0.5",
+        "eventsource": "^3.0.6",
         "lodash": "^4.17.21"
     },
     "devDependencies": {

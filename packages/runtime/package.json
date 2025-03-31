@@ -67,7 +67,7 @@
         "@nmshd/consumption": "*",
         "@nmshd/content": "*",
         "@nmshd/core-types": "*",
-        "@nmshd/crypto": "2.1.0",
+        "@nmshd/crypto": "2.1.1",
         "@nmshd/iql": "^1.0.2",
         "@nmshd/transport": "*",
         "@nmshd/typescript-ioc": "3.2.4",
@@ -76,7 +76,7 @@
         "ajv-formats": "^3.0.1",
         "json-stringify-safe": "^5.0.1",
         "lodash": "^4.17.21",
-        "luxon": "^3.5.0",
+        "luxon": "^3.6.1",
         "qrcode": "1.5.4",
         "reflect-metadata": "^0.2.2",
         "ts-simple-nameof": "^1.3.1"
