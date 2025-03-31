@@ -3472,12 +3472,12 @@ describe("AttributesController", function () {
         let attributeTagClientSpy: TagClient;
         beforeEach(async function () {
             connection = await TestUtil.createConnection();
-            transport = TestUtil.createTransport(connection, mockEventBus, {
+            transport = TestUtil.createTransport(mockEventBus, {
                 tagCacheLifetimeInMinutes: 1 / 60
             });
             await transport.init();
 
-            const connectorAccount = (await TestUtil.provideAccounts(transport, 1))[0];
+            const connectorAccount = (await TestUtil.provideAccounts(transport, connection, 1))[0];
             ({ accountController: testAccount, consumptionController } = connectorAccount);
             const attributeTagClient = consumptionController.attributes["attributeTagClient"];
 
@@ -3529,12 +3529,12 @@ describe("AttributesController", function () {
         let etag: string;
         beforeEach(async function () {
             connection = await TestUtil.createConnection();
-            transport = TestUtil.createTransport(connection, mockEventBus, {
+            transport = TestUtil.createTransport(mockEventBus, {
                 tagCacheLifetimeInMinutes: 0
             });
             await transport.init();
 
-            const connectorAccount = (await TestUtil.provideAccounts(transport, 1))[0];
+            const connectorAccount = (await TestUtil.provideAccounts(transport, connection, 1))[0];
             ({ accountController: testAccount, consumptionController } = connectorAccount);
             const attributeTagClient = consumptionController.attributes["attributeTagClient"];
 
