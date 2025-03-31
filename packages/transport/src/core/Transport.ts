@@ -1,4 +1,3 @@
-import { IDatabaseCollectionProvider, IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { ILogger, ILoggerFactory } from "@js-soft/logging-abstractions";
 import { SimpleLoggerFactory } from "@js-soft/simple-logger";
 import { EventBus } from "@js-soft/ts-utils";
@@ -53,8 +52,6 @@ export interface IConfigOverwrite {
 }
 
 export class Transport {
-    private readonly databaseConnection: IDatabaseConnection;
-
     private readonly _config: IConfig;
     public get config(): IConfig {
         return this._config;
@@ -86,13 +83,11 @@ export class Transport {
     };
 
     public constructor(
-        databaseConnection: IDatabaseConnection,
         customConfig: IConfigOverwrite,
         public readonly eventBus: EventBus,
         loggerFactory: ILoggerFactory = new SimpleLoggerFactory(),
         public readonly correlator?: ICorrelator
     ) {
-        this.databaseConnection = databaseConnection;
         this._config = _.defaultsDeep({}, customConfig, Transport.defaultConfig);
 
         TransportLoggerFactory.init(loggerFactory);
@@ -131,9 +126,5 @@ export class Transport {
         log.info("Transport initialized");
 
         return this;
-    }
-
-    public async createDatabase(name: string): Promise<IDatabaseCollectionProvider> {
-        return await this.databaseConnection.getDatabase(name);
     }
 }

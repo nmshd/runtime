@@ -181,11 +181,11 @@ describe("PublicAPI", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 1);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 1);
         account = accounts[0];
         controllers[AccountController.name] = account;
         controllers[DeviceController.name] = account.activeDevice;

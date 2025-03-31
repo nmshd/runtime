@@ -16,11 +16,11 @@ let secretController: SecretController;
 describe("SecretController", function () {
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 2);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 2);
         account = accounts[0];
         subject = accounts[1];
         secretController = await new SecretController(account).init();
