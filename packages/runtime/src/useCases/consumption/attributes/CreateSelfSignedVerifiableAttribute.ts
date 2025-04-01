@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController, CreateRepositoryAttributeParams, getVCProcessor } from "@nmshd/consumption";
-import { IdentityAttributeJSON, SupportedVCTypes } from "@nmshd/content";
+import { AttributeProof, IdentityAttributeJSON, SupportedVCTypes } from "@nmshd/content";
 import { AccountController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { LocalAttributeDTO } from "../../../types";
@@ -35,7 +35,7 @@ export class CreateSelfSignedVerifiableAttributeUseCase extends UseCase<CreateSe
         const vc = await getVCProcessor(SupportedVCTypes.SdJwtVc, this.accountController);
 
         const signedCredential = await vc.issue(parsedRequestAttribute, request.subjectDid);
-        params.content.proof = { credential: signedCredential, credentialType: SupportedVCTypes.SdJwtVc };
+        params.content.proof = AttributeProof.from({ credential: signedCredential, credentialType: SupportedVCTypes.SdJwtVc });
 
         const createdAttribute = await this.attributeController.createRepositoryAttribute(params);
         await this.accountController.syncDatawallet();

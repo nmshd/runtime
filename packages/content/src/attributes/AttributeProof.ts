@@ -20,7 +20,7 @@ export interface IAttributeProof extends ISerializable {
     expiresAt?: ICoreDate;
 }
 
-export abstract class AttributeProof extends Serializable implements IAttributeProof {
+export class AttributeProof extends Serializable implements IAttributeProof {
     @validate()
     @serialize()
     public credentialType: SupportedVCTypes;
@@ -36,4 +36,8 @@ export abstract class AttributeProof extends Serializable implements IAttributeP
     @validate({ nullable: true })
     @serialize()
     public expiresAt?: CoreDate;
+
+    public static from(value: IAttributeProof): AttributeProof {
+        return this.fromAny(value);
+    }
 }

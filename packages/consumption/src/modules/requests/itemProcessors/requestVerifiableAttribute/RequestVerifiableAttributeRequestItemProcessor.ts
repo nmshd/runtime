@@ -1,4 +1,5 @@
 import {
+    AttributeProof,
     IdentityAttribute,
     RelationshipAttribute,
     Request,
@@ -53,7 +54,7 @@ export class RequestVerifiableAttributeRequestItemProcessor extends GenericReque
 
         const vcProcessor = await getVCProcessor(SupportedVCTypes.SdJwtVc, this.accountController);
         const signedCredential = await vcProcessor.issue(parsedRequestAttribute, requestItem.did);
-        requestItem.attribute.proof = { credential: signedCredential, credentialType: SupportedVCTypes.SdJwtVc };
+        requestItem.attribute.proof = AttributeProof.from({ credential: signedCredential, credentialType: SupportedVCTypes.SdJwtVc });
         const peerAttribute = await this.consumptionController.attributes.createSharedLocalAttribute({
             content: requestItem.attribute,
             peer: requestInfo.peer,
