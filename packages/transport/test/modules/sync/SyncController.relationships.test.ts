@@ -184,7 +184,7 @@ describe("RelationshipSync", function () {
     });
 
     // eslint-disable-next-line jest/expect-expect -- no assertions are needed because it is sufficient that no error is thrown
-    test.only("Synchronizing after both parties have decomposed simultaneously does not throw", async function () {
+    test("Synchronizing after both parties have decomposed simultaneously does not throw", async function () {
         // This is a regression test. In the past, an error was thrown when synchronizing after both parties had decomposed the relationship.
         // This was because an external event for the decomposition of the peer was received during the sync, and the template didn't exist
         // anymore at this time.
