@@ -506,8 +506,9 @@ export class RelationshipsController extends TransportController {
     private async createNewRelationshipByIncomingCreation(relationshipId: string): Promise<Relationship | undefined> {
         const backboneRelationshipResponse = await this.client.getRelationship(relationshipId);
 
-        if (backboneRelationshipResponse.isError && backboneRelationshipResponse.error.code === "error.platform.validation.relationship.relationshipAlreadyDecomposed")
+        if (backboneRelationshipResponse.isError && backboneRelationshipResponse.error.code === "error.platform.validation.relationship.relationshipAlreadyDecomposed") {
             return undefined;
+        }
 
         const backboneRelationship = backboneRelationshipResponse.value;
 
