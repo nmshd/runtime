@@ -503,8 +503,14 @@ export class RelationshipsController extends TransportController {
     }
 
     @log()
-    private async createNewRelationshipByIncomingCreation(relationshipId: string): Promise<Relationship> {
-        const backboneRelationship = (await this.client.getRelationship(relationshipId)).value;
+    private async createNewRelationshipByIncomingCreation(relationshipId: string): Promise<Relationship | undefined> {
+        const backboneRelationshipResponse = await this.client.getRelationship(relationshipId);
+
+        if (backboneRelationshipResponse.isError && backboneRelationshipResponse.error.code === "error.platform.validation.relationship.relationshipAlreadyDecomposed")
+            return undefined;
+
+        const backboneRelationship = backboneRelationshipResponse.value;
+
         if (!backboneRelationship.creationContent) throw new TransportError("Creation content is missing");
 
         const templateId = CoreId.from(backboneRelationship.relationshipTemplateId);
@@ -524,10 +530,13 @@ export class RelationshipsController extends TransportController {
         return relationship;
     }
 
-    public async applyRelationshipChangedEvent(relationshipId: string): Promise<{ oldRelationship?: Relationship; changedRelationship: Relationship }> {
+    public async applyRelationshipChangedEvent(relationshipId: string): Promise<{ oldRelationship?: Relationship; changedRelationship?: Relationship }> {
         const relationshipDoc = await this.relationships.read(relationshipId);
         if (!relationshipDoc) {
             const changedRelationship = await this.createNewRelationshipByIncomingCreation(relationshipId);
+
+            if (changedRelationship === undefined) return { changedRelationship: undefined };
+
             if (changedRelationship.status === RelationshipStatus.Pending) return { changedRelationship };
 
             const relationshipDoc = await this.relationships.read(relationshipId);
