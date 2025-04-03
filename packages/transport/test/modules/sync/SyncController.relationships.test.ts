@@ -182,4 +182,33 @@ describe("RelationshipSync", function () {
         expect(templateOnDevice2?.cache).toBeDefined();
         expect(templateOnDevice2!.toJSON()).toStrictEqualExcluding(templateOnDevice1.toJSON(), "cachedAt");
     });
+
+    // eslint-disable-next-line jest/expect-expect -- no assertions are needed because it is sufficient that no error is thrown
+    test.only("Synchronizing after both parties have decomposed simultaneously does not throw", async function () {
+        // This is a regression test. In the past, an error was thrown when synchronizing after both parties had decomposed the relationship.
+        // This was because an external event for the decomposition of the peer was received during the sync, and the template didn't exist
+        // anymore at this time.
+        // The important thing here is that after the peer as decomposed, no sync has happened before the other identity decomposes.
+
+        const transport = TestUtil.createTransport();
+        const [templator, requestor] = await TestUtil.provideAccounts(transport, connection, 2);
+
+        const relationship = (await TestUtil.addRelationship(requestor, templator)).acceptedRelationshipFromSelf;
+        const relationshipId = relationship.id;
+        const templateId = relationship.cache!.template.id;
+
+        await templator.syncEverything();
+        await requestor.syncEverything();
+
+        await requestor.relationships.terminate(relationshipId);
+        await templator.syncEverything();
+
+        await requestor.relationships.decompose(relationshipId);
+        await templator.relationships.decompose(relationshipId);
+
+        const template = await templator.relationshipTemplates.getRelationshipTemplate(templateId);
+        await templator.relationshipTemplates.deleteRelationshipTemplate(template!);
+
+        await templator.syncEverything();
+    });
 });
