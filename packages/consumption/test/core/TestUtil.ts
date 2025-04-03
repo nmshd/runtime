@@ -134,9 +134,10 @@ export class TestUtil {
     public static createTransport(
         eventBus: EventBus = new EventEmitter2EventBus(() => {
             // ignore errors
-        })
+        }),
+        configOverwrite?: Partial<IConfigOverwrite>
     ): Transport {
-        return new Transport(this.createConfig(), eventBus, loggerFactory);
+        return new Transport({ ...this.createConfig(), ...configOverwrite }, eventBus, loggerFactory);
     }
 
     public static async provideAccounts(
