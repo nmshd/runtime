@@ -8,13 +8,17 @@ import {
     CreateAttributeAcceptResponseItemJSON,
     FreeTextAcceptResponseItem,
     FreeTextAcceptResponseItemJSON,
+    FreeValueFormAcceptResponseItem,
+    FreeValueFormAcceptResponseItemJSON,
     IAttributeAlreadySharedAcceptResponseItem,
     IAttributeSuccessionAcceptResponseItem,
     ICreateAttributeAcceptResponseItem,
     IFreeTextAcceptResponseItem,
+    IFreeValueFormAcceptResponseItem,
     IProposeAttributeAcceptResponseItem,
     IReadAttributeAcceptResponseItem,
     IRegisterAttributeListenerAcceptResponseItem,
+    ISelectionFormAcceptResponseItem,
     IShareAttributeAcceptResponseItem,
     ProposeAttributeAcceptResponseItem,
     ProposeAttributeAcceptResponseItemJSON,
@@ -22,6 +26,8 @@ import {
     ReadAttributeAcceptResponseItemJSON,
     RegisterAttributeListenerAcceptResponseItem,
     RegisterAttributeListenerAcceptResponseItemJSON,
+    SelectionFormAcceptResponseItem,
+    SelectionFormAcceptResponseItemJSON,
     ShareAttributeAcceptResponseItem,
     ShareAttributeAcceptResponseItemJSON
 } from "../items";
@@ -41,7 +47,9 @@ export type AcceptResponseItemJSONDerivations =
     | ProposeAttributeAcceptResponseItemJSON
     | ReadAttributeAcceptResponseItemJSON
     | RegisterAttributeListenerAcceptResponseItemJSON
-    | FreeTextAcceptResponseItemJSON;
+    | FreeTextAcceptResponseItemJSON
+    | FreeValueFormAcceptResponseItemJSON
+    | SelectionFormAcceptResponseItemJSON;
 
 export interface IAcceptResponseItem extends IResponseItem {
     result: ResponseItemResult.Accepted;
@@ -56,7 +64,9 @@ export type IAcceptResponseItemDerivations =
     | IProposeAttributeAcceptResponseItem
     | IReadAttributeAcceptResponseItem
     | IRegisterAttributeListenerAcceptResponseItem
-    | IFreeTextAcceptResponseItem;
+    | IFreeTextAcceptResponseItem
+    | IFreeValueFormAcceptResponseItem
+    | ISelectionFormAcceptResponseItem;
 
 @type("AcceptResponseItem")
 export class AcceptResponseItem extends ResponseItem implements IAcceptResponseItem {
@@ -80,4 +90,6 @@ export type AcceptResponseItemDerivations =
     | ProposeAttributeAcceptResponseItem
     | ReadAttributeAcceptResponseItem
     | RegisterAttributeListenerAcceptResponseItem
-    | FreeTextAcceptResponseItem;
+    | FreeTextAcceptResponseItem
+    | FreeValueFormAcceptResponseItem
+    | SelectionFormAcceptResponseItem;
