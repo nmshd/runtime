@@ -1,15 +1,9 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { IRequestItem, RequestItem, RequestItemJSON } from "../../RequestItem";
 
-export enum SelectionFormRequestItemTypes {
-    Radio = "Radio",
-    Dropdown = "Dropdown",
-    Checklist = "Checklist"
-}
-
 export interface SelectionFormRequestItemJSON extends RequestItemJSON {
     "@type": "SelectionFormRequestItem";
-    selectionType: SelectionFormRequestItemTypes;
+    selectionType: SelectionFormRequestItemTypes | `${SelectionFormRequestItemTypes}`;
     options: string[];
 }
 
@@ -18,13 +12,21 @@ export interface ISelectionFormRequestItem extends IRequestItem {
     options: string[];
 }
 
+export enum SelectionFormRequestItemTypes {
+    Radio = "Radio",
+    Dropdown = "Dropdown",
+    Checklist = "Checklist"
+}
 @type("SelectionFormRequestItem")
 export class SelectionFormRequestItem extends RequestItem implements ISelectionFormRequestItem {
     @serialize()
-    @validate()
+    @validate({
+        customValidator: (v) =>
+            !Object.values(SelectionFormRequestItemTypes).includes(v) ? `must be one of: ${Object.values(SelectionFormRequestItemTypes).map((o) => `"${o}"`)}` : undefined
+    })
     public selectionType: SelectionFormRequestItemTypes;
 
-    @serialize()
+    @serialize({ type: String })
     @validate()
     public options: string[];
 

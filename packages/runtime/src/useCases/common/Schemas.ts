@@ -3140,7 +3140,23 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
                 "selectionType": {
-                    "$ref": "#/definitions/SelectionFormRequestItemTypes"
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/SelectionFormRequestItemTypes"
+                        },
+                        {
+                            "type": "string",
+                            "const": "Radio"
+                        },
+                        {
+                            "type": "string",
+                            "const": "Dropdown"
+                        },
+                        {
+                            "type": "string",
+                            "const": "Checklist"
+                        }
+                    ]
                 },
                 "options": {
                     "type": "array",
@@ -11277,7 +11293,23 @@ export const CreateOutgoingRequestRequest: any = {
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
                 "selectionType": {
-                    "$ref": "#/definitions/SelectionFormRequestItemTypes"
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/SelectionFormRequestItemTypes"
+                        },
+                        {
+                            "type": "string",
+                            "const": "Radio"
+                        },
+                        {
+                            "type": "string",
+                            "const": "Dropdown"
+                        },
+                        {
+                            "type": "string",
+                            "const": "Checklist"
+                        }
+                    ]
                 },
                 "options": {
                     "type": "array",
@@ -14808,7 +14840,23 @@ export const ReceivedIncomingRequestRequest: any = {
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
                 "selectionType": {
-                    "$ref": "#/definitions/SelectionFormRequestItemTypes"
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/SelectionFormRequestItemTypes"
+                        },
+                        {
+                            "type": "string",
+                            "const": "Radio"
+                        },
+                        {
+                            "type": "string",
+                            "const": "Dropdown"
+                        },
+                        {
+                            "type": "string",
+                            "const": "Checklist"
+                        }
+                    ]
                 },
                 "options": {
                     "type": "array",

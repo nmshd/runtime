@@ -12,7 +12,7 @@ export interface ISelectionFormAcceptResponseItem extends IAcceptResponseItem {
 
 @type("SelectionFormAcceptResponseItem")
 export class SelectionFormAcceptResponseItem extends AcceptResponseItem implements ISelectionFormAcceptResponseItem {
-    @serialize()
+    @serialize({ type: String })
     @validate()
     public options: string[];
 

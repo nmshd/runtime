@@ -7,7 +7,7 @@ export interface AcceptSelectionFormRequestItemParametersJSON extends AcceptRequ
 
 @type("AcceptSelectionFormRequestItemParameters")
 export class AcceptSelectionFormRequestItemParameters extends Serializable {
-    @serialize()
+    @serialize({ type: String })
     @validate()
     public options: string[];
 
