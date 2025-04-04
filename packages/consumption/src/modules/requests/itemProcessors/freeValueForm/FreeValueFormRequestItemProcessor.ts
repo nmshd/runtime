@@ -16,7 +16,7 @@ export class FreeValueFormRequestItemProcessor extends GenericRequestItemProcess
         ) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidAcceptParameters(
-                    `The freeValueType ${requestItem.freeValueType} of the FreeValueFormRequestItem does not match the type ${typeof parsedParams.freeValue} of the provided freeValue.`
+                    `The freeValueType '${requestItem.freeValueType}' of the FreeValueFormRequestItem does not match the type '${typeof parsedParams.freeValue}' of the provided freeValue.`
                 )
             );
         }

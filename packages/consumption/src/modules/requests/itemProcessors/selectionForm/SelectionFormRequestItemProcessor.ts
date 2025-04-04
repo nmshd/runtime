@@ -11,6 +11,11 @@ export class SelectionFormRequestItemProcessor extends GenericRequestItemProcess
             return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("A SelectionFormRequestItem must provide at least one option."));
         }
 
+        const uniqueOptions = new Set(requestItem.options);
+        if (uniqueOptions.size !== requestItem.options.length) {
+            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("A SelectionFormRequestItem must provide unique options."));
+        }
+
         return ValidationResult.success();
     }
 
@@ -27,9 +32,22 @@ export class SelectionFormRequestItemProcessor extends GenericRequestItemProcess
         ) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidAcceptParameters(
-                    `A SelectionFormRequestItem of the ${requestItem.selectionType} selectionType must be accepted with exactly one option.`
+                    `A SelectionFormRequestItem of the '${requestItem.selectionType}' selectionType must be accepted with exactly one option.`
                 )
             );
+        }
+
+        const uniqueOptions = new Set(parsedParams.options);
+        if (uniqueOptions.size !== parsedParams.options.length) {
+            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters("The options specified for accepting a SelectionFormRequestItem must be unique."));
+        }
+
+        for (const option of parsedParams.options) {
+            if (!requestItem.options.includes(option)) {
+                return ValidationResult.error(
+                    ConsumptionCoreErrors.requests.invalidAcceptParameters(`The SelectionRequestItem does not provide the option '${option}' for selection.`)
+                );
+            }
         }
 
         return ValidationResult.success();
