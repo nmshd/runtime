@@ -11,14 +11,18 @@ import {
     DeleteAttributeRequestItemJSON,
     FreeTextRequestItem,
     FreeTextRequestItemJSON,
+    FreeValueFormRequestItem,
+    FreeValueFormRequestItemJSON,
     IAuthenticationRequestItem,
     IConsentRequestItem,
     ICreateAttributeRequestItem,
     IDeleteAttributeRequestItem,
     IFreeTextRequestItem,
+    IFreeValueFormRequestItem,
     IProposeAttributeRequestItem,
     IReadAttributeRequestItem,
     IRegisterAttributeListenerRequestItem,
+    ISelectionFormRequestItem,
     IShareAttributeRequestItem,
     ITransferFileOwnershipRequestItem,
     ProposeAttributeRequestItem,
@@ -27,6 +31,8 @@ import {
     ReadAttributeRequestItemJSON,
     RegisterAttributeListenerRequestItem,
     RegisterAttributeListenerRequestItemJSON,
+    SelectionFormRequestItem,
+    SelectionFormRequestItemJSON,
     ShareAttributeRequestItem,
     ShareAttributeRequestItemJSON,
     TransferFileOwnershipRequestItem,
@@ -75,7 +81,9 @@ export type RequestItemJSONDerivations =
     | ConsentRequestItemJSON
     | AuthenticationRequestItemJSON
     | FreeTextRequestItemJSON
+    | FreeValueFormRequestItemJSON
     | RegisterAttributeListenerRequestItemJSON
+    | SelectionFormRequestItemJSON
     | TransferFileOwnershipRequestItemJSON;
 
 export interface IRequestItem extends ISerializable {
@@ -120,7 +128,9 @@ export type IRequestItemDerivations =
     | IConsentRequestItem
     | IAuthenticationRequestItem
     | IFreeTextRequestItem
+    | IFreeValueFormRequestItem
     | IRegisterAttributeListenerRequestItem
+    | ISelectionFormRequestItem
     | ITransferFileOwnershipRequestItem;
 
 export abstract class RequestItem extends Serializable {
@@ -159,7 +169,9 @@ export type RequestItemDerivations =
     | ConsentRequestItem
     | AuthenticationRequestItem
     | FreeTextRequestItem
+    | FreeValueFormRequestItem
     | RegisterAttributeListenerRequestItem
+    | SelectionFormRequestItem
     | TransferFileOwnershipRequestItem;
 
 export function isRequestItemDerivation(input: any): input is RequestItemDerivations {
@@ -173,7 +185,9 @@ export function isRequestItemDerivation(input: any): input is RequestItemDerivat
         input["@type"] === "ConsentRequestItem" ||
         input["@type"] === "AuthenticationRequestItem" ||
         input["@type"] === "FreeTextRequestItem" ||
+        input["@type"] === "FreeValueFormRequestItem" ||
         input["@type"] === "RegisterAttributeListenerRequestItem" ||
+        input["@type"] === "SelectionFormRequestItem" ||
         input["@type"] === "TransferFileOwnershipRequestItem"
     );
 }
