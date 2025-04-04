@@ -3021,7 +3021,23 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
                 "freeValueType": {
-                    "$ref": "#/definitions/FreeValueFormRequestItemTypes"
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/FreeValueFormRequestItemTypes"
+                        },
+                        {
+                            "type": "string",
+                            "const": "String"
+                        },
+                        {
+                            "type": "string",
+                            "const": "Number"
+                        },
+                        {
+                            "type": "string",
+                            "const": "Date"
+                        }
+                    ]
                 }
             },
             "required": [
@@ -5713,10 +5729,7 @@ export const CompleteOutgoingRequestRequest: any = {
                     "const": "Accepted"
                 },
                 "freeValue": {
-                    "type": [
-                        "string",
-                        "number"
-                    ]
+                    "type": "string"
                 }
             },
             "required": [
@@ -8214,10 +8227,7 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                     "const": "Accepted"
                 },
                 "freeValue": {
-                    "type": [
-                        "string",
-                        "number"
-                    ]
+                    "type": "string"
                 }
             },
             "required": [
@@ -11148,7 +11158,23 @@ export const CreateOutgoingRequestRequest: any = {
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
                 "freeValueType": {
-                    "$ref": "#/definitions/FreeValueFormRequestItemTypes"
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/FreeValueFormRequestItemTypes"
+                        },
+                        {
+                            "type": "string",
+                            "const": "String"
+                        },
+                        {
+                            "type": "string",
+                            "const": "Number"
+                        },
+                        {
+                            "type": "string",
+                            "const": "Date"
+                        }
+                    ]
                 }
             },
             "required": [
@@ -14663,7 +14689,23 @@ export const ReceivedIncomingRequestRequest: any = {
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
                 "freeValueType": {
-                    "$ref": "#/definitions/FreeValueFormRequestItemTypes"
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/FreeValueFormRequestItemTypes"
+                        },
+                        {
+                            "type": "string",
+                            "const": "String"
+                        },
+                        {
+                            "type": "string",
+                            "const": "Number"
+                        },
+                        {
+                            "type": "string",
+                            "const": "Date"
+                        }
+                    ]
                 }
             },
             "required": [

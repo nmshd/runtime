@@ -80,7 +80,7 @@ export interface FreeTextAcceptResponseItemDVO extends AcceptResponseItemDVO {
 
 export interface FreeValueFormAcceptResponseItemDVO extends AcceptResponseItemDVO {
     type: "FreeValueFormAcceptResponseItemDVO";
-    freeValue: string | number;
+    freeValue: string;
 }
 
 export interface RegisterAttributeListenerAcceptResponseItemDVO extends AcceptResponseItemDVO {

@@ -1,25 +1,28 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { IRequestItem, RequestItem, RequestItemJSON } from "../../RequestItem";
 
-export enum FreeValueFormRequestItemTypes {
-    String = "String",
-    Number = "Number",
-    Date = "Date"
-}
-
 export interface FreeValueFormRequestItemJSON extends RequestItemJSON {
     "@type": "FreeValueFormRequestItem";
-    freeValueType: FreeValueFormRequestItemTypes;
+    freeValueType: FreeValueFormRequestItemTypes | `${FreeValueFormRequestItemTypes}`;
 }
 
 export interface IFreeValueFormRequestItem extends IRequestItem {
     freeValueType: FreeValueFormRequestItemTypes;
 }
 
+export enum FreeValueFormRequestItemTypes {
+    String = "String",
+    Number = "Number",
+    Date = "Date"
+}
+
 @type("FreeValueFormRequestItem")
 export class FreeValueFormRequestItem extends RequestItem implements IFreeValueFormRequestItem {
     @serialize()
-    @validate()
+    @validate({
+        customValidator: (v) =>
+            !Object.values(FreeValueFormRequestItemTypes).includes(v) ? `must be one of: ${Object.values(FreeValueFormRequestItemTypes).map((o) => `"${o}"`)}` : undefined
+    })
     public freeValueType: FreeValueFormRequestItemTypes;
 
     @serialize()

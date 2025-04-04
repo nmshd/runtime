@@ -11,12 +11,12 @@ export class FreeValueFormRequestItemProcessor extends GenericRequestItemProcess
 
         if (
             (requestItem.freeValueType === FreeValueFormRequestItemTypes.String && typeof parsedParams.freeValue !== "string") ||
-            (requestItem.freeValueType === FreeValueFormRequestItemTypes.Number && typeof parsedParams.freeValue !== "number") ||
-            (requestItem.freeValueType === FreeValueFormRequestItemTypes.Date && !(parsedParams.freeValue instanceof Date))
+            (requestItem.freeValueType === FreeValueFormRequestItemTypes.Number && parsedParams.freeValue.trim() !== "" && !isNaN(Number(parsedParams.freeValue))) ||
+            (requestItem.freeValueType === FreeValueFormRequestItemTypes.Date && !isNaN(new Date(parsedParams.freeValue).getTime()))
         ) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidAcceptParameters(
-                    `The freeValueType '${requestItem.freeValueType}' of the FreeValueFormRequestItem does not match the type '${typeof parsedParams.freeValue}' of the provided freeValue.`
+                    `Conversion of the provided freeValue to the freeValueType '${requestItem.freeValueType}' of the FreeValueFormRequestItem is not possible.`
                 )
             );
         }

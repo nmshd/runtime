@@ -3,18 +3,18 @@ import { AcceptResponseItem, AcceptResponseItemJSON, IAcceptResponseItem } from 
 
 export interface FreeValueFormAcceptResponseItemJSON extends AcceptResponseItemJSON {
     "@type": "FreeValueFormAcceptResponseItem";
-    freeValue: string | number;
+    freeValue: string;
 }
 
 export interface IFreeValueFormAcceptResponseItem extends IAcceptResponseItem {
-    freeValue: string | number | Date;
+    freeValue: string;
 }
 
 @type("FreeValueFormAcceptResponseItem")
 export class FreeValueFormAcceptResponseItem extends AcceptResponseItem implements IFreeValueFormAcceptResponseItem {
     @serialize()
     @validate()
-    public freeValue: string | number | Date;
+    public freeValue: string;
 
     public static override from(
         value: IFreeValueFormAcceptResponseItem | Omit<FreeValueFormAcceptResponseItemJSON, "@type"> | FreeValueFormAcceptResponseItemJSON
