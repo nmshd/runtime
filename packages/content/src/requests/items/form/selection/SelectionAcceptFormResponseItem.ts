@@ -1,28 +1,28 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { AcceptResponseItem, AcceptResponseItemJSON, IAcceptResponseItem } from "../../../response";
 
-export interface SelectAcceptFormResponseItemJSON extends AcceptResponseItemJSON {
-    "@type": "SelectAcceptFormResponseItem";
+export interface SelectionAcceptFormResponseItemJSON extends AcceptResponseItemJSON {
+    "@type": "SelectionAcceptFormResponseItem";
     options: string[];
 }
 
-export interface ISelectAcceptFormResponseItem extends IAcceptResponseItem {
+export interface ISelectionAcceptFormResponseItem extends IAcceptResponseItem {
     options: string[];
 }
 
-@type("SelectAcceptFormResponseItem")
-export class SelectAcceptFormResponseItem extends AcceptResponseItem implements ISelectAcceptFormResponseItem {
+@type("SelectionAcceptFormResponseItem")
+export class SelectionAcceptFormResponseItem extends AcceptResponseItem implements ISelectionAcceptFormResponseItem {
     @serialize()
     @validate()
     public options: string[];
 
     public static override from(
-        value: ISelectAcceptFormResponseItem | Omit<SelectAcceptFormResponseItemJSON, "@type"> | SelectAcceptFormResponseItemJSON
-    ): SelectAcceptFormResponseItem {
+        value: ISelectionAcceptFormResponseItem | Omit<SelectionAcceptFormResponseItemJSON, "@type"> | SelectionAcceptFormResponseItemJSON
+    ): SelectionAcceptFormResponseItem {
         return this.fromAny(value);
     }
 
-    public override toJSON(verbose?: boolean | undefined, serializeAsString?: boolean | undefined): SelectAcceptFormResponseItemJSON {
-        return super.toJSON(verbose, serializeAsString) as SelectAcceptFormResponseItemJSON;
+    public override toJSON(verbose?: boolean | undefined, serializeAsString?: boolean | undefined): SelectionAcceptFormResponseItemJSON {
+        return super.toJSON(verbose, serializeAsString) as SelectionAcceptFormResponseItemJSON;
     }
 }
