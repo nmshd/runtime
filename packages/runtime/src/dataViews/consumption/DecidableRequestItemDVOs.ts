@@ -1,3 +1,4 @@
+import { FreeValueFormRequestItemTypes, SelectionFormRequestItemTypes } from "@nmshd/content";
 import { RequestItemDVO } from "../content";
 import { DraftIdentityAttributeDVO, DraftRelationshipAttributeDVO, IdentityAttributeQueryDVO, ThirdPartyRelationshipAttributeQueryDVO } from "../content/AttributeDVOs";
 import { FileDVO } from "../transport";
@@ -51,9 +52,19 @@ export interface DecidableFreeTextRequestItemDVO extends DecidableRequestItemDVO
     freeText: string;
 }
 
+export interface DecidableFreeValueFormRequestItemDVO extends DecidableRequestItemDVO {
+    type: "DecidableFreeValueFormRequestItemDVO";
+    freeValueType: FreeValueFormRequestItemTypes;
+}
+
 export interface DecidableRegisterAttributeListenerRequestItemDVO extends DecidableRequestItemDVO {
     type: "DecidableRegisterAttributeListenerRequestItemDVO";
     query: IdentityAttributeQueryDVO | ThirdPartyRelationshipAttributeQueryDVO;
+}
+
+export interface DecidableSelectionFormRequestItemDVO extends DecidableRequestItemDVO {
+    type: "DecidableSelectionFormRequestItemDVO";
+    selectionType: SelectionFormRequestItemTypes;
 }
 
 export interface DecidableTransferFileOwnershipRequestItemDVO extends DecidableRequestItemDVO {

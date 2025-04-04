@@ -16,6 +16,8 @@ export * from "./itemProcessors/deleteAttribute/AcceptDeleteAttributeRequestItem
 export * from "./itemProcessors/deleteAttribute/DeleteAttributeRequestItemProcessor";
 export * from "./itemProcessors/freeText/AcceptFreeTextRequestItemParameters";
 export * from "./itemProcessors/freeText/FreeTextRequestItemProcessor";
+export * from "./itemProcessors/freeValueForm/AcceptFreeValueFormRequestItemParameters";
+export * from "./itemProcessors/freeValueForm/FreeValueFormRequestItemProcessor";
 export * from "./itemProcessors/GenericRequestItemProcessor";
 export * from "./itemProcessors/IRequestItemProcessor";
 export * from "./itemProcessors/proposeAttribute/AcceptProposeAttributeRequestItemParameters";
@@ -30,6 +32,8 @@ export * from "./itemProcessors/registerAttributeListener/RegisterAttributeListe
 export * from "./itemProcessors/RequestItemConstructor";
 export * from "./itemProcessors/RequestItemProcessorConstructor";
 export * from "./itemProcessors/RequestItemProcessorRegistry";
+export * from "./itemProcessors/selectionForm/AcceptSelectionFormRequestItemParameters";
+export * from "./itemProcessors/selectionForm/SelectionFormRequestItemProcessor";
 export * from "./itemProcessors/shareAttribute/ShareAttributeRequestItemProcessor";
 export * from "./itemProcessors/transferFileOwnership/TransferFileOwnershipRequestItemProcessor";
 export * from "./local/LocalRequest";

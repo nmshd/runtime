@@ -13,6 +13,8 @@ import {
     ErrorResponseItemJSON,
     FreeTextAcceptResponseItemJSON,
     FreeTextRequestItemJSON,
+    FreeValueFormAcceptResponseItemJSON,
+    FreeValueFormRequestItemJSON,
     GivenNameJSON,
     IQLQueryJSON,
     IdentityAttribute,
@@ -42,6 +44,7 @@ import {
     ResponseItemJSON,
     ResponseItemResult,
     ResponseJSON,
+    SelectionFormRequestItemJSON,
     SexJSON,
     ShareAttributeAcceptResponseItemJSON,
     ShareAttributeRequestItemJSON,
@@ -53,6 +56,7 @@ import {
     ValueHintsJSON,
     isRequestItemDerivation
 } from "@nmshd/content";
+import { SelectionFormAcceptResponseItemJSON } from "@nmshd/content/src/requests/items/selectionForm/SelectionFormAcceptResponseItem";
 import { CoreAddress, CoreId, FileReference } from "@nmshd/core-types";
 import { IdentityController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
@@ -82,9 +86,11 @@ import {
     DecidableCreateAttributeRequestItemDVO,
     DecidableDeleteAttributeRequestItemDVO,
     DecidableFreeTextRequestItemDVO,
+    DecidableFreeValueFormRequestItemDVO,
     DecidableProposeAttributeRequestItemDVO,
     DecidableReadAttributeRequestItemDVO,
     DecidableRegisterAttributeListenerRequestItemDVO,
+    DecidableSelectionFormRequestItemDVO,
     DecidableShareAttributeRequestItemDVO,
     DecidableTransferFileOwnershipRequestItemDVO,
     LocalAttributeDVO,
@@ -119,6 +125,8 @@ import {
     ErrorResponseItemDVO,
     FreeTextAcceptResponseItemDVO,
     FreeTextRequestItemDVO,
+    FreeValueFormAcceptResponseItemDVO,
+    FreeValueFormRequestItemDVO,
     IQLQueryDVO,
     IdentityAttributeQueryDVO,
     MailDVO,
@@ -138,6 +146,8 @@ import {
     ResponseDVO,
     ResponseItemDVO,
     ResponseItemGroupDVO,
+    SelectionFormAcceptResponseItemDVO,
+    SelectionFormRequestItemDVO,
     ShareAttributeAcceptResponseItemDVO,
     ShareAttributeRequestItemDVO,
     ThirdPartyRelationshipAttributeQueryDVO,
@@ -720,6 +730,28 @@ export class DataViewExpander {
                     response: responseItemDVO
                 } as FreeTextRequestItemDVO;
 
+            case "FreeValueFormRequestItem":
+                const freeValueFormRequestItem = requestItem as FreeValueFormRequestItemJSON;
+
+                if (isDecidable) {
+                    return {
+                        ...freeValueFormRequestItem,
+                        type: "DecidableFreeValueFormRequestItemDVO",
+                        id: "",
+                        name: requestItem.title ?? "i18n://dvo.requestItem.DecidableFreeValueFormRequestItem.name",
+                        isDecidable,
+                        response: responseItemDVO
+                    } as DecidableFreeValueFormRequestItemDVO;
+                }
+                return {
+                    ...freeValueFormRequestItem,
+                    type: "FreeValueFormRequestItemDVO",
+                    id: "",
+                    name: requestItem.title ?? "i18n://dvo.requestItem.FreeValueFormRequestItem.name",
+                    isDecidable,
+                    response: responseItemDVO
+                } as FreeValueFormRequestItemDVO;
+
             case "RegisterAttributeListenerRequestItem":
                 const registerAttributeListenerRequestItem = requestItem as RegisterAttributeListenerRequestItemJSON;
                 const queryDVO = (await this.expandAttributeQuery(registerAttributeListenerRequestItem.query)) as
@@ -746,6 +778,28 @@ export class DataViewExpander {
                     isDecidable,
                     response: responseItemDVO
                 } as RegisterAttributeListenerRequestItemDVO;
+
+            case "SelectionFormRequestItem":
+                const selectionFormRequestItem = requestItem as SelectionFormRequestItemJSON;
+
+                if (isDecidable) {
+                    return {
+                        ...selectionFormRequestItem,
+                        type: "DecidableSelectionFormRequestItemDVO",
+                        id: "",
+                        name: requestItem.title ?? "i18n://dvo.requestItem.DecidableSelectionFormRequestItem.name",
+                        isDecidable,
+                        response: responseItemDVO
+                    } as DecidableSelectionFormRequestItemDVO;
+                }
+                return {
+                    ...selectionFormRequestItem,
+                    type: "SelectionFormRequestItemDVO",
+                    id: "",
+                    name: requestItem.title ?? "i18n://dvo.requestItem.SelectionFormRequestItem.name",
+                    isDecidable,
+                    response: responseItemDVO
+                } as SelectionFormRequestItemDVO;
 
             case "TransferFileOwnershipRequestItem":
                 const transferFileOwnershipRequestItem = requestItem as TransferFileOwnershipRequestItemJSON;
@@ -900,6 +954,16 @@ export class DataViewExpander {
                         name: name
                     } as FreeTextAcceptResponseItemDVO;
 
+                case "FreeValueFormAcceptResponseItem":
+                    const freeValueFormResponseItem = responseItem as FreeValueFormAcceptResponseItemJSON;
+
+                    return {
+                        ...freeValueFormResponseItem,
+                        type: "FreeValueFormAcceptResponseItemDVO",
+                        id: "",
+                        name: name
+                    } as FreeValueFormAcceptResponseItemDVO;
+
                 case "RegisterAttributeListenerAcceptResponseItem":
                     const registerAttributeListenerResponseItem = responseItem as RegisterAttributeListenerAcceptResponseItemJSON;
                     const localAttributeListenerResult = await this.consumption.attributeListeners.getAttributeListener({ id: registerAttributeListenerResponseItem.listenerId });
@@ -912,6 +976,16 @@ export class DataViewExpander {
                         name: name,
                         listener: localAttributeListener
                     } as RegisterAttributeListenerAcceptResponseItemDVO;
+
+                case "SelectionFormAcceptResponseItem":
+                    const selectionFormResponseItem = responseItem as SelectionFormAcceptResponseItemJSON;
+
+                    return {
+                        ...selectionFormResponseItem,
+                        type: "SelectionFormAcceptResponseItemDVO",
+                        id: "",
+                        name: name
+                    } as SelectionFormAcceptResponseItemDVO;
 
                 case "TransferFileOwnershipAcceptResponseItem":
                     const transferFileOwnershipResponseItem = responseItem as TransferFileOwnershipAcceptResponseItemJSON;
