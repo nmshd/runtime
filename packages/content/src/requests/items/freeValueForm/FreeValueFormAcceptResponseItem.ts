@@ -3,7 +3,7 @@ import { AcceptResponseItem, AcceptResponseItemJSON, IAcceptResponseItem } from 
 
 export interface FreeValueFormAcceptResponseItemJSON extends AcceptResponseItemJSON {
     "@type": "FreeValueFormAcceptResponseItem";
-    freeValue: string | number | Date;
+    freeValue: string | number;
 }
 
 export interface IFreeValueFormAcceptResponseItem extends IAcceptResponseItem {

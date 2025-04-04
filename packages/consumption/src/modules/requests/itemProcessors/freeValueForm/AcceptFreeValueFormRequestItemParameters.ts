@@ -2,7 +2,7 @@ import { Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
 
 export interface AcceptFreeValueFormRequestItemParametersJSON extends AcceptRequestItemParametersJSON {
-    freeValue: string | number | Date;
+    freeValue: string | number;
 }
 
 @type("AcceptFreeValueFormRequestItemParameters")
