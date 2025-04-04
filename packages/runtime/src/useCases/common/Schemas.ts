@@ -5713,17 +5713,9 @@ export const CompleteOutgoingRequestRequest: any = {
                     "const": "Accepted"
                 },
                 "freeValue": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "number"
-                        },
-                        {
-                            "type": "string",
-                            "format": "date-time"
-                        }
+                    "type": [
+                        "string",
+                        "number"
                     ]
                 }
             },
@@ -8222,17 +8214,9 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                     "const": "Accepted"
                 },
                 "freeValue": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "number"
-                        },
-                        {
-                            "type": "string",
-                            "format": "date-time"
-                        }
+                    "type": [
+                        "string",
+                        "number"
                     ]
                 }
             },
