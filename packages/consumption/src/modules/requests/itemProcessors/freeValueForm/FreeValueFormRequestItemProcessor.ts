@@ -1,4 +1,4 @@
-import { FreeValueAcceptFormResponseItem, FreeValueFormRequestItem, FreeValueFormRequestItemTypes, ResponseItemResult } from "@nmshd/content";
+import { FreeValueFormAcceptResponseItem, FreeValueFormRequestItem, FreeValueFormRequestItemTypes, ResponseItemResult } from "@nmshd/content";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 
@@ -24,9 +24,9 @@ export class FreeValueFormRequestItemProcessor extends GenericRequestItemProcess
         return ValidationResult.success();
     }
 
-    public override accept(_requestItem: FreeValueFormRequestItem, params: AcceptFreeValueFormRequestItemParametersJSON): FreeValueAcceptFormResponseItem {
+    public override accept(_requestItem: FreeValueFormRequestItem, params: AcceptFreeValueFormRequestItemParametersJSON): FreeValueFormAcceptResponseItem {
         const parsedParams = AcceptFreeValueFormRequestItemParameters.from(params);
-        return FreeValueAcceptFormResponseItem.from({
+        return FreeValueFormAcceptResponseItem.from({
             result: ResponseItemResult.Accepted,
             freeValue: parsedParams.freeValue
         });

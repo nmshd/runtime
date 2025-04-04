@@ -1,7 +1,8 @@
-import { Request, ResponseItemResult, SelectionAcceptFormResponseItem, SelectionFormRequestItem, SelectionFormRequestItemTypes } from "@nmshd/content";
+import { Request, ResponseItemResult, SelectionFormRequestItem, SelectionFormRequestItemTypes } from "@nmshd/content";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 
+import { SelectionFormAcceptResponseItem } from "@nmshd/content/src/requests/items/selectionForm/SelectionFormAcceptResponseItem";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import { AcceptSelectionFormRequestItemParameters, AcceptSelectionFormRequestItemParametersJSON } from "./AcceptSelectionFormRequestItemParameters";
 
@@ -53,9 +54,9 @@ export class SelectionFormRequestItemProcessor extends GenericRequestItemProcess
         return ValidationResult.success();
     }
 
-    public override accept(_requestItem: SelectionFormRequestItem, params: AcceptSelectionFormRequestItemParametersJSON): SelectionAcceptFormResponseItem {
+    public override accept(_requestItem: SelectionFormRequestItem, params: AcceptSelectionFormRequestItemParametersJSON): SelectionFormAcceptResponseItem {
         const parsedParams = AcceptSelectionFormRequestItemParameters.from(params);
-        return SelectionAcceptFormResponseItem.from({
+        return SelectionFormAcceptResponseItem.from({
             result: ResponseItemResult.Accepted,
             options: parsedParams.options
         });
