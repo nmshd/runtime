@@ -1,5 +1,5 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { AcceptResponseItem, AcceptResponseItemJSON, IAcceptResponseItem } from "../../../response";
+import { AcceptResponseItem, AcceptResponseItemJSON, IAcceptResponseItem } from "../../response";
 
 export interface SelectionAcceptFormResponseItemJSON extends AcceptResponseItemJSON {
     "@type": "SelectionAcceptFormResponseItem";

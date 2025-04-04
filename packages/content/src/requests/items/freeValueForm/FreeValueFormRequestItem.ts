@@ -1,34 +1,29 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { IRequestItem, RequestItem, RequestItemJSON } from "../../../RequestItem";
-import { ValuesOfSelectionFormRequestItemJSON } from "../ValuesOfSelectionFormRequestItem";
+import { IRequestItem, RequestItem, RequestItemJSON } from "../../RequestItem";
 
-enum FreeValueFormRequestItemTypes {
-    String = "string",
-    Number = "number",
-    Date = "date"
+export enum FreeValueFormRequestItemTypes {
+    String = "String",
+    Number = "Number",
+    Date = "Date"
 }
 
 export interface FreeValueFormRequestItemJSON extends RequestItemJSON {
     "@type": "FreeValueFormRequestItem";
-    valueType: FreeValueFormRequestItemTypes;
-    dependsOn?: ValuesOfSelectionFormRequestItemJSON;
+    freeValueType: FreeValueFormRequestItemTypes;
 }
 
 export interface IFreeValueFormRequestItem extends IRequestItem {
-    valueType: FreeValueFormRequestItemTypes;
-    dependsOn?: ValuesOfSelectionFormRequestItemJSON;
+    freeValueType: FreeValueFormRequestItemTypes;
 }
 
 @type("FreeValueFormRequestItem")
 export class FreeValueFormRequestItem extends RequestItem implements IFreeValueFormRequestItem {
     @serialize()
     @validate()
-    public valueType: FreeValueFormRequestItemTypes;
+    public freeValueType: FreeValueFormRequestItemTypes;
 
     @serialize()
     @validate()
-    public dependsOn?: ValuesOfSelectionFormRequestItemJSON;
-
     public static from(value: IFreeValueFormRequestItem | Omit<FreeValueFormRequestItemJSON, "@type"> | FreeValueFormRequestItemJSON): FreeValueFormRequestItem {
         return this.fromAny(value);
     }

@@ -1,31 +1,21 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { IRequestItem, RequestItem, RequestItemJSON } from "../../../RequestItem";
-import { ValuesOfSelectionFormRequestItemJSON } from "../ValuesOfSelectionFormRequestItem";
+import { IRequestItem, RequestItem, RequestItemJSON } from "../../RequestItem";
 
-enum SelectionFormRequestItemTypes {
-    Radio = "radio",
-    Dropdown = "dropdown",
-    Checklist = "checklist"
-}
-
-interface DependentSelectionFormRequestItemOptionJSON {
-    option: string;
-    dependsOn: ValuesOfSelectionFormRequestItemJSON;
+export enum SelectionFormRequestItemTypes {
+    Radio = "Radio",
+    Dropdown = "Dropdown",
+    Checklist = "Checklist"
 }
 
 export interface SelectionFormRequestItemJSON extends RequestItemJSON {
     "@type": "SelectionFormRequestItem";
     selectionType: SelectionFormRequestItemTypes;
-    options: (string | DependentSelectionFormRequestItemOptionJSON)[];
-    itemId?: string;
-    dependsOn?: ValuesOfSelectionFormRequestItemJSON;
+    options: string[];
 }
 
 export interface ISelectionFormRequestItem extends IRequestItem {
     selectionType: SelectionFormRequestItemTypes;
-    options: (string | DependentSelectionFormRequestItemOptionJSON)[];
-    itemId?: string;
-    dependsOn?: ValuesOfSelectionFormRequestItemJSON;
+    options: string[];
 }
 
 @type("SelectionFormRequestItem")
@@ -36,15 +26,7 @@ export class SelectionFormRequestItem extends RequestItem implements ISelectionF
 
     @serialize()
     @validate()
-    public options: (string | DependentSelectionFormRequestItemOptionJSON)[];
-
-    @serialize()
-    @validate()
-    public itemId?: "string";
-
-    @serialize()
-    @validate()
-    public dependsOn?: ValuesOfSelectionFormRequestItemJSON;
+    public options: string[];
 
     public static from(value: ISelectionFormRequestItem | Omit<SelectionFormRequestItemJSON, "@type"> | SelectionFormRequestItemJSON): SelectionFormRequestItem {
         return this.fromAny(value);

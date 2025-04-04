@@ -1,5 +1,4 @@
-import { ParsingError } from "@js-soft/ts-serval";
-import { FreeValueAcceptFormResponseItem, FreeValueFormRequestItem, ResponseItemResult } from "@nmshd/content";
+import { FreeValueAcceptFormResponseItem, FreeValueFormRequestItem, FreeValueFormRequestItemTypes, ResponseItemResult } from "@nmshd/content";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 
@@ -7,13 +6,19 @@ import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreEr
 import { AcceptFreeValueFormRequestItemParameters, AcceptFreeValueFormRequestItemParametersJSON } from "./AcceptFreeValueFormRequestItemParameters";
 
 export class FreeValueFormRequestItemProcessor extends GenericRequestItemProcessor<FreeValueFormRequestItem, AcceptFreeValueFormRequestItemParametersJSON> {
-    public override canAccept(_requestItem: FreeValueFormRequestItem, params: AcceptFreeValueFormRequestItemParametersJSON): ValidationResult {
-        try {
-            AcceptFreeValueFormRequestItemParameters.from(params);
-        } catch (error) {
-            if (!(error instanceof ParsingError)) throw error;
+    public override canAccept(requestItem: FreeValueFormRequestItem, params: AcceptFreeValueFormRequestItemParametersJSON): ValidationResult {
+        const parsedParams = AcceptFreeValueFormRequestItemParameters.from(params);
 
-            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters("The RequestItem was answered with incorrect parameters."));
+        if (
+            (requestItem.freeValueType === FreeValueFormRequestItemTypes.String && typeof parsedParams.freeValue !== "string") ||
+            (requestItem.freeValueType === FreeValueFormRequestItemTypes.Number && typeof parsedParams.freeValue !== "number") ||
+            (requestItem.freeValueType === FreeValueFormRequestItemTypes.Date && !(parsedParams.freeValue instanceof Date))
+        ) {
+            return ValidationResult.error(
+                ConsumptionCoreErrors.requests.invalidAcceptParameters(
+                    `The freeValueType ${requestItem.freeValueType} of the FreeValueFormRequestItem does not match the type ${typeof parsedParams.freeValue} of the provided freeValue.`
+                )
+            );
         }
 
         return ValidationResult.success();
