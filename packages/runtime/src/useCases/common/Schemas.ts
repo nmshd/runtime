@@ -3027,15 +3027,15 @@ export const CanCreateOutgoingRequestRequest: any = {
                         },
                         {
                             "type": "string",
-                            "const": "String"
+                            "const": "TextField"
                         },
                         {
                             "type": "string",
-                            "const": "Number"
+                            "const": "NumberField"
                         },
                         {
                             "type": "string",
-                            "const": "Date"
+                            "const": "DateField"
                         }
                     ]
                 }
@@ -3050,9 +3050,9 @@ export const CanCreateOutgoingRequestRequest: any = {
         "FreeValueFormRequestItemTypes": {
             "type": "string",
             "enum": [
-                "String",
-                "Number",
-                "Date"
+                "TextField",
+                "NumberField",
+                "DateField"
             ]
         },
         "RegisterAttributeListenerRequestItemJSON": {
@@ -11180,15 +11180,15 @@ export const CreateOutgoingRequestRequest: any = {
                         },
                         {
                             "type": "string",
-                            "const": "String"
+                            "const": "TextField"
                         },
                         {
                             "type": "string",
-                            "const": "Number"
+                            "const": "NumberField"
                         },
                         {
                             "type": "string",
-                            "const": "Date"
+                            "const": "DateField"
                         }
                     ]
                 }
@@ -11203,9 +11203,9 @@ export const CreateOutgoingRequestRequest: any = {
         "FreeValueFormRequestItemTypes": {
             "type": "string",
             "enum": [
-                "String",
-                "Number",
-                "Date"
+                "TextField",
+                "NumberField",
+                "DateField"
             ]
         },
         "RegisterAttributeListenerRequestItemJSON": {
@@ -14727,15 +14727,15 @@ export const ReceivedIncomingRequestRequest: any = {
                         },
                         {
                             "type": "string",
-                            "const": "String"
+                            "const": "TextField"
                         },
                         {
                             "type": "string",
-                            "const": "Number"
+                            "const": "NumberField"
                         },
                         {
                             "type": "string",
-                            "const": "Date"
+                            "const": "DateField"
                         }
                     ]
                 }
@@ -14750,9 +14750,9 @@ export const ReceivedIncomingRequestRequest: any = {
         "FreeValueFormRequestItemTypes": {
             "type": "string",
             "enum": [
-                "String",
-                "Number",
-                "Date"
+                "TextField",
+                "NumberField",
+                "DateField"
             ]
         },
         "RegisterAttributeListenerRequestItemJSON": {
