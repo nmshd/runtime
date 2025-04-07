@@ -34,7 +34,7 @@ export class Consent extends AbstractAttributeValue implements IConsent {
     public link?: string;
 
     @serialize()
-    @validate({ nullable: true, max: 30 })
+    @validate({ nullable: true, min: 3, max: 30 })
     public linkDisplayText?: string;
 
     protected static override postFrom<T extends Serializable>(value: T): T {
@@ -64,7 +64,7 @@ export class Consent extends AbstractAttributeValue implements IConsent {
             propertyHints: {
                 consent: { max: 2000 },
                 link: { min: 3, max: 1024 },
-                linkDisplayText: { max: 30 }
+                linkDisplayText: { min: 3, max: 30 }
             }
         });
     }
