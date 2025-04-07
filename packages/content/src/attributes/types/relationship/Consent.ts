@@ -5,11 +5,13 @@ import { RenderHints, RenderHintsDataType, RenderHintsEditType, RenderHintsTechn
 export interface ConsentJSON extends AbstractAttributeValueJSON {
     consent: string;
     link?: string;
+    linkText?: string;
 }
 
 export interface IConsent extends IAbstractAttributeValue {
     consent: string;
     link?: string;
+    linkText?: string;
 }
 
 @type("Consent")
@@ -29,6 +31,10 @@ export class Consent extends AbstractAttributeValue implements IConsent {
         )
     })
     public link?: string;
+
+    @serialize()
+    @validate({ nullable: true })
+    public linkText?: string;
 
     public static from(value: IConsent | Omit<ConsentJSON, "@type">): Consent {
         return this.fromAny(value);
