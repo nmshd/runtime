@@ -34,7 +34,7 @@ export class ConsentRequestItem extends RequestItem implements IConsentRequestIt
     public link?: string;
 
     @serialize()
-    @validate({ nullable: true, min: 3, max: 30 })
+    @validate({ nullable: true, max: 30 })
     public linkDisplayText?: string;
 
     protected static override postFrom<T extends Serializable>(value: T): T {
