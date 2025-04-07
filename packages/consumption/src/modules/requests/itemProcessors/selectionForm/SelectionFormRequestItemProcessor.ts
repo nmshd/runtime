@@ -1,8 +1,7 @@
-import { Request, ResponseItemResult, SelectionFormFieldTypes, SelectionFormRequestItem } from "@nmshd/content";
+import { Request, ResponseItemResult, SelectionFormAcceptResponseItem, SelectionFormFieldTypes, SelectionFormRequestItem } from "@nmshd/content";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 
-import { SelectionFormAcceptResponseItem } from "@nmshd/content/src/requests/items/selectionForm/SelectionFormAcceptResponseItem";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import { AcceptSelectionFormRequestItemParameters, AcceptSelectionFormRequestItemParametersJSON } from "./AcceptSelectionFormRequestItemParameters";
 
