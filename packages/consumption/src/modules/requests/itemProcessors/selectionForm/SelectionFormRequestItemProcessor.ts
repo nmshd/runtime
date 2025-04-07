@@ -2,7 +2,6 @@ import { Request, ResponseItemResult, SelectionFormFieldTypes, SelectionFormRequ
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 
-import { ParsingError } from "@js-soft/ts-serval";
 import { SelectionFormAcceptResponseItem } from "@nmshd/content/src/requests/items/selectionForm/SelectionFormAcceptResponseItem";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import { AcceptSelectionFormRequestItemParameters, AcceptSelectionFormRequestItemParametersJSON } from "./AcceptSelectionFormRequestItemParameters";
@@ -22,14 +21,6 @@ export class SelectionFormRequestItemProcessor extends GenericRequestItemProcess
     }
 
     public override canAccept(requestItem: SelectionFormRequestItem, params: AcceptSelectionFormRequestItemParametersJSON): ValidationResult {
-        try {
-            AcceptSelectionFormRequestItemParameters.from(params);
-        } catch (error) {
-            if (!(error instanceof ParsingError)) throw error;
-
-            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters("The RequestItem was answered with incorrect parameters."));
-        }
-
         const parsedParams = AcceptSelectionFormRequestItemParameters.from(params);
 
         if (parsedParams.options.length === 0) {
