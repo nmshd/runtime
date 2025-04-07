@@ -3031,6 +3031,10 @@ export const CanCreateOutgoingRequestRequest: any = {
                         },
                         {
                             "type": "string",
+                            "const": "TextAreaField"
+                        },
+                        {
+                            "type": "string",
                             "const": "NumberField"
                         },
                         {
@@ -3051,6 +3055,7 @@ export const CanCreateOutgoingRequestRequest: any = {
             "type": "string",
             "enum": [
                 "TextField",
+                "TextAreaField",
                 "NumberField",
                 "DateField"
             ]
@@ -11184,6 +11189,10 @@ export const CreateOutgoingRequestRequest: any = {
                         },
                         {
                             "type": "string",
+                            "const": "TextAreaField"
+                        },
+                        {
+                            "type": "string",
                             "const": "NumberField"
                         },
                         {
@@ -11204,6 +11213,7 @@ export const CreateOutgoingRequestRequest: any = {
             "type": "string",
             "enum": [
                 "TextField",
+                "TextAreaField",
                 "NumberField",
                 "DateField"
             ]
@@ -14731,6 +14741,10 @@ export const ReceivedIncomingRequestRequest: any = {
                         },
                         {
                             "type": "string",
+                            "const": "TextAreaField"
+                        },
+                        {
+                            "type": "string",
                             "const": "NumberField"
                         },
                         {
@@ -14751,6 +14765,7 @@ export const ReceivedIncomingRequestRequest: any = {
             "type": "string",
             "enum": [
                 "TextField",
+                "TextAreaField",
                 "NumberField",
                 "DateField"
             ]
