@@ -12,6 +12,7 @@ export interface IFreeValueFormRequestItem extends IRequestItem {
 
 export enum FreeValueFieldTypes {
     TextField = "TextField",
+    TextAreaField = "TextAreaField",
     NumberField = "NumberField",
     DateField = "DateField"
 }

@@ -10,7 +10,8 @@ export class FreeValueFormRequestItemProcessor extends GenericRequestItemProcess
         const parsedParams = AcceptFreeValueFormRequestItemParameters.from(params);
 
         if (
-            (requestItem.freeValueFieldType === FreeValueFieldTypes.TextField && typeof parsedParams.freeValue !== "string") ||
+            ((requestItem.freeValueFieldType === FreeValueFieldTypes.TextField || requestItem.freeValueFieldType === FreeValueFieldTypes.TextAreaField) &&
+                typeof parsedParams.freeValue !== "string") ||
             (requestItem.freeValueFieldType === FreeValueFieldTypes.NumberField && (parsedParams.freeValue.trim() === "" || isNaN(Number(parsedParams.freeValue)))) ||
             (requestItem.freeValueFieldType === FreeValueFieldTypes.DateField && isNaN(new Date(parsedParams.freeValue).getTime()))
         ) {

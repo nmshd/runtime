@@ -47,6 +47,17 @@ describe("FreeValueFormRequestItemProcessor", function () {
             expect(result).successfulValidationResult();
         });
 
+        test("can create a form text area field", async () => {
+            const requestItem = FreeValueFormRequestItem.from({
+                mustBeAccepted: false,
+                freeValueFieldType: FreeValueFieldTypes.TextAreaField
+            });
+
+            const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
+
+            expect(result).successfulValidationResult();
+        });
+
         test("can create a form number field", async () => {
             const requestItem = FreeValueFormRequestItem.from({
                 mustBeAccepted: false,
@@ -75,6 +86,22 @@ describe("FreeValueFormRequestItemProcessor", function () {
             const requestItem = FreeValueFormRequestItem.from({
                 mustBeAccepted: true,
                 freeValueFieldType: FreeValueFieldTypes.TextField
+            });
+
+            const acceptParams: AcceptFreeValueFormRequestItemParametersJSON = {
+                accept: true,
+                freeValue: "aFreeTextValue"
+            };
+
+            const result = processor.canAccept(requestItem, acceptParams);
+
+            expect(result).successfulValidationResult();
+        });
+
+        test("can accept a form text area field with a free text", function () {
+            const requestItem = FreeValueFormRequestItem.from({
+                mustBeAccepted: true,
+                freeValueFieldType: FreeValueFieldTypes.TextAreaField
             });
 
             const acceptParams: AcceptFreeValueFormRequestItemParametersJSON = {
@@ -165,6 +192,21 @@ describe("FreeValueFormRequestItemProcessor", function () {
             const requestItem = FreeValueFormRequestItem.from({
                 mustBeAccepted: true,
                 freeValueFieldType: FreeValueFieldTypes.TextField
+            });
+
+            const acceptParams: AcceptFreeValueFormRequestItemParametersJSON = {
+                accept: true,
+                freeValue: "aFreeTextValue"
+            };
+
+            const result = processor.accept(requestItem, acceptParams);
+            expect(result).toBeInstanceOf(FreeValueFormAcceptResponseItem);
+        });
+
+        test("accept form text area field with a free text", function () {
+            const requestItem = FreeValueFormRequestItem.from({
+                mustBeAccepted: true,
+                freeValueFieldType: FreeValueFieldTypes.TextAreaField
             });
 
             const acceptParams: AcceptFreeValueFormRequestItemParametersJSON = {
