@@ -5,13 +5,13 @@ export interface ConsentRequestItemJSON extends RequestItemJSON {
     "@type": "ConsentRequestItem";
     consent: string;
     link?: string;
-    linkText?: string;
+    linkDisplayText?: string;
 }
 
 export interface IConsentRequestItem extends IRequestItem {
     consent: string;
     link?: string;
-    linkText?: string;
+    linkDisplayText?: string;
 }
 
 @type("ConsentRequestItem")
@@ -34,7 +34,7 @@ export class ConsentRequestItem extends RequestItem implements IConsentRequestIt
 
     @serialize()
     @validate({ nullable: true })
-    public linkText?: string;
+    public linkDisplayText?: string;
 
     public static from(value: IConsentRequestItem | Omit<ConsentRequestItemJSON, "@type"> | ConsentRequestItemJSON): ConsentRequestItem {
         return this.fromAny(value);

@@ -59,7 +59,7 @@ export interface ConsentRequestItemDVO extends RequestItemDVO {
     type: "ConsentRequestItemDVO";
     consent: string;
     link?: string;
-    linkText?: string;
+    linkDisplayText?: string;
 }
 
 export interface RegisterAttributeListenerRequestItemDVO extends RequestItemDVO {
