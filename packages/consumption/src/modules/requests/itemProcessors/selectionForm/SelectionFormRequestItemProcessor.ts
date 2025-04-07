@@ -1,4 +1,4 @@
-import { Request, ResponseItemResult, SelectionFormAcceptResponseItem, SelectionFormFieldTypes, SelectionFormRequestItem } from "@nmshd/content";
+import { Request, ResponseItemResult, SelectionFieldTypes, SelectionFormAcceptResponseItem, SelectionFormRequestItem } from "@nmshd/content";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 
@@ -27,12 +27,12 @@ export class SelectionFormRequestItemProcessor extends GenericRequestItemProcess
         }
 
         if (
-            (requestItem.selectionType === SelectionFormFieldTypes.RadioButtonGroup || requestItem.selectionType === SelectionFormFieldTypes.DropdownMenu) &&
+            (requestItem.selectionFieldType === SelectionFieldTypes.RadioButtonGroup || requestItem.selectionFieldType === SelectionFieldTypes.DropdownMenu) &&
             parsedParams.options.length !== 1
         ) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidAcceptParameters(
-                    `A SelectionFormRequestItem of the '${requestItem.selectionType}' selectionType must be accepted with exactly one option.`
+                    `A SelectionFormRequestItem of the '${requestItem.selectionFieldType}' selectionFieldType must be accepted with exactly one option.`
                 )
             );
         }

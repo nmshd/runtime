@@ -1,4 +1,4 @@
-import { FreeValueFormFieldTypes, SelectionFormFieldTypes } from "@nmshd/content";
+import { FreeValueFieldTypes, SelectionFieldTypes } from "@nmshd/content";
 import { LocalAttributeDVO } from "../consumption";
 import { DataViewObject } from "../DataViewObject";
 import { FileDVO } from "../transport";
@@ -74,12 +74,12 @@ export interface FreeTextRequestItemDVO extends RequestItemDVO {
 
 export interface FreeValueFormRequestItemDVO extends RequestItemDVO {
     type: "FreeValueFormRequestItemDVO";
-    freeValueType: FreeValueFormFieldTypes;
+    freeValueFieldType: FreeValueFieldTypes;
 }
 
 export interface SelectionFormRequestItemDVO extends RequestItemDVO {
     type: "SelectionFormRequestItemDVO";
-    selectionType: SelectionFormFieldTypes;
+    selectionFieldType: SelectionFieldTypes;
     options: string[];
 }
 

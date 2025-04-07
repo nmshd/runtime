@@ -1,5 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { FreeValueFormAcceptResponseItem, FreeValueFormFieldTypes, FreeValueFormRequestItem, Request, ResponseItemResult } from "@nmshd/content";
+import { FreeValueFieldTypes, FreeValueFormAcceptResponseItem, FreeValueFormRequestItem, Request, ResponseItemResult } from "@nmshd/content";
 import { CoreAddress, CoreDate } from "@nmshd/core-types";
 import { Transport } from "@nmshd/transport";
 import {
@@ -39,7 +39,7 @@ describe("FreeValueFormRequestItemProcessor", function () {
         test("can create a form text field", async () => {
             const requestItem = FreeValueFormRequestItem.from({
                 mustBeAccepted: false,
-                freeValueType: FreeValueFormFieldTypes.TextField
+                freeValueFieldType: FreeValueFieldTypes.TextField
             });
 
             const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
@@ -50,7 +50,7 @@ describe("FreeValueFormRequestItemProcessor", function () {
         test("can create a form number field", async () => {
             const requestItem = FreeValueFormRequestItem.from({
                 mustBeAccepted: false,
-                freeValueType: FreeValueFormFieldTypes.NumberField
+                freeValueFieldType: FreeValueFieldTypes.NumberField
             });
 
             const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
@@ -61,7 +61,7 @@ describe("FreeValueFormRequestItemProcessor", function () {
         test("can create a form date field", async () => {
             const requestItem = FreeValueFormRequestItem.from({
                 mustBeAccepted: false,
-                freeValueType: FreeValueFormFieldTypes.DateField
+                freeValueFieldType: FreeValueFieldTypes.DateField
             });
 
             const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
@@ -74,7 +74,7 @@ describe("FreeValueFormRequestItemProcessor", function () {
         test("can accept a form text field with a free text", function () {
             const requestItem = FreeValueFormRequestItem.from({
                 mustBeAccepted: true,
-                freeValueType: FreeValueFormFieldTypes.TextField
+                freeValueFieldType: FreeValueFieldTypes.TextField
             });
 
             const acceptParams: AcceptFreeValueFormRequestItemParametersJSON = {
@@ -90,7 +90,7 @@ describe("FreeValueFormRequestItemProcessor", function () {
         test("can accept a form number field with a free number", function () {
             const requestItem = FreeValueFormRequestItem.from({
                 mustBeAccepted: true,
-                freeValueType: FreeValueFormFieldTypes.NumberField
+                freeValueFieldType: FreeValueFieldTypes.NumberField
             });
 
             const aNumber = 123456789;
@@ -107,7 +107,7 @@ describe("FreeValueFormRequestItemProcessor", function () {
         test("returns an error when it is tried to accept a form number field with no free number", function () {
             const requestItem = FreeValueFormRequestItem.from({
                 mustBeAccepted: true,
-                freeValueType: FreeValueFormFieldTypes.NumberField
+                freeValueFieldType: FreeValueFieldTypes.NumberField
             });
 
             const acceptParams: AcceptFreeValueFormRequestItemParametersJSON = {
@@ -119,14 +119,14 @@ describe("FreeValueFormRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidAcceptParameters",
-                message: `Conversion of the provided freeValue 'noNumber' to the freeValueType 'NumberField' of the FreeValueFormRequestItem is not possible.`
+                message: `Conversion of the provided freeValue 'noNumber' to the freeValueFieldType 'NumberField' of the FreeValueFormRequestItem is not possible.`
             });
         });
 
         test("can accept a form date field with a free date", function () {
             const requestItem = FreeValueFormRequestItem.from({
                 mustBeAccepted: true,
-                freeValueType: FreeValueFormFieldTypes.DateField
+                freeValueFieldType: FreeValueFieldTypes.DateField
             });
 
             const aDate = new Date("2000-01-01");
@@ -143,7 +143,7 @@ describe("FreeValueFormRequestItemProcessor", function () {
         test("returns an error when it is tried to accept a form date field with no free date", function () {
             const requestItem = FreeValueFormRequestItem.from({
                 mustBeAccepted: true,
-                freeValueType: FreeValueFormFieldTypes.DateField
+                freeValueFieldType: FreeValueFieldTypes.DateField
             });
 
             const acceptParams: AcceptFreeValueFormRequestItemParametersJSON = {
@@ -155,7 +155,7 @@ describe("FreeValueFormRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidAcceptParameters",
-                message: `Conversion of the provided freeValue 'noDate' to the freeValueType 'DateField' of the FreeValueFormRequestItem is not possible.`
+                message: `Conversion of the provided freeValue 'noDate' to the freeValueFieldType 'DateField' of the FreeValueFormRequestItem is not possible.`
             });
         });
     });
@@ -164,7 +164,7 @@ describe("FreeValueFormRequestItemProcessor", function () {
         test("accept form text field with a free text", function () {
             const requestItem = FreeValueFormRequestItem.from({
                 mustBeAccepted: true,
-                freeValueType: FreeValueFormFieldTypes.TextField
+                freeValueFieldType: FreeValueFieldTypes.TextField
             });
 
             const acceptParams: AcceptFreeValueFormRequestItemParametersJSON = {
@@ -179,7 +179,7 @@ describe("FreeValueFormRequestItemProcessor", function () {
         test("accept form number field with a free number", function () {
             const requestItem = FreeValueFormRequestItem.from({
                 mustBeAccepted: true,
-                freeValueType: FreeValueFormFieldTypes.NumberField
+                freeValueFieldType: FreeValueFieldTypes.NumberField
             });
 
             const aNumber = 123456789;
@@ -195,7 +195,7 @@ describe("FreeValueFormRequestItemProcessor", function () {
         test("accept form date field with a free date", function () {
             const requestItem = FreeValueFormRequestItem.from({
                 mustBeAccepted: true,
-                freeValueType: FreeValueFormFieldTypes.DateField
+                freeValueFieldType: FreeValueFieldTypes.DateField
             });
 
             const aDate = new Date("2000-01-01");
@@ -215,7 +215,7 @@ describe("FreeValueFormRequestItemProcessor", function () {
 
             const requestItem = FreeValueFormRequestItem.from({
                 mustBeAccepted: true,
-                freeValueType: FreeValueFormFieldTypes.TextField
+                freeValueFieldType: FreeValueFieldTypes.TextField
             });
 
             const requestId = await ConsumptionIds.request.generate();

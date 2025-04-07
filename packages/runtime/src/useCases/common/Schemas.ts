@@ -3020,10 +3020,10 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "type": "boolean",
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
-                "freeValueType": {
+                "freeValueFieldType": {
                     "anyOf": [
                         {
-                            "$ref": "#/definitions/FreeValueFormFieldTypes"
+                            "$ref": "#/definitions/FreeValueFieldTypes"
                         },
                         {
                             "type": "string",
@@ -3042,12 +3042,12 @@ export const CanCreateOutgoingRequestRequest: any = {
             },
             "required": [
                 "@type",
-                "freeValueType",
+                "freeValueFieldType",
                 "mustBeAccepted"
             ],
             "additionalProperties": false
         },
-        "FreeValueFormFieldTypes": {
+        "FreeValueFieldTypes": {
             "type": "string",
             "enum": [
                 "TextField",
@@ -3139,10 +3139,10 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "type": "boolean",
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
-                "selectionType": {
+                "selectionFieldType": {
                     "anyOf": [
                         {
-                            "$ref": "#/definitions/SelectionFormFieldTypes"
+                            "$ref": "#/definitions/SelectionFieldTypes"
                         },
                         {
                             "type": "string",
@@ -3169,11 +3169,11 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "@type",
                 "mustBeAccepted",
                 "options",
-                "selectionType"
+                "selectionFieldType"
             ],
             "additionalProperties": false
         },
-        "SelectionFormFieldTypes": {
+        "SelectionFieldTypes": {
             "type": "string",
             "enum": [
                 "RadioButtonGroup",
@@ -11173,10 +11173,10 @@ export const CreateOutgoingRequestRequest: any = {
                     "type": "boolean",
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
-                "freeValueType": {
+                "freeValueFieldType": {
                     "anyOf": [
                         {
-                            "$ref": "#/definitions/FreeValueFormFieldTypes"
+                            "$ref": "#/definitions/FreeValueFieldTypes"
                         },
                         {
                             "type": "string",
@@ -11195,12 +11195,12 @@ export const CreateOutgoingRequestRequest: any = {
             },
             "required": [
                 "@type",
-                "freeValueType",
+                "freeValueFieldType",
                 "mustBeAccepted"
             ],
             "additionalProperties": false
         },
-        "FreeValueFormFieldTypes": {
+        "FreeValueFieldTypes": {
             "type": "string",
             "enum": [
                 "TextField",
@@ -11292,10 +11292,10 @@ export const CreateOutgoingRequestRequest: any = {
                     "type": "boolean",
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
-                "selectionType": {
+                "selectionFieldType": {
                     "anyOf": [
                         {
-                            "$ref": "#/definitions/SelectionFormFieldTypes"
+                            "$ref": "#/definitions/SelectionFieldTypes"
                         },
                         {
                             "type": "string",
@@ -11322,11 +11322,11 @@ export const CreateOutgoingRequestRequest: any = {
                 "@type",
                 "mustBeAccepted",
                 "options",
-                "selectionType"
+                "selectionFieldType"
             ],
             "additionalProperties": false
         },
-        "SelectionFormFieldTypes": {
+        "SelectionFieldTypes": {
             "type": "string",
             "enum": [
                 "RadioButtonGroup",
@@ -14720,10 +14720,10 @@ export const ReceivedIncomingRequestRequest: any = {
                     "type": "boolean",
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
-                "freeValueType": {
+                "freeValueFieldType": {
                     "anyOf": [
                         {
-                            "$ref": "#/definitions/FreeValueFormFieldTypes"
+                            "$ref": "#/definitions/FreeValueFieldTypes"
                         },
                         {
                             "type": "string",
@@ -14742,12 +14742,12 @@ export const ReceivedIncomingRequestRequest: any = {
             },
             "required": [
                 "@type",
-                "freeValueType",
+                "freeValueFieldType",
                 "mustBeAccepted"
             ],
             "additionalProperties": false
         },
-        "FreeValueFormFieldTypes": {
+        "FreeValueFieldTypes": {
             "type": "string",
             "enum": [
                 "TextField",
@@ -14839,10 +14839,10 @@ export const ReceivedIncomingRequestRequest: any = {
                     "type": "boolean",
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
-                "selectionType": {
+                "selectionFieldType": {
                     "anyOf": [
                         {
-                            "$ref": "#/definitions/SelectionFormFieldTypes"
+                            "$ref": "#/definitions/SelectionFieldTypes"
                         },
                         {
                             "type": "string",
@@ -14869,11 +14869,11 @@ export const ReceivedIncomingRequestRequest: any = {
                 "@type",
                 "mustBeAccepted",
                 "options",
-                "selectionType"
+                "selectionFieldType"
             ],
             "additionalProperties": false
         },
-        "SelectionFormFieldTypes": {
+        "SelectionFieldTypes": {
             "type": "string",
             "enum": [
                 "RadioButtonGroup",

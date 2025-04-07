@@ -3,16 +3,16 @@ import { IRequestItem, RequestItem, RequestItemJSON } from "../../RequestItem";
 
 export interface SelectionFormRequestItemJSON extends RequestItemJSON {
     "@type": "SelectionFormRequestItem";
-    selectionType: SelectionFormFieldTypes | `${SelectionFormFieldTypes}`;
+    selectionFieldType: SelectionFieldTypes | `${SelectionFieldTypes}`;
     options: string[];
 }
 
 export interface ISelectionFormRequestItem extends IRequestItem {
-    selectionType: SelectionFormFieldTypes;
+    selectionFieldType: SelectionFieldTypes;
     options: string[];
 }
 
-export enum SelectionFormFieldTypes {
+export enum SelectionFieldTypes {
     RadioButtonGroup = "RadioButtonGroup",
     DropdownMenu = "DropdownMenu",
     Checklist = "Checklist"
@@ -21,9 +21,9 @@ export enum SelectionFormFieldTypes {
 export class SelectionFormRequestItem extends RequestItem implements ISelectionFormRequestItem {
     @serialize()
     @validate({
-        customValidator: (v) => (!Object.values(SelectionFormFieldTypes).includes(v) ? `must be one of: ${Object.values(SelectionFormFieldTypes).map((o) => `"${o}"`)}` : undefined)
+        customValidator: (v) => (!Object.values(SelectionFieldTypes).includes(v) ? `must be one of: ${Object.values(SelectionFieldTypes).map((o) => `"${o}"`)}` : undefined)
     })
-    public selectionType: SelectionFormFieldTypes;
+    public selectionFieldType: SelectionFieldTypes;
 
     @serialize({ type: String })
     @validate()

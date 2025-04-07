@@ -1,5 +1,5 @@
 import { AcceptSelectionFormRequestItemParametersJSON, DecideRequestItemParametersJSON } from "@nmshd/consumption";
-import { SelectionFormFieldTypes, SelectionFormRequestItem } from "@nmshd/content";
+import { SelectionFieldTypes, SelectionFormRequestItem } from "@nmshd/content";
 import {
     ConsumptionServices,
     CreateOutgoingRequestRequest,
@@ -67,7 +67,7 @@ describe("SelectionFormRequestItemDVO", () => {
                 items: [
                     SelectionFormRequestItem.from({
                         mustBeAccepted: true,
-                        selectionType: SelectionFormFieldTypes.RadioButtonGroup,
+                        selectionFieldType: SelectionFieldTypes.RadioButtonGroup,
                         options: ["optionA", "optionB"]
                     }).toJSON()
                 ]
@@ -99,7 +99,7 @@ describe("SelectionFormRequestItemDVO", () => {
         const requestItemDVO = dvo.request.content.items[0] as SelectionFormRequestItemDVO;
         expect(requestItemDVO.type).toBe("SelectionFormRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(false);
-        expect(requestItemDVO.selectionType).toBe(SelectionFormFieldTypes.RadioButtonGroup);
+        expect(requestItemDVO.selectionFieldType).toBe(SelectionFieldTypes.RadioButtonGroup);
         expect(requestItemDVO.options).toStrictEqual(["optionA", "optionB"]);
         expect(requestItemDVO.mustBeAccepted).toBe(true);
     });
@@ -125,7 +125,7 @@ describe("SelectionFormRequestItemDVO", () => {
         const requestItemDVO = dvo.request.content.items[0] as SelectionFormRequestItemDVO;
         expect(requestItemDVO.type).toBe("DecidableSelectionFormRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(true);
-        expect(requestItemDVO.selectionType).toBe(SelectionFormFieldTypes.RadioButtonGroup);
+        expect(requestItemDVO.selectionFieldType).toBe(SelectionFieldTypes.RadioButtonGroup);
         expect(requestItemDVO.options).toStrictEqual(["optionA", "optionB"]);
         expect(requestItemDVO.mustBeAccepted).toBe(true);
     });
@@ -157,7 +157,7 @@ describe("SelectionFormRequestItemDVO", () => {
         const requestItemDVO = dvo.request.content.items[0] as SelectionFormRequestItemDVO;
         expect(requestItemDVO.type).toBe("SelectionFormRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(false);
-        expect(requestItemDVO.selectionType).toBe(SelectionFormFieldTypes.RadioButtonGroup);
+        expect(requestItemDVO.selectionFieldType).toBe(SelectionFieldTypes.RadioButtonGroup);
         expect(requestItemDVO.options).toStrictEqual(["optionA", "optionB"]);
         expect(requestItemDVO.mustBeAccepted).toBe(true);
 
@@ -198,7 +198,7 @@ describe("SelectionFormRequestItemDVO", () => {
         const requestItemDVO = dvo.request.content.items[0] as SelectionFormRequestItemDVO;
         expect(requestItemDVO.type).toBe("SelectionFormRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(false);
-        expect(requestItemDVO.selectionType).toBe(SelectionFormFieldTypes.RadioButtonGroup);
+        expect(requestItemDVO.selectionFieldType).toBe(SelectionFieldTypes.RadioButtonGroup);
         expect(requestItemDVO.options).toStrictEqual(["optionA", "optionB"]);
         expect(requestItemDVO.mustBeAccepted).toBe(true);
         const response = dvo.request.response;

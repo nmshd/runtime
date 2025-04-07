@@ -1,4 +1,4 @@
-import { FreeValueFormAcceptResponseItem, FreeValueFormFieldTypes, FreeValueFormRequestItem, ResponseItemResult } from "@nmshd/content";
+import { FreeValueFieldTypes, FreeValueFormAcceptResponseItem, FreeValueFormRequestItem, ResponseItemResult } from "@nmshd/content";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 
@@ -10,13 +10,13 @@ export class FreeValueFormRequestItemProcessor extends GenericRequestItemProcess
         const parsedParams = AcceptFreeValueFormRequestItemParameters.from(params);
 
         if (
-            (requestItem.freeValueType === FreeValueFormFieldTypes.TextField && typeof parsedParams.freeValue !== "string") ||
-            (requestItem.freeValueType === FreeValueFormFieldTypes.NumberField && (parsedParams.freeValue.trim() === "" || isNaN(Number(parsedParams.freeValue)))) ||
-            (requestItem.freeValueType === FreeValueFormFieldTypes.DateField && isNaN(new Date(parsedParams.freeValue).getTime()))
+            (requestItem.freeValueFieldType === FreeValueFieldTypes.TextField && typeof parsedParams.freeValue !== "string") ||
+            (requestItem.freeValueFieldType === FreeValueFieldTypes.NumberField && (parsedParams.freeValue.trim() === "" || isNaN(Number(parsedParams.freeValue)))) ||
+            (requestItem.freeValueFieldType === FreeValueFieldTypes.DateField && isNaN(new Date(parsedParams.freeValue).getTime()))
         ) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidAcceptParameters(
-                    `Conversion of the provided freeValue '${parsedParams.freeValue}' to the freeValueType '${requestItem.freeValueType}' of the FreeValueFormRequestItem is not possible.`
+                    `Conversion of the provided freeValue '${parsedParams.freeValue}' to the freeValueFieldType '${requestItem.freeValueFieldType}' of the FreeValueFormRequestItem is not possible.`
                 )
             );
         }
