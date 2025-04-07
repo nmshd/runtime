@@ -44,6 +44,7 @@ export interface DecidableConsentRequestItemDVO extends DecidableRequestItemDVO 
     type: "DecidableConsentRequestItemDVO";
     consent: string;
     link?: string;
+    linkText?: string;
 }
 
 export interface DecidableFreeTextRequestItemDVO extends DecidableRequestItemDVO {
