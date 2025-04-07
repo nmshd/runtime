@@ -62,7 +62,7 @@ export class W3CVCProcessor extends AbstractVCProcessor<any> {
         if (statusList && statusList.type !== SupportedStatusListTypes.BitstringStatusList) throw new Error("unsupported status list");
 
         const enrichedData = {
-            "@context": ["https://www.w3.org/2018/credentials/v1"],
+            "@context": ["https://www.w3.org/2018/credentials/v1"], // TODO: decide which VC version to use
             type: ["VerifiableCredential"],
             issuer: this.issuerId,
             issuanceDate: CoreDate.utc().toString(),
@@ -120,7 +120,6 @@ export class W3CVCProcessor extends AbstractVCProcessor<any> {
 
     public override async verify(data: any): Promise<{ isSuccess: false } | { isSuccess: true; payload: Record<string, unknown>; subject?: string; issuer: string }> {
         const suite = new DataIntegrityProof({ cryptosuite: this.eddsa2022CryptoSuite });
-
         const verificationResult = await vc.verifyCredential({
             credential: data,
             suite,
