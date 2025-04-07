@@ -1,4 +1,5 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
+import { Serializable, serialize, type, validate, ValidationError } from "@js-soft/ts-serval";
+import { nameof } from "ts-simple-nameof";
 import { AbstractAttributeValue, AbstractAttributeValueJSON, IAbstractAttributeValue } from "../../AbstractAttributeValue";
 import { RenderHints, RenderHintsDataType, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../../hints";
 
@@ -35,6 +36,20 @@ export class Consent extends AbstractAttributeValue implements IConsent {
     @serialize()
     @validate({ nullable: true, min: 5, max: 30 })
     public linkDisplayText?: string;
+
+    protected static override postFrom<T extends Serializable>(value: T): T {
+        if (!(value instanceof Consent)) throw new Error("this should never happen");
+
+        if (typeof value.linkDisplayText === "string" && typeof value.link === "undefined") {
+            throw new ValidationError(
+                Consent.name,
+                nameof<Consent>((x) => x.linkDisplayText),
+                `A ${nameof<Consent>((x) => x.linkDisplayText)} can only be defined if a ${nameof<Consent>((x) => x.link)} is defined too.`
+            );
+        }
+
+        return value;
+    }
 
     public static from(value: IConsent | Omit<ConsentJSON, "@type">): Consent {
         return this.fromAny(value);

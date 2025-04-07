@@ -1,4 +1,5 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
+import { Serializable, serialize, type, validate, ValidationError } from "@js-soft/ts-serval";
+import { nameof } from "ts-simple-nameof";
 import { IRequestItem, RequestItem, RequestItemJSON } from "../../RequestItem";
 
 export interface ConsentRequestItemJSON extends RequestItemJSON {
@@ -35,6 +36,20 @@ export class ConsentRequestItem extends RequestItem implements IConsentRequestIt
     @serialize()
     @validate({ nullable: true })
     public linkDisplayText?: string;
+
+    protected static override postFrom<T extends Serializable>(value: T): T {
+        if (!(value instanceof ConsentRequestItem)) throw new Error("this should never happen");
+
+        if (typeof value.linkDisplayText === "string" && typeof value.link === "undefined") {
+            throw new ValidationError(
+                ConsentRequestItem.name,
+                nameof<ConsentRequestItem>((x) => x.linkDisplayText),
+                `A ${nameof<ConsentRequestItem>((x) => x.linkDisplayText)} can only be defined if a ${nameof<ConsentRequestItem>((x) => x.link)} is defined too.`
+            );
+        }
+
+        return value;
+    }
 
     public static from(value: IConsentRequestItem | Omit<ConsentRequestItemJSON, "@type"> | ConsentRequestItemJSON): ConsentRequestItem {
         return this.fromAny(value);
