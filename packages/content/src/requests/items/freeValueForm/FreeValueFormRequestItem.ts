@@ -3,14 +3,14 @@ import { IRequestItem, RequestItem, RequestItemJSON } from "../../RequestItem";
 
 export interface FreeValueFormRequestItemJSON extends RequestItemJSON {
     "@type": "FreeValueFormRequestItem";
-    freeValueType: FreeValueFormRequestItemTypes | `${FreeValueFormRequestItemTypes}`;
+    freeValueType: FreeValueFormFieldTypes | `${FreeValueFormFieldTypes}`;
 }
 
 export interface IFreeValueFormRequestItem extends IRequestItem {
-    freeValueType: FreeValueFormRequestItemTypes;
+    freeValueType: FreeValueFormFieldTypes;
 }
 
-export enum FreeValueFormRequestItemTypes {
+export enum FreeValueFormFieldTypes {
     TextField = "TextField",
     NumberField = "NumberField",
     DateField = "DateField"
@@ -20,10 +20,9 @@ export enum FreeValueFormRequestItemTypes {
 export class FreeValueFormRequestItem extends RequestItem implements IFreeValueFormRequestItem {
     @serialize()
     @validate({
-        customValidator: (v) =>
-            !Object.values(FreeValueFormRequestItemTypes).includes(v) ? `must be one of: ${Object.values(FreeValueFormRequestItemTypes).map((o) => `"${o}"`)}` : undefined
+        customValidator: (v) => (!Object.values(FreeValueFormFieldTypes).includes(v) ? `must be one of: ${Object.values(FreeValueFormFieldTypes).map((o) => `"${o}"`)}` : undefined)
     })
-    public freeValueType: FreeValueFormRequestItemTypes;
+    public freeValueType: FreeValueFormFieldTypes;
 
     public static from(value: IFreeValueFormRequestItem | Omit<FreeValueFormRequestItemJSON, "@type"> | FreeValueFormRequestItemJSON): FreeValueFormRequestItem {
         return this.fromAny(value);

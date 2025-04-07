@@ -1,5 +1,5 @@
 import { AcceptFreeValueFormRequestItemParametersJSON, DecideRequestItemParametersJSON } from "@nmshd/consumption";
-import { FreeValueFormRequestItem, FreeValueFormRequestItemTypes } from "@nmshd/content";
+import { FreeValueFormFieldTypes, FreeValueFormRequestItem } from "@nmshd/content";
 import {
     ConsumptionServices,
     CreateOutgoingRequestRequest,
@@ -67,7 +67,7 @@ describe("FreeValueFormRequestItemDVO", () => {
                 items: [
                     FreeValueFormRequestItem.from({
                         mustBeAccepted: true,
-                        freeValueType: FreeValueFormRequestItemTypes.TextField
+                        freeValueType: FreeValueFormFieldTypes.TextField
                     }).toJSON()
                 ]
             },
@@ -98,7 +98,7 @@ describe("FreeValueFormRequestItemDVO", () => {
         const requestItemDVO = dvo.request.content.items[0] as FreeValueFormRequestItemDVO;
         expect(requestItemDVO.type).toBe("FreeValueFormRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(false);
-        expect(requestItemDVO.freeValueType).toBe(FreeValueFormRequestItemTypes.TextField);
+        expect(requestItemDVO.freeValueType).toBe(FreeValueFormFieldTypes.TextField);
         expect(requestItemDVO.mustBeAccepted).toBe(true);
     });
 
@@ -123,7 +123,7 @@ describe("FreeValueFormRequestItemDVO", () => {
         const requestItemDVO = dvo.request.content.items[0] as FreeValueFormRequestItemDVO;
         expect(requestItemDVO.type).toBe("DecidableFreeValueFormRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(true);
-        expect(requestItemDVO.freeValueType).toBe(FreeValueFormRequestItemTypes.TextField);
+        expect(requestItemDVO.freeValueType).toBe(FreeValueFormFieldTypes.TextField);
         expect(requestItemDVO.mustBeAccepted).toBe(true);
     });
 
@@ -154,7 +154,7 @@ describe("FreeValueFormRequestItemDVO", () => {
         const requestItemDVO = dvo.request.content.items[0] as FreeValueFormRequestItemDVO;
         expect(requestItemDVO.type).toBe("FreeValueFormRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(false);
-        expect(requestItemDVO.freeValueType).toBe(FreeValueFormRequestItemTypes.TextField);
+        expect(requestItemDVO.freeValueType).toBe(FreeValueFormFieldTypes.TextField);
         expect(requestItemDVO.mustBeAccepted).toBe(true);
 
         const response = dvo.request.response;
@@ -194,7 +194,7 @@ describe("FreeValueFormRequestItemDVO", () => {
         const requestItemDVO = dvo.request.content.items[0] as FreeValueFormRequestItemDVO;
         expect(requestItemDVO.type).toBe("FreeValueFormRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(false);
-        expect(requestItemDVO.freeValueType).toBe(FreeValueFormRequestItemTypes.TextField);
+        expect(requestItemDVO.freeValueType).toBe(FreeValueFormFieldTypes.TextField);
         expect(requestItemDVO.mustBeAccepted).toBe(true);
         const response = dvo.request.response;
         expect(response).toBeDefined();

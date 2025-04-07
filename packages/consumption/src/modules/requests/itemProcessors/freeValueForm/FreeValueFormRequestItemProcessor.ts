@@ -1,4 +1,4 @@
-import { FreeValueFormAcceptResponseItem, FreeValueFormRequestItem, FreeValueFormRequestItemTypes, ResponseItemResult } from "@nmshd/content";
+import { FreeValueFormAcceptResponseItem, FreeValueFormFieldTypes, FreeValueFormRequestItem, ResponseItemResult } from "@nmshd/content";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 
@@ -19,9 +19,9 @@ export class FreeValueFormRequestItemProcessor extends GenericRequestItemProcess
         const parsedParams = AcceptFreeValueFormRequestItemParameters.from(params);
 
         if (
-            (requestItem.freeValueType === FreeValueFormRequestItemTypes.TextField && typeof parsedParams.freeValue !== "string") ||
-            (requestItem.freeValueType === FreeValueFormRequestItemTypes.NumberField && (parsedParams.freeValue.trim() === "" || isNaN(Number(parsedParams.freeValue)))) ||
-            (requestItem.freeValueType === FreeValueFormRequestItemTypes.DateField && isNaN(new Date(parsedParams.freeValue).getTime()))
+            (requestItem.freeValueType === FreeValueFormFieldTypes.TextField && typeof parsedParams.freeValue !== "string") ||
+            (requestItem.freeValueType === FreeValueFormFieldTypes.NumberField && (parsedParams.freeValue.trim() === "" || isNaN(Number(parsedParams.freeValue)))) ||
+            (requestItem.freeValueType === FreeValueFormFieldTypes.DateField && isNaN(new Date(parsedParams.freeValue).getTime()))
         ) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidAcceptParameters(

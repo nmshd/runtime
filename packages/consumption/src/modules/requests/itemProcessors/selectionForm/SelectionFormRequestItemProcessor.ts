@@ -1,4 +1,4 @@
-import { Request, ResponseItemResult, SelectionFormRequestItem, SelectionFormRequestItemTypes } from "@nmshd/content";
+import { Request, ResponseItemResult, SelectionFormFieldTypes, SelectionFormRequestItem } from "@nmshd/content";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 
@@ -37,7 +37,7 @@ export class SelectionFormRequestItemProcessor extends GenericRequestItemProcess
         }
 
         if (
-            (requestItem.selectionType === SelectionFormRequestItemTypes.Radio || requestItem.selectionType === SelectionFormRequestItemTypes.Dropdown) &&
+            (requestItem.selectionType === SelectionFormFieldTypes.RadioButtonGroup || requestItem.selectionType === SelectionFormFieldTypes.DropdownMenu) &&
             parsedParams.options.length !== 1
         ) {
             return ValidationResult.error(

@@ -1,5 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { Request, ResponseItemResult, SelectionFormAcceptResponseItem, SelectionFormRequestItem, SelectionFormRequestItemTypes } from "@nmshd/content";
+import { Request, ResponseItemResult, SelectionFormAcceptResponseItem, SelectionFormFieldTypes, SelectionFormRequestItem } from "@nmshd/content";
 import { CoreAddress, CoreDate } from "@nmshd/core-types";
 import { Transport } from "@nmshd/transport";
 import {
@@ -40,7 +40,7 @@ describe("SelectionFormRequestItemProcessor", function () {
             test("can create a form radio button group", () => {
                 const requestItem = SelectionFormRequestItem.from({
                     mustBeAccepted: false,
-                    selectionType: SelectionFormRequestItemTypes.Radio,
+                    selectionType: SelectionFormFieldTypes.RadioButtonGroup,
                     options: ["optionA", "optionB"]
                 });
 
@@ -52,7 +52,7 @@ describe("SelectionFormRequestItemProcessor", function () {
             test("cannot create a form radio button group with no options", () => {
                 const requestItem = SelectionFormRequestItem.from({
                     mustBeAccepted: false,
-                    selectionType: SelectionFormRequestItemTypes.Radio,
+                    selectionType: SelectionFormFieldTypes.RadioButtonGroup,
                     options: []
                 });
 
@@ -67,7 +67,7 @@ describe("SelectionFormRequestItemProcessor", function () {
             test("cannot create a form radio button group with non-unique options", () => {
                 const requestItem = SelectionFormRequestItem.from({
                     mustBeAccepted: false,
-                    selectionType: SelectionFormRequestItemTypes.Radio,
+                    selectionType: SelectionFormFieldTypes.RadioButtonGroup,
                     options: ["optionA", "optionA"]
                 });
 
@@ -84,7 +84,7 @@ describe("SelectionFormRequestItemProcessor", function () {
             test("can create a form dropdown menu", () => {
                 const requestItem = SelectionFormRequestItem.from({
                     mustBeAccepted: false,
-                    selectionType: SelectionFormRequestItemTypes.Dropdown,
+                    selectionType: SelectionFormFieldTypes.DropdownMenu,
                     options: ["optionA", "optionB"]
                 });
 
@@ -96,7 +96,7 @@ describe("SelectionFormRequestItemProcessor", function () {
             test("cannot create a form dropdown menu with no options", () => {
                 const requestItem = SelectionFormRequestItem.from({
                     mustBeAccepted: false,
-                    selectionType: SelectionFormRequestItemTypes.Dropdown,
+                    selectionType: SelectionFormFieldTypes.DropdownMenu,
                     options: []
                 });
 
@@ -111,7 +111,7 @@ describe("SelectionFormRequestItemProcessor", function () {
             test("cannot create a form dropdown menu with non-unique options", () => {
                 const requestItem = SelectionFormRequestItem.from({
                     mustBeAccepted: false,
-                    selectionType: SelectionFormRequestItemTypes.Dropdown,
+                    selectionType: SelectionFormFieldTypes.DropdownMenu,
                     options: ["optionA", "optionA"]
                 });
 
@@ -128,7 +128,7 @@ describe("SelectionFormRequestItemProcessor", function () {
             test("can create a form checklist", () => {
                 const requestItem = SelectionFormRequestItem.from({
                     mustBeAccepted: false,
-                    selectionType: SelectionFormRequestItemTypes.Checklist,
+                    selectionType: SelectionFormFieldTypes.Checklist,
                     options: ["optionA", "optionB"]
                 });
 
@@ -140,7 +140,7 @@ describe("SelectionFormRequestItemProcessor", function () {
             test("cannot create a form checklist with no options", () => {
                 const requestItem = SelectionFormRequestItem.from({
                     mustBeAccepted: false,
-                    selectionType: SelectionFormRequestItemTypes.Checklist,
+                    selectionType: SelectionFormFieldTypes.Checklist,
                     options: []
                 });
 
@@ -155,7 +155,7 @@ describe("SelectionFormRequestItemProcessor", function () {
             test("cannot create a form checklist with non-unique options", () => {
                 const requestItem = SelectionFormRequestItem.from({
                     mustBeAccepted: false,
-                    selectionType: SelectionFormRequestItemTypes.Checklist,
+                    selectionType: SelectionFormFieldTypes.Checklist,
                     options: ["optionA", "optionA"]
                 });
 
@@ -174,7 +174,7 @@ describe("SelectionFormRequestItemProcessor", function () {
             test("can accept a form radio button group with an option", function () {
                 const requestItem = SelectionFormRequestItem.from({
                     mustBeAccepted: true,
-                    selectionType: SelectionFormRequestItemTypes.Radio,
+                    selectionType: SelectionFormFieldTypes.RadioButtonGroup,
                     options: ["optionA", "optionB"]
                 });
 
@@ -191,7 +191,7 @@ describe("SelectionFormRequestItemProcessor", function () {
             test("returns an error when it is tried to accept a form radio button group with no option", function () {
                 const requestItem = SelectionFormRequestItem.from({
                     mustBeAccepted: true,
-                    selectionType: SelectionFormRequestItemTypes.Radio,
+                    selectionType: SelectionFormFieldTypes.RadioButtonGroup,
                     options: ["optionA", "optionB"]
                 });
 
@@ -211,7 +211,7 @@ describe("SelectionFormRequestItemProcessor", function () {
             test("returns an error when it is tried to accept a form radio button group with an unknown option", function () {
                 const requestItem = SelectionFormRequestItem.from({
                     mustBeAccepted: true,
-                    selectionType: SelectionFormRequestItemTypes.Radio,
+                    selectionType: SelectionFormFieldTypes.RadioButtonGroup,
                     options: ["optionA", "optionB"]
                 });
 
@@ -231,7 +231,7 @@ describe("SelectionFormRequestItemProcessor", function () {
             test("returns an error when it is tried to accept a form radio button group with more than one option", function () {
                 const requestItem = SelectionFormRequestItem.from({
                     mustBeAccepted: true,
-                    selectionType: SelectionFormRequestItemTypes.Radio,
+                    selectionType: SelectionFormFieldTypes.RadioButtonGroup,
                     options: ["optionA", "optionB"]
                 });
 
@@ -253,7 +253,7 @@ describe("SelectionFormRequestItemProcessor", function () {
             test("can accept a form dropdown menu with an option", function () {
                 const requestItem = SelectionFormRequestItem.from({
                     mustBeAccepted: true,
-                    selectionType: SelectionFormRequestItemTypes.Dropdown,
+                    selectionType: SelectionFormFieldTypes.DropdownMenu,
                     options: ["optionA", "optionB"]
                 });
 
@@ -270,7 +270,7 @@ describe("SelectionFormRequestItemProcessor", function () {
             test("returns an error when it is tried to accept a form dropdown menu with no option", function () {
                 const requestItem = SelectionFormRequestItem.from({
                     mustBeAccepted: true,
-                    selectionType: SelectionFormRequestItemTypes.Dropdown,
+                    selectionType: SelectionFormFieldTypes.DropdownMenu,
                     options: ["optionA", "optionB"]
                 });
 
@@ -290,7 +290,7 @@ describe("SelectionFormRequestItemProcessor", function () {
             test("returns an error when it is tried to accept a form dropdown menu with an unknown option", function () {
                 const requestItem = SelectionFormRequestItem.from({
                     mustBeAccepted: true,
-                    selectionType: SelectionFormRequestItemTypes.Dropdown,
+                    selectionType: SelectionFormFieldTypes.DropdownMenu,
                     options: ["optionA", "optionB"]
                 });
 
@@ -310,7 +310,7 @@ describe("SelectionFormRequestItemProcessor", function () {
             test("returns an error when it is tried to accept a form dropdown menu with more than one option", function () {
                 const requestItem = SelectionFormRequestItem.from({
                     mustBeAccepted: true,
-                    selectionType: SelectionFormRequestItemTypes.Dropdown,
+                    selectionType: SelectionFormFieldTypes.DropdownMenu,
                     options: ["optionA", "optionB"]
                 });
 
@@ -332,7 +332,7 @@ describe("SelectionFormRequestItemProcessor", function () {
             test("can accept a form checklist with an option", function () {
                 const requestItem = SelectionFormRequestItem.from({
                     mustBeAccepted: true,
-                    selectionType: SelectionFormRequestItemTypes.Checklist,
+                    selectionType: SelectionFormFieldTypes.Checklist,
                     options: ["optionA", "optionB"]
                 });
 
@@ -349,7 +349,7 @@ describe("SelectionFormRequestItemProcessor", function () {
             test("can accept a form checklist with multiple options", function () {
                 const requestItem = SelectionFormRequestItem.from({
                     mustBeAccepted: true,
-                    selectionType: SelectionFormRequestItemTypes.Checklist,
+                    selectionType: SelectionFormFieldTypes.Checklist,
                     options: ["optionA", "optionB"]
                 });
 
@@ -366,7 +366,7 @@ describe("SelectionFormRequestItemProcessor", function () {
             test("returns an error when it is tried to accept a form checklist with no option", function () {
                 const requestItem = SelectionFormRequestItem.from({
                     mustBeAccepted: true,
-                    selectionType: SelectionFormRequestItemTypes.Checklist,
+                    selectionType: SelectionFormFieldTypes.Checklist,
                     options: ["optionA", "optionB"]
                 });
 
@@ -386,7 +386,7 @@ describe("SelectionFormRequestItemProcessor", function () {
             test("returns an error when it is tried to accept a form checklist with an unknown option", function () {
                 const requestItem = SelectionFormRequestItem.from({
                     mustBeAccepted: true,
-                    selectionType: SelectionFormRequestItemTypes.Checklist,
+                    selectionType: SelectionFormFieldTypes.Checklist,
                     options: ["optionA", "optionB"]
                 });
 
@@ -406,7 +406,7 @@ describe("SelectionFormRequestItemProcessor", function () {
             test("returns an error when it is tried to accept a form checklist with the same option twice", function () {
                 const requestItem = SelectionFormRequestItem.from({
                     mustBeAccepted: true,
-                    selectionType: SelectionFormRequestItemTypes.Checklist,
+                    selectionType: SelectionFormFieldTypes.Checklist,
                     options: ["optionA", "optionB"]
                 });
 
@@ -429,7 +429,7 @@ describe("SelectionFormRequestItemProcessor", function () {
         test("accept form radio button group with an option", function () {
             const requestItem = SelectionFormRequestItem.from({
                 mustBeAccepted: true,
-                selectionType: SelectionFormRequestItemTypes.Radio,
+                selectionType: SelectionFormFieldTypes.RadioButtonGroup,
                 options: ["optionA", "optionB"]
             });
 
@@ -445,7 +445,7 @@ describe("SelectionFormRequestItemProcessor", function () {
         test("accept form dropdown menu with an option", function () {
             const requestItem = SelectionFormRequestItem.from({
                 mustBeAccepted: true,
-                selectionType: SelectionFormRequestItemTypes.Dropdown,
+                selectionType: SelectionFormFieldTypes.DropdownMenu,
                 options: ["optionA", "optionB"]
             });
 
@@ -461,7 +461,7 @@ describe("SelectionFormRequestItemProcessor", function () {
         test("accept form checklist with an option", function () {
             const requestItem = SelectionFormRequestItem.from({
                 mustBeAccepted: true,
-                selectionType: SelectionFormRequestItemTypes.Checklist,
+                selectionType: SelectionFormFieldTypes.Checklist,
                 options: ["optionA", "optionB"]
             });
 
@@ -477,7 +477,7 @@ describe("SelectionFormRequestItemProcessor", function () {
         test("accept form checklist with multiple options", function () {
             const requestItem = SelectionFormRequestItem.from({
                 mustBeAccepted: true,
-                selectionType: SelectionFormRequestItemTypes.Checklist,
+                selectionType: SelectionFormFieldTypes.Checklist,
                 options: ["optionA", "optionB"]
             });
 
@@ -497,7 +497,7 @@ describe("SelectionFormRequestItemProcessor", function () {
 
             const requestItem = SelectionFormRequestItem.from({
                 mustBeAccepted: true,
-                selectionType: SelectionFormRequestItemTypes.Radio,
+                selectionType: SelectionFormFieldTypes.RadioButtonGroup,
                 options: ["optionA", "optionB"]
             });
 

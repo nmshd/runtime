@@ -3023,7 +3023,7 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "freeValueType": {
                     "anyOf": [
                         {
-                            "$ref": "#/definitions/FreeValueFormRequestItemTypes"
+                            "$ref": "#/definitions/FreeValueFormFieldTypes"
                         },
                         {
                             "type": "string",
@@ -3047,7 +3047,7 @@ export const CanCreateOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
-        "FreeValueFormRequestItemTypes": {
+        "FreeValueFormFieldTypes": {
             "type": "string",
             "enum": [
                 "TextField",
@@ -3142,15 +3142,15 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "selectionType": {
                     "anyOf": [
                         {
-                            "$ref": "#/definitions/SelectionFormRequestItemTypes"
+                            "$ref": "#/definitions/SelectionFormFieldTypes"
                         },
                         {
                             "type": "string",
-                            "const": "Radio"
+                            "const": "RadioButtonGroup"
                         },
                         {
                             "type": "string",
-                            "const": "Dropdown"
+                            "const": "DropdownMenu"
                         },
                         {
                             "type": "string",
@@ -3173,11 +3173,11 @@ export const CanCreateOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
-        "SelectionFormRequestItemTypes": {
+        "SelectionFormFieldTypes": {
             "type": "string",
             "enum": [
-                "Radio",
-                "Dropdown",
+                "RadioButtonGroup",
+                "DropdownMenu",
                 "Checklist"
             ]
         },
@@ -11176,7 +11176,7 @@ export const CreateOutgoingRequestRequest: any = {
                 "freeValueType": {
                     "anyOf": [
                         {
-                            "$ref": "#/definitions/FreeValueFormRequestItemTypes"
+                            "$ref": "#/definitions/FreeValueFormFieldTypes"
                         },
                         {
                             "type": "string",
@@ -11200,7 +11200,7 @@ export const CreateOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
-        "FreeValueFormRequestItemTypes": {
+        "FreeValueFormFieldTypes": {
             "type": "string",
             "enum": [
                 "TextField",
@@ -11295,15 +11295,15 @@ export const CreateOutgoingRequestRequest: any = {
                 "selectionType": {
                     "anyOf": [
                         {
-                            "$ref": "#/definitions/SelectionFormRequestItemTypes"
+                            "$ref": "#/definitions/SelectionFormFieldTypes"
                         },
                         {
                             "type": "string",
-                            "const": "Radio"
+                            "const": "RadioButtonGroup"
                         },
                         {
                             "type": "string",
-                            "const": "Dropdown"
+                            "const": "DropdownMenu"
                         },
                         {
                             "type": "string",
@@ -11326,11 +11326,11 @@ export const CreateOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
-        "SelectionFormRequestItemTypes": {
+        "SelectionFormFieldTypes": {
             "type": "string",
             "enum": [
-                "Radio",
-                "Dropdown",
+                "RadioButtonGroup",
+                "DropdownMenu",
                 "Checklist"
             ]
         },
@@ -14723,7 +14723,7 @@ export const ReceivedIncomingRequestRequest: any = {
                 "freeValueType": {
                     "anyOf": [
                         {
-                            "$ref": "#/definitions/FreeValueFormRequestItemTypes"
+                            "$ref": "#/definitions/FreeValueFormFieldTypes"
                         },
                         {
                             "type": "string",
@@ -14747,7 +14747,7 @@ export const ReceivedIncomingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
-        "FreeValueFormRequestItemTypes": {
+        "FreeValueFormFieldTypes": {
             "type": "string",
             "enum": [
                 "TextField",
@@ -14842,15 +14842,15 @@ export const ReceivedIncomingRequestRequest: any = {
                 "selectionType": {
                     "anyOf": [
                         {
-                            "$ref": "#/definitions/SelectionFormRequestItemTypes"
+                            "$ref": "#/definitions/SelectionFormFieldTypes"
                         },
                         {
                             "type": "string",
-                            "const": "Radio"
+                            "const": "RadioButtonGroup"
                         },
                         {
                             "type": "string",
-                            "const": "Dropdown"
+                            "const": "DropdownMenu"
                         },
                         {
                             "type": "string",
@@ -14873,11 +14873,11 @@ export const ReceivedIncomingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
-        "SelectionFormRequestItemTypes": {
+        "SelectionFormFieldTypes": {
             "type": "string",
             "enum": [
-                "Radio",
-                "Dropdown",
+                "RadioButtonGroup",
+                "DropdownMenu",
                 "Checklist"
             ]
         },
