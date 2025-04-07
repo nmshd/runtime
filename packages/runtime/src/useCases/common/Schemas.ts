@@ -1081,7 +1081,7 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "link": {
                     "type": "string"
                 },
-                "linkText": {
+                "linkDisplayText": {
                     "type": "string"
                 }
             },
@@ -2892,7 +2892,7 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "link": {
                     "type": "string"
                 },
-                "linkText": {
+                "linkDisplayText": {
                     "type": "string"
                 }
             },
@@ -5370,7 +5370,7 @@ export const CompleteOutgoingRequestRequest: any = {
                 "link": {
                     "type": "string"
                 },
-                "linkText": {
+                "linkDisplayText": {
                     "type": "string"
                 }
             },
@@ -7806,7 +7806,7 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                 "link": {
                     "type": "string"
                 },
-                "linkText": {
+                "linkDisplayText": {
                     "type": "string"
                 }
             },
@@ -8967,7 +8967,7 @@ export const CreateOutgoingRequestRequest: any = {
                 "link": {
                     "type": "string"
                 },
-                "linkText": {
+                "linkDisplayText": {
                     "type": "string"
                 }
             },
@@ -10778,7 +10778,7 @@ export const CreateOutgoingRequestRequest: any = {
                 "link": {
                     "type": "string"
                 },
-                "linkText": {
+                "linkDisplayText": {
                     "type": "string"
                 }
             },
@@ -12371,7 +12371,7 @@ export const ReceivedIncomingRequestRequest: any = {
                 "link": {
                     "type": "string"
                 },
-                "linkText": {
+                "linkDisplayText": {
                     "type": "string"
                 }
             },
@@ -14182,7 +14182,7 @@ export const ReceivedIncomingRequestRequest: any = {
                 "link": {
                     "type": "string"
                 },
-                "linkText": {
+                "linkDisplayText": {
                     "type": "string"
                 }
             },
@@ -15127,7 +15127,7 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
                 "link": {
                     "type": "string"
                 },
-                "linkText": {
+                "linkDisplayText": {
                     "type": "string"
                 }
             },
@@ -17501,7 +17501,7 @@ export const SucceedRelationshipAttributeAndNotifyPeerRequest: any = {
                 "link": {
                     "type": "string"
                 },
-                "linkText": {
+                "linkDisplayText": {
                     "type": "string"
                 }
             },
