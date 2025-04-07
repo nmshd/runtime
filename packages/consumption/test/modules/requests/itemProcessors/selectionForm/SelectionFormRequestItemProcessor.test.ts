@@ -244,7 +244,7 @@ describe("SelectionFormRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidAcceptParameters",
-                    message: `A SelectionFormRequestItem of the 'Radio' selectionType must be accepted with exactly one option.`
+                    message: `A SelectionFormRequestItem of the 'RadioButtonGroup' selectionType must be accepted with exactly one option.`
                 });
             });
         });
@@ -323,7 +323,7 @@ describe("SelectionFormRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidAcceptParameters",
-                    message: `A SelectionFormRequestItem of the 'Dropdown' selectionType must be accepted with exactly one option.`
+                    message: `A SelectionFormRequestItem of the 'DropdownMenu' selectionType must be accepted with exactly one option.`
                 });
             });
         });
