@@ -26,10 +26,7 @@ export class SelectionFormRequestItemProcessor extends GenericRequestItemProcess
             return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters("At least one option must be specified to accept a SelectionFormRequestItem."));
         }
 
-        if (
-            (requestItem.selectionFieldType === SelectionFieldTypes.RadioButtonGroup || requestItem.selectionFieldType === SelectionFieldTypes.DropdownMenu) &&
-            parsedParams.options.length !== 1
-        ) {
+        if ([SelectionFieldTypes.RadioButtonGroup, SelectionFieldTypes.DropdownMenu].includes(requestItem.selectionFieldType) && parsedParams.options.length !== 1) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidAcceptParameters(
                     `A SelectionFormRequestItem of the '${requestItem.selectionFieldType}' selectionFieldType must be accepted with exactly one option.`

@@ -10,8 +10,7 @@ export class FreeValueFormRequestItemProcessor extends GenericRequestItemProcess
         const parsedParams = AcceptFreeValueFormRequestItemParameters.from(params);
 
         if (
-            ((requestItem.freeValueFieldType === FreeValueFieldTypes.TextField || requestItem.freeValueFieldType === FreeValueFieldTypes.TextAreaField) &&
-                typeof parsedParams.freeValue !== "string") ||
+            ([FreeValueFieldTypes.TextField, FreeValueFieldTypes.TextAreaField].includes(requestItem.freeValueFieldType) && typeof parsedParams.freeValue !== "string") ||
             (requestItem.freeValueFieldType === FreeValueFieldTypes.NumberField && !FreeValueFormRequestItemProcessor.canBeConvertedToValidNumber(parsedParams.freeValue)) ||
             (requestItem.freeValueFieldType === FreeValueFieldTypes.DateField && !FreeValueFormRequestItemProcessor.canBeConvertedToValidDate(parsedParams.freeValue))
         ) {
@@ -26,7 +25,8 @@ export class FreeValueFormRequestItemProcessor extends GenericRequestItemProcess
     }
 
     private static canBeConvertedToValidNumber(value: string): boolean {
-        return value.trim() !== "" && !isNaN(Number(value));
+        const valueIsEmptyString = value.trim() === "";
+        return !valueIsEmptyString && !isNaN(Number(value));
     }
 
     private static canBeConvertedToValidDate(value: string): boolean {
