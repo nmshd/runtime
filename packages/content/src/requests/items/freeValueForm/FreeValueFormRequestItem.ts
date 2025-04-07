@@ -25,8 +25,6 @@ export class FreeValueFormRequestItem extends RequestItem implements IFreeValueF
     })
     public freeValueType: FreeValueFormRequestItemTypes;
 
-    @serialize()
-    @validate()
     public static from(value: IFreeValueFormRequestItem | Omit<FreeValueFormRequestItemJSON, "@type"> | FreeValueFormRequestItemJSON): FreeValueFormRequestItem {
         return this.fromAny(value);
     }
