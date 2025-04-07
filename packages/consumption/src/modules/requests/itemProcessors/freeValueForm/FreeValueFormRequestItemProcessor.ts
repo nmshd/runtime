@@ -12,8 +12,8 @@ export class FreeValueFormRequestItemProcessor extends GenericRequestItemProcess
         if (
             ((requestItem.freeValueFieldType === FreeValueFieldTypes.TextField || requestItem.freeValueFieldType === FreeValueFieldTypes.TextAreaField) &&
                 typeof parsedParams.freeValue !== "string") ||
-            (requestItem.freeValueFieldType === FreeValueFieldTypes.NumberField && (parsedParams.freeValue.trim() === "" || isNaN(Number(parsedParams.freeValue)))) ||
-            (requestItem.freeValueFieldType === FreeValueFieldTypes.DateField && isNaN(new Date(parsedParams.freeValue).getTime()))
+            (requestItem.freeValueFieldType === FreeValueFieldTypes.NumberField && !FreeValueFormRequestItemProcessor.canBeConvertedToValidNumber(parsedParams.freeValue)) ||
+            (requestItem.freeValueFieldType === FreeValueFieldTypes.DateField && !FreeValueFormRequestItemProcessor.canBeConvertedToValidDate(parsedParams.freeValue))
         ) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidAcceptParameters(
@@ -23,6 +23,15 @@ export class FreeValueFormRequestItemProcessor extends GenericRequestItemProcess
         }
 
         return ValidationResult.success();
+    }
+
+    private static canBeConvertedToValidNumber(value: string): boolean {
+        return value.trim() !== "" && !isNaN(Number(value));
+    }
+
+    private static canBeConvertedToValidDate(value: string): boolean {
+        const date = new Date(value);
+        return !isNaN(date.getTime());
     }
 
     public override accept(_requestItem: FreeValueFormRequestItem, params: AcceptFreeValueFormRequestItemParametersJSON): FreeValueFormAcceptResponseItem {
