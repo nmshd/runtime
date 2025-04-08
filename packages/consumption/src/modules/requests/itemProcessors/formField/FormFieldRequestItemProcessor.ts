@@ -30,10 +30,11 @@ export class FormFieldRequestItemProcessor extends GenericRequestItemProcessor<F
             }
 
             if (
-                ([FreeValueType.String, FreeValueType.String].includes(requestItem.freeValueFormField.freeValueType) && typeof parsedParams.formFieldResponse !== "string") ||
-                (requestItem.freeValueFormField.freeValueType === FreeValueType.Integer &&
-                    !FormFieldRequestItemProcessor.canBeConvertedToValidNumber(parsedParams.formFieldResponse)) ||
-                (requestItem.freeValueFormField.freeValueType === FreeValueType.Date && !FormFieldRequestItemProcessor.canBeConvertedToValidDate(parsedParams.formFieldResponse))
+                (requestItem.freeValueFormField.freeValueType === FreeValueType.String && typeof parsedParams.formFieldResponse !== "string") ||
+                ([FreeValueType.Integer, FreeValueType.Double].includes(requestItem.freeValueFormField.freeValueType) && typeof parsedParams.formFieldResponse !== "number") ||
+                (requestItem.freeValueFormField.freeValueType === FreeValueType.Boolean && typeof parsedParams.formFieldResponse !== "boolean") ||
+                (requestItem.freeValueFormField.freeValueType === FreeValueType.Date &&
+                    (typeof parsedParams.formFieldResponse !== "string" || !FormFieldRequestItemProcessor.canBeConvertedToValidDate(parsedParams.formFieldResponse)))
             ) {
                 return ValidationResult.error(
                     ConsumptionCoreErrors.requests.invalidAcceptParameters(
@@ -73,11 +74,6 @@ export class FormFieldRequestItemProcessor extends GenericRequestItemProcessor<F
         }
 
         return ValidationResult.success();
-    }
-
-    private static canBeConvertedToValidNumber(value: string): boolean {
-        const valueIsEmptyString = value.trim() === "";
-        return !valueIsEmptyString && !isNaN(Number(value));
     }
 
     private static canBeConvertedToValidDate(value: string): boolean {

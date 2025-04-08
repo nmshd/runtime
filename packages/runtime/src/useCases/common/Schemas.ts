@@ -3007,7 +3007,8 @@ export const CanCreateOutgoingRequestRequest: any = {
             },
             "required": [
                 "@type",
-                "mustBeAccepted"
+                "mustBeAccepted",
+                "title"
             ],
             "additionalProperties": false
         },
@@ -5677,6 +5678,12 @@ export const CompleteOutgoingRequestRequest: any = {
                             "type": "string"
                         },
                         {
+                            "type": "number"
+                        },
+                        {
+                            "type": "boolean"
+                        },
+                        {
                             "type": "array",
                             "items": {
                                 "type": "string"
@@ -8149,6 +8156,12 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                     "anyOf": [
                         {
                             "type": "string"
+                        },
+                        {
+                            "type": "number"
+                        },
+                        {
+                            "type": "boolean"
                         },
                         {
                             "type": "array",
@@ -11042,7 +11055,8 @@ export const CreateOutgoingRequestRequest: any = {
             },
             "required": [
                 "@type",
-                "mustBeAccepted"
+                "mustBeAccepted",
+                "title"
             ],
             "additionalProperties": false
         },
@@ -14519,7 +14533,8 @@ export const ReceivedIncomingRequestRequest: any = {
             },
             "required": [
                 "@type",
-                "mustBeAccepted"
+                "mustBeAccepted",
+                "title"
             ],
             "additionalProperties": false
         },

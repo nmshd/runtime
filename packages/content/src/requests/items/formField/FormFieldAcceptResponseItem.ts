@@ -3,18 +3,18 @@ import { AcceptResponseItem, AcceptResponseItemJSON, IAcceptResponseItem } from 
 
 export interface FormFieldAcceptResponseItemJSON extends AcceptResponseItemJSON {
     "@type": "FormFieldAcceptResponseItem";
-    formFieldResponse: string | string[];
+    formFieldResponse: string | number | boolean | string[];
 }
 
 export interface IFormFieldAcceptResponseItem extends IAcceptResponseItem {
-    formFieldResponse: string | string[];
+    formFieldResponse: string | number | boolean | string[];
 }
 
 @type("FormFieldAcceptResponseItem")
 export class FormFieldAcceptResponseItem extends AcceptResponseItem implements IFormFieldAcceptResponseItem {
     @serialize()
     @validate()
-    public formFieldResponse: string | string[];
+    public formFieldResponse: string | number | boolean | string[];
 
     public static override from(
         value: IFormFieldAcceptResponseItem | Omit<FormFieldAcceptResponseItemJSON, "@type"> | FormFieldAcceptResponseItemJSON
