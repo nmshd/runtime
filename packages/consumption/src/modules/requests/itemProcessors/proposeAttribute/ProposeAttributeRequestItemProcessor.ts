@@ -33,7 +33,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             return queryValidationResult;
         }
 
-        const attributeValidationResult = ProposeAttributeRequestItemProcessor.validateAttribute(requestItem.attribute);
+        const attributeValidationResult = this.validateAttribute(requestItem.attribute);
         if (attributeValidationResult.isError()) {
             return attributeValidationResult;
         }
@@ -68,13 +68,16 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
         return ValidationResult.success();
     }
 
-    private static validateAttribute(attribute: IdentityAttribute | RelationshipAttribute) {
+    private validateAttribute(attribute: IdentityAttribute | RelationshipAttribute) {
         if (attribute.owner.toString() !== "") {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidRequestItem(
                     "The owner of the given `attribute` can only be an empty string. This is because you can only propose Attributes where the Recipient of the Request is the owner anyway. And in order to avoid mistakes, the owner will be automatically filled for you."
                 )
             );
+        }
+        if (!this.consumptionController.attributes.validateAttributeCharacters(attribute)) {
+            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("The Attribute contains forbidden characters."));
         }
 
         return ValidationResult.success();
@@ -179,6 +182,10 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
                     )} or ${nameof<AcceptProposeAttributeRequestItemParameters>((x) => x.attributeId)}.`
                 )
             );
+        }
+
+        if (!this.consumptionController.attributes.validateAttributeCharacters(attribute)) {
+            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters("The Attribute contains forbidden characters."));
         }
 
         const answerToQueryValidationResult = validateAttributeMatchesWithQuery(requestItem.query, attribute, this.currentIdentityAddress, requestInfo.peer);
