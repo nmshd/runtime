@@ -25,21 +25,30 @@ export class FormFieldRequestItemProcessor extends GenericRequestItemProcessor<F
         const parsedParams = AcceptFormFieldRequestItemParameters.from(params);
 
         if (requestItem.freeValueFormField instanceof FreeValueFormField) {
+            if (Array.isArray(parsedParams.formFieldResponse)) {
+                return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters("A freeValueFormField cannot be accepted with an array."));
+            }
+
             if (
-                ([FreeValueType.String, FreeValueType.String].includes(requestItem.freeValueFormField.freeValueType) && typeof parsedParams.freeValue !== "string") ||
-                (requestItem.freeValueFormField.freeValueType === FreeValueType.Integer && !FormFieldRequestItemProcessor.canBeConvertedToValidNumber(parsedParams.freeValue)) ||
-                (requestItem.freeValueFormField.freeValueType === FreeValueType.Date && !FormFieldRequestItemProcessor.canBeConvertedToValidDate(parsedParams.freeValue))
+                ([FreeValueType.String, FreeValueType.String].includes(requestItem.freeValueFormField.freeValueType) && typeof parsedParams.formFieldResponse !== "string") ||
+                (requestItem.freeValueFormField.freeValueType === FreeValueType.Integer &&
+                    !FormFieldRequestItemProcessor.canBeConvertedToValidNumber(parsedParams.formFieldResponse)) ||
+                (requestItem.freeValueFormField.freeValueType === FreeValueType.Date && !FormFieldRequestItemProcessor.canBeConvertedToValidDate(parsedParams.formFieldResponse))
             ) {
                 return ValidationResult.error(
                     ConsumptionCoreErrors.requests.invalidAcceptParameters(
-                        `Conversion of the provided freeValue '${parsedParams.freeValue}' to the freeValueType '${requestItem.freeValueFormField.freeValueType}' of the freeValueFormField is not possible.`
+                        `Conversion of the provided freeValue '${parsedParams.formFieldResponse}' to the freeValueType '${requestItem.freeValueFormField.freeValueType}' of the freeValueFormField is not possible.`
                     )
                 );
             }
         }
 
         if (requestItem.selectionFormField instanceof SelectionFormField) {
-            if (parsedParams.options.length === 0) {
+            if (!Array.isArray(parsedParams.formFieldResponse)) {
+                return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters("A selectionFormField must be accepted with an array."));
+            }
+
+            if (parsedParams.formFieldResponse.length === 0) {
                 return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters("At least one option must be specified to accept a selectionFormField."));
             }
 
@@ -49,12 +58,12 @@ export class FormFieldRequestItemProcessor extends GenericRequestItemProcessor<F
                 );
             }
 
-            const uniqueOptions = new Set(parsedParams.options);
-            if (uniqueOptions.size !== parsedParams.options.length) {
+            const uniqueOptions = new Set(parsedParams.formFieldResponse);
+            if (uniqueOptions.size !== parsedParams.formFieldResponse.length) {
                 return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters("The options specified for accepting a selectionFormField must be unique."));
             }
 
-            for (const option of parsedParams.options) {
+            for (const option of parsedParams.formFieldResponse) {
                 if (!requestItem.selectionFormField.options.includes(option)) {
                     return ValidationResult.error(
                         ConsumptionCoreErrors.requests.invalidAcceptParameters(`The selectionFormField does not provide the option '${option}' for selection.`)
@@ -79,16 +88,9 @@ export class FormFieldRequestItemProcessor extends GenericRequestItemProcessor<F
     public override accept(_requestItem: FormFieldRequestItem, params: AcceptFormFieldRequestItemParametersJSON): FormFieldAcceptResponseItem {
         const parsedParams = AcceptFormFieldRequestItemParameters.from(params);
 
-        if (parsedParams.freeValue) {
-            return FormFieldAcceptResponseItem.from({
-                result: ResponseItemResult.Accepted,
-                freeValue: parsedParams.freeValue
-            });
-        }
-
         return FormFieldAcceptResponseItem.from({
             result: ResponseItemResult.Accepted,
-            options: parsedParams.options
+            formFieldResponse: parsedParams.formFieldResponse
         });
     }
 }

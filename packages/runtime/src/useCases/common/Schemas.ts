@@ -5671,18 +5671,23 @@ export const CompleteOutgoingRequestRequest: any = {
                     "type": "string",
                     "const": "Accepted"
                 },
-                "freeValue": {
-                    "type": "string"
-                },
-                "options": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                "formFieldResponse": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
                 }
             },
             "required": [
                 "@type",
+                "formFieldResponse",
                 "result"
             ],
             "additionalProperties": false
@@ -8140,18 +8145,23 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                     "type": "string",
                     "const": "Accepted"
                 },
-                "freeValue": {
-                    "type": "string"
-                },
-                "options": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                "formFieldResponse": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
                 }
             },
             "required": [
                 "@type",
+                "formFieldResponse",
                 "result"
             ],
             "additionalProperties": false

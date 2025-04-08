@@ -90,7 +90,7 @@ describe("FormFieldRequestItemProcessor with freeValueFormField", function () {
 
             const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                 accept: true,
-                freeValue: "aFreeTextValue"
+                formFieldResponse: "aFreeTextValue"
             };
 
             const result = processor.canAccept(requestItem, acceptParams);
@@ -106,7 +106,7 @@ describe("FormFieldRequestItemProcessor with freeValueFormField", function () {
 
             const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                 accept: true,
-                freeValue: "aFreeTextValue"
+                formFieldResponse: "aFreeTextValue"
             };
 
             const result = processor.canAccept(requestItem, acceptParams);
@@ -123,7 +123,7 @@ describe("FormFieldRequestItemProcessor with freeValueFormField", function () {
             const aNumber = 123456789;
             const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                 accept: true,
-                freeValue: aNumber.toString()
+                formFieldResponse: aNumber.toString()
             };
 
             const result = processor.canAccept(requestItem, acceptParams);
@@ -139,7 +139,7 @@ describe("FormFieldRequestItemProcessor with freeValueFormField", function () {
 
             const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                 accept: true,
-                freeValue: "noNumber"
+                formFieldResponse: "noNumber"
             };
 
             const result = processor.canAccept(requestItem, acceptParams);
@@ -159,7 +159,7 @@ describe("FormFieldRequestItemProcessor with freeValueFormField", function () {
             const aDate = new Date("2000-01-01");
             const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                 accept: true,
-                freeValue: aDate.toString()
+                formFieldResponse: aDate.toString()
             };
 
             const result = processor.canAccept(requestItem, acceptParams);
@@ -175,7 +175,7 @@ describe("FormFieldRequestItemProcessor with freeValueFormField", function () {
 
             const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                 accept: true,
-                freeValue: "noDate"
+                formFieldResponse: "noDate"
             };
 
             const result = processor.canAccept(requestItem, acceptParams);
@@ -196,7 +196,7 @@ describe("FormFieldRequestItemProcessor with freeValueFormField", function () {
 
             const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                 accept: true,
-                freeValue: "aFreeTextValue"
+                formFieldResponse: "aFreeTextValue"
             };
 
             const result = processor.accept(requestItem, acceptParams);
@@ -211,7 +211,7 @@ describe("FormFieldRequestItemProcessor with freeValueFormField", function () {
 
             const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                 accept: true,
-                freeValue: "aFreeTextValue"
+                formFieldResponse: "aFreeTextValue"
             };
 
             const result = processor.accept(requestItem, acceptParams);
@@ -227,7 +227,7 @@ describe("FormFieldRequestItemProcessor with freeValueFormField", function () {
             const aNumber = 123456789;
             const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                 accept: true,
-                freeValue: aNumber.toString()
+                formFieldResponse: aNumber.toString()
             };
 
             const result = processor.accept(requestItem, acceptParams);
@@ -243,7 +243,7 @@ describe("FormFieldRequestItemProcessor with freeValueFormField", function () {
             const aDate = new Date("2000-01-01");
             const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                 accept: true,
-                freeValue: aDate.toString()
+                formFieldResponse: aDate.toString()
             };
 
             const result = processor.accept(requestItem, acceptParams);
@@ -276,7 +276,7 @@ describe("FormFieldRequestItemProcessor with freeValueFormField", function () {
 
             const responseItem = FormFieldAcceptResponseItem.from({
                 result: ResponseItemResult.Accepted,
-                freeValue: "aFreeTextValue"
+                formFieldResponse: "aFreeTextValue"
             });
 
             await processor.applyIncomingResponseItem(responseItem, requestItem, incomingRequest);
@@ -445,7 +445,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
 
                 const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                     accept: true,
-                    options: ["optionA"]
+                    formFieldResponse: ["optionA"]
                 };
 
                 const result = processor.canAccept(requestItem, acceptParams);
@@ -456,14 +456,12 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
             test("returns an error when it is tried to accept a form radio button group with no option", function () {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
-                    selectionFormField: {
-                        options: ["optionA", "optionB"]
-                    }
+                    selectionFormField: { options: ["optionA", "optionB"] }
                 });
 
                 const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                     accept: true,
-                    options: []
+                    formFieldResponse: []
                 };
 
                 const result = processor.canAccept(requestItem, acceptParams);
@@ -482,7 +480,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
 
                 const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                     accept: true,
-                    options: ["unknownOption"]
+                    formFieldResponse: ["unknownOption"]
                 };
 
                 const result = processor.canAccept(requestItem, acceptParams);
@@ -501,7 +499,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
 
                 const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                     accept: true,
-                    options: ["optionA", "optionB"]
+                    formFieldResponse: ["optionA", "optionB"]
                 };
 
                 const result = processor.canAccept(requestItem, acceptParams);
@@ -522,7 +520,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
 
                 const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                     accept: true,
-                    options: ["optionA"]
+                    formFieldResponse: ["optionA"]
                 };
 
                 const result = processor.canAccept(requestItem, acceptParams);
@@ -538,7 +536,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
 
                 const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                     accept: true,
-                    options: []
+                    formFieldResponse: []
                 };
 
                 const result = processor.canAccept(requestItem, acceptParams);
@@ -557,7 +555,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
 
                 const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                     accept: true,
-                    options: ["unknownOption"]
+                    formFieldResponse: ["unknownOption"]
                 };
 
                 const result = processor.canAccept(requestItem, acceptParams);
@@ -576,7 +574,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
 
                 const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                     accept: true,
-                    options: ["optionA", "optionB"]
+                    formFieldResponse: ["optionA", "optionB"]
                 };
 
                 const result = processor.canAccept(requestItem, acceptParams);
@@ -597,7 +595,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
 
                 const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                     accept: true,
-                    options: ["optionA"]
+                    formFieldResponse: ["optionA"]
                 };
 
                 const result = processor.canAccept(requestItem, acceptParams);
@@ -613,7 +611,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
 
                 const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                     accept: true,
-                    options: ["optionA", "optionB"]
+                    formFieldResponse: ["optionA", "optionB"]
                 };
 
                 const result = processor.canAccept(requestItem, acceptParams);
@@ -629,7 +627,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
 
                 const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                     accept: true,
-                    options: []
+                    formFieldResponse: []
                 };
 
                 const result = processor.canAccept(requestItem, acceptParams);
@@ -648,7 +646,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
 
                 const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                     accept: true,
-                    options: ["unknownOption"]
+                    formFieldResponse: ["unknownOption"]
                 };
 
                 const result = processor.canAccept(requestItem, acceptParams);
@@ -667,7 +665,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
 
                 const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                     accept: true,
-                    options: ["optionA", "optionA"]
+                    formFieldResponse: ["optionA", "optionA"]
                 };
 
                 const result = processor.canAccept(requestItem, acceptParams);
@@ -689,7 +687,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
 
             const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                 accept: true,
-                options: ["optionA"]
+                formFieldResponse: ["optionA"]
             };
 
             const result = processor.accept(requestItem, acceptParams);
@@ -704,7 +702,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
 
             const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                 accept: true,
-                options: ["optionA"]
+                formFieldResponse: ["optionA"]
             };
 
             const result = processor.accept(requestItem, acceptParams);
@@ -719,7 +717,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
 
             const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                 accept: true,
-                options: ["optionA"]
+                formFieldResponse: ["optionA"]
             };
 
             const result = processor.accept(requestItem, acceptParams);
@@ -734,7 +732,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
 
             const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                 accept: true,
-                options: ["optionA", "optionB"]
+                formFieldResponse: ["optionA", "optionB"]
             };
 
             const result = processor.accept(requestItem, acceptParams);
@@ -767,7 +765,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
 
             const responseItem = FormFieldAcceptResponseItem.from({
                 result: ResponseItemResult.Accepted,
-                options: ["optionA"]
+                formFieldResponse: ["optionA"]
             });
 
             await processor.applyIncomingResponseItem(responseItem, requestItem, incomingRequest);

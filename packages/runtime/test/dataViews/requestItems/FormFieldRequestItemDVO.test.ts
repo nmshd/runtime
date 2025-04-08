@@ -74,7 +74,7 @@ describe("FormFieldRequestItemDVO with freeValueFormField", () => {
             peer: address2
         };
 
-        responseItems = [{ accept: true, freeValue: "I accept to specify a free string value." } as AcceptFormFieldRequestItemParametersJSON];
+        responseItems = [{ accept: true, formFieldResponse: "I accept to specify a free string value." } as AcceptFormFieldRequestItemParametersJSON];
     }, 30000);
 
     test("check the MessageDVO for the sender", async () => {
@@ -239,7 +239,7 @@ describe("FormFieldRequestItemDVO with selectionFormField", () => {
             peer: address2
         };
 
-        responseItems = [{ accept: true, options: ["optionA"] } as AcceptFormFieldRequestItemParametersJSON];
+        responseItems = [{ accept: true, formFieldResponse: ["optionA"] } as AcceptFormFieldRequestItemParametersJSON];
     }, 30000);
 
     test("check the MessageDVO for the sender", async () => {
