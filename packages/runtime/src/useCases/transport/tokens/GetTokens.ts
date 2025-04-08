@@ -16,6 +16,7 @@ export interface GetTokensQuery {
     passwordProtection?: "" | "!";
     "passwordProtection.password"?: string | string[];
     "passwordProtection.passwordIsPin"?: "true" | "!";
+    "passwordProtection.passwordLocationIndicator"?: string | string[];
 }
 
 export interface GetTokensRequest {
@@ -39,7 +40,8 @@ export class GetTokensUseCase extends UseCase<GetTokensRequest, TokenDTO[]> {
             [nameof<TokenDTO>((t) => t.forIdentity)]: true,
             [nameof<TokenDTO>((r) => r.passwordProtection)]: true,
             [`${nameof<TokenDTO>((r) => r.passwordProtection)}.password`]: true,
-            [`${nameof<TokenDTO>((r) => r.passwordProtection)}.passwordIsPin`]: true
+            [`${nameof<TokenDTO>((r) => r.passwordProtection)}.passwordIsPin`]: true,
+            [`${nameof<TokenDTO>((r) => r.passwordProtection)}.passwordLocationIndicator`]: true
         },
         alias: {
             [nameof<TokenDTO>((t) => t.createdAt)]: `${nameof<Token>((t) => t.cache)}.${[nameof<CachedToken>((t) => t.createdAt)]}`,
@@ -62,6 +64,9 @@ export class GetTokensUseCase extends UseCase<GetTokensRequest, TokenDTO[]> {
                 if (input === "!") {
                     query[`${nameof<Token>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordType)}`] = "pw";
                 }
+            },
+            [`${nameof<TokenDTO>((r) => r.passwordProtection)}.passwordLocationIndicator`]: (query: any, input: string) => {
+                query[`${nameof<Token>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordLocationIndicator)}`] = input;
             }
         }
     });

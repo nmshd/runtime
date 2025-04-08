@@ -18,6 +18,7 @@ export interface GetRelationshipTemplatesQuery {
     passwordProtection?: "" | "!";
     "passwordProtection.password"?: string | string[];
     "passwordProtection.passwordIsPin"?: "true" | "!";
+    "passwordProtection.passwordLocationIndicator"?: string | string[];
 }
 
 export interface GetRelationshipTemplatesRequest {
@@ -43,7 +44,8 @@ export class GetRelationshipTemplatesUseCase extends UseCase<GetRelationshipTemp
             [nameof<RelationshipTemplateDTO>((r) => r.forIdentity)]: true,
             [nameof<RelationshipTemplateDTO>((r) => r.passwordProtection)]: true,
             [`${nameof<RelationshipTemplateDTO>((r) => r.passwordProtection)}.password`]: true,
-            [`${nameof<RelationshipTemplateDTO>((r) => r.passwordProtection)}.passwordIsPin`]: true
+            [`${nameof<RelationshipTemplateDTO>((r) => r.passwordProtection)}.passwordIsPin`]: true,
+            [`${nameof<RelationshipTemplateDTO>((r) => r.passwordProtection)}.passwordLocationIndicator`]: true
         },
         alias: {
             [nameof<RelationshipTemplateDTO>((r) => r.isOwn)]: nameof<RelationshipTemplate>((r) => r.isOwn),
@@ -72,6 +74,9 @@ export class GetRelationshipTemplatesUseCase extends UseCase<GetRelationshipTemp
                 if (input === "!") {
                     query[`${nameof<RelationshipTemplate>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordType)}`] = "pw";
                 }
+            },
+            [`${nameof<RelationshipTemplateDTO>((r) => r.passwordProtection)}.passwordLocationIndicator`]: (query: any, input: string) => {
+                query[`${nameof<RelationshipTemplate>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordLocationIndicator)}`] = input;
             }
         }
     });

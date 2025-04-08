@@ -22,7 +22,8 @@ export class TokenMapper {
             passwordProtection: token.passwordProtection
                 ? {
                       password: token.passwordProtection.password,
-                      passwordIsPin: token.passwordProtection.passwordType.startsWith("pin") ? true : undefined
+                      passwordIsPin: token.passwordProtection.passwordType.startsWith("pin") ? true : undefined,
+                      passswordLocationIndicator: Number(token.passwordProtection.passwordLocationIndicator)
                   }
                 : undefined
         };

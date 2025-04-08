@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { CoreAddress, CoreDate, CoreId, SharedPasswordProtection } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId, PasswordLocationIndicator, SharedPasswordProtection } from "@nmshd/core-types";
 import { PasswordProtectionCreationParameters, RelationshipTemplate, RelationshipTemplateController, TokenContentRelationshipTemplate, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import {
@@ -23,6 +23,7 @@ export interface CreateTokenQRCodeForOwnTemplateRequest {
          */
         password: string;
         passwordIsPin?: true;
+        passwordLocationIndicator?: PasswordLocationIndicator;
     };
 }
 

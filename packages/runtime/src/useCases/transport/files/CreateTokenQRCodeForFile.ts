@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId, PasswordLocationIndicator } from "@nmshd/core-types";
 import { File, FileController, PasswordProtectionCreationParameters, TokenContentFile, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { AddressString, FileIdString, ISO8601DateTimeString, QRCode, RuntimeErrors, SchemaRepository, TokenAndTemplateCreationValidator, UseCase } from "../../common";
@@ -14,6 +14,7 @@ export interface CreateTokenQRCodeForFileRequest {
          */
         password: string;
         passwordIsPin?: true;
+        passwordLocationIndicator?: PasswordLocationIndicator;
     };
 }
 
