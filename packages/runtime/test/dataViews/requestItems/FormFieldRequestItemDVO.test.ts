@@ -167,7 +167,7 @@ describe("FormFieldRequestItemDVO with freeValueFormField", () => {
         const responseItem = response!.content.items[0] as FormFieldAcceptResponseItemDVO;
         expect(responseItem.result).toBe("Accepted");
         expect(responseItem.type).toBe("FormFieldAcceptResponseItemDVO");
-        expect(responseItem.freeValue).toBe("I accept to specify a free string value.");
+        expect(responseItem.formFieldResponse).toBe("I accept to specify a free string value.");
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         await syncUntilHasMessageWithResponse(transportServices1, recipientMessage.content.id!);
@@ -206,7 +206,7 @@ describe("FormFieldRequestItemDVO with freeValueFormField", () => {
         const responseItem = response!.content.items[0] as FormFieldAcceptResponseItemDVO;
         expect(responseItem.result).toBe("Accepted");
         expect(responseItem.type).toBe("FormFieldAcceptResponseItemDVO");
-        expect(responseItem.freeValue).toBe("I accept to specify a free string value.");
+        expect(responseItem.formFieldResponse).toBe("I accept to specify a free string value.");
         expect(requestItemDVO.response).toStrictEqual(responseItem);
     });
 });
@@ -332,7 +332,7 @@ describe("FormFieldRequestItemDVO with selectionFormField", () => {
         const responseItem = response!.content.items[0] as FormFieldAcceptResponseItemDVO;
         expect(responseItem.result).toBe("Accepted");
         expect(responseItem.type).toBe("SelectionFormAcceptResponseItemDVO");
-        expect(responseItem.options).toStrictEqual(["optionA"]);
+        expect(responseItem.formFieldResponse).toStrictEqual(["optionA"]);
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         await syncUntilHasMessageWithResponse(transportServices1, recipientMessage.content.id!);
@@ -371,7 +371,7 @@ describe("FormFieldRequestItemDVO with selectionFormField", () => {
         const responseItem = response!.content.items[0] as FormFieldAcceptResponseItemDVO;
         expect(responseItem.result).toBe("Accepted");
         expect(responseItem.type).toBe("SelectionFormAcceptResponseItemDVO");
-        expect(responseItem.options).toStrictEqual(["optionA"]);
+        expect(responseItem.formFieldResponse).toStrictEqual(["optionA"]);
         expect(requestItemDVO.response).toStrictEqual(responseItem);
     });
 });
