@@ -67,7 +67,7 @@
         "@nmshd/consumption": "*",
         "@nmshd/content": "*",
         "@nmshd/core-types": "*",
-        "@nmshd/crypto": "2.1.0",
+        "@nmshd/crypto": "2.1.1",
         "@nmshd/iql": "^1.0.2",
         "@nmshd/transport": "*",
         "@nmshd/typescript-ioc": "3.2.4",
@@ -76,7 +76,7 @@
         "ajv-formats": "^3.0.1",
         "json-stringify-safe": "^5.0.1",
         "lodash": "^4.17.21",
-        "luxon": "^3.5.0",
+        "luxon": "^3.6.1",
         "qrcode": "1.5.4",
         "reflect-metadata": "^0.2.2",
         "ts-simple-nameof": "^1.3.1"
@@ -87,9 +87,9 @@
         "@js-soft/node-logger": "1.2.0",
         "@types/json-stringify-safe": "^5.0.3",
         "@types/lodash": "^4.17.16",
-        "@types/luxon": "^3.4.2",
+        "@types/luxon": "^3.6.2",
         "@types/qrcode": "^1.5.5",
-        "ts-json-schema-generator": "2.3.0",
+        "ts-json-schema-generator": "2.4.0",
         "ts-mockito": "^2.6.1"
     },
     "publishConfig": {
