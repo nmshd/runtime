@@ -1511,7 +1511,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
-                    query: IdentityAttributeQuery.from({ tags: ["aNewTag", "anotherNewTag"], valueType: "GivenName" })
+                    query: IdentityAttributeQuery.from({ tags: ["x+%+aNewTag", "x+%+anotherNewTag"], valueType: "GivenName" })
                 });
                 const requestId = await ConsumptionIds.request.generate();
                 const incomingRequest = LocalRequest.from({
