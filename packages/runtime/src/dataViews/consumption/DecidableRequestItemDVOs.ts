@@ -1,4 +1,4 @@
-import { FreeValueFieldTypes, SelectionFieldTypes } from "@nmshd/content";
+import { FreeValueFormFieldJSON, SelectionFormFieldJSON } from "@nmshd/content";
 import { RequestItemDVO } from "../content";
 import { DraftIdentityAttributeDVO, DraftRelationshipAttributeDVO, IdentityAttributeQueryDVO, ThirdPartyRelationshipAttributeQueryDVO } from "../content/AttributeDVOs";
 import { FileDVO } from "../transport";
@@ -52,19 +52,15 @@ export interface DecidableFreeTextRequestItemDVO extends DecidableRequestItemDVO
     freeText: string;
 }
 
-export interface DecidableFreeValueFormRequestItemDVO extends DecidableRequestItemDVO {
-    type: "DecidableFreeValueFormRequestItemDVO";
-    freeValueFieldType: FreeValueFieldTypes;
+export interface DecidableFormFieldRequestItemDVO extends DecidableRequestItemDVO {
+    type: "DecidableFormFieldRequestItemDVO";
+    freeValueFormField?: FreeValueFormFieldJSON;
+    selectionFormField?: SelectionFormFieldJSON;
 }
 
 export interface DecidableRegisterAttributeListenerRequestItemDVO extends DecidableRequestItemDVO {
     type: "DecidableRegisterAttributeListenerRequestItemDVO";
     query: IdentityAttributeQueryDVO | ThirdPartyRelationshipAttributeQueryDVO;
-}
-
-export interface DecidableSelectionFormRequestItemDVO extends DecidableRequestItemDVO {
-    type: "DecidableSelectionFormRequestItemDVO";
-    selectionFieldType: SelectionFieldTypes;
 }
 
 export interface DecidableTransferFileOwnershipRequestItemDVO extends DecidableRequestItemDVO {
