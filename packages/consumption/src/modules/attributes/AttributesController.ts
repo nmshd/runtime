@@ -1393,36 +1393,37 @@ export class AttributesController extends ConsumptionBaseController {
         });
     }
 
+    public async _getAttributeTagCollection(): Promise<AttributeTagCollection> {
+        const isCacheValid = await this.isTagCollectionCacheValid();
+        if (isCacheValid) {
+            return await this.getTagCollection();
+        }
+
+        const backboneTagCollection = await this.attributeTagClient.getTagCollection(await this.getETag());
+        if (!backboneTagCollection) {
+            return await this.getTagCollection();
+        }
+
+        await this.setETag(backboneTagCollection.etag ?? "");
+        await this.updateCacheTimestamp();
+        const attributeTagCollection = AttributeTagCollection.from(backboneTagCollection.value);
+        await this.setTagCollection(attributeTagCollection);
+
+        return attributeTagCollection;
+    }
+
     public async getAttributeTagCollection(): Promise<AttributeTagCollection> {
         if (this.readTagCollectionPromise) {
             return await this.readTagCollectionPromise;
         }
 
-        this.readTagCollectionPromise = new Promise(async (resolve) => {
-            const isCacheValid = await this.isTagCollectionCacheValid();
-            if (isCacheValid) {
-                resolve(await this.getTagCollection());
-                return;
-            }
+        this.readTagCollectionPromise = this._getAttributeTagCollection();
 
-            const backboneTagCollection = await this.attributeTagClient.getTagCollection(await this.getETag());
-            if (!backboneTagCollection) {
-                resolve(await this.getTagCollection());
-                return;
-            }
-
-            await this.setETag(backboneTagCollection.etag ?? "");
-            await this.updateCacheTimestamp();
-            const attributeTagCollection = AttributeTagCollection.from(backboneTagCollection.value);
-            await this.setTagCollection(attributeTagCollection);
-
-            resolve(attributeTagCollection);
-        });
-
-        return await this.readTagCollectionPromise.then((value) => {
+        try {
+            return await this.readTagCollectionPromise;
+        } finally {
             this.readTagCollectionPromise = undefined;
-            return value;
-        });
+        }
     }
 
     private async getTagCollection(): Promise<AttributeTagCollection> {
