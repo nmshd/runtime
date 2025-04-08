@@ -332,13 +332,10 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/FreeTextRequestItemJSON"
                 },
                 {
-                    "$ref": "#/definitions/FreeValueFormRequestItemJSON"
+                    "$ref": "#/definitions/FormFieldRequestItemJSON"
                 },
                 {
                     "$ref": "#/definitions/RegisterAttributeListenerRequestItemJSON"
-                },
-                {
-                    "$ref": "#/definitions/SelectionFormRequestItemJSON"
                 },
                 {
                     "$ref": "#/definitions/TransferFileOwnershipRequestItemJSON"
@@ -2809,22 +2806,11 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "owner": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/ThirdPartyRelationshipAttributeQueryOwner"
-                        },
-                        {
-                            "type": "string",
-                            "const": "thirdParty"
-                        },
-                        {
-                            "type": "string",
-                            "const": "recipient"
-                        },
-                        {
-                            "type": "string",
-                            "const": ""
-                        }
+                    "type": "string",
+                    "enum": [
+                        "thirdParty",
+                        "recipient",
+                        ""
                     ]
                 },
                 "thirdParty": {
@@ -2847,14 +2833,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "thirdParty"
             ],
             "additionalProperties": false
-        },
-        "ThirdPartyRelationshipAttributeQueryOwner": {
-            "type": "string",
-            "enum": [
-                "thirdParty",
-                "recipient",
-                ""
-            ]
         },
         "ConsentRequestItemJSON": {
             "type": "object",
@@ -2987,12 +2965,12 @@ export const CanCreateOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
-        "FreeValueFormRequestItemJSON": {
+        "FormFieldRequestItemJSON": {
             "type": "object",
             "properties": {
                 "@type": {
                     "type": "string",
-                    "const": "FreeValueFormRequestItem"
+                    "const": "FormFieldRequestItem"
                 },
                 "@context": {
                     "type": "string"
@@ -3020,45 +2998,67 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "type": "boolean",
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
-                "freeValueFieldType": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/FreeValueFieldTypes"
-                        },
-                        {
-                            "type": "string",
-                            "const": "TextField"
-                        },
-                        {
-                            "type": "string",
-                            "const": "TextAreaField"
-                        },
-                        {
-                            "type": "string",
-                            "const": "NumberField"
-                        },
-                        {
-                            "type": "string",
-                            "const": "DateField"
-                        }
-                    ]
+                "freeValueFormField": {
+                    "$ref": "#/definitions/FreeValueFormFieldJSON"
+                },
+                "selectionFormField": {
+                    "$ref": "#/definitions/SelectionFormFieldJSON"
                 }
             },
             "required": [
                 "@type",
-                "freeValueFieldType",
                 "mustBeAccepted"
             ],
             "additionalProperties": false
         },
-        "FreeValueFieldTypes": {
-            "type": "string",
-            "enum": [
-                "TextField",
-                "TextAreaField",
-                "NumberField",
-                "DateField"
-            ]
+        "FreeValueFormFieldJSON": {
+            "type": "object",
+            "properties": {
+                "freeValueType": {
+                    "type": "string",
+                    "enum": [
+                        "String",
+                        "Integer",
+                        "Double",
+                        "Date",
+                        "Boolean"
+                    ]
+                },
+                "allowNewLines": {
+                    "type": "boolean"
+                },
+                "unit": {
+                    "type": "string"
+                },
+                "min": {
+                    "type": "number"
+                },
+                "max": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "freeValueType"
+            ],
+            "additionalProperties": false
+        },
+        "SelectionFormFieldJSON": {
+            "type": "object",
+            "properties": {
+                "options": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "allowMultipleSelection": {
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "options"
+            ],
+            "additionalProperties": false
         },
         "RegisterAttributeListenerRequestItemJSON": {
             "type": "object",
@@ -3110,81 +3110,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "query"
             ],
             "additionalProperties": false
-        },
-        "SelectionFormRequestItemJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "SelectionFormRequestItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
-                },
-                "selectionFieldType": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/SelectionFieldTypes"
-                        },
-                        {
-                            "type": "string",
-                            "const": "RadioButtonGroup"
-                        },
-                        {
-                            "type": "string",
-                            "const": "DropdownMenu"
-                        },
-                        {
-                            "type": "string",
-                            "const": "Checklist"
-                        }
-                    ]
-                },
-                "options": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            },
-            "required": [
-                "@type",
-                "mustBeAccepted",
-                "options",
-                "selectionFieldType"
-            ],
-            "additionalProperties": false
-        },
-        "SelectionFieldTypes": {
-            "type": "string",
-            "enum": [
-                "RadioButtonGroup",
-                "DropdownMenu",
-                "Checklist"
-            ]
         },
         "TransferFileOwnershipRequestItemJSON": {
             "type": "object",
@@ -3528,10 +3453,7 @@ export const CompleteOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/FreeTextAcceptResponseItemJSON"
                 },
                 {
-                    "$ref": "#/definitions/FreeValueFormAcceptResponseItemJSON"
-                },
-                {
-                    "$ref": "#/definitions/SelectionFormAcceptResponseItemJSON"
+                    "$ref": "#/definitions/FormFieldAcceptResponseItemJSON"
                 }
             ]
         },
@@ -5732,12 +5654,12 @@ export const CompleteOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
-        "FreeValueFormAcceptResponseItemJSON": {
+        "FormFieldAcceptResponseItemJSON": {
             "type": "object",
             "properties": {
                 "@type": {
                     "type": "string",
-                    "const": "FreeValueFormAcceptResponseItem"
+                    "const": "FormFieldAcceptResponseItem"
                 },
                 "@context": {
                     "type": "string"
@@ -5751,31 +5673,6 @@ export const CompleteOutgoingRequestRequest: any = {
                 },
                 "freeValue": {
                     "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "freeValue",
-                "result"
-            ],
-            "additionalProperties": false
-        },
-        "SelectionFormAcceptResponseItemJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "SelectionFormAcceptResponseItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "result": {
-                    "type": "string",
-                    "const": "Accepted"
                 },
                 "options": {
                     "type": "array",
@@ -5786,7 +5683,6 @@ export const CompleteOutgoingRequestRequest: any = {
             },
             "required": [
                 "@type",
-                "options",
                 "result"
             ],
             "additionalProperties": false
@@ -6026,10 +5922,7 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                     "$ref": "#/definitions/FreeTextAcceptResponseItemJSON"
                 },
                 {
-                    "$ref": "#/definitions/FreeValueFormAcceptResponseItemJSON"
-                },
-                {
-                    "$ref": "#/definitions/SelectionFormAcceptResponseItemJSON"
+                    "$ref": "#/definitions/FormFieldAcceptResponseItemJSON"
                 }
             ]
         },
@@ -8230,12 +8123,12 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
             ],
             "additionalProperties": false
         },
-        "FreeValueFormAcceptResponseItemJSON": {
+        "FormFieldAcceptResponseItemJSON": {
             "type": "object",
             "properties": {
                 "@type": {
                     "type": "string",
-                    "const": "FreeValueFormAcceptResponseItem"
+                    "const": "FormFieldAcceptResponseItem"
                 },
                 "@context": {
                     "type": "string"
@@ -8249,31 +8142,6 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                 },
                 "freeValue": {
                     "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "freeValue",
-                "result"
-            ],
-            "additionalProperties": false
-        },
-        "SelectionFormAcceptResponseItemJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "SelectionFormAcceptResponseItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "result": {
-                    "type": "string",
-                    "const": "Accepted"
                 },
                 "options": {
                     "type": "array",
@@ -8284,7 +8152,6 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
             },
             "required": [
                 "@type",
-                "options",
                 "result"
             ],
             "additionalProperties": false
@@ -8490,13 +8357,10 @@ export const CreateOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/FreeTextRequestItemJSON"
                 },
                 {
-                    "$ref": "#/definitions/FreeValueFormRequestItemJSON"
+                    "$ref": "#/definitions/FormFieldRequestItemJSON"
                 },
                 {
                     "$ref": "#/definitions/RegisterAttributeListenerRequestItemJSON"
-                },
-                {
-                    "$ref": "#/definitions/SelectionFormRequestItemJSON"
                 },
                 {
                     "$ref": "#/definitions/TransferFileOwnershipRequestItemJSON"
@@ -10967,22 +10831,11 @@ export const CreateOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "owner": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/ThirdPartyRelationshipAttributeQueryOwner"
-                        },
-                        {
-                            "type": "string",
-                            "const": "thirdParty"
-                        },
-                        {
-                            "type": "string",
-                            "const": "recipient"
-                        },
-                        {
-                            "type": "string",
-                            "const": ""
-                        }
+                    "type": "string",
+                    "enum": [
+                        "thirdParty",
+                        "recipient",
+                        ""
                     ]
                 },
                 "thirdParty": {
@@ -11005,14 +10858,6 @@ export const CreateOutgoingRequestRequest: any = {
                 "thirdParty"
             ],
             "additionalProperties": false
-        },
-        "ThirdPartyRelationshipAttributeQueryOwner": {
-            "type": "string",
-            "enum": [
-                "thirdParty",
-                "recipient",
-                ""
-            ]
         },
         "ConsentRequestItemJSON": {
             "type": "object",
@@ -11145,12 +10990,12 @@ export const CreateOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
-        "FreeValueFormRequestItemJSON": {
+        "FormFieldRequestItemJSON": {
             "type": "object",
             "properties": {
                 "@type": {
                     "type": "string",
-                    "const": "FreeValueFormRequestItem"
+                    "const": "FormFieldRequestItem"
                 },
                 "@context": {
                     "type": "string"
@@ -11178,45 +11023,67 @@ export const CreateOutgoingRequestRequest: any = {
                     "type": "boolean",
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
-                "freeValueFieldType": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/FreeValueFieldTypes"
-                        },
-                        {
-                            "type": "string",
-                            "const": "TextField"
-                        },
-                        {
-                            "type": "string",
-                            "const": "TextAreaField"
-                        },
-                        {
-                            "type": "string",
-                            "const": "NumberField"
-                        },
-                        {
-                            "type": "string",
-                            "const": "DateField"
-                        }
-                    ]
+                "freeValueFormField": {
+                    "$ref": "#/definitions/FreeValueFormFieldJSON"
+                },
+                "selectionFormField": {
+                    "$ref": "#/definitions/SelectionFormFieldJSON"
                 }
             },
             "required": [
                 "@type",
-                "freeValueFieldType",
                 "mustBeAccepted"
             ],
             "additionalProperties": false
         },
-        "FreeValueFieldTypes": {
-            "type": "string",
-            "enum": [
-                "TextField",
-                "TextAreaField",
-                "NumberField",
-                "DateField"
-            ]
+        "FreeValueFormFieldJSON": {
+            "type": "object",
+            "properties": {
+                "freeValueType": {
+                    "type": "string",
+                    "enum": [
+                        "String",
+                        "Integer",
+                        "Double",
+                        "Date",
+                        "Boolean"
+                    ]
+                },
+                "allowNewLines": {
+                    "type": "boolean"
+                },
+                "unit": {
+                    "type": "string"
+                },
+                "min": {
+                    "type": "number"
+                },
+                "max": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "freeValueType"
+            ],
+            "additionalProperties": false
+        },
+        "SelectionFormFieldJSON": {
+            "type": "object",
+            "properties": {
+                "options": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "allowMultipleSelection": {
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "options"
+            ],
+            "additionalProperties": false
         },
         "RegisterAttributeListenerRequestItemJSON": {
             "type": "object",
@@ -11268,81 +11135,6 @@ export const CreateOutgoingRequestRequest: any = {
                 "query"
             ],
             "additionalProperties": false
-        },
-        "SelectionFormRequestItemJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "SelectionFormRequestItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
-                },
-                "selectionFieldType": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/SelectionFieldTypes"
-                        },
-                        {
-                            "type": "string",
-                            "const": "RadioButtonGroup"
-                        },
-                        {
-                            "type": "string",
-                            "const": "DropdownMenu"
-                        },
-                        {
-                            "type": "string",
-                            "const": "Checklist"
-                        }
-                    ]
-                },
-                "options": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            },
-            "required": [
-                "@type",
-                "mustBeAccepted",
-                "options",
-                "selectionFieldType"
-            ],
-            "additionalProperties": false
-        },
-        "SelectionFieldTypes": {
-            "type": "string",
-            "enum": [
-                "RadioButtonGroup",
-                "DropdownMenu",
-                "Checklist"
-            ]
         },
         "TransferFileOwnershipRequestItemJSON": {
             "type": "object",
@@ -12042,13 +11834,10 @@ export const ReceivedIncomingRequestRequest: any = {
                     "$ref": "#/definitions/FreeTextRequestItemJSON"
                 },
                 {
-                    "$ref": "#/definitions/FreeValueFormRequestItemJSON"
+                    "$ref": "#/definitions/FormFieldRequestItemJSON"
                 },
                 {
                     "$ref": "#/definitions/RegisterAttributeListenerRequestItemJSON"
-                },
-                {
-                    "$ref": "#/definitions/SelectionFormRequestItemJSON"
                 },
                 {
                     "$ref": "#/definitions/TransferFileOwnershipRequestItemJSON"
@@ -14519,22 +14308,11 @@ export const ReceivedIncomingRequestRequest: any = {
                     "type": "string"
                 },
                 "owner": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/ThirdPartyRelationshipAttributeQueryOwner"
-                        },
-                        {
-                            "type": "string",
-                            "const": "thirdParty"
-                        },
-                        {
-                            "type": "string",
-                            "const": "recipient"
-                        },
-                        {
-                            "type": "string",
-                            "const": ""
-                        }
+                    "type": "string",
+                    "enum": [
+                        "thirdParty",
+                        "recipient",
+                        ""
                     ]
                 },
                 "thirdParty": {
@@ -14557,14 +14335,6 @@ export const ReceivedIncomingRequestRequest: any = {
                 "thirdParty"
             ],
             "additionalProperties": false
-        },
-        "ThirdPartyRelationshipAttributeQueryOwner": {
-            "type": "string",
-            "enum": [
-                "thirdParty",
-                "recipient",
-                ""
-            ]
         },
         "ConsentRequestItemJSON": {
             "type": "object",
@@ -14697,12 +14467,12 @@ export const ReceivedIncomingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
-        "FreeValueFormRequestItemJSON": {
+        "FormFieldRequestItemJSON": {
             "type": "object",
             "properties": {
                 "@type": {
                     "type": "string",
-                    "const": "FreeValueFormRequestItem"
+                    "const": "FormFieldRequestItem"
                 },
                 "@context": {
                     "type": "string"
@@ -14730,45 +14500,67 @@ export const ReceivedIncomingRequestRequest: any = {
                     "type": "boolean",
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
-                "freeValueFieldType": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/FreeValueFieldTypes"
-                        },
-                        {
-                            "type": "string",
-                            "const": "TextField"
-                        },
-                        {
-                            "type": "string",
-                            "const": "TextAreaField"
-                        },
-                        {
-                            "type": "string",
-                            "const": "NumberField"
-                        },
-                        {
-                            "type": "string",
-                            "const": "DateField"
-                        }
-                    ]
+                "freeValueFormField": {
+                    "$ref": "#/definitions/FreeValueFormFieldJSON"
+                },
+                "selectionFormField": {
+                    "$ref": "#/definitions/SelectionFormFieldJSON"
                 }
             },
             "required": [
                 "@type",
-                "freeValueFieldType",
                 "mustBeAccepted"
             ],
             "additionalProperties": false
         },
-        "FreeValueFieldTypes": {
-            "type": "string",
-            "enum": [
-                "TextField",
-                "TextAreaField",
-                "NumberField",
-                "DateField"
-            ]
+        "FreeValueFormFieldJSON": {
+            "type": "object",
+            "properties": {
+                "freeValueType": {
+                    "type": "string",
+                    "enum": [
+                        "String",
+                        "Integer",
+                        "Double",
+                        "Date",
+                        "Boolean"
+                    ]
+                },
+                "allowNewLines": {
+                    "type": "boolean"
+                },
+                "unit": {
+                    "type": "string"
+                },
+                "min": {
+                    "type": "number"
+                },
+                "max": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "freeValueType"
+            ],
+            "additionalProperties": false
+        },
+        "SelectionFormFieldJSON": {
+            "type": "object",
+            "properties": {
+                "options": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "allowMultipleSelection": {
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "options"
+            ],
+            "additionalProperties": false
         },
         "RegisterAttributeListenerRequestItemJSON": {
             "type": "object",
@@ -14820,81 +14612,6 @@ export const ReceivedIncomingRequestRequest: any = {
                 "query"
             ],
             "additionalProperties": false
-        },
-        "SelectionFormRequestItemJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "SelectionFormRequestItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
-                },
-                "selectionFieldType": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/SelectionFieldTypes"
-                        },
-                        {
-                            "type": "string",
-                            "const": "RadioButtonGroup"
-                        },
-                        {
-                            "type": "string",
-                            "const": "DropdownMenu"
-                        },
-                        {
-                            "type": "string",
-                            "const": "Checklist"
-                        }
-                    ]
-                },
-                "options": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            },
-            "required": [
-                "@type",
-                "mustBeAccepted",
-                "options",
-                "selectionFieldType"
-            ],
-            "additionalProperties": false
-        },
-        "SelectionFieldTypes": {
-            "type": "string",
-            "enum": [
-                "RadioButtonGroup",
-                "DropdownMenu",
-                "Checklist"
-            ]
         },
         "TransferFileOwnershipRequestItemJSON": {
             "type": "object",
@@ -16329,22 +16046,11 @@ export const ExecuteThirdPartyRelationshipAttributeQueryRequest: any = {
                     "type": "string"
                 },
                 "owner": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/ThirdPartyRelationshipAttributeQueryOwner"
-                        },
-                        {
-                            "type": "string",
-                            "const": "thirdParty"
-                        },
-                        {
-                            "type": "string",
-                            "const": "recipient"
-                        },
-                        {
-                            "type": "string",
-                            "const": ""
-                        }
+                    "type": "string",
+                    "enum": [
+                        "thirdParty",
+                        "recipient",
+                        ""
                     ]
                 },
                 "thirdParty": {
@@ -16367,14 +16073,6 @@ export const ExecuteThirdPartyRelationshipAttributeQueryRequest: any = {
                 "thirdParty"
             ],
             "additionalProperties": false
-        },
-        "ThirdPartyRelationshipAttributeQueryOwner": {
-            "type": "string",
-            "enum": [
-                "thirdParty",
-                "recipient",
-                ""
-            ]
         }
     }
 }

@@ -1,8 +1,9 @@
 import { Serializable, serialize, type, validate, ValidationError } from "@js-soft/ts-serval";
 import { nameof } from "ts-simple-nameof";
-import { ISelectionFormField, SelectionFormField, SelectionFormFieldJSON } from "../..";
+
 import { IRequestItem, RequestItem, RequestItemJSON } from "../../RequestItem";
 import { FreeValueFormField, FreeValueFormFieldJSON, IFreeValueFormField } from "./FreeValueFormField";
+import { ISelectionFormField, SelectionFormField, SelectionFormFieldJSON } from "./SelectionFormField";
 
 export interface FormFieldRequestItemJSON extends RequestItemJSON {
     "@type": "FormFieldRequestItem";
