@@ -39,6 +39,7 @@ describe("FormFieldRequestItemProcessor with freeValueFormField", function () {
         test("can create a form text field", () => {
             const requestItem = FormFieldRequestItem.from({
                 mustBeAccepted: false,
+                title: "aFreeValueFormField",
                 freeValueFormField: { freeValueType: FreeValueType.String }
             });
 
@@ -50,6 +51,7 @@ describe("FormFieldRequestItemProcessor with freeValueFormField", function () {
         test("can create a form text area field", () => {
             const requestItem = FormFieldRequestItem.from({
                 mustBeAccepted: false,
+                title: "aFreeValueFormField",
                 freeValueFormField: { freeValueType: FreeValueType.String }
             });
 
@@ -61,6 +63,7 @@ describe("FormFieldRequestItemProcessor with freeValueFormField", function () {
         test("can create a form number field", () => {
             const requestItem = FormFieldRequestItem.from({
                 mustBeAccepted: false,
+                title: "aFreeValueFormField",
                 freeValueFormField: { freeValueType: FreeValueType.Integer }
             });
 
@@ -72,6 +75,7 @@ describe("FormFieldRequestItemProcessor with freeValueFormField", function () {
         test("can create a form date field", () => {
             const requestItem = FormFieldRequestItem.from({
                 mustBeAccepted: false,
+                title: "aFreeValueFormField",
                 freeValueFormField: { freeValueType: FreeValueType.Date }
             });
 
@@ -85,6 +89,7 @@ describe("FormFieldRequestItemProcessor with freeValueFormField", function () {
         test("can accept a form text field with a free text", function () {
             const requestItem = FormFieldRequestItem.from({
                 mustBeAccepted: true,
+                title: "aFreeValueFormField",
                 freeValueFormField: { freeValueType: FreeValueType.String }
             });
 
@@ -101,6 +106,7 @@ describe("FormFieldRequestItemProcessor with freeValueFormField", function () {
         test("can accept a form text area field with a free text", function () {
             const requestItem = FormFieldRequestItem.from({
                 mustBeAccepted: true,
+                title: "aFreeValueFormField",
                 freeValueFormField: { freeValueType: FreeValueType.String }
             });
 
@@ -117,6 +123,7 @@ describe("FormFieldRequestItemProcessor with freeValueFormField", function () {
         test("can accept a form number field with a free number", function () {
             const requestItem = FormFieldRequestItem.from({
                 mustBeAccepted: true,
+                title: "aFreeValueFormField",
                 freeValueFormField: { freeValueType: FreeValueType.Integer }
             });
 
@@ -134,6 +141,7 @@ describe("FormFieldRequestItemProcessor with freeValueFormField", function () {
         test("returns an error when it is tried to accept a form number field with no free number", function () {
             const requestItem = FormFieldRequestItem.from({
                 mustBeAccepted: true,
+                title: "aFreeValueFormField",
                 freeValueFormField: { freeValueType: FreeValueType.Integer }
             });
 
@@ -153,6 +161,7 @@ describe("FormFieldRequestItemProcessor with freeValueFormField", function () {
         test("can accept a form date field with a free date", function () {
             const requestItem = FormFieldRequestItem.from({
                 mustBeAccepted: true,
+                title: "aFreeValueFormField",
                 freeValueFormField: { freeValueType: FreeValueType.Date }
             });
 
@@ -170,6 +179,7 @@ describe("FormFieldRequestItemProcessor with freeValueFormField", function () {
         test("returns an error when it is tried to accept a form date field with no free date", function () {
             const requestItem = FormFieldRequestItem.from({
                 mustBeAccepted: true,
+                title: "aFreeValueFormField",
                 freeValueFormField: { freeValueType: FreeValueType.Date }
             });
 
@@ -191,6 +201,7 @@ describe("FormFieldRequestItemProcessor with freeValueFormField", function () {
         test("accept form text field with a free text", function () {
             const requestItem = FormFieldRequestItem.from({
                 mustBeAccepted: true,
+                title: "aFreeValueFormField",
                 freeValueFormField: { freeValueType: FreeValueType.String }
             });
 
@@ -206,6 +217,7 @@ describe("FormFieldRequestItemProcessor with freeValueFormField", function () {
         test("accept form text area field with a free text", function () {
             const requestItem = FormFieldRequestItem.from({
                 mustBeAccepted: true,
+                title: "aFreeValueFormField",
                 freeValueFormField: { freeValueType: FreeValueType.String }
             });
 
@@ -221,6 +233,7 @@ describe("FormFieldRequestItemProcessor with freeValueFormField", function () {
         test("accept form number field with a free number", function () {
             const requestItem = FormFieldRequestItem.from({
                 mustBeAccepted: true,
+                title: "aFreeValueFormField",
                 freeValueFormField: { freeValueType: FreeValueType.Integer }
             });
 
@@ -237,6 +250,7 @@ describe("FormFieldRequestItemProcessor with freeValueFormField", function () {
         test("accept form date field with a free date", function () {
             const requestItem = FormFieldRequestItem.from({
                 mustBeAccepted: true,
+                title: "aFreeValueFormField",
                 freeValueFormField: { freeValueType: FreeValueType.Date }
             });
 
@@ -257,6 +271,7 @@ describe("FormFieldRequestItemProcessor with freeValueFormField", function () {
 
             const requestItem = FormFieldRequestItem.from({
                 mustBeAccepted: true,
+                title: "aFreeValueFormField",
                 freeValueFormField: { freeValueType: FreeValueType.String }
             });
 
@@ -315,6 +330,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
             test("can create a form radio button group", () => {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: false,
+                    title: "aSelectionFormField",
                     selectionFormField: { options: ["optionA", "optionB"] }
                 });
 
@@ -326,6 +342,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
             test("cannot create a form radio button group with no options", () => {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: false,
+                    title: "aSelectionFormField",
                     selectionFormField: { options: [] }
                 });
 
@@ -340,6 +357,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
             test("cannot create a form radio button group with non-unique options", () => {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: false,
+                    title: "aSelectionFormField",
                     selectionFormField: { options: ["optionA", "optionA"] }
                 });
 
@@ -356,6 +374,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
             test("can create a form dropdown menu", () => {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: false,
+                    title: "aSelectionFormField",
                     selectionFormField: { options: ["optionA", "optionB"] }
                 });
 
@@ -367,6 +386,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
             test("cannot create a form dropdown menu with no options", () => {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: false,
+                    title: "aSelectionFormField",
                     selectionFormField: { options: [] }
                 });
 
@@ -381,6 +401,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
             test("cannot create a form dropdown menu with non-unique options", () => {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: false,
+                    title: "aSelectionFormField",
                     selectionFormField: { options: ["optionA", "optionA"] }
                 });
 
@@ -397,6 +418,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
             test("can create a form checklist", () => {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: false,
+                    title: "aSelectionFormField",
                     selectionFormField: { options: ["optionA", "optionB"] }
                 });
 
@@ -408,6 +430,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
             test("cannot create a form checklist with no options", () => {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: false,
+                    title: "aSelectionFormField",
                     selectionFormField: { options: [] }
                 });
 
@@ -422,6 +445,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
             test("cannot create a form checklist with non-unique options", () => {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: false,
+                    title: "aSelectionFormField",
                     selectionFormField: { options: ["optionA", "optionA"] }
                 });
 
@@ -440,6 +464,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
             test("can accept a form radio button group with an option", function () {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
+                    title: "aSelectionFormField",
                     selectionFormField: { options: ["optionA", "optionB"] }
                 });
 
@@ -456,6 +481,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
             test("returns an error when it is tried to accept a form radio button group with no option", function () {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
+                    title: "aSelectionFormField",
                     selectionFormField: { options: ["optionA", "optionB"] }
                 });
 
@@ -475,6 +501,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
             test("returns an error when it is tried to accept a form radio button group with an unknown option", function () {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
+                    title: "aSelectionFormField",
                     selectionFormField: { options: ["optionA", "optionB"] }
                 });
 
@@ -494,6 +521,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
             test("returns an error when it is tried to accept a form radio button group with more than one option", function () {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
+                    title: "aSelectionFormField",
                     selectionFormField: { options: ["optionA", "optionB"] }
                 });
 
@@ -515,6 +543,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
             test("can accept a form dropdown menu with an option", function () {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
+                    title: "aSelectionFormField",
                     selectionFormField: { options: ["optionA", "optionB"] }
                 });
 
@@ -531,6 +560,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
             test("returns an error when it is tried to accept a form dropdown menu with no option", function () {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
+                    title: "aSelectionFormField",
                     selectionFormField: { options: ["optionA", "optionB"] }
                 });
 
@@ -550,6 +580,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
             test("returns an error when it is tried to accept a form dropdown menu with an unknown option", function () {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
+                    title: "aSelectionFormField",
                     selectionFormField: { options: ["optionA", "optionB"] }
                 });
 
@@ -569,6 +600,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
             test("returns an error when it is tried to accept a form dropdown menu with more than one option", function () {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
+                    title: "aSelectionFormField",
                     selectionFormField: { options: ["optionA", "optionB"] }
                 });
 
@@ -590,6 +622,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
             test("can accept a form checklist with an option", function () {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
+                    title: "aSelectionFormField",
                     selectionFormField: { options: ["optionA", "optionB"] }
                 });
 
@@ -606,6 +639,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
             test("can accept a form checklist with multiple options", function () {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
+                    title: "aSelectionFormField",
                     selectionFormField: { options: ["optionA", "optionB"] }
                 });
 
@@ -622,6 +656,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
             test("returns an error when it is tried to accept a form checklist with no option", function () {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
+                    title: "aSelectionFormField",
                     selectionFormField: { options: ["optionA", "optionB"] }
                 });
 
@@ -641,6 +676,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
             test("returns an error when it is tried to accept a form checklist with an unknown option", function () {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
+                    title: "aSelectionFormField",
                     selectionFormField: { options: ["optionA", "optionB"] }
                 });
 
@@ -660,6 +696,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
             test("returns an error when it is tried to accept a form checklist with the same option twice", function () {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
+                    title: "aSelectionFormField",
                     selectionFormField: { options: ["optionA", "optionB"] }
                 });
 
@@ -682,6 +719,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
         test("accept form radio button group with an option", function () {
             const requestItem = FormFieldRequestItem.from({
                 mustBeAccepted: true,
+                title: "aSelectionFormField",
                 selectionFormField: { options: ["optionA", "optionB"] }
             });
 
@@ -697,6 +735,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
         test("accept form dropdown menu with an option", function () {
             const requestItem = FormFieldRequestItem.from({
                 mustBeAccepted: true,
+                title: "aSelectionFormField",
                 selectionFormField: { options: ["optionA", "optionB"] }
             });
 
@@ -712,6 +751,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
         test("accept form checklist with an option", function () {
             const requestItem = FormFieldRequestItem.from({
                 mustBeAccepted: true,
+                title: "aSelectionFormField",
                 selectionFormField: { options: ["optionA", "optionB"] }
             });
 
@@ -727,6 +767,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
         test("accept form checklist with multiple options", function () {
             const requestItem = FormFieldRequestItem.from({
                 mustBeAccepted: true,
+                title: "aSelectionFormField",
                 selectionFormField: { options: ["optionA", "optionB"] }
             });
 
@@ -746,6 +787,7 @@ describe("FormFieldRequestItemProcessor with selectionFormField", function () {
 
             const requestItem = FormFieldRequestItem.from({
                 mustBeAccepted: true,
+                title: "aSelectionFormField",
                 selectionFormField: { options: ["optionA", "optionB"] }
             });
 

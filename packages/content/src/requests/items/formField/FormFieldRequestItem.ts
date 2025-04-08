@@ -7,17 +7,23 @@ import { ISelectionFormField, SelectionFormField, SelectionFormFieldJSON } from 
 
 export interface FormFieldRequestItemJSON extends RequestItemJSON {
     "@type": "FormFieldRequestItem";
+    title: string;
     freeValueFormField?: FreeValueFormFieldJSON;
     selectionFormField?: SelectionFormFieldJSON;
 }
 
 export interface IFormFieldRequestItem extends IRequestItem {
+    title: string;
     freeValueFormField?: IFreeValueFormField;
     selectionFormField?: ISelectionFormField;
 }
 
 @type("FormFieldRequestItem")
 export class FormFieldRequestItem extends RequestItem implements IFormFieldRequestItem {
+    @serialize()
+    @validate()
+    public override title: string;
+
     @serialize()
     @validate({ nullable: true })
     public freeValueFormField: FreeValueFormField;

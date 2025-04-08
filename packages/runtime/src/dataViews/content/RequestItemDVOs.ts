@@ -74,6 +74,7 @@ export interface FreeTextRequestItemDVO extends RequestItemDVO {
 
 export interface FormFieldRequestItemDVO extends RequestItemDVO {
     type: "FormFieldRequestItemDVO";
+    title: string;
     freeValueFormField?: FreeValueFormFieldJSON;
     selectionFormField?: SelectionFormFieldJSON;
 }

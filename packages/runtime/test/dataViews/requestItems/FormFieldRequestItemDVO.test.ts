@@ -67,6 +67,7 @@ describe("FormFieldRequestItemDVO with freeValueFormField", () => {
                 items: [
                     FormFieldRequestItem.from({
                         mustBeAccepted: true,
+                        title: "aFreeValueFormField",
                         freeValueFormField: { freeValueType: FreeValueType.String }
                     }).toJSON()
                 ]
@@ -232,6 +233,7 @@ describe("FormFieldRequestItemDVO with selectionFormField", () => {
                 items: [
                     FormFieldRequestItem.from({
                         mustBeAccepted: true,
+                        title: "aSelectionFormField",
                         selectionFormField: { options: ["optionA", "optionB"] }
                     }).toJSON()
                 ]

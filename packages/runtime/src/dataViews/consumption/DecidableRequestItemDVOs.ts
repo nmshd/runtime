@@ -54,6 +54,7 @@ export interface DecidableFreeTextRequestItemDVO extends DecidableRequestItemDVO
 
 export interface DecidableFormFieldRequestItemDVO extends DecidableRequestItemDVO {
     type: "DecidableFormFieldRequestItemDVO";
+    title: string;
     freeValueFormField?: FreeValueFormFieldJSON;
     selectionFormField?: SelectionFormFieldJSON;
 }
