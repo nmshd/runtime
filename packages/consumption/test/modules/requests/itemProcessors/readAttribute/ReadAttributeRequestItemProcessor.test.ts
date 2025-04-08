@@ -1511,7 +1511,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
-                    query: IdentityAttributeQuery.from({ tags: ["aNewTag", "anotherNewTag"], valueType: "GivenName" })
+                    query: IdentityAttributeQuery.from({ tags: ["x+%+aNewTag", "x+%+anotherNewTag"], valueType: "GivenName" })
                 });
                 const requestId = await ConsumptionIds.request.generate();
                 const incomingRequest = LocalRequest.from({
@@ -2409,7 +2409,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: recipient,
                         value: GivenName.fromAny({ value: "aGivenName" }),
-                        tags: ["tag1"]
+                        tags: ["x+%+tag1"]
                     })
                 });
 
@@ -2440,7 +2440,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                             "@type": "GivenName",
                             value: "aGivenName"
                         },
-                        tags: ["tag2"]
+                        tags: ["x+%+tag2"]
                     }
                 };
 
@@ -2450,7 +2450,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const createdSharedAttribute = await consumptionController.attributes.getLocalAttribute((result as ReadAttributeAcceptResponseItem).attributeId);
                 const sourceAttribute = await consumptionController.attributes.getLocalAttribute(createdSharedAttribute!.shareInfo!.sourceAttribute!);
                 expect(sourceAttribute!.succeeds).toStrictEqual(existingRepositoryAttribute.id);
-                expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["tag1", "tag2"]);
+                expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x+%+tag1", "x+%+tag2"]);
             });
 
             test("accept with new IdentityAttribute that is a duplicate after trimming with different tags", async function () {
@@ -2458,7 +2458,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: recipient,
                         value: GivenName.fromAny({ value: "aGivenName" }),
-                        tags: ["tag1"]
+                        tags: ["x+%+tag1"]
                     })
                 });
 
@@ -2489,7 +2489,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                             "@type": "GivenName",
                             value: " aGivenName "
                         },
-                        tags: ["tag2"]
+                        tags: ["x+%+tag2"]
                     }
                 };
 
@@ -2499,7 +2499,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const createdSharedAttribute = await consumptionController.attributes.getLocalAttribute((result as ReadAttributeAcceptResponseItem).attributeId);
                 const sourceAttribute = await consumptionController.attributes.getLocalAttribute(createdSharedAttribute!.shareInfo!.sourceAttribute!);
                 expect(sourceAttribute!.succeeds).toStrictEqual(existingRepositoryAttribute.id);
-                expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["tag1", "tag2"]);
+                expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x+%+tag1", "x+%+tag2"]);
             });
 
             test("accept with new IdentityAttribute that is already shared", async function () {
@@ -2605,7 +2605,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: recipient,
                         value: GivenName.fromAny({ value: "aGivenName" }),
-                        tags: ["tag1"]
+                        tags: ["x+%+tag1"]
                     })
                 });
 
@@ -2642,7 +2642,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                             "@type": "GivenName",
                             value: "aGivenName"
                         },
-                        tags: ["tag2"]
+                        tags: ["x+%+tag2"]
                     }
                 };
 
@@ -2653,7 +2653,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const succeededOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute((result as AttributeSuccessionAcceptResponseItem).successorId);
                 const sourceAttribute = await consumptionController.attributes.getLocalAttribute(succeededOwnSharedIdentityAttribute!.shareInfo!.sourceAttribute!);
                 expect(sourceAttribute!.succeeds).toStrictEqual(existingRepositoryAttribute.id);
-                expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["tag1", "tag2"]);
+                expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x+%+tag1", "x+%+tag2"]);
             });
 
             test("accept with new IdentityAttribute that is already shared after trimming with different tags", async function () {
@@ -2661,7 +2661,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: recipient,
                         value: GivenName.fromAny({ value: "aGivenName" }),
-                        tags: ["tag1"]
+                        tags: ["x+%+tag1"]
                     })
                 });
 
@@ -2698,7 +2698,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                             "@type": "GivenName",
                             value: " aGivenName "
                         },
-                        tags: ["tag2"]
+                        tags: ["x+%+tag2"]
                     }
                 };
 
@@ -2709,7 +2709,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const succeededOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute((result as AttributeSuccessionAcceptResponseItem).successorId);
                 const sourceAttribute = await consumptionController.attributes.getLocalAttribute(succeededOwnSharedIdentityAttribute!.shareInfo!.sourceAttribute!);
                 expect(sourceAttribute!.succeeds).toStrictEqual(existingRepositoryAttribute.id);
-                expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["tag1", "tag2"]);
+                expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x+%+tag1", "x+%+tag2"]);
             });
 
             test("accept with new IdentityAttribute whose predecessor is already shared", async function () {
@@ -2792,7 +2792,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         content: IdentityAttribute.from({
                             value: GivenName.fromAny({ value: "aSucceededGivenName" }),
                             owner: recipient,
-                            tags: ["tag1"]
+                            tags: ["x+%+tag1"]
                         })
                     })
                 ).successor;
@@ -2824,7 +2824,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                             "@type": "GivenName",
                             value: "aSucceededGivenName"
                         },
-                        tags: ["tag2"]
+                        tags: ["x+%+tag2"]
                     }
                 };
 
@@ -2835,7 +2835,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const succeededOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute((result as AttributeSuccessionAcceptResponseItem).successorId);
                 const sourceAttribute = await consumptionController.attributes.getLocalAttribute(succeededOwnSharedIdentityAttribute!.shareInfo!.sourceAttribute!);
                 expect(sourceAttribute!.succeeds).toStrictEqual(existingRepositoryAttributeSuccessor.id);
-                expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["tag1", "tag2"]);
+                expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x+%+tag1", "x+%+tag2"]);
             });
         });
     });
