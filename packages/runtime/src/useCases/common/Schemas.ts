@@ -1063,6 +1063,9 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "link": {
                     "type": "string"
+                },
+                "linkDisplayText": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -2846,6 +2849,9 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "link": {
+                    "type": "string"
+                },
+                "linkDisplayText": {
                     "type": "string"
                 }
             },
@@ -5311,6 +5317,9 @@ export const CompleteOutgoingRequestRequest: any = {
                 },
                 "link": {
                     "type": "string"
+                },
+                "linkDisplayText": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -7732,6 +7741,9 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                 },
                 "link": {
                     "type": "string"
+                },
+                "linkDisplayText": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -8883,6 +8895,9 @@ export const CreateOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "link": {
+                    "type": "string"
+                },
+                "linkDisplayText": {
                     "type": "string"
                 }
             },
@@ -10667,6 +10682,9 @@ export const CreateOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "link": {
+                    "type": "string"
+                },
+                "linkDisplayText": {
                     "type": "string"
                 }
             },
@@ -12253,6 +12271,9 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "link": {
                     "type": "string"
+                },
+                "linkDisplayText": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -14037,6 +14058,9 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "link": {
                     "type": "string"
+                },
+                "linkDisplayText": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -14973,6 +14997,9 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
                     "type": "string"
                 },
                 "link": {
+                    "type": "string"
+                },
+                "linkDisplayText": {
                     "type": "string"
                 }
             },
@@ -17196,6 +17223,9 @@ export const SucceedRelationshipAttributeAndNotifyPeerRequest: any = {
                     "type": "string"
                 },
                 "link": {
+                    "type": "string"
+                },
+                "linkDisplayText": {
                     "type": "string"
                 }
             },
