@@ -116,16 +116,6 @@ export class SyncController extends TransportController {
 
         await this.setLastCompletedSyncTime();
 
-        if (externalEventSyncResult.some((r) => r.errorCode !== undefined)) {
-            throw new CoreError(
-                "error.transport.errorWhileApplyingExternalEvents",
-                externalEventSyncResult
-                    .filter((r) => r.errorCode !== undefined)
-                    .map((r) => r.errorCode)
-                    .join(" | ")
-            );
-        }
-
         if (this.datawalletEnabled && (await this.unpushedDatawalletModifications.exists())) {
             await this.syncDatawallet(changedItems).catch((e) => this.log.error(e));
         }
