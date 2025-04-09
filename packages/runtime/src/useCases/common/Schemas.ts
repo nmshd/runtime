@@ -2998,37 +2998,62 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "type": "boolean",
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
-                "freeValueFormField": {
-                    "$ref": "#/definitions/FreeValueFormFieldJSON"
-                },
-                "selectionFormField": {
-                    "$ref": "#/definitions/SelectionFormFieldJSON"
+                "settings": {
+                    "$ref": "#/definitions/FormFieldSettingsJSONDerivations"
                 }
             },
             "required": [
                 "@type",
                 "mustBeAccepted",
+                "settings",
                 "title"
             ],
             "additionalProperties": false
         },
-        "FreeValueFormFieldJSON": {
+        "FormFieldSettingsJSONDerivations": {
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/StringFormFieldSettingsJSON"
+                },
+                {
+                    "$ref": "#/definitions/IntegerFormFieldSettingsJSON"
+                },
+                {
+                    "$ref": "#/definitions/DoubleFormFieldSettingsJSON"
+                },
+                {
+                    "$ref": "#/definitions/BooleanFormFieldSettingsJSON"
+                },
+                {
+                    "$ref": "#/definitions/DateFormFieldSettingsJSON"
+                },
+                {
+                    "$ref": "#/definitions/SelectionFormFieldSettingsJSON"
+                },
+                {
+                    "$ref": "#/definitions/RatingFormFieldSettingsJSON"
+                }
+            ]
+        },
+        "StringFormFieldSettingsJSON": {
             "type": "object",
             "properties": {
-                "freeValueType": {
-                    "type": "string",
-                    "enum": [
-                        "String",
-                        "Integer",
-                        "Double",
-                        "Date",
-                        "Boolean"
-                    ]
-                },
                 "allowNewLines": {
                     "type": "boolean",
                     "const": true
                 },
+                "min": {
+                    "type": "number"
+                },
+                "max": {
+                    "type": "number"
+                }
+            },
+            "additionalProperties": false
+        },
+        "IntegerFormFieldSettingsJSON": {
+            "type": "object",
+            "properties": {
                 "unit": {
                     "type": "string"
                 },
@@ -3039,12 +3064,32 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "type": "number"
                 }
             },
-            "required": [
-                "freeValueType"
-            ],
             "additionalProperties": false
         },
-        "SelectionFormFieldJSON": {
+        "DoubleFormFieldSettingsJSON": {
+            "type": "object",
+            "properties": {
+                "unit": {
+                    "type": "string"
+                },
+                "min": {
+                    "type": "number"
+                },
+                "max": {
+                    "type": "number"
+                }
+            },
+            "additionalProperties": false
+        },
+        "BooleanFormFieldSettingsJSON": {
+            "type": "object",
+            "additionalProperties": false
+        },
+        "DateFormFieldSettingsJSON": {
+            "type": "object",
+            "additionalProperties": false
+        },
+        "SelectionFormFieldSettingsJSON": {
             "type": "object",
             "properties": {
                 "options": {
@@ -3060,6 +3105,26 @@ export const CanCreateOutgoingRequestRequest: any = {
             },
             "required": [
                 "options"
+            ],
+            "additionalProperties": false
+        },
+        "RatingFormFieldSettingsJSON": {
+            "type": "object",
+            "properties": {
+                "maxRating": {
+                    "type": "number",
+                    "enum": [
+                        5,
+                        6,
+                        7,
+                        8,
+                        9,
+                        10
+                    ]
+                }
+            },
+            "required": [
+                "maxRating"
             ],
             "additionalProperties": false
         },
@@ -5674,7 +5739,7 @@ export const CompleteOutgoingRequestRequest: any = {
                     "type": "string",
                     "const": "Accepted"
                 },
-                "formFieldResponse": {
+                "response": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -5696,7 +5761,7 @@ export const CompleteOutgoingRequestRequest: any = {
             },
             "required": [
                 "@type",
-                "formFieldResponse",
+                "response",
                 "result"
             ],
             "additionalProperties": false
@@ -8154,7 +8219,7 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                     "type": "string",
                     "const": "Accepted"
                 },
-                "formFieldResponse": {
+                "response": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -8176,7 +8241,7 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
             },
             "required": [
                 "@type",
-                "formFieldResponse",
+                "response",
                 "result"
             ],
             "additionalProperties": false
@@ -11048,37 +11113,62 @@ export const CreateOutgoingRequestRequest: any = {
                     "type": "boolean",
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
-                "freeValueFormField": {
-                    "$ref": "#/definitions/FreeValueFormFieldJSON"
-                },
-                "selectionFormField": {
-                    "$ref": "#/definitions/SelectionFormFieldJSON"
+                "settings": {
+                    "$ref": "#/definitions/FormFieldSettingsJSONDerivations"
                 }
             },
             "required": [
                 "@type",
                 "mustBeAccepted",
+                "settings",
                 "title"
             ],
             "additionalProperties": false
         },
-        "FreeValueFormFieldJSON": {
+        "FormFieldSettingsJSONDerivations": {
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/StringFormFieldSettingsJSON"
+                },
+                {
+                    "$ref": "#/definitions/IntegerFormFieldSettingsJSON"
+                },
+                {
+                    "$ref": "#/definitions/DoubleFormFieldSettingsJSON"
+                },
+                {
+                    "$ref": "#/definitions/BooleanFormFieldSettingsJSON"
+                },
+                {
+                    "$ref": "#/definitions/DateFormFieldSettingsJSON"
+                },
+                {
+                    "$ref": "#/definitions/SelectionFormFieldSettingsJSON"
+                },
+                {
+                    "$ref": "#/definitions/RatingFormFieldSettingsJSON"
+                }
+            ]
+        },
+        "StringFormFieldSettingsJSON": {
             "type": "object",
             "properties": {
-                "freeValueType": {
-                    "type": "string",
-                    "enum": [
-                        "String",
-                        "Integer",
-                        "Double",
-                        "Date",
-                        "Boolean"
-                    ]
-                },
                 "allowNewLines": {
                     "type": "boolean",
                     "const": true
                 },
+                "min": {
+                    "type": "number"
+                },
+                "max": {
+                    "type": "number"
+                }
+            },
+            "additionalProperties": false
+        },
+        "IntegerFormFieldSettingsJSON": {
+            "type": "object",
+            "properties": {
                 "unit": {
                     "type": "string"
                 },
@@ -11089,12 +11179,32 @@ export const CreateOutgoingRequestRequest: any = {
                     "type": "number"
                 }
             },
-            "required": [
-                "freeValueType"
-            ],
             "additionalProperties": false
         },
-        "SelectionFormFieldJSON": {
+        "DoubleFormFieldSettingsJSON": {
+            "type": "object",
+            "properties": {
+                "unit": {
+                    "type": "string"
+                },
+                "min": {
+                    "type": "number"
+                },
+                "max": {
+                    "type": "number"
+                }
+            },
+            "additionalProperties": false
+        },
+        "BooleanFormFieldSettingsJSON": {
+            "type": "object",
+            "additionalProperties": false
+        },
+        "DateFormFieldSettingsJSON": {
+            "type": "object",
+            "additionalProperties": false
+        },
+        "SelectionFormFieldSettingsJSON": {
             "type": "object",
             "properties": {
                 "options": {
@@ -11110,6 +11220,26 @@ export const CreateOutgoingRequestRequest: any = {
             },
             "required": [
                 "options"
+            ],
+            "additionalProperties": false
+        },
+        "RatingFormFieldSettingsJSON": {
+            "type": "object",
+            "properties": {
+                "maxRating": {
+                    "type": "number",
+                    "enum": [
+                        5,
+                        6,
+                        7,
+                        8,
+                        9,
+                        10
+                    ]
+                }
+            },
+            "required": [
+                "maxRating"
             ],
             "additionalProperties": false
         },
@@ -14528,37 +14658,62 @@ export const ReceivedIncomingRequestRequest: any = {
                     "type": "boolean",
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
-                "freeValueFormField": {
-                    "$ref": "#/definitions/FreeValueFormFieldJSON"
-                },
-                "selectionFormField": {
-                    "$ref": "#/definitions/SelectionFormFieldJSON"
+                "settings": {
+                    "$ref": "#/definitions/FormFieldSettingsJSONDerivations"
                 }
             },
             "required": [
                 "@type",
                 "mustBeAccepted",
+                "settings",
                 "title"
             ],
             "additionalProperties": false
         },
-        "FreeValueFormFieldJSON": {
+        "FormFieldSettingsJSONDerivations": {
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/StringFormFieldSettingsJSON"
+                },
+                {
+                    "$ref": "#/definitions/IntegerFormFieldSettingsJSON"
+                },
+                {
+                    "$ref": "#/definitions/DoubleFormFieldSettingsJSON"
+                },
+                {
+                    "$ref": "#/definitions/BooleanFormFieldSettingsJSON"
+                },
+                {
+                    "$ref": "#/definitions/DateFormFieldSettingsJSON"
+                },
+                {
+                    "$ref": "#/definitions/SelectionFormFieldSettingsJSON"
+                },
+                {
+                    "$ref": "#/definitions/RatingFormFieldSettingsJSON"
+                }
+            ]
+        },
+        "StringFormFieldSettingsJSON": {
             "type": "object",
             "properties": {
-                "freeValueType": {
-                    "type": "string",
-                    "enum": [
-                        "String",
-                        "Integer",
-                        "Double",
-                        "Date",
-                        "Boolean"
-                    ]
-                },
                 "allowNewLines": {
                     "type": "boolean",
                     "const": true
                 },
+                "min": {
+                    "type": "number"
+                },
+                "max": {
+                    "type": "number"
+                }
+            },
+            "additionalProperties": false
+        },
+        "IntegerFormFieldSettingsJSON": {
+            "type": "object",
+            "properties": {
                 "unit": {
                     "type": "string"
                 },
@@ -14569,12 +14724,32 @@ export const ReceivedIncomingRequestRequest: any = {
                     "type": "number"
                 }
             },
-            "required": [
-                "freeValueType"
-            ],
             "additionalProperties": false
         },
-        "SelectionFormFieldJSON": {
+        "DoubleFormFieldSettingsJSON": {
+            "type": "object",
+            "properties": {
+                "unit": {
+                    "type": "string"
+                },
+                "min": {
+                    "type": "number"
+                },
+                "max": {
+                    "type": "number"
+                }
+            },
+            "additionalProperties": false
+        },
+        "BooleanFormFieldSettingsJSON": {
+            "type": "object",
+            "additionalProperties": false
+        },
+        "DateFormFieldSettingsJSON": {
+            "type": "object",
+            "additionalProperties": false
+        },
+        "SelectionFormFieldSettingsJSON": {
             "type": "object",
             "properties": {
                 "options": {
@@ -14590,6 +14765,26 @@ export const ReceivedIncomingRequestRequest: any = {
             },
             "required": [
                 "options"
+            ],
+            "additionalProperties": false
+        },
+        "RatingFormFieldSettingsJSON": {
+            "type": "object",
+            "properties": {
+                "maxRating": {
+                    "type": "number",
+                    "enum": [
+                        5,
+                        6,
+                        7,
+                        8,
+                        9,
+                        10
+                    ]
+                }
+            },
+            "required": [
+                "maxRating"
             ],
             "additionalProperties": false
         },

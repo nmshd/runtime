@@ -1,21 +1,17 @@
-import { Serializable, serialize, type, validate, ValidationError } from "@js-soft/ts-serval";
-import { nameof } from "ts-simple-nameof";
+import { Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 
 import { IRequestItem, RequestItem, RequestItemJSON } from "../../RequestItem";
-import { FreeValueFormField, FreeValueFormFieldJSON, IFreeValueFormField } from "./FreeValueFormField";
-import { ISelectionFormField, SelectionFormField, SelectionFormFieldJSON } from "./SelectionFormField";
+import { FormFieldSettingsDerivations, FormFieldSettingsJSONDerivations, IFormFieldSettingsDerivations } from "./FormFieldSettingsDerivations";
 
 export interface FormFieldRequestItemJSON extends RequestItemJSON {
     "@type": "FormFieldRequestItem";
     title: string;
-    freeValueFormField?: FreeValueFormFieldJSON;
-    selectionFormField?: SelectionFormFieldJSON;
+    settings: FormFieldSettingsJSONDerivations;
 }
 
 export interface IFormFieldRequestItem extends IRequestItem {
     title: string;
-    freeValueFormField?: IFreeValueFormField;
-    selectionFormField?: ISelectionFormField;
+    settings: IFormFieldSettingsDerivations;
 }
 
 @type("FormFieldRequestItem")
@@ -25,12 +21,8 @@ export class FormFieldRequestItem extends RequestItem implements IFormFieldReque
     public override title: string;
 
     @serialize()
-    @validate({ nullable: true })
-    public freeValueFormField?: FreeValueFormField;
-
-    @serialize()
-    @validate({ nullable: true })
-    public selectionFormField?: SelectionFormField;
+    @validate()
+    public settings: FormFieldSettingsDerivations;
 
     public static from(value: IFormFieldRequestItem | Omit<FormFieldRequestItemJSON, "@type"> | FormFieldRequestItemJSON): FormFieldRequestItem {
         return this.fromAny(value);
@@ -39,22 +31,6 @@ export class FormFieldRequestItem extends RequestItem implements IFormFieldReque
     protected static override postFrom<T extends Serializable>(value: T): T {
         if (!(value instanceof FormFieldRequestItem)) {
             throw new Error("this should never happen");
-        }
-
-        if (value.freeValueFormField && value.selectionFormField) {
-            throw new ValidationError(
-                FormFieldRequestItem.name,
-                nameof<FormFieldRequestItem>((x) => x.freeValueFormField),
-                `You cannot specify both ${nameof<FormFieldRequestItem>((x) => x.freeValueFormField)} and ${nameof<FormFieldRequestItem>((x) => x.selectionFormField)}.`
-            );
-        }
-
-        if (!value.freeValueFormField && !value.selectionFormField) {
-            throw new ValidationError(
-                FormFieldRequestItem.name,
-                nameof<FormFieldRequestItem>((x) => x.freeValueFormField),
-                `You have to specify either ${nameof<FormFieldRequestItem>((x) => x.freeValueFormField)} or ${nameof<FormFieldRequestItem>((x) => x.selectionFormField)}.`
-            );
         }
 
         return value;

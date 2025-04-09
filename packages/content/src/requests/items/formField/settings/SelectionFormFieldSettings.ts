@@ -1,16 +1,16 @@
 import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-serval";
 
-export interface SelectionFormFieldJSON {
+export interface SelectionFormFieldSettingsJSON {
     options: string[];
     allowMultipleSelection?: true;
 }
 
-export interface ISelectionFormField extends ISerializable {
+export interface ISelectionFormFieldSettings extends ISerializable {
     options: string[];
     allowMultipleSelection?: true;
 }
 
-export class SelectionFormField extends Serializable implements ISelectionFormField {
+export class SelectionFormFieldSettings extends Serializable implements ISelectionFormFieldSettings {
     @serialize()
     @validate()
     public options: string[];
@@ -19,7 +19,7 @@ export class SelectionFormField extends Serializable implements ISelectionFormFi
     @validate({ nullable: true })
     public allowMultipleSelection?: true;
 
-    public static from(value: ISelectionFormField | SelectionFormFieldJSON): SelectionFormField {
+    public static from(value: ISelectionFormFieldSettings | SelectionFormFieldSettingsJSON): SelectionFormFieldSettings {
         return this.fromAny(value);
     }
 }

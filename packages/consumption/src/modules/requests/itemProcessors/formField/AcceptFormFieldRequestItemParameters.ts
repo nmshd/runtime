@@ -2,14 +2,14 @@ import { PrimitiveType, Serializable, serialize, type, validate } from "@js-soft
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
 
 export interface AcceptFormFieldRequestItemParametersJSON extends AcceptRequestItemParametersJSON {
-    formFieldResponse: string | number | boolean | string[];
+    response: string | number | boolean | string[];
 }
 
 @type("AcceptFormFieldRequestItemParameters")
 export class AcceptFormFieldRequestItemParameters extends Serializable {
     @serialize()
     @validate({ allowedTypes: [PrimitiveType.String, PrimitiveType.Number, PrimitiveType.Boolean, PrimitiveType.Array] })
-    public formFieldResponse: string | number | boolean | string[];
+    public response: string | number | boolean | string[];
 
     public static from(value: AcceptFormFieldRequestItemParametersJSON): AcceptFormFieldRequestItemParameters {
         return this.fromAny(value);

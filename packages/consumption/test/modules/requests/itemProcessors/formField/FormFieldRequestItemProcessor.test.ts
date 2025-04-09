@@ -363,7 +363,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                     accept: true,
-                    formFieldResponse: ["aString"]
+                    response: ["aString"]
                 };
 
                 const result = processor.canAccept(requestItem, acceptParams);
@@ -384,7 +384,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                     const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                         accept: true,
-                        formFieldResponse: aString
+                        response: aString
                     };
 
                     const result = processor.canAccept(requestItem, acceptParams);
@@ -401,7 +401,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                     const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                         accept: true,
-                        formFieldResponse: anInteger
+                        response: anInteger
                     };
 
                     const result = processor.canAccept(requestItem, acceptParams);
@@ -423,7 +423,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                     const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                         accept: true,
-                        formFieldResponse: anInteger
+                        response: anInteger
                     };
 
                     const result = processor.canAccept(requestItem, acceptParams);
@@ -440,7 +440,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                     const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                         accept: true,
-                        formFieldResponse: aDouble
+                        response: aDouble
                     };
 
                     const result = processor.canAccept(requestItem, acceptParams);
@@ -462,7 +462,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                     const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                         accept: true,
-                        formFieldResponse: aDouble
+                        response: aDouble
                     };
 
                     const result = processor.canAccept(requestItem, acceptParams);
@@ -479,7 +479,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                     const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                         accept: true,
-                        formFieldResponse: aString
+                        response: aString
                     };
 
                     const result = processor.canAccept(requestItem, acceptParams);
@@ -501,7 +501,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                     const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                         accept: true,
-                        formFieldResponse: aBoolean
+                        response: aBoolean
                     };
 
                     const result = processor.canAccept(requestItem, acceptParams);
@@ -518,7 +518,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                     const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                         accept: true,
-                        formFieldResponse: aString
+                        response: aString
                     };
 
                     const result = processor.canAccept(requestItem, acceptParams);
@@ -540,7 +540,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                     const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                         accept: true,
-                        formFieldResponse: aDate.toString()
+                        response: aDate.toString()
                     };
 
                     const result = processor.canAccept(requestItem, acceptParams);
@@ -557,7 +557,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                     const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                         accept: true,
-                        formFieldResponse: aString
+                        response: aString
                     };
 
                     const result = processor.canAccept(requestItem, acceptParams);
@@ -582,7 +582,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                     accept: true,
-                    formFieldResponse: "aFreeTextValue"
+                    response: "aFreeTextValue"
                 };
 
                 const result = processor.accept(requestItem, acceptParams);
@@ -598,7 +598,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                     accept: true,
-                    formFieldResponse: anInteger
+                    response: anInteger
                 };
 
                 const result = processor.accept(requestItem, acceptParams);
@@ -614,7 +614,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                     accept: true,
-                    formFieldResponse: aDouble
+                    response: aDouble
                 };
 
                 const result = processor.accept(requestItem, acceptParams);
@@ -630,7 +630,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                     accept: true,
-                    formFieldResponse: aBoolean
+                    response: aBoolean
                 };
 
                 const result = processor.accept(requestItem, acceptParams);
@@ -646,7 +646,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                     accept: true,
-                    formFieldResponse: aDate.toString()
+                    response: aDate.toString()
                 };
 
                 const result = processor.accept(requestItem, acceptParams);
@@ -680,7 +680,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 const responseItem = FormFieldAcceptResponseItem.from({
                     result: ResponseItemResult.Accepted,
-                    formFieldResponse: "aFreeTextValue"
+                    response: "aFreeTextValue"
                 });
 
                 await processor.applyIncomingResponseItem(responseItem, requestItem, incomingRequest);
@@ -693,135 +693,45 @@ describe("FormFieldRequestItemProcessor", function () {
 
     describe("Validate selectionFormField", function () {
         describe("canCreateOutgoingRequestItem", function () {
-            describe("RadioButtonGroups", function () {
-                test("can create a form radio button group", () => {
-                    const requestItem = FormFieldRequestItem.from({
-                        mustBeAccepted: false,
-                        title: "aSelectionFormField",
-                        selectionFormField: { options: ["optionA", "optionB"] }
-                    });
-
-                    const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
-
-                    expect(result).successfulValidationResult();
+            test("can create a selectionFormField", () => {
+                const requestItem = FormFieldRequestItem.from({
+                    mustBeAccepted: false,
+                    title: "aSelectionFormField",
+                    selectionFormField: { options: ["optionA", "optionB"] }
                 });
 
-                test("cannot create a form radio button group with no options", () => {
-                    const requestItem = FormFieldRequestItem.from({
-                        mustBeAccepted: false,
-                        title: "aSelectionFormField",
-                        selectionFormField: { options: [] }
-                    });
+                const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
 
-                    const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
+                expect(result).successfulValidationResult();
+            });
 
-                    expect(result).errorValidationResult({
-                        code: "error.consumption.requests.invalidRequestItem",
-                        message: "A selectionFormField must provide at least one option."
-                    });
+            test("cannot create a selectionFormField with no options", () => {
+                const requestItem = FormFieldRequestItem.from({
+                    mustBeAccepted: false,
+                    title: "aSelectionFormField",
+                    selectionFormField: { options: [] }
                 });
 
-                test("cannot create a form radio button group with non-unique options", () => {
-                    const requestItem = FormFieldRequestItem.from({
-                        mustBeAccepted: false,
-                        title: "aSelectionFormField",
-                        selectionFormField: { options: ["optionA", "optionA"] }
-                    });
+                const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
 
-                    const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
-
-                    expect(result).errorValidationResult({
-                        code: "error.consumption.requests.invalidRequestItem",
-                        message: "A selectionFormField must provide unique options."
-                    });
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidRequestItem",
+                    message: "A selectionFormField must provide at least one option."
                 });
             });
 
-            describe("DropdownMenus", function () {
-                test("can create a form dropdown menu", () => {
-                    const requestItem = FormFieldRequestItem.from({
-                        mustBeAccepted: false,
-                        title: "aSelectionFormField",
-                        selectionFormField: { options: ["optionA", "optionB"] }
-                    });
-
-                    const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
-
-                    expect(result).successfulValidationResult();
+            test("cannot create a selectionFormField with non-unique options", () => {
+                const requestItem = FormFieldRequestItem.from({
+                    mustBeAccepted: false,
+                    title: "aSelectionFormField",
+                    selectionFormField: { options: ["optionA", "optionA"] }
                 });
 
-                test("cannot create a form dropdown menu with no options", () => {
-                    const requestItem = FormFieldRequestItem.from({
-                        mustBeAccepted: false,
-                        title: "aSelectionFormField",
-                        selectionFormField: { options: [] }
-                    });
+                const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
 
-                    const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
-
-                    expect(result).errorValidationResult({
-                        code: "error.consumption.requests.invalidRequestItem",
-                        message: "A selectionFormField must provide at least one option."
-                    });
-                });
-
-                test("cannot create a form dropdown menu with non-unique options", () => {
-                    const requestItem = FormFieldRequestItem.from({
-                        mustBeAccepted: false,
-                        title: "aSelectionFormField",
-                        selectionFormField: { options: ["optionA", "optionA"] }
-                    });
-
-                    const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
-
-                    expect(result).errorValidationResult({
-                        code: "error.consumption.requests.invalidRequestItem",
-                        message: "A selectionFormField must provide unique options."
-                    });
-                });
-            });
-
-            describe("Checklists", function () {
-                test("can create a form checklist", () => {
-                    const requestItem = FormFieldRequestItem.from({
-                        mustBeAccepted: false,
-                        title: "aSelectionFormField",
-                        selectionFormField: { options: ["optionA", "optionB"] }
-                    });
-
-                    const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
-
-                    expect(result).successfulValidationResult();
-                });
-
-                test("cannot create a form checklist with no options", () => {
-                    const requestItem = FormFieldRequestItem.from({
-                        mustBeAccepted: false,
-                        title: "aSelectionFormField",
-                        selectionFormField: { options: [] }
-                    });
-
-                    const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
-
-                    expect(result).errorValidationResult({
-                        code: "error.consumption.requests.invalidRequestItem",
-                        message: "A selectionFormField must provide at least one option."
-                    });
-                });
-
-                test("cannot create a form checklist with non-unique options", () => {
-                    const requestItem = FormFieldRequestItem.from({
-                        mustBeAccepted: false,
-                        title: "aSelectionFormField",
-                        selectionFormField: { options: ["optionA", "optionA"] }
-                    });
-
-                    const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
-
-                    expect(result).errorValidationResult({
-                        code: "error.consumption.requests.invalidRequestItem",
-                        message: "A selectionFormField must provide unique options."
-                    });
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidRequestItem",
+                    message: "A selectionFormField must provide unique options."
                 });
             });
         });
@@ -836,7 +746,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                     accept: true,
-                    formFieldResponse: "optionA"
+                    response: "optionA"
                 };
 
                 const result = processor.canAccept(requestItem, acceptParams);
@@ -847,263 +757,103 @@ describe("FormFieldRequestItemProcessor", function () {
                 });
             });
 
-            describe("RadioButtonGroups", function () {
-                test("can accept a form radio button group with an option", function () {
-                    const requestItem = FormFieldRequestItem.from({
-                        mustBeAccepted: true,
-                        title: "aSelectionFormField",
-                        selectionFormField: { options: ["optionA", "optionB"] }
-                    });
-
-                    const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
-                        accept: true,
-                        formFieldResponse: ["optionA"]
-                    };
-
-                    const result = processor.canAccept(requestItem, acceptParams);
-
-                    expect(result).successfulValidationResult();
+            test("can accept a selectionFormField with an option", function () {
+                const requestItem = FormFieldRequestItem.from({
+                    mustBeAccepted: true,
+                    title: "aSelectionFormField",
+                    selectionFormField: { options: ["optionA", "optionB"] }
                 });
 
-                test("returns an error when it is tried to accept a form radio button group with no option", function () {
-                    const requestItem = FormFieldRequestItem.from({
-                        mustBeAccepted: true,
-                        title: "aSelectionFormField",
-                        selectionFormField: { options: ["optionA", "optionB"] }
-                    });
+                const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
+                    accept: true,
+                    response: ["optionA"]
+                };
 
-                    const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
-                        accept: true,
-                        formFieldResponse: []
-                    };
+                const result = processor.canAccept(requestItem, acceptParams);
 
-                    const result = processor.canAccept(requestItem, acceptParams);
+                expect(result).successfulValidationResult();
+            });
 
-                    expect(result).errorValidationResult({
-                        code: "error.consumption.requests.invalidAcceptParameters",
-                        message: `At least one option must be specified to accept a selectionFormField.`
-                    });
+            test("returns an error when it is tried to accept a selectionFormField with no option", function () {
+                const requestItem = FormFieldRequestItem.from({
+                    mustBeAccepted: true,
+                    title: "aSelectionFormField",
+                    selectionFormField: { options: ["optionA", "optionB"] }
                 });
 
-                test("returns an error when it is tried to accept a form radio button group with an unknown option", function () {
-                    const requestItem = FormFieldRequestItem.from({
-                        mustBeAccepted: true,
-                        title: "aSelectionFormField",
-                        selectionFormField: { options: ["optionA", "optionB"] }
-                    });
+                const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
+                    accept: true,
+                    response: []
+                };
 
-                    const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
-                        accept: true,
-                        formFieldResponse: ["unknownOption"]
-                    };
+                const result = processor.canAccept(requestItem, acceptParams);
 
-                    const result = processor.canAccept(requestItem, acceptParams);
-
-                    expect(result).errorValidationResult({
-                        code: "error.consumption.requests.invalidAcceptParameters",
-                        message: `The selectionFormField does not provide the following option(s) for selection: 'unknownOption'.`
-                    });
-                });
-
-                test("returns an error when it is tried to accept a form radio button group with more than one option", function () {
-                    const requestItem = FormFieldRequestItem.from({
-                        mustBeAccepted: true,
-                        title: "aSelectionFormField",
-                        selectionFormField: { options: ["optionA", "optionB"] }
-                    });
-
-                    const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
-                        accept: true,
-                        formFieldResponse: ["optionA", "optionB"]
-                    };
-
-                    const result = processor.canAccept(requestItem, acceptParams);
-
-                    expect(result).errorValidationResult({
-                        code: "error.consumption.requests.invalidAcceptParameters",
-                        message: `A selectionFormField that does not allowMultipleSelection must be accepted with exactly one option.`
-                    });
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidAcceptParameters",
+                    message: `At least one option must be specified to accept a selectionFormField.`
                 });
             });
 
-            describe("DropdownMenus", function () {
-                test("can accept a form dropdown menu with an option", function () {
-                    const requestItem = FormFieldRequestItem.from({
-                        mustBeAccepted: true,
-                        title: "aSelectionFormField",
-                        selectionFormField: { options: ["optionA", "optionB"] }
-                    });
-
-                    const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
-                        accept: true,
-                        formFieldResponse: ["optionA"]
-                    };
-
-                    const result = processor.canAccept(requestItem, acceptParams);
-
-                    expect(result).successfulValidationResult();
+            test("returns an error when it is tried to accept a selectionFormField with an unknown option", function () {
+                const requestItem = FormFieldRequestItem.from({
+                    mustBeAccepted: true,
+                    title: "aSelectionFormField",
+                    selectionFormField: { options: ["optionA", "optionB"] }
                 });
 
-                test("returns an error when it is tried to accept a form dropdown menu with no option", function () {
-                    const requestItem = FormFieldRequestItem.from({
-                        mustBeAccepted: true,
-                        title: "aSelectionFormField",
-                        selectionFormField: { options: ["optionA", "optionB"] }
-                    });
+                const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
+                    accept: true,
+                    response: ["unknownOption"]
+                };
 
-                    const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
-                        accept: true,
-                        formFieldResponse: []
-                    };
+                const result = processor.canAccept(requestItem, acceptParams);
 
-                    const result = processor.canAccept(requestItem, acceptParams);
-
-                    expect(result).errorValidationResult({
-                        code: "error.consumption.requests.invalidAcceptParameters",
-                        message: `At least one option must be specified to accept a selectionFormField.`
-                    });
-                });
-
-                test("returns an error when it is tried to accept a form dropdown menu with an unknown option", function () {
-                    const requestItem = FormFieldRequestItem.from({
-                        mustBeAccepted: true,
-                        title: "aSelectionFormField",
-                        selectionFormField: { options: ["optionA", "optionB"] }
-                    });
-
-                    const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
-                        accept: true,
-                        formFieldResponse: ["unknownOption"]
-                    };
-
-                    const result = processor.canAccept(requestItem, acceptParams);
-
-                    expect(result).errorValidationResult({
-                        code: "error.consumption.requests.invalidAcceptParameters",
-                        message: `The selectionFormField does not provide the following option(s) for selection: 'unknownOption'.`
-                    });
-                });
-
-                test("returns an error when it is tried to accept a form dropdown menu with more than one option", function () {
-                    const requestItem = FormFieldRequestItem.from({
-                        mustBeAccepted: true,
-                        title: "aSelectionFormField",
-                        selectionFormField: { options: ["optionA", "optionB"] }
-                    });
-
-                    const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
-                        accept: true,
-                        formFieldResponse: ["optionA", "optionB"]
-                    };
-
-                    const result = processor.canAccept(requestItem, acceptParams);
-
-                    expect(result).errorValidationResult({
-                        code: "error.consumption.requests.invalidAcceptParameters",
-                        message: `A selectionFormField that does not allowMultipleSelection must be accepted with exactly one option.`
-                    });
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidAcceptParameters",
+                    message: `The selectionFormField does not provide the following option(s) for selection: 'unknownOption'.`
                 });
             });
 
-            describe("Checklists", function () {
-                test("can accept a form checklist with an option", function () {
-                    const requestItem = FormFieldRequestItem.from({
-                        mustBeAccepted: true,
-                        title: "aSelectionFormField",
-                        selectionFormField: { options: ["optionA", "optionB"] }
-                    });
-
-                    const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
-                        accept: true,
-                        formFieldResponse: ["optionA"]
-                    };
-
-                    const result = processor.canAccept(requestItem, acceptParams);
-
-                    expect(result).successfulValidationResult();
+            test("can accept a selectionFormField allowing multiple selection with multiple options", function () {
+                const requestItem = FormFieldRequestItem.from({
+                    mustBeAccepted: true,
+                    title: "aSelectionFormField",
+                    selectionFormField: { options: ["optionA", "optionB"], allowMultipleSelection: true }
                 });
 
-                test("can accept a form checklist with multiple options", function () {
-                    const requestItem = FormFieldRequestItem.from({
-                        mustBeAccepted: true,
-                        title: "aSelectionFormField",
-                        selectionFormField: { options: ["optionA", "optionB"] }
-                    });
+                const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
+                    accept: true,
+                    response: ["optionA", "optionB"]
+                };
 
-                    const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
-                        accept: true,
-                        formFieldResponse: ["optionA", "optionB"]
-                    };
+                const result = processor.canAccept(requestItem, acceptParams);
 
-                    const result = processor.canAccept(requestItem, acceptParams);
+                expect(result).successfulValidationResult();
+            });
 
-                    expect(result).successfulValidationResult();
+            test("returns an error when it is tried to accept a selectionFormField allowing no multiple selection with more than one option", function () {
+                const requestItem = FormFieldRequestItem.from({
+                    mustBeAccepted: true,
+                    title: "aSelectionFormField",
+                    selectionFormField: { options: ["optionA", "optionB"] }
                 });
 
-                test("returns an error when it is tried to accept a form checklist with no option", function () {
-                    const requestItem = FormFieldRequestItem.from({
-                        mustBeAccepted: true,
-                        title: "aSelectionFormField",
-                        selectionFormField: { options: ["optionA", "optionB"] }
-                    });
+                const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
+                    accept: true,
+                    response: ["optionA", "optionB"]
+                };
 
-                    const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
-                        accept: true,
-                        formFieldResponse: []
-                    };
+                const result = processor.canAccept(requestItem, acceptParams);
 
-                    const result = processor.canAccept(requestItem, acceptParams);
-
-                    expect(result).errorValidationResult({
-                        code: "error.consumption.requests.invalidAcceptParameters",
-                        message: `At least one option must be specified to accept a selectionFormField.`
-                    });
-                });
-
-                test("returns an error when it is tried to accept a form checklist with an unknown option", function () {
-                    const requestItem = FormFieldRequestItem.from({
-                        mustBeAccepted: true,
-                        title: "aSelectionFormField",
-                        selectionFormField: { options: ["optionA", "optionB"] }
-                    });
-
-                    const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
-                        accept: true,
-                        formFieldResponse: ["unknownOption"]
-                    };
-
-                    const result = processor.canAccept(requestItem, acceptParams);
-
-                    expect(result).errorValidationResult({
-                        code: "error.consumption.requests.invalidAcceptParameters",
-                        message: `The selectionFormField does not provide the following option(s) for selection: 'unknownOption'.`
-                    });
-                });
-
-                test("returns an error when it is tried to accept a form checklist with the same option twice", function () {
-                    const requestItem = FormFieldRequestItem.from({
-                        mustBeAccepted: true,
-                        title: "aSelectionFormField",
-                        selectionFormField: { options: ["optionA", "optionB"] }
-                    });
-
-                    const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
-                        accept: true,
-                        formFieldResponse: ["optionA", "optionA"]
-                    };
-
-                    const result = processor.canAccept(requestItem, acceptParams);
-
-                    expect(result).errorValidationResult({
-                        code: "error.consumption.requests.invalidAcceptParameters",
-                        message: `The options specified for accepting a selectionFormField must be unique.`
-                    });
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidAcceptParameters",
+                    message: `A selectionFormField that does not allowMultipleSelection must be accepted with exactly one option.`
                 });
             });
         });
 
         describe("accept", function () {
-            test("accept form radio button group with an option", function () {
+            test("accept selectionFormField with an option", function () {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
                     title: "aSelectionFormField",
@@ -1112,55 +862,23 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                     accept: true,
-                    formFieldResponse: ["optionA"]
+                    response: ["optionA"]
                 };
 
                 const result = processor.accept(requestItem, acceptParams);
                 expect(result).toBeInstanceOf(FormFieldAcceptResponseItem);
             });
 
-            test("accept form dropdown menu with an option", function () {
+            test("accept selectionFormField with multiple options", function () {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
                     title: "aSelectionFormField",
-                    selectionFormField: { options: ["optionA", "optionB"] }
+                    selectionFormField: { options: ["optionA", "optionB"], allowMultipleSelection: true }
                 });
 
                 const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                     accept: true,
-                    formFieldResponse: ["optionA"]
-                };
-
-                const result = processor.accept(requestItem, acceptParams);
-                expect(result).toBeInstanceOf(FormFieldAcceptResponseItem);
-            });
-
-            test("accept form checklist with an option", function () {
-                const requestItem = FormFieldRequestItem.from({
-                    mustBeAccepted: true,
-                    title: "aSelectionFormField",
-                    selectionFormField: { options: ["optionA", "optionB"] }
-                });
-
-                const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
-                    accept: true,
-                    formFieldResponse: ["optionA"]
-                };
-
-                const result = processor.accept(requestItem, acceptParams);
-                expect(result).toBeInstanceOf(FormFieldAcceptResponseItem);
-            });
-
-            test("accept form checklist with multiple options", function () {
-                const requestItem = FormFieldRequestItem.from({
-                    mustBeAccepted: true,
-                    title: "aSelectionFormField",
-                    selectionFormField: { options: ["optionA", "optionB"] }
-                });
-
-                const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
-                    accept: true,
-                    formFieldResponse: ["optionA", "optionB"]
+                    response: ["optionA", "optionB"]
                 };
 
                 const result = processor.accept(requestItem, acceptParams);
@@ -1169,7 +887,7 @@ describe("FormFieldRequestItemProcessor", function () {
         });
 
         describe("applyIncomingResponseItem", function () {
-            test("does not create an Attribute when getting the option selected by the recipient in the form radio button group", async function () {
+            test("does not create an Attribute when getting the option selected by the recipient in the selectionFormField", async function () {
                 const recipient = CoreAddress.from("Recipient");
 
                 const requestItem = FormFieldRequestItem.from({
@@ -1194,7 +912,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 const responseItem = FormFieldAcceptResponseItem.from({
                     result: ResponseItemResult.Accepted,
-                    formFieldResponse: ["optionA"]
+                    response: ["optionA"]
                 });
 
                 await processor.applyIncomingResponseItem(responseItem, requestItem, incomingRequest);

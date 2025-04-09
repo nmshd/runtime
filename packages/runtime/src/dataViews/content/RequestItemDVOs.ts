@@ -1,4 +1,4 @@
-import { FreeValueFormFieldJSON, SelectionFormFieldJSON } from "@nmshd/content";
+import { FormFieldSettingsJSONDerivations } from "@nmshd/content/src/requests/items/formField/FormFieldSettingsDerivations";
 import { LocalAttributeDVO } from "../consumption";
 import { DataViewObject } from "../DataViewObject";
 import { FileDVO } from "../transport";
@@ -75,8 +75,7 @@ export interface FreeTextRequestItemDVO extends RequestItemDVO {
 export interface FormFieldRequestItemDVO extends RequestItemDVO {
     type: "FormFieldRequestItemDVO";
     title: string;
-    freeValueFormField?: FreeValueFormFieldJSON;
-    selectionFormField?: SelectionFormFieldJSON;
+    settings: FormFieldSettingsJSONDerivations;
 }
 
 export interface TransferFileOwnershipRequestItemDVO extends RequestItemDVO {

@@ -75,7 +75,7 @@ describe("FormFieldRequestItemDVO with freeValueFormField", () => {
             peer: address2
         };
 
-        responseItems = [{ accept: true, formFieldResponse: "I accept to specify a free string value." } as AcceptFormFieldRequestItemParametersJSON];
+        responseItems = [{ accept: true, response: "I accept to specify a free string value." } as AcceptFormFieldRequestItemParametersJSON];
     }, 30000);
 
     test("check the MessageDVO for the sender", async () => {
@@ -168,7 +168,7 @@ describe("FormFieldRequestItemDVO with freeValueFormField", () => {
         const responseItem = response!.content.items[0] as FormFieldAcceptResponseItemDVO;
         expect(responseItem.result).toBe("Accepted");
         expect(responseItem.type).toBe("FormFieldAcceptResponseItemDVO");
-        expect(responseItem.formFieldResponse).toBe("I accept to specify a free string value.");
+        expect(responseItem.response).toBe("I accept to specify a free string value.");
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         await syncUntilHasMessageWithResponse(transportServices1, recipientMessage.content.id!);
@@ -207,7 +207,7 @@ describe("FormFieldRequestItemDVO with freeValueFormField", () => {
         const responseItem = response!.content.items[0] as FormFieldAcceptResponseItemDVO;
         expect(responseItem.result).toBe("Accepted");
         expect(responseItem.type).toBe("FormFieldAcceptResponseItemDVO");
-        expect(responseItem.formFieldResponse).toBe("I accept to specify a free string value.");
+        expect(responseItem.response).toBe("I accept to specify a free string value.");
         expect(requestItemDVO.response).toStrictEqual(responseItem);
     });
 });
@@ -241,7 +241,7 @@ describe("FormFieldRequestItemDVO with selectionFormField", () => {
             peer: address2
         };
 
-        responseItems = [{ accept: true, formFieldResponse: ["optionA"] } as AcceptFormFieldRequestItemParametersJSON];
+        responseItems = [{ accept: true, response: ["optionA"] } as AcceptFormFieldRequestItemParametersJSON];
     }, 30000);
 
     test("check the MessageDVO for the sender", async () => {
@@ -334,7 +334,7 @@ describe("FormFieldRequestItemDVO with selectionFormField", () => {
         const responseItem = response!.content.items[0] as FormFieldAcceptResponseItemDVO;
         expect(responseItem.result).toBe("Accepted");
         expect(responseItem.type).toBe("SelectionFormAcceptResponseItemDVO");
-        expect(responseItem.formFieldResponse).toStrictEqual(["optionA"]);
+        expect(responseItem.response).toStrictEqual(["optionA"]);
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         await syncUntilHasMessageWithResponse(transportServices1, recipientMessage.content.id!);
@@ -373,7 +373,7 @@ describe("FormFieldRequestItemDVO with selectionFormField", () => {
         const responseItem = response!.content.items[0] as FormFieldAcceptResponseItemDVO;
         expect(responseItem.result).toBe("Accepted");
         expect(responseItem.type).toBe("SelectionFormAcceptResponseItemDVO");
-        expect(responseItem.formFieldResponse).toStrictEqual(["optionA"]);
+        expect(responseItem.response).toStrictEqual(["optionA"]);
         expect(requestItemDVO.response).toStrictEqual(responseItem);
     });
 });
