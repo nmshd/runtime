@@ -26,11 +26,11 @@ export class FormFieldRequestItem extends RequestItem implements IFormFieldReque
 
     @serialize()
     @validate({ nullable: true })
-    public freeValueFormField: FreeValueFormField;
+    public freeValueFormField?: FreeValueFormField;
 
     @serialize()
     @validate({ nullable: true })
-    public selectionFormField: SelectionFormField;
+    public selectionFormField?: SelectionFormField;
 
     public static from(value: IFormFieldRequestItem | Omit<FormFieldRequestItemJSON, "@type"> | FormFieldRequestItemJSON): FormFieldRequestItem {
         return this.fromAny(value);
@@ -41,7 +41,7 @@ export class FormFieldRequestItem extends RequestItem implements IFormFieldReque
             throw new Error("this should never happen");
         }
 
-        if (value.freeValueFormField instanceof FreeValueFormField && value.selectionFormField instanceof SelectionFormField) {
+        if (value.freeValueFormField && value.selectionFormField) {
             throw new ValidationError(
                 FormFieldRequestItem.name,
                 nameof<FormFieldRequestItem>((x) => x.freeValueFormField),
@@ -49,7 +49,7 @@ export class FormFieldRequestItem extends RequestItem implements IFormFieldReque
             );
         }
 
-        if (!(value.freeValueFormField instanceof FreeValueFormField) && !(value.selectionFormField instanceof FreeValueFormField)) {
+        if (!value.freeValueFormField && !value.selectionFormField) {
             throw new ValidationError(
                 FormFieldRequestItem.name,
                 nameof<FormFieldRequestItem>((x) => x.freeValueFormField),
