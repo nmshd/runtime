@@ -116,9 +116,8 @@ export class SdJwtVcProcessor extends AbstractVCProcessor<any> {
 
     public async revokeCredential(credential: string): Promise<string> {
         const agent = new SDJwtInstance({
-            // TODO: read the hash algorithm from the credential
             hasher: this.hasher,
-            hashAlg: "sha-512"
+            hashAlg: "sha-512" // this is only set to avoid errors, it doesn't influence the decoding
         });
 
         const decodedCredential = (await agent.getClaims(credential)) as SdJwtVcPayload;

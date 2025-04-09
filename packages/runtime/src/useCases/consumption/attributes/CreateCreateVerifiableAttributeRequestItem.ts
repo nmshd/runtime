@@ -53,7 +53,8 @@ export class CreateCreateVerifiableAttributeRequestItemUseCase extends UseCase<
         request.content.proof = {
             credential: signedCredential,
             credentialType: request.credentialType,
-            expiresAt: request.expiresAt
+            expiresAt: request.expiresAt,
+            issuer: this.accountController.identity.address.toString()
         };
 
         return Result.ok({

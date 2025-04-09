@@ -35,7 +35,7 @@ export class CreateSelfSignedVerifiableAttributeUseCase extends UseCase<CreateSe
         const vc = await getVCProcessor(SupportedVCTypes.SdJwtVc, this.accountController);
 
         const signedCredential = await vc.issue(parsedRequestAttribute, request.subjectDid);
-        params.content.proof = AttributeProof.from({ credential: signedCredential, credentialType: SupportedVCTypes.SdJwtVc });
+        params.content.proof = AttributeProof.from({ credential: signedCredential, credentialType: SupportedVCTypes.SdJwtVc, issuer: this.accountController.identity.address });
 
         const createdAttribute = await this.attributeController.createRepositoryAttribute(params);
         await this.accountController.syncDatawallet();

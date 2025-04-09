@@ -17,8 +17,9 @@ import {
     ThirdPartyRelationshipAttributeQueryOwner
 } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId, ICoreDate, ICoreId } from "@nmshd/core-types";
+import { CoreBuffer, CryptoSignatureAlgorithm, CryptoSignaturePublicKey } from "@nmshd/crypto";
 import * as iql from "@nmshd/iql";
-import { SynchronizedCollection, TagClient, TransportCoreErrors } from "@nmshd/transport";
+import { IdentityUtil, SynchronizedCollection, TagClient, TransportCoreErrors } from "@nmshd/transport";
 import _ from "lodash";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
@@ -264,6 +265,7 @@ export class AttributesController extends ConsumptionBaseController {
 
         if (localAttribute.content.proof) {
             await this.createRepositoryAttribute({
+                // create a non-verified attribute so it's possible to not share the proof if the proof is not requested
                 content: IdentityAttribute.from({ ...(localAttribute.content.toJSON() as IdentityAttributeJSON), proof: undefined })
             });
         }
@@ -1407,8 +1409,22 @@ export class AttributesController extends ConsumptionBaseController {
         const expirationMatches =
             (!attributeExpiration && !credentialExpiration) || (attributeExpiration && credentialExpiration && attributeExpiration.isSame(credentialExpiration, "millisecond"));
 
-        attribute.proof.proofInvalid = credentialConfirmsAttribute && expirationMatches ? undefined : true;
+        const issuerMatches = attribute.proof.issuer.equals(await this.calculateAddressFromDidKey(verificationResult.issuer));
+
+        attribute.proof.proofInvalid = credentialConfirmsAttribute && expirationMatches && issuerMatches ? undefined : true;
         return attribute;
+    }
+
+    private async calculateAddressFromDidKey(didKey: string): Promise<CoreAddress> {
+        const keyPartOfDidKey = didKey.split(":")[2].slice(1);
+        const keyContent = CoreBuffer.fromBase58(keyPartOfDidKey).buffer.slice(2);
+        const key = CryptoSignaturePublicKey.from({
+            publicKey: CoreBuffer.from(keyContent),
+            algorithm: CryptoSignatureAlgorithm.ECDSA_ED25519
+        });
+
+        const backboneHostname = this.parent.accountController.identity.address.toString().split(":")[2];
+        return await IdentityUtil.createAddress(key, backboneHostname);
     }
 
     public async revokeAttribute(attribute: IdentityAttribute | RelationshipAttribute): Promise<unknown> {

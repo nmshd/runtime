@@ -1,7 +1,7 @@
 import { QueryTranslator } from "@js-soft/docdb-querytranslator";
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController, LocalAttribute, LocalAttributeDeletionInfoJSON, LocalAttributeShareInfoJSON } from "@nmshd/consumption";
-import { AbstractAttributeJSON, IdentityAttribute, IdentityAttributeJSON, RelationshipAttributeJSON } from "@nmshd/content";
+import { AbstractAttributeJSON, AttributeProofJSON, IdentityAttribute, IdentityAttributeJSON, RelationshipAttributeJSON } from "@nmshd/content";
 import { Inject } from "@nmshd/typescript-ioc";
 import { DateTime } from "luxon";
 import { nameof } from "ts-simple-nameof";
@@ -56,6 +56,8 @@ export class GetAttributesUseCase extends UseCase<GetAttributesRequest, LocalAtt
             [`${nameof<LocalAttributeDTO>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.validTo)}`]: true,
             [`${nameof<LocalAttributeDTO>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.owner)}`]: true,
             [`${nameof<LocalAttributeDTO>((x) => x.content)}.@type`]: true,
+            [`${nameof<LocalAttributeDTO>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.proof)}`]: true,
+            [`${nameof<LocalAttributeDTO>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.proof)}.${nameof<AttributeProofJSON>((x) => x.issuer)}`]: true,
 
             // content.identityAttribute
             [`${nameof<LocalAttributeDTO>((x) => x.content)}.${nameof<IdentityAttributeJSON>((x) => x.tags)}`]: true,

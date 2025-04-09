@@ -449,25 +449,7 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "proof": {
-                    "type": "object",
-                    "properties": {
-                        "credentialType": {
-                            "$ref": "#/definitions/SupportedVCTypes"
-                        },
-                        "credential": {},
-                        "proofInvalid": {
-                            "type": "boolean",
-                            "const": true
-                        },
-                        "expiresAt": {
-                            "type": "string"
-                        }
-                    },
-                    "required": [
-                        "credentialType",
-                        "credential"
-                    ],
-                    "additionalProperties": false
+                    "$ref": "#/definitions/AttributeProofJSON"
                 },
                 "validFrom": {
                     "type": "string"
@@ -494,6 +476,31 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "key",
                 "owner",
                 "value"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeProofJSON": {
+            "type": "object",
+            "properties": {
+                "credentialType": {
+                    "$ref": "#/definitions/SupportedVCTypes"
+                },
+                "credential": {},
+                "proofInvalid": {
+                    "type": "boolean",
+                    "const": true
+                },
+                "expiresAt": {
+                    "type": "string"
+                },
+                "issuer": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "credentialType",
+                "credential",
+                "issuer"
             ],
             "additionalProperties": false
         },
@@ -1144,25 +1151,7 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "proof": {
-                    "type": "object",
-                    "properties": {
-                        "credentialType": {
-                            "$ref": "#/definitions/SupportedVCTypes"
-                        },
-                        "credential": {},
-                        "proofInvalid": {
-                            "type": "boolean",
-                            "const": true
-                        },
-                        "expiresAt": {
-                            "type": "string"
-                        }
-                    },
-                    "required": [
-                        "credentialType",
-                        "credential"
-                    ],
-                    "additionalProperties": false
+                    "$ref": "#/definitions/AttributeProofJSON"
                 },
                 "validFrom": {
                     "type": "string"
@@ -3602,25 +3591,7 @@ export const CompleteOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "proof": {
-                    "type": "object",
-                    "properties": {
-                        "credentialType": {
-                            "$ref": "#/definitions/SupportedVCTypes"
-                        },
-                        "credential": {},
-                        "proofInvalid": {
-                            "type": "boolean",
-                            "const": true
-                        },
-                        "expiresAt": {
-                            "type": "string"
-                        }
-                    },
-                    "required": [
-                        "credentialType",
-                        "credential"
-                    ],
-                    "additionalProperties": false
+                    "$ref": "#/definitions/AttributeProofJSON"
                 },
                 "validFrom": {
                     "type": "string"
@@ -3642,6 +3613,31 @@ export const CompleteOutgoingRequestRequest: any = {
                 "@type",
                 "owner",
                 "value"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeProofJSON": {
+            "type": "object",
+            "properties": {
+                "credentialType": {
+                    "$ref": "#/definitions/SupportedVCTypes"
+                },
+                "credential": {},
+                "proofInvalid": {
+                    "type": "boolean",
+                    "const": true
+                },
+                "expiresAt": {
+                    "type": "string"
+                },
+                "issuer": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "credentialType",
+                "credential",
+                "issuer"
             ],
             "additionalProperties": false
         },
@@ -4873,25 +4869,7 @@ export const CompleteOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "proof": {
-                    "type": "object",
-                    "properties": {
-                        "credentialType": {
-                            "$ref": "#/definitions/SupportedVCTypes"
-                        },
-                        "credential": {},
-                        "proofInvalid": {
-                            "type": "boolean",
-                            "const": true
-                        },
-                        "expiresAt": {
-                            "type": "string"
-                        }
-                    },
-                    "required": [
-                        "credentialType",
-                        "credential"
-                    ],
-                    "additionalProperties": false
+                    "$ref": "#/definitions/AttributeProofJSON"
                 },
                 "validFrom": {
                     "type": "string"
@@ -6084,25 +6062,7 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                     "type": "string"
                 },
                 "proof": {
-                    "type": "object",
-                    "properties": {
-                        "credentialType": {
-                            "$ref": "#/definitions/SupportedVCTypes"
-                        },
-                        "credential": {},
-                        "proofInvalid": {
-                            "type": "boolean",
-                            "const": true
-                        },
-                        "expiresAt": {
-                            "type": "string"
-                        }
-                    },
-                    "required": [
-                        "credentialType",
-                        "credential"
-                    ],
-                    "additionalProperties": false
+                    "$ref": "#/definitions/AttributeProofJSON"
                 },
                 "validFrom": {
                     "type": "string"
@@ -6124,6 +6084,31 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                 "@type",
                 "owner",
                 "value"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeProofJSON": {
+            "type": "object",
+            "properties": {
+                "credentialType": {
+                    "$ref": "#/definitions/SupportedVCTypes"
+                },
+                "credential": {},
+                "proofInvalid": {
+                    "type": "boolean",
+                    "const": true
+                },
+                "expiresAt": {
+                    "type": "string"
+                },
+                "issuer": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "credentialType",
+                "credential",
+                "issuer"
             ],
             "additionalProperties": false
         },
@@ -7355,25 +7340,7 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                     "type": "string"
                 },
                 "proof": {
-                    "type": "object",
-                    "properties": {
-                        "credentialType": {
-                            "$ref": "#/definitions/SupportedVCTypes"
-                        },
-                        "credential": {},
-                        "proofInvalid": {
-                            "type": "boolean",
-                            "const": true
-                        },
-                        "expiresAt": {
-                            "type": "string"
-                        }
-                    },
-                    "required": [
-                        "credentialType",
-                        "credential"
-                    ],
-                    "additionalProperties": false
+                    "$ref": "#/definitions/AttributeProofJSON"
                 },
                 "validFrom": {
                     "type": "string"
@@ -8537,25 +8504,7 @@ export const CreateOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "proof": {
-                    "type": "object",
-                    "properties": {
-                        "credentialType": {
-                            "$ref": "#/definitions/SupportedVCTypes"
-                        },
-                        "credential": {},
-                        "proofInvalid": {
-                            "type": "boolean",
-                            "const": true
-                        },
-                        "expiresAt": {
-                            "type": "string"
-                        }
-                    },
-                    "required": [
-                        "credentialType",
-                        "credential"
-                    ],
-                    "additionalProperties": false
+                    "$ref": "#/definitions/AttributeProofJSON"
                 },
                 "validFrom": {
                     "type": "string"
@@ -8582,6 +8531,31 @@ export const CreateOutgoingRequestRequest: any = {
                 "key",
                 "owner",
                 "value"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeProofJSON": {
+            "type": "object",
+            "properties": {
+                "credentialType": {
+                    "$ref": "#/definitions/SupportedVCTypes"
+                },
+                "credential": {},
+                "proofInvalid": {
+                    "type": "boolean",
+                    "const": true
+                },
+                "expiresAt": {
+                    "type": "string"
+                },
+                "issuer": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "credentialType",
+                "credential",
+                "issuer"
             ],
             "additionalProperties": false
         },
@@ -9232,25 +9206,7 @@ export const CreateOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "proof": {
-                    "type": "object",
-                    "properties": {
-                        "credentialType": {
-                            "$ref": "#/definitions/SupportedVCTypes"
-                        },
-                        "credential": {},
-                        "proofInvalid": {
-                            "type": "boolean",
-                            "const": true
-                        },
-                        "expiresAt": {
-                            "type": "string"
-                        }
-                    },
-                    "required": [
-                        "credentialType",
-                        "credential"
-                    ],
-                    "additionalProperties": false
+                    "$ref": "#/definitions/AttributeProofJSON"
                 },
                 "validFrom": {
                     "type": "string"
@@ -12051,25 +12007,7 @@ export const ReceivedIncomingRequestRequest: any = {
                     "type": "string"
                 },
                 "proof": {
-                    "type": "object",
-                    "properties": {
-                        "credentialType": {
-                            "$ref": "#/definitions/SupportedVCTypes"
-                        },
-                        "credential": {},
-                        "proofInvalid": {
-                            "type": "boolean",
-                            "const": true
-                        },
-                        "expiresAt": {
-                            "type": "string"
-                        }
-                    },
-                    "required": [
-                        "credentialType",
-                        "credential"
-                    ],
-                    "additionalProperties": false
+                    "$ref": "#/definitions/AttributeProofJSON"
                 },
                 "validFrom": {
                     "type": "string"
@@ -12096,6 +12034,31 @@ export const ReceivedIncomingRequestRequest: any = {
                 "key",
                 "owner",
                 "value"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeProofJSON": {
+            "type": "object",
+            "properties": {
+                "credentialType": {
+                    "$ref": "#/definitions/SupportedVCTypes"
+                },
+                "credential": {},
+                "proofInvalid": {
+                    "type": "boolean",
+                    "const": true
+                },
+                "expiresAt": {
+                    "type": "string"
+                },
+                "issuer": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "credentialType",
+                "credential",
+                "issuer"
             ],
             "additionalProperties": false
         },
@@ -12746,25 +12709,7 @@ export const ReceivedIncomingRequestRequest: any = {
                     "type": "string"
                 },
                 "proof": {
-                    "type": "object",
-                    "properties": {
-                        "credentialType": {
-                            "$ref": "#/definitions/SupportedVCTypes"
-                        },
-                        "credential": {},
-                        "proofInvalid": {
-                            "type": "boolean",
-                            "const": true
-                        },
-                        "expiresAt": {
-                            "type": "string"
-                        }
-                    },
-                    "required": [
-                        "credentialType",
-                        "credential"
-                    ],
-                    "additionalProperties": false
+                    "$ref": "#/definitions/AttributeProofJSON"
                 },
                 "validFrom": {
                     "type": "string"
@@ -15634,25 +15579,7 @@ export const CreateCreateVerifiableAttributeRequestItemRequest: any = {
                     "type": "string"
                 },
                 "proof": {
-                    "type": "object",
-                    "properties": {
-                        "credentialType": {
-                            "$ref": "#/definitions/SupportedVCTypes"
-                        },
-                        "credential": {},
-                        "proofInvalid": {
-                            "type": "boolean",
-                            "const": true
-                        },
-                        "expiresAt": {
-                            "type": "string"
-                        }
-                    },
-                    "required": [
-                        "credentialType",
-                        "credential"
-                    ],
-                    "additionalProperties": false
+                    "$ref": "#/definitions/AttributeProofJSON"
                 },
                 "validFrom": {
                     "type": "string"
@@ -15674,6 +15601,31 @@ export const CreateCreateVerifiableAttributeRequestItemRequest: any = {
                 "@type",
                 "owner",
                 "value"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeProofJSON": {
+            "type": "object",
+            "properties": {
+                "credentialType": {
+                    "$ref": "#/definitions/SupportedVCTypes"
+                },
+                "credential": {},
+                "proofInvalid": {
+                    "type": "boolean",
+                    "const": true
+                },
+                "expiresAt": {
+                    "type": "string"
+                },
+                "issuer": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "credentialType",
+                "credential",
+                "issuer"
             ],
             "additionalProperties": false
         },
@@ -16905,25 +16857,7 @@ export const CreateCreateVerifiableAttributeRequestItemRequest: any = {
                     "type": "string"
                 },
                 "proof": {
-                    "type": "object",
-                    "properties": {
-                        "credentialType": {
-                            "$ref": "#/definitions/SupportedVCTypes"
-                        },
-                        "credential": {},
-                        "proofInvalid": {
-                            "type": "boolean",
-                            "const": true
-                        },
-                        "expiresAt": {
-                            "type": "string"
-                        }
-                    },
-                    "required": [
-                        "credentialType",
-                        "credential"
-                    ],
-                    "additionalProperties": false
+                    "$ref": "#/definitions/AttributeProofJSON"
                 },
                 "validFrom": {
                     "type": "string"
@@ -19303,25 +19237,7 @@ export const RevokeAttributeRequest: any = {
                     "type": "string"
                 },
                 "proof": {
-                    "type": "object",
-                    "properties": {
-                        "credentialType": {
-                            "$ref": "#/definitions/SupportedVCTypes"
-                        },
-                        "credential": {},
-                        "proofInvalid": {
-                            "type": "boolean",
-                            "const": true
-                        },
-                        "expiresAt": {
-                            "type": "string"
-                        }
-                    },
-                    "required": [
-                        "credentialType",
-                        "credential"
-                    ],
-                    "additionalProperties": false
+                    "$ref": "#/definitions/AttributeProofJSON"
                 },
                 "validFrom": {
                     "type": "string"
@@ -19343,6 +19259,31 @@ export const RevokeAttributeRequest: any = {
                 "@type",
                 "owner",
                 "value"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeProofJSON": {
+            "type": "object",
+            "properties": {
+                "credentialType": {
+                    "$ref": "#/definitions/SupportedVCTypes"
+                },
+                "credential": {},
+                "proofInvalid": {
+                    "type": "boolean",
+                    "const": true
+                },
+                "expiresAt": {
+                    "type": "string"
+                },
+                "issuer": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "credentialType",
+                "credential",
+                "issuer"
             ],
             "additionalProperties": false
         },
@@ -26096,25 +26037,7 @@ export const CreateSelfSignedVerifiableAttributeRequest: any = {
                     "type": "string"
                 },
                 "proof": {
-                    "type": "object",
-                    "properties": {
-                        "credentialType": {
-                            "$ref": "#/definitions/SupportedVCTypes"
-                        },
-                        "credential": {},
-                        "proofInvalid": {
-                            "type": "boolean",
-                            "const": true
-                        },
-                        "expiresAt": {
-                            "type": "string"
-                        }
-                    },
-                    "required": [
-                        "credentialType",
-                        "credential"
-                    ],
-                    "additionalProperties": false
+                    "$ref": "#/definitions/AttributeProofJSON"
                 },
                 "validFrom": {
                     "type": "string"
@@ -26136,6 +26059,31 @@ export const CreateSelfSignedVerifiableAttributeRequest: any = {
                 "@type",
                 "owner",
                 "value"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeProofJSON": {
+            "type": "object",
+            "properties": {
+                "credentialType": {
+                    "$ref": "#/definitions/SupportedVCTypes"
+                },
+                "credential": {},
+                "proofInvalid": {
+                    "type": "boolean",
+                    "const": true
+                },
+                "expiresAt": {
+                    "type": "string"
+                },
+                "issuer": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "credentialType",
+                "credential",
+                "issuer"
             ],
             "additionalProperties": false
         },
@@ -27431,25 +27379,7 @@ export const VerifyVerifiableCredentialRequest: any = {
                     "type": "string"
                 },
                 "proof": {
-                    "type": "object",
-                    "properties": {
-                        "credentialType": {
-                            "$ref": "#/definitions/SupportedVCTypes"
-                        },
-                        "credential": {},
-                        "proofInvalid": {
-                            "type": "boolean",
-                            "const": true
-                        },
-                        "expiresAt": {
-                            "type": "string"
-                        }
-                    },
-                    "required": [
-                        "credentialType",
-                        "credential"
-                    ],
-                    "additionalProperties": false
+                    "$ref": "#/definitions/AttributeProofJSON"
                 },
                 "validFrom": {
                     "type": "string"
@@ -27471,6 +27401,31 @@ export const VerifyVerifiableCredentialRequest: any = {
                 "@type",
                 "owner",
                 "value"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeProofJSON": {
+            "type": "object",
+            "properties": {
+                "credentialType": {
+                    "$ref": "#/definitions/SupportedVCTypes"
+                },
+                "credential": {},
+                "proofInvalid": {
+                    "type": "boolean",
+                    "const": true
+                },
+                "expiresAt": {
+                    "type": "string"
+                },
+                "issuer": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "credentialType",
+                "credential",
+                "issuer"
             ],
             "additionalProperties": false
         },
@@ -28702,25 +28657,7 @@ export const VerifyVerifiableCredentialRequest: any = {
                     "type": "string"
                 },
                 "proof": {
-                    "type": "object",
-                    "properties": {
-                        "credentialType": {
-                            "$ref": "#/definitions/SupportedVCTypes"
-                        },
-                        "credential": {},
-                        "proofInvalid": {
-                            "type": "boolean",
-                            "const": true
-                        },
-                        "expiresAt": {
-                            "type": "string"
-                        }
-                    },
-                    "required": [
-                        "credentialType",
-                        "credential"
-                    ],
-                    "additionalProperties": false
+                    "$ref": "#/definitions/AttributeProofJSON"
                 },
                 "validFrom": {
                     "type": "string"
