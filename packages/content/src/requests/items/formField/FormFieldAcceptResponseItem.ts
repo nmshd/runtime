@@ -1,4 +1,4 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
+import { PrimitiveType, serialize, type, validate } from "@js-soft/ts-serval";
 import { AcceptResponseItem, AcceptResponseItemJSON, IAcceptResponseItem } from "../../response";
 
 export interface FormFieldAcceptResponseItemJSON extends AcceptResponseItemJSON {
@@ -13,7 +13,7 @@ export interface IFormFieldAcceptResponseItem extends IAcceptResponseItem {
 @type("FormFieldAcceptResponseItem")
 export class FormFieldAcceptResponseItem extends AcceptResponseItem implements IFormFieldAcceptResponseItem {
     @serialize()
-    @validate()
+    @validate({ allowedTypes: [PrimitiveType.String, PrimitiveType.Number, PrimitiveType.Boolean] })
     public formFieldResponse: string | number | boolean | string[];
 
     public static override from(

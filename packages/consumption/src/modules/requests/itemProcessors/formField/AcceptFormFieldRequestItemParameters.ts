@@ -1,4 +1,4 @@
-import { Serializable, serialize, type, validate } from "@js-soft/ts-serval";
+import { PrimitiveType, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
 
 export interface AcceptFormFieldRequestItemParametersJSON extends AcceptRequestItemParametersJSON {
@@ -8,7 +8,7 @@ export interface AcceptFormFieldRequestItemParametersJSON extends AcceptRequestI
 @type("AcceptFormFieldRequestItemParameters")
 export class AcceptFormFieldRequestItemParameters extends Serializable {
     @serialize()
-    @validate()
+    @validate({ allowedTypes: [PrimitiveType.String, PrimitiveType.Number, PrimitiveType.Boolean] })
     public formFieldResponse: string | number | boolean | string[];
 
     public static from(value: AcceptFormFieldRequestItemParametersJSON): AcceptFormFieldRequestItemParameters {
