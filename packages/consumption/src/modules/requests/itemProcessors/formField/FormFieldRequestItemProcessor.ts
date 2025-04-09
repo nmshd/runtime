@@ -1,12 +1,20 @@
-import { FormFieldAcceptResponseItem, FormFieldRequestItem, Request, ResponseItemResult, SelectionFormFieldSettings, StringFormFieldSettings } from "@nmshd/content";
+import {
+    BooleanFormFieldSettings,
+    DateFormFieldSettings,
+    DoubleFormFieldSettings,
+    FormFieldAcceptResponseItem,
+    FormFieldRequestItem,
+    IntegerFormFieldSettings,
+    minRating,
+    RatingFormFieldSettings,
+    Request,
+    ResponseItemResult,
+    SelectionFormFieldSettings,
+    StringFormFieldSettings
+} from "@nmshd/content";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 
-import { BooleanFormFieldSettings } from "@nmshd/content/src/requests/items/formField/settings/BooleanFormFieldSettings";
-import { DateFormFieldSettings } from "@nmshd/content/src/requests/items/formField/settings/DateFormFieldSettings";
-import { DoubleFormFieldSettings } from "@nmshd/content/src/requests/items/formField/settings/DoubleFormFieldSettings";
-import { IntegerFormFieldSettings } from "@nmshd/content/src/requests/items/formField/settings/IntegerFormFieldSettings";
-import { minRating, RatingFormFieldSettings } from "@nmshd/content/src/requests/items/formField/settings/RatingFormFieldSettings";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import { AcceptFormFieldRequestItemParameters, AcceptFormFieldRequestItemParametersJSON } from "./AcceptFormFieldRequestItemParameters";
 
