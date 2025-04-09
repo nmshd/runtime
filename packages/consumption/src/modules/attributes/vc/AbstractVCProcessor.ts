@@ -1,29 +1,21 @@
 import { StatusListEntryCreationParameters } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
-import { CoreBuffer } from "@nmshd/crypto";
 import { AccountController } from "@nmshd/transport";
 import axios from "axios";
 
 export abstract class AbstractVCProcessor<VCType> {
     public constructor(protected readonly accountController: AccountController) {}
 
-    protected get issuerId(): string {
-        const multikeyPublic = `z${CoreBuffer.from([0xed, 0x01]).append(this.accountController.identity.identity.publicKey.publicKey).toBase58()}`;
-        return `did:key:${multikeyPublic}`;
+    public init(): this {
+        return this;
     }
-    protected get issuerVerificationMethod(): string {
-        const keyPart = this.issuerId.split(":").at(-1);
-        return `${this.issuerId}#${keyPart}`;
-    }
-
-    public abstract init(): Promise<this>;
     public abstract issue(
         data: unknown,
         subjectDid: string,
         statusList?: StatusListEntryCreationParameters,
         expiresAt?: CoreDate
     ): Promise<{ credential: VCType; statusListCredential?: unknown }>;
-    public abstract verify(data: VCType): Promise<
+    public abstract credentialTypeSpecificVerify(data: VCType): Promise<
         | { isSuccess: false }
         | {
               isSuccess: true;
@@ -32,7 +24,7 @@ export abstract class AbstractVCProcessor<VCType> {
               issuer: string;
           }
     >;
-    public async validate(data: VCType): Promise<
+    public async verify(data: VCType): Promise<
         | { isSuccess: false }
         | {
               isSuccess: true;
@@ -41,7 +33,7 @@ export abstract class AbstractVCProcessor<VCType> {
               issuer: string;
           }
     > {
-        const verificationResult = await this.verify(data);
+        const verificationResult = await this.credentialTypeSpecificVerify(data);
         if (!verificationResult.isSuccess) return verificationResult;
         if (!(await this.isIssuerTrusted(verificationResult.issuer))) return { isSuccess: false };
         return verificationResult;

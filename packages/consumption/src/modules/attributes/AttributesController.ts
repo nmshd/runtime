@@ -1392,7 +1392,7 @@ export class AttributesController extends ConsumptionBaseController {
     public async verifyAttribute(attribute: IdentityAttribute | RelationshipAttribute, intendedSubject: CoreAddress): Promise<IdentityAttribute | RelationshipAttribute> {
         if (!attribute.proof) return attribute;
         const vc = await getVCProcessor(attribute.proof.credentialType, this.parent.accountController);
-        const verificationResult = await vc.validate(attribute.proof.credential);
+        const verificationResult = await vc.verify(attribute.proof.credential);
         if (!verificationResult.isSuccess || !intendedSubject.equals(verificationResult.subject)) {
             attribute.proof.proofInvalid = true;
             return attribute;

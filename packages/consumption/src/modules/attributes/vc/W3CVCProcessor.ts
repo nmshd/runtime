@@ -24,17 +24,7 @@ export class W3CVCProcessor extends AbstractVCProcessor<any> {
     private eddsa2022CryptoSuite: any;
     private documentLoader: any;
 
-    public override async revokeCredential(credential: Record<string, any>): Promise<unknown> {
-        if (!credential.credentialStatus) throw new Error("Can't revoke credential without credential status");
-        if (credential.credentialStatus.type !== "BitstringStatusListEntry") throw new Error("unsupported status type");
-
-        const statusListCredential = (await axios.get(credential.credentialStatus.statusListCredential)).data;
-        const statusList = await BitstringStatusList.decode({ encodedList: statusListCredential.credentialSubject.encodedList });
-        statusList.setStatus(Number(credential.credentialStatus.statusListIndex), true);
-        return await this.createStatusList({ type: SupportedStatusListTypes.BitstringStatusList, uri: statusListCredential.id, data: statusList });
-    }
-
-    public override async init(): Promise<this> {
+    public override init(): this {
         const documentLoader = securityLoader();
         documentLoader.addDocuments({ documents: dataIntegrityContexts });
         documentLoader.addDocuments({ documents: bitstringStatusListContexts });
@@ -50,7 +40,17 @@ export class W3CVCProcessor extends AbstractVCProcessor<any> {
 
         this.eddsa2022CryptoSuite = eddsa2022CryptoSuite.cryptosuite;
         this.eddsa2022CryptoSuite.canonize = this.canonize;
-        return await Promise.resolve(this);
+        return this;
+    }
+
+    // Disable safe mode of canonization - otherwise enmeshed's @type is misinterpreted as JSON-LD's @type causing an error because it's not a URL
+    private async canonize(input: Record<string, unknown>, options: Record<string, unknown>) {
+        return await jsonld.canonize(input, {
+            ...options,
+            algorithm: "URDNA2015",
+            format: "application/n-quads",
+            safe: false
+        });
     }
 
     public override async issue(
@@ -64,7 +64,7 @@ export class W3CVCProcessor extends AbstractVCProcessor<any> {
         const enrichedData = {
             "@context": ["https://www.w3.org/2018/credentials/v1"], // TODO: decide which VC version to use
             type: ["VerifiableCredential"],
-            issuer: this.issuerId,
+            issuer: this.accountController.identity.didKey,
             issuanceDate: CoreDate.utc().toString(),
             credentialSubject: { ...data, id: subjectDid }
         };
@@ -102,7 +102,7 @@ export class W3CVCProcessor extends AbstractVCProcessor<any> {
             context: VC_BSL_VC_V2_CONTEXT
         });
 
-        const completedCredential = { ...credential, issuer: this.issuerId };
+        const completedCredential = { ...credential, issuer: this.accountController.identity.didKey };
 
         return await this.sign(completedCredential);
     }
@@ -111,14 +111,16 @@ export class W3CVCProcessor extends AbstractVCProcessor<any> {
         const signer = {
             sign: async (data: any) => (await this.accountController.identity.sign(CoreBuffer.from(data.data))).signature.buffer,
             algorithm: "Ed25519",
-            id: this.issuerVerificationMethod
+            id: this.accountController.identity.issuerVerificationMethod
         };
 
         const suite = new DataIntegrityProof({ signer, cryptosuite: this.eddsa2022CryptoSuite });
         return await vc.issue({ credential: data, suite, documentLoader: this.documentLoader });
     }
 
-    public override async verify(data: any): Promise<{ isSuccess: false } | { isSuccess: true; payload: Record<string, unknown>; subject?: string; issuer: string }> {
+    public override async credentialTypeSpecificVerify(
+        data: any
+    ): Promise<{ isSuccess: false } | { isSuccess: true; payload: Record<string, unknown>; subject?: string; issuer: string }> {
         const suite = new DataIntegrityProof({ cryptosuite: this.eddsa2022CryptoSuite });
         const verificationResult = await vc.verifyCredential({
             credential: data,
@@ -153,14 +155,14 @@ export class W3CVCProcessor extends AbstractVCProcessor<any> {
         return { isSuccess: false };
     }
 
-    // Disable safe mode of canonization - otherwise enmeshed's @type is misinterpreted as JSON-LD's @type causing an error because it's not a URL
-    private async canonize(input: Record<string, unknown>, options: Record<string, unknown>) {
-        return await jsonld.canonize(input, {
-            ...options,
-            algorithm: "URDNA2015",
-            format: "application/n-quads",
-            safe: false
-        });
+    public override async revokeCredential(credential: Record<string, any>): Promise<unknown> {
+        if (!credential.credentialStatus) throw new Error("Can't revoke credential without credential status");
+        if (credential.credentialStatus.type !== "BitstringStatusListEntry") throw new Error("unsupported status type");
+
+        const statusListCredential = (await axios.get(credential.credentialStatus.statusListCredential)).data;
+        const statusList = await BitstringStatusList.decode({ encodedList: statusListCredential.credentialSubject.encodedList });
+        statusList.setStatus(Number(credential.credentialStatus.statusListIndex), true);
+        return await this.createStatusList({ type: SupportedStatusListTypes.BitstringStatusList, uri: statusListCredential.id, data: statusList });
     }
 
     public override async getExpiration(credential: Record<string, any>): Promise<CoreDate | undefined> {

@@ -13,10 +13,6 @@ import { getResolver } from "key-did-resolver";
 import { AbstractVCProcessor } from "./AbstractVCProcessor";
 
 export class SdJwtVcProcessor extends AbstractVCProcessor<any> {
-    public override async init(): Promise<this> {
-        return await Promise.resolve(this);
-    }
-
     public override async issue(
         data: object,
         subjectDid: string,
@@ -35,7 +31,7 @@ export class SdJwtVcProcessor extends AbstractVCProcessor<any> {
 
         const enrichedData = {
             vct: "placeholder",
-            iss: this.issuerId,
+            iss: this.accountController.identity.didKey,
             sub: subjectDid,
             iat: new Date().getTime(),
             exp: expiresAt ? new Date(expiresAt.toString()).getTime() : undefined,
@@ -48,7 +44,7 @@ export class SdJwtVcProcessor extends AbstractVCProcessor<any> {
                       }
                   }
                 : undefined,
-            ...data // TODO: if the data already contains a status list, don't overwrite it
+            ...data
         };
 
         const statusListCredential = await this.createStatusList(statusList);
@@ -62,7 +58,7 @@ export class SdJwtVcProcessor extends AbstractVCProcessor<any> {
 
         const statusListCredential = statusList.data ?? new StatusList([0], 1); // TODO: allow multiple credentials in a status list
         const payload: JwtPayload = {
-            iss: this.issuerId,
+            iss: this.accountController.identity.didKey,
             sub: statusList.uri,
             iat: new Date().getTime()
         };
@@ -85,31 +81,9 @@ export class SdJwtVcProcessor extends AbstractVCProcessor<any> {
         return signedCredential.replaceAll("~", ""); // replace trailing ~
     }
 
-    public async revokeCredential(credential: string): Promise<string> {
-        const agent = new SDJwtInstance({
-            // TODO: read the hasher from the credential
-            hasher: this.hasher,
-            hashAlg: "sha-512"
-        });
-
-        const decodedCredential = (await agent.getClaims(credential)) as SdJwtVcPayload;
-        if (!decodedCredential.status) throw new Error("no status given");
-
-        const uri = decodedCredential.status.status_list.uri;
-        const index = decodedCredential.status.status_list.idx;
-
-        const statusList = (await axios.get(uri)).data;
-        const decodedStatusList = getListFromStatusListJWT(statusList);
-        decodedStatusList.setStatus(index, 1);
-
-        return (await this.createStatusList({
-            type: SupportedStatusListTypes.TokenStatusList,
-            uri,
-            data: decodedStatusList
-        }))!;
-    }
-
-    public override async verify(data: any): Promise<{ isSuccess: false } | { isSuccess: true; payload: Record<string, unknown>; subject?: string; issuer: string }> {
+    public override async credentialTypeSpecificVerify(
+        data: any
+    ): Promise<{ isSuccess: false } | { isSuccess: true; payload: Record<string, unknown>; subject?: string; issuer: string }> {
         const didResolver = new Resolver(getResolver());
 
         const agent = new SDJwtVcInstance({
@@ -140,6 +114,43 @@ export class SdJwtVcProcessor extends AbstractVCProcessor<any> {
         }
     }
 
+    public async revokeCredential(credential: string): Promise<string> {
+        const agent = new SDJwtInstance({
+            // TODO: read the hash algorithm from the credential
+            hasher: this.hasher,
+            hashAlg: "sha-512"
+        });
+
+        const decodedCredential = (await agent.getClaims(credential)) as SdJwtVcPayload;
+        if (!decodedCredential.status) throw new Error("no status given");
+
+        const uri = decodedCredential.status.status_list.uri;
+        const index = decodedCredential.status.status_list.idx;
+
+        const statusList = (await axios.get(uri)).data;
+        const decodedStatusList = getListFromStatusListJWT(statusList);
+        decodedStatusList.setStatus(index, 1);
+
+        return (await this.createStatusList({
+            type: SupportedStatusListTypes.TokenStatusList,
+            uri,
+            data: decodedStatusList
+        }))!;
+    }
+
+    public override async getExpiration(credential: string): Promise<CoreDate | undefined> {
+        const agent = new SDJwtInstance({
+            hasher: this.hasher,
+            hashAlg: "sha-512"
+        });
+
+        const decodedCredential = (await agent.getClaims(credential)) as SdJwtVcPayload;
+        if (decodedCredential.exp) {
+            return CoreDate.from(decodedCredential.exp);
+        }
+        return undefined;
+    }
+
     private readonly hasher: Hasher = async (data: string | ArrayBuffer, alg: string) => {
         let mappedAlg: CryptoHashAlgorithm;
         switch (alg) {
@@ -158,17 +169,4 @@ export class SdJwtVcProcessor extends AbstractVCProcessor<any> {
 
         return (await CryptoHash.hash(CoreBuffer.from(data), mappedAlg)).buffer;
     };
-
-    public override async getExpiration(credential: string): Promise<CoreDate | undefined> {
-        const agent = new SDJwtInstance({
-            hasher: this.hasher,
-            hashAlg: "sha-512"
-        });
-
-        const decodedCredential = (await agent.getClaims(credential)) as SdJwtVcPayload;
-        if (decodedCredential.exp) {
-            return CoreDate.from(decodedCredential.exp);
-        }
-        return undefined;
-    }
 }

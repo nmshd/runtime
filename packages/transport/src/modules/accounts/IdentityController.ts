@@ -21,6 +21,17 @@ export class IdentityController extends TransportController {
     public get identity(): Identity {
         return this._identity;
     }
+
+    public get didKey(): string {
+        const multikeyPublic = `z${CoreBuffer.from([0xed, 0x01]).append(this._identity.publicKey.publicKey).toBase58()}`;
+        return `did:key:${multikeyPublic}`;
+    }
+
+    public get issuerVerificationMethod(): string {
+        const keyPart = this.didKey.split(":").at(-1);
+        return `${this.didKey}#${keyPart}`;
+    }
+
     private _identity: Identity;
 
     public constructor(parent: AccountController) {
