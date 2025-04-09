@@ -3026,7 +3026,8 @@ export const CanCreateOutgoingRequestRequest: any = {
                     ]
                 },
                 "allowNewLines": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "const": true
                 },
                 "unit": {
                     "type": "string"
@@ -3053,7 +3054,8 @@ export const CanCreateOutgoingRequestRequest: any = {
                     }
                 },
                 "allowMultipleSelection": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "const": true
                 }
             },
             "required": [
@@ -11074,7 +11076,8 @@ export const CreateOutgoingRequestRequest: any = {
                     ]
                 },
                 "allowNewLines": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "const": true
                 },
                 "unit": {
                     "type": "string"
@@ -11101,7 +11104,8 @@ export const CreateOutgoingRequestRequest: any = {
                     }
                 },
                 "allowMultipleSelection": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "const": true
                 }
             },
             "required": [
@@ -14552,7 +14556,8 @@ export const ReceivedIncomingRequestRequest: any = {
                     ]
                 },
                 "allowNewLines": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "const": true
                 },
                 "unit": {
                     "type": "string"
@@ -14579,7 +14584,8 @@ export const ReceivedIncomingRequestRequest: any = {
                     }
                 },
                 "allowMultipleSelection": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "const": true
                 }
             },
             "required": [

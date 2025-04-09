@@ -2,12 +2,12 @@ import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-se
 
 export interface SelectionFormFieldJSON {
     options: string[];
-    allowMultipleSelection?: boolean;
+    allowMultipleSelection?: true;
 }
 
 export interface ISelectionFormField extends ISerializable {
     options: string[];
-    allowMultipleSelection?: boolean;
+    allowMultipleSelection?: true;
 }
 
 export class SelectionFormField extends Serializable implements ISelectionFormField {
@@ -17,7 +17,7 @@ export class SelectionFormField extends Serializable implements ISelectionFormFi
 
     @serialize()
     @validate({ nullable: true })
-    public allowMultipleSelection: boolean;
+    public allowMultipleSelection: true;
 
     public static from(value: ISelectionFormField | SelectionFormFieldJSON): SelectionFormField {
         return this.fromAny(value);

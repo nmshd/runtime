@@ -10,7 +10,7 @@ export enum FreeValueType {
 
 export interface FreeValueFormFieldJSON {
     freeValueType: `${FreeValueType}`;
-    allowNewLines?: boolean;
+    allowNewLines?: true;
     unit?: string;
     min?: number;
     max?: number;
@@ -18,7 +18,7 @@ export interface FreeValueFormFieldJSON {
 
 export interface IFreeValueFormField extends ISerializable {
     freeValueType: FreeValueType;
-    allowNewLines?: boolean;
+    allowNewLines?: true;
     unit?: string;
     min?: number;
     max?: number;
@@ -33,7 +33,7 @@ export class FreeValueFormField extends Serializable implements IFreeValueFormFi
 
     @serialize()
     @validate({ nullable: true })
-    public allowNewLines: boolean;
+    public allowNewLines: true;
 
     @serialize()
     @validate({ nullable: true })
