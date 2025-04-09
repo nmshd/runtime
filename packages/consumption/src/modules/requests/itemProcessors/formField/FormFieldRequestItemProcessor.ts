@@ -47,7 +47,7 @@ export class FormFieldRequestItemProcessor extends GenericRequestItemProcessor<F
                 (requestItem.settings instanceof IntegerFormFieldSettings && !Number.isInteger(parsedParams.response)) ||
                 (requestItem.settings instanceof DoubleFormFieldSettings && typeof parsedParams.response !== "number") ||
                 (requestItem.settings instanceof BooleanFormFieldSettings && typeof parsedParams.response !== "boolean") ||
-                (requestItem.settings instanceof DateFormFieldSettings && !FormFieldRequestItemProcessor.canBeConvertedToValidDate(parsedParams.response)) ||
+                (requestItem.settings instanceof DateFormFieldSettings && !FormFieldRequestItemProcessor.isValidDate(parsedParams.response)) ||
                 (requestItem.settings instanceof RatingFormFieldSettings && !FormFieldRequestItemProcessor.isValidRating(parsedParams.response, requestItem.settings.maxRating))
             ) {
                 return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters(`The response provided cannot be used to accept the form field.`));
@@ -93,7 +93,7 @@ export class FormFieldRequestItemProcessor extends GenericRequestItemProcessor<F
         return ValidationResult.success();
     }
 
-    private static canBeConvertedToValidDate(value: any): boolean {
+    private static isValidDate(value: any): boolean {
         return typeof value === "string" && !isNaN(new Date(value).getTime());
     }
 
