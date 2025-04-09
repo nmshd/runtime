@@ -195,7 +195,7 @@ describe("RelationshipSync", function () {
 
         const relationship = (await TestUtil.addRelationship(requestor, templator)).acceptedRelationshipFromSelf;
         const relationshipId = relationship.id;
-        const templateId = relationship.cache!.template.id;
+        const templateId = relationship.cache!.templateId;
 
         await templator.syncEverything();
         await requestor.syncEverything();
