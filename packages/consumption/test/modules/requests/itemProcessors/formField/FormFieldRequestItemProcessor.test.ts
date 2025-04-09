@@ -37,7 +37,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
     describe("Common form field validation", function () {
         describe("canCreateOutgoingRequestItem", function () {
-            test("cannot specify neither a freeValueFormField nor a selectionFormField", () => {
+            test("cannot specify no freeValueFormField and no selectionFormField", () => {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
                     title: "aFormField"
@@ -122,8 +122,8 @@ describe("FormFieldRequestItemProcessor", function () {
                     const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
 
                     expect(result).errorValidationResult({
-                        code: "error.consumption.requests....",
-                        message: `...`
+                        code: "error.consumption.requests.invalidRequestItem",
+                        message: `A freeValueFormField with unit must be of freeValueType 'Integer' or 'Double'.`
                     });
                 });
             });
@@ -151,8 +151,8 @@ describe("FormFieldRequestItemProcessor", function () {
                     const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
 
                     expect(result).errorValidationResult({
-                        code: "error.consumption.requests....",
-                        message: `...`
+                        code: "error.consumption.requests.invalidRequestItem",
+                        message: `A freeValueFormField with allowNewLines must be of freeValueType 'String'.`
                     });
                 });
 
@@ -192,8 +192,8 @@ describe("FormFieldRequestItemProcessor", function () {
                     const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
 
                     expect(result).errorValidationResult({
-                        code: "error.consumption.requests....",
-                        message: `...`
+                        code: "error.consumption.requests.invalidRequestItem",
+                        message: `A freeValueFormField with allowNewLines must be of freeValueType 'String'.`
                     });
                 });
 
@@ -233,8 +233,8 @@ describe("FormFieldRequestItemProcessor", function () {
                     const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
 
                     expect(result).errorValidationResult({
-                        code: "error.consumption.requests....",
-                        message: `...`
+                        code: "error.consumption.requests.invalidRequestItem",
+                        message: `A freeValueFormField with allowNewLines must be of freeValueType 'String'.`
                     });
                 });
 
@@ -248,8 +248,8 @@ describe("FormFieldRequestItemProcessor", function () {
                     const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
 
                     expect(result).errorValidationResult({
-                        code: "error.consumption.requests....",
-                        message: `...`
+                        code: "error.consumption.requests.invalidRequestItem",
+                        message: `A freeValueFormField with unit must be of freeValueType 'Integer' or 'Double'.`
                     });
                 });
 
@@ -263,8 +263,8 @@ describe("FormFieldRequestItemProcessor", function () {
                     const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
 
                     expect(result).errorValidationResult({
-                        code: "error.consumption.requests....",
-                        message: `...`
+                        code: "error.consumption.requests.invalidRequestItem",
+                        message: `A freeValueFormField with min must be of freeValueType 'String', 'Integer' or 'Double'.`
                     });
                 });
 
@@ -278,8 +278,8 @@ describe("FormFieldRequestItemProcessor", function () {
                     const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
 
                     expect(result).errorValidationResult({
-                        code: "error.consumption.requests....",
-                        message: `...`
+                        code: "error.consumption.requests.invalidRequestItem",
+                        message: `A freeValueFormField with max must be of freeValueType 'String', 'Integer' or 'Double'.`
                     });
                 });
             });
@@ -307,8 +307,8 @@ describe("FormFieldRequestItemProcessor", function () {
                     const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
 
                     expect(result).errorValidationResult({
-                        code: "error.consumption.requests....",
-                        message: `...`
+                        code: "error.consumption.requests.invalidRequestItem",
+                        message: `A freeValueFormField with allowNewLines must be of freeValueType 'String'.`
                     });
                 });
 
@@ -322,8 +322,8 @@ describe("FormFieldRequestItemProcessor", function () {
                     const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
 
                     expect(result).errorValidationResult({
-                        code: "error.consumption.requests....",
-                        message: `...`
+                        code: "error.consumption.requests.invalidRequestItem",
+                        message: `A freeValueFormField with unit must be of freeValueType 'Integer' or 'Double'.`
                     });
                 });
 
@@ -337,8 +337,8 @@ describe("FormFieldRequestItemProcessor", function () {
                     const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
 
                     expect(result).errorValidationResult({
-                        code: "error.consumption.requests....",
-                        message: `...`
+                        code: "error.consumption.requests.invalidRequestItem",
+                        message: `A freeValueFormField with min must be of freeValueType 'String', 'Integer' or 'Double'.`
                     });
                 });
 
@@ -352,8 +352,8 @@ describe("FormFieldRequestItemProcessor", function () {
                     const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
 
                     expect(result).errorValidationResult({
-                        code: "error.consumption.requests....",
-                        message: `...`
+                        code: "error.consumption.requests.invalidRequestItem",
+                        message: `A freeValueFormField with max must be of freeValueType 'String', 'Integer' or 'Double'.`
                     });
                 });
             });

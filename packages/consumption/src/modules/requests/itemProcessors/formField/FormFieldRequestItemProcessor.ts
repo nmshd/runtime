@@ -7,6 +7,28 @@ import { AcceptFormFieldRequestItemParameters, AcceptFormFieldRequestItemParamet
 
 export class FormFieldRequestItemProcessor extends GenericRequestItemProcessor<FormFieldRequestItem, AcceptFormFieldRequestItemParametersJSON> {
     public override canCreateOutgoingRequestItem(requestItem: FormFieldRequestItem, _request: Request): ValidationResult {
+        if (requestItem.freeValueFormField instanceof FreeValueFormField) {
+            if (requestItem.freeValueFormField.allowNewLines && requestItem.freeValueFormField.freeValueType !== FreeValueType.String) {
+                return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("A freeValueFormField with allowNewLines must be of freeValueType 'String'."));
+            }
+
+            if (requestItem.freeValueFormField.unit && ![FreeValueType.Integer, FreeValueType.Double].includes(requestItem.freeValueFormField.freeValueType)) {
+                return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("A freeValueFormField with unit must be of freeValueType 'Integer' or 'Double'."));
+            }
+
+            if (requestItem.freeValueFormField.min && ![FreeValueType.String, FreeValueType.Integer, FreeValueType.Double].includes(requestItem.freeValueFormField.freeValueType)) {
+                return ValidationResult.error(
+                    ConsumptionCoreErrors.requests.invalidRequestItem("A freeValueFormField with min must be of freeValueType 'String', 'Integer' or 'Double'.")
+                );
+            }
+
+            if (requestItem.freeValueFormField.max && ![FreeValueType.String, FreeValueType.Integer, FreeValueType.Double].includes(requestItem.freeValueFormField.freeValueType)) {
+                return ValidationResult.error(
+                    ConsumptionCoreErrors.requests.invalidRequestItem("A freeValueFormField with max must be of freeValueType 'String', 'Integer' or 'Double'.")
+                );
+            }
+        }
+
         if (requestItem.selectionFormField instanceof SelectionFormField) {
             if (requestItem.selectionFormField.options.length === 0) {
                 return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("A selectionFormField must provide at least one option."));
