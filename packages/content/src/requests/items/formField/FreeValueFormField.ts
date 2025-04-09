@@ -33,19 +33,19 @@ export class FreeValueFormField extends Serializable implements IFreeValueFormFi
 
     @serialize()
     @validate({ nullable: true })
-    public allowNewLines: true;
+    public allowNewLines?: true;
 
     @serialize()
     @validate({ nullable: true })
-    public unit: string;
+    public unit?: string;
 
     @serialize()
     @validate({ nullable: true })
-    public min: number;
+    public min?: number;
 
     @serialize()
     @validate({ nullable: true })
-    public max: number;
+    public max?: number;
 
     public static from(value: IFreeValueFormField | FreeValueFormFieldJSON): FreeValueFormField {
         return this.fromAny(value);

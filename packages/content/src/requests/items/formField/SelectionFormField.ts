@@ -17,7 +17,7 @@ export class SelectionFormField extends Serializable implements ISelectionFormFi
 
     @serialize()
     @validate({ nullable: true })
-    public allowMultipleSelection: true;
+    public allowMultipleSelection?: true;
 
     public static from(value: ISelectionFormField | SelectionFormFieldJSON): SelectionFormField {
         return this.fromAny(value);
