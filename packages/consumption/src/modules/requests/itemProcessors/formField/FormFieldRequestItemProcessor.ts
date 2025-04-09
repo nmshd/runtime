@@ -53,14 +53,15 @@ export class FormFieldRequestItemProcessor extends GenericRequestItemProcessor<F
 
             if (
                 (requestItem.freeValueFormField.freeValueType === FreeValueType.String && typeof parsedParams.formFieldResponse !== "string") ||
-                ([FreeValueType.Integer, FreeValueType.Double].includes(requestItem.freeValueFormField.freeValueType) && typeof parsedParams.formFieldResponse !== "number") ||
+                (requestItem.freeValueFormField.freeValueType === FreeValueType.Integer && !Number.isInteger(parsedParams.formFieldResponse)) ||
+                (requestItem.freeValueFormField.freeValueType === FreeValueType.Double && typeof parsedParams.formFieldResponse !== "number") ||
                 (requestItem.freeValueFormField.freeValueType === FreeValueType.Boolean && typeof parsedParams.formFieldResponse !== "boolean") ||
                 (requestItem.freeValueFormField.freeValueType === FreeValueType.Date &&
                     (typeof parsedParams.formFieldResponse !== "string" || !FormFieldRequestItemProcessor.canBeConvertedToValidDate(parsedParams.formFieldResponse)))
             ) {
                 return ValidationResult.error(
                     ConsumptionCoreErrors.requests.invalidAcceptParameters(
-                        `Conversion of the provided freeValue '${parsedParams.formFieldResponse}' to the freeValueType '${requestItem.freeValueFormField.freeValueType}' of the freeValueFormField is not possible.`
+                        `Conversion of the provided freeValue to the freeValueType '${requestItem.freeValueFormField.freeValueType}' of the freeValueFormField is not possible.`
                     )
                 );
             }

@@ -36,36 +36,24 @@ describe("FormFieldRequestItemProcessor", function () {
     afterAll(async () => await connection.close());
 
     describe("Common form field validation", function () {
-        describe("canCreateOutgoingRequestItem", function () {
-            test("cannot specify no freeValueFormField and no selectionFormField", () => {
-                const requestItem = FormFieldRequestItem.from({
+        test("cannot specify no freeValueFormField and no selectionFormField", () => {
+            expect(() => {
+                FormFieldRequestItem.from({
                     mustBeAccepted: true,
                     title: "aFormField"
                 });
+            }).toThrow(`You have to specify either freeValueFormField or selectionFormField.`);
+        });
 
-                const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
-
-                expect(result).errorValidationResult({
-                    code: "error.consumption.requests....",
-                    message: `You have to specify either freeValueFormField or selectionFormField.`
-                });
-            });
-
-            test("cannot specify both a freeValueFormField and a selectionFormField", () => {
-                const requestItem = FormFieldRequestItem.from({
+        test("cannot specify both a freeValueFormField and a selectionFormField", () => {
+            expect(() => {
+                FormFieldRequestItem.from({
                     mustBeAccepted: true,
                     title: "aFreeValueFormFieldOrASelectionFormField",
                     freeValueFormField: { freeValueType: FreeValueType.String },
                     selectionFormField: { options: ["optionA", "optionB"] }
                 });
-
-                const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
-
-                expect(result).errorValidationResult({
-                    code: "error.consumption.requests....",
-                    message: `You cannot specify both freeValueFormField and selectionFormField.`
-                });
-            });
+            }).toThrow(`You cannot specify both freeValueFormField and selectionFormField.`);
         });
     });
 
@@ -73,6 +61,12 @@ describe("FormFieldRequestItemProcessor", function () {
         const aMin = 1;
         const aMax = 10;
         const aUnit = "aUnit";
+
+        const aString = "aString";
+        const anInteger = 123456789;
+        const aDouble = 123456789.123456789;
+        const aBoolean = true;
+        const aDate = new Date("2000-01-01");
 
         describe("canCreateOutgoingRequestItem", function () {
             describe("String freeValueFormField", function () {
@@ -360,119 +354,206 @@ describe("FormFieldRequestItemProcessor", function () {
         });
 
         describe("canAccept", function () {
-            test("can accept a form text field with a free text", function () {
-                const requestItem = FormFieldRequestItem.from({
-                    mustBeAccepted: true,
-                    title: "aFreeValueFormField",
-                    freeValueFormField: { freeValueType: FreeValueType.String }
+            describe("String freeValueFormField", function () {
+                test("can accept a string freeValueFormField with a free string", function () {
+                    const requestItem = FormFieldRequestItem.from({
+                        mustBeAccepted: true,
+                        title: "aFreeValueFormField",
+                        freeValueFormField: { freeValueType: FreeValueType.String }
+                    });
+
+                    const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
+                        accept: true,
+                        formFieldResponse: aString
+                    };
+
+                    const result = processor.canAccept(requestItem, acceptParams);
+
+                    expect(result).successfulValidationResult();
                 });
 
-                const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
-                    accept: true,
-                    formFieldResponse: "aFreeTextValue"
-                };
+                test("returns an error when it is tried to accept a string freeValueFormField with no free string", function () {
+                    const requestItem = FormFieldRequestItem.from({
+                        mustBeAccepted: true,
+                        title: "aFreeValueFormField",
+                        freeValueFormField: { freeValueType: FreeValueType.String }
+                    });
 
-                const result = processor.canAccept(requestItem, acceptParams);
+                    const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
+                        accept: true,
+                        formFieldResponse: anInteger
+                    };
 
-                expect(result).successfulValidationResult();
-            });
+                    const result = processor.canAccept(requestItem, acceptParams);
 
-            test("can accept a form text area field with a free text", function () {
-                const requestItem = FormFieldRequestItem.from({
-                    mustBeAccepted: true,
-                    title: "aFreeValueFormField",
-                    freeValueFormField: { freeValueType: FreeValueType.String }
-                });
-
-                const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
-                    accept: true,
-                    formFieldResponse: "aFreeTextValue"
-                };
-
-                const result = processor.canAccept(requestItem, acceptParams);
-
-                expect(result).successfulValidationResult();
-            });
-
-            test("can accept a form number field with a free number", function () {
-                const requestItem = FormFieldRequestItem.from({
-                    mustBeAccepted: true,
-                    title: "aFreeValueFormField",
-                    freeValueFormField: { freeValueType: FreeValueType.Integer }
-                });
-
-                const aNumber = 123456789;
-                const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
-                    accept: true,
-                    formFieldResponse: aNumber.toString()
-                };
-
-                const result = processor.canAccept(requestItem, acceptParams);
-
-                expect(result).successfulValidationResult();
-            });
-
-            test("returns an error when it is tried to accept a form number field with no free number", function () {
-                const requestItem = FormFieldRequestItem.from({
-                    mustBeAccepted: true,
-                    title: "aFreeValueFormField",
-                    freeValueFormField: { freeValueType: FreeValueType.Integer }
-                });
-
-                const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
-                    accept: true,
-                    formFieldResponse: "noNumber"
-                };
-
-                const result = processor.canAccept(requestItem, acceptParams);
-
-                expect(result).errorValidationResult({
-                    code: "error.consumption.requests.invalidAcceptParameters",
-                    message: `Conversion of the provided freeValue 'noNumber' to the freeValueType 'Integer' of the freeValueFormField is not possible.`
+                    expect(result).errorValidationResult({
+                        code: "error.consumption.requests.invalidAcceptParameters",
+                        message: `Conversion of the provided freeValue to the freeValueType 'String' of the freeValueFormField is not possible.`
+                    });
                 });
             });
 
-            test("can accept a form date field with a free date", function () {
-                const requestItem = FormFieldRequestItem.from({
-                    mustBeAccepted: true,
-                    title: "aFreeValueFormField",
-                    freeValueFormField: { freeValueType: FreeValueType.Date }
+            describe("Integer freeValueFormField", function () {
+                test("can accept an integer freeValueFormField with a free integer", function () {
+                    const requestItem = FormFieldRequestItem.from({
+                        mustBeAccepted: true,
+                        title: "aFreeValueFormField",
+                        freeValueFormField: { freeValueType: FreeValueType.Integer }
+                    });
+
+                    const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
+                        accept: true,
+                        formFieldResponse: anInteger
+                    };
+
+                    const result = processor.canAccept(requestItem, acceptParams);
+
+                    expect(result).successfulValidationResult();
                 });
 
-                const aDate = new Date("2000-01-01");
-                const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
-                    accept: true,
-                    formFieldResponse: aDate.toString()
-                };
+                test("returns an error when it is tried to accept an integer freeValueFormField with no free integer", function () {
+                    const requestItem = FormFieldRequestItem.from({
+                        mustBeAccepted: true,
+                        title: "aFreeValueFormField",
+                        freeValueFormField: { freeValueType: FreeValueType.Integer }
+                    });
 
-                const result = processor.canAccept(requestItem, acceptParams);
+                    const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
+                        accept: true,
+                        formFieldResponse: aDouble
+                    };
 
-                expect(result).successfulValidationResult();
+                    const result = processor.canAccept(requestItem, acceptParams);
+
+                    expect(result).errorValidationResult({
+                        code: "error.consumption.requests.invalidAcceptParameters",
+                        message: `Conversion of the provided freeValue to the freeValueType 'Integer' of the freeValueFormField is not possible.`
+                    });
+                });
             });
 
-            test("returns an error when it is tried to accept a form date field with no free date", function () {
-                const requestItem = FormFieldRequestItem.from({
-                    mustBeAccepted: true,
-                    title: "aFreeValueFormField",
-                    freeValueFormField: { freeValueType: FreeValueType.Date }
+            describe("Double freeValueFormField", function () {
+                test("can accept a double freeValueFormField with a free double", function () {
+                    const requestItem = FormFieldRequestItem.from({
+                        mustBeAccepted: true,
+                        title: "aFreeValueFormField",
+                        freeValueFormField: { freeValueType: FreeValueType.Double }
+                    });
+
+                    const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
+                        accept: true,
+                        formFieldResponse: aDouble
+                    };
+
+                    const result = processor.canAccept(requestItem, acceptParams);
+
+                    expect(result).successfulValidationResult();
                 });
 
-                const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
-                    accept: true,
-                    formFieldResponse: "noDate"
-                };
+                test("returns an error when it is tried to accept a double freeValueFormField with no free double", function () {
+                    const requestItem = FormFieldRequestItem.from({
+                        mustBeAccepted: true,
+                        title: "aFreeValueFormField",
+                        freeValueFormField: { freeValueType: FreeValueType.Double }
+                    });
 
-                const result = processor.canAccept(requestItem, acceptParams);
+                    const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
+                        accept: true,
+                        formFieldResponse: aString
+                    };
 
-                expect(result).errorValidationResult({
-                    code: "error.consumption.requests.invalidAcceptParameters",
-                    message: `Conversion of the provided freeValue 'noDate' to the freeValueType 'Date' of the freeValueFormField is not possible.`
+                    const result = processor.canAccept(requestItem, acceptParams);
+
+                    expect(result).errorValidationResult({
+                        code: "error.consumption.requests.invalidAcceptParameters",
+                        message: `Conversion of the provided freeValue to the freeValueType 'Double' of the freeValueFormField is not possible.`
+                    });
+                });
+            });
+
+            describe("Boolean freeValueFormField", function () {
+                test("can accept a boolean freeValueFormField with a free boolean", function () {
+                    const requestItem = FormFieldRequestItem.from({
+                        mustBeAccepted: true,
+                        title: "aFreeValueFormField",
+                        freeValueFormField: { freeValueType: FreeValueType.Boolean }
+                    });
+
+                    const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
+                        accept: true,
+                        formFieldResponse: aBoolean
+                    };
+
+                    const result = processor.canAccept(requestItem, acceptParams);
+
+                    expect(result).successfulValidationResult();
+                });
+
+                test("returns an error when it is tried to accept a boolean freeValueFormField with no free boolean", function () {
+                    const requestItem = FormFieldRequestItem.from({
+                        mustBeAccepted: true,
+                        title: "aFreeValueFormField",
+                        freeValueFormField: { freeValueType: FreeValueType.Boolean }
+                    });
+
+                    const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
+                        accept: true,
+                        formFieldResponse: aString
+                    };
+
+                    const result = processor.canAccept(requestItem, acceptParams);
+
+                    expect(result).errorValidationResult({
+                        code: "error.consumption.requests.invalidAcceptParameters",
+                        message: `Conversion of the provided freeValue to the freeValueType 'Boolean' of the freeValueFormField is not possible.`
+                    });
+                });
+            });
+
+            describe("Date freeValueFormField", function () {
+                test("can accept a date freeValueFormField with a free date", function () {
+                    const requestItem = FormFieldRequestItem.from({
+                        mustBeAccepted: true,
+                        title: "aFreeValueFormField",
+                        freeValueFormField: { freeValueType: FreeValueType.Date }
+                    });
+
+                    const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
+                        accept: true,
+                        formFieldResponse: aDate.toString()
+                    };
+
+                    const result = processor.canAccept(requestItem, acceptParams);
+
+                    expect(result).successfulValidationResult();
+                });
+
+                test("returns an error when it is tried to accept a date freeValueFormField with no free date", function () {
+                    const requestItem = FormFieldRequestItem.from({
+                        mustBeAccepted: true,
+                        title: "aFreeValueFormField",
+                        freeValueFormField: { freeValueType: FreeValueType.Date }
+                    });
+
+                    const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
+                        accept: true,
+                        formFieldResponse: aString
+                    };
+
+                    const result = processor.canAccept(requestItem, acceptParams);
+
+                    expect(result).errorValidationResult({
+                        code: "error.consumption.requests.invalidAcceptParameters",
+                        message: `Conversion of the provided freeValue to the freeValueType 'Date' of the freeValueFormField is not possible.`
+                    });
                 });
             });
         });
 
         describe("accept", function () {
-            test("accept form text field with a free text", function () {
+            const anInteger = 123456789;
+
+            test("accept string freeValueFormField with a free string", function () {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
                     title: "aFreeValueFormField",
@@ -488,47 +569,61 @@ describe("FormFieldRequestItemProcessor", function () {
                 expect(result).toBeInstanceOf(FormFieldAcceptResponseItem);
             });
 
-            test("accept form text area field with a free text", function () {
-                const requestItem = FormFieldRequestItem.from({
-                    mustBeAccepted: true,
-                    title: "aFreeValueFormField",
-                    freeValueFormField: { freeValueType: FreeValueType.String }
-                });
-
-                const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
-                    accept: true,
-                    formFieldResponse: "aFreeTextValue"
-                };
-
-                const result = processor.accept(requestItem, acceptParams);
-                expect(result).toBeInstanceOf(FormFieldAcceptResponseItem);
-            });
-
-            test("accept form number field with a free number", function () {
+            test("accept integer freeValueFormField with a free integer", function () {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
                     title: "aFreeValueFormField",
                     freeValueFormField: { freeValueType: FreeValueType.Integer }
                 });
 
-                const aNumber = 123456789;
                 const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                     accept: true,
-                    formFieldResponse: aNumber.toString()
+                    formFieldResponse: anInteger
                 };
 
                 const result = processor.accept(requestItem, acceptParams);
                 expect(result).toBeInstanceOf(FormFieldAcceptResponseItem);
             });
 
-            test("accept form date field with a free date", function () {
+            test("accept double freeValueFormField with a free double", function () {
+                const requestItem = FormFieldRequestItem.from({
+                    mustBeAccepted: true,
+                    title: "aFreeValueFormField",
+                    freeValueFormField: { freeValueType: FreeValueType.Double }
+                });
+
+                const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
+                    accept: true,
+                    formFieldResponse: aDouble
+                };
+
+                const result = processor.accept(requestItem, acceptParams);
+                expect(result).toBeInstanceOf(FormFieldAcceptResponseItem);
+            });
+
+            test("accept boolean freeValueFormField with a free boolean", function () {
+                const requestItem = FormFieldRequestItem.from({
+                    mustBeAccepted: true,
+                    title: "aFreeValueFormField",
+                    freeValueFormField: { freeValueType: FreeValueType.Boolean }
+                });
+
+                const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
+                    accept: true,
+                    formFieldResponse: aBoolean
+                };
+
+                const result = processor.accept(requestItem, acceptParams);
+                expect(result).toBeInstanceOf(FormFieldAcceptResponseItem);
+            });
+
+            test("accept date freeValueFormField with a free date", function () {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
                     title: "aFreeValueFormField",
                     freeValueFormField: { freeValueType: FreeValueType.Date }
                 });
 
-                const aDate = new Date("2000-01-01");
                 const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                     accept: true,
                     formFieldResponse: aDate.toString()
@@ -540,7 +635,7 @@ describe("FormFieldRequestItemProcessor", function () {
         });
 
         describe("applyIncomingResponseItem", function () {
-            test("does not create an Attribute when getting the free text entered by the recipient in the form text field", async function () {
+            test("does not create an Attribute when getting the free string entered by the recipient in the string freeValueFormField", async function () {
                 const recipient = CoreAddress.from("Recipient");
 
                 const requestItem = FormFieldRequestItem.from({
