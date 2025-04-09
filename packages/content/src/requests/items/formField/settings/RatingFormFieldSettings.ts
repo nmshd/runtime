@@ -1,5 +1,6 @@
 import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-serval";
 
+export const minRating = 1;
 type MaxRating = 5 | 6 | 7 | 8 | 9 | 10;
 
 export interface RatingFormFieldSettingsJSON {

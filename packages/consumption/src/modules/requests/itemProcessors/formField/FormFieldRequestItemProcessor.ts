@@ -6,7 +6,7 @@ import { BooleanFormFieldSettings } from "@nmshd/content/src/requests/items/form
 import { DateFormFieldSettings } from "@nmshd/content/src/requests/items/formField/settings/DateFormFieldSettings";
 import { DoubleFormFieldSettings } from "@nmshd/content/src/requests/items/formField/settings/DoubleFormFieldSettings";
 import { IntegerFormFieldSettings } from "@nmshd/content/src/requests/items/formField/settings/IntegerFormFieldSettings";
-import { RatingFormFieldSettings } from "@nmshd/content/src/requests/items/formField/settings/RatingFormFieldSettings";
+import { minRating, RatingFormFieldSettings } from "@nmshd/content/src/requests/items/formField/settings/RatingFormFieldSettings";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import { AcceptFormFieldRequestItemParameters, AcceptFormFieldRequestItemParametersJSON } from "./AcceptFormFieldRequestItemParameters";
 
@@ -29,20 +29,21 @@ export class FormFieldRequestItemProcessor extends GenericRequestItemProcessor<F
     public override canAccept(requestItem: FormFieldRequestItem, params: AcceptFormFieldRequestItemParametersJSON): ValidationResult {
         const parsedParams = AcceptFormFieldRequestItemParameters.from(params);
 
-        if (!(requestItem.settings instanceof SelectionFormFieldSettings) && Array.isArray(parsedParams.response)) {
-            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters("Only a selection form field can be accepted with an array."));
-        }
+        if (!(requestItem.settings instanceof SelectionFormFieldSettings)) {
+            if (Array.isArray(parsedParams.response)) {
+                return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters("Only a selection form field can be accepted with an array."));
+            }
 
-        if (
-            (requestItem.settings instanceof StringFormFieldSettings && typeof parsedParams.response !== "string") ||
-            (requestItem.settings instanceof IntegerFormFieldSettings && !Number.isInteger(parsedParams.response)) ||
-            (requestItem.settings instanceof DoubleFormFieldSettings && typeof parsedParams.response !== "number") ||
-            (requestItem.settings instanceof BooleanFormFieldSettings && typeof parsedParams.response !== "boolean") ||
-            (requestItem.settings instanceof DateFormFieldSettings &&
-                (typeof parsedParams.response !== "string" || !FormFieldRequestItemProcessor.canBeConvertedToValidDate(parsedParams.response))) ||
-            (requestItem.settings instanceof RatingFormFieldSettings && !FormFieldRequestItemProcessor.isIntegerInRange(parsedParams.response, 1, requestItem.settings.maxRating))
-        ) {
-            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters(`The provided response does not match the type of the form field.`));
+            if (
+                (requestItem.settings instanceof StringFormFieldSettings && typeof parsedParams.response !== "string") ||
+                (requestItem.settings instanceof IntegerFormFieldSettings && !Number.isInteger(parsedParams.response)) ||
+                (requestItem.settings instanceof DoubleFormFieldSettings && typeof parsedParams.response !== "number") ||
+                (requestItem.settings instanceof BooleanFormFieldSettings && typeof parsedParams.response !== "boolean") ||
+                (requestItem.settings instanceof DateFormFieldSettings && !FormFieldRequestItemProcessor.canBeConvertedToValidDate(parsedParams.response)) ||
+                (requestItem.settings instanceof RatingFormFieldSettings && !FormFieldRequestItemProcessor.isValidRating(parsedParams.response, requestItem.settings.maxRating))
+            ) {
+                return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters(`The response provided cannot be used to accept the form field.`));
+            }
         }
 
         if (requestItem.settings instanceof SelectionFormFieldSettings) {
@@ -84,13 +85,12 @@ export class FormFieldRequestItemProcessor extends GenericRequestItemProcessor<F
         return ValidationResult.success();
     }
 
-    private static canBeConvertedToValidDate(value: string): boolean {
-        const date = new Date(value);
-        return !isNaN(date.getTime());
+    private static canBeConvertedToValidDate(value: any): boolean {
+        return typeof value === "string" && !isNaN(new Date(value).getTime());
     }
 
-    private static isIntegerInRange(value: any, min: number, max: number): boolean {
-        return typeof value === "number" && Number.isInteger(value) && value >= min && value <= max;
+    private static isValidRating(value: any, maxRating: number): boolean {
+        return Number.isInteger(value) && value >= minRating && value <= maxRating;
     }
 
     public override accept(_requestItem: FormFieldRequestItem, params: AcceptFormFieldRequestItemParametersJSON): FormFieldAcceptResponseItem {
