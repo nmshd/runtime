@@ -1393,7 +1393,21 @@ export class AttributesController extends ConsumptionBaseController {
         });
     }
 
-    public async _getAttributeTagCollection(): Promise<AttributeTagCollection> {
+    public async getAttributeTagCollection(): Promise<AttributeTagCollection> {
+        if (this.readTagCollectionPromise) {
+            return await this.readTagCollectionPromise;
+        }
+
+        this.readTagCollectionPromise = this._getAttributeTagCollection();
+
+        try {
+            return await this.readTagCollectionPromise;
+        } finally {
+            this.readTagCollectionPromise = undefined;
+        }
+    }
+
+    private async _getAttributeTagCollection(): Promise<AttributeTagCollection> {
         const isCacheValid = await this.isTagCollectionCacheValid();
         if (isCacheValid) {
             return await this.getTagCollection();
@@ -1410,20 +1424,6 @@ export class AttributesController extends ConsumptionBaseController {
         await this.setTagCollection(attributeTagCollection);
 
         return attributeTagCollection;
-    }
-
-    public async getAttributeTagCollection(): Promise<AttributeTagCollection> {
-        if (this.readTagCollectionPromise) {
-            return await this.readTagCollectionPromise;
-        }
-
-        this.readTagCollectionPromise = this._getAttributeTagCollection();
-
-        try {
-            return await this.readTagCollectionPromise;
-        } finally {
-            this.readTagCollectionPromise = undefined;
-        }
     }
 
     private async getTagCollection(): Promise<AttributeTagCollection> {
