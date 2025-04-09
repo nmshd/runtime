@@ -76,23 +76,30 @@ export class FormFieldRequestItemProcessor extends GenericRequestItemProcessor<F
                 return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters("At least one option must be specified to accept a selectionFormField."));
             }
 
-            if (!requestItem.selectionFormField.allowMultipleSelection) {
-                return ValidationResult.error(
-                    ConsumptionCoreErrors.requests.invalidAcceptParameters(`A selectionFormField that does not allowMultipleSelection must be accepted with exactly one option.`)
-                );
-            }
-
             const uniqueOptions = new Set(parsedParams.formFieldResponse);
             if (uniqueOptions.size !== parsedParams.formFieldResponse.length) {
                 return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters("The options specified for accepting a selectionFormField must be unique."));
             }
 
+            if (!requestItem.selectionFormField.allowMultipleSelection && parsedParams.formFieldResponse.length !== 1) {
+                return ValidationResult.error(
+                    ConsumptionCoreErrors.requests.invalidAcceptParameters(`A selectionFormField that does not allowMultipleSelection must be accepted with exactly one option.`)
+                );
+            }
+
+            const unknownOptions: string[] = [];
             for (const option of parsedParams.formFieldResponse) {
                 if (!requestItem.selectionFormField.options.includes(option)) {
-                    return ValidationResult.error(
-                        ConsumptionCoreErrors.requests.invalidAcceptParameters(`The selectionFormField does not provide the option '${option}' for selection.`)
-                    );
+                    unknownOptions.push(option);
                 }
+            }
+
+            if (unknownOptions.length > 0) {
+                return ValidationResult.error(
+                    ConsumptionCoreErrors.requests.invalidAcceptParameters(
+                        `The selectionFormField does not provide the following option(s) for selection: ${unknownOptions.map((option) => `'${option}'`).join(", ")}.`
+                    )
+                );
             }
         }
 

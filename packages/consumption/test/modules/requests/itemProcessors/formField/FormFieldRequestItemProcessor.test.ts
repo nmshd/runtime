@@ -827,6 +827,26 @@ describe("FormFieldRequestItemProcessor", function () {
         });
 
         describe("canAccept", function () {
+            test("returns an error when it is tried to accept a selectionFormField with no array", function () {
+                const requestItem = FormFieldRequestItem.from({
+                    mustBeAccepted: true,
+                    title: "aSelectionFormField",
+                    selectionFormField: { options: ["optionA", "optionB"] }
+                });
+
+                const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
+                    accept: true,
+                    formFieldResponse: "optionA"
+                };
+
+                const result = processor.canAccept(requestItem, acceptParams);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidAcceptParameters",
+                    message: `A selectionFormField must be accepted with an array.`
+                });
+            });
+
             describe("RadioButtonGroups", function () {
                 test("can accept a form radio button group with an option", function () {
                     const requestItem = FormFieldRequestItem.from({
@@ -881,7 +901,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                     expect(result).errorValidationResult({
                         code: "error.consumption.requests.invalidAcceptParameters",
-                        message: `The selectionFormField does not provide the option 'unknownOption' for selection.`
+                        message: `The selectionFormField does not provide the following option(s) for selection: 'unknownOption'.`
                     });
                 });
 
@@ -960,7 +980,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                     expect(result).errorValidationResult({
                         code: "error.consumption.requests.invalidAcceptParameters",
-                        message: `The selectionFormField does not provide the option 'unknownOption' for selection.`
+                        message: `The selectionFormField does not provide the following option(s) for selection: 'unknownOption'.`
                     });
                 });
 
@@ -1056,7 +1076,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                     expect(result).errorValidationResult({
                         code: "error.consumption.requests.invalidAcceptParameters",
-                        message: `The selectionFormField does not provide the option 'unknownOption' for selection.`
+                        message: `The selectionFormField does not provide the following option(s) for selection: 'unknownOption'.`
                     });
                 });
 
