@@ -80,7 +80,13 @@ test.each(Object.values(SupportedVCTypes))("issue and present a credential of ty
     const requestItem = signingResult.value.requestItem;
     expect(requestItem.attribute.proof).toBeDefined();
 
-    await exchangeAndAcceptRequestByMessage(issuerServices, holderServices, readAttributeRequest, [{ accept: true }]);
+    const createAttributeRequest: CreateOutgoingRequestRequest = {
+        peer: holderServices.address,
+        content: {
+            items: [requestItem]
+        }
+    };
+    await exchangeAndAcceptRequestByMessage(issuerServices, holderServices, createAttributeRequest, [{ accept: true }]);
 
     const attributes = (await holderServices.consumption.attributes.getAttributes({})).value;
     expect(attributes).toHaveLength(3);
@@ -125,7 +131,13 @@ test.each([
 
     setupMocks({ statusListCredential: statusListCredential, statusListMediaType: mediaType });
 
-    await exchangeAndAcceptRequestByMessage(issuerServices, holderServices, readAttributeRequest, [{ accept: true }]);
+    const createAttributeRequest: CreateOutgoingRequestRequest = {
+        peer: holderServices.address,
+        content: {
+            items: [requestItem]
+        }
+    };
+    await exchangeAndAcceptRequestByMessage(issuerServices, holderServices, createAttributeRequest, [{ accept: true }]);
 
     const attributes = (await holderServices.consumption.attributes.getAttributes({})).value;
     expect(attributes).toHaveLength(3);
@@ -168,7 +180,13 @@ test.each([
 
     setupMocks({ statusListCredential: statusListCredential, statusListMediaType: mediaType });
 
-    await exchangeAndAcceptRequestByMessage(issuerServices, holderServices, readAttributeRequest, [{ accept: true }]);
+    const createAttributeRequest: CreateOutgoingRequestRequest = {
+        peer: holderServices.address,
+        content: {
+            items: [requestItem]
+        }
+    };
+    await exchangeAndAcceptRequestByMessage(issuerServices, holderServices, createAttributeRequest, [{ accept: true }]);
 
     const attributes = (await holderServices.consumption.attributes.getAttributes({})).value;
     expect(attributes).toHaveLength(3);
@@ -203,7 +221,13 @@ test.each(Object.values(SupportedVCTypes))("expiration of a credential of type %
     const requestItem = signingResult.value.requestItem;
     expect(requestItem.attribute.proof).toBeDefined();
 
-    await exchangeAndAcceptRequestByMessage(issuerServices, holderServices, readAttributeRequest, [{ accept: true }]);
+    const createAttributeRequest: CreateOutgoingRequestRequest = {
+        peer: holderServices.address,
+        content: {
+            items: [requestItem]
+        }
+    };
+    await exchangeAndAcceptRequestByMessage(issuerServices, holderServices, createAttributeRequest, [{ accept: true }]);
 
     const attributes = (await holderServices.consumption.attributes.getAttributes({})).value;
     expect(attributes).toHaveLength(3);
@@ -232,7 +256,13 @@ test.each(Object.values(SupportedVCTypes))("don't trust an issuer with credentia
     const requestItem = signingResult.value.requestItem;
     expect(requestItem.attribute.proof).toBeDefined();
 
-    await exchangeAndAcceptRequestByMessage(issuerServices, holderServices, readAttributeRequest, [{ accept: true }]);
+    const createAttributeRequest: CreateOutgoingRequestRequest = {
+        peer: holderServices.address,
+        content: {
+            items: [requestItem]
+        }
+    };
+    await exchangeAndAcceptRequestByMessage(issuerServices, holderServices, createAttributeRequest, [{ accept: true }]);
 
     const attributes = (await holderServices.consumption.attributes.getAttributes({})).value;
     expect(attributes).toHaveLength(3);
