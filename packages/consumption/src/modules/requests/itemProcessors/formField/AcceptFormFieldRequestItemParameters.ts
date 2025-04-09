@@ -8,7 +8,7 @@ export interface AcceptFormFieldRequestItemParametersJSON extends AcceptRequestI
 @type("AcceptFormFieldRequestItemParameters")
 export class AcceptFormFieldRequestItemParameters extends Serializable {
     @serialize()
-    @validate({ allowedTypes: [PrimitiveType.String, PrimitiveType.Number, PrimitiveType.Boolean] })
+    @validate({ allowedTypes: [PrimitiveType.String, PrimitiveType.Number, PrimitiveType.Boolean, PrimitiveType.Array] })
     public formFieldResponse: string | number | boolean | string[];
 
     public static from(value: AcceptFormFieldRequestItemParametersJSON): AcceptFormFieldRequestItemParameters {

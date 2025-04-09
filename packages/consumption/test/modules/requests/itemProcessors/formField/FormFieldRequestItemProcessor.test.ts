@@ -94,18 +94,6 @@ describe("FormFieldRequestItemProcessor", function () {
                     expect(result).successfulValidationResult();
                 });
 
-                test("can create a string freeValueFormField using min and max", () => {
-                    const requestItem = FormFieldRequestItem.from({
-                        mustBeAccepted: false,
-                        title: "aFreeValueFormField",
-                        freeValueFormField: { freeValueType: FreeValueType.String, min: aMin, max: aMax }
-                    });
-
-                    const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
-
-                    expect(result).successfulValidationResult();
-                });
-
                 test("cannot create a string freeValueFormField using unit", () => {
                     const requestItem = FormFieldRequestItem.from({
                         mustBeAccepted: false,
@@ -119,6 +107,18 @@ describe("FormFieldRequestItemProcessor", function () {
                         code: "error.consumption.requests.invalidRequestItem",
                         message: `A freeValueFormField with unit must be of freeValueType 'Integer' or 'Double'.`
                     });
+                });
+
+                test("can create a string freeValueFormField using min and max", () => {
+                    const requestItem = FormFieldRequestItem.from({
+                        mustBeAccepted: false,
+                        title: "aFreeValueFormField",
+                        freeValueFormField: { freeValueType: FreeValueType.String, min: aMin, max: aMax }
+                    });
+
+                    const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
+
+                    expect(result).successfulValidationResult();
                 });
             });
 
@@ -354,6 +354,26 @@ describe("FormFieldRequestItemProcessor", function () {
         });
 
         describe("canAccept", function () {
+            test("returns an error when it is tried to accept a freeValueFormField with an array", function () {
+                const requestItem = FormFieldRequestItem.from({
+                    mustBeAccepted: true,
+                    title: "aFreeValueFormField",
+                    freeValueFormField: { freeValueType: FreeValueType.String }
+                });
+
+                const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
+                    accept: true,
+                    formFieldResponse: ["aString"]
+                };
+
+                const result = processor.canAccept(requestItem, acceptParams);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidAcceptParameters",
+                    message: `A freeValueFormField cannot be accepted with an array.`
+                });
+            });
+
             describe("String freeValueFormField", function () {
                 test("can accept a string freeValueFormField with a free string", function () {
                     const requestItem = FormFieldRequestItem.from({

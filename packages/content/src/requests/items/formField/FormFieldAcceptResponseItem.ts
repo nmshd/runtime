@@ -13,7 +13,7 @@ export interface IFormFieldAcceptResponseItem extends IAcceptResponseItem {
 @type("FormFieldAcceptResponseItem")
 export class FormFieldAcceptResponseItem extends AcceptResponseItem implements IFormFieldAcceptResponseItem {
     @serialize()
-    @validate({ allowedTypes: [PrimitiveType.String, PrimitiveType.Number, PrimitiveType.Boolean] })
+    @validate({ allowedTypes: [PrimitiveType.String, PrimitiveType.Number, PrimitiveType.Boolean, PrimitiveType.Array] })
     public formFieldResponse: string | number | boolean | string[];
 
     public static override from(
