@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { CoreDate, CoreId, PasswordLocationIndicator } from "@nmshd/core-types";
+import { CoreDate, CoreId } from "@nmshd/core-types";
 import { DevicesController, PasswordProtectionCreationParameters, TokenContentDeviceSharedSecret, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { TokenDTO } from "../../../types";
@@ -11,12 +11,9 @@ export interface CreateDeviceOnboardingTokenRequest {
     expiresAt?: ISO8601DateTimeString;
     profileName?: string;
     passwordProtection?: {
-        /**
-         * @minLength 1
-         */
         password: string;
         passwordIsPin?: true;
-        passwordLocationIndicator?: PasswordLocationIndicator;
+        passwordLocationIndicator?: number;
     };
 }
 

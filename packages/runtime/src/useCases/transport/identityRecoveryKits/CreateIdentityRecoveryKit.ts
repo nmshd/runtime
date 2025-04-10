@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { CoreDate, PasswordLocationIndicator } from "@nmshd/core-types";
+import { CoreDate } from "@nmshd/core-types";
 import { AccountController, Device, DevicesController, PasswordProtectionCreationParameters, TokenContentDeviceSharedSecret, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { TokenDTO } from "../../../types";
@@ -14,7 +14,7 @@ export interface CreateIdentityRecoveryKitRequest {
          */
         password: string;
         passwordIsPin?: true;
-        passwordLocationIndicator?: PasswordLocationIndicator;
+        passwordLocationIndicator?: number;
     };
 }
 

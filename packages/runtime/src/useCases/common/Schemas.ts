@@ -19986,6 +19986,9 @@ export const CreateDeviceOnboardingTokenRequest: any = {
                         "passwordIsPin": {
                             "type": "boolean",
                             "const": true
+                        },
+                        "passwordLocationIndicator": {
+                            "type": "number"
                         }
                     },
                     "required": [
@@ -20371,6 +20374,9 @@ export const CreateTokenForFileRequest: any = {
                         "passwordIsPin": {
                             "type": "boolean",
                             "const": true
+                        },
+                        "passwordLocationIndicator": {
+                            "type": "number"
                         }
                     },
                     "required": [
@@ -20426,6 +20432,9 @@ export const CreateTokenQRCodeForFileRequest: any = {
                         "passwordIsPin": {
                             "type": "boolean",
                             "const": true
+                        },
+                        "passwordLocationIndicator": {
+                            "type": "number"
                         }
                     },
                     "required": [
@@ -20864,6 +20873,9 @@ export const CreateIdentityRecoveryKitRequest: any = {
                         "passwordIsPin": {
                             "type": "boolean",
                             "const": true
+                        },
+                        "passwordLocationIndicator": {
+                            "type": "number"
                         }
                     },
                     "required": [
@@ -21606,6 +21618,9 @@ export const CreateOwnRelationshipTemplateRequest: any = {
                         "passwordIsPin": {
                             "type": "boolean",
                             "const": true
+                        },
+                        "passwordLocationIndicator": {
+                            "type": "number"
                         }
                     },
                     "required": [
@@ -21684,6 +21699,9 @@ export const CreateTokenForOwnTemplateRequest: any = {
                         "passwordIsPin": {
                             "type": "boolean",
                             "const": true
+                        },
+                        "passwordLocationIndicator": {
+                            "type": "number"
                         }
                     },
                     "required": [
@@ -21739,6 +21757,9 @@ export const CreateTokenQRCodeForOwnTemplateRequest: any = {
                         "passwordIsPin": {
                             "type": "boolean",
                             "const": true
+                        },
+                        "passwordLocationIndicator": {
+                            "type": "number"
                         }
                     },
                     "required": [
@@ -21950,6 +21971,19 @@ export const GetRelationshipTemplatesRequest: any = {
                         "true",
                         "!"
                     ]
+                },
+                "passwordProtection.passwordLocationIndicator": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
                 }
             },
             "additionalProperties": false
@@ -22029,6 +22063,9 @@ export const CreateOwnTokenRequest: any = {
                         "passwordIsPin": {
                             "type": "boolean",
                             "const": true
+                        },
+                        "passwordLocationIndicator": {
+                            "type": "number"
                         }
                     },
                     "required": [
@@ -22234,6 +22271,19 @@ export const GetTokensRequest: any = {
                     "enum": [
                         "true",
                         "!"
+                    ]
+                },
+                "passwordProtection.passwordLocationIndicator": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
                     ]
                 }
             },

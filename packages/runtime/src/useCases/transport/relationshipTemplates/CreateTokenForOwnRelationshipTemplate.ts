@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { CoreAddress, CoreDate, CoreId, PasswordLocationIndicator, SharedPasswordProtection } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId, SharedPasswordProtection } from "@nmshd/core-types";
 import {
     AccountController,
     PasswordProtectionCreationParameters,
@@ -24,7 +24,7 @@ export interface CreateTokenForOwnTemplateRequest {
          */
         password: string;
         passwordIsPin?: true;
-        passwordLocationIndicator?: PasswordLocationIndicator;
+        passwordLocationIndicator?: number;
     };
 }
 
