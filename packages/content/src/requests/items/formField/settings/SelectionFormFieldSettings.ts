@@ -14,7 +14,7 @@ export interface ISelectionFormFieldSettings extends IFormFieldSettings {
 
 @type("SelectionFormFieldSettings")
 export class SelectionFormFieldSettings extends FormFieldSettings implements ISelectionFormFieldSettings {
-    @serialize()
+    @serialize({ type: String })
     @validate()
     public options: string[];
 

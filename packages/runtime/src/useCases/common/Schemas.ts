@@ -3039,7 +3039,8 @@ export const CanCreateOutgoingRequestRequest: any = {
             "type": "object",
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "StringFormFieldSettings"
                 },
                 "@context": {
                     "type": "string"
@@ -3058,16 +3059,17 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "type": "number"
                 }
             },
-            "additionalProperties": false,
             "required": [
                 "@type"
-            ]
+            ],
+            "additionalProperties": false
         },
         "IntegerFormFieldSettingsJSON": {
             "type": "object",
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "IntegerFormFieldSettings"
                 },
                 "@context": {
                     "type": "string"
@@ -3085,16 +3087,17 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "type": "number"
                 }
             },
-            "additionalProperties": false,
             "required": [
                 "@type"
-            ]
+            ],
+            "additionalProperties": false
         },
         "DoubleFormFieldSettingsJSON": {
             "type": "object",
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "DoubleFormFieldSettings"
                 },
                 "@context": {
                     "type": "string"
@@ -3112,21 +3115,30 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "type": "number"
                 }
             },
-            "additionalProperties": false,
             "required": [
                 "@type"
-            ]
+            ],
+            "additionalProperties": false
         },
         "BooleanFormFieldSettingsJSON": {
             "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "BooleanFormFieldSettings"
+                }
+            },
+            "required": [
+                "@type"
+            ],
             "additionalProperties": false
         },
         "DateFormFieldSettingsJSON": {
             "type": "object",
-            "additionalProperties": false,
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "DateFormFieldSettings"
                 },
                 "@context": {
                     "type": "string"
@@ -3137,13 +3149,15 @@ export const CanCreateOutgoingRequestRequest: any = {
             },
             "required": [
                 "@type"
-            ]
+            ],
+            "additionalProperties": false
         },
         "SelectionFormFieldSettingsJSON": {
             "type": "object",
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "SelectionFormFieldSettings"
                 },
                 "@context": {
                     "type": "string"
@@ -3172,7 +3186,8 @@ export const CanCreateOutgoingRequestRequest: any = {
             "type": "object",
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "RatingFormFieldSettings"
                 },
                 "@context": {
                     "type": "string"
@@ -11224,7 +11239,8 @@ export const CreateOutgoingRequestRequest: any = {
             "type": "object",
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "StringFormFieldSettings"
                 },
                 "@context": {
                     "type": "string"
@@ -11243,16 +11259,17 @@ export const CreateOutgoingRequestRequest: any = {
                     "type": "number"
                 }
             },
-            "additionalProperties": false,
             "required": [
                 "@type"
-            ]
+            ],
+            "additionalProperties": false
         },
         "IntegerFormFieldSettingsJSON": {
             "type": "object",
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "IntegerFormFieldSettings"
                 },
                 "@context": {
                     "type": "string"
@@ -11270,16 +11287,17 @@ export const CreateOutgoingRequestRequest: any = {
                     "type": "number"
                 }
             },
-            "additionalProperties": false,
             "required": [
                 "@type"
-            ]
+            ],
+            "additionalProperties": false
         },
         "DoubleFormFieldSettingsJSON": {
             "type": "object",
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "DoubleFormFieldSettings"
                 },
                 "@context": {
                     "type": "string"
@@ -11297,21 +11315,30 @@ export const CreateOutgoingRequestRequest: any = {
                     "type": "number"
                 }
             },
-            "additionalProperties": false,
             "required": [
                 "@type"
-            ]
+            ],
+            "additionalProperties": false
         },
         "BooleanFormFieldSettingsJSON": {
             "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "BooleanFormFieldSettings"
+                }
+            },
+            "required": [
+                "@type"
+            ],
             "additionalProperties": false
         },
         "DateFormFieldSettingsJSON": {
             "type": "object",
-            "additionalProperties": false,
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "DateFormFieldSettings"
                 },
                 "@context": {
                     "type": "string"
@@ -11322,13 +11349,15 @@ export const CreateOutgoingRequestRequest: any = {
             },
             "required": [
                 "@type"
-            ]
+            ],
+            "additionalProperties": false
         },
         "SelectionFormFieldSettingsJSON": {
             "type": "object",
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "SelectionFormFieldSettings"
                 },
                 "@context": {
                     "type": "string"
@@ -11357,7 +11386,8 @@ export const CreateOutgoingRequestRequest: any = {
             "type": "object",
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "RatingFormFieldSettings"
                 },
                 "@context": {
                     "type": "string"
@@ -14839,7 +14869,8 @@ export const ReceivedIncomingRequestRequest: any = {
             "type": "object",
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "StringFormFieldSettings"
                 },
                 "@context": {
                     "type": "string"
@@ -14858,16 +14889,17 @@ export const ReceivedIncomingRequestRequest: any = {
                     "type": "number"
                 }
             },
-            "additionalProperties": false,
             "required": [
                 "@type"
-            ]
+            ],
+            "additionalProperties": false
         },
         "IntegerFormFieldSettingsJSON": {
             "type": "object",
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "IntegerFormFieldSettings"
                 },
                 "@context": {
                     "type": "string"
@@ -14885,16 +14917,17 @@ export const ReceivedIncomingRequestRequest: any = {
                     "type": "number"
                 }
             },
-            "additionalProperties": false,
             "required": [
                 "@type"
-            ]
+            ],
+            "additionalProperties": false
         },
         "DoubleFormFieldSettingsJSON": {
             "type": "object",
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "DoubleFormFieldSettings"
                 },
                 "@context": {
                     "type": "string"
@@ -14912,21 +14945,30 @@ export const ReceivedIncomingRequestRequest: any = {
                     "type": "number"
                 }
             },
-            "additionalProperties": false,
             "required": [
                 "@type"
-            ]
+            ],
+            "additionalProperties": false
         },
         "BooleanFormFieldSettingsJSON": {
             "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "BooleanFormFieldSettings"
+                }
+            },
+            "required": [
+                "@type"
+            ],
             "additionalProperties": false
         },
         "DateFormFieldSettingsJSON": {
             "type": "object",
-            "additionalProperties": false,
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "DateFormFieldSettings"
                 },
                 "@context": {
                     "type": "string"
@@ -14937,13 +14979,15 @@ export const ReceivedIncomingRequestRequest: any = {
             },
             "required": [
                 "@type"
-            ]
+            ],
+            "additionalProperties": false
         },
         "SelectionFormFieldSettingsJSON": {
             "type": "object",
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "SelectionFormFieldSettings"
                 },
                 "@context": {
                     "type": "string"
@@ -14972,7 +15016,8 @@ export const ReceivedIncomingRequestRequest: any = {
             "type": "object",
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "RatingFormFieldSettings"
                 },
                 "@context": {
                     "type": "string"

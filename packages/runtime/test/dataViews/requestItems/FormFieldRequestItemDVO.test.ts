@@ -1,5 +1,5 @@
 import { AcceptFormFieldRequestItemParametersJSON, DecideRequestItemParametersJSON } from "@nmshd/consumption";
-import { FormFieldRequestItem, StringFormFieldSettings } from "@nmshd/content";
+import { FormFieldRequestItem, SelectionFormFieldSettings, SelectionFormFieldSettingsJSON, StringFormFieldSettings, StringFormFieldSettingsJSON } from "@nmshd/content";
 import {
     ConsumptionServices,
     CreateOutgoingRequestRequest,
@@ -102,11 +102,12 @@ describe("FormFieldRequestItemDVO with StringFormFieldSettings", () => {
         const requestItemDVO = dvo.request.content.items[0] as FormFieldRequestItemDVO;
         expect(requestItemDVO.type).toBe("FormFieldRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(false);
-        expect(typeof requestItemDVO.settings).toBe("StringFormFieldSettings");
-        // expect(requestItemDVO.settings.allowNewLines).toBe(true);
-        // expect(requestItemDVO.settings.min).toBe(aMin);
-        // expect(requestItemDVO.settings.max).toBe(aMax);
         expect(requestItemDVO.mustBeAccepted).toBe(true);
+        expect(requestItemDVO.settings["@type"]).toBe("StringFormFieldSettings");
+        const stringFormFieldSettings = requestItemDVO.settings as StringFormFieldSettingsJSON;
+        expect(stringFormFieldSettings.allowNewLines).toBe(true);
+        expect(stringFormFieldSettings.min).toBe(aMin);
+        expect(stringFormFieldSettings.max).toBe(aMax);
     });
 
     test("check the MessageDVO for the recipient", async () => {
@@ -130,8 +131,12 @@ describe("FormFieldRequestItemDVO with StringFormFieldSettings", () => {
         const requestItemDVO = dvo.request.content.items[0] as FormFieldRequestItemDVO;
         expect(requestItemDVO.type).toBe("DecidableFormFieldRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(true);
-        expect(requestItemDVO.settings).toBe("StringFormFieldSettings");
         expect(requestItemDVO.mustBeAccepted).toBe(true);
+        expect(requestItemDVO.settings["@type"]).toBe("StringFormFieldSettings");
+        const stringFormFieldSettings = requestItemDVO.settings as StringFormFieldSettingsJSON;
+        expect(stringFormFieldSettings.allowNewLines).toBe(true);
+        expect(stringFormFieldSettings.min).toBe(aMin);
+        expect(stringFormFieldSettings.max).toBe(aMax);
     });
 
     test("check the MessageDVO for the recipient after acceptance", async () => {
@@ -161,8 +166,12 @@ describe("FormFieldRequestItemDVO with StringFormFieldSettings", () => {
         const requestItemDVO = dvo.request.content.items[0] as FormFieldRequestItemDVO;
         expect(requestItemDVO.type).toBe("FormFieldRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(false);
-        expect(requestItemDVO.settings).toBe("StringFormFieldSettings");
         expect(requestItemDVO.mustBeAccepted).toBe(true);
+        expect(requestItemDVO.settings["@type"]).toBe("StringFormFieldSettings");
+        const stringFormFieldSettings = requestItemDVO.settings as StringFormFieldSettingsJSON;
+        expect(stringFormFieldSettings.allowNewLines).toBe(true);
+        expect(stringFormFieldSettings.min).toBe(aMin);
+        expect(stringFormFieldSettings.max).toBe(aMax);
 
         const response = dvo.request.response;
         expect(response).toBeDefined();
@@ -201,8 +210,12 @@ describe("FormFieldRequestItemDVO with StringFormFieldSettings", () => {
         const requestItemDVO = dvo.request.content.items[0] as FormFieldRequestItemDVO;
         expect(requestItemDVO.type).toBe("FormFieldRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(false);
-        expect(requestItemDVO.settings).toBe("StringFormFieldSettings");
         expect(requestItemDVO.mustBeAccepted).toBe(true);
+        expect(requestItemDVO.settings["@type"]).toBe("StringFormFieldSettings");
+        const stringFormFieldSettings = requestItemDVO.settings as StringFormFieldSettingsJSON;
+        expect(stringFormFieldSettings.allowNewLines).toBe(true);
+        expect(stringFormFieldSettings.min).toBe(aMin);
+        expect(stringFormFieldSettings.max).toBe(aMax);
         const response = dvo.request.response;
         expect(response).toBeDefined();
         expect(response!.type).toBe("LocalResponseDVO");
@@ -240,7 +253,7 @@ describe("FormFieldRequestItemDVO with SelectionFormFieldSettings", () => {
                     FormFieldRequestItem.from({
                         mustBeAccepted: true,
                         title: "aSelectionFormField",
-                        settings: { options: ["optionA", "optionB"], allowMultipleSelection: true }
+                        settings: SelectionFormFieldSettings.from({ options: ["optionA", "optionB"], allowMultipleSelection: true })
                     }).toJSON()
                 ]
             },
@@ -271,9 +284,11 @@ describe("FormFieldRequestItemDVO with SelectionFormFieldSettings", () => {
         const requestItemDVO = dvo.request.content.items[0] as FormFieldRequestItemDVO;
         expect(requestItemDVO.type).toBe("FormFieldRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(false);
-        expect(requestItemDVO.settings).toBe("SelectionFormFieldSettings");
-        // expect(requestItemDVO.settings.options).toStrictEqual(["optionA", "optionB"]);
         expect(requestItemDVO.mustBeAccepted).toBe(true);
+        expect(requestItemDVO.settings["@type"]).toBe("SelectionFormFieldSettings");
+        const selectionFormFieldSettings = requestItemDVO.settings as SelectionFormFieldSettingsJSON;
+        expect(selectionFormFieldSettings.options).toStrictEqual(["optionA", "optionB"]);
+        expect(selectionFormFieldSettings.allowMultipleSelection).toBe(true);
     });
 
     test("check the MessageDVO for the recipient", async () => {
@@ -297,9 +312,11 @@ describe("FormFieldRequestItemDVO with SelectionFormFieldSettings", () => {
         const requestItemDVO = dvo.request.content.items[0] as FormFieldRequestItemDVO;
         expect(requestItemDVO.type).toBe("DecidableFormFieldRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(true);
-        expect(requestItemDVO.settings).toBe("SelectionFormFieldSettings");
-        // expect(requestItemDVO.settings.options).toStrictEqual(["optionA", "optionB"]);
         expect(requestItemDVO.mustBeAccepted).toBe(true);
+        expect(requestItemDVO.settings["@type"]).toBe("SelectionFormFieldSettings");
+        const selectionFormFieldSettings = requestItemDVO.settings as SelectionFormFieldSettingsJSON;
+        expect(selectionFormFieldSettings.options).toStrictEqual(["optionA", "optionB"]);
+        expect(selectionFormFieldSettings.allowMultipleSelection).toBe(true);
     });
 
     test("check the MessageDVO for the recipient after acceptance", async () => {
@@ -329,9 +346,11 @@ describe("FormFieldRequestItemDVO with SelectionFormFieldSettings", () => {
         const requestItemDVO = dvo.request.content.items[0] as FormFieldRequestItemDVO;
         expect(requestItemDVO.type).toBe("FormFieldRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(false);
-        expect(requestItemDVO.settings).toBe("SelectionFormFieldSettings");
-        // expect(requestItemDVO.settings.options).toStrictEqual(["optionA", "optionB"]);
         expect(requestItemDVO.mustBeAccepted).toBe(true);
+        expect(requestItemDVO.settings["@type"]).toBe("SelectionFormFieldSettings");
+        const selectionFormFieldSettings = requestItemDVO.settings as SelectionFormFieldSettingsJSON;
+        expect(selectionFormFieldSettings.options).toStrictEqual(["optionA", "optionB"]);
+        expect(selectionFormFieldSettings.allowMultipleSelection).toBe(true);
 
         const response = dvo.request.response;
         expect(response).toBeDefined();
@@ -370,9 +389,11 @@ describe("FormFieldRequestItemDVO with SelectionFormFieldSettings", () => {
         const requestItemDVO = dvo.request.content.items[0] as FormFieldRequestItemDVO;
         expect(requestItemDVO.type).toBe("FormFieldRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(false);
-        expect(requestItemDVO.settings).toBe("SelectionFormFieldSettings");
-        // expect(requestItemDVO.settings.options).toStrictEqual(["optionA", "optionB"]);
         expect(requestItemDVO.mustBeAccepted).toBe(true);
+        expect(requestItemDVO.settings["@type"]).toBe("SelectionFormFieldSettings");
+        const selectionFormFieldSettings = requestItemDVO.settings as SelectionFormFieldSettingsJSON;
+        expect(selectionFormFieldSettings.options).toStrictEqual(["optionA", "optionB"]);
+        expect(selectionFormFieldSettings.allowMultipleSelection).toBe(true);
         const response = dvo.request.response;
         expect(response).toBeDefined();
         expect(response!.type).toBe("LocalResponseDVO");
