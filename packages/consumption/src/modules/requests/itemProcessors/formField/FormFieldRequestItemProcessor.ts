@@ -15,6 +15,7 @@ import {
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 
+import { CoreDate } from "@nmshd/core-types";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import { AcceptFormFieldRequestItemParameters, AcceptFormFieldRequestItemParametersJSON } from "./AcceptFormFieldRequestItemParameters";
 
@@ -94,7 +95,7 @@ export class FormFieldRequestItemProcessor extends GenericRequestItemProcessor<F
     }
 
     private static isValidDate(value: any): boolean {
-        return typeof value === "string" && !isNaN(new Date(value).getTime());
+        return typeof value === "string" && CoreDate.from(value).dateTime.isValid;
     }
 
     private static isValidRating(value: any, maxRating: number): boolean {
