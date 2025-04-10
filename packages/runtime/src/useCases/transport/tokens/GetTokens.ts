@@ -66,7 +66,7 @@ export class GetTokensUseCase extends UseCase<GetTokensRequest, TokenDTO[]> {
                 }
             },
             [`${nameof<TokenDTO>((r) => r.passwordProtection)}.passwordLocationIndicator`]: (query: any, input: string) => {
-                query[`${nameof<Token>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordLocationIndicator)}`] = input;
+                query[`${nameof<Token>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordLocationIndicator)}`] = Number(input);
             }
         }
     });

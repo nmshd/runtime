@@ -76,7 +76,7 @@ export class GetRelationshipTemplatesUseCase extends UseCase<GetRelationshipTemp
                 }
             },
             [`${nameof<RelationshipTemplateDTO>((r) => r.passwordProtection)}.passwordLocationIndicator`]: (query: any, input: string) => {
-                query[`${nameof<RelationshipTemplate>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordLocationIndicator)}`] = input;
+                query[`${nameof<RelationshipTemplate>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordLocationIndicator)}`] = Number(input);
             }
         }
     });

@@ -116,6 +116,26 @@ describe("Tokens query", () => {
         await conditions.executeTests((c, q) => c.tokens.getTokens({ query: q, ownerRestriction: OwnerRestriction.Own }));
     });
 
+    test("query own PIN-protected tokens with passwordLocationIndicator", async () => {
+        const token = await uploadOwnToken(runtimeServices1.transport, runtimeServices1.address, {
+            password: "1234",
+            passwordIsPin: true,
+            passwordLocationIndicator: 50
+        });
+        const conditions = new QueryParamConditions<GetTokensQuery>(token, runtimeServices1.transport)
+            .addSingleCondition({
+                expectedResult: true,
+                key: "passwordProtection.passwordLocationIndicator",
+                value: "50"
+            })
+            .addSingleCondition({
+                expectedResult: false,
+                key: "passwordProtection.passwordLocationIndicator",
+                value: "0"
+            });
+        await conditions.executeTests((c, q) => c.tokens.getTokens({ query: q, ownerRestriction: OwnerRestriction.Own }));
+    });
+
     test("query peer tokens", async () => {
         const token = await exchangeToken(runtimeServices1.transport, runtimeServices2.transport);
         const conditions = new QueryParamConditions<GetTokensQuery>(token, runtimeServices2.transport)
