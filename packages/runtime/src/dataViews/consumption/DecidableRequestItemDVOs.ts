@@ -1,4 +1,4 @@
-import { FormFieldSettingsJSONDerivations } from "@nmshd/content/src/requests/items/formField/FormFieldSettingsDerivations";
+import { FormFieldSettingsJSONDerivations } from "@nmshd/content/src/requests/items/formField/FormFieldSettings";
 import { RequestItemDVO } from "../content";
 import { DraftIdentityAttributeDVO, DraftRelationshipAttributeDVO, IdentityAttributeQueryDVO, ThirdPartyRelationshipAttributeQueryDVO } from "../content/AttributeDVOs";
 import { FileDVO } from "../transport";

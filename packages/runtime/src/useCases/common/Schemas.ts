@@ -3038,6 +3038,15 @@ export const CanCreateOutgoingRequestRequest: any = {
         "StringFormFieldSettingsJSON": {
             "type": "object",
             "properties": {
+                "@type": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
                 "allowNewLines": {
                     "type": "boolean",
                     "const": true
@@ -3049,11 +3058,23 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "type": "number"
                 }
             },
-            "additionalProperties": false
+            "additionalProperties": false,
+            "required": [
+                "@type"
+            ]
         },
         "IntegerFormFieldSettingsJSON": {
             "type": "object",
             "properties": {
+                "@type": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
                 "unit": {
                     "type": "string"
                 },
@@ -3064,11 +3085,23 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "type": "number"
                 }
             },
-            "additionalProperties": false
+            "additionalProperties": false,
+            "required": [
+                "@type"
+            ]
         },
         "DoubleFormFieldSettingsJSON": {
             "type": "object",
             "properties": {
+                "@type": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
                 "unit": {
                     "type": "string"
                 },
@@ -3079,7 +3112,10 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "type": "number"
                 }
             },
-            "additionalProperties": false
+            "additionalProperties": false,
+            "required": [
+                "@type"
+            ]
         },
         "BooleanFormFieldSettingsJSON": {
             "type": "object",
@@ -3087,11 +3123,34 @@ export const CanCreateOutgoingRequestRequest: any = {
         },
         "DateFormFieldSettingsJSON": {
             "type": "object",
-            "additionalProperties": false
+            "additionalProperties": false,
+            "properties": {
+                "@type": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type"
+            ]
         },
         "SelectionFormFieldSettingsJSON": {
             "type": "object",
             "properties": {
+                "@type": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
                 "options": {
                     "type": "array",
                     "items": {
@@ -3104,6 +3163,7 @@ export const CanCreateOutgoingRequestRequest: any = {
                 }
             },
             "required": [
+                "@type",
                 "options"
             ],
             "additionalProperties": false
@@ -3111,6 +3171,15 @@ export const CanCreateOutgoingRequestRequest: any = {
         "RatingFormFieldSettingsJSON": {
             "type": "object",
             "properties": {
+                "@type": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
                 "maxRating": {
                     "type": "number",
                     "enum": [
@@ -3124,6 +3193,7 @@ export const CanCreateOutgoingRequestRequest: any = {
                 }
             },
             "required": [
+                "@type",
                 "maxRating"
             ],
             "additionalProperties": false
@@ -11153,6 +11223,15 @@ export const CreateOutgoingRequestRequest: any = {
         "StringFormFieldSettingsJSON": {
             "type": "object",
             "properties": {
+                "@type": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
                 "allowNewLines": {
                     "type": "boolean",
                     "const": true
@@ -11164,11 +11243,23 @@ export const CreateOutgoingRequestRequest: any = {
                     "type": "number"
                 }
             },
-            "additionalProperties": false
+            "additionalProperties": false,
+            "required": [
+                "@type"
+            ]
         },
         "IntegerFormFieldSettingsJSON": {
             "type": "object",
             "properties": {
+                "@type": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
                 "unit": {
                     "type": "string"
                 },
@@ -11179,11 +11270,23 @@ export const CreateOutgoingRequestRequest: any = {
                     "type": "number"
                 }
             },
-            "additionalProperties": false
+            "additionalProperties": false,
+            "required": [
+                "@type"
+            ]
         },
         "DoubleFormFieldSettingsJSON": {
             "type": "object",
             "properties": {
+                "@type": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
                 "unit": {
                     "type": "string"
                 },
@@ -11194,7 +11297,10 @@ export const CreateOutgoingRequestRequest: any = {
                     "type": "number"
                 }
             },
-            "additionalProperties": false
+            "additionalProperties": false,
+            "required": [
+                "@type"
+            ]
         },
         "BooleanFormFieldSettingsJSON": {
             "type": "object",
@@ -11202,11 +11308,34 @@ export const CreateOutgoingRequestRequest: any = {
         },
         "DateFormFieldSettingsJSON": {
             "type": "object",
-            "additionalProperties": false
+            "additionalProperties": false,
+            "properties": {
+                "@type": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type"
+            ]
         },
         "SelectionFormFieldSettingsJSON": {
             "type": "object",
             "properties": {
+                "@type": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
                 "options": {
                     "type": "array",
                     "items": {
@@ -11219,6 +11348,7 @@ export const CreateOutgoingRequestRequest: any = {
                 }
             },
             "required": [
+                "@type",
                 "options"
             ],
             "additionalProperties": false
@@ -11226,6 +11356,15 @@ export const CreateOutgoingRequestRequest: any = {
         "RatingFormFieldSettingsJSON": {
             "type": "object",
             "properties": {
+                "@type": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
                 "maxRating": {
                     "type": "number",
                     "enum": [
@@ -11239,6 +11378,7 @@ export const CreateOutgoingRequestRequest: any = {
                 }
             },
             "required": [
+                "@type",
                 "maxRating"
             ],
             "additionalProperties": false
@@ -14698,6 +14838,15 @@ export const ReceivedIncomingRequestRequest: any = {
         "StringFormFieldSettingsJSON": {
             "type": "object",
             "properties": {
+                "@type": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
                 "allowNewLines": {
                     "type": "boolean",
                     "const": true
@@ -14709,11 +14858,23 @@ export const ReceivedIncomingRequestRequest: any = {
                     "type": "number"
                 }
             },
-            "additionalProperties": false
+            "additionalProperties": false,
+            "required": [
+                "@type"
+            ]
         },
         "IntegerFormFieldSettingsJSON": {
             "type": "object",
             "properties": {
+                "@type": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
                 "unit": {
                     "type": "string"
                 },
@@ -14724,11 +14885,23 @@ export const ReceivedIncomingRequestRequest: any = {
                     "type": "number"
                 }
             },
-            "additionalProperties": false
+            "additionalProperties": false,
+            "required": [
+                "@type"
+            ]
         },
         "DoubleFormFieldSettingsJSON": {
             "type": "object",
             "properties": {
+                "@type": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
                 "unit": {
                     "type": "string"
                 },
@@ -14739,7 +14912,10 @@ export const ReceivedIncomingRequestRequest: any = {
                     "type": "number"
                 }
             },
-            "additionalProperties": false
+            "additionalProperties": false,
+            "required": [
+                "@type"
+            ]
         },
         "BooleanFormFieldSettingsJSON": {
             "type": "object",
@@ -14747,11 +14923,34 @@ export const ReceivedIncomingRequestRequest: any = {
         },
         "DateFormFieldSettingsJSON": {
             "type": "object",
-            "additionalProperties": false
+            "additionalProperties": false,
+            "properties": {
+                "@type": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type"
+            ]
         },
         "SelectionFormFieldSettingsJSON": {
             "type": "object",
             "properties": {
+                "@type": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
                 "options": {
                     "type": "array",
                     "items": {
@@ -14764,6 +14963,7 @@ export const ReceivedIncomingRequestRequest: any = {
                 }
             },
             "required": [
+                "@type",
                 "options"
             ],
             "additionalProperties": false
@@ -14771,6 +14971,15 @@ export const ReceivedIncomingRequestRequest: any = {
         "RatingFormFieldSettingsJSON": {
             "type": "object",
             "properties": {
+                "@type": {
+                    "type": "string"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
                 "maxRating": {
                     "type": "number",
                     "enum": [
@@ -14784,6 +14993,7 @@ export const ReceivedIncomingRequestRequest: any = {
                 }
             },
             "required": [
+                "@type",
                 "maxRating"
             ],
             "additionalProperties": false

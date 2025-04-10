@@ -1,4 +1,4 @@
-import { FormFieldSettingsJSONDerivations } from "@nmshd/content/src/requests/items/formField/FormFieldSettingsDerivations";
+import { FormFieldSettingsJSONDerivations } from "@nmshd/content/src/requests/items/formField/FormFieldSettings";
 import { LocalAttributeDVO } from "../consumption";
 import { DataViewObject } from "../DataViewObject";
 import { FileDVO } from "../transport";

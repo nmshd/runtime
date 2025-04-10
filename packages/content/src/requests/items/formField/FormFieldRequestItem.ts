@@ -1,7 +1,7 @@
 import { Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 
 import { IRequestItem, RequestItem, RequestItemJSON } from "../../RequestItem";
-import { FormFieldSettingsDerivations, FormFieldSettingsJSONDerivations, IFormFieldSettingsDerivations } from "./FormFieldSettingsDerivations";
+import { FormFieldSettingsDerivations, FormFieldSettingsJSONDerivations, IFormFieldSettingsDerivations } from "./FormFieldSettings";
 
 export interface FormFieldRequestItemJSON extends RequestItemJSON {
     "@type": "FormFieldRequestItem";
