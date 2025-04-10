@@ -24,6 +24,7 @@ export interface CreateTokenForOwnTemplateRequest {
          */
         password: string;
         passwordIsPin?: true;
+        passwordLocationIndicator?: number;
     };
 }
 

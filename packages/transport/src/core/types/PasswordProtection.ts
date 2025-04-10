@@ -1,5 +1,5 @@
 import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-serval";
-import { SharedPasswordProtection } from "@nmshd/core-types";
+import { PasswordLocationIndicator, SharedPasswordProtection, validatePasswordLocationIndicator } from "@nmshd/core-types";
 import { CoreBuffer, ICoreBuffer } from "@nmshd/crypto";
 import { PasswordProtectionCreationParameters } from "./PasswordProtectionCreationParameters";
 
@@ -7,6 +7,7 @@ export interface IPasswordProtection extends ISerializable {
     passwordType: "pw" | `pin${number}`;
     salt: ICoreBuffer;
     password: string;
+    passwordLocationIndicator?: PasswordLocationIndicator;
 }
 
 export class PasswordProtection extends Serializable implements IPasswordProtection {
@@ -22,6 +23,10 @@ export class PasswordProtection extends Serializable implements IPasswordProtect
     @serialize()
     public password: string;
 
+    @validate({ nullable: true, customValidator: validatePasswordLocationIndicator })
+    @serialize()
+    public passwordLocationIndicator?: PasswordLocationIndicator;
+
     public static from(value: IPasswordProtection): PasswordProtection {
         return this.fromAny(value);
     }
@@ -29,11 +34,14 @@ export class PasswordProtection extends Serializable implements IPasswordProtect
     public toSharedPasswordProtection(): SharedPasswordProtection {
         return SharedPasswordProtection.from({
             passwordType: this.passwordType,
-            salt: this.salt
+            salt: this.salt,
+            passwordLocationIndicator: this.passwordLocationIndicator
         });
     }
 
-    public matchesInputForNewPasswordProtection(newPasswordProtection: { password: string; passwordIsPin?: true } | undefined): boolean {
+    public matchesInputForNewPasswordProtection(
+        newPasswordProtection: { password: string; passwordIsPin?: true; passwordLocationIndicator?: PasswordLocationIndicator } | undefined
+    ): boolean {
         const newCreationParameters = PasswordProtectionCreationParameters.create(newPasswordProtection);
         if (!newCreationParameters) return false;
 
@@ -41,6 +49,10 @@ export class PasswordProtection extends Serializable implements IPasswordProtect
     }
 
     private matchesCreationParameters(creationParameters: PasswordProtectionCreationParameters): boolean {
-        return this.passwordType === creationParameters.passwordType && this.password === creationParameters.password;
+        return (
+            this.passwordType === creationParameters.passwordType &&
+            this.password === creationParameters.password &&
+            this.passwordLocationIndicator === creationParameters.passwordLocationIndicator
+        );
     }
 }

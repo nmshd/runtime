@@ -6,6 +6,8 @@ import { ISO8601DateTimeString } from "./ValidatableStrings";
 import { ValidationFailure } from "./ValidationFailure";
 import { ValidationResult } from "./ValidationResult";
 
+// TODO: should I add validatePasswordLocationIndicator here?
+
 export class TokenAndTemplateCreationValidator<
     T extends {
         expiresAt?: ISO8601DateTimeString;

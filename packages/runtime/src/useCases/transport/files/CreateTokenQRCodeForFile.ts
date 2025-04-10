@@ -14,6 +14,7 @@ export interface CreateTokenQRCodeForFileRequest {
          */
         password: string;
         passwordIsPin?: true;
+        passwordLocationIndicator?: number;
     };
 }
 

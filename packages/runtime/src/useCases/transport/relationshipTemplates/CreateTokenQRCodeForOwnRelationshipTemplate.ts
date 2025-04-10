@@ -23,6 +23,7 @@ export interface CreateTokenQRCodeForOwnTemplateRequest {
          */
         password: string;
         passwordIsPin?: true;
+        passwordLocationIndicator?: number;
     };
 }
 

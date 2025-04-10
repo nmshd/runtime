@@ -42,6 +42,14 @@ describe("Password-protected tokens", () => {
         expect(loadResult.value.passwordProtection?.passwordIsPin).toBe(true);
     });
 
+    test("send token with passwordLocationIndicator", async () => {
+        const token = await uploadOwnToken(runtimeServices1.transport, undefined, { password: "password", passwordLocationIndicator: 50 });
+        expect(token.passwordProtection!.passwordLocationIndicator).toBe(50);
+
+        const reference = TokenReference.from(token.truncatedReference);
+        expect(reference.passwordProtection!.passwordLocationIndicator).toBe(50);
+    });
+
     test("error when loading a token with a wrong password", async () => {
         const token = await uploadOwnToken(runtimeServices1.transport, undefined, { password: "password" });
 

@@ -372,6 +372,31 @@ describe("RelationshipTemplates query", () => {
         await conditions.executeTests((c, q) => c.relationshipTemplates.getRelationshipTemplates({ query: q, ownerRestriction: OwnerRestriction.Own }));
     });
 
+    test("query own relationshipTemplates with passwordLocationIndicator", async () => {
+        const template = (
+            await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                expiresAt: DateTime.utc().plus({ minutes: 10 }).toString(),
+                content: emptyRelationshipTemplateContent,
+                passwordProtection: {
+                    password: "password",
+                    passwordLocationIndicator: 50
+                }
+            })
+        ).value;
+        const conditions = new QueryParamConditions<GetRelationshipTemplatesQuery>(template, runtimeServices1.transport)
+            .addSingleCondition({
+                expectedResult: true,
+                key: "passwordProtection.passwordLocationIndicator",
+                value: "50"
+            })
+            .addSingleCondition({
+                expectedResult: false,
+                key: "passwordProtection.passwordLocationIndicator",
+                value: "0"
+            });
+        await conditions.executeTests((c, q) => c.relationshipTemplates.getRelationshipTemplates({ query: q, ownerRestriction: OwnerRestriction.Own }));
+    });
+
     test("query peerRelationshipTemplates", async () => {
         const createdTemplate = (
             await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({

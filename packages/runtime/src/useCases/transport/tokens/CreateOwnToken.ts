@@ -29,6 +29,7 @@ export interface CreateOwnTokenRequest {
          */
         password: string;
         passwordIsPin?: true;
+        passwordLocationIndicator?: number;
     };
 }
 

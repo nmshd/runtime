@@ -23,6 +23,7 @@ export interface CreateOwnRelationshipTemplateRequest {
          */
         password: string;
         passwordIsPin?: true;
+        passwordLocationIndicator?: number;
     };
 }
 

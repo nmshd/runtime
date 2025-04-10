@@ -17,6 +17,7 @@ export interface CreateTokenForFileRequest {
          */
         password: string;
         passwordIsPin?: true;
+        passwordLocationIndicator?: number;
     };
 }
 
