@@ -5,7 +5,7 @@ import { CoreError } from "./CoreError";
 type Enumerate<N extends number, Acc extends number[] = []> = Acc["length"] extends N ? Acc[number] : Enumerate<N, [...Acc, Acc["length"]]>;
 type IntRange<From extends number, To extends number> = Exclude<Enumerate<To>, Enumerate<From>>;
 
-enum PasswordLocationIndicatorMedium {
+export enum PasswordLocationIndicatorMedium {
     RecoveryKit,
     Self,
     Letter,
@@ -18,13 +18,8 @@ enum PasswordLocationIndicatorMedium {
 
 export type PasswordLocationIndicator = PasswordLocationIndicatorMedium | IntRange<50, 100>;
 
-// TODO: should we validate that only numbers below 50 are used that have a representation in the enum?
 export function validatePasswordLocationIndicator(value: number): string | undefined {
-    if (value < 0 || value > 99) {
-        return "must be a number between 0 and 99";
-    }
-
-    return undefined;
+    return value < 0 || value > 99 ? "must be a number between 0 and 99" : undefined;
 }
 
 export interface ISharedPasswordProtection extends ISerializable {
@@ -59,7 +54,6 @@ export class SharedPasswordProtection extends Serializable implements ISharedPas
         }
 
         const passwordType = splittedPasswordParts[0] as "pw" | `pin${number}`;
-        // TODO: we must ensure that no numbers below 50 that don't have a representation in the enum are converted
         const passwordLocationIndicator = splittedPasswordParts.length === 3 ? (Number(splittedPasswordParts[2]) as PasswordLocationIndicator) : undefined;
         try {
             const salt = CoreBuffer.fromBase64(splittedPasswordParts[1]);
@@ -70,8 +64,8 @@ export class SharedPasswordProtection extends Serializable implements ISharedPas
     }
 
     public truncate(): string {
-        // TODO: is it necessary to explicitly convert to number?
-        const passwordLocationIndicatorPart = this.passwordLocationIndicator ? `&${Number(this.passwordLocationIndicator)}` : "";
+        // TODO: is it necessary to explicitly convert to number? -> no; should we do it anyways?
+        const passwordLocationIndicatorPart = this.passwordLocationIndicator !== undefined ? `&${Number(this.passwordLocationIndicator)}` : "";
         return `${this.passwordType}&${this.salt.toBase64()}${passwordLocationIndicatorPart}`;
     }
 }
