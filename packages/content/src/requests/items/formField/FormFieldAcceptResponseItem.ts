@@ -13,7 +13,7 @@ export interface IFormFieldAcceptResponseItem extends IAcceptResponseItem {
 
 @type("FormFieldAcceptResponseItem")
 export class FormFieldAcceptResponseItem extends AcceptResponseItem implements IFormFieldAcceptResponseItem {
-    @serialize()
+    @serialize({ any: true })
     @validate({ allowedTypes: [PrimitiveType.String, PrimitiveType.Number, PrimitiveType.Boolean, PrimitiveType.Array] })
     public response: string | number | boolean | string[];
 
@@ -28,7 +28,7 @@ export class FormFieldAcceptResponseItem extends AcceptResponseItem implements I
             throw new Error("this should never happen");
         }
 
-        if (value.response instanceof Array && !value.response.every((option) => typeof option === "string")) {
+        if (Array.isArray(value.response) && !value.response.every((option) => typeof option === "string")) {
             throw new ValidationError(
                 FormFieldAcceptResponseItem.name,
                 nameof<FormFieldAcceptResponseItem>((x) => x.response),
