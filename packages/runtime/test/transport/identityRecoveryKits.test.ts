@@ -44,6 +44,7 @@ describe("Identity Recovery Kits", () => {
             passwordProtection: { password: "aPassword" }
         });
         expect(response).toBeSuccessful();
+        expect(response.value.passwordProtection!.passwordLocationIndicator).toBe(0);
 
         const devices = (await services.transport.devices.getDevices()).value;
         const backupDevices = devices.filter((device) => device.isBackupDevice);

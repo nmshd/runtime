@@ -19981,7 +19981,8 @@ export const CreateDeviceOnboardingTokenRequest: any = {
                     "type": "object",
                     "properties": {
                         "password": {
-                            "type": "string"
+                            "type": "string",
+                            "minLength": 1
                         },
                         "passwordIsPin": {
                             "type": "boolean",
@@ -20873,9 +20874,6 @@ export const CreateIdentityRecoveryKitRequest: any = {
                         "passwordIsPin": {
                             "type": "boolean",
                             "const": true
-                        },
-                        "passwordLocationIndicator": {
-                            "type": "number"
                         }
                     },
                     "required": [
