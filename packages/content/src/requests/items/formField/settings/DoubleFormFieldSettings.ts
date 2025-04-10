@@ -1,7 +1,8 @@
-import { serialize, validate } from "@js-soft/ts-serval";
-import { FormFieldSettings, FormFieldSettingsJSON, IFormFieldSettings } from "../FormFieldSettings";
+import { serialize, type, validate } from "@js-soft/ts-serval";
+import { FormFieldSettings, FormFieldSettingsJSON, IFormFieldSettings } from "./FormFieldSettings";
 
 export interface DoubleFormFieldSettingsJSON extends FormFieldSettingsJSON {
+    "@type": "DoubleFormFieldSettings";
     unit?: string;
     min?: number;
     max?: number;
@@ -13,6 +14,7 @@ export interface IDoubleFormFieldSettings extends IFormFieldSettings {
     max?: number;
 }
 
+@type("DoubleFormFieldSettings")
 export class DoubleFormFieldSettings extends FormFieldSettings implements IDoubleFormFieldSettings {
     @serialize()
     @validate({ nullable: true })

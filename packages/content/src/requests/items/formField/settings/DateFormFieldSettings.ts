@@ -1,9 +1,13 @@
-import { FormFieldSettings, FormFieldSettingsJSON, IFormFieldSettings } from "../FormFieldSettings";
+import { type } from "@js-soft/ts-serval";
+import { FormFieldSettings, FormFieldSettingsJSON, IFormFieldSettings } from "./FormFieldSettings";
 
-export interface DateFormFieldSettingsJSON extends FormFieldSettingsJSON {}
+export interface DateFormFieldSettingsJSON extends FormFieldSettingsJSON {
+    "@type": "DateFormFieldSettings";
+}
 
 export interface IDateFormFieldSettings extends IFormFieldSettings {}
 
+@type("DateFormFieldSettings")
 export class DateFormFieldSettings extends FormFieldSettings implements IDateFormFieldSettings {
     public static from(value: IDateFormFieldSettings | DateFormFieldSettingsJSON): DateFormFieldSettings {
         return this.fromAny(value);

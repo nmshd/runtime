@@ -1,7 +1,8 @@
-import { serialize, validate } from "@js-soft/ts-serval";
-import { FormFieldSettings, FormFieldSettingsJSON, IFormFieldSettings } from "../FormFieldSettings";
+import { serialize, type, validate } from "@js-soft/ts-serval";
+import { FormFieldSettings, FormFieldSettingsJSON, IFormFieldSettings } from "./FormFieldSettings";
 
 export interface SelectionFormFieldSettingsJSON extends FormFieldSettingsJSON {
+    "@type": "SelectionFormFieldSettings";
     options: string[];
     allowMultipleSelection?: true;
 }
@@ -11,6 +12,7 @@ export interface ISelectionFormFieldSettings extends IFormFieldSettings {
     allowMultipleSelection?: true;
 }
 
+@type("SelectionFormFieldSettings")
 export class SelectionFormFieldSettings extends FormFieldSettings implements ISelectionFormFieldSettings {
     @serialize()
     @validate()

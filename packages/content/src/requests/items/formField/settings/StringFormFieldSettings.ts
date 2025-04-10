@@ -1,7 +1,8 @@
-import { serialize, validate } from "@js-soft/ts-serval";
-import { FormFieldSettings, FormFieldSettingsJSON, IFormFieldSettings } from "../FormFieldSettings";
+import { serialize, type, validate } from "@js-soft/ts-serval";
+import { FormFieldSettings, FormFieldSettingsJSON, IFormFieldSettings } from "./FormFieldSettings";
 
 export interface StringFormFieldSettingsJSON extends FormFieldSettingsJSON {
+    "@type": "StringFormFieldSettings";
     allowNewLines?: true;
     min?: number;
     max?: number;
@@ -13,6 +14,7 @@ export interface IStringFormFieldSettings extends IFormFieldSettings {
     max?: number;
 }
 
+@type("StringFormFieldSettings")
 export class StringFormFieldSettings extends FormFieldSettings implements IStringFormFieldSettings {
     @serialize()
     @validate({ nullable: true })

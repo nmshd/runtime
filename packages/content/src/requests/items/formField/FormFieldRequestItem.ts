@@ -1,7 +1,6 @@
 import { Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-
 import { IRequestItem, RequestItem, RequestItemJSON } from "../../RequestItem";
-import { FormFieldSettingsDerivations, FormFieldSettingsJSONDerivations, IFormFieldSettingsDerivations } from "./FormFieldSettings";
+import { FORM_FIELD_SETTINGS_CLASSES, FormFieldSettingsDerivations, FormFieldSettingsJSONDerivations, IFormFieldSettingsDerivations } from "./settings";
 
 export interface FormFieldRequestItemJSON extends RequestItemJSON {
     "@type": "FormFieldRequestItem";
@@ -20,11 +19,11 @@ export class FormFieldRequestItem extends RequestItem implements IFormFieldReque
     @validate()
     public override title: string;
 
-    @serialize()
+    @serialize({ unionTypes: FORM_FIELD_SETTINGS_CLASSES })
     @validate()
     public settings: FormFieldSettingsDerivations;
 
-    public static from(value: IFormFieldRequestItem | Omit<FormFieldRequestItemJSON, "@type"> | FormFieldRequestItemJSON): FormFieldRequestItem {
+    public static from(value: FormFieldRequestItemJSON | Omit<FormFieldRequestItemJSON, "@type">): FormFieldRequestItem {
         return this.fromAny(value);
     }
 
