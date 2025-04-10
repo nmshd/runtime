@@ -259,6 +259,26 @@ describe("FormFieldRequestItemProcessor", function () {
             });
         });
 
+        test("returns an error when it is tried to accept a selection form field with no array", function () {
+            const requestItem = FormFieldRequestItem.from({
+                mustBeAccepted: true,
+                title: "aFormField",
+                settings: SelectionFormFieldSettings.from({ options: ["optionA", "optionB"] })
+            });
+
+            const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
+                accept: true,
+                response: "optionA"
+            };
+
+            const result = processor.canAccept(requestItem, acceptParams);
+
+            expect(result).errorValidationResult({
+                code: "error.consumption.requests.invalidAcceptParameters",
+                message: `A selection form field must be accepted with an array.`
+            });
+        });
+
         describe("StringFormFieldSettings", function () {
             test("can accept a string form field with a free string", function () {
                 const requestItem = FormFieldRequestItem.from({
@@ -494,26 +514,6 @@ describe("FormFieldRequestItemProcessor", function () {
         });
 
         describe("SelectionFormFieldSettings", function () {
-            test("returns an error when it is tried to accept a selection form field with no array", function () {
-                const requestItem = FormFieldRequestItem.from({
-                    mustBeAccepted: true,
-                    title: "aFormField",
-                    settings: SelectionFormFieldSettings.from({ options: ["optionA", "optionB"] })
-                });
-
-                const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
-                    accept: true,
-                    response: "optionA"
-                };
-
-                const result = processor.canAccept(requestItem, acceptParams);
-
-                expect(result).errorValidationResult({
-                    code: "error.consumption.requests.invalidAcceptParameters",
-                    message: `A selection form field must be accepted with an array.`
-                });
-            });
-
             test("can accept a selection form field with an option", function () {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
