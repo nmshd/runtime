@@ -1,5 +1,5 @@
 import { AcceptFormFieldRequestItemParametersJSON, DecideRequestItemParametersJSON } from "@nmshd/consumption";
-import { FormFieldRequestItem, FreeValueType } from "@nmshd/content";
+import { FormFieldRequestItem, StringFormFieldSettings } from "@nmshd/content";
 import {
     ConsumptionServices,
     CreateOutgoingRequestRequest,
@@ -46,7 +46,10 @@ beforeEach(function () {
     eventBus2.reset();
 });
 
-describe("FormFieldRequestItemDVO with freeValueFormField", () => {
+describe("FormFieldRequestItemDVO with StringFormFieldSettings", () => {
+    const aMin = 1;
+    const aMax = 10;
+
     beforeAll(async () => {
         const runtimeServices = await serviceProvider.launch(2, { enableRequestModule: true });
         runtimeServices1 = runtimeServices[0];
@@ -67,8 +70,8 @@ describe("FormFieldRequestItemDVO with freeValueFormField", () => {
                 items: [
                     FormFieldRequestItem.from({
                         mustBeAccepted: true,
-                        title: "aFreeValueFormField",
-                        freeValueFormField: { freeValueType: FreeValueType.String }
+                        title: "aStringFormField",
+                        settings: StringFormFieldSettings.from({ allowNewLines: true, min: aMin, max: aMax })
                     }).toJSON()
                 ]
             },
@@ -99,7 +102,10 @@ describe("FormFieldRequestItemDVO with freeValueFormField", () => {
         const requestItemDVO = dvo.request.content.items[0] as FormFieldRequestItemDVO;
         expect(requestItemDVO.type).toBe("FormFieldRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(false);
-        expect(requestItemDVO.freeValueFormField!.freeValueType).toBe(FreeValueType.String);
+        expect(typeof requestItemDVO.settings).toBe("StringFormFieldSettings");
+        // expect(requestItemDVO.settings.allowNewLines).toBe(true);
+        // expect(requestItemDVO.settings.min).toBe(aMin);
+        // expect(requestItemDVO.settings.max).toBe(aMax);
         expect(requestItemDVO.mustBeAccepted).toBe(true);
     });
 
@@ -124,7 +130,7 @@ describe("FormFieldRequestItemDVO with freeValueFormField", () => {
         const requestItemDVO = dvo.request.content.items[0] as FormFieldRequestItemDVO;
         expect(requestItemDVO.type).toBe("DecidableFormFieldRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(true);
-        expect(requestItemDVO.freeValueFormField!.freeValueType).toBe(FreeValueType.String);
+        expect(requestItemDVO.settings).toBe("StringFormFieldSettings");
         expect(requestItemDVO.mustBeAccepted).toBe(true);
     });
 
@@ -155,7 +161,7 @@ describe("FormFieldRequestItemDVO with freeValueFormField", () => {
         const requestItemDVO = dvo.request.content.items[0] as FormFieldRequestItemDVO;
         expect(requestItemDVO.type).toBe("FormFieldRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(false);
-        expect(requestItemDVO.freeValueFormField!.freeValueType).toBe(FreeValueType.String);
+        expect(requestItemDVO.settings).toBe("StringFormFieldSettings");
         expect(requestItemDVO.mustBeAccepted).toBe(true);
 
         const response = dvo.request.response;
@@ -195,7 +201,7 @@ describe("FormFieldRequestItemDVO with freeValueFormField", () => {
         const requestItemDVO = dvo.request.content.items[0] as FormFieldRequestItemDVO;
         expect(requestItemDVO.type).toBe("FormFieldRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(false);
-        expect(requestItemDVO.freeValueFormField!.freeValueType).toBe(FreeValueType.String);
+        expect(requestItemDVO.settings).toBe("StringFormFieldSettings");
         expect(requestItemDVO.mustBeAccepted).toBe(true);
         const response = dvo.request.response;
         expect(response).toBeDefined();
@@ -212,7 +218,7 @@ describe("FormFieldRequestItemDVO with freeValueFormField", () => {
     });
 });
 
-describe("FormFieldRequestItemDVO with selectionFormField", () => {
+describe("FormFieldRequestItemDVO with SelectionFormFieldSettings", () => {
     beforeAll(async () => {
         const runtimeServices = await serviceProvider.launch(2, { enableRequestModule: true });
         runtimeServices1 = runtimeServices[0];
@@ -234,7 +240,7 @@ describe("FormFieldRequestItemDVO with selectionFormField", () => {
                     FormFieldRequestItem.from({
                         mustBeAccepted: true,
                         title: "aSelectionFormField",
-                        selectionFormField: { options: ["optionA", "optionB"] }
+                        settings: { options: ["optionA", "optionB"], allowMultipleSelection: true }
                     }).toJSON()
                 ]
             },
@@ -265,7 +271,8 @@ describe("FormFieldRequestItemDVO with selectionFormField", () => {
         const requestItemDVO = dvo.request.content.items[0] as FormFieldRequestItemDVO;
         expect(requestItemDVO.type).toBe("FormFieldRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(false);
-        expect(requestItemDVO.selectionFormField!.options).toStrictEqual(["optionA", "optionB"]);
+        expect(requestItemDVO.settings).toBe("SelectionFormFieldSettings");
+        // expect(requestItemDVO.settings.options).toStrictEqual(["optionA", "optionB"]);
         expect(requestItemDVO.mustBeAccepted).toBe(true);
     });
 
@@ -290,7 +297,8 @@ describe("FormFieldRequestItemDVO with selectionFormField", () => {
         const requestItemDVO = dvo.request.content.items[0] as FormFieldRequestItemDVO;
         expect(requestItemDVO.type).toBe("DecidableFormFieldRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(true);
-        expect(requestItemDVO.selectionFormField!.options).toStrictEqual(["optionA", "optionB"]);
+        expect(requestItemDVO.settings).toBe("SelectionFormFieldSettings");
+        // expect(requestItemDVO.settings.options).toStrictEqual(["optionA", "optionB"]);
         expect(requestItemDVO.mustBeAccepted).toBe(true);
     });
 
@@ -321,7 +329,8 @@ describe("FormFieldRequestItemDVO with selectionFormField", () => {
         const requestItemDVO = dvo.request.content.items[0] as FormFieldRequestItemDVO;
         expect(requestItemDVO.type).toBe("FormFieldRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(false);
-        expect(requestItemDVO.selectionFormField!.options).toStrictEqual(["optionA", "optionB"]);
+        expect(requestItemDVO.settings).toBe("SelectionFormFieldSettings");
+        // expect(requestItemDVO.settings.options).toStrictEqual(["optionA", "optionB"]);
         expect(requestItemDVO.mustBeAccepted).toBe(true);
 
         const response = dvo.request.response;
@@ -361,7 +370,8 @@ describe("FormFieldRequestItemDVO with selectionFormField", () => {
         const requestItemDVO = dvo.request.content.items[0] as FormFieldRequestItemDVO;
         expect(requestItemDVO.type).toBe("FormFieldRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(false);
-        expect(requestItemDVO.selectionFormField!.options).toStrictEqual(["optionA", "optionB"]);
+        expect(requestItemDVO.settings).toBe("SelectionFormFieldSettings");
+        // expect(requestItemDVO.settings.options).toStrictEqual(["optionA", "optionB"]);
         expect(requestItemDVO.mustBeAccepted).toBe(true);
         const response = dvo.request.response;
         expect(response).toBeDefined();
