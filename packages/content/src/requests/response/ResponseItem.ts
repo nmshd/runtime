@@ -6,7 +6,7 @@ import { IRejectResponseItemDerivations, RejectResponseItemDerivations, RejectRe
 import { ResponseItemResult } from "./ResponseItemResult";
 
 export interface ResponseItemJSON extends ContentJSON {
-    result: `${ResponseItemResult}`;
+    result: ResponseItemResult;
 }
 
 export type ResponseItemJSONDerivations = AcceptResponseItemJSONDerivations | RejectResponseItemJSONDerivations | ErrorResponseItemJSONDerivations;

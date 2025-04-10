@@ -32,7 +32,7 @@ import { IResponseItem, ResponseItem, ResponseItemJSON } from "./ResponseItem";
 import { ResponseItemResult } from "./ResponseItemResult";
 
 export interface AcceptResponseItemJSON extends ResponseItemJSON {
-    result: `${ResponseItemResult.Accepted}`;
+    result: ResponseItemResult.Accepted;
 }
 
 export type AcceptResponseItemJSONDerivations =

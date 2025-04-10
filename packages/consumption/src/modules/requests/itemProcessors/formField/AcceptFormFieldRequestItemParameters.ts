@@ -8,7 +8,7 @@ export interface AcceptFormFieldRequestItemParametersJSON extends AcceptRequestI
 
 @type("AcceptFormFieldRequestItemParameters")
 export class AcceptFormFieldRequestItemParameters extends Serializable {
-    @serialize()
+    @serialize({ any: true })
     @validate({ allowedTypes: [PrimitiveType.String, PrimitiveType.Number, PrimitiveType.Boolean, PrimitiveType.Array] })
     public response: string | number | boolean | string[];
 
@@ -21,7 +21,7 @@ export class AcceptFormFieldRequestItemParameters extends Serializable {
             throw new Error("this should never happen");
         }
 
-        if (value.response instanceof Array && !value.response.every((option) => typeof option === "string")) {
+        if (Array.isArray(value.response) && !value.response.every((option) => typeof option === "string")) {
             throw new ValidationError(
                 AcceptFormFieldRequestItemParameters.name,
                 nameof<AcceptFormFieldRequestItemParameters>((x) => x.response),
