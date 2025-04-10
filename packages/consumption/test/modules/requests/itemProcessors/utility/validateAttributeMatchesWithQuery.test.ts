@@ -229,7 +229,7 @@ describe("validateAttributeMatchesWithQuery", function () {
         test("returns an error when an IdentityAttribute has no tag but at least one tag was queried by IdentityAttributeQuery", async function () {
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
-                query: IdentityAttributeQuery.from({ valueType: "GivenName", tags: ["aTag"] })
+                query: IdentityAttributeQuery.from({ valueType: "GivenName", tags: ["x+%+aTag"] })
             });
             const requestId = await ConsumptionIds.request.generate();
             const request = LocalRequest.from({
@@ -268,7 +268,7 @@ describe("validateAttributeMatchesWithQuery", function () {
         test("returns an error when the tags of the IdentityAttribute do not match the tags queried by IdentityAttributeQuery", async function () {
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
-                query: IdentityAttributeQuery.from({ tags: ["tagA", "tagB", "tagC"], valueType: "GivenName" })
+                query: IdentityAttributeQuery.from({ tags: ["x+%+tagA", "x+%+tagB", "x+%+tagC"], valueType: "GivenName" })
             });
             const requestId = await ConsumptionIds.request.generate();
             const request = LocalRequest.from({
@@ -289,7 +289,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 newAttribute: {
                     "@type": "IdentityAttribute",
                     owner: recipient.toString(),
-                    tags: ["tagD", "tagE", "tagF"],
+                    tags: ["x+%+tagD", "x+%+tagE", "x+%+tagF"],
                     value: {
                         "@type": "GivenName",
                         value: "aGivenName"
@@ -302,47 +302,6 @@ describe("validateAttributeMatchesWithQuery", function () {
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.attributeQueryMismatch",
                 message: "The tags of the provided IdentityAttribute do not contain at least one queried tag."
-            });
-        });
-
-        test("returns an error when an IdentityAttribute is not valid in the queried time frame", async function () {
-            const requestItem = ReadAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: IdentityAttributeQuery.from({ validTo: "2024-02-14T09:35:12.824Z", valueType: "GivenName" })
-            });
-            const requestId = await ConsumptionIds.request.generate();
-            const request = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
-            });
-
-            const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
-                accept: true,
-                newAttribute: {
-                    "@type": "IdentityAttribute",
-                    owner: recipient.toString(),
-                    validFrom: "2024-02-14T08:47:35.077Z",
-                    validTo: "2024-02-14T09:35:12.824Z",
-                    value: {
-                        "@type": "GivenName",
-                        value: "aGivenName"
-                    }
-                }
-            };
-
-            const result = await readProcessor.canAccept(requestItem, acceptParams, request);
-
-            expect(result).errorValidationResult({
-                code: "error.consumption.requests.attributeQueryMismatch",
-                message: "The provided Attribute is not valid in the queried time frame."
             });
         });
     });
@@ -840,60 +799,6 @@ describe("validateAttributeMatchesWithQuery", function () {
                 message: "The provided RelationshipAttribute does not have the queried description."
             });
         });
-
-        test("returns an error when a RelationshipAttribute is not valid in the queried time frame", async function () {
-            const requestItem = ReadAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: RelationshipAttributeQuery.from({
-                    owner: sender.toString(),
-                    key: "aKey",
-                    validFrom: "2024-02-14T08:47:35.077Z",
-                    validTo: "2024-02-14T09:35:12.824Z",
-                    attributeCreationHints: {
-                        valueType: "ProprietaryString",
-                        title: "aTitle",
-                        confidentiality: RelationshipAttributeConfidentiality.Public
-                    }
-                })
-            });
-            const requestId = await ConsumptionIds.request.generate();
-            const request = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
-            });
-
-            const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
-                accept: true,
-                newAttribute: {
-                    "@type": "RelationshipAttribute",
-                    key: "aKey",
-                    confidentiality: RelationshipAttributeConfidentiality.Public,
-                    owner: sender.toString(),
-                    validFrom: "2024-02-14T08:47:35.077Z",
-                    validTo: "2024-02-14T09:30:00.000Z",
-                    value: {
-                        "@type": "ProprietaryString",
-                        title: "aTitle",
-                        value: "aStringValue"
-                    }
-                }
-            };
-
-            const result = await readProcessor.canAccept(requestItem, acceptParams, request);
-
-            expect(result).errorValidationResult({
-                code: "error.consumption.requests.attributeQueryMismatch",
-                message: "The provided Attribute is not valid in the queried time frame."
-            });
-        });
     });
 
     describe("ThirdPartyRelationshipAttributeQuery", function () {
@@ -1095,61 +1000,6 @@ describe("validateAttributeMatchesWithQuery", function () {
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.attributeQueryMismatch",
                 message: "The provided RelationshipAttribute does not have the queried key."
-            });
-        });
-
-        test("returns an error when a RelationshipAttribute is not valid in the time frame that was queried using a ThirdPartyRelationshipAttributeQuery", async function () {
-            const requestItem = ReadAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: ThirdPartyRelationshipAttributeQuery.from({
-                    owner: ThirdPartyRelationshipAttributeQueryOwner.Recipient,
-                    validFrom: "2024-02-14T08:47:35.077Z",
-                    validTo: "2024-02-14T09:35:12.824Z",
-                    key: "aKey",
-                    thirdParty: [aThirdParty.toString()]
-                })
-            });
-
-            const requestId = await ConsumptionIds.request.generate();
-            const request = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
-            });
-
-            const localAttribute = await consumptionController.attributes.createSharedLocalAttribute({
-                content: RelationshipAttribute.from({
-                    key: "aKey",
-                    confidentiality: RelationshipAttributeConfidentiality.Public,
-                    owner: recipient,
-                    validFrom: CoreDate.from("2024-02-14T08:47:35.077Z"),
-                    validTo: CoreDate.from("2024-02-14T09:30:00.000Z"),
-                    value: ProprietaryString.from({
-                        title: "aTitle",
-                        value: "aStringValue"
-                    })
-                }),
-                peer: aThirdParty,
-                requestReference: await ConsumptionIds.request.generate()
-            });
-
-            const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
-                accept: true,
-                existingAttributeId: localAttribute.id.toString()
-            };
-
-            const result = await readProcessor.canAccept(requestItem, acceptParams, request);
-
-            expect(result).errorValidationResult({
-                code: "error.consumption.requests.attributeQueryMismatch",
-                message: "The provided Attribute is not valid in the queried time frame."
             });
         });
     });

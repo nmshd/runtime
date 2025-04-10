@@ -333,10 +333,20 @@ export class RequestModule extends RuntimeModule {
         }
 
         // only trigger for new relationships that were created from an own template
-        if (createdRelationship.status !== RelationshipStatus.Pending || !createdRelationship.template.isOwn) return;
+        const relationshipIsNotPending = createdRelationship.status !== RelationshipStatus.Pending;
+        const relationshipIsCreatedByCurrentAccount = createdRelationship.auditLog[0].createdBy === event.eventTargetAddress;
+        if (relationshipIsNotPending || relationshipIsCreatedByCurrentAccount) return;
 
-        const template = createdRelationship.template;
-        const templateId = template.id;
+        const templateId = createdRelationship.templateId;
+
+        const templateResult = await services.transportServices.relationshipTemplates.getRelationshipTemplate({ id: templateId });
+        if (templateResult.isError) {
+            this.logger.error(`Could not get template with id '${templateId}'. Root error:`, templateResult.error);
+            return;
+        }
+
+        const template = templateResult.value;
+
         // do not trigger for templates without the correct content type
         if (template.content["@type"] !== "RelationshipTemplateContent") return;
         if (createdRelationship.creationContent["@type"] !== "RelationshipCreationContent") {

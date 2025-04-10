@@ -44,7 +44,7 @@ describe("RelationshipTemplateProcessedModule", function () {
         await TestUtil.createAndLoadPeerTemplate(
             session1,
             session2,
-            RelationshipTemplateContent.from({ onNewRelationship: { items: [AuthenticationRequestItem.from({ mustBeAccepted: false })] } }).toJSON()
+            RelationshipTemplateContent.from({ onNewRelationship: { items: [AuthenticationRequestItem.from({ title: "aTitle", mustBeAccepted: false })] } }).toJSON()
         );
         await eventBus.waitForRunningEventHandlers();
 
@@ -55,7 +55,7 @@ describe("RelationshipTemplateProcessedModule", function () {
         const templateFrom = (
             await session1.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
                 content: RelationshipTemplateContent.from({
-                    onNewRelationship: { expiresAt: CoreDate.utc().add({ seconds: 2 }), items: [AuthenticationRequestItem.from({ mustBeAccepted: false })] }
+                    onNewRelationship: { expiresAt: CoreDate.utc().add({ seconds: 2 }), items: [AuthenticationRequestItem.from({ title: "aTitle", mustBeAccepted: false })] }
                 }).toJSON(),
                 expiresAt: CoreDate.utc().add({ minutes: 5 }).toString(),
                 maxNumberOfAllocations: 1
@@ -78,11 +78,11 @@ describe("RelationshipTemplateProcessedModule", function () {
                 content: RelationshipTemplateContent.from({
                     onNewRelationship: {
                         "@type": "Request",
-                        items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }]
+                        items: [{ "@type": "AuthenticationRequestItem", title: "aTitle", mustBeAccepted: false }]
                     },
                     onExistingRelationship: {
                         "@type": "Request",
-                        items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }],
+                        items: [{ "@type": "AuthenticationRequestItem", title: "aTitle", mustBeAccepted: false }],
                         expiresAt: CoreDate.utc().add({ seconds: 2 }).toString()
                     }
                 }).toJSON(),

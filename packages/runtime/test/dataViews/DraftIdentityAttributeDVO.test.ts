@@ -35,7 +35,7 @@ describe("DraftIdentityAttributeDVO", () => {
     test("check the GivenName", async () => {
         const attribute = IdentityAttribute.from<GivenName>({
             owner: transportService1Address,
-            value: GivenName.from("Hugo")
+            value: GivenName.from("aGivenName")
         }).toJSON();
         const dvo = await expander1.expandAttribute(attribute);
         expect(dvo).toBeDefined();
@@ -46,7 +46,7 @@ describe("DraftIdentityAttributeDVO", () => {
         expect(dvo.content).toStrictEqual(attribute);
         const value = dvo.value as AbstractStringJSON;
         expect(value["@type"]).toBe("GivenName");
-        expect(value.value).toBe("Hugo");
+        expect(value.value).toBe("aGivenName");
         expect(dvo.owner.type).toBe("IdentityDVO");
         expect(dvo.owner.id).toStrictEqual(attribute.owner);
         expect(dvo.owner.name).toBe("i18n://dvo.identity.self.name");

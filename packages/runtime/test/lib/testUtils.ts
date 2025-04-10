@@ -288,8 +288,8 @@ export async function sendMessage(transportServices: TransportServices, recipien
         recipients: [recipient],
         content: content ?? {
             "@type": "Mail",
-            subject: "This is the mail subject",
-            body: "This is the mail body",
+            subject: "aSubject",
+            body: "aBody",
             cc: [],
             to: [recipient]
         },
@@ -310,8 +310,8 @@ export async function sendMessageToMultipleRecipients(
         recipients,
         content: content ?? {
             "@type": "Mail",
-            subject: "This is the mail subject",
-            body: "This is the mail body",
+            subject: "aSubject",
+            body: "aBody",
             cc: [],
             to: recipients
         },
@@ -517,7 +517,8 @@ export async function ensureActiveRelationship(sTransportServices: TransportServ
         await rTransportServices.relationships.decomposeRelationship({ relationshipId: relationship.id });
         await establishRelationship(sTransportServices, rTransportServices);
     } else if (sRelationships[0].status === RelationshipStatus.Pending) {
-        if (sRelationships[0].template.isOwn) {
+        const sRelationshipTemplate = await sTransportServices.relationshipTemplates.getRelationshipTemplate({ id: sRelationships[0].templateId });
+        if (sRelationshipTemplate.value.isOwn) {
             const relationship = sRelationships[0];
             await sTransportServices.relationships.acceptRelationship({ relationshipId: relationship.id });
             await syncUntilHasRelationships(rTransportServices, 1);
