@@ -87,9 +87,9 @@
         "@js-soft/node-logger": "1.2.0",
         "@types/json-stringify-safe": "^5.0.3",
         "@types/lodash": "^4.17.16",
-        "@types/luxon": "^3.6.0",
+        "@types/luxon": "^3.6.2",
         "@types/qrcode": "^1.5.5",
-        "ts-json-schema-generator": "2.3.0",
+        "ts-json-schema-generator": "2.4.0",
         "ts-mockito": "^2.6.1"
     },
     "publishConfig": {
