@@ -1,4 +1,5 @@
-import { PrimitiveType, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
+import { PrimitiveType, Serializable, serialize, type, validate, ValidationError } from "@js-soft/ts-serval";
+import { nameof } from "ts-simple-nameof";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
 
 export interface AcceptFormFieldRequestItemParametersJSON extends AcceptRequestItemParametersJSON {
@@ -13,5 +14,21 @@ export class AcceptFormFieldRequestItemParameters extends Serializable {
 
     public static from(value: AcceptFormFieldRequestItemParametersJSON): AcceptFormFieldRequestItemParameters {
         return this.fromAny(value);
+    }
+
+    protected static override postFrom<T extends Serializable>(value: T): T {
+        if (!(value instanceof AcceptFormFieldRequestItemParameters)) {
+            throw new Error("this should never happen");
+        }
+
+        if (value.response instanceof Array && !value.response.every((option) => typeof option === "string")) {
+            throw new ValidationError(
+                AcceptFormFieldRequestItemParameters.name,
+                nameof<AcceptFormFieldRequestItemParameters>((x) => x.response),
+                `If the ${nameof<AcceptFormFieldRequestItemParameters>((x) => x.response)} is an array, it must be a string array.`
+            );
+        }
+
+        return value;
     }
 }
