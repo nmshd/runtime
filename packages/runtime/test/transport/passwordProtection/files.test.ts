@@ -44,6 +44,15 @@ describe("Password-protected tokens for files", () => {
         expect(loadResult).toBeSuccessful();
     });
 
+    test("send a file via token with passwordLocationIndicator", async () => {
+        const createResult = await runtimeServices1.transport.files.createTokenForFile({
+            fileId,
+            passwordProtection: { password: "password", passwordLocationIndicator: 50 }
+        });
+        expect(createResult).toBeSuccessful();
+        expect(createResult.value.passwordProtection!.passwordLocationIndicator).toBe(50);
+    });
+
     test("error when loading the file with a wrong password", async () => {
         const createResult = await runtimeServices1.transport.files.createTokenForFile({
             fileId,
