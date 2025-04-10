@@ -11,6 +11,9 @@ export interface CreateDeviceOnboardingTokenRequest {
     expiresAt?: ISO8601DateTimeString;
     profileName?: string;
     passwordProtection?: {
+        /**
+         * @minLength 1
+         */
         password: string;
         passwordIsPin?: true;
         passwordLocationIndicator?: number;

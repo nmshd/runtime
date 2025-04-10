@@ -166,7 +166,7 @@ export async function syncUntilHasEvent<TEvent extends Event>(
 export async function uploadOwnToken(
     transportServices: TransportServices,
     forIdentity?: string,
-    passwordProtection?: { password: string; passwordIsPin?: true }
+    passwordProtection?: { password: string; passwordIsPin?: true; passwordLocationIndicator?: number }
 ): Promise<TokenDTO> {
     const response = await transportServices.tokens.createOwnToken({
         content: { aKey: "aValue" },
@@ -222,7 +222,7 @@ export const emptyRelationshipCreationContent: ArbitraryRelationshipCreationCont
 export async function createTemplate(
     transportServices: TransportServices,
     body?: RelationshipTemplateContentJSON,
-    passwordProtection?: { password: string; passwordIsPin?: true },
+    passwordProtection?: { password: string; passwordIsPin?: true; passwordLocationIndicator?: number },
     templateExpiresAt?: DateTime
 ): Promise<RelationshipTemplateDTO> {
     const defaultExpirationDateTime = DateTime.utc().plus({ minutes: 10 }).toString();
