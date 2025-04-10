@@ -18,6 +18,7 @@ import {
     AcceptFormFieldRequestItemParametersJSON,
     ConsumptionController,
     ConsumptionIds,
+    ErrorValidationResult,
     FormFieldRequestItemProcessor,
     LocalRequest,
     LocalRequestStatus
@@ -566,9 +567,9 @@ describe("FormFieldRequestItemProcessor", function () {
                 const result = processor.canAccept(requestItem, acceptParams);
 
                 expect(result).errorValidationResult({
-                    code: "error.consumption.requests.invalidAcceptParameters",
-                    message: `The selection form field does not provide the following option(s) for selection: 'unknownOption'.`
+                    code: "error.consumption.requests.invalidAcceptParameters"
                 });
+                expect((result as ErrorValidationResult).error.message).toBe(`The selection form field does not provide the following option(s) for selection: 'unknownOption'.`);
             });
 
             test("can accept a selection form field allowing multiple selection with multiple options", function () {
