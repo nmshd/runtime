@@ -361,7 +361,7 @@ describe("FormFieldRequestItemDVO with SelectionFormFieldSettings", () => {
         expect(response!.content.items).toHaveLength(1);
         const responseItem = response!.content.items[0] as FormFieldAcceptResponseItemDVO;
         expect(responseItem.result).toBe("Accepted");
-        expect(responseItem.type).toBe("SelectionFormAcceptResponseItemDVO");
+        expect(responseItem.type).toBe("FormFieldAcceptResponseItemDVO");
         expect(responseItem.response).toStrictEqual(["optionA"]);
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
@@ -403,7 +403,7 @@ describe("FormFieldRequestItemDVO with SelectionFormFieldSettings", () => {
         expect(response!.content.items).toHaveLength(1);
         const responseItem = response!.content.items[0] as FormFieldAcceptResponseItemDVO;
         expect(responseItem.result).toBe("Accepted");
-        expect(responseItem.type).toBe("SelectionFormAcceptResponseItemDVO");
+        expect(responseItem.type).toBe("FormFieldAcceptResponseItemDVO");
         expect(responseItem.response).toStrictEqual(["optionA"]);
         expect(requestItemDVO.response).toStrictEqual(responseItem);
     });
