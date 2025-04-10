@@ -236,7 +236,7 @@ describe("FormFieldRequestItemProcessor", function () {
         const anInteger = 123456789;
         const aDouble = 123456789.123456789;
         const aBoolean = true;
-        const aDate = new Date("2000-01-01");
+        const aDate = "2000-01-01T00:00:00.000Z";
         const aRating = 5;
 
         test("returns an error when it is tried to accept a free value form field with an array", function () {
@@ -445,7 +445,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                     accept: true,
-                    response: aDate.toString()
+                    response: aDate
                 };
 
                 const result = processor.canAccept(requestItem, acceptParams);
@@ -615,7 +615,7 @@ describe("FormFieldRequestItemProcessor", function () {
         const anInteger = 123456789;
         const aDouble = 123456789.123456789;
         const aBoolean = true;
-        const aDate = new Date("2000-01-01");
+        const aDate = "2000-01-01T00:00:00.000Z";
         const aRating = 5;
 
         test("accept string form field with a free string", function () {
@@ -691,7 +691,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
             const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                 accept: true,
-                response: aDate.toString()
+                response: aDate
             };
 
             const result = processor.accept(requestItem, acceptParams);
