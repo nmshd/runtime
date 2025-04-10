@@ -1,3 +1,4 @@
+import { IDatabaseCollection } from "@js-soft/docdb-access-abstractions";
 import { EventBus } from "@js-soft/ts-utils";
 import {
     AbstractAttributeValue,
@@ -46,7 +47,13 @@ import { IdentityAttributeQueryTranslator, RelationshipAttributeQueryTranslator,
 
 export class AttributesController extends ConsumptionBaseController {
     private attributes: SynchronizedCollection;
+    private tagCollection: IDatabaseCollection;
     private attributeTagClient: TagClient;
+    private readTagCollectionPromise: Promise<AttributeTagCollection> | undefined;
+
+    private readonly ETAG_DB_KEY = "etag";
+    private readonly CACHE_TIMESTAMP_DB_KEY = "cacheTimestamp";
+    private readonly TAG_COLLECTION_DB_KEY = "tagCollection";
 
     public constructor(
         parent: ConsumptionController,
@@ -61,7 +68,18 @@ export class AttributesController extends ConsumptionBaseController {
         await super.init();
 
         this.attributes = await this.parent.accountController.getSynchronizedCollection("Attributes");
+        this.tagCollection = await this.parent.accountController.db.getCollection("TagCollection");
         this.attributeTagClient = new TagClient(this.parent.transport.config, this.parent.accountController.authenticator, this.parent.transport.correlator);
+
+        const tagDefinitionCacheExists = await this.tagCollection.exists({ name: this.TAG_COLLECTION_DB_KEY });
+        if (!tagDefinitionCacheExists) {
+            await this.tagCollection.create({
+                name: this.TAG_COLLECTION_DB_KEY,
+                value: AttributeTagCollection.from({ supportedLanguages: [], tagsForAttributeValueTypes: {} }).toJSON()
+            });
+        }
+        await this.tagCollection.create({ name: this.ETAG_DB_KEY, value: "" });
+        await this.tagCollection.create({ name: this.CACHE_TIMESTAMP_DB_KEY, value: undefined });
 
         return this;
     }
@@ -1376,7 +1394,74 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async getAttributeTagCollection(): Promise<AttributeTagCollection> {
-        const backboneTagCollection = (await this.attributeTagClient.getTagCollection()).value;
-        return AttributeTagCollection.from(backboneTagCollection);
+        if (this.readTagCollectionPromise) {
+            return await this.readTagCollectionPromise;
+        }
+
+        this.readTagCollectionPromise = this._getAttributeTagCollection();
+
+        try {
+            return await this.readTagCollectionPromise;
+        } finally {
+            this.readTagCollectionPromise = undefined;
+        }
+    }
+
+    private async _getAttributeTagCollection(): Promise<AttributeTagCollection> {
+        const isCacheValid = await this.isTagCollectionCacheValid();
+        if (isCacheValid) {
+            return await this.getTagCollection();
+        }
+
+        const backboneTagCollection = await this.attributeTagClient.getTagCollection(await this.getETag());
+        if (!backboneTagCollection) {
+            return await this.getTagCollection();
+        }
+
+        await this.setETag(backboneTagCollection.etag ?? "");
+        await this.updateCacheTimestamp();
+        const attributeTagCollection = AttributeTagCollection.from(backboneTagCollection.value);
+        await this.setTagCollection(attributeTagCollection);
+
+        return attributeTagCollection;
+    }
+
+    private async getTagCollection(): Promise<AttributeTagCollection> {
+        const newLocal = await this.tagCollection.findOne({ name: this.TAG_COLLECTION_DB_KEY });
+        return AttributeTagCollection.from(newLocal.value);
+    }
+
+    private async setTagCollection(tagCollection: AttributeTagCollection): Promise<void> {
+        await this.tagCollection.update(await this.tagCollection.findOne({ name: this.TAG_COLLECTION_DB_KEY }), {
+            name: this.TAG_COLLECTION_DB_KEY,
+            value: tagCollection.toJSON()
+        });
+    }
+
+    private async getETag(): Promise<string | undefined> {
+        return (await this.tagCollection.findOne({ name: this.ETAG_DB_KEY }))?.value;
+    }
+
+    private async setETag(etag: string): Promise<void> {
+        await this.tagCollection.update(await this.tagCollection.findOne({ name: this.ETAG_DB_KEY }), { name: this.ETAG_DB_KEY, value: etag });
+    }
+
+    private async isTagCollectionCacheValid(): Promise<boolean> {
+        return (await this.getCacheTimestamp())?.isSameOrAfter(CoreDate.utc().subtract({ minutes: this.parent.accountController.config.tagCacheLifetimeInMinutes })) ?? false;
+    }
+
+    private async getCacheTimestamp(): Promise<CoreDate | undefined> {
+        try {
+            return CoreDate.from((await this.tagCollection.findOne({ name: this.CACHE_TIMESTAMP_DB_KEY })).value);
+        } catch {
+            return undefined;
+        }
+    }
+
+    private async updateCacheTimestamp(): Promise<void> {
+        await this.tagCollection.update(await this.tagCollection.findOne({ name: this.CACHE_TIMESTAMP_DB_KEY }), {
+            name: this.CACHE_TIMESTAMP_DB_KEY,
+            value: CoreDate.utc().toJSON()
+        });
     }
 }
