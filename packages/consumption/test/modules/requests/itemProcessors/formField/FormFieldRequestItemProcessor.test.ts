@@ -92,7 +92,7 @@ describe("FormFieldRequestItemProcessor", function () {
             });
         });
 
-        describe("Integer freeValueFormField", function () {
+        describe("IntegerFormFieldSettings", function () {
             test("can create an integer form field", () => {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: false,
@@ -118,7 +118,7 @@ describe("FormFieldRequestItemProcessor", function () {
             });
         });
 
-        describe("Double freeValueFormField", function () {
+        describe("DoubleFormFieldSettings", function () {
             test("can create a double form field", () => {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: false,
@@ -144,7 +144,7 @@ describe("FormFieldRequestItemProcessor", function () {
             });
         });
 
-        describe("Boolean freeValueFormField", function () {
+        describe("BooleanFormFieldSettings", function () {
             test("can create a boolean form field", () => {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: false,
@@ -158,7 +158,7 @@ describe("FormFieldRequestItemProcessor", function () {
             });
         });
 
-        describe("Date freeValueFormField", function () {
+        describe("DateFormFieldSettings", function () {
             test("can create a date form field", () => {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: false,
@@ -186,7 +186,7 @@ describe("FormFieldRequestItemProcessor", function () {
             });
         });
 
-        describe("Selection formField", function () {
+        describe("SelectionFormFieldSettings", function () {
             test("can create a selection form field", () => {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: false,
@@ -239,7 +239,7 @@ describe("FormFieldRequestItemProcessor", function () {
         const aDate = new Date("2000-01-01");
         const aRating = 5;
 
-        test("returns an error when it is tried to accept a freeValueFormField with an array", function () {
+        test("returns an error when it is tried to accept a free value form field with an array", function () {
             const requestItem = FormFieldRequestItem.from({
                 mustBeAccepted: true,
                 title: "aFormField",
@@ -293,12 +293,12 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidAcceptParameters",
-                    message: `Conversion of the provided freeValue to the freeValueType 'String' of the freeValueFormField is not possible.`
+                    message: `The response provided cannot be used to accept the form field.`
                 });
             });
         });
 
-        describe("Integer freeValueFormField", function () {
+        describe("IntegerFormFieldSettings", function () {
             test("can accept an integer form field with a free integer", function () {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
@@ -332,12 +332,12 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidAcceptParameters",
-                    message: `Conversion of the provided freeValue to the freeValueType 'Integer' of the freeValueFormField is not possible.`
+                    message: `The response provided cannot be used to accept the form field.`
                 });
             });
         });
 
-        describe("Double freeValueFormField", function () {
+        describe("DoubleFormFieldSettings", function () {
             test("can accept a double form field with a free double", function () {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
@@ -371,12 +371,12 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidAcceptParameters",
-                    message: `Conversion of the provided freeValue to the freeValueType 'Double' of the freeValueFormField is not possible.`
+                    message: `The response provided cannot be used to accept the form field.`
                 });
             });
         });
 
-        describe("Boolean freeValueFormField", function () {
+        describe("BooleanFormFieldSettings", function () {
             test("can accept a boolean form field with a free boolean", function () {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
@@ -410,12 +410,12 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidAcceptParameters",
-                    message: `Conversion of the provided freeValue to the freeValueType 'Boolean' of the freeValueFormField is not possible.`
+                    message: `The response provided cannot be used to accept the form field.`
                 });
             });
         });
 
-        describe("Date freeValueFormField", function () {
+        describe("DateFormFieldSettings", function () {
             test("can accept a date form field with a free date", function () {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
@@ -449,12 +449,12 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidAcceptParameters",
-                    message: `Conversion of the provided freeValue to the freeValueType 'Date' of the freeValueFormField is not possible.`
+                    message: `The response provided cannot be used to accept the form field.`
                 });
             });
         });
 
-        describe("Rating freeValueFormField", function () {
+        describe("RatingFormFieldSettings", function () {
             test("can accept a rating form field with a free rating", function () {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
@@ -488,12 +488,12 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidAcceptParameters",
-                    message: `Conversion of the provided freeValue to the freeValueType 'Boolean' of the freeValueFormField is not possible.`
+                    message: `The response provided cannot be used to accept the form field.`
                 });
             });
         });
 
-        describe("Selection formField", function () {
+        describe("SelectionFormFieldSettings", function () {
             test("returns an error when it is tried to accept a selection form field with no array", function () {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
