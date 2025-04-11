@@ -48,7 +48,7 @@ beforeEach(function () {
 
 describe("FormFieldRequestItemDVO with StringFormFieldSettings", () => {
     const aMin = 1;
-    const aMax = 10;
+    const aMax = 100;
 
     beforeAll(async () => {
         const runtimeServices = await serviceProvider.launch(2, { enableRequestModule: true });
