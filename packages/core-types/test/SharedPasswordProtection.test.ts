@@ -98,7 +98,6 @@ describe("SharedPasswordProtection", () => {
 
             const deserializedSharedPasswordProtection = SharedPasswordProtection.fromTruncated(truncatedSharedPasswordProtection);
             expect(deserializedSharedPasswordProtection!.passwordLocationIndicator).toBe(PasswordLocationIndicatorMedium.RecoveryKit);
-            expect(deserializedSharedPasswordProtection!.passwordLocationIndicator).toBe(0);
         });
 
         test("should not add passwordLocationIndicator if none is set", function () {

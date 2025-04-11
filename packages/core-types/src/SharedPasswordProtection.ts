@@ -58,7 +58,8 @@ export class SharedPasswordProtection extends Serializable implements ISharedPas
         }
 
         const passwordType = splittedPasswordParts[0] as "pw" | `pin${number}`;
-        const passwordLocationIndicator = splittedPasswordParts.length === 3 ? (Number(splittedPasswordParts[2]) as PasswordLocationIndicator) : undefined;
+        const passwordLocationIndicator = splittedPasswordParts.length === 3 ? this.mapNumberToPasswordLocationIndicatorMedium(Number(splittedPasswordParts[2])) : undefined;
+
         try {
             const salt = CoreBuffer.fromBase64(splittedPasswordParts[1]);
             return SharedPasswordProtection.from({ passwordType, salt, passwordLocationIndicator });
@@ -68,8 +69,29 @@ export class SharedPasswordProtection extends Serializable implements ISharedPas
     }
 
     public truncate(): string {
-        // TODO: is it necessary to explicitly convert to number? -> no; should we do it anyways?
-        const passwordLocationIndicatorPart = this.passwordLocationIndicator !== undefined ? `&${Number(this.passwordLocationIndicator)}` : "";
+        const passwordLocationIndicatorPart =
+            this.passwordLocationIndicator !== undefined ? `&${this.mapPasswordLocationIndicatorMediumToNumber(this.passwordLocationIndicator)}` : "";
         return `${this.passwordType}&${this.salt.toBase64()}${passwordLocationIndicatorPart}`;
+    }
+
+    private static mapNumberToPasswordLocationIndicatorMedium(value: number): PasswordLocationIndicator {
+        const passwordLocationIndicatorMediumValues = Object.values(PasswordLocationIndicatorMedium);
+
+        if (value >= 0 && value < passwordLocationIndicatorMediumValues.length) {
+            return passwordLocationIndicatorMediumValues[value];
+        }
+
+        return value as PasswordLocationIndicator;
+    }
+
+    private mapPasswordLocationIndicatorMediumToNumber(value: PasswordLocationIndicator): number {
+        if (typeof value === "number") return value;
+
+        const index = Object.values(PasswordLocationIndicatorMedium).indexOf(value);
+        if (index === -1) {
+            throw new CoreError("error.core-types.invalidPasswordLocationIndicator", `Invalid PasswordLocationIndicator: ${value}`);
+        }
+
+        return index;
     }
 }
