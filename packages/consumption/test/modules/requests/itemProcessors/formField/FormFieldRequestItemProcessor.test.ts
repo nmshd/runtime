@@ -445,6 +445,46 @@ describe("FormFieldRequestItemProcessor", function () {
                     message: `The response provided cannot be used to accept the form field.`
                 });
             });
+
+            test("returns an error when it is tried to accept an integer form field with a free integer which is smaller than the min", function () {
+                const requestItem = FormFieldRequestItem.from({
+                    mustBeAccepted: true,
+                    title: "aFormField",
+                    settings: IntegerFormFieldSettings.from({ min: aMax })
+                });
+
+                const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
+                    accept: true,
+                    response: aMin
+                };
+
+                const result = processor.canAccept(requestItem, acceptParams);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidAcceptParameters",
+                    message: `The response cannot be smaller than the min.`
+                });
+            });
+
+            test("returns an error when it is tried to accept an integer form field with a free integer which is greater than the max", function () {
+                const requestItem = FormFieldRequestItem.from({
+                    mustBeAccepted: true,
+                    title: "aFormField",
+                    settings: IntegerFormFieldSettings.from({ max: aMin })
+                });
+
+                const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
+                    accept: true,
+                    response: aMax
+                };
+
+                const result = processor.canAccept(requestItem, acceptParams);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidAcceptParameters",
+                    message: `The response cannot be greater than the max.`
+                });
+            });
         });
 
         describe("DoubleFormFieldSettings", function () {
@@ -482,6 +522,46 @@ describe("FormFieldRequestItemProcessor", function () {
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidAcceptParameters",
                     message: `The response provided cannot be used to accept the form field.`
+                });
+            });
+
+            test("returns an error when it is tried to accept a double form field with a free double which is smaller than the min", function () {
+                const requestItem = FormFieldRequestItem.from({
+                    mustBeAccepted: true,
+                    title: "aFormField",
+                    settings: DoubleFormFieldSettings.from({ min: aMax })
+                });
+
+                const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
+                    accept: true,
+                    response: aMin
+                };
+
+                const result = processor.canAccept(requestItem, acceptParams);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidAcceptParameters",
+                    message: `The response cannot be smaller than the min.`
+                });
+            });
+
+            test("returns an error when it is tried to accept a double form field with a free double which is greater than the max", function () {
+                const requestItem = FormFieldRequestItem.from({
+                    mustBeAccepted: true,
+                    title: "aFormField",
+                    settings: DoubleFormFieldSettings.from({ max: aMin })
+                });
+
+                const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
+                    accept: true,
+                    response: aMax
+                };
+
+                const result = processor.canAccept(requestItem, acceptParams);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidAcceptParameters",
+                    message: `The response cannot be greater than the max.`
                 });
             });
         });
