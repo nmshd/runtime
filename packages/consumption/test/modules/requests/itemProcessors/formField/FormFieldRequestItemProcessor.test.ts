@@ -35,6 +35,17 @@ describe("FormFieldRequestItemProcessor", function () {
 
     const aMaxRating = 5;
 
+    const aMin = 1;
+    const aMax = 10;
+    const aUnit = "aUnit";
+
+    const aString = "aString";
+    const anInteger = 123456789;
+    const aDouble = 123456789.123456789;
+    const aBoolean = true;
+    const aDate = "2000-01-01T00:00:00.000Z";
+    const aRating = 5;
+
     beforeAll(async function () {
         connection = await TestUtil.createConnection();
         transport = TestUtil.createTransport();
@@ -51,10 +62,6 @@ describe("FormFieldRequestItemProcessor", function () {
     afterAll(async () => await connection.close());
 
     describe("canCreateOutgoingRequestItem", function () {
-        const aMin = 1;
-        const aMax = 10;
-        const aUnit = "aUnit";
-
         describe("StringFormFieldSettings", function () {
             test("can create a string form field", () => {
                 const requestItem = FormFieldRequestItem.from({
@@ -91,6 +98,21 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 expect(result).successfulValidationResult();
             });
+
+            test("cannot create a string form field with a max smaller than the min", () => {
+                const requestItem = FormFieldRequestItem.from({
+                    mustBeAccepted: false,
+                    title: "aFormField",
+                    settings: StringFormFieldSettings.from({ min: aMax, max: aMin })
+                });
+
+                const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidRequestItem",
+                    message: "The max cannot be smaller than the min."
+                });
+            });
         });
 
         describe("IntegerFormFieldSettings", function () {
@@ -117,6 +139,21 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 expect(result).successfulValidationResult();
             });
+
+            test("cannot create an integer form field with a max smaller than the min", () => {
+                const requestItem = FormFieldRequestItem.from({
+                    mustBeAccepted: false,
+                    title: "aFormField",
+                    settings: IntegerFormFieldSettings.from({ min: aMax, max: aMin })
+                });
+
+                const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidRequestItem",
+                    message: "The max cannot be smaller than the min."
+                });
+            });
         });
 
         describe("DoubleFormFieldSettings", function () {
@@ -142,6 +179,21 @@ describe("FormFieldRequestItemProcessor", function () {
                 const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
 
                 expect(result).successfulValidationResult();
+            });
+
+            test("cannot create a double form field with a max smaller than the min", () => {
+                const requestItem = FormFieldRequestItem.from({
+                    mustBeAccepted: false,
+                    title: "aFormField",
+                    settings: DoubleFormFieldSettings.from({ min: aMax, max: aMin })
+                });
+
+                const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidRequestItem",
+                    message: "The max cannot be smaller than the min."
+                });
             });
         });
 
@@ -233,13 +285,6 @@ describe("FormFieldRequestItemProcessor", function () {
     });
 
     describe("canAccept", function () {
-        const aString = "aString";
-        const anInteger = 123456789;
-        const aDouble = 123456789.123456789;
-        const aBoolean = true;
-        const aDate = "2000-01-01T00:00:00.000Z";
-        const aRating = 5;
-
         test("returns an error when it is tried to accept a free value form field with an array", function () {
             const requestItem = FormFieldRequestItem.from({
                 mustBeAccepted: true,
@@ -315,6 +360,50 @@ describe("FormFieldRequestItemProcessor", function () {
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidAcceptParameters",
                     message: `The response provided cannot be used to accept the form field.`
+                });
+            });
+
+            test("returns an error when it is tried to accept a string form field with a free string whose length is smaller than the min", function () {
+                const anEmptyString = "";
+
+                const requestItem = FormFieldRequestItem.from({
+                    mustBeAccepted: true,
+                    title: "aFormField",
+                    settings: StringFormFieldSettings.from({ min: aMin })
+                });
+
+                const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
+                    accept: true,
+                    response: anEmptyString
+                };
+
+                const result = processor.canAccept(requestItem, acceptParams);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidAcceptParameters",
+                    message: `The length of the response cannot be smaller than the min.`
+                });
+            });
+
+            test("returns an error when it is tried to accept a string form field with a free string whose length is greater than the max", function () {
+                const aStringTooLong = "aStringTooLong";
+
+                const requestItem = FormFieldRequestItem.from({
+                    mustBeAccepted: true,
+                    title: "aFormField",
+                    settings: StringFormFieldSettings.from({ max: aMax })
+                });
+
+                const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
+                    accept: true,
+                    response: aStringTooLong
+                };
+
+                const result = processor.canAccept(requestItem, acceptParams);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidAcceptParameters",
+                    message: `The length of the response cannot be greater than the max.`
                 });
             });
         });
@@ -612,13 +701,6 @@ describe("FormFieldRequestItemProcessor", function () {
     });
 
     describe("accept", function () {
-        const aString = "aString";
-        const anInteger = 123456789;
-        const aDouble = 123456789.123456789;
-        const aBoolean = true;
-        const aDate = "2000-01-01T00:00:00.000Z";
-        const aRating = 5;
-
         test("accept string form field with a free string", function () {
             const requestItem = FormFieldRequestItem.from({
                 mustBeAccepted: true,
