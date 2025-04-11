@@ -32,6 +32,16 @@ export class FormFieldRequestItemProcessor extends GenericRequestItemProcessor<F
             }
         }
 
+        if (
+            requestItem.settings instanceof StringFormFieldSettings ||
+            requestItem.settings instanceof IntegerFormFieldSettings ||
+            requestItem.settings instanceof DoubleFormFieldSettings
+        ) {
+            if (requestItem.settings.max && requestItem.settings.min && requestItem.settings.max < requestItem.settings.min) {
+                return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("The max cannot be smaller than the min."));
+            }
+        }
+
         return ValidationResult.success();
     }
 
@@ -52,6 +62,29 @@ export class FormFieldRequestItemProcessor extends GenericRequestItemProcessor<F
                 (requestItem.settings instanceof RatingFormFieldSettings && !FormFieldRequestItemProcessor.isValidRating(parsedParams.response, requestItem.settings.maxRating))
             ) {
                 return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters(`The response provided cannot be used to accept the form field.`));
+            }
+
+            if (requestItem.settings instanceof StringFormFieldSettings && typeof parsedParams.response === "string") {
+                if (requestItem.settings.max && parsedParams.response.length > requestItem.settings.max) {
+                    return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("The length of the response cannot be greater than the max."));
+                }
+
+                if (requestItem.settings.min && parsedParams.response.length < requestItem.settings.min) {
+                    return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("The length of the response cannot be smaller than the min."));
+                }
+            }
+
+            if (
+                (requestItem.settings instanceof IntegerFormFieldSettings || requestItem.settings instanceof DoubleFormFieldSettings) &&
+                typeof parsedParams.response === "number"
+            ) {
+                if (requestItem.settings.max && parsedParams.response > requestItem.settings.max) {
+                    return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("The response cannot be greater than the max."));
+                }
+
+                if (requestItem.settings.min && parsedParams.response < requestItem.settings.min) {
+                    return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("The response cannot be smaller than the min."));
+                }
             }
         }
 
