@@ -53,39 +53,36 @@ export class FormFieldRequestItemProcessor extends GenericRequestItemProcessor<F
             if (Array.isArray(parsedParams.response)) {
                 return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters("Only a selection form field can be accepted with an array."));
             }
+        }
 
-            if (
-                (requestItem.settings instanceof StringFormFieldSettings && typeof parsedParams.response !== "string") ||
-                (requestItem.settings instanceof IntegerFormFieldSettings && !Number.isInteger(parsedParams.response)) ||
-                (requestItem.settings instanceof DoubleFormFieldSettings && typeof parsedParams.response !== "number") ||
-                (requestItem.settings instanceof BooleanFormFieldSettings && typeof parsedParams.response !== "boolean") ||
-                (requestItem.settings instanceof DateFormFieldSettings && !FormFieldRequestItemProcessor.isValidDate(parsedParams.response)) ||
-                (requestItem.settings instanceof RatingFormFieldSettings && !FormFieldRequestItemProcessor.isValidRating(parsedParams.response, requestItem.settings.maxRating))
-            ) {
-                return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters(`The response provided cannot be used to accept the form field.`));
+        if (
+            (requestItem.settings instanceof StringFormFieldSettings && typeof parsedParams.response !== "string") ||
+            (requestItem.settings instanceof IntegerFormFieldSettings && !Number.isInteger(parsedParams.response)) ||
+            (requestItem.settings instanceof DoubleFormFieldSettings && typeof parsedParams.response !== "number") ||
+            (requestItem.settings instanceof BooleanFormFieldSettings && typeof parsedParams.response !== "boolean") ||
+            (requestItem.settings instanceof DateFormFieldSettings && !FormFieldRequestItemProcessor.isValidDate(parsedParams.response)) ||
+            (requestItem.settings instanceof RatingFormFieldSettings && !FormFieldRequestItemProcessor.isValidRating(parsedParams.response, requestItem.settings.maxRating))
+        ) {
+            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters(`The response provided cannot be used to accept the form field.`));
+        }
+
+        if (requestItem.settings instanceof StringFormFieldSettings && typeof parsedParams.response === "string") {
+            if (requestItem.settings.max && parsedParams.response.length > requestItem.settings.max) {
+                return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters("The length of the response cannot be greater than the max."));
             }
 
-            if (requestItem.settings instanceof StringFormFieldSettings && typeof parsedParams.response === "string") {
-                if (requestItem.settings.max && parsedParams.response.length > requestItem.settings.max) {
-                    return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters("The length of the response cannot be greater than the max."));
-                }
+            if (requestItem.settings.min && parsedParams.response.length < requestItem.settings.min) {
+                return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters("The length of the response cannot be smaller than the min."));
+            }
+        }
 
-                if (requestItem.settings.min && parsedParams.response.length < requestItem.settings.min) {
-                    return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters("The length of the response cannot be smaller than the min."));
-                }
+        if ((requestItem.settings instanceof IntegerFormFieldSettings || requestItem.settings instanceof DoubleFormFieldSettings) && typeof parsedParams.response === "number") {
+            if (requestItem.settings.max && parsedParams.response > requestItem.settings.max) {
+                return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters("The response cannot be greater than the max."));
             }
 
-            if (
-                (requestItem.settings instanceof IntegerFormFieldSettings || requestItem.settings instanceof DoubleFormFieldSettings) &&
-                typeof parsedParams.response === "number"
-            ) {
-                if (requestItem.settings.max && parsedParams.response > requestItem.settings.max) {
-                    return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters("The response cannot be greater than the max."));
-                }
-
-                if (requestItem.settings.min && parsedParams.response < requestItem.settings.min) {
-                    return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters("The response cannot be smaller than the min."));
-                }
+            if (requestItem.settings.min && parsedParams.response < requestItem.settings.min) {
+                return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters("The response cannot be smaller than the min."));
             }
         }
 
