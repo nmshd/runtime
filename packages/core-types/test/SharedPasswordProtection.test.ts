@@ -1,8 +1,40 @@
 import { CoreBuffer, SodiumWrapper } from "@nmshd/crypto";
-import { PasswordLocationIndicatorMedium, SharedPasswordProtection } from "../src";
+import { PasswordLocationIndicator, PasswordLocationIndicatorMedium, SharedPasswordProtection, validatePasswordLocationIndicator } from "../src";
 
 describe("SharedPasswordProtection", () => {
     beforeAll(async () => await SodiumWrapper.ready());
+
+    describe("validatePasswordLocationIndicator", () => {
+        test("should allow to set valid enum entry as PasswordLocationIndicator", function () {
+            const result = validatePasswordLocationIndicator(PasswordLocationIndicatorMedium.Letter);
+            expect(result).toBeUndefined();
+        });
+
+        test("should allow to set valid string as PasswordLocationIndicator", function () {
+            const result = validatePasswordLocationIndicator("Letter" as PasswordLocationIndicatorMedium);
+            expect(result).toBeUndefined();
+        });
+
+        test("should allow to set valid number as PasswordLocationIndicator", function () {
+            const result = validatePasswordLocationIndicator(50);
+            expect(result).toBeUndefined();
+        });
+
+        test("should allow to set valid number mapping to a PasswordLocationIndicatorMedium as PasswordLocationIndicator", function () {
+            const result = validatePasswordLocationIndicator(0 as PasswordLocationIndicator);
+            expect(result).toBeUndefined();
+        });
+
+        test("should not allow to set invalid string as PasswordLocationIndicator", function () {
+            const result = validatePasswordLocationIndicator("Invalid-PasswordLocationIndicatorMedium" as any);
+            expect(result).toBe("must be a number between 0 and 99 or one of the following strings: RecoveryKit, Self, Letter, RegistrationLetter, Mail, Sms, App, Website");
+        });
+
+        test("should not allow to set invalid number as PasswordLocationIndicator", function () {
+            const result = validatePasswordLocationIndicator(100 as any);
+            expect(result).toBe("must be a number between 0 and 99 or one of the following strings: RecoveryKit, Self, Letter, RegistrationLetter, Mail, Sms, App, Website");
+        });
+    });
 
     describe("serialization", () => {
         test("should add passwordLocationIndicator", function () {
