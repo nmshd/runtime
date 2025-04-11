@@ -3,7 +3,7 @@ import { FormFieldRequestItem, FormFieldSettings, StringFormFieldSettings } from
 describe("creation of FormFieldRequestItem", () => {
     test("should create a FormFieldRequestItem with a StringFormFieldSettings JSON", () => {
         const item = FormFieldRequestItem.from({
-            title: "aTitle",
+            title: "aFormField",
             mustBeAccepted: false,
             settings: StringFormFieldSettings.from({}).toJSON()
         });
@@ -15,7 +15,7 @@ describe("creation of FormFieldRequestItem", () => {
 
     test("should create a FormFieldRequestItem with a StringFormFieldSettings object", () => {
         const item = FormFieldRequestItem.from({
-            title: "aTitle",
+            title: "aFormField",
             mustBeAccepted: false,
             settings: StringFormFieldSettings.from({})
         });
