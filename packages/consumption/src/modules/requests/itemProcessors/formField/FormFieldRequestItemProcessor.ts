@@ -66,11 +66,11 @@ export class FormFieldRequestItemProcessor extends GenericRequestItemProcessor<F
 
             if (requestItem.settings instanceof StringFormFieldSettings && typeof parsedParams.response === "string") {
                 if (requestItem.settings.max && parsedParams.response.length > requestItem.settings.max) {
-                    return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("The length of the response cannot be greater than the max."));
+                    return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters("The length of the response cannot be greater than the max."));
                 }
 
                 if (requestItem.settings.min && parsedParams.response.length < requestItem.settings.min) {
-                    return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("The length of the response cannot be smaller than the min."));
+                    return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters("The length of the response cannot be smaller than the min."));
                 }
             }
 
@@ -79,11 +79,11 @@ export class FormFieldRequestItemProcessor extends GenericRequestItemProcessor<F
                 typeof parsedParams.response === "number"
             ) {
                 if (requestItem.settings.max && parsedParams.response > requestItem.settings.max) {
-                    return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("The response cannot be greater than the max."));
+                    return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters("The response cannot be greater than the max."));
                 }
 
                 if (requestItem.settings.min && parsedParams.response < requestItem.settings.min) {
-                    return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("The response cannot be smaller than the min."));
+                    return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters("The response cannot be smaller than the min."));
                 }
             }
         }
