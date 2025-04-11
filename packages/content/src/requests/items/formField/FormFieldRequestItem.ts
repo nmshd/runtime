@@ -16,7 +16,7 @@ export interface IFormFieldRequestItem extends IRequestItem {
 @type("FormFieldRequestItem")
 export class FormFieldRequestItem extends RequestItem implements IFormFieldRequestItem {
     @serialize()
-    @validate()
+    @validate({ max: 200 })
     public override title: string;
 
     @serialize({ unionTypes: FORM_FIELD_SETTINGS_CLASSES })

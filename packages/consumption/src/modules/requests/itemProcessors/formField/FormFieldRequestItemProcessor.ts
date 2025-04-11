@@ -16,6 +16,7 @@ import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 
 import { CoreDate } from "@nmshd/core-types";
+import _ from "lodash";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import { AcceptFormFieldRequestItemParameters, AcceptFormFieldRequestItemParametersJSON } from "./AcceptFormFieldRequestItemParameters";
 
@@ -102,13 +103,7 @@ export class FormFieldRequestItemProcessor extends GenericRequestItemProcessor<F
                 return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters("The options specified for accepting a selection form field must be unique."));
             }
 
-            const unknownOptions: string[] = [];
-            for (const option of parsedParams.response) {
-                if (!requestItem.settings.options.includes(option)) {
-                    unknownOptions.push(option);
-                }
-            }
-
+            const unknownOptions: string[] = _.difference(parsedParams.response, requestItem.settings.options);
             if (unknownOptions.length > 0) {
                 return ValidationResult.error(
                     ConsumptionCoreErrors.requests.invalidAcceptParameters(
