@@ -6,20 +6,24 @@ type Enumerate<N extends number, Acc extends number[] = []> = Acc["length"] exte
 type IntRange<From extends number, To extends number> = Exclude<Enumerate<To>, Enumerate<From>>;
 
 export enum PasswordLocationIndicatorMedium {
-    RecoveryKit,
-    Self,
-    Letter,
-    RegistrationLetter,
-    Mail,
-    Sms,
-    App,
-    Website
+    RecoveryKit = "RecoveryKit",
+    Self = "Self",
+    Letter = "Letter",
+    RegistrationLetter = "RegistrationLetter",
+    Mail = "Mail",
+    Sms = "Sms",
+    App = "App",
+    Website = "Website"
 }
 
 export type PasswordLocationIndicator = PasswordLocationIndicatorMedium | IntRange<50, 100>;
 
-export function validatePasswordLocationIndicator(value: number): string | undefined {
-    return value < 0 || value > 99 ? "must be a number between 0 and 99" : undefined;
+export function validatePasswordLocationIndicator(value: PasswordLocationIndicator): string | undefined {
+    if ((typeof value === "string" && Object.values(PasswordLocationIndicatorMedium).includes(value)) || (typeof value === "number" && value >= 0 && value < 100)) {
+        return undefined;
+    }
+
+    return `must be a number between 0 and 99 or one of the following strings: ${Object.values(PasswordLocationIndicatorMedium).join(", ")}`;
 }
 
 export interface ISharedPasswordProtection extends ISerializable {
@@ -38,7 +42,7 @@ export class SharedPasswordProtection extends Serializable implements ISharedPas
     public salt: CoreBuffer;
 
     @validate({ nullable: true, customValidator: validatePasswordLocationIndicator })
-    @serialize()
+    @serialize({ any: true })
     public passwordLocationIndicator?: PasswordLocationIndicator;
 
     public static from(value: ISharedPasswordProtection): SharedPasswordProtection {
