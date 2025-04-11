@@ -34,6 +34,7 @@ export interface AcceptResponseItemDVO extends ResponseItemDVO {
         | "DeleteAttributeAcceptResponseItemDVO"
         | "ShareAttributeAcceptResponseItemDVO"
         | "FreeTextAcceptResponseItemDVO"
+        | "FormFieldAcceptResponseItemDVO"
         | "RegisterAttributeListenerAcceptResponseItemDVO"
         | "TransferFileOwnershipAcceptResponseItemDVO"
         | "AttributeSuccessionAcceptResponseItemDVO"
@@ -74,6 +75,11 @@ export interface ShareAttributeAcceptResponseItemDVO extends AcceptResponseItemD
 export interface FreeTextAcceptResponseItemDVO extends AcceptResponseItemDVO {
     type: "FreeTextAcceptResponseItemDVO";
     freeText: string;
+}
+
+export interface FormFieldAcceptResponseItemDVO extends AcceptResponseItemDVO {
+    type: "FormFieldAcceptResponseItemDVO";
+    response: string | number | boolean | string[];
 }
 
 export interface RegisterAttributeListenerAcceptResponseItemDVO extends AcceptResponseItemDVO {
