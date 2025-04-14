@@ -33,19 +33,6 @@ describe("FormFieldRequestItemProcessor", function () {
 
     let processor: FormFieldRequestItemProcessor;
 
-    const aMaxRating = 5;
-
-    const aMin = 1;
-    const aMax = 10;
-    const aUnit = "aUnit";
-
-    const aString = "aString";
-    const anInteger = 123456789;
-    const aDouble = 123456789.123456789;
-    const aBoolean = true;
-    const aDate = "2000-01-01T00:00:00.000Z";
-    const aRating = 5;
-
     beforeAll(async function () {
         connection = await TestUtil.createConnection();
         transport = TestUtil.createTransport();
@@ -79,7 +66,7 @@ describe("FormFieldRequestItemProcessor", function () {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: false,
                     title: "aFormField",
-                    settings: StringFormFieldSettings.from({ allowNewLines: true })
+                    settings: StringFormFieldSettings.from({ allowNewlines: true })
                 });
 
                 const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
@@ -88,6 +75,9 @@ describe("FormFieldRequestItemProcessor", function () {
             });
 
             test("can create a string form field using min and max", () => {
+                const aMin = 1;
+                const aMax = 10;
+
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: false,
                     title: "aFormField",
@@ -100,10 +90,13 @@ describe("FormFieldRequestItemProcessor", function () {
             });
 
             test("cannot create a string form field with a max smaller than the min", () => {
+                const aMaxSmallerThanMin = 1;
+                const aMinGreaterThanMax = 10;
+
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: false,
                     title: "aFormField",
-                    settings: StringFormFieldSettings.from({ min: aMax, max: aMin })
+                    settings: StringFormFieldSettings.from({ min: aMinGreaterThanMax, max: aMaxSmallerThanMin })
                 });
 
                 const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
@@ -129,6 +122,10 @@ describe("FormFieldRequestItemProcessor", function () {
             });
 
             test("can create an integer form field using unit, min and max", () => {
+                const aMin = 1;
+                const aMax = 10;
+                const aUnit = "aUnit";
+
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: false,
                     title: "aFormField",
@@ -141,10 +138,13 @@ describe("FormFieldRequestItemProcessor", function () {
             });
 
             test("cannot create an integer form field with a max smaller than the min", () => {
+                const aMaxSmallerThanMin = 1;
+                const aMinGreaterThanMax = 10;
+
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: false,
                     title: "aFormField",
-                    settings: IntegerFormFieldSettings.from({ min: aMax, max: aMin })
+                    settings: IntegerFormFieldSettings.from({ min: aMinGreaterThanMax, max: aMaxSmallerThanMin })
                 });
 
                 const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
@@ -170,6 +170,10 @@ describe("FormFieldRequestItemProcessor", function () {
             });
 
             test("can create a double form field using unit, min and max", () => {
+                const aMin = 1;
+                const aMax = 10;
+                const aUnit = "aUnit";
+
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: false,
                     title: "aFormField",
@@ -182,10 +186,13 @@ describe("FormFieldRequestItemProcessor", function () {
             });
 
             test("cannot create a double form field with a max smaller than the min", () => {
+                const aMaxSmallerThanMin = 1;
+                const aMinGreaterThanMax = 10;
+
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: false,
                     title: "aFormField",
-                    settings: DoubleFormFieldSettings.from({ min: aMax, max: aMin })
+                    settings: DoubleFormFieldSettings.from({ min: aMinGreaterThanMax, max: aMaxSmallerThanMin })
                 });
 
                 const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
@@ -227,6 +234,8 @@ describe("FormFieldRequestItemProcessor", function () {
 
         describe("RatingFormFieldSettings", function () {
             test("can create a rating form field", () => {
+                const aMaxRating = 5;
+
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: false,
                     title: "aFormField",
@@ -286,7 +295,9 @@ describe("FormFieldRequestItemProcessor", function () {
 
     describe("canAccept", function () {
         describe("StringFormFieldSettings", function () {
-            test("can accept a string form field with a free string", function () {
+            test("can accept a string form field with a string", function () {
+                const aString = "aString";
+
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
                     title: "aFormField",
@@ -304,6 +315,8 @@ describe("FormFieldRequestItemProcessor", function () {
             });
 
             test("returns an error when it is tried to accept a string form field with a string array", function () {
+                const aString = "aString";
+
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
                     title: "aFormField",
@@ -312,7 +325,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                     accept: true,
-                    response: ["aString"]
+                    response: [aString]
                 };
 
                 const result = processor.canAccept(requestItem, acceptParams);
@@ -323,7 +336,9 @@ describe("FormFieldRequestItemProcessor", function () {
                 });
             });
 
-            test("returns an error when it is tried to accept a string form field with no free string", function () {
+            test("returns an error when it is tried to accept a string form field with an integer", function () {
+                const anInteger = 123456789;
+
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
                     title: "aFormField",
@@ -343,8 +358,9 @@ describe("FormFieldRequestItemProcessor", function () {
                 });
             });
 
-            test("returns an error when it is tried to accept a string form field with a free string whose length is smaller than the min", function () {
-                const anEmptyString = "";
+            test("returns an error when it is tried to accept a string form field with a string whose length is smaller than the min", function () {
+                const aMin = 1;
+                const aStringTooShort = "";
 
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
@@ -354,7 +370,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                     accept: true,
-                    response: anEmptyString
+                    response: aStringTooShort
                 };
 
                 const result = processor.canAccept(requestItem, acceptParams);
@@ -365,7 +381,8 @@ describe("FormFieldRequestItemProcessor", function () {
                 });
             });
 
-            test("returns an error when it is tried to accept a string form field with a free string whose length is greater than the max", function () {
+            test("returns an error when it is tried to accept a string form field with a string whose length is greater than the max", function () {
+                const aMax = 10;
                 const aStringTooLong = "aStringTooLong";
 
                 const requestItem = FormFieldRequestItem.from({
@@ -389,7 +406,9 @@ describe("FormFieldRequestItemProcessor", function () {
         });
 
         describe("IntegerFormFieldSettings", function () {
-            test("can accept an integer form field with a free integer", function () {
+            test("can accept an integer form field with an integer", function () {
+                const anInteger = 123456789;
+
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
                     title: "aFormField",
@@ -406,7 +425,9 @@ describe("FormFieldRequestItemProcessor", function () {
                 expect(result).successfulValidationResult();
             });
 
-            test("returns an error when it is tried to accept an integer form field with no free integer", function () {
+            test("returns an error when it is tried to accept an integer form field with a double which is no integer", function () {
+                const aDoubleWhichIsNoInteger = 123456789.123456789;
+
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
                     title: "aFormField",
@@ -415,7 +436,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                     accept: true,
-                    response: aDouble
+                    response: aDoubleWhichIsNoInteger
                 };
 
                 const result = processor.canAccept(requestItem, acceptParams);
@@ -426,16 +447,19 @@ describe("FormFieldRequestItemProcessor", function () {
                 });
             });
 
-            test("returns an error when it is tried to accept an integer form field with a free integer which is smaller than the min", function () {
+            test("returns an error when it is tried to accept an integer form field with an integer which is smaller than the min", function () {
+                const aMin = 1;
+                const anIntegerTooSmall = -123456789;
+
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
                     title: "aFormField",
-                    settings: IntegerFormFieldSettings.from({ min: aMax })
+                    settings: IntegerFormFieldSettings.from({ min: aMin })
                 });
 
                 const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                     accept: true,
-                    response: aMin
+                    response: anIntegerTooSmall
                 };
 
                 const result = processor.canAccept(requestItem, acceptParams);
@@ -446,16 +470,19 @@ describe("FormFieldRequestItemProcessor", function () {
                 });
             });
 
-            test("returns an error when it is tried to accept an integer form field with a free integer which is greater than the max", function () {
+            test("returns an error when it is tried to accept an integer form field with an integer which is greater than the max", function () {
+                const aMax = 10;
+                const anIntegerTooBig = 123456789;
+
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
                     title: "aFormField",
-                    settings: IntegerFormFieldSettings.from({ max: aMin })
+                    settings: IntegerFormFieldSettings.from({ max: aMax })
                 });
 
                 const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                     accept: true,
-                    response: aMax
+                    response: anIntegerTooBig
                 };
 
                 const result = processor.canAccept(requestItem, acceptParams);
@@ -468,7 +495,9 @@ describe("FormFieldRequestItemProcessor", function () {
         });
 
         describe("DoubleFormFieldSettings", function () {
-            test("can accept a double form field with a free double", function () {
+            test("can accept a double form field with a double", function () {
+                const aDouble = 123456789.123456789;
+
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
                     title: "aFormField",
@@ -485,7 +514,9 @@ describe("FormFieldRequestItemProcessor", function () {
                 expect(result).successfulValidationResult();
             });
 
-            test("returns an error when it is tried to accept a double form field with no free double", function () {
+            test("returns an error when it is tried to accept a double form field with a string", function () {
+                const aString = "aString";
+
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
                     title: "aFormField",
@@ -505,16 +536,19 @@ describe("FormFieldRequestItemProcessor", function () {
                 });
             });
 
-            test("returns an error when it is tried to accept a double form field with a free double which is smaller than the min", function () {
+            test("returns an error when it is tried to accept a double form field with a double which is smaller than the min", function () {
+                const aMin = 1;
+                const aDoubleTooSmall = -123456789.123456789;
+
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
                     title: "aFormField",
-                    settings: DoubleFormFieldSettings.from({ min: aMax })
+                    settings: DoubleFormFieldSettings.from({ min: aMin })
                 });
 
                 const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                     accept: true,
-                    response: aMin
+                    response: aDoubleTooSmall
                 };
 
                 const result = processor.canAccept(requestItem, acceptParams);
@@ -525,16 +559,19 @@ describe("FormFieldRequestItemProcessor", function () {
                 });
             });
 
-            test("returns an error when it is tried to accept a double form field with a free double which is greater than the max", function () {
+            test("returns an error when it is tried to accept a double form field with a double which is greater than the max", function () {
+                const aMax = 10;
+                const aDoubleTooBig = 123456789.123456789;
+
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
                     title: "aFormField",
-                    settings: DoubleFormFieldSettings.from({ max: aMin })
+                    settings: DoubleFormFieldSettings.from({ max: aMax })
                 });
 
                 const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                     accept: true,
-                    response: aMax
+                    response: aDoubleTooBig
                 };
 
                 const result = processor.canAccept(requestItem, acceptParams);
@@ -547,7 +584,9 @@ describe("FormFieldRequestItemProcessor", function () {
         });
 
         describe("BooleanFormFieldSettings", function () {
-            test("can accept a boolean form field with a free boolean", function () {
+            test("can accept a boolean form field with a boolean", function () {
+                const aBoolean = true;
+
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
                     title: "aFormField",
@@ -564,7 +603,9 @@ describe("FormFieldRequestItemProcessor", function () {
                 expect(result).successfulValidationResult();
             });
 
-            test("returns an error when it is tried to accept a boolean form field with no free boolean", function () {
+            test("returns an error when it is tried to accept a boolean form field with a string", function () {
+                const aString = "aString";
+
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
                     title: "aFormField",
@@ -586,7 +627,9 @@ describe("FormFieldRequestItemProcessor", function () {
         });
 
         describe("DateFormFieldSettings", function () {
-            test("can accept a date form field with a free date", function () {
+            test("can accept a date form field with a date", function () {
+                const aDate = "2000-01-01T00:00:00.000Z";
+
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
                     title: "aFormField",
@@ -603,7 +646,9 @@ describe("FormFieldRequestItemProcessor", function () {
                 expect(result).successfulValidationResult();
             });
 
-            test("returns an error when it is tried to accept a date form field with no free date", function () {
+            test("returns an error when it is tried to accept a date form field with a string", function () {
+                const aString = "aString";
+
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
                     title: "aFormField",
@@ -625,7 +670,10 @@ describe("FormFieldRequestItemProcessor", function () {
         });
 
         describe("RatingFormFieldSettings", function () {
-            test("can accept a rating form field with a free rating", function () {
+            test("can accept a rating form field with a rating", function () {
+                const aMaxRating = 5;
+                const aRating = 5;
+
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
                     title: "aFormField",
@@ -642,7 +690,10 @@ describe("FormFieldRequestItemProcessor", function () {
                 expect(result).successfulValidationResult();
             });
 
-            test("returns an error when it is tried to accept a rating form field with no free rating", function () {
+            test("returns an error when it is tried to accept a rating form field with a string", function () {
+                const aMaxRating = 5;
+                const aString = "aString";
+
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
                     title: "aFormField",
@@ -662,8 +713,9 @@ describe("FormFieldRequestItemProcessor", function () {
                 });
             });
 
-            test("returns an error when it is tried to accept a rating form field with a free rating which is smaller than the minRating of one", function () {
-                const aZeroRating = 0;
+            test("returns an error when it is tried to accept a rating form field with a rating which is smaller than the minimum rating", function () {
+                const aMaxRating = 5;
+                const aRatingTooSmall = 0;
 
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
@@ -673,7 +725,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                     accept: true,
-                    response: aZeroRating
+                    response: aRatingTooSmall
                 };
 
                 const result = processor.canAccept(requestItem, acceptParams);
@@ -684,7 +736,10 @@ describe("FormFieldRequestItemProcessor", function () {
                 });
             });
 
-            test("returns an error when it is tried to accept a rating form field with a free rating which is greater than the maxRating", function () {
+            test("returns an error when it is tried to accept a rating form field with a rating which is greater than the maxRating", function () {
+                const aMaxRating = 5;
+                const aRatingTooBig = 123456789;
+
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: true,
                     title: "aFormField",
@@ -693,7 +748,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 const acceptParams: AcceptFormFieldRequestItemParametersJSON = {
                     accept: true,
-                    response: anInteger
+                    response: aRatingTooBig
                 };
 
                 const result = processor.canAccept(requestItem, acceptParams);
@@ -823,7 +878,9 @@ describe("FormFieldRequestItemProcessor", function () {
     });
 
     describe("accept", function () {
-        test("accept string form field with a free string", function () {
+        test("accept string form field with a string", function () {
+            const aString = "aString";
+
             const requestItem = FormFieldRequestItem.from({
                 mustBeAccepted: true,
                 title: "aFormField",
@@ -839,7 +896,9 @@ describe("FormFieldRequestItemProcessor", function () {
             expect(result).toBeInstanceOf(FormFieldAcceptResponseItem);
         });
 
-        test("accept integer form field with a free integer", function () {
+        test("accept integer form field with an integer", function () {
+            const anInteger = 123456789;
+
             const requestItem = FormFieldRequestItem.from({
                 mustBeAccepted: true,
                 title: "aFormField",
@@ -855,7 +914,9 @@ describe("FormFieldRequestItemProcessor", function () {
             expect(result).toBeInstanceOf(FormFieldAcceptResponseItem);
         });
 
-        test("accept double form field with a free double", function () {
+        test("accept double form field with a double", function () {
+            const aDouble = 123456789.123456789;
+
             const requestItem = FormFieldRequestItem.from({
                 mustBeAccepted: true,
                 title: "aFormField",
@@ -871,7 +932,9 @@ describe("FormFieldRequestItemProcessor", function () {
             expect(result).toBeInstanceOf(FormFieldAcceptResponseItem);
         });
 
-        test("accept boolean form field with a free boolean", function () {
+        test("accept boolean form field with a boolean", function () {
+            const aBoolean = true;
+
             const requestItem = FormFieldRequestItem.from({
                 mustBeAccepted: true,
                 title: "aFormField",
@@ -887,7 +950,9 @@ describe("FormFieldRequestItemProcessor", function () {
             expect(result).toBeInstanceOf(FormFieldAcceptResponseItem);
         });
 
-        test("accept date form field with a free date", function () {
+        test("accept date form field with a date", function () {
+            const aDate = "2000-01-01T00:00:00.000Z";
+
             const requestItem = FormFieldRequestItem.from({
                 mustBeAccepted: true,
                 title: "aFormField",
@@ -903,7 +968,10 @@ describe("FormFieldRequestItemProcessor", function () {
             expect(result).toBeInstanceOf(FormFieldAcceptResponseItem);
         });
 
-        test("accept rating form field with a free rating", function () {
+        test("accept rating form field with a rating", function () {
+            const aMaxRating = 5;
+            const aRating = 5;
+
             const requestItem = FormFieldRequestItem.from({
                 mustBeAccepted: true,
                 title: "aFormField",
@@ -953,7 +1021,7 @@ describe("FormFieldRequestItemProcessor", function () {
     });
 
     describe("applyIncomingResponseItem", function () {
-        test("does not create an Attribute when getting the free string entered by the recipient in the string form field", async function () {
+        test("does not create an Attribute when getting the string entered by the recipient in the string form field", async function () {
             const recipient = CoreAddress.from("Recipient");
 
             const requestItem = FormFieldRequestItem.from({

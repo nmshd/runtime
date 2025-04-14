@@ -5,7 +5,6 @@ import {
     FormFieldAcceptResponseItem,
     FormFieldRequestItem,
     IntegerFormFieldSettings,
-    minRating,
     RatingFormFieldSettings,
     Request,
     ResponseItemResult,
@@ -61,7 +60,8 @@ export class FormFieldRequestItemProcessor extends GenericRequestItemProcessor<F
             (requestItem.settings instanceof DoubleFormFieldSettings && typeof parsedParams.response !== "number") ||
             (requestItem.settings instanceof BooleanFormFieldSettings && typeof parsedParams.response !== "boolean") ||
             (requestItem.settings instanceof DateFormFieldSettings && !FormFieldRequestItemProcessor.isValidDate(parsedParams.response)) ||
-            (requestItem.settings instanceof RatingFormFieldSettings && !FormFieldRequestItemProcessor.isValidRating(parsedParams.response, requestItem.settings.maxRating))
+            (requestItem.settings instanceof RatingFormFieldSettings &&
+                !FormFieldRequestItemProcessor.isValidRating(parsedParams.response, requestItem.settings.getMinRating(), requestItem.settings.maxRating))
         ) {
             return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters(`The response provided cannot be used to accept the form field.`));
         }
@@ -123,7 +123,7 @@ export class FormFieldRequestItemProcessor extends GenericRequestItemProcessor<F
         return typeof value === "string" && CoreDate.from(value).dateTime.isValid;
     }
 
-    private static isValidRating(value: any, maxRating: number): boolean {
+    private static isValidRating(value: any, minRating: number, maxRating: number): boolean {
         return Number.isInteger(value) && value >= minRating && value <= maxRating;
     }
 

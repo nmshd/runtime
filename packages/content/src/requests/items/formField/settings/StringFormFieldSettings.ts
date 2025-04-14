@@ -3,13 +3,13 @@ import { FormFieldSettings, FormFieldSettingsJSON, IFormFieldSettings } from "./
 
 export interface StringFormFieldSettingsJSON extends FormFieldSettingsJSON {
     "@type": "StringFormFieldSettings";
-    allowNewLines?: true;
+    allowNewlines?: true;
     min?: number;
     max?: number;
 }
 
 export interface IStringFormFieldSettings extends IFormFieldSettings {
-    allowNewLines?: true;
+    allowNewlines?: true;
     min?: number;
     max?: number;
 }
@@ -18,7 +18,7 @@ export interface IStringFormFieldSettings extends IFormFieldSettings {
 export class StringFormFieldSettings extends FormFieldSettings implements IStringFormFieldSettings {
     @serialize()
     @validate({ nullable: true })
-    public allowNewLines?: true;
+    public allowNewlines?: true;
 
     @serialize()
     @validate({ nullable: true })

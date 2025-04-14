@@ -3054,7 +3054,7 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "@version": {
                     "type": "string"
                 },
-                "allowNewLines": {
+                "allowNewlines": {
                     "type": "boolean",
                     "const": true
                 },
@@ -11266,7 +11266,7 @@ export const CreateOutgoingRequestRequest: any = {
                 "@version": {
                     "type": "string"
                 },
-                "allowNewLines": {
+                "allowNewlines": {
                     "type": "boolean",
                     "const": true
                 },
@@ -14902,7 +14902,7 @@ export const ReceivedIncomingRequestRequest: any = {
                 "@version": {
                     "type": "string"
                 },
-                "allowNewLines": {
+                "allowNewlines": {
                     "type": "boolean",
                     "const": true
                 },

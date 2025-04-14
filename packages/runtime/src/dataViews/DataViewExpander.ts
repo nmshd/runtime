@@ -928,10 +928,10 @@ export class DataViewExpander {
                     } as FreeTextAcceptResponseItemDVO;
 
                 case "FormFieldAcceptResponseItem":
-                    const freeValueFormResponseItem = responseItem as FormFieldAcceptResponseItemJSON;
+                    const formFieldResponseItem = responseItem as FormFieldAcceptResponseItemJSON;
 
                     return {
-                        ...freeValueFormResponseItem,
+                        ...formFieldResponseItem,
                         type: "FormFieldAcceptResponseItemDVO",
                         id: "",
                         name: name

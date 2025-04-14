@@ -47,9 +47,6 @@ beforeEach(function () {
 });
 
 describe("FormFieldRequestItemDVO with StringFormFieldSettings", () => {
-    const aMin = 1;
-    const aMax = 100;
-
     beforeAll(async () => {
         const runtimeServices = await serviceProvider.launch(2, { enableRequestModule: true });
         runtimeServices1 = runtimeServices[0];
@@ -65,20 +62,23 @@ describe("FormFieldRequestItemDVO with StringFormFieldSettings", () => {
         await establishRelationship(transportServices1, transportServices2);
         address2 = (await transportServices2.account.getIdentityInfo()).value.address;
 
+        const aMin = 1;
+        const aMax = 100;
         requestContent = {
             content: {
                 items: [
                     FormFieldRequestItem.from({
                         mustBeAccepted: true,
                         title: "aStringFormField",
-                        settings: StringFormFieldSettings.from({ allowNewLines: true, min: aMin, max: aMax })
+                        settings: StringFormFieldSettings.from({ allowNewlines: true, min: aMin, max: aMax })
                     }).toJSON()
                 ]
             },
             peer: address2
         };
 
-        responseItems = [{ accept: true, response: "I accept to specify a free string value." } as AcceptFormFieldRequestItemParametersJSON];
+        const aStringFormFieldResponse = "I accept to specify a string value.";
+        responseItems = [{ accept: true, response: aStringFormFieldResponse } as AcceptFormFieldRequestItemParametersJSON];
     }, 30000);
 
     test("check the MessageDVO for the sender", async () => {
@@ -105,7 +105,9 @@ describe("FormFieldRequestItemDVO with StringFormFieldSettings", () => {
         expect(requestItemDVO.mustBeAccepted).toBe(true);
         expect(requestItemDVO.settings["@type"]).toBe("StringFormFieldSettings");
         const stringFormFieldSettings = requestItemDVO.settings as StringFormFieldSettingsJSON;
-        expect(stringFormFieldSettings.allowNewLines).toBe(true);
+        expect(stringFormFieldSettings.allowNewlines).toBe(true);
+        const aMin = 1;
+        const aMax = 100;
         expect(stringFormFieldSettings.min).toBe(aMin);
         expect(stringFormFieldSettings.max).toBe(aMax);
     });
@@ -134,7 +136,9 @@ describe("FormFieldRequestItemDVO with StringFormFieldSettings", () => {
         expect(requestItemDVO.mustBeAccepted).toBe(true);
         expect(requestItemDVO.settings["@type"]).toBe("StringFormFieldSettings");
         const stringFormFieldSettings = requestItemDVO.settings as StringFormFieldSettingsJSON;
-        expect(stringFormFieldSettings.allowNewLines).toBe(true);
+        expect(stringFormFieldSettings.allowNewlines).toBe(true);
+        const aMin = 1;
+        const aMax = 100;
         expect(stringFormFieldSettings.min).toBe(aMin);
         expect(stringFormFieldSettings.max).toBe(aMax);
     });
@@ -169,7 +173,9 @@ describe("FormFieldRequestItemDVO with StringFormFieldSettings", () => {
         expect(requestItemDVO.mustBeAccepted).toBe(true);
         expect(requestItemDVO.settings["@type"]).toBe("StringFormFieldSettings");
         const stringFormFieldSettings = requestItemDVO.settings as StringFormFieldSettingsJSON;
-        expect(stringFormFieldSettings.allowNewLines).toBe(true);
+        expect(stringFormFieldSettings.allowNewlines).toBe(true);
+        const aMin = 1;
+        const aMax = 100;
         expect(stringFormFieldSettings.min).toBe(aMin);
         expect(stringFormFieldSettings.max).toBe(aMax);
 
@@ -183,7 +189,8 @@ describe("FormFieldRequestItemDVO with StringFormFieldSettings", () => {
         const responseItem = response!.content.items[0] as FormFieldAcceptResponseItemDVO;
         expect(responseItem.result).toBe("Accepted");
         expect(responseItem.type).toBe("FormFieldAcceptResponseItemDVO");
-        expect(responseItem.response).toBe("I accept to specify a free string value.");
+        const aStringFormFieldResponse = "I accept to specify a string value.";
+        expect(responseItem.response).toBe(aStringFormFieldResponse);
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         await syncUntilHasMessageWithResponse(transportServices1, recipientMessage.content.id!);
@@ -213,7 +220,9 @@ describe("FormFieldRequestItemDVO with StringFormFieldSettings", () => {
         expect(requestItemDVO.mustBeAccepted).toBe(true);
         expect(requestItemDVO.settings["@type"]).toBe("StringFormFieldSettings");
         const stringFormFieldSettings = requestItemDVO.settings as StringFormFieldSettingsJSON;
-        expect(stringFormFieldSettings.allowNewLines).toBe(true);
+        expect(stringFormFieldSettings.allowNewlines).toBe(true);
+        const aMin = 1;
+        const aMax = 100;
         expect(stringFormFieldSettings.min).toBe(aMin);
         expect(stringFormFieldSettings.max).toBe(aMax);
         const response = dvo.request.response;
@@ -226,7 +235,8 @@ describe("FormFieldRequestItemDVO with StringFormFieldSettings", () => {
         const responseItem = response!.content.items[0] as FormFieldAcceptResponseItemDVO;
         expect(responseItem.result).toBe("Accepted");
         expect(responseItem.type).toBe("FormFieldAcceptResponseItemDVO");
-        expect(responseItem.response).toBe("I accept to specify a free string value.");
+        const aStringFormFieldResponse = "I accept to specify a string value.";
+        expect(responseItem.response).toBe(aStringFormFieldResponse);
         expect(requestItemDVO.response).toStrictEqual(responseItem);
     });
 });
