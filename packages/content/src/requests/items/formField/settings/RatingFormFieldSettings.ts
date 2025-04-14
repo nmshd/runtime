@@ -22,6 +22,26 @@ export class RatingFormFieldSettings extends FormFieldSettings implements IRatin
         return 1;
     }
 
+    public canCreate(): string | undefined {
+        return;
+    }
+
+    public canAccept(response: string | number | boolean | string[]): string | undefined {
+        if (Array.isArray(response)) {
+            return "Only a selection form field can be accepted with an array.";
+        }
+
+        if (!RatingFormFieldSettings.isValidRating(response, RatingFormFieldSettings.minRating, this.maxRating)) {
+            return "The response provided cannot be used to accept the form field.";
+        }
+
+        return;
+    }
+
+    private static isValidRating(value: any, minRating: number, maxRating: number): boolean {
+        return Number.isInteger(value) && value >= minRating && value <= maxRating;
+    }
+
     public static from(value: IRatingFormFieldSettings | RatingFormFieldSettingsJSON): RatingFormFieldSettings {
         return this.fromAny(value);
     }

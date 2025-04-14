@@ -28,6 +28,34 @@ export class DoubleFormFieldSettings extends FormFieldSettings implements IDoubl
     @validate({ nullable: true })
     public max?: number;
 
+    public canCreate(): string | undefined {
+        if (this.max && this.min && this.max < this.min) {
+            return "The max cannot be smaller than the min.";
+        }
+
+        return;
+    }
+
+    public canAccept(response: string | number | boolean | string[]): string | undefined {
+        if (Array.isArray(response)) {
+            return "Only a selection form field can be accepted with an array.";
+        }
+
+        if (typeof response !== "number") {
+            return "The response provided cannot be used to accept the form field.";
+        }
+
+        if (this.max && response > this.max) {
+            return "The response cannot be greater than the max.";
+        }
+
+        if (this.min && response < this.min) {
+            return "The response cannot be smaller than the min.";
+        }
+
+        return;
+    }
+
     public static from(value: IDoubleFormFieldSettings | DoubleFormFieldSettingsJSON): DoubleFormFieldSettings {
         return this.fromAny(value);
     }
