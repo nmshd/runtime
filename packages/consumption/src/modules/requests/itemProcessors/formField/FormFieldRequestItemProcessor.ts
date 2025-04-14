@@ -61,7 +61,7 @@ export class FormFieldRequestItemProcessor extends GenericRequestItemProcessor<F
             (requestItem.settings instanceof BooleanFormFieldSettings && typeof parsedParams.response !== "boolean") ||
             (requestItem.settings instanceof DateFormFieldSettings && !FormFieldRequestItemProcessor.isValidDate(parsedParams.response)) ||
             (requestItem.settings instanceof RatingFormFieldSettings &&
-                !FormFieldRequestItemProcessor.isValidRating(parsedParams.response, requestItem.settings.getMinRating(), requestItem.settings.maxRating))
+                !FormFieldRequestItemProcessor.isValidRating(parsedParams.response, RatingFormFieldSettings.minRating, requestItem.settings.maxRating))
         ) {
             return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters(`The response provided cannot be used to accept the form field.`));
         }
