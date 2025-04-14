@@ -18,9 +18,8 @@ export class RatingFormFieldSettings extends FormFieldSettings implements IRatin
     @validate({ min: 5, max: 10 })
     public maxRating: MaxRating;
 
-    private static readonly MIN_RATING = 1;
     public static get minRating(): number {
-        return this.MIN_RATING;
+        return 1;
     }
 
     public static from(value: IRatingFormFieldSettings | RatingFormFieldSettingsJSON): RatingFormFieldSettings {

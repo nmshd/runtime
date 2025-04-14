@@ -48,10 +48,8 @@ export class FormFieldRequestItemProcessor extends GenericRequestItemProcessor<F
     public override canAccept(requestItem: FormFieldRequestItem, params: AcceptFormFieldRequestItemParametersJSON): ValidationResult {
         const parsedParams = AcceptFormFieldRequestItemParameters.from(params);
 
-        if (!(requestItem.settings instanceof SelectionFormFieldSettings)) {
-            if (Array.isArray(parsedParams.response)) {
-                return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters("Only a selection form field can be accepted with an array."));
-            }
+        if (!(requestItem.settings instanceof SelectionFormFieldSettings) && Array.isArray(parsedParams.response)) {
+            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters("Only a selection form field can be accepted with an array."));
         }
 
         if (
@@ -63,7 +61,7 @@ export class FormFieldRequestItemProcessor extends GenericRequestItemProcessor<F
             (requestItem.settings instanceof RatingFormFieldSettings &&
                 !FormFieldRequestItemProcessor.isValidRating(parsedParams.response, RatingFormFieldSettings.minRating, requestItem.settings.maxRating))
         ) {
-            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters(`The response provided cannot be used to accept the form field.`));
+            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters("The response provided cannot be used to accept the form field."));
         }
 
         if (requestItem.settings instanceof StringFormFieldSettings && typeof parsedParams.response === "string") {
