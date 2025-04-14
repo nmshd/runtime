@@ -1,6 +1,6 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
-import { CoreAddress, CoreDate } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, PasswordLocationIndicator } from "@nmshd/core-types";
 import { AccountController, PasswordProtectionCreationParameters, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { DateTime } from "luxon";
@@ -29,7 +29,7 @@ export interface CreateOwnTokenRequest {
          */
         password: string;
         passwordIsPin?: true;
-        passwordLocationIndicator?: number;
+        passwordLocationIndicator?: PasswordLocationIndicator;
     };
 }
 

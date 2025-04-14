@@ -24,7 +24,7 @@ import {
     ShareAttributeAcceptResponseItemJSON,
     ShareAttributeRequestItem
 } from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId, PasswordLocationIndicator } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
 import { IdentityUtil } from "@nmshd/transport";
 import fs from "fs";
@@ -166,7 +166,7 @@ export async function syncUntilHasEvent<TEvent extends Event>(
 export async function uploadOwnToken(
     transportServices: TransportServices,
     forIdentity?: string,
-    passwordProtection?: { password: string; passwordIsPin?: true; passwordLocationIndicator?: number }
+    passwordProtection?: { password: string; passwordIsPin?: true; passwordLocationIndicator?: PasswordLocationIndicator }
 ): Promise<TokenDTO> {
     const response = await transportServices.tokens.createOwnToken({
         content: { aKey: "aValue" },
@@ -222,7 +222,7 @@ export const emptyRelationshipCreationContent: ArbitraryRelationshipCreationCont
 export async function createTemplate(
     transportServices: TransportServices,
     body?: RelationshipTemplateContentJSON,
-    passwordProtection?: { password: string; passwordIsPin?: true; passwordLocationIndicator?: number },
+    passwordProtection?: { password: string; passwordIsPin?: true; passwordLocationIndicator?: PasswordLocationIndicator },
     templateExpiresAt?: DateTime
 ): Promise<RelationshipTemplateDTO> {
     const defaultExpirationDateTime = DateTime.utc().plus({ minutes: 10 }).toString();

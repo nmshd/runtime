@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { CoreDate, CoreId } from "@nmshd/core-types";
+import { CoreDate, CoreId, PasswordLocationIndicator, PasswordLocationIndicatorMedium } from "@nmshd/core-types";
 import { DevicesController, PasswordProtectionCreationParameters, TokenContentDeviceSharedSecret, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { TokenDTO } from "../../../types";
@@ -16,7 +16,7 @@ export interface CreateDeviceOnboardingTokenRequest {
          */
         password: string;
         passwordIsPin?: true;
-        passwordLocationIndicator?: number;
+        passwordLocationIndicator?: PasswordLocationIndicatorMedium;
     };
 }
 
@@ -44,7 +44,11 @@ export class CreateDeviceOnboardingTokenUseCase extends UseCase<CreateDeviceOnbo
             content: tokenContent,
             expiresAt: expiresAt,
             ephemeral: true,
-            passwordProtection: PasswordProtectionCreationParameters.create(request.passwordProtection)
+            passwordProtection: PasswordProtectionCreationParameters.create({
+                password: request.passwordProtection!.password,
+                passwordIsPin: request.passwordProtection?.passwordIsPin,
+                passwordLocationIndicator: request.passwordProtection?.passwordLocationIndicator as PasswordLocationIndicator
+            })
         });
 
         return Result.ok(TokenMapper.toTokenDTO(token, true));
