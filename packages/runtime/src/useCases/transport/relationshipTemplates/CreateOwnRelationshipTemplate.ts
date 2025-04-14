@@ -23,7 +23,7 @@ export interface CreateOwnRelationshipTemplateRequest {
          */
         password: string;
         passwordIsPin?: true;
-        passwordLocationIndicator?: PasswordLocationIndicator;
+        passwordLocationIndicator?: unknown;
     };
 }
 
@@ -53,12 +53,20 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
             content.onNewRelationship.expiresAt = CoreDate.from(request.expiresAt);
         }
 
+        const passwordProtection = request.passwordProtection
+            ? PasswordProtectionCreationParameters.create({
+                  password: request.passwordProtection.password,
+                  passwordIsPin: request.passwordProtection.passwordIsPin,
+                  passwordLocationIndicator: request.passwordProtection.passwordLocationIndicator as PasswordLocationIndicator
+              })
+            : undefined;
+
         const relationshipTemplate = await this.templateController.sendRelationshipTemplate({
             content: content,
             expiresAt: CoreDate.from(request.expiresAt),
             maxNumberOfAllocations: request.maxNumberOfAllocations,
             forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
-            passwordProtection: PasswordProtectionCreationParameters.create(request.passwordProtection)
+            passwordProtection
         });
 
         await this.accountController.syncDatawallet();

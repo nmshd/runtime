@@ -1,4 +1,4 @@
-import { CoreDate } from "@nmshd/core-types";
+import { CoreDate, validatePasswordLocationIndicator } from "@nmshd/core-types";
 import { RuntimeErrors } from "../RuntimeErrors";
 import { JsonSchema } from "../SchemaRepository";
 import { SchemaValidator } from "./SchemaValidator";
@@ -6,14 +6,13 @@ import { ISO8601DateTimeString } from "./ValidatableStrings";
 import { ValidationFailure } from "./ValidationFailure";
 import { ValidationResult } from "./ValidationResult";
 
-// TODO: should I add validatePasswordLocationIndicator here?
-
 export class TokenAndTemplateCreationValidator<
     T extends {
         expiresAt?: ISO8601DateTimeString;
         passwordProtection?: {
             password: string;
             passwordIsPin?: true;
+            passwordLocationIndicator?: any;
         };
     }
 > extends SchemaValidator<T> {
@@ -40,6 +39,15 @@ export class TokenAndTemplateCreationValidator<
                             ),
                             "passwordProtection"
                         )
+                    );
+                }
+            }
+
+            if (passwordProtection.passwordLocationIndicator) {
+                const passwordLocationIndicatorValidationError = validatePasswordLocationIndicator(passwordProtection.passwordLocationIndicator);
+                if (passwordLocationIndicatorValidationError) {
+                    validationResult.addFailure(
+                        new ValidationFailure(RuntimeErrors.general.invalidPropertyValue(`${passwordLocationIndicatorValidationError}`), "passwordLocationIndicator")
                     );
                 }
             }

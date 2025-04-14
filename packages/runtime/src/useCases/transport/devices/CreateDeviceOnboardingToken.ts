@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { CoreDate, CoreId, PasswordLocationIndicator, PasswordLocationIndicatorMedium } from "@nmshd/core-types";
+import { CoreDate, CoreId, PasswordLocationIndicator } from "@nmshd/core-types";
 import { DevicesController, PasswordProtectionCreationParameters, TokenContentDeviceSharedSecret, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { TokenDTO } from "../../../types";
@@ -16,7 +16,7 @@ export interface CreateDeviceOnboardingTokenRequest {
          */
         password: string;
         passwordIsPin?: true;
-        passwordLocationIndicator?: PasswordLocationIndicatorMedium;
+        passwordLocationIndicator?: unknown;
     };
 }
 
@@ -37,18 +37,22 @@ export class CreateDeviceOnboardingTokenUseCase extends UseCase<CreateDeviceOnbo
 
     protected async executeInternal(request: CreateDeviceOnboardingTokenRequest): Promise<Result<TokenDTO>> {
         const sharedSecret = await this.devicesController.getSharedSecret(CoreId.from(request.id), request.profileName);
-        const expiresAt = request.expiresAt ? CoreDate.from(request.expiresAt) : CoreDate.utc().add({ minutes: 5 });
-
         const tokenContent = TokenContentDeviceSharedSecret.from({ sharedSecret });
+
+        const expiresAt = request.expiresAt ? CoreDate.from(request.expiresAt) : CoreDate.utc().add({ minutes: 5 });
+        const passwordProtection = request.passwordProtection
+            ? PasswordProtectionCreationParameters.create({
+                  password: request.passwordProtection.password,
+                  passwordIsPin: request.passwordProtection.passwordIsPin,
+                  passwordLocationIndicator: request.passwordProtection.passwordLocationIndicator as PasswordLocationIndicator
+              })
+            : undefined;
+
         const token = await this.tokenController.sendToken({
             content: tokenContent,
             expiresAt: expiresAt,
             ephemeral: true,
-            passwordProtection: PasswordProtectionCreationParameters.create({
-                password: request.passwordProtection!.password,
-                passwordIsPin: request.passwordProtection?.passwordIsPin,
-                passwordLocationIndicator: request.passwordProtection?.passwordLocationIndicator as PasswordLocationIndicator
-            })
+            passwordProtection
         });
 
         return Result.ok(TokenMapper.toTokenDTO(token, true));

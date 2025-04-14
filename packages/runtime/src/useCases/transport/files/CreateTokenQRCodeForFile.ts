@@ -14,7 +14,7 @@ export interface CreateTokenQRCodeForFileRequest {
          */
         password: string;
         passwordIsPin?: true;
-        passwordLocationIndicator?: PasswordLocationIndicator;
+        passwordLocationIndicator?: unknown;
     };
 }
 
@@ -51,12 +51,20 @@ export class CreateTokenQRCodeForFileUseCase extends UseCase<CreateTokenQRCodeFo
 
         const defaultTokenExpiry = file.cache?.expiresAt ?? CoreDate.utc().add({ days: 12 });
         const tokenExpiry = request.expiresAt ? CoreDate.from(request.expiresAt) : defaultTokenExpiry;
+        const passwordProtection = request.passwordProtection
+            ? PasswordProtectionCreationParameters.create({
+                  password: request.passwordProtection.password,
+                  passwordIsPin: request.passwordProtection.passwordIsPin,
+                  passwordLocationIndicator: request.passwordProtection.passwordLocationIndicator as PasswordLocationIndicator
+              })
+            : undefined;
+
         const token = await this.tokenController.sendToken({
             content: tokenContent,
             expiresAt: tokenExpiry,
             ephemeral: true,
             forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
-            passwordProtection: PasswordProtectionCreationParameters.create(request.passwordProtection)
+            passwordProtection
         });
 
         const qrCode = await QRCode.forTruncateable(token);

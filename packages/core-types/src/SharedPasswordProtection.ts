@@ -18,8 +18,11 @@ export enum PasswordLocationIndicatorMedium {
 
 export type PasswordLocationIndicator = PasswordLocationIndicatorMedium | IntRange<50, 100>;
 
-export function validatePasswordLocationIndicator(value: PasswordLocationIndicator): string | undefined {
-    if ((typeof value === "string" && Object.values(PasswordLocationIndicatorMedium).includes(value)) || (typeof value === "number" && value >= 0 && value < 100)) {
+export function validatePasswordLocationIndicator(value: unknown): string | undefined {
+    if (
+        (typeof value === "string" && Object.values(PasswordLocationIndicatorMedium).includes(value as PasswordLocationIndicatorMedium)) ||
+        (typeof value === "number" && value >= 0 && value < 100)
+    ) {
         return undefined;
     }
 

@@ -29,7 +29,7 @@ export interface CreateOwnTokenRequest {
          */
         password: string;
         passwordIsPin?: true;
-        passwordLocationIndicator?: PasswordLocationIndicator;
+        passwordLocationIndicator?: unknown;
     };
 }
 
@@ -72,12 +72,20 @@ export class CreateOwnTokenUseCase extends UseCase<CreateOwnTokenRequest, TokenD
             throw RuntimeErrors.general.invalidTokenContent();
         }
 
+        const passwordProtection = request.passwordProtection
+            ? PasswordProtectionCreationParameters.create({
+                  password: request.passwordProtection.password,
+                  passwordIsPin: request.passwordProtection.passwordIsPin,
+                  passwordLocationIndicator: request.passwordProtection.passwordLocationIndicator as PasswordLocationIndicator
+              })
+            : undefined;
+
         const response = await this.tokenController.sendToken({
             content: tokenContent,
             expiresAt: CoreDate.from(request.expiresAt),
             ephemeral: request.ephemeral,
             forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
-            passwordProtection: PasswordProtectionCreationParameters.create(request.passwordProtection)
+            passwordProtection
         });
 
         if (!request.ephemeral) {

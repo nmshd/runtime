@@ -19988,9 +19988,7 @@ export const CreateDeviceOnboardingTokenRequest: any = {
                             "type": "boolean",
                             "const": true
                         },
-                        "passwordLocationIndicator": {
-                            "type": "number"
-                        }
+                        "passwordLocationIndicator": {}
                     },
                     "required": [
                         "password"
@@ -20376,9 +20374,7 @@ export const CreateTokenForFileRequest: any = {
                             "type": "boolean",
                             "const": true
                         },
-                        "passwordLocationIndicator": {
-                            "type": "number"
-                        }
+                        "passwordLocationIndicator": {}
                     },
                     "required": [
                         "password"
@@ -20434,9 +20430,7 @@ export const CreateTokenQRCodeForFileRequest: any = {
                             "type": "boolean",
                             "const": true
                         },
-                        "passwordLocationIndicator": {
-                            "type": "number"
-                        }
+                        "passwordLocationIndicator": {}
                     },
                     "required": [
                         "password"
@@ -21617,9 +21611,7 @@ export const CreateOwnRelationshipTemplateRequest: any = {
                             "type": "boolean",
                             "const": true
                         },
-                        "passwordLocationIndicator": {
-                            "type": "number"
-                        }
+                        "passwordLocationIndicator": {}
                     },
                     "required": [
                         "password"
@@ -21698,9 +21690,7 @@ export const CreateTokenForOwnTemplateRequest: any = {
                             "type": "boolean",
                             "const": true
                         },
-                        "passwordLocationIndicator": {
-                            "type": "number"
-                        }
+                        "passwordLocationIndicator": {}
                     },
                     "required": [
                         "password"
@@ -21756,9 +21746,7 @@ export const CreateTokenQRCodeForOwnTemplateRequest: any = {
                             "type": "boolean",
                             "const": true
                         },
-                        "passwordLocationIndicator": {
-                            "type": "number"
-                        }
+                        "passwordLocationIndicator": {}
                     },
                     "required": [
                         "password"
@@ -22062,9 +22050,7 @@ export const CreateOwnTokenRequest: any = {
                             "type": "boolean",
                             "const": true
                         },
-                        "passwordLocationIndicator": {
-                            "type": "number"
-                        }
+                        "passwordLocationIndicator": {}
                     },
                     "required": [
                         "password"
