@@ -27,15 +27,15 @@ export class RatingFormFieldSettings extends FormFieldSettings implements IRatin
     }
 
     public canAccept(response: string | number | boolean | string[]): string | undefined {
-        if (!RatingFormFieldSettings.isValidRating(response, RatingFormFieldSettings.minRating, this.maxRating)) {
+        if (!this.isValidRating(response)) {
             return `The rating form field must be accepted with an integer between ${RatingFormFieldSettings.minRating} and ${this.maxRating}.`;
         }
 
         return;
     }
 
-    private static isValidRating(value: any, minRating: number, maxRating: number): boolean {
-        return Number.isInteger(value) && value >= minRating && value <= maxRating;
+    private isValidRating(value: any): boolean {
+        return Number.isInteger(value) && value >= RatingFormFieldSettings.minRating && value <= this.maxRating;
     }
 
     public static from(value: IRatingFormFieldSettings | RatingFormFieldSettingsJSON): RatingFormFieldSettings {
