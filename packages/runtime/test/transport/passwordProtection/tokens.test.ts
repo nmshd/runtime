@@ -90,6 +90,19 @@ describe("Password-protected tokens", () => {
         );
     });
 
+    test("validation error when creating a token with an invalid PasswordLocationIndicator", async () => {
+        const createResult = await runtimeServices1.transport.tokens.createOwnToken({
+            content: { key: "value" },
+            expiresAt: CoreDate.utc().add({ minutes: 10 }).toISOString(),
+            ephemeral: true,
+            passwordProtection: { password: "password", passwordLocationIndicator: "invalid-password-location-indicator" }
+        });
+        expect(createResult).toBeAnError(
+            "must be a number between 0 and 99 or one of the following strings: RecoveryKit, Self, Letter, RegistrationLetter, Mail, Sms, App, Website",
+            "error.runtime.validation.invalidPropertyValue"
+        );
+    });
+
     describe("LoadItemFromTruncatedReferenceUseCase", () => {
         test("send and receive a password-protected token", async () => {
             const token = await uploadOwnToken(runtimeServices1.transport, undefined, { password: "password" });

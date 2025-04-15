@@ -94,6 +94,17 @@ describe("Password-protected tokens for files", () => {
         );
     });
 
+    test("validation error when creating a token with an invalid PasswordLocationIndicator", async () => {
+        const createResult = await runtimeServices1.transport.files.createTokenForFile({
+            fileId,
+            passwordProtection: { password: "password", passwordLocationIndicator: "invalid-password-location-indicator" }
+        });
+        expect(createResult).toBeAnError(
+            "must be a number between 0 and 99 or one of the following strings: RecoveryKit, Self, Letter, RegistrationLetter, Mail, Sms, App, Website",
+            "error.runtime.validation.invalidPropertyValue"
+        );
+    });
+
     describe("LoadItemFromTruncatedReferenceUseCase", () => {
         test("send and receive a file via password-protected token", async () => {
             const createResult = await runtimeServices1.transport.files.createTokenForFile({

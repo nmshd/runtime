@@ -133,6 +133,18 @@ describe("Password-protected templates", () => {
         );
     });
 
+    test("validation error when creating a template with an invalid PasswordLocationIndicator", async () => {
+        const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+            content: emptyRelationshipTemplateContent,
+            expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+            passwordProtection: { password: "password", passwordLocationIndicator: "invalid-password-location-indicator" }
+        });
+        expect(createResult).toBeAnError(
+            "must be a number between 0 and 99 or one of the following strings: RecoveryKit, Self, Letter, RegistrationLetter, Mail, Sms, App, Website",
+            "error.runtime.validation.invalidPropertyValue"
+        );
+    });
+
     describe("LoadItemFromTruncatedReferenceUseCase", () => {
         test("send and receive a password-protected template", async () => {
             const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
@@ -403,6 +415,17 @@ describe("Password-protected tokens for unprotected templates", () => {
         });
         expect(createResult).toBeAnError(
             "'passwordProtection.passwordIsPin' is true, hence 'passwordProtection.password' must consist of 4 to 16 digits from 0 to 9.",
+            "error.runtime.validation.invalidPropertyValue"
+        );
+    });
+
+    test("validation error when creating a token with an invalid PasswordLocationIndicator", async () => {
+        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+            templateId: templateId,
+            passwordProtection: { password: "password", passwordLocationIndicator: "invalid-password-location-indicator" }
+        });
+        expect(createResult).toBeAnError(
+            "must be a number between 0 and 99 or one of the following strings: RecoveryKit, Self, Letter, RegistrationLetter, Mail, Sms, App, Website",
             "error.runtime.validation.invalidPropertyValue"
         );
     });

@@ -104,7 +104,6 @@ describe("Password-protected DeviceOnboardingTokens", () => {
         );
     });
 
-    // TODO: add this test in other files
     test("validation error when creating a DeviceOnboardingToken with an invalid PasswordLocationIndicator", async () => {
         const createResult = await runtimeServices1.transport.devices.createDeviceOnboardingToken({
             id: device.id,
