@@ -37,8 +37,8 @@ export class SelectionFormFieldSettings extends FormFieldSettings implements ISe
     }
 
     public canAccept(response: string | number | boolean | string[]): string | undefined {
-        if (!Array.isArray(response)) {
-            return "A selection form field must be accepted with an array.";
+        if (!Array.isArray(response) || !response.every((option) => typeof option === "string")) {
+            return "A selection form field must be accepted with a string array.";
         }
 
         if (response.length === 0) {

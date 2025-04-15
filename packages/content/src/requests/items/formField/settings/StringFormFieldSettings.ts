@@ -37,20 +37,16 @@ export class StringFormFieldSettings extends FormFieldSettings implements IStrin
     }
 
     public canAccept(response: string | number | boolean | string[]): string | undefined {
-        if (Array.isArray(response)) {
-            return "Only a selection form field can be accepted with an array.";
-        }
-
         if (typeof response !== "string") {
-            return "The response provided cannot be used to accept the form field.";
+            return "A string form field must be accepted with a string.";
         }
 
         if (this.max && response.length > this.max) {
-            return "The length of the response cannot be greater than the max.";
+            return `The length of the response cannot be greater than the max ${this.max}.`;
         }
 
         if (this.min && response.length < this.min) {
-            return "The length of the response cannot be smaller than the min.";
+            return `The length of the response cannot be smaller than the min ${this.min}.`;
         }
 
         return;

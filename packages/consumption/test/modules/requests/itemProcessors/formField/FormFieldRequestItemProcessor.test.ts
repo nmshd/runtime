@@ -354,7 +354,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidAcceptParameters",
-                    message: "The response provided cannot be used to accept the form field."
+                    message: "A string form field must be accepted with a string."
                 });
             });
 
@@ -377,7 +377,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidAcceptParameters",
-                    message: "The length of the response cannot be smaller than the min."
+                    message: `The length of the response cannot be smaller than the min ${aMin}.`
                 });
             });
 
@@ -400,7 +400,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidAcceptParameters",
-                    message: "The length of the response cannot be greater than the max."
+                    message: `The length of the response cannot be greater than the max ${aMax}.`
                 });
             });
         });
@@ -443,7 +443,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidAcceptParameters",
-                    message: "The response provided cannot be used to accept the form field."
+                    message: "An integer form field must be accepted with an integer."
                 });
             });
 
@@ -466,7 +466,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidAcceptParameters",
-                    message: "The response cannot be smaller than the min."
+                    message: `The response cannot be smaller than the min ${aMin}.`
                 });
             });
 
@@ -489,7 +489,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidAcceptParameters",
-                    message: "The response cannot be greater than the max."
+                    message: `The response cannot be greater than the max ${aMax}.`
                 });
             });
         });
@@ -532,7 +532,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidAcceptParameters",
-                    message: "The response provided cannot be used to accept the form field."
+                    message: "A double form field must be accepted with a double."
                 });
             });
 
@@ -555,7 +555,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidAcceptParameters",
-                    message: "The response cannot be smaller than the min."
+                    message: `The response cannot be smaller than the min ${aMin}.`
                 });
             });
 
@@ -578,7 +578,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidAcceptParameters",
-                    message: "The response cannot be greater than the max."
+                    message: `The response cannot be greater than the max ${aMax}.`
                 });
             });
         });
@@ -621,7 +621,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidAcceptParameters",
-                    message: "The response provided cannot be used to accept the form field."
+                    message: "A boolean form field must be accepted with a boolean."
                 });
             });
         });
@@ -664,7 +664,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidAcceptParameters",
-                    message: "The response provided cannot be used to accept the form field."
+                    message: "A date form field must be accepted with a valid date string in ISO 8601 format."
                 });
             });
         });
@@ -709,7 +709,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidAcceptParameters",
-                    message: "The response provided cannot be used to accept the form field."
+                    message: `The rating form field must be accepted with an integer between ${RatingFormFieldSettings.minRating} and ${aMaxRating}.`
                 });
             });
 
@@ -732,7 +732,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidAcceptParameters",
-                    message: "The response provided cannot be used to accept the form field."
+                    message: `The rating form field must be accepted with an integer between ${RatingFormFieldSettings.minRating} and ${aMaxRating}.`
                 });
             });
 
@@ -755,7 +755,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidAcceptParameters",
-                    message: "The response provided cannot be used to accept the form field."
+                    message: `The rating form field must be accepted with an integer between ${RatingFormFieldSettings.minRating} and ${aMaxRating}.`
                 });
             });
         });
@@ -794,7 +794,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidAcceptParameters",
-                    message: "A selection form field must be accepted with an array."
+                    message: "A selection form field must be accepted with a string array."
                 });
             });
 

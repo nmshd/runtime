@@ -14,25 +14,21 @@ export interface IRatingFormFieldSettings extends IFormFieldSettings {
 
 @type("RatingFormFieldSettings")
 export class RatingFormFieldSettings extends FormFieldSettings implements IRatingFormFieldSettings {
-    @serialize()
-    @validate({ min: 5, max: 10 })
-    public maxRating: MaxRating;
-
     public static get minRating(): number {
         return 1;
     }
+
+    @serialize()
+    @validate({ min: 5, max: 10 })
+    public maxRating: MaxRating;
 
     public canCreate(): string | undefined {
         return;
     }
 
     public canAccept(response: string | number | boolean | string[]): string | undefined {
-        if (Array.isArray(response)) {
-            return "Only a selection form field can be accepted with an array.";
-        }
-
         if (!RatingFormFieldSettings.isValidRating(response, RatingFormFieldSettings.minRating, this.maxRating)) {
-            return "The response provided cannot be used to accept the form field.";
+            return `The rating form field must be accepted with an integer between ${RatingFormFieldSettings.minRating} and ${this.maxRating}.`;
         }
 
         return;

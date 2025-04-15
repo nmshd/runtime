@@ -37,20 +37,16 @@ export class DoubleFormFieldSettings extends FormFieldSettings implements IDoubl
     }
 
     public canAccept(response: string | number | boolean | string[]): string | undefined {
-        if (Array.isArray(response)) {
-            return "Only a selection form field can be accepted with an array.";
-        }
-
         if (typeof response !== "number") {
-            return "The response provided cannot be used to accept the form field.";
+            return "A double form field must be accepted with a double.";
         }
 
         if (this.max && response > this.max) {
-            return "The response cannot be greater than the max.";
+            return `The response cannot be greater than the max ${this.max}.`;
         }
 
         if (this.min && response < this.min) {
-            return "The response cannot be smaller than the min.";
+            return `The response cannot be smaller than the min ${this.min}.`;
         }
 
         return;

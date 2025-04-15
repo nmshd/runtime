@@ -15,19 +15,11 @@ export class DateFormFieldSettings extends FormFieldSettings implements IDateFor
     }
 
     public canAccept(response: string | number | boolean | string[]): string | undefined {
-        if (Array.isArray(response)) {
-            return "Only a selection form field can be accepted with an array.";
-        }
-
-        if (!DateFormFieldSettings.isValidDate(response)) {
-            return "The response provided cannot be used to accept the form field.";
+        if (!(typeof response === "string" && CoreDate.from(response).dateTime.isValid)) {
+            return "A date form field must be accepted with a valid date string in ISO 8601 format.";
         }
 
         return;
-    }
-
-    private static isValidDate(value: any): boolean {
-        return typeof value === "string" && CoreDate.from(value).dateTime.isValid;
     }
 
     public static from(value: IDateFormFieldSettings | DateFormFieldSettingsJSON): DateFormFieldSettings {
