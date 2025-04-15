@@ -19,7 +19,7 @@ export class RatingFormFieldSettings extends FormFieldSettings implements IRatin
     }
 
     @serialize()
-    @validate({ min: 5, max: 10, customValidator: (v) => (Number.isInteger(v) ? undefined : "This value must be an integer.") })
+    @validate({ min: 5, max: 10, customValidator: (v) => (!Number.isInteger(v) ? "This value must be an integer." : undefined) })
     public maxRating: MaxRating;
 
     public canCreate(): string | undefined {

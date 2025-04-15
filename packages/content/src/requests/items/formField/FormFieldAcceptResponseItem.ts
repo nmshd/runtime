@@ -1,5 +1,4 @@
-import { PrimitiveType, Serializable, serialize, type, validate, ValidationError } from "@js-soft/ts-serval";
-import { nameof } from "ts-simple-nameof";
+import { PrimitiveType, serialize, type, validate } from "@js-soft/ts-serval";
 import { AcceptResponseItem, AcceptResponseItemJSON, IAcceptResponseItem } from "../../response";
 
 export interface FormFieldAcceptResponseItemJSON extends AcceptResponseItemJSON {
@@ -16,7 +15,12 @@ export class FormFieldAcceptResponseItem extends AcceptResponseItem implements I
     @serialize({ any: true })
     @validate({
         allowedTypes: [PrimitiveType.String, PrimitiveType.Number, PrimitiveType.Boolean, PrimitiveType.Array],
-        customValidator: (v) => (typeof v === "string" && v.length > 4096 ? "The response cannot be longer than 4096 characters." : undefined)
+        customValidator: (v) =>
+            typeof v === "string" && v.length > 4096
+                ? "The response cannot be longer than 4096 characters."
+                : Array.isArray(v) && !v.every((option) => typeof option === "string")
+                  ? "If the response is an array, it must be a string array."
+                  : undefined
     })
     public response: string | number | boolean | string[];
 
@@ -24,22 +28,6 @@ export class FormFieldAcceptResponseItem extends AcceptResponseItem implements I
         value: IFormFieldAcceptResponseItem | Omit<FormFieldAcceptResponseItemJSON, "@type"> | FormFieldAcceptResponseItemJSON
     ): FormFieldAcceptResponseItem {
         return this.fromAny(value);
-    }
-
-    protected static override postFrom<T extends Serializable>(value: T): T {
-        if (!(value instanceof FormFieldAcceptResponseItem)) {
-            throw new Error("this should never happen");
-        }
-
-        if (Array.isArray(value.response) && !value.response.every((option) => typeof option === "string")) {
-            throw new ValidationError(
-                FormFieldAcceptResponseItem.name,
-                nameof<FormFieldAcceptResponseItem>((x) => x.response),
-                `If the ${nameof<FormFieldAcceptResponseItem>((x) => x.response)} is an array, it must be a string array.`
-            );
-        }
-
-        return value;
     }
 
     public override toJSON(verbose?: boolean | undefined, serializeAsString?: boolean | undefined): FormFieldAcceptResponseItemJSON {

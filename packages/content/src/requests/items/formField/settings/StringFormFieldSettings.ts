@@ -25,7 +25,7 @@ export class StringFormFieldSettings extends FormFieldSettings implements IStrin
         nullable: true,
         min: 0,
         max: 4096,
-        customValidator: (v) => (Number.isInteger(v) ? undefined : "This value must be an integer.")
+        customValidator: (v) => (!Number.isInteger(v) ? "This value must be an integer." : undefined)
     })
     public min?: number;
 
@@ -34,7 +34,7 @@ export class StringFormFieldSettings extends FormFieldSettings implements IStrin
         nullable: true,
         min: 0,
         max: 4096,
-        customValidator: (v) => (Number.isInteger(v) ? undefined : "This value must be an integer.")
+        customValidator: (v) => (!Number.isInteger(v) ? "This value must be an integer." : undefined)
     })
     public max?: number;
 
