@@ -3132,6 +3132,12 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "@type": {
                     "type": "string",
                     "const": "BooleanFormFieldSettings"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -11344,6 +11350,12 @@ export const CreateOutgoingRequestRequest: any = {
                 "@type": {
                     "type": "string",
                     "const": "BooleanFormFieldSettings"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -14980,6 +14992,12 @@ export const ReceivedIncomingRequestRequest: any = {
                 "@type": {
                     "type": "string",
                     "const": "BooleanFormFieldSettings"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
                 }
             },
             "required": [
