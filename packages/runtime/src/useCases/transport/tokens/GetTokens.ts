@@ -66,10 +66,18 @@ export class GetTokensUseCase extends UseCase<GetTokensRequest, TokenDTO[]> {
                 }
             },
             [`${nameof<TokenDTO>((r) => r.passwordProtection)}.passwordLocationIndicator`]: (query: any, input: string) => {
-                query[`${nameof<Token>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordLocationIndicator)}`] = Number(input);
+                if (this.stringContainsNumber(input)) {
+                    query[`${nameof<Token>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordLocationIndicator)}`] = Number(input);
+                } else {
+                    query[`${nameof<Token>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordLocationIndicator)}`] = input;
+                }
             }
         }
     });
+
+    private static stringContainsNumber(input: string): boolean {
+        return /^\d+$/.test(input);
+    }
 
     public constructor(
         @Inject private readonly tokenController: TokenController,
