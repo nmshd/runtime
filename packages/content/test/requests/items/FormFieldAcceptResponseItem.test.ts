@@ -47,7 +47,7 @@ describe("creation of FormFieldAcceptResponseItem", () => {
                 result: ResponseItemResult.Accepted,
                 response: aStringTooLong
             })
-        ).toThrow("The response cannot be shorter than 1 character or longer than 4096 characters.");
+        ).toThrow("The string response cannot be shorter than 1 character or longer than 4096 characters.");
     });
 
     test("should throw when trying to create a FormFieldAcceptResponseItem with a string response too short", () => {
@@ -58,6 +58,6 @@ describe("creation of FormFieldAcceptResponseItem", () => {
                 result: ResponseItemResult.Accepted,
                 response: aStringTooShort
             })
-        ).toThrow("The response cannot be shorter than 1 character or longer than 4096 characters.");
+        ).toThrow("The string response cannot be shorter than 1 character or longer than 4096 characters.");
     });
 });
