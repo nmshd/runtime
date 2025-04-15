@@ -1,13 +1,14 @@
-import { ISerializable, Serializable, type } from "@js-soft/ts-serval";
+import { type } from "@js-soft/ts-serval";
+import { FormFieldSettings, FormFieldSettingsJSON, IFormFieldSettings } from "./FormFieldSettings";
 
-export interface BooleanFormFieldSettingsJSON {
+export interface BooleanFormFieldSettingsJSON extends FormFieldSettingsJSON {
     "@type": "BooleanFormFieldSettings";
 }
 
-export interface IBooleanFormFieldSettings extends ISerializable {}
+export interface IBooleanFormFieldSettings extends IFormFieldSettings {}
 
 @type("BooleanFormFieldSettings")
-export class BooleanFormFieldSettings extends Serializable implements IBooleanFormFieldSettings {
+export class BooleanFormFieldSettings extends FormFieldSettings implements IBooleanFormFieldSettings {
     public canCreate(): string | undefined {
         return;
     }
