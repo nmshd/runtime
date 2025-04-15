@@ -25,6 +25,30 @@ describe("creation of FormFieldRequestItem", () => {
         expect(item.settings).toBeInstanceOf(StringFormFieldSettings);
     });
 
+    test("should throw when trying to create a FormFieldRequestItem with a StringFormFieldSettings and a min which is not an integer", () => {
+        const aMinWhichIsNotAnInteger = 0.9;
+
+        expect(() =>
+            FormFieldRequestItem.from({
+                title: "aFormField",
+                mustBeAccepted: false,
+                settings: StringFormFieldSettings.from({ min: aMinWhichIsNotAnInteger })
+            })
+        ).toThrow("If the min of a string form field is set, it must be an integer.");
+    });
+
+    test("should throw when trying to create a FormFieldRequestItem with a StringFormFieldSettings and a max which is not an integer", () => {
+        const aMaxWhichIsNotAnInteger = 10.1;
+
+        expect(() =>
+            FormFieldRequestItem.from({
+                title: "aFormField",
+                mustBeAccepted: false,
+                settings: StringFormFieldSettings.from({ max: aMaxWhichIsNotAnInteger })
+            })
+        ).toThrow("If the max of a string form field is set, it must be an integer.");
+    });
+
     test("should throw when trying to create a FormFieldRequestItem with an IntegerFormFieldSettings and a min which is not an integer", () => {
         const aMinWhichIsNotAnInteger = 0.9;
 
