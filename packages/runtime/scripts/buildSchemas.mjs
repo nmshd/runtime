@@ -7,11 +7,10 @@ const runtimeConfig = {
     type: "*",
     extraTags: ["errorMessage"]
 };
-// use SchemaValidatable(Can)CreateRepositoryAttributeRequest instead of (Can)CreateRepositoryAttributeRequest
-const useCaseSchemaDeclarations = getSchemaDeclarations(
-    runtimeConfig,
-    (x) => x.endsWith("Request") && x !== "CreateRepositoryAttributeRequest" && x !== "CanCreateRepositoryAttributeRequest"
-);
+
+// use SchemaValidatable(Can)... instead of ...
+const excludedTypes = ["CreateRepositoryAttributeRequest", "CanCreateRepositoryAttributeRequest", "CreateDeviceOnboardingTokenRequest"];
+const useCaseSchemaDeclarations = getSchemaDeclarations(runtimeConfig, (x) => x.endsWith("Request") && excludedTypes.indexOf(x) === -1);
 const cleanUseCaseSchemaDeclarations = useCaseSchemaDeclarations.replaceAll("SchemaValidatable", "");
 
 const contentConfig = {

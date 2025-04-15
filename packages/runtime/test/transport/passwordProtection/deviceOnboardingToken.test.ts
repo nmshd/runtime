@@ -108,7 +108,7 @@ describe("Password-protected DeviceOnboardingTokens", () => {
         const createResult = await runtimeServices1.transport.devices.createDeviceOnboardingToken({
             id: device.id,
             expiresAt: CoreDate.utc().add({ minutes: 10 }).toISOString(),
-            passwordProtection: { password: "password", passwordLocationIndicator: "invalid-password-location-indicator" }
+            passwordProtection: { password: "password", passwordLocationIndicator: "invalid-password-location-indicator" as any }
         });
         expect(createResult).toBeAnError(
             "must be a number between 0 and 99 or one of the following strings: RecoveryKit, Self, Letter, RegistrationLetter, Mail, Sms, App, Website",

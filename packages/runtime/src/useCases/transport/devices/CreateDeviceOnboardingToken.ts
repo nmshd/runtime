@@ -6,7 +6,7 @@ import { TokenDTO } from "../../../types";
 import { DeviceIdString, ISO8601DateTimeString, SchemaRepository, TokenAndTemplateCreationValidator, UseCase } from "../../common";
 import { TokenMapper } from "../tokens/TokenMapper";
 
-export interface CreateDeviceOnboardingTokenRequest {
+export interface SchemaValidatableCreateDeviceOnboardingTokenRequest {
     id: DeviceIdString;
     expiresAt?: ISO8601DateTimeString;
     profileName?: string;
@@ -19,6 +19,10 @@ export interface CreateDeviceOnboardingTokenRequest {
         passwordLocationIndicator?: unknown;
     };
 }
+
+export type CreateDeviceOnboardingTokenRequest = SchemaValidatableCreateDeviceOnboardingTokenRequest & {
+    passwordProtection?: { passwordLocationIndicator?: PasswordLocationIndicator };
+};
 
 class Validator extends TokenAndTemplateCreationValidator<CreateDeviceOnboardingTokenRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
@@ -40,19 +44,12 @@ export class CreateDeviceOnboardingTokenUseCase extends UseCase<CreateDeviceOnbo
         const tokenContent = TokenContentDeviceSharedSecret.from({ sharedSecret });
 
         const expiresAt = request.expiresAt ? CoreDate.from(request.expiresAt) : CoreDate.utc().add({ minutes: 5 });
-        const passwordProtection = request.passwordProtection
-            ? PasswordProtectionCreationParameters.create({
-                  password: request.passwordProtection.password,
-                  passwordIsPin: request.passwordProtection.passwordIsPin,
-                  passwordLocationIndicator: request.passwordProtection.passwordLocationIndicator as PasswordLocationIndicator
-              })
-            : undefined;
 
         const token = await this.tokenController.sendToken({
             content: tokenContent,
             expiresAt: expiresAt,
             ephemeral: true,
-            passwordProtection
+            passwordProtection: PasswordProtectionCreationParameters.create(request.passwordProtection)
         });
 
         return Result.ok(TokenMapper.toTokenDTO(token, true));
