@@ -1,5 +1,4 @@
-import { Serializable, serialize, type, validate, ValidationError } from "@js-soft/ts-serval";
-import { nameof } from "ts-simple-nameof";
+import { serialize, type, validate } from "@js-soft/ts-serval";
 import { FormFieldSettings, FormFieldSettingsJSON, IFormFieldSettings } from "./FormFieldSettings";
 
 export interface StringFormFieldSettingsJSON extends FormFieldSettingsJSON {
@@ -22,11 +21,21 @@ export class StringFormFieldSettings extends FormFieldSettings implements IStrin
     public allowNewlines?: true;
 
     @serialize()
-    @validate({ nullable: true })
+    @validate({
+        nullable: true,
+        min: 0,
+        max: 4096,
+        customValidator: (value) => (Number.isInteger(value) ? undefined : "This value must be an integer.")
+    })
     public min?: number;
 
     @serialize()
-    @validate({ nullable: true })
+    @validate({
+        nullable: true,
+        min: 1,
+        max: 4096,
+        customValidator: (value) => (Number.isInteger(value) ? undefined : "This value must be an integer.")
+    })
     public max?: number;
 
     public canCreate(): string | undefined {
@@ -55,30 +64,6 @@ export class StringFormFieldSettings extends FormFieldSettings implements IStrin
 
     public static from(value: IStringFormFieldSettings | StringFormFieldSettingsJSON): StringFormFieldSettings {
         return this.fromAny(value);
-    }
-
-    protected static override postFrom<T extends Serializable>(value: T): T {
-        if (!(value instanceof StringFormFieldSettings)) {
-            throw new Error("this should never happen");
-        }
-
-        if (value.min && !Number.isInteger(value.min)) {
-            throw new ValidationError(
-                StringFormFieldSettings.name,
-                nameof<StringFormFieldSettings>((x) => x.min),
-                `If the ${nameof<StringFormFieldSettings>((x) => x.min)} of a string form field is set, it must be an integer.`
-            );
-        }
-
-        if (value.max && !Number.isInteger(value.max)) {
-            throw new ValidationError(
-                StringFormFieldSettings.name,
-                nameof<StringFormFieldSettings>((x) => x.max),
-                `If the ${nameof<StringFormFieldSettings>((x) => x.max)} of a string form field is set, it must be an integer.`
-            );
-        }
-
-        return value;
     }
 
     public override toJSON(verbose?: boolean | undefined, serializeAsString?: boolean | undefined): StringFormFieldSettingsJSON {

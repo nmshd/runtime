@@ -1,5 +1,4 @@
-import { Serializable, serialize, type, validate, ValidationError } from "@js-soft/ts-serval";
-import { nameof } from "ts-simple-nameof";
+import { serialize, type, validate } from "@js-soft/ts-serval";
 import { FormFieldSettings, FormFieldSettingsJSON, IFormFieldSettings } from "./FormFieldSettings";
 
 export interface IntegerFormFieldSettingsJSON extends FormFieldSettingsJSON {
@@ -22,11 +21,17 @@ export class IntegerFormFieldSettings extends FormFieldSettings implements IInte
     public unit?: string;
 
     @serialize()
-    @validate({ nullable: true })
+    @validate({
+        nullable: true,
+        customValidator: (value) => (Number.isInteger(value) ? undefined : "This value must be an integer.")
+    })
     public min?: number;
 
     @serialize()
-    @validate({ nullable: true })
+    @validate({
+        nullable: true,
+        customValidator: (value) => (Number.isInteger(value) ? undefined : "This value must be an integer.")
+    })
     public max?: number;
 
     public canCreate(): string | undefined {
@@ -55,30 +60,6 @@ export class IntegerFormFieldSettings extends FormFieldSettings implements IInte
 
     public static from(value: IIntegerFormFieldSettings | IntegerFormFieldSettingsJSON): IntegerFormFieldSettings {
         return this.fromAny(value);
-    }
-
-    protected static override postFrom<T extends Serializable>(value: T): T {
-        if (!(value instanceof IntegerFormFieldSettings)) {
-            throw new Error("this should never happen");
-        }
-
-        if (value.min && !Number.isInteger(value.min)) {
-            throw new ValidationError(
-                IntegerFormFieldSettings.name,
-                nameof<IntegerFormFieldSettings>((x) => x.min),
-                `If the ${nameof<IntegerFormFieldSettings>((x) => x.min)} of an integer form field is set, it must be an integer.`
-            );
-        }
-
-        if (value.max && !Number.isInteger(value.max)) {
-            throw new ValidationError(
-                IntegerFormFieldSettings.name,
-                nameof<IntegerFormFieldSettings>((x) => x.max),
-                `If the ${nameof<IntegerFormFieldSettings>((x) => x.max)} of an integer form field is set, it must be an integer.`
-            );
-        }
-
-        return value;
     }
 
     public override toJSON(verbose?: boolean | undefined, serializeAsString?: boolean | undefined): IntegerFormFieldSettingsJSON {

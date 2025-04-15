@@ -14,7 +14,10 @@ export interface IFormFieldAcceptResponseItem extends IAcceptResponseItem {
 @type("FormFieldAcceptResponseItem")
 export class FormFieldAcceptResponseItem extends AcceptResponseItem implements IFormFieldAcceptResponseItem {
     @serialize({ any: true })
-    @validate({ allowedTypes: [PrimitiveType.String, PrimitiveType.Number, PrimitiveType.Boolean, PrimitiveType.Array] })
+    @validate({
+        allowedTypes: [PrimitiveType.String, PrimitiveType.Number, PrimitiveType.Boolean, PrimitiveType.Array],
+        customValidator: (value) => (typeof value === "string" && value.length > 4096 ? "The response cannot be longer than 4096 characters." : undefined)
+    })
     public response: string | number | boolean | string[];
 
     public static override from(
