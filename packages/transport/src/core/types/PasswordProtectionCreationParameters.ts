@@ -17,7 +17,7 @@ export class PasswordProtectionCreationParameters extends Serializable implement
     public password: string;
 
     @validate({ nullable: true, customValidator: validatePasswordLocationIndicator })
-    @serialize()
+    @serialize({ any: true })
     public passwordLocationIndicator?: PasswordLocationIndicator;
 
     public static from(value: IPasswordProtectionCreationParameters): PasswordProtectionCreationParameters {
