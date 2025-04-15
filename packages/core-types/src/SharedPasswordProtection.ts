@@ -45,7 +45,6 @@ export class SharedPasswordProtection extends Serializable implements ISharedPas
     @serialize()
     public salt: CoreBuffer;
 
-    // TODO: do we need allowedTypes here?
     @validate({ nullable: true, customValidator: validatePasswordLocationIndicator })
     @serialize({ any: true })
     public passwordLocationIndicator?: PasswordLocationIndicator;

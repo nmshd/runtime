@@ -21,7 +21,7 @@ export class RelationshipTemplateMapper {
                 ? {
                       password: template.passwordProtection.password,
                       passwordIsPin: template.passwordProtection.passwordType.startsWith("pin") ? true : undefined,
-                      passwordLocationIndicator: Number(template.passwordProtection.passwordLocationIndicator)
+                      passwordLocationIndicator: template.passwordProtection.passwordLocationIndicator
                   }
                 : undefined,
             content: this.toTemplateContent(template.cache.content),
