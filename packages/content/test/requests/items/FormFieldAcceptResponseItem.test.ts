@@ -27,7 +27,7 @@ describe("creation of FormFieldAcceptResponseItem", () => {
                 result: ResponseItemResult.Accepted,
                 response: ["aString", 1, true] as any
             })
-        ).toThrow("If the response is an array, it must be a string array");
+        ).toThrow("If the response is an array, it must be a string array.");
     });
 
     test("should throw when trying to create a FormFieldAcceptResponseItem with an object", () => {

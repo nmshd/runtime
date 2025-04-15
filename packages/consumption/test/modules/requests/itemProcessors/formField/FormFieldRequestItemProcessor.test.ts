@@ -332,7 +332,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidAcceptParameters",
-                    message: "Only a selection form field can be accepted with an array."
+                    message: "A string form field must be accepted with a string."
                 });
             });
 

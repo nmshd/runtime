@@ -15,7 +15,7 @@ export class DateFormFieldSettings extends FormFieldSettings implements IDateFor
     }
 
     public canAccept(response: string | number | boolean | string[]): string | undefined {
-        if (!(typeof response === "string" && CoreDate.from(response).dateTime.isValid)) {
+        if (typeof response !== "string" || !CoreDate.from(response).dateTime.isValid) {
             return "A date form field must be accepted with a valid date string in ISO 8601 format.";
         }
 

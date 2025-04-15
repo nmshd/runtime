@@ -1,4 +1,4 @@
-import { FormFieldRequestItem, FormFieldSettings, StringFormFieldSettings } from "../../../src";
+import { FormFieldRequestItem, FormFieldSettings, IntegerFormFieldSettings, StringFormFieldSettings } from "../../../src";
 
 describe("creation of FormFieldRequestItem", () => {
     test("should create a FormFieldRequestItem with a StringFormFieldSettings JSON", () => {
@@ -23,5 +23,29 @@ describe("creation of FormFieldRequestItem", () => {
         expect(item).toBeInstanceOf(FormFieldRequestItem);
         expect(item.settings).toBeInstanceOf(FormFieldSettings);
         expect(item.settings).toBeInstanceOf(StringFormFieldSettings);
+    });
+
+    test("should throw when trying to create a FormFieldRequestItem with an IntegerFormFieldSettings and a min which is not an integer", () => {
+        const aMinWhichIsNotAnInteger = 0.9;
+
+        expect(() =>
+            FormFieldRequestItem.from({
+                title: "aFormField",
+                mustBeAccepted: false,
+                settings: IntegerFormFieldSettings.from({ min: aMinWhichIsNotAnInteger })
+            })
+        ).toThrow("If the min of an integer form field is set, it must be an integer.");
+    });
+
+    test("should throw when trying to create a FormFieldRequestItem with an IntegerFormFieldSettings and a max which is not an integer", () => {
+        const aMaxWhichIsNotAnInteger = 10.1;
+
+        expect(() =>
+            FormFieldRequestItem.from({
+                title: "aFormField",
+                mustBeAccepted: false,
+                settings: IntegerFormFieldSettings.from({ max: aMaxWhichIsNotAnInteger })
+            })
+        ).toThrow("If the max of an integer form field is set, it must be an integer.");
     });
 });
