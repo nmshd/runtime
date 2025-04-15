@@ -12,7 +12,7 @@ export class TokenAndTemplateCreationValidator<
         passwordProtection?: {
             password: string;
             passwordIsPin?: true;
-            passwordLocationIndicator?: any;
+            passwordLocationIndicator?: unknown;
         };
     }
 > extends SchemaValidator<T> {
