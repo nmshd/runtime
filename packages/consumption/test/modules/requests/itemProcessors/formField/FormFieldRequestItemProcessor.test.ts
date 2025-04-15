@@ -261,6 +261,18 @@ describe("FormFieldRequestItemProcessor", function () {
                 expect(result).successfulValidationResult();
             });
 
+            test("can create a selection form field allowing multiple selection", () => {
+                const requestItem = FormFieldRequestItem.from({
+                    mustBeAccepted: false,
+                    title: "aFormField",
+                    settings: SelectionFormFieldSettings.from({ options: ["optionA", "optionB"], allowMultipleSelection: true })
+                });
+
+                const result = processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }));
+
+                expect(result).successfulValidationResult();
+            });
+
             test("cannot create a selection form field with no options", () => {
                 const requestItem = FormFieldRequestItem.from({
                     mustBeAccepted: false,
@@ -821,7 +833,7 @@ describe("FormFieldRequestItemProcessor", function () {
             });
 
             describe("Multiple selection form field", function () {
-                test("can accept a multiple selection form field with an option as an array", function () {
+                test("can accept a multiple selection form field with an option", function () {
                     const requestItem = FormFieldRequestItem.from({
                         mustBeAccepted: true,
                         title: "aFormField",
@@ -855,7 +867,7 @@ describe("FormFieldRequestItemProcessor", function () {
                     expect(result).successfulValidationResult();
                 });
 
-                test("returns an error when it is tried to accept a multiple selection form field with an option as a string", function () {
+                test("returns an error when it is tried to accept a multiple selection form field with a string", function () {
                     const requestItem = FormFieldRequestItem.from({
                         mustBeAccepted: true,
                         title: "aFormField",
@@ -1098,7 +1110,7 @@ describe("FormFieldRequestItemProcessor", function () {
             expect(attributesAfterGettingFreeText).toHaveLength(0);
         });
 
-        test("does not create an Attribute when getting the option selected by the recipient in the selection form field", async function () {
+        test("does not create an Attribute when getting the option selected by the recipient in the single selection form field", async function () {
             const recipient = CoreAddress.from("Recipient");
 
             const requestItem = FormFieldRequestItem.from({
