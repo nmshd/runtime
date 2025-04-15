@@ -34,7 +34,7 @@ describe("creation of FormFieldRequestItem", () => {
                 mustBeAccepted: false,
                 settings: StringFormFieldSettings.from({ min: aMinWhichIsNotAnInteger })
             })
-        ).toThrow("If the min of a string form field is set, it must be an integer.");
+        ).toThrow("This value must be an integer.");
     });
 
     test("should throw when trying to create a FormFieldRequestItem with a StringFormFieldSettings and a max which is not an integer", () => {
@@ -46,7 +46,7 @@ describe("creation of FormFieldRequestItem", () => {
                 mustBeAccepted: false,
                 settings: StringFormFieldSettings.from({ max: aMaxWhichIsNotAnInteger })
             })
-        ).toThrow("If the max of a string form field is set, it must be an integer.");
+        ).toThrow("This value must be an integer.");
     });
 
     test("should throw when trying to create a FormFieldRequestItem with an IntegerFormFieldSettings and a min which is not an integer", () => {
@@ -58,7 +58,7 @@ describe("creation of FormFieldRequestItem", () => {
                 mustBeAccepted: false,
                 settings: IntegerFormFieldSettings.from({ min: aMinWhichIsNotAnInteger })
             })
-        ).toThrow("If the min of an integer form field is set, it must be an integer.");
+        ).toThrow("This value must be an integer.");
     });
 
     test("should throw when trying to create a FormFieldRequestItem with an IntegerFormFieldSettings and a max which is not an integer", () => {
@@ -70,6 +70,6 @@ describe("creation of FormFieldRequestItem", () => {
                 mustBeAccepted: false,
                 settings: IntegerFormFieldSettings.from({ max: aMaxWhichIsNotAnInteger })
             })
-        ).toThrow("If the max of an integer form field is set, it must be an integer.");
+        ).toThrow("This value must be an integer.");
     });
 });
