@@ -38,4 +38,15 @@ describe("creation of FormFieldAcceptResponseItem", () => {
             })
         ).toThrow("Value is not an allowed type.");
     });
+
+    test("should throw when trying to create a FormFieldAcceptResponseItem with a string response too long", () => {
+        const aStringTooLong = "x".repeat(4097);
+
+        expect(() =>
+            FormFieldAcceptResponseItem.from({
+                result: ResponseItemResult.Accepted,
+                response: aStringTooLong
+            })
+        ).toThrow("The response cannot be longer than 4096 characters.");
+    });
 });

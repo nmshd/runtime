@@ -16,7 +16,7 @@ export class FormFieldAcceptResponseItem extends AcceptResponseItem implements I
     @serialize({ any: true })
     @validate({
         allowedTypes: [PrimitiveType.String, PrimitiveType.Number, PrimitiveType.Boolean, PrimitiveType.Array],
-        customValidator: (value) => (typeof value === "string" && value.length > 4096 ? "The response cannot be longer than 4096 characters." : undefined)
+        customValidator: (v) => (typeof v === "string" && v.length > 4096 ? "The response cannot be longer than 4096 characters." : undefined)
     })
     public response: string | number | boolean | string[];
 

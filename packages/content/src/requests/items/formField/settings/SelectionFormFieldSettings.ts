@@ -16,7 +16,10 @@ export interface ISelectionFormFieldSettings extends IFormFieldSettings {
 @type("SelectionFormFieldSettings")
 export class SelectionFormFieldSettings extends FormFieldSettings implements ISelectionFormFieldSettings {
     @serialize({ type: String })
-    @validate()
+    @validate({
+        customValidator: (v) =>
+            Array.isArray(v) && v.some((option) => typeof option === "string" && option.length > 4096) ? "An option cannot be longer than 4096 characters." : undefined
+    })
     public options: string[];
 
     @serialize()

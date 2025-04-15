@@ -23,14 +23,14 @@ export class IntegerFormFieldSettings extends FormFieldSettings implements IInte
     @serialize()
     @validate({
         nullable: true,
-        customValidator: (value) => (Number.isInteger(value) ? undefined : "This value must be an integer.")
+        customValidator: (v) => (Number.isInteger(v) ? undefined : "This value must be an integer.")
     })
     public min?: number;
 
     @serialize()
     @validate({
         nullable: true,
-        customValidator: (value) => (Number.isInteger(value) ? undefined : "This value must be an integer.")
+        customValidator: (v) => (Number.isInteger(v) ? undefined : "This value must be an integer.")
     })
     public max?: number;
 

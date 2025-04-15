@@ -25,16 +25,16 @@ export class StringFormFieldSettings extends FormFieldSettings implements IStrin
         nullable: true,
         min: 0,
         max: 4096,
-        customValidator: (value) => (Number.isInteger(value) ? undefined : "This value must be an integer.")
+        customValidator: (v) => (Number.isInteger(v) ? undefined : "This value must be an integer.")
     })
     public min?: number;
 
     @serialize()
     @validate({
         nullable: true,
-        min: 1,
+        min: 0,
         max: 4096,
-        customValidator: (value) => (Number.isInteger(value) ? undefined : "This value must be an integer.")
+        customValidator: (v) => (Number.isInteger(v) ? undefined : "This value must be an integer.")
     })
     public max?: number;
 
