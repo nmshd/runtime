@@ -40,8 +40,35 @@ export class SelectionFormFieldSettings extends FormFieldSettings implements ISe
     }
 
     public canAccept(response: string | number | boolean | string[]): string | undefined {
+        if (!this.allowMultipleSelection) {
+            const canAcceptSingleSelectionFormFieldError = this.canAcceptSingleSelectionFormField(response);
+            if (canAcceptSingleSelectionFormFieldError) return canAcceptSingleSelectionFormFieldError;
+
+            return;
+        }
+
+        const canAcceptMultipleSelectionFormFieldError = this.canAcceptMultipleSelectionFormField(response);
+        if (canAcceptMultipleSelectionFormFieldError) return canAcceptMultipleSelectionFormFieldError;
+
+        return;
+    }
+
+    public canAcceptSingleSelectionFormField(response: string | number | boolean | string[]): string | undefined {
+        if (typeof response !== "string") {
+            return "A selection form field that does not allow multiple selection must be accepted with a string.";
+        }
+
+        const isKnownOption: boolean = this.options.includes(response);
+        if (!isKnownOption) {
+            return `The selection form field does not provide the option '${response}' for selection.`;
+        }
+
+        return;
+    }
+
+    public canAcceptMultipleSelectionFormField(response: string | number | boolean | string[]): string | undefined {
         if (!Array.isArray(response) || !response.every((option) => typeof option === "string")) {
-            return "A selection form field must be accepted with a string array.";
+            return "A selection form field that allows multiple selection must be accepted with a string array.";
         }
 
         if (response.length === 0) {
@@ -56,10 +83,6 @@ export class SelectionFormFieldSettings extends FormFieldSettings implements ISe
         const unknownOptions: string[] = _.difference(response, this.options);
         if (unknownOptions.length > 0) {
             return `The selection form field does not provide the following option(s) for selection: ${unknownOptions.map((option) => `'${option}'`).join(", ")}.`;
-        }
-
-        if (!this.allowMultipleSelection && response.length !== 1) {
-            return `A selection form field that does not allowMultipleSelection must be accepted with exactly one option.`;
         }
 
         return;
