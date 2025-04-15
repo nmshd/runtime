@@ -94,6 +94,18 @@ describe("creation of FormFieldRequestItem", () => {
                 mustBeAccepted: false,
                 settings: SelectionFormFieldSettings.from({ options: [aStringTooLong] })
             })
-        ).toThrow("An option cannot be longer than 4096 characters.");
+        ).toThrow("An option cannot be shorter than 1 character or longer than 4096 characters.");
+    });
+
+    test("should throw when trying to create a FormFieldRequestItem with SelectionFormFieldSettings and an option too short", () => {
+        const aStringTooShort = "";
+
+        expect(() =>
+            FormFieldRequestItem.from({
+                title: "aFormField",
+                mustBeAccepted: false,
+                settings: SelectionFormFieldSettings.from({ options: [aStringTooShort] })
+            })
+        ).toThrow("An option cannot be shorter than 1 character or longer than 4096 characters.");
     });
 });

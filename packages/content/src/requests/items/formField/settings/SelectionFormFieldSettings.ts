@@ -18,7 +18,9 @@ export class SelectionFormFieldSettings extends FormFieldSettings implements ISe
     @serialize({ type: String })
     @validate({
         customValidator: (v) =>
-            Array.isArray(v) && v.some((option) => typeof option === "string" && option.length > 4096) ? "An option cannot be longer than 4096 characters." : undefined
+            Array.isArray(v) && v.some((option) => typeof option === "string" && (option.length < 1 || option.length > 4096))
+                ? "An option cannot be shorter than 1 character or longer than 4096 characters."
+                : undefined
     })
     public options: string[];
 

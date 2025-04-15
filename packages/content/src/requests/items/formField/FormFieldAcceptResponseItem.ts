@@ -16,8 +16,8 @@ export class FormFieldAcceptResponseItem extends AcceptResponseItem implements I
     @validate({
         allowedTypes: [PrimitiveType.String, PrimitiveType.Number, PrimitiveType.Boolean, PrimitiveType.Array],
         customValidator: (v) =>
-            typeof v === "string" && v.length > 4096
-                ? "The response cannot be longer than 4096 characters."
+            typeof v === "string" && (v.length < 1 || v.length > 4096)
+                ? "The string response cannot be shorter than 1 character or longer than 4096 characters."
                 : Array.isArray(v) && !v.every((option) => typeof option === "string")
                   ? "If the response is an array, it must be a string array."
                   : undefined
