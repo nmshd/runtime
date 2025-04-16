@@ -76,18 +76,12 @@ export class GetRelationshipTemplatesUseCase extends UseCase<GetRelationshipTemp
                 }
             },
             [`${nameof<RelationshipTemplateDTO>((r) => r.passwordProtection)}.passwordLocationIndicator`]: (query: any, input: string) => {
-                if (this.stringContainsNumber(input)) {
-                    query[`${nameof<RelationshipTemplate>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordLocationIndicator)}`] = Number(input);
-                } else {
-                    query[`${nameof<RelationshipTemplate>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordLocationIndicator)}`] = input;
-                }
+                const stringIsNumeric = /^\d+$/.test(input);
+                const queryInput = stringIsNumeric ? Number(input) : input;
+                query[`${nameof<RelationshipTemplate>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordLocationIndicator)}`] = queryInput;
             }
         }
     });
-
-    private static stringContainsNumber(input: string): boolean {
-        return /^\d+$/.test(input);
-    }
 
     public constructor(
         @Inject private readonly relationshipTemplateController: RelationshipTemplateController,
