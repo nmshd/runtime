@@ -97,10 +97,10 @@ describe("Password-protected tokens for files", () => {
     test("validation error when creating a token with an invalid PasswordLocationIndicator", async () => {
         const createResult = await runtimeServices1.transport.files.createTokenForFile({
             fileId,
-            passwordProtection: { password: "password", passwordLocationIndicator: "invalid-password-location-indicator" }
+            passwordProtection: { password: "password", passwordLocationIndicator: "invalid-password-location-indicator" as any }
         });
         expect(createResult).toBeAnError(
-            "must be a number from 0 to 99 or one of the following strings: RecoveryKit, Self, Letter, RegistrationLetter, Mail, Sms, App, Website",
+            "must be a number from 50 to 99 or one of the following strings: Self, Letter, RegistrationLetter, Mail, Sms, App, Website",
             "error.runtime.validation.invalidPropertyValue"
         );
     });

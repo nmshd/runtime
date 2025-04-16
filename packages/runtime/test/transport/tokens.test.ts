@@ -145,13 +145,13 @@ describe("Tokens query", () => {
         const token = await uploadOwnToken(runtimeServices1.transport, runtimeServices1.address, {
             password: "1234",
             passwordIsPin: true,
-            passwordLocationIndicator: PasswordLocationIndicatorMedium.RecoveryKit
+            passwordLocationIndicator: PasswordLocationIndicatorMedium.Letter
         });
         const conditions = new QueryParamConditions<GetTokensQuery>(token, runtimeServices1.transport)
             .addSingleCondition({
                 expectedResult: true,
                 key: "passwordProtection.passwordLocationIndicator",
-                value: "RecoveryKit"
+                value: "Letter"
             })
             .addSingleCondition({
                 expectedResult: false,
@@ -161,7 +161,7 @@ describe("Tokens query", () => {
             .addSingleCondition({
                 expectedResult: false,
                 key: "passwordProtection.passwordLocationIndicator",
-                value: "0"
+                value: "2"
             });
         await conditions.executeTests((c, q) => c.tokens.getTokens({ query: q, ownerRestriction: OwnerRestriction.Own }));
     });

@@ -410,7 +410,7 @@ describe("RelationshipTemplates query", () => {
                 content: emptyRelationshipTemplateContent,
                 passwordProtection: {
                     password: "password",
-                    passwordLocationIndicator: PasswordLocationIndicatorMedium.RecoveryKit
+                    passwordLocationIndicator: PasswordLocationIndicatorMedium.Letter
                 }
             })
         ).value;
@@ -418,7 +418,7 @@ describe("RelationshipTemplates query", () => {
             .addSingleCondition({
                 expectedResult: true,
                 key: "passwordProtection.passwordLocationIndicator",
-                value: "RecoveryKit"
+                value: "Letter"
             })
             .addSingleCondition({
                 expectedResult: false,
@@ -428,7 +428,7 @@ describe("RelationshipTemplates query", () => {
             .addSingleCondition({
                 expectedResult: false,
                 key: "passwordProtection.passwordLocationIndicator",
-                value: "0"
+                value: "2"
             });
         await conditions.executeTests((c, q) => c.relationshipTemplates.getRelationshipTemplates({ query: q, ownerRestriction: OwnerRestriction.Own }));
     });
