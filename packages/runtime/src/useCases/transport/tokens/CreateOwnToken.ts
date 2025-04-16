@@ -18,7 +18,7 @@ import {
 } from "../../common";
 import { TokenMapper } from "./TokenMapper";
 
-export interface CreateOwnTokenRequest {
+export interface SchemaValidatableCreateOwnTokenRequest {
     content: any;
     expiresAt: ISO8601DateTimeString;
     ephemeral: boolean;
@@ -32,6 +32,10 @@ export interface CreateOwnTokenRequest {
         passwordLocationIndicator?: unknown;
     };
 }
+
+export type CreateOwnTokenRequest = SchemaValidatableCreateOwnTokenRequest & {
+    passwordProtection?: { passwordLocationIndicator?: PasswordLocationIndicator };
+};
 
 class Validator extends TokenAndTemplateCreationValidator<CreateOwnTokenRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
@@ -72,20 +76,12 @@ export class CreateOwnTokenUseCase extends UseCase<CreateOwnTokenRequest, TokenD
             throw RuntimeErrors.general.invalidTokenContent();
         }
 
-        const passwordProtection = request.passwordProtection
-            ? PasswordProtectionCreationParameters.create({
-                  password: request.passwordProtection.password,
-                  passwordIsPin: request.passwordProtection.passwordIsPin,
-                  passwordLocationIndicator: request.passwordProtection.passwordLocationIndicator as PasswordLocationIndicator
-              })
-            : undefined;
-
         const response = await this.tokenController.sendToken({
             content: tokenContent,
             expiresAt: CoreDate.from(request.expiresAt),
             ephemeral: request.ephemeral,
             forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
-            passwordProtection
+            passwordProtection: PasswordProtectionCreationParameters.create(request.passwordProtection)
         });
 
         if (!request.ephemeral) {

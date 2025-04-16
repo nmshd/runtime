@@ -13,7 +13,7 @@ import { TokenDTO } from "../../../types";
 import { AddressString, ISO8601DateTimeString, RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, TokenAndTemplateCreationValidator, UseCase } from "../../common";
 import { TokenMapper } from "../tokens/TokenMapper";
 
-export interface CreateTokenForOwnTemplateRequest {
+export interface SchemaValidatableCreateTokenForOwnTemplateRequest {
     templateId: RelationshipTemplateIdString;
     expiresAt?: ISO8601DateTimeString;
     ephemeral?: boolean;
@@ -27,6 +27,10 @@ export interface CreateTokenForOwnTemplateRequest {
         passwordLocationIndicator?: unknown;
     };
 }
+
+export type CreateTokenForOwnTemplateRequest = SchemaValidatableCreateTokenForOwnTemplateRequest & {
+    passwordProtection?: { passwordLocationIndicator?: PasswordLocationIndicator };
+};
 
 class Validator extends TokenAndTemplateCreationValidator<CreateTokenForOwnTemplateRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
@@ -59,25 +63,17 @@ export class CreateTokenForOwnTemplateUseCase extends UseCase<CreateTokenForOwnT
             return Result.fail(RuntimeErrors.relationshipTemplates.personalizationMustBeInherited());
         }
 
-        const tokenPasswordProtection = request.passwordProtection
-            ? PasswordProtectionCreationParameters.create({
-                  password: request.passwordProtection.password,
-                  passwordIsPin: request.passwordProtection.passwordIsPin,
-                  passwordLocationIndicator: request.passwordProtection.passwordLocationIndicator as PasswordLocationIndicator
-              })
-            : undefined;
-
-        if (template.passwordProtection && !template.passwordProtection.matchesCreationParameters(tokenPasswordProtection)) {
+        if (template.passwordProtection && !template.passwordProtection.matchesInputForNewPasswordProtection(request.passwordProtection)) {
             return Result.fail(RuntimeErrors.relationshipTemplates.passwordProtectionMustBeInherited());
         }
 
-        const templatePasswordProtection = template.passwordProtection ? SharedPasswordProtection.from(template.passwordProtection) : undefined;
+        const passwordProtection = template.passwordProtection ? SharedPasswordProtection.from(template.passwordProtection) : undefined;
 
         const tokenContent = TokenContentRelationshipTemplate.from({
             templateId: template.id,
             secretKey: template.secretKey,
             forIdentity: template.cache?.forIdentity,
-            passwordProtection: templatePasswordProtection
+            passwordProtection
         });
 
         const ephemeral = request.ephemeral ?? true;
@@ -88,7 +84,7 @@ export class CreateTokenForOwnTemplateUseCase extends UseCase<CreateTokenForOwnT
             expiresAt: tokenExpiry,
             ephemeral,
             forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
-            passwordProtection: tokenPasswordProtection
+            passwordProtection: PasswordProtectionCreationParameters.create(request.passwordProtection)
         });
 
         if (!ephemeral) {

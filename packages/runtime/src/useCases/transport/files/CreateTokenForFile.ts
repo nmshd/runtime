@@ -6,7 +6,7 @@ import { TokenDTO } from "../../../types";
 import { AddressString, FileIdString, ISO8601DateTimeString, RuntimeErrors, SchemaRepository, TokenAndTemplateCreationValidator, UseCase } from "../../common";
 import { TokenMapper } from "../tokens/TokenMapper";
 
-export interface CreateTokenForFileRequest {
+export interface SchemaValidatableCreateTokenForFileRequest {
     fileId: FileIdString;
     expiresAt?: ISO8601DateTimeString;
     ephemeral?: boolean;
@@ -20,6 +20,10 @@ export interface CreateTokenForFileRequest {
         passwordLocationIndicator?: unknown;
     };
 }
+
+export type CreateTokenForFileRequest = SchemaValidatableCreateTokenForFileRequest & {
+    passwordProtection?: { passwordLocationIndicator?: PasswordLocationIndicator };
+};
 
 class Validator extends TokenAndTemplateCreationValidator<CreateTokenForFileRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
@@ -52,20 +56,13 @@ export class CreateTokenForFileUseCase extends UseCase<CreateTokenForFileRequest
         const defaultTokenExpiry = file.cache?.expiresAt ?? CoreDate.utc().add({ days: 12 });
         const tokenExpiry = request.expiresAt ? CoreDate.from(request.expiresAt) : defaultTokenExpiry;
         const ephemeral = request.ephemeral ?? true;
-        const passwordProtection = request.passwordProtection
-            ? PasswordProtectionCreationParameters.create({
-                  password: request.passwordProtection.password,
-                  passwordIsPin: request.passwordProtection.passwordIsPin,
-                  passwordLocationIndicator: request.passwordProtection.passwordLocationIndicator as PasswordLocationIndicator
-              })
-            : undefined;
 
         const token = await this.tokenController.sendToken({
             content: tokenContent,
             expiresAt: tokenExpiry,
             ephemeral,
             forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
-            passwordProtection
+            passwordProtection: PasswordProtectionCreationParameters.create(request.passwordProtection)
         });
 
         if (!ephemeral) {

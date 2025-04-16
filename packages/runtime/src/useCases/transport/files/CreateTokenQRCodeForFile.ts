@@ -4,7 +4,7 @@ import { File, FileController, PasswordProtectionCreationParameters, TokenConten
 import { Inject } from "@nmshd/typescript-ioc";
 import { AddressString, FileIdString, ISO8601DateTimeString, QRCode, RuntimeErrors, SchemaRepository, TokenAndTemplateCreationValidator, UseCase } from "../../common";
 
-export interface CreateTokenQRCodeForFileRequest {
+export interface SchemaValidatableCreateTokenQRCodeForFileRequest {
     fileId: FileIdString;
     expiresAt?: ISO8601DateTimeString;
     forIdentity?: AddressString;
@@ -17,6 +17,10 @@ export interface CreateTokenQRCodeForFileRequest {
         passwordLocationIndicator?: unknown;
     };
 }
+
+export type CreateTokenQRCodeForFileRequest = SchemaValidatableCreateTokenQRCodeForFileRequest & {
+    passwordProtection?: { passwordLocationIndicator?: PasswordLocationIndicator };
+};
 
 export interface CreateTokenQRCodeForFileResponse {
     qrCodeBytes: string;
@@ -51,20 +55,13 @@ export class CreateTokenQRCodeForFileUseCase extends UseCase<CreateTokenQRCodeFo
 
         const defaultTokenExpiry = file.cache?.expiresAt ?? CoreDate.utc().add({ days: 12 });
         const tokenExpiry = request.expiresAt ? CoreDate.from(request.expiresAt) : defaultTokenExpiry;
-        const passwordProtection = request.passwordProtection
-            ? PasswordProtectionCreationParameters.create({
-                  password: request.passwordProtection.password,
-                  passwordIsPin: request.passwordProtection.passwordIsPin,
-                  passwordLocationIndicator: request.passwordProtection.passwordLocationIndicator as PasswordLocationIndicator
-              })
-            : undefined;
 
         const token = await this.tokenController.sendToken({
             content: tokenContent,
             expiresAt: tokenExpiry,
             ephemeral: true,
             forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
-            passwordProtection
+            passwordProtection: PasswordProtectionCreationParameters.create(request.passwordProtection)
         });
 
         const qrCode = await QRCode.forTruncateable(token);

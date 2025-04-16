@@ -13,7 +13,7 @@ import {
     UseCase
 } from "../../common";
 
-export interface CreateTokenQRCodeForOwnTemplateRequest {
+export interface SchemaValidatableCreateTokenQRCodeForOwnTemplateRequest {
     templateId: RelationshipTemplateIdString;
     expiresAt?: ISO8601DateTimeString;
     forIdentity?: AddressString;
@@ -27,6 +27,9 @@ export interface CreateTokenQRCodeForOwnTemplateRequest {
     };
 }
 
+export type CreateTokenQRCodeForOwnTemplateRequest = SchemaValidatableCreateTokenQRCodeForOwnTemplateRequest & {
+    passwordProtection?: { passwordLocationIndicator?: PasswordLocationIndicator };
+};
 class Validator extends TokenAndTemplateCreationValidator<CreateTokenQRCodeForOwnTemplateRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
         super(schemaRepository.getSchema("CreateTokenQRCodeForOwnTemplateRequest"));
@@ -61,25 +64,17 @@ export class CreateTokenQRCodeForOwnTemplateUseCase extends UseCase<CreateTokenQ
             return Result.fail(RuntimeErrors.relationshipTemplates.personalizationMustBeInherited());
         }
 
-        const tokenPasswordProtection = request.passwordProtection
-            ? PasswordProtectionCreationParameters.create({
-                  password: request.passwordProtection.password,
-                  passwordIsPin: request.passwordProtection.passwordIsPin,
-                  passwordLocationIndicator: request.passwordProtection.passwordLocationIndicator as PasswordLocationIndicator
-              })
-            : undefined;
-
-        if (template.passwordProtection && !template.passwordProtection.matchesCreationParameters(tokenPasswordProtection)) {
+        if (template.passwordProtection && !template.passwordProtection.matchesInputForNewPasswordProtection(request.passwordProtection)) {
             return Result.fail(RuntimeErrors.relationshipTemplates.passwordProtectionMustBeInherited());
         }
 
-        const templatePasswordProtection = template.passwordProtection ? SharedPasswordProtection.from(template.passwordProtection) : undefined;
+        const passwordProtection = template.passwordProtection ? SharedPasswordProtection.from(template.passwordProtection) : undefined;
 
         const tokenContent = TokenContentRelationshipTemplate.from({
             templateId: template.id,
             secretKey: template.secretKey,
             forIdentity: template.cache!.forIdentity,
-            passwordProtection: templatePasswordProtection
+            passwordProtection
         });
 
         const defaultTokenExpiry = template.cache?.expiresAt ?? CoreDate.utc().add({ days: 12 });
@@ -89,7 +84,7 @@ export class CreateTokenQRCodeForOwnTemplateUseCase extends UseCase<CreateTokenQ
             expiresAt: tokenExpiry,
             ephemeral: true,
             forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
-            passwordProtection: tokenPasswordProtection
+            passwordProtection: PasswordProtectionCreationParameters.create(request.passwordProtection)
         });
 
         const qrCode = await QRCode.forTruncateable(token);

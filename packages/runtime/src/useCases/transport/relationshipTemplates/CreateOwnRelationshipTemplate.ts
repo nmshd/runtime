@@ -9,7 +9,7 @@ import { RelationshipTemplateDTO } from "../../../types";
 import { AddressString, ISO8601DateTimeString, RuntimeErrors, SchemaRepository, TokenAndTemplateCreationValidator, UseCase } from "../../common";
 import { RelationshipTemplateMapper } from "./RelationshipTemplateMapper";
 
-export interface CreateOwnRelationshipTemplateRequest {
+export interface SchemaValidatableCreateOwnRelationshipTemplateRequest {
     expiresAt: ISO8601DateTimeString;
     content: any;
     /**
@@ -26,6 +26,10 @@ export interface CreateOwnRelationshipTemplateRequest {
         passwordLocationIndicator?: unknown;
     };
 }
+
+export type CreateOwnRelationshipTemplateRequest = SchemaValidatableCreateOwnRelationshipTemplateRequest & {
+    passwordProtection?: { passwordLocationIndicator?: PasswordLocationIndicator };
+};
 
 class Validator extends TokenAndTemplateCreationValidator<CreateOwnRelationshipTemplateRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
@@ -53,20 +57,12 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
             content.onNewRelationship.expiresAt = CoreDate.from(request.expiresAt);
         }
 
-        const passwordProtection = request.passwordProtection
-            ? PasswordProtectionCreationParameters.create({
-                  password: request.passwordProtection.password,
-                  passwordIsPin: request.passwordProtection.passwordIsPin,
-                  passwordLocationIndicator: request.passwordProtection.passwordLocationIndicator as PasswordLocationIndicator
-              })
-            : undefined;
-
         const relationshipTemplate = await this.templateController.sendRelationshipTemplate({
             content: content,
             expiresAt: CoreDate.from(request.expiresAt),
             maxNumberOfAllocations: request.maxNumberOfAllocations,
             forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
-            passwordProtection
+            passwordProtection: PasswordProtectionCreationParameters.create(request.passwordProtection)
         });
 
         await this.accountController.syncDatawallet();
