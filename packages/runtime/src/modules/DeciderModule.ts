@@ -333,7 +333,7 @@ async function checkCompatibility(
             continue;
         }
 
-        if (property.endsWith("At") || property.endsWith("From") || property.endsWith("To")) {
+        if (property.endsWith("At")) {
             compatible &&= checkDatesCompatibility(requestConfigProperty, requestProperty);
             if (!compatible) break;
             continue;

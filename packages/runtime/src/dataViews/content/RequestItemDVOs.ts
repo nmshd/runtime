@@ -54,6 +54,7 @@ export interface ShareAttributeRequestItemDVO extends RequestItemDVO {
 
 export interface AuthenticationRequestItemDVO extends RequestItemDVO {
     type: "AuthenticationRequestItemDVO";
+    title: string;
 }
 
 export interface ConsentRequestItemDVO extends RequestItemDVO {

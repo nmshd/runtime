@@ -180,7 +180,7 @@ describe("DeciderModule", () => {
                 receivedRequest: {
                     "@type": "Request",
                     items: [
-                        { "@type": "AuthenticationRequestItem", mustBeAccepted: false },
+                        { "@type": "AuthenticationRequestItem", mustBeAccepted: false, title: "Title of RequestItem" },
                         { "@type": "FreeTextRequestItem", mustBeAccepted: false, freeText: "A free text" }
                     ]
                 },
@@ -225,7 +225,7 @@ describe("DeciderModule", () => {
                 receivedRequest: {
                     "@type": "Request",
                     items: [
-                        { "@type": "AuthenticationRequestItem", mustBeAccepted: false },
+                        { "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false },
                         { "@type": "ConsentRequestItem", consent: "A consent text", mustBeAccepted: false },
                         {
                             "@type": "CreateAttributeRequestItem",
@@ -315,7 +315,7 @@ describe("DeciderModule", () => {
                 title: "Title of Request",
                 description: "Description of Request",
                 metadata: { key: "value" },
-                items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }]
+                items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }]
             });
             const template = (
                 await sender.transport.relationshipTemplates.createOwnRelationshipTemplate({
@@ -370,7 +370,7 @@ describe("DeciderModule", () => {
                     title: "Title of Request",
                     description: "Description of Request",
                     metadata: { key: "value" },
-                    items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }]
+                    items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }]
                 },
                 requestSourceId: message.id
             });
@@ -403,7 +403,7 @@ describe("DeciderModule", () => {
                 receivedRequest: {
                     "@type": "Request",
                     title: "Title of Request",
-                    items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }]
+                    items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }]
                 },
                 requestSourceId: message.id
             });
@@ -434,7 +434,7 @@ describe("DeciderModule", () => {
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
             const receivedRequestResult = await recipient.consumption.incomingRequests.received({
-                receivedRequest: { "@type": "Request", items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }] },
+                receivedRequest: { "@type": "Request", items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }] },
                 requestSourceId: message.id
             });
             await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
@@ -464,7 +464,11 @@ describe("DeciderModule", () => {
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
             const receivedRequestResult = await recipient.consumption.incomingRequests.received({
-                receivedRequest: { "@type": "Request", items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }], expiresAt: requestExpirationDate },
+                receivedRequest: {
+                    "@type": "Request",
+                    items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }],
+                    expiresAt: requestExpirationDate
+                },
                 requestSourceId: message.id
             });
             await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
@@ -494,7 +498,11 @@ describe("DeciderModule", () => {
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
             const receivedRequestResult = await recipient.consumption.incomingRequests.received({
-                receivedRequest: { "@type": "Request", items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }], expiresAt: requestExpirationDate },
+                receivedRequest: {
+                    "@type": "Request",
+                    items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }],
+                    expiresAt: requestExpirationDate
+                },
                 requestSourceId: message.id
             });
             await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
@@ -524,7 +532,7 @@ describe("DeciderModule", () => {
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
             const receivedRequestResult = await recipient.consumption.incomingRequests.received({
-                receivedRequest: { "@type": "Request", items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }] },
+                receivedRequest: { "@type": "Request", items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }] },
                 requestSourceId: message.id
             });
             await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
@@ -554,7 +562,7 @@ describe("DeciderModule", () => {
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
             const receivedRequestResult = await recipient.consumption.incomingRequests.received({
-                receivedRequest: { "@type": "Request", items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }] },
+                receivedRequest: { "@type": "Request", items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }] },
                 requestSourceId: message.id
             });
             await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
@@ -615,7 +623,7 @@ describe("DeciderModule", () => {
             const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
 
             const request = Request.from({
-                items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }]
+                items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }]
             });
             const template = (
                 await sender.transport.relationshipTemplates.createOwnRelationshipTemplate({
@@ -658,7 +666,7 @@ describe("DeciderModule", () => {
             const receivedRequestResult = await recipient.consumption.incomingRequests.received({
                 receivedRequest: {
                     "@type": "Request",
-                    items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }]
+                    items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }]
                 },
                 requestSourceId: message.id
             });
@@ -686,7 +694,7 @@ describe("DeciderModule", () => {
             const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
 
             const request = Request.from({
-                items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }]
+                items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }]
             });
             const template = (
                 await sender.transport.relationshipTemplates.createOwnRelationshipTemplate({
@@ -729,7 +737,7 @@ describe("DeciderModule", () => {
             const receivedRequestResult = await recipient.consumption.incomingRequests.received({
                 receivedRequest: {
                     "@type": "Request",
-                    items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }]
+                    items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }]
                 },
                 requestSourceId: message.id
             });
@@ -923,10 +931,12 @@ describe("DeciderModule", () => {
                     items: [
                         {
                             "@type": "AuthenticationRequestItem",
+                            title: "Title of RequestItem",
                             mustBeAccepted: false
                         },
                         {
                             "@type": "AuthenticationRequestItem",
+                            title: "Title of RequestItem",
                             mustBeAccepted: false
                         }
                     ]
@@ -1120,7 +1130,7 @@ describe("DeciderModule", () => {
                     {
                         requestConfig: {
                             "content.item.@type": "AuthenticationRequestItem",
-                            "content.item.title": "Title of RequestItem"
+                            "content.item.description": "Description of RequestItem"
                         },
                         responseConfig: {
                             accept: true
@@ -1133,7 +1143,7 @@ describe("DeciderModule", () => {
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
             const receivedRequestResult = await recipient.consumption.incomingRequests.received({
-                receivedRequest: { "@type": "Request", items: [{ "@type": "AuthenticationRequestItem", mustBeAccepted: false }] },
+                receivedRequest: { "@type": "Request", items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }] },
                 requestSourceId: message.id
             });
             await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
@@ -1169,6 +1179,7 @@ describe("DeciderModule", () => {
                     items: [
                         {
                             "@type": "AuthenticationRequestItem",
+                            title: "Title of RequestItem",
                             mustBeAccepted: true
                         }
                     ]
@@ -1243,18 +1254,13 @@ describe("DeciderModule", () => {
         });
 
         test("accepts a CreateAttributeRequestItem given a CreateAttributeRequestItemConfig with all fields set for an IdentityAttribute", async () => {
-            const attributeValidFrom = CoreDate.utc().subtract({ days: 1 }).toString();
-            const attributeValidTo = CoreDate.utc().add({ days: 1 }).toString();
-
             const deciderConfig: DeciderModuleConfigurationOverwrite = {
                 automationConfig: [
                     {
                         requestConfig: {
                             "content.item.@type": "CreateAttributeRequestItem",
                             "content.item.attribute.@type": "IdentityAttribute",
-                            "content.item.attribute.validFrom": attributeValidFrom,
-                            "content.item.attribute.validTo": attributeValidTo,
-                            "content.item.attribute.tags": ["tag1", "tag2"],
+                            "content.item.attribute.tags": ["x+%+tag1", "x+%+tag2"],
                             "content.item.attribute.value.@type": "IdentityFileReference",
                             "content.item.attribute.value.value": "A link to a file with more than 30 characters"
                         },
@@ -1277,9 +1283,7 @@ describe("DeciderModule", () => {
                             attribute: {
                                 "@type": "IdentityAttribute",
                                 owner: recipient.address,
-                                validFrom: attributeValidFrom,
-                                validTo: attributeValidTo,
-                                tags: ["tag1", "tag3"],
+                                tags: ["x+%+tag1", "x+%+tag3"],
                                 value: {
                                     "@type": "IdentityFileReference",
                                     value: "A link to a file with more than 30 characters"
@@ -1318,9 +1322,6 @@ describe("DeciderModule", () => {
         });
 
         test("accepts a CreateAttributeRequestItem given a CreateAttributeRequestItemConfig with all fields set for a RelationshipAttribute", async () => {
-            const attributeValidFrom = CoreDate.utc().subtract({ days: 1 }).toString();
-            const attributeValidTo = CoreDate.utc().add({ days: 1 }).toString();
-
             const deciderConfig: DeciderModuleConfigurationOverwrite = {
                 automationConfig: [
                     {
@@ -1328,8 +1329,6 @@ describe("DeciderModule", () => {
                             "content.item.@type": "CreateAttributeRequestItem",
                             "content.item.attribute.@type": "RelationshipAttribute",
                             "content.item.attribute.owner": sender.address,
-                            "content.item.attribute.validFrom": attributeValidFrom,
-                            "content.item.attribute.validTo": attributeValidTo,
                             "content.item.attribute.key": "A key",
                             "content.item.attribute.isTechnical": false,
                             "content.item.attribute.confidentiality": RelationshipAttributeConfidentiality.Public,
@@ -1357,8 +1356,6 @@ describe("DeciderModule", () => {
                             attribute: {
                                 "@type": "RelationshipAttribute",
                                 owner: sender.address,
-                                validFrom: attributeValidFrom,
-                                validTo: attributeValidTo,
                                 key: "A key",
                                 isTechnical: false,
                                 confidentiality: RelationshipAttributeConfidentiality.Public,
@@ -1516,34 +1513,25 @@ describe("DeciderModule", () => {
         });
 
         test("accepts a ProposeAttributeRequestItem given a ProposeAttributeRequestItemConfig with all fields set for an IdentityAttribute", async () => {
-            const attributeValidFrom = CoreDate.utc().subtract({ days: 1 }).toString();
-            const attributeValidTo = CoreDate.utc().add({ days: 1 }).toString();
-
             const deciderConfig: DeciderModuleConfigurationOverwrite = {
                 automationConfig: [
                     {
                         requestConfig: {
                             "content.item.@type": "ProposeAttributeRequestItem",
                             "content.item.attribute.@type": "IdentityAttribute",
-                            "content.item.attribute.validFrom": attributeValidFrom,
-                            "content.item.attribute.validTo": attributeValidTo,
-                            "content.item.attribute.tags": ["tag1", "tag2"],
+                            "content.item.attribute.tags": ["x+%+tag1", "x+%+tag2"],
                             "content.item.attribute.value.@type": "GivenName",
                             "content.item.attribute.value.value": "Given name of recipient proposed by sender",
                             "content.item.query.@type": "IdentityAttributeQuery",
-                            "content.item.query.validFrom": attributeValidFrom,
-                            "content.item.query.validTo": attributeValidTo,
                             "content.item.query.valueType": "GivenName",
-                            "content.item.query.tags": ["tag1", "tag2"]
+                            "content.item.query.tags": ["x+%+tag1", "x+%+tag2"]
                         },
                         responseConfig: {
                             accept: true,
                             attribute: IdentityAttribute.from({
                                 owner: "",
-                                validFrom: attributeValidFrom,
-                                validTo: attributeValidTo,
                                 value: GivenName.from("Given name of recipient").toJSON(),
-                                tags: ["tag1"]
+                                tags: ["x+%+tag1"]
                             })
                         }
                     }
@@ -1562,9 +1550,7 @@ describe("DeciderModule", () => {
                             attribute: {
                                 "@type": "IdentityAttribute",
                                 owner: recipient.address,
-                                validFrom: attributeValidFrom,
-                                validTo: attributeValidTo,
-                                tags: ["tag1", "tag3"],
+                                tags: ["x+%+tag1", "x+%+tag3"],
                                 value: {
                                     "@type": "GivenName",
                                     value: "Given name of recipient proposed by sender"
@@ -1572,10 +1558,8 @@ describe("DeciderModule", () => {
                             },
                             query: {
                                 "@type": "IdentityAttributeQuery",
-                                validFrom: attributeValidFrom,
-                                validTo: attributeValidTo,
                                 valueType: "GivenName",
-                                tags: ["tag1", "tag3"]
+                                tags: ["x+%+tag1", "x+%+tag3"]
                             },
                             mustBeAccepted: true
                         }
@@ -1610,17 +1594,12 @@ describe("DeciderModule", () => {
         });
 
         test("accepts a ProposeAttributeRequestItem given a ProposeAttributeRequestItemConfig with all fields set for a RelationshipAttribute", async () => {
-            const attributeValidFrom = CoreDate.utc().subtract({ days: 1 }).toString();
-            const attributeValidTo = CoreDate.utc().add({ days: 1 }).toString();
-
             const deciderConfig: DeciderModuleConfigurationOverwrite = {
                 automationConfig: [
                     {
                         requestConfig: {
                             "content.item.@type": "ProposeAttributeRequestItem",
                             "content.item.attribute.@type": "RelationshipAttribute",
-                            "content.item.attribute.validFrom": attributeValidFrom,
-                            "content.item.attribute.validTo": attributeValidTo,
                             "content.item.attribute.key": "A key",
                             "content.item.attribute.isTechnical": false,
                             "content.item.attribute.confidentiality": RelationshipAttributeConfidentiality.Public,
@@ -1629,8 +1608,6 @@ describe("DeciderModule", () => {
                             "content.item.attribute.value.title": "Title of Attribute",
                             "content.item.attribute.value.description": "Description of Attribute",
                             "content.item.query.@type": "RelationshipAttributeQuery",
-                            "content.item.query.validFrom": attributeValidFrom,
-                            "content.item.query.validTo": attributeValidTo,
                             "content.item.query.key": "A key",
                             "content.item.query.attributeCreationHints.title": "Title of Attribute",
                             "content.item.query.attributeCreationHints.description": "Description of Attribute",
@@ -1645,9 +1622,7 @@ describe("DeciderModule", () => {
                                     "@type": "ProprietaryString",
                                     value: "A proprietary string",
                                     title: "Title of Attribute",
-                                    description: "Description of Attribute",
-                                    validFrom: attributeValidFrom,
-                                    validTo: attributeValidTo
+                                    description: "Description of Attribute"
                                 },
                                 key: "A key",
                                 confidentiality: RelationshipAttributeConfidentiality.Public
@@ -1670,8 +1645,6 @@ describe("DeciderModule", () => {
                             attribute: {
                                 "@type": "RelationshipAttribute",
                                 owner: sender.address,
-                                validFrom: attributeValidFrom,
-                                validTo: attributeValidTo,
                                 key: "A key",
                                 isTechnical: false,
                                 confidentiality: RelationshipAttributeConfidentiality.Public,
@@ -1685,8 +1658,6 @@ describe("DeciderModule", () => {
                             query: {
                                 "@type": "RelationshipAttributeQuery",
                                 owner: "",
-                                validFrom: attributeValidFrom,
-                                validTo: attributeValidTo,
                                 key: "A key",
                                 attributeCreationHints: {
                                     valueType: "ProprietaryString",
@@ -1728,28 +1699,21 @@ describe("DeciderModule", () => {
         });
 
         test("accepts a ReadAttributeRequestItem given a ReadAttributeRequestItemConfig with all fields set for an IdentityAttributeQuery", async () => {
-            const attributeValidFrom = CoreDate.utc().subtract({ days: 1 }).toString();
-            const attributeValidTo = CoreDate.utc().add({ days: 1 }).toString();
-
             const deciderConfig: DeciderModuleConfigurationOverwrite = {
                 automationConfig: [
                     {
                         requestConfig: {
                             "content.item.@type": "ReadAttributeRequestItem",
                             "content.item.query.@type": "IdentityAttributeQuery",
-                            "content.item.query.validFrom": attributeValidFrom,
-                            "content.item.query.validTo": attributeValidTo,
                             "content.item.query.valueType": "GivenName",
-                            "content.item.query.tags": ["tag1", "tag2"]
+                            "content.item.query.tags": ["x+%+tag1", "x+%+tag2"]
                         },
                         responseConfig: {
                             accept: true,
                             newAttribute: IdentityAttribute.from({
                                 owner: "",
-                                validFrom: attributeValidFrom,
-                                validTo: attributeValidTo,
                                 value: GivenName.from("Given name of recipient").toJSON(),
-                                tags: ["tag1"]
+                                tags: ["x+%+tag1"]
                             })
                         }
                     }
@@ -1767,10 +1731,8 @@ describe("DeciderModule", () => {
                             "@type": "ReadAttributeRequestItem",
                             query: {
                                 "@type": "IdentityAttributeQuery",
-                                validFrom: attributeValidFrom,
-                                validTo: attributeValidTo,
                                 valueType: "GivenName",
-                                tags: ["tag1", "tag3"]
+                                tags: ["x+%+tag1", "x+%+tag3"]
                             },
                             mustBeAccepted: true
                         }
@@ -1805,17 +1767,12 @@ describe("DeciderModule", () => {
         });
 
         test("accepts a ReadAttributeRequestItem given a ReadAttributeRequestItemConfig with all fields set for a RelationshipAttributeQuery", async () => {
-            const attributeValidFrom = CoreDate.utc().subtract({ days: 1 }).toString();
-            const attributeValidTo = CoreDate.utc().add({ days: 1 }).toString();
-
             const deciderConfig: DeciderModuleConfigurationOverwrite = {
                 automationConfig: [
                     {
                         requestConfig: {
                             "content.item.@type": "ReadAttributeRequestItem",
                             "content.item.query.@type": "RelationshipAttributeQuery",
-                            "content.item.query.validFrom": attributeValidFrom,
-                            "content.item.query.validTo": attributeValidTo,
                             "content.item.query.key": "A key",
                             "content.item.query.owner": "",
                             "content.item.query.attributeCreationHints.title": "Title of Attribute",
@@ -1831,9 +1788,7 @@ describe("DeciderModule", () => {
                                     "@type": "ProprietaryString",
                                     value: "A proprietary string",
                                     title: "Title of Attribute",
-                                    description: "Description of Attribute",
-                                    validFrom: attributeValidFrom,
-                                    validTo: attributeValidTo
+                                    description: "Description of Attribute"
                                 },
                                 key: "A key",
                                 confidentiality: RelationshipAttributeConfidentiality.Public
@@ -1856,8 +1811,6 @@ describe("DeciderModule", () => {
                             query: {
                                 "@type": "RelationshipAttributeQuery",
                                 owner: "",
-                                validFrom: attributeValidFrom,
-                                validTo: attributeValidTo,
                                 key: "A key",
                                 attributeCreationHints: {
                                     valueType: "ProprietaryString",
@@ -1907,14 +1860,14 @@ describe("DeciderModule", () => {
                             "content.item.query.@type": "IQLQuery",
                             "content.item.query.queryString": "GivenName || LastName",
                             "content.item.query.attributeCreationHints.valueType": "GivenName",
-                            "content.item.query.attributeCreationHints.tags": ["tag1", "tag2"]
+                            "content.item.query.attributeCreationHints.tags": ["x+%+tag1", "x+%+tag2"]
                         },
                         responseConfig: {
                             accept: true,
                             newAttribute: IdentityAttribute.from({
                                 owner: "",
                                 value: GivenName.from("Given name of recipient").toJSON(),
-                                tags: ["tag1"]
+                                tags: ["x+%+tag1"]
                             })
                         }
                     }
@@ -1935,7 +1888,7 @@ describe("DeciderModule", () => {
                                 queryString: "GivenName || LastName",
                                 attributeCreationHints: {
                                     valueType: "GivenName",
-                                    tags: ["tag1", "tag3"]
+                                    tags: ["x+%+tag1", "x+%+tag3"]
                                 }
                             },
                             mustBeAccepted: true
@@ -1971,19 +1924,14 @@ describe("DeciderModule", () => {
         });
 
         test("accepts a RegisterAttributeListenerRequestItem given a RegisterAttributeListenerRequestItemConfig with all fields set for an IdentityAttributeQuery and lower bounds for dates", async () => {
-            const attributeValidFrom = CoreDate.utc().subtract({ days: 1 });
-            const attributeValidTo = CoreDate.utc().add({ days: 1 });
-
             const deciderConfig: DeciderModuleConfigurationOverwrite = {
                 automationConfig: [
                     {
                         requestConfig: {
                             "content.item.@type": "RegisterAttributeListenerRequestItem",
                             "content.item.query.@type": "IdentityAttributeQuery",
-                            "content.item.query.validFrom": `>${attributeValidFrom.subtract({ days: 1 }).toString()}`,
-                            "content.item.query.validTo": `>${attributeValidTo.subtract({ days: 1 }).toString()}`,
                             "content.item.query.valueType": "GivenName",
-                            "content.item.query.tags": ["tag1", "tag2"]
+                            "content.item.query.tags": ["x+%+tag1", "x+%+tag2"]
                         },
                         responseConfig: {
                             accept: true
@@ -2003,10 +1951,8 @@ describe("DeciderModule", () => {
                             "@type": "RegisterAttributeListenerRequestItem",
                             query: {
                                 "@type": "IdentityAttributeQuery",
-                                validFrom: attributeValidFrom.toString(),
-                                validTo: attributeValidTo.toString(),
                                 valueType: "GivenName",
-                                tags: ["tag1", "tag3"]
+                                tags: ["x+%+tag1", "x+%+tag3"]
                             },
                             mustBeAccepted: true
                         }
@@ -2033,9 +1979,6 @@ describe("DeciderModule", () => {
         });
 
         test("accepts a ShareAttributeRequestItem given a ShareAttributeRequestItemConfig with all fields set for an IdentityAttribute and upper bounds for dates", async () => {
-            const attributeValidFrom = CoreDate.utc().subtract({ days: 1 });
-            const attributeValidTo = CoreDate.utc().add({ days: 1 });
-
             const deciderConfig: DeciderModuleConfigurationOverwrite = {
                 automationConfig: [
                     {
@@ -2043,9 +1986,7 @@ describe("DeciderModule", () => {
                             "content.item.@type": "ShareAttributeRequestItem",
                             "content.item.attribute.@type": "IdentityAttribute",
                             "content.item.attribute.owner": sender.address,
-                            "content.item.attribute.validFrom": `<${attributeValidFrom.add({ days: 1 }).toString()}`,
-                            "content.item.attribute.validTo": `<${attributeValidTo.add({ days: 1 }).toString()}`,
-                            "content.item.attribute.tags": ["tag1", "tag2"],
+                            "content.item.attribute.tags": ["x+%+tag1", "x+%+tag2"],
                             "content.item.attribute.value.@type": "IdentityFileReference",
                             "content.item.attribute.value.value": "A link to a file with more than 30 characters"
                         },
@@ -2069,9 +2010,7 @@ describe("DeciderModule", () => {
                             attribute: {
                                 "@type": "IdentityAttribute",
                                 owner: sender.address,
-                                validFrom: attributeValidFrom.toString(),
-                                validTo: attributeValidTo.toString(),
-                                tags: ["tag1", "tag3"],
+                                tags: ["x+%+tag1", "x+%+tag3"],
                                 value: {
                                     "@type": "IdentityFileReference",
                                     value: "A link to a file with more than 30 characters"
@@ -2110,9 +2049,6 @@ describe("DeciderModule", () => {
         });
 
         test("accepts a ShareAttributeRequestItem given a ShareAttributeRequestItemConfig with all fields set for a RelationshipAttribute", async () => {
-            const attributeValidFrom = CoreDate.utc().subtract({ days: 1 }).toString();
-            const attributeValidTo = CoreDate.utc().add({ days: 1 }).toString();
-
             const deciderConfig: DeciderModuleConfigurationOverwrite = {
                 automationConfig: [
                     {
@@ -2120,8 +2056,6 @@ describe("DeciderModule", () => {
                             "content.item.@type": "ShareAttributeRequestItem",
                             "content.item.attribute.@type": "RelationshipAttribute",
                             "content.item.attribute.owner": sender.address,
-                            "content.item.attribute.validFrom": attributeValidFrom,
-                            "content.item.attribute.validTo": attributeValidTo,
                             "content.item.attribute.key": "A key",
                             "content.item.attribute.isTechnical": false,
                             "content.item.attribute.confidentiality": RelationshipAttributeConfidentiality.Public,
@@ -2150,8 +2084,6 @@ describe("DeciderModule", () => {
                             attribute: {
                                 "@type": "RelationshipAttribute",
                                 owner: sender.address,
-                                validFrom: attributeValidFrom,
-                                validTo: attributeValidTo,
                                 key: "A key",
                                 isTechnical: false,
                                 confidentiality: RelationshipAttributeConfidentiality.Public,
@@ -2398,7 +2330,8 @@ describe("DeciderModule", () => {
                     items: [
                         {
                             "@type": "AuthenticationRequestItem",
-                            mustBeAccepted: false
+                            mustBeAccepted: false,
+                            title: "Title of RequestItem"
                         },
                         {
                             "@type": "ConsentRequestItem",
@@ -2447,6 +2380,7 @@ describe("DeciderModule", () => {
                             items: [
                                 {
                                     "@type": "AuthenticationRequestItem",
+                                    title: "Title of RequestItem",
                                     mustBeAccepted: false
                                 }
                             ]
@@ -2503,6 +2437,7 @@ describe("DeciderModule", () => {
                     items: [
                         {
                             "@type": "AuthenticationRequestItem",
+                            title: "Title of RequestItem",
                             mustBeAccepted: false
                         },
                         {
@@ -2510,10 +2445,12 @@ describe("DeciderModule", () => {
                             items: [
                                 {
                                     "@type": "AuthenticationRequestItem",
+                                    title: "Title of RequestItem",
                                     mustBeAccepted: false
                                 },
                                 {
                                     "@type": "AuthenticationRequestItem",
+                                    title: "Title of RequestItem",
                                     mustBeAccepted: false
                                 }
                             ]
@@ -2576,6 +2513,7 @@ describe("DeciderModule", () => {
                             items: [
                                 {
                                     "@type": "AuthenticationRequestItem",
+                                    title: "Title of RequestItem",
                                     mustBeAccepted: false
                                 }
                             ]
@@ -2632,6 +2570,7 @@ describe("DeciderModule", () => {
                     items: [
                         {
                             "@type": "AuthenticationRequestItem",
+                            title: "Title of RequestItem",
                             mustBeAccepted: false
                         },
                         {
@@ -2639,10 +2578,12 @@ describe("DeciderModule", () => {
                             items: [
                                 {
                                     "@type": "AuthenticationRequestItem",
+                                    title: "Title of RequestItem",
                                     mustBeAccepted: false
                                 },
                                 {
                                     "@type": "AuthenticationRequestItem",
+                                    title: "Title of RequestItem",
                                     mustBeAccepted: false
                                 }
                             ]
@@ -2700,7 +2641,8 @@ describe("DeciderModule", () => {
                     items: [
                         {
                             "@type": "AuthenticationRequestItem",
-                            mustBeAccepted: false
+                            mustBeAccepted: false,
+                            title: "Title of RequestItem"
                         },
                         {
                             "@type": "RequestItemGroup",
@@ -2757,7 +2699,8 @@ describe("DeciderModule", () => {
                     items: [
                         {
                             "@type": "AuthenticationRequestItem",
-                            mustBeAccepted: false
+                            mustBeAccepted: false,
+                            title: "Title of RequestItem"
                         },
                         {
                             "@type": "ConsentRequestItem",
@@ -2819,7 +2762,8 @@ describe("DeciderModule", () => {
                     items: [
                         {
                             "@type": "AuthenticationRequestItem",
-                            mustBeAccepted: false
+                            mustBeAccepted: false,
+                            title: "Title of RequestItem"
                         },
                         {
                             "@type": "RequestItemGroup",
@@ -2888,6 +2832,7 @@ describe("DeciderModule", () => {
                     items: [
                         {
                             "@type": "AuthenticationRequestItem",
+                            title: "Title of RequestItem",
                             mustBeAccepted: false
                         }
                     ]
@@ -2940,7 +2885,8 @@ describe("DeciderModule", () => {
                     items: [
                         {
                             "@type": "AuthenticationRequestItem",
-                            mustBeAccepted: true
+                            mustBeAccepted: true,
+                            title: "Title of RequestItem"
                         },
                         {
                             "@type": "ConsentRequestItem",
@@ -3003,7 +2949,8 @@ describe("DeciderModule", () => {
                     items: [
                         {
                             "@type": "AuthenticationRequestItem",
-                            mustBeAccepted: false
+                            mustBeAccepted: false,
+                            title: "Title of RequestItem"
                         },
                         {
                             "@type": "ConsentRequestItem",
@@ -3072,7 +3019,8 @@ describe("DeciderModule", () => {
                     items: [
                         {
                             "@type": "AuthenticationRequestItem",
-                            mustBeAccepted: false
+                            mustBeAccepted: false,
+                            title: "Title of RequestItem"
                         },
                         {
                             "@type": "ConsentRequestItem",
@@ -3145,7 +3093,8 @@ describe("DeciderModule", () => {
                     items: [
                         {
                             "@type": "AuthenticationRequestItem",
-                            mustBeAccepted: false
+                            mustBeAccepted: false,
+                            title: "Title of RequestItem"
                         },
                         {
                             "@type": "ConsentRequestItem",
@@ -3213,7 +3162,8 @@ describe("DeciderModule", () => {
                     items: [
                         {
                             "@type": "AuthenticationRequestItem",
-                            mustBeAccepted: true
+                            mustBeAccepted: true,
+                            title: "Title of RequestItem"
                         },
                         {
                             "@type": "ConsentRequestItem",
