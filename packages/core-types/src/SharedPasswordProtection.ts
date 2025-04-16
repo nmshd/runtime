@@ -26,7 +26,7 @@ export function validatePasswordLocationIndicator(value: unknown): string | unde
         return undefined;
     }
 
-    return `must be a number between 0 and 99 or one of the following strings: ${Object.values(PasswordLocationIndicatorMedium).join(", ")}`;
+    return `must be a number from 0 to 99 or one of the following strings: ${Object.values(PasswordLocationIndicatorMedium).join(", ")}`;
 }
 
 export interface ISharedPasswordProtection extends ISerializable {

@@ -27,12 +27,12 @@ describe("SharedPasswordProtection", () => {
 
         test("should not allow to set invalid string as PasswordLocationIndicator", function () {
             const result = validatePasswordLocationIndicator("Invalid-PasswordLocationIndicatorMedium" as any);
-            expect(result).toBe("must be a number between 0 and 99 or one of the following strings: RecoveryKit, Self, Letter, RegistrationLetter, Mail, Sms, App, Website");
+            expect(result).toBe("must be a number from 0 to 99 or one of the following strings: RecoveryKit, Self, Letter, RegistrationLetter, Mail, Sms, App, Website");
         });
 
         test("should not allow to set invalid number as PasswordLocationIndicator", function () {
             const result = validatePasswordLocationIndicator(100 as any);
-            expect(result).toBe("must be a number between 0 and 99 or one of the following strings: RecoveryKit, Self, Letter, RegistrationLetter, Mail, Sms, App, Website");
+            expect(result).toBe("must be a number from 0 to 99 or one of the following strings: RecoveryKit, Self, Letter, RegistrationLetter, Mail, Sms, App, Website");
         });
     });
 

@@ -100,7 +100,7 @@ describe("Password-protected tokens for files", () => {
             passwordProtection: { password: "password", passwordLocationIndicator: "invalid-password-location-indicator" }
         });
         expect(createResult).toBeAnError(
-            "must be a number between 0 and 99 or one of the following strings: RecoveryKit, Self, Letter, RegistrationLetter, Mail, Sms, App, Website",
+            "must be a number from 0 to 99 or one of the following strings: RecoveryKit, Self, Letter, RegistrationLetter, Mail, Sms, App, Website",
             "error.runtime.validation.invalidPropertyValue"
         );
     });
