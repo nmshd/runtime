@@ -1,5 +1,4 @@
 import { Result } from "@js-soft/ts-utils";
-import { PasswordLocationIndicator } from "@nmshd/core-types";
 import { DeviceOnboardingInfoDTO, FileDVO, IdentityDVO, LocalRequestDVO, MailDVO, MessageDVO, RequestMessageDVO } from "@nmshd/runtime";
 import { UserfriendlyApplicationError } from "../../UserfriendlyApplicationError";
 import { LocalAccountDTO } from "../../multiAccount";
@@ -12,5 +11,5 @@ export interface IUIBridge {
     showRequest(account: LocalAccountDTO, request: LocalRequestDVO): Promise<Result<void>>;
     showError(error: UserfriendlyApplicationError, account?: LocalAccountDTO): Promise<Result<void>>;
     requestAccountSelection(possibleAccounts: LocalAccountDTO[], title?: string, description?: string): Promise<Result<LocalAccountDTO | undefined>>;
-    enterPassword(passwordType: "pw" | "pin", pinLength?: number, attempt?: number, passwordLocationIndicator?: PasswordLocationIndicator): Promise<Result<string>>;
+    enterPassword(passwordType: "pw" | "pin", pinLength?: number, attempt?: number, passwordLocationIndicator?: number): Promise<Result<string>>;
 }

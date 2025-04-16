@@ -87,7 +87,7 @@ export class SharedPasswordProtection extends Serializable implements ISharedPas
         return value as PasswordLocationIndicator;
     }
 
-    private mapPasswordLocationIndicatorMediumToNumber(value: PasswordLocationIndicator): number {
+    public mapPasswordLocationIndicatorMediumToNumber(value: PasswordLocationIndicator): number {
         if (typeof value === "number") return value;
 
         const index = Object.values(PasswordLocationIndicatorMedium).indexOf(value);

@@ -185,6 +185,8 @@ export class AppStringProcessor {
                 passwordProtection.passwordType.startsWith("pin") ? parseInt(passwordProtection.passwordType.substring(3)) : undefined,
                 attempt,
                 passwordProtection.passwordLocationIndicator
+                    ? passwordProtection.mapPasswordLocationIndicatorMediumToNumber(passwordProtection.passwordLocationIndicator)
+                    : undefined
             );
             if (passwordResult.isError) {
                 return { result: UserfriendlyResult.fail(new UserfriendlyApplicationError("error.appStringProcessor.passwordNotProvided", "No password was provided.")) };
