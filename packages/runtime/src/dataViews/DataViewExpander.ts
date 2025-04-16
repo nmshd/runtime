@@ -11,6 +11,8 @@ import {
     DeleteAttributeRequestItemJSON,
     DisplayNameJSON,
     ErrorResponseItemJSON,
+    FormFieldAcceptResponseItemJSON,
+    FormFieldRequestItemJSON,
     FreeTextAcceptResponseItemJSON,
     FreeTextRequestItemJSON,
     GivenNameJSON,
@@ -81,6 +83,7 @@ import {
     DecidableConsentRequestItemDVO,
     DecidableCreateAttributeRequestItemDVO,
     DecidableDeleteAttributeRequestItemDVO,
+    DecidableFormFieldRequestItemDVO,
     DecidableFreeTextRequestItemDVO,
     DecidableProposeAttributeRequestItemDVO,
     DecidableReadAttributeRequestItemDVO,
@@ -117,6 +120,8 @@ import {
     DraftIdentityAttributeDVO,
     DraftRelationshipAttributeDVO,
     ErrorResponseItemDVO,
+    FormFieldAcceptResponseItemDVO,
+    FormFieldRequestItemDVO,
     FreeTextAcceptResponseItemDVO,
     FreeTextRequestItemDVO,
     IQLQueryDVO,
@@ -720,6 +725,28 @@ export class DataViewExpander {
                     response: responseItemDVO
                 } as FreeTextRequestItemDVO;
 
+            case "FormFieldRequestItem":
+                const formFieldRequestItem = requestItem as FormFieldRequestItemJSON;
+
+                if (isDecidable) {
+                    return {
+                        ...formFieldRequestItem,
+                        type: "DecidableFormFieldRequestItemDVO",
+                        id: "",
+                        name: requestItem.title ?? "i18n://dvo.requestItem.DecidableFormFieldRequestItem.name",
+                        isDecidable,
+                        response: responseItemDVO
+                    } as DecidableFormFieldRequestItemDVO;
+                }
+                return {
+                    ...formFieldRequestItem,
+                    type: "FormFieldRequestItemDVO",
+                    id: "",
+                    name: requestItem.title ?? "i18n://dvo.requestItem.FormFieldRequestItem.name",
+                    isDecidable,
+                    response: responseItemDVO
+                } as FormFieldRequestItemDVO;
+
             case "RegisterAttributeListenerRequestItem":
                 const registerAttributeListenerRequestItem = requestItem as RegisterAttributeListenerRequestItemJSON;
                 const queryDVO = (await this.expandAttributeQuery(registerAttributeListenerRequestItem.query)) as
@@ -899,6 +926,16 @@ export class DataViewExpander {
                         id: "",
                         name: name
                     } as FreeTextAcceptResponseItemDVO;
+
+                case "FormFieldAcceptResponseItem":
+                    const formFieldResponseItem = responseItem as FormFieldAcceptResponseItemJSON;
+
+                    return {
+                        ...formFieldResponseItem,
+                        type: "FormFieldAcceptResponseItemDVO",
+                        id: "",
+                        name: name
+                    } as FormFieldAcceptResponseItemDVO;
 
                 case "RegisterAttributeListenerAcceptResponseItem":
                     const registerAttributeListenerResponseItem = responseItem as RegisterAttributeListenerAcceptResponseItemJSON;

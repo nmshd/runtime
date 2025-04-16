@@ -1,3 +1,4 @@
+import { FormFieldSettingsJSONDerivations } from "@nmshd/content";
 import { LocalAttributeDVO } from "../consumption";
 import { DataViewObject } from "../DataViewObject";
 import { FileDVO } from "../transport";
@@ -71,6 +72,12 @@ export interface RegisterAttributeListenerRequestItemDVO extends RequestItemDVO 
 export interface FreeTextRequestItemDVO extends RequestItemDVO {
     type: "FreeTextRequestItemDVO";
     freeText: string;
+}
+
+export interface FormFieldRequestItemDVO extends RequestItemDVO {
+    type: "FormFieldRequestItemDVO";
+    title: string;
+    settings: FormFieldSettingsJSONDerivations;
 }
 
 export interface TransferFileOwnershipRequestItemDVO extends RequestItemDVO {
