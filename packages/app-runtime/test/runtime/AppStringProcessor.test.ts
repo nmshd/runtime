@@ -1,5 +1,5 @@
 import { ArbitraryRelationshipTemplateContentJSON } from "@nmshd/content";
-import { CoreDate } from "@nmshd/core-types";
+import { CoreDate, PasswordLocationIndicatorMedium } from "@nmshd/core-types";
 import { DeviceOnboardingInfoDTO, PeerRelationshipTemplateLoadedEvent } from "@nmshd/runtime";
 import assert from "assert";
 import { AppRuntime, LocalAccountSession } from "../../src";
@@ -190,6 +190,37 @@ describe("AppStringProcessor", function () {
         expect(mockUiBridge).enterPasswordCalled("pw", undefined, 1);
         expect(mockUiBridge).enterPasswordCalled("pw", undefined, 2);
         expect(mockUiBridge).requestAccountSelectionCalled(2);
+    });
+
+    test("should properly handle a protected RelationshipTemplate with PasswordLocationIndicator that is a string", async function () {
+        const templateResult = await runtime1Session.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
+            content: templateContent,
+            expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(),
+            passwordProtection: { password: "password", passwordLocationIndicator: PasswordLocationIndicatorMedium.Sms }
+        });
+
+        mockUiBridge.setPasswordToReturnForAttempt(1, "password");
+        mockUiBridge.accountIdToReturn = runtime2SessionA.account.id;
+
+        await runtime2.stringProcessor.processTruncatedReference(templateResult.value.truncatedReference);
+
+        const smsIndex = 5;
+        expect(mockUiBridge).enterPasswordCalled("pw", undefined, undefined, smsIndex);
+    });
+
+    test("should properly handle a protected RelationshipTemplate with PasswordLocationIndicator that is a number", async function () {
+        const templateResult = await runtime1Session.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
+            content: templateContent,
+            expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(),
+            passwordProtection: { password: "password", passwordLocationIndicator: 50 }
+        });
+
+        mockUiBridge.setPasswordToReturnForAttempt(1, "password");
+        mockUiBridge.accountIdToReturn = runtime2SessionA.account.id;
+
+        await runtime2.stringProcessor.processTruncatedReference(templateResult.value.truncatedReference);
+
+        expect(mockUiBridge).enterPasswordCalled("pw", undefined, undefined, 50);
     });
 
     describe("onboarding", function () {
