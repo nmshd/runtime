@@ -1,6 +1,6 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
-import { CoreAddress, CoreDate } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, PasswordLocationIndicator } from "@nmshd/core-types";
 import { AccountController, PasswordProtectionCreationParameters, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { DateTime } from "luxon";
@@ -18,7 +18,7 @@ import {
 } from "../../common";
 import { TokenMapper } from "./TokenMapper";
 
-export interface CreateOwnTokenRequest {
+export interface SchemaValidatableCreateOwnTokenRequest {
     content: any;
     expiresAt: ISO8601DateTimeString;
     ephemeral: boolean;
@@ -29,8 +29,13 @@ export interface CreateOwnTokenRequest {
          */
         password: string;
         passwordIsPin?: true;
+        passwordLocationIndicator?: unknown;
     };
 }
+
+export type CreateOwnTokenRequest = SchemaValidatableCreateOwnTokenRequest & {
+    passwordProtection?: { passwordLocationIndicator?: PasswordLocationIndicator };
+};
 
 class Validator extends TokenAndTemplateCreationValidator<CreateOwnTokenRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {

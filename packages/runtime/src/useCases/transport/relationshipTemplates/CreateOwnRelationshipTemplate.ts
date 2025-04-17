@@ -2,14 +2,14 @@ import { Serializable } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
 import { OutgoingRequestsController } from "@nmshd/consumption";
 import { ArbitraryRelationshipTemplateContent, RelationshipTemplateContent } from "@nmshd/content";
-import { CoreAddress, CoreDate } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, PasswordLocationIndicator } from "@nmshd/core-types";
 import { AccountController, PasswordProtectionCreationParameters, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { RelationshipTemplateDTO } from "../../../types";
 import { AddressString, ISO8601DateTimeString, RuntimeErrors, SchemaRepository, TokenAndTemplateCreationValidator, UseCase } from "../../common";
 import { RelationshipTemplateMapper } from "./RelationshipTemplateMapper";
 
-export interface CreateOwnRelationshipTemplateRequest {
+export interface SchemaValidatableCreateOwnRelationshipTemplateRequest {
     expiresAt: ISO8601DateTimeString;
     content: any;
     /**
@@ -23,8 +23,13 @@ export interface CreateOwnRelationshipTemplateRequest {
          */
         password: string;
         passwordIsPin?: true;
+        passwordLocationIndicator?: unknown;
     };
 }
+
+export type CreateOwnRelationshipTemplateRequest = SchemaValidatableCreateOwnRelationshipTemplateRequest & {
+    passwordProtection?: { passwordLocationIndicator?: PasswordLocationIndicator };
+};
 
 class Validator extends TokenAndTemplateCreationValidator<CreateOwnRelationshipTemplateRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {

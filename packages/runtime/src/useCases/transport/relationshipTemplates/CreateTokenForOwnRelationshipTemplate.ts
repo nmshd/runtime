@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { CoreAddress, CoreDate, CoreId, SharedPasswordProtection } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId, PasswordLocationIndicator, SharedPasswordProtection } from "@nmshd/core-types";
 import {
     AccountController,
     PasswordProtectionCreationParameters,
@@ -13,7 +13,7 @@ import { TokenDTO } from "../../../types";
 import { AddressString, ISO8601DateTimeString, RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, TokenAndTemplateCreationValidator, UseCase } from "../../common";
 import { TokenMapper } from "../tokens/TokenMapper";
 
-export interface CreateTokenForOwnTemplateRequest {
+export interface SchemaValidatableCreateTokenForOwnTemplateRequest {
     templateId: RelationshipTemplateIdString;
     expiresAt?: ISO8601DateTimeString;
     ephemeral?: boolean;
@@ -24,8 +24,13 @@ export interface CreateTokenForOwnTemplateRequest {
          */
         password: string;
         passwordIsPin?: true;
+        passwordLocationIndicator?: unknown;
     };
 }
+
+export type CreateTokenForOwnTemplateRequest = SchemaValidatableCreateTokenForOwnTemplateRequest & {
+    passwordProtection?: { passwordLocationIndicator?: PasswordLocationIndicator };
+};
 
 class Validator extends TokenAndTemplateCreationValidator<CreateTokenForOwnTemplateRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {

@@ -10,7 +10,7 @@ export type MockUIBridgeCall =
     | { method: "showRequest"; account: LocalAccountDTO; request: LocalRequestDVO }
     | { method: "showError"; error: UserfriendlyApplicationError; account?: LocalAccountDTO }
     | { method: "requestAccountSelection"; possibleAccounts: LocalAccountDTO[]; title?: string; description?: string }
-    | { method: "enterPassword"; passwordType: "pw" | "pin"; pinLength?: number; attempt?: number };
+    | { method: "enterPassword"; passwordType: "pw" | "pin"; pinLength?: number; attempt?: number; passwordLocationIndicator?: number };
 
 export class MockUIBridge implements IUIBridge {
     private _accountIdToReturn: string | undefined;
@@ -82,8 +82,8 @@ export class MockUIBridge implements IUIBridge {
         return Promise.resolve(Result.ok(foundAccount));
     }
 
-    public enterPassword(passwordType: "pw" | "pin", pinLength?: number, attempt?: number): Promise<Result<string>> {
-        this._calls.push({ method: "enterPassword", passwordType, pinLength, attempt });
+    public enterPassword(passwordType: "pw" | "pin", pinLength?: number, attempt?: number, passwordLocationIndicator?: number): Promise<Result<string>> {
+        this._calls.push({ method: "enterPassword", passwordType, pinLength, attempt, passwordLocationIndicator });
 
         const password = this._passwordToReturnForAttempt[attempt ?? 1];
         if (!password) return Promise.resolve(Result.fail(new ApplicationError("code", "message")));

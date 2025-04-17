@@ -1,4 +1,4 @@
-import { CoreDate } from "@nmshd/core-types";
+import { CoreDate, PasswordLocationIndicatorMedium } from "@nmshd/core-types";
 import { GetTokensQuery, OwnerRestriction } from "../../src";
 import { exchangeToken, QueryParamConditions, RuntimeServiceProvider, TestRuntimeServices, uploadOwnToken } from "../lib";
 
@@ -112,6 +112,56 @@ describe("Tokens query", () => {
                 expectedResult: false,
                 key: "passwordProtection.passwordIsPin",
                 value: "!"
+            });
+        await conditions.executeTests((c, q) => c.tokens.getTokens({ query: q, ownerRestriction: OwnerRestriction.Own }));
+    });
+
+    test("query own PIN-protected tokens with passwordLocationIndicator that is a number", async () => {
+        const token = await uploadOwnToken(runtimeServices1.transport, runtimeServices1.address, {
+            password: "1234",
+            passwordIsPin: true,
+            passwordLocationIndicator: 50
+        });
+        const conditions = new QueryParamConditions<GetTokensQuery>(token, runtimeServices1.transport)
+            .addSingleCondition({
+                expectedResult: true,
+                key: "passwordProtection.passwordLocationIndicator",
+                value: "50"
+            })
+            .addSingleCondition({
+                expectedResult: false,
+                key: "passwordProtection.passwordLocationIndicator",
+                value: "0"
+            })
+            .addSingleCondition({
+                expectedResult: false,
+                key: "passwordProtection.passwordLocationIndicator",
+                value: "anotherString"
+            });
+        await conditions.executeTests((c, q) => c.tokens.getTokens({ query: q, ownerRestriction: OwnerRestriction.Own }));
+    });
+
+    test("query own PIN-protected tokens with passwordLocationIndicator that is a string", async () => {
+        const token = await uploadOwnToken(runtimeServices1.transport, runtimeServices1.address, {
+            password: "1234",
+            passwordIsPin: true,
+            passwordLocationIndicator: PasswordLocationIndicatorMedium.Letter
+        });
+        const conditions = new QueryParamConditions<GetTokensQuery>(token, runtimeServices1.transport)
+            .addSingleCondition({
+                expectedResult: true,
+                key: "passwordProtection.passwordLocationIndicator",
+                value: "Letter"
+            })
+            .addSingleCondition({
+                expectedResult: false,
+                key: "passwordProtection.passwordLocationIndicator",
+                value: "anotherString"
+            })
+            .addSingleCondition({
+                expectedResult: false,
+                key: "passwordProtection.passwordLocationIndicator",
+                value: "2"
             });
         await conditions.executeTests((c, q) => c.tokens.getTokens({ query: q, ownerRestriction: OwnerRestriction.Own }));
     });

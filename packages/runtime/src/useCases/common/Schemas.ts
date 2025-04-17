@@ -20770,12 +20770,14 @@ export const CreateDeviceOnboardingTokenRequest: any = {
                     "type": "object",
                     "properties": {
                         "password": {
-                            "type": "string"
+                            "type": "string",
+                            "minLength": 1
                         },
                         "passwordIsPin": {
                             "type": "boolean",
                             "const": true
-                        }
+                        },
+                        "passwordLocationIndicator": {}
                     },
                     "required": [
                         "password"
@@ -21160,7 +21162,8 @@ export const CreateTokenForFileRequest: any = {
                         "passwordIsPin": {
                             "type": "boolean",
                             "const": true
-                        }
+                        },
+                        "passwordLocationIndicator": {}
                     },
                     "required": [
                         "password"
@@ -21215,7 +21218,8 @@ export const CreateTokenQRCodeForFileRequest: any = {
                         "passwordIsPin": {
                             "type": "boolean",
                             "const": true
-                        }
+                        },
+                        "passwordLocationIndicator": {}
                     },
                     "required": [
                         "password"
@@ -22395,7 +22399,8 @@ export const CreateOwnRelationshipTemplateRequest: any = {
                         "passwordIsPin": {
                             "type": "boolean",
                             "const": true
-                        }
+                        },
+                        "passwordLocationIndicator": {}
                     },
                     "required": [
                         "password"
@@ -22473,7 +22478,8 @@ export const CreateTokenForOwnTemplateRequest: any = {
                         "passwordIsPin": {
                             "type": "boolean",
                             "const": true
-                        }
+                        },
+                        "passwordLocationIndicator": {}
                     },
                     "required": [
                         "password"
@@ -22528,7 +22534,8 @@ export const CreateTokenQRCodeForOwnTemplateRequest: any = {
                         "passwordIsPin": {
                             "type": "boolean",
                             "const": true
-                        }
+                        },
+                        "passwordLocationIndicator": {}
                     },
                     "required": [
                         "password"
@@ -22739,6 +22746,19 @@ export const GetRelationshipTemplatesRequest: any = {
                         "true",
                         "!"
                     ]
+                },
+                "passwordProtection.passwordLocationIndicator": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
                 }
             },
             "additionalProperties": false
@@ -22818,7 +22838,8 @@ export const CreateOwnTokenRequest: any = {
                         "passwordIsPin": {
                             "type": "boolean",
                             "const": true
-                        }
+                        },
+                        "passwordLocationIndicator": {}
                     },
                     "required": [
                         "password"
@@ -23023,6 +23044,19 @@ export const GetTokensRequest: any = {
                     "enum": [
                         "true",
                         "!"
+                    ]
+                },
+                "passwordProtection.passwordLocationIndicator": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
                     ]
                 }
             },

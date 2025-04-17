@@ -1,10 +1,10 @@
 import { Result } from "@js-soft/ts-utils";
-import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId, PasswordLocationIndicator } from "@nmshd/core-types";
 import { File, FileController, PasswordProtectionCreationParameters, TokenContentFile, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { AddressString, FileIdString, ISO8601DateTimeString, QRCode, RuntimeErrors, SchemaRepository, TokenAndTemplateCreationValidator, UseCase } from "../../common";
 
-export interface CreateTokenQRCodeForFileRequest {
+export interface SchemaValidatableCreateTokenQRCodeForFileRequest {
     fileId: FileIdString;
     expiresAt?: ISO8601DateTimeString;
     forIdentity?: AddressString;
@@ -14,8 +14,13 @@ export interface CreateTokenQRCodeForFileRequest {
          */
         password: string;
         passwordIsPin?: true;
+        passwordLocationIndicator?: unknown;
     };
 }
+
+export type CreateTokenQRCodeForFileRequest = SchemaValidatableCreateTokenQRCodeForFileRequest & {
+    passwordProtection?: { passwordLocationIndicator?: PasswordLocationIndicator };
+};
 
 export interface CreateTokenQRCodeForFileResponse {
     qrCodeBytes: string;
@@ -50,6 +55,7 @@ export class CreateTokenQRCodeForFileUseCase extends UseCase<CreateTokenQRCodeFo
 
         const defaultTokenExpiry = file.cache?.expiresAt ?? CoreDate.utc().add({ days: 12 });
         const tokenExpiry = request.expiresAt ? CoreDate.from(request.expiresAt) : defaultTokenExpiry;
+
         const token = await this.tokenController.sendToken({
             content: tokenContent,
             expiresAt: tokenExpiry,

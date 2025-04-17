@@ -68,7 +68,7 @@ expect.extend({
 
         return { pass: true, message: () => "" };
     },
-    enterPasswordCalled(mockUIBridge: unknown, passwordType: "pw" | "pin", pinLength?: number, attempt?: number) {
+    enterPasswordCalled(mockUIBridge: unknown, passwordType: "pw" | "pin", pinLength?: number, attempt?: number, passwordLocationIndicator?: number) {
         if (!(mockUIBridge instanceof MockUIBridge)) {
             throw new Error("This method can only be used with expect(MockUIBridge).");
         }
@@ -78,11 +78,13 @@ expect.extend({
             return { pass: false, message: () => "The method enterPassword was not called." };
         }
 
-        const matchingCalls = calls.filter((x) => x.passwordType === passwordType && x.pinLength === pinLength && x.attempt === (attempt ?? 1));
+        const matchingCalls = calls.filter(
+            (x) => x.passwordType === passwordType && x.pinLength === pinLength && x.attempt === (attempt ?? 1) && x.passwordLocationIndicator === passwordLocationIndicator
+        );
         if (matchingCalls.length === 0) {
             const parameters = calls
                 .map((e) => {
-                    return { passwordType: e.passwordType, pinLength: e.pinLength, attempt: e.attempt };
+                    return { passwordType: e.passwordType, pinLength: e.pinLength, attempt: e.attempt, passwordLocationIndicator: e.passwordLocationIndicator };
                 })
                 .map((e) => JSON.stringify(e))
                 .join(", ");
@@ -90,7 +92,7 @@ expect.extend({
             return {
                 pass: false,
                 message: () =>
-                    `The method enterPassword was called, but not with the specified password type '${passwordType}' and pin length '${pinLength}', instead with parameters '${parameters}'.`
+                    `The method enterPassword was called, but not with the specified password type '${passwordType}', pin length '${pinLength}', attempt '${attempt}' and passwordLocationIndicator '${passwordLocationIndicator}', instead with parameters '${parameters}'.`
             };
         }
 
@@ -161,7 +163,7 @@ declare global {
             showDeviceOnboardingNotCalled(): R;
             requestAccountSelectionCalled(possibleAccountsLength: number): R;
             requestAccountSelectionNotCalled(): R;
-            enterPasswordCalled(passwordType: "pw" | "pin", pinLength?: number, attempt?: number): R;
+            enterPasswordCalled(passwordType: "pw" | "pin", pinLength?: number, attempt?: number, passwordLocationIndicator?: number): R;
             enterPasswordNotCalled(): R;
             showRequestCalled(): R;
             showRequestNotCalled(): R;

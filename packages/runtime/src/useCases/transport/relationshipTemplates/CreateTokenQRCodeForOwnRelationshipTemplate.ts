@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { CoreAddress, CoreDate, CoreId, SharedPasswordProtection } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId, PasswordLocationIndicator, SharedPasswordProtection } from "@nmshd/core-types";
 import { PasswordProtectionCreationParameters, RelationshipTemplate, RelationshipTemplateController, TokenContentRelationshipTemplate, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import {
@@ -13,7 +13,7 @@ import {
     UseCase
 } from "../../common";
 
-export interface CreateTokenQRCodeForOwnTemplateRequest {
+export interface SchemaValidatableCreateTokenQRCodeForOwnTemplateRequest {
     templateId: RelationshipTemplateIdString;
     expiresAt?: ISO8601DateTimeString;
     forIdentity?: AddressString;
@@ -23,8 +23,13 @@ export interface CreateTokenQRCodeForOwnTemplateRequest {
          */
         password: string;
         passwordIsPin?: true;
+        passwordLocationIndicator?: unknown;
     };
 }
+
+export type CreateTokenQRCodeForOwnTemplateRequest = SchemaValidatableCreateTokenQRCodeForOwnTemplateRequest & {
+    passwordProtection?: { passwordLocationIndicator?: PasswordLocationIndicator };
+};
 
 class Validator extends TokenAndTemplateCreationValidator<CreateTokenQRCodeForOwnTemplateRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {

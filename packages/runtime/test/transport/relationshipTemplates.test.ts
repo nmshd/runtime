@@ -1,4 +1,5 @@
 import { RelationshipTemplateContent, RelationshipTemplateContentJSON } from "@nmshd/content";
+import { PasswordLocationIndicatorMedium } from "@nmshd/core-types";
 import { DateTime } from "luxon";
 import { GetRelationshipTemplatesQuery, OwnerRestriction } from "../../src";
 import { emptyRelationshipTemplateContent, QueryParamConditions, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
@@ -368,6 +369,66 @@ describe("RelationshipTemplates query", () => {
                 expectedResult: true,
                 key: "passwordProtection.passwordIsPin",
                 value: "!"
+            });
+        await conditions.executeTests((c, q) => c.relationshipTemplates.getRelationshipTemplates({ query: q, ownerRestriction: OwnerRestriction.Own }));
+    });
+
+    test("query own relationshipTemplates with passwordLocationIndicator that is a number", async () => {
+        const template = (
+            await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                expiresAt: DateTime.utc().plus({ minutes: 10 }).toString(),
+                content: emptyRelationshipTemplateContent,
+                passwordProtection: {
+                    password: "password",
+                    passwordLocationIndicator: 50
+                }
+            })
+        ).value;
+        const conditions = new QueryParamConditions<GetRelationshipTemplatesQuery>(template, runtimeServices1.transport)
+            .addSingleCondition({
+                expectedResult: true,
+                key: "passwordProtection.passwordLocationIndicator",
+                value: "50"
+            })
+            .addSingleCondition({
+                expectedResult: false,
+                key: "passwordProtection.passwordLocationIndicator",
+                value: "0"
+            })
+            .addSingleCondition({
+                expectedResult: false,
+                key: "passwordProtection.passwordLocationIndicator",
+                value: "anotherString"
+            });
+        await conditions.executeTests((c, q) => c.relationshipTemplates.getRelationshipTemplates({ query: q, ownerRestriction: OwnerRestriction.Own }));
+    });
+
+    test("query own relationshipTemplates with passwordLocationIndicator that is a string", async () => {
+        const template = (
+            await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                expiresAt: DateTime.utc().plus({ minutes: 10 }).toString(),
+                content: emptyRelationshipTemplateContent,
+                passwordProtection: {
+                    password: "password",
+                    passwordLocationIndicator: PasswordLocationIndicatorMedium.Letter
+                }
+            })
+        ).value;
+        const conditions = new QueryParamConditions<GetRelationshipTemplatesQuery>(template, runtimeServices1.transport)
+            .addSingleCondition({
+                expectedResult: true,
+                key: "passwordProtection.passwordLocationIndicator",
+                value: "Letter"
+            })
+            .addSingleCondition({
+                expectedResult: false,
+                key: "passwordProtection.passwordLocationIndicator",
+                value: "anotherString"
+            })
+            .addSingleCondition({
+                expectedResult: false,
+                key: "passwordProtection.passwordLocationIndicator",
+                value: "2"
             });
         await conditions.executeTests((c, q) => c.relationshipTemplates.getRelationshipTemplates({ query: q, ownerRestriction: OwnerRestriction.Own }));
     });

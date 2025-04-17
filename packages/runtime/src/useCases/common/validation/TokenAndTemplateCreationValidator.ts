@@ -1,4 +1,4 @@
-import { CoreDate } from "@nmshd/core-types";
+import { CoreDate, PasswordLocationIndicatorMedium } from "@nmshd/core-types";
 import { RuntimeErrors } from "../RuntimeErrors";
 import { JsonSchema } from "../SchemaRepository";
 import { SchemaValidator } from "./SchemaValidator";
@@ -12,6 +12,7 @@ export class TokenAndTemplateCreationValidator<
         passwordProtection?: {
             password: string;
             passwordIsPin?: true;
+            passwordLocationIndicator?: unknown;
         };
     }
 > extends SchemaValidator<T> {
@@ -37,6 +38,26 @@ export class TokenAndTemplateCreationValidator<
                                 `'passwordProtection.passwordIsPin' is true, hence 'passwordProtection.password' must consist of 4 to 16 digits from 0 to 9.`
                             ),
                             "passwordProtection"
+                        )
+                    );
+                }
+            }
+
+            if (passwordProtection.passwordLocationIndicator) {
+                if (
+                    (typeof passwordProtection.passwordLocationIndicator === "string" &&
+                        (!Object.values(PasswordLocationIndicatorMedium).includes(passwordProtection.passwordLocationIndicator as PasswordLocationIndicatorMedium) ||
+                            passwordProtection.passwordLocationIndicator === PasswordLocationIndicatorMedium.RecoveryKit)) ||
+                    (typeof passwordProtection.passwordLocationIndicator === "number" &&
+                        passwordProtection.passwordLocationIndicator < 50 &&
+                        passwordProtection.passwordLocationIndicator > 99)
+                ) {
+                    validationResult.addFailure(
+                        new ValidationFailure(
+                            RuntimeErrors.general.invalidPropertyValue(
+                                `must be a number from 50 to 99 or one of the following strings: ${Object.values(PasswordLocationIndicatorMedium).slice(1).join(", ")}`
+                            ),
+                            "passwordLocationIndicator"
                         )
                     );
                 }
