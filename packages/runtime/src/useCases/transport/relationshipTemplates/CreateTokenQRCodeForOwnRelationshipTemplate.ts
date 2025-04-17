@@ -30,6 +30,7 @@ export interface SchemaValidatableCreateTokenQRCodeForOwnTemplateRequest {
 export type CreateTokenQRCodeForOwnTemplateRequest = SchemaValidatableCreateTokenQRCodeForOwnTemplateRequest & {
     passwordProtection?: { passwordLocationIndicator?: PasswordLocationIndicator };
 };
+
 class Validator extends TokenAndTemplateCreationValidator<CreateTokenQRCodeForOwnTemplateRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
         super(schemaRepository.getSchema("CreateTokenQRCodeForOwnTemplateRequest"));
