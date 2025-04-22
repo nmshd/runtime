@@ -38,8 +38,8 @@ export class IdentityAttributeQuery extends AbstractAttributeQuery implements II
             return "The maximum number of tags is 20.";
         }
 
-        if (tags.some((tag) => tag.length > 100)) {
-            return "The maximum length of a tag is 100 characters.";
+        if (tags.some((tag) => tag.length > 250)) {
+            return "The maximum length of a tag is 250 characters.";
         }
 
         return undefined;
