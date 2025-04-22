@@ -1793,6 +1793,12 @@ export class DataViewExpander {
             }
         }
 
+        const sendMailDisabledResult = await this.consumption.attributes.getPeerSharedAttributes({
+            peer: relationship.peer,
+            query: { "content.value.@type": "Consent", "content.isTechnical": "true", "content.key": "__App_Contact_sendMailDisabled" }
+        });
+        const sendMailDisabled = sendMailDisabledResult.value.length > 0;
+
         let direction = RelationshipDirection.Incoming;
         if (!relationship.template.isOwn) {
             direction = RelationshipDirection.Outgoing;
@@ -1857,7 +1863,8 @@ export class DataViewExpander {
             nameMap: stringByType,
             templateId: relationship.template.id,
             auditLog: relationship.auditLog,
-            creationContent: relationship.creationContent
+            creationContent: relationship.creationContent,
+            sendMailDisabled
         };
     }
 
