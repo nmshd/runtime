@@ -44,7 +44,7 @@ export class IdentityAttribute<TValueClass extends AttributeValues.Identity.Clas
         }
 
         if (tags.some((tag) => tag.length > 250)) {
-            return "The maximum length of a tag is 100 characters.";
+            return "The maximum length of a tag is 250 characters.";
         }
 
         return undefined;
