@@ -14,7 +14,6 @@ import {
     ArbitraryRelationshipTemplateContentJSON,
     INotificationItem,
     Notification,
-    RelationshipCreationContent,
     RelationshipTemplateContentJSON,
     Request,
     RequestItemGroupJSON,
@@ -398,42 +397,16 @@ export async function establishRelationship(transportServices1: TransportService
 export async function establishRelationshipWithContents(
     runtimeServices1: TestRuntimeServices,
     runtimeServices2: TestRuntimeServices,
-    templateContent?: RelationshipTemplateContentJSON,
-    acceptRequestItemsParameters?: (AcceptRequestItemParametersJSON | DecideRequestItemGroupParametersJSON)[]
+    templateContent: RelationshipTemplateContentJSON,
+    acceptRequestItemsParameters: (AcceptRequestItemParametersJSON | DecideRequestItemGroupParametersJSON)[]
 ): Promise<void> {
     const template = await exchangeTemplate(runtimeServices1.transport, runtimeServices2.transport, templateContent);
-    let creationContent;
+    await runtimeServices2.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.request.source!.reference === template.id);
 
-    if (templateContent && acceptRequestItemsParameters) {
-        const receivedRequest = (
-            await runtimeServices2.consumption.incomingRequests.received({
-                receivedRequest: templateContent.onNewRelationship,
-                requestSourceId: template.id
-            })
-        ).value;
+    const requestId = (await runtimeServices2.consumption.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
 
-        const checkedRequest = (
-            await runtimeServices2.consumption.incomingRequests.checkPrerequisites({
-                requestId: receivedRequest.id
-            })
-        ).value;
-
-        const manualDecisionRequiredRequest = (
-            await runtimeServices2.consumption.incomingRequests.requireManualDecision({
-                requestId: checkedRequest.id
-            })
-        ).value;
-
-        const acceptedRequest = await runtimeServices2.consumption.incomingRequests.accept({ requestId: manualDecisionRequiredRequest.id, items: acceptRequestItemsParameters });
-
-        creationContent = RelationshipCreationContent.from({ response: acceptedRequest.value.response!.content }).toJSON();
-    }
-
-    const createRelationshipResponse = await runtimeServices2.transport.relationships.createRelationship({
-        templateId: template.id,
-        creationContent: creationContent ?? emptyRelationshipCreationContent
-    });
-    expect(createRelationshipResponse).toBeSuccessful();
+    const acceptRequestResult = await runtimeServices2.consumption.incomingRequests.accept({ requestId, items: acceptRequestItemsParameters });
+    expect(acceptRequestResult).toBeSuccessful();
 
     const relationships = await syncUntilHasRelationships(runtimeServices1.transport);
     expect(relationships).toHaveLength(1);
