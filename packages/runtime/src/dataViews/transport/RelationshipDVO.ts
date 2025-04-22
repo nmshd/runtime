@@ -23,6 +23,7 @@ export interface RelationshipDVO extends DataViewObject {
     nameMap: Record<string, undefined | string>;
     templateId: string;
     originalName?: string;
+    sendMailDisabled: boolean;
 }
 
 export interface RelationshipTheme {
