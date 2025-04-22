@@ -1787,6 +1787,12 @@ export class DataViewExpander {
             }
         }
 
+        const sendMailDisabledResult = await this.consumption.attributes.getPeerSharedAttributes({
+            peer: relationship.peer,
+            query: { "content.value.@type": "Consent", "content.key": "__App_Contact_sendMailDisabled" }
+        });
+        const sendMailDisabled = sendMailDisabledResult.value.length > 0;
+
         const direction = this.identityController.isMe(CoreAddress.from(relationship.auditLog[0].createdBy)) ? RelationshipDirection.Outgoing : RelationshipDirection.Incoming;
 
         let statusText = "";
@@ -1848,7 +1854,8 @@ export class DataViewExpander {
             nameMap: stringByType,
             templateId: relationship.templateId,
             auditLog: relationship.auditLog,
-            creationContent: relationship.creationContent
+            creationContent: relationship.creationContent,
+            sendMailDisabled
         };
     }
 
