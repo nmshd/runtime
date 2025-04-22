@@ -1795,7 +1795,7 @@ export class DataViewExpander {
 
         const sendMailDisabledResult = await this.consumption.attributes.getPeerSharedAttributes({
             peer: relationship.peer,
-            query: { "content.value.@type": "Consent", "content.isTechnical": "true", "content.key": "__App_Contact_sendMailDisabled" }
+            query: { "content.value.@type": "Consent", "content.key": "__App_Contact_sendMailDisabled" }
         });
         const sendMailDisabled = sendMailDisabledResult.value.length > 0;
 
