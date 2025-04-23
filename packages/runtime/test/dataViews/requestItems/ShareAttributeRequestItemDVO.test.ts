@@ -5,7 +5,6 @@ import {
     ConsumptionServices,
     CreateOutgoingRequestRequest,
     DataViewExpander,
-    DecidableShareAttributeRequestItemDVO,
     IncomingRequestStatusChangedEvent,
     LocalRequestStatus,
     OutgoingRequestStatusChangedEvent,
@@ -144,8 +143,8 @@ describe("ShareAttributeRequestItemDVO", () => {
         expect(dvo.request.content.type).toBe("RequestDVO");
         expect(dvo.request.content.items).toHaveLength(1);
         expect(dvo.request.isDecidable).toBe(true);
-        const requestItemDVO = dvo.request.content.items[0] as DecidableShareAttributeRequestItemDVO;
-        expect(requestItemDVO.type).toBe("DecidableShareAttributeRequestItemDVO");
+        const requestItemDVO = dvo.request.content.items[0] as ShareAttributeRequestItemDVO;
+        expect(requestItemDVO.type).toBe("ShareAttributeRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(true);
         expect(requestItemDVO.attribute.type).toBe("DraftIdentityAttributeDVO");
         const value = requestItemDVO.attribute.value as AbstractStringJSON;
