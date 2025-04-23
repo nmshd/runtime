@@ -131,7 +131,7 @@ describe("FormFieldRequestItemDVO with StringFormFieldSettings", () => {
         expect(dvo.request.content.items).toHaveLength(1);
         expect(dvo.request.isDecidable).toBe(true);
         const requestItemDVO = dvo.request.content.items[0] as FormFieldRequestItemDVO;
-        expect(requestItemDVO.type).toBe("DecidableFormFieldRequestItemDVO");
+        expect(requestItemDVO.type).toBe("FormFieldRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(true);
         expect(requestItemDVO.mustBeAccepted).toBe(true);
         expect(requestItemDVO.settings["@type"]).toBe("StringFormFieldSettings");
@@ -320,7 +320,7 @@ describe("FormFieldRequestItemDVO with SelectionFormFieldSettings", () => {
         expect(dvo.request.content.items).toHaveLength(1);
         expect(dvo.request.isDecidable).toBe(true);
         const requestItemDVO = dvo.request.content.items[0] as FormFieldRequestItemDVO;
-        expect(requestItemDVO.type).toBe("DecidableFormFieldRequestItemDVO");
+        expect(requestItemDVO.type).toBe("FormFieldRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(true);
         expect(requestItemDVO.mustBeAccepted).toBe(true);
         expect(requestItemDVO.settings["@type"]).toBe("SelectionFormFieldSettings");

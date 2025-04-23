@@ -6,7 +6,6 @@ import {
     CreateAttributeRequestItemDVO,
     CreateOutgoingRequestRequest,
     DataViewExpander,
-    DecidableCreateAttributeRequestItemDVO,
     IncomingRequestStatusChangedEvent,
     LocalRequestStatus,
     OutgoingRequestStatusChangedEvent,
@@ -138,8 +137,8 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
         expect(dvo.request.content.type).toBe("RequestDVO");
         expect(dvo.request.content.items).toHaveLength(1);
         expect(dvo.request.isDecidable).toBe(true);
-        const requestItemDVO = dvo.request.content.items[0] as DecidableCreateAttributeRequestItemDVO;
-        expect(requestItemDVO.type).toBe("DecidableCreateAttributeRequestItemDVO");
+        const requestItemDVO = dvo.request.content.items[0] as CreateAttributeRequestItemDVO;
+        expect(requestItemDVO.type).toBe("CreateAttributeRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(true);
         expect(requestItemDVO.attribute.type).toBe("DraftIdentityAttributeDVO");
         const value = requestItemDVO.attribute.value as AbstractStringJSON;

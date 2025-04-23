@@ -21,7 +21,6 @@ import {
     ConsumptionServices,
     CreateOutgoingRequestRequest,
     DataViewExpander,
-    DecidableProposeAttributeRequestItemDVO,
     IdentityAttributeQueryDVO,
     IncomingRequestStatusChangedEvent,
     LocalRequestStatus,
@@ -210,10 +209,10 @@ describe("ProposeAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         expect(dvo.request.content.type).toBe("RequestDVO");
         expect(dvo.request.content.items).toHaveLength(2);
         expect(dvo.request.isDecidable).toBe(true);
-        let requestItemDVO = dvo.request.content.items[0] as DecidableProposeAttributeRequestItemDVO;
-        expect(requestItemDVO.type).toBe("DecidableProposeAttributeRequestItemDVO");
+        let requestItemDVO = dvo.request.content.items[0] as ProposeAttributeRequestItemDVO;
+        expect(requestItemDVO.type).toBe("ProposeAttributeRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(true);
-        expect((requestItemDVO as any)["proposedValueOverruled"]).toBeUndefined();
+        expect(requestItemDVO.proposedValueOverruled).toBe(false);
 
         expect(requestItemDVO.attribute).toBeDefined();
         expect(requestItemDVO.attribute.type).toBe("DraftIdentityAttributeDVO");
@@ -240,8 +239,8 @@ describe("ProposeAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         expect(resultItem.content.value["@type"]).toBe("GivenName");
         expect((resultItem.content.value as GivenNameJSON).value).toBe("Marlene");
 
-        requestItemDVO = dvo.request.content.items[1] as DecidableProposeAttributeRequestItemDVO;
-        expect(requestItemDVO.type).toBe("DecidableProposeAttributeRequestItemDVO");
+        requestItemDVO = dvo.request.content.items[1] as ProposeAttributeRequestItemDVO;
+        expect(requestItemDVO.type).toBe("ProposeAttributeRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(true);
 
         expect(requestItemDVO.attribute).toBeDefined();
