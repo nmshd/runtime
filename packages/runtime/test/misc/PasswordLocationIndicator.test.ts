@@ -5,13 +5,8 @@ describe("PasswordLocationIndicator", () => {
     beforeAll(async () => await SodiumWrapper.ready());
 
     describe("isValidPasswordLocationIndicator", () => {
-        test("should allow to set valid enum entry as PasswordLocationIndicator", function () {
-            const result = isValidPasswordLocationIndicator(PasswordLocationIndicatorStrings.Letter);
-            expect(result).toBe(true);
-        });
-
         test("should allow to set valid string as PasswordLocationIndicator", function () {
-            const result = isValidPasswordLocationIndicator("Letter" as PasswordLocationIndicatorStrings);
+            const result = isValidPasswordLocationIndicator("Letter");
             expect(result).toBe(true);
         });
 
@@ -26,12 +21,12 @@ describe("PasswordLocationIndicator", () => {
         });
 
         test("should not allow to set RecoveryKit as PasswordLocationIndicator", function () {
-            const result = isValidPasswordLocationIndicator(PasswordLocationIndicatorStrings.RecoveryKit);
+            const result = isValidPasswordLocationIndicator("RecoveryKit");
             expect(result).toBe(false);
         });
 
         test("should not allow to set number mapping to a PasswordLocationIndicatorStrings as PasswordLocationIndicator", function () {
-            const result = isValidPasswordLocationIndicator(0);
+            const result = isValidPasswordLocationIndicator(PasswordLocationIndicatorStrings.Letter);
             expect(result).toBe(false);
         });
 

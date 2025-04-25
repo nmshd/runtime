@@ -1,21 +1,22 @@
 type Enumerate<N extends number, Acc extends number[] = []> = Acc["length"] extends N ? Acc[number] : Enumerate<N, [...Acc, Acc["length"]]>;
 type IntRange<From extends number, To extends number> = Exclude<Enumerate<To>, Enumerate<From>>;
 
-// TODO: use numeric enum or map
+// TODO: naming
 export enum PasswordLocationIndicatorStrings {
-    RecoveryKit = "RecoveryKit",
-    Self = "Self",
-    Letter = "Letter",
-    RegistrationLetter = "RegistrationLetter",
-    Email = "Email",
-    SMS = "SMS",
-    App = "App",
-    Website = "Website"
+    RecoveryKit = 0,
+    Self = 1,
+    Letter = 2,
+    RegistrationLetter = 3,
+    Email = 4,
+    SMS = 5,
+    App = 6,
+    Website = 7
 }
 
-export type PasswordLocationIndicator = PasswordLocationIndicatorStrings | IntRange<50, 100>;
+export type PasswordLocationIndicator = keyof typeof PasswordLocationIndicatorStrings | IntRange<50, 100>;
 
 // TODO: naming
+// TODO: maybe we can move this to PasswordProtectionCreationParameters after all
 export function convertPasswordProtection(passwordProtection: { password: string; passwordIsPin?: true; passwordLocationIndicator?: PasswordLocationIndicator }): {
     password: string;
     passwordIsPin?: true;
@@ -29,19 +30,19 @@ export function convertPasswordProtection(passwordProtection: { password: string
     return { ...passwordProtection, passwordLocationIndicator: numericPasswordLocationIndicator };
 }
 
-// TODO: maybe we can move this to PasswordProtectionCreationParameters after all
 function mapPasswordLocationIndicatorStringToNumber(value: PasswordLocationIndicator): number {
     if (typeof value === "number") return value;
 
-    const index = Object.values(PasswordLocationIndicatorStrings).indexOf(value);
-    return index;
+    const numericValue = PasswordLocationIndicatorStrings[value];
+    return numericValue;
 }
 
+// TODO: what about numbers like 30? -> should not appear
 export function mapNumberToPasswordLocationIndicatorString(value: number): PasswordLocationIndicator {
     const passwordLocationIndicatorStringValues = Object.values(PasswordLocationIndicatorStrings);
 
     if (value >= 0 && value < passwordLocationIndicatorStringValues.length) {
-        return passwordLocationIndicatorStringValues[value];
+        return PasswordLocationIndicatorStrings[value] as PasswordLocationIndicator;
     }
 
     return value as PasswordLocationIndicator;
@@ -54,7 +55,7 @@ export function isValidPasswordLocationIndicator(value: unknown): boolean {
 
     if (typeof value === "string") {
         const isPasswordLocationIndicatorString = Object.keys(PasswordLocationIndicatorStrings).includes(value);
-        const isRecoveryKit = value === PasswordLocationIndicatorStrings.RecoveryKit;
+        const isRecoveryKit = value === "RecoveryKit";
         return isPasswordLocationIndicatorString && !isRecoveryKit;
     }
 
