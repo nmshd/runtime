@@ -47,11 +47,11 @@ export class File extends CoreSynchronizable implements IFile {
         return this.fromAny(value);
     }
 
-    public toFileReference(backboneBaseUrl: string): FileReference {
+    public toFileReference(backboneBaseUrl?: string): FileReference {
         return FileReference.from({ id: this.id, backboneBaseUrl, key: this.secretKey });
     }
 
-    public truncate(backboneBaseUrl: string): string {
+    public truncate(backboneBaseUrl?: string): string {
         const reference = this.toFileReference(backboneBaseUrl);
         return reference.truncate();
     }
