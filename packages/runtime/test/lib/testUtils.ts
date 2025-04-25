@@ -34,7 +34,6 @@ import {
     CreateAndShareRelationshipAttributeRequest,
     CreateOutgoingRequestRequest,
     CreateRepositoryAttributeRequest,
-    CreateTokenForFileRequest,
     FileDTO,
     IdentityDeletionProcessDTO,
     IncomingRequestStatusChangedEvent,
@@ -185,10 +184,6 @@ export async function uploadFile(transportServices: TransportServices): Promise<
     expect(response).toBeSuccessful();
 
     return response.value;
-}
-
-export function createToken(transportServices: TransportServices, request: CreateTokenForFileRequest): Promise<any> {
-    return transportServices.files.createTokenForFile(request);
 }
 
 // Override the default upload request with values
