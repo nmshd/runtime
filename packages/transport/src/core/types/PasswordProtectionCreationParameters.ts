@@ -15,7 +15,7 @@ export class PasswordProtectionCreationParameters extends Serializable implement
     @serialize()
     public password: string;
 
-    @validate({ nullable: true, min: 50, max: 99, customValidator: (v) => (!Number.isInteger(v) ? "This value must be an integer." : undefined) })
+    @validate({ nullable: true, min: 0, max: 99, customValidator: (v) => (!Number.isInteger(v) ? "This value must be an integer." : undefined) })
     @serialize({ any: true })
     public passwordLocationIndicator?: number;
 

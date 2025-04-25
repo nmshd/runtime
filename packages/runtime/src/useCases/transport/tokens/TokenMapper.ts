@@ -36,9 +36,8 @@ export class TokenMapper {
         }
 
         const passwordIsPin = passwordProtection.passwordType.startsWith("pin") ? true : undefined;
-        const passwordLocationIndicator = passwordProtection.passwordLocationIndicator
-            ? mapNumberToPasswordLocationIndicatorString(passwordProtection.passwordLocationIndicator)
-            : undefined;
+        const passwordLocationIndicator =
+            passwordProtection.passwordLocationIndicator !== undefined ? mapNumberToPasswordLocationIndicatorString(passwordProtection.passwordLocationIndicator) : undefined;
 
         return {
             password: passwordProtection.password,

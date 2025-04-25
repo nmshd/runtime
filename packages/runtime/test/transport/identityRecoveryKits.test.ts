@@ -1,5 +1,4 @@
-import { PasswordLocationIndicatorStrings } from "src/useCases/common";
-import { OwnerRestriction } from "../../src";
+import { OwnerRestriction, PasswordLocationIndicatorStrings } from "../../src";
 import { RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();

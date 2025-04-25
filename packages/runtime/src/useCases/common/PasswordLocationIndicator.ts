@@ -39,7 +39,6 @@ function mapPasswordLocationIndicatorStringToNumber(value: PasswordLocationIndic
 export function mapNumberToPasswordLocationIndicatorString(value: number): PasswordLocationIndicator {
     const passwordLocationIndicatorStringValues = Object.values(PasswordLocationIndicatorStrings);
 
-    // TODO: what about numbers like 30?
     if (value >= 0 && value < passwordLocationIndicatorStringValues.length) {
         return passwordLocationIndicatorStringValues[value];
     }
