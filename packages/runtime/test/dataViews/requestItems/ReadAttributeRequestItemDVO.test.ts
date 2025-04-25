@@ -11,7 +11,6 @@ import {
     ConsumptionServices,
     CreateOutgoingRequestRequest,
     DataViewExpander,
-    DecidableReadAttributeRequestItemDVO,
     IdentityAttributeQueryDVO,
     IncomingRequestStatusChangedEvent,
     IQLQueryDVO,
@@ -155,8 +154,8 @@ describe("ReadAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         expect(dvo.request.content.type).toBe("RequestDVO");
         expect(dvo.request.content.items).toHaveLength(1);
         expect(dvo.request.isDecidable).toBe(true);
-        const requestItemDVO = dvo.request.content.items[0] as DecidableReadAttributeRequestItemDVO;
-        expect(requestItemDVO.type).toBe("DecidableReadAttributeRequestItemDVO");
+        const requestItemDVO = dvo.request.content.items[0] as ReadAttributeRequestItemDVO;
+        expect(requestItemDVO.type).toBe("ReadAttributeRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(true);
         expect(requestItemDVO.query).toBeDefined();
         expect(requestItemDVO.query.type).toBe("ProcessedIdentityAttributeQueryDVO");
@@ -389,8 +388,8 @@ describe("ReadAttributeRequestItemDVO with IQL and results", () => {
         expect(dvo.request.content.type).toBe("RequestDVO");
         expect(dvo.request.content.items).toHaveLength(1);
         expect(dvo.request.isDecidable).toBe(true);
-        const requestItemDVO = dvo.request.content.items[0] as DecidableReadAttributeRequestItemDVO;
-        expect(requestItemDVO.type).toBe("DecidableReadAttributeRequestItemDVO");
+        const requestItemDVO = dvo.request.content.items[0] as ReadAttributeRequestItemDVO;
+        expect(requestItemDVO.type).toBe("ReadAttributeRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(true);
         expect(requestItemDVO.query).toBeDefined();
         expect(requestItemDVO.query.type).toBe("ProcessedIQLQueryDVO");
@@ -624,8 +623,8 @@ describe("ReadAttributeRequestItemDVO with IQL and fallback", () => {
         expect(dvo.request.content.type).toBe("RequestDVO");
         expect(dvo.request.content.items).toHaveLength(1);
         expect(dvo.request.isDecidable).toBe(true);
-        const requestItemDVO = dvo.request.content.items[0] as DecidableReadAttributeRequestItemDVO;
-        expect(requestItemDVO.type).toBe("DecidableReadAttributeRequestItemDVO");
+        const requestItemDVO = dvo.request.content.items[0] as ReadAttributeRequestItemDVO;
+        expect(requestItemDVO.type).toBe("ReadAttributeRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(true);
         expect(requestItemDVO.query).toBeDefined();
         expect(requestItemDVO.query.type).toBe("ProcessedIQLQueryDVO");

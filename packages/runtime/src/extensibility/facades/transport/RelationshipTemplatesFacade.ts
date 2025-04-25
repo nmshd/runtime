@@ -4,14 +4,8 @@ import { RelationshipTemplateDTO, TokenDTO } from "../../../types";
 import {
     CreateOwnRelationshipTemplateRequest,
     CreateOwnRelationshipTemplateUseCase,
-    CreateQRCodeForOwnTemplateRequest,
-    CreateQRCodeForOwnTemplateResponse,
-    CreateQRCodeForOwnTemplateUseCase,
     CreateTokenForOwnTemplateRequest,
     CreateTokenForOwnTemplateUseCase,
-    CreateTokenQRCodeForOwnTemplateRequest,
-    CreateTokenQRCodeForOwnTemplateResponse,
-    CreateTokenQRCodeForOwnTemplateUseCase,
     DeleteRelationshipTemplateRequest,
     DeleteRelationshipTemplateUseCase,
     GetRelationshipTemplateRequest,
@@ -29,8 +23,6 @@ export class RelationshipTemplatesFacade {
         @Inject private readonly getRelationshipTemplatesUseCase: GetRelationshipTemplatesUseCase,
         @Inject private readonly getRelationshipTemplateUseCase: GetRelationshipTemplateUseCase,
         @Inject private readonly deleteRelationshipTemplateUseCase: DeleteRelationshipTemplateUseCase,
-        @Inject private readonly createQRCodeForOwnTemplateUseCase: CreateQRCodeForOwnTemplateUseCase,
-        @Inject private readonly createTokenQRCodeForOwnTemplateUseCase: CreateTokenQRCodeForOwnTemplateUseCase,
         @Inject private readonly createTokenForOwnTemplateUseCase: CreateTokenForOwnTemplateUseCase
     ) {}
 
@@ -52,14 +44,6 @@ export class RelationshipTemplatesFacade {
 
     public async deleteRelationshipTemplate(request: DeleteRelationshipTemplateRequest): Promise<Result<void>> {
         return await this.deleteRelationshipTemplateUseCase.execute(request);
-    }
-
-    public async createQRCodeForOwnTemplate(request: CreateQRCodeForOwnTemplateRequest): Promise<Result<CreateQRCodeForOwnTemplateResponse>> {
-        return await this.createQRCodeForOwnTemplateUseCase.execute(request);
-    }
-
-    public async createTokenQRCodeForOwnTemplate(request: CreateTokenQRCodeForOwnTemplateRequest): Promise<Result<CreateTokenQRCodeForOwnTemplateResponse>> {
-        return await this.createTokenQRCodeForOwnTemplateUseCase.execute(request);
     }
 
     public async createTokenForOwnTemplate(request: CreateTokenForOwnTemplateRequest): Promise<Result<TokenDTO>> {
