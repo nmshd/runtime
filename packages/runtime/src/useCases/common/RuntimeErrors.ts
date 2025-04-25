@@ -95,10 +95,6 @@ class RelationshipTemplates {
         return new ApplicationError("error.runtime.relationshipTemplates.cannotCreateTokenForPeerTemplate", "You cannot create a Token for a peer RelationshipTemplate.");
     }
 
-    public cannotCreateQRCodeForPeerTemplate(): ApplicationError {
-        return new ApplicationError("error.runtime.relationshipTemplates.cannotCreateQRCodeForPeerTemplate", "You cannot create a QR code for a peer RelationshipTemplate.");
-    }
-
     public invalidReference(reference: string): ApplicationError {
         return new ApplicationError(
             "error.runtime.relationshipTemplates.invalidReference",
