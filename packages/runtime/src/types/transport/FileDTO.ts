@@ -1,4 +1,4 @@
-export interface FileDTO {
+export type FileDTO = {
     id: string;
     filename: string;
     tags?: string[];
@@ -8,8 +8,15 @@ export interface FileDTO {
     createdByDevice: string;
     expiresAt: string;
     mimetype: string;
-    isOwn: boolean;
     title: string;
     description?: string;
-    truncatedReference: string;
-}
+} & (
+    | {
+          isOwn: true;
+          truncatedReference: string;
+          url: string;
+      }
+    | {
+          isOwn: false;
+      }
+);

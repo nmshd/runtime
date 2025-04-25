@@ -58,6 +58,7 @@ export class CreateOwnTokenUseCase extends UseCase<CreateOwnTokenRequest, TokenD
     public constructor(
         @Inject private readonly tokenController: TokenController,
         @Inject private readonly accountController: AccountController,
+        @Inject private readonly tokenMapper: TokenMapper,
         @Inject validator: Validator
     ) {
         super(validator);
@@ -83,6 +84,6 @@ export class CreateOwnTokenUseCase extends UseCase<CreateOwnTokenRequest, TokenD
             await this.accountController.syncDatawallet();
         }
 
-        return Result.ok(TokenMapper.toTokenDTO(response, request.ephemeral));
+        return Result.ok(this.tokenMapper.toTokenDTO(response, request.ephemeral));
     }
 }

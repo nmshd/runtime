@@ -5,7 +5,9 @@ import { RuntimeErrors } from "../../common";
 import { DownloadFileResponse } from "./DownloadFile";
 
 export class FileMapper {
-    public static toDownloadFileResponse(buffer: CoreBuffer, file: File): DownloadFileResponse {
+    public constructor(private readonly backboneBaseUrl: string) {}
+
+    public toDownloadFileResponse(buffer: CoreBuffer, file: File): DownloadFileResponse {
         if (!file.cache) {
             throw RuntimeErrors.general.cacheEmpty(File, file.id.toString());
         }
@@ -17,12 +19,14 @@ export class FileMapper {
         };
     }
 
-    public static toFileDTO(file: File): FileDTO {
+    public toFileDTO(file: File): FileDTO {
         if (!file.cache) {
             throw RuntimeErrors.general.cacheEmpty(File, file.id.toString());
         }
+
         return {
             id: file.id.toString(),
+            isOwn: file.isOwn,
             filename: file.cache.filename,
             tags: file.cache.tags,
             filesize: file.cache.filesize,
@@ -31,14 +35,14 @@ export class FileMapper {
             createdByDevice: file.cache.createdByDevice.toString(),
             expiresAt: file.cache.expiresAt.toString(),
             mimetype: file.cache.mimetype,
-            isOwn: file.isOwn,
             title: file.cache.title ?? "",
             description: file.cache.description,
-            truncatedReference: file.truncate()
-        };
+            truncatedReference: file.isOwn ? file.truncate(this.backboneBaseUrl) : undefined,
+            url: file.isOwn ? file.toFileReference(this.backboneBaseUrl).toUrl() : undefined
+        } as FileDTO;
     }
 
-    public static toFileDTOList(files: File[]): FileDTO[] {
+    public toFileDTOList(files: File[]): FileDTO[] {
         return files.map((file) => this.toFileDTO(file));
     }
 }

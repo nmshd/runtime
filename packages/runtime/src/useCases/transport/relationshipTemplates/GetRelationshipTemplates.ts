@@ -78,6 +78,7 @@ export class GetRelationshipTemplatesUseCase extends UseCase<GetRelationshipTemp
 
     public constructor(
         @Inject private readonly relationshipTemplateController: RelationshipTemplateController,
+        @Inject private readonly templateMapper: RelationshipTemplateMapper,
         @Inject validator: Validator
     ) {
         super(validator);
@@ -91,6 +92,6 @@ export class GetRelationshipTemplatesUseCase extends UseCase<GetRelationshipTemp
         }
 
         const relationshipTemplates = await this.relationshipTemplateController.getRelationshipTemplates(query);
-        return Result.ok(RelationshipTemplateMapper.toRelationshipTemplateDTOList(relationshipTemplates));
+        return Result.ok(this.templateMapper.toRelationshipTemplateDTOList(relationshipTemplates));
     }
 }

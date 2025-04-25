@@ -26,6 +26,7 @@ export class GetOrLoadFileUseCase extends UseCase<GetOrLoadFileRequest, FileDTO>
         @Inject private readonly fileController: FileController,
         @Inject private readonly tokenController: TokenController,
         @Inject private readonly accountController: AccountController,
+        @Inject private readonly fileMapper: FileMapper,
         @Inject validator: Validator
     ) {
         super(validator);
@@ -53,7 +54,7 @@ export class GetOrLoadFileUseCase extends UseCase<GetOrLoadFileRequest, FileDTO>
 
     private async loadFileFromFileReference(truncatedReference: string): Promise<Result<FileDTO>> {
         const file = await this.fileController.getOrLoadFileByTruncated(truncatedReference);
-        return Result.ok(FileMapper.toFileDTO(file));
+        return Result.ok(this.fileMapper.toFileDTO(file));
     }
 
     private async loadFileFromTokenReference(truncatedReference: string, password?: string): Promise<Result<FileDTO>> {
@@ -73,6 +74,6 @@ export class GetOrLoadFileUseCase extends UseCase<GetOrLoadFileRequest, FileDTO>
 
     private async loadFile(id: CoreId, key: CryptoSecretKey): Promise<Result<FileDTO>> {
         const file = await this.fileController.getOrLoadFile(id, key);
-        return Result.ok(FileMapper.toFileDTO(file));
+        return Result.ok(this.fileMapper.toFileDTO(file));
     }
 }

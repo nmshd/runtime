@@ -8,6 +8,8 @@ import { FileMapper } from "../files/FileMapper";
 import { DownloadAttachmentResponse } from "./DownloadAttachment";
 
 export class MessageMapper {
+    public constructor(private readonly fileMapper: FileMapper) {}
+
     public static toDownloadAttachmentResponse(buffer: CoreBuffer, file: File): DownloadAttachmentResponse {
         if (!file.cache) {
             throw RuntimeErrors.general.cacheEmpty(File, file.id.toString());
@@ -20,19 +22,19 @@ export class MessageMapper {
         };
     }
 
-    public static toMessageWithAttachmentsDTO(message: Message, attachments: File[]): MessageWithAttachmentsDTO {
+    public toMessageWithAttachmentsDTO(message: Message, attachments: File[]): MessageWithAttachmentsDTO {
         if (!message.cache) {
             throw RuntimeErrors.general.cacheEmpty(Message, message.id.toString());
         }
 
         return {
             id: message.id.toString(),
-            content: this.toMessageContent(message.cache.content),
+            content: MessageMapper.toMessageContent(message.cache.content),
             createdBy: message.cache.createdBy.toString(),
             createdByDevice: message.cache.createdByDevice.toString(),
-            recipients: this.toRecipients(message.cache.recipients),
+            recipients: MessageMapper.toRecipients(message.cache.recipients),
             createdAt: message.cache.createdAt.toString(),
-            attachments: attachments.map((f) => FileMapper.toFileDTO(f)),
+            attachments: attachments.map((f) => this.fileMapper.toFileDTO(f)),
             isOwn: message.isOwn,
             wasReadAt: message.wasReadAt?.toString()
         };

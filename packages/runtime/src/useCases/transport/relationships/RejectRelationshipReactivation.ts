@@ -20,6 +20,7 @@ export class RejectRelationshipReactivationUseCase extends UseCase<RejectRelatio
     public constructor(
         @Inject private readonly relationshipsController: RelationshipsController,
         @Inject private readonly accountController: AccountController,
+        @Inject private readonly relationshipMapper: RelationshipMapper,
         @Inject validator: Validator
     ) {
         super(validator);
@@ -39,6 +40,6 @@ export class RejectRelationshipReactivationUseCase extends UseCase<RejectRelatio
 
         await this.accountController.syncDatawallet();
 
-        return Result.ok(RelationshipMapper.toRelationshipDTO(updatedRelationship));
+        return Result.ok(this.relationshipMapper.toRelationshipDTO(updatedRelationship));
     }
 }

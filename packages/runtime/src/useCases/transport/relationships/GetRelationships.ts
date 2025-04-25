@@ -41,6 +41,7 @@ export class GetRelationshipsUseCase extends UseCase<GetRelationshipsRequest, Re
 
     public constructor(
         @Inject private readonly relationshipsController: RelationshipsController,
+        @Inject private readonly relationshipMapper: RelationshipMapper,
         @Inject validator: Validator
     ) {
         super(validator);
@@ -51,6 +52,6 @@ export class GetRelationshipsUseCase extends UseCase<GetRelationshipsRequest, Re
 
         const relationships = await this.relationshipsController.getRelationships(query);
 
-        return Result.ok(RelationshipMapper.toRelationshipDTOList(relationships));
+        return Result.ok(this.relationshipMapper.toRelationshipDTOList(relationships));
     }
 }

@@ -5,7 +5,9 @@ import { RelationshipTemplateDTO } from "../../../types";
 import { RuntimeErrors } from "../../common";
 
 export class RelationshipTemplateMapper {
-    public static toRelationshipTemplateDTO(template: RelationshipTemplate): RelationshipTemplateDTO {
+    public constructor(private readonly backboneBaseUrl: string) {}
+
+    public toRelationshipTemplateDTO(template: RelationshipTemplate): RelationshipTemplateDTO {
         if (!template.cache) {
             throw RuntimeErrors.general.cacheEmpty(RelationshipTemplate, template.id.toString());
         }
@@ -26,15 +28,16 @@ export class RelationshipTemplateMapper {
             content: this.toTemplateContent(template.cache.content),
             expiresAt: template.cache.expiresAt?.toString(),
             maxNumberOfAllocations: template.cache.maxNumberOfAllocations,
-            truncatedReference: template.truncate()
-        };
+            truncatedReference: template.isOwn ? template.truncate(this.backboneBaseUrl) : undefined,
+            url: template.isOwn ? template.toRelationshipTemplateReference(this.backboneBaseUrl).toUrl() : undefined
+        } as RelationshipTemplateDTO;
     }
 
-    public static toRelationshipTemplateDTOList(responseItems: RelationshipTemplate[]): RelationshipTemplateDTO[] {
+    public toRelationshipTemplateDTOList(responseItems: RelationshipTemplate[]): RelationshipTemplateDTO[] {
         return responseItems.map((i) => this.toRelationshipTemplateDTO(i));
     }
 
-    private static toTemplateContent(content: Serializable) {
+    private toTemplateContent(content: Serializable) {
         if (!(content instanceof RelationshipTemplateContent || content instanceof ArbitraryRelationshipTemplateContent)) {
             return ArbitraryRelationshipTemplateContent.from({ value: content }).toJSON();
         }

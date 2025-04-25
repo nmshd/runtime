@@ -24,6 +24,7 @@ export class LoadPeerRelationshipTemplateUseCase extends UseCase<LoadPeerRelatio
         @Inject private readonly templateController: RelationshipTemplateController,
         @Inject private readonly tokenController: TokenController,
         @Inject private readonly accountController: AccountController,
+        @Inject private readonly templateMapper: RelationshipTemplateMapper,
         @Inject validator: Validator
     ) {
         super(validator);
@@ -51,7 +52,7 @@ export class LoadPeerRelationshipTemplateUseCase extends UseCase<LoadPeerRelatio
 
     private async loadRelationshipTemplateFromRelationshipTemplateReference(relationshipTemplateReference: string, password?: string): Promise<Result<RelationshipTemplateDTO>> {
         const template = await this.templateController.loadPeerRelationshipTemplateByTruncated(relationshipTemplateReference, password);
-        return Result.ok(RelationshipTemplateMapper.toRelationshipTemplateDTO(template));
+        return Result.ok(this.templateMapper.toRelationshipTemplateDTO(template));
     }
 
     private async loadRelationshipTemplateFromTokenReference(tokenReference: string, password?: string): Promise<Result<RelationshipTemplateDTO>> {
@@ -67,6 +68,6 @@ export class LoadPeerRelationshipTemplateUseCase extends UseCase<LoadPeerRelatio
 
         const content = token.cache.content;
         const template = await this.templateController.loadPeerRelationshipTemplateByTokenContent(content, password);
-        return Result.ok(RelationshipTemplateMapper.toRelationshipTemplateDTO(template));
+        return Result.ok(this.templateMapper.toRelationshipTemplateDTO(template));
     }
 }

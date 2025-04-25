@@ -38,6 +38,7 @@ export class CreateTokenForOwnTemplateUseCase extends UseCase<CreateTokenForOwnT
         @Inject private readonly templateController: RelationshipTemplateController,
         @Inject private readonly tokenController: TokenController,
         @Inject private readonly accountController: AccountController,
+        @Inject private readonly tokenMapper: TokenMapper,
         @Inject validator: Validator
     ) {
         super(validator);
@@ -86,6 +87,6 @@ export class CreateTokenForOwnTemplateUseCase extends UseCase<CreateTokenForOwnT
             await this.accountController.syncDatawallet();
         }
 
-        return Result.ok(TokenMapper.toTokenDTO(token, ephemeral));
+        return Result.ok(this.tokenMapper.toTokenDTO(token, ephemeral));
     }
 }

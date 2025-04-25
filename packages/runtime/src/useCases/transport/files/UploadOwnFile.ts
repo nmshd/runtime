@@ -62,6 +62,7 @@ export class UploadOwnFileUseCase extends UseCase<UploadOwnFileRequest, FileDTO>
     public constructor(
         @Inject private readonly fileController: FileController,
         @Inject private readonly accountController: AccountController,
+        @Inject private readonly fileMapper: FileMapper,
         @Inject validator: Validator
     ) {
         super(validator);
@@ -81,6 +82,6 @@ export class UploadOwnFileUseCase extends UseCase<UploadOwnFileRequest, FileDTO>
 
         await this.accountController.syncDatawallet();
 
-        return Result.ok(FileMapper.toFileDTO(file));
+        return Result.ok(this.fileMapper.toFileDTO(file));
     }
 }

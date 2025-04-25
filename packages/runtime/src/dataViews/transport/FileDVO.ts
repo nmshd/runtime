@@ -13,5 +13,4 @@ export interface FileDVO extends DataViewObject {
     mimetype: string;
     isOwn: boolean;
     title: string;
-    truncatedReference: string;
 }

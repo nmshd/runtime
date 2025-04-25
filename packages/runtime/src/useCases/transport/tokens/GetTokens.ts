@@ -68,6 +68,7 @@ export class GetTokensUseCase extends UseCase<GetTokensRequest, TokenDTO[]> {
 
     public constructor(
         @Inject private readonly tokenController: TokenController,
+        @Inject private readonly tokenMapper: TokenMapper,
         @Inject validator: Validator
     ) {
         super(validator);
@@ -81,6 +82,6 @@ export class GetTokensUseCase extends UseCase<GetTokensRequest, TokenDTO[]> {
         }
 
         const tokens = await this.tokenController.getTokens(query);
-        return Result.ok(TokenMapper.toTokenDTOList(tokens, false));
+        return Result.ok(this.tokenMapper.toTokenDTOList(tokens, false));
     }
 }

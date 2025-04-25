@@ -72,6 +72,7 @@ class Validator extends SchemaValidator<ValidateChallengeRequest> {
 export class ValidateChallengeUseCase extends UseCase<ValidateChallengeRequest, ValidateChallengeResponse> {
     public constructor(
         @Inject private readonly challengeController: ChallengeController,
+        @Inject private readonly relationshipMapper: RelationshipMapper,
         @Inject validator: Validator
     ) {
         super(validator);
@@ -87,7 +88,7 @@ export class ValidateChallengeUseCase extends UseCase<ValidateChallengeRequest, 
         try {
             const success = await this.challengeController.validateChallenge(signedChallenge);
 
-            const correspondingRelationship = success.correspondingRelationship ? RelationshipMapper.toRelationshipDTO(success.correspondingRelationship) : undefined;
+            const correspondingRelationship = success.correspondingRelationship ? this.relationshipMapper.toRelationshipDTO(success.correspondingRelationship) : undefined;
             return Result.ok({
                 isValid: success.isValid,
                 correspondingRelationship

@@ -20,6 +20,7 @@ export class GetMessageUseCase extends UseCase<GetMessageRequest, MessageWithAtt
     public constructor(
         @Inject private readonly messageController: MessageController,
         @Inject private readonly fileController: FileController,
+        @Inject private readonly messageMapper: MessageMapper,
         @Inject validator: Validator
     ) {
         super(validator);
@@ -41,6 +42,6 @@ export class GetMessageUseCase extends UseCase<GetMessageRequest, MessageWithAtt
             throw new Error("A file could not be fetched.");
         }
 
-        return Result.ok(MessageMapper.toMessageWithAttachmentsDTO(message, attachments as File[]));
+        return Result.ok(this.messageMapper.toMessageWithAttachmentsDTO(message, attachments as File[]));
     }
 }

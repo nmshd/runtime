@@ -24,6 +24,7 @@ export class LoadPeerTokenUseCase extends UseCase<LoadPeerTokenRequest, TokenDTO
     public constructor(
         @Inject private readonly tokenController: TokenController,
         @Inject private readonly accountController: AccountController,
+        @Inject private readonly tokenMapper: TokenMapper,
         @Inject validator: Validator
     ) {
         super(validator);
@@ -36,6 +37,6 @@ export class LoadPeerTokenUseCase extends UseCase<LoadPeerTokenRequest, TokenDTO
             await this.accountController.syncDatawallet();
         }
 
-        return Result.ok(TokenMapper.toTokenDTO(result, request.ephemeral));
+        return Result.ok(this.tokenMapper.toTokenDTO(result, request.ephemeral));
     }
 }

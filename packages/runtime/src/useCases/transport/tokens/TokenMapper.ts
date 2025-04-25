@@ -3,20 +3,25 @@ import { TokenDTO } from "../../../types";
 import { RuntimeErrors } from "../../common";
 
 export class TokenMapper {
-    public static toTokenDTO(token: Token, ephemeral: boolean): TokenDTO {
+    public constructor(private readonly backboneBaseUrl: string) {}
+
+    public toTokenDTO(token: Token, ephemeral: boolean): TokenDTO {
         if (!token.cache) {
             throw RuntimeErrors.general.cacheEmpty(Token, token.id.toString());
         }
 
-        const reference = token.toTokenReference();
+        const reference = token.toTokenReference(this.backboneBaseUrl);
+
         return {
             id: token.id.toString(),
+            isOwn: token.isOwn,
             createdBy: token.cache.createdBy.toString(),
             createdByDevice: token.cache.createdByDevice.toString(),
             content: token.cache.content.toJSON(),
             createdAt: token.cache.createdAt.toString(),
             expiresAt: token.cache.expiresAt.toString(),
-            truncatedReference: reference.truncate(),
+            truncatedReference: token.isOwn ? reference.truncate() : undefined,
+            url: token.isOwn ? reference.toUrl() : undefined,
             isEphemeral: ephemeral,
             forIdentity: token.cache.forIdentity?.toString(),
             passwordProtection: token.passwordProtection
@@ -25,10 +30,10 @@ export class TokenMapper {
                       passwordIsPin: token.passwordProtection.passwordType.startsWith("pin") ? true : undefined
                   }
                 : undefined
-        };
+        } as TokenDTO;
     }
 
-    public static toTokenDTOList(tokens: Token[], ephemeral: boolean): TokenDTO[] {
-        return tokens.map((t) => TokenMapper.toTokenDTO(t, ephemeral));
+    public toTokenDTOList(tokens: Token[], ephemeral: boolean): TokenDTO[] {
+        return tokens.map((t) => this.toTokenDTO(t, ephemeral));
     }
 }

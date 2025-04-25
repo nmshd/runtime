@@ -19,6 +19,7 @@ class Validator extends SchemaValidator<LoadPeerTokenAnonymousRequest> {
 export class LoadPeerTokenAnonymousUseCase extends UseCase<LoadPeerTokenAnonymousRequest, TokenDTO> {
     public constructor(
         @Inject private readonly anonymousTokenController: AnonymousTokenController,
+        @Inject private readonly tokenMapper: TokenMapper,
         @Inject validator: Validator
     ) {
         super(validator);
@@ -26,6 +27,6 @@ export class LoadPeerTokenAnonymousUseCase extends UseCase<LoadPeerTokenAnonymou
 
     protected async executeInternal(request: LoadPeerTokenAnonymousRequest): Promise<Result<TokenDTO>> {
         const createdToken = await this.anonymousTokenController.loadPeerTokenByTruncated(request.reference, request.password);
-        return Result.ok(TokenMapper.toTokenDTO(createdToken, true));
+        return Result.ok(this.tokenMapper.toTokenDTO(createdToken, true));
     }
 }

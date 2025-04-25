@@ -28,6 +28,7 @@ export class CreateIdentityRecoveryKitUseCase extends UseCase<CreateIdentityReco
         @Inject private readonly devicesController: DevicesController,
         @Inject private readonly tokenController: TokenController,
         @Inject private readonly accountController: AccountController,
+        @Inject private readonly tokenMapper: TokenMapper,
         @Inject validator: Validator
     ) {
         super(validator);
@@ -52,7 +53,7 @@ export class CreateIdentityRecoveryKitUseCase extends UseCase<CreateIdentityReco
 
         await this.accountController.syncDatawallet();
 
-        return Result.ok(TokenMapper.toTokenDTO(token, false));
+        return Result.ok(this.tokenMapper.toTokenDTO(token, false));
     }
 
     private async removeBackupDevices(backupDevices: Device[]) {

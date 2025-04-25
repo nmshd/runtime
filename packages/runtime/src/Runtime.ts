@@ -42,7 +42,7 @@ import { AttributeListenerModule, DeciderModule, MessageModule, NotificationModu
 import { RuntimeConfig } from "./RuntimeConfig";
 import { RuntimeLoggerFactory } from "./RuntimeLoggerFactory";
 import { RuntimeHealth } from "./types";
-import { RuntimeErrors } from "./useCases";
+import { FileMapper, MessageMapper, RelationshipMapper, RelationshipTemplateMapper, RuntimeErrors, TokenMapper } from "./useCases";
 import { AbstractCorrelator } from "./useCases/common/AbstractCorrelator";
 import { SchemaRepository } from "./useCases/common/SchemaRepository";
 
@@ -150,7 +150,7 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
         await this.initInfrastructure();
         await this.initModules();
 
-        this._eventProxy = new EventProxy(this._eventBus, this.transport.eventBus).start();
+        this._eventProxy = new EventProxy(this.templateMapper, this.relationshipMapper, this._eventBus, this.transport.eventBus).start();
 
         this._isInitialized = true;
         this.eventBus.publish(new RuntimeInitializedEvent());
@@ -205,12 +205,52 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
         return { ...originalTransportConfig, platformAdditionalHeaders };
     }
 
+    private get tokenMapper(): TokenMapper {
+        return new TokenMapper(new URL(this.runtimeConfig.transportLibrary.baseUrl).hostname);
+    }
+
+    private get templateMapper(): RelationshipTemplateMapper {
+        return new RelationshipTemplateMapper(new URL(this.runtimeConfig.transportLibrary.baseUrl).hostname);
+    }
+
+    private get relationshipMapper(): RelationshipMapper {
+        return new RelationshipMapper(this.templateMapper);
+    }
+
+    private get fileMapper(): FileMapper {
+        return new FileMapper(new URL(this.runtimeConfig.transportLibrary.baseUrl).hostname);
+    }
+
+    private get messageMapper(): MessageMapper {
+        return new MessageMapper(this.fileMapper);
+    }
+
     private async initDIContainer() {
         if (this.correlator) {
             Container.bind(AbstractCorrelator)
                 .factory(() => this.correlator!)
                 .scope(Scope.Request);
         }
+
+        Container.bind(TokenMapper)
+            .factory(() => this.tokenMapper)
+            .scope(Scope.Request);
+
+        Container.bind(RelationshipTemplateMapper)
+            .factory(() => this.templateMapper)
+            .scope(Scope.Request);
+
+        Container.bind(RelationshipMapper)
+            .factory(() => this.relationshipMapper)
+            .scope(Scope.Request);
+
+        Container.bind(FileMapper)
+            .factory(() => this.fileMapper)
+            .scope(Scope.Request);
+
+        Container.bind(MessageMapper)
+            .factory(() => this.messageMapper)
+            .scope(Scope.Request);
 
         Container.bind(EventBus)
             .factory(() => this.eventBus)

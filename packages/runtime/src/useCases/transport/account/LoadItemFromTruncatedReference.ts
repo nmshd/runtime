@@ -49,6 +49,9 @@ export class LoadItemFromTruncatedReferenceUseCase extends UseCase<LoadItemFromT
         @Inject private readonly templateController: RelationshipTemplateController,
         @Inject private readonly tokenController: TokenController,
         @Inject private readonly accountController: AccountController,
+        @Inject private readonly tokenMapper: TokenMapper,
+        @Inject private readonly fileMapper: FileMapper,
+        @Inject private readonly templateMapper: RelationshipTemplateMapper,
         @Inject validator: Validator
     ) {
         super(validator);
@@ -69,7 +72,7 @@ export class LoadItemFromTruncatedReferenceUseCase extends UseCase<LoadItemFromT
             const template = await this.templateController.loadPeerRelationshipTemplateByTruncated(reference, request.password);
             return Result.ok({
                 type: "RelationshipTemplate",
-                value: RelationshipTemplateMapper.toRelationshipTemplateDTO(template)
+                value: this.templateMapper.toRelationshipTemplateDTO(template)
             });
         }
 
@@ -77,7 +80,7 @@ export class LoadItemFromTruncatedReferenceUseCase extends UseCase<LoadItemFromT
             const file = await this.fileController.getOrLoadFileByTruncated(reference);
             return Result.ok({
                 type: "File",
-                value: FileMapper.toFileDTO(file)
+                value: this.fileMapper.toFileDTO(file)
             });
         }
 
@@ -97,7 +100,7 @@ export class LoadItemFromTruncatedReferenceUseCase extends UseCase<LoadItemFromT
             const template = await this.templateController.loadPeerRelationshipTemplateByTokenContent(tokenContent, password);
             return Result.ok({
                 type: "RelationshipTemplate",
-                value: RelationshipTemplateMapper.toRelationshipTemplateDTO(template)
+                value: this.templateMapper.toRelationshipTemplateDTO(template)
             });
         }
 
@@ -105,7 +108,7 @@ export class LoadItemFromTruncatedReferenceUseCase extends UseCase<LoadItemFromT
             const file = await this.fileController.getOrLoadFile(tokenContent.fileId, tokenContent.secretKey);
             return Result.ok({
                 type: "File",
-                value: FileMapper.toFileDTO(file)
+                value: this.fileMapper.toFileDTO(file)
             });
         }
 
@@ -118,7 +121,7 @@ export class LoadItemFromTruncatedReferenceUseCase extends UseCase<LoadItemFromT
 
         return Result.ok({
             type: "Token",
-            value: TokenMapper.toTokenDTO(token, true)
+            value: this.tokenMapper.toTokenDTO(token, true)
         });
     }
 }

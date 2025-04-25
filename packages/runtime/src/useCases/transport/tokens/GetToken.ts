@@ -19,6 +19,7 @@ class Validator extends SchemaValidator<GetTokenRequest> {
 export class GetTokenUseCase extends UseCase<GetTokenRequest, TokenDTO> {
     public constructor(
         @Inject private readonly tokenController: TokenController,
+        @Inject private readonly tokenMapper: TokenMapper,
         @Inject validator: Validator
     ) {
         super(validator);
@@ -30,6 +31,6 @@ export class GetTokenUseCase extends UseCase<GetTokenRequest, TokenDTO> {
             return Result.fail(RuntimeErrors.general.recordNotFound("Token"));
         }
 
-        return Result.ok(TokenMapper.toTokenDTO(token, false));
+        return Result.ok(this.tokenMapper.toTokenDTO(token, false));
     }
 }

@@ -19,6 +19,7 @@ class Validator extends SchemaValidator<GetFileRequest> {
 export class GetFileUseCase extends UseCase<GetFileRequest, FileDTO> {
     public constructor(
         @Inject private readonly fileController: FileController,
+        @Inject private readonly fileMapper: FileMapper,
         @Inject validator: Validator
     ) {
         super(validator);
@@ -30,6 +31,6 @@ export class GetFileUseCase extends UseCase<GetFileRequest, FileDTO> {
             return Result.fail(RuntimeErrors.general.recordNotFound(File));
         }
 
-        return Result.ok(FileMapper.toFileDTO(file));
+        return Result.ok(this.fileMapper.toFileDTO(file));
     }
 }
