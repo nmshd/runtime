@@ -98,7 +98,7 @@ describe("Password-protected tokens", () => {
             passwordProtection: { password: "password", passwordLocationIndicator: "invalid-password-location-indicator" as any }
         });
         expect(createResult).toBeAnError(
-            "must be a number from 50 to 99 or one of the following strings: Self, Letter, RegistrationLetter, Mail, Sms, App, Website",
+            "must be a number from 50 to 99 or one of the following strings: Self, Letter, RegistrationLetter, Email, SMS, App, Website",
             "error.runtime.validation.invalidPropertyValue"
         );
     });

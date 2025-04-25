@@ -1,7 +1,6 @@
 import { RelationshipTemplateContent, RelationshipTemplateContentJSON } from "@nmshd/content";
-import { PasswordLocationIndicatorMedium } from "@nmshd/core-types";
 import { DateTime } from "luxon";
-import { GetRelationshipTemplatesQuery, OwnerRestriction } from "../../src";
+import { GetRelationshipTemplatesQuery, OwnerRestriction, PasswordLocationIndicatorStrings } from "../../src";
 import { emptyRelationshipTemplateContent, QueryParamConditions, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
@@ -410,7 +409,7 @@ describe("RelationshipTemplates query", () => {
                 content: emptyRelationshipTemplateContent,
                 passwordProtection: {
                     password: "password",
-                    passwordLocationIndicator: PasswordLocationIndicatorMedium.Letter
+                    passwordLocationIndicator: PasswordLocationIndicatorStrings.Letter
                 }
             })
         ).value;

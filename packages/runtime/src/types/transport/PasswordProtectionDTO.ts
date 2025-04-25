@@ -1,7 +1,7 @@
-import { PasswordLocationIndicatorStrings } from "../../useCases/common";
+import { PasswordLocationIndicator } from "../../useCases/common";
 
 export interface PasswordProtectionDTO {
     password: string;
     passwordIsPin?: true;
-    passwordLocationIndicator?: PasswordLocationIndicatorStrings | number;
+    passwordLocationIndicator?: PasswordLocationIndicator;
 }

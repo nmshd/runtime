@@ -1,7 +1,9 @@
 export * from "./anonymous";
+// TODO: why don't we just export common?
 export * from "./common/AbstractCorrelator";
 export * from "./common/Base64ForIdPrefix";
 export * from "./common/OwnerRestriction";
+export * from "./common/PasswordLocationIndicator";
 export * from "./common/RuntimeErrors";
 export * from "./consumption";
 export * from "./transport";

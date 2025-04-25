@@ -1,5 +1,5 @@
-import { CoreDate, PasswordLocationIndicatorMedium } from "@nmshd/core-types";
-import { GetTokensQuery, OwnerRestriction } from "../../src";
+import { CoreDate } from "@nmshd/core-types";
+import { GetTokensQuery, OwnerRestriction, PasswordLocationIndicatorStrings } from "../../src";
 import { exchangeToken, QueryParamConditions, RuntimeServiceProvider, TestRuntimeServices, uploadOwnToken } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
@@ -145,7 +145,7 @@ describe("Tokens query", () => {
         const token = await uploadOwnToken(runtimeServices1.transport, runtimeServices1.address, {
             password: "1234",
             passwordIsPin: true,
-            passwordLocationIndicator: PasswordLocationIndicatorMedium.Letter
+            passwordLocationIndicator: PasswordLocationIndicatorStrings.Letter
         });
         const conditions = new QueryParamConditions<GetTokensQuery>(token, runtimeServices1.transport)
             .addSingleCondition({
@@ -161,7 +161,7 @@ describe("Tokens query", () => {
             .addSingleCondition({
                 expectedResult: false,
                 key: "passwordProtection.passwordLocationIndicator",
-                value: "2"
+                value: "2" // TODO: how can we handle this gracefully?
             });
         await conditions.executeTests((c, q) => c.tokens.getTokens({ query: q, ownerRestriction: OwnerRestriction.Own }));
     });
