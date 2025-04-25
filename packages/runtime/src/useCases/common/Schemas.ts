@@ -20816,29 +20816,6 @@ export const UpdateDeviceRequest: any = {
     }
 }
 
-export const CreateQRCodeForFileRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CreateQRCodeForFileRequest",
-    "definitions": {
-        "CreateQRCodeForFileRequest": {
-            "type": "object",
-            "properties": {
-                "fileId": {
-                    "$ref": "#/definitions/FileIdString"
-                }
-            },
-            "required": [
-                "fileId"
-            ],
-            "additionalProperties": false
-        },
-        "FileIdString": {
-            "type": "string",
-            "pattern": "FIL[A-Za-z0-9]{17}"
-        }
-    }
-}
-
 export const CreateTokenForFileRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/CreateTokenForFileRequest",
@@ -20854,61 +20831,6 @@ export const CreateTokenForFileRequest: any = {
                 },
                 "ephemeral": {
                     "type": "boolean"
-                },
-                "forIdentity": {
-                    "$ref": "#/definitions/AddressString"
-                },
-                "passwordProtection": {
-                    "type": "object",
-                    "properties": {
-                        "password": {
-                            "type": "string",
-                            "minLength": 1
-                        },
-                        "passwordIsPin": {
-                            "type": "boolean",
-                            "const": true
-                        }
-                    },
-                    "required": [
-                        "password"
-                    ],
-                    "additionalProperties": false
-                }
-            },
-            "required": [
-                "fileId"
-            ],
-            "additionalProperties": false
-        },
-        "FileIdString": {
-            "type": "string",
-            "pattern": "FIL[A-Za-z0-9]{17}"
-        },
-        "ISO8601DateTimeString": {
-            "type": "string",
-            "errorMessage": "must match ISO8601 datetime format",
-            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
-        },
-        "AddressString": {
-            "type": "string",
-            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
-        }
-    }
-}
-
-export const CreateTokenQRCodeForFileRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CreateTokenQRCodeForFileRequest",
-    "definitions": {
-        "CreateTokenQRCodeForFileRequest": {
-            "type": "object",
-            "properties": {
-                "fileId": {
-                    "$ref": "#/definitions/FileIdString"
-                },
-                "expiresAt": {
-                    "$ref": "#/definitions/ISO8601DateTimeString"
                 },
                 "forIdentity": {
                     "$ref": "#/definitions/AddressString"
@@ -22129,29 +22051,6 @@ export const CreateOwnRelationshipTemplateRequest: any = {
     }
 }
 
-export const CreateQRCodeForOwnTemplateRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CreateQRCodeForOwnTemplateRequest",
-    "definitions": {
-        "CreateQRCodeForOwnTemplateRequest": {
-            "type": "object",
-            "properties": {
-                "templateId": {
-                    "$ref": "#/definitions/RelationshipTemplateIdString"
-                }
-            },
-            "required": [
-                "templateId"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipTemplateIdString": {
-            "type": "string",
-            "pattern": "RLT[A-Za-z0-9]{17}"
-        }
-    }
-}
-
 export const CreateTokenForOwnTemplateRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/CreateTokenForOwnTemplateRequest",
@@ -22167,61 +22066,6 @@ export const CreateTokenForOwnTemplateRequest: any = {
                 },
                 "ephemeral": {
                     "type": "boolean"
-                },
-                "forIdentity": {
-                    "$ref": "#/definitions/AddressString"
-                },
-                "passwordProtection": {
-                    "type": "object",
-                    "properties": {
-                        "password": {
-                            "type": "string",
-                            "minLength": 1
-                        },
-                        "passwordIsPin": {
-                            "type": "boolean",
-                            "const": true
-                        }
-                    },
-                    "required": [
-                        "password"
-                    ],
-                    "additionalProperties": false
-                }
-            },
-            "required": [
-                "templateId"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipTemplateIdString": {
-            "type": "string",
-            "pattern": "RLT[A-Za-z0-9]{17}"
-        },
-        "ISO8601DateTimeString": {
-            "type": "string",
-            "errorMessage": "must match ISO8601 datetime format",
-            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
-        },
-        "AddressString": {
-            "type": "string",
-            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
-        }
-    }
-}
-
-export const CreateTokenQRCodeForOwnTemplateRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CreateTokenQRCodeForOwnTemplateRequest",
-    "definitions": {
-        "CreateTokenQRCodeForOwnTemplateRequest": {
-            "type": "object",
-            "properties": {
-                "templateId": {
-                    "$ref": "#/definitions/RelationshipTemplateIdString"
-                },
-                "expiresAt": {
-                    "$ref": "#/definitions/ISO8601DateTimeString"
                 },
                 "forIdentity": {
                     "$ref": "#/definitions/AddressString"
@@ -22566,29 +22410,6 @@ export const DeleteTokenRequest: any = {
             },
             "required": [
                 "tokenId"
-            ],
-            "additionalProperties": false
-        },
-        "TokenIdString": {
-            "type": "string",
-            "pattern": "TOK[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const GetQRCodeForTokenRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetQRCodeForTokenRequest",
-    "definitions": {
-        "GetQRCodeForTokenRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/TokenIdString"
-                }
-            },
-            "required": [
-                "id"
             ],
             "additionalProperties": false
         },
