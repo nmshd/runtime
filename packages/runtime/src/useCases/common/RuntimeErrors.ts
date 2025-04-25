@@ -2,6 +2,7 @@ import { ApplicationError } from "@js-soft/ts-utils";
 import { LocalAttribute } from "@nmshd/consumption";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { Base64ForIdPrefix } from "./Base64ForIdPrefix";
+import { PasswordLocationIndicatorStrings } from "./PasswordLocationIndicator";
 
 class General {
     public unknown(message: string, data?: any) {
@@ -50,6 +51,14 @@ class General {
 
     public cacheEmpty(entityName: string | Function, id: string) {
         return new ApplicationError("error.runtime.cacheEmpty", `The cache of ${entityName instanceof Function ? entityName.name : entityName} with id '${id}' is empty.`);
+    }
+
+    // TODO: check if this is still required
+    public invalidPasswordLocationIndicator(value: string | number) {
+        return new ApplicationError(
+            "error.runtime.invalidPasswordLocationIndicator",
+            `${value} is not a valid PasswordLocationIndicator. Instead, it must be a number from 50 to 99 or one of the following strings: ${Object.values(PasswordLocationIndicatorStrings).slice(1).join(", ")}`
+        );
     }
 }
 

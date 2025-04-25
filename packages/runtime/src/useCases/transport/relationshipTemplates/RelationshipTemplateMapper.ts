@@ -1,8 +1,8 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { ArbitraryRelationshipTemplateContent, RelationshipTemplateContent } from "@nmshd/content";
-import { RelationshipTemplate } from "@nmshd/transport";
+import { PasswordProtection, RelationshipTemplate } from "@nmshd/transport";
 import { RelationshipTemplateDTO } from "../../../types";
-import { RuntimeErrors } from "../../common";
+import { mapNumberToPasswordLocationIndicatorString, PasswordLocationIndicator, RuntimeErrors } from "../../common";
 
 export class RelationshipTemplateMapper {
     public static toRelationshipTemplateDTO(template: RelationshipTemplate): RelationshipTemplateDTO {
@@ -17,13 +17,7 @@ export class RelationshipTemplateMapper {
             createdByDevice: template.cache.createdByDevice.toString(),
             createdAt: template.cache.createdAt.toString(),
             forIdentity: template.cache.forIdentity?.toString(),
-            passwordProtection: template.passwordProtection
-                ? {
-                      password: template.passwordProtection.password,
-                      passwordIsPin: template.passwordProtection.passwordType.startsWith("pin") ? true : undefined,
-                      passwordLocationIndicator: template.passwordProtection.passwordLocationIndicator
-                  }
-                : undefined,
+            passwordProtection: this.toPasswordProtection(template.passwordProtection),
             content: this.toTemplateContent(template.cache.content),
             expiresAt: template.cache.expiresAt?.toString(),
             maxNumberOfAllocations: template.cache.maxNumberOfAllocations,
@@ -33,6 +27,25 @@ export class RelationshipTemplateMapper {
 
     public static toRelationshipTemplateDTOList(responseItems: RelationshipTemplate[]): RelationshipTemplateDTO[] {
         return responseItems.map((i) => this.toRelationshipTemplateDTO(i));
+    }
+
+    private static toPasswordProtection(
+        passwordProtection?: PasswordProtection
+    ): { password: string; passwordIsPin?: true; passwordLocationIndicator?: PasswordLocationIndicator } | undefined {
+        if (!passwordProtection) {
+            return undefined;
+        }
+
+        const passwordIsPin = passwordProtection.passwordType.startsWith("pin") ? true : undefined;
+        const passwordLocationIndicator = passwordProtection.passwordLocationIndicator
+            ? mapNumberToPasswordLocationIndicatorString(passwordProtection.passwordLocationIndicator)
+            : undefined;
+
+        return {
+            password: passwordProtection.password,
+            passwordIsPin,
+            passwordLocationIndicator
+        };
     }
 
     private static toTemplateContent(content: Serializable) {

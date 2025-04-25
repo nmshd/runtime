@@ -1,4 +1,4 @@
-import { PasswordLocationIndicatorMedium } from "@nmshd/core-types";
+import { PasswordLocationIndicatorStrings } from "src/useCases/common";
 import { OwnerRestriction } from "../../src";
 import { RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 
@@ -45,7 +45,7 @@ describe("Identity Recovery Kits", () => {
             passwordProtection: { password: "aPassword" }
         });
         expect(response).toBeSuccessful();
-        expect(response.value.passwordProtection!.passwordLocationIndicator).toBe(PasswordLocationIndicatorMedium.RecoveryKit);
+        expect(response.value.passwordProtection!.passwordLocationIndicator).toBe(PasswordLocationIndicatorStrings.RecoveryKit);
 
         const devices = (await services.transport.devices.getDevices()).value;
         const backupDevices = devices.filter((device) => device.isBackupDevice);

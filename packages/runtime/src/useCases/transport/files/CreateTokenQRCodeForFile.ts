@@ -1,8 +1,19 @@
 import { Result } from "@js-soft/ts-utils";
-import { CoreAddress, CoreDate, CoreId, PasswordLocationIndicator } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { File, FileController, PasswordProtectionCreationParameters, TokenContentFile, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { AddressString, FileIdString, ISO8601DateTimeString, QRCode, RuntimeErrors, SchemaRepository, TokenAndTemplateCreationValidator, UseCase } from "../../common";
+import {
+    AddressString,
+    convertPasswordProtection,
+    FileIdString,
+    ISO8601DateTimeString,
+    PasswordLocationIndicator,
+    QRCode,
+    RuntimeErrors,
+    SchemaRepository,
+    TokenAndTemplateCreationValidator,
+    UseCase
+} from "../../common";
 
 export interface SchemaValidatableCreateTokenQRCodeForFileRequest {
     fileId: FileIdString;
@@ -56,12 +67,14 @@ export class CreateTokenQRCodeForFileUseCase extends UseCase<CreateTokenQRCodeFo
         const defaultTokenExpiry = file.cache?.expiresAt ?? CoreDate.utc().add({ days: 12 });
         const tokenExpiry = request.expiresAt ? CoreDate.from(request.expiresAt) : defaultTokenExpiry;
 
+        const passwordProtection = request.passwordProtection ? convertPasswordProtection(request.passwordProtection) : undefined;
+
         const token = await this.tokenController.sendToken({
             content: tokenContent,
             expiresAt: tokenExpiry,
             ephemeral: true,
             forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
-            passwordProtection: PasswordProtectionCreationParameters.create(request.passwordProtection)
+            passwordProtection: PasswordProtectionCreationParameters.create(passwordProtection)
         });
 
         const qrCode = await QRCode.forTruncateable(token);

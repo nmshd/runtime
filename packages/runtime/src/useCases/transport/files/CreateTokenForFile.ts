@@ -1,9 +1,19 @@
 import { Result } from "@js-soft/ts-utils";
-import { CoreAddress, CoreDate, CoreId, PasswordLocationIndicator } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { AccountController, File, FileController, PasswordProtectionCreationParameters, TokenContentFile, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { TokenDTO } from "../../../types";
-import { AddressString, FileIdString, ISO8601DateTimeString, RuntimeErrors, SchemaRepository, TokenAndTemplateCreationValidator, UseCase } from "../../common";
+import {
+    AddressString,
+    convertPasswordProtection,
+    FileIdString,
+    ISO8601DateTimeString,
+    PasswordLocationIndicator,
+    RuntimeErrors,
+    SchemaRepository,
+    TokenAndTemplateCreationValidator,
+    UseCase
+} from "../../common";
 import { TokenMapper } from "../tokens/TokenMapper";
 
 export interface SchemaValidatableCreateTokenForFileRequest {
@@ -55,14 +65,17 @@ export class CreateTokenForFileUseCase extends UseCase<CreateTokenForFileRequest
 
         const defaultTokenExpiry = file.cache?.expiresAt ?? CoreDate.utc().add({ days: 12 });
         const tokenExpiry = request.expiresAt ? CoreDate.from(request.expiresAt) : defaultTokenExpiry;
+
         const ephemeral = request.ephemeral ?? true;
+
+        const passwordProtection = request.passwordProtection ? convertPasswordProtection(request.passwordProtection) : undefined;
 
         const token = await this.tokenController.sendToken({
             content: tokenContent,
             expiresAt: tokenExpiry,
             ephemeral,
             forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
-            passwordProtection: PasswordProtectionCreationParameters.create(request.passwordProtection)
+            passwordProtection: PasswordProtectionCreationParameters.create(passwordProtection)
         });
 
         if (!ephemeral) {

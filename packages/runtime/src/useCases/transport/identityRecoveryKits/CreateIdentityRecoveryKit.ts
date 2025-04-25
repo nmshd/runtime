@@ -1,9 +1,9 @@
 import { Result } from "@js-soft/ts-utils";
-import { CoreDate, PasswordLocationIndicatorMedium } from "@nmshd/core-types";
+import { CoreDate } from "@nmshd/core-types";
 import { AccountController, Device, DevicesController, PasswordProtectionCreationParameters, TokenContentDeviceSharedSecret, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { TokenDTO } from "../../../types";
-import { RuntimeErrors, SchemaRepository, TokenAndTemplateCreationValidator, UseCase } from "../../common";
+import { convertPasswordProtection, PasswordLocationIndicatorStrings, RuntimeErrors, SchemaRepository, TokenAndTemplateCreationValidator, UseCase } from "../../common";
 import { TokenMapper } from "../tokens/TokenMapper";
 
 export interface CreateIdentityRecoveryKitRequest {
@@ -43,14 +43,14 @@ export class CreateIdentityRecoveryKitUseCase extends UseCase<CreateIdentityReco
 
         const newBackupDevice = await this.devicesController.sendDevice({ isAdmin: true, isBackupDevice: true, name: "Backup Device" });
         const sharedSecret = await this.devicesController.getSharedSecret(newBackupDevice.id, request.profileName);
+
+        const passwordProtection = convertPasswordProtection({ ...request.passwordProtection, passwordLocationIndicator: PasswordLocationIndicatorStrings.RecoveryKit });
+
         const token = await this.tokenController.sendToken({
             content: TokenContentDeviceSharedSecret.from({ sharedSecret }),
             expiresAt: CoreDate.from("9999-12-31"),
             ephemeral: false,
-            passwordProtection: PasswordProtectionCreationParameters.create({
-                ...request.passwordProtection,
-                passwordLocationIndicator: PasswordLocationIndicatorMedium.RecoveryKit
-            })
+            passwordProtection: PasswordProtectionCreationParameters.create(passwordProtection)
         });
 
         await this.accountController.syncDatawallet();

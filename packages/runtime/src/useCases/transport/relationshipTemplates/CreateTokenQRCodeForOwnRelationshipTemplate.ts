@@ -1,10 +1,12 @@
 import { Result } from "@js-soft/ts-utils";
-import { CoreAddress, CoreDate, CoreId, PasswordLocationIndicator, SharedPasswordProtection } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId, SharedPasswordProtection } from "@nmshd/core-types";
 import { PasswordProtectionCreationParameters, RelationshipTemplate, RelationshipTemplateController, TokenContentRelationshipTemplate, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import {
     AddressString,
+    convertPasswordProtection,
     ISO8601DateTimeString,
+    PasswordLocationIndicator,
     QRCode,
     RelationshipTemplateIdString,
     RuntimeErrors,
@@ -65,7 +67,9 @@ export class CreateTokenQRCodeForOwnTemplateUseCase extends UseCase<CreateTokenQ
             return Result.fail(RuntimeErrors.relationshipTemplates.personalizationMustBeInherited());
         }
 
-        if (template.passwordProtection && !template.passwordProtection.matchesInputForNewPasswordProtection(request.passwordProtection)) {
+        const tokenPasswordProtection = request.passwordProtection ? convertPasswordProtection(request.passwordProtection) : undefined;
+
+        if (template.passwordProtection && !template.passwordProtection.matchesInputForNewPasswordProtection(tokenPasswordProtection)) {
             return Result.fail(RuntimeErrors.relationshipTemplates.passwordProtectionMustBeInherited());
         }
 
@@ -85,7 +89,7 @@ export class CreateTokenQRCodeForOwnTemplateUseCase extends UseCase<CreateTokenQ
             expiresAt: tokenExpiry,
             ephemeral: true,
             forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
-            passwordProtection: PasswordProtectionCreationParameters.create(request.passwordProtection)
+            passwordProtection: PasswordProtectionCreationParameters.create(tokenPasswordProtection)
         });
 
         const qrCode = await QRCode.forTruncateable(token);

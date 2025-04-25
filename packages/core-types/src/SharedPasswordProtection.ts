@@ -2,37 +2,10 @@ import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-se
 import { CoreBuffer, ICoreBuffer } from "@nmshd/crypto";
 import { CoreError } from "./CoreError";
 
-type Enumerate<N extends number, Acc extends number[] = []> = Acc["length"] extends N ? Acc[number] : Enumerate<N, [...Acc, Acc["length"]]>;
-type IntRange<From extends number, To extends number> = Exclude<Enumerate<To>, Enumerate<From>>;
-
-export enum PasswordLocationIndicatorMedium {
-    RecoveryKit = "RecoveryKit",
-    Self = "Self",
-    Letter = "Letter",
-    RegistrationLetter = "RegistrationLetter",
-    Mail = "Mail",
-    Sms = "Sms",
-    App = "App",
-    Website = "Website"
-}
-
-export type PasswordLocationIndicator = PasswordLocationIndicatorMedium | IntRange<50, 100>;
-
-export function validatePasswordLocationIndicator(value: unknown): string | undefined {
-    if (
-        (typeof value === "string" && Object.values(PasswordLocationIndicatorMedium).includes(value as PasswordLocationIndicatorMedium)) ||
-        (typeof value === "number" && value >= 0 && value < 100)
-    ) {
-        return undefined;
-    }
-
-    return `must be a number from 0 to 99 or one of the following strings: ${Object.values(PasswordLocationIndicatorMedium).join(", ")}`;
-}
-
 export interface ISharedPasswordProtection extends ISerializable {
     passwordType: "pw" | `pin${number}`;
     salt: ICoreBuffer;
-    passwordLocationIndicator?: PasswordLocationIndicator;
+    passwordLocationIndicator?: number;
 }
 
 export class SharedPasswordProtection extends Serializable implements ISharedPasswordProtection {
@@ -44,9 +17,9 @@ export class SharedPasswordProtection extends Serializable implements ISharedPas
     @serialize()
     public salt: CoreBuffer;
 
-    @validate({ nullable: true, customValidator: validatePasswordLocationIndicator })
+    @validate({ nullable: true, min: 50, max: 99, customValidator: (v) => (!Number.isInteger(v) ? "This value must be an integer." : undefined) })
     @serialize({ any: true })
-    public passwordLocationIndicator?: PasswordLocationIndicator;
+    public passwordLocationIndicator?: number;
 
     public static from(value: ISharedPasswordProtection): SharedPasswordProtection {
         return this.fromAny(value);
@@ -61,7 +34,7 @@ export class SharedPasswordProtection extends Serializable implements ISharedPas
         }
 
         const passwordType = splittedPasswordParts[0] as "pw" | `pin${number}`;
-        const passwordLocationIndicator = splittedPasswordParts.length === 3 ? this.mapNumberToPasswordLocationIndicatorMedium(Number(splittedPasswordParts[2])) : undefined;
+        const passwordLocationIndicator = splittedPasswordParts.length === 3 ? Number(splittedPasswordParts[2]) : undefined;
 
         try {
             const salt = CoreBuffer.fromBase64(splittedPasswordParts[1]);
@@ -72,29 +45,7 @@ export class SharedPasswordProtection extends Serializable implements ISharedPas
     }
 
     public truncate(): string {
-        const passwordLocationIndicatorPart =
-            this.passwordLocationIndicator !== undefined ? `&${this.mapPasswordLocationIndicatorMediumToNumber(this.passwordLocationIndicator)}` : "";
+        const passwordLocationIndicatorPart = this.passwordLocationIndicator !== undefined ? `&${this.passwordLocationIndicator}` : "";
         return `${this.passwordType}&${this.salt.toBase64()}${passwordLocationIndicatorPart}`;
-    }
-
-    private static mapNumberToPasswordLocationIndicatorMedium(value: number): PasswordLocationIndicator {
-        const passwordLocationIndicatorMediumValues = Object.values(PasswordLocationIndicatorMedium);
-
-        if (value >= 0 && value < passwordLocationIndicatorMediumValues.length) {
-            return passwordLocationIndicatorMediumValues[value];
-        }
-
-        return value as PasswordLocationIndicator;
-    }
-
-    public mapPasswordLocationIndicatorMediumToNumber(value: PasswordLocationIndicator): number {
-        if (typeof value === "number") return value;
-
-        const index = Object.values(PasswordLocationIndicatorMedium).indexOf(value);
-        if (index === -1) {
-            throw new CoreError("error.core-types.invalidPasswordLocationIndicator", `Invalid PasswordLocationIndicator: ${value}`);
-        }
-
-        return index;
     }
 }

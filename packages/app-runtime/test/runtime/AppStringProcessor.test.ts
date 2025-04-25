@@ -1,6 +1,7 @@
 import { ArbitraryRelationshipTemplateContentJSON } from "@nmshd/content";
-import { CoreDate, PasswordLocationIndicatorMedium } from "@nmshd/core-types";
+import { CoreDate } from "@nmshd/core-types";
 import { DeviceOnboardingInfoDTO, PeerRelationshipTemplateLoadedEvent } from "@nmshd/runtime";
+import { PasswordLocationIndicatorStrings } from "@nmshd/runtime/dist/useCases/common";
 import assert from "assert";
 import { AppRuntime, LocalAccountSession } from "../../src";
 import { MockEventBus, MockUIBridge, TestUtil } from "../lib";
@@ -196,7 +197,7 @@ describe("AppStringProcessor", function () {
         const templateResult = await runtime1Session.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
             content: templateContent,
             expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(),
-            passwordProtection: { password: "password", passwordLocationIndicator: PasswordLocationIndicatorMedium.Sms }
+            passwordProtection: { password: "password", passwordLocationIndicator: PasswordLocationIndicatorStrings.SMS }
         });
 
         mockUiBridge.setPasswordToReturnForAttempt(1, "password");

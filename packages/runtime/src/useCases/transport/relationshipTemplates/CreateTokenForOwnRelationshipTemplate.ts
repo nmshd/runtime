@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { CoreAddress, CoreDate, CoreId, PasswordLocationIndicator, SharedPasswordProtection } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId, SharedPasswordProtection } from "@nmshd/core-types";
 import {
     AccountController,
     PasswordProtectionCreationParameters,
@@ -10,7 +10,17 @@ import {
 } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { TokenDTO } from "../../../types";
-import { AddressString, ISO8601DateTimeString, RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, TokenAndTemplateCreationValidator, UseCase } from "../../common";
+import {
+    AddressString,
+    convertPasswordProtection,
+    ISO8601DateTimeString,
+    PasswordLocationIndicator,
+    RelationshipTemplateIdString,
+    RuntimeErrors,
+    SchemaRepository,
+    TokenAndTemplateCreationValidator,
+    UseCase
+} from "../../common";
 import { TokenMapper } from "../tokens/TokenMapper";
 
 export interface SchemaValidatableCreateTokenForOwnTemplateRequest {
@@ -63,7 +73,9 @@ export class CreateTokenForOwnTemplateUseCase extends UseCase<CreateTokenForOwnT
             return Result.fail(RuntimeErrors.relationshipTemplates.personalizationMustBeInherited());
         }
 
-        if (template.passwordProtection && !template.passwordProtection.matchesInputForNewPasswordProtection(request.passwordProtection)) {
+        const tokenPasswordProtection = request.passwordProtection ? convertPasswordProtection(request.passwordProtection) : undefined;
+
+        if (template.passwordProtection && !template.passwordProtection.matchesInputForNewPasswordProtection(tokenPasswordProtection)) {
             return Result.fail(RuntimeErrors.relationshipTemplates.passwordProtectionMustBeInherited());
         }
 
@@ -76,15 +88,17 @@ export class CreateTokenForOwnTemplateUseCase extends UseCase<CreateTokenForOwnT
             passwordProtection
         });
 
-        const ephemeral = request.ephemeral ?? true;
         const defaultTokenExpiry = template.cache?.expiresAt ?? CoreDate.utc().add({ days: 12 });
         const tokenExpiry = request.expiresAt ? CoreDate.from(request.expiresAt) : defaultTokenExpiry;
+
+        const ephemeral = request.ephemeral ?? true;
+
         const token = await this.tokenController.sendToken({
             content: tokenContent,
             expiresAt: tokenExpiry,
             ephemeral,
             forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
-            passwordProtection: PasswordProtectionCreationParameters.create(request.passwordProtection)
+            passwordProtection: PasswordProtectionCreationParameters.create(tokenPasswordProtection)
         });
 
         if (!ephemeral) {

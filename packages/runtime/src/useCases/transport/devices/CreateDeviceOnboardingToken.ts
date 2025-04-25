@@ -1,9 +1,17 @@
 import { Result } from "@js-soft/ts-utils";
-import { CoreDate, CoreId, PasswordLocationIndicator } from "@nmshd/core-types";
+import { CoreDate, CoreId } from "@nmshd/core-types";
 import { DevicesController, PasswordProtectionCreationParameters, TokenContentDeviceSharedSecret, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { TokenDTO } from "../../../types";
-import { DeviceIdString, ISO8601DateTimeString, SchemaRepository, TokenAndTemplateCreationValidator, UseCase } from "../../common";
+import {
+    convertPasswordProtection,
+    DeviceIdString,
+    ISO8601DateTimeString,
+    PasswordLocationIndicator,
+    SchemaRepository,
+    TokenAndTemplateCreationValidator,
+    UseCase
+} from "../../common";
 import { TokenMapper } from "../tokens/TokenMapper";
 
 export interface SchemaValidatableCreateDeviceOnboardingTokenRequest {
@@ -45,11 +53,13 @@ export class CreateDeviceOnboardingTokenUseCase extends UseCase<CreateDeviceOnbo
 
         const expiresAt = request.expiresAt ? CoreDate.from(request.expiresAt) : CoreDate.utc().add({ minutes: 5 });
 
+        const passwordProtection = request.passwordProtection ? convertPasswordProtection(request.passwordProtection) : undefined;
+
         const token = await this.tokenController.sendToken({
             content: tokenContent,
             expiresAt: expiresAt,
             ephemeral: true,
-            passwordProtection: PasswordProtectionCreationParameters.create(request.passwordProtection)
+            passwordProtection: PasswordProtectionCreationParameters.create(passwordProtection)
         });
 
         return Result.ok(TokenMapper.toTokenDTO(token, true));

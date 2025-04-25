@@ -1,5 +1,5 @@
 import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-serval";
-import { PasswordLocationIndicator, SharedPasswordProtection, validatePasswordLocationIndicator } from "@nmshd/core-types";
+import { SharedPasswordProtection } from "@nmshd/core-types";
 import { CoreBuffer, ICoreBuffer } from "@nmshd/crypto";
 import { PasswordProtectionCreationParameters } from "./PasswordProtectionCreationParameters";
 
@@ -7,7 +7,7 @@ export interface IPasswordProtection extends ISerializable {
     passwordType: "pw" | `pin${number}`;
     salt: ICoreBuffer;
     password: string;
-    passwordLocationIndicator?: PasswordLocationIndicator;
+    passwordLocationIndicator?: number;
 }
 
 export class PasswordProtection extends Serializable implements IPasswordProtection {
@@ -23,9 +23,9 @@ export class PasswordProtection extends Serializable implements IPasswordProtect
     @serialize()
     public password: string;
 
-    @validate({ nullable: true, customValidator: validatePasswordLocationIndicator })
+    @validate({ nullable: true, min: 50, max: 99, customValidator: (v) => (!Number.isInteger(v) ? "This value must be an integer." : undefined) })
     @serialize({ any: true })
-    public passwordLocationIndicator?: PasswordLocationIndicator;
+    public passwordLocationIndicator?: number;
 
     public static from(value: IPasswordProtection): PasswordProtection {
         return this.fromAny(value);
@@ -39,9 +39,7 @@ export class PasswordProtection extends Serializable implements IPasswordProtect
         });
     }
 
-    public matchesInputForNewPasswordProtection(
-        newPasswordProtection: { password: string; passwordIsPin?: true; passwordLocationIndicator?: PasswordLocationIndicator } | undefined
-    ): boolean {
+    public matchesInputForNewPasswordProtection(newPasswordProtection: { password: string; passwordIsPin?: true; passwordLocationIndicator?: number } | undefined): boolean {
         const newCreationParameters = PasswordProtectionCreationParameters.create(newPasswordProtection);
         if (!newCreationParameters) return false;
 

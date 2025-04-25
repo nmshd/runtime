@@ -1,37 +1,38 @@
 import { CoreBuffer, SodiumWrapper } from "@nmshd/crypto";
-import { PasswordLocationIndicator, PasswordLocationIndicatorMedium, SharedPasswordProtection, validatePasswordLocationIndicator } from "../src";
+import { isValidPasswordLocationIndicator, PasswordLocationIndicatorStrings } from "src/useCases/common";
 
-describe("SharedPasswordProtection", () => {
+describe("PasswordLocationIndicatorMedium", () => {
     beforeAll(async () => await SodiumWrapper.ready());
 
-    describe("validatePasswordLocationIndicator", () => {
+    describe("isValidPasswordLocationIndicator", () => {
         test("should allow to set valid enum entry as PasswordLocationIndicator", function () {
-            const result = validatePasswordLocationIndicator(PasswordLocationIndicatorMedium.Letter);
+            const result = isValidPasswordLocationIndicator(PasswordLocationIndicatorStrings.Letter);
             expect(result).toBeUndefined();
         });
 
         test("should allow to set valid string as PasswordLocationIndicator", function () {
-            const result = validatePasswordLocationIndicator("Letter" as PasswordLocationIndicatorMedium);
+            const result = isValidPasswordLocationIndicator("Letter" as PasswordLocationIndicatorStrings);
             expect(result).toBeUndefined();
         });
 
         test("should allow to set valid number as PasswordLocationIndicator", function () {
-            const result = validatePasswordLocationIndicator(50);
+            const result = isValidPasswordLocationIndicator(50);
             expect(result).toBeUndefined();
         });
 
-        test("should allow to set valid number mapping to a PasswordLocationIndicatorMedium as PasswordLocationIndicator", function () {
-            const result = validatePasswordLocationIndicator(0 as PasswordLocationIndicator);
+        test("should allow to set valid number mapping to a PasswordLocationIndicatorStrings as PasswordLocationIndicator", function () {
+            const result = isValidPasswordLocationIndicator(0);
             expect(result).toBeUndefined();
         });
 
         test("should not allow to set invalid string as PasswordLocationIndicator", function () {
-            const result = validatePasswordLocationIndicator("Invalid-PasswordLocationIndicatorMedium" as any);
+            const result = isValidPasswordLocationIndicator("Invalid-PasswordLocationIndicatorStrings" as any);
             expect(result).toBe("must be a number from 0 to 99 or one of the following strings: RecoveryKit, Self, Letter, RegistrationLetter, Mail, Sms, App, Website");
         });
 
+        // TODO: also lower number
         test("should not allow to set invalid number as PasswordLocationIndicator", function () {
-            const result = validatePasswordLocationIndicator(100 as any);
+            const result = isValidPasswordLocationIndicator(100);
             expect(result).toBe("must be a number from 0 to 99 or one of the following strings: RecoveryKit, Self, Letter, RegistrationLetter, Mail, Sms, App, Website");
         });
     });
@@ -50,11 +51,11 @@ describe("SharedPasswordProtection", () => {
             expect(splittedPasswordParts[2]).toBe("50");
         });
 
-        test("should convert passwordLocationIndicatorMedium to number", function () {
+        test("should convert PasswordLocationIndicatorStrings to number", function () {
             const sharedPasswordProtection = SharedPasswordProtection.from({
                 passwordType: "pw",
                 salt: CoreBuffer.random(16),
-                passwordLocationIndicator: PasswordLocationIndicatorMedium.RecoveryKit
+                passwordLocationIndicator: PasswordLocationIndicatorStrings.RecoveryKit
             });
 
             const truncatedSharedPasswordProtection = sharedPasswordProtection.truncate();
@@ -88,16 +89,16 @@ describe("SharedPasswordProtection", () => {
             expect(deserializedSharedPasswordProtection!.passwordLocationIndicator).toBe(50);
         });
 
-        test("should convert to passwordLocationIndicatorMedium", function () {
+        test("should convert to PasswordLocationIndicatorStrings", function () {
             const sharedPasswordProtection = SharedPasswordProtection.from({
                 passwordType: "pw",
                 salt: CoreBuffer.random(16),
-                passwordLocationIndicator: PasswordLocationIndicatorMedium.RecoveryKit
+                passwordLocationIndicator: PasswordLocationIndicatorStrings.RecoveryKit
             });
             const truncatedSharedPasswordProtection = sharedPasswordProtection.truncate();
 
             const deserializedSharedPasswordProtection = SharedPasswordProtection.fromTruncated(truncatedSharedPasswordProtection);
-            expect(deserializedSharedPasswordProtection!.passwordLocationIndicator).toBe(PasswordLocationIndicatorMedium.RecoveryKit);
+            expect(deserializedSharedPasswordProtection!.passwordLocationIndicator).toBe(PasswordLocationIndicatorStrings.RecoveryKit);
         });
 
         test("should not add passwordLocationIndicator if none is set", function () {

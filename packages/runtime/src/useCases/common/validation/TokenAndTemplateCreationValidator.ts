@@ -1,4 +1,5 @@
-import { CoreDate, PasswordLocationIndicatorMedium } from "@nmshd/core-types";
+import { CoreDate } from "@nmshd/core-types";
+import { isValidPasswordLocationIndicator, PasswordLocationIndicatorStrings } from "../PasswordLocationIndicator";
 import { RuntimeErrors } from "../RuntimeErrors";
 import { JsonSchema } from "../SchemaRepository";
 import { SchemaValidator } from "./SchemaValidator";
@@ -43,24 +44,15 @@ export class TokenAndTemplateCreationValidator<
                 }
             }
 
-            if (passwordProtection.passwordLocationIndicator) {
-                if (
-                    (typeof passwordProtection.passwordLocationIndicator === "string" &&
-                        (!Object.values(PasswordLocationIndicatorMedium).includes(passwordProtection.passwordLocationIndicator as PasswordLocationIndicatorMedium) ||
-                            passwordProtection.passwordLocationIndicator === PasswordLocationIndicatorMedium.RecoveryKit)) ||
-                    (typeof passwordProtection.passwordLocationIndicator === "number" &&
-                        passwordProtection.passwordLocationIndicator < 50 &&
-                        passwordProtection.passwordLocationIndicator > 99)
-                ) {
-                    validationResult.addFailure(
-                        new ValidationFailure(
-                            RuntimeErrors.general.invalidPropertyValue(
-                                `must be a number from 50 to 99 or one of the following strings: ${Object.values(PasswordLocationIndicatorMedium).slice(1).join(", ")}`
-                            ),
-                            "passwordLocationIndicator"
-                        )
-                    );
-                }
+            if (passwordProtection.passwordLocationIndicator && !isValidPasswordLocationIndicator(passwordProtection.passwordLocationIndicator)) {
+                validationResult.addFailure(
+                    new ValidationFailure(
+                        RuntimeErrors.general.invalidPropertyValue(
+                            `must be a number from 50 to 99 or one of the following strings: ${Object.values(PasswordLocationIndicatorStrings).slice(1).join(", ")}`
+                        ),
+                        "passwordLocationIndicator"
+                    )
+                );
             }
         }
 
