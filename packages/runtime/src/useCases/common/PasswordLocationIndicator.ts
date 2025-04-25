@@ -29,6 +29,7 @@ export function convertPasswordProtection(passwordProtection: { password: string
     return { ...passwordProtection, passwordLocationIndicator: numericPasswordLocationIndicator };
 }
 
+// TODO: maybe we can move this to PasswordProtectionCreationParameters after all
 function mapPasswordLocationIndicatorStringToNumber(value: PasswordLocationIndicator): number {
     if (typeof value === "number") return value;
 
