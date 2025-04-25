@@ -34,8 +34,6 @@ import {
     CreateAndShareRelationshipAttributeRequest,
     CreateOutgoingRequestRequest,
     CreateRepositoryAttributeRequest,
-    CreateTokenForFileRequest,
-    CreateTokenQRCodeForFileRequest,
     FileDTO,
     IdentityDeletionProcessDTO,
     IncomingRequestStatusChangedEvent,
@@ -186,19 +184,6 @@ export async function uploadFile(transportServices: TransportServices): Promise<
     expect(response).toBeSuccessful();
 
     return response.value;
-}
-
-export function createToken(
-    transportServices: TransportServices,
-    request: CreateTokenForFileRequest | CreateTokenQRCodeForFileRequest,
-    tokenType: "file" | "qrcode"
-): Promise<any> {
-    switch (tokenType) {
-        case "file":
-            return transportServices.files.createTokenForFile(request as CreateTokenForFileRequest);
-        case "qrcode":
-            return transportServices.files.createTokenQRCodeForFile(request as CreateTokenQRCodeForFileRequest);
-    }
 }
 
 // Override the default upload request with values
