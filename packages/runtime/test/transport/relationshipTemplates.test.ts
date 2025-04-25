@@ -199,20 +199,6 @@ describe("RelationshipTemplate Tests", () => {
             expect(createTokenResult).toBeSuccessful();
         });
 
-        test("create a token QR code for a personalized template", async () => {
-            const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
-                content: emptyRelationshipTemplateContent,
-                expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
-                forIdentity: runtimeServices2.address
-            });
-            expect(createResult).toBeSuccessful();
-            const createQRCodeResult = await runtimeServices1.transport.relationshipTemplates.createTokenQRCodeForOwnTemplate({
-                templateId: createResult.value.id,
-                forIdentity: runtimeServices2.address
-            });
-            expect(createQRCodeResult).toBeSuccessful();
-        });
-
         test("error when creating a token for a personalized template with false personalization", async () => {
             const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
                 content: emptyRelationshipTemplateContent,
@@ -226,24 +212,6 @@ describe("RelationshipTemplate Tests", () => {
             });
             expect(createQRCodeWithWrongPersonalizationResult).toBeAnError(/.*/, "error.runtime.relationshipTemplates.personalizationMustBeInherited");
             const createQRCodeWithoutPersonalizationResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
-                templateId: createResult.value.id
-            });
-            expect(createQRCodeWithoutPersonalizationResult).toBeAnError(/.*/, "error.runtime.relationshipTemplates.personalizationMustBeInherited");
-        });
-
-        test("error when creating a token QR code for a personalized template with false personalization", async () => {
-            const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
-                content: emptyRelationshipTemplateContent,
-                expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
-                forIdentity: runtimeServices2.address
-            });
-            expect(createResult).toBeSuccessful();
-            const createQRCodeWithWrongPersonalizationResult = await runtimeServices1.transport.relationshipTemplates.createTokenQRCodeForOwnTemplate({
-                templateId: createResult.value.id,
-                forIdentity: runtimeServices1.address
-            });
-            expect(createQRCodeWithWrongPersonalizationResult).toBeAnError(/.*/, "error.runtime.relationshipTemplates.personalizationMustBeInherited");
-            const createQRCodeWithoutPersonalizationResult = await runtimeServices1.transport.relationshipTemplates.createTokenQRCodeForOwnTemplate({
                 templateId: createResult.value.id
             });
             expect(createQRCodeWithoutPersonalizationResult).toBeAnError(/.*/, "error.runtime.relationshipTemplates.personalizationMustBeInherited");
