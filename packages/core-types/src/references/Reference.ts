@@ -44,6 +44,35 @@ export class Reference extends Serializable implements IReference {
         return truncatedReference.toBase64URL();
     }
 
+    public toUrl(appName?: string): string {
+        if (!this.backboneBaseUrl) throw new CoreError("error.core-types.missingBackboneBaseUrl", "The backboneBaseUrl is required to create a URL from a reference.");
+
+        const truncatedPart = `${this.key.toBase64()}|${this.forIdentityTruncated ?? ""}|${this.passwordProtection?.truncate() ?? ""}`;
+        const link = `https://${this.backboneBaseUrl}/Tokens/${this.id.toString()}${appName ? `?app=${appName}` : ""}#${truncatedPart}`;
+
+        return link;
+    }
+
+    public static fromUrl(value: string): Reference {
+        const url = new URL(value);
+
+        const id = CoreId.from(url.pathname.split("/").pop() ?? "");
+        const backboneBaseUrl = url.hostname;
+
+        const [keyBase64, forIdentityTruncated, passwordProtectionBase64] = url.hash.substring(1).split("|");
+
+        const key = CryptoSecretKey.fromBase64(keyBase64);
+        const passwordProtection = passwordProtectionBase64 ? SharedPasswordProtection.fromTruncated(passwordProtectionBase64) : undefined;
+
+        return this.from({
+            id,
+            backboneBaseUrl,
+            key,
+            forIdentityTruncated,
+            passwordProtection
+        });
+    }
+
     public static fromTruncated(value: string): Reference {
         const truncatedBuffer = CoreBuffer.fromBase64URL(value);
         const splitted = truncatedBuffer.toUtf8().split("|");
