@@ -1154,12 +1154,13 @@ describe("DeciderModule", () => {
     });
 
     describe("RequestItemDerivationConfigs", () => {
-        test("accepts an AuthenticationRequestItem given a AuthenticationRequestItemConfig", async () => {
+        test("accepts an AuthenticationRequestItem given a AuthenticationRequestItemConfig with all fields set", async () => {
             const deciderConfig: DeciderModuleConfigurationOverwrite = {
                 automationConfig: [
                     {
                         requestConfig: {
-                            "content.item.@type": "AuthenticationRequestItem"
+                            "content.item.@type": "AuthenticationRequestItem",
+                            "content.item.title": "Title of RequestItem"
                         },
                         responseConfig: {
                             accept: true
