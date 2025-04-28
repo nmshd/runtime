@@ -1106,8 +1106,8 @@ describe("FormFieldRequestItemProcessor", function () {
 
             await processor.applyIncomingResponseItem(responseItem, requestItem, incomingRequest);
 
-            const attributesAfterGettingFreeText = await consumptionController.attributes.getLocalAttributes();
-            expect(attributesAfterGettingFreeText).toHaveLength(0);
+            const attributesAfterGettingResponse = await consumptionController.attributes.getLocalAttributes();
+            expect(attributesAfterGettingResponse).toHaveLength(0);
         });
 
         test("does not create an Attribute when getting the option selected by the recipient in the single selection form field", async function () {
