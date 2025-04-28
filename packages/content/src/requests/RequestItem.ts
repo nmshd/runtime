@@ -38,11 +38,6 @@ import {
 
 export interface RequestItemJSON extends ContentJSON {
     /**
-     * The human-readable title of this item.
-     */
-    title?: string;
-
-    /**
      * The human-readable description of this item.
      */
     description?: string;
@@ -84,11 +79,6 @@ export type RequestItemJSONDerivations =
 
 export interface IRequestItem extends ISerializable {
     /**
-     * The human-readable title of this item.
-     */
-    title?: string;
-
-    /**
      * The human-readable description of this item.
      */
     description?: string;
@@ -129,10 +119,6 @@ export type IRequestItemDerivations =
     | ITransferFileOwnershipRequestItem;
 
 export abstract class RequestItem extends Serializable {
-    @serialize()
-    @validate({ nullable: true, max: 200 })
-    public title?: string;
-
     @serialize()
     @validate({ nullable: true, max: 500 })
     public description?: string;
