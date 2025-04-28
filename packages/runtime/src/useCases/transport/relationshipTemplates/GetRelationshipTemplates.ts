@@ -77,7 +77,7 @@ export class GetRelationshipTemplatesUseCase extends UseCase<GetRelationshipTemp
             },
             [`${nameof<RelationshipTemplateDTO>((r) => r.passwordProtection)}.passwordLocationIndicator`]: (query: any, input: string) => {
                 const stringIsNumeric = /^\d+$/.test(input);
-                const queryInput = stringIsNumeric ? parseInt(input) : PasswordLocationIndicatorOptions[input as keyof typeof PasswordLocationIndicatorOptions];
+                const queryInput = stringIsNumeric ? parseInt(input) : (PasswordLocationIndicatorOptions[input as keyof typeof PasswordLocationIndicatorOptions] ?? -1);
                 query[`${nameof<RelationshipTemplate>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordLocationIndicator)}`] = queryInput;
             }
         }
