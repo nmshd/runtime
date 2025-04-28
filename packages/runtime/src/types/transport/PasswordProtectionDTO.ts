@@ -1,4 +1,4 @@
-import { PasswordLocationIndicator } from "../../useCases/common";
+import { PasswordLocationIndicator } from "@nmshd/transport";
 
 export interface PasswordProtectionDTO {
     password: string;

@@ -1,5 +1,22 @@
 import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-serval";
 
+type Enumerate<N extends number, Acc extends number[] = []> = Acc["length"] extends N ? Acc[number] : Enumerate<N, [...Acc, Acc["length"]]>;
+type IntRange<From extends number, To extends number> = Exclude<Enumerate<To>, Enumerate<From>>;
+
+// TODO: naming
+export enum PasswordLocationIndicatorStrings {
+    RecoveryKit = 0,
+    Self = 1,
+    Letter = 2,
+    RegistrationLetter = 3,
+    Email = 4,
+    SMS = 5,
+    App = 6,
+    Website = 7
+}
+
+export type PasswordLocationIndicator = keyof typeof PasswordLocationIndicatorStrings | IntRange<50, 100>;
+
 export interface IPasswordProtectionCreationParameters extends ISerializable {
     passwordType: "pw" | `pin${number}`;
     password: string;
@@ -23,13 +40,25 @@ export class PasswordProtectionCreationParameters extends Serializable implement
         return this.fromAny(value);
     }
 
-    public static create(params: { password: string; passwordIsPin?: true; passwordLocationIndicator?: number } | undefined): PasswordProtectionCreationParameters | undefined {
+    public static create(
+        params: { password: string; passwordIsPin?: true; passwordLocationIndicator?: PasswordLocationIndicator } | undefined
+    ): PasswordProtectionCreationParameters | undefined {
         if (!params) return;
+
+        const passwordLocationIndicator =
+            params.passwordLocationIndicator !== undefined ? this.mapPasswordLocationIndicatorStringToNumber(params.passwordLocationIndicator) : undefined;
 
         return PasswordProtectionCreationParameters.from({
             password: params.password,
             passwordType: params.passwordIsPin ? `pin${params.password.length}` : "pw",
-            passwordLocationIndicator: params.passwordLocationIndicator
+            passwordLocationIndicator: passwordLocationIndicator
         });
+    }
+
+    private static mapPasswordLocationIndicatorStringToNumber(value: PasswordLocationIndicator): number {
+        if (typeof value === "number") return value;
+
+        const numericValue = PasswordLocationIndicatorStrings[value];
+        return numericValue;
     }
 }

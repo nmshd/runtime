@@ -2,6 +2,7 @@ import { Result } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId, SharedPasswordProtection } from "@nmshd/core-types";
 import {
     AccountController,
+    PasswordLocationIndicator,
     PasswordProtectionCreationParameters,
     RelationshipTemplate,
     RelationshipTemplateController,
@@ -10,17 +11,7 @@ import {
 } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { TokenDTO } from "../../../types";
-import {
-    AddressString,
-    convertPasswordProtection,
-    ISO8601DateTimeString,
-    PasswordLocationIndicator,
-    RelationshipTemplateIdString,
-    RuntimeErrors,
-    SchemaRepository,
-    TokenAndTemplateCreationValidator,
-    UseCase
-} from "../../common";
+import { AddressString, ISO8601DateTimeString, RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, TokenAndTemplateCreationValidator, UseCase } from "../../common";
 import { TokenMapper } from "../tokens/TokenMapper";
 
 export interface SchemaValidatableCreateTokenForOwnTemplateRequest {
@@ -73,9 +64,7 @@ export class CreateTokenForOwnTemplateUseCase extends UseCase<CreateTokenForOwnT
             return Result.fail(RuntimeErrors.relationshipTemplates.personalizationMustBeInherited());
         }
 
-        const tokenPasswordProtection = request.passwordProtection ? convertPasswordProtection(request.passwordProtection) : undefined;
-
-        if (template.passwordProtection && !template.passwordProtection.matchesInputForNewPasswordProtection(tokenPasswordProtection)) {
+        if (template.passwordProtection && !template.passwordProtection.matchesInputForNewPasswordProtection(request.passwordProtection)) {
             return Result.fail(RuntimeErrors.relationshipTemplates.passwordProtectionMustBeInherited());
         }
 
@@ -98,7 +87,7 @@ export class CreateTokenForOwnTemplateUseCase extends UseCase<CreateTokenForOwnT
             expiresAt: tokenExpiry,
             ephemeral,
             forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
-            passwordProtection: PasswordProtectionCreationParameters.create(tokenPasswordProtection)
+            passwordProtection: PasswordProtectionCreationParameters.create(request.passwordProtection)
         });
 
         if (!ephemeral) {

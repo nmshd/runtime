@@ -1,5 +1,5 @@
 import { CoreDate } from "@nmshd/core-types";
-import { isValidPasswordLocationIndicator, PasswordLocationIndicatorStrings } from "../PasswordLocationIndicator";
+import { PasswordLocationIndicatorStrings } from "@nmshd/transport";
 import { RuntimeErrors } from "../RuntimeErrors";
 import { JsonSchema } from "../SchemaRepository";
 import { SchemaValidator } from "./SchemaValidator";
@@ -44,7 +44,7 @@ export class TokenAndTemplateCreationValidator<
                 }
             }
 
-            if (passwordProtection.passwordLocationIndicator && !isValidPasswordLocationIndicator(passwordProtection.passwordLocationIndicator)) {
+            if (passwordProtection.passwordLocationIndicator && !TokenAndTemplateCreationValidator.isValidPasswordLocationIndicator(passwordProtection.passwordLocationIndicator)) {
                 validationResult.addFailure(
                     new ValidationFailure(
                         RuntimeErrors.general.invalidPropertyValue(
@@ -57,5 +57,23 @@ export class TokenAndTemplateCreationValidator<
         }
 
         return validationResult;
+    }
+
+    private static isValidPasswordLocationIndicator(value: unknown): boolean {
+        if (typeof value !== "string" && typeof value !== "number") return false;
+
+        if (typeof value === "string") {
+            const lowerCaseValue = value.toLowerCase();
+
+            const lowerCaseKeys = Object.keys(PasswordLocationIndicatorStrings).map((key) => key.toLowerCase());
+            const isPasswordLocationIndicatorString = lowerCaseKeys.includes(lowerCaseValue);
+
+            const isRecoveryKit = lowerCaseValue === "recoverykit";
+
+            return isPasswordLocationIndicatorString && !isRecoveryKit;
+        }
+
+        const isInValidRange = value >= 50 && value <= 99;
+        return isInValidRange;
     }
 }

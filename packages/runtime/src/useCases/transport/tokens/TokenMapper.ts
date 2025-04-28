@@ -1,6 +1,6 @@
-import { PasswordProtection, Token } from "@nmshd/transport";
+import { Token } from "@nmshd/transport";
 import { TokenDTO } from "../../../types";
-import { mapNumberToPasswordLocationIndicatorString, PasswordLocationIndicator, RuntimeErrors } from "../../common";
+import { RuntimeErrors, toPasswordProtection } from "../../common";
 
 export class TokenMapper {
     public static toTokenDTO(token: Token, ephemeral: boolean): TokenDTO {
@@ -20,29 +20,11 @@ export class TokenMapper {
             truncatedReference: reference.truncate(),
             isEphemeral: ephemeral,
             forIdentity: token.cache.forIdentity?.toString(),
-            passwordProtection: this.toPasswordProtection(token.passwordProtection)
+            passwordProtection: toPasswordProtection(token.passwordProtection)
         };
     }
 
     public static toTokenDTOList(tokens: Token[], ephemeral: boolean): TokenDTO[] {
         return tokens.map((t) => TokenMapper.toTokenDTO(t, ephemeral));
-    }
-
-    private static toPasswordProtection(
-        passwordProtection?: PasswordProtection
-    ): { password: string; passwordIsPin?: true; passwordLocationIndicator?: PasswordLocationIndicator } | undefined {
-        if (!passwordProtection) {
-            return undefined;
-        }
-
-        const passwordIsPin = passwordProtection.passwordType.startsWith("pin") ? true : undefined;
-        const passwordLocationIndicator =
-            passwordProtection.passwordLocationIndicator !== undefined ? mapNumberToPasswordLocationIndicatorString(passwordProtection.passwordLocationIndicator) : undefined;
-
-        return {
-            password: passwordProtection.password,
-            passwordIsPin,
-            passwordLocationIndicator
-        };
     }
 }

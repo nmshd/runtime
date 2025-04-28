@@ -3,19 +3,10 @@ import { Result } from "@js-soft/ts-utils";
 import { OutgoingRequestsController } from "@nmshd/consumption";
 import { ArbitraryRelationshipTemplateContent, RelationshipTemplateContent } from "@nmshd/content";
 import { CoreAddress, CoreDate } from "@nmshd/core-types";
-import { AccountController, PasswordProtectionCreationParameters, RelationshipTemplateController } from "@nmshd/transport";
+import { AccountController, PasswordLocationIndicator, PasswordProtectionCreationParameters, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { RelationshipTemplateDTO } from "../../../types";
-import {
-    AddressString,
-    convertPasswordProtection,
-    ISO8601DateTimeString,
-    PasswordLocationIndicator,
-    RuntimeErrors,
-    SchemaRepository,
-    TokenAndTemplateCreationValidator,
-    UseCase
-} from "../../common";
+import { AddressString, ISO8601DateTimeString, RuntimeErrors, SchemaRepository, TokenAndTemplateCreationValidator, UseCase } from "../../common";
 import { RelationshipTemplateMapper } from "./RelationshipTemplateMapper";
 
 export interface SchemaValidatableCreateOwnRelationshipTemplateRequest {
@@ -66,14 +57,12 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
             content.onNewRelationship.expiresAt = CoreDate.from(request.expiresAt);
         }
 
-        const passwordProtection = request.passwordProtection ? convertPasswordProtection(request.passwordProtection) : undefined;
-
         const relationshipTemplate = await this.templateController.sendRelationshipTemplate({
             content: content,
             expiresAt: CoreDate.from(request.expiresAt),
             maxNumberOfAllocations: request.maxNumberOfAllocations,
             forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
-            passwordProtection: PasswordProtectionCreationParameters.create(passwordProtection)
+            passwordProtection: PasswordProtectionCreationParameters.create(request.passwordProtection)
         });
 
         await this.accountController.syncDatawallet();

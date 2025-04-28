@@ -25,11 +25,10 @@ import {
 } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
-import { IdentityUtil } from "@nmshd/transport";
+import { IdentityUtil, PasswordLocationIndicator } from "@nmshd/transport";
 import fs from "fs";
 import _ from "lodash";
 import { DateTime } from "luxon";
-import { PasswordLocationIndicator } from "src/useCases/common";
 import {
     ConsumptionServices,
     CreateAndShareRelationshipAttributeRequest,

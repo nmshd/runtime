@@ -1,43 +1,26 @@
-type Enumerate<N extends number, Acc extends number[] = []> = Acc["length"] extends N ? Acc[number] : Enumerate<N, [...Acc, Acc["length"]]>;
-type IntRange<From extends number, To extends number> = Exclude<Enumerate<To>, Enumerate<From>>;
+import { PasswordLocationIndicator, PasswordLocationIndicatorStrings, PasswordProtection } from "@nmshd/transport";
 
-// TODO: naming
-export enum PasswordLocationIndicatorStrings {
-    RecoveryKit = 0,
-    Self = 1,
-    Letter = 2,
-    RegistrationLetter = 3,
-    Email = 4,
-    SMS = 5,
-    App = 6,
-    Website = 7
-}
+// TODO: name of file
 
-export type PasswordLocationIndicator = keyof typeof PasswordLocationIndicatorStrings | IntRange<50, 100>;
-
-// TODO: naming
-// TODO: maybe we can move this to PasswordProtectionCreationParameters after all
-export function convertPasswordProtection(passwordProtection: { password: string; passwordIsPin?: true; passwordLocationIndicator?: PasswordLocationIndicator }): {
-    password: string;
-    passwordIsPin?: true;
-    passwordLocationIndicator?: number;
-} {
-    if (passwordProtection.passwordLocationIndicator === undefined) {
-        return passwordProtection as { password: string; passwordIsPin?: true };
+export function toPasswordProtection(
+    passwordProtection?: PasswordProtection
+): { password: string; passwordIsPin?: true; passwordLocationIndicator?: PasswordLocationIndicator } | undefined {
+    if (!passwordProtection) {
+        return undefined;
     }
 
-    const numericPasswordLocationIndicator = mapPasswordLocationIndicatorStringToNumber(passwordProtection.passwordLocationIndicator);
-    return { ...passwordProtection, passwordLocationIndicator: numericPasswordLocationIndicator };
+    const passwordIsPin = passwordProtection.passwordType.startsWith("pin") ? true : undefined;
+    const passwordLocationIndicator =
+        passwordProtection.passwordLocationIndicator !== undefined ? mapNumberToPasswordLocationIndicatorString(passwordProtection.passwordLocationIndicator) : undefined;
+
+    return {
+        password: passwordProtection.password,
+        passwordIsPin,
+        passwordLocationIndicator
+    };
 }
 
-function mapPasswordLocationIndicatorStringToNumber(value: PasswordLocationIndicator): number {
-    if (typeof value === "number") return value;
-
-    const numericValue = PasswordLocationIndicatorStrings[value];
-    return numericValue;
-}
-
-export function mapNumberToPasswordLocationIndicatorString(value: number): PasswordLocationIndicator {
+function mapNumberToPasswordLocationIndicatorString(value: number): PasswordLocationIndicator {
     const passwordLocationIndicatorStringValues = Object.values(PasswordLocationIndicatorStrings);
 
     if (value >= 0 && value < passwordLocationIndicatorStringValues.length) {
@@ -45,23 +28,4 @@ export function mapNumberToPasswordLocationIndicatorString(value: number): Passw
     }
 
     return value as PasswordLocationIndicator;
-}
-
-// TODO: is this needed here or can it be moved directly to validator?
-export function isValidPasswordLocationIndicator(value: unknown): boolean {
-    if (typeof value !== "string" && typeof value !== "number") return false;
-
-    if (typeof value === "string") {
-        const lowerCaseValue = value.toLowerCase();
-
-        const lowerCaseKeys = Object.keys(PasswordLocationIndicatorStrings).map((key) => key.toLowerCase());
-        const isPasswordLocationIndicatorString = lowerCaseKeys.includes(lowerCaseValue);
-
-        const isRecoveryKit = lowerCaseValue === "recoverykit";
-
-        return isPasswordLocationIndicatorString && !isRecoveryKit;
-    }
-
-    const isInValidRange = value >= 50 && value <= 99;
-    return isInValidRange;
 }

@@ -1,7 +1,7 @@
 import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-serval";
 import { SharedPasswordProtection } from "@nmshd/core-types";
 import { CoreBuffer, ICoreBuffer } from "@nmshd/crypto";
-import { PasswordProtectionCreationParameters } from "./PasswordProtectionCreationParameters";
+import { PasswordLocationIndicator, PasswordProtectionCreationParameters } from "./PasswordProtectionCreationParameters";
 
 export interface IPasswordProtection extends ISerializable {
     passwordType: "pw" | `pin${number}`;
@@ -39,7 +39,9 @@ export class PasswordProtection extends Serializable implements IPasswordProtect
         });
     }
 
-    public matchesInputForNewPasswordProtection(newPasswordProtection: { password: string; passwordIsPin?: true; passwordLocationIndicator?: number } | undefined): boolean {
+    public matchesInputForNewPasswordProtection(
+        newPasswordProtection: { password: string; passwordIsPin?: true; passwordLocationIndicator?: PasswordLocationIndicator } | undefined
+    ): boolean {
         const newCreationParameters = PasswordProtectionCreationParameters.create(newPasswordProtection);
         if (!newCreationParameters) return false;
 
