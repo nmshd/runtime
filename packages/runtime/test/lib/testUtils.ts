@@ -636,7 +636,7 @@ export async function executeFullShareRepositoryAttributeFlow(sender: TestRuntim
 export async function acceptIncomingShareAttributeRequest(sender: TestRuntimeServices, recipient: TestRuntimeServices, requestId: string): Promise<LocalAttributeDTO> {
     await syncUntilHasMessageWithRequest(recipient.transport, requestId);
     await recipient.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => {
-        return e.data.request.id === requestId && e.data.newStatus === LocalRequestStatus.ManualDecisionRequired;
+        return e.data.request.id === requestId && (e.data.newStatus === LocalRequestStatus.ManualDecisionRequired || e.data.newStatus === LocalRequestStatus.Decided);
     });
     await recipient.consumption.incomingRequests.accept({ requestId: requestId, items: [{ accept: true }] });
 
