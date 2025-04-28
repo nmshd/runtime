@@ -17,13 +17,13 @@ export interface RelationshipRequestConfig extends GeneralRequestConfig {
 export interface RequestItemConfig extends GeneralRequestConfig {
     "content.item.@type"?: string | string[];
     "content.item.mustBeAccepted"?: boolean;
-    "content.item.title"?: string | string[];
     "content.item.description"?: string | string[];
     "content.item.metadata"?: object | object[];
 }
 
 export interface AuthenticationRequestItemConfig extends RequestItemConfig {
     "content.item.@type": "AuthenticationRequestItem";
+    "content.item.title"?: string | string[];
 }
 
 export interface ConsentRequestItemConfig extends RequestItemConfig {
