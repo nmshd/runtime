@@ -1,6 +1,6 @@
 import { SodiumWrapper } from "@nmshd/crypto";
 import { PasswordLocationIndicatorStrings } from "@nmshd/transport";
-import { TokenAndTemplateCreationValidator } from "../../src/useCases/common";
+import { TokenAndTemplateCreationValidator } from "../../../src/useCases/common";
 
 describe("PasswordLocationIndicator", () => {
     let isValidPasswordLocationIndicator: (value: unknown) => boolean;
