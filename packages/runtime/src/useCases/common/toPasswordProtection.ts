@@ -9,7 +9,7 @@ export function toPasswordProtection(
 
     const passwordIsPin = passwordProtection.passwordType.startsWith("pin") ? true : undefined;
     const passwordLocationIndicator =
-        passwordProtection.passwordLocationIndicator !== undefined ? mapNumberToPasswordLocationIndicatorOptions(passwordProtection.passwordLocationIndicator) : undefined;
+        passwordProtection.passwordLocationIndicator !== undefined ? mapNumberToPasswordLocationIndicatorOption(passwordProtection.passwordLocationIndicator) : undefined;
 
     return {
         password: passwordProtection.password,
@@ -18,7 +18,7 @@ export function toPasswordProtection(
     };
 }
 
-function mapNumberToPasswordLocationIndicatorOptions(value: number): PasswordLocationIndicator {
+function mapNumberToPasswordLocationIndicatorOption(value: number): PasswordLocationIndicator {
     const passwordLocationIndicatorOptions = Object.values(PasswordLocationIndicatorOptions);
 
     if (value >= 0 && value < passwordLocationIndicatorOptions.length) {

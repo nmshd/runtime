@@ -45,7 +45,7 @@ export class PasswordProtectionCreationParameters extends Serializable implement
         if (!params) return;
 
         const passwordLocationIndicator =
-            params.passwordLocationIndicator !== undefined ? this.mapPasswordLocationIndicatorOptionsToNumber(params.passwordLocationIndicator) : undefined;
+            params.passwordLocationIndicator !== undefined ? this.mapPasswordLocationIndicatorOptionToNumber(params.passwordLocationIndicator) : undefined;
 
         return PasswordProtectionCreationParameters.from({
             password: params.password,
@@ -54,7 +54,7 @@ export class PasswordProtectionCreationParameters extends Serializable implement
         });
     }
 
-    private static mapPasswordLocationIndicatorOptionsToNumber(value: PasswordLocationIndicator): number {
+    private static mapPasswordLocationIndicatorOptionToNumber(value: PasswordLocationIndicator): number {
         if (typeof value === "number") return value;
 
         const numericValue = PasswordLocationIndicatorOptions[value];
