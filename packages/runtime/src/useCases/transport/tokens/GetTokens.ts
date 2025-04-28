@@ -67,8 +67,12 @@ export class GetTokensUseCase extends UseCase<GetTokensRequest, TokenDTO[]> {
                 }
             },
             [`${nameof<TokenDTO>((r) => r.passwordProtection)}.passwordLocationIndicator`]: (query: any, input: string) => {
+                let queryInput = -1;
+
                 const stringIsNumeric = /^\d+$/.test(input);
-                const queryInput = stringIsNumeric ? parseInt(input) : (PasswordLocationIndicatorOptions[input as keyof typeof PasswordLocationIndicatorOptions] ?? -1);
+                if (stringIsNumeric) queryInput = parseInt(input);
+                else if (input in PasswordLocationIndicatorOptions) queryInput = PasswordLocationIndicatorOptions[input as keyof typeof PasswordLocationIndicatorOptions];
+
                 query[`${nameof<Token>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordLocationIndicator)}`] = queryInput;
             }
         }
