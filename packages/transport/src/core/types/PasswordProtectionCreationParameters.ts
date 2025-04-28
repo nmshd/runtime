@@ -43,12 +43,9 @@ export class PasswordProtectionCreationParameters extends Serializable implement
     private static mapPasswordLocationIndicatorOptionToNumber(value: PasswordLocationIndicator): number {
         if (typeof value === "number") return value;
 
+        if (!(value in PasswordLocationIndicatorOptions)) throw TransportCoreErrors.general.invalidPasswordLocationIndicator(value);
+
         const numericValue = PasswordLocationIndicatorOptions[value];
-
-        if (numericValue === undefined) {
-            throw TransportCoreErrors.general.invalidPasswordLocationIndicator(value);
-        }
-
         return numericValue;
     }
 }
