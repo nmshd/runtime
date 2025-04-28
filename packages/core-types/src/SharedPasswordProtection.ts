@@ -34,7 +34,7 @@ export class SharedPasswordProtection extends Serializable implements ISharedPas
         }
 
         const passwordType = splittedPasswordParts[0] as "pw" | `pin${number}`;
-        const passwordLocationIndicator = splittedPasswordParts.length === 3 ? Number(splittedPasswordParts[2]) : undefined;
+        const passwordLocationIndicator = splittedPasswordParts.length === 3 ? parseInt(splittedPasswordParts[2]) : undefined;
 
         try {
             const salt = CoreBuffer.fromBase64(splittedPasswordParts[1]);
