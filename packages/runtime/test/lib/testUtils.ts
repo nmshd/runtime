@@ -23,9 +23,9 @@ import {
     ShareAttributeAcceptResponseItemJSON,
     ShareAttributeRequestItem
 } from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId, PasswordLocationIndicator } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
-import { IdentityUtil, PasswordLocationIndicator } from "@nmshd/transport";
+import { IdentityUtil } from "@nmshd/transport";
 import fs from "fs";
 import _ from "lodash";
 import { DateTime } from "luxon";

@@ -47,7 +47,9 @@ export class TokenAndTemplateCreationValidator<
                 validationResult.addFailure(
                     new ValidationFailure(
                         RuntimeErrors.general.invalidPropertyValue(
-                            `must be a number from 50 to 99 or one of the following strings: ${Object.values(PasswordLocationIndicatorOptions).slice(1).join(", ")}`
+                            `must be a number from 50 to 99 or one of the following strings: ${Object.values(PasswordLocationIndicatorOptions)
+                                .filter((value) => value !== "RecoveryKit")
+                                .join(", ")}`
                         ),
                         "passwordLocationIndicator"
                     )
@@ -61,18 +63,14 @@ export class TokenAndTemplateCreationValidator<
     private static isValidPasswordLocationIndicator(value: unknown): boolean {
         if (typeof value !== "string" && typeof value !== "number") return false;
 
-        if (typeof value === "string") {
-            const lowerCaseValue = value.toLowerCase();
-
-            const lowerCaseKeys = Object.keys(PasswordLocationIndicatorOptions).map((key) => key.toLowerCase());
-            const isPasswordLocationIndicatorOption = lowerCaseKeys.includes(lowerCaseValue);
-
-            const isRecoveryKit = lowerCaseValue === "recoverykit";
-
-            return isPasswordLocationIndicatorOption && !isRecoveryKit;
+        if (typeof value === "number") {
+            const isInValidRange = value >= 50 && value <= 99;
+            return isInValidRange;
         }
 
-        const isInValidRange = value >= 50 && value <= 99;
-        return isInValidRange;
+        const isPasswordLocationIndicatorOption = Object.keys(PasswordLocationIndicatorOptions).includes(value);
+        const isRecoveryKit = value === "RecoveryKit";
+
+        return isPasswordLocationIndicatorOption && !isRecoveryKit;
     }
 }
