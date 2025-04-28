@@ -2,7 +2,6 @@ import { LocalAttributeDeletionStatus } from "@nmshd/consumption";
 import {
     CreateAttributeAcceptResponseItemJSON,
     DeleteAttributeAcceptResponseItemJSON,
-    FreeTextAcceptResponseItemJSON,
     GivenName,
     GivenNameJSON,
     IdentityAttribute,

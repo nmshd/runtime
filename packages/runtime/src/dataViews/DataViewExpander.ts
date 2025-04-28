@@ -13,8 +13,6 @@ import {
     ErrorResponseItemJSON,
     FormFieldAcceptResponseItemJSON,
     FormFieldRequestItemJSON,
-    FreeTextAcceptResponseItemJSON,
-    FreeTextRequestItemJSON,
     GivenNameJSON,
     IQLQueryJSON,
     IdentityAttribute,
@@ -111,8 +109,6 @@ import {
     ErrorResponseItemDVO,
     FormFieldAcceptResponseItemDVO,
     FormFieldRequestItemDVO,
-    FreeTextAcceptResponseItemDVO,
-    FreeTextRequestItemDVO,
     IQLQueryDVO,
     IdentityAttributeQueryDVO,
     MailDVO,
@@ -608,18 +604,6 @@ export class DataViewExpander {
                     response: responseItemDVO
                 } as ConsentRequestItemDVO;
 
-            case "FreeTextRequestItem":
-                const freeTextRequestItem = requestItem as FreeTextRequestItemJSON;
-
-                return {
-                    ...freeTextRequestItem,
-                    type: "FreeTextRequestItemDVO",
-                    id: "",
-                    name: requestItem.title ?? this.generateRequestItemName(requestItem["@type"], isDecidable),
-                    isDecidable,
-                    response: responseItemDVO
-                } as FreeTextRequestItemDVO;
-
             case "FormFieldRequestItem":
                 const formFieldRequestItem = requestItem as FormFieldRequestItemJSON;
 
@@ -785,16 +769,6 @@ export class DataViewExpander {
                         name: name,
                         attribute: localAttributeDVOForShare
                     } as ShareAttributeAcceptResponseItemDVO;
-
-                case "FreeTextAcceptResponseItem":
-                    const freeTextResponseItem = responseItem as FreeTextAcceptResponseItemJSON;
-
-                    return {
-                        ...freeTextResponseItem,
-                        type: "FreeTextAcceptResponseItemDVO",
-                        id: "",
-                        name: name
-                    } as FreeTextAcceptResponseItemDVO;
 
                 case "FormFieldAcceptResponseItem":
                     const formFieldResponseItem = responseItem as FormFieldAcceptResponseItemJSON;

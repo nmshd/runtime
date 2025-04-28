@@ -318,9 +318,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/AuthenticationRequestItemJSON"
                 },
                 {
-                    "$ref": "#/definitions/FreeTextRequestItemJSON"
-                },
-                {
                     "$ref": "#/definitions/FormFieldRequestItemJSON"
                 },
                 {
@@ -2884,50 +2881,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "@type",
                 "mustBeAccepted",
                 "title"
-            ],
-            "additionalProperties": false
-        },
-        "FreeTextRequestItemJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "FreeTextRequestItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
-                },
-                "freeText": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "freeText",
-                "mustBeAccepted"
             ],
             "additionalProperties": false
         },
@@ -3575,9 +3528,6 @@ export const CompleteOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/RegisterAttributeListenerAcceptResponseItemJSON"
                 },
                 {
-                    "$ref": "#/definitions/FreeTextAcceptResponseItemJSON"
-                },
-                {
                     "$ref": "#/definitions/FormFieldAcceptResponseItemJSON"
                 }
             ]
@@ -5738,34 +5688,6 @@ export const CompleteOutgoingRequestRequest: any = {
             "required": [
                 "@type",
                 "listenerId",
-                "result"
-            ],
-            "additionalProperties": false
-        },
-        "FreeTextAcceptResponseItemJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "FreeTextAcceptResponseItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "result": {
-                    "type": "string",
-                    "const": "Accepted"
-                },
-                "freeText": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "freeText",
                 "result"
             ],
             "additionalProperties": false
@@ -6046,9 +5968,6 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                     "$ref": "#/definitions/RegisterAttributeListenerAcceptResponseItemJSON"
                 },
                 {
-                    "$ref": "#/definitions/FreeTextAcceptResponseItemJSON"
-                },
-                {
                     "$ref": "#/definitions/FormFieldAcceptResponseItemJSON"
                 }
             ]
@@ -8213,34 +8132,6 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
             ],
             "additionalProperties": false
         },
-        "FreeTextAcceptResponseItemJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "FreeTextAcceptResponseItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "result": {
-                    "type": "string",
-                    "const": "Accepted"
-                },
-                "freeText": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "freeText",
-                "result"
-            ],
-            "additionalProperties": false
-        },
         "FormFieldAcceptResponseItemJSON": {
             "type": "object",
             "properties": {
@@ -8481,9 +8372,6 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 {
                     "$ref": "#/definitions/AuthenticationRequestItemJSON"
-                },
-                {
-                    "$ref": "#/definitions/FreeTextRequestItemJSON"
                 },
                 {
                     "$ref": "#/definitions/FormFieldRequestItemJSON"
@@ -11049,50 +10937,6 @@ export const CreateOutgoingRequestRequest: any = {
                 "@type",
                 "mustBeAccepted",
                 "title"
-            ],
-            "additionalProperties": false
-        },
-        "FreeTextRequestItemJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "FreeTextRequestItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
-                },
-                "freeText": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "freeText",
-                "mustBeAccepted"
             ],
             "additionalProperties": false
         },
@@ -12096,9 +11940,6 @@ export const ReceivedIncomingRequestRequest: any = {
                     "$ref": "#/definitions/AuthenticationRequestItemJSON"
                 },
                 {
-                    "$ref": "#/definitions/FreeTextRequestItemJSON"
-                },
-                {
                     "$ref": "#/definitions/FormFieldRequestItemJSON"
                 },
                 {
@@ -14662,50 +14503,6 @@ export const ReceivedIncomingRequestRequest: any = {
                 "@type",
                 "mustBeAccepted",
                 "title"
-            ],
-            "additionalProperties": false
-        },
-        "FreeTextRequestItemJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "FreeTextRequestItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
-                },
-                "freeText": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "freeText",
-                "mustBeAccepted"
             ],
             "additionalProperties": false
         },
