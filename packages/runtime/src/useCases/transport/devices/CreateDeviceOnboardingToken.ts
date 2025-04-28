@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
-import { CoreDate, CoreId } from "@nmshd/core-types";
-import { DevicesController, PasswordLocationIndicator, PasswordProtectionCreationParameters, TokenContentDeviceSharedSecret, TokenController } from "@nmshd/transport";
+import { CoreDate, CoreId, PasswordLocationIndicator } from "@nmshd/core-types";
+import { DevicesController, PasswordProtectionCreationParameters, TokenContentDeviceSharedSecret, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { TokenDTO } from "../../../types";
 import { DeviceIdString, ISO8601DateTimeString, SchemaRepository, TokenAndTemplateCreationValidator, UseCase } from "../../common";

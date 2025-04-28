@@ -1,6 +1,7 @@
 import { QueryTranslator } from "@js-soft/docdb-querytranslator";
 import { Result } from "@js-soft/ts-utils";
-import { CachedToken, PasswordLocationIndicatorOptions, PasswordProtection, Token, TokenController } from "@nmshd/transport";
+import { PasswordLocationIndicatorOptions } from "@nmshd/core-types";
+import { CachedToken, PasswordProtection, Token, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { nameof } from "ts-simple-nameof";
 import { TokenDTO } from "../../../types";

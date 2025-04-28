@@ -1,4 +1,5 @@
-import { PasswordLocationIndicator, PasswordLocationIndicatorOptions, PasswordProtection } from "@nmshd/transport";
+import { PasswordLocationIndicator, PasswordLocationIndicatorOptions } from "@nmshd/core-types";
+import { PasswordProtection } from "@nmshd/transport";
 
 export function toPasswordProtection(
     passwordProtection?: PasswordProtection

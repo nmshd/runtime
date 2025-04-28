@@ -1,6 +1,7 @@
 import { QueryTranslator } from "@js-soft/docdb-querytranslator";
 import { Result } from "@js-soft/ts-utils";
-import { CachedRelationshipTemplate, PasswordLocationIndicatorOptions, PasswordProtection, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
+import { PasswordLocationIndicatorOptions } from "@nmshd/core-types";
+import { CachedRelationshipTemplate, PasswordProtection, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { nameof } from "ts-simple-nameof";
 import { RelationshipTemplateDTO } from "../../../types";

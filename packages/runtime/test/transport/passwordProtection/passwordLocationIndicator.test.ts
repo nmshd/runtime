@@ -1,5 +1,5 @@
+import { PasswordLocationIndicatorOptions } from "@nmshd/core-types";
 import { SodiumWrapper } from "@nmshd/crypto";
-import { PasswordLocationIndicatorOptions } from "@nmshd/transport";
 import { TokenAndTemplateCreationValidator } from "../../../src/useCases/common";
 
 describe("PasswordLocationIndicator", () => {

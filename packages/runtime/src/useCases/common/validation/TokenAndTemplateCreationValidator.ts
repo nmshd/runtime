@@ -1,5 +1,4 @@
-import { CoreDate } from "@nmshd/core-types";
-import { PasswordLocationIndicatorOptions } from "@nmshd/transport";
+import { CoreDate, PasswordLocationIndicatorOptions } from "@nmshd/core-types";
 import { RuntimeErrors } from "../RuntimeErrors";
 import { JsonSchema } from "../SchemaRepository";
 import { SchemaValidator } from "./SchemaValidator";

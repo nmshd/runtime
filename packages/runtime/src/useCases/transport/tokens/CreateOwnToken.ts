@@ -1,7 +1,7 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
-import { CoreAddress, CoreDate } from "@nmshd/core-types";
-import { AccountController, PasswordLocationIndicator, PasswordProtectionCreationParameters, TokenController } from "@nmshd/transport";
+import { CoreAddress, CoreDate, PasswordLocationIndicator } from "@nmshd/core-types";
+import { AccountController, PasswordProtectionCreationParameters, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { DateTime } from "luxon";
 import { nameof } from "ts-simple-nameof";

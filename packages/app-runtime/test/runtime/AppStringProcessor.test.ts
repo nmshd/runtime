@@ -1,7 +1,6 @@
 import { ArbitraryRelationshipTemplateContentJSON } from "@nmshd/content";
-import { CoreDate } from "@nmshd/core-types";
+import { CoreDate, PasswordLocationIndicatorOptions } from "@nmshd/core-types";
 import { DeviceOnboardingInfoDTO, PeerRelationshipTemplateLoadedEvent } from "@nmshd/runtime";
-import { PasswordLocationIndicatorOptions } from "@nmshd/transport";
 import assert from "assert";
 import { AppRuntime, LocalAccountSession } from "../../src";
 import { MockEventBus, MockUIBridge, TestUtil } from "../lib";
