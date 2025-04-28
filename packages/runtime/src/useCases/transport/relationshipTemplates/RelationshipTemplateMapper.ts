@@ -2,7 +2,7 @@ import { Serializable } from "@js-soft/ts-serval";
 import { ArbitraryRelationshipTemplateContent, RelationshipTemplateContent } from "@nmshd/content";
 import { RelationshipTemplate } from "@nmshd/transport";
 import { RelationshipTemplateDTO } from "../../../types";
-import { RuntimeErrors, toPasswordProtection } from "../../common";
+import { PasswordProtectionMapper, RuntimeErrors } from "../../common";
 
 export class RelationshipTemplateMapper {
     public static toRelationshipTemplateDTO(template: RelationshipTemplate): RelationshipTemplateDTO {
@@ -17,7 +17,7 @@ export class RelationshipTemplateMapper {
             createdByDevice: template.cache.createdByDevice.toString(),
             createdAt: template.cache.createdAt.toString(),
             forIdentity: template.cache.forIdentity?.toString(),
-            passwordProtection: toPasswordProtection(template.passwordProtection),
+            passwordProtection: PasswordProtectionMapper.toPasswordProtectionDTO(template.passwordProtection),
             content: this.toTemplateContent(template.cache.content),
             expiresAt: template.cache.expiresAt?.toString(),
             maxNumberOfAllocations: template.cache.maxNumberOfAllocations,

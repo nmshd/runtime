@@ -1,6 +1,6 @@
 import { Token } from "@nmshd/transport";
 import { TokenDTO } from "../../../types";
-import { RuntimeErrors, toPasswordProtection } from "../../common";
+import { PasswordProtectionMapper, RuntimeErrors } from "../../common";
 
 export class TokenMapper {
     public static toTokenDTO(token: Token, ephemeral: boolean): TokenDTO {
@@ -20,7 +20,7 @@ export class TokenMapper {
             truncatedReference: reference.truncate(),
             isEphemeral: ephemeral,
             forIdentity: token.cache.forIdentity?.toString(),
-            passwordProtection: toPasswordProtection(token.passwordProtection)
+            passwordProtection: PasswordProtectionMapper.toPasswordProtectionDTO(token.passwordProtection)
         };
     }
 
