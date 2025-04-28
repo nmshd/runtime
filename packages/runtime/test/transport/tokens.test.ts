@@ -154,14 +154,14 @@ describe("Tokens query", () => {
                 value: "Letter"
             })
             .addSingleCondition({
-                expectedResult: false,
+                expectedResult: true,
                 key: "passwordProtection.passwordLocationIndicator",
-                value: "anotherString"
+                value: "2"
             })
             .addSingleCondition({
                 expectedResult: false,
                 key: "passwordProtection.passwordLocationIndicator",
-                value: "2" // TODO: how can we handle this gracefully?
+                value: "anotherString"
             });
         await conditions.executeTests((c, q) => c.tokens.getTokens({ query: q, ownerRestriction: OwnerRestriction.Own }));
     });

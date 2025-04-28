@@ -1,6 +1,6 @@
 import { QueryTranslator } from "@js-soft/docdb-querytranslator";
 import { Result } from "@js-soft/ts-utils";
-import { CachedRelationshipTemplate, PasswordProtection, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
+import { CachedRelationshipTemplate, PasswordLocationIndicatorOptions, PasswordProtection, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { nameof } from "ts-simple-nameof";
 import { RelationshipTemplateDTO } from "../../../types";
@@ -77,7 +77,7 @@ export class GetRelationshipTemplatesUseCase extends UseCase<GetRelationshipTemp
             },
             [`${nameof<RelationshipTemplateDTO>((r) => r.passwordProtection)}.passwordLocationIndicator`]: (query: any, input: string) => {
                 const stringIsNumeric = /^\d+$/.test(input);
-                const queryInput = stringIsNumeric ? parseInt(input) : input;
+                const queryInput = stringIsNumeric ? parseInt(input) : PasswordLocationIndicatorOptions[input as keyof typeof PasswordLocationIndicatorOptions];
                 query[`${nameof<RelationshipTemplate>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordLocationIndicator)}`] = queryInput;
             }
         }

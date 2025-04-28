@@ -388,14 +388,14 @@ describe("RelationshipTemplates query", () => {
                 value: "Letter"
             })
             .addSingleCondition({
-                expectedResult: false,
+                expectedResult: true,
                 key: "passwordProtection.passwordLocationIndicator",
-                value: "anotherString"
+                value: "2"
             })
             .addSingleCondition({
                 expectedResult: false,
                 key: "passwordProtection.passwordLocationIndicator",
-                value: "2"
+                value: "anotherString"
             });
         await conditions.executeTests((c, q) => c.relationshipTemplates.getRelationshipTemplates({ query: q, ownerRestriction: OwnerRestriction.Own }));
     });
