@@ -1,7 +1,5 @@
 import { PasswordLocationIndicator, PasswordLocationIndicatorStrings, PasswordProtection } from "@nmshd/transport";
 
-// TODO: name of file
-
 export function toPasswordProtection(
     passwordProtection?: PasswordProtection
 ): { password: string; passwordIsPin?: true; passwordLocationIndicator?: PasswordLocationIndicator } | undefined {
