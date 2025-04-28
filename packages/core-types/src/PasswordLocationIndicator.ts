@@ -8,8 +8,7 @@ export enum PasswordLocationIndicatorOptions {
     RegistrationLetter = 3,
     Email = 4,
     SMS = 5,
-    App = 6,
-    Website = 7
+    Website = 6
 }
 
 export type PasswordLocationIndicator = keyof typeof PasswordLocationIndicatorOptions | IntRange<50, 100>;
