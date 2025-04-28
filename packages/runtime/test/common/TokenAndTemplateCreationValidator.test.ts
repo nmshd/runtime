@@ -1,9 +1,10 @@
 import { PasswordLocationIndicatorOptions } from "@nmshd/core-types";
 import { SodiumWrapper } from "@nmshd/crypto";
-import { TokenAndTemplateCreationValidator } from "../../../src/useCases/common";
+import { TokenAndTemplateCreationValidator } from "../../src/useCases/common";
 
-describe("PasswordLocationIndicator", () => {
+describe("TokenAndTemplateCreationValidator", () => {
     let isValidPasswordLocationIndicator: (value: unknown) => boolean;
+
     beforeAll(async function () {
         await SodiumWrapper.ready();
 
@@ -13,11 +14,6 @@ describe("PasswordLocationIndicator", () => {
     describe("isValidPasswordLocationIndicator", () => {
         test("should allow to set valid string as PasswordLocationIndicator", function () {
             const result = isValidPasswordLocationIndicator("SMS");
-            expect(result).toBe(true);
-        });
-
-        test("should allow to set valid string with different casing as PasswordLocationIndicator", function () {
-            const result = isValidPasswordLocationIndicator("sms");
             expect(result).toBe(true);
         });
 
@@ -33,6 +29,11 @@ describe("PasswordLocationIndicator", () => {
 
         test("should not allow to set RecoveryKit as PasswordLocationIndicator", function () {
             const result = isValidPasswordLocationIndicator("RecoveryKit");
+            expect(result).toBe(false);
+        });
+
+        test("should not allow to set valid string with different casing as PasswordLocationIndicator", function () {
+            const result = isValidPasswordLocationIndicator("sms");
             expect(result).toBe(false);
         });
 
