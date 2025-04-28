@@ -1,4 +1,4 @@
-import { CoreError } from "@nmshd/core-types";
+import { CoreError, PasswordLocationIndicatorOptions } from "@nmshd/core-types";
 import { RelationshipStatus } from "../modules";
 
 class Relationships {
@@ -226,6 +226,13 @@ class General {
 
     public noPasswordProvided() {
         return new CoreError("error.transport.noPasswordProvided", "You need to provide a password to perform this operation.");
+    }
+
+    public invalidPasswordLocationIndicator(value: unknown) {
+        return new CoreError(
+            "error.transport.invalidPasswordLocationIndicator",
+            `${value} is not a valid PasswordLocationIndicator. Instead, it must be a number from 50 to 99 or one of the following strings: ${Object.values(PasswordLocationIndicatorOptions).join(", ")}`
+        );
     }
 }
 

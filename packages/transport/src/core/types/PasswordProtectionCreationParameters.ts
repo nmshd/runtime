@@ -1,5 +1,6 @@
 import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-serval";
 import { PasswordLocationIndicator, PasswordLocationIndicatorOptions } from "@nmshd/core-types";
+import { TransportCoreErrors } from "../TransportCoreErrors";
 
 export interface IPasswordProtectionCreationParameters extends ISerializable {
     passwordType: "pw" | `pin${number}`;
@@ -43,6 +44,11 @@ export class PasswordProtectionCreationParameters extends Serializable implement
         if (typeof value === "number") return value;
 
         const numericValue = PasswordLocationIndicatorOptions[value];
+
+        if (numericValue === undefined) {
+            throw TransportCoreErrors.general.invalidPasswordLocationIndicator(value);
+        }
+
         return numericValue;
     }
 }
