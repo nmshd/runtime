@@ -1430,7 +1430,6 @@ describe(ShareRepositoryAttributeUseCase.name, () => {
                 expiresAt
             },
             requestItemMetadata: {
-                title: "An item title",
                 description: "An item description",
                 metadata: { aKey: "aValue" },
                 requireManualDecision: true
@@ -1445,7 +1444,6 @@ describe(ShareRepositoryAttributeUseCase.name, () => {
         expect(request.content.metadata).toStrictEqual({ aKey: "aValue" });
         expect(request.content.expiresAt).toBe(expiresAt);
 
-        expect(request.content.items[0].title).toBe("An item title");
         expect(request.content.items[0].description).toBe("An item description");
         expect(request.content.items[0].metadata).toStrictEqual({ aKey: "aValue" });
         expect((request.content.items[0] as RequestItemJSONDerivations).requireManualDecision).toBe(true);
@@ -1971,7 +1969,6 @@ describe(CreateAndShareRelationshipAttributeUseCase.name, () => {
                 expiresAt
             },
             requestItemMetadata: {
-                title: "An item Title",
                 description: "An item Description",
                 metadata: { aKey: "aValue" },
                 requireManualDecision: true
@@ -1987,7 +1984,6 @@ describe(CreateAndShareRelationshipAttributeUseCase.name, () => {
         expect(request.content.metadata).toStrictEqual({ aKey: "aValue" });
         expect(request.content.expiresAt).toBe(expiresAt);
 
-        expect(request.content.items[0].title).toBe("An item Title");
         expect(request.content.items[0].description).toBe("An item Description");
         expect(request.content.items[0].metadata).toStrictEqual({ aKey: "aValue" });
         expect((request.content.items[0] as RequestItemJSONDerivations).requireManualDecision).toBe(true);

@@ -863,7 +863,6 @@ describe("DeciderModule", () => {
                         requestConfig: {
                             "content.item.@type": ["AuthenticationRequestItem", "ContentRequestItem"],
                             "content.item.mustBeAccepted": false,
-                            "content.item.title": ["Title of RequestItem", "Another title of RequestItem"],
                             "content.item.description": ["Description of RequestItem", "Another description of RequestItem"],
                             "content.item.metadata": [{ key: "value" }, { anotherKey: "anotherValue" }]
                         },
