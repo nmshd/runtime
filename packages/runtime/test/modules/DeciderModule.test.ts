@@ -2,7 +2,6 @@ import { LocalAttributeDeletionStatus } from "@nmshd/consumption";
 import {
     CreateAttributeAcceptResponseItemJSON,
     DeleteAttributeAcceptResponseItemJSON,
-    FreeTextAcceptResponseItemJSON,
     GivenName,
     GivenNameJSON,
     IdentityAttribute,
@@ -36,6 +35,7 @@ import {
     RuntimeServiceProvider,
     TestRequestItem,
     TestRuntimeServices,
+    cleanupAttributes,
     establishRelationship,
     exchangeMessage,
     executeFullCreateAndShareRepositoryAttributeFlow,
@@ -55,6 +55,8 @@ describe("DeciderModule", () => {
     }, 30000);
 
     afterEach(async () => {
+        await cleanupAttributes([sender]);
+
         const testRuntimes = runtimeServiceProvider["runtimes"];
         await testRuntimes[testRuntimes.length - 1].stop();
     });
@@ -181,7 +183,7 @@ describe("DeciderModule", () => {
                     "@type": "Request",
                     items: [
                         { "@type": "AuthenticationRequestItem", mustBeAccepted: false, title: "Title of RequestItem" },
-                        { "@type": "FreeTextRequestItem", mustBeAccepted: false, freeText: "A free text" }
+                        { "@type": "ConsentRequestItem", mustBeAccepted: false, consent: "A consent text" }
                     ]
                 },
                 requestSourceId: message.id
@@ -593,7 +595,7 @@ describe("DeciderModule", () => {
             const receivedRequestResult = await recipient.consumption.incomingRequests.received({
                 receivedRequest: {
                     "@type": "Request",
-                    items: [{ "@type": "FreeTextRequestItem", mustBeAccepted: false, freeText: "A free text" }]
+                    items: [{ "@type": "DeleteAttributeRequestItem", mustBeAccepted: false, attributeId: "anAttributeId" }]
                 },
                 requestSourceId: message.id
             });
@@ -1460,56 +1462,6 @@ describe("DeciderModule", () => {
             const updatedSharedAttribute = (await recipient.consumption.attributes.getAttribute({ id: sharedAttribute.id })).value;
             expect(updatedSharedAttribute.deletionInfo!.deletionStatus).toBe(LocalAttributeDeletionStatus.ToBeDeleted);
             expect(updatedSharedAttribute.deletionInfo!.deletionDate).toBe(deletionDate);
-        });
-
-        test("accepts a FreeTextRequestItem given a FreeTextRequestItemConfig with all fields set", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            "content.item.@type": "FreeTextRequestItem",
-                            "content.item.freeText": "A Request free text"
-                        },
-                        responseConfig: {
-                            accept: true,
-                            freeText: "A Response free text"
-                        }
-                    }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
-            await establishRelationship(sender.transport, recipient.transport);
-
-            const message = await exchangeMessage(sender.transport, recipient.transport);
-            const receivedRequestResult = await recipient.consumption.incomingRequests.received({
-                receivedRequest: {
-                    "@type": "Request",
-                    items: [
-                        {
-                            "@type": "FreeTextRequestItem",
-                            mustBeAccepted: true,
-                            freeText: "A Request free text"
-                        }
-                    ]
-                },
-                requestSourceId: message.id
-            });
-            await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
-
-            await expect(recipient.eventBus).toHavePublished(
-                MessageProcessedEvent,
-                (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
-            );
-
-            const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
-            expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Decided);
-            expect(requestAfterAction.response).toBeDefined();
-
-            const responseContent = requestAfterAction.response!.content;
-            expect(responseContent.result).toBe(ResponseResult.Accepted);
-            expect(responseContent.items).toHaveLength(1);
-            expect(responseContent.items[0]["@type"]).toBe("FreeTextAcceptResponseItem");
-            expect((responseContent.items[0] as FreeTextAcceptResponseItemJSON).freeText).toBe("A Response free text");
         });
 
         test("accepts a ProposeAttributeRequestItem given a ProposeAttributeRequestItemConfig with all fields set for an IdentityAttribute", async () => {
@@ -2958,9 +2910,9 @@ describe("DeciderModule", () => {
                             consent: "A consent text"
                         },
                         {
-                            "@type": "FreeTextRequestItem",
+                            "@type": "ConsentRequestItem",
                             mustBeAccepted: false,
-                            freeText: "A free text"
+                            consent: "Another consent text"
                         }
                     ]
                 },
@@ -3074,17 +3026,26 @@ describe("DeciderModule", () => {
                     {
                         requestConfig: {
                             peer: sender.address,
-                            "content.item.@type": "FreeTextRequestItem"
+                            "content.item.@type": "DeleteAttributeRequestItem"
                         },
                         responseConfig: {
                             accept: true,
-                            freeText: "A free response text"
+                            deletionDate: CoreDate.utc().add({ days: 1 }).toString()
                         }
                     }
                 ]
             };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig, enableRequestModule: true }))[0];
+
             await establishRelationship(sender.transport, recipient.transport);
+            const sharedAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(sender, recipient, {
+                content: {
+                    value: {
+                        "@type": "GivenName",
+                        value: "Given name of sender"
+                    }
+                }
+            });
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
             const receivedRequestResult = await recipient.consumption.incomingRequests.received({
@@ -3102,9 +3063,9 @@ describe("DeciderModule", () => {
                             consent: "A consent text"
                         },
                         {
-                            "@type": "FreeTextRequestItem",
+                            "@type": "DeleteAttributeRequestItem",
                             mustBeAccepted: false,
-                            freeText: "A free request text"
+                            attributeId: sharedAttribute.id
                         }
                     ]
                 },
@@ -3128,7 +3089,7 @@ describe("DeciderModule", () => {
             expect(responseItems).toHaveLength(3);
             expect(responseItems[0]["@type"]).toBe("RejectResponseItem");
             expect(responseItems[1]["@type"]).toBe("AcceptResponseItem");
-            expect(responseItems[2]["@type"]).toBe("FreeTextAcceptResponseItem");
+            expect(responseItems[2]["@type"]).toBe("DeleteAttributeAcceptResponseItem");
         });
 
         test("cannot decide a Request if a mustBeAccepted RequestItem is not accepted", async () => {
@@ -3188,7 +3149,7 @@ describe("DeciderModule", () => {
             automationConfig: [
                 {
                     requestConfig: {
-                        "content.item.@type": "FreeTextRequestItem"
+                        "content.item.@type": "AuthenticationRequestItem"
                     },
                     responseConfig: {
                         accept: true,

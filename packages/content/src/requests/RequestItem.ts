@@ -11,14 +11,11 @@ import {
     DeleteAttributeRequestItemJSON,
     FormFieldRequestItem,
     FormFieldRequestItemJSON,
-    FreeTextRequestItem,
-    FreeTextRequestItemJSON,
     IAuthenticationRequestItem,
     IConsentRequestItem,
     ICreateAttributeRequestItem,
     IDeleteAttributeRequestItem,
     IFormFieldRequestItem,
-    IFreeTextRequestItem,
     IProposeAttributeRequestItem,
     IReadAttributeRequestItem,
     IRegisterAttributeListenerRequestItem,
@@ -72,7 +69,6 @@ export type RequestItemJSONDerivations =
     | ReadAttributeRequestItemJSON
     | ConsentRequestItemJSON
     | AuthenticationRequestItemJSON
-    | FreeTextRequestItemJSON
     | FormFieldRequestItemJSON
     | RegisterAttributeListenerRequestItemJSON
     | TransferFileOwnershipRequestItemJSON;
@@ -113,7 +109,6 @@ export type IRequestItemDerivations =
     | IReadAttributeRequestItem
     | IConsentRequestItem
     | IAuthenticationRequestItem
-    | IFreeTextRequestItem
     | IFormFieldRequestItem
     | IRegisterAttributeListenerRequestItem
     | ITransferFileOwnershipRequestItem;
@@ -149,7 +144,6 @@ export type RequestItemDerivations =
     | ReadAttributeRequestItem
     | ConsentRequestItem
     | AuthenticationRequestItem
-    | FreeTextRequestItem
     | FormFieldRequestItem
     | RegisterAttributeListenerRequestItem
     | TransferFileOwnershipRequestItem;
@@ -164,7 +158,6 @@ export function isRequestItemDerivation(input: any): input is RequestItemDerivat
         input["@type"] === "ReadAttributeRequestItem" ||
         input["@type"] === "ConsentRequestItem" ||
         input["@type"] === "AuthenticationRequestItem" ||
-        input["@type"] === "FreeTextRequestItem" ||
         input["@type"] === "FormFieldRequestItem" ||
         input["@type"] === "RegisterAttributeListenerRequestItem" ||
         input["@type"] === "TransferFileOwnershipRequestItem"

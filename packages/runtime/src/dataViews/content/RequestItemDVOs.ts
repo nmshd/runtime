@@ -69,11 +69,6 @@ export interface RegisterAttributeListenerRequestItemDVO extends RequestItemDVO 
     query: IdentityAttributeQueryDVO | ThirdPartyRelationshipAttributeQueryDVO;
 }
 
-export interface FreeTextRequestItemDVO extends RequestItemDVO {
-    type: "FreeTextRequestItemDVO";
-    freeText: string;
-}
-
 export interface FormFieldRequestItemDVO extends RequestItemDVO {
     type: "FormFieldRequestItemDVO";
     title: string;

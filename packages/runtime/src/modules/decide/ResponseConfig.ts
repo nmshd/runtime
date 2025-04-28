@@ -30,14 +30,6 @@ export function isDeleteAttributeAcceptResponseConfig(object: any): object is De
     return "deletionDate" in object;
 }
 
-export interface FreeTextAcceptResponseConfig extends AcceptResponseConfig {
-    freeText: string;
-}
-
-export function isFreeTextAcceptResponseConfig(object: any): object is FreeTextAcceptResponseConfig {
-    return "freeText" in object;
-}
-
 export interface ProposeAttributeWithNewAttributeAcceptResponseConfig extends AcceptResponseConfig {
     attribute: IdentityAttribute | RelationshipAttribute;
 }
@@ -57,7 +49,6 @@ export function isReadAttributeWithNewAttributeAcceptResponseConfig(object: any)
 export type AcceptResponseConfigDerivation =
     | AcceptResponseConfig
     | DeleteAttributeAcceptResponseConfig
-    | FreeTextAcceptResponseConfig
     | ProposeAttributeWithNewAttributeAcceptResponseConfig
     | ReadAttributeWithNewAttributeAcceptResponseConfig;
 

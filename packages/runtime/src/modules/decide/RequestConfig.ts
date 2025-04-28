@@ -50,11 +50,6 @@ export interface DeleteAttributeRequestItemConfig extends RequestItemConfig {
     "content.item.@type": "DeleteAttributeRequestItem";
 }
 
-export interface FreeTextRequestItemConfig extends RequestItemConfig {
-    "content.item.@type": "FreeTextRequestItem";
-    "content.item.freeText"?: string | string[];
-}
-
 export interface ProposeAttributeRequestItemConfig extends RequestItemConfig {
     "content.item.@type": "ProposeAttributeRequestItem";
     "content.item.attribute.@type"?: "IdentityAttribute" | "RelationshipAttribute";
@@ -124,7 +119,6 @@ export type RequestItemDerivationConfig =
     | ConsentRequestItemConfig
     | CreateAttributeRequestItemConfig
     | DeleteAttributeRequestItemConfig
-    | FreeTextRequestItemConfig
     | ProposeAttributeRequestItemConfig
     | ReadAttributeRequestItemConfig
     | RegisterAttributeListenerRequestItemConfig
