@@ -1,5 +1,5 @@
 import { CoreDate } from "@nmshd/core-types";
-import { PasswordLocationIndicatorStrings } from "@nmshd/transport";
+import { PasswordLocationIndicatorOptions } from "@nmshd/transport";
 import { RuntimeErrors } from "../RuntimeErrors";
 import { JsonSchema } from "../SchemaRepository";
 import { SchemaValidator } from "./SchemaValidator";
@@ -48,7 +48,7 @@ export class TokenAndTemplateCreationValidator<
                 validationResult.addFailure(
                     new ValidationFailure(
                         RuntimeErrors.general.invalidPropertyValue(
-                            `must be a number from 50 to 99 or one of the following strings: ${Object.values(PasswordLocationIndicatorStrings).slice(1).join(", ")}`
+                            `must be a number from 50 to 99 or one of the following strings: ${Object.values(PasswordLocationIndicatorOptions).slice(1).join(", ")}`
                         ),
                         "passwordLocationIndicator"
                     )
@@ -65,12 +65,12 @@ export class TokenAndTemplateCreationValidator<
         if (typeof value === "string") {
             const lowerCaseValue = value.toLowerCase();
 
-            const lowerCaseKeys = Object.keys(PasswordLocationIndicatorStrings).map((key) => key.toLowerCase());
-            const isPasswordLocationIndicatorString = lowerCaseKeys.includes(lowerCaseValue);
+            const lowerCaseKeys = Object.keys(PasswordLocationIndicatorOptions).map((key) => key.toLowerCase());
+            const isPasswordLocationIndicatorOption = lowerCaseKeys.includes(lowerCaseValue);
 
             const isRecoveryKit = lowerCaseValue === "recoverykit";
 
-            return isPasswordLocationIndicatorString && !isRecoveryKit;
+            return isPasswordLocationIndicatorOption && !isRecoveryKit;
         }
 
         const isInValidRange = value >= 50 && value <= 99;

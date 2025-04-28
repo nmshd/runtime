@@ -1,6 +1,7 @@
 import { ArbitraryRelationshipTemplateContentJSON } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
-import { DeviceOnboardingInfoDTO, PasswordLocationIndicatorStrings, PeerRelationshipTemplateLoadedEvent } from "@nmshd/runtime";
+import { DeviceOnboardingInfoDTO, PeerRelationshipTemplateLoadedEvent } from "@nmshd/runtime";
+import { PasswordLocationIndicatorOptions } from "@nmshd/transport";
 import assert from "assert";
 import { AppRuntime, LocalAccountSession } from "../../src";
 import { MockEventBus, MockUIBridge, TestUtil } from "../lib";
@@ -204,7 +205,7 @@ describe("AppStringProcessor", function () {
 
         await runtime2.stringProcessor.processTruncatedReference(templateResult.value.truncatedReference);
 
-        expect(mockUiBridge).enterPasswordCalled("pw", undefined, undefined, PasswordLocationIndicatorStrings.SMS);
+        expect(mockUiBridge).enterPasswordCalled("pw", undefined, undefined, PasswordLocationIndicatorOptions.SMS);
     });
 
     test("should properly handle a protected RelationshipTemplate with PasswordLocationIndicator that is a number", async function () {

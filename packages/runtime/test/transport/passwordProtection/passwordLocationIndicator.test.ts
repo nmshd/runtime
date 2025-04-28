@@ -1,5 +1,5 @@
 import { SodiumWrapper } from "@nmshd/crypto";
-import { PasswordLocationIndicatorStrings } from "@nmshd/transport";
+import { PasswordLocationIndicatorOptions } from "@nmshd/transport";
 import { TokenAndTemplateCreationValidator } from "../../../src/useCases/common";
 
 describe("PasswordLocationIndicator", () => {
@@ -27,7 +27,7 @@ describe("PasswordLocationIndicator", () => {
         });
 
         test("should not allow to set invalid string as PasswordLocationIndicator", function () {
-            const result = isValidPasswordLocationIndicator("Invalid-PasswordLocationIndicatorString");
+            const result = isValidPasswordLocationIndicator("Invalid-PasswordLocationIndicatorOption");
             expect(result).toBe(false);
         });
 
@@ -36,8 +36,8 @@ describe("PasswordLocationIndicator", () => {
             expect(result).toBe(false);
         });
 
-        test("should not allow to set number mapping to a PasswordLocationIndicatorStrings as PasswordLocationIndicator", function () {
-            const result = isValidPasswordLocationIndicator(PasswordLocationIndicatorStrings.Letter);
+        test("should not allow to set number mapping to a PasswordLocationIndicatorOptions as PasswordLocationIndicator", function () {
+            const result = isValidPasswordLocationIndicator(PasswordLocationIndicatorOptions.Letter);
             expect(result).toBe(false);
         });
 

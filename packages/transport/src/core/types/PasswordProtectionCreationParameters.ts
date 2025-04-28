@@ -3,8 +3,7 @@ import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-se
 type Enumerate<N extends number, Acc extends number[] = []> = Acc["length"] extends N ? Acc[number] : Enumerate<N, [...Acc, Acc["length"]]>;
 type IntRange<From extends number, To extends number> = Exclude<Enumerate<To>, Enumerate<From>>;
 
-// TODO: naming
-export enum PasswordLocationIndicatorStrings {
+export enum PasswordLocationIndicatorOptions {
     RecoveryKit = 0,
     Self = 1,
     Letter = 2,
@@ -15,7 +14,7 @@ export enum PasswordLocationIndicatorStrings {
     Website = 7
 }
 
-export type PasswordLocationIndicator = keyof typeof PasswordLocationIndicatorStrings | IntRange<50, 100>;
+export type PasswordLocationIndicator = keyof typeof PasswordLocationIndicatorOptions | IntRange<50, 100>;
 
 export interface IPasswordProtectionCreationParameters extends ISerializable {
     passwordType: "pw" | `pin${number}`;
@@ -46,7 +45,7 @@ export class PasswordProtectionCreationParameters extends Serializable implement
         if (!params) return;
 
         const passwordLocationIndicator =
-            params.passwordLocationIndicator !== undefined ? this.mapPasswordLocationIndicatorStringToNumber(params.passwordLocationIndicator) : undefined;
+            params.passwordLocationIndicator !== undefined ? this.mapPasswordLocationIndicatorOptionsToNumber(params.passwordLocationIndicator) : undefined;
 
         return PasswordProtectionCreationParameters.from({
             password: params.password,
@@ -55,10 +54,10 @@ export class PasswordProtectionCreationParameters extends Serializable implement
         });
     }
 
-    private static mapPasswordLocationIndicatorStringToNumber(value: PasswordLocationIndicator): number {
+    private static mapPasswordLocationIndicatorOptionsToNumber(value: PasswordLocationIndicator): number {
         if (typeof value === "number") return value;
 
-        const numericValue = PasswordLocationIndicatorStrings[value];
+        const numericValue = PasswordLocationIndicatorOptions[value];
         return numericValue;
     }
 }

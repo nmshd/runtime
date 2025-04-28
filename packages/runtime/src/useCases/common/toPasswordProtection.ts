@@ -1,4 +1,4 @@
-import { PasswordLocationIndicator, PasswordLocationIndicatorStrings, PasswordProtection } from "@nmshd/transport";
+import { PasswordLocationIndicator, PasswordLocationIndicatorOptions, PasswordProtection } from "@nmshd/transport";
 
 export function toPasswordProtection(
     passwordProtection?: PasswordProtection
@@ -9,7 +9,7 @@ export function toPasswordProtection(
 
     const passwordIsPin = passwordProtection.passwordType.startsWith("pin") ? true : undefined;
     const passwordLocationIndicator =
-        passwordProtection.passwordLocationIndicator !== undefined ? mapNumberToPasswordLocationIndicatorString(passwordProtection.passwordLocationIndicator) : undefined;
+        passwordProtection.passwordLocationIndicator !== undefined ? mapNumberToPasswordLocationIndicatorOptions(passwordProtection.passwordLocationIndicator) : undefined;
 
     return {
         password: passwordProtection.password,
@@ -18,11 +18,11 @@ export function toPasswordProtection(
     };
 }
 
-function mapNumberToPasswordLocationIndicatorString(value: number): PasswordLocationIndicator {
-    const passwordLocationIndicatorStringValues = Object.values(PasswordLocationIndicatorStrings);
+function mapNumberToPasswordLocationIndicatorOptions(value: number): PasswordLocationIndicator {
+    const passwordLocationIndicatorOptions = Object.values(PasswordLocationIndicatorOptions);
 
-    if (value >= 0 && value < passwordLocationIndicatorStringValues.length) {
-        return PasswordLocationIndicatorStrings[value] as PasswordLocationIndicator;
+    if (value >= 0 && value < passwordLocationIndicatorOptions.length) {
+        return PasswordLocationIndicatorOptions[value] as PasswordLocationIndicator;
     }
 
     return value as PasswordLocationIndicator;
