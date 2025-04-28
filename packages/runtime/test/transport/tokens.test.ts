@@ -1,5 +1,5 @@
 import { CoreDate } from "@nmshd/core-types";
-import { GetTokensQuery, OwnerRestriction, PasswordLocationIndicatorStrings } from "../../src";
+import { GetTokensQuery, OwnerRestriction } from "../../src";
 import { exchangeToken, QueryParamConditions, RuntimeServiceProvider, TestRuntimeServices, uploadOwnToken } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
@@ -145,7 +145,7 @@ describe("Tokens query", () => {
         const token = await uploadOwnToken(runtimeServices1.transport, runtimeServices1.address, {
             password: "1234",
             passwordIsPin: true,
-            passwordLocationIndicator: PasswordLocationIndicatorStrings.Letter
+            passwordLocationIndicator: "Letter"
         });
         const conditions = new QueryParamConditions<GetTokensQuery>(token, runtimeServices1.transport)
             .addSingleCondition({

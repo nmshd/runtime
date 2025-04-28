@@ -1,7 +1,6 @@
 import { ArbitraryRelationshipTemplateContentJSON } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
-import { DeviceOnboardingInfoDTO, PeerRelationshipTemplateLoadedEvent } from "@nmshd/runtime";
-import { PasswordLocationIndicatorStrings } from "@nmshd/runtime/dist/useCases/common";
+import { DeviceOnboardingInfoDTO, PasswordLocationIndicatorStrings, PeerRelationshipTemplateLoadedEvent } from "@nmshd/runtime";
 import assert from "assert";
 import { AppRuntime, LocalAccountSession } from "../../src";
 import { MockEventBus, MockUIBridge, TestUtil } from "../lib";
@@ -197,7 +196,7 @@ describe("AppStringProcessor", function () {
         const templateResult = await runtime1Session.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
             content: templateContent,
             expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(),
-            passwordProtection: { password: "password", passwordLocationIndicator: PasswordLocationIndicatorStrings.SMS }
+            passwordProtection: { password: "password", passwordLocationIndicator: "SMS" }
         });
 
         mockUiBridge.setPasswordToReturnForAttempt(1, "password");
@@ -205,8 +204,7 @@ describe("AppStringProcessor", function () {
 
         await runtime2.stringProcessor.processTruncatedReference(templateResult.value.truncatedReference);
 
-        const smsIndex = 5;
-        expect(mockUiBridge).enterPasswordCalled("pw", undefined, undefined, smsIndex);
+        expect(mockUiBridge).enterPasswordCalled("pw", undefined, undefined, PasswordLocationIndicatorStrings.SMS);
     });
 
     test("should properly handle a protected RelationshipTemplate with PasswordLocationIndicator that is a number", async function () {
