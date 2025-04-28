@@ -49,13 +49,17 @@ export function mapNumberToPasswordLocationIndicatorString(value: number): Passw
 }
 
 // TODO: is this needed here or can it be moved directly to validator?
-// TODO: toLowerCase
 export function isValidPasswordLocationIndicator(value: unknown): boolean {
     if (typeof value !== "string" && typeof value !== "number") return false;
 
     if (typeof value === "string") {
-        const isPasswordLocationIndicatorString = Object.keys(PasswordLocationIndicatorStrings).includes(value);
-        const isRecoveryKit = value === "RecoveryKit";
+        const lowerCaseValue = value.toLowerCase();
+
+        const lowerCaseKeys = Object.keys(PasswordLocationIndicatorStrings).map((key) => key.toLowerCase());
+        const isPasswordLocationIndicatorString = lowerCaseKeys.includes(lowerCaseValue);
+
+        const isRecoveryKit = lowerCaseValue === "recoverykit";
+
         return isPasswordLocationIndicatorString && !isRecoveryKit;
     }
 

@@ -6,7 +6,12 @@ describe("PasswordLocationIndicator", () => {
 
     describe("isValidPasswordLocationIndicator", () => {
         test("should allow to set valid string as PasswordLocationIndicator", function () {
-            const result = isValidPasswordLocationIndicator("Letter");
+            const result = isValidPasswordLocationIndicator("SMS");
+            expect(result).toBe(true);
+        });
+
+        test("should allow to set valid string with different casing as PasswordLocationIndicator", function () {
+            const result = isValidPasswordLocationIndicator("sms");
             expect(result).toBe(true);
         });
 
@@ -16,7 +21,7 @@ describe("PasswordLocationIndicator", () => {
         });
 
         test("should not allow to set invalid string as PasswordLocationIndicator", function () {
-            const result = isValidPasswordLocationIndicator("Invalid-PasswordLocationIndicatorStrings" as any);
+            const result = isValidPasswordLocationIndicator("Invalid-PasswordLocationIndicatorString");
             expect(result).toBe(false);
         });
 
