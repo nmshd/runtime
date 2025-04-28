@@ -1101,7 +1101,7 @@ describe("FormFieldRequestItemProcessor", function () {
 
             const responseItem = FormFieldAcceptResponseItem.from({
                 result: ResponseItemResult.Accepted,
-                response: "aFreeTextValue"
+                response: "aResponse"
             });
 
             await processor.applyIncomingResponseItem(responseItem, requestItem, incomingRequest);
