@@ -37,7 +37,6 @@ function mapPasswordLocationIndicatorStringToNumber(value: PasswordLocationIndic
     return numericValue;
 }
 
-// TODO: what about numbers like 30? -> should not appear
 export function mapNumberToPasswordLocationIndicatorString(value: number): PasswordLocationIndicator {
     const passwordLocationIndicatorStringValues = Object.values(PasswordLocationIndicatorStrings);
 
