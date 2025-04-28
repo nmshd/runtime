@@ -44,13 +44,14 @@ export class CreateIdentityRecoveryKitUseCase extends UseCase<CreateIdentityReco
         const newBackupDevice = await this.devicesController.sendDevice({ isAdmin: true, isBackupDevice: true, name: "Backup Device" });
         const sharedSecret = await this.devicesController.getSharedSecret(newBackupDevice.id, request.profileName);
 
-        const passwordProtection = { ...request.passwordProtection, passwordLocationIndicator: "RecoveryKit" as PasswordLocationIndicator };
-
         const token = await this.tokenController.sendToken({
             content: TokenContentDeviceSharedSecret.from({ sharedSecret }),
             expiresAt: CoreDate.from("9999-12-31"),
             ephemeral: false,
-            passwordProtection: PasswordProtectionCreationParameters.create(passwordProtection)
+            passwordProtection: PasswordProtectionCreationParameters.create({
+                ...request.passwordProtection,
+                passwordLocationIndicator: "RecoveryKit" as PasswordLocationIndicator
+            })
         });
 
         await this.accountController.syncDatawallet();
