@@ -9,19 +9,19 @@ class General {
     }
 
     public alreadyInitialized() {
-        return new ApplicationError("error.runtime.alreadyInitialized", "The runtime is already initialized. The init method can only be executed once.");
+        return new ApplicationError("error.runtime.alreadyInitialized", "The Runtime is already initialized. The init method can only be executed once.");
     }
 
     public notInitialized() {
-        return new ApplicationError("error.runtime.notInitialized", "The runtime is not initialized. You must run init before you can start or stop the runtime.");
+        return new ApplicationError("error.runtime.notInitialized", "The Runtime is not initialized. You must run init before you can start or stop the Runtime.");
     }
 
     public alreadyStarted() {
-        return new ApplicationError("error.runtime.alreadyStarted", "The runtime is already started. You should stop it first for a restart.");
+        return new ApplicationError("error.runtime.alreadyStarted", "The Runtime is already started. You should stop it first for a restart.");
     }
 
     public notStarted() {
-        return new ApplicationError("error.runtime.notStarted", "The runtime is not started. You can only stop the runtime if you executed start before.");
+        return new ApplicationError("error.runtime.notStarted", "The Runtime is not started. You can only stop the Runtime if you executed start before.");
     }
 
     public recordNotFound(entityName?: string | Function): ApplicationError {
@@ -93,10 +93,6 @@ class RelationshipTemplates {
 
     public cannotCreateTokenForPeerTemplate(): ApplicationError {
         return new ApplicationError("error.runtime.relationshipTemplates.cannotCreateTokenForPeerTemplate", "You cannot create a Token for a peer RelationshipTemplate.");
-    }
-
-    public cannotCreateQRCodeForPeerTemplate(): ApplicationError {
-        return new ApplicationError("error.runtime.relationshipTemplates.cannotCreateQRCodeForPeerTemplate", "You cannot create a QR code for a peer RelationshipTemplate.");
     }
 
     public invalidReference(reference: string): ApplicationError {

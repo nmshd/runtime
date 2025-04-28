@@ -57,7 +57,7 @@ export async function exchangeMessageWithRequestAndSendResponse(
             {
                 accept: action === "Accept"
             }
-        ] as any // bug in runtime
+        ] as any // bug in Runtime
     });
 
     const rResponseMessage = (

@@ -29,11 +29,11 @@ describe("RelationshipTemplateController", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 2);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 2);
         sender = accounts[0];
         recipient = accounts[1];
     });
@@ -141,7 +141,7 @@ describe("RelationshipTemplateController", function () {
         );
     });
 
-    test("should throw an error if loaded by the wrong identity and it's uncaught before reaching the backbone", async function () {
+    test("should throw an error if loaded by the wrong identity and it's uncaught before reaching the Backbone", async function () {
         const ownTemplate = await sender.relationshipTemplates.sendRelationshipTemplate({
             content: { a: "A" },
             expiresAt: CoreDate.utc().add({ minutes: 1 }),
@@ -260,7 +260,7 @@ describe("RelationshipTemplateController", function () {
             peerTemplate = await recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(reference);
         });
 
-        test("should delete own RelationshipTemplate locally and from the backbone", async function () {
+        test("should delete own RelationshipTemplate locally and from the Backbone", async function () {
             await sender.relationshipTemplates.deleteRelationshipTemplate(ownTemplate);
             const templateOnBackbone = await recipient.relationshipTemplates.fetchCaches([ownTemplate.id]);
             expect(templateOnBackbone).toHaveLength(0);

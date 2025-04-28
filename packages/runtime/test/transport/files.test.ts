@@ -2,7 +2,7 @@ import { CoreDate } from "@nmshd/core-types";
 import fs from "fs";
 import { DateTime } from "luxon";
 import { FileDTO, GetFilesQuery, OwnerRestriction, TransportServices } from "../../src";
-import { createToken, exchangeFile, makeUploadRequest, QueryParamConditions, RuntimeServiceProvider, uploadFile } from "../lib";
+import { exchangeFile, makeUploadRequest, QueryParamConditions, RuntimeServiceProvider, uploadFile } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let transportServices1: TransportServices;
@@ -268,10 +268,7 @@ describe("Files query", () => {
     });
 });
 
-describe.each([
-    ["create token for file", "file" as "file" | "qrcode"],
-    ["create token QR code for file", "qrcode" as "file" | "qrcode"]
-])("Can %s", (_description: string, tokenType) => {
+describe("Can create token for file", () => {
     let file: FileDTO;
 
     beforeAll(async () => {
@@ -279,37 +276,37 @@ describe.each([
     });
 
     test("can generate token for uploaded file", async () => {
-        const response = await createToken(transportServices1, { fileId: file.id }, tokenType);
+        const response = await transportServices1.files.createTokenForFile({ fileId: file.id });
         expect(response).toBeSuccessful();
     });
 
     test("can generate token for uploaded file with explicit expiration date", async () => {
         const expiresAt = DateTime.now().plus({ minutes: 5 }).toString();
-        const response = await createToken(transportServices1, { fileId: file.id, expiresAt }, tokenType);
+        const response = await transportServices1.files.createTokenForFile({ fileId: file.id, expiresAt });
 
         expect(response).toBeSuccessful();
     });
 
     test("cannot generate token for uploaded file with wrong expiration date", async () => {
-        const response = await createToken(transportServices1, { fileId: file.id, expiresAt: "invalid date" }, tokenType);
+        const response = await transportServices1.files.createTokenForFile({ fileId: file.id, expiresAt: "invalid date" });
 
         expect(response).toBeAnError("expiresAt must match ISO8601 datetime format", "error.runtime.validation.invalidPropertyValue");
     });
 
     test("cannot generate token with wrong type of id", async () => {
-        const response = await createToken(transportServices1, { fileId: UNKNOWN_TOKEN_ID }, tokenType);
+        const response = await transportServices1.files.createTokenForFile({ fileId: UNKNOWN_TOKEN_ID });
 
         expect(response).toBeAnError("fileId must match pattern FIL.*", "error.runtime.validation.invalidPropertyValue");
     });
 
     test("cannot generate token for non-existant file", async () => {
-        const response = await createToken(transportServices1, { fileId: UNKNOWN_FILE_ID }, tokenType);
+        const response = await transportServices1.files.createTokenForFile({ fileId: UNKNOWN_FILE_ID });
 
         expect(response).toBeAnError("File not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
     });
 
     test("cannot generate token for invalid file id", async () => {
-        const response = await createToken(transportServices1, { fileId: "INVALID FILE ID" }, tokenType);
+        const response = await transportServices1.files.createTokenForFile({ fileId: "INVALID FILE ID" });
 
         expect(response).toBeAnError("fileId must match pattern FIL.*", "error.runtime.validation.invalidPropertyValue");
     });

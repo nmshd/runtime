@@ -2,7 +2,7 @@
 
 [![npm version](https://badge.fury.io/js/@nmshd%2ftransport.svg)](https://www.npmjs.com/package/@nmshd/transport)
 
-The transport library handles backbone communication and content encryption.
+The transport library handles Backbone communication and content encryption.
 
 ## Documentation
 
@@ -18,7 +18,7 @@ Share your feedback with the enmeshed team by contributing to the [discussions](
 
 ## Contribute
 
-Contribution to this project is highly apprecicated. Head over to our [contribution guide](https://github.com/nmshd/.github/blob/main/CONTRIBUTING.md) to learn more.
+Contribution to this project is highly appreciated. Head over to our [contribution guide](https://github.com/nmshd/.github/blob/main/CONTRIBUTING.md) to learn more.
 
 ## License
 

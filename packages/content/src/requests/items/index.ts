@@ -6,6 +6,9 @@ export * from "./createAttribute/CreateAttributeAcceptResponseItem";
 export * from "./createAttribute/CreateAttributeRequestItem";
 export * from "./deleteAttribute/DeleteAttributeAcceptResponseItem";
 export * from "./deleteAttribute/DeleteAttributeRequestItem";
+export * from "./formField/FormFieldAcceptResponseItem";
+export * from "./formField/FormFieldRequestItem";
+export * from "./formField/settings";
 export * from "./freeText/FreeTextAcceptResponseItem";
 export * from "./freeText/FreeTextRequestItem";
 export * from "./proposeAttribute/ProposeAttributeAcceptResponseItem";
@@ -16,3 +19,5 @@ export * from "./registerAttributeListener/RegisterAttributeListenerAcceptRespon
 export * from "./registerAttributeListener/RegisterAttributeListenerRequestItem";
 export * from "./shareAttribute/ShareAttributeAcceptResponseItem";
 export * from "./shareAttribute/ShareAttributeRequestItem";
+export * from "./transferFileOwnership/TransferFileOwnershipAcceptResponseItem";
+export * from "./transferFileOwnership/TransferFileOwnershipRequestItem";

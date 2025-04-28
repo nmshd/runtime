@@ -14,7 +14,7 @@ describe("SyncController", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection, { datawalletEnabled: true });
+        transport = TestUtil.createTransport({ datawalletEnabled: true });
 
         await transport.init();
     });
@@ -29,7 +29,7 @@ describe("SyncController", function () {
     test("creating a new identity sets the identityDatawalletVersion to the supportedDatawalletVersion", async function () {
         const syncClient = new FakeSyncClient();
 
-        const account = await TestUtil.createAccount(transport, { syncClient });
+        const account = await TestUtil.createAccount(transport, connection, { syncClient });
 
         expect(syncClient.finalizeDatawalletVersionUpgradeRequest).toBeDefined();
         expect(syncClient.finalizeDatawalletVersionUpgradeRequest!.newDatawalletVersion).toStrictEqual(account.config.supportedDatawalletVersion);
@@ -38,7 +38,7 @@ describe("SyncController", function () {
     test("all datawallet modifications are created with the configured supportedDatawalletVersion", async function () {
         const syncClient = new FakeSyncClient();
 
-        const account = await TestUtil.createAccount(transport, { syncClient });
+        const account = await TestUtil.createAccount(transport, connection, { syncClient });
 
         await account.tokens.sendToken({
             content: { someProperty: "someValue" },
@@ -58,7 +58,7 @@ describe("SyncController", function () {
     test("syncDatawallet upgrades identityDatawalletVersion to supportedDatawalletVersion", async function () {
         const syncClient = new FakeSyncClient();
 
-        const account = await TestUtil.createAccount(transport, { syncClient });
+        const account = await TestUtil.createAccount(transport, connection, { syncClient });
 
         TestUtil.defineMigrationToVersion(2, account);
 
@@ -72,7 +72,7 @@ describe("SyncController", function () {
     });
 
     test("sync should return existing promise when called twice", async function () {
-        const [sender, recipient] = await TestUtil.provideAccounts(transport, 2);
+        const [sender, recipient] = await TestUtil.provideAccounts(transport, connection, 2);
         await TestUtil.addRelationship(sender, recipient);
 
         await TestUtil.sendMessage(sender, recipient);

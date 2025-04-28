@@ -3,6 +3,7 @@ import {
     ConsentRequestItem,
     CreateAttributeRequestItem,
     DeleteAttributeRequestItem,
+    FormFieldRequestItem,
     FreeTextRequestItem,
     OwnSharedAttributeDeletedByOwnerNotificationItem,
     PeerSharedAttributeDeletedByPeerNotificationItem,
@@ -11,7 +12,8 @@ import {
     ReadAttributeRequestItem,
     RegisterAttributeListenerRequestItem,
     ShareAttributeRequestItem,
-    ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem
+    ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem,
+    TransferFileOwnershipRequestItem
 } from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { AccountController, Transport } from "@nmshd/transport";
@@ -21,6 +23,7 @@ import {
     CreateAttributeRequestItemProcessor,
     DeleteAttributeRequestItemProcessor,
     DraftsController,
+    FormFieldRequestItemProcessor,
     FreeTextRequestItemProcessor,
     GenericRequestItemProcessor,
     IdentityMetadataController,
@@ -41,7 +44,8 @@ import {
     RequestItemProcessorRegistry,
     SettingsController,
     ShareAttributeRequestItemProcessor,
-    ThirdPartyRelationshipAttributeDeletedByPeerNotificationItemProcessor
+    ThirdPartyRelationshipAttributeDeletedByPeerNotificationItemProcessor,
+    TransferFileOwnershipRequestItemProcessor
 } from "../modules";
 import { ConsumptionConfig } from "./ConsumptionConfig";
 
@@ -158,7 +162,9 @@ export class ConsumptionController {
             [ConsentRequestItem, GenericRequestItemProcessor],
             [AuthenticationRequestItem, GenericRequestItemProcessor],
             [RegisterAttributeListenerRequestItem, RegisterAttributeListenerRequestItemProcessor],
-            [FreeTextRequestItem, FreeTextRequestItemProcessor]
+            [FreeTextRequestItem, FreeTextRequestItemProcessor],
+            [FormFieldRequestItem, FormFieldRequestItemProcessor],
+            [TransferFileOwnershipRequestItem, TransferFileOwnershipRequestItemProcessor]
         ]);
     }
 

@@ -23,6 +23,7 @@ import { LocalAttribute } from "../../../attributes/local/LocalAttribute";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 import { LocalRequestInfo } from "../IRequestItemProcessor";
+import createAppropriateResponseItem from "../utility/createAppropriateResponseItem";
 import validateAttributeMatchesWithQuery from "../utility/validateAttributeMatchesWithQuery";
 import validateQuery from "../utility/validateQuery";
 import { AcceptReadAttributeRequestItemParameters, AcceptReadAttributeRequestItemParametersJSON } from "./AcceptReadAttributeRequestItemParameters";
@@ -198,20 +199,6 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 );
             }
 
-            if (requestItem.query instanceof IdentityAttributeQuery) {
-                const existingRepositoryAttribute = await this.consumptionController.attributes.getRepositoryAttributeWithSameValue(
-                    (parsedParams.newAttribute.value as any).toJSON()
-                );
-
-                if (existingRepositoryAttribute) {
-                    return ValidationResult.error(
-                        ConsumptionCoreErrors.requests.invalidAcceptParameters(
-                            `The new Attribute cannot be created because it has the same content.value as the already existing RepositoryAttribute with id '${existingRepositoryAttribute.id.toString()}'.`
-                        )
-                    );
-                }
-            }
-
             attribute = parsedParams.newAttribute;
 
             const ownerIsEmptyString = attribute.owner.equals("");
@@ -383,13 +370,22 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             if (parsedParams.newAttribute.owner.equals("")) {
                 parsedParams.newAttribute.owner = this.currentIdentityAddress;
             }
-            sharedLocalAttribute = await this.createNewAttribute(parsedParams.newAttribute, requestInfo);
 
-            return ReadAttributeAcceptResponseItem.from({
-                result: ResponseItemResult.Accepted,
-                attributeId: sharedLocalAttribute.id,
-                attribute: sharedLocalAttribute.content
-            });
+            if (parsedParams.newAttribute instanceof RelationshipAttribute) {
+                const ownSharedRelationshipAttribute = await this.consumptionController.attributes.createSharedLocalAttribute({
+                    content: parsedParams.newAttribute,
+                    peer: requestInfo.peer,
+                    requestReference: CoreId.from(requestInfo.id)
+                });
+
+                return ReadAttributeAcceptResponseItem.from({
+                    result: ResponseItemResult.Accepted,
+                    attributeId: ownSharedRelationshipAttribute.id,
+                    attribute: ownSharedRelationshipAttribute.content
+                });
+            }
+
+            return await createAppropriateResponseItem(parsedParams.newAttribute, requestInfo, this.consumptionController.attributes, "Read");
         }
 
         throw new Error(
@@ -397,26 +393,6 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 (x) => x.newAttribute
             )} or ${nameof<AcceptReadAttributeRequestItemParameters>((x) => x.existingAttributeId)}.`
         );
-    }
-
-    private async createNewAttribute(attribute: IdentityAttribute | RelationshipAttribute, requestInfo: LocalRequestInfo) {
-        if (attribute instanceof IdentityAttribute) {
-            const repositoryAttribute = await this.consumptionController.attributes.createRepositoryAttribute({
-                content: attribute
-            });
-
-            return await this.consumptionController.attributes.createSharedLocalAttributeCopy({
-                sourceAttributeId: CoreId.from(repositoryAttribute.id),
-                peer: CoreAddress.from(requestInfo.peer),
-                requestReference: CoreId.from(requestInfo.id)
-            });
-        }
-
-        return await this.consumptionController.attributes.createSharedLocalAttribute({
-            content: attribute,
-            peer: requestInfo.peer,
-            requestReference: CoreId.from(requestInfo.id)
-        });
     }
 
     public override async applyIncomingResponseItem(

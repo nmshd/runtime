@@ -6,7 +6,7 @@ The enmeshed Runtime defines a framework for enmeshed applications. This framewo
 
 In order to simplify the development of those modules, this project delivers wrappers around the functionality of the [transport](https://www.npmjs.com/package/@nmshd/transport)- and [consumption](https://www.npmjs.com/package/@nmshd/consumption)-library which map the data types from their rather technical format to a more consumer-friendly format.
 
-Both the enmeshed Connector and the official enmeshed Apps implement this runtime.
+Both the enmeshed Connector and the official enmeshed Apps implement this Runtime.
 
 ## Documentation
 
@@ -22,7 +22,7 @@ Share your feedback with the enmeshed team by contributing to the [discussions](
 
 ## Contribute
 
-Contribution to this project is highly apprecicated. Head over to our [contribution guide](https://github.com/nmshd/.github/blob/main/CONTRIBUTING.md) to learn more.
+Contribution to this project is highly appreciated. Head over to our [contribution guide](https://github.com/nmshd/.github/blob/main/CONTRIBUTING.md) to learn more.
 
 ## License
 

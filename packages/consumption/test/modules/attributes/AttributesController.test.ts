@@ -1,4 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
+import { sleep } from "@js-soft/ts-utils";
 import {
     BirthDate,
     BirthYear,
@@ -21,10 +22,13 @@ import {
     ZipCode
 } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
-import { AccountController, Transport } from "@nmshd/transport";
+import { AccountController, ClientResult, TagClient, Transport } from "@nmshd/transport";
+import { anything, reset, spy, verify, when } from "ts-mockito";
 import {
     AttributeCreatedEvent,
     AttributeDeletedEvent,
+    AttributesController,
+    AttributeTagCollection,
     ConsumptionController,
     IAttributeSuccessorParams,
     ICreateRepositoryAttributeParams,
@@ -53,13 +57,13 @@ describe("AttributesController", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createConnection();
-        transport = TestUtil.createTransport(connection, mockEventBus);
+        transport = TestUtil.createTransport(mockEventBus);
         await transport.init();
 
-        const connectorAccount = (await TestUtil.provideAccounts(transport, 1))[0];
+        const connectorAccount = (await TestUtil.provideAccounts(transport, connection, 1))[0];
         ({ accountController: testAccount, consumptionController } = connectorAccount);
 
-        const appAccount = (await TestUtil.provideAccounts(transport, 1, undefined, undefined, { setDefaultRepositoryAttributes: true }))[0];
+        const appAccount = (await TestUtil.provideAccounts(transport, connection, 1, undefined, undefined, { setDefaultRepositoryAttributes: true }))[0];
         ({ accountController: appTestAccount, consumptionController: appConsumptionController } = appAccount);
     });
 
@@ -457,6 +461,7 @@ describe("AttributesController", function () {
             expect(thirdPartyLocalAttributeCopy.shareInfo?.thirdPartyAddress?.toString()).toBe(thirdPartyAddress.toString());
         });
     });
+
     describe("query Attributes", function () {
         test("should allow to query relationship attributes with empty owner", async function () {
             const relationshipAttributeParams: ICreateSharedLocalAttributeParams = {
@@ -2807,6 +2812,7 @@ describe("AttributesController", function () {
                 peer: CoreAddress.from("peer")
             });
         });
+
         test("should list all attributes", async function () {
             const attributes = await consumptionController.attributes.getLocalAttributes();
             expect(attributes).toHaveLength(3);
@@ -3378,6 +3384,94 @@ describe("AttributesController", function () {
         });
     });
 
+    describe("get Attribute with same value", function () {
+        test("should return an existing RepositoryAttribute duplicate", async function () {
+            const existingRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "GivenName",
+                        value: "aGivenName"
+                    },
+                    owner: testAccount.identity.address
+                })
+            });
+
+            const duplicate = await consumptionController.attributes.getRepositoryAttributeWithSameValue({
+                "@type": "GivenName",
+                value: "aGivenName"
+            });
+
+            expect(duplicate).toStrictEqual(existingRepositoryAttribute);
+        });
+
+        test("should return undefined if no RepositoryAttribute duplicate exists", async function () {
+            await consumptionController.attributes.createRepositoryAttribute({
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "GivenName",
+                        value: "aGivenName"
+                    },
+                    owner: testAccount.identity.address
+                })
+            });
+
+            const duplicate = await consumptionController.attributes.getRepositoryAttributeWithSameValue({
+                "@type": "GivenName",
+                value: "anotherGivenName"
+            });
+
+            expect(duplicate).toBeUndefined();
+        });
+
+        test("should return an existing peer shared IdentityAttribute duplicate", async function () {
+            const existingPeerSharedIdentityAttribute = await consumptionController.attributes.createSharedLocalAttribute({
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "GivenName",
+                        value: "aGivenName"
+                    },
+                    owner: CoreAddress.from("peer")
+                }),
+                requestReference: CoreId.from("reqRef"),
+                peer: CoreAddress.from("peer")
+            });
+
+            const duplicate = await consumptionController.attributes.getPeerSharedIdentityAttributeWithSameValue(
+                {
+                    "@type": "GivenName",
+                    value: "aGivenName"
+                },
+                "peer"
+            );
+
+            expect(duplicate).toStrictEqual(existingPeerSharedIdentityAttribute);
+        });
+
+        test("should return undefined if no peer shared IdentityAttribute duplicate exists", async function () {
+            await consumptionController.attributes.createSharedLocalAttribute({
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "GivenName",
+                        value: "aGivenName"
+                    },
+                    owner: CoreAddress.from("peer")
+                }),
+                requestReference: CoreId.from("reqRef"),
+                peer: CoreAddress.from("peer")
+            });
+
+            const duplicate = await consumptionController.attributes.getPeerSharedIdentityAttributeWithSameValue(
+                {
+                    "@type": "GivenName",
+                    value: "anotherGivenName"
+                },
+                "peer"
+            );
+
+            expect(duplicate).toBeUndefined();
+        });
+    });
+
     test("should delete attributes exchanged with peer", async function () {
         const ownRelationshipAttribute = await consumptionController.attributes.createSharedLocalAttribute({
             content: RelationshipAttribute.from({
@@ -3414,6 +3508,131 @@ describe("AttributesController", function () {
         const peerAttribute = await consumptionController.attributes.getLocalAttribute(peerRelationshipAttribute.id);
         expect(ownAttribute).toBeUndefined();
         expect(peerAttribute).toBeUndefined();
+    });
+
+    describe("tag definition caching by time", function () {
+        let connection: IDatabaseConnection;
+        let transport: Transport;
+        let testAccount: AccountController;
+        let consumptionController: ConsumptionController;
+        let attributeTagClientSpy: TagClient;
+        beforeEach(async function () {
+            connection = await TestUtil.createConnection();
+            transport = TestUtil.createTransport(mockEventBus, {
+                tagCacheLifetimeInMinutes: 1 / 60
+            });
+            await transport.init();
+
+            const connectorAccount = (await TestUtil.provideAccounts(transport, connection, 1))[0];
+            ({ accountController: testAccount, consumptionController } = connectorAccount);
+            const attributeTagClient = consumptionController.attributes["attributeTagClient"];
+
+            attributeTagClientSpy = spy(attributeTagClient);
+            when(attributeTagClientSpy.get("/api/v1/Tags", anything(), anything())).thenResolve(
+                ClientResult.ok(
+                    AttributeTagCollection.from({
+                        supportedLanguages: ["en"],
+                        tagsForAttributeValueTypes: {}
+                    }).toJSON(),
+                    {
+                        etag: "some-e-tag"
+                    }
+                )
+            );
+        });
+
+        afterEach(async function () {
+            await testAccount.close();
+            await connection.close();
+            reset(attributeTagClientSpy);
+        });
+
+        test("should cache the tag definitions when called twice within tagCachingDurationInMinutes", async function () {
+            await consumptionController.attributes.getAttributeTagCollection();
+            await consumptionController.attributes.getAttributeTagCollection();
+
+            verify(attributeTagClientSpy.getTagCollection(anything())).once();
+            reset(attributeTagClientSpy);
+        });
+
+        test("should not cache the tag definitions when the tagCachingDurationInMinutes was reached", async function () {
+            await consumptionController.attributes.getAttributeTagCollection();
+            await sleep(1100);
+            await consumptionController.attributes.getAttributeTagCollection();
+
+            verify(attributeTagClientSpy.getTagCollection(anything())).twice();
+            reset(attributeTagClientSpy);
+        });
+    });
+
+    describe("tag definition caching by e-tag", function () {
+        let connection: IDatabaseConnection;
+        let transport: Transport;
+        let testAccount: AccountController;
+        let consumptionController: ConsumptionController;
+        let attributeTagClientSpy: TagClient;
+        let attributesControllerSpy: AttributesController;
+        let etag: string;
+        beforeEach(async function () {
+            connection = await TestUtil.createConnection();
+            transport = TestUtil.createTransport(mockEventBus, {
+                tagCacheLifetimeInMinutes: 0
+            });
+            await transport.init();
+
+            const connectorAccount = (await TestUtil.provideAccounts(transport, connection, 1))[0];
+            ({ accountController: testAccount, consumptionController } = connectorAccount);
+            const attributeTagClient = consumptionController.attributes["attributeTagClient"];
+
+            attributeTagClientSpy = spy(attributeTagClient);
+            attributesControllerSpy = spy(consumptionController.attributes);
+
+            etag = "some-e-tag";
+            when(attributeTagClientSpy.get("/api/v1/Tags", anything(), anything())).thenCall((_path, _params, config) => {
+                const etagMatched = etag === config?.headers?.["if-none-match"];
+                const platformParameters = {
+                    etag,
+                    responseStatus: etagMatched ? 304 : 200
+                };
+                return Promise.resolve(
+                    ClientResult.ok(
+                        etagMatched
+                            ? undefined
+                            : AttributeTagCollection.from({
+                                  supportedLanguages: ["en"],
+                                  tagsForAttributeValueTypes: {}
+                              }).toJSON(),
+                        platformParameters
+                    )
+                );
+            });
+        });
+
+        afterEach(async function () {
+            await testAccount.close();
+            await connection.close();
+            reset(attributeTagClientSpy);
+            reset(attributesControllerSpy);
+        });
+
+        test("should cache the tag definitions when called twice without new etag", async function () {
+            await consumptionController.attributes.getAttributeTagCollection();
+            await sleep(100);
+            await consumptionController.attributes.getAttributeTagCollection();
+
+            verify(attributeTagClientSpy.getTagCollection(anything())).twice();
+            verify(attributesControllerSpy["setTagCollection"](anything())).once();
+        });
+
+        test("should not cache the tag definitions when called twice with new etag", async function () {
+            await consumptionController.attributes.getAttributeTagCollection();
+            await sleep(100);
+            etag = "some-other-e-tag";
+            await consumptionController.attributes.getAttributeTagCollection();
+
+            verify(attributeTagClientSpy.getTagCollection(anything())).twice();
+            verify(attributesControllerSpy["setTagCollection"](anything())).twice();
+        });
     });
 
     describe("validate attribute values", function () {

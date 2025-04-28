@@ -1,8 +1,8 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { JSONWrapper, Serializable } from "@js-soft/ts-serval";
-import { CoreDate, CoreId } from "@nmshd/core-types";
+import { CoreDate, CoreId, CoreIdHelper } from "@nmshd/core-types";
 import { CoreBuffer, CryptoEncryption, CryptoSecretKey } from "@nmshd/crypto";
-import { AccountController, CoreCrypto, CoreIdHelper, Token, TokenContentFile, TokenContentRelationshipTemplate, Transport } from "../../../src";
+import { AccountController, CoreCrypto, Token, TokenContentFile, TokenContentRelationshipTemplate, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("TokenController", function () {
@@ -35,11 +35,11 @@ describe("TokenController", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 2);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 2);
         sender = accounts[0];
         recipient = accounts[1];
     });
@@ -413,7 +413,7 @@ describe("TokenController", function () {
             receivedToken = await recipient.tokens.loadPeerTokenByTruncated(reference, false);
         });
 
-        test("should delete own token locally and from the backbone", async function () {
+        test("should delete own token locally and from the Backbone", async function () {
             await sender.tokens.delete(sentToken);
             const tokenOnBackbone = await recipient.tokens.fetchCaches([sentToken.id]);
             expect(tokenOnBackbone).toHaveLength(0);

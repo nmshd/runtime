@@ -1,7 +1,6 @@
 export * from "./Base64ForIdPrefix";
 export * from "./flattenObject";
 export * from "./OwnerRestriction";
-export * from "./QRCode";
 export * from "./RuntimeErrors";
 export * from "./SchemaRepository";
 export * from "./UseCase";

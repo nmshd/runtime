@@ -31,11 +31,11 @@ describe("AnonymousTokenController", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 1);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 1);
         sender = accounts[0];
 
         anonymousTokenController = new AnonymousTokenController(transport.config);
@@ -79,7 +79,7 @@ describe("AnonymousTokenController", function () {
         await expect(anonymousTokenController.loadPeerTokenByTruncated(sentToken.toTokenReference().truncate())).rejects.toThrow("transport.general.notIntendedForYou");
     });
 
-    test("should throw when loading a personalized token and it's uncaught before reaching the backbone", async function () {
+    test("should throw when loading a personalized token and it's uncaught before reaching the Backbone", async function () {
         const expiresAt = CoreDate.utc().add({ minutes: 5 });
         const content = Serializable.fromAny({ content: "TestToken" });
         const sentToken = await sender.tokens.sendToken({

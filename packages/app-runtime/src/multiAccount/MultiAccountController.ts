@@ -1,8 +1,8 @@
 import { IDatabaseCollection, IDatabaseCollectionProvider } from "@js-soft/docdb-access-abstractions";
 import { LokiJsConnection } from "@js-soft/docdb-access-loki";
 import { ILogger } from "@js-soft/logging-abstractions";
-import { CoreAddress, CoreDate, CoreError, CoreId } from "@nmshd/core-types";
-import { AccountController, CoreIdHelper, DeviceSharedSecret, Transport, TransportCoreErrors, TransportLoggerFactory } from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreError, CoreId, CoreIdHelper } from "@nmshd/core-types";
+import { AccountController, DeviceSharedSecret, Transport, TransportCoreErrors, TransportLoggerFactory } from "@nmshd/transport";
 import { AppConfig } from "../AppConfig";
 import { SessionStorage } from "../SessionStorage";
 import { LocalAccount } from "./data/LocalAccount";
@@ -37,7 +37,7 @@ export class MultiAccountController {
 
     public async init(): Promise<MultiAccountController> {
         this._log.trace("opening accounts DB");
-        this._db = await this.transport.createDatabase(this.config.accountsDbName);
+        this._db = await this.databaseConnection.getDatabase(this.config.accountsDbName);
         this._log.trace("accounts DB opened.");
 
         this._dbClosed = false;
@@ -107,7 +107,7 @@ export class MultiAccountController {
         }
 
         this._log.trace(`Opening DB for account ${localAccount.id}...`);
-        const db = await this.transport.createDatabase(`acc-${localAccount.id.toString()}`);
+        const db = await this.databaseConnection.getDatabase(`acc-${localAccount.id.toString()}`);
         this._log.trace(`DB for account ${id} opened.`);
 
         this._log.trace(`Initializing AccountController for local account ${id}...`);
@@ -185,7 +185,7 @@ export class MultiAccountController {
         this._log.trace("Local account created.");
 
         this._log.trace(`Opening DB for account ${id}...`);
-        const db = await this.transport.createDatabase(`acc-${id.toString()}`);
+        const db = await this.databaseConnection.getDatabase(`acc-${id.toString()}`);
         this._log.trace(`DB for account ${id} opened.`);
 
         this._log.trace(`Initializing AccountController for local account ${id}...`);
@@ -225,7 +225,7 @@ export class MultiAccountController {
         this._log.trace("Local account created.");
 
         this._log.trace(`Opening DB for account ${id}...`);
-        const db = await this.transport.createDatabase(`acc-${id.toString()}`);
+        const db = await this.databaseConnection.getDatabase(`acc-${id.toString()}`);
         this._log.trace(`DB for account ${id} opened.`);
 
         this._log.trace(`Initializing AccountController for local account ${id}...`);

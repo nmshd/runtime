@@ -37,7 +37,7 @@ describe("Backbone Compatibility Check", () => {
         expect(result.value.isCompatible).toBe(true);
     });
 
-    test("should catch a too low backbone version", async () => {
+    test("should catch a too low Backbone version", async () => {
         const transportConfigOverride = { supportedMinBackboneVersion: actualBackboneVersion - 1, supportedMaxBackboneVersion: actualBackboneVersion - 1 };
         noLoginRuntime = new NoLoginTestRuntime({
             transportLibrary: { ...RuntimeServiceProvider.defaultConfig.transportLibrary, ...transportConfigOverride },
@@ -52,7 +52,7 @@ describe("Backbone Compatibility Check", () => {
         expect(result.value.isCompatible).toBe(false);
     });
 
-    test("should catch a too high backbone version", async () => {
+    test("should catch a too high Backbone version", async () => {
         const transportConfigOverride = { supportedMinBackboneVersion: actualBackboneVersion + 1, supportedMaxBackboneVersion: actualBackboneVersion + 1 };
         noLoginRuntime = new NoLoginTestRuntime({
             transportLibrary: { ...RuntimeServiceProvider.defaultConfig.transportLibrary, ...transportConfigOverride },

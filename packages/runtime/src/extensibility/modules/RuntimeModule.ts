@@ -4,8 +4,7 @@ import { Runtime } from "../../Runtime";
 
 export interface ModuleConfiguration {
     enabled: boolean;
-    name: string;
-    displayName: string;
+    displayName?: string;
     location: string;
 }
 
@@ -22,12 +21,8 @@ export abstract class RuntimeModule<TConfig extends ModuleConfiguration = Module
         };
     }
 
-    public get name(): string {
-        return this.configuration.name;
-    }
-
     public get displayName(): string {
-        return this.configuration.displayName;
+        return this.configuration.displayName ?? this.constructor.name.replace(/([a-z0-9])([A-Z])/g, "$1 $2");
     }
 
     public abstract init(): Promise<void> | void;

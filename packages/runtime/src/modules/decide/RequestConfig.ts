@@ -126,6 +126,10 @@ export interface ShareAttributeRequestItemConfig extends RequestItemConfig {
     "content.item.attribute.value.description"?: string | string[];
 }
 
+export interface TransferFileOwnershipRequestItemConfig extends RequestItemConfig {
+    "content.item.@type": "TransferFileOwnershipRequestItem";
+}
+
 export type RequestItemDerivationConfig =
     | RequestItemConfig
     | AuthenticationRequestItemConfig
@@ -136,7 +140,8 @@ export type RequestItemDerivationConfig =
     | ProposeAttributeRequestItemConfig
     | ReadAttributeRequestItemConfig
     | RegisterAttributeListenerRequestItemConfig
-    | ShareAttributeRequestItemConfig;
+    | ShareAttributeRequestItemConfig
+    | TransferFileOwnershipRequestItemConfig;
 
 export function isGeneralRequestConfig(input: any): input is GeneralRequestConfig {
     return !Object.keys(input).some((key) => key.startsWith("content.item."));
