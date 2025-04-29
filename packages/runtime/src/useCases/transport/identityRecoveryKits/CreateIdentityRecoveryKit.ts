@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { CoreDate, PasswordLocationIndicator } from "@nmshd/core-types";
+import { CoreDate } from "@nmshd/core-types";
 import { AccountController, Device, DevicesController, PasswordProtectionCreationParameters, TokenContentDeviceSharedSecret, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { TokenDTO } from "../../../types";
@@ -48,10 +48,7 @@ export class CreateIdentityRecoveryKitUseCase extends UseCase<CreateIdentityReco
             content: TokenContentDeviceSharedSecret.from({ sharedSecret }),
             expiresAt: CoreDate.from("9999-12-31"),
             ephemeral: false,
-            passwordProtection: PasswordProtectionCreationParameters.create({
-                ...request.passwordProtection,
-                passwordLocationIndicator: "RecoveryKit" as PasswordLocationIndicator
-            })
+            passwordProtection: PasswordProtectionCreationParameters.create({ ...request.passwordProtection, passwordLocationIndicator: "RecoveryKit" })
         });
 
         await this.accountController.syncDatawallet();
