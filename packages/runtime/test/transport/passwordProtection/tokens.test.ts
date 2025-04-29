@@ -42,6 +42,14 @@ describe("Password-protected tokens", () => {
         expect(loadResult.value.passwordProtection?.passwordIsPin).toBe(true);
     });
 
+    test("send token with passwordLocationIndicator", async () => {
+        const token = await uploadOwnToken(runtimeServices1.transport, undefined, { password: "password", passwordLocationIndicator: 50 });
+        expect(token.passwordProtection!.passwordLocationIndicator).toBe(50);
+
+        const reference = TokenReference.from(token.truncatedReference);
+        expect(reference.passwordProtection!.passwordLocationIndicator).toBe(50);
+    });
+
     test("error when loading a token with a wrong password", async () => {
         const token = await uploadOwnToken(runtimeServices1.transport, undefined, { password: "password" });
 
@@ -78,6 +86,19 @@ describe("Password-protected tokens", () => {
         });
         expect(createResult).toBeAnError(
             "'passwordProtection.passwordIsPin' is true, hence 'passwordProtection.password' must consist of 4 to 16 digits from 0 to 9.",
+            "error.runtime.validation.invalidPropertyValue"
+        );
+    });
+
+    test("validation error when creating a token with an invalid PasswordLocationIndicator", async () => {
+        const createResult = await runtimeServices1.transport.tokens.createOwnToken({
+            content: { key: "value" },
+            expiresAt: CoreDate.utc().add({ minutes: 10 }).toISOString(),
+            ephemeral: true,
+            passwordProtection: { password: "password", passwordLocationIndicator: "invalid-password-location-indicator" as any }
+        });
+        expect(createResult).toBeAnError(
+            "must be a number from 50 to 99 or one of the following strings: Self, Letter, RegistrationLetter, Email, SMS, Website",
             "error.runtime.validation.invalidPropertyValue"
         );
     });
