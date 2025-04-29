@@ -1,5 +1,5 @@
 import { PasswordLocationIndicator, PasswordLocationIndicatorOptions } from "@nmshd/core-types";
-import { PasswordProtection } from "@nmshd/transport";
+import { PasswordProtection, PasswordProtectionCreationParameters } from "@nmshd/transport";
 import { PasswordProtectionDTO } from "../../types";
 
 export class PasswordProtectionMapper {
@@ -17,13 +17,32 @@ export class PasswordProtectionMapper {
     }
 
     private static mapNumberToPasswordLocationIndicatorOption(value: number): PasswordLocationIndicator {
-        const passwordLocationIndicatorOptions = Object.values(PasswordLocationIndicatorOptions);
-
-        if (value >= 0 && value < passwordLocationIndicatorOptions.length) {
-            return PasswordLocationIndicatorOptions[value] as PasswordLocationIndicator;
-        }
+        const match = PasswordLocationIndicatorOptions[value];
+        if (typeof match === "string") return match as PasswordLocationIndicator;
 
         return value as PasswordLocationIndicator;
+    }
+
+    public static toPasswordProtectionCreationParameters(params?: {
+        password: string;
+        passwordIsPin?: true;
+        passwordLocationIndicator?: PasswordLocationIndicator;
+    }): PasswordProtectionCreationParameters | undefined {
+        if (!params) return;
+
+        return PasswordProtectionCreationParameters.create({
+            password: params.password,
+            passwordIsPin: params.passwordIsPin,
+            passwordLocationIndicator: this.mapPasswordLocationIndicatorOptionToNumber(params.passwordLocationIndicator)
+        });
+    }
+
+    private static mapPasswordLocationIndicatorOptionToNumber(value?: PasswordLocationIndicator): number | undefined {
+        if (typeof value === "undefined") return;
+        if (typeof value === "number") return value;
+
+        const numericValue = PasswordLocationIndicatorOptions[value];
+        return numericValue;
     }
 
     public static mapPasswordLocationIndicatorFromQuery(input: string | string[]): number | number[] {

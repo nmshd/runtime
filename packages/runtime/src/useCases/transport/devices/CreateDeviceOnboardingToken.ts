@@ -1,9 +1,9 @@
 import { Result } from "@js-soft/ts-utils";
 import { CoreDate, CoreId, PasswordLocationIndicator } from "@nmshd/core-types";
-import { DevicesController, PasswordProtectionCreationParameters, TokenContentDeviceSharedSecret, TokenController } from "@nmshd/transport";
+import { DevicesController, TokenContentDeviceSharedSecret, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { TokenDTO } from "../../../types";
-import { DeviceIdString, ISO8601DateTimeString, SchemaRepository, TokenAndTemplateCreationValidator, UseCase } from "../../common";
+import { DeviceIdString, ISO8601DateTimeString, PasswordProtectionMapper, SchemaRepository, TokenAndTemplateCreationValidator, UseCase } from "../../common";
 import { TokenMapper } from "../tokens/TokenMapper";
 
 export interface SchemaValidatableCreateDeviceOnboardingTokenRequest {
@@ -49,7 +49,7 @@ export class CreateDeviceOnboardingTokenUseCase extends UseCase<CreateDeviceOnbo
             content: tokenContent,
             expiresAt: expiresAt,
             ephemeral: true,
-            passwordProtection: PasswordProtectionCreationParameters.create(request.passwordProtection)
+            passwordProtection: PasswordProtectionMapper.toPasswordProtectionCreationParameters(request.passwordProtection)
         });
 
         return Result.ok(TokenMapper.toTokenDTO(token, true));

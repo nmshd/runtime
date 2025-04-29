@@ -1,7 +1,7 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, PasswordLocationIndicator } from "@nmshd/core-types";
-import { AccountController, PasswordProtectionCreationParameters, TokenController } from "@nmshd/transport";
+import { AccountController, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { DateTime } from "luxon";
 import { nameof } from "ts-simple-nameof";
@@ -9,6 +9,7 @@ import { TokenDTO } from "../../../types";
 import {
     AddressString,
     ISO8601DateTimeString,
+    PasswordProtectionMapper,
     RuntimeErrors,
     SchemaRepository,
     TokenAndTemplateCreationValidator,
@@ -81,7 +82,7 @@ export class CreateOwnTokenUseCase extends UseCase<CreateOwnTokenRequest, TokenD
             expiresAt: CoreDate.from(request.expiresAt),
             ephemeral: request.ephemeral,
             forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
-            passwordProtection: PasswordProtectionCreationParameters.create(request.passwordProtection)
+            passwordProtection: PasswordProtectionMapper.toPasswordProtectionCreationParameters(request.passwordProtection)
         });
 
         if (!request.ephemeral) {

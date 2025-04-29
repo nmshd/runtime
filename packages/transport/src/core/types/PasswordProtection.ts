@@ -1,5 +1,5 @@
 import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-serval";
-import { PasswordLocationIndicator, SharedPasswordProtection } from "@nmshd/core-types";
+import { SharedPasswordProtection } from "@nmshd/core-types";
 import { CoreBuffer, ICoreBuffer } from "@nmshd/crypto";
 import { PasswordProtectionCreationParameters } from "./PasswordProtectionCreationParameters";
 
@@ -39,20 +39,9 @@ export class PasswordProtection extends Serializable implements IPasswordProtect
         });
     }
 
-    public matchesInputForNewPasswordProtection(
-        newPasswordProtection: { password: string; passwordIsPin?: true; passwordLocationIndicator?: PasswordLocationIndicator } | undefined
-    ): boolean {
-        const newCreationParameters = PasswordProtectionCreationParameters.create(newPasswordProtection);
-        if (!newCreationParameters) return false;
+    public matchesPasswordProtectionParameters(parameters: PasswordProtectionCreationParameters | undefined): boolean {
+        if (!parameters) return false;
 
-        return this.matchesCreationParameters(newCreationParameters);
-    }
-
-    private matchesCreationParameters(creationParameters: PasswordProtectionCreationParameters): boolean {
-        return (
-            this.passwordType === creationParameters.passwordType &&
-            this.password === creationParameters.password &&
-            this.passwordLocationIndicator === creationParameters.passwordLocationIndicator
-        );
+        return this.passwordType === parameters.passwordType && this.password === parameters.password && this.passwordLocationIndicator === parameters.passwordLocationIndicator;
     }
 }

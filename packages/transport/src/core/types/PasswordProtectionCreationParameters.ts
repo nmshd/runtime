@@ -1,6 +1,4 @@
 import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-serval";
-import { PasswordLocationIndicator, PasswordLocationIndicatorOptions } from "@nmshd/core-types";
-import { TransportCoreErrors } from "../TransportCoreErrors";
 
 export interface IPasswordProtectionCreationParameters extends ISerializable {
     passwordType: "pw" | `pin${number}`;
@@ -25,27 +23,13 @@ export class PasswordProtectionCreationParameters extends Serializable implement
         return this.fromAny(value);
     }
 
-    public static create(
-        params: { password: string; passwordIsPin?: true; passwordLocationIndicator?: PasswordLocationIndicator } | undefined
-    ): PasswordProtectionCreationParameters | undefined {
+    public static create(params: { password: string; passwordIsPin?: true; passwordLocationIndicator?: number } | undefined): PasswordProtectionCreationParameters | undefined {
         if (!params) return;
-
-        const passwordLocationIndicator =
-            params.passwordLocationIndicator !== undefined ? this.mapPasswordLocationIndicatorOptionToNumber(params.passwordLocationIndicator) : undefined;
 
         return PasswordProtectionCreationParameters.from({
             password: params.password,
             passwordType: params.passwordIsPin ? `pin${params.password.length}` : "pw",
-            passwordLocationIndicator: passwordLocationIndicator
+            passwordLocationIndicator: params.passwordLocationIndicator
         });
-    }
-
-    private static mapPasswordLocationIndicatorOptionToNumber(value: PasswordLocationIndicator): number {
-        if (typeof value === "number") return value;
-
-        if (!(value in PasswordLocationIndicatorOptions)) throw TransportCoreErrors.general.invalidPasswordLocationIndicator(value);
-
-        const numericValue = PasswordLocationIndicatorOptions[value];
-        return numericValue;
     }
 }
