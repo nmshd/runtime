@@ -1,4 +1,4 @@
-import { CoreDate } from "@nmshd/core-types";
+import { CoreDate, PasswordLocationIndicatorOptions } from "@nmshd/core-types";
 import { RuntimeErrors } from "../RuntimeErrors";
 import { JsonSchema } from "../SchemaRepository";
 import { SchemaValidator } from "./SchemaValidator";
@@ -12,6 +12,7 @@ export class TokenAndTemplateCreationValidator<
         passwordProtection?: {
             password: string;
             passwordIsPin?: true;
+            passwordLocationIndicator?: unknown;
         };
     }
 > extends SchemaValidator<T> {
@@ -41,8 +42,35 @@ export class TokenAndTemplateCreationValidator<
                     );
                 }
             }
+
+            if (passwordProtection.passwordLocationIndicator && !TokenAndTemplateCreationValidator.isValidPasswordLocationIndicator(passwordProtection.passwordLocationIndicator)) {
+                validationResult.addFailure(
+                    new ValidationFailure(
+                        RuntimeErrors.general.invalidPropertyValue(
+                            `must be a number from 50 to 99 or one of the following strings: ${Object.values(PasswordLocationIndicatorOptions)
+                                .filter((value) => value !== "RecoveryKit")
+                                .join(", ")}`
+                        ),
+                        "passwordLocationIndicator"
+                    )
+                );
+            }
         }
 
         return validationResult;
+    }
+
+    private static isValidPasswordLocationIndicator(value: unknown): boolean {
+        if (typeof value !== "string" && typeof value !== "number") return false;
+
+        if (typeof value === "number") {
+            const isInValidRange = value >= 50 && value <= 99;
+            return isInValidRange;
+        }
+
+        const isPasswordLocationIndicatorOption = Object.keys(PasswordLocationIndicatorOptions).includes(value);
+        const isRecoveryKit = value === "RecoveryKit";
+
+        return isPasswordLocationIndicatorOption && !isRecoveryKit;
     }
 }

@@ -44,6 +44,15 @@ describe("Password-protected tokens for files", () => {
         expect(loadResult).toBeSuccessful();
     });
 
+    test("send a file via token with passwordLocationIndicator", async () => {
+        const createResult = await runtimeServices1.transport.files.createTokenForFile({
+            fileId,
+            passwordProtection: { password: "password", passwordLocationIndicator: 50 }
+        });
+        expect(createResult).toBeSuccessful();
+        expect(createResult.value.passwordProtection!.passwordLocationIndicator).toBe(50);
+    });
+
     test("error when loading the file with a wrong password", async () => {
         const createResult = await runtimeServices1.transport.files.createTokenForFile({
             fileId,
@@ -81,6 +90,17 @@ describe("Password-protected tokens for files", () => {
         });
         expect(createResult).toBeAnError(
             "'passwordProtection.passwordIsPin' is true, hence 'passwordProtection.password' must consist of 4 to 16 digits from 0 to 9.",
+            "error.runtime.validation.invalidPropertyValue"
+        );
+    });
+
+    test("validation error when creating a token with an invalid PasswordLocationIndicator", async () => {
+        const createResult = await runtimeServices1.transport.files.createTokenForFile({
+            fileId,
+            passwordProtection: { password: "password", passwordLocationIndicator: "invalid-password-location-indicator" as any }
+        });
+        expect(createResult).toBeAnError(
+            "must be a number from 50 to 99 or one of the following strings: Self, Letter, RegistrationLetter, Email, SMS, Website",
             "error.runtime.validation.invalidPropertyValue"
         );
     });

@@ -1,4 +1,4 @@
-import { RelationshipTemplateReference } from "@nmshd/transport";
+import { RelationshipTemplateReference, TokenReference } from "@nmshd/transport";
 import { DateTime } from "luxon";
 import { createTemplate, emptyRelationshipTemplateContent, RuntimeServiceProvider, TestRuntimeServices } from "../../lib";
 
@@ -61,6 +61,19 @@ describe("Password-protected templates", () => {
         expect(loadResult.value.passwordProtection!.passwordIsPin).toBe(true);
     });
 
+    test("send a template with passwordLocationIndicator", async () => {
+        const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+            content: emptyRelationshipTemplateContent,
+            expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+            passwordProtection: { password: "password", passwordLocationIndicator: 50 }
+        });
+        expect(createResult).toBeSuccessful();
+        expect(createResult.value.passwordProtection!.passwordLocationIndicator).toBe(50);
+
+        const reference = RelationshipTemplateReference.from(createResult.value.truncatedReference);
+        expect(reference.passwordProtection!.passwordLocationIndicator).toBe(50);
+    });
+
     test("error when loading a password-protected template with a wrong password", async () => {
         const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
             content: emptyRelationshipTemplateContent,
@@ -116,6 +129,18 @@ describe("Password-protected templates", () => {
         });
         expect(createResult).toBeAnError(
             "'passwordProtection.passwordIsPin' is true, hence 'passwordProtection.password' must consist of 4 to 16 digits from 0 to 9.",
+            "error.runtime.validation.invalidPropertyValue"
+        );
+    });
+
+    test("validation error when creating a template with an invalid PasswordLocationIndicator", async () => {
+        const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+            content: emptyRelationshipTemplateContent,
+            expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+            passwordProtection: { password: "password", passwordLocationIndicator: "invalid-password-location-indicator" as any }
+        });
+        expect(createResult).toBeAnError(
+            "must be a number from 50 to 99 or one of the following strings: Self, Letter, RegistrationLetter, Email, SMS, Website",
             "error.runtime.validation.invalidPropertyValue"
         );
     });
@@ -209,6 +234,21 @@ describe("Password-protected templates via tokens", () => {
         expect(loadResult).toBeSuccessful();
         expect(loadResult.value.passwordProtection!.password).toBe("1234");
         expect(loadResult.value.passwordProtection!.passwordIsPin).toBe(true);
+    });
+
+    test("send and receive a template via token with passwordLocationIndicator", async () => {
+        const templateId = (await createTemplate(runtimeServices1.transport, undefined, { password: "password", passwordLocationIndicator: 50 })).id;
+
+        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+            templateId,
+            passwordProtection: { password: "password", passwordLocationIndicator: 50 }
+        });
+
+        expect(createResult).toBeSuccessful();
+        expect(createResult.value.passwordProtection!.passwordLocationIndicator).toBe(50);
+
+        const reference = TokenReference.from(createResult.value.truncatedReference);
+        expect(reference.passwordProtection!.passwordLocationIndicator).toBe(50);
     });
 
     test("error when loading a password-protected template via token with wrong password", async () => {
@@ -326,6 +366,18 @@ describe("Password-protected tokens for unprotected templates", () => {
         expect(loadResult).toBeSuccessful();
     });
 
+    test("send a template with passwordLocationIndicator", async () => {
+        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+            templateId,
+            passwordProtection: { password: "password", passwordLocationIndicator: 50 }
+        });
+        expect(createResult).toBeSuccessful();
+        expect(createResult.value.passwordProtection!.passwordLocationIndicator).toBe(50);
+
+        const reference = TokenReference.from(createResult.value.truncatedReference);
+        expect(reference.passwordProtection!.passwordLocationIndicator).toBe(50);
+    });
+
     test("error when loading the template with a wrong password", async () => {
         const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
             templateId,
@@ -363,6 +415,17 @@ describe("Password-protected tokens for unprotected templates", () => {
         });
         expect(createResult).toBeAnError(
             "'passwordProtection.passwordIsPin' is true, hence 'passwordProtection.password' must consist of 4 to 16 digits from 0 to 9.",
+            "error.runtime.validation.invalidPropertyValue"
+        );
+    });
+
+    test("validation error when creating a token with an invalid PasswordLocationIndicator", async () => {
+        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+            templateId: templateId,
+            passwordProtection: { password: "password", passwordLocationIndicator: "invalid-password-location-indicator" as any }
+        });
+        expect(createResult).toBeAnError(
+            "must be a number from 50 to 99 or one of the following strings: Self, Letter, RegistrationLetter, Email, SMS, Website",
             "error.runtime.validation.invalidPropertyValue"
         );
     });
