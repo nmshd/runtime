@@ -47,8 +47,9 @@ export class TokenAndTemplateCreationValidator<
                 validationResult.addFailure(
                     new ValidationFailure(
                         RuntimeErrors.general.invalidPropertyValue(
-                            `must be a number from 50 to 99 or one of the following strings: ${Object.keys(PasswordLocationIndicatorOptions)
-                                .filter((key) => isNaN(Number(key)) && key !== "RecoveryKit")
+                            `must be a number from 50 to 99 or one of the following strings: ${Object.values(PasswordLocationIndicatorOptions)
+                                .slice(0, Object.values(PasswordLocationIndicatorOptions).length / 2)
+                                .filter((key) => key !== "RecoveryKit")
                                 .join(", ")}`
                         ),
                         "passwordLocationIndicator"
