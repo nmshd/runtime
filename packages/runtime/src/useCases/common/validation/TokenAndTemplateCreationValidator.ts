@@ -48,8 +48,7 @@ export class TokenAndTemplateCreationValidator<
                     new ValidationFailure(
                         RuntimeErrors.general.invalidPropertyValue(
                             `must be a number from 50 to 99 or one of the following strings: ${Object.values(PasswordLocationIndicatorOptions)
-                                .slice(0, Object.values(PasswordLocationIndicatorOptions).length / 2)
-                                .filter((key) => key !== "RecoveryKit")
+                                .filter((value) => typeof value === "string" && value !== "RecoveryKit")
                                 .join(", ")}`
                         ),
                         "passwordLocationIndicator"
