@@ -1,11 +1,10 @@
 import { QueryTranslator } from "@js-soft/docdb-querytranslator";
 import { Result } from "@js-soft/ts-utils";
-import { PasswordLocationIndicatorOptions } from "@nmshd/core-types";
 import { CachedRelationshipTemplate, PasswordProtection, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { nameof } from "ts-simple-nameof";
 import { RelationshipTemplateDTO } from "../../../types";
-import { OwnerRestriction, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { OwnerRestriction, PasswordProtectionMapper, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { RelationshipTemplateMapper } from "./RelationshipTemplateMapper";
 
 export interface GetRelationshipTemplatesQuery {
@@ -63,7 +62,7 @@ export class GetRelationshipTemplatesUseCase extends UseCase<GetRelationshipTemp
             [nameof<RelationshipTemplateDTO>((r) => r.passwordProtection)]: nameof<RelationshipTemplate>((r) => r.passwordProtection)
         },
         custom: {
-            [`${nameof<RelationshipTemplateDTO>((r) => r.passwordProtection)}.password`]: (query: any, input: string) => {
+            [`${nameof<RelationshipTemplateDTO>((r) => r.passwordProtection)}.password`]: (query: any, input: string | string[]) => {
                 query[`${nameof<RelationshipTemplate>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.password)}`] = input;
             },
             [`${nameof<RelationshipTemplateDTO>((t) => t.passwordProtection)}.passwordIsPin`]: (query: any, input: string) => {
@@ -76,14 +75,9 @@ export class GetRelationshipTemplatesUseCase extends UseCase<GetRelationshipTemp
                     query[`${nameof<RelationshipTemplate>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordType)}`] = "pw";
                 }
             },
-            [`${nameof<RelationshipTemplateDTO>((r) => r.passwordProtection)}.passwordLocationIndicator`]: (query: any, input: string) => {
-                let queryInput = -1;
-
-                const stringIsNumeric = /^\d+$/.test(input);
-                if (stringIsNumeric) queryInput = parseInt(input);
-                else if (input in PasswordLocationIndicatorOptions) queryInput = PasswordLocationIndicatorOptions[input as keyof typeof PasswordLocationIndicatorOptions];
-
-                query[`${nameof<RelationshipTemplate>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordLocationIndicator)}`] = queryInput;
+            [`${nameof<RelationshipTemplateDTO>((r) => r.passwordProtection)}.passwordLocationIndicator`]: (query: any, input: string | string[]) => {
+                const queryValue = PasswordProtectionMapper.mapPasswordLocationIndicatorFromQuery(input);
+                query[`${nameof<RelationshipTemplate>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordLocationIndicator)}`] = queryValue;
             }
         }
     });

@@ -25,4 +25,19 @@ export class PasswordProtectionMapper {
 
         return value as PasswordLocationIndicator;
     }
+
+    public static mapPasswordLocationIndicatorFromQuery(input: string | string[]): number | number[] {
+        if (Array.isArray(input)) return input.map((i) => this.mapSinglePasswordLocationIndicatorFromQuery(i));
+        return this.mapSinglePasswordLocationIndicatorFromQuery(input);
+    }
+
+    private static mapSinglePasswordLocationIndicatorFromQuery(input: string): number {
+        const stringIsNumeric = /^\d+$/.test(input);
+        if (stringIsNumeric) return parseInt(input);
+
+        const match = PasswordLocationIndicatorOptions[input as any] as any;
+        if (typeof match === "number") return match;
+
+        return -1;
+    }
 }

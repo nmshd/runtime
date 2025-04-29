@@ -1,11 +1,10 @@
 import { QueryTranslator } from "@js-soft/docdb-querytranslator";
 import { Result } from "@js-soft/ts-utils";
-import { PasswordLocationIndicatorOptions } from "@nmshd/core-types";
 import { CachedToken, PasswordProtection, Token, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { nameof } from "ts-simple-nameof";
 import { TokenDTO } from "../../../types";
-import { OwnerRestriction, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { OwnerRestriction, PasswordProtectionMapper, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { TokenMapper } from "./TokenMapper";
 
 export interface GetTokensQuery {
@@ -53,7 +52,7 @@ export class GetTokensUseCase extends UseCase<GetTokensRequest, TokenDTO[]> {
             [nameof<TokenDTO>((r) => r.passwordProtection)]: nameof<Token>((r) => r.passwordProtection)
         },
         custom: {
-            [`${nameof<TokenDTO>((r) => r.passwordProtection)}.password`]: (query: any, input: string) => {
+            [`${nameof<TokenDTO>((r) => r.passwordProtection)}.password`]: (query: any, input: string | string[]) => {
                 query[`${nameof<Token>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.password)}`] = input;
             },
             [`${nameof<TokenDTO>((t) => t.passwordProtection)}.passwordIsPin`]: (query: any, input: string) => {
@@ -66,14 +65,9 @@ export class GetTokensUseCase extends UseCase<GetTokensRequest, TokenDTO[]> {
                     query[`${nameof<Token>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordType)}`] = "pw";
                 }
             },
-            [`${nameof<TokenDTO>((r) => r.passwordProtection)}.passwordLocationIndicator`]: (query: any, input: string) => {
-                let queryInput = -1;
-
-                const stringIsNumeric = /^\d+$/.test(input);
-                if (stringIsNumeric) queryInput = parseInt(input);
-                else if (input in PasswordLocationIndicatorOptions) queryInput = PasswordLocationIndicatorOptions[input as keyof typeof PasswordLocationIndicatorOptions];
-
-                query[`${nameof<Token>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordLocationIndicator)}`] = queryInput;
+            [`${nameof<TokenDTO>((r) => r.passwordProtection)}.passwordLocationIndicator`]: (query: any, input: string | string[]) => {
+                const queryValue = PasswordProtectionMapper.mapPasswordLocationIndicatorFromQuery(input);
+                query[`${nameof<Token>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordLocationIndicator)}`] = queryValue;
             }
         }
     });
