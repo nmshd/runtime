@@ -65,10 +65,9 @@ export class CreateTokenForOwnTemplateUseCase extends UseCase<CreateTokenForOwnT
             return Result.fail(RuntimeErrors.relationshipTemplates.personalizationMustBeInherited());
         }
 
-        if (
-            template.passwordProtection &&
-            !template.passwordProtection.matchesPasswordProtectionParameters(PasswordProtectionMapper.toPasswordProtectionCreationParameters(request.passwordProtection))
-        ) {
+        const passwordProtectionCreationParameters = PasswordProtectionMapper.toPasswordProtectionCreationParameters(request.passwordProtection);
+
+        if (template.passwordProtection && !template.passwordProtection.matchesPasswordProtectionParameters(passwordProtectionCreationParameters)) {
             return Result.fail(RuntimeErrors.relationshipTemplates.passwordProtectionMustBeInherited());
         }
 
@@ -91,7 +90,7 @@ export class CreateTokenForOwnTemplateUseCase extends UseCase<CreateTokenForOwnT
             expiresAt: tokenExpiry,
             ephemeral,
             forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
-            passwordProtection: PasswordProtectionMapper.toPasswordProtectionCreationParameters(request.passwordProtection)
+            passwordProtection: passwordProtectionCreationParameters
         });
 
         if (!ephemeral) {
