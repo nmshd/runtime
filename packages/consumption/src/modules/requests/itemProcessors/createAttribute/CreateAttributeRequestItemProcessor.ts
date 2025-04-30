@@ -52,7 +52,7 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
             );
         }
 
-        if (typeof recipient !== "undefined") {
+        if (recipient) {
             const relationshipAttributesWithSameKey = await this.consumptionController.attributes.getRelationshipAttributesOfValueTypeToPeerWithGivenKeyAndOwner(
                 requestItem.attribute.key,
                 ownerIsEmptyString ? recipient : requestItem.attribute.owner,
