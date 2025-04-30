@@ -4,6 +4,7 @@ import { AbstractAttributeValue, AbstractAttributeValueJSON, IAbstractAttributeV
 import { RenderHints, RenderHintsDataType, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../../hints";
 
 export interface ConsentJSON extends AbstractAttributeValueJSON {
+    "@type": "Consent";
     consent: string;
     link?: string;
     linkDisplayText?: string;
