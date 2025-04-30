@@ -43,7 +43,10 @@ export class TokenAndTemplateCreationValidator<
                 }
             }
 
-            if (passwordProtection.passwordLocationIndicator && !TokenAndTemplateCreationValidator.isValidPasswordLocationIndicator(passwordProtection.passwordLocationIndicator)) {
+            if (
+                passwordProtection.passwordLocationIndicator !== undefined &&
+                !TokenAndTemplateCreationValidator.isValidPasswordLocationIndicator(passwordProtection.passwordLocationIndicator)
+            ) {
                 validationResult.addFailure(
                     new ValidationFailure(
                         RuntimeErrors.general.invalidPropertyValue(

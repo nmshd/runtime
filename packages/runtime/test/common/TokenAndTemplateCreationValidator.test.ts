@@ -42,6 +42,11 @@ describe("TokenAndTemplateCreationValidator", () => {
             expect(result).toBe(false);
         });
 
+        test("should not allow to set number mapping to the PasswordLocationIndicatorOption RecoveryKit as PasswordLocationIndicator", function () {
+            const result = isValidPasswordLocationIndicator(PasswordLocationIndicatorOptions.RecoveryKit);
+            expect(result).toBe(false);
+        });
+
         test("should not allow to set number higher than maximum as PasswordLocationIndicator", function () {
             const result = isValidPasswordLocationIndicator(100);
             expect(result).toBe(false);
