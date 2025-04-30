@@ -94,13 +94,46 @@ describe("Password-protected tokens for files", () => {
         );
     });
 
-    test("validation error when creating a token with an invalid PasswordLocationIndicator", async () => {
+    test("validation error when creating a token with a PasswordLocationIndicator that is an invalid string", async () => {
         const createResult = await runtimeServices1.transport.files.createTokenForFile({
             fileId,
             passwordProtection: { password: "password", passwordLocationIndicator: "invalid-password-location-indicator" as any }
         });
         expect(createResult).toBeAnError(
             /^must be a number from 50 to 99 or one of the following strings: Self, Letter, RegistrationLetter, Email, SMS, Website$/,
+            "error.runtime.validation.invalidPropertyValue"
+        );
+    });
+
+    test("validation error when creating a token with a PasswordLocationIndicator that is an invalid number", async () => {
+        const createResult = await runtimeServices1.transport.files.createTokenForFile({
+            fileId,
+            passwordProtection: { password: "password", passwordLocationIndicator: 1000 as any }
+        });
+        expect(createResult).toBeAnError(
+            "must be a number from 50 to 99 or one of the following strings: Self, Letter, RegistrationLetter, Email, SMS, Website",
+            "error.runtime.validation.invalidPropertyValue"
+        );
+    });
+
+    test("validation error when creating a token with a PasswordLocationIndicator that is a number mapping to a PasswordLocationIndicatorOption", async () => {
+        const createResult = await runtimeServices1.transport.files.createTokenForFile({
+            fileId,
+            passwordProtection: { password: "password", passwordLocationIndicator: 1 as any }
+        });
+        expect(createResult).toBeAnError(
+            "must be a number from 50 to 99 or one of the following strings: Self, Letter, RegistrationLetter, Email, SMS, Website",
+            "error.runtime.validation.invalidPropertyValue"
+        );
+    });
+
+    test("validation error when creating a token with a PasswordLocationIndicator that is a number mapping to a RecoveryKit", async () => {
+        const createResult = await runtimeServices1.transport.files.createTokenForFile({
+            fileId,
+            passwordProtection: { password: "password", passwordLocationIndicator: 1 as any }
+        });
+        expect(createResult).toBeAnError(
+            "must be a number from 50 to 99 or one of the following strings: Self, Letter, RegistrationLetter, Email, SMS, Website",
             "error.runtime.validation.invalidPropertyValue"
         );
     });
