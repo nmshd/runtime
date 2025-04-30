@@ -4,8 +4,8 @@ import { RelationshipTemplateDTO, TokenDTO } from "../../../types";
 import {
     CreateOwnRelationshipTemplateRequest,
     CreateOwnRelationshipTemplateUseCase,
-    CreateTokenForOwnTemplateRequest,
-    CreateTokenForOwnTemplateUseCase,
+    CreateTokenForOwnRelationshipTemplateRequest,
+    CreateTokenForOwnRelationshipTemplateUseCase,
     DeleteRelationshipTemplateRequest,
     DeleteRelationshipTemplateUseCase,
     GetRelationshipTemplateRequest,
@@ -23,7 +23,7 @@ export class RelationshipTemplatesFacade {
         @Inject private readonly getRelationshipTemplatesUseCase: GetRelationshipTemplatesUseCase,
         @Inject private readonly getRelationshipTemplateUseCase: GetRelationshipTemplateUseCase,
         @Inject private readonly deleteRelationshipTemplateUseCase: DeleteRelationshipTemplateUseCase,
-        @Inject private readonly createTokenForOwnTemplateUseCase: CreateTokenForOwnTemplateUseCase
+        @Inject private readonly createTokenForOwnRelationshipTemplateUseCase: CreateTokenForOwnRelationshipTemplateUseCase
     ) {}
 
     public async createOwnRelationshipTemplate(request: CreateOwnRelationshipTemplateRequest): Promise<Result<RelationshipTemplateDTO>> {
@@ -46,7 +46,7 @@ export class RelationshipTemplatesFacade {
         return await this.deleteRelationshipTemplateUseCase.execute(request);
     }
 
-    public async createTokenForOwnTemplate(request: CreateTokenForOwnTemplateRequest): Promise<Result<TokenDTO>> {
-        return await this.createTokenForOwnTemplateUseCase.execute(request);
+    public async createTokenForOwnRelationshipTemplate(request: CreateTokenForOwnRelationshipTemplateRequest): Promise<Result<TokenDTO>> {
+        return await this.createTokenForOwnRelationshipTemplateUseCase.execute(request);
     }
 }

@@ -126,8 +126,8 @@ describe("LoadItemFromTruncatedReference", () => {
                 })
             ).value;
             relationshipTemplateReference = relationshipTemplate.truncatedReference;
-            relationshipTemplateTokenReference = (await sTransportServices.relationshipTemplates.createTokenForOwnTemplate({ templateId: relationshipTemplate.id })).value
-                .truncatedReference;
+            relationshipTemplateTokenReference = (await sTransportServices.relationshipTemplates.createTokenForOwnRelationshipTemplate({ templateId: relationshipTemplate.id }))
+                .value.truncatedReference;
         });
 
         test("loads the RelationshipTemplate with the truncated reference", async () => {
