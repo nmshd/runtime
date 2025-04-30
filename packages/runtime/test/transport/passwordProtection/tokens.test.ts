@@ -90,7 +90,7 @@ describe("Password-protected tokens", () => {
         );
     });
 
-    test("validation error when creating a token with an invalid PasswordLocationIndicator", async () => {
+    test("validation error when creating a token with a PasswordLocationIndicator that is an invalid string", async () => {
         const createResult = await runtimeServices1.transport.tokens.createOwnToken({
             content: { key: "value" },
             expiresAt: CoreDate.utc().add({ minutes: 10 }).toISOString(),
@@ -99,6 +99,45 @@ describe("Password-protected tokens", () => {
         });
         expect(createResult).toBeAnError(
             /^must be a number from 50 to 99 or one of the following strings: Self, Letter, RegistrationLetter, Email, SMS, Website$/,
+            "error.runtime.validation.invalidPropertyValue"
+        );
+    });
+
+    test("validation error when creating a token with a PasswordLocationIndicator that is an invalid number", async () => {
+        const createResult = await runtimeServices1.transport.tokens.createOwnToken({
+            content: { key: "value" },
+            expiresAt: CoreDate.utc().add({ minutes: 10 }).toISOString(),
+            ephemeral: true,
+            passwordProtection: { password: "password", passwordLocationIndicator: 49 as any }
+        });
+        expect(createResult).toBeAnError(
+            "must be a number from 50 to 99 or one of the following strings: Self, Letter, RegistrationLetter, Email, SMS, Website",
+            "error.runtime.validation.invalidPropertyValue"
+        );
+    });
+
+    test("validation error when creating a token with a PasswordLocationIndicator that is a number mapping to a PasswordLocationIndicatorOption", async () => {
+        const createResult = await runtimeServices1.transport.tokens.createOwnToken({
+            content: { key: "value" },
+            expiresAt: CoreDate.utc().add({ minutes: 10 }).toISOString(),
+            ephemeral: true,
+            passwordProtection: { password: "password", passwordLocationIndicator: 1 as any }
+        });
+        expect(createResult).toBeAnError(
+            "must be a number from 50 to 99 or one of the following strings: Self, Letter, RegistrationLetter, Email, SMS, Website",
+            "error.runtime.validation.invalidPropertyValue"
+        );
+    });
+
+    test("validation error when creating a token with a PasswordLocationIndicator that is a number mapping to RecoveryKit", async () => {
+        const createResult = await runtimeServices1.transport.tokens.createOwnToken({
+            content: { key: "value" },
+            expiresAt: CoreDate.utc().add({ minutes: 10 }).toISOString(),
+            ephemeral: true,
+            passwordProtection: { password: "password", passwordLocationIndicator: 0 as any }
+        });
+        expect(createResult).toBeAnError(
+            "must be a number from 50 to 99 or one of the following strings: Self, Letter, RegistrationLetter, Email, SMS, Website",
             "error.runtime.validation.invalidPropertyValue"
         );
     });
