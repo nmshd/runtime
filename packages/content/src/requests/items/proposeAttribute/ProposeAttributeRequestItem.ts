@@ -77,7 +77,7 @@ export class ProposeAttributeRequestItem extends RequestItem implements IPropose
             }
         }
 
-        if (value.query instanceof IQLQuery && typeof value.query.attributeCreationHints !== "undefined") {
+        if (value.query instanceof IQLQuery && value.query.attributeCreationHints) {
             const attributeValueType = (value.attribute.value.toJSON() as any)["@type"];
             const queryValueType = value.query.attributeCreationHints.valueType;
 
