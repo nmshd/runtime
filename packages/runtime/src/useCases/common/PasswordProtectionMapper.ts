@@ -38,7 +38,7 @@ export class PasswordProtectionMapper {
     }
 
     private static mapPasswordLocationIndicatorOptionToNumber(value?: PasswordLocationIndicator): number | undefined {
-        if (typeof value === "undefined") return;
+        if (value === undefined) return;
         if (typeof value === "number") return value;
 
         const numericValue = PasswordLocationIndicatorOptions[value];

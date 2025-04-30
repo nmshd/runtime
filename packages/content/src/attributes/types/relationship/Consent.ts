@@ -41,7 +41,7 @@ export class Consent extends AbstractAttributeValue implements IConsent {
     protected static override postFrom<T extends Serializable>(value: T): T {
         if (!(value instanceof Consent)) throw new Error("this should never happen");
 
-        if (typeof value.linkDisplayText === "string" && typeof value.link === "undefined") {
+        if (typeof value.linkDisplayText === "string" && value.link === undefined) {
             throw new ValidationError(
                 Consent.name,
                 nameof<Consent>((x) => x.linkDisplayText),
