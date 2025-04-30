@@ -1,6 +1,6 @@
 import { Token } from "@nmshd/transport";
 import { TokenDTO } from "../../../types";
-import { RuntimeErrors } from "../../common";
+import { PasswordProtectionMapper, RuntimeErrors } from "../../common";
 
 export class TokenMapper {
     public constructor(private readonly backboneBaseUrl: string) {}
@@ -24,12 +24,7 @@ export class TokenMapper {
             url: token.isOwn ? reference.toUrl() : undefined,
             isEphemeral: ephemeral,
             forIdentity: token.cache.forIdentity?.toString(),
-            passwordProtection: token.passwordProtection
-                ? {
-                      password: token.passwordProtection.password,
-                      passwordIsPin: token.passwordProtection.passwordType.startsWith("pin") ? true : undefined
-                  }
-                : undefined
+            passwordProtection: PasswordProtectionMapper.toPasswordProtectionDTO(token.passwordProtection)
         } as TokenDTO;
     }
 
