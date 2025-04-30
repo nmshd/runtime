@@ -22354,11 +22354,11 @@ export const CreateOwnRelationshipTemplateRequest: any = {
     }
 }
 
-export const CreateTokenForOwnTemplateRequest: any = {
+export const CreateTokenForOwnRelationshipTemplateRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CreateTokenForOwnTemplateRequest",
+    "$ref": "#/definitions/CreateTokenForOwnRelationshipTemplateRequest",
     "definitions": {
-        "CreateTokenForOwnTemplateRequest": {
+        "CreateTokenForOwnRelationshipTemplateRequest": {
             "type": "object",
             "properties": {
                 "templateId": {
