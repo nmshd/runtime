@@ -15,7 +15,7 @@ import {
 } from "../../common";
 import { TokenMapper } from "../tokens/TokenMapper";
 
-export interface SchemaValidatableCreateTokenForOwnTemplateRequest {
+export interface SchemaValidatableCreateTokenForOwnRelationshipTemplateRequest {
     templateId: RelationshipTemplateIdString;
     expiresAt?: ISO8601DateTimeString;
     ephemeral?: boolean;
@@ -30,17 +30,17 @@ export interface SchemaValidatableCreateTokenForOwnTemplateRequest {
     };
 }
 
-export type CreateTokenForOwnTemplateRequest = SchemaValidatableCreateTokenForOwnTemplateRequest & {
+export type CreateTokenForOwnRelationshipTemplateRequest = SchemaValidatableCreateTokenForOwnRelationshipTemplateRequest & {
     passwordProtection?: { passwordLocationIndicator?: PasswordLocationIndicator };
 };
 
-class Validator extends TokenAndTemplateCreationValidator<CreateTokenForOwnTemplateRequest> {
+class Validator extends TokenAndTemplateCreationValidator<CreateTokenForOwnRelationshipTemplateRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
-        super(schemaRepository.getSchema("CreateTokenForOwnTemplateRequest"));
+        super(schemaRepository.getSchema("CreateTokenForOwnRelationshipTemplateRequest"));
     }
 }
 
-export class CreateTokenForOwnTemplateUseCase extends UseCase<CreateTokenForOwnTemplateRequest, TokenDTO> {
+export class CreateTokenForOwnRelationshipTemplateUseCase extends UseCase<CreateTokenForOwnRelationshipTemplateRequest, TokenDTO> {
     public constructor(
         @Inject private readonly templateController: RelationshipTemplateController,
         @Inject private readonly tokenController: TokenController,
@@ -50,7 +50,7 @@ export class CreateTokenForOwnTemplateUseCase extends UseCase<CreateTokenForOwnT
         super(validator);
     }
 
-    protected async executeInternal(request: CreateTokenForOwnTemplateRequest): Promise<Result<TokenDTO>> {
+    protected async executeInternal(request: CreateTokenForOwnRelationshipTemplateRequest): Promise<Result<TokenDTO>> {
         const template = await this.templateController.getRelationshipTemplate(CoreId.from(request.templateId));
 
         if (!template) {

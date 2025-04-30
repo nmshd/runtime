@@ -192,7 +192,7 @@ describe("RelationshipTemplate Tests", () => {
                 forIdentity: runtimeServices2.address
             });
             expect(createResult).toBeSuccessful();
-            const createTokenResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+            const createTokenResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnRelationshipTemplate({
                 templateId: createResult.value.id,
                 forIdentity: runtimeServices2.address
             });
@@ -206,12 +206,12 @@ describe("RelationshipTemplate Tests", () => {
                 forIdentity: runtimeServices2.address
             });
             expect(createResult).toBeSuccessful();
-            const createTokenWithWrongPersonalizationResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+            const createTokenWithWrongPersonalizationResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnRelationshipTemplate({
                 templateId: createResult.value.id,
                 forIdentity: runtimeServices1.address
             });
             expect(createTokenWithWrongPersonalizationResult).toBeAnError(/.*/, "error.runtime.relationshipTemplates.personalizationMustBeInherited");
-            const createTokenWithoutPersonalizationResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+            const createTokenWithoutPersonalizationResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnRelationshipTemplate({
                 templateId: createResult.value.id
             });
             expect(createTokenWithoutPersonalizationResult).toBeAnError(/.*/, "error.runtime.relationshipTemplates.personalizationMustBeInherited");

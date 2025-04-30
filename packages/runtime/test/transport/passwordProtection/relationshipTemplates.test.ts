@@ -200,7 +200,7 @@ describe("Password-protected templates via tokens", () => {
     test("send and receive a password-protected template via token", async () => {
         const templateId = (await createTemplate(runtimeServices1.transport, undefined, { password: "password" })).id;
 
-        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnRelationshipTemplate({
             templateId,
             passwordProtection: {
                 password: "password"
@@ -219,7 +219,7 @@ describe("Password-protected templates via tokens", () => {
     test("send and receive a PIN-protected template via token", async () => {
         const templateId = (await createTemplate(runtimeServices1.transport, undefined, { password: "1234", passwordIsPin: true })).id;
 
-        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnRelationshipTemplate({
             templateId,
             passwordProtection: {
                 password: "1234",
@@ -239,7 +239,7 @@ describe("Password-protected templates via tokens", () => {
     test("send and receive a template via token with passwordLocationIndicator", async () => {
         const templateId = (await createTemplate(runtimeServices1.transport, undefined, { password: "password", passwordLocationIndicator: 50 })).id;
 
-        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnRelationshipTemplate({
             templateId,
             passwordProtection: { password: "password", passwordLocationIndicator: 50 }
         });
@@ -254,7 +254,7 @@ describe("Password-protected templates via tokens", () => {
     test("error when loading a password-protected template via token with wrong password", async () => {
         const templateId = (await createTemplate(runtimeServices1.transport, undefined, { password: "password" })).id;
 
-        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnRelationshipTemplate({
             templateId,
             passwordProtection: {
                 password: "password"
@@ -271,7 +271,7 @@ describe("Password-protected templates via tokens", () => {
     test("error when loading a password-protected template via token with no password", async () => {
         const templateId = (await createTemplate(runtimeServices1.transport, undefined, { password: "password" })).id;
 
-        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnRelationshipTemplate({
             templateId,
             passwordProtection: {
                 password: "password"
@@ -287,7 +287,7 @@ describe("Password-protected templates via tokens", () => {
     test("validation error when token password protection doesn't inherit template password protection", async () => {
         const templateId = (await createTemplate(runtimeServices1.transport, undefined, { password: "password" })).id;
 
-        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnRelationshipTemplate({
             templateId
         });
 
@@ -335,7 +335,7 @@ describe("Password-protected tokens for unprotected templates", () => {
     });
 
     test("send and receive a template via password-protected token", async () => {
-        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnRelationshipTemplate({
             templateId,
             passwordProtection: { password: "password" }
         });
@@ -351,7 +351,7 @@ describe("Password-protected tokens for unprotected templates", () => {
     });
 
     test("send and receive a template via PIN-protected token", async () => {
-        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnRelationshipTemplate({
             templateId,
             passwordProtection: { password: "1234", passwordIsPin: true }
         });
@@ -367,7 +367,7 @@ describe("Password-protected tokens for unprotected templates", () => {
     });
 
     test("send a template with passwordLocationIndicator", async () => {
-        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnRelationshipTemplate({
             templateId,
             passwordProtection: { password: "password", passwordLocationIndicator: 50 }
         });
@@ -379,7 +379,7 @@ describe("Password-protected tokens for unprotected templates", () => {
     });
 
     test("error when loading the template with a wrong password", async () => {
-        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnRelationshipTemplate({
             templateId,
             passwordProtection: { password: "password" }
         });
@@ -390,7 +390,7 @@ describe("Password-protected tokens for unprotected templates", () => {
     });
 
     test("error when loading the template with no password", async () => {
-        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnRelationshipTemplate({
             templateId,
             passwordProtection: { password: "password" }
         });
@@ -401,7 +401,7 @@ describe("Password-protected tokens for unprotected templates", () => {
     });
 
     test("validation error when creating a token with empty string as the password", async () => {
-        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnRelationshipTemplate({
             templateId,
             passwordProtection: { password: "" }
         });
@@ -409,7 +409,7 @@ describe("Password-protected tokens for unprotected templates", () => {
     });
 
     test("validation error when creating a token with an invalid PIN", async () => {
-        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnRelationshipTemplate({
             templateId: templateId,
             passwordProtection: { password: "invalid-pin", passwordIsPin: true }
         });
@@ -420,7 +420,7 @@ describe("Password-protected tokens for unprotected templates", () => {
     });
 
     test("validation error when creating a token with an invalid PasswordLocationIndicator", async () => {
-        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnRelationshipTemplate({
             templateId: templateId,
             passwordProtection: { password: "password", passwordLocationIndicator: "invalid-password-location-indicator" as any }
         });
@@ -432,7 +432,7 @@ describe("Password-protected tokens for unprotected templates", () => {
 
     describe("LoadItemFromTruncatedReferenceUseCase", () => {
         test("send and receive a template  via password-protected token", async () => {
-            const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnRelationshipTemplate({
                 templateId,
                 passwordProtection: { password: "password" }
             });
@@ -446,7 +446,7 @@ describe("Password-protected tokens for unprotected templates", () => {
         });
 
         test("error when loading a template with wrong password", async () => {
-            const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnRelationshipTemplate({
                 templateId,
                 passwordProtection: { password: "password" }
             });
@@ -459,7 +459,7 @@ describe("Password-protected tokens for unprotected templates", () => {
         });
 
         test("error when loading a template with no password", async () => {
-            const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+            const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnRelationshipTemplate({
                 templateId,
                 passwordProtection: { password: "password" }
             });
