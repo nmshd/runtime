@@ -48,7 +48,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             return proposedAttributeMatchesWithQueryValidationResult;
         }
 
-        if (requestItem.query instanceof RelationshipAttributeQuery && typeof recipient !== "undefined") {
+        if (requestItem.query instanceof RelationshipAttributeQuery && recipient) {
             const relationshipAttributesWithSameKey = await this.consumptionController.attributes.getRelationshipAttributesOfValueTypeToPeerWithGivenKeyAndOwner(
                 requestItem.query.key,
                 recipient,
@@ -181,7 +181,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             }
         }
 
-        if (typeof attribute === "undefined") {
+        if (attribute === undefined) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidAcceptParameters(
                     `You have to specify either ${nameof<AcceptProposeAttributeRequestItemParameters>(

@@ -35,7 +35,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             return queryValidationResult;
         }
 
-        if (requestItem.query instanceof RelationshipAttributeQuery && typeof recipient !== "undefined") {
+        if (requestItem.query instanceof RelationshipAttributeQuery && recipient) {
             const ownerIsEmptyString = requestItem.query.owner.toString() === "";
             const relationshipAttributesWithSameKey = await this.consumptionController.attributes.getRelationshipAttributesOfValueTypeToPeerWithGivenKeyAndOwner(
                 requestItem.query.key,
@@ -156,7 +156,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                     );
                 }
 
-                if (typeof foundLocalAttribute.shareInfo.sourceAttribute !== "undefined") {
+                if (foundLocalAttribute.shareInfo.sourceAttribute) {
                     return ValidationResult.error(
                         ConsumptionCoreErrors.requests.attributeQueryMismatch(
                             "When responding to a ThirdPartyRelationshipAttributeQuery, only RelationshipAttributes that are not a copy of a sourceAttribute may be provided."
@@ -212,7 +212,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             }
         }
 
-        if (typeof attribute === "undefined") {
+        if (attribute === undefined) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidAcceptParameters(
                     `You have to specify either ${nameof<AcceptReadAttributeRequestItemParameters>(

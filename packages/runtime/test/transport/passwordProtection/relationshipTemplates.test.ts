@@ -133,11 +133,47 @@ describe("Password-protected templates", () => {
         );
     });
 
-    test("validation error when creating a template with an invalid PasswordLocationIndicator", async () => {
+    test("validation error when creating a template with a PasswordLocationIndicator that is an invalid string", async () => {
         const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
             content: emptyRelationshipTemplateContent,
             expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
             passwordProtection: { password: "password", passwordLocationIndicator: "invalid-password-location-indicator" as any }
+        });
+        expect(createResult).toBeAnError(
+            /^must be a number from 50 to 99 or one of the following strings: Self, Letter, RegistrationLetter, Email, SMS, Website$/,
+            "error.runtime.validation.invalidPropertyValue"
+        );
+    });
+
+    test("validation error when creating a template with a PasswordLocationIndicator that is an invalid number", async () => {
+        const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+            content: emptyRelationshipTemplateContent,
+            expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+            passwordProtection: { password: "password", passwordLocationIndicator: 49 as any }
+        });
+        expect(createResult).toBeAnError(
+            "must be a number from 50 to 99 or one of the following strings: Self, Letter, RegistrationLetter, Email, SMS, Website",
+            "error.runtime.validation.invalidPropertyValue"
+        );
+    });
+
+    test("validation error when creating a template with a PasswordLocationIndicator that is an invalid number mapping to a PasswordLocationIndicatorOption", async () => {
+        const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+            content: emptyRelationshipTemplateContent,
+            expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+            passwordProtection: { password: "password", passwordLocationIndicator: 1 as any }
+        });
+        expect(createResult).toBeAnError(
+            "must be a number from 50 to 99 or one of the following strings: Self, Letter, RegistrationLetter, Email, SMS, Website",
+            "error.runtime.validation.invalidPropertyValue"
+        );
+    });
+
+    test("validation error when creating a template with a PasswordLocationIndicator that is an invalid number mapping to RecoveryKit", async () => {
+        const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+            content: emptyRelationshipTemplateContent,
+            expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
+            passwordProtection: { password: "password", passwordLocationIndicator: 0 as any }
         });
         expect(createResult).toBeAnError(
             "must be a number from 50 to 99 or one of the following strings: Self, Letter, RegistrationLetter, Email, SMS, Website",
@@ -419,10 +455,54 @@ describe("Password-protected tokens for unprotected templates", () => {
         );
     });
 
-    test("validation error when creating a token with an invalid PasswordLocationIndicator", async () => {
+    test("validation error when creating a token with a PasswordLocationIndicator that is an invalid string", async () => {
         const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
             templateId: templateId,
             passwordProtection: { password: "password", passwordLocationIndicator: "invalid-password-location-indicator" as any }
+        });
+        expect(createResult).toBeAnError(
+            /^must be a number from 50 to 99 or one of the following strings: Self, Letter, RegistrationLetter, Email, SMS, Website$/,
+            "error.runtime.validation.invalidPropertyValue"
+        );
+    });
+
+    test("validation error when creating a token with RecoveryKit as PasswordLocationIndicator", async () => {
+        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+            templateId: templateId,
+            passwordProtection: { password: "password", passwordLocationIndicator: "RecoveryKit" }
+        });
+        expect(createResult).toBeAnError(
+            "must be a number from 50 to 99 or one of the following strings: Self, Letter, RegistrationLetter, Email, SMS, Website",
+            "error.runtime.validation.invalidPropertyValue"
+        );
+    });
+
+    test("validation error when creating a token with a PasswordLocationIndicator that is an invalid number", async () => {
+        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+            templateId: templateId,
+            passwordProtection: { password: "password", passwordLocationIndicator: 49 as any }
+        });
+        expect(createResult).toBeAnError(
+            "must be a number from 50 to 99 or one of the following strings: Self, Letter, RegistrationLetter, Email, SMS, Website",
+            "error.runtime.validation.invalidPropertyValue"
+        );
+    });
+
+    test("validation error when creating a token with a PasswordLocationIndicator that is a number mapping to a PasswordLocationIndicatorOption", async () => {
+        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+            templateId: templateId,
+            passwordProtection: { password: "password", passwordLocationIndicator: 1 as any }
+        });
+        expect(createResult).toBeAnError(
+            "must be a number from 50 to 99 or one of the following strings: Self, Letter, RegistrationLetter, Email, SMS, Website",
+            "error.runtime.validation.invalidPropertyValue"
+        );
+    });
+
+    test("validation error when creating a token with a PasswordLocationIndicator that is a number mapping to RecoveryKit", async () => {
+        const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+            templateId: templateId,
+            passwordProtection: { password: "password", passwordLocationIndicator: 0 as any }
         });
         expect(createResult).toBeAnError(
             "must be a number from 50 to 99 or one of the following strings: Self, Letter, RegistrationLetter, Email, SMS, Website",

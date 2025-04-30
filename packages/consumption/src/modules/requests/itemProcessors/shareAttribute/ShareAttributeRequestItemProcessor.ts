@@ -23,7 +23,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
     public override async canCreateOutgoingRequestItem(requestItem: ShareAttributeRequestItem, _request: Request, recipient?: CoreAddress): Promise<ValidationResult> {
         const foundAttribute = await this.consumptionController.attributes.getLocalAttribute(requestItem.sourceAttributeId);
 
-        if (typeof foundAttribute === "undefined") {
+        if (!foundAttribute) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidRequestItem(
                     `The Attribute with the given sourceAttributeId '${requestItem.sourceAttributeId.toString()}' could not be found.`
@@ -50,7 +50,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                 );
             }
 
-            if (typeof recipient !== "undefined") {
+            if (recipient) {
                 const query = {
                     "shareInfo.sourceAttribute": requestItem.sourceAttributeId.toString(),
                     "shareInfo.peer": recipient.toString(),
@@ -104,13 +104,13 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                 );
             }
 
-            if (typeof foundAttribute.shareInfo.sourceAttribute !== "undefined") {
+            if (foundAttribute.shareInfo.sourceAttribute) {
                 return ValidationResult.error(
                     ConsumptionCoreErrors.requests.invalidRequestItem("You can only share RelationshipAttributes that are not a copy of a sourceAttribute.")
                 );
             }
 
-            if (typeof recipient !== "undefined") {
+            if (recipient) {
                 const query = {
                     "shareInfo.sourceAttribute": requestItem.sourceAttributeId.toString(),
                     "shareInfo.peer": recipient.toString(),

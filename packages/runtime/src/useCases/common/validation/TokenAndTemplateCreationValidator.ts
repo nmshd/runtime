@@ -43,12 +43,15 @@ export class TokenAndTemplateCreationValidator<
                 }
             }
 
-            if (passwordProtection.passwordLocationIndicator && !TokenAndTemplateCreationValidator.isValidPasswordLocationIndicator(passwordProtection.passwordLocationIndicator)) {
+            if (
+                passwordProtection.passwordLocationIndicator !== undefined &&
+                !TokenAndTemplateCreationValidator.isValidPasswordLocationIndicator(passwordProtection.passwordLocationIndicator)
+            ) {
                 validationResult.addFailure(
                     new ValidationFailure(
                         RuntimeErrors.general.invalidPropertyValue(
                             `must be a number from 50 to 99 or one of the following strings: ${Object.values(PasswordLocationIndicatorOptions)
-                                .filter((value) => value !== "RecoveryKit")
+                                .filter((value) => typeof value === "string" && value !== "RecoveryKit")
                                 .join(", ")}`
                         ),
                         "passwordLocationIndicator"

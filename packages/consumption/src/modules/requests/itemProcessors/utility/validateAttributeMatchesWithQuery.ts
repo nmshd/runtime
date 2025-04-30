@@ -63,7 +63,7 @@ function validateAttributeMatchesWithIdentityAttributeQuery(
         return ValidationResult.error(ConsumptionCoreErrors.requests.attributeQueryMismatch("The provided IdentityAttribute is not of the queried IdentityAttribute value type."));
     }
 
-    if (typeof query.tags !== "undefined" && query.tags.length !== 0) {
+    if (query.tags && query.tags.length !== 0) {
         if (attribute.tags === undefined || attribute.tags.length === 0 || !query.tags.some((aQueriedTag) => attribute.tags!.includes(aQueriedTag))) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.attributeQueryMismatch("The tags of the provided IdentityAttribute do not contain at least one queried tag.")

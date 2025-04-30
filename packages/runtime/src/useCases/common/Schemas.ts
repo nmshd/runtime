@@ -1042,7 +1042,8 @@ export const CanCreateOutgoingRequestRequest: any = {
             "type": "object",
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "Consent"
                 },
                 "@context": {
                     "type": "string"
@@ -5457,7 +5458,8 @@ export const CompleteOutgoingRequestRequest: any = {
             "type": "object",
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "Consent"
                 },
                 "@context": {
                     "type": "string"
@@ -7897,7 +7899,8 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
             "type": "object",
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "Consent"
                 },
                 "@context": {
                     "type": "string"
@@ -9060,7 +9063,8 @@ export const CreateOutgoingRequestRequest: any = {
             "type": "object",
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "Consent"
                 },
                 "@context": {
                     "type": "string"
@@ -12588,7 +12592,8 @@ export const ReceivedIncomingRequestRequest: any = {
             "type": "object",
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "Consent"
                 },
                 "@context": {
                     "type": "string"
@@ -15473,7 +15478,8 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
             "type": "object",
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "Consent"
                 },
                 "@context": {
                     "type": "string"
@@ -17677,7 +17683,8 @@ export const SucceedRelationshipAttributeAndNotifyPeerRequest: any = {
             "type": "object",
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "Consent"
                 },
                 "@context": {
                     "type": "string"
