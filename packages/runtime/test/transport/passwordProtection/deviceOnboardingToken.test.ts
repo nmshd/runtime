@@ -110,9 +110,10 @@ describe("Password-protected DeviceOnboardingTokens", () => {
             expiresAt: CoreDate.utc().add({ minutes: 10 }).toISOString(),
             passwordProtection: { password: "password", passwordLocationIndicator: "invalid-password-location-indicator" as any }
         });
-        expect(createResult.isError).toBe(true);
-        expect(createResult.error.code).toBe("error.runtime.validation.invalidPropertyValue");
-        expect(createResult.error.message).toBe("must be a number from 50 to 99 or one of the following strings: Self, Letter, RegistrationLetter, Email, SMS, Website");
+        expect(createResult).toBeAnError(
+            /^must be a number from 50 to 99 or one of the following strings: Self, Letter, RegistrationLetter, Email, SMS, Website$/,
+            "error.runtime.validation.invalidPropertyValue"
+        );
     });
 
     describe("LoadItemFromTruncatedReferenceUseCase", () => {
