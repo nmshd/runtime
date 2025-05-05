@@ -25,8 +25,8 @@ describe("AccountController", function () {
         await connection.close();
     });
 
-    // eslint-disable-next-line jest/expect-expect
     test("should init a second time", async function () {
-        await account!.init();
+        const promise = account!.init();
+        await expect(promise).resolves.not.toThrow();
     });
 });

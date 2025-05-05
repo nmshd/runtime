@@ -263,23 +263,6 @@ export class SyncController extends TransportController {
         return datawalletModificationsProcessor.changedObjectIdentifiers;
     }
 
-    private async promiseAllWithProgess<T>(promises: Promise<T>[], callback: (percentage: number) => void) {
-        callback(0);
-
-        let processedItemCount = 0;
-        for (const promise of promises) {
-            // eslint-disable-next-line no-loop-func,no-void
-            void promise.then(() => {
-                processedItemCount++;
-
-                const percentage = Math.round((processedItemCount / promises.length) * 100);
-                callback(percentage);
-            });
-        }
-
-        return await Promise.all(promises);
-    }
-
     private async decryptDatawalletModifications(encryptedModifications: BackboneDatawalletModification[]): Promise<DatawalletModification[]> {
         const promises = encryptedModifications.map((m) => this.decryptDatawalletModification(m));
         return await Promise.all(promises);
