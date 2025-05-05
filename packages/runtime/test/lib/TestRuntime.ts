@@ -5,6 +5,7 @@ import { NodeLoggerFactory } from "@js-soft/node-logger";
 import { ConsumptionConfig, ConsumptionController, GenericRequestItemProcessor } from "@nmshd/consumption";
 import { ICoreAddress } from "@nmshd/core-types";
 import { AccountController } from "@nmshd/transport";
+import assert from "assert";
 import { ConsumptionServices, DataViewExpander, ModuleConfiguration, Runtime, RuntimeConfig, RuntimeHealth, RuntimeServices, TransportServices } from "../../src";
 import { AbstractCorrelator } from "../../src/useCases/common/AbstractCorrelator";
 import { MockEventBus } from "./MockEventBus";
@@ -61,8 +62,7 @@ export class TestRuntime extends Runtime {
             const currentAddress = (await this._transportServices.account.getIdentityInfo()).value.address;
 
             const givenAddressString = typeof address === "string" ? address : address.address;
-            // eslint-disable-next-line jest/no-standalone-expect
-            expect(givenAddressString).toStrictEqual(currentAddress);
+            assert(givenAddressString === currentAddress);
         }
 
         return {
