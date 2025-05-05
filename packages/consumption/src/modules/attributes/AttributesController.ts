@@ -225,6 +225,9 @@ export class AttributesController extends ConsumptionBaseController {
 
         const parsedParams = CreateRepositoryAttributeParams.from(params);
 
+        const tagValidationResult = await this.validateTags(parsedParams.content);
+        if (tagValidationResult.isError()) throw tagValidationResult.error;
+
         const trimmedAttribute = {
             ...parsedParams.content.toJSON(),
             value: this.trimAttributeValue(parsedParams.content.value.toJSON() as AttributeValues.Identity.Json)
