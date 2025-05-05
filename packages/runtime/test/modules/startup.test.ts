@@ -27,7 +27,6 @@ describe("Runtime Module Startup", () => {
         await expect(() => runtime.init()).rejects.toThrow("at location '@nmshd/runtime:NotificationModule' is not allowed to be used multiple times, but it has 2 instances.");
     });
 
-    // eslint-disable-next-line jest/expect-expect -- no assertions are needed because it is sufficient that the startup does not throw an error
     test("should allow starting the runtime with two modules that have denyMultipleInstances set to false", async () => {
         const runtime = new TestRuntimeWithCustomModuleLoading(
             {
@@ -42,7 +41,8 @@ describe("Runtime Module Startup", () => {
         );
         runtimes.push(runtime);
 
-        await runtime.init();
+        const value = await runtime.init();
+        expect(value).toBeUndefined();
     });
 });
 
