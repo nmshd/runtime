@@ -345,7 +345,7 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
         }
 
         // iterate modules and check if they are allowed to be loaded multiple times
-        for (const module of this.modules.toArray()) {
+        for (const module of this.modules) {
             if (!(module.constructor as Function & { denyMultipleInstances: boolean }).denyMultipleInstances) return;
 
             const instances = this.modules.toArray().filter((m) => m.constructor === module.constructor);
