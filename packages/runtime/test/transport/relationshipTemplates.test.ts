@@ -192,25 +192,11 @@ describe("RelationshipTemplate Tests", () => {
                 forIdentity: runtimeServices2.address
             });
             expect(createResult).toBeSuccessful();
-            const createTokenResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+            const createTokenResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnRelationshipTemplate({
                 templateId: createResult.value.id,
                 forIdentity: runtimeServices2.address
             });
             expect(createTokenResult).toBeSuccessful();
-        });
-
-        test("create a token QR code for a personalized template", async () => {
-            const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
-                content: emptyRelationshipTemplateContent,
-                expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
-                forIdentity: runtimeServices2.address
-            });
-            expect(createResult).toBeSuccessful();
-            const createQRCodeResult = await runtimeServices1.transport.relationshipTemplates.createTokenQRCodeForOwnTemplate({
-                templateId: createResult.value.id,
-                forIdentity: runtimeServices2.address
-            });
-            expect(createQRCodeResult).toBeSuccessful();
         });
 
         test("error when creating a token for a personalized template with false personalization", async () => {
@@ -220,33 +206,15 @@ describe("RelationshipTemplate Tests", () => {
                 forIdentity: runtimeServices2.address
             });
             expect(createResult).toBeSuccessful();
-            const createQRCodeWithWrongPersonalizationResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+            const createTokenWithWrongPersonalizationResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnRelationshipTemplate({
                 templateId: createResult.value.id,
                 forIdentity: runtimeServices1.address
             });
-            expect(createQRCodeWithWrongPersonalizationResult).toBeAnError(/.*/, "error.runtime.relationshipTemplates.personalizationMustBeInherited");
-            const createQRCodeWithoutPersonalizationResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnTemplate({
+            expect(createTokenWithWrongPersonalizationResult).toBeAnError(/.*/, "error.runtime.relationshipTemplates.personalizationMustBeInherited");
+            const createTokenWithoutPersonalizationResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnRelationshipTemplate({
                 templateId: createResult.value.id
             });
-            expect(createQRCodeWithoutPersonalizationResult).toBeAnError(/.*/, "error.runtime.relationshipTemplates.personalizationMustBeInherited");
-        });
-
-        test("error when creating a token QR code for a personalized template with false personalization", async () => {
-            const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
-                content: emptyRelationshipTemplateContent,
-                expiresAt: DateTime.utc().plus({ minutes: 1 }).toString(),
-                forIdentity: runtimeServices2.address
-            });
-            expect(createResult).toBeSuccessful();
-            const createQRCodeWithWrongPersonalizationResult = await runtimeServices1.transport.relationshipTemplates.createTokenQRCodeForOwnTemplate({
-                templateId: createResult.value.id,
-                forIdentity: runtimeServices1.address
-            });
-            expect(createQRCodeWithWrongPersonalizationResult).toBeAnError(/.*/, "error.runtime.relationshipTemplates.personalizationMustBeInherited");
-            const createQRCodeWithoutPersonalizationResult = await runtimeServices1.transport.relationshipTemplates.createTokenQRCodeForOwnTemplate({
-                templateId: createResult.value.id
-            });
-            expect(createQRCodeWithoutPersonalizationResult).toBeAnError(/.*/, "error.runtime.relationshipTemplates.personalizationMustBeInherited");
+            expect(createTokenWithoutPersonalizationResult).toBeAnError(/.*/, "error.runtime.relationshipTemplates.personalizationMustBeInherited");
         });
     });
 
@@ -368,6 +336,66 @@ describe("RelationshipTemplates query", () => {
                 expectedResult: true,
                 key: "passwordProtection.passwordIsPin",
                 value: "!"
+            });
+        await conditions.executeTests((c, q) => c.relationshipTemplates.getRelationshipTemplates({ query: q, ownerRestriction: OwnerRestriction.Own }));
+    });
+
+    test("query own relationshipTemplates with passwordLocationIndicator that is a number", async () => {
+        const template = (
+            await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                expiresAt: DateTime.utc().plus({ minutes: 10 }).toString(),
+                content: emptyRelationshipTemplateContent,
+                passwordProtection: {
+                    password: "password",
+                    passwordLocationIndicator: 50
+                }
+            })
+        ).value;
+        const conditions = new QueryParamConditions<GetRelationshipTemplatesQuery>(template, runtimeServices1.transport)
+            .addSingleCondition({
+                expectedResult: true,
+                key: "passwordProtection.passwordLocationIndicator",
+                value: "50"
+            })
+            .addSingleCondition({
+                expectedResult: false,
+                key: "passwordProtection.passwordLocationIndicator",
+                value: "0"
+            })
+            .addSingleCondition({
+                expectedResult: false,
+                key: "passwordProtection.passwordLocationIndicator",
+                value: "anotherString"
+            });
+        await conditions.executeTests((c, q) => c.relationshipTemplates.getRelationshipTemplates({ query: q, ownerRestriction: OwnerRestriction.Own }));
+    });
+
+    test("query own relationshipTemplates with passwordLocationIndicator that is a string", async () => {
+        const template = (
+            await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                expiresAt: DateTime.utc().plus({ minutes: 10 }).toString(),
+                content: emptyRelationshipTemplateContent,
+                passwordProtection: {
+                    password: "password",
+                    passwordLocationIndicator: "Letter"
+                }
+            })
+        ).value;
+        const conditions = new QueryParamConditions<GetRelationshipTemplatesQuery>(template, runtimeServices1.transport)
+            .addSingleCondition({
+                expectedResult: true,
+                key: "passwordProtection.passwordLocationIndicator",
+                value: "Letter"
+            })
+            .addSingleCondition({
+                expectedResult: true,
+                key: "passwordProtection.passwordLocationIndicator",
+                value: "2"
+            })
+            .addSingleCondition({
+                expectedResult: false,
+                key: "passwordProtection.passwordLocationIndicator",
+                value: "anotherString"
             });
         await conditions.executeTests((c, q) => c.relationshipTemplates.getRelationshipTemplates({ query: q, ownerRestriction: OwnerRestriction.Own }));
     });

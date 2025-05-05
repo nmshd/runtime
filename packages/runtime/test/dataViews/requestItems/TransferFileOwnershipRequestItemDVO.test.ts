@@ -4,7 +4,6 @@ import {
     ConsumptionServices,
     CreateOutgoingRequestRequest,
     DataViewExpander,
-    DecidableTransferFileOwnershipRequestItemDVO,
     IncomingRequestStatusChangedEvent,
     LocalRequestStatus,
     OutgoingRequestStatusChangedEvent,
@@ -132,8 +131,8 @@ describe("TransferFileOwnershipRequestItemDVO", () => {
         expect(dvo.request.content.items).toHaveLength(1);
         expect(dvo.request.isDecidable).toBe(true);
 
-        const requestItemDVO = dvo.request.content.items[0] as DecidableTransferFileOwnershipRequestItemDVO;
-        expect(requestItemDVO.type).toBe("DecidableTransferFileOwnershipRequestItemDVO");
+        const requestItemDVO = dvo.request.content.items[0] as TransferFileOwnershipRequestItemDVO;
+        expect(requestItemDVO.type).toBe("TransferFileOwnershipRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(true);
         expect(requestItemDVO.fileReference).toBe(truncatedFileReference);
         expect(requestItemDVO.file.type).toBe("FileDVO");

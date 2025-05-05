@@ -1,6 +1,6 @@
 import { Token } from "@nmshd/transport";
 import { TokenDTO } from "../../../types";
-import { RuntimeErrors } from "../../common";
+import { PasswordProtectionMapper, RuntimeErrors } from "../../common";
 
 export class TokenMapper {
     public static toTokenDTO(token: Token, ephemeral: boolean): TokenDTO {
@@ -9,6 +9,7 @@ export class TokenMapper {
         }
 
         const reference = token.toTokenReference();
+
         return {
             id: token.id.toString(),
             createdBy: token.cache.createdBy.toString(),
@@ -19,12 +20,7 @@ export class TokenMapper {
             truncatedReference: reference.truncate(),
             isEphemeral: ephemeral,
             forIdentity: token.cache.forIdentity?.toString(),
-            passwordProtection: token.passwordProtection
-                ? {
-                      password: token.passwordProtection.password,
-                      passwordIsPin: token.passwordProtection.passwordType.startsWith("pin") ? true : undefined
-                  }
-                : undefined
+            passwordProtection: PasswordProtectionMapper.toPasswordProtectionDTO(token.passwordProtection)
         };
     }
 

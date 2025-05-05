@@ -1,6 +1,4 @@
-export * from "./CreateQRCodeForFile";
 export * from "./CreateTokenForFile";
-export * from "./CreateTokenQRCodeForFile";
 export * from "./DeleteFile";
 export * from "./DownloadFile";
 export * from "./FileMapper";

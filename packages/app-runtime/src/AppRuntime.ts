@@ -291,7 +291,7 @@ export class AppRuntime extends Runtime<AppConfig> {
         const accounts = await this._multiAccountController.getAccounts();
 
         for (const account of accounts) {
-            const session = await this.selectAccount(account.id.toString());
+            const session = await this.getOrCreateSession(account.id.toString());
 
             session.accountController.authenticator.clear();
             try {

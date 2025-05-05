@@ -92,7 +92,8 @@ export class RelationshipTemplateController extends TransportController {
             ? PasswordProtection.from({
                   password: parameters.passwordProtection.password,
                   passwordType: parameters.passwordProtection.passwordType,
-                  salt: salt!
+                  salt: salt!,
+                  passwordLocationIndicator: parameters.passwordProtection.passwordLocationIndicator
               })
             : undefined;
 
@@ -287,7 +288,8 @@ export class RelationshipTemplateController extends TransportController {
             ? PasswordProtection.from({
                   salt: reference.passwordProtection.salt,
                   passwordType: reference.passwordProtection.passwordType,
-                  password: password!
+                  password: password!,
+                  passwordLocationIndicator: reference.passwordProtection.passwordLocationIndicator
               })
             : undefined;
 
@@ -300,7 +302,8 @@ export class RelationshipTemplateController extends TransportController {
             ? PasswordProtection.from({
                   salt: tokenContent.passwordProtection.salt,
                   passwordType: tokenContent.passwordProtection.passwordType,
-                  password: password!
+                  password: password!,
+                  passwordLocationIndicator: tokenContent.passwordProtection.passwordLocationIndicator
               })
             : undefined;
 
