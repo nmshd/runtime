@@ -121,9 +121,7 @@ describe("File upload", () => {
 
     test("cannot upload a file with invalid tags", async () => {
         const response = await transportServices1.files.uploadOwnFile(await makeUploadRequest({ tags: ["x+%+valid-tag", "invalid-tag"] }));
-        expect(response.isError).toBe(true);
-
-        // TODO: check error
+        expect(response).toBeAnError("Detected invalidity of the following tags: 'invalid-tag'.", "error.consumption.attributes.invalidTags");
     });
 
     test("cannot upload a file with expiry date in the past", async () => {
