@@ -15,7 +15,6 @@ describe("Runtime Module Startup", () => {
             {
                 transportLibrary: RuntimeServiceProvider.transportConfig,
                 modules: {
-                    // decider module seems to be ts-required
                     decider: { enabled: false, location: "@nmshd/runtime:DeciderModule" },
                     notification: { enabled: true, location: "@nmshd/runtime:NotificationModule" },
                     notification2: { enabled: true, location: "@nmshd/runtime:NotificationModule" }
