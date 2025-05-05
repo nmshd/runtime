@@ -1,4 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
+import { AttributesController } from "@nmshd/consumption";
+import { IdentityAttribute, IdentityFileReference } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
 import { AccountController, FileController } from "@nmshd/transport";
@@ -62,6 +64,7 @@ export class UploadOwnFileUseCase extends UseCase<UploadOwnFileRequest, FileDTO>
     public constructor(
         @Inject private readonly fileController: FileController,
         @Inject private readonly accountController: AccountController,
+        @Inject private readonly attributesController: AttributesController,
         @Inject validator: Validator
     ) {
         super(validator);
@@ -69,6 +72,16 @@ export class UploadOwnFileUseCase extends UseCase<UploadOwnFileRequest, FileDTO>
     }
 
     protected async executeInternal(request: UploadOwnFileRequest): Promise<Result<FileDTO>> {
+        const draftIdentityFileReferenceAttribute = IdentityAttribute.from({
+            value: IdentityFileReference.from({
+                value: ownFile.truncate()
+            }),
+            owner: this.accountController.identity.address.toString(),
+            tags: request.tags
+        });
+        const tagValidationResult = await this.attributesController.validateTags(draftIdentityFileReferenceAttribute);
+        if (tagValidationResult.isError()) return Result.fail({ code: tagValidationResult.error.code, message: tagValidationResult.error.message });
+
         const file = await this.fileController.sendFile({
             buffer: CoreBuffer.from(request.content),
             title: request.title,
