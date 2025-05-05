@@ -116,7 +116,7 @@ export class TestRuntime extends Runtime {
     }
 
     public override async stop(): Promise<void> {
-        if (this.isInitialized) {
+        if (this.isInitialized && this.isStarted) {
             try {
                 await super.stop();
             } catch (e) {
