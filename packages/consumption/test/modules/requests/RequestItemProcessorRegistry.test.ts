@@ -53,10 +53,8 @@ describe("RequestItemProcessorRegistry", function () {
         expect(processor).toBeDefined();
     });
 
-    // The following test is considered as passed when no exception occurs
-    // eslint-disable-next-line jest/expect-expect
     test("registerProcessor can register processors", function () {
-        registry.registerProcessor(TestRequestItem, TestRequestItemProcessor);
+        expect(() => registry.registerProcessor(TestRequestItem, TestRequestItemProcessor)).not.toThrow();
     });
 
     test("registerProcessorForType throws exception when registering multiple processors for the same Request Item type", function () {
