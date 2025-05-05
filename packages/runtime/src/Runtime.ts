@@ -352,7 +352,7 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
             if (instances.length === 1) continue;
 
             throw new Error(
-                `The Module '${module.displayName}' at location '${module.configuration.location}' is not allowed to be used multiple times, but has ${instances.length} instances.`
+                `The Module '${module.displayName}' at location '${module.configuration.location}' is not allowed to be used multiple times, but it has ${instances.length} instances.`
             );
         }
 
