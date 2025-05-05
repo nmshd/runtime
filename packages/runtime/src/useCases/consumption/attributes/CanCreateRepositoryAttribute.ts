@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController } from "@nmshd/consumption";
-import { AttributeValues, IdentityAttribute } from "@nmshd/content";
+import { AttributeValues } from "@nmshd/content";
 import { AccountController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationResult } from "../../common";
@@ -59,12 +59,10 @@ export class CanCreateRepositoryAttributeUseCase extends UseCase<CanCreateReposi
             return Result.ok({ isSuccess: false, code: error.code, message: error.message });
         }
 
-        const draftIdentityAttribute = IdentityAttribute.from({
-            owner: this.accountController.identity.address.toString(),
-            ...request.content
-        });
-        const tagValidationResult = await this.attributesController.validateTags(draftIdentityAttribute);
-        if (tagValidationResult.isError()) return Result.ok({ isSuccess: false, code: tagValidationResult.error.code, message: tagValidationResult.error.message });
+        if (request.content.tags && request.content.tags.length > 0) {
+            const tagValidationResult = await this.attributesController.validateTagsForType(request.content.tags, request.content.value["@type"]);
+            if (tagValidationResult.isError()) return Result.ok({ isSuccess: false, code: tagValidationResult.error.code, message: tagValidationResult.error.message });
+        }
 
         return Result.ok({ isSuccess: true });
     }

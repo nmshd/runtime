@@ -225,7 +225,7 @@ export class AttributesController extends ConsumptionBaseController {
 
         const parsedParams = CreateRepositoryAttributeParams.from(params);
 
-        const tagValidationResult = await this.validateTags(parsedParams.content);
+        const tagValidationResult = await this.validateTagsOfAttribute(parsedParams.content);
         if (tagValidationResult.isError()) throw tagValidationResult.error;
 
         const trimmedAttribute = {
@@ -346,7 +346,7 @@ export class AttributesController extends ConsumptionBaseController {
 
     public async createSharedLocalAttribute(params: ICreateSharedLocalAttributeParams): Promise<LocalAttribute> {
         const parsedParams = CreateSharedLocalAttributeParams.from(params);
-        const tagValidationResult = await this.validateTags(parsedParams.content);
+        const tagValidationResult = await this.validateTagsOfAttribute(parsedParams.content);
         if (tagValidationResult.isError()) throw tagValidationResult.error;
 
         const shareInfo = LocalAttributeShareInfo.from({
@@ -943,7 +943,7 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successorIsNotAValidAttribute(e));
         }
 
-        const tagValidationResult = await this.validateTags(parsedSuccessorParams.content);
+        const tagValidationResult = await this.validateTagsOfAttribute(parsedSuccessorParams.content);
         if (tagValidationResult.isError()) throw tagValidationResult.error;
 
         const successor = LocalAttribute.from({
@@ -1438,14 +1438,19 @@ export class AttributesController extends ConsumptionBaseController {
         });
     }
 
-    public async validateTags(attribute: IdentityAttribute | RelationshipAttribute): Promise<ValidationResult> {
+    public async validateTagsOfAttribute(attribute: IdentityAttribute | RelationshipAttribute): Promise<ValidationResult> {
         if (attribute instanceof RelationshipAttribute) return ValidationResult.success();
         if (!attribute.tags || attribute.tags.length === 0) return ValidationResult.success();
 
+        return await this.validateTagsForType(attribute.tags, attribute.toJSON().value["@type"]);
+    }
+
+    public async validateTagsForType(tags: string[], attributeValueType: string): Promise<ValidationResult> {
         const tagCollection = await this.getAttributeTagCollection();
+        const tagsForAttributeValueType = tagCollection.tagsForAttributeValueTypes[attributeValueType];
         const invalidTags = [];
-        for (const tag of attribute.tags) {
-            if (!this.isValidTag(tag, tagCollection.tagsForAttributeValueTypes[attribute.toJSON().value["@type"]])) {
+        for (const tag of tags) {
+            if (!this.isValidTag(tag, tagsForAttributeValueType)) {
                 invalidTags.push(tag);
             }
         }

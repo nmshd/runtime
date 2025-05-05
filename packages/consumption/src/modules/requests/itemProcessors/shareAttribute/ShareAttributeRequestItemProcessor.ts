@@ -160,7 +160,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             );
         }
 
-        const tagValidationResult = await this.consumptionController.attributes.validateTags(requestItem.attribute);
+        const tagValidationResult = await this.consumptionController.attributes.validateTagsOfAttribute(requestItem.attribute);
         if (tagValidationResult.isError()) {
             return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem(tagValidationResult.error.message));
         }
@@ -183,7 +183,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
     }
 
     public override async canAccept(requestItem: ShareAttributeRequestItem, _params: AcceptRequestItemParametersJSON, _requestInfo: LocalRequestInfo): Promise<ValidationResult> {
-        const tagValidationResult = await this.consumptionController.attributes.validateTags(requestItem.attribute);
+        const tagValidationResult = await this.consumptionController.attributes.validateTagsOfAttribute(requestItem.attribute);
         if (tagValidationResult.isError()) {
             return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem(tagValidationResult.error.message));
         }

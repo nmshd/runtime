@@ -77,7 +77,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             );
         }
 
-        const tagValidationResult = await this.consumptionController.attributes.validateTags(attribute);
+        const tagValidationResult = await this.consumptionController.attributes.validateTagsOfAttribute(attribute);
         if (tagValidationResult.isError()) {
             return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem(tagValidationResult.error.message));
         }
@@ -217,7 +217,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             }
         }
 
-        const tagValidationResult = await this.consumptionController.attributes.validateTags(attribute);
+        const tagValidationResult = await this.consumptionController.attributes.validateTagsOfAttribute(attribute);
         if (tagValidationResult.isError()) {
             return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters(tagValidationResult.error.message));
         }
