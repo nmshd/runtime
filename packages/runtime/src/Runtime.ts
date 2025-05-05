@@ -351,8 +351,9 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
             const instances = this.modules.toArray().filter((m) => m.constructor === module.constructor);
             if (instances.length === 1) continue;
 
-            // TODO: log the keys of the modules that cause the conflict
-            throw new Error(`Module ${module.displayName} is not allowed to be used multiple times, but has ${instances.length} instances.`);
+            throw new Error(
+                `The Module '${module.displayName}' at location '${module.configuration.location}' is not allowed to be used multiple times, but has ${instances.length} instances.`
+            );
         }
 
         this.eventBus.publish(new ModulesLoadedEvent());
