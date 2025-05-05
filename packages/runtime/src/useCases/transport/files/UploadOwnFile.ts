@@ -1,6 +1,5 @@
-import { Result } from "@js-soft/ts-utils";
+import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { AttributesController } from "@nmshd/consumption";
-import { IdentityAttribute, IdentityFileReference } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
 import { AccountController, FileController } from "@nmshd/transport";
@@ -72,15 +71,11 @@ export class UploadOwnFileUseCase extends UseCase<UploadOwnFileRequest, FileDTO>
     }
 
     protected async executeInternal(request: UploadOwnFileRequest): Promise<Result<FileDTO>> {
-        const draftIdentityFileReferenceAttribute = IdentityAttribute.from({
-            value: IdentityFileReference.from({
-                value: ownFile.truncate()
-            }),
-            owner: this.accountController.identity.address.toString(),
-            tags: request.tags
-        });
-        const tagValidationResult = await this.attributesController.validateTags(draftIdentityFileReferenceAttribute);
-        if (tagValidationResult.isError()) return Result.fail({ code: tagValidationResult.error.code, message: tagValidationResult.error.message });
+        if (request.tags && request.tags.length > 0) {
+            const tagValidationResult = await this.attributesController.validateTagsForType(request.tags, "IdentityFileReference");
+            // TODO: error
+            if (tagValidationResult.isError()) return Result.fail(new ApplicationError(tagValidationResult.error.code, tagValidationResult.error.message));
+        }
 
         const file = await this.fileController.sendFile({
             buffer: CoreBuffer.from(request.content),

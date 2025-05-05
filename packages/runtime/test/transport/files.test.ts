@@ -113,10 +113,17 @@ describe("File upload", () => {
     });
 
     test("can upload a file with tags", async () => {
-        const response = await transportServices1.files.uploadOwnFile(await makeUploadRequest({ tags: ["tag1", "tag2"] }));
+        const response = await transportServices1.files.uploadOwnFile(await makeUploadRequest({ tags: ["x+%+tag1", "x+%+tag2"] }));
         expect(response).toBeSuccessful();
 
-        expect(response.value.tags).toStrictEqual(["tag1", "tag2"]);
+        expect(response.value.tags).toStrictEqual(["x+%+tag1", "x+%+tag2"]);
+    });
+
+    test("cannot upload a file with invalid tags", async () => {
+        const response = await transportServices1.files.uploadOwnFile(await makeUploadRequest({ tags: ["x+%+valid-tag", "invalid-tag"] }));
+        expect(response.isError).toBe(true);
+
+        // TODO: check error
     });
 
     test("cannot upload a file with expiry date in the past", async () => {
