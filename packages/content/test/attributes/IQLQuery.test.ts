@@ -16,8 +16,7 @@ describe("IQLQuery", function () {
             IQLQuery.from({
                 queryString: q
             });
-            // eslint-disable-next-line jest/require-to-throw-message
-        }).toThrow();
+        }).toThrow("invalid IQL query at character offset");
     });
 
     test("can be created with creation hints", function () {

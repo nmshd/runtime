@@ -194,10 +194,8 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const result = await processor.canCreateOutgoingRequestItem(requestItem, request, recipient);
 
             if (testParams.result === "success") {
-                // eslint-disable-next-line jest/no-conditional-expect
                 expect(result).successfulValidationResult();
             } else {
-                // eslint-disable-next-line jest/no-conditional-expect
                 expect(result).errorValidationResult(testParams.expectedError);
             }
         });

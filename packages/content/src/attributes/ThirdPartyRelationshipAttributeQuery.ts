@@ -40,7 +40,7 @@ export class ThirdPartyRelationshipAttributeQuery extends AbstractAttributeQuery
     public thirdParty: CoreAddress[];
 
     protected static override preFrom(value: any): any {
-        if (typeof value.thirdParty === "string" || "address" in value.thirdParty) {
+        if (typeof value.thirdParty === "string" || (typeof value.thirdParty === "object" && value.thirdParty !== null && "address" in value.thirdParty)) {
             value.thirdParty = [CoreAddress.from(value.thirdParty)];
         }
 
