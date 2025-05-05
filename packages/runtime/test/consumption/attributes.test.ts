@@ -1737,6 +1737,30 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
         expect(result).toBeAnError(/.*/, "error.consumption.attributes.predecessorDoesNotExist");
     });
 
+    test("should throw if successor doesn't meet validation criteria", async () => {
+        const createAttributeRequest: CreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "PhoneNumber",
+                    value: "0123456789"
+                }
+            }
+        };
+        const predecessor = (await services1.consumption.attributes.createRepositoryAttribute(createAttributeRequest)).value;
+
+        const succeedAttributeRequest: SucceedRepositoryAttributeRequest = {
+            predecessorId: predecessor.id.toString(),
+            successorContent: {
+                value: {
+                    "@type": "PhoneNumber",
+                    value: ""
+                }
+            }
+        };
+        const result = await services1.consumption.attributes.succeedRepositoryAttribute(succeedAttributeRequest);
+        expect(result).toBeAnError("Value is shorter than 3 characters", "error.consumption.attributes.successorIsNotAValidAttribute");
+    });
+
     test("validation should catch attempts of changing the value type", async () => {
         const createAttributeRequest: CreateRepositoryAttributeRequest = {
             content: {
