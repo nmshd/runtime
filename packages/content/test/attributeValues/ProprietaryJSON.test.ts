@@ -2,11 +2,7 @@ import { ProprietaryJSON } from "../../src";
 
 describe("ProprietaryJSON", function () {
     test.each([
-        // eslint-disable-next-line no-new-object
-        new Object(),
         {},
-        // eslint-disable-next-line no-array-constructor
-        new Array(),
         [],
         [1, 2, 3],
         ["1", "2", "3"],
