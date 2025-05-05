@@ -24,7 +24,7 @@ describe("Runtime Module Startup", () => {
         );
         runtimes.push(runtime);
 
-        await expect(() => runtime.init()).rejects.toThrow("at location '@nmshd/runtime:NotificationModule' is not allowed to be used multiple times, but it has 2 instances.");
+        await expect(runtime.init()).rejects.toThrow("at location '@nmshd/runtime:NotificationModule' is not allowed to be used multiple times, but it has 2 instances.");
     });
 
     test("should allow starting the runtime with two modules that have denyMultipleInstances set to false", async () => {
@@ -41,8 +41,7 @@ describe("Runtime Module Startup", () => {
         );
         runtimes.push(runtime);
 
-        const value = await runtime.init();
-        expect(value).toBeUndefined();
+        await expect(runtime.init()).resolves.not.toThrow();
     });
 });
 
