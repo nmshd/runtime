@@ -42,6 +42,8 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
             );
         }
 
+        // TODO: validate tags
+
         return ValidationResult.success();
     }
 
@@ -84,6 +86,8 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
                 )
             );
         }
+
+        // TODO: validate tags
 
         return ValidationResult.success();
     }
