@@ -10,7 +10,7 @@ describe("Runtime Module Startup", () => {
         }
     });
 
-    test("should prohibit starting the runtime with two modules that has denyMultipleInstances set to true", async () => {
+    test("should prohibit starting the runtime with two modules that have denyMultipleInstances set to true", async () => {
         const runtime = new TestRuntime(
             {
                 transportLibrary: RuntimeServiceProvider.transportConfig,
@@ -28,7 +28,7 @@ describe("Runtime Module Startup", () => {
     });
 
     // eslint-disable-next-line jest/expect-expect -- no assertions are needed because it is sufficient that the startup does not throw an error
-    test("should allow starting the runtime with two modules that has denyMultipleInstances set to false", async () => {
+    test("should allow starting the runtime with two modules that have denyMultipleInstances set to false", async () => {
         const runtime = new TestRuntimeWithCustomModuleLoading(
             {
                 transportLibrary: RuntimeServiceProvider.transportConfig,
