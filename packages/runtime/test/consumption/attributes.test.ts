@@ -912,6 +912,26 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
         const result = await services1.consumption.attributes.canCreateRepositoryAttribute(canCreateAttributeWithoutOptionalPropertyRequest);
         expect(result.value.isSuccess).toBe(true);
     });
+
+    test("should not allow to create a RepositoryAttribute with invalid tags", async () => {
+        const canCreateAttributeRequest: CanCreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "aGivenName"
+                },
+                tags: ["x+%+valid-tag", "invalid-tag"]
+            }
+        };
+
+        const result = await services1.consumption.attributes.canCreateRepositoryAttribute(canCreateAttributeRequest);
+
+        assert(!result.value.isSuccess);
+
+        expect(result.value.isSuccess).toBe(false);
+        expect(result.value.message).toBe("Detected invalidity of the following tags: 'invalid-tag'.");
+        expect(result.value.code).toBe("error.consumption.attributes.invalidTags");
+    });
 });
 
 describe(CreateRepositoryAttributeUseCase.name, () => {
