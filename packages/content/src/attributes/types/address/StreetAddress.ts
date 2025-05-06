@@ -1,7 +1,7 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
+import { COUNTRIES_ALPHA2_TO_ENGLISH_NAME } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
 import { AbstractAttributeValue } from "../../AbstractAttributeValue";
-import { COUNTRIES_ALPHA2_TO_ENGLISH_NAME } from "../../constants";
 import { RenderHints, ValueHints } from "../../hints";
 import { AbstractAddress, AbstractAddressJSON, IAbstractAddress } from "./AbstractAddress";
 import { City, ICity } from "./City";
