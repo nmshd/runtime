@@ -50,6 +50,8 @@ import {
     NotifyPeerAboutRepositoryAttributeSuccessionRequest,
     NotifyPeerAboutRepositoryAttributeSuccessionResponse,
     NotifyPeerAboutRepositoryAttributeSuccessionUseCase,
+    SetDeletionInfoOfAttributeRequest,
+    SetDeletionInfoOfAttributeUseCase,
     ShareRepositoryAttributeRequest,
     ShareRepositoryAttributeUseCase,
     SucceedRelationshipAttributeAndNotifyPeerRequest,
@@ -90,7 +92,8 @@ export class AttributesFacade {
         @Inject private readonly deleteThirdPartyRelationshipAttributeAndNotifyPeerUseCase: DeleteThirdPartyRelationshipAttributeAndNotifyPeerUseCase,
         @Inject private readonly deleteRepositoryAttributeUseCase: DeleteRepositoryAttributeUseCase,
         @Inject private readonly deleteSharedAttributesForRejectedOrRevokedRelationshipUseCase: DeleteSharedAttributesForRejectedOrRevokedRelationshipUseCase,
-        @Inject private readonly getAttributeTagCollectionUseCase: GetAttributeTagCollectionUseCase
+        @Inject private readonly getAttributeTagCollectionUseCase: GetAttributeTagCollectionUseCase,
+        @Inject private readonly setDeletionInfoOfAttributeUseCase: SetDeletionInfoOfAttributeUseCase
     ) {}
 
     public async canCreateRepositoryAttribute(request: CanCreateRepositoryAttributeRequest): Promise<Result<CanCreateRepositoryAttributeResponse>> {
@@ -212,5 +215,9 @@ export class AttributesFacade {
 
     public async getAttributeTagCollection(): Promise<Result<AttributeTagCollectionDTO>> {
         return await this.getAttributeTagCollectionUseCase.execute();
+    }
+
+    public async setDeletionInfoOfAttribute(request: SetDeletionInfoOfAttributeRequest): Promise<Result<LocalAttributeDTO>> {
+        return await this.setDeletionInfoOfAttributeUseCase.execute(request);
     }
 }
