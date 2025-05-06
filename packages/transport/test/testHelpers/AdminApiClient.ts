@@ -1,6 +1,7 @@
 import { CoreId } from "@nmshd/core-types";
 import axios, { Axios } from "axios";
 import { AccountController, IdentityDeletionProcess, IdentityDeletionProcessStatus } from "../../src";
+import { AnnouncementSeverity } from "../../src/modules/announcements/data/Announcement";
 import { TestUtil } from "./TestUtil";
 
 export class AdminApiClient {
@@ -51,4 +52,30 @@ export class AdminApiClient {
 
         return (await account.identityDeletionProcess.getIdentityDeletionProcess(identityDeletionProcessId.toString()))!;
     }
+
+    public static async createAnnouncement(request: CreateAnnouncementRequest): Promise<CreateAnnouncementResponse> {
+        const adminApiClient = await AdminApiClient.getBackboneAdminApiClient();
+        const response = await adminApiClient.post<{ result: CreateAnnouncementResponse }>(`/api/v1/Announcements`, request);
+        if (response.status !== 201) {
+            throw new Error(`Failed to create announcement: ${response.statusText}`);
+        }
+        return response.data.result;
+    }
+}
+
+export interface CreateAnnouncementRequest {
+    severity: AnnouncementSeverity;
+    texts: CreateAnnouncementRequestText[];
+    expiresAt?: string;
+    recipients?: string[];
+}
+
+export interface CreateAnnouncementRequestText {
+    language: string;
+    title: string;
+    body: string;
+}
+
+export interface CreateAnnouncementResponse {
+    id: string;
 }
