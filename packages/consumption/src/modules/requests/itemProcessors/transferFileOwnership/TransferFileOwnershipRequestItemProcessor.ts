@@ -20,7 +20,7 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
     public override async canCreateOutgoingRequestItem(requestItem: TransferFileOwnershipRequestItem, _request: Request, _recipient?: CoreAddress): Promise<ValidationResult> {
         const foundFile = await this.accountController.files.getFile(CoreId.from(requestItem.fileReference.id));
 
-        if (typeof foundFile === "undefined") {
+        if (!foundFile) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidRequestItem(`The File with the given ID '${requestItem.fileReference.id.toString()}' could not be found.`)
             );

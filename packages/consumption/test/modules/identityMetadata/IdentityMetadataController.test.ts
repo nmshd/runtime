@@ -2,6 +2,7 @@ import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { JSONWrapper } from "@js-soft/ts-serval";
 import { CoreAddress } from "@nmshd/core-types";
 import { AccountController, Transport } from "@nmshd/transport";
+import assert from "assert";
 import { ConsumptionController } from "../../../src";
 import { TestUtil } from "../../core/TestUtil";
 import { MockEventBus } from "../MockEventBus";
@@ -33,8 +34,7 @@ describe("IdentityMetadataController", function () {
     afterEach(async function () {
         await consumptionController.identityMetadata["identityMetadata"]["parent"].delete({});
         const count = await consumptionController.identityMetadata["identityMetadata"].count();
-        // eslint-disable-next-line jest/no-standalone-expect
-        expect(count).toBe(0);
+        assert(count === 0);
     });
 
     test("should create an identity metadata", async function () {

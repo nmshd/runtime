@@ -96,7 +96,7 @@
         "@types/uuid": "^10.0.0",
         "correlation-id": "^5.2.0",
         "expect": "^29.7.0",
-        "testcontainers": "^10.24.2",
+        "testcontainers": "^10.25.0",
         "ts-mockito": "^2.6.1"
     },
     "publishConfig": {

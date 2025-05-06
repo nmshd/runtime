@@ -101,8 +101,8 @@ export class SSEModule extends AppRuntimeModule<SSEModuleConfiguration> {
     }
 
     public override stop(): void {
-        for (const eventsource of Object.values(this.eventSource).filter((eventsource) => typeof eventsource !== "undefined")) {
-            eventsource.close();
+        for (const eventsource of Object.values(this.eventSource)) {
+            eventsource?.close();
         }
     }
 }

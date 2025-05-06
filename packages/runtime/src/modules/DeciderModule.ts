@@ -302,9 +302,10 @@ async function checkCompatibility(
 
     for (const property in requestConfigElement) {
         const unformattedRequestConfigProperty = requestConfigElement[property as keyof RequestConfig];
-        if (typeof unformattedRequestConfigProperty === "undefined") {
+        if (unformattedRequestConfigProperty === undefined) {
             continue;
         }
+
         const requestConfigProperty = makeObjectsToStrings(unformattedRequestConfigProperty);
 
         if (property === "relationshipAlreadyExists") {
@@ -321,7 +322,7 @@ async function checkCompatibility(
         }
 
         const unformattedRequestProperty = getNestedProperty(requestOrRequestItem, property);
-        if (typeof unformattedRequestProperty === "undefined") {
+        if (unformattedRequestProperty === undefined) {
             compatible = false;
             break;
         }

@@ -245,11 +245,9 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), CoreAddress.from("recipient"));
 
                 if (testParams.expectedOutput.hasOwnProperty("success")) {
-                    // eslint-disable-next-line jest/no-conditional-expect
                     expect(result).successfulValidationResult();
                 } else {
                     const error = testParams.expectedOutput as { errorCode?: string; errorMessage?: string };
-                    // eslint-disable-next-line jest/no-conditional-expect
                     expect(result).errorValidationResult({
                         code: error.errorCode,
                         message: error.errorMessage

@@ -101,9 +101,9 @@ describe("Requests", () => {
             expect((sLocalRequest.content.items[0] as TestRequestItemJSON).mustBeAccepted).toBe(false);
         });
 
-        // eslint-disable-next-line jest/expect-expect
         test("sender: send the outgoing Request via Message", async () => {
-            await sendMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
+            const promise = sendMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
+            await expect(promise).resolves.not.toThrow();
         });
 
         test("sender: mark the outgoing Request as sent", async () => {
