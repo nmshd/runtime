@@ -22,5 +22,7 @@ export type RelationshipTemplateDTO = {
       }
     | {
           isOwn: false;
+          truncatedReference: undefined;
+          url: undefined;
       }
 );

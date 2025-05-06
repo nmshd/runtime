@@ -9,7 +9,6 @@ export type TokenDTO = {
     expiresAt: string;
     forIdentity?: string;
     passwordProtection?: PasswordProtectionDTO;
-
     isEphemeral: boolean;
 } & (
     | {
@@ -19,5 +18,7 @@ export type TokenDTO = {
       }
     | {
           isOwn: false;
+          truncatedReference: undefined;
+          url: undefined;
       }
 );

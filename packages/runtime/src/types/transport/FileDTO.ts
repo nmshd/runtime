@@ -18,5 +18,7 @@ export type FileDTO = {
       }
     | {
           isOwn: false;
+          truncatedReference: undefined;
+          url: undefined;
       }
 );

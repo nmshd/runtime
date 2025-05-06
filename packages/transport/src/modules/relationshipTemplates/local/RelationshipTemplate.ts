@@ -54,7 +54,7 @@ export class RelationshipTemplate extends CoreSynchronizable implements IRelatio
         return this.fromAny(value);
     }
 
-    public toRelationshipTemplateReference(backboneBaseUrl: string): RelationshipTemplateReference {
+    public toRelationshipTemplateReference(backboneBaseUrl?: string): RelationshipTemplateReference {
         return RelationshipTemplateReference.from({
             id: this.id,
             backboneBaseUrl,
@@ -64,7 +64,7 @@ export class RelationshipTemplate extends CoreSynchronizable implements IRelatio
         });
     }
 
-    public truncate(backboneBaseUrl: string): string {
+    public truncate(backboneBaseUrl?: string): string {
         const reference = this.toRelationshipTemplateReference(backboneBaseUrl);
         return reference.truncate();
     }

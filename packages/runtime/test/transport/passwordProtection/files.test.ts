@@ -27,7 +27,7 @@ describe("Password-protected tokens for files", () => {
         expect(createResult.value.passwordProtection?.password).toBe("password");
         expect(createResult.value.passwordProtection?.passwordIsPin).toBeUndefined();
 
-        const loadResult = await runtimeServices2.transport.files.getOrLoadFile({ reference: createResult.value.truncatedReference, password: "password" });
+        const loadResult = await runtimeServices2.transport.files.getOrLoadFile({ reference: createResult.value.truncatedReference!, password: "password" });
         expect(loadResult).toBeSuccessful();
     });
 
@@ -40,7 +40,7 @@ describe("Password-protected tokens for files", () => {
         expect(createResult.value.passwordProtection?.password).toBe("1234");
         expect(createResult.value.passwordProtection?.passwordIsPin).toBe(true);
 
-        const loadResult = await runtimeServices2.transport.files.getOrLoadFile({ reference: createResult.value.truncatedReference, password: "1234" });
+        const loadResult = await runtimeServices2.transport.files.getOrLoadFile({ reference: createResult.value.truncatedReference!, password: "1234" });
         expect(loadResult).toBeSuccessful();
     });
 
@@ -60,7 +60,7 @@ describe("Password-protected tokens for files", () => {
         });
         expect(createResult).toBeSuccessful();
 
-        const loadResult = await runtimeServices2.transport.files.getOrLoadFile({ reference: createResult.value.truncatedReference, password: "wrong-password" });
+        const loadResult = await runtimeServices2.transport.files.getOrLoadFile({ reference: createResult.value.truncatedReference!, password: "wrong-password" });
         expect(loadResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
     });
 
@@ -71,7 +71,7 @@ describe("Password-protected tokens for files", () => {
         });
         expect(createResult).toBeSuccessful();
 
-        const loadResult = await runtimeServices2.transport.files.getOrLoadFile({ reference: createResult.value.truncatedReference });
+        const loadResult = await runtimeServices2.transport.files.getOrLoadFile({ reference: createResult.value.truncatedReference! });
         expect(loadResult).toBeAnError(/.*/, "error.transport.noPasswordProvided");
     });
 
@@ -144,7 +144,7 @@ describe("Password-protected tokens for files", () => {
                 fileId,
                 passwordProtection: { password: "password" }
             });
-            const loadResult = await runtimeServices2.transport.account.loadItemFromTruncatedReference({ reference: createResult.value.truncatedReference, password: "password" });
+            const loadResult = await runtimeServices2.transport.account.loadItemFromTruncatedReference({ reference: createResult.value.truncatedReference!, password: "password" });
             expect(loadResult).toBeSuccessful();
             expect(loadResult.value.type).toBe("File");
         });
@@ -155,7 +155,7 @@ describe("Password-protected tokens for files", () => {
                 passwordProtection: { password: "password" }
             });
             const loadResult = await runtimeServices2.transport.account.loadItemFromTruncatedReference({
-                reference: createResult.value.truncatedReference,
+                reference: createResult.value.truncatedReference!,
                 password: "wrong-password"
             });
             expect(loadResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
@@ -166,7 +166,7 @@ describe("Password-protected tokens for files", () => {
                 fileId,
                 passwordProtection: { password: "password" }
             });
-            const loadResult = await runtimeServices2.transport.account.loadItemFromTruncatedReference({ reference: createResult.value.truncatedReference });
+            const loadResult = await runtimeServices2.transport.account.loadItemFromTruncatedReference({ reference: createResult.value.truncatedReference! });
             expect(loadResult).toBeAnError(/.*/, "error.transport.noPasswordProvided");
         });
     });

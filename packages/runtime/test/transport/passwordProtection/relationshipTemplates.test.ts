@@ -25,11 +25,11 @@ describe("Password-protected templates", () => {
         expect(createResult).toBeSuccessful();
         expect(createResult.value.passwordProtection!.password).toBe("password");
         expect(createResult.value.passwordProtection!.passwordIsPin).toBeUndefined();
-        const reference = RelationshipTemplateReference.from(createResult.value.truncatedReference);
+        const reference = RelationshipTemplateReference.from(createResult.value.truncatedReference!);
         expect(reference.passwordProtection!.passwordType).toBe("pw");
 
         const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
-            reference: createResult.value.truncatedReference,
+            reference: createResult.value.truncatedReference!,
             password: "password"
         });
         expect(loadResult).toBeSuccessful();
@@ -49,11 +49,11 @@ describe("Password-protected templates", () => {
         expect(createResult).toBeSuccessful();
         expect(createResult.value.passwordProtection!.password).toBe("1234");
         expect(createResult.value.passwordProtection!.passwordIsPin).toBe(true);
-        const reference = RelationshipTemplateReference.from(createResult.value.truncatedReference);
+        const reference = RelationshipTemplateReference.from(createResult.value.truncatedReference!);
         expect(reference.passwordProtection!.passwordType).toBe("pin4");
 
         const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
-            reference: createResult.value.truncatedReference,
+            reference: createResult.value.truncatedReference!,
             password: "1234"
         });
         expect(loadResult).toBeSuccessful();
@@ -70,7 +70,7 @@ describe("Password-protected templates", () => {
         expect(createResult).toBeSuccessful();
         expect(createResult.value.passwordProtection!.passwordLocationIndicator).toBe(50);
 
-        const reference = RelationshipTemplateReference.from(createResult.value.truncatedReference);
+        const reference = RelationshipTemplateReference.from(createResult.value.truncatedReference!);
         expect(reference.passwordProtection!.passwordLocationIndicator).toBe(50);
     });
 
@@ -85,7 +85,7 @@ describe("Password-protected templates", () => {
         expect(createResult).toBeSuccessful();
 
         const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
-            reference: createResult.value.truncatedReference,
+            reference: createResult.value.truncatedReference!,
             password: "wrong-password"
         });
         expect(loadResult).toBeAnError("RelationshipTemplate not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
@@ -102,7 +102,7 @@ describe("Password-protected templates", () => {
         expect(createResult).toBeSuccessful();
 
         const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
-            reference: createResult.value.truncatedReference
+            reference: createResult.value.truncatedReference!
         });
         expect(loadResult).toBeAnError(/.*/, "error.transport.noPasswordProvided");
     });
@@ -192,7 +192,7 @@ describe("Password-protected templates", () => {
             });
 
             const result = await runtimeServices2.transport.account.loadItemFromTruncatedReference({
-                reference: createResult.value.truncatedReference,
+                reference: createResult.value.truncatedReference!,
                 password: "password"
             });
             expect(result).toBeSuccessful();
@@ -209,7 +209,7 @@ describe("Password-protected templates", () => {
             });
 
             const result = await runtimeServices2.transport.account.loadItemFromTruncatedReference({
-                reference: createResult.value.truncatedReference,
+                reference: createResult.value.truncatedReference!,
                 password: "wrong-password"
             });
             expect(result).toBeAnError(/.*/, "error.runtime.recordNotFound");
@@ -225,7 +225,7 @@ describe("Password-protected templates", () => {
             });
 
             const result = await runtimeServices2.transport.account.loadItemFromTruncatedReference({
-                reference: createResult.value.truncatedReference
+                reference: createResult.value.truncatedReference!
             });
             expect(result).toBeAnError(/.*/, "error.transport.noPasswordProvided");
         });
@@ -244,7 +244,7 @@ describe("Password-protected templates via tokens", () => {
         });
 
         const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
-            reference: createResult.value.truncatedReference,
+            reference: createResult.value.truncatedReference!,
             password: "password"
         });
         expect(loadResult).toBeSuccessful();
@@ -264,7 +264,7 @@ describe("Password-protected templates via tokens", () => {
         });
 
         const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
-            reference: createResult.value.truncatedReference,
+            reference: createResult.value.truncatedReference!,
             password: "1234"
         });
         expect(loadResult).toBeSuccessful();
@@ -283,7 +283,7 @@ describe("Password-protected templates via tokens", () => {
         expect(createResult).toBeSuccessful();
         expect(createResult.value.passwordProtection!.passwordLocationIndicator).toBe(50);
 
-        const reference = TokenReference.from(createResult.value.truncatedReference);
+        const reference = TokenReference.from(createResult.value.truncatedReference!);
         expect(reference.passwordProtection!.passwordLocationIndicator).toBe(50);
     });
 
@@ -298,7 +298,7 @@ describe("Password-protected templates via tokens", () => {
         });
 
         const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
-            reference: createResult.value.truncatedReference,
+            reference: createResult.value.truncatedReference!,
             password: "wrong-password"
         });
         expect(loadResult).toBeAnError("Token not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
@@ -315,7 +315,7 @@ describe("Password-protected templates via tokens", () => {
         });
 
         const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
-            reference: createResult.value.truncatedReference
+            reference: createResult.value.truncatedReference!
         });
         expect(loadResult).toBeAnError(/.*/, "error.transport.noPasswordProvided");
     });
@@ -335,7 +335,7 @@ describe("Password-protected templates via tokens", () => {
             const template = await createTemplate(runtimeServices1.transport, undefined, { password: "password" });
 
             const result = await runtimeServices2.transport.account.loadItemFromTruncatedReference({
-                reference: template.truncatedReference,
+                reference: template.truncatedReference!,
                 password: "password"
             });
             expect(result).toBeSuccessful();
@@ -346,7 +346,7 @@ describe("Password-protected templates via tokens", () => {
             const template = await createTemplate(runtimeServices1.transport, undefined, { password: "password" });
 
             const result = await runtimeServices2.transport.account.loadItemFromTruncatedReference({
-                reference: template.truncatedReference,
+                reference: template.truncatedReference!,
                 password: "wrong-password"
             });
             expect(result).toBeAnError(/.*/, "error.runtime.recordNotFound");
@@ -356,7 +356,7 @@ describe("Password-protected templates via tokens", () => {
             const template = await createTemplate(runtimeServices1.transport, undefined, { password: "password" });
 
             const result = await runtimeServices2.transport.account.loadItemFromTruncatedReference({
-                reference: template.truncatedReference
+                reference: template.truncatedReference!
             });
             expect(result).toBeAnError(/.*/, "error.transport.noPasswordProvided");
         });
@@ -380,7 +380,7 @@ describe("Password-protected tokens for unprotected templates", () => {
         expect(createResult.value.passwordProtection?.passwordIsPin).toBeUndefined();
 
         const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
-            reference: createResult.value.truncatedReference,
+            reference: createResult.value.truncatedReference!,
             password: "password"
         });
         expect(loadResult).toBeSuccessful();
@@ -396,7 +396,7 @@ describe("Password-protected tokens for unprotected templates", () => {
         expect(createResult.value.passwordProtection?.passwordIsPin).toBe(true);
 
         const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
-            reference: createResult.value.truncatedReference,
+            reference: createResult.value.truncatedReference!,
             password: "1234"
         });
         expect(loadResult).toBeSuccessful();
@@ -410,7 +410,7 @@ describe("Password-protected tokens for unprotected templates", () => {
         expect(createResult).toBeSuccessful();
         expect(createResult.value.passwordProtection!.passwordLocationIndicator).toBe(50);
 
-        const reference = TokenReference.from(createResult.value.truncatedReference);
+        const reference = TokenReference.from(createResult.value.truncatedReference!);
         expect(reference.passwordProtection!.passwordLocationIndicator).toBe(50);
     });
 
@@ -421,7 +421,7 @@ describe("Password-protected tokens for unprotected templates", () => {
         });
         expect(createResult).toBeSuccessful();
 
-        const loadResult = await runtimeServices2.transport.files.getOrLoadFile({ reference: createResult.value.truncatedReference, password: "wrong-password" });
+        const loadResult = await runtimeServices2.transport.files.getOrLoadFile({ reference: createResult.value.truncatedReference!, password: "wrong-password" });
         expect(loadResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
     });
 
@@ -432,7 +432,7 @@ describe("Password-protected tokens for unprotected templates", () => {
         });
         expect(createResult).toBeSuccessful();
 
-        const loadResult = await runtimeServices2.transport.files.getOrLoadFile({ reference: createResult.value.truncatedReference });
+        const loadResult = await runtimeServices2.transport.files.getOrLoadFile({ reference: createResult.value.truncatedReference! });
         expect(loadResult).toBeAnError(/.*/, "error.transport.noPasswordProvided");
     });
 
@@ -518,7 +518,7 @@ describe("Password-protected tokens for unprotected templates", () => {
             });
 
             const result = await runtimeServices2.transport.account.loadItemFromTruncatedReference({
-                reference: createResult.value.truncatedReference,
+                reference: createResult.value.truncatedReference!,
                 password: "password"
             });
             expect(result).toBeSuccessful();
@@ -532,7 +532,7 @@ describe("Password-protected tokens for unprotected templates", () => {
             });
 
             const result = await runtimeServices2.transport.account.loadItemFromTruncatedReference({
-                reference: createResult.value.truncatedReference,
+                reference: createResult.value.truncatedReference!,
                 password: "wrong-password"
             });
             expect(result).toBeAnError(/.*/, "error.runtime.recordNotFound");
@@ -545,7 +545,7 @@ describe("Password-protected tokens for unprotected templates", () => {
             });
 
             const result = await runtimeServices2.transport.account.loadItemFromTruncatedReference({
-                reference: createResult.value.truncatedReference
+                reference: createResult.value.truncatedReference!
             });
             expect(result).toBeAnError(/.*/, "error.transport.noPasswordProvided");
         });

@@ -196,7 +196,7 @@ describe("Personalized tokens", () => {
         });
         expect(createResult).toBeSuccessful();
 
-        const loadResult = await runtimeServices2.transport.tokens.loadPeerToken({ reference: createResult.value.truncatedReference, ephemeral: true });
+        const loadResult = await runtimeServices2.transport.tokens.loadPeerToken({ reference: createResult.value.truncatedReference!, ephemeral: true });
         expect(loadResult).toBeSuccessful();
         expect(loadResult.value.forIdentity).toBe(runtimeServices2.address);
     });
@@ -210,7 +210,7 @@ describe("Personalized tokens", () => {
         });
         expect(createResult).toBeSuccessful();
 
-        const loadResult = await runtimeServices2.transport.tokens.loadPeerToken({ reference: createResult.value.truncatedReference, ephemeral: true });
+        const loadResult = await runtimeServices2.transport.tokens.loadPeerToken({ reference: createResult.value.truncatedReference!, ephemeral: true });
         expect(loadResult).toBeAnError(/.*/, "error.transport.general.notIntendedForYou");
     });
 });
