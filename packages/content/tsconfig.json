@@ -4,7 +4,7 @@
         "outDir": "dist",
         "rootDir": "src"
     },
-    "include": ["src/**/*.ts"],
+    "include": ["src/**/*.ts", "../core-types/src/LanguagesISO639.ts", "../core-types/src/CountriesAlpha2.ts"],
     "exclude": [],
     "references": [{ "path": "../core-types" }]
 }
