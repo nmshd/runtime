@@ -1,6 +1,7 @@
 {
     $schema: "https://docs.renovatebot.com/renovate-schema.json",
-    extends: ["config:recommended"],
+    rangeStrategy: "bump",
+    extends: ["config:recommended", ":disableDependencyDashboard"],
     labels: ["dependencies"],
     schedule: ["after 10pm every weekday", "before 5am every weekday", "every weekend"],
     packageRules: [
@@ -12,11 +13,10 @@
             enabled: false
         },
         {
-            // all patch versions of all packages should be part of a single group; we don't even want a PR for this group (hence the automergeType "branch")
+            // all patch versions of all packages should be part of a single group
             groupName: "patch-all",
             matchUpdateTypes: ["patch", "digest"],
-            automerge: true,
-            automergeType: "branch"
+            automerge: true
         },
         // ############# Minor updates (one group per datasource) #############
         {
