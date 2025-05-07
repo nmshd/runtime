@@ -25,7 +25,7 @@ describe("RelationshipSync", function () {
             maxNumberOfAllocations: 1
         });
 
-        const reference = templateOnTemplatorDevice.toRelationshipTemplateReference().truncate();
+        const reference = templateOnTemplatorDevice.toRelationshipTemplateReference(templatorDevice.config.baseUrl).truncate();
         const templateOnRequestorDevice1 = await requestorDevice1.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(reference);
 
         const createdRelationship = await requestorDevice1.relationships.sendRelationship({
@@ -78,7 +78,7 @@ describe("RelationshipSync", function () {
             maxNumberOfAllocations: 1
         });
 
-        const reference = templateOnTemplatorDevice.toRelationshipTemplateReference().truncate();
+        const reference = templateOnTemplatorDevice.toRelationshipTemplateReference(templatorDevice.config.baseUrl).truncate();
         const templateOnRequestorDevice1 = await requestorDevice1.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(reference);
 
         const createdRelationship = await requestorDevice1.relationships.sendRelationship({
@@ -125,7 +125,7 @@ describe("RelationshipSync", function () {
         });
         await templatorDevice1.syncDatawallet();
 
-        const reference = templateOnTemplatorDevice.toRelationshipTemplateReference().truncate();
+        const reference = templateOnTemplatorDevice.toRelationshipTemplateReference(requestorDevice.config.baseUrl).truncate();
         const templateOnRequestorDevice1 = await requestorDevice.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(reference);
 
         const createdRelationship = await requestorDevice.relationships.sendRelationship({

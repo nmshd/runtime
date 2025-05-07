@@ -41,17 +41,17 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
         const thirdPartyAccountController = accounts[2].accountController;
 
         const senderFile = await TestUtil.uploadFile(senderAccountController, { tags: ["x+%+tag"] });
-        senderTrucatedFileReference = senderFile.truncate();
+        senderTrucatedFileReference = senderFile.toFileReference(senderAccountController.config.baseUrl).truncate();
 
         const senderExpiredFile = await TestUtil.uploadFile(senderAccountController, { expiresAt: CoreDate.utc().add({ seconds: 1 }) });
-        senderExpiredTrucatedFileReference = senderExpiredFile.truncate();
+        senderExpiredTrucatedFileReference = senderExpiredFile.toFileReference(senderAccountController.config.baseUrl).truncate();
         await sleep(2000);
 
         const recipientFile = await TestUtil.uploadFile(recipientAccountController, { tags: ["x+%+tag"] });
-        recipientTrucatedFileReference = recipientFile.truncate();
+        recipientTrucatedFileReference = recipientFile.toFileReference(recipientAccountController.config.baseUrl).truncate();
 
         const thirdPartyFile = await TestUtil.uploadFile(thirdPartyAccountController);
-        thirdPartyTrucatedFileReference = thirdPartyFile.truncate();
+        thirdPartyTrucatedFileReference = thirdPartyFile.toFileReference(thirdPartyAccountController.config.baseUrl).truncate();
     });
 
     beforeEach(async () => {
@@ -103,7 +103,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
 
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
-                fileReference: thirdPartyFile.truncate()
+                fileReference: thirdPartyFile.toFileReference(senderAccountController.config.baseUrl).truncate()
             });
             const request = Request.from({ items: [requestItem] });
 
