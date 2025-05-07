@@ -2,7 +2,6 @@ import { ArbitraryRelationshipTemplateContentJSON, AuthenticationRequestItem, Re
 import { CoreDate, PasswordLocationIndicatorOptions } from "@nmshd/core-types";
 import { DeviceOnboardingInfoDTO, PeerRelationshipTemplateLoadedEvent } from "@nmshd/runtime";
 import assert from "assert";
-import { DateTime } from "luxon";
 import { AppRuntime, LocalAccountSession } from "../../src";
 import { MockEventBus, MockUIBridge, TestUtil } from "../lib";
 
@@ -301,7 +300,7 @@ describe("AppStringProcessor", function () {
                 filename: "aFileName",
                 content: new TextEncoder().encode("aFileContent"),
                 mimetype: "aMimetype",
-                expiresAt: DateTime.utc().plus({ minutes: 10 }).toString()
+                expiresAt: CoreDate.utc().add({ minutes: 10 }).toISOString()
             });
             const file = fileResult.value;
 
