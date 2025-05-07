@@ -206,11 +206,11 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
     }
 
     private get tokenMapper(): TokenMapper {
-        return new TokenMapper(new URL(this.runtimeConfig.transportLibrary.baseUrl).hostname);
+        return new TokenMapper(this.runtimeConfig.transportLibrary.baseUrl);
     }
 
     private get templateMapper(): RelationshipTemplateMapper {
-        return new RelationshipTemplateMapper(new URL(this.runtimeConfig.transportLibrary.baseUrl).hostname);
+        return new RelationshipTemplateMapper(this.runtimeConfig.transportLibrary.baseUrl);
     }
 
     private get relationshipMapper(): RelationshipMapper {
@@ -218,7 +218,7 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
     }
 
     private get fileMapper(): FileMapper {
-        return new FileMapper(new URL(this.runtimeConfig.transportLibrary.baseUrl).hostname);
+        return new FileMapper(this.runtimeConfig.transportLibrary.baseUrl);
     }
 
     private get messageMapper(): MessageMapper {
