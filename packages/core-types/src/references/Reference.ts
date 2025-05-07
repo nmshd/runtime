@@ -89,20 +89,23 @@ export class Reference extends Serializable implements IReference {
     public static fromUrl(value: string): Reference {
         const url = new URL(value);
 
-        const id = CoreId.from(url.pathname.split("/").pop()!);
+        const pathMatch = url.pathname.match(/^(?<baseUrlPath>.*)\/r\/(?<referenceId>[^/]+)$/)?.groups;
 
-        const pathRegex = /^(.*)\/r\/[^/]+$/;
-        const remainingPath = url.pathname.match(pathRegex);
-        const backboneBaseUrl = `${url.origin}${remainingPath?.[1] ?? ""}`;
+        const baseUrlPath = pathMatch?.baseUrlPath ?? "";
+        const backboneBaseUrl = `${url.origin}${baseUrlPath}`;
+        const id = CoreId.from(pathMatch?.referenceId ?? "");
 
         const hashValue = url.hash.substring(1);
-        const truncatedBuffer = CoreBuffer.fromBase64URL(hashValue);
-        const splitted = truncatedBuffer.toUtf8().split("|");
+        const truncatedPart = CoreBuffer.fromBase64URL(hashValue).toUtf8();
+        const truncatedPartMatch = truncatedPart.match(/(?<algorithm>[^|]+)\|(?<key>[^|]+)\|(?<forIdentity>[^|]+)?\|(?<passwordProtection>[^|]+)?/)?.groups;
 
-        const secretKey = this.parseSecretKey(splitted[0], splitted[1]);
-        const forIdentityTruncated = splitted[2] ? splitted[2] : undefined;
+        const algorithm = truncatedPartMatch?.algorithm ?? "";
+        const key = truncatedPartMatch?.key ?? "";
+        const secretKey = this.parseSecretKey(algorithm, key);
 
-        const passwordProtection = SharedPasswordProtection.fromTruncated(splitted[3]);
+        const forIdentityTruncated = truncatedPartMatch?.forIdentity ?? undefined;
+
+        const passwordProtection = SharedPasswordProtection.fromTruncated(truncatedPartMatch?.passwordProtection);
 
         return this.from({
             id,
