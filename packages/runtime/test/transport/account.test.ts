@@ -166,7 +166,7 @@ describe("LoadItemFromTruncatedReference", () => {
         });
 
         test("loads the DeviceOnboardingInfo with the truncated reference", async () => {
-            const deviceOnboardingInfoReference = (await sTransportServices.devices.createDeviceOnboardingToken({ id: device.id })).value.truncatedReference!;
+            const deviceOnboardingInfoReference = (await sTransportServices.devices.createDeviceOnboardingToken({ id: device.id })).value.truncatedReference;
 
             const result = await sTransportServices.account.loadItemFromTruncatedReference({ reference: deviceOnboardingInfoReference });
 
@@ -176,7 +176,7 @@ describe("LoadItemFromTruncatedReference", () => {
 
         test("loads the DeviceOnboardingInfo with the truncated reference including a profile name", async () => {
             const profileName = "aProfileName";
-            const deviceOnboardingInfoReference = (await sTransportServices.devices.createDeviceOnboardingToken({ id: device.id, profileName })).value.truncatedReference!;
+            const deviceOnboardingInfoReference = (await sTransportServices.devices.createDeviceOnboardingToken({ id: device.id, profileName })).value.truncatedReference;
 
             const result = await sTransportServices.account.loadItemFromTruncatedReference({ reference: deviceOnboardingInfoReference });
 

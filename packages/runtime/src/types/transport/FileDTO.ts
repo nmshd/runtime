@@ -1,5 +1,6 @@
-export type FileDTO = {
+export interface FileDTO {
     id: string;
+    isOwn: boolean;
     filename: string;
     tags?: string[];
     filesize: number;
@@ -10,15 +11,6 @@ export type FileDTO = {
     mimetype: string;
     title: string;
     description?: string;
-} & (
-    | {
-          isOwn: true;
-          truncatedReference: string;
-          url: string;
-      }
-    | {
-          isOwn: false;
-          truncatedReference: undefined;
-          url: undefined;
-      }
-);
+    truncatedReference: string;
+    url: string;
+}

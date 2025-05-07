@@ -42,13 +42,13 @@ describe("Onboarding", function () {
             passwordProtection: { password: "aPassword" }
         });
 
-        const token = await runtime2.anonymousServices.tokens.loadPeerToken({ reference: recoveryKitResponse.value.truncatedReference!, password: "aPassword" });
+        const token = await runtime2.anonymousServices.tokens.loadPeerToken({ reference: recoveryKitResponse.value.truncatedReference, password: "aPassword" });
         const deviceOnboardingDTO = DeviceMapper.toDeviceOnboardingInfoDTO(DeviceSharedSecret.from(token.value.content.sharedSecret));
 
         const result = await runtime2.accountServices.onboardAccount(deviceOnboardingDTO);
         expect(result.address!).toBe((await services1.transportServices.account.getIdentityInfo()).value.address);
 
-        const anonymousTokenResponse = await runtime2.anonymousServices.tokens.loadPeerToken({ reference: recoveryKitResponse.value.truncatedReference!, password: "aPassword" });
+        const anonymousTokenResponse = await runtime2.anonymousServices.tokens.loadPeerToken({ reference: recoveryKitResponse.value.truncatedReference, password: "aPassword" });
         expect(anonymousTokenResponse).toBeAnError(
             "Token not found. Make sure the ID exists and the record is not expired. If a password is required to fetch the record, make sure you passed the correct one.",
             "error.runtime.recordNotFound"
@@ -63,7 +63,7 @@ describe("Onboarding", function () {
             passwordProtection: { password: "aPassword" }
         });
 
-        const token = await runtime3.anonymousServices.tokens.loadPeerToken({ reference: recoveryKitResponse.value.truncatedReference!, password: "aPassword" });
+        const token = await runtime3.anonymousServices.tokens.loadPeerToken({ reference: recoveryKitResponse.value.truncatedReference, password: "aPassword" });
         const deviceOnboardingDTO = DeviceMapper.toDeviceOnboardingInfoDTO(DeviceSharedSecret.from(token.value.content.sharedSecret));
 
         const result = await runtime3.accountServices.onboardAccount(deviceOnboardingDTO);

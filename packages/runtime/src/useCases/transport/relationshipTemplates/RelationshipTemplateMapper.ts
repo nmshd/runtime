@@ -23,9 +23,9 @@ export class RelationshipTemplateMapper {
             content: this.toTemplateContent(template.cache.content),
             expiresAt: template.cache.expiresAt?.toString(),
             maxNumberOfAllocations: template.cache.maxNumberOfAllocations,
-            truncatedReference: template.isOwn ? template.truncate(this.backboneBaseUrl) : undefined,
-            url: template.isOwn ? template.toRelationshipTemplateReference(this.backboneBaseUrl).toUrl() : undefined
-        } as RelationshipTemplateDTO;
+            truncatedReference: template.truncate(this.backboneBaseUrl),
+            url: template.toRelationshipTemplateReference(this.backboneBaseUrl).toUrl()
+        };
     }
 
     public toRelationshipTemplateDTOList(responseItems: RelationshipTemplate[]): RelationshipTemplateDTO[] {

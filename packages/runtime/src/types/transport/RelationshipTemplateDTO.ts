@@ -3,7 +3,7 @@ import { PasswordProtectionDTO } from "./PasswordProtectionDTO";
 
 export type RelationshipTemplateContentDerivation = RelationshipTemplateContentJSON | ArbitraryRelationshipTemplateContentJSON;
 
-export type RelationshipTemplateDTO = {
+export interface RelationshipTemplateDTO {
     id: string;
     isOwn: boolean;
     createdBy: string;
@@ -14,15 +14,6 @@ export type RelationshipTemplateDTO = {
     content: RelationshipTemplateContentDerivation;
     expiresAt?: string;
     maxNumberOfAllocations?: number;
-} & (
-    | {
-          isOwn: true;
-          truncatedReference: string;
-          url: string;
-      }
-    | {
-          isOwn: false;
-          truncatedReference: undefined;
-          url: undefined;
-      }
-);
+    truncatedReference: string;
+    url: string;
+}

@@ -37,9 +37,9 @@ export class FileMapper {
             mimetype: file.cache.mimetype,
             title: file.cache.title ?? "",
             description: file.cache.description,
-            truncatedReference: file.isOwn ? file.truncate(this.backboneBaseUrl) : undefined,
-            url: file.isOwn ? file.toFileReference(this.backboneBaseUrl).toUrl() : undefined
-        } as FileDTO;
+            truncatedReference: file.truncate(this.backboneBaseUrl),
+            url: file.toFileReference(this.backboneBaseUrl).toUrl()
+        };
     }
 
     public toFileDTOList(files: File[]): FileDTO[] {

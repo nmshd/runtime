@@ -25,7 +25,7 @@ describe("Anonymous tokens", () => {
 
     test("should get the token anonymous by truncated reference", async () => {
         const result = await noLoginRuntime.anonymousServices.tokens.loadPeerToken({
-            reference: uploadedToken.truncatedReference!
+            reference: uploadedToken.truncatedReference
         });
         expect(result).toBeSuccessful();
 
@@ -36,7 +36,7 @@ describe("Anonymous tokens", () => {
     test("should catch a personalized token", async () => {
         const uploadedPersonalizedToken = await uploadOwnToken(runtimeService.transport, runtimeService.address);
         const result = await noLoginRuntime.anonymousServices.tokens.loadPeerToken({
-            reference: uploadedPersonalizedToken.truncatedReference!
+            reference: uploadedPersonalizedToken.truncatedReference
         });
         expect(result).toBeAnError(/.*/, "error.transport.general.notIntendedForYou");
     });

@@ -193,7 +193,7 @@ describe("RelationshipTemplateDVO", () => {
     test("TemplateDVO for requestor", async () => {
         const requestorTemplate = (
             await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({
-                reference: templatorTemplate.truncatedReference!,
+                reference: templatorTemplate.truncatedReference,
                 password: "password"
             })
         ).value as RelationshipTemplateDTO & { content: RelationshipTemplateContentJSON };
@@ -239,7 +239,7 @@ describe("RelationshipTemplateDVO", () => {
                 "source.reference": templateId
             }
         });
-        await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.truncatedReference! });
+        await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.truncatedReference });
         if (requestResult.value.length === 0) {
             await requestor.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
             requestResult = await requestor.consumption.incomingRequests.getRequests({
@@ -274,7 +274,7 @@ describe("RelationshipTemplateDVO", () => {
         });
         const requestorTemplate = (
             await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({
-                reference: templatorTemplate.truncatedReference!,
+                reference: templatorTemplate.truncatedReference,
                 password: "password"
             })
         ).value as RelationshipTemplateDTO & { content: RelationshipTemplateContentJSON };

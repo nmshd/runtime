@@ -142,7 +142,7 @@ describe("DeciderModule", () => {
                     expiresAt: CoreDate.utc().add({ minutes: 5 }).toISOString()
                 })
             ).value;
-            await recipient.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference! });
+            await recipient.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
             const receivedRequestResult = await recipient.consumption.incomingRequests.received({
                 receivedRequest: request.toJSON(),
                 requestSourceId: template.id
@@ -325,7 +325,7 @@ describe("DeciderModule", () => {
                     expiresAt: requestExpirationDate.add({ minutes: 5 }).toISOString()
                 })
             ).value;
-            await recipient.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference! });
+            await recipient.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
             const receivedRequestResult = await recipient.consumption.incomingRequests.received({
                 receivedRequest: request.toJSON(),
                 requestSourceId: template.id
@@ -625,7 +625,7 @@ describe("DeciderModule", () => {
                     expiresAt: CoreDate.utc().add({ hours: 1 }).toISOString()
                 })
             ).value;
-            await recipient.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference! });
+            await recipient.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
             const receivedRequestResult = await recipient.consumption.incomingRequests.received({
                 receivedRequest: request.toJSON(),
                 requestSourceId: template.id
@@ -696,7 +696,7 @@ describe("DeciderModule", () => {
                     expiresAt: CoreDate.utc().add({ hours: 1 }).toISOString()
                 })
             ).value;
-            await recipient.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference! });
+            await recipient.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
             const receivedRequestResult = await recipient.consumption.incomingRequests.received({
                 receivedRequest: request.toJSON(),
                 requestSourceId: template.id
@@ -2222,7 +2222,7 @@ describe("DeciderModule", () => {
                         {
                             "@type": "TransferFileOwnershipRequestItem",
                             mustBeAccepted: true,
-                            fileReference: file.truncatedReference!
+                            fileReference: file.truncatedReference
                         }
                     ]
                 },
