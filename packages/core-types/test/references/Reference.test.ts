@@ -14,7 +14,7 @@ describe("Reference", () => {
             })
         });
 
-        expect(reference.toUrl()).toBe("https://backbone.example.com/References/ANID1234#M3xsZXJKeVg4eWRKREVYb3dxMlBNTW50UlhYQTI3d2dISllBX0JqbkZ4NTVZfHw");
+        expect(reference.toUrl()).toBe("https://backbone.example.com/r/ANID1234#M3xsZXJKeVg4eWRKREVYb3dxMlBNTW50UlhYQTI3d2dISllBX0JqbkZ4NTVZfHw");
     });
 
     test("toUrl with custom appName", () => {
@@ -27,7 +27,7 @@ describe("Reference", () => {
             })
         });
 
-        expect(reference.toUrl("anAppName")).toBe("https://backbone.example.com/References/ANID1234?app=anAppName#M3xsZXJKeVg4eWRKREVYb3dxMlBNTW50UlhYQTI3d2dISllBX0JqbkZ4NTVZfHw");
+        expect(reference.toUrl("anAppName")).toBe("https://backbone.example.com/r/ANID1234?app=anAppName#M3xsZXJKeVg4eWRKREVYb3dxMlBNTW50UlhYQTI3d2dISllBX0JqbkZ4NTVZfHw");
     });
 
     test("toUrl with all reference fields used", () => {
@@ -46,12 +46,12 @@ describe("Reference", () => {
         });
 
         expect(reference.toUrl("anAppName")).toBe(
-            "https://backbone.example.com/References/ANID1234?app=anAppName#M3xsZXJKeVg4eWRKREVYb3dxMlBNTW50UlhYQTI3d2dISllBX0JqbkZ4NTVZfDEyMzR8cHcmWVRFMllubDBaWE5zYjI1bmMyRnNkQT09"
+            "https://backbone.example.com/r/ANID1234?app=anAppName#M3xsZXJKeVg4eWRKREVYb3dxMlBNTW50UlhYQTI3d2dISllBX0JqbkZ4NTVZfDEyMzR8cHcmWVRFMllubDBaWE5zYjI1bmMyRnNkQT09"
         );
     });
 
     test("fromUrl", () => {
-        const reference = Reference.fromUrl("https://backbone.example.com/References/ANID1234#M3xsZXJKeVg4eWRKREVYb3dxMlBNTW50UlhYQTI3d2dISllBX0JqbkZ4NTVZfHw");
+        const reference = Reference.fromUrl("https://backbone.example.com/r/ANID1234#M3xsZXJKeVg4eWRKREVYb3dxMlBNTW50UlhYQTI3d2dISllBX0JqbkZ4NTVZfHw");
 
         expect(reference).toBeInstanceOf(Reference);
 
@@ -65,7 +65,7 @@ describe("Reference", () => {
 
     test("fromUrl with all fields used", () => {
         const reference = Reference.fromUrl(
-            "https://backbone.example.com/References/ANID1234?app=anAppName#M3xsZXJKeVg4eWRKREVYb3dxMlBNTW50UlhYQTI3d2dISllBX0JqbkZ4NTVZfDEyMzR8cHcmWVRFMllubDBaWE5zYjI1bmMyRnNkQT09"
+            "https://backbone.example.com/r/ANID1234?app=anAppName#M3xsZXJKeVg4eWRKREVYb3dxMlBNTW50UlhYQTI3d2dISllBX0JqbkZ4NTVZfDEyMzR8cHcmWVRFMllubDBaWE5zYjI1bmMyRnNkQT09"
         );
 
         expect(reference).toBeInstanceOf(Reference);
@@ -81,7 +81,7 @@ describe("Reference", () => {
     });
 
     test.each([
-        "https://backbone.example.com/References/ANID1234?app=anAppName#M3xsZXJKeVg4eWRKREVYb3dxMlBNTW50UlhYQTI3d2dISllBX0JqbkZ4NTVZfHw",
+        "https://backbone.example.com/r/ANID1234?app=anAppName#M3xsZXJKeVg4eWRKREVYb3dxMlBNTW50UlhYQTI3d2dISllBX0JqbkZ4NTVZfHw",
         "QU5JRDEyMzRAaHR0cHM6Ly9iYWNrYm9uZS5leGFtcGxlLmNvbXwzfGxlckp5WDh5ZEpERVhvd3EyUE1NbnRSWFhBMjd3Z0hKWUFfQmpuRng1NVl8fA",
         "nmshd://qr#QU5JRDEyMzRAaHR0cHM6Ly9iYWNrYm9uZS5leGFtcGxlLmNvbXwzfGxlckp5WDh5ZEpERVhvd3EyUE1NbnRSWFhBMjd3Z0hKWUFfQmpuRng1NVl8fA",
         "nmshd://tr#QU5JRDEyMzRAaHR0cHM6Ly9iYWNrYm9uZS5leGFtcGxlLmNvbXwzfGxlckp5WDh5ZEpERVhvd3EyUE1NbnRSWFhBMjd3Z0hKWUFfQmpuRng1NVl8fA"

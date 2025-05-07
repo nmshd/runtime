@@ -53,7 +53,7 @@ export class Reference extends Serializable implements IReference {
 
         const appNamePart = appName ? `?app=${appName}` : "";
 
-        const link = `${this.backboneBaseUrl}/References/${this.id.toString()}${appNamePart}#${truncatedPart}`;
+        const link = `${this.backboneBaseUrl}/r/${this.id.toString()}${appNamePart}#${truncatedPart}`;
 
         return link;
     }
