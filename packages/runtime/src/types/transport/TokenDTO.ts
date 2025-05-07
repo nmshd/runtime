@@ -10,7 +10,6 @@ export interface TokenDTO {
     expiresAt: string;
     forIdentity?: string;
     passwordProtection?: PasswordProtectionDTO;
-    truncatedReference: string;
     reference: {
         truncated: string;
         url: string;
