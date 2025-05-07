@@ -44,13 +44,16 @@ export class Reference extends Serializable implements IReference {
         return truncatedReference.toBase64URL();
     }
 
-    public toUrl(appName = "default"): string {
+    public toUrl(appName?: string): string {
         if (!this.backboneBaseUrl) throw new CoreError("error.core-types.missingBackboneBaseUrl", "The backboneBaseUrl is required to create a URL from a reference.");
 
         const truncatedPart = CoreBuffer.fromUtf8(
             `${this.key.algorithm}|${this.key.secretKey.toBase64URL()}|${this.forIdentityTruncated ?? ""}|${this.passwordProtection?.truncate() ?? ""}`
         ).toBase64URL();
-        const link = `${this.backboneBaseUrl}/References/${this.id.toString()}?app=${appName}#${truncatedPart}`;
+
+        const appNamePart = appName ? `?app=${appName}` : "";
+
+        const link = `${this.backboneBaseUrl}/References/${this.id.toString()}${appNamePart}#${truncatedPart}`;
 
         return link;
     }
@@ -138,6 +141,10 @@ export class Reference extends Serializable implements IReference {
         if (typeof value !== "string") return this.fromAny(value);
 
         if (value.startsWith("http")) return this.fromUrl(value);
+        if (value.startsWith("nmshd://qr#") || value.startsWith("nmshd://tr#")) {
+            return this.fromTruncated(value.substring(11));
+        }
+
         return this.fromTruncated(value);
     }
 }
