@@ -45,7 +45,7 @@ describe("Anonymous tokens", () => {
         let tokenReference: string;
 
         beforeAll(async () => {
-            tokenReference = (await uploadOwnToken(runtimeService.transport, undefined, { password: "password" })).truncatedReference!;
+            tokenReference = (await uploadOwnToken(runtimeService.transport, undefined, { password: "password" })).truncatedReference;
         });
 
         test("send and receive a password-protected token", async () => {
