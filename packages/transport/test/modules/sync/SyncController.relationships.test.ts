@@ -125,7 +125,7 @@ describe("RelationshipSync", function () {
         });
         await templatorDevice1.syncDatawallet();
 
-        const reference = templateOnTemplatorDevice.toRelationshipTemplateReference(requestorDevice.config.baseUrl).truncate();
+        const reference = templateOnTemplatorDevice.toRelationshipTemplateReference(templatorDevice1.config.baseUrl).truncate();
         const templateOnRequestorDevice1 = await requestorDevice.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(reference);
 
         const createdRelationship = await requestorDevice.relationships.sendRelationship({
