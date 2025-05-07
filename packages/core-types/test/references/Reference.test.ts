@@ -79,4 +79,13 @@ describe("Reference", () => {
         expect(reference.passwordProtection!.passwordType).toBe("pw");
         expect(reference.passwordProtection!.salt.toUtf8()).toBe("a16byteslongsalt");
     });
+
+    test.each([
+        "https://backbone.example.com/References/ANID1234?app=anAppName#M3xsZXJKeVg4eWRKREVYb3dxMlBNTW50UlhYQTI3d2dISllBX0JqbkZ4NTVZfHw",
+        "QU5JRDEyMzRAaHR0cHM6Ly9iYWNrYm9uZS5leGFtcGxlLmNvbXwzfGxlckp5WDh5ZEpERVhvd3EyUE1NbnRSWFhBMjd3Z0hKWUFfQmpuRng1NVl8fA"
+    ])("Reference#from called with %s", (value) => {
+        const reference = Reference.from(value);
+
+        expect(reference).toBeInstanceOf(Reference);
+    });
 });
