@@ -27,10 +27,10 @@ export class MessageMapper {
 
         return {
             id: message.id.toString(),
-            content: MessageMapper.toMessageContent(message.cache.content),
+            content: this.toMessageContent(message.cache.content),
             createdBy: message.cache.createdBy.toString(),
             createdByDevice: message.cache.createdByDevice.toString(),
-            recipients: MessageMapper.toRecipients(message.cache.recipients),
+            recipients: this.toRecipients(message.cache.recipients),
             createdAt: message.cache.createdAt.toString(),
             attachments: attachments.map((f) => FileMapper.toFileDTO(f)),
             isOwn: message.isOwn,
