@@ -54,7 +54,7 @@ class Startup {
     }
 
     public wrongURL(): UserfriendlyApplicationError {
-        return new UserfriendlyApplicationError("error.appruntime.startup.WrongURL", "The given URL to start the app is in a wrong format.");
+        return new UserfriendlyApplicationError("error.appruntime.startup.wrongURL", "The given URL to start the app is in a wrong format.");
     }
 
     public wrongCode(): UserfriendlyApplicationError {
