@@ -91,8 +91,9 @@ export class Reference extends Serializable implements IReference {
 
         const id = CoreId.from(url.pathname.split("/").pop()!);
 
-        const splitHref = url.href.split("/r");
-        const backboneBaseUrl = splitHref.slice(0, splitHref.length - 1).join("/r");
+        const pathRegex = /^(.*)\/r\/[^/]+$/;
+        const remainingPath = url.pathname.match(pathRegex);
+        const backboneBaseUrl = `${url.origin}${remainingPath?.[1] ?? ""}`;
 
         const hashValue = url.hash.substring(1);
         const truncatedBuffer = CoreBuffer.fromBase64URL(hashValue);
