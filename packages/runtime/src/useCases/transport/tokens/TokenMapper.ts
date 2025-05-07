@@ -12,6 +12,7 @@ export class TokenMapper {
 
         return {
             id: token.id.toString(),
+            isOwn: token.isOwn,
             createdBy: token.cache.createdBy.toString(),
             createdByDevice: token.cache.createdByDevice.toString(),
             content: token.cache.content.toJSON(),

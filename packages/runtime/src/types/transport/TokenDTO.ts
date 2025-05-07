@@ -2,6 +2,7 @@ import { PasswordProtectionDTO } from "./PasswordProtectionDTO";
 
 export interface TokenDTO {
     id: string;
+    isOwn: boolean;
     createdBy: string;
     createdByDevice: string;
     content: any;

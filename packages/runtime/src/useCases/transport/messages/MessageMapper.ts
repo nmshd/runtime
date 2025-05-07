@@ -27,13 +27,13 @@ export class MessageMapper {
 
         return {
             id: message.id.toString(),
+            isOwn: message.isOwn,
             content: this.toMessageContent(message.cache.content),
             createdBy: message.cache.createdBy.toString(),
             createdByDevice: message.cache.createdByDevice.toString(),
             recipients: this.toRecipients(message.cache.recipients),
             createdAt: message.cache.createdAt.toString(),
             attachments: attachments.map((f) => FileMapper.toFileDTO(f)),
-            isOwn: message.isOwn,
             wasReadAt: message.wasReadAt?.toString()
         };
     }
@@ -45,13 +45,13 @@ export class MessageMapper {
 
         return {
             id: message.id.toString(),
+            isOwn: message.isOwn,
             content: this.toMessageContent(message.cache.content),
             createdBy: message.cache.createdBy.toString(),
             createdByDevice: message.cache.createdByDevice.toString(),
             recipients: this.toRecipients(message.cache.recipients),
             createdAt: message.cache.createdAt.toString(),
             attachments: message.cache.attachments.map((a) => a.toString()),
-            isOwn: message.isOwn,
             wasReadAt: message.wasReadAt?.toString()
         };
     }
