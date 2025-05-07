@@ -21,11 +21,11 @@ export class TokenMapper {
             content: token.cache.content.toJSON(),
             createdAt: token.cache.createdAt.toString(),
             expiresAt: token.cache.expiresAt.toString(),
-            isEphemeral: ephemeral,
             forIdentity: token.cache.forIdentity?.toString(),
             passwordProtection: PasswordProtectionMapper.toPasswordProtectionDTO(token.passwordProtection),
             truncatedReference: reference.truncate(),
-            url: reference.toUrl()
+            url: reference.toUrl(),
+            isEphemeral: ephemeral
         };
     }
 
