@@ -129,8 +129,9 @@ export class Reference extends Serializable implements IReference {
     }
 
     public static from(value: IReference | string): Reference {
-        if (typeof value === "string") return this.fromTruncated(value);
+        if (typeof value !== "string") return this.fromAny(value);
 
-        return this.fromAny(value);
+        if (value.startsWith("http")) return this.fromUrl(value);
+        return this.fromTruncated(value);
     }
 }
