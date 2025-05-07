@@ -54,18 +54,14 @@ export class RelationshipTemplate extends CoreSynchronizable implements IRelatio
         return this.fromAny(value);
     }
 
-    public toRelationshipTemplateReference(): RelationshipTemplateReference {
+    public toRelationshipTemplateReference(backboneBaseUrl: string): RelationshipTemplateReference {
         return RelationshipTemplateReference.from({
             id: this.id,
+            backboneBaseUrl,
             key: this.secretKey,
             forIdentityTruncated: this.cache!.forIdentity?.toString().slice(-4),
             passwordProtection: this.passwordProtection?.toSharedPasswordProtection()
         });
-    }
-
-    public truncate(): string {
-        const reference = this.toRelationshipTemplateReference();
-        return reference.truncate();
     }
 
     public setCache(cache: CachedRelationshipTemplate): this {
