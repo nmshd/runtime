@@ -10,7 +10,7 @@ export interface TokenDTO {
     expiresAt: string;
     forIdentity?: string;
     passwordProtection?: PasswordProtectionDTO;
-    isEphemeral: boolean;
     truncatedReference: string;
     url: string;
+    isEphemeral: boolean;
 }
