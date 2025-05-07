@@ -12,4 +12,8 @@ export interface FileDTO {
     title: string;
     description?: string;
     truncatedReference: string;
+    reference: {
+        truncated: string;
+        url: string;
+    };
 }
