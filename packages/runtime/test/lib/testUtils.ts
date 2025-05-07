@@ -240,7 +240,7 @@ export async function exchangeTemplate(
 ): Promise<RelationshipTemplateDTO> {
     const template = await createTemplate(transportServicesCreator, content, undefined, templateExpiresAt);
 
-    const response = await transportServicesRecipient.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
+    const response = await transportServicesRecipient.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.reference.truncated });
     expect(response).toBeSuccessful();
 
     return response.value;
@@ -249,7 +249,7 @@ export async function exchangeTemplate(
 export async function exchangeFile(transportServicesCreator: TransportServices, transportServicesRecipient: TransportServices): Promise<FileDTO> {
     const fileToken = await getFileToken(transportServicesCreator);
 
-    const response = await transportServicesRecipient.files.getOrLoadFile({ reference: fileToken.truncatedReference });
+    const response = await transportServicesRecipient.files.getOrLoadFile({ reference: fileToken.reference.truncated });
     expect(response).toBeSuccessful();
 
     return response.value;
@@ -259,7 +259,7 @@ export async function exchangeToken(transportServicesCreator: TransportServices,
     const token = await uploadOwnToken(transportServicesCreator);
 
     const response = await transportServicesRecipient.tokens.loadPeerToken({
-        reference: token.truncatedReference,
+        reference: token.reference.truncated,
         ephemeral: false
     });
     expect(response).toBeSuccessful();
@@ -890,7 +890,7 @@ export async function createRelationshipWithStatusPending(
     });
 
     const loadedPeerTemplateResult = await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({
-        reference: relationshipTemplateResult.value.truncatedReference
+        reference: relationshipTemplateResult.value.reference.truncated
     });
 
     await requestor.eventBus.waitForEvent(RelationshipTemplateProcessedEvent, (event) => {

@@ -19,10 +19,10 @@ describe("Password-protected tokens", () => {
         expect(token.passwordProtection?.password).toBe("password");
         expect(token.passwordProtection?.passwordIsPin).toBeUndefined();
 
-        const reference = TokenReference.from(token.truncatedReference);
+        const reference = TokenReference.from(token.reference.truncated);
         expect(reference.passwordProtection!.passwordType).toBe("pw");
 
-        const loadResult = await runtimeServices2.transport.tokens.loadPeerToken({ reference: token.truncatedReference, ephemeral: true, password: "password" });
+        const loadResult = await runtimeServices2.transport.tokens.loadPeerToken({ reference: token.reference.truncated, ephemeral: true, password: "password" });
         expect(loadResult).toBeSuccessful();
         expect(loadResult.value.passwordProtection?.password).toBe("password");
         expect(loadResult.value.passwordProtection?.passwordIsPin).toBeUndefined();
@@ -33,10 +33,10 @@ describe("Password-protected tokens", () => {
         expect(token.passwordProtection?.password).toBe("1234");
         expect(token.passwordProtection?.passwordIsPin).toBe(true);
 
-        const reference = TokenReference.from(token.truncatedReference);
+        const reference = TokenReference.from(token.reference.truncated);
         expect(reference.passwordProtection!.passwordType).toBe("pin4");
 
-        const loadResult = await runtimeServices2.transport.tokens.loadPeerToken({ reference: token.truncatedReference, ephemeral: true, password: "1234" });
+        const loadResult = await runtimeServices2.transport.tokens.loadPeerToken({ reference: token.reference.truncated, ephemeral: true, password: "1234" });
         expect(loadResult).toBeSuccessful();
         expect(loadResult.value.passwordProtection?.password).toBe("1234");
         expect(loadResult.value.passwordProtection?.passwordIsPin).toBe(true);
@@ -46,14 +46,14 @@ describe("Password-protected tokens", () => {
         const token = await uploadOwnToken(runtimeServices1.transport, undefined, { password: "password", passwordLocationIndicator: 50 });
         expect(token.passwordProtection!.passwordLocationIndicator).toBe(50);
 
-        const reference = TokenReference.from(token.truncatedReference);
+        const reference = TokenReference.from(token.reference.truncated);
         expect(reference.passwordProtection!.passwordLocationIndicator).toBe(50);
     });
 
     test("error when loading a token with a wrong password", async () => {
         const token = await uploadOwnToken(runtimeServices1.transport, undefined, { password: "password" });
 
-        const loadResult = await runtimeServices2.transport.tokens.loadPeerToken({ reference: token.truncatedReference, ephemeral: true, password: "wrong-password" });
+        const loadResult = await runtimeServices2.transport.tokens.loadPeerToken({ reference: token.reference.truncated, ephemeral: true, password: "wrong-password" });
         expect(loadResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
     });
 
@@ -61,7 +61,7 @@ describe("Password-protected tokens", () => {
         const token = await uploadOwnToken(runtimeServices1.transport, undefined, { password: "password" });
 
         const loadResult = await runtimeServices2.transport.tokens.loadPeerToken({
-            reference: token.truncatedReference,
+            reference: token.reference.truncated,
             ephemeral: true
         });
         expect(loadResult).toBeAnError(/.*/, "error.transport.noPasswordProvided");
@@ -146,7 +146,7 @@ describe("Password-protected tokens", () => {
         test("send and receive a password-protected token", async () => {
             const token = await uploadOwnToken(runtimeServices1.transport, undefined, { password: "password" });
 
-            const loadResult = await runtimeServices2.transport.account.loadItemFromTruncatedReference({ reference: token.truncatedReference, password: "password" });
+            const loadResult = await runtimeServices2.transport.account.loadItemFromTruncatedReference({ reference: token.reference.truncated, password: "password" });
             expect(loadResult).toBeSuccessful();
             expect(loadResult.value.type).toBe("Token");
         });
@@ -154,14 +154,14 @@ describe("Password-protected tokens", () => {
         test("error when loading a token with a wrong password", async () => {
             const token = await uploadOwnToken(runtimeServices1.transport, undefined, { password: "password" });
 
-            const loadResult = await runtimeServices2.transport.account.loadItemFromTruncatedReference({ reference: token.truncatedReference, password: "wrong-password" });
+            const loadResult = await runtimeServices2.transport.account.loadItemFromTruncatedReference({ reference: token.reference.truncated, password: "wrong-password" });
             expect(loadResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
         });
 
         test("error when loading a token with no password", async () => {
             const token = await uploadOwnToken(runtimeServices1.transport, undefined, { password: "password" });
 
-            const loadResult = await runtimeServices2.transport.account.loadItemFromTruncatedReference({ reference: token.truncatedReference });
+            const loadResult = await runtimeServices2.transport.account.loadItemFromTruncatedReference({ reference: token.reference.truncated });
             expect(loadResult).toBeAnError(/.*/, "error.transport.noPasswordProvided");
         });
     });

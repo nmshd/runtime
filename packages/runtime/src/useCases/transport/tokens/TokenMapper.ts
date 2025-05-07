@@ -23,7 +23,6 @@ export class TokenMapper {
             expiresAt: token.cache.expiresAt.toString(),
             forIdentity: token.cache.forIdentity?.toString(),
             passwordProtection: PasswordProtectionMapper.toPasswordProtectionDTO(token.passwordProtection),
-            truncatedReference: reference.truncate(),
             reference: {
                 truncated: reference.truncate(),
                 url: reference.toUrl()

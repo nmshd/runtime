@@ -40,7 +40,6 @@ export class FileMapper {
             mimetype: file.cache.mimetype,
             title: file.cache.title,
             description: file.cache.description,
-            truncatedReference: reference.truncate(),
             reference: {
                 truncated: reference.truncate(),
                 url: reference.toUrl()

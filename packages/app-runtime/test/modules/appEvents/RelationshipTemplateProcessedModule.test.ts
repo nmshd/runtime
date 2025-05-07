@@ -63,7 +63,7 @@ describe("RelationshipTemplateProcessedModule", function () {
         ).value;
 
         await sleep(3000);
-        await session2.transportServices.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templateFrom.truncatedReference });
+        await session2.transportServices.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templateFrom.reference.truncated });
         await eventBus.waitForRunningEventHandlers();
 
         expect(uiBridge).showRequestNotCalled();
@@ -92,7 +92,7 @@ describe("RelationshipTemplateProcessedModule", function () {
         ).value;
 
         await sleep(3000);
-        await session2.transportServices.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templateFrom.truncatedReference });
+        await session2.transportServices.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templateFrom.reference.truncated });
         await eventBus.waitForRunningEventHandlers();
 
         expect(uiBridge).showRequestNotCalled();

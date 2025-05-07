@@ -63,7 +63,7 @@ describe("AppStringProcessor", function () {
             forIdentity: runtime2SessionAAddress
         });
 
-        const result = await runtime2.stringProcessor.processTruncatedReference(templateResult.value.truncatedReference);
+        const result = await runtime2.stringProcessor.processTruncatedReference(templateResult.value.reference.truncated);
         expect(result).toBeSuccessful();
 
         await expect(eventBus).toHavePublished(PeerRelationshipTemplateLoadedEvent);
@@ -82,7 +82,7 @@ describe("AppStringProcessor", function () {
             forIdentity: runtime1SessionAddress
         });
 
-        const result = await runtime2.stringProcessor.processTruncatedReference(templateResult.value.truncatedReference);
+        const result = await runtime2.stringProcessor.processTruncatedReference(templateResult.value.reference.truncated);
         expect(result).toBeAnError("There is no account matching the given 'forIdentityTruncated'.", "error.appruntime.general.noAccountAvailableForIdentityTruncated");
 
         expect(mockUiBridge).enterPasswordNotCalled();
@@ -99,7 +99,7 @@ describe("AppStringProcessor", function () {
         mockUiBridge.setPasswordToReturnForAttempt(1, "password");
         mockUiBridge.accountIdToReturn = runtime2SessionA.account.id;
 
-        const result = await runtime2.stringProcessor.processTruncatedReference(templateResult.value.truncatedReference);
+        const result = await runtime2.stringProcessor.processTruncatedReference(templateResult.value.reference.truncated);
         expect(result).toBeSuccessful();
         expect(result.value).toBeUndefined();
 
@@ -119,7 +119,7 @@ describe("AppStringProcessor", function () {
         mockUiBridge.setPasswordToReturnForAttempt(1, "000000");
         mockUiBridge.accountIdToReturn = runtime2SessionA.account.id;
 
-        const result = await runtime2.stringProcessor.processTruncatedReference(templateResult.value.truncatedReference);
+        const result = await runtime2.stringProcessor.processTruncatedReference(templateResult.value.reference.truncated);
         expect(result).toBeSuccessful();
         expect(result.value).toBeUndefined();
 
@@ -139,7 +139,7 @@ describe("AppStringProcessor", function () {
 
         mockUiBridge.setPasswordToReturnForAttempt(1, "password");
 
-        const result = await runtime2.stringProcessor.processTruncatedReference(templateResult.value.truncatedReference);
+        const result = await runtime2.stringProcessor.processTruncatedReference(templateResult.value.reference.truncated);
         expect(result).toBeSuccessful();
         expect(result.value).toBeUndefined();
 
@@ -159,7 +159,7 @@ describe("AppStringProcessor", function () {
 
         mockUiBridge.setPasswordToReturnForAttempt(1, "000000");
 
-        const result = await runtime2.stringProcessor.processTruncatedReference(templateResult.value.truncatedReference);
+        const result = await runtime2.stringProcessor.processTruncatedReference(templateResult.value.reference.truncated);
         expect(result).toBeSuccessful();
         expect(result.value).toBeUndefined();
 
@@ -181,7 +181,7 @@ describe("AppStringProcessor", function () {
 
         mockUiBridge.accountIdToReturn = runtime2SessionA.account.id;
 
-        const result = await runtime2.stringProcessor.processTruncatedReference(templateResult.value.truncatedReference);
+        const result = await runtime2.stringProcessor.processTruncatedReference(templateResult.value.reference.truncated);
         expect(result).toBeSuccessful();
         expect(result.value).toBeUndefined();
 
@@ -202,7 +202,7 @@ describe("AppStringProcessor", function () {
         mockUiBridge.setPasswordToReturnForAttempt(1, "password");
         mockUiBridge.accountIdToReturn = runtime2SessionA.account.id;
 
-        await runtime2.stringProcessor.processTruncatedReference(templateResult.value.truncatedReference);
+        await runtime2.stringProcessor.processTruncatedReference(templateResult.value.reference.truncated);
 
         expect(mockUiBridge).enterPasswordCalled("pw", undefined, undefined, PasswordLocationIndicatorOptions.SMS);
     });
@@ -217,7 +217,7 @@ describe("AppStringProcessor", function () {
         mockUiBridge.setPasswordToReturnForAttempt(1, "password");
         mockUiBridge.accountIdToReturn = runtime2SessionA.account.id;
 
-        await runtime2.stringProcessor.processTruncatedReference(templateResult.value.truncatedReference);
+        await runtime2.stringProcessor.processTruncatedReference(templateResult.value.reference.truncated);
 
         expect(mockUiBridge).enterPasswordCalled("pw", undefined, undefined, 50);
     });
@@ -242,7 +242,7 @@ describe("AppStringProcessor", function () {
 
             mockUiBridge.setPasswordToReturnForAttempt(1, "password");
 
-            const result = await runtime2.stringProcessor.processTruncatedReference(tokenResult.value.truncatedReference);
+            const result = await runtime2.stringProcessor.processTruncatedReference(tokenResult.value.reference.truncated);
             expect(result).toBeSuccessful();
             expect(result.value).toBeUndefined();
 
@@ -257,7 +257,7 @@ describe("AppStringProcessor", function () {
 
             mockUiBridge.setPasswordToReturnForAttempt(1, "password");
 
-            const result = await runtime2.stringProcessor.processTruncatedReference(tokenResult.value.truncatedReference);
+            const result = await runtime2.stringProcessor.processTruncatedReference(tokenResult.value.reference.truncated);
             expect(result).toBeSuccessful();
             expect(result.value).toBeUndefined();
 
@@ -313,7 +313,9 @@ describe("AppStringProcessor", function () {
 
         test("get a template using a url", async function () {
             const templateResult = await runtime1Session.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
-                content: RelationshipTemplateContent.from({ onNewRelationship: { items: [AuthenticationRequestItem.from({ mustBeAccepted: false })] } }).toJSON(),
+                content: RelationshipTemplateContent.from({
+                    onNewRelationship: { items: [AuthenticationRequestItem.from({ mustBeAccepted: false, title: "anAuthentication" })] }
+                }).toJSON(),
                 expiresAt: CoreDate.utc().add({ days: 1 }).toISOString()
             });
             const template = templateResult.value;
@@ -329,7 +331,9 @@ describe("AppStringProcessor", function () {
 
         test("get a template using a url including forIdentity and passwordProtection", async function () {
             const templateResult = await runtime1Session.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
-                content: RelationshipTemplateContent.from({ onNewRelationship: { items: [AuthenticationRequestItem.from({ mustBeAccepted: false })] } }).toJSON(),
+                content: RelationshipTemplateContent.from({
+                    onNewRelationship: { items: [AuthenticationRequestItem.from({ mustBeAccepted: false, title: "anAuthentication" })] }
+                }).toJSON(),
                 expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(),
                 forIdentity: runtime4Session.account.address!,
                 passwordProtection: { password: "password" }
@@ -349,7 +353,9 @@ describe("AppStringProcessor", function () {
 
         test("get a template in a token using a url", async function () {
             const templateResult = await runtime1Session.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
-                content: RelationshipTemplateContent.from({ onNewRelationship: { items: [AuthenticationRequestItem.from({ mustBeAccepted: false })] } }).toJSON(),
+                content: RelationshipTemplateContent.from({
+                    onNewRelationship: { items: [AuthenticationRequestItem.from({ mustBeAccepted: false, title: "anAuthentication" })] }
+                }).toJSON(),
                 expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(),
                 forIdentity: runtime4Session.account.address!,
                 passwordProtection: { password: "password" }
