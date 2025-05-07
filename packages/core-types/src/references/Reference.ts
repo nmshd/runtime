@@ -48,7 +48,7 @@ export class Reference extends Serializable implements IReference {
         if (!this.backboneBaseUrl) throw new CoreError("error.core-types.missingBackboneBaseUrl", "The backboneBaseUrl is required to create a URL from a reference.");
 
         const truncatedPart = `${this.key.toBase64()}|${this.forIdentityTruncated ?? ""}|${this.passwordProtection?.truncate() ?? ""}`;
-        const link = `https://${this.backboneBaseUrl}/Tokens/${this.id.toString()}${appName ? `?app=${appName}` : ""}#${truncatedPart}`;
+        const link = `${this.backboneBaseUrl}/References/${this.id.toString()}${appName ? `?app=${appName}` : ""}#${truncatedPart}`;
 
         return link;
     }
