@@ -1,4 +1,6 @@
 import { Token } from "@nmshd/transport";
+import { Container } from "@nmshd/typescript-ioc";
+import { ConfigHolder } from "../../../ConfigHolder";
 import { TokenDTO } from "../../../types";
 import { PasswordProtectionMapper, RuntimeErrors } from "../../common";
 
@@ -8,7 +10,8 @@ export class TokenMapper {
             throw RuntimeErrors.general.cacheEmpty(Token, token.id.toString());
         }
 
-        const reference = token.toTokenReference();
+        const backboneBaseUrl = Container.get<ConfigHolder>(ConfigHolder).getConfig().transportLibrary.baseUrl;
+        const reference = token.toTokenReference(backboneBaseUrl);
 
         return {
             id: token.id.toString(),

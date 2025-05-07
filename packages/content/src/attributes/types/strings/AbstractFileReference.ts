@@ -6,14 +6,14 @@ export class AbstractFileReference extends AbstractString {
     @serialize()
     @validate({
         min: 30,
-        max: 100
+        max: 150
     })
     public override value: string;
 
     public static override get valueHints(): ValueHints {
         return super.valueHints.copyWith({
             min: 30,
-            max: 100
+            max: 150
         });
     }
 
