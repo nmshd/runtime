@@ -26,7 +26,6 @@ export class RelationshipTemplateMapper {
             content: this.toTemplateContent(template.cache.content),
             expiresAt: template.cache.expiresAt?.toString(),
             maxNumberOfAllocations: template.cache.maxNumberOfAllocations,
-            truncatedReference: reference.truncate(),
             reference: {
                 truncated: reference.truncate(),
                 url: reference.toUrl()
