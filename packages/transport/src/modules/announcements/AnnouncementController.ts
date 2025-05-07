@@ -1,3 +1,4 @@
+import { LanguageISO639 } from "@nmshd/core-types";
 import { ControllerName, TransportController } from "../../core";
 import { AccountController } from "../accounts/AccountController";
 import { AnnouncementClient } from "./backbone/AnnouncementClient";
@@ -16,7 +17,7 @@ export class AnnouncementController extends TransportController {
         return this;
     }
 
-    public async getAnnouncements(language: string): Promise<Announcement[]> {
+    public async getAnnouncements(language: LanguageISO639): Promise<Announcement[]> {
         const response = await this.client.getAnnouncements({ language });
         return this.parseArray<Announcement>(response.value, Announcement);
     }

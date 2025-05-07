@@ -1,5 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { CoreAddress, CoreId } from "@nmshd/core-types";
+import { CoreAddress, CoreId, LanguageISO639 } from "@nmshd/core-types";
 import { AccountController, Transport } from "../../../src";
 import { AnnouncementSeverity } from "../../../src/modules/announcements/data/Announcement";
 import { AdminApiClient } from "../../testHelpers/AdminApiClient";
@@ -31,7 +31,7 @@ describe("MessageController", function () {
         test("returns announcements created for all identities", async function () {
             const idOfCreatedAnnouncement = await createAnnouncement();
 
-            const announcements = await mainAccountController.announcements.getAnnouncements("en");
+            const announcements = await mainAccountController.announcements.getAnnouncements(LanguageISO639.en);
 
             const containsCreatedAnnouncement = announcements.some((a) => a.id.equals(idOfCreatedAnnouncement));
             expect(containsCreatedAnnouncement).toBeTruthy();
@@ -40,7 +40,7 @@ describe("MessageController", function () {
         test("returns announcements in correct language", async function () {
             const idOfCreatedAnnouncement = await createAnnouncement();
 
-            const announcements = await mainAccountController.announcements.getAnnouncements("de");
+            const announcements = await mainAccountController.announcements.getAnnouncements(LanguageISO639.de);
 
             const createdAnnouncement = announcements.find((a) => a.id.equals(idOfCreatedAnnouncement))!;
             expect(createdAnnouncement.title).toBe("Deutscher Titel");
@@ -49,7 +49,7 @@ describe("MessageController", function () {
         test("returns identity specific announcements created for own identity", async function () {
             const idOfCreatedAnnouncement = await createAnnouncement(mainAccountController.identity.address);
 
-            const announcements = await mainAccountController.announcements.getAnnouncements("en");
+            const announcements = await mainAccountController.announcements.getAnnouncements(LanguageISO639.en);
 
             const containsCreatedAnnouncement = announcements.some((a) => a.id.equals(idOfCreatedAnnouncement));
             expect(containsCreatedAnnouncement).toBeTruthy();
@@ -58,7 +58,7 @@ describe("MessageController", function () {
         test("does not return identity specific announcements created for other identities", async function () {
             const idOfCreatedAnnouncement = await createAnnouncement(otherAccountController.identity.address);
 
-            const announcements = await mainAccountController.announcements.getAnnouncements("en");
+            const announcements = await mainAccountController.announcements.getAnnouncements(LanguageISO639.en);
 
             const containsCreatedAnnouncement = announcements.some((a) => a.id.equals(idOfCreatedAnnouncement));
             expect(containsCreatedAnnouncement).toBeFalsy();
@@ -71,7 +71,7 @@ describe("MessageController", function () {
                 recipients: forIdentity ? [forIdentity.toString()] : [],
                 texts: [
                     {
-                        language: "en",
+                        language: LanguageISO639.en,
                         title: "English Title",
                         body: "English Body"
                     },
