@@ -324,33 +324,33 @@ export class RequestModule extends RuntimeModule {
     }
 
     private async handleRelationshipChangedEvent(event: RelationshipChangedEvent) {
-        const createdRelationship = event.data;
+        const relationship = event.data;
         const services = await this.runtime.getServices(event.eventTargetAddress);
 
-        if (createdRelationship.status === RelationshipStatus.Rejected || createdRelationship.status === RelationshipStatus.Revoked) {
-            await services.consumptionServices.attributes.deleteSharedAttributesForRejectedOrRevokedRelationship({ relationshipId: createdRelationship.id });
+        if (relationship.status === RelationshipStatus.Rejected || relationship.status === RelationshipStatus.Revoked) {
+            await services.consumptionServices.attributes.deleteSharedAttributesForRejectedOrRevokedRelationship({ relationshipId: relationship.id });
             return;
         }
 
         // only trigger for new relationships that were created from an own template
-        if (createdRelationship.status !== RelationshipStatus.Pending || !createdRelationship.template.isOwn) return;
+        if (relationship.status !== RelationshipStatus.Pending || !relationship.template.isOwn) return;
 
-        const template = createdRelationship.template;
+        const template = relationship.template;
         const templateId = template.id;
         // do not trigger for templates without the correct content type
         if (template.content["@type"] !== "RelationshipTemplateContent") return;
-        if (createdRelationship.creationContent["@type"] !== "RelationshipCreationContent") {
-            this.logger.error(`The creation content of relationshipId ${createdRelationship.id} is not of type RelationshipCreationContent.`);
+        if (relationship.creationContent["@type"] !== "RelationshipCreationContent") {
+            this.logger.error(`The creation content of relationshipId ${relationship.id} is not of type RelationshipCreationContent.`);
             return;
         }
 
         const result = await services.consumptionServices.outgoingRequests.createAndCompleteFromRelationshipTemplateResponse({
             templateId,
-            responseSourceId: createdRelationship.id,
-            response: createdRelationship.creationContent.response
+            responseSourceId: relationship.id,
+            response: relationship.creationContent.response
         });
         if (result.isError) {
-            this.logger.error(`Could not create and complete request for templateId '${templateId}' and relationshipId '${createdRelationship.id}'. Root error:`, result.error);
+            this.logger.error(`Could not create and complete request for templateId '${templateId}' and relationshipId '${relationship.id}'. Root error:`, result.error);
             return;
         }
     }
