@@ -1,6 +1,8 @@
+import { ILogger } from "@js-soft/logging-abstractions";
 import { Result } from "@js-soft/ts-utils";
 import { AccountController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
+import { RuntimeLoggerFactory } from "../../../RuntimeLoggerFactory";
 import { IdentityDeletionProcessDTO, MessageDTO, RelationshipDTO } from "../../../types";
 import { UseCase } from "../../common";
 import { IdentityDeletionProcessMapper } from "../identityDeletionProcesses";
@@ -14,8 +16,14 @@ export interface SyncEverythingResponse {
 }
 
 export class SyncEverythingUseCase extends UseCase<void, SyncEverythingResponse> {
-    public constructor(@Inject private readonly accountController: AccountController) {
+    private readonly logger: ILogger;
+    public constructor(
+        @Inject private readonly accountController: AccountController,
+        @Inject loggerFactory: RuntimeLoggerFactory
+    ) {
         super();
+
+        this.logger = loggerFactory.getLogger(SyncEverythingUseCase);
     }
 
     private currentSync?: Promise<Result<SyncEverythingResponse>>;
