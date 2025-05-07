@@ -80,6 +80,14 @@ describe("Reference", () => {
         expect(reference.passwordProtection!.salt.toUtf8()).toBe("a16byteslongsalt");
     });
 
+    test("fromUrl with multiple /r/", () => {
+        const reference = Reference.fromUrl("https://backbone.example.com/r/anotherPathSegment/r/r/ANID1234#M3xsZXJKeVg4eWRKREVYb3dxMlBNTW50UlhYQTI3d2dISllBX0JqbkZ4NTVZfHw");
+
+        expect(reference).toBeInstanceOf(Reference);
+
+        expect(reference.backboneBaseUrl).toBe("https://backbone.example.com/r/anotherPathSegment/r");
+    });
+
     test.each([
         "https://backbone.example.com/r/ANID1234?app=anAppName#M3xsZXJKeVg4eWRKREVYb3dxMlBNTW50UlhYQTI3d2dISllBX0JqbkZ4NTVZfHw",
         "QU5JRDEyMzRAaHR0cHM6Ly9iYWNrYm9uZS5leGFtcGxlLmNvbXwzfGxlckp5WDh5ZEpERVhvd3EyUE1NbnRSWFhBMjd3Z0hKWUFfQmpuRng1NVl8fA",
