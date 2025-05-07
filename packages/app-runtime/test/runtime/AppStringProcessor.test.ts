@@ -314,7 +314,7 @@ describe("AppStringProcessor", function () {
         test("get a template using a url", async function () {
             const templateResult = await runtime1Session.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
                 content: RelationshipTemplateContent.from({
-                    onNewRelationship: { items: [AuthenticationRequestItem.from({ mustBeAccepted: false, title: "AnAuthentication" })] }
+                    onNewRelationship: { items: [AuthenticationRequestItem.from({ mustBeAccepted: false, title: "anAuthentication" })] }
                 }).toJSON(),
                 expiresAt: CoreDate.utc().add({ days: 1 }).toISOString()
             });
@@ -332,7 +332,7 @@ describe("AppStringProcessor", function () {
         test("get a template using a url including forIdentity and passwordProtection", async function () {
             const templateResult = await runtime1Session.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
                 content: RelationshipTemplateContent.from({
-                    onNewRelationship: { items: [AuthenticationRequestItem.from({ mustBeAccepted: false, title: "AnAuthentication" })] }
+                    onNewRelationship: { items: [AuthenticationRequestItem.from({ mustBeAccepted: false, title: "anAuthentication" })] }
                 }).toJSON(),
                 expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(),
                 forIdentity: runtime4Session.account.address!,
@@ -354,7 +354,7 @@ describe("AppStringProcessor", function () {
         test("get a template in a token using a url", async function () {
             const templateResult = await runtime1Session.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
                 content: RelationshipTemplateContent.from({
-                    onNewRelationship: { items: [AuthenticationRequestItem.from({ mustBeAccepted: false, title: "AnAuthentication" })] }
+                    onNewRelationship: { items: [AuthenticationRequestItem.from({ mustBeAccepted: false, title: "anAuthentication" })] }
                 }).toJSON(),
                 expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(),
                 forIdentity: runtime4Session.account.address!,
