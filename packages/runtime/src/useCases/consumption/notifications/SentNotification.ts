@@ -22,6 +22,7 @@ export class SentNotificationUseCase extends UseCase<SentNotificationRequest, Lo
     public constructor(
         @Inject private readonly notificationsController: NotificationsController,
         @Inject private readonly messageController: MessageController,
+
         @Inject validator: Validator
     ) {
         super(validator);
