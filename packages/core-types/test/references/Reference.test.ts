@@ -17,7 +17,7 @@ describe("Reference", () => {
         expect(reference.toUrl()).toBe("https://backbone.example.com/r/ANID1234#M3xsZXJKeVg4eWRKREVYb3dxMlBNTW50UlhYQTI3d2dISllBX0JqbkZ4NTVZfHw");
     });
 
-    test("toUrl with custom appName", () => {
+    test("toUrl with custom appId", () => {
         const reference = Reference.from({
             id: CoreId.from("ANID1234"),
             backboneBaseUrl: "https://backbone.example.com",
