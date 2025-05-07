@@ -42,7 +42,6 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
         @Inject private readonly templateController: RelationshipTemplateController,
         @Inject private readonly accountController: AccountController,
         @Inject private readonly outgoingRequestsController: OutgoingRequestsController,
-
         @Inject validator: Validator
     ) {
         super(validator);

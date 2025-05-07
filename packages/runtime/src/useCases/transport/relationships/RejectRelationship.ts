@@ -20,7 +20,6 @@ export class RejectRelationshipUseCase extends UseCase<RejectRelationshipRequest
     public constructor(
         @Inject private readonly relationshipsController: RelationshipsController,
         @Inject private readonly accountController: AccountController,
-
         @Inject validator: Validator
     ) {
         super(validator);

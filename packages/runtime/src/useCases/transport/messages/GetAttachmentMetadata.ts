@@ -21,7 +21,6 @@ export class GetAttachmentMetadataUseCase extends UseCase<GetAttachmentMetadataR
     public constructor(
         @Inject private readonly messageController: MessageController,
         @Inject private readonly fileController: FileController,
-
         @Inject validator: Validator
     ) {
         super(validator);

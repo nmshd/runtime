@@ -28,7 +28,6 @@ export class CreateIdentityRecoveryKitUseCase extends UseCase<CreateIdentityReco
         @Inject private readonly devicesController: DevicesController,
         @Inject private readonly tokenController: TokenController,
         @Inject private readonly accountController: AccountController,
-
         @Inject validator: Validator
     ) {
         super(validator);

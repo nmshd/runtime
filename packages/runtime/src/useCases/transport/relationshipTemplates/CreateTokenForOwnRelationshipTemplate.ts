@@ -45,7 +45,6 @@ export class CreateTokenForOwnRelationshipTemplateUseCase extends UseCase<Create
         @Inject private readonly templateController: RelationshipTemplateController,
         @Inject private readonly tokenController: TokenController,
         @Inject private readonly accountController: AccountController,
-
         @Inject validator: Validator
     ) {
         super(validator);

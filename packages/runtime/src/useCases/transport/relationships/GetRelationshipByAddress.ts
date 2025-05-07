@@ -19,7 +19,6 @@ class Validator extends SchemaValidator<GetRelationshipByAddressRequest> {
 export class GetRelationshipByAddressUseCase extends UseCase<GetRelationshipByAddressRequest, RelationshipDTO> {
     public constructor(
         @Inject private readonly relationshipsController: RelationshipsController,
-
         @Inject validator: Validator
     ) {
         super(validator);

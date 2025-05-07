@@ -19,7 +19,6 @@ class Validator extends SchemaValidator<GetFileRequest> {
 export class GetFileUseCase extends UseCase<GetFileRequest, FileDTO> {
     public constructor(
         @Inject private readonly fileController: FileController,
-
         @Inject validator: Validator
     ) {
         super(validator);

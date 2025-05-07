@@ -62,7 +62,6 @@ export class UploadOwnFileUseCase extends UseCase<UploadOwnFileRequest, FileDTO>
     public constructor(
         @Inject private readonly fileController: FileController,
         @Inject private readonly accountController: AccountController,
-
         @Inject validator: Validator
     ) {
         super(validator);

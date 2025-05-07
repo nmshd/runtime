@@ -19,7 +19,6 @@ class Validator extends SchemaValidator<GetTokenRequest> {
 export class GetTokenUseCase extends UseCase<GetTokenRequest, TokenDTO> {
     public constructor(
         @Inject private readonly tokenController: TokenController,
-
         @Inject validator: Validator
     ) {
         super(validator);

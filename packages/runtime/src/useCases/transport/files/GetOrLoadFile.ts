@@ -26,7 +26,6 @@ export class GetOrLoadFileUseCase extends UseCase<GetOrLoadFileRequest, FileDTO>
         @Inject private readonly fileController: FileController,
         @Inject private readonly tokenController: TokenController,
         @Inject private readonly accountController: AccountController,
-
         @Inject validator: Validator
     ) {
         super(validator);

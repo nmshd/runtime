@@ -79,7 +79,6 @@ export class GetFilesUseCase extends UseCase<GetFilesRequest, FileDTO[]> {
 
     public constructor(
         @Inject private readonly fileController: FileController,
-
         @Inject validator: Validator
     ) {
         super(validator);

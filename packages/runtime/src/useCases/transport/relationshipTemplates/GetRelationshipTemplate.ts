@@ -19,7 +19,6 @@ class Validator extends SchemaValidator<GetRelationshipTemplateRequest> {
 export class GetRelationshipTemplateUseCase extends UseCase<GetRelationshipTemplateRequest, RelationshipTemplateDTO> {
     public constructor(
         @Inject private readonly relationshipTemplateController: RelationshipTemplateController,
-
         @Inject validator: Validator
     ) {
         super(validator);

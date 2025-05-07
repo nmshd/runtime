@@ -20,7 +20,6 @@ export class GetMessageUseCase extends UseCase<GetMessageRequest, MessageWithAtt
     public constructor(
         @Inject private readonly messageController: MessageController,
         @Inject private readonly fileController: FileController,
-
         @Inject validator: Validator
     ) {
         super(validator);

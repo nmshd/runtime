@@ -74,7 +74,6 @@ export class GetTokensUseCase extends UseCase<GetTokensRequest, TokenDTO[]> {
 
     public constructor(
         @Inject private readonly tokenController: TokenController,
-
         @Inject validator: Validator
     ) {
         super(validator);

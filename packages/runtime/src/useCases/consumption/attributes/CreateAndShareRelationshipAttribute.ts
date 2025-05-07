@@ -43,7 +43,6 @@ export class CreateAndShareRelationshipAttributeUseCase extends UseCase<CreateAn
         @Inject private readonly accountController: AccountController,
         @Inject private readonly requestsController: OutgoingRequestsController,
         @Inject private readonly messageController: MessageController,
-
         @Inject validator: Validator
     ) {
         super(validator);

@@ -64,7 +64,6 @@ export class CreateOwnTokenUseCase extends UseCase<CreateOwnTokenRequest, TokenD
     public constructor(
         @Inject private readonly tokenController: TokenController,
         @Inject private readonly accountController: AccountController,
-
         @Inject validator: Validator
     ) {
         super(validator);

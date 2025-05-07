@@ -84,7 +84,6 @@ export class GetRelationshipTemplatesUseCase extends UseCase<GetRelationshipTemp
 
     public constructor(
         @Inject private readonly relationshipTemplateController: RelationshipTemplateController,
-
         @Inject validator: Validator
     ) {
         super(validator);

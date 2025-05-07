@@ -24,7 +24,6 @@ export class LoadPeerRelationshipTemplateUseCase extends UseCase<LoadPeerRelatio
         @Inject private readonly templateController: RelationshipTemplateController,
         @Inject private readonly tokenController: TokenController,
         @Inject private readonly accountController: AccountController,
-
         @Inject validator: Validator
     ) {
         super(validator);

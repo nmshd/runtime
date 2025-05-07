@@ -1810,7 +1810,8 @@ export class DataViewExpander {
             image: "",
             filename: file.filename,
             filesize: file.filesize,
-            createdBy: await this.expandAddress(file.createdBy)
+            createdBy: await this.expandAddress(file.createdBy),
+            truncatedReference: file.truncatedReference
         };
     }
 
