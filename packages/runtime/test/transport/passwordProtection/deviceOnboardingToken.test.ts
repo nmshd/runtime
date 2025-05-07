@@ -26,10 +26,10 @@ describe("Password-protected DeviceOnboardingTokens", () => {
         expect(deviceOnboardingToken.passwordProtection?.password).toBe("password");
         expect(deviceOnboardingToken.passwordProtection?.passwordIsPin).toBeUndefined();
 
-        const reference = TokenReference.from(deviceOnboardingToken.truncatedReference);
+        const reference = TokenReference.from(deviceOnboardingToken.reference.truncated);
         expect(reference.passwordProtection!.passwordType).toBe("pw");
 
-        const loadResult = await runtimeServices2.transport.tokens.loadPeerToken({ reference: deviceOnboardingToken.truncatedReference, ephemeral: true, password: "password" });
+        const loadResult = await runtimeServices2.transport.tokens.loadPeerToken({ reference: deviceOnboardingToken.reference.truncated, ephemeral: true, password: "password" });
         expect(loadResult).toBeSuccessful();
         expect(loadResult.value.passwordProtection?.password).toBe("password");
         expect(loadResult.value.passwordProtection?.passwordIsPin).toBeUndefined();
@@ -42,10 +42,10 @@ describe("Password-protected DeviceOnboardingTokens", () => {
         expect(deviceOnboardingToken.passwordProtection?.password).toBe("1234");
         expect(deviceOnboardingToken.passwordProtection?.passwordIsPin).toBe(true);
 
-        const reference = TokenReference.from(deviceOnboardingToken.truncatedReference);
+        const reference = TokenReference.from(deviceOnboardingToken.reference.truncated);
         expect(reference.passwordProtection!.passwordType).toBe("pin4");
 
-        const loadResult = await runtimeServices2.transport.tokens.loadPeerToken({ reference: deviceOnboardingToken.truncatedReference, ephemeral: true, password: "1234" });
+        const loadResult = await runtimeServices2.transport.tokens.loadPeerToken({ reference: deviceOnboardingToken.reference.truncated, ephemeral: true, password: "1234" });
         expect(loadResult).toBeSuccessful();
         expect(loadResult.value.passwordProtection?.password).toBe("1234");
         expect(loadResult.value.passwordProtection?.passwordIsPin).toBe(true);
@@ -57,7 +57,7 @@ describe("Password-protected DeviceOnboardingTokens", () => {
         ).value;
         expect(deviceOnboardingToken.passwordProtection!.passwordLocationIndicator).toBe(50);
 
-        const reference = TokenReference.from(deviceOnboardingToken.truncatedReference);
+        const reference = TokenReference.from(deviceOnboardingToken.reference.truncated);
         expect(reference.passwordProtection!.passwordLocationIndicator).toBe(50);
     });
 
@@ -65,7 +65,7 @@ describe("Password-protected DeviceOnboardingTokens", () => {
         const deviceOnboardingToken = (await runtimeServices1.transport.devices.createDeviceOnboardingToken({ id: device.id, passwordProtection: { password: "password" } })).value;
 
         const loadResult = await runtimeServices2.transport.tokens.loadPeerToken({
-            reference: deviceOnboardingToken.truncatedReference,
+            reference: deviceOnboardingToken.reference.truncated,
             ephemeral: true,
             password: "wrong-password"
         });
@@ -76,7 +76,7 @@ describe("Password-protected DeviceOnboardingTokens", () => {
         const deviceOnboardingToken = (await runtimeServices1.transport.devices.createDeviceOnboardingToken({ id: device.id, passwordProtection: { password: "password" } })).value;
 
         const loadResult = await runtimeServices2.transport.tokens.loadPeerToken({
-            reference: deviceOnboardingToken.truncatedReference,
+            reference: deviceOnboardingToken.reference.truncated,
             ephemeral: true
         });
         expect(loadResult).toBeAnError(/.*/, "error.transport.noPasswordProvided");
@@ -158,7 +158,7 @@ describe("Password-protected DeviceOnboardingTokens", () => {
                 .value;
 
             const loadResult = await runtimeServices2.transport.account.loadItemFromTruncatedReference({
-                reference: deviceOnboardingToken.truncatedReference,
+                reference: deviceOnboardingToken.reference.truncated,
                 password: "password"
             });
             expect(loadResult).toBeSuccessful();
@@ -170,7 +170,7 @@ describe("Password-protected DeviceOnboardingTokens", () => {
                 .value;
 
             const loadResult = await runtimeServices2.transport.account.loadItemFromTruncatedReference({
-                reference: deviceOnboardingToken.truncatedReference,
+                reference: deviceOnboardingToken.reference.truncated,
                 password: "wrong-password"
             });
             expect(loadResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
@@ -180,7 +180,7 @@ describe("Password-protected DeviceOnboardingTokens", () => {
             const deviceOnboardingToken = (await runtimeServices1.transport.devices.createDeviceOnboardingToken({ id: device.id, passwordProtection: { password: "password" } }))
                 .value;
 
-            const loadResult = await runtimeServices2.transport.account.loadItemFromTruncatedReference({ reference: deviceOnboardingToken.truncatedReference });
+            const loadResult = await runtimeServices2.transport.account.loadItemFromTruncatedReference({ reference: deviceOnboardingToken.reference.truncated });
             expect(loadResult).toBeAnError(/.*/, "error.transport.noPasswordProvided");
         });
     });

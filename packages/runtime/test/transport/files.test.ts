@@ -335,7 +335,7 @@ describe("Load peer file with token reference", () => {
         expect(file).toBeDefined();
 
         const token = (await transportServices1.files.createTokenForFile({ fileId: file.id })).value;
-        const response = await transportServices2.files.getOrLoadFile({ reference: token.truncatedReference });
+        const response = await transportServices2.files.getOrLoadFile({ reference: token.reference.truncated });
 
         expect(response).toBeSuccessful();
         expect(response.value).toMatchObject({ ...file, isOwn: false });
@@ -364,7 +364,7 @@ describe("Load peer file with token reference", () => {
             })
         );
         const token = (await transportServices1.files.createTokenForFile({ fileId: uploadOwnFileResult.value.id })).value;
-        const loadFileResult = await transportServices2.files.getOrLoadFile({ reference: token.truncatedReference });
+        const loadFileResult = await transportServices2.files.getOrLoadFile({ reference: token.reference.truncated });
 
         expect(loadFileResult.value.tags).toStrictEqual(["x+%+tag1", "x+%+tag2"]);
     });
@@ -414,7 +414,7 @@ describe("Load peer file with the FileReference", () => {
     });
 
     test("load the file using the FileReference", async () => {
-        const fileResult = await transportServices2.files.getOrLoadFile({ reference: file.truncatedReference });
+        const fileResult = await transportServices2.files.getOrLoadFile({ reference: file.reference.truncated });
         expect(fileResult).toBeSuccessful();
     });
 
