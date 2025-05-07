@@ -47,7 +47,9 @@ export class Reference extends Serializable implements IReference {
     public toUrl(appName = "default"): string {
         if (!this.backboneBaseUrl) throw new CoreError("error.core-types.missingBackboneBaseUrl", "The backboneBaseUrl is required to create a URL from a reference.");
 
-        const truncatedPart = `${this.key.toBase64()}|${this.forIdentityTruncated ?? ""}|${this.passwordProtection?.truncate() ?? ""}`;
+        const truncatedPart = CoreBuffer.fromUtf8(
+            `${this.key.algorithm}|${this.key.secretKey.toBase64URL()}|${this.forIdentityTruncated ?? ""}|${this.passwordProtection?.truncate() ?? ""}`
+        ).toBase64URL();
         const link = `${this.backboneBaseUrl}/References/${this.id.toString()}?app=${appName}#${truncatedPart}`;
 
         return link;
@@ -85,17 +87,21 @@ export class Reference extends Serializable implements IReference {
         const url = new URL(value);
 
         const id = CoreId.from(url.pathname.split("/").pop()!);
-        const backboneBaseUrl = url.hostname;
+        const backboneBaseUrl = `${url.protocol}//${url.host}`;
 
-        const [keyBase64, forIdentityTruncated, passwordProtectionBase64] = url.hash.substring(1).split("|");
+        const hashValue = url.hash.substring(1);
+        const truncatedBuffer = CoreBuffer.fromBase64URL(hashValue);
+        const splitted = truncatedBuffer.toUtf8().split("|");
 
-        const key = CryptoSecretKey.fromBase64(keyBase64);
-        const passwordProtection = passwordProtectionBase64 ? SharedPasswordProtection.fromTruncated(passwordProtectionBase64) : undefined;
+        const secretKey = this.parseSecretKey(splitted[0], splitted[1]);
+        const forIdentityTruncated = splitted[2] ? splitted[2] : undefined;
+
+        const passwordProtection = SharedPasswordProtection.fromTruncated(splitted[3]);
 
         return this.from({
             id,
             backboneBaseUrl,
-            key,
+            key: secretKey,
             forIdentityTruncated,
             passwordProtection
         });
