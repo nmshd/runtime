@@ -47,7 +47,7 @@ describe("AppStringProcessor", function () {
         const result = await runtime1.stringProcessor.processURL("nmshd://qr#", runtime1Session.account);
         expect(result.isError).toBeDefined();
 
-        expect(result.error.code).toBe("error.appStringProcessor.truncatedReference!!Invalid");
+        expect(result.error.code).toBe("error.appStringProcessor.truncatedReferenceInvalid");
 
         expect(mockUiBridge).enterPasswordNotCalled();
         expect(mockUiBridge).requestAccountSelectionNotCalled();
