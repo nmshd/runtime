@@ -39,9 +39,7 @@ export class AppStringProcessor {
         try {
             reference = Reference.from(url);
         } catch (_) {
-            return UserfriendlyResult.fail(
-                new UserfriendlyApplicationError("error.appStringProcessor.truncatedReferenceInvalid", "The given code does not contain a valid truncated reference.")
-            );
+            return UserfriendlyResult.fail(AppRuntimeErrors.startup.wrongURL());
         }
 
         return await this._processReference(reference, account);
