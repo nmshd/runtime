@@ -59,7 +59,7 @@ describe("TokenController", function () {
             expiresAt,
             ephemeral: false
         });
-        const reference = sentToken.toTokenReference();
+        const reference = sentToken.toTokenReference(sender.config.baseUrl);
         const receivedToken = await recipient.tokens.loadPeerTokenByTruncated(reference.truncate(), false);
         tempId1 = sentToken.id;
 
@@ -90,7 +90,7 @@ describe("TokenController", function () {
             expiresAt,
             ephemeral: false
         });
-        const reference = sentToken.toTokenReference().truncate();
+        const reference = sentToken.toTokenReference(sender.config.baseUrl).truncate();
         const receivedToken = await recipient.tokens.loadPeerTokenByTruncated(reference, false);
         tempId2 = sentToken.id;
 
@@ -121,7 +121,7 @@ describe("TokenController", function () {
             expiresAt,
             ephemeral: false
         });
-        const reference = sentToken.toTokenReference().truncate();
+        const reference = sentToken.toTokenReference(sender.config.baseUrl).truncate();
         const receivedToken = await recipient.tokens.loadPeerTokenByTruncated(reference, false);
 
         testTokens(sentToken, receivedToken, tempDate);
@@ -152,7 +152,7 @@ describe("TokenController", function () {
             expiresAt,
             ephemeral: false
         });
-        const reference = sentToken.toTokenReference().truncate();
+        const reference = sentToken.toTokenReference(sender.config.baseUrl).truncate();
         const receivedToken = await recipient.tokens.loadPeerTokenByTruncated(reference, false);
 
         testTokens(sentToken, receivedToken, tempDate);
@@ -187,7 +187,7 @@ describe("TokenController", function () {
             expiresAt,
             ephemeral: false
         });
-        const reference = sentToken.toTokenReference().truncate();
+        const reference = sentToken.toTokenReference(sender.config.baseUrl).truncate();
         const receivedToken = await recipient.tokens.loadPeerTokenByTruncated(reference, false);
 
         testTokens(sentToken, receivedToken, tempDate);
@@ -227,7 +227,7 @@ describe("TokenController", function () {
             expiresAt,
             ephemeral: false
         });
-        const reference = sentToken.toTokenReference().truncate();
+        const reference = sentToken.toTokenReference(sender.config.baseUrl).truncate();
         const receivedToken = await recipient.tokens.loadPeerTokenByTruncated(reference, false);
 
         testTokens(sentToken, receivedToken, tempDate);
@@ -274,7 +274,7 @@ describe("TokenController", function () {
             ephemeral: false,
             forIdentity: recipient.identity.address
         });
-        const reference = sentToken.toTokenReference().truncate();
+        const reference = sentToken.toTokenReference(sender.config.baseUrl).truncate();
         const receivedToken = await recipient.tokens.loadPeerTokenByTruncated(reference, false);
         tempId1 = sentToken.id;
 
@@ -299,7 +299,7 @@ describe("TokenController", function () {
         });
 
         await expect(async () => {
-            await recipient.tokens.loadPeerTokenByTruncated(sentToken.toTokenReference().truncate(), true);
+            await recipient.tokens.loadPeerTokenByTruncated(sentToken.toTokenReference(sender.config.baseUrl).truncate(), true);
         }).rejects.toThrow("transport.general.notIntendedForYou");
     });
 
@@ -313,7 +313,7 @@ describe("TokenController", function () {
             forIdentity: sender.identity.address
         });
 
-        const reference = sentToken.toTokenReference();
+        const reference = sentToken.toTokenReference(sender.config.baseUrl);
         reference.forIdentityTruncated = undefined;
         const truncatedReference = reference.truncate();
 
@@ -332,7 +332,7 @@ describe("TokenController", function () {
             ephemeral: false,
             passwordProtection: { password: "password", passwordType: "pw" }
         });
-        const reference = sentToken.toTokenReference();
+        const reference = sentToken.toTokenReference(sender.config.baseUrl);
         const receivedToken = await recipient.tokens.loadPeerTokenByTruncated(reference.truncate(), false, "password");
         tempId1 = sentToken.id;
 
@@ -364,7 +364,7 @@ describe("TokenController", function () {
             ephemeral: false,
             passwordProtection: { password: "password", passwordType: "pw" }
         });
-        const reference = sentToken.toTokenReference().truncate();
+        const reference = sentToken.toTokenReference(sender.config.baseUrl).truncate();
 
         await expect(recipient.tokens.loadPeerTokenByTruncated(reference, true, "wrongPassword")).rejects.toThrow("error.platform.recordNotFound");
         await expect(recipient.tokens.loadPeerTokenByTruncated(reference, true)).rejects.toThrow("error.transport.noPasswordProvided");
@@ -380,7 +380,7 @@ describe("TokenController", function () {
             ephemeral: false,
             passwordProtection: { password: "password", passwordType: "pw" }
         });
-        const reference1 = sentToken1.toTokenReference().truncate();
+        const reference1 = sentToken1.toTokenReference(sender.config.baseUrl).truncate();
 
         const sentToken2 = await sender.tokens.sendToken({
             content,
@@ -388,7 +388,7 @@ describe("TokenController", function () {
             ephemeral: false,
             passwordProtection: { password: "1234", passwordType: "pin4" }
         });
-        const reference2 = sentToken2.toTokenReference().truncate();
+        const reference2 = sentToken2.toTokenReference(sender.config.baseUrl).truncate();
 
         const receivedToken1 = await recipient.tokens.loadPeerTokenByTruncated(reference1, false, "password");
         const receivedToken2 = await recipient.tokens.loadPeerTokenByTruncated(reference2, false, "1234");
@@ -409,7 +409,7 @@ describe("TokenController", function () {
                 ephemeral: false
             });
 
-            const reference = sentToken.toTokenReference().truncate();
+            const reference = sentToken.toTokenReference(sender.config.baseUrl).truncate();
             receivedToken = await recipient.tokens.loadPeerTokenByTruncated(reference, false);
         });
 

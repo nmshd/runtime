@@ -320,7 +320,7 @@ export class MessageController extends TransportController {
         const fileReferences: FileReference[] = [];
         for (const fileObject of parsedParams.attachments) {
             const file = File.from(fileObject);
-            fileReferences.push(file.toFileReference(new URL(this.transport.config.baseUrl).hostname));
+            fileReferences.push(file.toFileReference(this.transport.config.baseUrl));
             publicAttachmentArray.push(file.id);
         }
 

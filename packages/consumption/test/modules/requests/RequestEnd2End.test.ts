@@ -56,7 +56,7 @@ describe("End2End Request/Response via Relationship Template", function () {
     });
 
     test("recipient: load Relationship Template", async function () {
-        const reference = sTemplate.toRelationshipTemplateReference().truncate();
+        const reference = sTemplate.toRelationshipTemplateReference(sAccountController.config.baseUrl).truncate();
         rTemplate = await rAccountController.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(reference);
     });
 
@@ -344,7 +344,7 @@ describe("End2End Request via Template and Response via Message", function () {
     });
 
     test("recipient: load Relationship Template", async function () {
-        const reference = sTemplate.toRelationshipTemplateReference().truncate();
+        const reference = sTemplate.toRelationshipTemplateReference(sAccountController.config.baseUrl).truncate();
         rTemplate = await rAccountController.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(reference);
     });
 
