@@ -97,8 +97,8 @@ describe("LoadItemFromTruncatedReference", () => {
 
         beforeAll(async () => {
             const file = await uploadFile(sTransportServices);
-            fileReference = file.truncatedReference!;
-            fileTokenReference = (await sTransportServices.files.createTokenForFile({ fileId: file.id })).value.truncatedReference!;
+            fileReference = file.truncatedReference;
+            fileTokenReference = (await sTransportServices.files.createTokenForFile({ fileId: file.id })).value.truncatedReference;
         });
 
         test("loads the File with the truncated reference", async () => {
@@ -125,9 +125,9 @@ describe("LoadItemFromTruncatedReference", () => {
                     expiresAt: CoreDate.utc().add({ days: 1 }).toISOString()
                 })
             ).value;
-            relationshipTemplateReference = relationshipTemplate.truncatedReference!;
+            relationshipTemplateReference = relationshipTemplate.truncatedReference;
             relationshipTemplateTokenReference = (await sTransportServices.relationshipTemplates.createTokenForOwnRelationshipTemplate({ templateId: relationshipTemplate.id }))
-                .value.truncatedReference!;
+                .value.truncatedReference;
         });
 
         test("loads the RelationshipTemplate with the truncated reference", async () => {
@@ -148,7 +148,7 @@ describe("LoadItemFromTruncatedReference", () => {
 
         beforeAll(async () => {
             const token = (await sTransportServices.tokens.createOwnToken({ content: {}, expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(), ephemeral: true })).value;
-            tokenReference = token.truncatedReference!;
+            tokenReference = token.truncatedReference;
         });
 
         test("loads the Token with the truncated Token reference", async () => {
