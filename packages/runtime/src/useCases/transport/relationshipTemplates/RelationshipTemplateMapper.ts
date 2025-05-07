@@ -1,6 +1,8 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { ArbitraryRelationshipTemplateContent, RelationshipTemplateContent } from "@nmshd/content";
 import { RelationshipTemplate } from "@nmshd/transport";
+import { Container } from "@nmshd/typescript-ioc";
+import { ConfigHolder } from "../../../ConfigHolder";
 import { RelationshipTemplateDTO } from "../../../types";
 import { PasswordProtectionMapper, RuntimeErrors } from "../../common";
 
@@ -9,6 +11,9 @@ export class RelationshipTemplateMapper {
         if (!template.cache) {
             throw RuntimeErrors.general.cacheEmpty(RelationshipTemplate, template.id.toString());
         }
+
+        const backboneBaseUrl = Container.get<ConfigHolder>(ConfigHolder).getConfig().transportLibrary.baseUrl;
+        const reference = template.toRelationshipTemplateReference(backboneBaseUrl);
 
         return {
             id: template.id.toString(),
@@ -21,7 +26,7 @@ export class RelationshipTemplateMapper {
             content: this.toTemplateContent(template.cache.content),
             expiresAt: template.cache.expiresAt?.toString(),
             maxNumberOfAllocations: template.cache.maxNumberOfAllocations,
-            truncatedReference: template.truncate()
+            truncatedReference: reference.truncate()
         };
     }
 

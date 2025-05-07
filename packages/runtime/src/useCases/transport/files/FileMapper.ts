@@ -1,5 +1,7 @@
 import { CoreBuffer } from "@nmshd/crypto";
 import { File } from "@nmshd/transport";
+import { Container } from "@nmshd/typescript-ioc";
+import { ConfigHolder } from "../../../ConfigHolder";
 import { FileDTO } from "../../../types";
 import { RuntimeErrors } from "../../common";
 import { DownloadFileResponse } from "./DownloadFile";
@@ -21,6 +23,10 @@ export class FileMapper {
         if (!file.cache) {
             throw RuntimeErrors.general.cacheEmpty(File, file.id.toString());
         }
+
+        const backboneBaseUrl = Container.get<ConfigHolder>(ConfigHolder).getConfig().transportLibrary.baseUrl;
+        const reference = file.toFileReference(backboneBaseUrl);
+
         return {
             id: file.id.toString(),
             isOwn: file.isOwn,
@@ -34,7 +40,7 @@ export class FileMapper {
             mimetype: file.cache.mimetype,
             title: file.cache.title ?? "",
             description: file.cache.description,
-            truncatedReference: file.truncate()
+            truncatedReference: reference.truncate()
         };
     }
 
