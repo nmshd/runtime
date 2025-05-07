@@ -24,7 +24,10 @@ export class TokenMapper {
             forIdentity: token.cache.forIdentity?.toString(),
             passwordProtection: PasswordProtectionMapper.toPasswordProtectionDTO(token.passwordProtection),
             truncatedReference: reference.truncate(),
-            url: reference.toUrl(),
+            reference: {
+                truncated: reference.truncate(),
+                url: reference.toUrl()
+            },
             isEphemeral: ephemeral
         };
     }

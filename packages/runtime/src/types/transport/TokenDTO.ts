@@ -11,6 +11,9 @@ export interface TokenDTO {
     forIdentity?: string;
     passwordProtection?: PasswordProtectionDTO;
     truncatedReference: string;
-    url: string;
+    reference: {
+        truncated: string;
+        url: string;
+    };
     isEphemeral: boolean;
 }

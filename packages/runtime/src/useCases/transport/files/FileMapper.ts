@@ -41,7 +41,10 @@ export class FileMapper {
             title: file.cache.title ?? "",
             description: file.cache.description,
             truncatedReference: reference.truncate(),
-            url: reference.toUrl()
+            reference: {
+                truncated: reference.truncate(),
+                url: reference.toUrl()
+            }
         };
     }
 
