@@ -29,6 +29,7 @@ export class FileMapper {
 
         return {
             id: file.id.toString(),
+            isOwn: file.isOwn,
             filename: file.cache.filename,
             tags: file.cache.tags,
             filesize: file.cache.filesize,
@@ -37,7 +38,6 @@ export class FileMapper {
             createdByDevice: file.cache.createdByDevice.toString(),
             expiresAt: file.cache.expiresAt.toString(),
             mimetype: file.cache.mimetype,
-            isOwn: file.isOwn,
             title: file.cache.title ?? "",
             description: file.cache.description,
             truncatedReference: reference.truncate(),

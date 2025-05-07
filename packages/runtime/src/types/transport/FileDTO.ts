@@ -1,5 +1,6 @@
 export interface FileDTO {
     id: string;
+    isOwn: boolean;
     filename: string;
     tags?: string[];
     filesize: number;
@@ -8,7 +9,6 @@ export interface FileDTO {
     createdByDevice: string;
     expiresAt: string;
     mimetype: string;
-    isOwn: boolean;
     title: string;
     description?: string;
     truncatedReference: string;
