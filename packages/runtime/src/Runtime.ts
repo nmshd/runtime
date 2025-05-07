@@ -33,6 +33,7 @@ import {
 } from "@nmshd/transport";
 import { Container, Scope } from "@nmshd/typescript-ioc";
 import { buildInformation } from "./buildInformation";
+import { ConfigHolder } from "./ConfigHolder";
 import { DatabaseSchemaUpgrader } from "./DatabaseSchemaUpgrader";
 import { DataViewExpander } from "./dataViews";
 import { ModulesInitializedEvent, ModulesLoadedEvent, ModulesStartedEvent, RuntimeInitializedEvent, RuntimeInitializingEvent } from "./events";
@@ -211,6 +212,10 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
                 .factory(() => this.correlator!)
                 .scope(Scope.Request);
         }
+
+        Container.bind(ConfigHolder)
+            .factory(() => new ConfigHolder(this.runtimeConfig))
+            .scope(Scope.Request);
 
         Container.bind(EventBus)
             .factory(() => this.eventBus)
