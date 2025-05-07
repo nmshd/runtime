@@ -53,26 +53,6 @@ export class Reference extends Serializable implements IReference {
         return link;
     }
 
-    public static fromUrl(value: string): Reference {
-        const url = new URL(value);
-
-        const id = CoreId.from(url.pathname.split("/").pop()!);
-        const backboneBaseUrl = url.hostname;
-
-        const [keyBase64, forIdentityTruncated, passwordProtectionBase64] = url.hash.substring(1).split("|");
-
-        const key = CryptoSecretKey.fromBase64(keyBase64);
-        const passwordProtection = passwordProtectionBase64 ? SharedPasswordProtection.fromTruncated(passwordProtectionBase64) : undefined;
-
-        return this.from({
-            id,
-            backboneBaseUrl,
-            key,
-            forIdentityTruncated,
-            passwordProtection
-        });
-    }
-
     public static fromTruncated(value: string): Reference {
         const truncatedBuffer = CoreBuffer.fromBase64URL(value);
         const splitted = truncatedBuffer.toUtf8().split("|");
@@ -96,6 +76,26 @@ export class Reference extends Serializable implements IReference {
             id: CoreId.from(id),
             backboneBaseUrl,
             key: secretKey,
+            forIdentityTruncated,
+            passwordProtection
+        });
+    }
+
+    public static fromUrl(value: string): Reference {
+        const url = new URL(value);
+
+        const id = CoreId.from(url.pathname.split("/").pop()!);
+        const backboneBaseUrl = url.hostname;
+
+        const [keyBase64, forIdentityTruncated, passwordProtectionBase64] = url.hash.substring(1).split("|");
+
+        const key = CryptoSecretKey.fromBase64(keyBase64);
+        const passwordProtection = passwordProtectionBase64 ? SharedPasswordProtection.fromTruncated(passwordProtectionBase64) : undefined;
+
+        return this.from({
+            id,
+            backboneBaseUrl,
+            key,
             forIdentityTruncated,
             passwordProtection
         });
