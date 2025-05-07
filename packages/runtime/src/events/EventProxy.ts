@@ -43,8 +43,6 @@ export class EventProxy {
     private readonly subscriptionIds: number[] = [];
 
     public constructor(
-        private readonly templateMapper: RelationshipTemplateMapper,
-        private readonly relationshipMapper: RelationshipMapper,
         private readonly targetEventBus: EventBus,
         private readonly sourceEventBus: EventBus
     ) {}
@@ -75,19 +73,19 @@ export class EventProxy {
         });
 
         this.subscribeToSourceEvent(transport.PeerRelationshipTemplateLoadedEvent, (event) => {
-            this.targetEventBus.publish(new PeerRelationshipTemplateLoadedEvent(event.eventTargetAddress, this.templateMapper.toRelationshipTemplateDTO(event.data)));
+            this.targetEventBus.publish(new PeerRelationshipTemplateLoadedEvent(event.eventTargetAddress, RelationshipTemplateMapper.toRelationshipTemplateDTO(event.data)));
         });
 
         this.subscribeToSourceEvent(transport.RelationshipChangedEvent, (event) => {
-            this.targetEventBus.publish(new RelationshipChangedEvent(event.eventTargetAddress, this.relationshipMapper.toRelationshipDTO(event.data)));
+            this.targetEventBus.publish(new RelationshipChangedEvent(event.eventTargetAddress, RelationshipMapper.toRelationshipDTO(event.data)));
         });
 
         this.subscribeToSourceEvent(transport.RelationshipReactivationRequestedEvent, (event) => {
-            this.targetEventBus.publish(new RelationshipReactivationRequestedEvent(event.eventTargetAddress, this.relationshipMapper.toRelationshipDTO(event.data)));
+            this.targetEventBus.publish(new RelationshipReactivationRequestedEvent(event.eventTargetAddress, RelationshipMapper.toRelationshipDTO(event.data)));
         });
 
         this.subscribeToSourceEvent(transport.RelationshipReactivationCompletedEvent, (event) => {
-            this.targetEventBus.publish(new RelationshipReactivationCompletedEvent(event.eventTargetAddress, this.relationshipMapper.toRelationshipDTO(event.data)));
+            this.targetEventBus.publish(new RelationshipReactivationCompletedEvent(event.eventTargetAddress, RelationshipMapper.toRelationshipDTO(event.data)));
         });
 
         this.subscribeToSourceEvent(transport.RelationshipDecomposedBySelfEvent, (event) => {
@@ -104,15 +102,15 @@ export class EventProxy {
         });
 
         this.subscribeToSourceEvent(transport.PeerDeletedEvent, (event) => {
-            this.targetEventBus.publish(new PeerDeletedEvent(event.eventTargetAddress, this.relationshipMapper.toRelationshipDTO(event.data)));
+            this.targetEventBus.publish(new PeerDeletedEvent(event.eventTargetAddress, RelationshipMapper.toRelationshipDTO(event.data)));
         });
 
         this.subscribeToSourceEvent(transport.PeerToBeDeletedEvent, (event) => {
-            this.targetEventBus.publish(new PeerToBeDeletedEvent(event.eventTargetAddress, this.relationshipMapper.toRelationshipDTO(event.data)));
+            this.targetEventBus.publish(new PeerToBeDeletedEvent(event.eventTargetAddress, RelationshipMapper.toRelationshipDTO(event.data)));
         });
 
         this.subscribeToSourceEvent(transport.PeerDeletionCancelledEvent, (event) => {
-            this.targetEventBus.publish(new PeerDeletionCancelledEvent(event.eventTargetAddress, this.relationshipMapper.toRelationshipDTO(event.data)));
+            this.targetEventBus.publish(new PeerDeletionCancelledEvent(event.eventTargetAddress, RelationshipMapper.toRelationshipDTO(event.data)));
         });
 
         this.subscribeToSourceEvent(transport.DatawalletSynchronizedEvent, (event) => {

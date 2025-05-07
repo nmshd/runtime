@@ -26,7 +26,7 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
         @Inject private readonly relationshipTemplateController: RelationshipTemplateController,
         @Inject private readonly incomingRequestsController: IncomingRequestsController,
         @Inject private readonly accountController: AccountController,
-        @Inject private readonly relationshipMapper: RelationshipMapper,
+
         @Inject validator: Validator
     ) {
         super(validator);
@@ -51,6 +51,6 @@ export class CreateRelationshipUseCase extends UseCase<CreateRelationshipRequest
 
         await this.accountController.syncDatawallet();
 
-        return Result.ok(this.relationshipMapper.toRelationshipDTO(sendRelationshipResult));
+        return Result.ok(RelationshipMapper.toRelationshipDTO(sendRelationshipResult));
     }
 }

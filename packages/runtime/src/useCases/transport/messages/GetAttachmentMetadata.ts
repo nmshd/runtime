@@ -21,7 +21,7 @@ export class GetAttachmentMetadataUseCase extends UseCase<GetAttachmentMetadataR
     public constructor(
         @Inject private readonly messageController: MessageController,
         @Inject private readonly fileController: FileController,
-        @Inject private readonly fileMapper: FileMapper,
+
         @Inject validator: Validator
     ) {
         super(validator);
@@ -47,6 +47,6 @@ export class GetAttachmentMetadataUseCase extends UseCase<GetAttachmentMetadataR
             return Result.fail(RuntimeErrors.general.recordNotFound(File));
         }
 
-        return Result.ok(this.fileMapper.toFileDTO(file));
+        return Result.ok(FileMapper.toFileDTO(file));
     }
 }

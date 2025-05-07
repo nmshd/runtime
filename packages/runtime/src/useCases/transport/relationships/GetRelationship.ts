@@ -19,7 +19,7 @@ class Validator extends SchemaValidator<GetRelationshipRequest> {
 export class GetRelationshipUseCase extends UseCase<GetRelationshipRequest, RelationshipDTO> {
     public constructor(
         @Inject private readonly relationshipsController: RelationshipsController,
-        @Inject private readonly relationshipMapper: RelationshipMapper,
+
         @Inject validator: Validator
     ) {
         super(validator);
@@ -31,6 +31,6 @@ export class GetRelationshipUseCase extends UseCase<GetRelationshipRequest, Rela
             return Result.fail(RuntimeErrors.general.recordNotFound(Relationship));
         }
 
-        return Result.ok(this.relationshipMapper.toRelationshipDTO(relationship));
+        return Result.ok(RelationshipMapper.toRelationshipDTO(relationship));
     }
 }

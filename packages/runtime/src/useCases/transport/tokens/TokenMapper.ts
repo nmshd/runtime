@@ -1,16 +1,17 @@
 import { Token } from "@nmshd/transport";
+import { Container } from "@nmshd/typescript-ioc";
+import { ConfigHolder } from "../../../ConfigHolder";
 import { TokenDTO } from "../../../types";
 import { PasswordProtectionMapper, RuntimeErrors } from "../../common";
 
 export class TokenMapper {
-    public constructor(private readonly backboneBaseUrl: string) {}
-
-    public toTokenDTO(token: Token, ephemeral: boolean): TokenDTO {
+    public static toTokenDTO(token: Token, ephemeral: boolean): TokenDTO {
         if (!token.cache) {
             throw RuntimeErrors.general.cacheEmpty(Token, token.id.toString());
         }
 
-        const reference = token.toTokenReference(this.backboneBaseUrl);
+        const backboneBaseUrl = Container.get<ConfigHolder>(ConfigHolder).getConfig().transportLibrary.baseUrl;
+        const reference = token.toTokenReference(backboneBaseUrl);
 
         return {
             id: token.id.toString(),
@@ -28,7 +29,7 @@ export class TokenMapper {
         };
     }
 
-    public toTokenDTOList(tokens: Token[], ephemeral: boolean): TokenDTO[] {
+    public static toTokenDTOList(tokens: Token[], ephemeral: boolean): TokenDTO[] {
         return tokens.map((t) => this.toTokenDTO(t, ephemeral));
     }
 }

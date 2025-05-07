@@ -36,7 +36,7 @@ export class Reference extends Serializable implements IReference {
     public passwordProtection?: SharedPasswordProtection;
 
     public truncate(): string {
-        const idPart = this.backboneBaseUrl ? `${this.id.toString()}@${new URL(this.backboneBaseUrl).hostname}` : this.id.toString();
+        const idPart = this.backboneBaseUrl ? `${this.id.toString()}@${this.backboneBaseUrl}` : this.id.toString();
 
         const truncatedReference = CoreBuffer.fromUtf8(
             `${idPart}|${this.key.algorithm}|${this.key.secretKey.toBase64URL()}|${this.forIdentityTruncated ?? ""}|${this.passwordProtection?.truncate() ?? ""}`
@@ -44,11 +44,11 @@ export class Reference extends Serializable implements IReference {
         return truncatedReference.toBase64URL();
     }
 
-    public toUrl(appName?: string): string {
+    public toUrl(appName = "default"): string {
         if (!this.backboneBaseUrl) throw new CoreError("error.core-types.missingBackboneBaseUrl", "The backboneBaseUrl is required to create a URL from a reference.");
 
         const truncatedPart = `${this.key.toBase64()}|${this.forIdentityTruncated ?? ""}|${this.passwordProtection?.truncate() ?? ""}`;
-        const link = `${this.backboneBaseUrl}/References/${this.id.toString()}${appName ? `?app=${appName}` : ""}#${truncatedPart}`;
+        const link = `${this.backboneBaseUrl}/References/${this.id.toString()}?app=${appName}#${truncatedPart}`;
 
         return link;
     }
@@ -56,7 +56,7 @@ export class Reference extends Serializable implements IReference {
     public static fromUrl(value: string): Reference {
         const url = new URL(value);
 
-        const id = CoreId.from(url.pathname.split("/").pop() ?? "");
+        const id = CoreId.from(url.pathname.split("/").pop()!);
         const backboneBaseUrl = url.hostname;
 
         const [keyBase64, forIdentityTruncated, passwordProtectionBase64] = url.hash.substring(1).split("|");

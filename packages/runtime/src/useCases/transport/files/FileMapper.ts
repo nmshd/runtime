@@ -1,13 +1,13 @@
 import { CoreBuffer } from "@nmshd/crypto";
 import { File } from "@nmshd/transport";
+import { Container } from "@nmshd/typescript-ioc";
+import { ConfigHolder } from "../../../ConfigHolder";
 import { FileDTO } from "../../../types";
 import { RuntimeErrors } from "../../common";
 import { DownloadFileResponse } from "./DownloadFile";
 
 export class FileMapper {
-    public constructor(private readonly backboneBaseUrl: string) {}
-
-    public toDownloadFileResponse(buffer: CoreBuffer, file: File): DownloadFileResponse {
+    public static toDownloadFileResponse(buffer: CoreBuffer, file: File): DownloadFileResponse {
         if (!file.cache) {
             throw RuntimeErrors.general.cacheEmpty(File, file.id.toString());
         }
@@ -19,10 +19,13 @@ export class FileMapper {
         };
     }
 
-    public toFileDTO(file: File): FileDTO {
+    public static toFileDTO(file: File): FileDTO {
         if (!file.cache) {
             throw RuntimeErrors.general.cacheEmpty(File, file.id.toString());
         }
+
+        const backboneBaseUrl = Container.get<ConfigHolder>(ConfigHolder).getConfig().transportLibrary.baseUrl;
+        const reference = file.toFileReference(backboneBaseUrl);
 
         return {
             id: file.id.toString(),
@@ -37,12 +40,12 @@ export class FileMapper {
             mimetype: file.cache.mimetype,
             title: file.cache.title ?? "",
             description: file.cache.description,
-            truncatedReference: file.truncate(this.backboneBaseUrl),
-            url: file.toFileReference(this.backboneBaseUrl).toUrl()
+            truncatedReference: reference.truncate(),
+            url: reference.toUrl()
         };
     }
 
-    public toFileDTOList(files: File[]): FileDTO[] {
+    public static toFileDTOList(files: File[]): FileDTO[] {
         return files.map((file) => this.toFileDTO(file));
     }
 }

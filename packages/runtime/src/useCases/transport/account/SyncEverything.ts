@@ -14,10 +14,7 @@ export interface SyncEverythingResponse {
 }
 
 export class SyncEverythingUseCase extends UseCase<void, SyncEverythingResponse> {
-    public constructor(
-        @Inject private readonly accountController: AccountController,
-        @Inject private readonly relationshipMapper: RelationshipMapper
-    ) {
+    public constructor(@Inject private readonly accountController: AccountController) {
         super();
     }
 
@@ -41,7 +38,7 @@ export class SyncEverythingUseCase extends UseCase<void, SyncEverythingResponse>
         const changedItems = await this.accountController.syncEverything();
 
         const messageDTOs = MessageMapper.toMessageDTOList(changedItems.messages);
-        const relationshipDTOs = this.relationshipMapper.toRelationshipDTOList(changedItems.relationships);
+        const relationshipDTOs = RelationshipMapper.toRelationshipDTOList(changedItems.relationships);
         const identityDeletionProcessDTOs = IdentityDeletionProcessMapper.toIdentityDeletionProcessDTOList(changedItems.identityDeletionProcesses);
 
         return Result.ok({

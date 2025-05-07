@@ -19,7 +19,7 @@ class Validator extends SchemaValidator<GetRelationshipTemplateRequest> {
 export class GetRelationshipTemplateUseCase extends UseCase<GetRelationshipTemplateRequest, RelationshipTemplateDTO> {
     public constructor(
         @Inject private readonly relationshipTemplateController: RelationshipTemplateController,
-        @Inject private readonly templateMapper: RelationshipTemplateMapper,
+
         @Inject validator: Validator
     ) {
         super(validator);
@@ -31,6 +31,6 @@ export class GetRelationshipTemplateUseCase extends UseCase<GetRelationshipTempl
             return Result.fail(RuntimeErrors.general.recordNotFound(RelationshipTemplate));
         }
 
-        return Result.ok(this.templateMapper.toRelationshipTemplateDTO(template));
+        return Result.ok(RelationshipTemplateMapper.toRelationshipTemplateDTO(template));
     }
 }

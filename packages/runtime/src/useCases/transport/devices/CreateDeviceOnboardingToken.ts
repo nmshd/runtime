@@ -34,7 +34,6 @@ export class CreateDeviceOnboardingTokenUseCase extends UseCase<CreateDeviceOnbo
     public constructor(
         @Inject private readonly devicesController: DevicesController,
         @Inject private readonly tokenController: TokenController,
-        @Inject private readonly tokenMapper: TokenMapper,
         @Inject validator: Validator
     ) {
         super(validator);
@@ -53,6 +52,6 @@ export class CreateDeviceOnboardingTokenUseCase extends UseCase<CreateDeviceOnbo
             passwordProtection: PasswordProtectionMapper.toPasswordProtectionCreationParameters(request.passwordProtection)
         });
 
-        return Result.ok(this.tokenMapper.toTokenDTO(token, true));
+        return Result.ok(TokenMapper.toTokenDTO(token, true));
     }
 }

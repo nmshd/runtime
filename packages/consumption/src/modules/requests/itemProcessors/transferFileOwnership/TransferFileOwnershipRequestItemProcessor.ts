@@ -108,10 +108,8 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
 
         const repositoryAttribute = await this.consumptionController.attributes.createRepositoryAttribute({
             content: IdentityAttribute.from({
-                value: IdentityFileReference.from({
-                    // TODO: should this be truncated with the baseurl included?
-                    value: ownFile.truncate()
-                }),
+                // TODO: provide valid baseUrl here
+                value: IdentityFileReference.from({ value: ownFile.toFileReference("").truncate() }),
                 owner: this.accountController.identity.address,
                 tags: peerFile.cache!.tags
             })

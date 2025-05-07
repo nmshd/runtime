@@ -1,16 +1,19 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { ArbitraryRelationshipTemplateContent, RelationshipTemplateContent } from "@nmshd/content";
 import { RelationshipTemplate } from "@nmshd/transport";
+import { Container } from "@nmshd/typescript-ioc";
+import { ConfigHolder } from "../../../ConfigHolder";
 import { RelationshipTemplateDTO } from "../../../types";
 import { PasswordProtectionMapper, RuntimeErrors } from "../../common";
 
 export class RelationshipTemplateMapper {
-    public constructor(private readonly backboneBaseUrl: string) {}
-
-    public toRelationshipTemplateDTO(template: RelationshipTemplate): RelationshipTemplateDTO {
+    public static toRelationshipTemplateDTO(template: RelationshipTemplate): RelationshipTemplateDTO {
         if (!template.cache) {
             throw RuntimeErrors.general.cacheEmpty(RelationshipTemplate, template.id.toString());
         }
+
+        const backboneBaseUrl = Container.get<ConfigHolder>(ConfigHolder).getConfig().transportLibrary.baseUrl;
+        const reference = template.toRelationshipTemplateReference(backboneBaseUrl);
 
         return {
             id: template.id.toString(),
@@ -23,16 +26,16 @@ export class RelationshipTemplateMapper {
             content: this.toTemplateContent(template.cache.content),
             expiresAt: template.cache.expiresAt?.toString(),
             maxNumberOfAllocations: template.cache.maxNumberOfAllocations,
-            truncatedReference: template.truncate(this.backboneBaseUrl),
-            url: template.toRelationshipTemplateReference(this.backboneBaseUrl).toUrl()
+            truncatedReference: reference.truncate(),
+            url: reference.toUrl()
         };
     }
 
-    public toRelationshipTemplateDTOList(responseItems: RelationshipTemplate[]): RelationshipTemplateDTO[] {
+    public static toRelationshipTemplateDTOList(responseItems: RelationshipTemplate[]): RelationshipTemplateDTO[] {
         return responseItems.map((i) => this.toRelationshipTemplateDTO(i));
     }
 
-    private toTemplateContent(content: Serializable) {
+    private static toTemplateContent(content: Serializable) {
         if (!(content instanceof RelationshipTemplateContent || content instanceof ArbitraryRelationshipTemplateContent)) {
             return ArbitraryRelationshipTemplateContent.from({ value: content }).toJSON();
         }

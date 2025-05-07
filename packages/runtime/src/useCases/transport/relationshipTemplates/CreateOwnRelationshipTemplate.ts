@@ -42,7 +42,7 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
         @Inject private readonly templateController: RelationshipTemplateController,
         @Inject private readonly accountController: AccountController,
         @Inject private readonly outgoingRequestsController: OutgoingRequestsController,
-        @Inject private readonly templateMapper: RelationshipTemplateMapper,
+
         @Inject validator: Validator
     ) {
         super(validator);
@@ -68,7 +68,7 @@ export class CreateOwnRelationshipTemplateUseCase extends UseCase<CreateOwnRelat
 
         await this.accountController.syncDatawallet();
 
-        return Result.ok(this.templateMapper.toRelationshipTemplateDTO(relationshipTemplate));
+        return Result.ok(RelationshipTemplateMapper.toRelationshipTemplateDTO(relationshipTemplate));
     }
 
     private async validateRelationshipTemplateContent(content: any, templateExpiresAt: CoreDate) {

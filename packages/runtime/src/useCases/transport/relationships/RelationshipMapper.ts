@@ -6,16 +6,14 @@ import { RuntimeErrors } from "../../common";
 import { RelationshipTemplateMapper } from "../relationshipTemplates/RelationshipTemplateMapper";
 
 export class RelationshipMapper {
-    public constructor(private readonly relationshipTemplateMapper: RelationshipTemplateMapper) {}
-
-    public toRelationshipDTO(relationship: Relationship): RelationshipDTO {
+    public static toRelationshipDTO(relationship: Relationship): RelationshipDTO {
         if (!relationship.cache) {
             throw RuntimeErrors.general.cacheEmpty(Relationship, relationship.id.toString());
         }
 
         return {
             id: relationship.id.toString(),
-            template: this.relationshipTemplateMapper.toRelationshipTemplateDTO(relationship.cache.template),
+            template: RelationshipTemplateMapper.toRelationshipTemplateDTO(relationship.cache.template),
             status: relationship.status,
             peer: relationship.peer.address.toString(),
             peerDeletionInfo: relationship.peerDeletionInfo?.toJSON(),
@@ -28,7 +26,7 @@ export class RelationshipMapper {
         };
     }
 
-    private toAuditLogEntryDTO(entry: RelationshipAuditLogEntry): RelationshipAuditLogEntryDTO {
+    private static toAuditLogEntryDTO(entry: RelationshipAuditLogEntry): RelationshipAuditLogEntryDTO {
         return {
             createdAt: entry.createdAt.toString(),
             createdBy: entry.createdBy.toString(),
@@ -39,11 +37,11 @@ export class RelationshipMapper {
         };
     }
 
-    public toRelationshipDTOList(relationships: Relationship[]): RelationshipDTO[] {
+    public static toRelationshipDTOList(relationships: Relationship[]): RelationshipDTO[] {
         return relationships.map((r) => this.toRelationshipDTO(r));
     }
 
-    private toCreationContent(content: Serializable) {
+    private static toCreationContent(content: Serializable) {
         if (!(content instanceof RelationshipCreationContent || content instanceof ArbitraryRelationshipCreationContent)) {
             return ArbitraryRelationshipCreationContent.from({ value: content }).toJSON();
         }

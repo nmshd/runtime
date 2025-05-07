@@ -20,7 +20,7 @@ export class RevokeRelationshipUseCase extends UseCase<RevokeRelationshipRequest
     public constructor(
         @Inject private readonly relationshipsController: RelationshipsController,
         @Inject private readonly accountController: AccountController,
-        @Inject private readonly relationshipMapper: RelationshipMapper,
+
         @Inject validator: Validator
     ) {
         super(validator);
@@ -40,6 +40,6 @@ export class RevokeRelationshipUseCase extends UseCase<RevokeRelationshipRequest
 
         await this.accountController.syncDatawallet();
 
-        return Result.ok(this.relationshipMapper.toRelationshipDTO(updatedRelationship));
+        return Result.ok(RelationshipMapper.toRelationshipDTO(updatedRelationship));
     }
 }

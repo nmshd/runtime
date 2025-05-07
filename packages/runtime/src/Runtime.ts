@@ -33,6 +33,7 @@ import {
 } from "@nmshd/transport";
 import { Container, Scope } from "@nmshd/typescript-ioc";
 import { buildInformation } from "./buildInformation";
+import { ConfigHolder } from "./ConfigHolder";
 import { DatabaseSchemaUpgrader } from "./DatabaseSchemaUpgrader";
 import { DataViewExpander } from "./dataViews";
 import { ModulesInitializedEvent, ModulesLoadedEvent, ModulesStartedEvent, RuntimeInitializedEvent, RuntimeInitializingEvent } from "./events";
@@ -42,7 +43,7 @@ import { AttributeListenerModule, DeciderModule, MessageModule, NotificationModu
 import { RuntimeConfig } from "./RuntimeConfig";
 import { RuntimeLoggerFactory } from "./RuntimeLoggerFactory";
 import { RuntimeHealth } from "./types";
-import { FileMapper, MessageMapper, RelationshipMapper, RelationshipTemplateMapper, RuntimeErrors, TokenMapper } from "./useCases";
+import { RuntimeErrors } from "./useCases";
 import { AbstractCorrelator } from "./useCases/common/AbstractCorrelator";
 import { SchemaRepository } from "./useCases/common/SchemaRepository";
 
@@ -150,7 +151,7 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
         await this.initInfrastructure();
         await this.initModules();
 
-        this._eventProxy = new EventProxy(this.templateMapper, this.relationshipMapper, this._eventBus, this.transport.eventBus).start();
+        this._eventProxy = new EventProxy(this._eventBus, this.transport.eventBus).start();
 
         this._isInitialized = true;
         this.eventBus.publish(new RuntimeInitializedEvent());
@@ -205,26 +206,6 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
         return { ...originalTransportConfig, platformAdditionalHeaders };
     }
 
-    private get tokenMapper(): TokenMapper {
-        return new TokenMapper(this.runtimeConfig.transportLibrary.baseUrl);
-    }
-
-    private get templateMapper(): RelationshipTemplateMapper {
-        return new RelationshipTemplateMapper(this.runtimeConfig.transportLibrary.baseUrl);
-    }
-
-    private get relationshipMapper(): RelationshipMapper {
-        return new RelationshipMapper(this.templateMapper);
-    }
-
-    private get fileMapper(): FileMapper {
-        return new FileMapper(this.runtimeConfig.transportLibrary.baseUrl);
-    }
-
-    private get messageMapper(): MessageMapper {
-        return new MessageMapper(this.fileMapper);
-    }
-
     private async initDIContainer() {
         if (this.correlator) {
             Container.bind(AbstractCorrelator)
@@ -232,24 +213,8 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
                 .scope(Scope.Request);
         }
 
-        Container.bind(TokenMapper)
-            .factory(() => this.tokenMapper)
-            .scope(Scope.Request);
-
-        Container.bind(RelationshipTemplateMapper)
-            .factory(() => this.templateMapper)
-            .scope(Scope.Request);
-
-        Container.bind(RelationshipMapper)
-            .factory(() => this.relationshipMapper)
-            .scope(Scope.Request);
-
-        Container.bind(FileMapper)
-            .factory(() => this.fileMapper)
-            .scope(Scope.Request);
-
-        Container.bind(MessageMapper)
-            .factory(() => this.messageMapper)
+        Container.bind(ConfigHolder)
+            .factory(() => new ConfigHolder(this.runtimeConfig))
             .scope(Scope.Request);
 
         Container.bind(EventBus)

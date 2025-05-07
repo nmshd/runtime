@@ -55,7 +55,7 @@ export class Token extends CoreSynchronizable implements IToken {
         return this.fromAny(value);
     }
 
-    public toTokenReference(backboneBaseUrl?: string): TokenReference {
+    public toTokenReference(backboneBaseUrl: string): TokenReference {
         return TokenReference.from({
             id: this.id,
             backboneBaseUrl,
@@ -63,11 +63,6 @@ export class Token extends CoreSynchronizable implements IToken {
             forIdentityTruncated: this.cache!.forIdentity?.toString().slice(-4),
             passwordProtection: this.passwordProtection?.toSharedPasswordProtection()
         });
-    }
-
-    public truncate(backboneBaseUrl?: string): string {
-        const reference = this.toTokenReference(backboneBaseUrl);
-        return reference.truncate();
     }
 
     public setCache(cache: CachedToken): this {

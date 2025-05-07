@@ -24,7 +24,6 @@ export interface DownloadFileResponse {
 export class DownloadFileUseCase extends UseCase<DownloadFileRequest, DownloadFileResponse> {
     public constructor(
         @Inject private readonly fileController: FileController,
-        @Inject private readonly fileMapper: FileMapper,
         @Inject validator: Validator
     ) {
         super(validator);
@@ -40,7 +39,7 @@ export class DownloadFileUseCase extends UseCase<DownloadFileRequest, DownloadFi
 
         const fileContent = await this.fileController.downloadFileContent(fileMetadata);
 
-        const result = Result.ok(this.fileMapper.toDownloadFileResponse(fileContent, fileMetadata));
+        const result = Result.ok(FileMapper.toDownloadFileResponse(fileContent, fileMetadata));
         return result;
     }
 }

@@ -79,7 +79,7 @@ export class GetFilesUseCase extends UseCase<GetFilesRequest, FileDTO[]> {
 
     public constructor(
         @Inject private readonly fileController: FileController,
-        @Inject private readonly fileMapper: FileMapper,
+
         @Inject validator: Validator
     ) {
         super(validator);
@@ -93,6 +93,6 @@ export class GetFilesUseCase extends UseCase<GetFilesRequest, FileDTO[]> {
         }
 
         const files = await this.fileController.getFiles(query);
-        return Result.ok(this.fileMapper.toFileDTOList(files));
+        return Result.ok(FileMapper.toFileDTOList(files));
     }
 }
