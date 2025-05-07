@@ -131,7 +131,7 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
         const repositoryAttribute = await this.consumptionController.attributes.createRepositoryAttribute({
             content: IdentityAttribute.from({
                 value: IdentityFileReference.from({
-                    value: ownFile.truncate()
+                    value: ownFile.toFileReference(this.accountController.config.baseUrl).truncate()
                 }),
                 owner: this.accountController.identity.address,
                 tags: peerFile.cache!.tags

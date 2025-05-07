@@ -38,6 +38,7 @@ import {
     QueryParamConditions,
     RuntimeServiceProvider,
     TestRuntimeServices,
+    cleanupAttributes,
     emptyRelationshipCreationContent,
     ensureActiveRelationship,
     establishRelationship,
@@ -1103,6 +1104,8 @@ describe("RelationshipDecomposition", () => {
     let multipleRecipientsMessageId: string;
 
     beforeAll(async () => {
+        await cleanupAttributes([services1, services2]);
+
         const relationship = await ensureActiveRelationship(services1.transport, services2.transport);
         relationshipId = relationship.id;
         templateId = relationship.templateId;
@@ -1120,7 +1123,8 @@ describe("RelationshipDecomposition", () => {
 
         await services1.transport.relationships.terminateRelationship({ relationshipId });
         await services1.transport.relationships.decomposeRelationship({ relationshipId });
-        await services2.eventBus.waitForEvent(RelationshipChangedEvent);
+        await syncUntilHasRelationships(services2.transport);
+        await services2.eventBus.waitForEvent(RelationshipChangedEvent, (e) => e.data.status === RelationshipStatus.DeletionProposed);
 
         await services1.transport.relationships.terminateRelationship({ relationshipId: relationshipId2 });
     });
@@ -1128,15 +1132,11 @@ describe("RelationshipDecomposition", () => {
     test("relationship should be decomposed", async () => {
         await expect(services1.eventBus).toHavePublished(RelationshipDecomposedBySelfEvent, (e) => e.data.relationshipId === relationshipId);
 
-        const ownRelationship = await services1.transport.relationships.getRelationship({ id: relationshipId });
-        expect(ownRelationship).toBeAnError(/.*/, "error.runtime.recordNotFound");
+        const ownRelationshipResult = await services1.transport.relationships.getRelationship({ id: relationshipId });
+        expect(ownRelationshipResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
 
-        const peerRelationship = (await syncUntilHasRelationships(services2.transport))[0];
-        expect(peerRelationship.status).toBe(RelationshipStatus.DeletionProposed);
-        await expect(services2.eventBus).toHavePublished(
-            RelationshipChangedEvent,
-            (e) => e.data.id === relationshipId && e.data.auditLog[e.data.auditLog.length - 1].reason === RelationshipAuditLogEntryReason.Decomposition
-        );
+        const peerRelationshipResult = await services2.transport.relationships.getRelationship({ id: relationshipId });
+        expect(peerRelationshipResult.value.status).toBe(RelationshipStatus.DeletionProposed);
     });
 
     test("relationship template should be deleted", async () => {

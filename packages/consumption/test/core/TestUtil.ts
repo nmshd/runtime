@@ -189,7 +189,7 @@ export class TestUtil {
             maxNumberOfAllocations: 1
         });
 
-        const reference = templateFrom.toRelationshipTemplateReference().truncate();
+        const reference = templateFrom.toRelationshipTemplateReference(from.config.baseUrl).truncate();
         const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(reference);
 
         await to.relationships.sendRelationship({
@@ -236,7 +236,7 @@ export class TestUtil {
             ephemeral: false
         });
 
-        const tokenRef = token.truncate();
+        const tokenRef = token.toTokenReference(from.config.baseUrl).truncate();
 
         const receivedToken = await to.tokens.loadPeerTokenByTruncated(tokenRef, false);
 
@@ -416,7 +416,7 @@ export class TestUtil {
             ephemeral: false
         });
 
-        const tokenRef = token.truncate();
+        const tokenRef = token.toTokenReference(account.config.baseUrl).truncate();
         return tokenRef;
     }
 

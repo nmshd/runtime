@@ -49,7 +49,7 @@ describe("RelationshipTemplateController", function () {
         tempDate = CoreDate.utc().subtract(TestUtil.tempDateThreshold);
         const sentRelationshipTemplate = await TestUtil.sendRelationshipTemplate(sender);
 
-        const templateReference = sentRelationshipTemplate.toRelationshipTemplateReference().truncate();
+        const templateReference = sentRelationshipTemplate.toRelationshipTemplateReference(sender.config.baseUrl).truncate();
         const receivedRelationshipTemplate = await recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(templateReference);
         tempId1 = sentRelationshipTemplate.id;
 
@@ -68,7 +68,7 @@ describe("RelationshipTemplateController", function () {
         tempDate = CoreDate.utc().subtract(TestUtil.tempDateThreshold);
         const sentRelationshipTemplate = await TestUtil.sendRelationshipTemplate(sender);
 
-        const templateReference = sentRelationshipTemplate.toRelationshipTemplateReference().truncate();
+        const templateReference = sentRelationshipTemplate.toRelationshipTemplateReference(sender.config.baseUrl).truncate();
         const receivedRelationshipTemplate = await recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(templateReference);
         tempId2 = sentRelationshipTemplate.id;
 
@@ -79,7 +79,7 @@ describe("RelationshipTemplateController", function () {
         tempDate = CoreDate.utc().subtract(TestUtil.tempDateThreshold);
         const sentRelationshipTemplate = await TestUtil.sendRelationshipTemplate(sender);
 
-        const templateReference = sentRelationshipTemplate.toRelationshipTemplateReference().truncate();
+        const templateReference = sentRelationshipTemplate.toRelationshipTemplateReference(sender.config.baseUrl).truncate();
         const receivedRelationshipTemplate = await recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(templateReference);
         expectValidRelationshipTemplates(sentRelationshipTemplate, receivedRelationshipTemplate, tempDate);
     });
@@ -103,7 +103,7 @@ describe("RelationshipTemplateController", function () {
         });
         expect(ownTemplate).toBeDefined();
 
-        const templateReference = ownTemplate.toRelationshipTemplateReference().truncate();
+        const templateReference = ownTemplate.toRelationshipTemplateReference(sender.config.baseUrl).truncate();
         const peerTemplate = await recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(templateReference);
         expect(peerTemplate).toBeDefined();
     });
@@ -126,7 +126,9 @@ describe("RelationshipTemplateController", function () {
         });
         expect(ownTemplate).toBeDefined();
 
-        const peerTemplate = await recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(ownTemplate.toRelationshipTemplateReference().truncate());
+        const peerTemplate = await recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(
+            ownTemplate.toRelationshipTemplateReference(sender.config.baseUrl).truncate()
+        );
         expect(peerTemplate).toBeDefined();
     });
 
@@ -136,9 +138,9 @@ describe("RelationshipTemplateController", function () {
             expiresAt: CoreDate.utc().add({ minutes: 1 }),
             forIdentity: sender.identity.address
         });
-        await expect(recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(ownTemplate.toRelationshipTemplateReference().truncate())).rejects.toThrow(
-            "transport.general.notIntendedForYou"
-        );
+        await expect(
+            recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(ownTemplate.toRelationshipTemplateReference(sender.config.baseUrl).truncate())
+        ).rejects.toThrow("transport.general.notIntendedForYou");
     });
 
     test("should throw an error if loaded by the wrong identity and it's uncaught before reaching the Backbone", async function () {
@@ -170,7 +172,7 @@ describe("RelationshipTemplateController", function () {
         expect(ownTemplate.passwordProtection!.salt).toHaveLength(16);
         expect(ownTemplate.passwordProtection!.passwordType).toBe("pw");
 
-        const reference = ownTemplate.toRelationshipTemplateReference();
+        const reference = ownTemplate.toRelationshipTemplateReference(sender.config.baseUrl);
         expect(reference.passwordProtection!.passwordType).toBe("pw");
         expect(reference.passwordProtection!.salt).toStrictEqual(ownTemplate.passwordProtection!.salt);
 
@@ -193,13 +195,13 @@ describe("RelationshipTemplateController", function () {
         expect(ownTemplate).toBeDefined();
 
         await expect(
-            recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(ownTemplate.toRelationshipTemplateReference().truncate(), "wrongPassword")
+            recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(ownTemplate.toRelationshipTemplateReference(sender.config.baseUrl).truncate(), "wrongPassword")
         ).rejects.toThrow(
             "error.platform.recordNotFound (404): 'RelationshipTemplate not found. Make sure the ID exists and the record is not expired. If a password is required to fetch the record, make sure you passed the correct one.'"
         );
-        await expect(recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(ownTemplate.toRelationshipTemplateReference().truncate())).rejects.toThrow(
-            "error.transport.noPasswordProvided"
-        );
+        await expect(
+            recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(ownTemplate.toRelationshipTemplateReference(sender.config.baseUrl).truncate())
+        ).rejects.toThrow("error.transport.noPasswordProvided");
     });
 
     test("should fetch multiple password-protected templates", async function () {
@@ -220,8 +222,8 @@ describe("RelationshipTemplateController", function () {
             }
         });
 
-        await recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(ownTemplate1.toRelationshipTemplateReference().truncate(), "password");
-        await recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(ownTemplate2.toRelationshipTemplateReference().truncate(), "1234");
+        await recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(ownTemplate1.toRelationshipTemplateReference(sender.config.baseUrl).truncate(), "password");
+        await recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(ownTemplate2.toRelationshipTemplateReference(sender.config.baseUrl).truncate(), "1234");
         const fetchCachesResult = await recipient.relationshipTemplates.fetchCaches([ownTemplate1.id, ownTemplate2.id]);
         expect(fetchCachesResult).toHaveLength(2);
     });
@@ -230,7 +232,9 @@ describe("RelationshipTemplateController", function () {
         tempDate = CoreDate.utc().subtract(TestUtil.tempDateThreshold);
         const sentRelationshipTemplate = await TestUtil.sendRelationshipTemplate(sender);
 
-        const receivedRelationshipTemplate = await recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(sentRelationshipTemplate.truncate());
+        const receivedRelationshipTemplate = await recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(
+            sentRelationshipTemplate.toRelationshipTemplateReference(sender.config.baseUrl).truncate()
+        );
 
         expectValidRelationshipTemplates(sentRelationshipTemplate, receivedRelationshipTemplate, tempDate);
     });
@@ -256,7 +260,7 @@ describe("RelationshipTemplateController", function () {
         beforeEach(async function () {
             ownTemplate = await TestUtil.sendRelationshipTemplate(sender);
 
-            const reference = ownTemplate.toRelationshipTemplateReference().truncate();
+            const reference = ownTemplate.toRelationshipTemplateReference(sender.config.baseUrl).truncate();
             peerTemplate = await recipient.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(reference);
         });
 

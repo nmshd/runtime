@@ -44,6 +44,20 @@ export class Reference extends Serializable implements IReference {
         return truncatedReference.toBase64URL();
     }
 
+    public toUrl(appId?: string): string {
+        if (!this.backboneBaseUrl) throw new CoreError("error.core-types.missingBackboneBaseUrl", "The backboneBaseUrl is required to create a URL from a reference.");
+
+        const truncatedPart = CoreBuffer.fromUtf8(
+            `${this.key.algorithm}|${this.key.secretKey.toBase64URL()}|${this.forIdentityTruncated ?? ""}|${this.passwordProtection?.truncate() ?? ""}`
+        ).toBase64URL();
+
+        const appIdPart = appId ? `?app=${appId}` : "";
+
+        const link = `${this.backboneBaseUrl}/r/${this.id.toString()}${appIdPart}#${truncatedPart}`;
+
+        return link;
+    }
+
     public static fromTruncated(value: string): Reference {
         const truncatedBuffer = CoreBuffer.fromBase64URL(value);
         const splitted = truncatedBuffer.toUtf8().split("|");
@@ -65,6 +79,36 @@ export class Reference extends Serializable implements IReference {
 
         return this.from({
             id: CoreId.from(id),
+            backboneBaseUrl,
+            key: secretKey,
+            forIdentityTruncated,
+            passwordProtection
+        });
+    }
+
+    public static fromUrl(value: string): Reference {
+        const url = new URL(value);
+
+        const pathMatch = url.pathname.match(/^(?<baseUrlPath>.*)\/r\/(?<referenceId>[^/]+)$/)?.groups;
+
+        const baseUrlPath = pathMatch?.baseUrlPath ?? "";
+        const backboneBaseUrl = `${url.origin}${baseUrlPath}`;
+        const id = CoreId.from(pathMatch?.referenceId ?? "");
+
+        const hashValue = url.hash.substring(1);
+        const truncatedPart = CoreBuffer.fromBase64URL(hashValue).toUtf8();
+        const truncatedPartMatch = truncatedPart.match(/(?<algorithm>[^|]+)\|(?<key>[^|]+)\|(?<forIdentity>[^|]+)?\|(?<passwordProtection>[^|]+)?/)?.groups;
+
+        const algorithm = truncatedPartMatch?.algorithm ?? "";
+        const key = truncatedPartMatch?.key ?? "";
+        const secretKey = this.parseSecretKey(algorithm, key);
+
+        const forIdentityTruncated = truncatedPartMatch?.forIdentity ?? undefined;
+
+        const passwordProtection = SharedPasswordProtection.fromTruncated(truncatedPartMatch?.passwordProtection);
+
+        return this.from({
+            id,
             backboneBaseUrl,
             key: secretKey,
             forIdentityTruncated,
@@ -100,8 +144,13 @@ export class Reference extends Serializable implements IReference {
     }
 
     public static from(value: IReference | string): Reference {
-        if (typeof value === "string") return this.fromTruncated(value);
+        if (typeof value !== "string") return this.fromAny(value);
 
-        return this.fromAny(value);
+        if (value.startsWith("http")) return this.fromUrl(value);
+        if (value.startsWith("nmshd://qr#") || value.startsWith("nmshd://tr#")) {
+            return this.fromTruncated(value.substring(11));
+        }
+
+        return this.fromTruncated(value);
     }
 }

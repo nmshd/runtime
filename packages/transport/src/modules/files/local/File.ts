@@ -47,13 +47,8 @@ export class File extends CoreSynchronizable implements IFile {
         return this.fromAny(value);
     }
 
-    public toFileReference(): FileReference {
-        return FileReference.from({ id: this.id, key: this.secretKey });
-    }
-
-    public truncate(): string {
-        const reference = this.toFileReference();
-        return reference.truncate();
+    public toFileReference(backboneBaseUrl: string): FileReference {
+        return FileReference.from({ id: this.id, backboneBaseUrl, key: this.secretKey });
     }
 
     public setCache(cache: CachedFile): this {

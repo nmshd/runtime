@@ -134,6 +134,38 @@ expect.extend({
 
         return { pass: true, message: () => "" };
     },
+    showFileCalled(mockUIBridge: unknown, id: string) {
+        if (!(mockUIBridge instanceof MockUIBridge)) {
+            throw new Error("This method can only be used with expect(MockUIBridge).");
+        }
+
+        const calls = mockUIBridge.calls.filter((x) => x.method === "showFile");
+        if (calls.length === 0) {
+            return { pass: false, message: () => "The method showFile was not called." };
+        }
+
+        const matchingCalls = calls.filter((x) => x.file.id === id);
+        if (matchingCalls.length === 0) {
+            return {
+                pass: false,
+                message: () => `The method showFile was called, but not with the specified file id '${id}', instead with ids '${calls.map((e) => e.file.id).join(", ")}'.`
+            };
+        }
+
+        return { pass: true, message: () => "" };
+    },
+    showFileNotCalled(mockUIBridge: unknown) {
+        if (!(mockUIBridge instanceof MockUIBridge)) {
+            throw new Error("This method can only be used with expect(MockUIBridge).");
+        }
+
+        const calls = mockUIBridge.calls.filter((x) => x.method === "showFile");
+        if (calls.length > 0) {
+            return { pass: false, message: () => `The method showFile called: ${calls.map((c) => `'account id: ${c.account.id} - fileId: ${c.file.id}'`)}` };
+        }
+
+        return { pass: true, message: () => "" };
+    },
     showErrorCalled(mockUIBridge: unknown, code: string) {
         if (!(mockUIBridge instanceof MockUIBridge)) {
             throw new Error("This method can only be used with expect(MockUIBridge).");
@@ -167,6 +199,8 @@ declare global {
             enterPasswordNotCalled(): R;
             showRequestCalled(): R;
             showRequestNotCalled(): R;
+            showFileCalled(id: string): R;
+            showFileNotCalled(): R;
             showErrorCalled(code: string): R;
         }
     }

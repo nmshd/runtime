@@ -5,12 +5,12 @@ export type MessageContentDerivation = MailJSON | ResponseWrapperJSON | RequestJ
 
 export interface MessageDTO {
     id: string;
+    isOwn: boolean;
     content: MessageContentDerivation;
     createdBy: string;
     createdByDevice: string;
     recipients: RecipientDTO[];
     createdAt: string;
     attachments: string[];
-    isOwn: boolean;
     wasReadAt?: string;
 }
