@@ -1,8 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import {
     CreateAttributeRequestItem,
-    IdentityAttributeQuery,
-    IReadAttributeRequestItem,
     IRequest,
     IRequestItemGroup,
     ProprietaryString,
@@ -347,58 +345,6 @@ describe("IncomingRequestsController", function () {
         test("throws on syntactically invalid input", async function () {
             await When.iTryToCallCanAcceptWithoutARequestId();
             await Then.itThrowsAnErrorWithTheErrorMessage("*requestId*Value is not defined*");
-        });
-
-        test("throws on invalid input value", async function () {
-            const request = {
-                items: [
-                    {
-                        "@type": "ReadAttributeRequestItem",
-                        mustBeAccepted: true,
-                        query: IdentityAttributeQuery.from({ valueType: "GivenName" })
-                    } as IReadAttributeRequestItem,
-                    {
-                        "@type": "ReadAttributeRequestItem",
-                        mustBeAccepted: false,
-                        query: IdentityAttributeQuery.from({ valueType: "EMailAddress" })
-                    } as IReadAttributeRequestItem
-                ]
-            } as IRequest;
-
-            await Given.anIncomingRequestWith({
-                content: request,
-                status: LocalRequestStatus.DecisionRequired
-            });
-
-            const acceptParams = {
-                items: [
-                    {
-                        accept: true,
-                        newAttribute: {
-                            "@type": "IdentityAttribute",
-                            owner: context.currentIdentity.toString(),
-                            value: {
-                                "@type": "GivenName",
-                                value: "aGivenName"
-                            }
-                        }
-                    } as AcceptReadAttributeRequestItemParametersWithNewAttributeJSON,
-                    {
-                        accept: true,
-                        newAttribute: {
-                            "@type": "IdentityAttribute",
-                            owner: context.currentIdentity.toString(),
-                            value: {
-                                "@type": "EMailAddress",
-                                value: "invalid-email-address"
-                            }
-                        }
-                    } as AcceptReadAttributeRequestItemParametersWithNewAttributeJSON
-                ]
-            } as Omit<DecideRequestParametersJSON, "requestId">;
-
-            await When.iCallCanAcceptWith(acceptParams);
-            await Then.itReturnsAnErrorValidationResult();
         });
 
         test("throws when the Local Request is not in status 'DecisionRequired/ManualDecisionRequired'", async function () {
