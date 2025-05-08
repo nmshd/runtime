@@ -21,14 +21,18 @@ export class TokenMapper {
             content: token.cache.content.toJSON(),
             createdAt: token.cache.createdAt.toString(),
             expiresAt: token.cache.expiresAt.toString(),
-            truncatedReference: reference.truncate(),
-            isEphemeral: ephemeral,
             forIdentity: token.cache.forIdentity?.toString(),
-            passwordProtection: PasswordProtectionMapper.toPasswordProtectionDTO(token.passwordProtection)
+            passwordProtection: PasswordProtectionMapper.toPasswordProtectionDTO(token.passwordProtection),
+            truncatedReference: reference.truncate(),
+            reference: {
+                truncated: reference.truncate(),
+                url: reference.toUrl()
+            },
+            isEphemeral: ephemeral
         };
     }
 
     public static toTokenDTOList(tokens: Token[], ephemeral: boolean): TokenDTO[] {
-        return tokens.map((t) => TokenMapper.toTokenDTO(t, ephemeral));
+        return tokens.map((t) => this.toTokenDTO(t, ephemeral));
     }
 }
