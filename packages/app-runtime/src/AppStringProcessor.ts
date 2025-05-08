@@ -34,26 +34,16 @@ export class AppStringProcessor {
 
         if (!url.startsWith("http") && !url.startsWith("nmshd")) return UserfriendlyResult.fail(AppRuntimeErrors.appStringProcessor.wrongURL());
 
-        let reference: Reference;
-
-        try {
-            reference = Reference.from(url);
-        } catch (_) {
-            return UserfriendlyResult.fail(AppRuntimeErrors.appStringProcessor.invalidReference());
-        }
-
-        return await this._processReference(reference, account);
+        return await this.processReference(url, account);
     }
 
-    public async processTruncatedReference(truncatedReference: string, account?: LocalAccountDTO): Promise<UserfriendlyResult<void>> {
-        let reference: Reference;
+    public async processReference(referenceString: string, account?: LocalAccountDTO): Promise<UserfriendlyResult<void>> {
         try {
-            reference = Reference.fromTruncated(truncatedReference);
+            const reference = Reference.from(referenceString);
+            return await this._processReference(reference, account);
         } catch (_) {
             return UserfriendlyResult.fail(AppRuntimeErrors.appStringProcessor.invalidReference());
         }
-
-        return await this._processReference(reference, account);
     }
 
     private async _processReference(reference: Reference, account?: LocalAccountDTO): Promise<UserfriendlyResult<void>> {
