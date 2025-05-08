@@ -1,5 +1,41 @@
 import { UserfriendlyApplicationError } from "./UserfriendlyApplicationError";
 
+class AppStringProcessor {
+    public wrongURL(): UserfriendlyApplicationError {
+        return new UserfriendlyApplicationError("error.appruntime.appStringProcessor.wrongURL", "The given URL is in a wrong format.");
+    }
+
+    public wrongCode(): UserfriendlyApplicationError {
+        return new UserfriendlyApplicationError("error.appruntime.appStringProcessor.wrongCode", "The given code is in a wrong format.");
+    }
+
+    public invalidReference(): UserfriendlyApplicationError {
+        return new UserfriendlyApplicationError("error.appruntime.appStringProcessor.invalidReference", "The given code does not contain a valid truncated reference.");
+    }
+
+    public notSupportedTokenContent(): UserfriendlyApplicationError {
+        return new UserfriendlyApplicationError("error.appruntime.appStringProcessor.notSupportedTokenContent", "The scanned code is not supported in this context.");
+    }
+
+    public deviceOnboardingNotAllowed(): UserfriendlyApplicationError {
+        return new UserfriendlyApplicationError(
+            "error.appruntime.appStringProcessor.deviceOnboardingNotAllowed",
+            "The Token contains a device onboarding info, but this is not allowed in this context."
+        );
+    }
+
+    public passwordNotProvided(): UserfriendlyApplicationError {
+        return new UserfriendlyApplicationError("error.appruntime.appStringProcessor.passwordNotProvided", "No password was provided.");
+    }
+
+    public passwordRetryLimitReached(): UserfriendlyApplicationError {
+        return new UserfriendlyApplicationError(
+            "error.appruntime.appStringProcessor.passwordRetryLimitReached",
+            "The maximum number of attempts to enter the password was reached."
+        );
+    }
+}
+
 class General {
     public currentSessionUnavailable(): UserfriendlyApplicationError {
         return new UserfriendlyApplicationError(
@@ -52,14 +88,6 @@ class Startup {
     public uiBridgeAlreadyRegistered(): UserfriendlyApplicationError {
         return new UserfriendlyApplicationError("error.appruntime.startup.uiBridgeAlreadyRegistered", "The UI bridge was already registered for this Runtime instance.");
     }
-
-    public wrongURL(): UserfriendlyApplicationError {
-        return new UserfriendlyApplicationError("error.appruntime.startup.wrongURL", "The given URL to start the app is in a wrong format.");
-    }
-
-    public wrongCode(): UserfriendlyApplicationError {
-        return new UserfriendlyApplicationError("error.appruntime.startup.WrongCode", "The given code is in a wrong format.");
-    }
 }
 
 class PushNotificationModule {
@@ -96,6 +124,7 @@ class Modules {
 }
 
 export class AppRuntimeErrors {
+    public static readonly appStringProcessor = new AppStringProcessor();
     public static readonly general = new General();
     public static readonly startup = new Startup();
     public static readonly modules = new Modules();
