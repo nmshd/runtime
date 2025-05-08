@@ -230,9 +230,7 @@ export class TokenController extends TransportController {
         return cachedToken;
     }
 
-    public async loadPeerTokenByTruncated(truncated: string, ephemeral: boolean, password?: string): Promise<Token> {
-        const reference = TokenReference.fromTruncated(truncated);
-
+    public async loadPeerTokenByReference(reference: TokenReference, ephemeral: boolean, password?: string): Promise<Token> {
         if (reference.passwordProtection && !password) throw TransportCoreErrors.general.noPasswordProvided();
         const passwordProtection = reference.passwordProtection
             ? PasswordProtection.from({

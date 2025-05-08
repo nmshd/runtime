@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { AccountController, TokenController } from "@nmshd/transport";
+import { AccountController, TokenController, TokenReference } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { TokenDTO } from "../../../types";
 import { SchemaRepository, SchemaValidator, TokenReferenceString, UseCase } from "../../common";
@@ -30,7 +30,7 @@ export class LoadPeerTokenUseCase extends UseCase<LoadPeerTokenRequest, TokenDTO
     }
 
     protected async executeInternal(request: LoadPeerTokenRequest): Promise<Result<TokenDTO>> {
-        const result = await this.tokenController.loadPeerTokenByTruncated(request.reference, request.ephemeral, request.password);
+        const result = await this.tokenController.loadPeerTokenByReference(TokenReference.from(request.reference), request.ephemeral, request.password);
 
         if (!request.ephemeral) {
             await this.accountController.syncDatawallet();
