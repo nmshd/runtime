@@ -14,22 +14,25 @@ class AppStringProcessor {
     }
 
     public notSupportedTokenContent(): UserfriendlyApplicationError {
-        return new UserfriendlyApplicationError("error.appStringProcessor.notSupportedTokenContent", "The scanned code is not supported in this context");
+        return new UserfriendlyApplicationError("error.appruntime.AppStringProcessor.notSupportedTokenContent", "The scanned code is not supported in this context");
     }
 
     public deviceOnboardingNotAllowed(): UserfriendlyApplicationError {
         return new UserfriendlyApplicationError(
-            "error.appStringProcessor.deviceOnboardingNotAllowed",
+            "error.appruntime.AppStringProcessor.deviceOnboardingNotAllowed",
             "The token contained a device onboarding info, but this is not allowed in this context."
         );
     }
 
     public passwordNotProvided(): UserfriendlyApplicationError {
-        return new UserfriendlyApplicationError("error.appStringProcessor.passwordNotProvided", "No password was provided.");
+        return new UserfriendlyApplicationError("error.appruntime.AppStringProcessor.passwordNotProvided", "No password was provided.");
     }
 
     public passwordRetryLimitReached(): UserfriendlyApplicationError {
-        return new UserfriendlyApplicationError("error.appStringProcessor.passwordRetryLimitReached", "The maximum number of attempts to enter the password was reached.");
+        return new UserfriendlyApplicationError(
+            "error.appruntime.AppStringProcessor.passwordRetryLimitReached",
+            "The maximum number of attempts to enter the password was reached."
+        );
     }
 }
 
