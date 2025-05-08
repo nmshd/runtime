@@ -153,7 +153,11 @@ export class Reference extends Serializable implements IReference {
         }
 
         if (value.startsWith("nmshd://")) {
-            return this.fromUrl(value.replace("nmshd://", "https://"));
+            return this.fromUrl(value.replace("nmshd://", "http://"));
+        }
+
+        if (value.startsWith("nmshds://")) {
+            return this.fromUrl(value.replace("nmshds://", "https://"));
         }
 
         return this.fromTruncated(value);
