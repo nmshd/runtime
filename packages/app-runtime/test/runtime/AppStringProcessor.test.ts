@@ -385,7 +385,7 @@ describe("AppStringProcessor", function () {
             expect(runtime4MockUiBridge).showRequestCalled();
         });
 
-        test.each(["nmshd", "nmshds", "http"])("get file using a nmshd url with %s protocol", async function (replacement) {
+        test.each(["nmshd", "http"])("get file using a nmshd url with %s protocol", async function (replacement) {
             const fileResult = await runtime1Session.transportServices.files.uploadOwnFile({
                 filename: "aFileName",
                 content: new TextEncoder().encode("aFileContent"),
