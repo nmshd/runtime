@@ -109,7 +109,7 @@ describe("TransferFileOwnershipRequestItemDVO", () => {
         expect(requestItemDVO.isDecidable).toBe(false);
         expect(requestItemDVO.fileReference).toBe(truncatedFileReference);
         expect(requestItemDVO.file.type).toBe("FileDVO");
-        expect(requestItemDVO.file.truncatedReference).toBe(truncatedFileReference);
+        expect(requestItemDVO.file.reference.truncated).toBe(truncatedFileReference);
     });
 
     test("check the MessageDVO for the recipient", async () => {
@@ -136,7 +136,7 @@ describe("TransferFileOwnershipRequestItemDVO", () => {
         expect(requestItemDVO.isDecidable).toBe(true);
         expect(requestItemDVO.fileReference).toBe(truncatedFileReference);
         expect(requestItemDVO.file.type).toBe("FileDVO");
-        expect(requestItemDVO.file.truncatedReference).toBe(truncatedFileReference);
+        expect(requestItemDVO.file.reference.truncated).toBe(truncatedFileReference);
     });
 
     test("check the MessageDVO for the recipient after acceptance", async () => {
