@@ -280,9 +280,7 @@ export class RelationshipTemplateController extends TransportController {
         return template;
     }
 
-    public async loadPeerRelationshipTemplateByTruncated(truncated: string, password?: string): Promise<RelationshipTemplate> {
-        const reference = RelationshipTemplateReference.fromTruncated(truncated);
-
+    public async loadPeerRelationshipTemplateByReference(reference: RelationshipTemplateReference, password?: string): Promise<RelationshipTemplate> {
         if (reference.passwordProtection && !password) throw TransportCoreErrors.general.noPasswordProvided();
         const passwordProtection = reference.passwordProtection
             ? PasswordProtection.from({

@@ -128,11 +128,6 @@ export class FileController extends TransportController {
         return cachedFile;
     }
 
-    public async getOrLoadFileByTruncated(truncated: string): Promise<File> {
-        const reference = FileReference.fromTruncated(truncated);
-        return await this.getOrLoadFileByReference(reference);
-    }
-
     public async getOrLoadFileByReference(fileReference: FileReference): Promise<File> {
         return await this.getOrLoadFile(fileReference.id, fileReference.key);
     }
