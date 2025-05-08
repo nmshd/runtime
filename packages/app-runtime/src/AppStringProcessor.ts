@@ -120,11 +120,11 @@ export class AppStringProcessor {
         const result = reference.passwordProtection
             ? (
                   await this._fetchPasswordProtectedItemWithRetry(
-                      async (password) => await services.transportServices.account.loadItemFromTruncatedReference({ reference: reference.truncate(), password }),
+                      async (password) => await services.transportServices.account.loadItemFromReference({ reference: reference.truncate(), password }),
                       reference.passwordProtection
                   )
               ).result
-            : await services.transportServices.account.loadItemFromTruncatedReference({ reference: reference.truncate(), password: existingPassword });
+            : await services.transportServices.account.loadItemFromReference({ reference: reference.truncate(), password: existingPassword });
 
         if (result.isError && result.error.code === "error.appStringProcessor.passwordNotProvided") {
             return UserfriendlyResult.ok(undefined);
