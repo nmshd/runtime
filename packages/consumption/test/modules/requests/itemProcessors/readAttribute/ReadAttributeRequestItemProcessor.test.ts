@@ -541,6 +541,37 @@ describe("ReadAttributeRequestItemProcessor", function () {
             });
         });
 
+        test("returns an error trying to answer with a new Attribute that doesn't fulfill the validation criteria", async function () {
+            const requestItem = ReadAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: IdentityAttributeQuery.from({ valueType: "EMailAddress" })
+            });
+            const requestId = await ConsumptionIds.request.generate();
+            const request = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({ id: requestId, items: [requestItem] }),
+                statusLog: []
+            });
+
+            const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                accept: true,
+                newAttribute: {
+                    "@type": "IdentityAttribute",
+                    owner: recipient.toString(),
+                    value: {
+                        "@type": "EMailAddress",
+                        value: "invalid-email-address"
+                    }
+                }
+            };
+
+            await expect(processor.canAccept(requestItem, acceptParams, request)).rejects.toThrow(/EMailAddress.value :: Value does not match regular expression*/);
+        });
+
         describe("canAccept ReadAttributeRequestitem with IdentityAttributeQuery", function () {
             test("returns an error when the existing IdentityAttribute is already shared", async function () {
                 const attribute = await consumptionController.attributes.createSharedLocalAttribute({
