@@ -2,35 +2,35 @@ import { UserfriendlyApplicationError } from "./UserfriendlyApplicationError";
 
 class AppStringProcessor {
     public wrongURL(): UserfriendlyApplicationError {
-        return new UserfriendlyApplicationError("error.appruntime.AppStringProcessor.wrongURL", "The given URL is in a wrong format.");
+        return new UserfriendlyApplicationError("error.appruntime.appStringProcessor.wrongURL", "The given URL is in a wrong format.");
     }
 
     public wrongCode(): UserfriendlyApplicationError {
-        return new UserfriendlyApplicationError("error.appruntime.AppStringProcessor.wrongCode", "The given code is in a wrong format.");
+        return new UserfriendlyApplicationError("error.appruntime.appStringProcessor.wrongCode", "The given code is in a wrong format.");
     }
 
     public invalidReference(): UserfriendlyApplicationError {
-        return new UserfriendlyApplicationError("error.appruntime.AppStringProcessor.invalidReference", "The given code does not contain a valid truncated reference.");
+        return new UserfriendlyApplicationError("error.appruntime.appStringProcessor.invalidReference", "The given code does not contain a valid truncated reference.");
     }
 
     public notSupportedTokenContent(): UserfriendlyApplicationError {
-        return new UserfriendlyApplicationError("error.appruntime.AppStringProcessor.notSupportedTokenContent", "The scanned code is not supported in this context");
+        return new UserfriendlyApplicationError("error.appruntime.appStringProcessor.notSupportedTokenContent", "The scanned code is not supported in this context.");
     }
 
     public deviceOnboardingNotAllowed(): UserfriendlyApplicationError {
         return new UserfriendlyApplicationError(
-            "error.appruntime.AppStringProcessor.deviceOnboardingNotAllowed",
-            "The token contained a device onboarding info, but this is not allowed in this context."
+            "error.appruntime.appStringProcessor.deviceOnboardingNotAllowed",
+            "The Token contains a device onboarding info, but this is not allowed in this context."
         );
     }
 
     public passwordNotProvided(): UserfriendlyApplicationError {
-        return new UserfriendlyApplicationError("error.appruntime.AppStringProcessor.passwordNotProvided", "No password was provided.");
+        return new UserfriendlyApplicationError("error.appruntime.appStringProcessor.passwordNotProvided", "No password was provided.");
     }
 
     public passwordRetryLimitReached(): UserfriendlyApplicationError {
         return new UserfriendlyApplicationError(
-            "error.appruntime.AppStringProcessor.passwordRetryLimitReached",
+            "error.appruntime.appStringProcessor.passwordRetryLimitReached",
             "The maximum number of attempts to enter the password was reached."
         );
     }
