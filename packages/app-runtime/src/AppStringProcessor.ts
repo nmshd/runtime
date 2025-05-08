@@ -33,7 +33,7 @@ export class AppStringProcessor {
         url = url.trim();
 
         const parsed = new URL(url);
-        const allowedProtocols = ["http:", "https:", "nmshd:", "nmshds:"];
+        const allowedProtocols = ["http:", "https:", "nmshd:"];
         if (!allowedProtocols.includes(parsed.protocol)) return UserfriendlyResult.fail(AppRuntimeErrors.appStringProcessor.wrongURL());
 
         return await this.processReference(url, account);
