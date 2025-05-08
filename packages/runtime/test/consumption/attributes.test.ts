@@ -3380,7 +3380,7 @@ describe(SetAttributeDeletionInfoOfDeletionProposedRelationshipUseCase.name, () 
         relationshipId = relationship.id;
     }, 30000);
 
-    test("peer shared attributes should be marked as deleted for peer", async () => {
+    test("peer shared Attributes should be marked as deleted for peer", async () => {
         await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
             content: {
                 value: {
@@ -3407,7 +3407,7 @@ describe(SetAttributeDeletionInfoOfDeletionProposedRelationshipUseCase.name, () 
         expect(peerSharedAttributes[0].deletionInfo!.deletionDate).toStrictEqual(deletionDate);
     });
 
-    test("own shared attributes should be marked as deleted for peer", async () => {
+    test("own shared Attributes should be marked as deleted for peer", async () => {
         await executeFullCreateAndShareRepositoryAttributeFlow(services2, services1, {
             content: {
                 value: {
@@ -3442,10 +3442,10 @@ describe(SetAttributeDeletionInfoOfDeletionProposedRelationshipUseCase.name, () 
         expect(result).toBeAnError("'Relationship' not found.", "error.transport.recordNotFound");
     });
 
-    test("should return an error if the Relationship doesn't have status DeletionProposed", async () => {
+    test("should return an error if the Relationship doesn't have status 'DeletionProposed'", async () => {
         const result = await services2.consumption.attributes.setAttributeDeletionInfoOfDeletionProposedRelationship({ relationshipId });
         expect(result).toBeAnError(
-            "In order to manually set the deletionInfo of an Attribute, the corresponding Relationship must be in status DeletionProposed.",
+            "In order to manually set the deletionInfo of an Attribute, the corresponding Relationship must be in status 'DeletionProposed'.",
             "error.consumption.attributes.wrongRelationshipStatusToSetDeletionInfo"
         );
     });
