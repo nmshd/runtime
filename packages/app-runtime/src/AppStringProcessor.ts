@@ -32,7 +32,9 @@ export class AppStringProcessor {
     public async processURL(url: string, account?: LocalAccountDTO): Promise<UserfriendlyResult<void>> {
         url = url.trim();
 
-        if (!url.startsWith("http") && !url.startsWith("nmshd")) return UserfriendlyResult.fail(AppRuntimeErrors.appStringProcessor.wrongURL());
+        const parsed = new URL(url);
+        const allowedProtocols = ["http:", "https:", "nmshd:", "nmshds:"];
+        if (!allowedProtocols.includes(parsed.protocol)) return UserfriendlyResult.fail(AppRuntimeErrors.appStringProcessor.wrongURL());
 
         return await this.processReference(url, account);
     }
