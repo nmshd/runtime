@@ -3369,7 +3369,7 @@ describe("ThirdPartyRelationshipAttributes", () => {
     });
 });
 
-describe.only(SetAttributeDeletionInfoOfDeletionProposedRelationshipUseCase.name, () => {
+describe(SetAttributeDeletionInfoOfDeletionProposedRelationshipUseCase.name, () => {
     let services1: TestRuntimeServices;
     let services2: TestRuntimeServices;
     let relationshipId: string;
@@ -3401,6 +3401,10 @@ describe.only(SetAttributeDeletionInfoOfDeletionProposedRelationshipUseCase.name
         const peerSharedAttributes = (await services2.consumption.attributes.getPeerSharedAttributes({ peer: services1.address })).value;
         expect(peerSharedAttributes).toHaveLength(1);
         expect(peerSharedAttributes[0].deletionInfo!.deletionStatus).toBe(LocalAttributeDeletionStatus.DeletedByOwner);
+
+        const relationship = (await services2.transport.relationships.getRelationship({ id: relationshipId })).value;
+        const deletionDate = relationship.auditLog[relationship.auditLog.length - 1].createdAt;
+        expect(peerSharedAttributes[0].deletionInfo!.deletionDate).toStrictEqual(deletionDate);
     });
 
     test("own shared attributes should be marked as deleted for peer", async () => {
@@ -3424,6 +3428,10 @@ describe.only(SetAttributeDeletionInfoOfDeletionProposedRelationshipUseCase.name
         const ownSharedAttributes = (await services2.consumption.attributes.getOwnSharedAttributes({ peer: services1.address })).value;
         expect(ownSharedAttributes).toHaveLength(1);
         expect(ownSharedAttributes[0].deletionInfo!.deletionStatus).toBe(LocalAttributeDeletionStatus.DeletedByPeer);
+
+        const relationship = (await services2.transport.relationships.getRelationship({ id: relationshipId })).value;
+        const deletionDate = relationship.auditLog[relationship.auditLog.length - 1].createdAt;
+        expect(ownSharedAttributes[0].deletionInfo!.deletionDate).toStrictEqual(deletionDate);
     });
 
     test("should return an error if there is no matching Relationship", async () => {
