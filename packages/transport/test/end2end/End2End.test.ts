@@ -69,7 +69,7 @@ describe("RelationshipTest: Accept", function () {
             ephemeral: false
         });
 
-        const tokenRef = token.toTokenReference(from.config.baseUrl).truncate();
+        const tokenRef = token.toTokenReference(from.config.baseUrl);
 
         const receivedToken = await to.tokens.loadPeerTokenByReference(tokenRef, false);
 
