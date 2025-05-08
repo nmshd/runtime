@@ -97,5 +97,7 @@ describe("Reference", () => {
         const reference = Reference.from(value);
 
         expect(reference).toBeInstanceOf(Reference);
+        expect(reference.id.toString()).toBe("ANID1234");
+        expect(reference.backboneBaseUrl).toBe("https://backbone.example.com");
     });
 });
