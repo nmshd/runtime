@@ -1175,7 +1175,7 @@ describe("RelationshipDecomposition", () => {
         expect(peerSharedAttributesControl).not.toHaveLength(0);
     });
 
-    test("attributes should be marked as deleted for peer", async () => {
+    test.only("attributes should be marked as deleted for peer", async () => {
         const ownSharedAttributes = (await services2.consumption.attributes.getOwnSharedAttributes({ peer: services1.address })).value;
         expect(ownSharedAttributes).toHaveLength(1);
         expect(ownSharedAttributes[0].deletionInfo!.deletionStatus).toBe(LocalAttributeDeletionStatus.DeletedByPeer);

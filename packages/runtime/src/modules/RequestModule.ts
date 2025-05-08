@@ -1,4 +1,4 @@
-import { LocalAttributeDeletionInfoJSON, LocalAttributeDeletionStatus, LocalRequestStatus } from "@nmshd/consumption";
+import { LocalRequestStatus } from "@nmshd/consumption";
 import { RelationshipCreationContent, RequestJSON, ResponseJSON, ResponseResult, ResponseWrapper } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
 import {
@@ -333,43 +333,9 @@ export class RequestModule extends RuntimeModule {
         }
 
         if (relationship.status === RelationshipStatus.DeletionProposed) {
-            const deletionDate = CoreDate.utc().toString();
-
-            const ownSharedAttributeDeletionInfo: LocalAttributeDeletionInfoJSON = {
-                deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
-                deletionDate: deletionDate
-            };
-
-            const ownSharedAttributesResult = await services.consumptionServices.attributes.getOwnSharedAttributes({ peer: relationship.peer });
-            if (ownSharedAttributesResult.isError) {
-                this.logger.error(`Could not get own shared Attributes for peer '${relationship.peer}'. Root error:`, ownSharedAttributesResult.error);
-                return;
-            }
-
-            for (const ownSharedAttribute of ownSharedAttributesResult.value) {
-                await services.consumptionServices.attributes.setDeletionInfoOfAttribute({
-                    attributeId: ownSharedAttribute.id,
-                    deletionInfo: ownSharedAttributeDeletionInfo
-                });
-            }
-
-            const peerSharedAttributeDeletionInfo: LocalAttributeDeletionInfoJSON = {
-                deletionStatus: LocalAttributeDeletionStatus.DeletedByOwner,
-                deletionDate: deletionDate
-            };
-
-            const peerSharedAttributesResult = await services.consumptionServices.attributes.getPeerSharedAttributes({ peer: relationship.peer });
-            if (peerSharedAttributesResult.isError) {
-                this.logger.error(`Could not get peer shared Attributes for peer '${relationship.peer}'. Root error:`, peerSharedAttributesResult.error);
-                return;
-            }
-
-            for (const peerSharedAttribute of peerSharedAttributesResult.value) {
-                await services.consumptionServices.attributes.setDeletionInfoOfAttribute({
-                    attributeId: peerSharedAttribute.id,
-                    deletionInfo: peerSharedAttributeDeletionInfo
-                });
-            }
+            await services.consumptionServices.attributes.setAttributeDeletionInfoOfDeletionProposedRelationship({
+                relationshipId: relationship.id
+            });
         }
 
         // only trigger for new relationships that were created from an own template

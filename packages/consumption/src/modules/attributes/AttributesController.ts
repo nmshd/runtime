@@ -17,7 +17,7 @@ import {
 } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId, ICoreDate, ICoreId } from "@nmshd/core-types";
 import * as iql from "@nmshd/iql";
-import { SynchronizedCollection, TagClient, TransportCoreErrors } from "@nmshd/transport";
+import { Relationship, RelationshipStatus, SynchronizedCollection, TagClient, TransportCoreErrors } from "@nmshd/transport";
 import _ from "lodash";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
@@ -41,7 +41,7 @@ import { CreateRepositoryAttributeParams, ICreateRepositoryAttributeParams } fro
 import { CreateSharedLocalAttributeCopyParams, ICreateSharedLocalAttributeCopyParams } from "./local/CreateSharedLocalAttributeCopyParams";
 import { ICreateSharedLocalAttributeParams } from "./local/CreateSharedLocalAttributeParams";
 import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./local/LocalAttribute";
-import { LocalAttributeDeletionStatus } from "./local/LocalAttributeDeletionInfo";
+import { LocalAttributeDeletionInfo, LocalAttributeDeletionStatus } from "./local/LocalAttributeDeletionInfo";
 import { LocalAttributeShareInfo } from "./local/LocalAttributeShareInfo";
 import { IdentityAttributeQueryTranslator, RelationshipAttributeQueryTranslator, ThirdPartyRelationshipAttributeQueryTranslator } from "./local/QueryTranslator";
 
@@ -1463,5 +1463,51 @@ export class AttributesController extends ConsumptionBaseController {
             name: this.CACHE_TIMESTAMP_DB_KEY,
             value: CoreDate.utc().toJSON()
         });
+    }
+
+    public async setAttributeDeletionInfoOfDeletionProposedRelationship(relationshipId: CoreId): Promise<void> {
+        const relationship = await this.parent.accountController.relationships.getRelationship(relationshipId);
+        if (!relationship) throw TransportCoreErrors.general.recordNotFound(Relationship, relationshipId.toString());
+
+        if (relationship.status !== RelationshipStatus.DeletionProposed) {
+            // TODO:
+            throw new Error();
+        }
+
+        const deletionDate = relationship.cache!.auditLog[relationship.cache!.auditLog.length - 1].createdAt;
+
+        const ownSharedAttributeDeletionInfo = LocalAttributeDeletionInfo.from({
+            deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
+            deletionDate
+        });
+
+        const allAttributes = await this.getLocalAttributes({});
+
+        const ownSharedAttributes = await this.getLocalAttributes(
+            flattenObject({
+                shareInfo: { peer: relationship.peer.toString() },
+                content: { owner: this.identity.address.toString() }
+            })
+        );
+
+        for (const ownSharedAttribute of ownSharedAttributes) {
+            ownSharedAttribute.setDeletionInfo(ownSharedAttributeDeletionInfo, this.identity.address);
+            await this.updateAttributeUnsafe(ownSharedAttribute);
+        }
+
+        const peerSharedAttributeDeletionInfo = LocalAttributeDeletionInfo.from({
+            deletionStatus: LocalAttributeDeletionStatus.DeletedByOwner,
+            deletionDate
+        });
+
+        const peerSharedAttributes = await this.getLocalAttributes({
+            shareInfo: { peer: relationship.peer.toString() },
+            content: { owner: relationship.peer.toString() }
+        });
+
+        for (const peerSharedAttribute of peerSharedAttributes) {
+            peerSharedAttribute.setDeletionInfo(peerSharedAttributeDeletionInfo, this.identity.address);
+            await this.updateAttributeUnsafe(peerSharedAttribute);
+        }
     }
 }
