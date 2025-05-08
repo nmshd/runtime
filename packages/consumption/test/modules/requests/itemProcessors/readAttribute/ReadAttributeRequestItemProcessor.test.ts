@@ -569,7 +569,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 }
             };
 
-            await expect(processor.canAccept(requestItem, acceptParams, request)).rejects.toThrow("EMailAddress.value :: Value does not match regular expression");
+            await expect(processor.canAccept(requestItem, acceptParams, request)).rejects.toThrow(/EMailAddress.value :: Value does not match regular expression*/);
         });
 
         describe("canAccept ReadAttributeRequestitem with IdentityAttributeQuery", function () {
