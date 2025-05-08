@@ -1,5 +1,13 @@
 import { Result } from "@js-soft/ts-utils";
-import { AccountController, RelationshipTemplateController, Token, TokenContentRelationshipTemplate, TokenController } from "@nmshd/transport";
+import {
+    AccountController,
+    RelationshipTemplateController,
+    RelationshipTemplateReference,
+    Token,
+    TokenContentRelationshipTemplate,
+    TokenController,
+    TokenReference
+} from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { RelationshipTemplateDTO } from "../../../types";
 import { Base64ForIdPrefix, RelationshipTemplateReferenceString, RuntimeErrors, SchemaRepository, SchemaValidator, TokenReferenceString, UseCase } from "../../common";
@@ -49,13 +57,13 @@ export class LoadPeerRelationshipTemplateUseCase extends UseCase<LoadPeerRelatio
         throw RuntimeErrors.relationshipTemplates.invalidReference(reference);
     }
 
-    private async loadRelationshipTemplateFromRelationshipTemplateReference(relationshipTemplateReference: string, password?: string): Promise<Result<RelationshipTemplateDTO>> {
-        const template = await this.templateController.loadPeerRelationshipTemplateByTruncated(relationshipTemplateReference, password);
+    private async loadRelationshipTemplateFromRelationshipTemplateReference(reference: string, password?: string): Promise<Result<RelationshipTemplateDTO>> {
+        const template = await this.templateController.loadPeerRelationshipTemplateByReference(RelationshipTemplateReference.from(reference), password);
         return Result.ok(RelationshipTemplateMapper.toRelationshipTemplateDTO(template));
     }
 
     private async loadRelationshipTemplateFromTokenReference(tokenReference: string, password?: string): Promise<Result<RelationshipTemplateDTO>> {
-        const token = await this.tokenController.loadPeerTokenByTruncated(tokenReference, true, password);
+        const token = await this.tokenController.loadPeerTokenByReference(TokenReference.from(tokenReference), true, password);
 
         if (!token.cache) {
             throw RuntimeErrors.general.cacheEmpty(Token, token.id.toString());
