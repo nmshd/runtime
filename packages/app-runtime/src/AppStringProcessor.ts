@@ -32,28 +32,20 @@ export class AppStringProcessor {
     public async processURL(url: string, account?: LocalAccountDTO): Promise<UserfriendlyResult<void>> {
         url = url.trim();
 
-        if (!url.startsWith("http") && !url.startsWith("nmshd")) return UserfriendlyResult.fail(AppRuntimeErrors.appStringProcessor.wrongURL());
+        const parsed = new URL(url);
+        const allowedProtocols = ["http:", "https:", "nmshd:", "nmshds:"];
+        if (!allowedProtocols.includes(parsed.protocol)) return UserfriendlyResult.fail(AppRuntimeErrors.appStringProcessor.wrongURL());
 
-        let reference: Reference;
-
-        try {
-            reference = Reference.from(url);
-        } catch (_) {
-            return UserfriendlyResult.fail(AppRuntimeErrors.appStringProcessor.invalidReference());
-        }
-
-        return await this._processReference(reference, account);
+        return await this.processReference(url, account);
     }
 
-    public async processTruncatedReference(truncatedReference: string, account?: LocalAccountDTO): Promise<UserfriendlyResult<void>> {
-        let reference: Reference;
+    public async processReference(referenceString: string, account?: LocalAccountDTO): Promise<UserfriendlyResult<void>> {
         try {
-            reference = Reference.fromTruncated(truncatedReference);
+            const reference = Reference.from(referenceString);
+            return await this._processReference(reference, account);
         } catch (_) {
             return UserfriendlyResult.fail(AppRuntimeErrors.appStringProcessor.invalidReference());
         }
-
-        return await this._processReference(reference, account);
     }
 
     private async _processReference(reference: Reference, account?: LocalAccountDTO): Promise<UserfriendlyResult<void>> {
@@ -130,11 +122,11 @@ export class AppStringProcessor {
         const result = reference.passwordProtection
             ? (
                   await this._fetchPasswordProtectedItemWithRetry(
-                      async (password) => await services.transportServices.account.loadItemFromTruncatedReference({ reference: reference.truncate(), password }),
+                      async (password) => await services.transportServices.account.loadItemFromReference({ reference: reference.truncate(), password }),
                       reference.passwordProtection
                   )
               ).result
-            : await services.transportServices.account.loadItemFromTruncatedReference({ reference: reference.truncate(), password: existingPassword });
+            : await services.transportServices.account.loadItemFromReference({ reference: reference.truncate(), password: existingPassword });
 
         if (result.isError && result.error.code === "error.appStringProcessor.passwordNotProvided") {
             return UserfriendlyResult.ok(undefined);

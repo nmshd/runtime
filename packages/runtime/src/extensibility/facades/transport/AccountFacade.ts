@@ -10,9 +10,9 @@ import {
     GetIdentityInfoResponse,
     GetIdentityInfoUseCase,
     GetSyncInfoUseCase,
-    LoadItemFromTruncatedReferenceRequest,
-    LoadItemFromTruncatedReferenceResponse,
-    LoadItemFromTruncatedReferenceUseCase,
+    LoadItemFromReferenceRequest,
+    LoadItemFromReferenceResponse,
+    LoadItemFromReferenceUseCase,
     RegisterPushNotificationTokenRequest,
     RegisterPushNotificationTokenResponse,
     RegisterPushNotificationTokenUseCase,
@@ -34,7 +34,7 @@ export class AccountFacade {
         @Inject private readonly getSyncInfoUseCase: GetSyncInfoUseCase,
         @Inject private readonly disableAutoSyncUseCase: DisableAutoSyncUseCase,
         @Inject private readonly enableAutoSyncUseCase: EnableAutoSyncUseCase,
-        @Inject private readonly loadItemFromTruncatedReferenceUseCase: LoadItemFromTruncatedReferenceUseCase,
+        @Inject private readonly loadItemFromReferenceUseCase: LoadItemFromReferenceUseCase,
         @Inject private readonly checkIfIdentityIsDeletedUseCase: CheckIfIdentityIsDeletedUseCase
     ) {}
 
@@ -74,8 +74,15 @@ export class AccountFacade {
         return await this.disableAutoSyncUseCase.execute();
     }
 
-    public async loadItemFromTruncatedReference(request: LoadItemFromTruncatedReferenceRequest): Promise<Result<LoadItemFromTruncatedReferenceResponse, ApplicationError>> {
-        return await this.loadItemFromTruncatedReferenceUseCase.execute(request);
+    public async loadItemFromReference(request: LoadItemFromReferenceRequest): Promise<Result<LoadItemFromReferenceResponse, ApplicationError>> {
+        return await this.loadItemFromReferenceUseCase.execute(request);
+    }
+
+    /**
+     * @deprecated use {@link loadItemFromReference} instead
+     */
+    public async loadItemFromTruncatedReference(request: LoadItemFromReferenceRequest): Promise<Result<LoadItemFromReferenceResponse, ApplicationError>> {
+        return await this.loadItemFromReferenceUseCase.execute(request);
     }
 
     public async checkIfIdentityIsDeleted(): Promise<Result<CheckIfIdentityIsDeletedResponse, ApplicationError>> {
