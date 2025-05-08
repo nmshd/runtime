@@ -32,14 +32,14 @@ export class AppStringProcessor {
     public async processURL(url: string, account?: LocalAccountDTO): Promise<UserfriendlyResult<void>> {
         url = url.trim();
 
-        if (!url.startsWith("http") && !url.startsWith("nmshd")) return UserfriendlyResult.fail(AppRuntimeErrors.startup.wrongURL());
+        if (!url.startsWith("http") && !url.startsWith("nmshd")) return UserfriendlyResult.fail(AppRuntimeErrors.appStringProcessor.wrongURL());
 
         let reference: Reference;
 
         try {
             reference = Reference.from(url);
         } catch (_) {
-            return UserfriendlyResult.fail(AppRuntimeErrors.startup.wrongURL());
+            return UserfriendlyResult.fail(AppRuntimeErrors.appStringProcessor.invalidReference());
         }
 
         return await this._processReference(reference, account);
@@ -50,9 +50,7 @@ export class AppStringProcessor {
         try {
             reference = Reference.fromTruncated(truncatedReference);
         } catch (_) {
-            return UserfriendlyResult.fail(
-                new UserfriendlyApplicationError("error.appStringProcessor.truncatedReferenceInvalid", "The given code does not contain a valid truncated reference.")
-            );
+            return UserfriendlyResult.fail(AppRuntimeErrors.appStringProcessor.invalidReference());
         }
 
         return await this._processReference(reference, account);
@@ -78,7 +76,7 @@ export class AppStringProcessor {
         }
 
         if (!reference.id.toString().startsWith("TOK")) {
-            const error = AppRuntimeErrors.startup.wrongCode();
+            const error = AppRuntimeErrors.appStringProcessor.wrongCode();
             return UserfriendlyResult.fail(error);
         }
 
@@ -102,7 +100,7 @@ export class AppStringProcessor {
         const tokenDTO = tokenResultHolder.result.value;
         const tokenContent = this.parseTokenContent(tokenDTO.content);
         if (!tokenContent) {
-            const error = AppRuntimeErrors.startup.wrongCode();
+            const error = AppRuntimeErrors.appStringProcessor.wrongCode();
             return UserfriendlyResult.fail(error);
         }
 
@@ -155,16 +153,9 @@ export class AppStringProcessor {
                 // RelationshipTemplates are processed by the RequestModule
                 break;
             case "Token":
-                return UserfriendlyResult.fail(
-                    new UserfriendlyApplicationError("error.appStringProcessor.notSupportedTokenContent", "The scanned code is not supported in this context")
-                );
+                return UserfriendlyResult.fail(AppRuntimeErrors.appStringProcessor.notSupportedTokenContent());
             case "DeviceOnboardingInfo":
-                return UserfriendlyResult.fail(
-                    new UserfriendlyApplicationError(
-                        "error.appStringProcessor.deviceOnboardingNotAllowed",
-                        "The token contained a device onboarding info, but this is not allowed in this context."
-                    )
-                );
+                return UserfriendlyResult.fail(AppRuntimeErrors.appStringProcessor.deviceOnboardingNotAllowed());
         }
 
         return UserfriendlyResult.ok(undefined);
@@ -196,7 +187,7 @@ export class AppStringProcessor {
                 passwordProtection.passwordLocationIndicator
             );
             if (passwordResult.isError) {
-                return { result: UserfriendlyResult.fail(new UserfriendlyApplicationError("error.appStringProcessor.passwordNotProvided", "No password was provided.")) };
+                return { result: UserfriendlyResult.fail(AppRuntimeErrors.appStringProcessor.passwordNotProvided()) };
             }
 
             const password = passwordResult.value;
@@ -210,9 +201,7 @@ export class AppStringProcessor {
         }
 
         return {
-            result: UserfriendlyResult.fail(
-                new UserfriendlyApplicationError("error.appStringProcessor.passwordRetryLimitReached", "The maximum number of attempts to enter the password was reached.")
-            )
+            result: UserfriendlyResult.fail(AppRuntimeErrors.appStringProcessor.passwordRetryLimitReached())
         };
     }
 
