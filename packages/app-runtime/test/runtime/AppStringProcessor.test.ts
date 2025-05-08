@@ -47,7 +47,7 @@ describe("AppStringProcessor", function () {
         const result = await runtime1.stringProcessor.processURL("enmeshed://qr#", runtime1Session.account);
         expect(result.isError).toBeDefined();
 
-        expect(result.error.code).toBe("error.appruntime.AppStringProcessor.wrongURL");
+        expect(result.error.code).toBe("error.appruntime.appStringProcessor.wrongURL");
 
         expect(mockUiBridge).enterPasswordNotCalled();
         expect(mockUiBridge).requestAccountSelectionNotCalled();
@@ -57,7 +57,7 @@ describe("AppStringProcessor", function () {
         const result = await runtime1.stringProcessor.processURL("nmshd://qr#", runtime1Session.account);
         expect(result.isError).toBeDefined();
 
-        expect(result.error.code).toBe("error.appruntime.AppStringProcessor.invalidReference");
+        expect(result.error.code).toBe("error.appruntime.appStringProcessor.invalidReference");
 
         expect(mockUiBridge).enterPasswordNotCalled();
         expect(mockUiBridge).requestAccountSelectionNotCalled();
