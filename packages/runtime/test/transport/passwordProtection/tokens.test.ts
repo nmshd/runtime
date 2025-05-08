@@ -142,11 +142,11 @@ describe("Password-protected tokens", () => {
         );
     });
 
-    describe("LoadItemFromTruncatedReferenceUseCase", () => {
+    describe("LoadItemFromReferenceUseCase", () => {
         test("send and receive a password-protected token", async () => {
             const token = await uploadOwnToken(runtimeServices1.transport, undefined, { password: "password" });
 
-            const loadResult = await runtimeServices2.transport.account.loadItemFromTruncatedReference({ reference: token.reference.truncated, password: "password" });
+            const loadResult = await runtimeServices2.transport.account.loadItemFromReference({ reference: token.reference.truncated, password: "password" });
             expect(loadResult).toBeSuccessful();
             expect(loadResult.value.type).toBe("Token");
         });
@@ -154,14 +154,14 @@ describe("Password-protected tokens", () => {
         test("error when loading a token with a wrong password", async () => {
             const token = await uploadOwnToken(runtimeServices1.transport, undefined, { password: "password" });
 
-            const loadResult = await runtimeServices2.transport.account.loadItemFromTruncatedReference({ reference: token.reference.truncated, password: "wrong-password" });
+            const loadResult = await runtimeServices2.transport.account.loadItemFromReference({ reference: token.reference.truncated, password: "wrong-password" });
             expect(loadResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
         });
 
         test("error when loading a token with no password", async () => {
             const token = await uploadOwnToken(runtimeServices1.transport, undefined, { password: "password" });
 
-            const loadResult = await runtimeServices2.transport.account.loadItemFromTruncatedReference({ reference: token.reference.truncated });
+            const loadResult = await runtimeServices2.transport.account.loadItemFromReference({ reference: token.reference.truncated });
             expect(loadResult).toBeAnError(/.*/, "error.transport.noPasswordProvided");
         });
     });

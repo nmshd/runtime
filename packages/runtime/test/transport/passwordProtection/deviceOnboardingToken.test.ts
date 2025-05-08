@@ -152,12 +152,12 @@ describe("Password-protected DeviceOnboardingTokens", () => {
         );
     });
 
-    describe("LoadItemFromTruncatedReferenceUseCase", () => {
+    describe("LoadItemFromReferenceUseCase", () => {
         test("send and receive a password-protected DeviceOnboardingToken", async () => {
             const deviceOnboardingToken = (await runtimeServices1.transport.devices.createDeviceOnboardingToken({ id: device.id, passwordProtection: { password: "password" } }))
                 .value;
 
-            const loadResult = await runtimeServices2.transport.account.loadItemFromTruncatedReference({
+            const loadResult = await runtimeServices2.transport.account.loadItemFromReference({
                 reference: deviceOnboardingToken.reference.truncated,
                 password: "password"
             });
@@ -169,7 +169,7 @@ describe("Password-protected DeviceOnboardingTokens", () => {
             const deviceOnboardingToken = (await runtimeServices1.transport.devices.createDeviceOnboardingToken({ id: device.id, passwordProtection: { password: "password" } }))
                 .value;
 
-            const loadResult = await runtimeServices2.transport.account.loadItemFromTruncatedReference({
+            const loadResult = await runtimeServices2.transport.account.loadItemFromReference({
                 reference: deviceOnboardingToken.reference.truncated,
                 password: "wrong-password"
             });
@@ -180,7 +180,7 @@ describe("Password-protected DeviceOnboardingTokens", () => {
             const deviceOnboardingToken = (await runtimeServices1.transport.devices.createDeviceOnboardingToken({ id: device.id, passwordProtection: { password: "password" } }))
                 .value;
 
-            const loadResult = await runtimeServices2.transport.account.loadItemFromTruncatedReference({ reference: deviceOnboardingToken.reference.truncated });
+            const loadResult = await runtimeServices2.transport.account.loadItemFromReference({ reference: deviceOnboardingToken.reference.truncated });
             expect(loadResult).toBeAnError(/.*/, "error.transport.noPasswordProvided");
         });
     });

@@ -209,10 +209,6 @@ class General {
         return new CoreError("error.transport.notSupported", "The method is not yet supported.");
     }
 
-    public invalidTruncatedReference(message: string) {
-        return new CoreError("error.transport.files.invalidTruncatedReference", message);
-    }
-
     public notIntendedForYou(id: string) {
         return new CoreError(
             "error.transport.general.notIntendedForYou",

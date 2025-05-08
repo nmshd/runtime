@@ -63,7 +63,7 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
     ): Promise<ValidationResult> {
         let file: File;
         try {
-            file = await this.accountController.files.getOrLoadFileByTruncated(requestItem.fileReference.truncate());
+            file = await this.accountController.files.getOrLoadFileByReference(requestItem.fileReference);
         } catch (_) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidRequestItem(
@@ -115,7 +115,7 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
         _params: AcceptRequestItemParametersJSON,
         requestInfo: LocalRequestInfo
     ): Promise<TransferFileOwnershipAcceptResponseItem> {
-        const peerFile = await this.accountController.files.getOrLoadFileByTruncated(requestItem.fileReference.truncate());
+        const peerFile = await this.accountController.files.getOrLoadFileByReference(requestItem.fileReference);
         const fileContent = await this.accountController.files.downloadFileContent(peerFile);
 
         const ownFile = await this.accountController.files.sendFile({

@@ -138,13 +138,13 @@ describe("Password-protected tokens for files", () => {
         );
     });
 
-    describe("LoadItemFromTruncatedReferenceUseCase", () => {
+    describe("LoadItemFromReferenceUseCase", () => {
         test("send and receive a file via password-protected token", async () => {
             const createResult = await runtimeServices1.transport.files.createTokenForFile({
                 fileId,
                 passwordProtection: { password: "password" }
             });
-            const loadResult = await runtimeServices2.transport.account.loadItemFromTruncatedReference({ reference: createResult.value.reference.truncated, password: "password" });
+            const loadResult = await runtimeServices2.transport.account.loadItemFromReference({ reference: createResult.value.reference.truncated, password: "password" });
             expect(loadResult).toBeSuccessful();
             expect(loadResult.value.type).toBe("File");
         });
@@ -154,7 +154,7 @@ describe("Password-protected tokens for files", () => {
                 fileId,
                 passwordProtection: { password: "password" }
             });
-            const loadResult = await runtimeServices2.transport.account.loadItemFromTruncatedReference({
+            const loadResult = await runtimeServices2.transport.account.loadItemFromReference({
                 reference: createResult.value.reference.truncated,
                 password: "wrong-password"
             });
@@ -166,7 +166,7 @@ describe("Password-protected tokens for files", () => {
                 fileId,
                 passwordProtection: { password: "password" }
             });
-            const loadResult = await runtimeServices2.transport.account.loadItemFromTruncatedReference({ reference: createResult.value.reference.truncated });
+            const loadResult = await runtimeServices2.transport.account.loadItemFromReference({ reference: createResult.value.reference.truncated });
             expect(loadResult).toBeAnError(/.*/, "error.transport.noPasswordProvided");
         });
     });

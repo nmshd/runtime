@@ -19745,11 +19745,11 @@ export const DownloadFileRequest: any = {
     }
 }
 
-export const LoadItemFromTruncatedReferenceRequest: any = {
+export const LoadItemFromReferenceRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/LoadItemFromTruncatedReferenceRequest",
+    "$ref": "#/definitions/LoadItemFromReferenceRequest",
     "definitions": {
-        "LoadItemFromTruncatedReferenceRequest": {
+        "LoadItemFromReferenceRequest": {
             "type": "object",
             "properties": {
                 "reference": {

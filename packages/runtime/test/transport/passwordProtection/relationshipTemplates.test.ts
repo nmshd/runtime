@@ -181,7 +181,7 @@ describe("Password-protected templates", () => {
         );
     });
 
-    describe("LoadItemFromTruncatedReferenceUseCase", () => {
+    describe("LoadItemFromReferenceUseCase", () => {
         test("send and receive a password-protected template", async () => {
             const createResult = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
                 content: emptyRelationshipTemplateContent,
@@ -191,7 +191,7 @@ describe("Password-protected templates", () => {
                 }
             });
 
-            const result = await runtimeServices2.transport.account.loadItemFromTruncatedReference({
+            const result = await runtimeServices2.transport.account.loadItemFromReference({
                 reference: createResult.value.reference.truncated,
                 password: "password"
             });
@@ -208,7 +208,7 @@ describe("Password-protected templates", () => {
                 }
             });
 
-            const result = await runtimeServices2.transport.account.loadItemFromTruncatedReference({
+            const result = await runtimeServices2.transport.account.loadItemFromReference({
                 reference: createResult.value.reference.truncated,
                 password: "wrong-password"
             });
@@ -224,7 +224,7 @@ describe("Password-protected templates", () => {
                 }
             });
 
-            const result = await runtimeServices2.transport.account.loadItemFromTruncatedReference({
+            const result = await runtimeServices2.transport.account.loadItemFromReference({
                 reference: createResult.value.reference.truncated
             });
             expect(result).toBeAnError(/.*/, "error.transport.noPasswordProvided");
@@ -330,11 +330,11 @@ describe("Password-protected templates via tokens", () => {
         expect(createResult).toBeAnError(/.*/, "error.runtime.relationshipTemplates.passwordProtectionMustBeInherited");
     });
 
-    describe("LoadItemFromTruncatedReferenceUseCase", () => {
+    describe("LoadItemFromReferenceUseCase", () => {
         test("send and receive a password-protected template via token", async () => {
             const template = await createTemplate(runtimeServices1.transport, undefined, { password: "password" });
 
-            const result = await runtimeServices2.transport.account.loadItemFromTruncatedReference({
+            const result = await runtimeServices2.transport.account.loadItemFromReference({
                 reference: template.reference.truncated,
                 password: "password"
             });
@@ -345,7 +345,7 @@ describe("Password-protected templates via tokens", () => {
         test("error when loading a password-protected template via token with wrong password", async () => {
             const template = await createTemplate(runtimeServices1.transport, undefined, { password: "password" });
 
-            const result = await runtimeServices2.transport.account.loadItemFromTruncatedReference({
+            const result = await runtimeServices2.transport.account.loadItemFromReference({
                 reference: template.reference.truncated,
                 password: "wrong-password"
             });
@@ -355,7 +355,7 @@ describe("Password-protected templates via tokens", () => {
         test("error when loading a password-protected template via token with no password", async () => {
             const template = await createTemplate(runtimeServices1.transport, undefined, { password: "password" });
 
-            const result = await runtimeServices2.transport.account.loadItemFromTruncatedReference({
+            const result = await runtimeServices2.transport.account.loadItemFromReference({
                 reference: template.reference.truncated
             });
             expect(result).toBeAnError(/.*/, "error.transport.noPasswordProvided");
@@ -510,14 +510,14 @@ describe("Password-protected tokens for unprotected templates", () => {
         );
     });
 
-    describe("LoadItemFromTruncatedReferenceUseCase", () => {
+    describe("LoadItemFromReferenceUseCase", () => {
         test("send and receive a template  via password-protected token", async () => {
             const createResult = await runtimeServices1.transport.relationshipTemplates.createTokenForOwnRelationshipTemplate({
                 templateId,
                 passwordProtection: { password: "password" }
             });
 
-            const result = await runtimeServices2.transport.account.loadItemFromTruncatedReference({
+            const result = await runtimeServices2.transport.account.loadItemFromReference({
                 reference: createResult.value.reference.truncated,
                 password: "password"
             });
@@ -531,7 +531,7 @@ describe("Password-protected tokens for unprotected templates", () => {
                 passwordProtection: { password: "password" }
             });
 
-            const result = await runtimeServices2.transport.account.loadItemFromTruncatedReference({
+            const result = await runtimeServices2.transport.account.loadItemFromReference({
                 reference: createResult.value.reference.truncated,
                 password: "wrong-password"
             });
@@ -544,7 +544,7 @@ describe("Password-protected tokens for unprotected templates", () => {
                 passwordProtection: { password: "password" }
             });
 
-            const result = await runtimeServices2.transport.account.loadItemFromTruncatedReference({
+            const result = await runtimeServices2.transport.account.loadItemFromReference({
                 reference: createResult.value.reference.truncated
             });
             expect(result).toBeAnError(/.*/, "error.transport.noPasswordProvided");
