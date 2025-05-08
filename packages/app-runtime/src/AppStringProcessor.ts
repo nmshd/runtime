@@ -2,7 +2,7 @@ import { ILogger, ILoggerFactory } from "@js-soft/logging-abstractions";
 import { Serializable } from "@js-soft/ts-serval";
 import { EventBus, Result } from "@js-soft/ts-utils";
 import { ICoreAddress, Reference, SharedPasswordProtection } from "@nmshd/core-types";
-import { AnonymousServices, Base64ForIdPrefix, DeviceMapper } from "@nmshd/runtime";
+import { AnonymousServices, DeviceMapper } from "@nmshd/runtime";
 import { TokenContentDeviceSharedSecret } from "@nmshd/transport";
 import { AppRuntimeErrors } from "./AppRuntimeErrors";
 import { AppRuntimeServices } from "./AppRuntimeServices";
@@ -32,12 +32,17 @@ export class AppStringProcessor {
     public async processURL(url: string, account?: LocalAccountDTO): Promise<UserfriendlyResult<void>> {
         url = url.trim();
 
-        const prefix = url.substring(0, 11);
-        if (prefix.startsWith("nmshd://qr#") || prefix === "nmshd://tr#") {
-            return await this.processTruncatedReference(url.substring(11), account);
+        if (!url.startsWith("http") && !url.startsWith("nmshd")) return UserfriendlyResult.fail(AppRuntimeErrors.appStringProcessor.wrongURL());
+
+        let reference: Reference;
+
+        try {
+            reference = Reference.from(url);
+        } catch (_) {
+            return UserfriendlyResult.fail(AppRuntimeErrors.appStringProcessor.invalidReference());
         }
 
-        return UserfriendlyResult.fail(AppRuntimeErrors.startup.wrongURL());
+        return await this._processReference(reference, account);
     }
 
     public async processTruncatedReference(truncatedReference: string, account?: LocalAccountDTO): Promise<UserfriendlyResult<void>> {
@@ -45,15 +50,17 @@ export class AppStringProcessor {
         try {
             reference = Reference.fromTruncated(truncatedReference);
         } catch (_) {
-            return UserfriendlyResult.fail(
-                new UserfriendlyApplicationError("error.appStringProcessor.truncatedReferenceInvalid", "The given code does not contain a valid truncated reference.")
-            );
+            return UserfriendlyResult.fail(AppRuntimeErrors.appStringProcessor.invalidReference());
         }
 
+        return await this._processReference(reference, account);
+    }
+
+    private async _processReference(reference: Reference, account?: LocalAccountDTO): Promise<UserfriendlyResult<void>> {
         if (account) return await this._handleReference(reference, account);
 
         // process Files and RelationshipTemplates and ask for an account
-        if (truncatedReference.startsWith(Base64ForIdPrefix.File) || truncatedReference.startsWith(Base64ForIdPrefix.RelationshipTemplate)) {
+        if (reference.id.toString().startsWith("FIL") || reference.id.toString().startsWith("RLT")) {
             const result = await this.selectAccount(reference.forIdentityTruncated);
             if (result.isError) {
                 this.logger.info("Could not query account", result.error);
@@ -68,8 +75,8 @@ export class AppStringProcessor {
             return await this._handleReference(reference, result.value);
         }
 
-        if (!truncatedReference.startsWith(Base64ForIdPrefix.Token)) {
-            const error = AppRuntimeErrors.startup.wrongCode();
+        if (!reference.id.toString().startsWith("TOK")) {
+            const error = AppRuntimeErrors.appStringProcessor.wrongCode();
             return UserfriendlyResult.fail(error);
         }
 
@@ -77,10 +84,10 @@ export class AppStringProcessor {
 
         const tokenResultHolder = reference.passwordProtection
             ? await this._fetchPasswordProtectedItemWithRetry(
-                  async (password) => await this.runtime.anonymousServices.tokens.loadPeerToken({ reference: truncatedReference, password }),
+                  async (password) => await this.runtime.anonymousServices.tokens.loadPeerToken({ reference: reference.truncate(), password }),
                   reference.passwordProtection
               )
-            : { result: await this.runtime.anonymousServices.tokens.loadPeerToken({ reference: truncatedReference }) };
+            : { result: await this.runtime.anonymousServices.tokens.loadPeerToken({ reference: reference.truncate() }) };
 
         if (tokenResultHolder.result.isError && tokenResultHolder.result.error.code === "error.appStringProcessor.passwordNotProvided") {
             return UserfriendlyResult.ok(undefined);
@@ -93,7 +100,7 @@ export class AppStringProcessor {
         const tokenDTO = tokenResultHolder.result.value;
         const tokenContent = this.parseTokenContent(tokenDTO.content);
         if (!tokenContent) {
-            const error = AppRuntimeErrors.startup.wrongCode();
+            const error = AppRuntimeErrors.appStringProcessor.wrongCode();
             return UserfriendlyResult.fail(error);
         }
 
@@ -146,16 +153,9 @@ export class AppStringProcessor {
                 // RelationshipTemplates are processed by the RequestModule
                 break;
             case "Token":
-                return UserfriendlyResult.fail(
-                    new UserfriendlyApplicationError("error.appStringProcessor.notSupportedTokenContent", "The scanned code is not supported in this context")
-                );
+                return UserfriendlyResult.fail(AppRuntimeErrors.appStringProcessor.notSupportedTokenContent());
             case "DeviceOnboardingInfo":
-                return UserfriendlyResult.fail(
-                    new UserfriendlyApplicationError(
-                        "error.appStringProcessor.deviceOnboardingNotAllowed",
-                        "The token contained a device onboarding info, but this is not allowed in this context."
-                    )
-                );
+                return UserfriendlyResult.fail(AppRuntimeErrors.appStringProcessor.deviceOnboardingNotAllowed());
         }
 
         return UserfriendlyResult.ok(undefined);
@@ -187,7 +187,7 @@ export class AppStringProcessor {
                 passwordProtection.passwordLocationIndicator
             );
             if (passwordResult.isError) {
-                return { result: UserfriendlyResult.fail(new UserfriendlyApplicationError("error.appStringProcessor.passwordNotProvided", "No password was provided.")) };
+                return { result: UserfriendlyResult.fail(AppRuntimeErrors.appStringProcessor.passwordNotProvided()) };
             }
 
             const password = passwordResult.value;
@@ -201,9 +201,7 @@ export class AppStringProcessor {
         }
 
         return {
-            result: UserfriendlyResult.fail(
-                new UserfriendlyApplicationError("error.appStringProcessor.passwordRetryLimitReached", "The maximum number of attempts to enter the password was reached.")
-            )
+            result: UserfriendlyResult.fail(AppRuntimeErrors.appStringProcessor.passwordRetryLimitReached())
         };
     }
 

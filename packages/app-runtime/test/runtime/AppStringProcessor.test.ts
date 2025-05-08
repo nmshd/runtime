@@ -1,4 +1,4 @@
-import { ArbitraryRelationshipTemplateContentJSON } from "@nmshd/content";
+import { ArbitraryRelationshipTemplateContentJSON, AuthenticationRequestItem, RelationshipTemplateContent } from "@nmshd/content";
 import { CoreDate, PasswordLocationIndicatorOptions } from "@nmshd/core-types";
 import { DeviceOnboardingInfoDTO, PeerRelationshipTemplateLoadedEvent } from "@nmshd/runtime";
 import assert from "assert";
@@ -43,11 +43,21 @@ describe("AppStringProcessor", function () {
         mockUiBridge.reset();
     });
 
-    test("should process a URL", async function () {
+    test("should process an invalid URL", async function () {
+        const result = await runtime1.stringProcessor.processURL("enmeshed://qr#", runtime1Session.account);
+        expect(result.isError).toBeDefined();
+
+        expect(result.error.code).toBe("error.appruntime.appStringProcessor.wrongURL");
+
+        expect(mockUiBridge).enterPasswordNotCalled();
+        expect(mockUiBridge).requestAccountSelectionNotCalled();
+    });
+
+    test("should process a valid URL with invalid reference", async function () {
         const result = await runtime1.stringProcessor.processURL("nmshd://qr#", runtime1Session.account);
         expect(result.isError).toBeDefined();
 
-        expect(result.error.code).toBe("error.appStringProcessor.truncatedReferenceInvalid");
+        expect(result.error.code).toBe("error.appruntime.appStringProcessor.invalidReference");
 
         expect(mockUiBridge).enterPasswordNotCalled();
         expect(mockUiBridge).requestAccountSelectionNotCalled();
@@ -262,6 +272,117 @@ describe("AppStringProcessor", function () {
             expect(result.value).toBeUndefined();
 
             expect(mockUiBridge).showDeviceOnboardingCalled((deviceOnboardingInfo: DeviceOnboardingInfoDTO) => deviceOnboardingInfo.isBackupDevice);
+        });
+    });
+
+    describe("url processing", function () {
+        let runtime4: AppRuntime;
+        const runtime4MockUiBridge = new MockUIBridge();
+        let runtime4Session: LocalAccountSession;
+
+        beforeAll(async function () {
+            runtime4 = await TestUtil.createRuntime(undefined, runtime4MockUiBridge, eventBus);
+            await runtime4.start();
+
+            const account = await TestUtil.provideAccounts(runtime4, 1);
+            runtime4Session = await runtime4.selectAccount(account[0].id);
+        });
+
+        afterAll(async () => await runtime4.stop());
+
+        afterEach(async () => {
+            runtime4MockUiBridge.reset();
+
+            const openIncomingRequests = await runtime4Session.consumptionServices.incomingRequests.getRequests({
+                query: { status: ["DecisionRequired", "ManualDecisionRequired"] }
+            });
+
+            for (const request of openIncomingRequests.value) {
+                const result = await runtime4Session.consumptionServices.incomingRequests.reject({ requestId: request.id, items: [{ accept: false }] });
+                assert(result.isSuccess, `Failed to reject request: ${result.error}`);
+            }
+
+            await eventBus.waitForRunningEventHandlers();
+        });
+
+        test("get file using a url", async function () {
+            const fileResult = await runtime1Session.transportServices.files.uploadOwnFile({
+                filename: "aFileName",
+                content: new TextEncoder().encode("aFileContent"),
+                mimetype: "aMimetype",
+                expiresAt: CoreDate.utc().add({ minutes: 10 }).toISOString()
+            });
+            const file = fileResult.value;
+
+            const result = await runtime4.stringProcessor.processURL(file.reference.url, runtime4Session.account);
+            expect(result).toBeSuccessful();
+            expect(result.value).toBeUndefined();
+
+            expect(runtime4MockUiBridge).showFileCalled(file.id);
+        });
+
+        test("get a template using a url", async function () {
+            const templateResult = await runtime1Session.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
+                content: RelationshipTemplateContent.from({ onNewRelationship: { items: [AuthenticationRequestItem.from({ mustBeAccepted: false })] } }).toJSON(),
+                expiresAt: CoreDate.utc().add({ days: 1 }).toISOString()
+            });
+            const template = templateResult.value;
+
+            const result = await runtime4.stringProcessor.processURL(template.reference.url, runtime4Session.account);
+            expect(result).toBeSuccessful();
+            expect(result.value).toBeUndefined();
+
+            await eventBus.waitForRunningEventHandlers();
+
+            expect(runtime4MockUiBridge).showRequestCalled();
+        });
+
+        test("get a template using a url including forIdentity and passwordProtection", async function () {
+            const templateResult = await runtime1Session.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
+                content: RelationshipTemplateContent.from({ onNewRelationship: { items: [AuthenticationRequestItem.from({ mustBeAccepted: false })] } }).toJSON(),
+                expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(),
+                forIdentity: runtime4Session.account.address!,
+                passwordProtection: { password: "password" }
+            });
+            const template = templateResult.value;
+
+            runtime4MockUiBridge.setPasswordToReturnForAttempt(1, "password");
+
+            const result = await runtime4.stringProcessor.processURL(template.reference.url, runtime4Session.account);
+            expect(result).toBeSuccessful();
+            expect(result.value).toBeUndefined();
+
+            await eventBus.waitForRunningEventHandlers();
+
+            expect(runtime4MockUiBridge).showRequestCalled();
+        });
+
+        test("get a template in a token using a url", async function () {
+            const templateResult = await runtime1Session.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
+                content: RelationshipTemplateContent.from({ onNewRelationship: { items: [AuthenticationRequestItem.from({ mustBeAccepted: false })] } }).toJSON(),
+                expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(),
+                forIdentity: runtime4Session.account.address!,
+                passwordProtection: { password: "password" }
+            });
+            const template = templateResult.value;
+
+            const tokenResult = await runtime1Session.transportServices.relationshipTemplates.createTokenForOwnRelationshipTemplate({
+                templateId: template.id,
+                expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(),
+                forIdentity: runtime4Session.account.address!,
+                passwordProtection: { password: "password" }
+            });
+            const token = tokenResult.value;
+
+            runtime4MockUiBridge.setPasswordToReturnForAttempt(1, "password");
+
+            const result = await runtime4.stringProcessor.processURL(token.reference.url, runtime4Session.account);
+            expect(result).toBeSuccessful();
+            expect(result.value).toBeUndefined();
+
+            await eventBus.waitForRunningEventHandlers();
+
+            expect(runtime4MockUiBridge).showRequestCalled();
         });
     });
 });
