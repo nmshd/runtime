@@ -99,7 +99,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
         });
 
         test("returns error if the ownership of a File should be transferred that is not owned by the sender", async function () {
-            const thirdPartyFile = await senderAccountController.files.getOrLoadFileByTruncated(thirdPartyTrucatedFileReference);
+            const thirdPartyFile = await senderAccountController.files.getOrLoadFileByReference(FileReference.from(thirdPartyTrucatedFileReference));
 
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
@@ -290,7 +290,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
             expect(peerSharedIdentityAttribute!.shareInfo!.sourceAttribute).toBeUndefined();
 
             const truncatedFileReference = (peerSharedIdentityAttribute!.content.value as IdentityFileReference).value;
-            const file = await senderAccountController.files.getOrLoadFileByTruncated(truncatedFileReference);
+            const file = await senderAccountController.files.getOrLoadFileByReference(FileReference.from(truncatedFileReference));
             expect(file.isOwn).toBe(false);
             expect(file.cache!.tags).toStrictEqual(["x+%+tag"]);
         });
