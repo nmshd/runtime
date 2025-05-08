@@ -33,7 +33,6 @@ export class AppStringProcessor {
         url = url.trim();
 
         const parsed = new URL(url);
-        if (!url.startsWith("http") && !url.startsWith("nmshd")) return UserfriendlyResult.fail(AppRuntimeErrors.appStringProcessor.wrongURL());
         const allowedProtocols = ["http:", "https:", "nmshd:"];
         if (!allowedProtocols.includes(parsed.protocol)) return UserfriendlyResult.fail(AppRuntimeErrors.appStringProcessor.wrongURL());
 
