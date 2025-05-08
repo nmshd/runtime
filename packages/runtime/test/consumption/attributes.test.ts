@@ -3375,7 +3375,7 @@ describe(SetAttributeDeletionInfoOfDeletionProposedRelationshipUseCase.name, () 
     let relationshipId: string;
 
     beforeEach(async () => {
-        [services1, services2] = await runtimeServiceProvider.launch(2, { enableRequestModule: true, enableDeciderModule: true });
+        [services1, services2] = await runtimeServiceProvider.launch(2, { enableRequestModule: true, enableDeciderModule: true, enableNotificationModule: true });
         const relationship = await ensureActiveRelationship(services1.transport, services2.transport);
         relationshipId = relationship.id;
     }, 30000);
@@ -3445,7 +3445,7 @@ describe(SetAttributeDeletionInfoOfDeletionProposedRelationshipUseCase.name, () 
     test("should return an error if the Relationship doesn't have status 'DeletionProposed'", async () => {
         const result = await services2.consumption.attributes.setAttributeDeletionInfoOfDeletionProposedRelationship({ relationshipId });
         expect(result).toBeAnError(
-            "In order to manually set the deletionInfo of an Attribute, the corresponding Relationship must be in status 'DeletionProposed'.",
+            "In order to manually set the deletionInfo of an Attribute, the corresponding Relationship must have status 'DeletionProposed'.",
             "error.consumption.attributes.wrongRelationshipStatusToSetDeletionInfo"
         );
     });
