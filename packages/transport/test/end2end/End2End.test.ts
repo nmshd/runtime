@@ -71,7 +71,7 @@ describe("RelationshipTest: Accept", function () {
 
         const tokenRef = token.toTokenReference(from.config.baseUrl).truncate();
 
-        const receivedToken = await to.tokens.loadPeerTokenByTruncated(tokenRef, false);
+        const receivedToken = await to.tokens.loadPeerTokenByReference(tokenRef, false);
 
         if (!(receivedToken.cache!.content instanceof TokenContentRelationshipTemplate)) {
             throw new Error("token content not instanceof TokenContentRelationshipTemplate");
@@ -183,9 +183,8 @@ describe("RelationshipTest: Reject", function () {
             ephemeral: false
         });
 
-        const tokenRef = token.toTokenReference(from.config.baseUrl).truncate();
-
-        const receivedToken = await to.tokens.loadPeerTokenByTruncated(tokenRef, false);
+        const tokenRef = token.toTokenReference(from.config.baseUrl);
+        const receivedToken = await to.tokens.loadPeerTokenByReference(tokenRef, false);
 
         if (!(receivedToken.cache!.content instanceof TokenContentRelationshipTemplate)) {
             throw new Error("token content not instanceof TokenContentRelationshipTemplate");
@@ -292,9 +291,9 @@ describe("RelationshipTest: Revoke", function () {
             ephemeral: false
         });
 
-        const tokenRef = token.toTokenReference(templator.config.baseUrl).truncate();
+        const tokenRef = token.toTokenReference(templator.config.baseUrl);
 
-        const receivedToken = await requestor.tokens.loadPeerTokenByTruncated(tokenRef, false);
+        const receivedToken = await requestor.tokens.loadPeerTokenByReference(tokenRef, false);
 
         if (!(receivedToken.cache!.content instanceof TokenContentRelationshipTemplate)) {
             throw new Error("token content not instanceof TokenContentRelationshipTemplate");
@@ -378,9 +377,9 @@ describe("RelationshipTest: Revoke", function () {
             ephemeral: false
         });
 
-        const tokenRef = token.toTokenReference(templator.config.baseUrl).truncate();
+        const tokenRef = token.toTokenReference(templator.config.baseUrl);
 
-        const receivedToken = await requestor.tokens.loadPeerTokenByTruncated(tokenRef, false);
+        const receivedToken = await requestor.tokens.loadPeerTokenByReference(tokenRef, false);
 
         const receivedTemplateToken = TokenContentRelationshipTemplate.from(receivedToken.cache!.content as TokenContentRelationshipTemplate);
 
@@ -859,9 +858,9 @@ describe("RelationshipTest: operation executioner validation (on pending relatio
             ephemeral: false
         });
 
-        const tokenRef = token.toTokenReference(from.config.baseUrl).truncate();
+        const tokenRef = token.toTokenReference(from.config.baseUrl);
 
-        const receivedToken = await to.tokens.loadPeerTokenByTruncated(tokenRef, false);
+        const receivedToken = await to.tokens.loadPeerTokenByReference(tokenRef, false);
 
         if (!(receivedToken.cache!.content instanceof TokenContentRelationshipTemplate)) {
             throw new Error("token content not instanceof TokenContentRelationshipTemplate");
