@@ -1470,8 +1470,7 @@ export class AttributesController extends ConsumptionBaseController {
         if (!relationship) throw TransportCoreErrors.general.recordNotFound(Relationship, relationshipId.toString());
 
         if (relationship.status !== RelationshipStatus.DeletionProposed) {
-            // TODO:
-            throw new Error();
+            throw ConsumptionCoreErrors.attributes.wrongRelationshipStatusToSetDeletionInfo();
         }
 
         const deletionDate = relationship.cache!.auditLog[relationship.cache!.auditLog.length - 1].createdAt;

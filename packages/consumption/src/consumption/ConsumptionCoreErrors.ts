@@ -229,6 +229,13 @@ class Attributes {
         );
     }
 
+    public wrongRelationshipStatusToSetDeletionInfo() {
+        return new CoreError(
+            "error.consumption.attributes.wrongRelationshipStatusToSetDeletionInfo",
+            "In order to manually set the deletionInfo of an Attribute, the corresponding Relationship must be in status DeletionProposed."
+        );
+    }
+
     public wrongOwnerOfRepositoryAttribute() {
         return new CoreError(
             "error.consumption.attributes.wrongOwnerOfRepositoryAttribute",
