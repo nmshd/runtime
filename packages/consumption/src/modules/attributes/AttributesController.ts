@@ -1476,38 +1476,36 @@ export class AttributesController extends ConsumptionBaseController {
 
         const deletionDate = relationship.cache!.auditLog[relationship.cache!.auditLog.length - 1].createdAt;
 
+        await this.setDeletionInfoOfOwnSharedAttributes(relationship.peer.address.toString(), deletionDate);
+        await this.setDeletionInfoOfPeerSharedAttributes(relationship.peer.address.toString(), deletionDate);
+    }
+
+    private async setDeletionInfoOfOwnSharedAttributes(peer: String, deletionDate: CoreDate): Promise<void> {
         const ownSharedAttributeDeletionInfo = LocalAttributeDeletionInfo.from({
             deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
             deletionDate
         });
 
-        const allAttributes = await this.getLocalAttributes({});
+        const ownSharedAttributes = await this.getLocalAttributes({ "shareInfo.peer": peer, "content.owner": this.identity.address.toString() });
 
-        const ownSharedAttributes = await this.getLocalAttributes(
-            flattenObject({
-                shareInfo: { peer: relationship.peer.toString() },
-                content: { owner: this.identity.address.toString() }
-            })
-        );
+        await this.setDeletionInfoOfAttributes(ownSharedAttributes, ownSharedAttributeDeletionInfo);
+    }
 
-        for (const ownSharedAttribute of ownSharedAttributes) {
-            ownSharedAttribute.setDeletionInfo(ownSharedAttributeDeletionInfo, this.identity.address);
-            await this.updateAttributeUnsafe(ownSharedAttribute);
-        }
-
+    private async setDeletionInfoOfPeerSharedAttributes(peer: String, deletionDate: CoreDate): Promise<void> {
         const peerSharedAttributeDeletionInfo = LocalAttributeDeletionInfo.from({
             deletionStatus: LocalAttributeDeletionStatus.DeletedByOwner,
             deletionDate
         });
 
-        const peerSharedAttributes = await this.getLocalAttributes({
-            shareInfo: { peer: relationship.peer.toString() },
-            content: { owner: relationship.peer.toString() }
-        });
+        const peerSharedAttributes = await this.getLocalAttributes({ "shareInfo.peer": peer, "content.owner": peer });
 
-        for (const peerSharedAttribute of peerSharedAttributes) {
-            peerSharedAttribute.setDeletionInfo(peerSharedAttributeDeletionInfo, this.identity.address);
-            await this.updateAttributeUnsafe(peerSharedAttribute);
+        await this.setDeletionInfoOfAttributes(peerSharedAttributes, peerSharedAttributeDeletionInfo);
+    }
+
+    private async setDeletionInfoOfAttributes(attributes: LocalAttribute[], deletionInfo: LocalAttributeDeletionInfo): Promise<void> {
+        for (const attribute of attributes) {
+            attribute.setDeletionInfo(deletionInfo, this.identity.address);
+            await this.updateAttributeUnsafe(attribute);
         }
     }
 }
