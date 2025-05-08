@@ -384,5 +384,21 @@ describe("AppStringProcessor", function () {
 
             expect(runtime4MockUiBridge).showRequestCalled();
         });
+
+        test.each(["nmshd", "nmshds", "http"])("get file using a nmshd url with %s protocol", async function (replacement) {
+            const fileResult = await runtime1Session.transportServices.files.uploadOwnFile({
+                filename: "aFileName",
+                content: new TextEncoder().encode("aFileContent"),
+                mimetype: "aMimetype",
+                expiresAt: CoreDate.utc().add({ minutes: 10 }).toISOString()
+            });
+            const file = fileResult.value;
+
+            const result = await runtime4.stringProcessor.processURL(file.reference.url.replace("https", replacement), runtime4Session.account);
+            expect(result).toBeSuccessful();
+            expect(result.value).toBeUndefined();
+
+            expect(runtime4MockUiBridge).showFileCalled(file.id);
+        });
     });
 });
