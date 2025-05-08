@@ -3174,18 +3174,6 @@ describe("DeleteAttributeUseCases", () => {
             expect(CoreDate.from(updatedAttribute.deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))).toBe(true);
         });
 
-        test("should delete a ThirdPartyRelationshipAttribute as the emitter of it using the deprecated function deleteThirdPartyOwnedRelationshipAttributeAndNotifyPeer", async () => {
-            expect(emittedThirdPartyRelationshipAttribute).toBeDefined();
-
-            const deletionResult = await services1.consumption.attributes.deleteThirdPartyOwnedRelationshipAttributeAndNotifyPeer({
-                attributeId: emittedThirdPartyRelationshipAttribute.id
-            });
-            expect(deletionResult.isSuccess).toBe(true);
-
-            const getDeletedAttributeResult = await services1.consumption.attributes.getAttribute({ id: emittedThirdPartyRelationshipAttribute.id });
-            expect(getDeletedAttributeResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
-        });
-
         test("should throw an error trying to delete a ThirdPartyRelationshipAttribute when the Relationship is in status Pending", async () => {
             const [services1, services2, services3] = await runtimeServiceProvider.launch(3, {
                 enableRequestModule: true,
