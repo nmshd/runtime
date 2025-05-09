@@ -8,8 +8,10 @@ import {
     IdentityAttributeQuery,
     IIdentityAttributeQuery,
     IIQLQuery,
+    IQLQuery,
     IRelationshipAttributeQuery,
     IThirdPartyRelationshipAttributeQuery,
+    RelationshipAttribute,
     RelationshipAttributeJSON,
     RelationshipAttributeQuery,
     ThirdPartyRelationshipAttributeQuery,
@@ -36,16 +38,18 @@ import {
     ThirdPartyRelationshipAttributeSucceededEvent
 } from "./events";
 import { AttributeSuccessorParams, AttributeSuccessorParamsJSON, IAttributeSuccessorParams } from "./local/AttributeSuccessorParams";
-import { AttributeTagCollection } from "./local/AttributeTagCollection";
+import { AttributeTagCollection, IAttributeTag } from "./local/AttributeTagCollection";
 import { CreateRepositoryAttributeParams, ICreateRepositoryAttributeParams } from "./local/CreateRepositoryAttributeParams";
 import { CreateSharedLocalAttributeCopyParams, ICreateSharedLocalAttributeCopyParams } from "./local/CreateSharedLocalAttributeCopyParams";
-import { ICreateSharedLocalAttributeParams } from "./local/CreateSharedLocalAttributeParams";
+import { CreateSharedLocalAttributeParams, ICreateSharedLocalAttributeParams } from "./local/CreateSharedLocalAttributeParams";
 import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./local/LocalAttribute";
 import { LocalAttributeDeletionStatus } from "./local/LocalAttributeDeletionInfo";
 import { LocalAttributeShareInfo } from "./local/LocalAttributeShareInfo";
 import { IdentityAttributeQueryTranslator, RelationshipAttributeQueryTranslator, ThirdPartyRelationshipAttributeQueryTranslator } from "./local/QueryTranslator";
 
 export class AttributesController extends ConsumptionBaseController {
+    private static readonly TAG_SEPARATOR = "+%+";
+
     private attributes: SynchronizedCollection;
     private tagCollection: IDatabaseCollection;
     private attributeTagClient: TagClient;
@@ -84,47 +88,6 @@ export class AttributesController extends ConsumptionBaseController {
         return this;
     }
 
-    public checkValid(attribute: LocalAttribute): boolean {
-        const now = CoreDate.utc();
-        if (!attribute.content.validFrom && !attribute.content.validTo) {
-            return true;
-        } else if (attribute.content.validFrom && !attribute.content.validTo && attribute.content.validFrom.isSameOrBefore(now)) {
-            return true;
-        } else if (!attribute.content.validFrom && attribute.content.validTo?.isSameOrAfter(now)) {
-            return true;
-        } else if (attribute.content.validFrom && attribute.content.validTo && attribute.content.validFrom.isSameOrBefore(now) && attribute.content.validTo.isSameOrAfter(now)) {
-            return true;
-        }
-        return false;
-    }
-
-    public findCurrent(attributes: LocalAttribute[]): LocalAttribute | undefined {
-        const sorted = attributes.sort((a, b) => {
-            return a.createdAt.compare(b.createdAt);
-        });
-        let current: LocalAttribute | undefined;
-        for (const attribute of sorted) {
-            if (this.checkValid(attribute)) {
-                current = attribute;
-            }
-        }
-        return current;
-    }
-
-    public filterCurrent(attributes: LocalAttribute[]): LocalAttribute[] {
-        const sorted = attributes.sort((a, b) => {
-            return a.createdAt.compare(b.createdAt);
-        });
-
-        const items = [];
-        for (const attribute of sorted) {
-            if (this.checkValid(attribute)) {
-                items.push(attribute);
-            }
-        }
-        return items;
-    }
-
     public async getLocalAttribute(id: CoreId): Promise<LocalAttribute | undefined> {
         const result = await this.attributes.findOne({
             [nameof<LocalAttribute>((c) => c.id)]: id.toString()
@@ -134,13 +97,16 @@ export class AttributesController extends ConsumptionBaseController {
         return LocalAttribute.from(result);
     }
 
-    public async getLocalAttributes(query?: any, hideTechnical = false, onlyValid = false): Promise<LocalAttribute[]> {
+    public async getLocalAttributes(query?: any, hideTechnical = false): Promise<LocalAttribute[]> {
         const enrichedQuery = this.enrichQuery(query, hideTechnical);
         const attributes = await this.attributes.find(enrichedQuery);
         const parsed = this.parseArray(attributes, LocalAttribute);
-        if (!onlyValid) return parsed;
 
-        return this.filterCurrent(parsed);
+        const sorted = parsed.sort((a, b) => {
+            return a.createdAt.compare(b.createdAt);
+        });
+
+        return sorted;
     }
 
     private enrichQuery(query: any, hideTechnical: boolean) {
@@ -167,10 +133,6 @@ export class AttributesController extends ConsumptionBaseController {
         if (!query) return hideTechnicalQuery;
 
         return { $and: [query, hideTechnicalQuery] };
-    }
-
-    public async getValidLocalAttributes(query?: any, hideTechnical = false): Promise<LocalAttribute[]> {
-        return await this.getLocalAttributes(query, hideTechnical, true);
     }
 
     public async executeIQLQuery(query: IIQLQuery): Promise<LocalAttribute[]> {
@@ -262,6 +224,10 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         const parsedParams = CreateRepositoryAttributeParams.from(params);
+
+        const tagValidationResult = await this.validateTagsOfAttribute(parsedParams.content);
+        if (tagValidationResult.isError()) throw tagValidationResult.error;
+
         const trimmedAttribute = {
             ...parsedParams.content.toJSON(),
             value: this.trimAttributeValue(parsedParams.content.value.toJSON() as AttributeValues.Identity.Json)
@@ -379,6 +345,10 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async createSharedLocalAttribute(params: ICreateSharedLocalAttributeParams): Promise<LocalAttribute> {
+        const parsedParams = CreateSharedLocalAttributeParams.from(params);
+        const tagValidationResult = await this.validateTagsOfAttribute(parsedParams.content);
+        if (tagValidationResult.isError()) throw tagValidationResult.error;
+
         const shareInfo = LocalAttributeShareInfo.from({
             peer: params.peer,
             requestReference: params.requestReference,
@@ -973,6 +943,9 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successorIsNotAValidAttribute(e));
         }
 
+        const tagValidationResult = await this.validateTagsOfAttribute(parsedSuccessorParams.content);
+        if (tagValidationResult.isError()) throw tagValidationResult.error;
+
         const successor = LocalAttribute.from({
             id: CoreId.from(parsedSuccessorParams.id ?? "dummy"),
             content: parsedSuccessorParams.content,
@@ -1463,5 +1436,72 @@ export class AttributesController extends ConsumptionBaseController {
             name: this.CACHE_TIMESTAMP_DB_KEY,
             value: CoreDate.utc().toJSON()
         });
+    }
+
+    public async validateTagsOfAttribute(attribute: IdentityAttribute | RelationshipAttribute): Promise<ValidationResult> {
+        if (attribute instanceof RelationshipAttribute) return ValidationResult.success();
+        if (!attribute.tags || attribute.tags.length === 0) return ValidationResult.success();
+
+        return await this.validateTagsForType(attribute.tags, attribute.toJSON().value["@type"]);
+    }
+
+    public async validateTagsForType(tags: string[], attributeValueType: string): Promise<ValidationResult> {
+        const tagCollection = await this.getAttributeTagCollection();
+        const tagsForAttributeValueType = tagCollection.tagsForAttributeValueTypes[attributeValueType];
+        const invalidTags = [];
+        for (const tag of tags) {
+            if (!this.isValidTag(tag, tagsForAttributeValueType)) {
+                invalidTags.push(tag);
+            }
+        }
+
+        if (invalidTags.length > 0) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.invalidTags(invalidTags));
+        }
+
+        return ValidationResult.success();
+    }
+
+    public async validateAttributeQueryTags(
+        attributeQuery: IdentityAttributeQuery | IQLQuery | RelationshipAttributeQuery | ThirdPartyRelationshipAttributeQuery
+    ): Promise<ValidationResult> {
+        if (
+            (attributeQuery instanceof IQLQuery && !attributeQuery.attributeCreationHints) ||
+            attributeQuery instanceof RelationshipAttributeQuery ||
+            attributeQuery instanceof ThirdPartyRelationshipAttributeQuery
+        ) {
+            return ValidationResult.success();
+        }
+
+        const attributeTags = attributeQuery instanceof IdentityAttributeQuery ? attributeQuery.tags : attributeQuery.attributeCreationHints!.tags;
+        if (!attributeTags || attributeTags.length === 0) return ValidationResult.success();
+
+        const attributeValueType = attributeQuery instanceof IdentityAttributeQuery ? attributeQuery.valueType : attributeQuery.attributeCreationHints!.valueType;
+        const tagCollection = await this.getAttributeTagCollection();
+        const invalidTags = [];
+        for (const tag of attributeTags) {
+            if (!this.isValidTag(tag, tagCollection.tagsForAttributeValueTypes[attributeValueType])) {
+                invalidTags.push(tag);
+            }
+        }
+
+        if (invalidTags.length > 0) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.invalidTags(invalidTags));
+        }
+
+        return ValidationResult.success();
+    }
+
+    private isValidTag(tag: string, validTags: Record<string, IAttributeTag> | undefined): boolean {
+        const customTagPrefix = `x${AttributesController.TAG_SEPARATOR}`;
+        if (tag.toLowerCase().startsWith(customTagPrefix)) return true;
+
+        const tagParts = tag.split(AttributesController.TAG_SEPARATOR);
+        for (const part of tagParts) {
+            if (!validTags?.[part]) return false;
+            validTags = validTags[part].children;
+        }
+
+        return !validTags;
     }
 }

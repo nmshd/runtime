@@ -266,6 +266,10 @@ class Attributes {
     public setDefaultRepositoryAttributesIsDisabled() {
         return new CoreError("error.consumption.attributes.setDefaultRepositoryAttributesIsDisabled", "Setting default RepositoryAttributes is disabled for this Account.");
     }
+
+    public invalidTags(tags: string[]): ApplicationError {
+        return new ApplicationError("error.consumption.attributes.invalidTags", `Detected invalidity of the following tags: '${tags.join("', '")}'.`);
+    }
 }
 
 class Requests {
