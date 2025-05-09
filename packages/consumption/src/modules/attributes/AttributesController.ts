@@ -1485,7 +1485,11 @@ export class AttributesController extends ConsumptionBaseController {
             deletionDate
         });
 
-        const ownSharedAttributes = await this.getLocalAttributes({ "shareInfo.peer": peer, "content.owner": this.identity.address.toString() });
+        const ownSharedAttributes = await this.getLocalAttributes({
+            "shareInfo.peer": peer,
+            "content.owner": this.identity.address.toString(),
+            "deletionInfo.deletionStatus": { $ne: LocalAttributeDeletionStatus.DeletedByPeer }
+        });
 
         await this.setDeletionInfoOfAttributes(ownSharedAttributes, ownSharedAttributeDeletionInfo);
     }
@@ -1496,7 +1500,11 @@ export class AttributesController extends ConsumptionBaseController {
             deletionDate
         });
 
-        const peerSharedAttributes = await this.getLocalAttributes({ "shareInfo.peer": peer, "content.owner": peer });
+        const peerSharedAttributes = await this.getLocalAttributes({
+            "shareInfo.peer": peer,
+            "content.owner": peer,
+            "deletionInfo.deletionStatus": { $ne: LocalAttributeDeletionStatus.DeletedByOwner }
+        });
 
         await this.setDeletionInfoOfAttributes(peerSharedAttributes, peerSharedAttributeDeletionInfo);
     }
