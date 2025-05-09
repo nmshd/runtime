@@ -49,7 +49,10 @@ import {
     NotifyPeerAboutRepositoryAttributeSuccessionUseCase,
     OwnSharedAttributeDeletedByOwnerEvent,
     PeerSharedAttributeDeletedByPeerEvent,
+    RelationshipChangedEvent,
+    RelationshipStatus,
     RepositoryAttributeSucceededEvent,
+    SetAttributeDeletionInfoOfDeletionProposedRelationshipUseCase,
     ShareRepositoryAttributeRequest,
     ShareRepositoryAttributeUseCase,
     SucceedRelationshipAttributeAndNotifyPeerUseCase,
@@ -63,6 +66,7 @@ import {
     acceptIncomingShareAttributeRequest,
     cleanupAttributes,
     createRelationshipWithStatusPending,
+    ensureActiveRelationship,
     establishRelationship,
     exchangeAndAcceptRequestByMessage,
     executeFullCreateAndShareRelationshipAttributeFlow,
@@ -73,6 +77,7 @@ import {
     executeFullShareRepositoryAttributeFlow,
     executeFullSucceedRepositoryAttributeAndNotifyPeerFlow,
     syncUntilHasMessageWithNotification,
+    syncUntilHasRelationships,
     waitForRecipientToReceiveNotification
 } from "../lib";
 
@@ -105,6 +110,7 @@ beforeAll(async () => {
 
     await establishRelationship(appService.transport, services2.transport);
 }, 30000);
+
 afterAll(async () => await runtimeServiceProvider.stop());
 
 beforeEach(async () => {
@@ -3360,5 +3366,153 @@ describe("ThirdPartyRelationshipAttributes", () => {
 
         expect(services2AttributesResult.shareInfo!.thirdPartyAddress).toStrictEqual(services1.address);
         expect(services3AttributesResult.shareInfo!.thirdPartyAddress).toStrictEqual(services1.address);
+    });
+});
+
+describe(SetAttributeDeletionInfoOfDeletionProposedRelationshipUseCase.name, () => {
+    let services1: TestRuntimeServices;
+    let services2: TestRuntimeServices;
+    let relationshipId: string;
+
+    beforeEach(async () => {
+        [services1, services2] = await runtimeServiceProvider.launch(2, { enableRequestModule: true, enableDeciderModule: true, enableNotificationModule: true });
+        const relationship = await ensureActiveRelationship(services1.transport, services2.transport);
+        relationshipId = relationship.id;
+    }, 30000);
+
+    test("peer shared Attributes should be marked as deleted for peer", async () => {
+        await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "aGivenNameServices1"
+                }
+            }
+        });
+
+        await services1.transport.relationships.terminateRelationship({ relationshipId });
+        await services1.transport.relationships.decomposeRelationship({ relationshipId });
+        await syncUntilHasRelationships(services2.transport);
+        await services2.eventBus.waitForEvent(RelationshipChangedEvent, (e) => e.data.status === RelationshipStatus.DeletionProposed);
+
+        const result = await services2.consumption.attributes.setAttributeDeletionInfoOfDeletionProposedRelationship({ relationshipId });
+        expect(result).toBeSuccessful();
+
+        const peerSharedAttributes = (await services2.consumption.attributes.getPeerSharedAttributes({ peer: services1.address })).value;
+        expect(peerSharedAttributes).toHaveLength(1);
+        expect(peerSharedAttributes[0].deletionInfo!.deletionStatus).toBe(LocalAttributeDeletionStatus.DeletedByOwner);
+
+        const relationship = (await services2.transport.relationships.getRelationship({ id: relationshipId })).value;
+        const deletionDate = relationship.auditLog[relationship.auditLog.length - 1].createdAt;
+        expect(peerSharedAttributes[0].deletionInfo!.deletionDate).toStrictEqual(deletionDate);
+    });
+
+    test("own shared Attributes should be marked as deleted for peer", async () => {
+        await executeFullCreateAndShareRepositoryAttributeFlow(services2, services1, {
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "aGivenNameServices2"
+                }
+            }
+        });
+
+        await services1.transport.relationships.terminateRelationship({ relationshipId });
+        await services1.transport.relationships.decomposeRelationship({ relationshipId });
+        await syncUntilHasRelationships(services2.transport);
+        await services2.eventBus.waitForEvent(RelationshipChangedEvent, (e) => e.data.status === RelationshipStatus.DeletionProposed);
+
+        const result = await services2.consumption.attributes.setAttributeDeletionInfoOfDeletionProposedRelationship({ relationshipId });
+        expect(result).toBeSuccessful();
+
+        const ownSharedAttributes = (await services2.consumption.attributes.getOwnSharedAttributes({ peer: services1.address })).value;
+        expect(ownSharedAttributes).toHaveLength(1);
+        expect(ownSharedAttributes[0].deletionInfo!.deletionStatus).toBe(LocalAttributeDeletionStatus.DeletedByPeer);
+
+        const relationship = (await services2.transport.relationships.getRelationship({ id: relationshipId })).value;
+        const deletionDate = relationship.auditLog[relationship.auditLog.length - 1].createdAt;
+        expect(ownSharedAttributes[0].deletionInfo!.deletionDate).toStrictEqual(deletionDate);
+    });
+
+    test("peer shared Attributes should not be updated if they are already marked as deleted", async () => {
+        const sharedAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "aGivenNameServices1"
+                }
+            }
+        });
+
+        const notificationId = (await services1.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: sharedAttribute.id })).value.notificationId!;
+        await syncUntilHasMessageWithNotification(services2.transport, notificationId);
+        await services2.eventBus.waitForEvent(OwnSharedAttributeDeletedByOwnerEvent, (e) => {
+            return e.data.id.toString() === sharedAttribute.id;
+        });
+
+        const peerSharedAttributeAfterDeletion = (await services2.consumption.attributes.getAttribute({ id: sharedAttribute.id })).value;
+        const dateOfAttributeDeletion = peerSharedAttributeAfterDeletion.deletionInfo!.deletionDate;
+        expect(dateOfAttributeDeletion).toBeDefined();
+
+        await services1.transport.relationships.terminateRelationship({ relationshipId });
+        await services1.transport.relationships.decomposeRelationship({ relationshipId });
+        await syncUntilHasRelationships(services2.transport);
+        await services2.eventBus.waitForEvent(RelationshipChangedEvent, (e) => e.data.status === RelationshipStatus.DeletionProposed);
+
+        const result = await services2.consumption.attributes.setAttributeDeletionInfoOfDeletionProposedRelationship({ relationshipId });
+        expect(result).toBeSuccessful();
+
+        const peerSharedAttributeAfterDecomposition = (await services2.consumption.attributes.getAttribute({ id: sharedAttribute.id })).value;
+        expect(peerSharedAttributeAfterDecomposition.deletionInfo!.deletionStatus).toBe(LocalAttributeDeletionStatus.DeletedByOwner);
+        expect(peerSharedAttributeAfterDecomposition.deletionInfo!.deletionDate).toStrictEqual(dateOfAttributeDeletion);
+    });
+
+    test("own shared Attributes should not be updated if they are already marked as deleted", async () => {
+        const sharedAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(services2, services1, {
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "aGivenNameServices2"
+                }
+            }
+        });
+
+        const notificationId = (await services1.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: sharedAttribute.id })).value.notificationId!;
+        await syncUntilHasMessageWithNotification(services2.transport, notificationId);
+        await services2.eventBus.waitForEvent(PeerSharedAttributeDeletedByPeerEvent, (e) => {
+            return e.data.id.toString() === sharedAttribute.id;
+        });
+
+        const ownSharedAttributeAfterDeletion = (await services2.consumption.attributes.getAttribute({ id: sharedAttribute.id })).value;
+        const dateOfAttributeDeletion = ownSharedAttributeAfterDeletion.deletionInfo!.deletionDate;
+        expect(dateOfAttributeDeletion).toBeDefined();
+
+        await services1.transport.relationships.terminateRelationship({ relationshipId });
+        await services1.transport.relationships.decomposeRelationship({ relationshipId });
+        await syncUntilHasRelationships(services2.transport);
+        await services2.eventBus.waitForEvent(RelationshipChangedEvent, (e) => e.data.status === RelationshipStatus.DeletionProposed);
+
+        const result = await services2.consumption.attributes.setAttributeDeletionInfoOfDeletionProposedRelationship({ relationshipId });
+        expect(result).toBeSuccessful();
+
+        const ownSharedAttributeAfterDecomposition = (await services2.consumption.attributes.getAttribute({ id: sharedAttribute.id })).value;
+        expect(ownSharedAttributeAfterDecomposition.deletionInfo!.deletionStatus).toBe(LocalAttributeDeletionStatus.DeletedByPeer);
+        expect(ownSharedAttributeAfterDecomposition.deletionInfo!.deletionDate).toStrictEqual(dateOfAttributeDeletion);
+    });
+
+    test("should return an error if there is no matching Relationship", async () => {
+        await services1.transport.relationships.terminateRelationship({ relationshipId });
+        await services1.transport.relationships.decomposeRelationship({ relationshipId });
+
+        const result = await services1.consumption.attributes.setAttributeDeletionInfoOfDeletionProposedRelationship({ relationshipId });
+        expect(result).toBeAnError("'Relationship' not found.", "error.transport.recordNotFound");
+    });
+
+    test("should return an error if the Relationship doesn't have status 'DeletionProposed'", async () => {
+        const result = await services2.consumption.attributes.setAttributeDeletionInfoOfDeletionProposedRelationship({ relationshipId });
+        expect(result).toBeAnError(
+            "In order to manually set the deletionInfo of an Attribute, the corresponding Relationship must have status 'DeletionProposed'.",
+            "error.consumption.attributes.wrongRelationshipStatusToSetDeletionInfo"
+        );
     });
 });

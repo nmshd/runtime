@@ -17577,6 +17577,29 @@ export const NotifyPeerAboutRepositoryAttributeSuccessionRequest: any = {
     }
 }
 
+export const SetAttributeDeletionInfoOfDeletionProposedRelationshipRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/SetAttributeDeletionInfoOfDeletionProposedRelationshipRequest",
+    "definitions": {
+        "SetAttributeDeletionInfoOfDeletionProposedRelationshipRequest": {
+            "type": "object",
+            "properties": {
+                "relationshipId": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                }
+            },
+            "required": [
+                "relationshipId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
 export const ShareRepositoryAttributeRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/ShareRepositoryAttributeRequest",

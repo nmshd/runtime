@@ -1,5 +1,5 @@
 import { ApplicationError, Result, sleep } from "@js-soft/ts-utils";
-import { AcceptReadAttributeRequestItemParametersJSON } from "@nmshd/consumption";
+import { AcceptReadAttributeRequestItemParametersJSON, LocalAttributeDeletionStatus } from "@nmshd/consumption";
 import {
     GivenName,
     IdentityAttribute,
@@ -1173,6 +1173,16 @@ describe("RelationshipDecomposition", () => {
 
         const peerSharedAttributesControl = (await services1.consumption.attributes.getPeerSharedAttributes({ peer: services3.address })).value;
         expect(peerSharedAttributesControl).not.toHaveLength(0);
+    });
+
+    test("attributes should be marked as deleted for peer", async () => {
+        const ownSharedAttributes = (await services2.consumption.attributes.getOwnSharedAttributes({ peer: services1.address })).value;
+        expect(ownSharedAttributes).toHaveLength(1);
+        expect(ownSharedAttributes[0].deletionInfo!.deletionStatus).toBe(LocalAttributeDeletionStatus.DeletedByPeer);
+
+        const peerSharedAttributes = (await services2.consumption.attributes.getPeerSharedAttributes({ peer: services1.address })).value;
+        expect(peerSharedAttributes).toHaveLength(1);
+        expect(peerSharedAttributes[0].deletionInfo!.deletionStatus).toBe(LocalAttributeDeletionStatus.DeletedByOwner);
     });
 
     test("notifications should be deleted", async () => {
