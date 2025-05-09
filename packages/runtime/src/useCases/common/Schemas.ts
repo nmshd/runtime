@@ -21688,6 +21688,9 @@ export const GetMessagesRequest: any = {
             "properties": {
                 "query": {
                     "$ref": "#/definitions/GetMessagesQuery"
+                },
+                "paginationOptions": {
+                    "$ref": "#/definitions/DatabasePaginationOptions"
                 }
             },
             "additionalProperties": false
@@ -21837,6 +21840,18 @@ export const GetMessagesRequest: any = {
                             }
                         }
                     ]
+                }
+            },
+            "additionalProperties": false
+        },
+        "DatabasePaginationOptions": {
+            "type": "object",
+            "properties": {
+                "limit": {
+                    "type": "number"
+                },
+                "skip": {
+                    "type": "number"
                 }
             },
             "additionalProperties": false
