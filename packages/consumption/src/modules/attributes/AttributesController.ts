@@ -1506,8 +1506,8 @@ export class AttributesController extends ConsumptionBaseController {
         const isBackboneTag = tag.toLowerCase().startsWith(backbonePrefix);
         if (!isBackboneTag) return false;
 
-        const tagParts = tag.split(":").slice(1);
-        for (const part of tagParts) {
+        const tagPartsWithoutPrefix = tag.split(":").slice(1);
+        for (const part of tagPartsWithoutPrefix) {
             if (!validTags?.[part]) return false;
             validTags = validTags[part].children;
         }
