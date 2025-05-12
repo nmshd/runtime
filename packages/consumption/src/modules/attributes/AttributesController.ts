@@ -11,6 +11,7 @@ import {
     IQLQuery,
     IRelationshipAttributeQuery,
     IThirdPartyRelationshipAttributeQuery,
+    LanguageISO639,
     RelationshipAttribute,
     RelationshipAttributeJSON,
     RelationshipAttributeQuery,
@@ -48,8 +49,6 @@ import { LocalAttributeShareInfo } from "./local/LocalAttributeShareInfo";
 import { IdentityAttributeQueryTranslator, RelationshipAttributeQueryTranslator, ThirdPartyRelationshipAttributeQueryTranslator } from "./local/QueryTranslator";
 
 export class AttributesController extends ConsumptionBaseController {
-    private static readonly TAG_SEPARATOR = "+%+";
-
     private attributes: SynchronizedCollection;
     private tagCollection: IDatabaseCollection;
     private attributeTagClient: TagClient;
@@ -1493,10 +1492,21 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     private isValidTag(tag: string, validTags: Record<string, IAttributeTag> | undefined): boolean {
-        const customTagPrefix = `x${AttributesController.TAG_SEPARATOR}`;
-        if (tag.toLowerCase().startsWith(customTagPrefix)) return true;
+        const customPrefix = "x:";
+        const urnPrefix = "urn:";
+        if (tag.toLowerCase().startsWith(customPrefix) || tag.startsWith(urnPrefix)) return true;
 
-        const tagParts = tag.split(AttributesController.TAG_SEPARATOR);
+        const languagePrefix = "language:";
+        if (tag.startsWith(languagePrefix)) return Object.values(LanguageISO639).includes(tag.substring(9) as LanguageISO639);
+
+        const mimetypePrefix = "mimetype:";
+        if (tag.startsWith(mimetypePrefix)) return /^[a-z-*]+\/[a-z-*]+$/.test(tag.substring(9));
+
+        const backbonePrefix = "bkb:";
+        const isBackboneTag = tag.toLowerCase().startsWith(backbonePrefix);
+        if (!isBackboneTag) return false;
+
+        const tagParts = tag.split(":").slice(1);
         for (const part of tagParts) {
             if (!validTags?.[part]) return false;
             validTags = validTags[part].children;
