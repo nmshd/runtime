@@ -1,3 +1,4 @@
+export * from "./AnnouncementDTO";
 export * from "./ChallengeDTO";
 export * from "./DeviceDTO";
 export * from "./DeviceOnboardingInfoDTO";
