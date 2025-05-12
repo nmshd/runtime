@@ -1497,10 +1497,10 @@ export class AttributesController extends ConsumptionBaseController {
         if (tag.toLowerCase().startsWith(customPrefix) || tag.startsWith(urnPrefix)) return true;
 
         const languagePrefix = "language:";
-        if (tag.startsWith(languagePrefix)) return Object.values(LanguageISO639).includes(tag.substring(9) as LanguageISO639);
+        if (tag.startsWith(languagePrefix)) return Object.values(LanguageISO639).includes(tag.substring(languagePrefix.length) as LanguageISO639);
 
         const mimetypePrefix = "mimetype:";
-        if (tag.startsWith(mimetypePrefix)) return /^[a-z-*]+\/[a-z-*]+$/.test(tag.substring(9));
+        if (tag.startsWith(mimetypePrefix)) return /^[a-z-*]+\/[a-z-*]+$/.test(tag.substring(mimetypePrefix.length));
 
         const backbonePrefix = "bkb:";
         const isBackboneTag = tag.toLowerCase().startsWith(backbonePrefix);
