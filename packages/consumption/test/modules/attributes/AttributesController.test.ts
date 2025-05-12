@@ -3516,6 +3516,7 @@ describe("AttributesController", function () {
             expect(consumptionController.attributes["isValidTag"]("mimetype:/x", {})).toBe(false);
             expect(consumptionController.attributes["isValidTag"]("Urn:invalidUrn", {})).toBe(false);
             expect(consumptionController.attributes["isValidTag"]("language:invalid", {})).toBe(false);
+            expect(consumptionController.attributes["isValidTag"]("unsupportedPrefix:invalid", {})).toBe(false);
         });
     });
 
