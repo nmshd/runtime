@@ -40,14 +40,14 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
 
         const thirdPartyAccountController = accounts[2].accountController;
 
-        const senderFile = await TestUtil.uploadFile(senderAccountController, { tags: ["x+%+tag"] });
+        const senderFile = await TestUtil.uploadFile(senderAccountController, { tags: ["x:tag"] });
         senderTrucatedFileReference = senderFile.toFileReference(senderAccountController.config.baseUrl).truncate();
 
         const senderExpiredFile = await TestUtil.uploadFile(senderAccountController, { expiresAt: CoreDate.utc().add({ seconds: 1 }) });
         senderExpiredTrucatedFileReference = senderExpiredFile.toFileReference(senderAccountController.config.baseUrl).truncate();
         await sleep(2000);
 
-        const recipientFile = await TestUtil.uploadFile(recipientAccountController, { tags: ["x+%+tag"] });
+        const recipientFile = await TestUtil.uploadFile(recipientAccountController, { tags: ["x:tag"] });
         recipientTrucatedFileReference = recipientFile.toFileReference(recipientAccountController.config.baseUrl).truncate();
 
         const thirdPartyFile = await TestUtil.uploadFile(thirdPartyAccountController);
@@ -244,17 +244,17 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
             expect(ownSharedIdentityAttribute!.shareInfo!.peer).toStrictEqual(sender);
             expect(ownSharedIdentityAttribute!.shareInfo!.requestReference).toStrictEqual(incomingRequest.id);
             expect(ownSharedIdentityAttribute!.content.value).toBeInstanceOf(IdentityFileReference);
-            expect((ownSharedIdentityAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x+%+tag"]);
+            expect((ownSharedIdentityAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x:tag"]);
 
             const repositoryAttribute = await recipientConsumptionController.attributes.getLocalAttribute(ownSharedIdentityAttribute!.shareInfo!.sourceAttribute!);
             expect(repositoryAttribute!.shareInfo).toBeUndefined();
             expect(repositoryAttribute!.content.value).toBeInstanceOf(IdentityFileReference);
-            expect((repositoryAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x+%+tag"]);
+            expect((repositoryAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x:tag"]);
 
             const fileReference = FileReference.from((repositoryAttribute!.content.value as IdentityFileReference).value);
             const file = await recipientAccountController.files.getFile(fileReference.id);
             expect(file!.isOwn).toBe(true);
-            expect(file!.cache!.tags).toStrictEqual(["x+%+tag"]);
+            expect(file!.cache!.tags).toStrictEqual(["x:tag"]);
         });
     });
 
@@ -278,7 +278,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
                         value: recipientTrucatedFileReference
                     }),
                     owner: recipient,
-                    tags: ["x+%+tag"]
+                    tags: ["x:tag"]
                 })
             });
 
@@ -292,7 +292,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
             const truncatedFileReference = (peerSharedIdentityAttribute!.content.value as IdentityFileReference).value;
             const file = await senderAccountController.files.getOrLoadFileByReference(FileReference.from(truncatedFileReference));
             expect(file.isOwn).toBe(false);
-            expect(file.cache!.tags).toStrictEqual(["x+%+tag"]);
+            expect(file.cache!.tags).toStrictEqual(["x:tag"]);
         });
     });
 });

@@ -1286,7 +1286,7 @@ describe("AttributesController", function () {
                             value: "DE"
                         },
                         owner: consumptionController.accountController.identity.address,
-                        tags: ["x+%+aTag"]
+                        tags: ["x:aTag"]
                     })
                 });
 
@@ -1297,7 +1297,7 @@ describe("AttributesController", function () {
                             value: "DE"
                         },
                         owner: consumptionController.accountController.identity.address,
-                        tags: ["x+%+aTag"]
+                        tags: ["x:aTag"]
                     })
                 };
 
@@ -1900,7 +1900,7 @@ describe("AttributesController", function () {
                             value: "DE"
                         },
                         owner: consumptionController.accountController.identity.address,
-                        tags: ["x+%+aTag"]
+                        tags: ["x:aTag"]
                     })
                 });
 
@@ -1911,7 +1911,7 @@ describe("AttributesController", function () {
                             value: "DE"
                         },
                         owner: consumptionController.accountController.identity.address,
-                        tags: ["x+%+aTag", "x+%+anotherTag"]
+                        tags: ["x:aTag", "x:anotherTag"]
                     })
                 };
 
@@ -1923,8 +1923,8 @@ describe("AttributesController", function () {
                 expect(successor.succeeds!.equals(updatedPredecessor.id)).toBe(true);
                 expect((updatedPredecessor.content.value.toJSON() as any).value).toBe("DE");
                 expect((successor.content.value.toJSON() as any).value).toBe("DE");
-                expect((updatedPredecessor.content as IdentityAttribute).tags).toStrictEqual(["x+%+aTag"]);
-                expect((successor.content as IdentityAttribute).tags).toStrictEqual(["x+%+aTag", "x+%+anotherTag"]);
+                expect((updatedPredecessor.content as IdentityAttribute).tags).toStrictEqual(["x:aTag"]);
+                expect((successor.content as IdentityAttribute).tags).toStrictEqual(["x:aTag", "x:anotherTag"]);
             });
 
             test("should make successor default succeeding a default repository attribute", async function () {
@@ -3500,7 +3500,7 @@ describe("AttributesController", function () {
             expect(consumptionController.attributes["isValidTag"]("private", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(true);
             expect(consumptionController.attributes["isValidTag"]("emergency+%+first", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(true);
             expect(consumptionController.attributes["isValidTag"]("emergency+%+second", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(true);
-            expect(consumptionController.attributes["isValidTag"]("x+%+my+%+custom+%+tag", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(true);
+            expect(consumptionController.attributes["isValidTag"]("x:my+%+custom+%+tag", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(true);
             expect(consumptionController.attributes["isValidTag"]("X+%+my+%+custom+%+tag", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(true);
         });
 

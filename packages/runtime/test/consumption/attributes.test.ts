@@ -644,7 +644,7 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
                 "@type": "GivenName",
                 value: "aGivenName"
             },
-            tags: ["x+%+tag1", "x+%+tag2"]
+            tags: ["x:tag1", "x:tag2"]
         }
     };
 
@@ -656,7 +656,7 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
                         "@type": "GivenName",
                         value: 5
                     },
-                    tags: ["x+%+tag1", "x+%+tag2"]
+                    tags: ["x:tag1", "x:tag2"]
                 } as any
             };
             const result = await services1.consumption.attributes.canCreateRepositoryAttribute(request);
@@ -677,7 +677,7 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
                         month: 5,
                         year: "a-string"
                     },
-                    tags: ["x+%+tag1", "x+%+tag2"]
+                    tags: ["x:tag1", "x:tag2"]
                 } as any
             };
             const result = await services1.consumption.attributes.canCreateRepositoryAttribute(request);
@@ -697,7 +697,7 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
                         day: 5,
                         month: 5
                     },
-                    tags: ["x+%+tag1", "x+%+tag2"]
+                    tags: ["x:tag1", "x:tag2"]
                 } as any
             };
             const result = await services1.consumption.attributes.canCreateRepositoryAttribute(request);
@@ -716,7 +716,7 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
                         "@type": "BirthMonth",
                         value: 14
                     },
-                    tags: ["x+%+tag1", "x+%+tag2"]
+                    tags: ["x:tag1", "x:tag2"]
                 } as any
             };
             const result = await services1.consumption.attributes.canCreateRepositoryAttribute(request);
@@ -736,7 +736,7 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
                         value: "aGivenName",
                         additionalProperty: 1
                     },
-                    tags: ["x+%+tag1", "x+%+tag2"]
+                    tags: ["x:tag1", "x:tag2"]
                 } as any
             };
             const result = await services1.consumption.attributes.canCreateRepositoryAttribute(request);
@@ -792,7 +792,7 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "    aGivenName  "
                 },
-                tags: ["x+%+tag1", "x+%+tag2"]
+                tags: ["x:tag1", "x:tag2"]
             }
         };
         const repositoryAttribute = (await services1.consumption.attributes.createRepositoryAttribute(canCreateRepositoryAttributeRequest)).value;
@@ -815,7 +815,7 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["x+%+tag1", "x+%+tag2"]
+                tags: ["x:tag1", "x:tag2"]
             }
         };
         const repositoryAttribute = (await services1.consumption.attributes.createRepositoryAttribute(createAttributeRequest)).value;
@@ -826,7 +826,7 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["x+%+tag3"]
+                tags: ["x:tag3"]
             }
         };
 
@@ -848,7 +848,7 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["x+%+tag1", "x+%+tag2"]
+                tags: ["x:tag1", "x:tag2"]
             }
         };
         await services1.consumption.attributes.createRepositoryAttribute(request);
@@ -859,7 +859,7 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "anotherGivenName"
                 },
-                tags: ["x+%+tag1", "x+%+tag2"]
+                tags: ["x:tag1", "x:tag2"]
             }
         };
 
@@ -892,7 +892,7 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
                     surname: "aSurname",
                     middleName: "aMiddleName"
                 },
-                tags: ["x+%+tag1", "x+%+tag2"]
+                tags: ["x:tag1", "x:tag2"]
             }
         };
 
@@ -903,7 +903,7 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
                     givenName: "aGivenName",
                     surname: "aSurname"
                 },
-                tags: ["x+%+tag1", "x+%+tag2"]
+                tags: ["x:tag1", "x:tag2"]
             }
         };
 
@@ -920,7 +920,7 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["x+%+valid-tag", "invalid-tag"]
+                tags: ["x:valid-tag", "invalid-tag"]
             }
         };
 
@@ -942,7 +942,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["x+%+tag1", "x+%+tag2"]
+                tags: ["x:tag1", "x:tag2"]
             }
         };
 
@@ -960,7 +960,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "    aGivenName  "
                 },
-                tags: ["x+%+tag1", "x+%+tag2"]
+                tags: ["x:tag1", "x:tag2"]
             }
         };
 
@@ -1114,7 +1114,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                         "@type": "GivenName",
                         value: 5
                     },
-                    tags: ["x+%+tag1", "x+%+tag2"]
+                    tags: ["x:tag1", "x:tag2"]
                 } as any
             };
             const result = await services1.consumption.attributes.createRepositoryAttribute(request);
@@ -1131,7 +1131,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                         month: 5,
                         year: "a-string"
                     },
-                    tags: ["x+%+tag1", "x+%+tag2"]
+                    tags: ["x:tag1", "x:tag2"]
                 } as any
             };
             const result = await services1.consumption.attributes.createRepositoryAttribute(request);
@@ -1147,7 +1147,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                         day: 5,
                         month: 5
                     },
-                    tags: ["x+%+tag1", "x+%+tag2"]
+                    tags: ["x:tag1", "x:tag2"]
                 } as any
             };
             const result = await services1.consumption.attributes.createRepositoryAttribute(request);
@@ -1162,7 +1162,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                         "@type": "BirthMonth",
                         value: 14
                     },
-                    tags: ["x+%+tag1", "x+%+tag2"]
+                    tags: ["x:tag1", "x:tag2"]
                 } as any
             };
             const result = await services1.consumption.attributes.createRepositoryAttribute(request);
@@ -1178,7 +1178,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                         value: "aGivenName",
                         additionalProperty: 1
                     },
-                    tags: ["x+%+tag1", "x+%+tag2"]
+                    tags: ["x:tag1", "x:tag2"]
                 } as any
             };
             const result = await services1.consumption.attributes.createRepositoryAttribute(request);
@@ -1207,7 +1207,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["x+%+tag1", "x+%+tag2"]
+                tags: ["x:tag1", "x:tag2"]
             }
         };
 
@@ -1228,7 +1228,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["x+%+tag1", "x+%+tag2"]
+                tags: ["x:tag1", "x:tag2"]
             }
         };
 
@@ -1238,7 +1238,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "    aGivenName  "
                 },
-                tags: ["x+%+tag1", "x+%+tag2"]
+                tags: ["x:tag1", "x:tag2"]
             }
         };
 
@@ -1259,7 +1259,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["x+%+tag1", "x+%+tag2"]
+                tags: ["x:tag1", "x:tag2"]
             }
         };
 
@@ -1290,7 +1290,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                     surname: "aSurname",
                     middleName: "aMiddleName"
                 },
-                tags: ["x+%+tag1", "x+%+tag2"]
+                tags: ["x:tag1", "x:tag2"]
             }
         };
 
@@ -1301,7 +1301,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                     givenName: "aGivenName",
                     surname: "aSurname"
                 },
-                tags: ["x+%+tag1", "x+%+tag2"]
+                tags: ["x:tag1", "x:tag2"]
             }
         };
 
@@ -1319,7 +1319,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["x+%+tag1", "x+%+tag2"]
+                tags: ["x:tag1", "x:tag2"]
             }
         };
 
@@ -1332,7 +1332,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["x+%+tag1", "x+%+tag2"]
+                tags: ["x:tag1", "x:tag2"]
             }
         };
 
@@ -1348,7 +1348,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["x+%+tag1", "x+%+tag2"]
+                tags: ["x:tag1", "x:tag2"]
             }
         };
 
@@ -1381,7 +1381,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["x+%+tag1", "x+%+tag2"]
+                tags: ["x:tag1", "x:tag2"]
             }
         };
 
@@ -1394,7 +1394,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName2"
                 },
-                tags: ["x+%+tag1", "x+%+tag2"]
+                tags: ["x:tag1", "x:tag2"]
             }
         };
 
@@ -1413,7 +1413,7 @@ describe(ShareRepositoryAttributeUseCase.name, () => {
                         "@type": "GivenName",
                         value: "aGivenName"
                     },
-                    tags: ["x+%+tag1", "x+%+tag2"]
+                    tags: ["x:tag1", "x:tag2"]
                 }
             })
         ).value;
@@ -1651,7 +1651,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["x+%+tag1", "x+%+tag2"]
+                tags: ["x:tag1", "x:tag2"]
             }
         };
         const predecessor = (await services1.consumption.attributes.createRepositoryAttribute(createAttributeRequest)).value;
@@ -1663,7 +1663,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "anotherGivenName"
                 },
-                tags: ["x+%+tag3", "x+%+tag4"]
+                tags: ["x:tag3", "x:tag4"]
             }
         };
         const result = await services1.consumption.attributes.succeedRepositoryAttribute(succeedAttributeRequest);
@@ -1683,7 +1683,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["x+%+tag1", "x+%+tag2"]
+                tags: ["x:tag1", "x:tag2"]
             }
         };
         const predecessor = (await services1.consumption.attributes.createRepositoryAttribute(createAttributeRequest)).value;
@@ -1695,7 +1695,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "    anotherGivenName    "
                 },
-                tags: ["x+%+tag1", "x+%+tag2"]
+                tags: ["x:tag1", "x:tag2"]
             }
         };
         const result = await services1.consumption.attributes.succeedRepositoryAttribute(succeedAttributeRequest);
@@ -1715,7 +1715,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["x+%+tag1", "x+%+tag2"]
+                tags: ["x:tag1", "x:tag2"]
             }
         };
         const result = await services1.consumption.attributes.succeedRepositoryAttribute(succeedAttributeRequest);
@@ -1730,7 +1730,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["x+%+tag1", "x+%+tag2"]
+                tags: ["x:tag1", "x:tag2"]
             }
         };
         const result = await services1.consumption.attributes.succeedRepositoryAttribute(succeedAttributeRequest);
@@ -1768,7 +1768,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["x+%+tag1", "x+%+tag2"]
+                tags: ["x:tag1", "x:tag2"]
             }
         };
         const predecessor = (await services1.consumption.attributes.createRepositoryAttribute(createAttributeRequest)).value;
@@ -1780,7 +1780,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
                     "@type": "PhoneNumber",
                     value: "+4915155253460"
                 },
-                tags: ["x+%+tag3", "x+%+tag4"]
+                tags: ["x:tag3", "x:tag4"]
             }
         };
         const result = await services1.consumption.attributes.succeedRepositoryAttribute(succeedAttributeRequest);
@@ -1801,7 +1801,7 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["x+%+tag1", "x+%+tag2"]
+                tags: ["x:tag1", "x:tag2"]
             }
         });
 
@@ -1812,7 +1812,7 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
                     "@type": "GivenName",
                     value: "anotherGivenName"
                 },
-                tags: ["x+%+tag3", "x+%+tag4"]
+                tags: ["x:tag3", "x:tag4"]
             }
         };
         ({ successor: repositoryAttributeVersion1 } = (await services1.consumption.attributes.succeedRepositoryAttribute(succeedRepositoryAttributeRequest1)).value);
@@ -2266,7 +2266,7 @@ describe("Get (shared) versions of attribute", () => {
                     "@type": "GivenName",
                     value: "Second Name"
                 },
-                tags: ["x+%+tag2"]
+                tags: ["x:tag2"]
             }
         };
         const sRepositoryAttributeSuccessionResult1 = await services1.consumption.attributes.succeedRepositoryAttribute(succeedRepositoryAttributeRequest1);
@@ -2281,7 +2281,7 @@ describe("Get (shared) versions of attribute", () => {
                     "@type": "GivenName",
                     value: "Third Name"
                 },
-                tags: ["x+%+tag3"]
+                tags: ["x:tag3"]
             }
         };
         const sRepositoryAttributeSuccessionResult2 = await services1.consumption.attributes.succeedRepositoryAttribute(succeedRepositoryAttributeRequest2);
@@ -2296,7 +2296,7 @@ describe("Get (shared) versions of attribute", () => {
                         "@type": "GivenName",
                         value: "First Name"
                     },
-                    tags: ["x+%+tag1"]
+                    tags: ["x:tag1"]
                 }
             })
         ).value;
@@ -2321,7 +2321,7 @@ describe("Get (shared) versions of attribute", () => {
                         "@type": "GivenName",
                         value: "First Name"
                     },
-                    tags: ["x+%+tag1"]
+                    tags: ["x:tag1"]
                 }
             });
 
@@ -2618,7 +2618,7 @@ describe("DeleteAttributeUseCases", () => {
                     "@type": "GivenName",
                     value: "aGivenName"
                 },
-                tags: ["x+%+tag1", "x+%+tag2"]
+                tags: ["x:tag1", "x:tag2"]
             }
         });
         repositoryAttributeVersion0 = (await services1.consumption.attributes.getAttribute({ id: ownSharedIdentityAttributeVersion0.shareInfo!.sourceAttribute! })).value;

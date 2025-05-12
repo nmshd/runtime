@@ -1262,7 +1262,7 @@ describe("DeciderModule", () => {
                         requestConfig: {
                             "content.item.@type": "CreateAttributeRequestItem",
                             "content.item.attribute.@type": "IdentityAttribute",
-                            "content.item.attribute.tags": ["x+%+tag1", "x+%+tag2"],
+                            "content.item.attribute.tags": ["x:tag1", "x:tag2"],
                             "content.item.attribute.value.@type": "IdentityFileReference",
                             "content.item.attribute.value.value": "A link to a file with more than 30 characters"
                         },
@@ -1285,7 +1285,7 @@ describe("DeciderModule", () => {
                             attribute: {
                                 "@type": "IdentityAttribute",
                                 owner: recipient.address,
-                                tags: ["x+%+tag1", "x+%+tag3"],
+                                tags: ["x:tag1", "x:tag3"],
                                 value: {
                                     "@type": "IdentityFileReference",
                                     value: "A link to a file with more than 30 characters"
@@ -1471,19 +1471,19 @@ describe("DeciderModule", () => {
                         requestConfig: {
                             "content.item.@type": "ProposeAttributeRequestItem",
                             "content.item.attribute.@type": "IdentityAttribute",
-                            "content.item.attribute.tags": ["x+%+tag1", "x+%+tag2"],
+                            "content.item.attribute.tags": ["x:tag1", "x:tag2"],
                             "content.item.attribute.value.@type": "GivenName",
                             "content.item.attribute.value.value": "Given name of recipient proposed by sender",
                             "content.item.query.@type": "IdentityAttributeQuery",
                             "content.item.query.valueType": "GivenName",
-                            "content.item.query.tags": ["x+%+tag1", "x+%+tag2"]
+                            "content.item.query.tags": ["x:tag1", "x:tag2"]
                         },
                         responseConfig: {
                             accept: true,
                             attribute: IdentityAttribute.from({
                                 owner: "",
                                 value: GivenName.from("Given name of recipient").toJSON(),
-                                tags: ["x+%+tag1"]
+                                tags: ["x:tag1"]
                             })
                         }
                     }
@@ -1502,7 +1502,7 @@ describe("DeciderModule", () => {
                             attribute: {
                                 "@type": "IdentityAttribute",
                                 owner: recipient.address,
-                                tags: ["x+%+tag1", "x+%+tag3"],
+                                tags: ["x:tag1", "x:tag3"],
                                 value: {
                                     "@type": "GivenName",
                                     value: "Given name of recipient proposed by sender"
@@ -1511,7 +1511,7 @@ describe("DeciderModule", () => {
                             query: {
                                 "@type": "IdentityAttributeQuery",
                                 valueType: "GivenName",
-                                tags: ["x+%+tag1", "x+%+tag3"]
+                                tags: ["x:tag1", "x:tag3"]
                             },
                             mustBeAccepted: true
                         }
@@ -1658,14 +1658,14 @@ describe("DeciderModule", () => {
                             "content.item.@type": "ReadAttributeRequestItem",
                             "content.item.query.@type": "IdentityAttributeQuery",
                             "content.item.query.valueType": "GivenName",
-                            "content.item.query.tags": ["x+%+tag1", "x+%+tag2"]
+                            "content.item.query.tags": ["x:tag1", "x:tag2"]
                         },
                         responseConfig: {
                             accept: true,
                             newAttribute: IdentityAttribute.from({
                                 owner: "",
                                 value: GivenName.from("Given name of recipient").toJSON(),
-                                tags: ["x+%+tag1"]
+                                tags: ["x:tag1"]
                             })
                         }
                     }
@@ -1684,7 +1684,7 @@ describe("DeciderModule", () => {
                             query: {
                                 "@type": "IdentityAttributeQuery",
                                 valueType: "GivenName",
-                                tags: ["x+%+tag1", "x+%+tag3"]
+                                tags: ["x:tag1", "x:tag3"]
                             },
                             mustBeAccepted: true
                         }
@@ -1812,14 +1812,14 @@ describe("DeciderModule", () => {
                             "content.item.query.@type": "IQLQuery",
                             "content.item.query.queryString": "GivenName || LastName",
                             "content.item.query.attributeCreationHints.valueType": "GivenName",
-                            "content.item.query.attributeCreationHints.tags": ["x+%+tag1", "x+%+tag2"]
+                            "content.item.query.attributeCreationHints.tags": ["x:tag1", "x:tag2"]
                         },
                         responseConfig: {
                             accept: true,
                             newAttribute: IdentityAttribute.from({
                                 owner: "",
                                 value: GivenName.from("Given name of recipient").toJSON(),
-                                tags: ["x+%+tag1"]
+                                tags: ["x:tag1"]
                             })
                         }
                     }
@@ -1840,7 +1840,7 @@ describe("DeciderModule", () => {
                                 queryString: "GivenName || LastName",
                                 attributeCreationHints: {
                                     valueType: "GivenName",
-                                    tags: ["x+%+tag1", "x+%+tag3"]
+                                    tags: ["x:tag1", "x:tag3"]
                                 }
                             },
                             mustBeAccepted: true
@@ -1883,7 +1883,7 @@ describe("DeciderModule", () => {
                             "content.item.@type": "RegisterAttributeListenerRequestItem",
                             "content.item.query.@type": "IdentityAttributeQuery",
                             "content.item.query.valueType": "GivenName",
-                            "content.item.query.tags": ["x+%+tag1", "x+%+tag2"]
+                            "content.item.query.tags": ["x:tag1", "x:tag2"]
                         },
                         responseConfig: {
                             accept: true
@@ -1904,7 +1904,7 @@ describe("DeciderModule", () => {
                             query: {
                                 "@type": "IdentityAttributeQuery",
                                 valueType: "GivenName",
-                                tags: ["x+%+tag1", "x+%+tag3"]
+                                tags: ["x:tag1", "x:tag3"]
                             },
                             mustBeAccepted: true
                         }
@@ -1938,7 +1938,7 @@ describe("DeciderModule", () => {
                             "content.item.@type": "ShareAttributeRequestItem",
                             "content.item.attribute.@type": "IdentityAttribute",
                             "content.item.attribute.owner": sender.address,
-                            "content.item.attribute.tags": ["x+%+tag1", "x+%+tag2"],
+                            "content.item.attribute.tags": ["x:tag1", "x:tag2"],
                             "content.item.attribute.value.@type": "IdentityFileReference",
                             "content.item.attribute.value.value": "A link to a file with more than 30 characters"
                         },
@@ -1962,7 +1962,7 @@ describe("DeciderModule", () => {
                             attribute: {
                                 "@type": "IdentityAttribute",
                                 owner: sender.address,
-                                tags: ["x+%+tag1", "x+%+tag3"],
+                                tags: ["x:tag1", "x:tag3"],
                                 value: {
                                     "@type": "IdentityFileReference",
                                     value: "A link to a file with more than 30 characters"

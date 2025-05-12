@@ -113,14 +113,14 @@ describe("File upload", () => {
     });
 
     test("can upload a file with tags", async () => {
-        const response = await transportServices1.files.uploadOwnFile(await makeUploadRequest({ tags: ["x+%+tag1", "x+%+tag2"] }));
+        const response = await transportServices1.files.uploadOwnFile(await makeUploadRequest({ tags: ["x:tag1", "x:tag2"] }));
         expect(response).toBeSuccessful();
 
-        expect(response.value.tags).toStrictEqual(["x+%+tag1", "x+%+tag2"]);
+        expect(response.value.tags).toStrictEqual(["x:tag1", "x:tag2"]);
     });
 
     test("cannot upload a file with invalid tags", async () => {
-        const response = await transportServices1.files.uploadOwnFile(await makeUploadRequest({ tags: ["x+%+valid-tag", "invalid-tag"] }));
+        const response = await transportServices1.files.uploadOwnFile(await makeUploadRequest({ tags: ["x:valid-tag", "invalid-tag"] }));
         expect(response).toBeAnError("Detected invalidity of the following tags: 'invalid-tag'.", "error.consumption.attributes.invalidTags");
     });
 
@@ -151,29 +151,29 @@ describe("Get file", () => {
     test("can get file by tags", async () => {
         const uploadFileResult = await transportServices1.files.uploadOwnFile(
             await makeUploadRequest({
-                tags: ["x+%+aTag", "x+%+anotherTag"]
+                tags: ["x:aTag", "x:anotherTag"]
             })
         );
         const file = uploadFileResult.value;
 
         const uploadFileResult2 = await transportServices1.files.uploadOwnFile(
             await makeUploadRequest({
-                tags: ["x+%+aThirdTag", "x+%+aFourthTag"]
+                tags: ["x:aThirdTag", "x:aFourthTag"]
             })
         );
         const file2 = uploadFileResult2.value;
 
-        const getResult = await transportServices1.files.getFiles({ query: { tags: ["x+%+aTag"] } });
+        const getResult = await transportServices1.files.getFiles({ query: { tags: ["x:aTag"] } });
 
         expect(getResult).toBeSuccessful();
         expect(getResult.value[0].id).toStrictEqual(file.id);
 
-        const getResult2 = await transportServices1.files.getFiles({ query: { tags: ["x+%+aTag", "x+%+anotherTag"] } });
+        const getResult2 = await transportServices1.files.getFiles({ query: { tags: ["x:aTag", "x:anotherTag"] } });
 
         expect(getResult2).toBeSuccessful();
         expect(getResult2.value[0].id).toStrictEqual(file.id);
 
-        const getResult3 = await transportServices1.files.getFiles({ query: { tags: ["x+%+aTag", "x+%+aThirdTag"] } });
+        const getResult3 = await transportServices1.files.getFiles({ query: { tags: ["x:aTag", "x:aThirdTag"] } });
 
         expect(getResult3).toBeSuccessful();
         const result3Ids = getResult3.value.map((file) => file.id);
@@ -360,13 +360,13 @@ describe("Load peer file with token reference", () => {
     test("should load a peer file with its tags", async () => {
         const uploadOwnFileResult = await transportServices1.files.uploadOwnFile(
             await makeUploadRequest({
-                tags: ["x+%+tag1", "x+%+tag2"]
+                tags: ["x:tag1", "x:tag2"]
             })
         );
         const token = (await transportServices1.files.createTokenForFile({ fileId: uploadOwnFileResult.value.id })).value;
         const loadFileResult = await transportServices2.files.getOrLoadFile({ reference: token.reference.truncated });
 
-        expect(loadFileResult.value.tags).toStrictEqual(["x+%+tag1", "x+%+tag2"]);
+        expect(loadFileResult.value.tags).toStrictEqual(["x:tag1", "x:tag2"]);
     });
 
     test("cannot pass token id as truncated token reference", async () => {
