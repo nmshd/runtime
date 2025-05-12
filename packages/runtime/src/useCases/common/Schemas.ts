@@ -22952,6 +22952,25 @@ export const LoadPeerTokenRequest: any = {
     }
 }
 
+export const GetAnnouncementsRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetAnnouncementsRequest",
+    "definitions": {
+        "GetAnnouncementsRequest": {
+            "type": "object",
+            "properties": {
+                "language": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "language"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
 export const City: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/City",
