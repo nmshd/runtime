@@ -1,5 +1,5 @@
 import { serialize, validate } from "@js-soft/ts-serval";
-import { CountryAlpha2 } from "@nmshd/core-types/src/CountriesAlpha2";
+import { CountryAlpha2 } from "@nmshd/core-types";
 import { RenderHints, RenderHintsDataType, RenderHintsEditType, ValueHints, ValueHintsValue } from "../../../attributes/hints";
 import { AbstractString } from "../AbstractString";
 

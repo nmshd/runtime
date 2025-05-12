@@ -90,7 +90,7 @@ describe("IdentityInfo", () => {
     });
 });
 
-describe("LoadItemFromTruncatedReference", () => {
+describe("LoadItemFromReference", () => {
     describe("File", () => {
         let fileReference: string;
         let fileTokenReference: string;
@@ -102,13 +102,13 @@ describe("LoadItemFromTruncatedReference", () => {
         });
 
         test("loads the File with the truncated reference", async () => {
-            const result = await rTransportServices.account.loadItemFromTruncatedReference({ reference: fileReference });
+            const result = await rTransportServices.account.loadItemFromReference({ reference: fileReference });
             expect(result).toBeSuccessful();
             expect(result.value.type).toBe("File");
         });
 
         test("loads the File with the truncated Token reference", async () => {
-            const result = await rTransportServices.account.loadItemFromTruncatedReference({ reference: fileTokenReference });
+            const result = await rTransportServices.account.loadItemFromReference({ reference: fileTokenReference });
             expect(result).toBeSuccessful();
             expect(result.value.type).toBe("File");
         });
@@ -126,18 +126,18 @@ describe("LoadItemFromTruncatedReference", () => {
                 })
             ).value;
             relationshipTemplateReference = relationshipTemplate.truncatedReference;
-            relationshipTemplateTokenReference = (await sTransportServices.relationshipTemplates.createTokenForOwnTemplate({ templateId: relationshipTemplate.id })).value
-                .truncatedReference;
+            relationshipTemplateTokenReference = (await sTransportServices.relationshipTemplates.createTokenForOwnRelationshipTemplate({ templateId: relationshipTemplate.id }))
+                .value.truncatedReference;
         });
 
         test("loads the RelationshipTemplate with the truncated reference", async () => {
-            const result = await rTransportServices.account.loadItemFromTruncatedReference({ reference: relationshipTemplateReference });
+            const result = await rTransportServices.account.loadItemFromReference({ reference: relationshipTemplateReference });
             expect(result).toBeSuccessful();
             expect(result.value.type).toBe("RelationshipTemplate");
         });
 
         test("loads the RelationshipTemplate with the truncated Token reference", async () => {
-            const result = await rTransportServices.account.loadItemFromTruncatedReference({ reference: relationshipTemplateTokenReference });
+            const result = await rTransportServices.account.loadItemFromReference({ reference: relationshipTemplateTokenReference });
             expect(result).toBeSuccessful();
             expect(result.value.type).toBe("RelationshipTemplate");
         });
@@ -152,7 +152,7 @@ describe("LoadItemFromTruncatedReference", () => {
         });
 
         test("loads the Token with the truncated Token reference", async () => {
-            const result = await rTransportServices.account.loadItemFromTruncatedReference({ reference: tokenReference });
+            const result = await rTransportServices.account.loadItemFromReference({ reference: tokenReference });
             expect(result).toBeSuccessful();
             expect(result.value.type).toBe("Token");
         });
@@ -168,7 +168,7 @@ describe("LoadItemFromTruncatedReference", () => {
         test("loads the DeviceOnboardingInfo with the truncated reference", async () => {
             const deviceOnboardingInfoReference = (await sTransportServices.devices.createDeviceOnboardingToken({ id: device.id })).value.truncatedReference;
 
-            const result = await sTransportServices.account.loadItemFromTruncatedReference({ reference: deviceOnboardingInfoReference });
+            const result = await sTransportServices.account.loadItemFromReference({ reference: deviceOnboardingInfoReference });
 
             expect(result).toBeSuccessful();
             expect(result.value.type).toBe("DeviceOnboardingInfo");
@@ -178,7 +178,7 @@ describe("LoadItemFromTruncatedReference", () => {
             const profileName = "aProfileName";
             const deviceOnboardingInfoReference = (await sTransportServices.devices.createDeviceOnboardingToken({ id: device.id, profileName })).value.truncatedReference;
 
-            const result = await sTransportServices.account.loadItemFromTruncatedReference({ reference: deviceOnboardingInfoReference });
+            const result = await sTransportServices.account.loadItemFromReference({ reference: deviceOnboardingInfoReference });
 
             expect(result).toBeSuccessful();
             expect(result.value.type).toBe("DeviceOnboardingInfo");

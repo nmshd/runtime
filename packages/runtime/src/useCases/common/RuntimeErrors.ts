@@ -177,7 +177,7 @@ class Challenges {
     }
 
     public invalidChallengeString(): ApplicationError {
-        return new ApplicationError("error.runtime.challenges.invalidChallenge", "The challengeString is invalid.");
+        return new ApplicationError("error.runtime.challenges.invalidChallengeString", "The challengeString is invalid.");
     }
 }
 

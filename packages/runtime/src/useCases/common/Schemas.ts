@@ -1070,7 +1070,8 @@ export const CanCreateOutgoingRequestRequest: any = {
             "type": "object",
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "Consent"
                 },
                 "@context": {
                     "type": "string"
@@ -5597,7 +5598,8 @@ export const CompleteOutgoingRequestRequest: any = {
             "type": "object",
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "Consent"
                 },
                 "@context": {
                     "type": "string"
@@ -8080,7 +8082,8 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
             "type": "object",
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "Consent"
                 },
                 "@context": {
                     "type": "string"
@@ -9288,7 +9291,8 @@ export const CreateOutgoingRequestRequest: any = {
             "type": "object",
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "Consent"
                 },
                 "@context": {
                     "type": "string"
@@ -12930,7 +12934,8 @@ export const ReceivedIncomingRequestRequest: any = {
             "type": "object",
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "Consent"
                 },
                 "@context": {
                     "type": "string"
@@ -15921,7 +15926,8 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
             "type": "object",
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "Consent"
                 },
                 "@context": {
                     "type": "string"
@@ -17571,6 +17577,29 @@ export const NotifyPeerAboutRepositoryAttributeSuccessionRequest: any = {
     }
 }
 
+export const SetAttributeDeletionInfoOfDeletionProposedRelationshipRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/SetAttributeDeletionInfoOfDeletionProposedRelationshipRequest",
+    "definitions": {
+        "SetAttributeDeletionInfoOfDeletionProposedRelationshipRequest": {
+            "type": "object",
+            "properties": {
+                "relationshipId": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                }
+            },
+            "required": [
+                "relationshipId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
 export const ShareRepositoryAttributeRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/ShareRepositoryAttributeRequest",
@@ -18276,7 +18305,8 @@ export const SucceedRelationshipAttributeAndNotifyPeerRequest: any = {
             "type": "object",
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "Consent"
                 },
                 "@context": {
                     "type": "string"
@@ -20353,11 +20383,11 @@ export const DownloadFileRequest: any = {
     }
 }
 
-export const LoadItemFromTruncatedReferenceRequest: any = {
+export const LoadItemFromReferenceRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/LoadItemFromTruncatedReferenceRequest",
+    "$ref": "#/definitions/LoadItemFromReferenceRequest",
     "definitions": {
-        "LoadItemFromTruncatedReferenceRequest": {
+        "LoadItemFromReferenceRequest": {
             "type": "object",
             "properties": {
                 "reference": {
@@ -20770,12 +20800,14 @@ export const CreateDeviceOnboardingTokenRequest: any = {
                     "type": "object",
                     "properties": {
                         "password": {
-                            "type": "string"
+                            "type": "string",
+                            "minLength": 1
                         },
                         "passwordIsPin": {
                             "type": "boolean",
                             "const": true
-                        }
+                        },
+                        "passwordLocationIndicator": {}
                     },
                     "required": [
                         "password"
@@ -21137,7 +21169,8 @@ export const CreateTokenForFileRequest: any = {
                         "passwordIsPin": {
                             "type": "boolean",
                             "const": true
-                        }
+                        },
+                        "passwordLocationIndicator": {}
                     },
                     "required": [
                         "password"
@@ -22317,7 +22350,8 @@ export const CreateOwnRelationshipTemplateRequest: any = {
                         "passwordIsPin": {
                             "type": "boolean",
                             "const": true
-                        }
+                        },
+                        "passwordLocationIndicator": {}
                     },
                     "required": [
                         "password"
@@ -22343,11 +22377,11 @@ export const CreateOwnRelationshipTemplateRequest: any = {
     }
 }
 
-export const CreateTokenForOwnTemplateRequest: any = {
+export const CreateTokenForOwnRelationshipTemplateRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CreateTokenForOwnTemplateRequest",
+    "$ref": "#/definitions/CreateTokenForOwnRelationshipTemplateRequest",
     "definitions": {
-        "CreateTokenForOwnTemplateRequest": {
+        "CreateTokenForOwnRelationshipTemplateRequest": {
             "type": "object",
             "properties": {
                 "templateId": {
@@ -22372,7 +22406,8 @@ export const CreateTokenForOwnTemplateRequest: any = {
                         "passwordIsPin": {
                             "type": "boolean",
                             "const": true
-                        }
+                        },
+                        "passwordLocationIndicator": {}
                     },
                     "required": [
                         "password"
@@ -22583,6 +22618,19 @@ export const GetRelationshipTemplatesRequest: any = {
                         "true",
                         "!"
                     ]
+                },
+                "passwordProtection.passwordLocationIndicator": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
                 }
             },
             "additionalProperties": false
@@ -22662,7 +22710,8 @@ export const CreateOwnTokenRequest: any = {
                         "passwordIsPin": {
                             "type": "boolean",
                             "const": true
-                        }
+                        },
+                        "passwordLocationIndicator": {}
                     },
                     "required": [
                         "password"
@@ -22844,6 +22893,19 @@ export const GetTokensRequest: any = {
                     "enum": [
                         "true",
                         "!"
+                    ]
+                },
+                "passwordProtection.passwordLocationIndicator": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
                     ]
                 }
             },

@@ -41,17 +41,17 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
         const thirdPartyAccountController = accounts[2].accountController;
 
         const senderFile = await TestUtil.uploadFile(senderAccountController, { tags: ["x+%+tag"] });
-        senderTrucatedFileReference = senderFile.truncate();
+        senderTrucatedFileReference = senderFile.toFileReference(senderAccountController.config.baseUrl).truncate();
 
         const senderExpiredFile = await TestUtil.uploadFile(senderAccountController, { expiresAt: CoreDate.utc().add({ seconds: 1 }) });
-        senderExpiredTrucatedFileReference = senderExpiredFile.truncate();
+        senderExpiredTrucatedFileReference = senderExpiredFile.toFileReference(senderAccountController.config.baseUrl).truncate();
         await sleep(2000);
 
         const recipientFile = await TestUtil.uploadFile(recipientAccountController, { tags: ["x+%+tag"] });
-        recipientTrucatedFileReference = recipientFile.truncate();
+        recipientTrucatedFileReference = recipientFile.toFileReference(recipientAccountController.config.baseUrl).truncate();
 
         const thirdPartyFile = await TestUtil.uploadFile(thirdPartyAccountController);
-        thirdPartyTrucatedFileReference = thirdPartyFile.truncate();
+        thirdPartyTrucatedFileReference = thirdPartyFile.toFileReference(thirdPartyAccountController.config.baseUrl).truncate();
     });
 
     beforeEach(async () => {
@@ -99,11 +99,11 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
         });
 
         test("returns error if the ownership of a File should be transferred that is not owned by the sender", async function () {
-            const thirdPartyFile = await senderAccountController.files.getOrLoadFileByTruncated(thirdPartyTrucatedFileReference);
+            const thirdPartyFile = await senderAccountController.files.getOrLoadFileByReference(FileReference.from(thirdPartyTrucatedFileReference));
 
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
-                fileReference: thirdPartyFile.truncate()
+                fileReference: thirdPartyFile.toFileReference(senderAccountController.config.baseUrl).truncate()
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -290,7 +290,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
             expect(peerSharedIdentityAttribute!.shareInfo!.sourceAttribute).toBeUndefined();
 
             const truncatedFileReference = (peerSharedIdentityAttribute!.content.value as IdentityFileReference).value;
-            const file = await senderAccountController.files.getOrLoadFileByTruncated(truncatedFileReference);
+            const file = await senderAccountController.files.getOrLoadFileByReference(FileReference.from(truncatedFileReference));
             expect(file.isOwn).toBe(false);
             expect(file.cache!.tags).toStrictEqual(["x+%+tag"]);
         });

@@ -1,7 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
-import { CoreId } from "@nmshd/core-types";
+import { CoreId, FileReference } from "@nmshd/core-types";
 import { CryptoSecretKey } from "@nmshd/crypto";
-import { AccountController, FileController, Token, TokenContentFile, TokenController } from "@nmshd/transport";
+import { AccountController, FileController, Token, TokenContentFile, TokenController, TokenReference } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { FileDTO } from "../../../types";
 import { Base64ForIdPrefix, FileReferenceString, RuntimeErrors, SchemaRepository, SchemaValidator, TokenReferenceString, UseCase } from "../../common";
@@ -51,13 +51,13 @@ export class GetOrLoadFileUseCase extends UseCase<GetOrLoadFileRequest, FileDTO>
         throw RuntimeErrors.files.invalidReference(reference);
     }
 
-    private async loadFileFromFileReference(truncatedReference: string): Promise<Result<FileDTO>> {
-        const file = await this.fileController.getOrLoadFileByTruncated(truncatedReference);
+    private async loadFileFromFileReference(reference: string): Promise<Result<FileDTO>> {
+        const file = await this.fileController.getOrLoadFileByReference(FileReference.from(reference));
         return Result.ok(FileMapper.toFileDTO(file));
     }
 
-    private async loadFileFromTokenReference(truncatedReference: string, password?: string): Promise<Result<FileDTO>> {
-        const token = await this.tokenController.loadPeerTokenByTruncated(truncatedReference, true, password);
+    private async loadFileFromTokenReference(reference: string, password?: string): Promise<Result<FileDTO>> {
+        const token = await this.tokenController.loadPeerTokenByReference(TokenReference.from(reference), true, password);
 
         if (!token.cache) {
             throw RuntimeErrors.general.cacheEmpty(Token, token.id.toString());

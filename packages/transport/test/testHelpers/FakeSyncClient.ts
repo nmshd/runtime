@@ -87,8 +87,7 @@ export class FakeSyncClient implements ISyncClient {
             modifications: []
         };
 
-        // eslint-disable-next-line @typescript-eslint/prefer-for-of
-        for (let i = 0; i < request.modifications.length; i++) {
+        for (const _ of request.modifications) {
             response.modifications.push({
                 id: (await CoreIdHelper.notPrefixed.generate()).serialize(),
                 index: response.modifications.length,

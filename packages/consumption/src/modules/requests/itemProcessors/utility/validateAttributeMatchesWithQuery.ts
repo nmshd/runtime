@@ -39,15 +39,15 @@ export default function validateAttributeMatchesWithQuery(
 
     if (query instanceof IdentityAttributeQuery || query instanceof RelationshipAttributeQuery || query instanceof ThirdPartyRelationshipAttributeQuery) {
         if (
-            (typeof query.validFrom === "undefined" && typeof attribute.validFrom !== "undefined") ||
-            (typeof query.validFrom !== "undefined" && typeof attribute.validFrom !== "undefined" && query.validFrom.isBefore(attribute.validFrom))
+            (query.validFrom === undefined && attribute.validFrom !== undefined) ||
+            (query.validFrom !== undefined && attribute.validFrom !== undefined && query.validFrom.isBefore(attribute.validFrom))
         ) {
             return ValidationResult.error(ConsumptionCoreErrors.requests.attributeQueryMismatch("The provided Attribute is not valid in the queried time frame."));
         }
 
         if (
-            (typeof query.validTo === "undefined" && typeof attribute.validTo !== "undefined") ||
-            (typeof query.validTo !== "undefined" && typeof attribute.validTo !== "undefined" && query.validTo.isAfter(attribute.validTo))
+            (query.validTo === undefined && attribute.validTo !== undefined) ||
+            (query.validTo !== undefined && attribute.validTo !== undefined && query.validTo.isAfter(attribute.validTo))
         ) {
             return ValidationResult.error(ConsumptionCoreErrors.requests.attributeQueryMismatch("The provided Attribute is not valid in the queried time frame."));
         }
@@ -79,7 +79,7 @@ function validateAttributeMatchesWithIdentityAttributeQuery(
         return ValidationResult.error(ConsumptionCoreErrors.requests.attributeQueryMismatch("The provided IdentityAttribute is not of the queried IdentityAttribute value type."));
     }
 
-    if (typeof query.tags !== "undefined" && query.tags.length !== 0) {
+    if (query.tags && query.tags.length !== 0) {
         if (attribute.tags === undefined || attribute.tags.length === 0 || !query.tags.some((aQueriedTag) => attribute.tags!.includes(aQueriedTag))) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.attributeQueryMismatch("The tags of the provided IdentityAttribute do not contain at least one queried tag.")

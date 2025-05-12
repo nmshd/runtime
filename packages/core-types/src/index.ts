@@ -5,6 +5,7 @@ export * from "./CoreId";
 export * from "./CoreIdHelper";
 export * from "./CountriesAlpha2";
 export * from "./LanguagesISO639";
+export * from "./PasswordLocationIndicator";
 export * from "./Random";
 export * from "./references";
 export * from "./SharedPasswordProtection";

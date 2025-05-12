@@ -1,3 +1,4 @@
+import { IConfigOverwrite } from "@nmshd/transport";
 import correlator from "correlation-id";
 import { AnonymousServices, ConsumptionServices, DataViewExpander, DeciderModuleConfigurationOverwrite, RuntimeConfig, TransportServices } from "../../src";
 import { MockEventBus } from "./MockEventBus";
@@ -26,14 +27,18 @@ export interface LaunchConfiguration {
 export class RuntimeServiceProvider {
     private readonly runtimes: TestRuntime[] = [];
 
-    private static readonly _runtimeConfig: RuntimeConfig = {
-        transportLibrary: {
+    public static get transportConfig(): Omit<IConfigOverwrite, "supportedIdentityVersion"> {
+        return {
             baseUrl: process.env.NMSHD_TEST_BASEURL!,
             platformClientId: process.env.NMSHD_TEST_CLIENTID!,
             platformClientSecret: process.env.NMSHD_TEST_CLIENTSECRET!,
             addressGenerationHostnameOverride: globalThis.process.env.NMSHD_TEST_ADDRESS_GENERATION_HOSTNAME_OVERRIDE,
             debug: true
-        },
+        };
+    }
+
+    private static readonly _runtimeConfig: RuntimeConfig = {
+        transportLibrary: this.transportConfig,
         modules: {
             decider: { enabled: false, location: "@nmshd/runtime:DeciderModule" },
             request: { enabled: false, location: "@nmshd/runtime:RequestModule" },

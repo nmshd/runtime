@@ -11,5 +11,5 @@ export interface IUIBridge {
     showRequest(account: LocalAccountDTO, request: LocalRequestDVO): Promise<Result<void>>;
     showError(error: UserfriendlyApplicationError, account?: LocalAccountDTO): Promise<Result<void>>;
     requestAccountSelection(possibleAccounts: LocalAccountDTO[], title?: string, description?: string): Promise<Result<LocalAccountDTO | undefined>>;
-    enterPassword(passwordType: "pw" | "pin", pinLength?: number, attempt?: number): Promise<Result<string>>;
+    enterPassword(passwordType: "pw" | "pin", pinLength?: number, attempt?: number, passwordLocationIndicator?: number): Promise<Result<string>>;
 }

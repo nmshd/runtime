@@ -56,8 +56,7 @@ describe("ThirdPartyRelationshipAttributeQuery", function () {
                 owner: "",
                 thirdParty: thirdParty
             });
-            // eslint-disable-next-line jest/require-to-throw-message
-        }).toThrow();
+        }).toThrow(/(Value is not)|(may not be empty)/);
     });
 
     test.each([

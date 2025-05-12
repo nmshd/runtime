@@ -92,7 +92,8 @@ export class RelationshipTemplateController extends TransportController {
             ? PasswordProtection.from({
                   password: parameters.passwordProtection.password,
                   passwordType: parameters.passwordProtection.passwordType,
-                  salt: salt!
+                  salt: salt!,
+                  passwordLocationIndicator: parameters.passwordProtection.passwordLocationIndicator
               })
             : undefined;
 
@@ -279,15 +280,14 @@ export class RelationshipTemplateController extends TransportController {
         return template;
     }
 
-    public async loadPeerRelationshipTemplateByTruncated(truncated: string, password?: string): Promise<RelationshipTemplate> {
-        const reference = RelationshipTemplateReference.fromTruncated(truncated);
-
+    public async loadPeerRelationshipTemplateByReference(reference: RelationshipTemplateReference, password?: string): Promise<RelationshipTemplate> {
         if (reference.passwordProtection && !password) throw TransportCoreErrors.general.noPasswordProvided();
         const passwordProtection = reference.passwordProtection
             ? PasswordProtection.from({
                   salt: reference.passwordProtection.salt,
                   passwordType: reference.passwordProtection.passwordType,
-                  password: password!
+                  password: password!,
+                  passwordLocationIndicator: reference.passwordProtection.passwordLocationIndicator
               })
             : undefined;
 
@@ -300,7 +300,8 @@ export class RelationshipTemplateController extends TransportController {
             ? PasswordProtection.from({
                   salt: tokenContent.passwordProtection.salt,
                   passwordType: tokenContent.passwordProtection.passwordType,
-                  password: password!
+                  password: password!,
+                  passwordLocationIndicator: tokenContent.passwordProtection.passwordLocationIndicator
               })
             : undefined;
 

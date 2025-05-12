@@ -63,8 +63,8 @@ describe("FileController", function () {
         const content = CoreBuffer.fromUtf8("Test");
         const sentFile = await TestUtil.uploadFile(sender, content);
 
-        const reference = sentFile.toFileReference().truncate();
-        const receivedFile = await recipient.files.getOrLoadFileByTruncated(reference);
+        const reference = sentFile.toFileReference(sender.config.baseUrl);
+        const receivedFile = await recipient.files.getOrLoadFileByReference(reference);
         tempId1 = sentFile.id;
 
         expectValidFiles(sentFile, receivedFile, tempDate);
@@ -83,8 +83,8 @@ describe("FileController", function () {
         const content = CoreBuffer.fromUtf8("Test2");
         const sentFile = await TestUtil.uploadFile(sender, content);
 
-        const reference = sentFile.toFileReference().truncate();
-        const receivedFile = await recipient.files.getOrLoadFileByTruncated(reference);
+        const reference = sentFile.toFileReference(sender.config.baseUrl);
+        const receivedFile = await recipient.files.getOrLoadFileByReference(reference);
         tempId2 = sentFile.id;
 
         expectValidFiles(sentFile, receivedFile, tempDate);
@@ -95,8 +95,8 @@ describe("FileController", function () {
         const content = CoreBuffer.fromUtf8("Test3");
         const sentFile = await TestUtil.uploadFile(sender, content);
 
-        const reference = sentFile.toFileReference().truncate();
-        const receivedFile = await recipient.files.getOrLoadFileByTruncated(reference);
+        const reference = sentFile.toFileReference(sender.config.baseUrl);
+        const receivedFile = await recipient.files.getOrLoadFileByReference(reference);
 
         expectValidFiles(sentFile, receivedFile, tempDate);
     });
@@ -132,8 +132,8 @@ describe("FileController", function () {
             const content = CoreBuffer.fromUtf8("Test");
             sentFile = await TestUtil.uploadFile(sender, content);
 
-            const reference = sentFile.toFileReference().truncate();
-            receivedFile = await recipient.files.getOrLoadFileByTruncated(reference);
+            const reference = sentFile.toFileReference(sender.config.baseUrl);
+            receivedFile = await recipient.files.getOrLoadFileByReference(reference);
         });
 
         test("should delete own file locally and from the Backbone", async function () {

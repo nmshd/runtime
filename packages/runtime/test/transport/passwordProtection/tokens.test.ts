@@ -42,6 +42,14 @@ describe("Password-protected tokens", () => {
         expect(loadResult.value.passwordProtection?.passwordIsPin).toBe(true);
     });
 
+    test("send token with passwordLocationIndicator", async () => {
+        const token = await uploadOwnToken(runtimeServices1.transport, undefined, { password: "password", passwordLocationIndicator: 50 });
+        expect(token.passwordProtection!.passwordLocationIndicator).toBe(50);
+
+        const reference = TokenReference.from(token.truncatedReference);
+        expect(reference.passwordProtection!.passwordLocationIndicator).toBe(50);
+    });
+
     test("error when loading a token with a wrong password", async () => {
         const token = await uploadOwnToken(runtimeServices1.transport, undefined, { password: "password" });
 
@@ -82,11 +90,63 @@ describe("Password-protected tokens", () => {
         );
     });
 
-    describe("LoadItemFromTruncatedReferenceUseCase", () => {
+    test("validation error when creating a token with a PasswordLocationIndicator that is an invalid string", async () => {
+        const createResult = await runtimeServices1.transport.tokens.createOwnToken({
+            content: { key: "value" },
+            expiresAt: CoreDate.utc().add({ minutes: 10 }).toISOString(),
+            ephemeral: true,
+            passwordProtection: { password: "password", passwordLocationIndicator: "invalid-password-location-indicator" as any }
+        });
+        expect(createResult).toBeAnError(
+            /^must be a number from 50 to 99 or one of the following strings: Self, Letter, RegistrationLetter, Email, SMS, Website$/,
+            "error.runtime.validation.invalidPropertyValue"
+        );
+    });
+
+    test("validation error when creating a token with a PasswordLocationIndicator that is an invalid number", async () => {
+        const createResult = await runtimeServices1.transport.tokens.createOwnToken({
+            content: { key: "value" },
+            expiresAt: CoreDate.utc().add({ minutes: 10 }).toISOString(),
+            ephemeral: true,
+            passwordProtection: { password: "password", passwordLocationIndicator: 49 as any }
+        });
+        expect(createResult).toBeAnError(
+            "must be a number from 50 to 99 or one of the following strings: Self, Letter, RegistrationLetter, Email, SMS, Website",
+            "error.runtime.validation.invalidPropertyValue"
+        );
+    });
+
+    test("validation error when creating a token with a PasswordLocationIndicator that is a number mapping to a PasswordLocationIndicatorOption", async () => {
+        const createResult = await runtimeServices1.transport.tokens.createOwnToken({
+            content: { key: "value" },
+            expiresAt: CoreDate.utc().add({ minutes: 10 }).toISOString(),
+            ephemeral: true,
+            passwordProtection: { password: "password", passwordLocationIndicator: 1 as any }
+        });
+        expect(createResult).toBeAnError(
+            "must be a number from 50 to 99 or one of the following strings: Self, Letter, RegistrationLetter, Email, SMS, Website",
+            "error.runtime.validation.invalidPropertyValue"
+        );
+    });
+
+    test("validation error when creating a token with a PasswordLocationIndicator that is a number mapping to RecoveryKit", async () => {
+        const createResult = await runtimeServices1.transport.tokens.createOwnToken({
+            content: { key: "value" },
+            expiresAt: CoreDate.utc().add({ minutes: 10 }).toISOString(),
+            ephemeral: true,
+            passwordProtection: { password: "password", passwordLocationIndicator: 0 as any }
+        });
+        expect(createResult).toBeAnError(
+            "must be a number from 50 to 99 or one of the following strings: Self, Letter, RegistrationLetter, Email, SMS, Website",
+            "error.runtime.validation.invalidPropertyValue"
+        );
+    });
+
+    describe("LoadItemFromReferenceUseCase", () => {
         test("send and receive a password-protected token", async () => {
             const token = await uploadOwnToken(runtimeServices1.transport, undefined, { password: "password" });
 
-            const loadResult = await runtimeServices2.transport.account.loadItemFromTruncatedReference({ reference: token.truncatedReference, password: "password" });
+            const loadResult = await runtimeServices2.transport.account.loadItemFromReference({ reference: token.truncatedReference, password: "password" });
             expect(loadResult).toBeSuccessful();
             expect(loadResult.value.type).toBe("Token");
         });
@@ -94,14 +154,14 @@ describe("Password-protected tokens", () => {
         test("error when loading a token with a wrong password", async () => {
             const token = await uploadOwnToken(runtimeServices1.transport, undefined, { password: "password" });
 
-            const loadResult = await runtimeServices2.transport.account.loadItemFromTruncatedReference({ reference: token.truncatedReference, password: "wrong-password" });
+            const loadResult = await runtimeServices2.transport.account.loadItemFromReference({ reference: token.truncatedReference, password: "wrong-password" });
             expect(loadResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
         });
 
         test("error when loading a token with no password", async () => {
             const token = await uploadOwnToken(runtimeServices1.transport, undefined, { password: "password" });
 
-            const loadResult = await runtimeServices2.transport.account.loadItemFromTruncatedReference({ reference: token.truncatedReference });
+            const loadResult = await runtimeServices2.transport.account.loadItemFromReference({ reference: token.truncatedReference });
             expect(loadResult).toBeAnError(/.*/, "error.transport.noPasswordProvided");
         });
     });

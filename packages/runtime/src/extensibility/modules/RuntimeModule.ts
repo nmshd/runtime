@@ -9,6 +9,8 @@ export interface ModuleConfiguration {
 }
 
 export abstract class RuntimeModule<TConfig extends ModuleConfiguration = ModuleConfiguration, TRuntime extends Runtime = Runtime> {
+    public static readonly denyMultipleInstances: boolean = true;
+
     public constructor(
         public readonly runtime: TRuntime,
         public readonly configuration: TConfig,

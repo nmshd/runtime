@@ -25,8 +25,8 @@ describe("RelationshipSync", function () {
             maxNumberOfAllocations: 1
         });
 
-        const reference = templateOnTemplatorDevice.toRelationshipTemplateReference().truncate();
-        const templateOnRequestorDevice1 = await requestorDevice1.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(reference);
+        const reference = templateOnTemplatorDevice.toRelationshipTemplateReference(templatorDevice.config.baseUrl);
+        const templateOnRequestorDevice1 = await requestorDevice1.relationshipTemplates.loadPeerRelationshipTemplateByReference(reference);
 
         const createdRelationship = await requestorDevice1.relationships.sendRelationship({
             template: templateOnRequestorDevice1,
@@ -78,8 +78,8 @@ describe("RelationshipSync", function () {
             maxNumberOfAllocations: 1
         });
 
-        const reference = templateOnTemplatorDevice.toRelationshipTemplateReference().truncate();
-        const templateOnRequestorDevice1 = await requestorDevice1.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(reference);
+        const reference = templateOnTemplatorDevice.toRelationshipTemplateReference(templatorDevice.config.baseUrl);
+        const templateOnRequestorDevice1 = await requestorDevice1.relationshipTemplates.loadPeerRelationshipTemplateByReference(reference);
 
         const createdRelationship = await requestorDevice1.relationships.sendRelationship({
             template: templateOnRequestorDevice1,
@@ -125,8 +125,8 @@ describe("RelationshipSync", function () {
         });
         await templatorDevice1.syncDatawallet();
 
-        const reference = templateOnTemplatorDevice.toRelationshipTemplateReference().truncate();
-        const templateOnRequestorDevice1 = await requestorDevice.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(reference);
+        const reference = templateOnTemplatorDevice.toRelationshipTemplateReference(templatorDevice1.config.baseUrl);
+        const templateOnRequestorDevice1 = await requestorDevice.relationshipTemplates.loadPeerRelationshipTemplateByReference(reference);
 
         const createdRelationship = await requestorDevice.relationships.sendRelationship({
             template: templateOnRequestorDevice1,
@@ -183,7 +183,6 @@ describe("RelationshipSync", function () {
         expect(templateOnDevice2!.toJSON()).toStrictEqualExcluding(templateOnDevice1.toJSON(), "cachedAt");
     });
 
-    // eslint-disable-next-line jest/expect-expect -- no assertions are needed because it is sufficient that no error is thrown
     test("Synchronizing after both parties have decomposed simultaneously does not throw", async function () {
         // This is a regression test. In the past, an error was thrown when synchronizing after both parties had decomposed the relationship.
         // This was because an external event for the decomposition of the peer was received during the sync, and the template didn't exist
@@ -209,6 +208,6 @@ describe("RelationshipSync", function () {
         const template = await templator.relationshipTemplates.getRelationshipTemplate(templateId);
         await templator.relationshipTemplates.deleteRelationshipTemplate(template!);
 
-        await templator.syncEverything();
+        await expect(templator.syncEverything()).resolves.not.toThrow();
     });
 });

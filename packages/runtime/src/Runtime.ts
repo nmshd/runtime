@@ -33,6 +33,7 @@ import {
 } from "@nmshd/transport";
 import { Container, Scope } from "@nmshd/typescript-ioc";
 import { buildInformation } from "./buildInformation";
+import { ConfigHolder } from "./ConfigHolder";
 import { DatabaseSchemaUpgrader } from "./DatabaseSchemaUpgrader";
 import { DataViewExpander } from "./dataViews";
 import { ModulesInitializedEvent, ModulesLoadedEvent, ModulesStartedEvent, RuntimeInitializedEvent, RuntimeInitializingEvent } from "./events";
@@ -212,6 +213,10 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
                 .scope(Scope.Request);
         }
 
+        Container.bind(ConfigHolder)
+            .factory(() => new ConfigHolder(this.runtimeConfig))
+            .scope(Scope.Request);
+
         Container.bind(EventBus)
             .factory(() => this.eventBus)
             .scope(Scope.Singleton);
@@ -342,6 +347,18 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
             }
 
             await this.loadModule(moduleConfiguration);
+        }
+
+        // iterate modules and check if they are allowed to be loaded multiple times
+        for (const module of this.modules) {
+            if (!(module.constructor as Function & { denyMultipleInstances: boolean }).denyMultipleInstances) continue;
+
+            const instances = this.modules.toArray().filter((m) => m.constructor === module.constructor);
+            if (instances.length === 1) continue;
+
+            throw new Error(
+                `The Module '${module.displayName}' at location '${module.configuration.location}' is not allowed to be used multiple times, but it has ${instances.length} instances.`
+            );
         }
 
         this.eventBus.publish(new ModulesLoadedEvent());
