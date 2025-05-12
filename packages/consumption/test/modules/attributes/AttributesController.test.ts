@@ -3497,19 +3497,25 @@ describe("AttributesController", function () {
         /* eslint-enable @typescript-eslint/naming-convention */
 
         test("should validate valid tags", function () {
-            expect(consumptionController.attributes["isValidTag"]("private", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(true);
-            expect(consumptionController.attributes["isValidTag"]("emergency+%+first", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(true);
-            expect(consumptionController.attributes["isValidTag"]("emergency+%+second", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(true);
-            expect(consumptionController.attributes["isValidTag"]("x:my+%+custom+%+tag", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(true);
-            expect(consumptionController.attributes["isValidTag"]("X+%+my+%+custom+%+tag", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(true);
+            expect(consumptionController.attributes["isValidTag"]("bkb:private", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(true);
+            expect(consumptionController.attributes["isValidTag"]("bkb:emergency:first", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(true);
+            expect(consumptionController.attributes["isValidTag"]("bkb:emergency:second", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(true);
+            expect(consumptionController.attributes["isValidTag"]("x:my:custom:tag", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(true);
+            expect(consumptionController.attributes["isValidTag"]("X:my:custom:tag", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(true);
+            expect(consumptionController.attributes["isValidTag"]("mimetype:x/x", {})).toBe(true);
+            expect(consumptionController.attributes["isValidTag"]("urn:aUrnTag", {})).toBe(true);
+            expect(consumptionController.attributes["isValidTag"]("language:de", {})).toBe(true);
         });
 
         test("should validate invalid tags", function () {
-            expect(consumptionController.attributes["isValidTag"]("nonexistent", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(false);
-            expect(consumptionController.attributes["isValidTag"]("emergency", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(false);
-            expect(consumptionController.attributes["isValidTag"]("private", mockedTagCollection.tagsForAttributeValueTypes["nonexistent"])).toBe(false);
-            expect(consumptionController.attributes["isValidTag"]("emergency+%+nonexistent", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(false);
-            expect(consumptionController.attributes["isValidTag"]("emergency+%+first+%+nonexistent", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(false);
+            expect(consumptionController.attributes["isValidTag"]("bkb:nonexistent", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(false);
+            expect(consumptionController.attributes["isValidTag"]("bkb:emergency", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(false);
+            expect(consumptionController.attributes["isValidTag"]("bkb:private", mockedTagCollection.tagsForAttributeValueTypes["nonexistent"])).toBe(false);
+            expect(consumptionController.attributes["isValidTag"]("bkb:emergency:nonexistent", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(false);
+            expect(consumptionController.attributes["isValidTag"]("bkb:emergency:first:nonexistent", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(false);
+            expect(consumptionController.attributes["isValidTag"]("mimetype:/x", {})).toBe(false);
+            expect(consumptionController.attributes["isValidTag"]("Urn:invalidUrn", {})).toBe(false);
+            expect(consumptionController.attributes["isValidTag"]("language:invalid", {})).toBe(false);
         });
     });
 
