@@ -60,7 +60,7 @@ export class SSEModule extends AppRuntimeModule<SSEModuleConfiguration> {
 
                 const result = await fetch(url, {
                     ...options,
-                    headers: { ...options?.headers, authorization: `Bearer ${token}` }
+                    headers: { ...options.headers, authorization: `Bearer ${token}` }
                 });
 
                 this.logger.info(`SSE fetch result: ${result.status}`);
