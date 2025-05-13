@@ -229,7 +229,7 @@ describe("validateAttributeMatchesWithQuery", function () {
         test("returns an error when an IdentityAttribute has no tag but at least one tag was queried by IdentityAttributeQuery", async function () {
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
-                query: IdentityAttributeQuery.from({ valueType: "GivenName", tags: ["x+%+aTag"] })
+                query: IdentityAttributeQuery.from({ valueType: "GivenName", tags: ["x:aTag"] })
             });
             const requestId = await ConsumptionIds.request.generate();
             const request = LocalRequest.from({
@@ -268,7 +268,7 @@ describe("validateAttributeMatchesWithQuery", function () {
         test("returns an error when the tags of the IdentityAttribute do not match the tags queried by IdentityAttributeQuery", async function () {
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
-                query: IdentityAttributeQuery.from({ tags: ["x+%+tagA", "x+%+tagB", "x+%+tagC"], valueType: "GivenName" })
+                query: IdentityAttributeQuery.from({ tags: ["x:tagA", "x:tagB", "x:tagC"], valueType: "GivenName" })
             });
             const requestId = await ConsumptionIds.request.generate();
             const request = LocalRequest.from({
@@ -289,7 +289,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 newAttribute: {
                     "@type": "IdentityAttribute",
                     owner: recipient.toString(),
-                    tags: ["x+%+tagD", "x+%+tagE", "x+%+tagF"],
+                    tags: ["x:tagD", "x:tagE", "x:tagF"],
                     value: {
                         "@type": "GivenName",
                         value: "aGivenName"

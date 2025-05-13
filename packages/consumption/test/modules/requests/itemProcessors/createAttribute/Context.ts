@@ -140,7 +140,7 @@ export class GivenSteps {
         this.context.givenResponseItem = AttributeSuccessionAcceptResponseItem.from({
             predecessorId: params.predecessorId,
             successorId: await ConsumptionIds.attribute.generate(),
-            successorContent: TestObjectFactory.createIdentityAttribute({ owner: this.context.translateTestIdentity(TestIdentity.PEER), tags: ["x+%+succeededTag"] }),
+            successorContent: TestObjectFactory.createIdentityAttribute({ owner: this.context.translateTestIdentity(TestIdentity.PEER), tags: ["x:succeededTag"] }),
             result: ResponseItemResult.Accepted
         });
     }

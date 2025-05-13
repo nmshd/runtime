@@ -1037,7 +1037,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const existingAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: testAccount.identity.address,
-                    tags: ["x+%+tag1"]
+                    tags: ["x:tag1"]
                 })
             });
 
