@@ -381,7 +381,7 @@ describe("AppStringProcessor", function () {
             expect(runtime4MockUiBridge).showRequestCalled();
         });
 
-        test("get file using an url with http protocol", async function () {
+        test("get file using a url with http protocol", async function () {
             const fileResult = await runtime1Session.transportServices.files.uploadOwnFile({
                 filename: "aFileName",
                 content: new TextEncoder().encode("aFileContent"),
