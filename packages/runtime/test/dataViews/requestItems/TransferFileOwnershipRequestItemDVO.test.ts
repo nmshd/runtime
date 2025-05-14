@@ -1,5 +1,5 @@
 import { DecideRequestItemParametersJSON } from "@nmshd/consumption";
-import { TransferFileOwnershipRequestItemJSON } from "@nmshd/content";
+import { RequestJSON, TransferFileOwnershipAcceptResponseItemJSON, TransferFileOwnershipRequestItemJSON } from "@nmshd/content";
 import {
     ConsumptionServices,
     CreateOutgoingRequestRequest,
@@ -39,6 +39,7 @@ let rEventBus: MockEventBus;
 let requestContent: CreateOutgoingRequestRequest;
 let responseItems: DecideRequestItemParametersJSON[];
 let rAddress: string;
+let sAddress: string;
 
 let truncatedFileReference: string;
 
@@ -53,8 +54,10 @@ beforeAll(async () => {
     rConsumptionServices = rRuntimeServices.consumption;
     sEventBus = sRuntimeServices.eventBus;
     rEventBus = rRuntimeServices.eventBus;
-    await establishRelationship(sTransportServices, rTransportServices);
     rAddress = (await rTransportServices.account.getIdentityInfo()).value.address;
+    sAddress = (await sTransportServices.account.getIdentityInfo()).value.address;
+
+    await establishRelationship(sTransportServices, rTransportServices);
 
     const file = await uploadFile(sTransportServices);
     truncatedFileReference = file.truncatedReference;
@@ -181,7 +184,7 @@ describe("TransferFileOwnershipRequestItemDVO", () => {
         expect(requestItemDVO.response).toStrictEqual(responseItemDVO);
         expect(responseItemDVO.repositoryAttribute).toBeDefined();
         expect(responseItemDVO.sharedAttribute).toBeDefined();
-        expect(responseItemDVO.sharedAttributeId).toBe(responseItemDVO.sharedAttribute.id);
+        expect(responseItemDVO.sharedAttributeId).toBe(responseItemDVO.sharedAttribute!.id);
         expect(responseItemDVO.id).toBe(responseItemDVO.repositoryAttribute!.id);
 
         await syncUntilHasMessageWithResponse(sTransportServices, recipientMessage.content.id!);
@@ -225,7 +228,60 @@ describe("TransferFileOwnershipRequestItemDVO", () => {
         expect(requestItemDVO.response).toStrictEqual(responseItemDVO);
         expect(responseItemDVO.repositoryAttribute).toBeUndefined();
         expect(responseItemDVO.sharedAttribute).toBeDefined();
-        expect(responseItemDVO.sharedAttributeId).toBe(responseItemDVO.sharedAttribute.id);
+        expect(responseItemDVO.sharedAttributeId).toBe(responseItemDVO.sharedAttribute!.id);
         expect(responseItemDVO.id).toBe(responseItemDVO.sharedAttributeId);
+    });
+
+    test("check the MessageDVO for the recipient after they deleted the shared Attribute", async () => {
+        const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
+        const requestId = (senderMessage.content as RequestJSON).id!;
+        const localRequest = (await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: requestId })).value;
+        const sharedAttributeId = (localRequest.response!.content.items[0] as TransferFileOwnershipAcceptResponseItemJSON).attributeId;
+
+        await rRuntimeServices.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: sharedAttributeId });
+
+        const recipientMessage = (await rRuntimeServices.transport.messages.getMessage({ id: senderMessage.id })).value;
+        const dvo = await rExpander.expandMessageDTO(recipientMessage);
+        expect(dvo).toBeDefined();
+    });
+
+    test("check the MessageDVO for the recipient after they deleted the RepositoryAttribute", async () => {
+        const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
+        const requestId = (senderMessage.content as RequestJSON).id!;
+        const localRequest = (await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: requestId })).value;
+        const sharedAttributeId = (localRequest.response!.content.items[0] as TransferFileOwnershipAcceptResponseItemJSON).attributeId;
+
+        await rRuntimeServices.consumption.attributes.deleteRepositoryAttribute({ attributeId: sharedAttributeId });
+
+        const recipientMessage = (await rRuntimeServices.transport.messages.getMessage({ id: senderMessage.id })).value;
+        const dvo = await rExpander.expandMessageDTO(recipientMessage);
+        expect(dvo).toBeDefined();
+    });
+
+    test("check the MessageDVO for the recipient after they deleted the shared and RepositoryAttribute", async () => {
+        const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
+        const requestId = (senderMessage.content as RequestJSON).id!;
+        const localRequest = (await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: requestId })).value;
+        const sharedAttributeId = (localRequest.response!.content.items[0] as TransferFileOwnershipAcceptResponseItemJSON).attributeId;
+
+        await rRuntimeServices.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: sharedAttributeId });
+        await rRuntimeServices.consumption.attributes.deleteRepositoryAttribute({ attributeId: sharedAttributeId });
+
+        const recipientMessage = (await rRuntimeServices.transport.messages.getMessage({ id: senderMessage.id })).value;
+        const dvo = await rExpander.expandMessageDTO(recipientMessage);
+        expect(dvo).toBeDefined();
+    });
+
+    test("check the MessageDVO for the sender after they deleted the shared Attribute", async () => {
+        const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
+        const requestId = (senderMessage.content as RequestJSON).id!;
+        const localRequest = (await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: requestId })).value;
+        const sharedAttributeId = (localRequest.response!.content.items[0] as TransferFileOwnershipAcceptResponseItemJSON).attributeId;
+
+        await sRuntimeServices.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: sharedAttributeId });
+
+        const senderMessageAfterDeletion = (await sRuntimeServices.transport.messages.getMessage({ id: senderMessage.id })).value;
+        const dvo = await sExpander.expandMessageDTO(senderMessageAfterDeletion);
+        expect(dvo).toBeDefined();
     });
 });
