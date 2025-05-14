@@ -3620,6 +3620,9 @@ export const CompleteOutgoingRequestRequest: any = {
                 },
                 {
                     "$ref": "#/definitions/FormFieldAcceptResponseItemJSON"
+                },
+                {
+                    "$ref": "#/definitions/TransferFileOwnershipAcceptResponseItemJSON"
                 }
             ]
         },
@@ -5864,6 +5867,38 @@ export const CompleteOutgoingRequestRequest: any = {
             "required": [
                 "@type",
                 "response",
+                "result"
+            ],
+            "additionalProperties": false
+        },
+        "TransferFileOwnershipAcceptResponseItemJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "TransferFileOwnershipAcceptResponseItem"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "result": {
+                    "type": "string",
+                    "const": "Accepted"
+                },
+                "attributeId": {
+                    "type": "string"
+                },
+                "attribute": {
+                    "$ref": "#/definitions/IdentityAttributeJSON"
+                }
+            },
+            "required": [
+                "@type",
+                "attribute",
+                "attributeId",
                 "result"
             ],
             "additionalProperties": false
@@ -6104,6 +6139,9 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                 },
                 {
                     "$ref": "#/definitions/FormFieldAcceptResponseItemJSON"
+                },
+                {
+                    "$ref": "#/definitions/TransferFileOwnershipAcceptResponseItemJSON"
                 }
             ]
         },
@@ -8348,6 +8386,38 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
             "required": [
                 "@type",
                 "response",
+                "result"
+            ],
+            "additionalProperties": false
+        },
+        "TransferFileOwnershipAcceptResponseItemJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "TransferFileOwnershipAcceptResponseItem"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "result": {
+                    "type": "string",
+                    "const": "Accepted"
+                },
+                "attributeId": {
+                    "type": "string"
+                },
+                "attribute": {
+                    "$ref": "#/definitions/IdentityAttributeJSON"
+                }
+            },
+            "required": [
+                "@type",
+                "attribute",
+                "attributeId",
                 "result"
             ],
             "additionalProperties": false
