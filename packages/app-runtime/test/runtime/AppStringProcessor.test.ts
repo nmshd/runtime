@@ -43,7 +43,7 @@ describe("AppStringProcessor", function () {
         mockUiBridge.reset();
     });
 
-    test.each(["nmshd", "enmeshed"])("should process invalid URL schemes %s", async function (scheme) {
+    test.each(["nmshd", "enmeshed"])("should process the invalid URL scheme %s", async function (scheme) {
         const result = await runtime1.stringProcessor.processURL(`${scheme}://qr#`, runtime1Session.account);
         expect(result.isError).toBeDefined();
 
