@@ -823,15 +823,22 @@ export class DataViewExpander {
                     const transferFileOwnershipResponseItem = responseItem as TransferFileOwnershipAcceptResponseItemJSON;
 
                     const sharedAttributeResultForTransfer = await this.consumption.attributes.getAttribute({ id: transferFileOwnershipResponseItem.attributeId });
-                    const sharedAttributeDVOForTransfer = await this.expandLocalAttributeDTO(sharedAttributeResultForTransfer.value);
-
-                    const repositoryAttributeResultForTransfer = await this.consumption.attributes.getAttribute({
-                        id: sharedAttributeResultForTransfer.value.shareInfo!.sourceAttribute!
-                    });
+                    const sharedAttributeForTransferExists = sharedAttributeResultForTransfer.isSuccess;
+                    const sharedAttributeDVOForTransfer = sharedAttributeForTransferExists
+                        ? ((await this.expandLocalAttributeDTO(sharedAttributeResultForTransfer.value)) as SharedToPeerAttributeDVO)
+                        : undefined;
 
                     let repositoryAttributeDVOForTransfer;
-                    if (repositoryAttributeResultForTransfer.isSuccess) {
-                        repositoryAttributeDVOForTransfer = await this.expandLocalAttributeDTO(repositoryAttributeResultForTransfer.value);
+                    const repositoryAttributeIdForTransferExists = !!sharedAttributeDVOForTransfer?.sourceAttribute;
+                    if (repositoryAttributeIdForTransferExists) {
+                        const repositoryAttributeResultForTransfer = await this.consumption.attributes.getAttribute({
+                            id: sharedAttributeDVOForTransfer.sourceAttribute!
+                        });
+
+                        const repositoryAttributeForTransferExists = repositoryAttributeResultForTransfer.isSuccess;
+                        repositoryAttributeDVOForTransfer = repositoryAttributeForTransferExists
+                            ? ((await this.expandLocalAttributeDTO(repositoryAttributeResultForTransfer.value)) as RepositoryAttributeDVO)
+                            : undefined;
                     }
 
                     return {

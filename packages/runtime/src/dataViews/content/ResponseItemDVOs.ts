@@ -92,7 +92,7 @@ export interface TransferFileOwnershipAcceptResponseItemDVO extends AcceptRespon
     type: "TransferFileOwnershipAcceptResponseItemDVO";
     repositoryAttribute?: LocalAttributeDVO;
     sharedAttributeId: string;
-    sharedAttribute: LocalAttributeDVO;
+    sharedAttribute?: LocalAttributeDVO;
 }
 
 export interface AttributeSuccessionAcceptResponseItemDVO extends AcceptResponseItemDVO {
