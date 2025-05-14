@@ -1,5 +1,5 @@
 import { DecideRequestItemParametersJSON } from "@nmshd/consumption";
-import { AbstractStringJSON, DisplayNameJSON } from "@nmshd/content";
+import { AbstractStringJSON, CreateAttributeAcceptResponseItemJSON, DisplayNameJSON, RequestJSON } from "@nmshd/content";
 import {
     ConsumptionServices,
     CreateAttributeAcceptResponseItemDVO,
@@ -208,8 +208,8 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
 
         expect(responseItem.attributeId).toStrictEqual(attributeResult.value[0].id);
         expect(responseItem.attribute).toBeDefined();
-        expect(responseItem.attribute.valueType).toBe("DisplayName");
-        expect((attributeResult.value[0].content.value as DisplayNameJSON).value).toStrictEqual((responseItem.attribute.content.value as DisplayNameJSON).value);
+        expect(responseItem.attribute!.valueType).toBe("DisplayName");
+        expect((attributeResult.value[0].content.value as DisplayNameJSON).value).toStrictEqual((responseItem.attribute!.content.value as DisplayNameJSON).value);
 
         await syncUntilHasMessageWithResponse(sTransportServices, recipientMessage.content.id!);
         await sEventBus.waitForEvent(OutgoingRequestStatusChangedEvent);
@@ -281,9 +281,9 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
 
         expect(responseItem.attributeId).toStrictEqual(attributeResult.value[numberOfAttributes - 1].id);
         expect(responseItem.attribute).toBeDefined();
-        expect(responseItem.attribute.valueType).toBe("DisplayName");
+        expect(responseItem.attribute!.valueType).toBe("DisplayName");
         expect((attributeResult.value[numberOfAttributes - 1].content.value as DisplayNameJSON).value).toStrictEqual(
-            (responseItem.attribute.content.value as DisplayNameJSON).value
+            (responseItem.attribute!.content.value as DisplayNameJSON).value
         );
         expect(numberOfAttributes - baselineNumberOfAttributes).toBe(1);
     });
@@ -306,5 +306,31 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
         const numberOfItems = dvo.items!.length;
         expect(dvo.name).toBe("Richard Receiver");
         expect(numberOfItems - baselineNumberOfItems).toBe(1);
+    });
+
+    test("check the MessageDVO for the recipient after they deleted the shared Attribute", async () => {
+        const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
+        const requestId = (senderMessage.content as RequestJSON).id!;
+        const localRequest = (await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: requestId })).value;
+        const sharedAttributeId = (localRequest.response!.content.items[0] as CreateAttributeAcceptResponseItemJSON).attributeId;
+
+        await rRuntimeServices.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: sharedAttributeId });
+
+        const recipientMessage = (await rRuntimeServices.transport.messages.getMessage({ id: senderMessage.id })).value;
+        const dvo = await rExpander.expandMessageDTO(recipientMessage);
+        expect(dvo).toBeDefined();
+    });
+
+    test("check the MessageDVO for the sender after they deleted the shared Attribute", async () => {
+        const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
+        const requestId = (senderMessage.content as RequestJSON).id!;
+        const localRequest = (await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: requestId })).value;
+        const sharedAttributeId = (localRequest.response!.content.items[0] as CreateAttributeAcceptResponseItemJSON).attributeId;
+
+        await sRuntimeServices.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: sharedAttributeId });
+
+        const senderMessageAfterDeletion = (await sRuntimeServices.transport.messages.getMessage({ id: senderMessage.id })).value;
+        const dvo = await sExpander.expandMessageDTO(senderMessageAfterDeletion);
+        expect(dvo).toBeDefined();
     });
 });

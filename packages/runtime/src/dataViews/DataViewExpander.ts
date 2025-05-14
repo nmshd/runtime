@@ -729,9 +729,7 @@ export class DataViewExpander {
 
                     const localAttributeResultForRead = await this.consumption.attributes.getAttribute({ id: readAttributeResponseItem.attributeId });
                     const localAttributeForReadExists = localAttributeResultForRead.isSuccess;
-                    const localAttributeDVOForRead = localAttributeForReadExists
-                        ? ((await this.expandLocalAttributeDTO(localAttributeResultForRead.value)) as SharedToPeerAttributeDVO)
-                        : undefined;
+                    const localAttributeDVOForRead = localAttributeForReadExists ? await this.expandLocalAttributeDTO(localAttributeResultForRead.value) : undefined;
 
                     return {
                         ...readAttributeResponseItem,
@@ -743,8 +741,10 @@ export class DataViewExpander {
 
                 case "CreateAttributeAcceptResponseItem":
                     const createAttributeResponseItem = responseItem as CreateAttributeAcceptResponseItemJSON;
+
                     const localAttributeResultForCreate = await this.consumption.attributes.getAttribute({ id: createAttributeResponseItem.attributeId });
-                    const localAttributeDVOForCreate = await this.expandLocalAttributeDTO(localAttributeResultForCreate.value);
+                    const localAttributeForCreateExists = localAttributeResultForCreate.isSuccess;
+                    const localAttributeDVOForCreate = localAttributeForCreateExists ? await this.expandLocalAttributeDTO(localAttributeResultForCreate.value) : undefined;
 
                     return {
                         ...createAttributeResponseItem,
