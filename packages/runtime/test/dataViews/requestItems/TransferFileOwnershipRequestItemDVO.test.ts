@@ -39,7 +39,6 @@ let rEventBus: MockEventBus;
 let requestContent: CreateOutgoingRequestRequest;
 let responseItems: DecideRequestItemParametersJSON[];
 let rAddress: string;
-let sAddress: string;
 
 let truncatedFileReference: string;
 
@@ -55,7 +54,6 @@ beforeAll(async () => {
     sEventBus = sRuntimeServices.eventBus;
     rEventBus = rRuntimeServices.eventBus;
     rAddress = (await rTransportServices.account.getIdentityInfo()).value.address;
-    sAddress = (await sTransportServices.account.getIdentityInfo()).value.address;
 
     await establishRelationship(sTransportServices, rTransportServices);
 
