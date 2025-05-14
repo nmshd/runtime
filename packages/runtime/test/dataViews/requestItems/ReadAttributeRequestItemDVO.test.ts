@@ -3,7 +3,7 @@ import {
     AcceptReadAttributeRequestItemParametersWithNewAttributeJSON,
     DecideRequestItemParametersJSON
 } from "@nmshd/consumption";
-import { GivenNameJSON, IdentityAttributeQuery, IQLQuery, ReadAttributeRequestItem, SurnameJSON } from "@nmshd/content";
+import { GivenNameJSON, IdentityAttributeQuery, IQLQuery, ReadAttributeAcceptResponseItemJSON, ReadAttributeRequestItem, RequestJSON, SurnameJSON } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
 import {
     AttributeAlreadySharedAcceptResponseItemDVO,
@@ -297,6 +297,32 @@ describe("ReadAttributeRequestItemDVO with IdentityAttributeQuery", () => {
 
         expect(responseItem.attributeId).toStrictEqual(attributeResult.value[numberOfAttributes - 1].id);
         expect(givenName.value).toStrictEqual((responseItem.attribute.content.value as GivenNameJSON).value);
+    });
+
+    test.only("check the MessageDVO for the recipient after they deleted the shared Attribute", async () => {
+        const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
+        const requestId = (senderMessage.content as RequestJSON).id!;
+        const localRequest = (await runtimeServices1.consumption.outgoingRequests.getRequest({ id: requestId })).value;
+        const sharedAttributeId = (localRequest.response!.content.items[0] as ReadAttributeAcceptResponseItemJSON).attributeId;
+
+        await runtimeServices2.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: sharedAttributeId });
+
+        const recipientMessage = (await runtimeServices2.transport.messages.getMessage({ id: senderMessage.id })).value;
+        const dvo = await expander2.expandMessageDTO(recipientMessage);
+        expect(dvo).toBeDefined();
+    });
+
+    test.only("check the MessageDVO for the sender after they deleted the shared Attribute", async () => {
+        const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
+        const requestId = (senderMessage.content as RequestJSON).id!;
+        const localRequest = (await runtimeServices1.consumption.outgoingRequests.getRequest({ id: requestId })).value;
+        const sharedAttributeId = (localRequest.response!.content.items[0] as ReadAttributeAcceptResponseItemJSON).attributeId;
+
+        await runtimeServices1.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: sharedAttributeId });
+
+        const senderMessageAfterDeletion = (await runtimeServices1.transport.messages.getMessage({ id: senderMessage.id })).value;
+        const dvo = await expander1.expandMessageDTO(senderMessageAfterDeletion);
+        expect(dvo).toBeDefined();
     });
 });
 
