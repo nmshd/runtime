@@ -43,21 +43,11 @@ describe("AppStringProcessor", function () {
         mockUiBridge.reset();
     });
 
-    test("should process an invalid URL", async function () {
-        const result = await runtime1.stringProcessor.processURL("enmeshed://qr#", runtime1Session.account);
+    test.each(["nmshd", "enmeshed"])("should process invalid URL schemes %s", async function (scheme) {
+        const result = await runtime1.stringProcessor.processURL(`${scheme}://qr#`, runtime1Session.account);
         expect(result.isError).toBeDefined();
 
         expect(result.error.code).toBe("error.appruntime.appStringProcessor.wrongURL");
-
-        expect(mockUiBridge).enterPasswordNotCalled();
-        expect(mockUiBridge).requestAccountSelectionNotCalled();
-    });
-
-    test("should process a valid URL with invalid reference", async function () {
-        const result = await runtime1.stringProcessor.processURL("nmshd://qr#", runtime1Session.account);
-        expect(result.isError).toBeDefined();
-
-        expect(result.error.code).toBe("error.appruntime.appStringProcessor.invalidReference");
 
         expect(mockUiBridge).enterPasswordNotCalled();
         expect(mockUiBridge).requestAccountSelectionNotCalled();
@@ -391,7 +381,7 @@ describe("AppStringProcessor", function () {
             expect(runtime4MockUiBridge).showRequestCalled();
         });
 
-        test.each(["nmshd", "http"])("get file using a nmshd url with %s protocol", async function (replacement) {
+        test("get file using a nmshd url with http protocol", async function () {
             const fileResult = await runtime1Session.transportServices.files.uploadOwnFile({
                 filename: "aFileName",
                 content: new TextEncoder().encode("aFileContent"),
@@ -400,7 +390,7 @@ describe("AppStringProcessor", function () {
             });
             const file = fileResult.value;
 
-            const result = await runtime4.stringProcessor.processURL(file.reference.url.replace("https", replacement), runtime4Session.account);
+            const result = await runtime4.stringProcessor.processURL(file.reference.url.replace("https", "http"), runtime4Session.account);
             expect(result).toBeSuccessful();
             expect(result.value).toBeUndefined();
 
