@@ -219,10 +219,10 @@ describe("ReadAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         expect(responseItem.type).toBe("ReadAttributeAcceptResponseItemDVO");
         expect(responseItem.attribute).toBeDefined();
         const recipientAddress = (await transportServices2.account.getIdentityInfo()).value.address;
-        expect(responseItem.attribute.owner).toBe(recipientAddress);
-        expect(responseItem.attribute.type).toBe("SharedToPeerAttributeDVO");
-        expect(responseItem.attribute.content.value["@type"]).toBe("GivenName");
-        expect((responseItem.attribute.content.value as GivenNameJSON).value).toBe("aGivenName");
+        expect(responseItem.attribute!.owner).toBe(recipientAddress);
+        expect(responseItem.attribute!.type).toBe("SharedToPeerAttributeDVO");
+        expect(responseItem.attribute!.content.value["@type"]).toBe("GivenName");
+        expect((responseItem.attribute!.content.value as GivenNameJSON).value).toBe("aGivenName");
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         const attributeResult = await consumptionServices2.attributes.getAttributes({
@@ -236,7 +236,7 @@ describe("ReadAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         expect(displayName.value).toBe("aGivenName");
 
         expect(responseItem.attributeId).toStrictEqual(attributeResult.value[0].id);
-        expect(displayName.value).toStrictEqual((responseItem.attribute.content.value as GivenNameJSON).value);
+        expect(displayName.value).toStrictEqual((responseItem.attribute!.content.value as GivenNameJSON).value);
 
         await syncUntilHasMessageWithResponse(transportServices1, recipientMessage.content.id!);
         await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
@@ -296,10 +296,10 @@ describe("ReadAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         expect(givenName.value).toBe("aGivenName");
 
         expect(responseItem.attributeId).toStrictEqual(attributeResult.value[numberOfAttributes - 1].id);
-        expect(givenName.value).toStrictEqual((responseItem.attribute.content.value as GivenNameJSON).value);
+        expect(givenName.value).toStrictEqual((responseItem.attribute!.content.value as GivenNameJSON).value);
     });
 
-    test.only("check the MessageDVO for the recipient after they deleted the shared Attribute", async () => {
+    test("check the MessageDVO for the recipient after they deleted the shared Attribute", async () => {
         const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
         const requestId = (senderMessage.content as RequestJSON).id!;
         const localRequest = (await runtimeServices1.consumption.outgoingRequests.getRequest({ id: requestId })).value;
@@ -312,7 +312,7 @@ describe("ReadAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         expect(dvo).toBeDefined();
     });
 
-    test.only("check the MessageDVO for the sender after they deleted the shared Attribute", async () => {
+    test("check the MessageDVO for the sender after they deleted the shared Attribute", async () => {
         const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
         const requestId = (senderMessage.content as RequestJSON).id!;
         const localRequest = (await runtimeServices1.consumption.outgoingRequests.getRequest({ id: requestId })).value;
@@ -471,10 +471,10 @@ describe("ReadAttributeRequestItemDVO with IQL and results", () => {
         expect(responseItem.type).toBe("ReadAttributeAcceptResponseItemDVO");
         expect(responseItem.attribute).toBeDefined();
         const recipientAddress = (await transportServices2.account.getIdentityInfo()).value.address;
-        expect(responseItem.attribute.owner).toBe(recipientAddress);
-        expect(responseItem.attribute.type).toBe("SharedToPeerAttributeDVO");
-        expect(responseItem.attribute.content.value["@type"]).toBe("GivenName");
-        expect((responseItem.attribute.content.value as GivenNameJSON).value).toBe("aGivenName");
+        expect(responseItem.attribute!.owner).toBe(recipientAddress);
+        expect(responseItem.attribute!.type).toBe("SharedToPeerAttributeDVO");
+        expect(responseItem.attribute!.content.value["@type"]).toBe("GivenName");
+        expect((responseItem.attribute!.content.value as GivenNameJSON).value).toBe("aGivenName");
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         const attributeResult = await consumptionServices2.attributes.getAttributes({
@@ -488,7 +488,7 @@ describe("ReadAttributeRequestItemDVO with IQL and results", () => {
         expect(displayName.value).toBe("aGivenName");
 
         expect(responseItem.attributeId).toStrictEqual(attributeResult.value[0].id);
-        expect(displayName.value).toStrictEqual((responseItem.attribute.content.value as GivenNameJSON).value);
+        expect(displayName.value).toStrictEqual((responseItem.attribute!.content.value as GivenNameJSON).value);
 
         await syncUntilHasMessageWithResponse(transportServices1, recipientMessage.content.id!);
         await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
@@ -545,7 +545,7 @@ describe("ReadAttributeRequestItemDVO with IQL and results", () => {
         expect(givenName.value).toBe("aGivenName");
 
         expect(responseItem.attributeId).toStrictEqual(attributeResult.value[numberOfAttributes - 1].id);
-        expect(givenName.value).toStrictEqual((responseItem.attribute.content.value as GivenNameJSON).value);
+        expect(givenName.value).toStrictEqual((responseItem.attribute!.content.value as GivenNameJSON).value);
     });
 });
 
@@ -702,10 +702,10 @@ describe("ReadAttributeRequestItemDVO with IQL and fallback", () => {
         expect(responseItem.type).toBe("ReadAttributeAcceptResponseItemDVO");
         expect(responseItem.attribute).toBeDefined();
         const recipientAddress = (await transportServices2.account.getIdentityInfo()).value.address;
-        expect(responseItem.attribute.owner).toBe(recipientAddress);
-        expect(responseItem.attribute.type).toBe("SharedToPeerAttributeDVO");
-        expect(responseItem.attribute.content.value["@type"]).toBe("Surname");
-        expect((responseItem.attribute.content.value as SurnameJSON).value).toBe("Heuss");
+        expect(responseItem.attribute!.owner).toBe(recipientAddress);
+        expect(responseItem.attribute!.type).toBe("SharedToPeerAttributeDVO");
+        expect(responseItem.attribute!.content.value["@type"]).toBe("Surname");
+        expect((responseItem.attribute!.content.value as SurnameJSON).value).toBe("Heuss");
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         const attributeResult = await consumptionServices2.attributes.getAttributes({
@@ -719,7 +719,7 @@ describe("ReadAttributeRequestItemDVO with IQL and fallback", () => {
         expect(displayName.value).toBe("Heuss");
 
         expect(responseItem.attributeId).toStrictEqual(attributeResult.value[0].id);
-        expect(displayName.value).toStrictEqual((responseItem.attribute.content.value as SurnameJSON).value);
+        expect(displayName.value).toStrictEqual((responseItem.attribute!.content.value as SurnameJSON).value);
 
         await syncUntilHasMessageWithResponse(transportServices1, recipientMessage.content.id!);
         await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
@@ -775,7 +775,7 @@ describe("ReadAttributeRequestItemDVO with IQL and fallback", () => {
         expect(givenName.value).toBe("Heuss");
 
         expect(responseItem.attributeId).toStrictEqual(attributeResult.value[numberOfAttributes - 1].id);
-        expect(givenName.value).toStrictEqual((responseItem.attribute.content.value as SurnameJSON).value);
+        expect(givenName.value).toStrictEqual((responseItem.attribute!.content.value as SurnameJSON).value);
     });
 });
 

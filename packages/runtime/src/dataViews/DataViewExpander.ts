@@ -726,8 +726,12 @@ export class DataViewExpander {
             switch (responseItem["@type"]) {
                 case "ReadAttributeAcceptResponseItem":
                     const readAttributeResponseItem = responseItem as ReadAttributeAcceptResponseItemJSON;
+
                     const localAttributeResultForRead = await this.consumption.attributes.getAttribute({ id: readAttributeResponseItem.attributeId });
-                    const localAttributeDVOForRead = await this.expandLocalAttributeDTO(localAttributeResultForRead.value);
+                    const localAttributeForReadExists = localAttributeResultForRead.isSuccess;
+                    const localAttributeDVOForRead = localAttributeForReadExists
+                        ? ((await this.expandLocalAttributeDTO(localAttributeResultForRead.value)) as SharedToPeerAttributeDVO)
+                        : undefined;
 
                     return {
                         ...readAttributeResponseItem,

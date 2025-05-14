@@ -46,7 +46,7 @@ export interface ReadAttributeAcceptResponseItemDVO extends AcceptResponseItemDV
     type: "ReadAttributeAcceptResponseItemDVO";
     attributeId: string;
     thirdPartyAddress?: string;
-    attribute: LocalAttributeDVO;
+    attribute?: LocalAttributeDVO;
 }
 
 export interface ProposeAttributeAcceptResponseItemDVO extends AcceptResponseItemDVO {
