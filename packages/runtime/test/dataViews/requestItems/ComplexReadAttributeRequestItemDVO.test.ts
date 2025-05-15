@@ -234,10 +234,10 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         expect(responseItem.type).toBe("ReadAttributeAcceptResponseItemDVO");
         expect(responseItem.attribute).toBeDefined();
         const recipientAddress = (await transportServices2.account.getIdentityInfo()).value.address;
-        expect(responseItem.attribute.owner).toBe(recipientAddress);
-        expect(responseItem.attribute.type).toBe("SharedToPeerAttributeDVO");
+        expect(responseItem.attribute!.owner).toBe(recipientAddress);
+        expect(responseItem.attribute!.type).toBe("SharedToPeerAttributeDVO");
 
-        const attributeValue = responseItem.attribute.value as PersonNameJSON;
+        const attributeValue = responseItem.attribute!.value as PersonNameJSON;
         expect(attributeValue["@type"]).toBe("PersonName");
         expect(attributeValue.givenName).toBe("aGivenName");
         expect(attributeValue.surname).toBe("aSurname");
@@ -331,7 +331,7 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         expect(returnedValue.honorificSuffix).toBe("anHonorificSuffix");
 
         expect(responseItem.attributeId).toStrictEqual(attributeResult.value[numberOfAttributes - 1].id);
-        expect(returnedValue).toStrictEqual(responseItem.attribute.content.value);
+        expect(returnedValue).toStrictEqual(responseItem.attribute!.content.value);
     });
 });
 
@@ -489,10 +489,10 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
         expect(responseItem.type).toBe("ReadAttributeAcceptResponseItemDVO");
         expect(responseItem.attribute).toBeDefined();
         const recipientAddress = (await transportServices2.account.getIdentityInfo()).value.address;
-        expect(responseItem.attribute.owner).toBe(recipientAddress);
-        expect(responseItem.attribute.type).toBe("SharedToPeerAttributeDVO");
+        expect(responseItem.attribute!.owner).toBe(recipientAddress);
+        expect(responseItem.attribute!.type).toBe("SharedToPeerAttributeDVO");
 
-        const attributeValue = responseItem.attribute.value as PersonNameJSON;
+        const attributeValue = responseItem.attribute!.value as PersonNameJSON;
         expect(attributeValue["@type"]).toBe("PersonName");
         expect(attributeValue.givenName).toBe("aGivenName");
         expect(attributeValue.surname).toBe("aSurname");
@@ -579,6 +579,6 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
         expect(returnedValue.honorificSuffix).toBe("anHonorificSuffix");
 
         expect(responseItem.attributeId).toStrictEqual(attributeResult.value[numberOfAttributes - 1].id);
-        expect(returnedValue).toStrictEqual(responseItem.attribute.content.value);
+        expect(returnedValue).toStrictEqual(responseItem.attribute!.content.value);
     });
 });
