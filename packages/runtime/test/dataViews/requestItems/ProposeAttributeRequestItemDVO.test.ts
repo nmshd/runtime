@@ -491,8 +491,9 @@ describe("ProposeAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         await runtimeServices2.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: sharedAttributeId });
 
         const recipientMessage = (await runtimeServices2.transport.messages.getMessage({ id: senderMessage.id })).value;
-        const dvo = await expander2.expandMessageDTO(recipientMessage);
+        const dvo = (await expander2.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
+        expect((dvo.request.response!.items![0] as ProposeAttributeAcceptResponseItemDVO).attribute).toBeUndefined();
     });
 
     test("check the MessageDVO for the sender after they deleted the shared Attribute", async () => {
@@ -504,8 +505,9 @@ describe("ProposeAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         await runtimeServices1.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: sharedAttributeId });
 
         const senderMessageAfterDeletion = (await runtimeServices1.transport.messages.getMessage({ id: senderMessage.id })).value;
-        const dvo = await expander1.expandMessageDTO(senderMessageAfterDeletion);
+        const dvo = (await expander1.expandMessageDTO(senderMessageAfterDeletion)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
+        expect((dvo.request.response!.items![0] as ProposeAttributeAcceptResponseItemDVO).attribute).toBeUndefined();
     });
 });
 
@@ -941,8 +943,9 @@ describe("AttributeAlreadySharedAcceptResponseItemDVO with IdentityAttributeQuer
         await runtimeServices2.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: sharedAttributeId });
 
         const recipientMessage = (await runtimeServices2.transport.messages.getMessage({ id: senderMessage.id })).value;
-        const dvo = await expander2.expandMessageDTO(recipientMessage);
+        const dvo = (await expander2.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
+        expect((dvo.request.response!.items![0] as AttributeAlreadySharedAcceptResponseItemDVO).attribute).toBeUndefined();
     });
 
     test("check the MessageDVO for the sender after they deleted the shared Attribute", async () => {
@@ -954,7 +957,8 @@ describe("AttributeAlreadySharedAcceptResponseItemDVO with IdentityAttributeQuer
         await runtimeServices1.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: sharedAttributeId });
 
         const senderMessageAfterDeletion = (await runtimeServices1.transport.messages.getMessage({ id: senderMessage.id })).value;
-        const dvo = await expander1.expandMessageDTO(senderMessageAfterDeletion);
+        const dvo = (await expander1.expandMessageDTO(senderMessageAfterDeletion)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
+        expect((dvo.request.response!.items![0] as AttributeAlreadySharedAcceptResponseItemDVO).attribute).toBeUndefined();
     });
 });
