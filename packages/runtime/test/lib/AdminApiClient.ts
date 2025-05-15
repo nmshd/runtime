@@ -1,7 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
-import { AnnouncementSeverity } from "@nmshd/transport";
 import axios, { Axios } from "axios";
-import { IdentityDeletionProcessDTO, TransportServices } from "../../src";
+import { AnnouncementSeverity, IdentityDeletionProcessDTO, TransportServices } from "../../src";
 import { syncUntilHasIdentityDeletionProcess } from "./testUtils";
 
 let adminClient: Axios | undefined;
