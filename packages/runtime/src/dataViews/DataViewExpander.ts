@@ -819,14 +819,14 @@ export class DataViewExpander {
 
                     const localAttributeListenerResult = await this.consumption.attributeListeners.getAttributeListener({ id: registerAttributeListenerResponseItem.listenerId });
                     const localAttributeListenerExists = localAttributeListenerResult.isSuccess;
-                    const localAttributeListener = localAttributeListenerExists ? await this.expandLocalAttributeListenerDTO(localAttributeListenerResult.value) : undefined;
+                    const localAttributeListenerDVO = localAttributeListenerExists ? await this.expandLocalAttributeListenerDTO(localAttributeListenerResult.value) : undefined;
 
                     return {
                         ...registerAttributeListenerResponseItem,
                         type: "RegisterAttributeListenerAcceptResponseItemDVO",
                         id: registerAttributeListenerResponseItem.listenerId,
                         name: name,
-                        listener: localAttributeListener
+                        listener: localAttributeListenerDVO
                     } as RegisterAttributeListenerAcceptResponseItemDVO;
 
                 case "TransferFileOwnershipAcceptResponseItem":
@@ -866,19 +866,21 @@ export class DataViewExpander {
 
                     const localPredecessorResult = await this.consumption.attributes.getAttribute({ id: attributeSuccessionResponseItem.predecessorId });
                     const localPredecessorExists = localPredecessorResult.isSuccess;
-                    const localPredecessor = localPredecessorExists ? ((await this.expandLocalAttributeDTO(localPredecessorResult.value)) as SharedToPeerAttributeDVO) : undefined;
+                    const localPredecessorDVO = localPredecessorExists
+                        ? ((await this.expandLocalAttributeDTO(localPredecessorResult.value)) as SharedToPeerAttributeDVO)
+                        : undefined;
 
                     const localSuccessorResult = await this.consumption.attributes.getAttribute({ id: attributeSuccessionResponseItem.successorId });
                     const localSuccessorExists = localSuccessorResult.isSuccess;
-                    const localSuccessor = localSuccessorExists ? ((await this.expandLocalAttributeDTO(localSuccessorResult.value)) as SharedToPeerAttributeDVO) : undefined;
+                    const localSuccessorDVO = localSuccessorExists ? ((await this.expandLocalAttributeDTO(localSuccessorResult.value)) as SharedToPeerAttributeDVO) : undefined;
 
                     return {
                         ...attributeSuccessionResponseItem,
                         type: "AttributeSuccessionAcceptResponseItemDVO",
                         id: "",
                         name: name,
-                        predecessor: localPredecessor,
-                        successor: localSuccessor
+                        predecessor: localPredecessorDVO,
+                        successor: localSuccessorDVO
                     } as AttributeSuccessionAcceptResponseItemDVO;
 
                 case "AttributeAlreadySharedAcceptResponseItem":
@@ -886,14 +888,14 @@ export class DataViewExpander {
 
                     const localAttributeResult = await this.consumption.attributes.getAttribute({ id: attributeAlreadySharedResponseItem.attributeId });
                     const localAttributeExists = localAttributeResult.isSuccess;
-                    const localAttribute = localAttributeExists ? ((await this.expandLocalAttributeDTO(localAttributeResult.value)) as SharedToPeerAttributeDVO) : undefined;
+                    const localAttributeDVO = localAttributeExists ? ((await this.expandLocalAttributeDTO(localAttributeResult.value)) as SharedToPeerAttributeDVO) : undefined;
 
                     return {
                         ...attributeAlreadySharedResponseItem,
                         type: "AttributeAlreadySharedAcceptResponseItemDVO",
                         id: "",
                         name: name,
-                        attribute: localAttribute
+                        attribute: localAttributeDVO
                     } as AttributeAlreadySharedAcceptResponseItemDVO;
 
                 default:
