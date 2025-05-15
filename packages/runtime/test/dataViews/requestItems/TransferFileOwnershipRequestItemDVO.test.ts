@@ -249,8 +249,9 @@ describe("TransferFileOwnershipRequestItemDVO", () => {
         const requestId = (senderMessage.content as RequestJSON).id!;
         const localRequest = (await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: requestId })).value;
         const sharedAttributeId = (localRequest.response!.content.items[0] as TransferFileOwnershipAcceptResponseItemJSON).attributeId;
+        const sharedAttribute = (await rRuntimeServices.consumption.attributes.getAttribute({ id: sharedAttributeId })).value;
 
-        await rRuntimeServices.consumption.attributes.deleteRepositoryAttribute({ attributeId: sharedAttributeId });
+        await rRuntimeServices.consumption.attributes.deleteRepositoryAttribute({ attributeId: sharedAttribute.shareInfo!.sourceAttribute! });
 
         const recipientMessage = (await rRuntimeServices.transport.messages.getMessage({ id: senderMessage.id })).value;
         const dvo = (await rExpander.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
