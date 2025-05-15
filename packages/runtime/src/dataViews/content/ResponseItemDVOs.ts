@@ -106,5 +106,5 @@ export interface AttributeSuccessionAcceptResponseItemDVO extends AcceptResponse
 export interface AttributeAlreadySharedAcceptResponseItemDVO extends AcceptResponseItemDVO {
     type: "AttributeAlreadySharedAcceptResponseItemDVO";
     attributeId: string;
-    attribute: LocalAttributeDVO;
+    attribute?: LocalAttributeDVO;
 }

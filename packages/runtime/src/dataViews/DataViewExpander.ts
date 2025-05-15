@@ -545,10 +545,10 @@ export class DataViewExpander {
                         proposedValueOverruled = !_.isEqual(attributeSuccessionResponseItem.successor.content.value, proposeAttributeRequestItem.attribute.value);
                     } else if (responseItemDVO.type === "AttributeAlreadySharedAcceptResponseItemDVO") {
                         const attributeAlreadySharedResponseItem = responseItemDVO as AttributeAlreadySharedAcceptResponseItemDVO;
-                        proposedValueOverruled = !_.isEqual(attributeAlreadySharedResponseItem.attribute.content.value, proposeAttributeRequestItem.attribute.value);
+                        proposedValueOverruled = !_.isEqual(attributeAlreadySharedResponseItem.attribute?.content.value, proposeAttributeRequestItem.attribute.value);
                     } else {
                         const proposeAttributeResponseItem = responseItemDVO as ProposeAttributeAcceptResponseItemDVO;
-                        // TODO: if we don't know if the proposed value is overruled, should we set it to undefined?
+                        // TODO: if we don't know if the proposed value is overruled, should we set it to undefined? -> we should still be able to get it
                         proposedValueOverruled = !_.isEqual(proposeAttributeResponseItem.attribute?.content.value, proposeAttributeRequestItem.attribute.value);
                     }
                 }
@@ -880,15 +880,17 @@ export class DataViewExpander {
 
                 case "AttributeAlreadySharedAcceptResponseItem":
                     const attributeAlreadySharedResponseItem = responseItem as AttributeAlreadySharedAcceptResponseItemJSON;
+
                     const localAttributeResult = await this.consumption.attributes.getAttribute({ id: attributeAlreadySharedResponseItem.attributeId });
-                    const localAttributeDVOResult = await this.expandLocalAttributeDTO(localAttributeResult.value);
+                    const localAttributeExists = localAttributeResult.isSuccess;
+                    const localAttribute = localAttributeExists ? ((await this.expandLocalAttributeDTO(localAttributeResult.value)) as SharedToPeerAttributeDVO) : undefined;
 
                     return {
                         ...attributeAlreadySharedResponseItem,
                         type: "AttributeAlreadySharedAcceptResponseItemDVO",
                         id: "",
                         name: name,
-                        attribute: localAttributeDVOResult
+                        attribute: localAttribute
                     } as AttributeAlreadySharedAcceptResponseItemDVO;
 
                 default:
