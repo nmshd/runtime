@@ -21,9 +21,9 @@
         "lint:prettier": "prettier --check .",
         "lint:tsc": "npm run --workspaces lint:tsc",
         "outdated": "ncu -i && ncu -i --workspaces",
-        "pull:backbone": "docker compose -p runtime-test-backbone --env-file .dev/compose.backbone.env -f .dev/compose.backbone.yml pull",
-        "start:backbone": "docker compose -p runtime-test-backbone --env-file .dev/compose.backbone.env -f .dev/compose.backbone.yml up -d",
-        "teardown:backbone": "docker compose -p runtime-test-backbone --env-file .dev/compose.backbone.env -f .dev/compose.backbone.yml down -v",
+        "pull:backbone": "docker compose -p runtime-test-backbone -f .dev/compose.backbone.yml pull",
+        "start:backbone": "docker compose -p runtime-test-backbone -f .dev/compose.backbone.yml up -d",
+        "teardown:backbone": "docker compose -p runtime-test-backbone -f .dev/compose.backbone.yml down -v",
         "test:teardown": "docker compose -f .dev/compose.yml down -fsv"
     },
     "devDependencies": {
