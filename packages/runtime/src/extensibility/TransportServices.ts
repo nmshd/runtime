@@ -1,6 +1,7 @@
 import { Inject } from "@nmshd/typescript-ioc";
 import {
     AccountFacade,
+    AnnouncementsFacade,
     ChallengesFacade,
     DevicesFacade,
     FilesFacade,
@@ -16,6 +17,7 @@ import {
 export class TransportServices {
     public constructor(
         @Inject public readonly account: AccountFacade,
+        @Inject public readonly announcements: AnnouncementsFacade,
         @Inject public readonly challenges: ChallengesFacade,
         @Inject public readonly devices: DevicesFacade,
         @Inject public readonly files: FilesFacade,
