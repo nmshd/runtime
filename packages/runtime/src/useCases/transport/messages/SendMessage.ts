@@ -136,7 +136,7 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
         return;
     }
 
-    private validateMailRecipients(content: Serializable, recipients: string[]): ApplicationError | undefined {
+    private validateMailRecipients(content: Serializable, messageRecipients: string[]): ApplicationError | undefined {
         if (!(content instanceof Mail)) return;
 
         const ccRecipients = content.cc?.map((address) => address.toString()) ?? [];
@@ -147,7 +147,7 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
         }
 
         const mailRecipients = _.union(ccRecipients, toRecipients);
-        const mismatchBetweenMailAndMessageRecipients = _.xor(recipients, mailRecipients);
+        const mismatchBetweenMailAndMessageRecipients = _.xor(messageRecipients, mailRecipients);
         if (mismatchBetweenMailAndMessageRecipients.length > 0) {
             return RuntimeErrors.general.invalidPropertyValue(
                 `The identities '${mismatchBetweenMailAndMessageRecipients.join("', '")}' are not listed among both the Message recipients and the recipients in 'to'/'cc'.`
