@@ -37,11 +37,6 @@ describe("Announcements", () => {
                     language: "en",
                     title: "English Title",
                     body: "English Body"
-                },
-                {
-                    language: "de",
-                    title: "Deutscher Titel",
-                    body: "Deutscher Body"
                 }
             ]
         });
