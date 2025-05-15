@@ -241,7 +241,7 @@ describe("TransferFileOwnershipRequestItemDVO", () => {
         const recipientMessage = (await rRuntimeServices.transport.messages.getMessage({ id: senderMessage.id })).value;
         const dvo = (await rExpander.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
-        expect((dvo.request.response!.items![0] as TransferFileOwnershipAcceptResponseItemDVO).sharedAttribute).toBeUndefined();
+        expect((dvo.request.response!.content.items[0] as TransferFileOwnershipAcceptResponseItemDVO).sharedAttribute).toBeUndefined();
     });
 
     test("check the MessageDVO for the recipient after they deleted the RepositoryAttribute", async () => {
@@ -255,7 +255,7 @@ describe("TransferFileOwnershipRequestItemDVO", () => {
         const recipientMessage = (await rRuntimeServices.transport.messages.getMessage({ id: senderMessage.id })).value;
         const dvo = (await rExpander.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
-        expect((dvo.request.response!.items![0] as TransferFileOwnershipAcceptResponseItemDVO).repositoryAttribute).toBeUndefined();
+        expect((dvo.request.response!.content.items[0] as TransferFileOwnershipAcceptResponseItemDVO).repositoryAttribute).toBeUndefined();
     });
 
     test("check the MessageDVO for the recipient after they deleted the shared and RepositoryAttribute", async () => {
@@ -270,8 +270,8 @@ describe("TransferFileOwnershipRequestItemDVO", () => {
         const recipientMessage = (await rRuntimeServices.transport.messages.getMessage({ id: senderMessage.id })).value;
         const dvo = (await rExpander.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
-        expect((dvo.request.response!.items![0] as TransferFileOwnershipAcceptResponseItemDVO).sharedAttribute).toBeUndefined();
-        expect((dvo.request.response!.items![0] as TransferFileOwnershipAcceptResponseItemDVO).repositoryAttribute).toBeUndefined();
+        expect((dvo.request.response!.content.items[0] as TransferFileOwnershipAcceptResponseItemDVO).sharedAttribute).toBeUndefined();
+        expect((dvo.request.response!.content.items[0] as TransferFileOwnershipAcceptResponseItemDVO).repositoryAttribute).toBeUndefined();
     });
 
     test("check the MessageDVO for the sender after they deleted the shared Attribute", async () => {
@@ -285,6 +285,6 @@ describe("TransferFileOwnershipRequestItemDVO", () => {
         const senderMessageAfterDeletion = (await sRuntimeServices.transport.messages.getMessage({ id: senderMessage.id })).value;
         const dvo = (await sExpander.expandMessageDTO(senderMessageAfterDeletion)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
-        expect((dvo.request.response!.items![0] as TransferFileOwnershipAcceptResponseItemDVO).sharedAttribute).toBeUndefined();
+        expect((dvo.request.response!.content.items[0] as TransferFileOwnershipAcceptResponseItemDVO).sharedAttribute).toBeUndefined();
     });
 });

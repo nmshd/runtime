@@ -548,7 +548,6 @@ export class DataViewExpander {
                         proposedValueOverruled = !_.isEqual(attributeAlreadySharedResponseItem.attribute?.content.value, proposeAttributeRequestItem.attribute.value);
                     } else {
                         const proposeAttributeResponseItem = responseItemDVO as ProposeAttributeAcceptResponseItemDVO;
-                        // TODO: if we don't know if the proposed value is overruled, should we set it to undefined? -> we should still be able to get it
                         proposedValueOverruled = !_.isEqual(proposeAttributeResponseItem.attribute?.content.value, proposeAttributeRequestItem.attribute.value);
                     }
                 }

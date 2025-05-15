@@ -319,7 +319,7 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
         const recipientMessage = (await rRuntimeServices.transport.messages.getMessage({ id: senderMessage.id })).value;
         const dvo = (await rExpander.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
-        expect((dvo.request.response!.items![0] as CreateAttributeAcceptResponseItemDVO).attribute).toBeUndefined();
+        expect((dvo.request.response!.content.items[0] as CreateAttributeAcceptResponseItemDVO).attribute).toBeUndefined();
     });
 
     test("check the MessageDVO for the sender after they deleted the shared Attribute", async () => {
@@ -333,6 +333,6 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
         const senderMessageAfterDeletion = (await sRuntimeServices.transport.messages.getMessage({ id: senderMessage.id })).value;
         const dvo = (await sExpander.expandMessageDTO(senderMessageAfterDeletion)) as RequestMessageDVO;
         expect(dvo).toBeDefined();
-        expect((dvo.request.response!.items![0] as CreateAttributeAcceptResponseItemDVO).attribute).toBeUndefined();
+        expect((dvo.request.response!.content.items[0] as CreateAttributeAcceptResponseItemDVO).attribute).toBeUndefined();
     });
 });
