@@ -711,6 +711,7 @@ export class DataViewExpander {
             switch (responseItem["@type"]) {
                 case "ReadAttributeAcceptResponseItem":
                     const readAttributeResponseItem = responseItem as ReadAttributeAcceptResponseItemJSON;
+
                     const localAttributeResultForRead = await this.consumption.attributes.getAttribute({ id: readAttributeResponseItem.attributeId });
                     const localAttributeDVOForRead = await this.expandLocalAttributeDTO(localAttributeResultForRead.value);
 
@@ -724,6 +725,7 @@ export class DataViewExpander {
 
                 case "CreateAttributeAcceptResponseItem":
                     const createAttributeResponseItem = responseItem as CreateAttributeAcceptResponseItemJSON;
+
                     const localAttributeResultForCreate = await this.consumption.attributes.getAttribute({ id: createAttributeResponseItem.attributeId });
                     const localAttributeDVOForCreate = await this.expandLocalAttributeDTO(localAttributeResultForCreate.value);
 
@@ -747,6 +749,7 @@ export class DataViewExpander {
 
                 case "ProposeAttributeAcceptResponseItem":
                     const proposeAttributeResponseItem = responseItem as ProposeAttributeAcceptResponseItemJSON;
+
                     const localAttributeResultForPropose = await this.consumption.attributes.getAttribute({ id: proposeAttributeResponseItem.attributeId });
                     const localAttributeDVOForPropose = await this.expandLocalAttributeDTO(localAttributeResultForPropose.value);
 
@@ -760,6 +763,7 @@ export class DataViewExpander {
 
                 case "ShareAttributeAcceptResponseItem":
                     const shareAttributeResponseItem = responseItem as ShareAttributeAcceptResponseItemJSON;
+
                     const localAttributeResultForShare = await this.consumption.attributes.getAttribute({ id: shareAttributeResponseItem.attributeId });
                     const localAttributeDVOForShare = await this.expandLocalAttributeDTO(localAttributeResultForShare.value);
 
@@ -783,15 +787,16 @@ export class DataViewExpander {
 
                 case "RegisterAttributeListenerAcceptResponseItem":
                     const registerAttributeListenerResponseItem = responseItem as RegisterAttributeListenerAcceptResponseItemJSON;
+
                     const localAttributeListenerResult = await this.consumption.attributeListeners.getAttributeListener({ id: registerAttributeListenerResponseItem.listenerId });
-                    const localAttributeListener = await this.expandLocalAttributeListenerDTO(localAttributeListenerResult.value);
+                    const localAttributeListenerDVO = await this.expandLocalAttributeListenerDTO(localAttributeListenerResult.value);
 
                     return {
                         ...registerAttributeListenerResponseItem,
                         type: "RegisterAttributeListenerAcceptResponseItemDVO",
                         id: registerAttributeListenerResponseItem.listenerId,
                         name: name,
-                        listener: localAttributeListener
+                        listener: localAttributeListenerDVO
                     } as RegisterAttributeListenerAcceptResponseItemDVO;
 
                 case "TransferFileOwnershipAcceptResponseItem":
@@ -821,31 +826,34 @@ export class DataViewExpander {
 
                 case "AttributeSuccessionAcceptResponseItem":
                     const attributeSuccessionResponseItem = responseItem as AttributeSuccessionAcceptResponseItemJSON;
+
                     const localPredecessorResult = await this.consumption.attributes.getAttribute({ id: attributeSuccessionResponseItem.predecessorId });
-                    const localPredecessorDVOResult = await this.expandLocalAttributeDTO(localPredecessorResult.value);
+                    const localPredecessorDVO = await this.expandLocalAttributeDTO(localPredecessorResult.value);
+
                     const localSuccessorResult = await this.consumption.attributes.getAttribute({ id: attributeSuccessionResponseItem.successorId });
-                    const localSuccessorDVOResult = await this.expandLocalAttributeDTO(localSuccessorResult.value);
+                    const localSuccessorDVO = await this.expandLocalAttributeDTO(localSuccessorResult.value);
 
                     return {
                         ...attributeSuccessionResponseItem,
                         type: "AttributeSuccessionAcceptResponseItemDVO",
                         id: "",
                         name: name,
-                        predecessor: localPredecessorDVOResult,
-                        successor: localSuccessorDVOResult
+                        predecessor: localPredecessorDVO,
+                        successor: localSuccessorDVO
                     } as AttributeSuccessionAcceptResponseItemDVO;
 
                 case "AttributeAlreadySharedAcceptResponseItem":
                     const attributeAlreadySharedResponseItem = responseItem as AttributeAlreadySharedAcceptResponseItemJSON;
+
                     const localAttributeResult = await this.consumption.attributes.getAttribute({ id: attributeAlreadySharedResponseItem.attributeId });
-                    const localAttributeDVOResult = await this.expandLocalAttributeDTO(localAttributeResult.value);
+                    const localAttributeDVO = await this.expandLocalAttributeDTO(localAttributeResult.value);
 
                     return {
                         ...attributeAlreadySharedResponseItem,
                         type: "AttributeAlreadySharedAcceptResponseItemDVO",
                         id: "",
                         name: name,
-                        attribute: localAttributeDVOResult
+                        attribute: localAttributeDVO
                     } as AttributeAlreadySharedAcceptResponseItemDVO;
 
                 default:
