@@ -4,6 +4,7 @@
     extends: ["config:recommended", ":disableDependencyDashboard"],
     labels: ["dependencies"],
     schedule: ["after 10pm every weekday", "before 5am every weekday", "every weekend"],
+    reviewers: ["jkoenig134", "Milena-Czierlinski"],
     packageRules: [
         {
             // we don't want to update eslint currently, because there is a breaking change in its config
@@ -21,7 +22,8 @@
         {
             groupName: "backbone",
             matchPackageNames: ["ghcr.io/nmshd/backbone-*"],
-            matchDatasources: ["docker"]
+            matchDatasources: ["docker"],
+            additionalReviewers: ["tnotheis"]
         },
         // ############# Minor updates (one group per datasource) #############
         {
