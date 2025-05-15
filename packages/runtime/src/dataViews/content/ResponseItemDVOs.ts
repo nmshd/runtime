@@ -69,7 +69,7 @@ export interface DeleteAttributeAcceptResponseItemDVO extends AcceptResponseItem
 export interface ShareAttributeAcceptResponseItemDVO extends AcceptResponseItemDVO {
     type: "ShareAttributeAcceptResponseItemDVO";
     attributeId: string;
-    attribute: LocalAttributeDVO;
+    attribute?: LocalAttributeDVO;
 }
 
 export interface FreeTextAcceptResponseItemDVO extends AcceptResponseItemDVO {

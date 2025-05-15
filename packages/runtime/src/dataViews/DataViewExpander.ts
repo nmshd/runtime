@@ -782,8 +782,10 @@ export class DataViewExpander {
 
                 case "ShareAttributeAcceptResponseItem":
                     const shareAttributeResponseItem = responseItem as ShareAttributeAcceptResponseItemJSON;
+
                     const localAttributeResultForShare = await this.consumption.attributes.getAttribute({ id: shareAttributeResponseItem.attributeId });
-                    const localAttributeDVOForShare = await this.expandLocalAttributeDTO(localAttributeResultForShare.value);
+                    const localAttributeForShareExists = localAttributeResultForShare.isSuccess;
+                    const localAttributeDVOForShare = localAttributeForShareExists ? await this.expandLocalAttributeDTO(localAttributeResultForShare.value) : undefined;
 
                     return {
                         ...shareAttributeResponseItem,
