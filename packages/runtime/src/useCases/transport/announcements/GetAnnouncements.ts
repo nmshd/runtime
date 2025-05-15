@@ -7,7 +7,7 @@ import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { AnnouncementMapper } from "./AnnouncementMapper";
 
 export interface GetAnnouncementsRequest {
-    language: string
+    language: keyof typeof LanguageISO639;
 }
 
 class Validator extends SchemaValidator<GetAnnouncementsRequest> {
@@ -25,8 +25,8 @@ export class GetAnnouncementsUseCase extends UseCase<GetAnnouncementsRequest, An
     }
 
     protected async executeInternal(request: GetAnnouncementsRequest): Promise<Result<AnnouncementDTO[]>> {
-        const announcements = await this.announcementController.getAnnouncements(LanguageISO639[request.language as keyof typeof LanguageISO639]);
+        const announcements = await this.announcementController.getAnnouncements(LanguageISO639[request.language]);
 
-        return Result.ok(announcements.map(a => AnnouncementMapper.toAnnouncementDTO(a)));
+        return Result.ok(announcements.map((a) => AnnouncementMapper.toAnnouncementDTO(a)));
     }
 }

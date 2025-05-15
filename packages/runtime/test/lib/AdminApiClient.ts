@@ -1,4 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
+import { AnnouncementSeverity } from "@nmshd/transport";
 import axios, { Axios } from "axios";
 import { IdentityDeletionProcessDTO, TransportServices } from "../../src";
 import { syncUntilHasIdentityDeletionProcess } from "./testUtils";
@@ -51,4 +52,24 @@ export async function cancelIdentityDeletionProcessFromBackboneAdminApi(
     await syncUntilHasIdentityDeletionProcess(transportService, identityDeletionProcessId);
 
     return await transportService.identityDeletionProcesses.getIdentityDeletionProcess({ id: identityDeletionProcessId });
+}
+
+export async function createAnnouncement(request: CreateAnnouncementRequest): Promise<CreateAnnouncementResponse> {
+    const adminApiClient = await getBackboneAdminApiClient();
+    const response = await adminApiClient.post<{ result: CreateAnnouncementResponse }>(`/api/v1/Announcements`, request);
+    if (response.status !== 201) {
+        throw new Error(`Failed to create announcement: ${response.statusText}`);
+    }
+    return response.data.result;
+}
+
+export interface CreateAnnouncementRequest {
+    severity: AnnouncementSeverity;
+    texts: { language: string; title: string; body: string }[];
+    expiresAt?: string;
+    recipients?: string[];
+}
+
+export interface CreateAnnouncementResponse {
+    id: string;
 }
