@@ -85,7 +85,7 @@ export interface FormFieldAcceptResponseItemDVO extends AcceptResponseItemDVO {
 export interface RegisterAttributeListenerAcceptResponseItemDVO extends AcceptResponseItemDVO {
     type: "RegisterAttributeListenerAcceptResponseItemDVO";
     listenerId: string;
-    listener: LocalAttributeListenerDVO;
+    listener?: LocalAttributeListenerDVO;
 }
 
 export interface TransferFileOwnershipAcceptResponseItemDVO extends AcceptResponseItemDVO {

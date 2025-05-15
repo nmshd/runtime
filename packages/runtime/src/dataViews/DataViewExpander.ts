@@ -817,8 +817,10 @@ export class DataViewExpander {
 
                 case "RegisterAttributeListenerAcceptResponseItem":
                     const registerAttributeListenerResponseItem = responseItem as RegisterAttributeListenerAcceptResponseItemJSON;
+
                     const localAttributeListenerResult = await this.consumption.attributeListeners.getAttributeListener({ id: registerAttributeListenerResponseItem.listenerId });
-                    const localAttributeListener = await this.expandLocalAttributeListenerDTO(localAttributeListenerResult.value);
+                    const localAttributeListenerExists = localAttributeListenerResult.isSuccess;
+                    const localAttributeListener = localAttributeListenerExists ? await this.expandLocalAttributeListenerDTO(localAttributeListenerResult.value) : undefined;
 
                     return {
                         ...registerAttributeListenerResponseItem,
