@@ -53,6 +53,7 @@ npm run start:backbone
 Set the following environment variables:
 
 - `NMSHD_TEST_BASEURL` to `http://localhost:8090`
+- `NMSHD_TEST_BASEURL_ADMIN_API` to `http://localhost:8091`
 - `NMSHD_TEST_CLIENTID` to `test`
 - `NMSHD_TEST_CLIENTSECRET` to `test`
 

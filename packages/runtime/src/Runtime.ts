@@ -15,6 +15,7 @@ import {
 import { ICoreAddress } from "@nmshd/core-types";
 import {
     AccountController,
+    AnnouncementController,
     AnonymousTokenController,
     BackboneCompatibilityController,
     ChallengeController,
@@ -227,6 +228,10 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
 
         Container.bind(AccountController)
             .factory(() => this.getAccountController())
+            .scope(Scope.Request);
+
+        Container.bind(AnnouncementController)
+            .factory(() => this.getAccountController().announcements)
             .scope(Scope.Request);
 
         Container.bind(DevicesController)
