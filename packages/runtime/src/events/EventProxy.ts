@@ -35,7 +35,8 @@ import {
     RelationshipChangedEvent,
     RelationshipDecomposedBySelfEvent,
     RelationshipReactivationCompletedEvent,
-    RelationshipReactivationRequestedEvent
+    RelationshipReactivationRequestedEvent,
+    RelationshipTemplateAllocationsExhaustedEvent
 } from "./transport";
 
 export class EventProxy {
@@ -114,6 +115,12 @@ export class EventProxy {
 
         this.subscribeToSourceEvent(transport.DatawalletSynchronizedEvent, (event) => {
             this.targetEventBus.publish(new DatawalletSynchronizedEvent(event.eventTargetAddress));
+        });
+
+        this.subscribeToSourceEvent(transport.RelationshipTemplateAllocationsExhaustedEvent, (event) => {
+            this.targetEventBus.publish(
+                new RelationshipTemplateAllocationsExhaustedEvent(event.eventTargetAddress, RelationshipTemplateMapper.toRelationshipTemplateDTO(event.data))
+            );
         });
     }
 

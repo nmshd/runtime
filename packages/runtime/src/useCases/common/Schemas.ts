@@ -3492,6 +3492,9 @@ export const CompleteOutgoingRequestRequest: any = {
                 },
                 {
                     "$ref": "#/definitions/FormFieldAcceptResponseItemJSON"
+                },
+                {
+                    "$ref": "#/definitions/TransferFileOwnershipAcceptResponseItemJSON"
                 }
             ]
         },
@@ -5696,6 +5699,38 @@ export const CompleteOutgoingRequestRequest: any = {
             "required": [
                 "@type",
                 "response",
+                "result"
+            ],
+            "additionalProperties": false
+        },
+        "TransferFileOwnershipAcceptResponseItemJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "TransferFileOwnershipAcceptResponseItem"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "result": {
+                    "type": "string",
+                    "const": "Accepted"
+                },
+                "attributeId": {
+                    "type": "string"
+                },
+                "attribute": {
+                    "$ref": "#/definitions/IdentityAttributeJSON"
+                }
+            },
+            "required": [
+                "@type",
+                "attribute",
+                "attributeId",
                 "result"
             ],
             "additionalProperties": false
@@ -5933,6 +5968,9 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                 },
                 {
                     "$ref": "#/definitions/FormFieldAcceptResponseItemJSON"
+                },
+                {
+                    "$ref": "#/definitions/TransferFileOwnershipAcceptResponseItemJSON"
                 }
             ]
         },
@@ -8137,6 +8175,38 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
             "required": [
                 "@type",
                 "response",
+                "result"
+            ],
+            "additionalProperties": false
+        },
+        "TransferFileOwnershipAcceptResponseItemJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "TransferFileOwnershipAcceptResponseItem"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "result": {
+                    "type": "string",
+                    "const": "Accepted"
+                },
+                "attributeId": {
+                    "type": "string"
+                },
+                "attribute": {
+                    "$ref": "#/definitions/IdentityAttributeJSON"
+                }
+            },
+            "required": [
+                "@type",
+                "attribute",
+                "attributeId",
                 "result"
             ],
             "additionalProperties": false
@@ -16983,6 +17053,29 @@ export const NotifyPeerAboutRepositoryAttributeSuccessionRequest: any = {
         "AddressString": {
             "type": "string",
             "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
+        }
+    }
+}
+
+export const SetAttributeDeletionInfoOfDeletionProposedRelationshipRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/SetAttributeDeletionInfoOfDeletionProposedRelationshipRequest",
+    "definitions": {
+        "SetAttributeDeletionInfoOfDeletionProposedRelationshipRequest": {
+            "type": "object",
+            "properties": {
+                "relationshipId": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                }
+            },
+            "required": [
+                "relationshipId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
         }
     }
 }

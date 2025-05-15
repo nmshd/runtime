@@ -10,6 +10,7 @@ import { PeerToBeDeletedExternalEventProcessor } from "./PeerToBeDeletedExternal
 import { RelationshipReactivationCompletedExternalEventProcessor } from "./RelationshipReactivationCompletedExternalEventProcessor";
 import { RelationshipReactivationRequestedExternalEventProcessor } from "./RelationshipReactivationRequestedExternalEventProcessor";
 import { RelationshipStatusChangedExternalEventProcessor } from "./RelationshipStatusChangedExternalEventProcessor";
+import { RelationshipTemplateAllocationsExhaustedExternalEventProcessor } from "./RelationshipTemplateAllocationsExhaustedProcessor";
 
 export class ExternalEventProcessorRegistry {
     private readonly processors = new Map<string, ExternalEventProcessorConstructor>();
@@ -24,6 +25,7 @@ export class ExternalEventProcessorRegistry {
         this.registerProcessor("PeerDeleted", PeerDeletedExternalEventProcessor);
         this.registerProcessor("PeerDeletionCancelled", PeerDeletionCancelledExternalEventProcessor);
         this.registerProcessor("PeerToBeDeleted", PeerToBeDeletedExternalEventProcessor);
+        this.registerProcessor("RelationshipTemplateAllocationsExhausted", RelationshipTemplateAllocationsExhaustedExternalEventProcessor);
     }
 
     public registerProcessor(externalEventName: string, externalEventProcessor: ExternalEventProcessorConstructor): void {

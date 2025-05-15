@@ -1,4 +1,4 @@
-import { LanguageISO639 } from "@nmshd/content";
+import { LanguageISO639 } from "@nmshd/core-types";
 import { DeviceMapper, TransportServices } from "../../src";
 import { RuntimeServiceProvider } from "../lib";
 

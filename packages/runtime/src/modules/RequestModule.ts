@@ -332,6 +332,12 @@ export class RequestModule extends RuntimeModule {
             return;
         }
 
+        if (relationship.status === RelationshipStatus.DeletionProposed) {
+            await services.consumptionServices.attributes.setAttributeDeletionInfoOfDeletionProposedRelationship({
+                relationshipId: relationship.id
+            });
+        }
+
         // only trigger for new relationships that were created from an own template
         const relationshipIsNotPending = relationship.status !== RelationshipStatus.Pending;
         const relationshipIsCreatedByCurrentAccount = relationship.auditLog[0].createdBy === event.eventTargetAddress;

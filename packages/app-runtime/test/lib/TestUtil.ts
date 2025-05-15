@@ -278,13 +278,12 @@ export class TestUtil {
     private static getBackboneVersion() {
         if (process.env.BACKBONE_VERSION) return process.env.BACKBONE_VERSION;
 
-        const envFile = fs.readFileSync(path.resolve(`${__dirname}/../../../../.dev/compose.backbone.env`));
-        const env = envFile
-            .toString()
-            .split("\n")
-            .map((line) => line.split("="))
-            .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {} as Record<string, string>);
+        const composeFile = fs.readFileSync(path.resolve(`${__dirname}/../../../../.dev/compose.backbone.yml`));
 
-        return env["BACKBONE_VERSION"];
+        const regex = /image: ghcr\.io\/nmshd\/backbone-consumer-api:(?<version>[^\r\n]*)/;
+        const match = composeFile.toString().match(regex);
+        if (!match?.groups?.version) throw new Error("Could not find backbone version in compose file");
+
+        return match.groups.version;
     }
 }
