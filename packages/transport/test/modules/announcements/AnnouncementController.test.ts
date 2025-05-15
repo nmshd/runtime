@@ -46,7 +46,7 @@ describe("AnnouncementController", function () {
             expect(createdAnnouncement.title).toBe("Deutscher Titel");
         });
 
-        test("returns announcements for in English if passed language does not exist", async function () {
+        test("returns announcements in English if passed language does not exist", async function () {
             const idOfCreatedAnnouncement = await createAnnouncement();
 
             const announcements = await mainAccountController.announcements.getAnnouncements(LanguageISO639.aa);
@@ -85,7 +85,7 @@ describe("AnnouncementController", function () {
                         body: "English Body"
                     },
                     {
-                        language: "de",
+                        language: LanguageISO639.de,
                         title: "Deutscher Titel",
                         body: "Deutscher Body"
                     }
