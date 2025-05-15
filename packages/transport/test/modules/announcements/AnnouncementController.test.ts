@@ -46,6 +46,15 @@ describe("MessageController", function () {
             expect(createdAnnouncement.title).toBe("Deutscher Titel");
         });
 
+        test("returns announcements for in English if passed language does not exist", async function () {
+            const idOfCreatedAnnouncement = await createAnnouncement();
+
+            const announcements = await mainAccountController.announcements.getAnnouncements(LanguageISO639.aa);
+
+            const createdAnnouncement = announcements.find((a) => a.id.equals(idOfCreatedAnnouncement))!;
+            expect(createdAnnouncement.title).toBe("English Title");
+        });
+
         test("returns identity specific announcements created for own identity", async function () {
             const idOfCreatedAnnouncement = await createAnnouncement(mainAccountController.identity.address);
 
