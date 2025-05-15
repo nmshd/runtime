@@ -9,8 +9,10 @@ import {
     GivenNameJSON,
     IdentityAttribute,
     IdentityAttributeQuery,
+    ProposeAttributeAcceptResponseItemJSON,
     ProposeAttributeRequestItem,
     ProposeAttributeRequestItemJSON,
+    RequestJSON,
     Surname,
     SurnameJSON
 } from "@nmshd/content";
@@ -333,10 +335,10 @@ describe("ProposeAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         expect(responseItem.type).toBe("ProposeAttributeAcceptResponseItemDVO");
         expect(responseItem.attribute).toBeDefined();
         const recipientAddress = (await transportServices2.account.getIdentityInfo()).value.address;
-        expect(responseItem.attribute.owner).toBe(recipientAddress);
-        expect(responseItem.attribute.type).toBe("SharedToPeerAttributeDVO");
-        expect(responseItem.attribute.content.value["@type"]).toBe("GivenName");
-        expect((responseItem.attribute.content.value as GivenNameJSON).value).toBe("Marlene");
+        expect(responseItem.attribute!.owner).toBe(recipientAddress);
+        expect(responseItem.attribute!.type).toBe("SharedToPeerAttributeDVO");
+        expect(responseItem.attribute!.content.value["@type"]).toBe("GivenName");
+        expect((responseItem.attribute!.content.value as GivenNameJSON).value).toBe("Marlene");
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         const givenNameRepositoryResult = await consumptionServices2.attributes.getAttributes({
@@ -365,7 +367,7 @@ describe("ProposeAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         expect(responseItem2.type).toBe("ProposeAttributeAcceptResponseItemDVO");
         expect(responseItem2.attribute).toBeDefined();
 
-        expect(givenName.value).toStrictEqual((responseItem.attribute.content.value as GivenNameJSON).value);
+        expect(givenName.value).toStrictEqual((responseItem.attribute!.content.value as GivenNameJSON).value);
 
         const surnameRequestItem = dvo.request.content.items[1] as ProposeAttributeRequestItemDVO;
         expect(surnameRequestItem.proposedValueOverruled).toBe(false);
@@ -381,7 +383,7 @@ describe("ProposeAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         expect(surname.value).toBe("Weigl-Rostock");
 
         expect(responseItem2.attributeId).toStrictEqual(surnameShareResult.value[0].id);
-        expect(surname.value).toStrictEqual((responseItem2.attribute.content.value as SurnameJSON).value);
+        expect(surname.value).toStrictEqual((responseItem2.attribute!.content.value as SurnameJSON).value);
 
         await syncUntilHasMessageWithResponse(transportServices1, recipientMessage.content.id!);
         await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
@@ -461,7 +463,7 @@ describe("ProposeAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         expect(givenName.value).toBe("Marlene");
 
         expect(responseItem.attributeId).toStrictEqual(givenNameResult.value[numberOfGivenNames - 1].id);
-        expect(givenName.value).toStrictEqual((responseItem.attribute.content.value as GivenNameJSON).value);
+        expect(givenName.value).toStrictEqual((responseItem.attribute!.content.value as GivenNameJSON).value);
 
         const surnameResult = await consumptionServices1.attributes.getAttributes({
             query: { "content.value.@type": "Surname", "shareInfo.peer": dvo.request.peer.id }
@@ -475,7 +477,33 @@ describe("ProposeAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         expect(surname.value).toBe("Weigl-Rostock");
 
         expect(responseItem2.attributeId).toStrictEqual(surnameResult.value[numberOfSurnames - 1].id);
-        expect(surname.value).toStrictEqual((responseItem2.attribute.content.value as SurnameJSON).value);
+        expect(surname.value).toStrictEqual((responseItem2.attribute!.content.value as SurnameJSON).value);
+    });
+
+    test("check the MessageDVO for the recipient after they deleted the shared Attribute", async () => {
+        const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
+        const requestId = (senderMessage.content as RequestJSON).id!;
+        const localRequest = (await runtimeServices1.consumption.outgoingRequests.getRequest({ id: requestId })).value;
+        const sharedAttributeId = (localRequest.response!.content.items[0] as ProposeAttributeAcceptResponseItemJSON).attributeId;
+
+        await runtimeServices2.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: sharedAttributeId });
+
+        const recipientMessage = (await runtimeServices2.transport.messages.getMessage({ id: senderMessage.id })).value;
+        const dvo = await expander2.expandMessageDTO(recipientMessage);
+        expect(dvo).toBeDefined();
+    });
+
+    test("check the MessageDVO for the sender after they deleted the shared Attribute", async () => {
+        const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
+        const requestId = (senderMessage.content as RequestJSON).id!;
+        const localRequest = (await runtimeServices1.consumption.outgoingRequests.getRequest({ id: requestId })).value;
+        const sharedAttributeId = (localRequest.response!.content.items[0] as ProposeAttributeAcceptResponseItemJSON).attributeId;
+
+        await runtimeServices1.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: sharedAttributeId });
+
+        const senderMessageAfterDeletion = (await runtimeServices1.transport.messages.getMessage({ id: senderMessage.id })).value;
+        const dvo = await expander1.expandMessageDTO(senderMessageAfterDeletion);
+        expect(dvo).toBeDefined();
     });
 });
 

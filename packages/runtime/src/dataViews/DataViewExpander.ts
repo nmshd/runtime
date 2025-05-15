@@ -548,7 +548,8 @@ export class DataViewExpander {
                         proposedValueOverruled = !_.isEqual(attributeAlreadySharedResponseItem.attribute.content.value, proposeAttributeRequestItem.attribute.value);
                     } else {
                         const proposeAttributeResponseItem = responseItemDVO as ProposeAttributeAcceptResponseItemDVO;
-                        proposedValueOverruled = !_.isEqual(proposeAttributeResponseItem.attribute.content.value, proposeAttributeRequestItem.attribute.value);
+                        // TODO: if we don't know if the proposed value is overruled, should we set it to undefined?
+                        proposedValueOverruled = !_.isEqual(proposeAttributeResponseItem.attribute?.content.value, proposeAttributeRequestItem.attribute.value);
                     }
                 }
 
@@ -766,8 +767,10 @@ export class DataViewExpander {
 
                 case "ProposeAttributeAcceptResponseItem":
                     const proposeAttributeResponseItem = responseItem as ProposeAttributeAcceptResponseItemJSON;
+
                     const localAttributeResultForPropose = await this.consumption.attributes.getAttribute({ id: proposeAttributeResponseItem.attributeId });
-                    const localAttributeDVOForPropose = await this.expandLocalAttributeDTO(localAttributeResultForPropose.value);
+                    const localAttributeForProposeExists = localAttributeResultForPropose.isSuccess;
+                    const localAttributeDVOForPropose = localAttributeForProposeExists ? await this.expandLocalAttributeDTO(localAttributeResultForPropose.value) : undefined;
 
                     return {
                         ...proposeAttributeResponseItem,
