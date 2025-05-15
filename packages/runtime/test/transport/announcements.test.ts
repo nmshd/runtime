@@ -1,4 +1,4 @@
-import { CoreDate } from "@nmshd/core-types";
+import { CoreDate, LanguageISO639 } from "@nmshd/core-types";
 import { AnnouncementSeverity } from "@nmshd/transport";
 import { RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 import { createAnnouncement } from "../lib/AdminApiClient";
@@ -21,7 +21,7 @@ describe("Announcements", () => {
     test("get announcements", async () => {
         const idOfCreatedAnnouncement = await createTestAnnouncement();
 
-        const getAnnouncementsResult = await client.transport.announcements.getAnnouncements({ language: "en" });
+        const getAnnouncementsResult = await client.transport.announcements.getAnnouncements({ language: LanguageISO639.en });
         expect(getAnnouncementsResult).toBeSuccessful();
 
         const containsCreatedAnnouncement = getAnnouncementsResult.value.some((a) => a.id === idOfCreatedAnnouncement);
