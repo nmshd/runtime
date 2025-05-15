@@ -5,7 +5,7 @@ import { AnnouncementSeverity } from "../../../src/modules/announcements/data/An
 import { AdminApiClient } from "../../testHelpers/AdminApiClient";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
-describe("MessageController", function () {
+describe("AnnouncementController", function () {
     let connection: IDatabaseConnection;
     let transport: Transport;
     let mainAccountController: AccountController;
