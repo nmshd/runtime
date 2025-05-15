@@ -542,7 +542,7 @@ export class DataViewExpander {
                 if (responseItemDVO && responseItemDVO.result === ResponseItemResult.Accepted) {
                     if (responseItemDVO.type === "AttributeSuccessionAcceptResponseItemDVO") {
                         const attributeSuccessionResponseItem = responseItemDVO as AttributeSuccessionAcceptResponseItemDVO;
-                        proposedValueOverruled = !_.isEqual(attributeSuccessionResponseItem.successor.content.value, proposeAttributeRequestItem.attribute.value);
+                        proposedValueOverruled = !_.isEqual(attributeSuccessionResponseItem.successor?.content.value, proposeAttributeRequestItem.attribute.value);
                     } else if (responseItemDVO.type === "AttributeAlreadySharedAcceptResponseItemDVO") {
                         const attributeAlreadySharedResponseItem = responseItemDVO as AttributeAlreadySharedAcceptResponseItemDVO;
                         proposedValueOverruled = !_.isEqual(attributeAlreadySharedResponseItem.attribute?.content.value, proposeAttributeRequestItem.attribute.value);
@@ -864,18 +864,22 @@ export class DataViewExpander {
 
                 case "AttributeSuccessionAcceptResponseItem":
                     const attributeSuccessionResponseItem = responseItem as AttributeSuccessionAcceptResponseItemJSON;
+
                     const localPredecessorResult = await this.consumption.attributes.getAttribute({ id: attributeSuccessionResponseItem.predecessorId });
-                    const localPredecessorDVOResult = await this.expandLocalAttributeDTO(localPredecessorResult.value);
+                    const localPredecessorExists = localPredecessorResult.isSuccess;
+                    const localPredecessor = localPredecessorExists ? ((await this.expandLocalAttributeDTO(localPredecessorResult.value)) as SharedToPeerAttributeDVO) : undefined;
+
                     const localSuccessorResult = await this.consumption.attributes.getAttribute({ id: attributeSuccessionResponseItem.successorId });
-                    const localSuccessorDVOResult = await this.expandLocalAttributeDTO(localSuccessorResult.value);
+                    const localSuccessorExists = localSuccessorResult.isSuccess;
+                    const localSuccessor = localSuccessorExists ? ((await this.expandLocalAttributeDTO(localSuccessorResult.value)) as SharedToPeerAttributeDVO) : undefined;
 
                     return {
                         ...attributeSuccessionResponseItem,
                         type: "AttributeSuccessionAcceptResponseItemDVO",
                         id: "",
                         name: name,
-                        predecessor: localPredecessorDVOResult,
-                        successor: localSuccessorDVOResult
+                        predecessor: localPredecessor,
+                        successor: localSuccessor
                     } as AttributeSuccessionAcceptResponseItemDVO;
 
                 case "AttributeAlreadySharedAcceptResponseItem":

@@ -99,8 +99,8 @@ export interface AttributeSuccessionAcceptResponseItemDVO extends AcceptResponse
     type: "AttributeSuccessionAcceptResponseItemDVO";
     predecessorId: string;
     successorId: string;
-    predecessor: LocalAttributeDVO;
-    successor: LocalAttributeDVO;
+    predecessor?: LocalAttributeDVO;
+    successor?: LocalAttributeDVO;
 }
 
 export interface AttributeAlreadySharedAcceptResponseItemDVO extends AcceptResponseItemDVO {
