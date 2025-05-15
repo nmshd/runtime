@@ -65,15 +65,9 @@ export class AdminApiClient {
 
 export interface CreateAnnouncementRequest {
     severity: AnnouncementSeverity;
-    texts: CreateAnnouncementRequestText[];
+    texts: { language: string; title: string; body: string }[];
     expiresAt?: string;
     recipients?: string[];
-}
-
-export interface CreateAnnouncementRequestText {
-    language: string;
-    title: string;
-    body: string;
 }
 
 export interface CreateAnnouncementResponse {
