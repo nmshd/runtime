@@ -1,5 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { CoreAddress, CoreId, LanguageISO639 } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId, LanguageISO639 } from "@nmshd/core-types";
 import { AccountController, Transport } from "../../../src";
 import { AnnouncementSeverity } from "../../../src/modules/announcements/data/Announcement";
 import { AdminApiClient } from "../../testHelpers/AdminApiClient";
@@ -75,7 +75,7 @@ describe("MessageController", function () {
 
         async function createAnnouncement(forIdentity?: CoreAddress): Promise<CoreId> {
             const response = await AdminApiClient.createAnnouncement({
-                expiresAt: "2100-01-01T00:00:00Z",
+                expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(),
                 severity: AnnouncementSeverity.High,
                 recipients: forIdentity ? [forIdentity.toString()] : [],
                 texts: [

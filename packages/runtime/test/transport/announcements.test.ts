@@ -1,3 +1,4 @@
+import { CoreDate } from "@nmshd/core-types";
 import { AnnouncementSeverity } from "@nmshd/transport";
 import { RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 import { createAnnouncement } from "../lib/AdminApiClient";
@@ -30,7 +31,7 @@ describe("Announcements", () => {
 
     async function createTestAnnouncement(): Promise<string> {
         const response = await createAnnouncement({
-            expiresAt: "2100-01-01T00:00:00Z",
+            expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(),
             severity: AnnouncementSeverity.High,
             texts: [
                 {
