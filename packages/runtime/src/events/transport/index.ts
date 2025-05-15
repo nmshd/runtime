@@ -12,3 +12,4 @@ export * from "./RelationshipChangedEvent";
 export * from "./RelationshipDecomposedBySelfEvent";
 export * from "./RelationshipReactivationCompletedEvent";
 export * from "./RelationshipReactivationRequestedEvent";
+export * from "./RelationshipTemplateAllocationsExhaustedEvent";
