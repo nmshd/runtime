@@ -1,6 +1,6 @@
 services:
   consumer-api:
-    image: ghcr.io/nmshd/backbone-consumer-api:6.43.0
+    image: ghcr.io/nmshd/backbone-consumer-api:6.43.0-alpha.1
     container_name: consumer-api
     hostname: consumer-api
     environment:
