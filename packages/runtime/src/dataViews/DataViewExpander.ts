@@ -866,13 +866,11 @@ export class DataViewExpander {
 
                     const localPredecessorResult = await this.consumption.attributes.getAttribute({ id: attributeSuccessionResponseItem.predecessorId });
                     const localPredecessorExists = localPredecessorResult.isSuccess;
-                    const localPredecessorDVO = localPredecessorExists
-                        ? ((await this.expandLocalAttributeDTO(localPredecessorResult.value)) as SharedToPeerAttributeDVO)
-                        : undefined;
+                    const localPredecessorDVO = localPredecessorExists ? await this.expandLocalAttributeDTO(localPredecessorResult.value) : undefined;
 
                     const localSuccessorResult = await this.consumption.attributes.getAttribute({ id: attributeSuccessionResponseItem.successorId });
                     const localSuccessorExists = localSuccessorResult.isSuccess;
-                    const localSuccessorDVO = localSuccessorExists ? ((await this.expandLocalAttributeDTO(localSuccessorResult.value)) as SharedToPeerAttributeDVO) : undefined;
+                    const localSuccessorDVO = localSuccessorExists ? await this.expandLocalAttributeDTO(localSuccessorResult.value) : undefined;
 
                     return {
                         ...attributeSuccessionResponseItem,
@@ -888,7 +886,7 @@ export class DataViewExpander {
 
                     const localAttributeResult = await this.consumption.attributes.getAttribute({ id: attributeAlreadySharedResponseItem.attributeId });
                     const localAttributeExists = localAttributeResult.isSuccess;
-                    const localAttributeDVO = localAttributeExists ? ((await this.expandLocalAttributeDTO(localAttributeResult.value)) as SharedToPeerAttributeDVO) : undefined;
+                    const localAttributeDVO = localAttributeExists ? await this.expandLocalAttributeDTO(localAttributeResult.value) : undefined;
 
                     return {
                         ...attributeAlreadySharedResponseItem,
