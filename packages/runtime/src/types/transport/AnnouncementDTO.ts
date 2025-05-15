@@ -1,10 +1,10 @@
 export interface AnnouncementDTO {
-    id: string,
-    createdAt: string,
-    expiresAt?: string,
-    severity: AnnouncementSeverity,
-    title: string,
-    body: string
+    id: string;
+    createdAt: string;
+    expiresAt?: string;
+    severity: AnnouncementSeverity;
+    title: string;
+    body: string;
 }
 
 export enum AnnouncementSeverity {

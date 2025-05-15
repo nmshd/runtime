@@ -1,2 +1,2 @@
-export * from "./AnnouncementMapper"
-export * from "./GetAnnouncements"
+export * from "./AnnouncementMapper";
+export * from "./GetAnnouncements";
