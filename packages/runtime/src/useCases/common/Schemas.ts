@@ -63,7 +63,8 @@ export const CanCreateRepositoryAttributeRequest: any = {
                             "type": "array",
                             "items": {
                                 "type": "string"
-                            }
+                            },
+                            "uniqueItems": true
                         },
                         "validFrom": {
                             "$ref": "#/definitions/ISO8601DateTimeString"
@@ -1132,7 +1133,8 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "uniqueItems": true
                 }
             },
             "required": [
@@ -3749,7 +3751,8 @@ export const CompleteOutgoingRequestRequest: any = {
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "uniqueItems": true
                 }
             },
             "required": [
@@ -6268,7 +6271,8 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "uniqueItems": true
                 }
             },
             "required": [
@@ -9423,7 +9427,8 @@ export const CreateOutgoingRequestRequest: any = {
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "uniqueItems": true
                 }
             },
             "required": [
@@ -13066,7 +13071,8 @@ export const ReceivedIncomingRequestRequest: any = {
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "uniqueItems": true
                 }
             },
             "required": [
@@ -16057,7 +16063,8 @@ export const CreateRepositoryAttributeRequest: any = {
                             "type": "array",
                             "items": {
                                 "type": "string"
-                            }
+                            },
+                            "uniqueItems": true
                         },
                         "validFrom": {
                             "$ref": "#/definitions/ISO8601DateTimeString"
@@ -18428,7 +18435,8 @@ export const SucceedRepositoryAttributeRequest: any = {
                             "type": "array",
                             "items": {
                                 "type": "string"
-                            }
+                            },
+                            "uniqueItems": true
                         },
                         "validFrom": {
                             "$ref": "#/definitions/ISO8601DateTimeString"
@@ -21800,7 +21808,8 @@ export const UploadOwnFileRequest: any = {
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "uniqueItems": true
                 }
             },
             "required": [
@@ -21844,7 +21853,8 @@ export const UploadOwnFileValidatableRequest: any = {
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "uniqueItems": true
                 },
                 "content": {
                     "type": "object"
@@ -22179,14 +22189,16 @@ export const SendMessageRequest: any = {
                     "items": {
                         "$ref": "#/definitions/AddressString"
                     },
-                    "minItems": 1
+                    "minItems": 1,
+                    "uniqueItems": true
                 },
                 "content": {},
                 "attachments": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/FileIdString"
-                    }
+                    },
+                    "uniqueItems": true
                 }
             },
             "required": [

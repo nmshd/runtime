@@ -20,6 +20,8 @@ export interface RequestJSON extends ContentJSON {
     /**
      * The items of the Request. Can be either a single {@link RequestItemJSONDerivations RequestItem} or a {@link RequestItemGroupJSON RequestItemGroup}, which itself can contain
      * further {@link RequestItemJSONDerivations RequestItems}.
+     *
+     * @uniqueItems true
      */
     items: (RequestItemGroupJSON | RequestItemJSONDerivations)[];
 

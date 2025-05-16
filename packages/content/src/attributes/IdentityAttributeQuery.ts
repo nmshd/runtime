@@ -6,6 +6,9 @@ import { AttributeValues } from "./AttributeValueTypes";
 export interface IdentityAttributeQueryJSON extends AbstractAttributeQueryJSON {
     "@type": "IdentityAttributeQuery";
     valueType: AttributeValues.Identity.TypeName;
+    /**
+     * @uniqueItems true
+     */
     tags?: string[];
     validFrom?: string;
     validTo?: string;

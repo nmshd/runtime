@@ -5,6 +5,9 @@ export interface ThirdPartyRelationshipAttributeQueryJSON extends AbstractAttrib
     "@type": "ThirdPartyRelationshipAttributeQuery";
     key: string;
     owner: `${ThirdPartyRelationshipAttributeQueryOwner}`;
+    /**
+     * @uniqueItems true
+     */
     thirdParty: string[];
     validFrom?: string;
     validTo?: string;

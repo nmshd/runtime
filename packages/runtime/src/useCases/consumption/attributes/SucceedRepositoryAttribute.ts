@@ -17,6 +17,9 @@ export interface SucceedRepositoryAttributeRequest {
     predecessorId: string;
     successorContent: {
         value: AttributeValues.Identity.Json;
+        /**
+         * @uniqueItems true
+         */
         tags?: string[];
         validFrom?: ISO8601DateTimeString;
         validTo?: ISO8601DateTimeString;

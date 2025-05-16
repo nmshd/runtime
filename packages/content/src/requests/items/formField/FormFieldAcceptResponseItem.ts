@@ -3,6 +3,9 @@ import { AcceptResponseItem, AcceptResponseItemJSON, IAcceptResponseItem } from 
 
 export interface FormFieldAcceptResponseItemJSON extends AcceptResponseItemJSON {
     "@type": "FormFieldAcceptResponseItem";
+    /**
+     * @uniqueItems true
+     */
     response: string | number | boolean | string[];
 }
 
