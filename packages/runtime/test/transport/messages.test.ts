@@ -204,6 +204,33 @@ describe("Message errors", () => {
         expect(result).toBeAnError("Mail.to :: Value is not defined", "error.runtime.requestDeserialization");
     });
 
+    test("should throw correct error for a Mail recipient listed multiple times in 'to'", async () => {
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client2.address],
+            content: {
+                "@type": "Mail",
+                to: [client2.address, client2.address],
+                subject: "A Subject",
+                body: "A Body"
+            }
+        });
+        expect(result).toBeAnError("Some recipients in 'to' are listed multiple times.", "error.runtime.validation.invalidPropertyValue");
+    });
+
+    test("should throw correct error for a Mail recipient listed multiple times in 'cc'", async () => {
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client2.address],
+            content: {
+                "@type": "Mail",
+                to: [client2.address],
+                cc: ["did:e:a-domain:dids:an-identity", "did:e:a-domain:dids:an-identity"],
+                subject: "A Subject",
+                body: "A Body"
+            }
+        });
+        expect(result).toBeAnError("Some recipients in 'cc' are listed multiple times.", "error.runtime.validation.invalidPropertyValue");
+    });
+
     test("should throw correct error for a Message recipient not listed in 'to' or 'cc'", async () => {
         const result = await client1.transport.messages.sendMessage({
             recipients: [client2.address, client3.address],

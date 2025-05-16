@@ -140,7 +140,15 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
         if (!(content instanceof Mail)) return;
 
         const ccRecipients = content.cc?.map((address) => address.toString()) ?? [];
+        if (ccRecipients.length !== new Set(ccRecipients).size) {
+            return RuntimeErrors.general.invalidPropertyValue("Some recipients in 'cc' are listed multiple times.");
+        }
+
         const toRecipients = content.to.map((address) => address.toString());
+        if (toRecipients.length !== new Set(toRecipients).size) {
+            return RuntimeErrors.general.invalidPropertyValue("Some recipients in 'to' are listed multiple times.");
+        }
+
         const duplicatesInToAndCc = _.intersection(ccRecipients, toRecipients);
         if (duplicatesInToAndCc.length > 0) {
             return RuntimeErrors.general.invalidPropertyValue(`The recipients '${duplicatesInToAndCc.join("', '")}' are put into both 'to' and 'cc'.`);
