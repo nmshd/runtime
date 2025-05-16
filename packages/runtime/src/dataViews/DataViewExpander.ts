@@ -542,13 +542,13 @@ export class DataViewExpander {
                 if (responseItemDVO && responseItemDVO.result === ResponseItemResult.Accepted) {
                     if (responseItemDVO.type === "AttributeSuccessionAcceptResponseItemDVO") {
                         const attributeSuccessionResponseItem = responseItemDVO as AttributeSuccessionAcceptResponseItemDVO;
-                        proposedValueOverruled = !_.isEqual(attributeSuccessionResponseItem.successor?.content.value, proposeAttributeRequestItem.attribute.value);
+                        proposedValueOverruled = !_.isEqual(attributeSuccessionResponseItem.successor.content.value, proposeAttributeRequestItem.attribute.value);
                     } else if (responseItemDVO.type === "AttributeAlreadySharedAcceptResponseItemDVO") {
                         const attributeAlreadySharedResponseItem = responseItemDVO as AttributeAlreadySharedAcceptResponseItemDVO;
-                        proposedValueOverruled = !_.isEqual(attributeAlreadySharedResponseItem.attribute?.content.value, proposeAttributeRequestItem.attribute.value);
+                        proposedValueOverruled = !_.isEqual(attributeAlreadySharedResponseItem.attribute.content.value, proposeAttributeRequestItem.attribute.value);
                     } else {
                         const proposeAttributeResponseItem = responseItemDVO as ProposeAttributeAcceptResponseItemDVO;
-                        proposedValueOverruled = !_.isEqual(proposeAttributeResponseItem.attribute?.content.value, proposeAttributeRequestItem.attribute.value);
+                        proposedValueOverruled = !_.isEqual(proposeAttributeResponseItem.attribute.content.value, proposeAttributeRequestItem.attribute.value);
                     }
                 }
 

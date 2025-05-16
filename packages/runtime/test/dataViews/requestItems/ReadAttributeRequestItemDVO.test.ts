@@ -219,10 +219,10 @@ describe("ReadAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         expect(responseItem.type).toBe("ReadAttributeAcceptResponseItemDVO");
         expect(responseItem.attribute).toBeDefined();
         const recipientAddress = (await transportServices2.account.getIdentityInfo()).value.address;
-        expect(responseItem.attribute!.owner).toBe(recipientAddress);
-        expect(responseItem.attribute!.type).toBe("SharedToPeerAttributeDVO");
-        expect(responseItem.attribute!.content.value["@type"]).toBe("GivenName");
-        expect((responseItem.attribute!.content.value as GivenNameJSON).value).toBe("aGivenName");
+        expect(responseItem.attribute.owner).toBe(recipientAddress);
+        expect(responseItem.attribute.type).toBe("SharedToPeerAttributeDVO");
+        expect(responseItem.attribute.content.value["@type"]).toBe("GivenName");
+        expect((responseItem.attribute.content.value as GivenNameJSON).value).toBe("aGivenName");
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         const attributeResult = await consumptionServices2.attributes.getAttributes({
@@ -236,7 +236,7 @@ describe("ReadAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         expect(displayName.value).toBe("aGivenName");
 
         expect(responseItem.attributeId).toStrictEqual(attributeResult.value[0].id);
-        expect(displayName.value).toStrictEqual((responseItem.attribute!.content.value as GivenNameJSON).value);
+        expect(displayName.value).toStrictEqual((responseItem.attribute.content.value as GivenNameJSON).value);
 
         await syncUntilHasMessageWithResponse(transportServices1, recipientMessage.content.id!);
         await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
@@ -296,7 +296,7 @@ describe("ReadAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         expect(givenName.value).toBe("aGivenName");
 
         expect(responseItem.attributeId).toStrictEqual(attributeResult.value[numberOfAttributes - 1].id);
-        expect(givenName.value).toStrictEqual((responseItem.attribute!.content.value as GivenNameJSON).value);
+        expect(givenName.value).toStrictEqual((responseItem.attribute.content.value as GivenNameJSON).value);
     });
 
     test("check the MessageDVO for the recipient after they deleted the shared Attribute", async () => {
@@ -473,10 +473,10 @@ describe("ReadAttributeRequestItemDVO with IQL and results", () => {
         expect(responseItem.type).toBe("ReadAttributeAcceptResponseItemDVO");
         expect(responseItem.attribute).toBeDefined();
         const recipientAddress = (await transportServices2.account.getIdentityInfo()).value.address;
-        expect(responseItem.attribute!.owner).toBe(recipientAddress);
-        expect(responseItem.attribute!.type).toBe("SharedToPeerAttributeDVO");
-        expect(responseItem.attribute!.content.value["@type"]).toBe("GivenName");
-        expect((responseItem.attribute!.content.value as GivenNameJSON).value).toBe("aGivenName");
+        expect(responseItem.attribute.owner).toBe(recipientAddress);
+        expect(responseItem.attribute.type).toBe("SharedToPeerAttributeDVO");
+        expect(responseItem.attribute.content.value["@type"]).toBe("GivenName");
+        expect((responseItem.attribute.content.value as GivenNameJSON).value).toBe("aGivenName");
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         const attributeResult = await consumptionServices2.attributes.getAttributes({
@@ -490,7 +490,7 @@ describe("ReadAttributeRequestItemDVO with IQL and results", () => {
         expect(displayName.value).toBe("aGivenName");
 
         expect(responseItem.attributeId).toStrictEqual(attributeResult.value[0].id);
-        expect(displayName.value).toStrictEqual((responseItem.attribute!.content.value as GivenNameJSON).value);
+        expect(displayName.value).toStrictEqual((responseItem.attribute.content.value as GivenNameJSON).value);
 
         await syncUntilHasMessageWithResponse(transportServices1, recipientMessage.content.id!);
         await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
@@ -547,7 +547,7 @@ describe("ReadAttributeRequestItemDVO with IQL and results", () => {
         expect(givenName.value).toBe("aGivenName");
 
         expect(responseItem.attributeId).toStrictEqual(attributeResult.value[numberOfAttributes - 1].id);
-        expect(givenName.value).toStrictEqual((responseItem.attribute!.content.value as GivenNameJSON).value);
+        expect(givenName.value).toStrictEqual((responseItem.attribute.content.value as GivenNameJSON).value);
     });
 });
 
@@ -704,10 +704,10 @@ describe("ReadAttributeRequestItemDVO with IQL and fallback", () => {
         expect(responseItem.type).toBe("ReadAttributeAcceptResponseItemDVO");
         expect(responseItem.attribute).toBeDefined();
         const recipientAddress = (await transportServices2.account.getIdentityInfo()).value.address;
-        expect(responseItem.attribute!.owner).toBe(recipientAddress);
-        expect(responseItem.attribute!.type).toBe("SharedToPeerAttributeDVO");
-        expect(responseItem.attribute!.content.value["@type"]).toBe("Surname");
-        expect((responseItem.attribute!.content.value as SurnameJSON).value).toBe("Heuss");
+        expect(responseItem.attribute.owner).toBe(recipientAddress);
+        expect(responseItem.attribute.type).toBe("SharedToPeerAttributeDVO");
+        expect(responseItem.attribute.content.value["@type"]).toBe("Surname");
+        expect((responseItem.attribute.content.value as SurnameJSON).value).toBe("Heuss");
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         const attributeResult = await consumptionServices2.attributes.getAttributes({
@@ -721,7 +721,7 @@ describe("ReadAttributeRequestItemDVO with IQL and fallback", () => {
         expect(displayName.value).toBe("Heuss");
 
         expect(responseItem.attributeId).toStrictEqual(attributeResult.value[0].id);
-        expect(displayName.value).toStrictEqual((responseItem.attribute!.content.value as SurnameJSON).value);
+        expect(displayName.value).toStrictEqual((responseItem.attribute.content.value as SurnameJSON).value);
 
         await syncUntilHasMessageWithResponse(transportServices1, recipientMessage.content.id!);
         await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
@@ -777,7 +777,7 @@ describe("ReadAttributeRequestItemDVO with IQL and fallback", () => {
         expect(givenName.value).toBe("Heuss");
 
         expect(responseItem.attributeId).toStrictEqual(attributeResult.value[numberOfAttributes - 1].id);
-        expect(givenName.value).toStrictEqual((responseItem.attribute!.content.value as SurnameJSON).value);
+        expect(givenName.value).toStrictEqual((responseItem.attribute.content.value as SurnameJSON).value);
     });
 });
 
@@ -910,10 +910,10 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         expect(responseItem.successor).toBeDefined();
-        expect(responseItem.successor!.owner).toBe(recipientAddress);
-        expect(responseItem.successor!.type).toBe("SharedToPeerAttributeDVO");
-        expect(responseItem.successor!.content.value["@type"]).toBe("GivenName");
-        expect((responseItem.successor!.content.value as GivenNameJSON).value).toBe("Franz");
+        expect(responseItem.successor.owner).toBe(recipientAddress);
+        expect(responseItem.successor.type).toBe("SharedToPeerAttributeDVO");
+        expect(responseItem.successor.content.value["@type"]).toBe("GivenName");
+        expect((responseItem.successor.content.value as GivenNameJSON).value).toBe("Franz");
 
         const predecessorResult = await consumptionServices2.attributes.getAttributes({
             query: { "content.value.@type": "GivenName", "shareInfo.peer": dvo.createdBy.id, "content.tags": "predecessor" }
@@ -935,7 +935,7 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
         const successorName = successorResult.value[0].content.value as GivenNameJSON;
         expect(successorName.value).toBe("Franz");
         expect(responseItem.successorId).toStrictEqual(successorResult.value[0].id);
-        expect(successorName.value).toStrictEqual((responseItem.successor!.content.value as GivenNameJSON).value);
+        expect(successorName.value).toStrictEqual((responseItem.successor.content.value as GivenNameJSON).value);
 
         await syncUntilHasMessageWithResponse(transportServices1, recipientMessage.content.id!);
         await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
@@ -988,10 +988,10 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         expect(responseItem.successor).toBeDefined();
-        expect(responseItem.successor!.owner).toBe(recipientAddress);
-        expect(responseItem.successor!.type).toBe("PeerAttributeDVO");
-        expect(responseItem.successor!.content.value["@type"]).toBe("GivenName");
-        expect((responseItem.successor!.content.value as GivenNameJSON).value).toBe("Franz");
+        expect(responseItem.successor.owner).toBe(recipientAddress);
+        expect(responseItem.successor.type).toBe("PeerAttributeDVO");
+        expect(responseItem.successor.content.value["@type"]).toBe("GivenName");
+        expect((responseItem.successor.content.value as GivenNameJSON).value).toBe("Franz");
 
         const predecessorResult = await consumptionServices1.attributes.getAttributes({
             query: { "content.value.@type": "GivenName", "shareInfo.peer": dvo.request.peer.id, "content.tags": "predecessor" }
@@ -1013,7 +1013,7 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
         const successorName = successorResult.value[0].content.value as GivenNameJSON;
         expect(successorName.value).toBe("Franz");
         expect(responseItem.successorId).toStrictEqual(successorResult.value[0].id);
-        expect(successorName.value).toStrictEqual((responseItem.successor!.content.value as GivenNameJSON).value);
+        expect(successorName.value).toStrictEqual((responseItem.successor.content.value as GivenNameJSON).value);
     });
 });
 
@@ -1124,10 +1124,10 @@ describe("AttributeAlreadySharedAcceptResponseItemDVO with IdentityAttributeQuer
 
         const recipientAddress = (await transportServices2.account.getIdentityInfo()).value.address;
         expect(responseItem.attribute).toBeDefined();
-        expect(responseItem.attribute!.owner).toBe(recipientAddress);
-        expect(responseItem.attribute!.type).toBe("SharedToPeerAttributeDVO");
-        expect(responseItem.attribute!.content.value["@type"]).toBe("GivenName");
-        expect((responseItem.attribute!.content.value as GivenNameJSON).value).toBe("aGivenName");
+        expect(responseItem.attribute.owner).toBe(recipientAddress);
+        expect(responseItem.attribute.type).toBe("SharedToPeerAttributeDVO");
+        expect(responseItem.attribute.content.value["@type"]).toBe("GivenName");
+        expect((responseItem.attribute.content.value as GivenNameJSON).value).toBe("aGivenName");
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         await syncUntilHasMessageWithResponse(transportServices1, recipientMessage.content.id!);
@@ -1174,10 +1174,10 @@ describe("AttributeAlreadySharedAcceptResponseItemDVO with IdentityAttributeQuer
 
         const recipientAddress = (await transportServices2.account.getIdentityInfo()).value.address;
         expect(responseItem.attribute).toBeDefined();
-        expect(responseItem.attribute!.owner).toBe(recipientAddress);
-        expect(responseItem.attribute!.type).toBe("PeerAttributeDVO");
-        expect(responseItem.attribute!.content.value["@type"]).toBe("GivenName");
-        expect((responseItem.attribute!.content.value as GivenNameJSON).value).toBe("aGivenName");
+        expect(responseItem.attribute.owner).toBe(recipientAddress);
+        expect(responseItem.attribute.type).toBe("PeerAttributeDVO");
+        expect(responseItem.attribute.content.value["@type"]).toBe("GivenName");
+        expect((responseItem.attribute.content.value as GivenNameJSON).value).toBe("aGivenName");
         expect(requestItemDVO.response).toStrictEqual(responseItem);
     });
 });

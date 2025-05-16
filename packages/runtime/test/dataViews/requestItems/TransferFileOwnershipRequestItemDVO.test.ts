@@ -182,7 +182,7 @@ describe("TransferFileOwnershipRequestItemDVO", () => {
         expect(requestItemDVO.response).toStrictEqual(responseItemDVO);
         expect(responseItemDVO.repositoryAttribute).toBeDefined();
         expect(responseItemDVO.sharedAttribute).toBeDefined();
-        expect(responseItemDVO.sharedAttributeId).toBe(responseItemDVO.sharedAttribute!.id);
+        expect(responseItemDVO.sharedAttributeId).toBe(responseItemDVO.sharedAttribute.id);
         expect(responseItemDVO.id).toBe(responseItemDVO.repositoryAttribute!.id);
 
         await syncUntilHasMessageWithResponse(sTransportServices, recipientMessage.content.id!);
@@ -226,7 +226,7 @@ describe("TransferFileOwnershipRequestItemDVO", () => {
         expect(requestItemDVO.response).toStrictEqual(responseItemDVO);
         expect(responseItemDVO.repositoryAttribute).toBeUndefined();
         expect(responseItemDVO.sharedAttribute).toBeDefined();
-        expect(responseItemDVO.sharedAttributeId).toBe(responseItemDVO.sharedAttribute!.id);
+        expect(responseItemDVO.sharedAttributeId).toBe(responseItemDVO.sharedAttribute.id);
         expect(responseItemDVO.id).toBe(responseItemDVO.sharedAttributeId);
     });
 
