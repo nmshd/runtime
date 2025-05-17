@@ -217,8 +217,8 @@ describe("CreateRelationshipAttributeRequestItemDVO", () => {
 
         expect(responseItem.attributeId).toStrictEqual(attributeResult.value[0].id);
         expect(responseItem.attribute).toBeDefined();
-        expect(responseItem.attribute.valueType).toBe("ProprietaryString");
-        expect(proprietaryString.value).toStrictEqual((responseItem.attribute.content.value as ProprietaryStringJSON).value);
+        expect(responseItem.attribute!.valueType).toBe("ProprietaryString");
+        expect(proprietaryString.value).toStrictEqual((responseItem.attribute!.content.value as ProprietaryStringJSON).value);
 
         await syncUntilHasMessageWithResponse(sTransportServices, recipientMessage.content.id!);
         await sEventBus.waitForEvent(OutgoingRequestStatusChangedEvent);
@@ -288,8 +288,8 @@ describe("CreateRelationshipAttributeRequestItemDVO", () => {
 
         expect(responseItem.attributeId).toStrictEqual(attributeResult.value[numberOfAttributes - 1].id);
         expect(responseItem.attribute).toBeDefined();
-        expect(responseItem.attribute.valueType).toBe("ProprietaryString");
-        expect(proprietaryString.value).toStrictEqual((responseItem.attribute.content.value as ProprietaryStringJSON).value);
+        expect(responseItem.attribute!.valueType).toBe("ProprietaryString");
+        expect(proprietaryString.value).toStrictEqual((responseItem.attribute!.content.value as ProprietaryStringJSON).value);
     });
 
     test("check the attributes for the sender", async () => {

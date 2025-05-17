@@ -46,19 +46,19 @@ export interface ReadAttributeAcceptResponseItemDVO extends AcceptResponseItemDV
     type: "ReadAttributeAcceptResponseItemDVO";
     attributeId: string;
     thirdPartyAddress?: string;
-    attribute: LocalAttributeDVO;
+    attribute?: LocalAttributeDVO;
 }
 
 export interface ProposeAttributeAcceptResponseItemDVO extends AcceptResponseItemDVO {
     type: "ProposeAttributeAcceptResponseItemDVO";
     attributeId: string;
-    attribute: LocalAttributeDVO;
+    attribute?: LocalAttributeDVO;
 }
 
 export interface CreateAttributeAcceptResponseItemDVO extends AcceptResponseItemDVO {
     type: "CreateAttributeAcceptResponseItemDVO";
     attributeId: string;
-    attribute: LocalAttributeDVO;
+    attribute?: LocalAttributeDVO;
 }
 
 export interface DeleteAttributeAcceptResponseItemDVO extends AcceptResponseItemDVO {
@@ -69,7 +69,7 @@ export interface DeleteAttributeAcceptResponseItemDVO extends AcceptResponseItem
 export interface ShareAttributeAcceptResponseItemDVO extends AcceptResponseItemDVO {
     type: "ShareAttributeAcceptResponseItemDVO";
     attributeId: string;
-    attribute: LocalAttributeDVO;
+    attribute?: LocalAttributeDVO;
 }
 
 export interface FreeTextAcceptResponseItemDVO extends AcceptResponseItemDVO {
@@ -85,26 +85,26 @@ export interface FormFieldAcceptResponseItemDVO extends AcceptResponseItemDVO {
 export interface RegisterAttributeListenerAcceptResponseItemDVO extends AcceptResponseItemDVO {
     type: "RegisterAttributeListenerAcceptResponseItemDVO";
     listenerId: string;
-    listener: LocalAttributeListenerDVO;
+    listener?: LocalAttributeListenerDVO;
 }
 
 export interface TransferFileOwnershipAcceptResponseItemDVO extends AcceptResponseItemDVO {
     type: "TransferFileOwnershipAcceptResponseItemDVO";
     repositoryAttribute?: LocalAttributeDVO;
     sharedAttributeId: string;
-    sharedAttribute: LocalAttributeDVO;
+    sharedAttribute?: LocalAttributeDVO;
 }
 
 export interface AttributeSuccessionAcceptResponseItemDVO extends AcceptResponseItemDVO {
     type: "AttributeSuccessionAcceptResponseItemDVO";
     predecessorId: string;
     successorId: string;
-    predecessor: LocalAttributeDVO;
-    successor: LocalAttributeDVO;
+    predecessor?: LocalAttributeDVO;
+    successor?: LocalAttributeDVO;
 }
 
 export interface AttributeAlreadySharedAcceptResponseItemDVO extends AcceptResponseItemDVO {
     type: "AttributeAlreadySharedAcceptResponseItemDVO";
     attributeId: string;
-    attribute: LocalAttributeDVO;
+    attribute?: LocalAttributeDVO;
 }

@@ -542,13 +542,13 @@ export class DataViewExpander {
                 if (responseItemDVO && responseItemDVO.result === ResponseItemResult.Accepted) {
                     if (responseItemDVO.type === "AttributeSuccessionAcceptResponseItemDVO") {
                         const attributeSuccessionResponseItem = responseItemDVO as AttributeSuccessionAcceptResponseItemDVO;
-                        proposedValueOverruled = !_.isEqual(attributeSuccessionResponseItem.successor.content.value, proposeAttributeRequestItem.attribute.value);
+                        proposedValueOverruled = !_.isEqual(attributeSuccessionResponseItem.successor?.content.value, proposeAttributeRequestItem.attribute.value);
                     } else if (responseItemDVO.type === "AttributeAlreadySharedAcceptResponseItemDVO") {
                         const attributeAlreadySharedResponseItem = responseItemDVO as AttributeAlreadySharedAcceptResponseItemDVO;
-                        proposedValueOverruled = !_.isEqual(attributeAlreadySharedResponseItem.attribute.content.value, proposeAttributeRequestItem.attribute.value);
+                        proposedValueOverruled = !_.isEqual(attributeAlreadySharedResponseItem.attribute?.content.value, proposeAttributeRequestItem.attribute.value);
                     } else {
                         const proposeAttributeResponseItem = responseItemDVO as ProposeAttributeAcceptResponseItemDVO;
-                        proposedValueOverruled = !_.isEqual(proposeAttributeResponseItem.attribute.content.value, proposeAttributeRequestItem.attribute.value);
+                        proposedValueOverruled = !_.isEqual(proposeAttributeResponseItem.attribute?.content.value, proposeAttributeRequestItem.attribute.value);
                     }
                 }
 
@@ -728,7 +728,8 @@ export class DataViewExpander {
                     const readAttributeResponseItem = responseItem as ReadAttributeAcceptResponseItemJSON;
 
                     const localAttributeResultForRead = await this.consumption.attributes.getAttribute({ id: readAttributeResponseItem.attributeId });
-                    const localAttributeDVOForRead = await this.expandLocalAttributeDTO(localAttributeResultForRead.value);
+                    const localAttributeForReadExists = localAttributeResultForRead.isSuccess;
+                    const localAttributeDVOForRead = localAttributeForReadExists ? await this.expandLocalAttributeDTO(localAttributeResultForRead.value) : undefined;
 
                     return {
                         ...readAttributeResponseItem,
@@ -742,7 +743,8 @@ export class DataViewExpander {
                     const createAttributeResponseItem = responseItem as CreateAttributeAcceptResponseItemJSON;
 
                     const localAttributeResultForCreate = await this.consumption.attributes.getAttribute({ id: createAttributeResponseItem.attributeId });
-                    const localAttributeDVOForCreate = await this.expandLocalAttributeDTO(localAttributeResultForCreate.value);
+                    const localAttributeForCreateExists = localAttributeResultForCreate.isSuccess;
+                    const localAttributeDVOForCreate = localAttributeForCreateExists ? await this.expandLocalAttributeDTO(localAttributeResultForCreate.value) : undefined;
 
                     return {
                         ...createAttributeResponseItem,
@@ -766,7 +768,8 @@ export class DataViewExpander {
                     const proposeAttributeResponseItem = responseItem as ProposeAttributeAcceptResponseItemJSON;
 
                     const localAttributeResultForPropose = await this.consumption.attributes.getAttribute({ id: proposeAttributeResponseItem.attributeId });
-                    const localAttributeDVOForPropose = await this.expandLocalAttributeDTO(localAttributeResultForPropose.value);
+                    const localAttributeForProposeExists = localAttributeResultForPropose.isSuccess;
+                    const localAttributeDVOForPropose = localAttributeForProposeExists ? await this.expandLocalAttributeDTO(localAttributeResultForPropose.value) : undefined;
 
                     return {
                         ...proposeAttributeResponseItem,
@@ -780,7 +783,8 @@ export class DataViewExpander {
                     const shareAttributeResponseItem = responseItem as ShareAttributeAcceptResponseItemJSON;
 
                     const localAttributeResultForShare = await this.consumption.attributes.getAttribute({ id: shareAttributeResponseItem.attributeId });
-                    const localAttributeDVOForShare = await this.expandLocalAttributeDTO(localAttributeResultForShare.value);
+                    const localAttributeForShareExists = localAttributeResultForShare.isSuccess;
+                    const localAttributeDVOForShare = localAttributeForShareExists ? await this.expandLocalAttributeDTO(localAttributeResultForShare.value) : undefined;
 
                     return {
                         ...shareAttributeResponseItem,
@@ -814,7 +818,8 @@ export class DataViewExpander {
                     const registerAttributeListenerResponseItem = responseItem as RegisterAttributeListenerAcceptResponseItemJSON;
 
                     const localAttributeListenerResult = await this.consumption.attributeListeners.getAttributeListener({ id: registerAttributeListenerResponseItem.listenerId });
-                    const localAttributeListenerDVO = await this.expandLocalAttributeListenerDTO(localAttributeListenerResult.value);
+                    const localAttributeListenerExists = localAttributeListenerResult.isSuccess;
+                    const localAttributeListenerDVO = localAttributeListenerExists ? await this.expandLocalAttributeListenerDTO(localAttributeListenerResult.value) : undefined;
 
                     return {
                         ...registerAttributeListenerResponseItem,
@@ -828,15 +833,22 @@ export class DataViewExpander {
                     const transferFileOwnershipResponseItem = responseItem as TransferFileOwnershipAcceptResponseItemJSON;
 
                     const sharedAttributeResultForTransfer = await this.consumption.attributes.getAttribute({ id: transferFileOwnershipResponseItem.attributeId });
-                    const sharedAttributeDVOForTransfer = await this.expandLocalAttributeDTO(sharedAttributeResultForTransfer.value);
-
-                    const repositoryAttributeResultForTransfer = await this.consumption.attributes.getAttribute({
-                        id: sharedAttributeResultForTransfer.value.shareInfo!.sourceAttribute!
-                    });
+                    const sharedAttributeForTransferExists = sharedAttributeResultForTransfer.isSuccess;
+                    const sharedAttributeDVOForTransfer = sharedAttributeForTransferExists
+                        ? ((await this.expandLocalAttributeDTO(sharedAttributeResultForTransfer.value)) as SharedToPeerAttributeDVO)
+                        : undefined;
 
                     let repositoryAttributeDVOForTransfer;
-                    if (repositoryAttributeResultForTransfer.isSuccess) {
-                        repositoryAttributeDVOForTransfer = await this.expandLocalAttributeDTO(repositoryAttributeResultForTransfer.value);
+                    const repositoryAttributeIdForTransferExists = !!sharedAttributeDVOForTransfer?.sourceAttribute;
+                    if (repositoryAttributeIdForTransferExists) {
+                        const repositoryAttributeResultForTransfer = await this.consumption.attributes.getAttribute({
+                            id: sharedAttributeDVOForTransfer.sourceAttribute!
+                        });
+
+                        const repositoryAttributeForTransferExists = repositoryAttributeResultForTransfer.isSuccess;
+                        repositoryAttributeDVOForTransfer = repositoryAttributeForTransferExists
+                            ? ((await this.expandLocalAttributeDTO(repositoryAttributeResultForTransfer.value)) as RepositoryAttributeDVO)
+                            : undefined;
                     }
 
                     return {
@@ -853,10 +865,12 @@ export class DataViewExpander {
                     const attributeSuccessionResponseItem = responseItem as AttributeSuccessionAcceptResponseItemJSON;
 
                     const localPredecessorResult = await this.consumption.attributes.getAttribute({ id: attributeSuccessionResponseItem.predecessorId });
-                    const localPredecessorDVO = await this.expandLocalAttributeDTO(localPredecessorResult.value);
+                    const localPredecessorExists = localPredecessorResult.isSuccess;
+                    const localPredecessorDVO = localPredecessorExists ? await this.expandLocalAttributeDTO(localPredecessorResult.value) : undefined;
 
                     const localSuccessorResult = await this.consumption.attributes.getAttribute({ id: attributeSuccessionResponseItem.successorId });
-                    const localSuccessorDVO = await this.expandLocalAttributeDTO(localSuccessorResult.value);
+                    const localSuccessorExists = localSuccessorResult.isSuccess;
+                    const localSuccessorDVO = localSuccessorExists ? await this.expandLocalAttributeDTO(localSuccessorResult.value) : undefined;
 
                     return {
                         ...attributeSuccessionResponseItem,
@@ -871,7 +885,8 @@ export class DataViewExpander {
                     const attributeAlreadySharedResponseItem = responseItem as AttributeAlreadySharedAcceptResponseItemJSON;
 
                     const localAttributeResult = await this.consumption.attributes.getAttribute({ id: attributeAlreadySharedResponseItem.attributeId });
-                    const localAttributeDVO = await this.expandLocalAttributeDTO(localAttributeResult.value);
+                    const localAttributeExists = localAttributeResult.isSuccess;
+                    const localAttributeDVO = localAttributeExists ? await this.expandLocalAttributeDTO(localAttributeResult.value) : undefined;
 
                     return {
                         ...attributeAlreadySharedResponseItem,
