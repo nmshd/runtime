@@ -5,6 +5,9 @@ import { AttributeValues } from "./AttributeValueTypes";
 export interface IdentityAttributeJSON<TValueJSONInterface extends AttributeValues.Identity.Json = AttributeValues.Identity.Json> extends AbstractAttributeJSON {
     "@type": "IdentityAttribute";
     value: TValueJSONInterface;
+    /**
+     * @uniqueItems true
+     */
     tags?: string[];
 }
 

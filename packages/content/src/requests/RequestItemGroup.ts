@@ -28,6 +28,8 @@ export interface RequestItemGroupJSON extends ContentJSON {
 
     /**
      * The items of this group.
+     *
+     * @uniqueItems true
      */
     items: RequestItemJSONDerivations[];
 }
