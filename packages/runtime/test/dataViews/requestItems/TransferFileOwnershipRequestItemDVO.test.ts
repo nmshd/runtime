@@ -57,7 +57,7 @@ beforeAll(async () => {
     rAddress = (await rTransportServices.account.getIdentityInfo()).value.address;
 
     const file = await uploadFile(sTransportServices);
-    truncatedFileReference = file.truncatedReference;
+    truncatedFileReference = file.reference.truncated;
 
     requestContent = {
         content: {
