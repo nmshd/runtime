@@ -750,6 +750,7 @@ export class DataViewExpander {
 
                 case "CreateAttributeAcceptResponseItem":
                     const createAttributeResponseItem = responseItem as CreateAttributeAcceptResponseItemJSON;
+
                     const localAttributeResultForCreate = await this.consumption.attributes.getAttribute({ id: createAttributeResponseItem.attributeId });
                     const localAttributeForCreateExists = localAttributeResultForCreate.isSuccess;
 
