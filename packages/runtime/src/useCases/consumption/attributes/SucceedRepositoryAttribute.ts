@@ -16,11 +16,11 @@ export interface SucceedRepositoryAttributeResponse {
 export interface SucceedRepositoryAttributeRequest {
     predecessorId: string;
     successorContent: {
-        value: AttributeValues.Identity.Json;
         /**
          * @uniqueItems true
          */
         tags?: string[];
+        value: AttributeValues.Identity.Json;
         validFrom?: ISO8601DateTimeString;
         validTo?: ISO8601DateTimeString;
     };
