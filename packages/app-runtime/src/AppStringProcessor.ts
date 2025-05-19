@@ -128,7 +128,7 @@ export class AppStringProcessor {
               ).result
             : await services.transportServices.account.loadItemFromReference({ reference: reference.truncate(), password: existingPassword });
 
-        if (result.isError && result.error.code === "error.appStringProcessor.passwordNotProvided") {
+        if (result.isError && result.error.equals(AppRuntimeErrors.appStringProcessor.passwordNotProvided())) {
             return UserfriendlyResult.ok(undefined);
         }
 
