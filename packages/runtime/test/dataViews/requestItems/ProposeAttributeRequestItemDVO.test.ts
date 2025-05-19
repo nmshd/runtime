@@ -492,8 +492,8 @@ describe("ProposeAttributeRequestItemDVO with IdentityAttributeQuery", () => {
 
         const recipientMessage = (await runtimeServices2.transport.messages.getMessage({ id: senderMessage.id })).value;
         const dvo = (await expander2.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
-        expect(dvo).toBeDefined();
-        expect((dvo.request.response!.content.items[0] as ProposeAttributeAcceptResponseItemDVO).attribute).toBeUndefined();
+        const responseItemDVO = dvo.request.response!.content.items[0];
+        expect(responseItemDVO.type).toBe("AttributeAlreadyDeletedAcceptResponseItemDVO");
     });
 
     test("check the MessageDVO for the sender after they deleted the shared Attribute", async () => {
@@ -506,8 +506,8 @@ describe("ProposeAttributeRequestItemDVO with IdentityAttributeQuery", () => {
 
         const senderMessageAfterDeletion = (await runtimeServices1.transport.messages.getMessage({ id: senderMessage.id })).value;
         const dvo = (await expander1.expandMessageDTO(senderMessageAfterDeletion)) as RequestMessageDVO;
-        expect(dvo).toBeDefined();
-        expect((dvo.request.response!.content.items[0] as ProposeAttributeAcceptResponseItemDVO).attribute).toBeUndefined();
+        const responseItemDVO = dvo.request.response!.content.items[0];
+        expect(responseItemDVO.type).toBe("AttributeAlreadyDeletedAcceptResponseItemDVO");
     });
 });
 
@@ -732,8 +732,10 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
 
         const recipientMessage = (await runtimeServices2.transport.messages.getMessage({ id: senderMessage.id })).value;
         const dvo = (await expander2.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
-        expect(dvo).toBeDefined();
-        expect((dvo.request.response!.items![0] as AttributeSuccessionAcceptResponseItemDVO).predecessor).toBeUndefined();
+        const responseItemDVO = dvo.request.response!.content.items[0] as AttributeSuccessionAcceptResponseItemDVO;
+        expect(responseItemDVO.type).toBe("AttributeSuccessionAcceptResponseItemDVO");
+        expect(responseItemDVO.predecessor).toBeUndefined();
+        expect(responseItemDVO.successor).toBeDefined();
     });
 
     test("check the MessageDVO for the sender after they deleted the shared Attribute predecessor", async () => {
@@ -746,8 +748,10 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
 
         const senderMessageAfterDeletion = (await runtimeServices1.transport.messages.getMessage({ id: senderMessage.id })).value;
         const dvo = (await expander1.expandMessageDTO(senderMessageAfterDeletion)) as RequestMessageDVO;
-        expect(dvo).toBeDefined();
-        expect((dvo.request.response!.items![0] as AttributeSuccessionAcceptResponseItemDVO).predecessor).toBeUndefined();
+        const responseItemDVO = dvo.request.response!.content.items[0] as AttributeSuccessionAcceptResponseItemDVO;
+        expect(responseItemDVO.type).toBe("AttributeSuccessionAcceptResponseItemDVO");
+        expect(responseItemDVO.predecessor).toBeUndefined();
+        expect(responseItemDVO.successor).toBeDefined();
     });
 
     test("check the MessageDVO for the recipient after they deleted the shared Attribute successor", async () => {
@@ -760,9 +764,8 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
 
         const recipientMessage = (await runtimeServices2.transport.messages.getMessage({ id: senderMessage.id })).value;
         const dvo = (await expander2.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
-        expect(dvo).toBeDefined();
-        expect((dvo.request.response!.content.items[0] as AttributeSuccessionAcceptResponseItemDVO).predecessor).toBeUndefined();
-        expect((dvo.request.response!.content.items[0] as AttributeSuccessionAcceptResponseItemDVO).successor).toBeUndefined();
+        const responseItemDVO = dvo.request.response!.content.items[0];
+        expect(responseItemDVO.type).toBe("AttributeAlreadyDeletedAcceptResponseItemDVO");
     });
 
     test("check the MessageDVO for the sender after they deleted the shared Attribute successor", async () => {
@@ -775,9 +778,8 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
 
         const senderMessageAfterDeletion = (await runtimeServices1.transport.messages.getMessage({ id: senderMessage.id })).value;
         const dvo = (await expander1.expandMessageDTO(senderMessageAfterDeletion)) as RequestMessageDVO;
-        expect(dvo).toBeDefined();
-        expect((dvo.request.response!.content.items[0] as AttributeSuccessionAcceptResponseItemDVO).predecessor).toBeUndefined();
-        expect((dvo.request.response!.content.items[0] as AttributeSuccessionAcceptResponseItemDVO).successor).toBeUndefined();
+        const responseItemDVO = dvo.request.response!.content.items[0];
+        expect(responseItemDVO.type).toBe("AttributeAlreadyDeletedAcceptResponseItemDVO");
     });
 });
 
@@ -944,8 +946,8 @@ describe("AttributeAlreadySharedAcceptResponseItemDVO with IdentityAttributeQuer
 
         const recipientMessage = (await runtimeServices2.transport.messages.getMessage({ id: senderMessage.id })).value;
         const dvo = (await expander2.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
-        expect(dvo).toBeDefined();
-        expect((dvo.request.response!.content.items[0] as AttributeAlreadySharedAcceptResponseItemDVO).attribute).toBeUndefined();
+        const responseItemDVO = dvo.request.response!.content.items[0];
+        expect(responseItemDVO.type).toBe("AttributeAlreadyDeletedAcceptResponseItemDVO");
     });
 
     test("check the MessageDVO for the sender after they deleted the shared Attribute", async () => {
@@ -958,7 +960,7 @@ describe("AttributeAlreadySharedAcceptResponseItemDVO with IdentityAttributeQuer
 
         const senderMessageAfterDeletion = (await runtimeServices1.transport.messages.getMessage({ id: senderMessage.id })).value;
         const dvo = (await expander1.expandMessageDTO(senderMessageAfterDeletion)) as RequestMessageDVO;
-        expect(dvo).toBeDefined();
-        expect((dvo.request.response!.content.items[0] as AttributeAlreadySharedAcceptResponseItemDVO).attribute).toBeUndefined();
+        const responseItemDVO = dvo.request.response!.content.items[0];
+        expect(responseItemDVO.type).toBe("AttributeAlreadyDeletedAcceptResponseItemDVO");
     });
 });

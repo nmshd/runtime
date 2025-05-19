@@ -309,8 +309,8 @@ describe("ReadAttributeRequestItemDVO with IdentityAttributeQuery", () => {
 
         const recipientMessage = (await runtimeServices2.transport.messages.getMessage({ id: senderMessage.id })).value;
         const dvo = (await expander2.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
-        expect(dvo).toBeDefined();
-        expect((dvo.request.response!.content.items[0] as ReadAttributeAcceptResponseItemDVO).attribute).toBeUndefined();
+        const responseItemDVO = dvo.request.response!.content.items[0];
+        expect(responseItemDVO.type).toBe("AttributeAlreadyDeletedAcceptResponseItemDVO");
     });
 
     test("check the MessageDVO for the sender after they deleted the shared Attribute", async () => {
@@ -323,8 +323,8 @@ describe("ReadAttributeRequestItemDVO with IdentityAttributeQuery", () => {
 
         const senderMessageAfterDeletion = (await runtimeServices1.transport.messages.getMessage({ id: senderMessage.id })).value;
         const dvo = (await expander1.expandMessageDTO(senderMessageAfterDeletion)) as RequestMessageDVO;
-        expect(dvo).toBeDefined();
-        expect((dvo.request.response!.content.items[0] as ReadAttributeAcceptResponseItemDVO).attribute).toBeUndefined();
+        const responseItemDVO = dvo.request.response!.content.items[0];
+        expect(responseItemDVO.type).toBe("AttributeAlreadyDeletedAcceptResponseItemDVO");
     });
 });
 
