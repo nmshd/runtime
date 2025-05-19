@@ -923,14 +923,16 @@ export class DataViewExpander {
                     const attributeSuccessionResponseItem = responseItem as AttributeSuccessionAcceptResponseItemJSON;
 
                     const localSuccessorResult = await this.consumption.attributes.getAttribute({ id: attributeSuccessionResponseItem.successorId });
-                    const localSuccessorExists = localSuccessorResult.isSuccess;
+                    if (localSuccessorResult.isError) {
+                        if (localSuccessorResult.error.equals(RuntimeErrors.general.recordNotFound())) {
+                            return {
+                                type: "AttributeAlreadyDeletedAcceptResponseItemDVO",
+                                id: attributeSuccessionResponseItem.successorId,
+                                name: name
+                            } as AttributeAlreadyDeletedAcceptResponseItemDVO;
+                        }
 
-                    if (!localSuccessorExists) {
-                        return {
-                            type: "AttributeAlreadyDeletedAcceptResponseItemDVO",
-                            id: attributeSuccessionResponseItem.successorId,
-                            name: name
-                        } as AttributeAlreadyDeletedAcceptResponseItemDVO;
+                        throw localSuccessorResult.error;
                     }
 
                     const localSuccessorDVO = await this.expandLocalAttributeDTO(localSuccessorResult.value);
@@ -955,14 +957,16 @@ export class DataViewExpander {
                     const attributeAlreadySharedResponseItem = responseItem as AttributeAlreadySharedAcceptResponseItemJSON;
 
                     const localAttributeResult = await this.consumption.attributes.getAttribute({ id: attributeAlreadySharedResponseItem.attributeId });
-                    const localAttributeExists = localAttributeResult.isSuccess;
+                    if (localAttributeResult.isError) {
+                        if (localAttributeResult.error.equals(RuntimeErrors.general.recordNotFound())) {
+                            return {
+                                type: "AttributeAlreadyDeletedAcceptResponseItemDVO",
+                                id: attributeAlreadySharedResponseItem.attributeId,
+                                name: name
+                            } as AttributeAlreadyDeletedAcceptResponseItemDVO;
+                        }
 
-                    if (!localAttributeExists) {
-                        return {
-                            type: "AttributeAlreadyDeletedAcceptResponseItemDVO",
-                            id: attributeAlreadySharedResponseItem.attributeId,
-                            name: name
-                        } as AttributeAlreadyDeletedAcceptResponseItemDVO;
+                        throw localAttributeResult.error;
                     }
 
                     const localAttributeDVO = await this.expandLocalAttributeDTO(localAttributeResult.value);
