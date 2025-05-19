@@ -22465,6 +22465,19 @@ export const GetTokensRequest: any = {
         "GetTokensQuery": {
             "type": "object",
             "properties": {
+                "isOwn": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
                 "createdAt": {
                     "anyOf": [
                         {
