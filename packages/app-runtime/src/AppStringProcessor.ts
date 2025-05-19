@@ -81,7 +81,7 @@ export class AppStringProcessor {
               )
             : { result: await this.runtime.anonymousServices.tokens.loadPeerToken({ reference: reference.truncate() }) };
 
-        if (tokenResultHolder.result.isError && tokenResultHolder.result.error.code === "error.appStringProcessor.passwordNotProvided") {
+        if (tokenResultHolder.result.isError && tokenResultHolder.result.error.equals(AppRuntimeErrors.appStringProcessor.passwordNotProvided())) {
             return UserfriendlyResult.ok(undefined);
         }
 
