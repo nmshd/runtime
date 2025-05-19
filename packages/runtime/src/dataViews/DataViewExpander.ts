@@ -97,6 +97,7 @@ import {
     SharedToPeerAttributeDVO
 } from "./consumption";
 import {
+    AttributeAlreadyDeletedAcceptResponseItemDVO,
     AttributeAlreadySharedAcceptResponseItemDVO,
     AttributeQueryDVO,
     AttributeSuccessionAcceptResponseItemDVO,
@@ -741,11 +742,18 @@ export class DataViewExpander {
 
                 case "CreateAttributeAcceptResponseItem":
                     const createAttributeResponseItem = responseItem as CreateAttributeAcceptResponseItemJSON;
-
                     const localAttributeResultForCreate = await this.consumption.attributes.getAttribute({ id: createAttributeResponseItem.attributeId });
                     const localAttributeForCreateExists = localAttributeResultForCreate.isSuccess;
-                    const localAttributeDVOForCreate = localAttributeForCreateExists ? await this.expandLocalAttributeDTO(localAttributeResultForCreate.value) : undefined;
 
+                    if (!localAttributeForCreateExists) {
+                        return {
+                            type: "AttributeAlreadyDeletedAcceptResponseItemDVO",
+                            id: createAttributeResponseItem.attributeId,
+                            name: name
+                        } as AttributeAlreadyDeletedAcceptResponseItemDVO;
+                    }
+
+                    const localAttributeDVOForCreate = await this.expandLocalAttributeDTO(localAttributeResultForCreate.value);
                     return {
                         ...createAttributeResponseItem,
                         type: "CreateAttributeAcceptResponseItemDVO",
