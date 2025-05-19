@@ -208,8 +208,8 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
 
         expect(responseItem.attributeId).toStrictEqual(attributeResult.value[0].id);
         expect(responseItem.attribute).toBeDefined();
-        expect(responseItem.attribute!.valueType).toBe("DisplayName");
-        expect((attributeResult.value[0].content.value as DisplayNameJSON).value).toStrictEqual((responseItem.attribute!.content.value as DisplayNameJSON).value);
+        expect(responseItem.attribute.valueType).toBe("DisplayName");
+        expect((attributeResult.value[0].content.value as DisplayNameJSON).value).toStrictEqual((responseItem.attribute.content.value as DisplayNameJSON).value);
 
         await syncUntilHasMessageWithResponse(sTransportServices, recipientMessage.content.id!);
         await sEventBus.waitForEvent(OutgoingRequestStatusChangedEvent);
@@ -281,9 +281,9 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
 
         expect(responseItem.attributeId).toStrictEqual(attributeResult.value[numberOfAttributes - 1].id);
         expect(responseItem.attribute).toBeDefined();
-        expect(responseItem.attribute!.valueType).toBe("DisplayName");
+        expect(responseItem.attribute.valueType).toBe("DisplayName");
         expect((attributeResult.value[numberOfAttributes - 1].content.value as DisplayNameJSON).value).toStrictEqual(
-            (responseItem.attribute!.content.value as DisplayNameJSON).value
+            (responseItem.attribute.content.value as DisplayNameJSON).value
         );
         expect(numberOfAttributes - baselineNumberOfAttributes).toBe(1);
     });

@@ -59,7 +59,7 @@ export interface ProposeAttributeAcceptResponseItemDVO extends AcceptResponseIte
 export interface CreateAttributeAcceptResponseItemDVO extends AcceptResponseItemDVO {
     type: "CreateAttributeAcceptResponseItemDVO";
     attributeId: string;
-    attribute?: LocalAttributeDVO;
+    attribute: LocalAttributeDVO;
 }
 
 export interface DeleteAttributeAcceptResponseItemDVO extends AcceptResponseItemDVO {
