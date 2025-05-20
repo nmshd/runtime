@@ -730,9 +730,7 @@ export class DataViewExpander {
 
                     const localAttributeResultForRead = await this.consumption.attributes.getAttribute({ id: readAttributeResponseItem.attributeId });
                     if (localAttributeResultForRead.isError) {
-                        if (!localAttributeResultForRead.error.equals(RuntimeErrors.general.recordNotFound())) {
-                            throw localAttributeResultForRead.error;
-                        }
+                        if (!localAttributeResultForRead.error.equals(RuntimeErrors.general.recordNotFound())) throw localAttributeResultForRead.error;
 
                         return {
                             type: "AttributeAlreadyDeletedAcceptResponseItemDVO",
@@ -755,9 +753,7 @@ export class DataViewExpander {
 
                     const localAttributeResultForCreate = await this.consumption.attributes.getAttribute({ id: createAttributeResponseItem.attributeId });
                     if (localAttributeResultForCreate.isError) {
-                        if (!localAttributeResultForCreate.error.equals(RuntimeErrors.general.recordNotFound())) {
-                            throw localAttributeResultForCreate.error;
-                        }
+                        if (!localAttributeResultForCreate.error.equals(RuntimeErrors.general.recordNotFound())) throw localAttributeResultForCreate.error;
 
                         return {
                             type: "AttributeAlreadyDeletedAcceptResponseItemDVO",
@@ -790,9 +786,7 @@ export class DataViewExpander {
 
                     const localAttributeResultForPropose = await this.consumption.attributes.getAttribute({ id: proposeAttributeResponseItem.attributeId });
                     if (localAttributeResultForPropose.isError) {
-                        if (!localAttributeResultForPropose.error.equals(RuntimeErrors.general.recordNotFound())) {
-                            throw localAttributeResultForPropose.error;
-                        }
+                        if (!localAttributeResultForPropose.error.equals(RuntimeErrors.general.recordNotFound())) throw localAttributeResultForPropose.error;
 
                         return {
                             type: "AttributeAlreadyDeletedAcceptResponseItemDVO",
@@ -815,9 +809,7 @@ export class DataViewExpander {
 
                     const localAttributeResultForShare = await this.consumption.attributes.getAttribute({ id: shareAttributeResponseItem.attributeId });
                     if (localAttributeResultForShare.isError) {
-                        if (!localAttributeResultForShare.error.equals(RuntimeErrors.general.recordNotFound())) {
-                            throw localAttributeResultForShare.error;
-                        }
+                        if (!localAttributeResultForShare.error.equals(RuntimeErrors.general.recordNotFound())) throw localAttributeResultForShare.error;
 
                         return {
                             type: "AttributeAlreadyDeletedAcceptResponseItemDVO",
@@ -880,9 +872,7 @@ export class DataViewExpander {
 
                     const sharedAttributeResultForTransfer = await this.consumption.attributes.getAttribute({ id: transferFileOwnershipResponseItem.attributeId });
                     if (sharedAttributeResultForTransfer.isError) {
-                        if (!sharedAttributeResultForTransfer.error.equals(RuntimeErrors.general.recordNotFound())) {
-                            throw sharedAttributeResultForTransfer.error;
-                        }
+                        if (!sharedAttributeResultForTransfer.error.equals(RuntimeErrors.general.recordNotFound())) throw sharedAttributeResultForTransfer.error;
 
                         return {
                             type: "AttributeAlreadyDeletedAcceptResponseItemDVO",
@@ -924,9 +914,7 @@ export class DataViewExpander {
 
                     const localSuccessorResult = await this.consumption.attributes.getAttribute({ id: attributeSuccessionResponseItem.successorId });
                     if (localSuccessorResult.isError) {
-                        if (!localSuccessorResult.error.equals(RuntimeErrors.general.recordNotFound())) {
-                            throw localSuccessorResult.error;
-                        }
+                        if (!localSuccessorResult.error.equals(RuntimeErrors.general.recordNotFound())) throw localSuccessorResult.error;
 
                         return {
                             type: "AttributeAlreadyDeletedAcceptResponseItemDVO",
@@ -938,9 +926,7 @@ export class DataViewExpander {
                     const localSuccessorDVO = await this.expandLocalAttributeDTO(localSuccessorResult.value);
 
                     const localPredecessorResult = await this.consumption.attributes.getAttribute({ id: attributeSuccessionResponseItem.predecessorId });
-                    if (localPredecessorResult.isError && !localPredecessorResult.error.equals(RuntimeErrors.general.recordNotFound())) {
-                        throw localPredecessorResult.error;
-                    }
+                    if (localPredecessorResult.isError && !localPredecessorResult.error.equals(RuntimeErrors.general.recordNotFound())) throw localPredecessorResult.error;
 
                     const localPredecessorDVO = localPredecessorResult.isSuccess ? await this.expandLocalAttributeDTO(localPredecessorResult.value) : undefined;
 
@@ -958,9 +944,7 @@ export class DataViewExpander {
 
                     const localAttributeResult = await this.consumption.attributes.getAttribute({ id: attributeAlreadySharedResponseItem.attributeId });
                     if (localAttributeResult.isError) {
-                        if (!localAttributeResult.error.equals(RuntimeErrors.general.recordNotFound())) {
-                            throw localAttributeResult.error;
-                        }
+                        if (!localAttributeResult.error.equals(RuntimeErrors.general.recordNotFound())) throw localAttributeResult.error;
 
                         return {
                             type: "AttributeAlreadyDeletedAcceptResponseItemDVO",
