@@ -1,11 +1,8 @@
 import { RelationshipAuditLogEntryReason } from "@nmshd/runtime";
-import { AppRuntimeError } from "../../AppRuntimeError";
 import { OnboardingChangeReceivedEvent } from "../../events";
 import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "../AppRuntimeModule";
 
 export interface OnboardingChangeReceivedModuleConfig extends AppRuntimeModuleConfiguration {}
-
-export class OnboardingChangeReceivedModuleError extends AppRuntimeError {}
 
 export class OnboardingChangeReceivedModule extends AppRuntimeModule<OnboardingChangeReceivedModuleConfig> {
     public async init(): Promise<void> {
