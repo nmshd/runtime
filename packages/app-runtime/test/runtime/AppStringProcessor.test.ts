@@ -275,7 +275,7 @@ describe("AppStringProcessor", function () {
         });
 
         describe("invalid references", function () {
-            test("device onboarding with a trunacted relationship template reference", async function () {
+            test("device onboarding with a truncated relationship template reference", async function () {
                 const templateResult = await runtime1Session.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
                     content: templateContent,
                     expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(),
@@ -307,7 +307,7 @@ describe("AppStringProcessor", function () {
                 expect(mockUiBridge).requestAccountSelectionNotCalled();
             });
 
-            test("device onboarding with a trunacted relationship template token reference", async function () {
+            test("device onboarding with a truncated relationship template token reference", async function () {
                 const templateResult = await runtime1Session.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
                     content: templateContent,
                     expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(),
