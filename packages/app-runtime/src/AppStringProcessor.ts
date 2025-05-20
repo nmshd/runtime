@@ -151,7 +151,14 @@ export class AppStringProcessor {
     public async processDeviceOnboardingReference(url: string): Promise<UserfriendlyResult<void>> {
         url = url.trim();
 
-        const reference = Reference.from(url);
+        let reference: Reference;
+
+        try {
+            reference = Reference.from(url);
+        } catch (_) {
+            return UserfriendlyResult.fail(AppRuntimeErrors.appStringProcessor.invalidReference());
+        }
+
         if (!reference.id.toString().startsWith("TOK")) return UserfriendlyResult.fail(AppRuntimeErrors.appStringProcessor.noDeviceOnboardingCode());
 
         const tokenResultHolder = reference.passwordProtection
