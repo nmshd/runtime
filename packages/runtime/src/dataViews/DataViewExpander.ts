@@ -95,6 +95,7 @@ import {
     SharedToPeerAttributeDVO
 } from "./consumption";
 import {
+    AttributeAlreadyDeletedAcceptResponseItemDVO,
     AttributeAlreadySharedAcceptResponseItemDVO,
     AttributeQueryDVO,
     AttributeSuccessionAcceptResponseItemDVO,
@@ -713,8 +714,17 @@ export class DataViewExpander {
                     const readAttributeResponseItem = responseItem as ReadAttributeAcceptResponseItemJSON;
 
                     const localAttributeResultForRead = await this.consumption.attributes.getAttribute({ id: readAttributeResponseItem.attributeId });
-                    const localAttributeDVOForRead = await this.expandLocalAttributeDTO(localAttributeResultForRead.value);
+                    if (localAttributeResultForRead.isError) {
+                        if (!localAttributeResultForRead.error.equals(RuntimeErrors.general.recordNotFound())) throw localAttributeResultForRead.error;
 
+                        return {
+                            type: "AttributeAlreadyDeletedAcceptResponseItemDVO",
+                            id: readAttributeResponseItem.attributeId,
+                            name: name
+                        } as AttributeAlreadyDeletedAcceptResponseItemDVO;
+                    }
+
+                    const localAttributeDVOForRead = await this.expandLocalAttributeDTO(localAttributeResultForRead.value);
                     return {
                         ...readAttributeResponseItem,
                         type: "ReadAttributeAcceptResponseItemDVO",
@@ -727,8 +737,17 @@ export class DataViewExpander {
                     const createAttributeResponseItem = responseItem as CreateAttributeAcceptResponseItemJSON;
 
                     const localAttributeResultForCreate = await this.consumption.attributes.getAttribute({ id: createAttributeResponseItem.attributeId });
-                    const localAttributeDVOForCreate = await this.expandLocalAttributeDTO(localAttributeResultForCreate.value);
+                    if (localAttributeResultForCreate.isError) {
+                        if (!localAttributeResultForCreate.error.equals(RuntimeErrors.general.recordNotFound())) throw localAttributeResultForCreate.error;
 
+                        return {
+                            type: "AttributeAlreadyDeletedAcceptResponseItemDVO",
+                            id: createAttributeResponseItem.attributeId,
+                            name: name
+                        } as AttributeAlreadyDeletedAcceptResponseItemDVO;
+                    }
+
+                    const localAttributeDVOForCreate = await this.expandLocalAttributeDTO(localAttributeResultForCreate.value);
                     return {
                         ...createAttributeResponseItem,
                         type: "CreateAttributeAcceptResponseItemDVO",
@@ -751,8 +770,17 @@ export class DataViewExpander {
                     const proposeAttributeResponseItem = responseItem as ProposeAttributeAcceptResponseItemJSON;
 
                     const localAttributeResultForPropose = await this.consumption.attributes.getAttribute({ id: proposeAttributeResponseItem.attributeId });
-                    const localAttributeDVOForPropose = await this.expandLocalAttributeDTO(localAttributeResultForPropose.value);
+                    if (localAttributeResultForPropose.isError) {
+                        if (!localAttributeResultForPropose.error.equals(RuntimeErrors.general.recordNotFound())) throw localAttributeResultForPropose.error;
 
+                        return {
+                            type: "AttributeAlreadyDeletedAcceptResponseItemDVO",
+                            id: proposeAttributeResponseItem.attributeId,
+                            name: name
+                        } as AttributeAlreadyDeletedAcceptResponseItemDVO;
+                    }
+
+                    const localAttributeDVOForPropose = await this.expandLocalAttributeDTO(localAttributeResultForPropose.value);
                     return {
                         ...proposeAttributeResponseItem,
                         type: "ProposeAttributeAcceptResponseItemDVO",
@@ -765,8 +793,17 @@ export class DataViewExpander {
                     const shareAttributeResponseItem = responseItem as ShareAttributeAcceptResponseItemJSON;
 
                     const localAttributeResultForShare = await this.consumption.attributes.getAttribute({ id: shareAttributeResponseItem.attributeId });
-                    const localAttributeDVOForShare = await this.expandLocalAttributeDTO(localAttributeResultForShare.value);
+                    if (localAttributeResultForShare.isError) {
+                        if (!localAttributeResultForShare.error.equals(RuntimeErrors.general.recordNotFound())) throw localAttributeResultForShare.error;
 
+                        return {
+                            type: "AttributeAlreadyDeletedAcceptResponseItemDVO",
+                            id: shareAttributeResponseItem.attributeId,
+                            name: name
+                        } as AttributeAlreadyDeletedAcceptResponseItemDVO;
+                    }
+
+                    const localAttributeDVOForShare = await this.expandLocalAttributeDTO(localAttributeResultForShare.value);
                     return {
                         ...shareAttributeResponseItem,
                         type: "ShareAttributeAcceptResponseItemDVO",
@@ -789,7 +826,13 @@ export class DataViewExpander {
                     const registerAttributeListenerResponseItem = responseItem as RegisterAttributeListenerAcceptResponseItemJSON;
 
                     const localAttributeListenerResult = await this.consumption.attributeListeners.getAttributeListener({ id: registerAttributeListenerResponseItem.listenerId });
-                    const localAttributeListenerDVO = await this.expandLocalAttributeListenerDTO(localAttributeListenerResult.value);
+                    if (localAttributeListenerResult.isError && !localAttributeListenerResult.error.equals(RuntimeErrors.general.recordNotFound())) {
+                        throw localAttributeListenerResult.error;
+                    }
+
+                    const localAttributeListenerDVO = localAttributeListenerResult.isSuccess
+                        ? await this.expandLocalAttributeListenerDTO(localAttributeListenerResult.value)
+                        : undefined;
 
                     return {
                         ...registerAttributeListenerResponseItem,
@@ -803,15 +846,32 @@ export class DataViewExpander {
                     const transferFileOwnershipResponseItem = responseItem as TransferFileOwnershipAcceptResponseItemJSON;
 
                     const sharedAttributeResultForTransfer = await this.consumption.attributes.getAttribute({ id: transferFileOwnershipResponseItem.attributeId });
-                    const sharedAttributeDVOForTransfer = await this.expandLocalAttributeDTO(sharedAttributeResultForTransfer.value);
+                    if (sharedAttributeResultForTransfer.isError) {
+                        if (!sharedAttributeResultForTransfer.error.equals(RuntimeErrors.general.recordNotFound())) throw sharedAttributeResultForTransfer.error;
 
-                    const repositoryAttributeResultForTransfer = await this.consumption.attributes.getAttribute({
-                        id: sharedAttributeResultForTransfer.value.shareInfo!.sourceAttribute!
-                    });
+                        return {
+                            type: "AttributeAlreadyDeletedAcceptResponseItemDVO",
+                            id: transferFileOwnershipResponseItem.attributeId,
+                            name: name
+                        } as AttributeAlreadyDeletedAcceptResponseItemDVO;
+                    }
+
+                    const sharedAttributeDVOForTransfer = (await this.expandLocalAttributeDTO(sharedAttributeResultForTransfer.value)) as SharedToPeerAttributeDVO;
 
                     let repositoryAttributeDVOForTransfer;
-                    if (repositoryAttributeResultForTransfer.isSuccess) {
-                        repositoryAttributeDVOForTransfer = await this.expandLocalAttributeDTO(repositoryAttributeResultForTransfer.value);
+                    const repositoryAttributeIdForTransferExists = !!sharedAttributeDVOForTransfer.sourceAttribute;
+                    if (repositoryAttributeIdForTransferExists) {
+                        const repositoryAttributeResultForTransfer = await this.consumption.attributes.getAttribute({
+                            id: sharedAttributeDVOForTransfer.sourceAttribute!
+                        });
+
+                        if (repositoryAttributeResultForTransfer.isError && !repositoryAttributeResultForTransfer.error.equals(RuntimeErrors.general.recordNotFound())) {
+                            throw repositoryAttributeResultForTransfer.error;
+                        }
+
+                        if (repositoryAttributeResultForTransfer.isSuccess) {
+                            repositoryAttributeDVOForTransfer = await this.expandLocalAttributeDTO(repositoryAttributeResultForTransfer.value);
+                        }
                     }
 
                     return {
@@ -827,11 +887,23 @@ export class DataViewExpander {
                 case "AttributeSuccessionAcceptResponseItem":
                     const attributeSuccessionResponseItem = responseItem as AttributeSuccessionAcceptResponseItemJSON;
 
-                    const localPredecessorResult = await this.consumption.attributes.getAttribute({ id: attributeSuccessionResponseItem.predecessorId });
-                    const localPredecessorDVO = await this.expandLocalAttributeDTO(localPredecessorResult.value);
-
                     const localSuccessorResult = await this.consumption.attributes.getAttribute({ id: attributeSuccessionResponseItem.successorId });
+                    if (localSuccessorResult.isError) {
+                        if (!localSuccessorResult.error.equals(RuntimeErrors.general.recordNotFound())) throw localSuccessorResult.error;
+
+                        return {
+                            type: "AttributeAlreadyDeletedAcceptResponseItemDVO",
+                            id: attributeSuccessionResponseItem.successorId,
+                            name: name
+                        } as AttributeAlreadyDeletedAcceptResponseItemDVO;
+                    }
+
                     const localSuccessorDVO = await this.expandLocalAttributeDTO(localSuccessorResult.value);
+
+                    const localPredecessorResult = await this.consumption.attributes.getAttribute({ id: attributeSuccessionResponseItem.predecessorId });
+                    if (localPredecessorResult.isError && !localPredecessorResult.error.equals(RuntimeErrors.general.recordNotFound())) throw localPredecessorResult.error;
+
+                    const localPredecessorDVO = localPredecessorResult.isSuccess ? await this.expandLocalAttributeDTO(localPredecessorResult.value) : undefined;
 
                     return {
                         ...attributeSuccessionResponseItem,
@@ -846,8 +918,17 @@ export class DataViewExpander {
                     const attributeAlreadySharedResponseItem = responseItem as AttributeAlreadySharedAcceptResponseItemJSON;
 
                     const localAttributeResult = await this.consumption.attributes.getAttribute({ id: attributeAlreadySharedResponseItem.attributeId });
-                    const localAttributeDVO = await this.expandLocalAttributeDTO(localAttributeResult.value);
+                    if (localAttributeResult.isError) {
+                        if (!localAttributeResult.error.equals(RuntimeErrors.general.recordNotFound())) throw localAttributeResult.error;
 
+                        return {
+                            type: "AttributeAlreadyDeletedAcceptResponseItemDVO",
+                            id: attributeAlreadySharedResponseItem.attributeId,
+                            name: name
+                        } as AttributeAlreadyDeletedAcceptResponseItemDVO;
+                    }
+
+                    const localAttributeDVO = await this.expandLocalAttributeDTO(localAttributeResult.value);
                     return {
                         ...attributeAlreadySharedResponseItem,
                         type: "AttributeAlreadySharedAcceptResponseItemDVO",
