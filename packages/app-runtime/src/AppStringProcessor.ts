@@ -223,7 +223,7 @@ export class AppStringProcessor {
     }
 
     private async selectAccount(forIdentityTruncated?: string): Promise<UserfriendlyResult<LocalAccountDTO | undefined>> {
-        const accounts = await this.runtime.accountServices.getAccounts();
+        const accounts = await this.runtime.accountServices.getAccountsNotInDeletion();
 
         const title = "i18n://uibridge.accountSelection.title";
         const description = "i18n://uibridge.accountSelection.description";
