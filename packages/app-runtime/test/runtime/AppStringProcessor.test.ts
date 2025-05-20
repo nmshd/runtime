@@ -45,7 +45,7 @@ describe("AppStringProcessor", function () {
 
     test("should process an invalid URL", async function () {
         const result = await runtime1.stringProcessor.processURL("enmeshed://qr#", runtime1Session.account);
-        expect(result.isError).toBeDefined();
+        expect(result.isError).toBe(true);
 
         expect(result.error.code).toBe("error.appruntime.appStringProcessor.wrongURL");
 
@@ -55,7 +55,7 @@ describe("AppStringProcessor", function () {
 
     test("should process a valid URL with invalid reference", async function () {
         const result = await runtime1.stringProcessor.processURL("nmshd://qr#", runtime1Session.account);
-        expect(result.isError).toBeDefined();
+        expect(result.isError).toBe(true);
 
         expect(result.error.code).toBe("error.appruntime.appStringProcessor.invalidReference");
 
@@ -252,7 +252,7 @@ describe("AppStringProcessor", function () {
 
             mockUiBridge.setPasswordToReturnForAttempt(1, "password");
 
-            const result = await runtime2.stringProcessor.processReference(tokenResult.value.truncatedReference);
+            const result = await runtime2.stringProcessor.processDeviceOnboardingReference(tokenResult.value.truncatedReference);
             expect(result).toBeSuccessful();
             expect(result.value).toBeUndefined();
 
@@ -267,11 +267,111 @@ describe("AppStringProcessor", function () {
 
             mockUiBridge.setPasswordToReturnForAttempt(1, "password");
 
-            const result = await runtime2.stringProcessor.processReference(tokenResult.value.truncatedReference);
+            const result = await runtime2.stringProcessor.processDeviceOnboardingReference(tokenResult.value.truncatedReference);
             expect(result).toBeSuccessful();
             expect(result.value).toBeUndefined();
 
             expect(mockUiBridge).showDeviceOnboardingCalled((deviceOnboardingInfo: DeviceOnboardingInfoDTO) => deviceOnboardingInfo.isBackupDevice);
+        });
+
+        describe("invalid references", function () {
+            test("device onboarding with a trunacted relationship template reference", async function () {
+                const templateResult = await runtime1Session.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
+                    content: templateContent,
+                    expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(),
+                    passwordProtection: { password: "password" }
+                });
+
+                const result = await runtime2.stringProcessor.processDeviceOnboardingReference(templateResult.value.reference.truncated);
+                expect(result.isError).toBe(true);
+
+                expect(result.error.code).toBe("error.appruntime.appStringProcessor.noDeviceOnboardingCode");
+
+                expect(mockUiBridge).enterPasswordNotCalled();
+                expect(mockUiBridge).requestAccountSelectionNotCalled();
+            });
+
+            test("device onboarding with a url relationship template reference", async function () {
+                const templateResult = await runtime1Session.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
+                    content: templateContent,
+                    expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(),
+                    passwordProtection: { password: "password" }
+                });
+
+                const result = await runtime2.stringProcessor.processDeviceOnboardingReference(templateResult.value.reference.url);
+                expect(result.isError).toBe(true);
+
+                expect(result.error.code).toBe("error.appruntime.appStringProcessor.noDeviceOnboardingCode");
+
+                expect(mockUiBridge).enterPasswordNotCalled();
+                expect(mockUiBridge).requestAccountSelectionNotCalled();
+            });
+
+            test("device onboarding with a trunacted relationship template token reference", async function () {
+                const templateResult = await runtime1Session.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
+                    content: templateContent,
+                    expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(),
+                    passwordProtection: { password: "password" }
+                });
+
+                mockUiBridge.setPasswordToReturnForAttempt(1, "password");
+
+                const tokenResult = await runtime1Session.transportServices.relationshipTemplates.createTokenForOwnRelationshipTemplate({
+                    templateId: templateResult.value.id,
+                    ephemeral: true,
+                    passwordProtection: { password: "password" }
+                });
+
+                const result = await runtime2.stringProcessor.processDeviceOnboardingReference(tokenResult.value.reference.truncated);
+                expect(result.isError).toBe(true);
+
+                expect(result.error.code).toBe("error.appruntime.appStringProcessor.noDeviceOnboardingCode");
+
+                expect(mockUiBridge).enterPasswordCalled("pw");
+                expect(mockUiBridge).requestAccountSelectionNotCalled();
+            });
+
+            test("device onboarding with a url relationship template token reference", async function () {
+                const templateResult = await runtime1Session.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
+                    content: templateContent,
+                    expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(),
+                    passwordProtection: { password: "password" }
+                });
+
+                mockUiBridge.setPasswordToReturnForAttempt(1, "password");
+
+                const tokenResult = await runtime1Session.transportServices.relationshipTemplates.createTokenForOwnRelationshipTemplate({
+                    templateId: templateResult.value.id,
+                    ephemeral: true,
+                    passwordProtection: { password: "password" }
+                });
+
+                const result = await runtime2.stringProcessor.processDeviceOnboardingReference(tokenResult.value.reference.url);
+                expect(result.isError).toBe(true);
+
+                expect(result.error.code).toBe("error.appruntime.appStringProcessor.noDeviceOnboardingCode");
+
+                expect(mockUiBridge).enterPasswordCalled("pw");
+                expect(mockUiBridge).requestAccountSelectionNotCalled();
+            });
+
+            test("device onboarding with a password protected Token", async function () {
+                const deviceResult = await runtime1Session.transportServices.devices.createDevice({});
+                const tokenResult = await runtime1Session.transportServices.devices.createDeviceOnboardingToken({
+                    id: deviceResult.value.id,
+                    passwordProtection: { password: "password" }
+                });
+
+                mockUiBridge.setPasswordToReturnForAttempt(1, "password");
+
+                const result = await runtime2.stringProcessor.processURL(tokenResult.value.reference.url);
+                expect(result).toBeAnError(
+                    "The Token contains a device onboarding info, but this is not allowed in this context.",
+                    "error.appruntime.appStringProcessor.deviceOnboardingNotAllowed"
+                );
+
+                expect(mockUiBridge).showDeviceOnboardingNotCalled();
+            });
         });
     });
 

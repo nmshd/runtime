@@ -72,8 +72,6 @@ export class AppStringProcessor {
             return UserfriendlyResult.fail(error);
         }
 
-        const uiBridge = await this.runtime.uiBridge();
-
         const tokenResultHolder = reference.passwordProtection
             ? await this._fetchPasswordProtectedItemWithRetry(
                   async (password) => await this.runtime.anonymousServices.tokens.loadPeerToken({ reference: reference.truncate(), password }),
@@ -96,10 +94,7 @@ export class AppStringProcessor {
             return UserfriendlyResult.fail(error);
         }
 
-        if (tokenContent instanceof TokenContentDeviceSharedSecret) {
-            await uiBridge.showDeviceOnboarding(DeviceMapper.toDeviceOnboardingInfoDTO(tokenContent.sharedSecret));
-            return UserfriendlyResult.ok(undefined);
-        }
+        if (tokenContent instanceof TokenContentDeviceSharedSecret) return UserfriendlyResult.fail(AppRuntimeErrors.appStringProcessor.deviceOnboardingNotAllowed());
 
         const accountSelectionResult = await this.selectAccount(reference.forIdentityTruncated);
         if (accountSelectionResult.isError) {
@@ -150,6 +145,36 @@ export class AppStringProcessor {
                 return UserfriendlyResult.fail(AppRuntimeErrors.appStringProcessor.deviceOnboardingNotAllowed());
         }
 
+        return UserfriendlyResult.ok(undefined);
+    }
+
+    public async processDeviceOnboardingReference(url: string): Promise<UserfriendlyResult<void>> {
+        url = url.trim();
+
+        const reference = Reference.from(url);
+        if (!reference.id.toString().startsWith("TOK")) return UserfriendlyResult.fail(AppRuntimeErrors.appStringProcessor.noDeviceOnboardingCode());
+
+        const tokenResultHolder = reference.passwordProtection
+            ? await this._fetchPasswordProtectedItemWithRetry(
+                  async (password) => await this.runtime.anonymousServices.tokens.loadPeerToken({ reference: reference.truncate(), password }),
+                  reference.passwordProtection
+              )
+            : { result: await this.runtime.anonymousServices.tokens.loadPeerToken({ reference: reference.truncate() }) };
+
+        if (tokenResultHolder.result.isError && tokenResultHolder.result.error.equals(AppRuntimeErrors.appStringProcessor.passwordNotProvided())) {
+            return UserfriendlyResult.ok(undefined);
+        }
+
+        if (tokenResultHolder.result.isError) {
+            return UserfriendlyResult.fail(UserfriendlyApplicationError.fromError(tokenResultHolder.result.error));
+        }
+
+        const tokenDTO = tokenResultHolder.result.value;
+        const tokenContent = this.parseTokenContent(tokenDTO.content);
+        if (!(tokenContent instanceof TokenContentDeviceSharedSecret)) return UserfriendlyResult.fail(AppRuntimeErrors.appStringProcessor.noDeviceOnboardingCode());
+
+        const uiBridge = await this.runtime.uiBridge();
+        await uiBridge.showDeviceOnboarding(DeviceMapper.toDeviceOnboardingInfoDTO(tokenContent.sharedSecret));
         return UserfriendlyResult.ok(undefined);
     }
 
