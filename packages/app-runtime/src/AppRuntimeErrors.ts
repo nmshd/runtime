@@ -34,6 +34,13 @@ class AppStringProcessor {
             "The maximum number of attempts to enter the password was reached."
         );
     }
+
+    public noDeviceOnboardingCode(): UserfriendlyApplicationError {
+        return new UserfriendlyApplicationError(
+            "error.appruntime.appStringProcessor.noDeviceOnboardingCode",
+            "The scanned code does not contain a device onboarding info, but this scanner is only able to process device onboarding codes."
+        );
+    }
 }
 
 class General {
