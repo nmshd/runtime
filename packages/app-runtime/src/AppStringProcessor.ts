@@ -158,6 +158,7 @@ export class AppStringProcessor {
         } catch (_) {
             return UserfriendlyResult.fail(AppRuntimeErrors.appStringProcessor.invalidReference());
         }
+
         if (!reference.id.toString().startsWith("TOK")) return UserfriendlyResult.fail(AppRuntimeErrors.appStringProcessor.noDeviceOnboardingCode());
 
         const tokenResultHolder = reference.passwordProtection
