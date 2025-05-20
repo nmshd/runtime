@@ -38,7 +38,8 @@ export interface AcceptResponseItemDVO extends ResponseItemDVO {
         | "RegisterAttributeListenerAcceptResponseItemDVO"
         | "TransferFileOwnershipAcceptResponseItemDVO"
         | "AttributeSuccessionAcceptResponseItemDVO"
-        | "AttributeAlreadySharedAcceptResponseItemDVO";
+        | "AttributeAlreadySharedAcceptResponseItemDVO"
+        | "AttributeAlreadyDeletedAcceptResponseItemDVO";
     result: ResponseItemResult.Accepted;
 }
 
@@ -85,7 +86,7 @@ export interface FormFieldAcceptResponseItemDVO extends AcceptResponseItemDVO {
 export interface RegisterAttributeListenerAcceptResponseItemDVO extends AcceptResponseItemDVO {
     type: "RegisterAttributeListenerAcceptResponseItemDVO";
     listenerId: string;
-    listener: LocalAttributeListenerDVO;
+    listener?: LocalAttributeListenerDVO;
 }
 
 export interface TransferFileOwnershipAcceptResponseItemDVO extends AcceptResponseItemDVO {
@@ -99,7 +100,7 @@ export interface AttributeSuccessionAcceptResponseItemDVO extends AcceptResponse
     type: "AttributeSuccessionAcceptResponseItemDVO";
     predecessorId: string;
     successorId: string;
-    predecessor: LocalAttributeDVO;
+    predecessor?: LocalAttributeDVO;
     successor: LocalAttributeDVO;
 }
 
@@ -107,4 +108,8 @@ export interface AttributeAlreadySharedAcceptResponseItemDVO extends AcceptRespo
     type: "AttributeAlreadySharedAcceptResponseItemDVO";
     attributeId: string;
     attribute: LocalAttributeDVO;
+}
+
+export interface AttributeAlreadyDeletedAcceptResponseItemDVO extends AcceptResponseItemDVO {
+    type: "AttributeAlreadyDeletedAcceptResponseItemDVO";
 }
