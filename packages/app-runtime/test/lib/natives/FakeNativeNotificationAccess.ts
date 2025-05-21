@@ -5,6 +5,11 @@ import { INativeNotificationAccess, INativeNotificationScheduleOptions } from ".
 export class FakeNativeNotificationAccess implements INativeNotificationAccess {
     public constructor(private readonly logger: ILogger) {}
 
+    public getPushToken(): Promise<Result<string>> {
+        this.logger.info("NativeNotificationAccess.getPushToken()");
+        return Promise.resolve(Result.ok("fake-push-token"));
+    }
+
     public schedule(title: string, body: string, options?: INativeNotificationScheduleOptions): Promise<Result<number>> {
         this.logger.info(`NativeNotificationAccess.schedule(${title},${body},${options})`);
 

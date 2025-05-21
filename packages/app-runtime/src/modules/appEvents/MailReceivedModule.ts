@@ -1,10 +1,7 @@
-import { AppRuntimeError } from "../../AppRuntimeError";
 import { MailReceivedEvent } from "../../events";
 import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "../AppRuntimeModule";
 
 export interface MailReceivedModuleConfig extends AppRuntimeModuleConfiguration {}
-
-export class MailReceivedModuleError extends AppRuntimeError {}
 
 export class MailReceivedModule extends AppRuntimeModule<MailReceivedModuleConfig> {
     public async init(): Promise<void> {

@@ -1,5 +1,5 @@
+import { ApplicationError } from "@js-soft/ts-utils";
 import { RelationshipTemplateProcessedEvent, RelationshipTemplateProcessedResult } from "@nmshd/runtime";
-import { UserfriendlyApplicationError } from "../../UserfriendlyApplicationError";
 import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "../AppRuntimeModule";
 
 export interface RelationshipTemplateProcessedModuleConfig extends AppRuntimeModuleConfiguration {}
@@ -52,17 +52,14 @@ export class RelationshipTemplateProcessedModule extends AppRuntimeModule<Relati
 
             case RelationshipTemplateProcessedResult.NoRequest: {
                 await uiBridge.showError(
-                    new UserfriendlyApplicationError(
-                        "error.relationshipTemplateProcessedModule.relationshipTemplateNotSupported",
-                        "The relationship template content is not supported."
-                    )
+                    new ApplicationError("error.relationshipTemplateProcessedModule.relationshipTemplateNotSupported", "The relationship template content is not supported.")
                 );
                 break;
             }
 
             case RelationshipTemplateProcessedResult.Error: {
                 await uiBridge.showError(
-                    new UserfriendlyApplicationError(
+                    new ApplicationError(
                         "error.relationshipTemplateProcessedModule.relationshipTemplateProcessingError",
                         "An error occurred while processing the relationship template."
                     )
@@ -72,7 +69,7 @@ export class RelationshipTemplateProcessedModule extends AppRuntimeModule<Relati
 
             case RelationshipTemplateProcessedResult.RequestExpired: {
                 await uiBridge.showError(
-                    new UserfriendlyApplicationError(
+                    new ApplicationError(
                         "error.relationshipTemplateProcessedModule.requestExpired",
                         "No incoming Request could be created because the Request in the RelationshipTemplate is already expired."
                     )

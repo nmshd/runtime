@@ -14,6 +14,7 @@ export interface INativeNotificationScheduleOptions {
 }
 
 export interface INativeNotificationAccess {
+    getPushToken(): Promise<Result<string>>;
     schedule(title: string, body: string, options?: INativeNotificationScheduleOptions): Promise<Result<number>>;
     update(id: number, title: string, body: string, options?: INativeNotificationScheduleOptions): Promise<Result<void>>;
     clear(id: number): Promise<Result<void>>;
