@@ -1,6 +1,6 @@
-import { DeviceMapper } from "@nmshd/runtime";
+import { DeviceMapper, RuntimeServices } from "@nmshd/runtime";
 import { DeviceSharedSecret } from "@nmshd/transport";
-import { AppRuntime, AppRuntimeServices } from "../../src";
+import { AppRuntime } from "../../src";
 import { TestUtil } from "../lib";
 
 describe("Onboarding", function () {
@@ -8,7 +8,7 @@ describe("Onboarding", function () {
     let runtime2: AppRuntime;
     let runtime3: AppRuntime;
 
-    let services1: AppRuntimeServices;
+    let services1: RuntimeServices;
 
     beforeAll(async function () {
         runtime = await TestUtil.createRuntime();

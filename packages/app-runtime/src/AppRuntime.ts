@@ -3,14 +3,12 @@ import { LokiJsConnection } from "@js-soft/docdb-access-loki";
 import { EventBus, Result } from "@js-soft/ts-utils";
 import { ConsumptionController } from "@nmshd/consumption";
 import { CoreId, ICoreAddress } from "@nmshd/core-types";
-import { ModuleConfiguration, Runtime, RuntimeHealth } from "@nmshd/runtime";
-import { AccountController } from "@nmshd/transport";
+import { ModuleConfiguration, Runtime, RuntimeHealth, RuntimeServices } from "@nmshd/runtime";
 import { AppConfig, AppConfigOverwrite, createAppConfig } from "./AppConfig";
 import { AppRuntimeErrors } from "./AppRuntimeErrors";
-import { AppRuntimeServices } from "./AppRuntimeServices";
 import { AppStringProcessor } from "./AppStringProcessor";
 import { AccountSelectedEvent } from "./events";
-import { AppServices, IUIBridge } from "./extensibility";
+import { IUIBridge } from "./extensibility";
 import {
     AppRuntimeModuleConfiguration,
     AppSyncModule,
@@ -25,9 +23,8 @@ import {
     SSEModule
 } from "./modules";
 import { AccountServices, LocalAccountMapper, LocalAccountSession, MultiAccountController } from "./multiAccount";
-import { INativeBootstrapper, INativeEnvironment, INativeTranslationProvider } from "./natives";
+import { INativeBootstrapper, INativeEnvironment } from "./natives";
 import { SessionStorage } from "./SessionStorage";
-import { UserfriendlyResult } from "./UserfriendlyResult";
 
 export class AppRuntime extends Runtime<AppConfig> {
     public constructor(
@@ -63,13 +60,13 @@ export class AppRuntime extends Runtime<AppConfig> {
         }
     }
 
-    public registerUIBridge(uiBridge: IUIBridge): UserfriendlyResult<void> {
-        if (this._uiBridge) return UserfriendlyResult.fail(AppRuntimeErrors.startup.uiBridgeAlreadyRegistered());
+    public registerUIBridge(uiBridge: IUIBridge): Result<void> {
+        if (this._uiBridge) return Result.fail(AppRuntimeErrors.startup.uiBridgeAlreadyRegistered());
 
         this._uiBridge = uiBridge;
         this._uiBridgeResolver?.resolve(uiBridge);
 
-        return UserfriendlyResult.ok(undefined);
+        return Result.ok(undefined);
     }
 
     protected override readonly databaseConnection: LokiJsConnection;
@@ -98,21 +95,12 @@ export class AppRuntime extends Runtime<AppConfig> {
         return this._stringProcessor;
     }
 
-    protected override async login(accountController: AccountController, consumptionController: ConsumptionController): Promise<AppRuntimeServices> {
-        const services = await super.login(accountController, consumptionController);
-
-        const appServices = new AppServices(this, services.transportServices, services.consumptionServices, services.dataViewExpander);
-
-        return { ...services, appServices };
-    }
-
-    public async getServices(accountReference: string | ICoreAddress): Promise<AppRuntimeServices> {
+    public async getServices(accountReference: string | ICoreAddress): Promise<RuntimeServices> {
         const session = await this.getOrCreateSession(accountReference.toString());
 
         return {
             transportServices: session.transportServices,
             consumptionServices: session.consumptionServices,
-            appServices: session.appServices,
             dataViewExpander: session.expander
         };
     }
@@ -164,7 +152,9 @@ export class AppRuntime extends Runtime<AppConfig> {
     private async _createSession(accountId: string) {
         const [localAccount, accountController] = await this._multiAccountController.selectAccount(CoreId.from(accountId));
         if (!localAccount.address) {
-            throw AppRuntimeErrors.general.addressUnavailable().logWith(this.logger);
+            const error = AppRuntimeErrors.general.addressUnavailable();
+            this.logger.error(error);
+            throw error;
         }
 
         const consumptionController = await new ConsumptionController(this.transport, accountController, { setDefaultRepositoryAttributes: true }).init();
@@ -178,7 +168,6 @@ export class AppRuntime extends Runtime<AppConfig> {
             consumptionServices: services.consumptionServices,
             transportServices: services.transportServices,
             expander: services.dataViewExpander,
-            appServices: services.appServices,
             accountController,
             consumptionController
         };
@@ -322,17 +311,5 @@ export class AppRuntime extends Runtime<AppConfig> {
             const syncResult = await session.transportServices.account.syncDatawallet();
             if (syncResult.isError) this.logger.error(syncResult.error);
         }
-    }
-
-    private translationProvider: INativeTranslationProvider = {
-        translate: (key: string) => Promise.resolve(Result.ok(key))
-    };
-
-    public registerTranslationProvider(provider: INativeTranslationProvider): void {
-        this.translationProvider = provider;
-    }
-
-    public async translate(key: string, ...values: any[]): Promise<Result<string>> {
-        return await this.translationProvider.translate(key, ...values);
     }
 }
