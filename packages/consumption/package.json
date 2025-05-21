@@ -74,7 +74,7 @@
         "@js-soft/docdb-access-mongo": "1.2.0",
         "@js-soft/node-logger": "1.2.0",
         "@nmshd/crypto": "2.1.1",
-        "@types/lodash": "^4.17.16",
+        "@types/lodash": "^4.17.17",
         "ts-mockito": "^2.6.1"
     },
     "publishConfig": {
