@@ -477,6 +477,16 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         if (statusUpdated) await this.update(request);
         return request;
     }
+
+    public async setWasDecidedAutomatically(request: LocalRequest): Promise<LocalRequest> {
+        if (request.status !== LocalRequestStatus.Decided) {
+            throw ConsumptionCoreErrors.requests.cannotSetWasAutomaticallyDecided(request.id.toString(), request.status);
+        }
+
+        request.wasDecidedAutomatically = true;
+        await this.update(request);
+        return request;
+    }
 }
 
 interface InfoFromSource {

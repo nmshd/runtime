@@ -18,3 +18,4 @@ export * from "./RejectIncomingRequest";
 export * from "./RequestMapper";
 export * from "./RequireManualDecisionOfIncomingRequest";
 export * from "./SentOutgoingRequest";
+export * from "./SetIncomingRequestWasDecidedAutomatically";
