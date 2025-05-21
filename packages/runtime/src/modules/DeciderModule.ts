@@ -139,24 +139,32 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         const request = event.data.request;
 
         if (!containsItem(decideRequestItemParameters, isAcceptResponseConfig)) {
-            const canRejectResult = await services.consumptionServices.incomingRequests.canReject({ requestId: request.id, items: decideRequestItemParameters.items });
-            if (canRejectResult.isError) {
-                this.logger.error(`Can not reject Request ${request.id}`, canRejectResult.value.code, canRejectResult.error);
-                return { wasDecided: false };
-            } else if (!canRejectResult.value.isSuccess) {
-                this.logger.warn(`Can not reject Request ${request.id}`, canRejectResult.value.code, canRejectResult.value.message);
-                return { wasDecided: false };
-            }
-
-            const rejectResult = await services.consumptionServices.incomingRequests.reject({ requestId: request.id, items: decideRequestItemParameters.items });
-            if (rejectResult.isError) {
-                this.logger.error(`An error occured trying to reject Request ${request.id}`, rejectResult.error);
-                return { wasDecided: false };
-            }
-
-            return { wasDecided: true };
+            return await this.rejectRequest(services, request, decideRequestItemParameters);
         }
 
+        return await this.acceptRequest(services, request, decideRequestItemParameters);
+    }
+
+    private async rejectRequest(services: RuntimeServices, request: LocalRequestDTO, decideRequestItemParameters: { items: any[] }): Promise<{ wasDecided: boolean }> {
+        const canRejectResult = await services.consumptionServices.incomingRequests.canReject({ requestId: request.id, items: decideRequestItemParameters.items });
+        if (canRejectResult.isError) {
+            this.logger.error(`Can not reject Request ${request.id}`, canRejectResult.value.code, canRejectResult.error);
+            return { wasDecided: false };
+        } else if (!canRejectResult.value.isSuccess) {
+            this.logger.warn(`Can not reject Request ${request.id}`, canRejectResult.value.code, canRejectResult.value.message);
+            return { wasDecided: false };
+        }
+
+        const rejectResult = await services.consumptionServices.incomingRequests.reject({ requestId: request.id, items: decideRequestItemParameters.items });
+        if (rejectResult.isError) {
+            this.logger.error(`An error occured trying to reject Request ${request.id}`, rejectResult.error);
+            return { wasDecided: false };
+        }
+
+        return { wasDecided: true };
+    }
+
+    private async acceptRequest(services: RuntimeServices, request: LocalRequestDTO, decideRequestItemParameters: { items: any[] }): Promise<{ wasDecided: boolean }> {
         const canAcceptResult = await services.consumptionServices.incomingRequests.canAccept({ requestId: request.id, items: decideRequestItemParameters.items });
         if (canAcceptResult.isError) {
             this.logger.error(`Can not accept Request ${request.id}.`, canAcceptResult.error);
