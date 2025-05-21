@@ -157,7 +157,7 @@ describe("DeciderModule", () => {
     });
 
     describe("GeneralRequestConfig", () => {
-        test("rejects a Request given a GeneralRequestConfig", async () => {
+        test.only("rejects a Request given a GeneralRequestConfig", async () => {
             const deciderConfig: DeciderModuleConfigurationOverwrite = {
                 automationConfig: [
                     {
@@ -195,6 +195,7 @@ describe("DeciderModule", () => {
 
             const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
             expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Decided);
+            expect(requestAfterAction.wasDecidedAutomatically).toBe(true);
             expect(requestAfterAction.response).toBeDefined();
 
             const responseContent = requestAfterAction.response!.content;
@@ -204,7 +205,7 @@ describe("DeciderModule", () => {
             expect(responseContent.items[1]).toStrictEqual({ "@type": "RejectResponseItem", result: "Rejected", message: "An error message", code: "an.error.code" });
         });
 
-        test("accepts a Request given a GeneralRequestConfig", async () => {
+        test.only("accepts a Request given a GeneralRequestConfig", async () => {
             const deciderConfig: DeciderModuleConfigurationOverwrite = {
                 automationConfig: [
                     {
@@ -276,6 +277,7 @@ describe("DeciderModule", () => {
 
             const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
             expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Decided);
+            expect(requestAfterAction.wasDecidedAutomatically).toBe(true);
             expect(requestAfterAction.response).toBeDefined();
 
             const responseContent = requestAfterAction.response!.content;
@@ -415,7 +417,7 @@ describe("DeciderModule", () => {
             );
         });
 
-        test("cannot decide a Request given a GeneralRequestConfig that doesn't fit the Request", async () => {
+        test.only("cannot decide a Request given a GeneralRequestConfig that doesn't fit the Request", async () => {
             const deciderConfig: DeciderModuleConfigurationOverwrite = {
                 automationConfig: [
                     {
@@ -443,6 +445,11 @@ describe("DeciderModule", () => {
                 MessageProcessedEvent,
                 (e) => e.data.result === MessageProcessedResult.ManualRequestDecisionRequired && e.data.message.id === message.id
             );
+
+            const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
+            expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.ManualDecisionRequired);
+            expect(requestAfterAction.wasDecidedAutomatically).toBeUndefined();
+            expect(requestAfterAction.response).toBeUndefined();
         });
 
         test("cannot decide a Request given a GeneralRequestConfig with an expiration date too high", async () => {

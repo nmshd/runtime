@@ -126,6 +126,8 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
             decideRequestItemParameters = updatedRequestItemParameters;
             if (!containsItem(decideRequestItemParameters, (element) => element === undefined)) {
                 const decideRequestResult = await this.decideRequest(event, decideRequestItemParameters);
+                // TODO: maybe this can be moved to a lower level
+                if (decideRequestResult.wasDecided) await services.consumptionServices.incomingRequests.setWasDecidedAutomatically({ id: request.id });
                 return decideRequestResult;
             }
         }
@@ -139,6 +141,7 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         const request = event.data.request;
 
         if (!containsItem(decideRequestItemParameters, isAcceptResponseConfig)) {
+            // TODO: put into a separate function
             const canRejectResult = await services.consumptionServices.incomingRequests.canReject({ requestId: request.id, items: decideRequestItemParameters.items });
             if (canRejectResult.isError) {
                 this.logger.error(`Can not reject Request ${request.id}`, canRejectResult.value.code, canRejectResult.error);
