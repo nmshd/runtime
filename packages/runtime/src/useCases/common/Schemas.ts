@@ -63,8 +63,7 @@ export const CanCreateRepositoryAttributeRequest: any = {
                             "type": "array",
                             "items": {
                                 "type": "string"
-                            },
-                            "uniqueItems": true
+                            }
                         },
                         "validFrom": {
                             "$ref": "#/definitions/ISO8601DateTimeString"
@@ -1133,8 +1132,7 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "type": "array",
                     "items": {
                         "type": "string"
-                    },
-                    "uniqueItems": true
+                    }
                 }
             },
             "required": [
@@ -3751,8 +3749,7 @@ export const CompleteOutgoingRequestRequest: any = {
                     "type": "array",
                     "items": {
                         "type": "string"
-                    },
-                    "uniqueItems": true
+                    }
                 }
             },
             "required": [
@@ -6271,8 +6268,7 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                     "type": "array",
                     "items": {
                         "type": "string"
-                    },
-                    "uniqueItems": true
+                    }
                 }
             },
             "required": [
@@ -9427,8 +9423,7 @@ export const CreateOutgoingRequestRequest: any = {
                     "type": "array",
                     "items": {
                         "type": "string"
-                    },
-                    "uniqueItems": true
+                    }
                 }
             },
             "required": [
@@ -13071,8 +13066,7 @@ export const ReceivedIncomingRequestRequest: any = {
                     "type": "array",
                     "items": {
                         "type": "string"
-                    },
-                    "uniqueItems": true
+                    }
                 }
             },
             "required": [
@@ -16063,8 +16057,7 @@ export const CreateRepositoryAttributeRequest: any = {
                             "type": "array",
                             "items": {
                                 "type": "string"
-                            },
-                            "uniqueItems": true
+                            }
                         },
                         "validFrom": {
                             "$ref": "#/definitions/ISO8601DateTimeString"
@@ -18435,8 +18428,7 @@ export const SucceedRepositoryAttributeRequest: any = {
                             "type": "array",
                             "items": {
                                 "type": "string"
-                            },
-                            "uniqueItems": true
+                            }
                         },
                         "validFrom": {
                             "$ref": "#/definitions/ISO8601DateTimeString"
