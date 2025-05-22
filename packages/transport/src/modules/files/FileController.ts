@@ -50,6 +50,7 @@ export class FileController extends TransportController {
         await this.files.delete(file);
     }
 
+    // TODO: delete this?
     public async fetchCaches(ids: CoreId[]): Promise<{ id: CoreId; cache: CachedFile }[]> {
         if (ids.length === 0) return [];
 
@@ -234,7 +235,8 @@ export class FileController extends TransportController {
             mimetype: input.mimetype,
             owner: CoreAddress.from(response.owner),
             ownerSignature: signature,
-            plaintextHash: plaintextHash
+            plaintextHash: plaintextHash,
+            ownershipToken: response.ownershipToken
         });
 
         const file = File.from({

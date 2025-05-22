@@ -26,6 +26,7 @@ export interface ICachedFile extends ISerializable {
     deletedAt?: ICoreDate;
     deletedBy?: ICoreAddress;
     deletedByDevice?: ICoreId;
+    ownershipToken?: string;
 }
 
 @type("CachedFile")
@@ -105,6 +106,10 @@ export class CachedFile extends Serializable implements ICachedFile {
     @validate({ nullable: true })
     @serialize()
     public deletedByDevice?: CoreId;
+
+    @validate({ nullable: true })
+    @serialize()
+    public ownershipToken?: string;
 
     public static from(value: ICachedFile): CachedFile {
         return this.fromAny(value);
