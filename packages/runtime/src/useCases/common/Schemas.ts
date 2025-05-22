@@ -15320,6 +15320,29 @@ export const SentOutgoingRequestRequest: any = {
     }
 }
 
+export const SetIncomingRequestWasAutomaticallyDecidedRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/SetIncomingRequestWasAutomaticallyDecidedRequest",
+    "definitions": {
+        "SetIncomingRequestWasAutomaticallyDecidedRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/RequestIdString"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "additionalProperties": false
+        },
+        "RequestIdString": {
+            "type": "string",
+            "pattern": "REQ[A-Za-z0-9]{17}"
+        }
+    }
+}
+
 export const CreateAndShareRelationshipAttributeRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/CreateAndShareRelationshipAttributeRequest",
