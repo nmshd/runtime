@@ -24,4 +24,8 @@ export class FileClient extends RESTClientAuthenticate {
     public async downloadFile(id: string): Promise<ClientResult<Buffer | ArrayBuffer>> {
         return await this.download(`/api/v1/Files/${id}`);
     }
+
+    public async validateOwnershipToken(id: string, ownershipToken: string): Promise<ClientResult<BackbonePostFilesResponse>> {
+        return await this.post<BackbonePostFilesResponse>(`/api/v1/Files/${id}`, ownershipToken);
+    }
 }
