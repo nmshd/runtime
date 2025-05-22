@@ -8,9 +8,6 @@ export interface ValueHintsJSON extends ContentJSON {
     min?: number;
     max?: number;
     pattern?: string;
-    /**
-     * @uniqueItems true
-     */
     values?: ValueHintsValueJSON[];
     defaultValue?: string | number | boolean;
     propertyHints?: Record<string, ValueHintsJSON>;

@@ -4,9 +4,6 @@ import { FormFieldSettings, FormFieldSettingsJSON, IFormFieldSettings } from "./
 
 export interface SelectionFormFieldSettingsJSON extends FormFieldSettingsJSON {
     "@type": "SelectionFormFieldSettings";
-    /**
-     * @uniqueItems true
-     */
     options: string[];
     allowMultipleSelection?: true;
 }

@@ -6,9 +6,6 @@ import { IdentityAttribute } from "./IdentityAttribute";
 
 export interface IQLQueryCreationHintsJSON {
     valueType: AttributeValues.Identity.TypeName;
-    /**
-     * @uniqueItems true
-     */
     tags?: string[];
 }
 
