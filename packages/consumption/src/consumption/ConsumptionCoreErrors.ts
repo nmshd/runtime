@@ -357,7 +357,7 @@ class Requests {
     public cannotSetWasAutomaticallyDecided(id: string, status: string) {
         return new CoreError(
             "error.consumption.requests.cannotSetWasAutomaticallyDecided",
-            `The incoming Request '${id}' has status '${status}', but it must have status 'Decided'.`
+            `The incoming Request '${id}' has status '${status}', but it must have status 'Decided' to set wasAutomaticallyDecided.`
         );
     }
 
