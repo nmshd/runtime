@@ -195,7 +195,7 @@ describe("DeciderModule", () => {
 
             const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
             expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Decided);
-            expect(requestAfterAction.wasDecidedAutomatically).toBe(true);
+            expect(requestAfterAction.wasAutomaticallyDecided).toBe(true);
             expect(requestAfterAction.response).toBeDefined();
 
             const responseContent = requestAfterAction.response!.content;
@@ -277,7 +277,7 @@ describe("DeciderModule", () => {
 
             const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
             expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Decided);
-            expect(requestAfterAction.wasDecidedAutomatically).toBe(true);
+            expect(requestAfterAction.wasAutomaticallyDecided).toBe(true);
             expect(requestAfterAction.response).toBeDefined();
 
             const responseContent = requestAfterAction.response!.content;
@@ -448,7 +448,7 @@ describe("DeciderModule", () => {
 
             const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
             expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.ManualDecisionRequired);
-            expect(requestAfterAction.wasDecidedAutomatically).toBeUndefined();
+            expect(requestAfterAction.wasAutomaticallyDecided).toBeUndefined();
             expect(requestAfterAction.response).toBeUndefined();
         });
 

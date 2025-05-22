@@ -478,12 +478,12 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         return request;
     }
 
-    public async setWasDecidedAutomatically(request: LocalRequest): Promise<LocalRequest> {
+    public async setWasAutomaticallyDecided(request: LocalRequest): Promise<LocalRequest> {
         if (request.status !== LocalRequestStatus.Decided) {
             throw ConsumptionCoreErrors.requests.cannotSetWasAutomaticallyDecided(request.id.toString(), request.status);
         }
 
-        request.wasDecidedAutomatically = true;
+        request.wasAutomaticallyDecided = true;
         await this.update(request);
         return request;
     }

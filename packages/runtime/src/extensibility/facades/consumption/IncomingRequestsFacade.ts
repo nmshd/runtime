@@ -22,8 +22,8 @@ import {
     RejectIncomingRequestUseCase,
     RequireManualDecisionOfIncomingRequestRequest,
     RequireManualDecisionOfIncomingRequestUseCase,
-    SetIncomingRequestWasDecidedAutomaticallyRequest,
-    SetIncomingRequestWasDecidedAutomaticallyUseCase
+    SetIncomingRequestWasAutomaticallyDecidedRequest,
+    SetIncomingRequestWasAutomaticallyDecidedUseCase
 } from "../../../useCases";
 
 export class IncomingRequestsFacade {
@@ -39,7 +39,7 @@ export class IncomingRequestsFacade {
         @Inject private readonly getRequestUseCase: GetIncomingRequestUseCase,
         @Inject private readonly getRequestsUseCase: GetIncomingRequestsUseCase,
         @Inject private readonly deleteUseCase: DeleteIncomingRequestUseCase,
-        @Inject private readonly setWasDecidedAutomaticallyUseCase: SetIncomingRequestWasDecidedAutomaticallyUseCase
+        @Inject private readonly setWasAutomaticallyDecidedUseCase: SetIncomingRequestWasAutomaticallyDecidedUseCase
     ) {}
 
     public async received(request: ReceivedIncomingRequestRequest): Promise<Result<LocalRequestDTO>> {
@@ -86,7 +86,7 @@ export class IncomingRequestsFacade {
         return await this.deleteUseCase.execute(request);
     }
 
-    public async setWasDecidedAutomatically(request: SetIncomingRequestWasDecidedAutomaticallyRequest): Promise<Result<LocalRequestDTO>> {
-        return await this.setWasDecidedAutomaticallyUseCase.execute(request);
+    public async setWasAutomaticallyDecided(request: SetIncomingRequestWasAutomaticallyDecidedRequest): Promise<Result<LocalRequestDTO>> {
+        return await this.setWasAutomaticallyDecidedUseCase.execute(request);
     }
 }

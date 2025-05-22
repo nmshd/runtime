@@ -164,7 +164,7 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
             return { wasDecided: false };
         }
 
-        await services.consumptionServices.incomingRequests.setWasDecidedAutomatically({ id: request.id });
+        await services.consumptionServices.incomingRequests.setWasAutomaticallyDecided({ id: request.id });
         return { wasDecided: true };
     }
 
@@ -184,7 +184,7 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
             return { wasDecided: false };
         }
 
-        await services.consumptionServices.incomingRequests.setWasDecidedAutomatically({ id: request.id });
+        await services.consumptionServices.incomingRequests.setWasAutomaticallyDecided({ id: request.id });
         return { wasDecided: true };
     }
 

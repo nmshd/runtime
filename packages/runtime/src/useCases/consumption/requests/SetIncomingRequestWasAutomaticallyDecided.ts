@@ -7,11 +7,11 @@ import { LocalRequestDTO } from "../../../types";
 import { RequestIdString, RuntimeErrors, UseCase } from "../../common";
 import { RequestMapper } from "./RequestMapper";
 
-export interface SetIncomingRequestWasDecidedAutomaticallyRequest {
+export interface SetIncomingRequestWasAutomaticallyDecidedRequest {
     id: RequestIdString;
 }
 
-export class SetIncomingRequestWasDecidedAutomaticallyUseCase extends UseCase<SetIncomingRequestWasDecidedAutomaticallyRequest, LocalRequestDTO> {
+export class SetIncomingRequestWasAutomaticallyDecidedUseCase extends UseCase<SetIncomingRequestWasAutomaticallyDecidedRequest, LocalRequestDTO> {
     public constructor(
         @Inject private readonly incomingRequestsController: IncomingRequestsController,
         @Inject private readonly accountController: AccountController
@@ -19,14 +19,14 @@ export class SetIncomingRequestWasDecidedAutomaticallyUseCase extends UseCase<Se
         super();
     }
 
-    protected async executeInternal(request: SetIncomingRequestWasDecidedAutomaticallyRequest): Promise<Result<LocalRequestDTO, ApplicationError>> {
+    protected async executeInternal(request: SetIncomingRequestWasAutomaticallyDecidedRequest): Promise<Result<LocalRequestDTO, ApplicationError>> {
         const localRequest = await this.incomingRequestsController.getIncomingRequest(CoreId.from(request.id));
 
         if (!localRequest) {
             return Result.fail(RuntimeErrors.general.recordNotFound(LocalRequest));
         }
 
-        const updatedLocalRequest = await this.incomingRequestsController.setWasDecidedAutomatically(localRequest);
+        const updatedLocalRequest = await this.incomingRequestsController.setWasAutomaticallyDecided(localRequest);
 
         await this.accountController.syncDatawallet();
 
