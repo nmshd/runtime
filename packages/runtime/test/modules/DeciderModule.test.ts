@@ -157,7 +157,7 @@ describe("DeciderModule", () => {
     });
 
     describe("GeneralRequestConfig", () => {
-        test.only("rejects a Request given a GeneralRequestConfig", async () => {
+        test("rejects a Request given a GeneralRequestConfig", async () => {
             const deciderConfig: DeciderModuleConfigurationOverwrite = {
                 automationConfig: [
                     {
@@ -205,7 +205,7 @@ describe("DeciderModule", () => {
             expect(responseContent.items[1]).toStrictEqual({ "@type": "RejectResponseItem", result: "Rejected", message: "An error message", code: "an.error.code" });
         });
 
-        test.only("accepts a Request given a GeneralRequestConfig", async () => {
+        test("accepts a Request given a GeneralRequestConfig", async () => {
             const deciderConfig: DeciderModuleConfigurationOverwrite = {
                 automationConfig: [
                     {
@@ -417,7 +417,7 @@ describe("DeciderModule", () => {
             );
         });
 
-        test.only("cannot decide a Request given a GeneralRequestConfig that doesn't fit the Request", async () => {
+        test("cannot decide a Request given a GeneralRequestConfig that doesn't fit the Request", async () => {
             const deciderConfig: DeciderModuleConfigurationOverwrite = {
                 automationConfig: [
                     {

@@ -128,8 +128,6 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
             const allItemsAutomaticallyDecided = !containsItem(decideRequestItemParameters, (element) => element === undefined);
             if (allItemsAutomaticallyDecided) {
                 const decideRequestResult = await this.decideRequest(event, decideRequestItemParameters);
-                // TODO: maybe this can be moved to a lower level
-                if (decideRequestResult.wasDecided) await services.consumptionServices.incomingRequests.setWasDecidedAutomatically({ id: request.id });
                 return decideRequestResult;
             }
         }
@@ -166,6 +164,7 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
             return { wasDecided: false };
         }
 
+        await services.consumptionServices.incomingRequests.setWasDecidedAutomatically({ id: request.id });
         return { wasDecided: true };
     }
 
@@ -185,6 +184,7 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
             return { wasDecided: false };
         }
 
+        await services.consumptionServices.incomingRequests.setWasDecidedAutomatically({ id: request.id });
         return { wasDecided: true };
     }
 
