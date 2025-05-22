@@ -141,7 +141,6 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         const request = event.data.request;
 
         if (!containsItem(decideRequestItemParameters, isAcceptResponseConfig)) {
-            // TODO: put into a separate function
             const canRejectResult = await services.consumptionServices.incomingRequests.canReject({ requestId: request.id, items: decideRequestItemParameters.items });
             if (canRejectResult.isError) {
                 this.logger.error(`Can not reject Request ${request.id}`, canRejectResult.value.code, canRejectResult.error);
