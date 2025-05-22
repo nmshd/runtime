@@ -21,10 +21,7 @@ export class SetIncomingRequestWasAutomaticallyDecidedUseCase extends UseCase<Se
 
     protected async executeInternal(request: SetIncomingRequestWasAutomaticallyDecidedRequest): Promise<Result<LocalRequestDTO, ApplicationError>> {
         const localRequest = await this.incomingRequestsController.getIncomingRequest(CoreId.from(request.id));
-
-        if (!localRequest) {
-            return Result.fail(RuntimeErrors.general.recordNotFound(LocalRequest));
-        }
+        if (!localRequest) return Result.fail(RuntimeErrors.general.recordNotFound(LocalRequest));
 
         const updatedLocalRequest = await this.incomingRequestsController.setWasAutomaticallyDecided(localRequest);
 
