@@ -12,9 +12,6 @@ import { IdentityAttributeValueValidator } from "./IdentityAttributeValueValidat
 interface AbstractCreateRepositoryAttributeRequest<T> {
     content: {
         value: T;
-        /**
-         * @uniqueItems true
-         */
         tags?: string[];
         validFrom?: ISO8601DateTimeString;
         validTo?: ISO8601DateTimeString;
