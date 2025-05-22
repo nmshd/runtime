@@ -8,6 +8,7 @@ import { OwnerRestriction, PasswordProtectionMapper, SchemaRepository, SchemaVal
 import { TokenMapper } from "./TokenMapper";
 
 export interface GetTokensQuery {
+    isOwn?: string | string[];
     createdAt?: string | string[];
     createdBy?: string | string[];
     createdByDevice?: string | string[];
@@ -33,6 +34,7 @@ class Validator extends SchemaValidator<GetTokensRequest> {
 export class GetTokensUseCase extends UseCase<GetTokensRequest, TokenDTO[]> {
     private static readonly queryTranslator = new QueryTranslator({
         whitelist: {
+            [nameof<TokenDTO>((r) => r.isOwn)]: true,
             [nameof<TokenDTO>((t) => t.createdAt)]: true,
             [nameof<TokenDTO>((t) => t.createdBy)]: true,
             [nameof<TokenDTO>((t) => t.createdByDevice)]: true,
@@ -44,6 +46,7 @@ export class GetTokensUseCase extends UseCase<GetTokensRequest, TokenDTO[]> {
             [`${nameof<TokenDTO>((r) => r.passwordProtection)}.passwordLocationIndicator`]: true
         },
         alias: {
+            [nameof<TokenDTO>((r) => r.isOwn)]: nameof<Token>((r) => r.isOwn),
             [nameof<TokenDTO>((t) => t.createdAt)]: `${nameof<Token>((t) => t.cache)}.${[nameof<CachedToken>((t) => t.createdAt)]}`,
             [nameof<TokenDTO>((t) => t.createdBy)]: `${nameof<Token>((t) => t.cache)}.${[nameof<CachedToken>((t) => t.createdBy)]}`,
             [nameof<TokenDTO>((t) => t.createdByDevice)]: `${nameof<Token>((t) => t.cache)}.${[nameof<CachedToken>((t) => t.createdByDevice)]}`,

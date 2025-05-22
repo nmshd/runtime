@@ -5,12 +5,16 @@ import {
 } from "@nmshd/consumption";
 import {
     AbstractStringJSON,
+    AttributeAlreadySharedAcceptResponseItemJSON,
+    AttributeSuccessionAcceptResponseItemJSON,
     GivenName,
     GivenNameJSON,
     IdentityAttribute,
     IdentityAttributeQuery,
+    ProposeAttributeAcceptResponseItemJSON,
     ProposeAttributeRequestItem,
     ProposeAttributeRequestItemJSON,
+    RequestJSON,
     Surname,
     SurnameJSON
 } from "@nmshd/content";
@@ -477,6 +481,34 @@ describe("ProposeAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         expect(responseItem2.attributeId).toStrictEqual(surnameResult.value[numberOfSurnames - 1].id);
         expect(surname.value).toStrictEqual((responseItem2.attribute.content.value as SurnameJSON).value);
     });
+
+    test("check the MessageDVO for the recipient after they deleted the shared Attribute", async () => {
+        const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
+        const requestId = (senderMessage.content as RequestJSON).id!;
+        const localRequest = (await runtimeServices1.consumption.outgoingRequests.getRequest({ id: requestId })).value;
+        const sharedAttributeId = (localRequest.response!.content.items[0] as ProposeAttributeAcceptResponseItemJSON).attributeId;
+
+        await runtimeServices2.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: sharedAttributeId });
+
+        const recipientMessage = (await runtimeServices2.transport.messages.getMessage({ id: senderMessage.id })).value;
+        const dvo = (await expander2.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
+        const responseItemDVO = dvo.request.response!.content.items[0];
+        expect(responseItemDVO.type).toBe("AttributeAlreadyDeletedAcceptResponseItemDVO");
+    });
+
+    test("check the MessageDVO for the sender after they deleted the shared Attribute", async () => {
+        const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
+        const requestId = (senderMessage.content as RequestJSON).id!;
+        const localRequest = (await runtimeServices1.consumption.outgoingRequests.getRequest({ id: requestId })).value;
+        const sharedAttributeId = (localRequest.response!.content.items[0] as ProposeAttributeAcceptResponseItemJSON).attributeId;
+
+        await runtimeServices1.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: sharedAttributeId });
+
+        const senderMessageAfterDeletion = (await runtimeServices1.transport.messages.getMessage({ id: senderMessage.id })).value;
+        const dvo = (await expander1.expandMessageDTO(senderMessageAfterDeletion)) as RequestMessageDVO;
+        const responseItemDVO = dvo.request.response!.content.items[0];
+        expect(responseItemDVO.type).toBe("AttributeAlreadyDeletedAcceptResponseItemDVO");
+    });
 });
 
 describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery", () => {
@@ -577,10 +609,10 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
 
         const recipientAddress = (await transportServices2.account.getIdentityInfo()).value.address;
         expect(responseItem.predecessor).toBeDefined();
-        expect(responseItem.predecessor.owner).toBe(recipientAddress);
-        expect(responseItem.predecessor.type).toBe("SharedToPeerAttributeDVO");
-        expect(responseItem.predecessor.content.value["@type"]).toBe("GivenName");
-        expect((responseItem.predecessor.content.value as GivenNameJSON).value).toBe("Theodor");
+        expect(responseItem.predecessor!.owner).toBe(recipientAddress);
+        expect(responseItem.predecessor!.type).toBe("SharedToPeerAttributeDVO");
+        expect(responseItem.predecessor!.content.value["@type"]).toBe("GivenName");
+        expect((responseItem.predecessor!.content.value as GivenNameJSON).value).toBe("Theodor");
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         expect(responseItem.successor).toBeDefined();
@@ -598,7 +630,7 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
         const predecessorName = predecessorResult.value[0].content.value as GivenNameJSON;
         expect(predecessorName.value).toBe("Theodor");
         expect(responseItem.predecessorId).toStrictEqual(predecessorResult.value[0].id);
-        expect(predecessorName.value).toStrictEqual((responseItem.predecessor.content.value as GivenNameJSON).value);
+        expect(predecessorName.value).toStrictEqual((responseItem.predecessor!.content.value as GivenNameJSON).value);
 
         const successorResult = await consumptionServices2.attributes.getAttributes({
             query: { "content.value.@type": "GivenName", "shareInfo.peer": dvo.createdBy.id, "content.tags": "successor" }
@@ -655,10 +687,10 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
 
         const recipientAddress = (await transportServices2.account.getIdentityInfo()).value.address;
         expect(responseItem.predecessor).toBeDefined();
-        expect(responseItem.predecessor.owner).toBe(recipientAddress);
-        expect(responseItem.predecessor.type).toBe("PeerAttributeDVO");
-        expect(responseItem.predecessor.content.value["@type"]).toBe("GivenName");
-        expect((responseItem.predecessor.content.value as GivenNameJSON).value).toBe("Theodor");
+        expect(responseItem.predecessor!.owner).toBe(recipientAddress);
+        expect(responseItem.predecessor!.type).toBe("PeerAttributeDVO");
+        expect(responseItem.predecessor!.content.value["@type"]).toBe("GivenName");
+        expect((responseItem.predecessor!.content.value as GivenNameJSON).value).toBe("Theodor");
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         expect(responseItem.successor).toBeDefined();
@@ -676,7 +708,7 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
         const predecessorName = predecessorResult.value[0].content.value as GivenNameJSON;
         expect(predecessorName.value).toBe("Theodor");
         expect(responseItem.predecessorId).toStrictEqual(predecessorResult.value[0].id);
-        expect(predecessorName.value).toStrictEqual((responseItem.predecessor.content.value as GivenNameJSON).value);
+        expect(predecessorName.value).toStrictEqual((responseItem.predecessor!.content.value as GivenNameJSON).value);
 
         const successorResult = await consumptionServices1.attributes.getAttributes({
             query: { "content.value.@type": "GivenName", "shareInfo.peer": dvo.request.peer.id, "content.tags": "successor" }
@@ -688,6 +720,66 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
         expect(successorName.value).toBe("Franz");
         expect(responseItem.successorId).toStrictEqual(successorResult.value[0].id);
         expect(successorName.value).toStrictEqual((responseItem.successor.content.value as GivenNameJSON).value);
+    });
+
+    test("check the MessageDVO for the recipient after they deleted the shared Attribute predecessor", async () => {
+        const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
+        const requestId = (senderMessage.content as RequestJSON).id!;
+        const localRequest = (await runtimeServices1.consumption.outgoingRequests.getRequest({ id: requestId })).value;
+        const sharedPredecessorId = (localRequest.response!.content.items[0] as AttributeSuccessionAcceptResponseItemJSON).predecessorId;
+
+        await runtimeServices2.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: sharedPredecessorId });
+
+        const recipientMessage = (await runtimeServices2.transport.messages.getMessage({ id: senderMessage.id })).value;
+        const dvo = (await expander2.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
+        const responseItemDVO = dvo.request.response!.content.items[0] as AttributeSuccessionAcceptResponseItemDVO;
+        expect(responseItemDVO.type).toBe("AttributeSuccessionAcceptResponseItemDVO");
+        expect(responseItemDVO.predecessor).toBeUndefined();
+        expect(responseItemDVO.successor).toBeDefined();
+    });
+
+    test("check the MessageDVO for the sender after they deleted the shared Attribute predecessor", async () => {
+        const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
+        const requestId = (senderMessage.content as RequestJSON).id!;
+        const localRequest = (await runtimeServices1.consumption.outgoingRequests.getRequest({ id: requestId })).value;
+        const sharedPredecessorId = (localRequest.response!.content.items[0] as AttributeSuccessionAcceptResponseItemJSON).predecessorId;
+
+        await runtimeServices1.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: sharedPredecessorId });
+
+        const senderMessageAfterDeletion = (await runtimeServices1.transport.messages.getMessage({ id: senderMessage.id })).value;
+        const dvo = (await expander1.expandMessageDTO(senderMessageAfterDeletion)) as RequestMessageDVO;
+        const responseItemDVO = dvo.request.response!.content.items[0] as AttributeSuccessionAcceptResponseItemDVO;
+        expect(responseItemDVO.type).toBe("AttributeSuccessionAcceptResponseItemDVO");
+        expect(responseItemDVO.predecessor).toBeUndefined();
+        expect(responseItemDVO.successor).toBeDefined();
+    });
+
+    test("check the MessageDVO for the recipient after they deleted the shared Attribute successor", async () => {
+        const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
+        const requestId = (senderMessage.content as RequestJSON).id!;
+        const localRequest = (await runtimeServices1.consumption.outgoingRequests.getRequest({ id: requestId })).value;
+        const sharedSuccessorId = (localRequest.response!.content.items[0] as AttributeSuccessionAcceptResponseItemJSON).successorId;
+
+        await runtimeServices2.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: sharedSuccessorId });
+
+        const recipientMessage = (await runtimeServices2.transport.messages.getMessage({ id: senderMessage.id })).value;
+        const dvo = (await expander2.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
+        const responseItemDVO = dvo.request.response!.content.items[0];
+        expect(responseItemDVO.type).toBe("AttributeAlreadyDeletedAcceptResponseItemDVO");
+    });
+
+    test("check the MessageDVO for the sender after they deleted the shared Attribute successor", async () => {
+        const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
+        const requestId = (senderMessage.content as RequestJSON).id!;
+        const localRequest = (await runtimeServices1.consumption.outgoingRequests.getRequest({ id: requestId })).value;
+        const sharedSuccessorId = (localRequest.response!.content.items[0] as AttributeSuccessionAcceptResponseItemJSON).successorId;
+
+        await runtimeServices1.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: sharedSuccessorId });
+
+        const senderMessageAfterDeletion = (await runtimeServices1.transport.messages.getMessage({ id: senderMessage.id })).value;
+        const dvo = (await expander1.expandMessageDTO(senderMessageAfterDeletion)) as RequestMessageDVO;
+        const responseItemDVO = dvo.request.response!.content.items[0];
+        expect(responseItemDVO.type).toBe("AttributeAlreadyDeletedAcceptResponseItemDVO");
     });
 });
 
@@ -842,5 +934,33 @@ describe("AttributeAlreadySharedAcceptResponseItemDVO with IdentityAttributeQuer
         expect(responseItem.attribute.content.value["@type"]).toBe("GivenName");
         expect((responseItem.attribute.content.value as GivenNameJSON).value).toBe("Theodor");
         expect(requestItemDVO.response).toStrictEqual(responseItem);
+    });
+
+    test("check the MessageDVO for the recipient after they deleted the shared Attribute", async () => {
+        const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
+        const requestId = (senderMessage.content as RequestJSON).id!;
+        const localRequest = (await runtimeServices1.consumption.outgoingRequests.getRequest({ id: requestId })).value;
+        const sharedAttributeId = (localRequest.response!.content.items[0] as AttributeAlreadySharedAcceptResponseItemJSON).attributeId;
+
+        await runtimeServices2.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: sharedAttributeId });
+
+        const recipientMessage = (await runtimeServices2.transport.messages.getMessage({ id: senderMessage.id })).value;
+        const dvo = (await expander2.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
+        const responseItemDVO = dvo.request.response!.content.items[0];
+        expect(responseItemDVO.type).toBe("AttributeAlreadyDeletedAcceptResponseItemDVO");
+    });
+
+    test("check the MessageDVO for the sender after they deleted the shared Attribute", async () => {
+        const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
+        const requestId = (senderMessage.content as RequestJSON).id!;
+        const localRequest = (await runtimeServices1.consumption.outgoingRequests.getRequest({ id: requestId })).value;
+        const sharedAttributeId = (localRequest.response!.content.items[0] as AttributeAlreadySharedAcceptResponseItemJSON).attributeId;
+
+        await runtimeServices1.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: sharedAttributeId });
+
+        const senderMessageAfterDeletion = (await runtimeServices1.transport.messages.getMessage({ id: senderMessage.id })).value;
+        const dvo = (await expander1.expandMessageDTO(senderMessageAfterDeletion)) as RequestMessageDVO;
+        const responseItemDVO = dvo.request.response!.content.items[0];
+        expect(responseItemDVO.type).toBe("AttributeAlreadyDeletedAcceptResponseItemDVO");
     });
 });

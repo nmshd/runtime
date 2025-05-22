@@ -1,4 +1,3 @@
-import { Result } from "@js-soft/ts-utils";
 import { AppRuntimeErrors } from "../AppRuntimeErrors";
 import { AccountSelectedEvent, ExternalEventReceivedEvent } from "../events";
 import { RemoteNotificationEvent, RemoteNotificationRegistrationEvent } from "../natives";
@@ -79,7 +78,7 @@ export class PushNotificationModule extends AppRuntimeModule<PushNotificationMod
 
     private async handleAccountSelected(event: AccountSelectedEvent) {
         this.logger.trace("PushNotificationModule.handleAccountSelected", event);
-        const tokenResult = this.getNotificationTokenFromConfig();
+        const tokenResult = await this.runtime.nativeEnvironment.notificationAccess.getPushToken();
         if (tokenResult.isError) {
             this.logger.error(tokenResult.error);
             return;
@@ -99,7 +98,11 @@ export class PushNotificationModule extends AppRuntimeModule<PushNotificationMod
         const deviceResult = await services.transportServices.account.getDeviceInfo();
         if (deviceResult.isError) {
             this.logger.error(deviceResult.error);
-            throw AppRuntimeErrors.modules.pushNotificationModule.tokenRegistrationNotPossible("No device for this account found", deviceResult.error).logWith(this.logger);
+
+            const error = AppRuntimeErrors.modules.pushNotificationModule.tokenRegistrationNotPossible("No device for this account found", deviceResult.error);
+            this.logger.error(error);
+
+            throw error;
         }
 
         const appId = this.runtime.config.applicationId;
@@ -116,7 +119,11 @@ export class PushNotificationModule extends AppRuntimeModule<PushNotificationMod
 
         if (result.isError) {
             this.logger.error(result.error);
-            throw AppRuntimeErrors.modules.pushNotificationModule.tokenRegistrationNotPossible(result.error.message, result.error).logWith(this.logger);
+
+            const error = AppRuntimeErrors.modules.pushNotificationModule.tokenRegistrationNotPossible(result.error.message, result.error);
+            this.logger.error(error);
+
+            throw error;
         }
 
         this.logger.info(
@@ -132,13 +139,5 @@ export class PushNotificationModule extends AppRuntimeModule<PushNotificationMod
         this.logger.trace("PushNotificationModule.registerPushIdentifierForAccount", { address, pushIdentifier: devicePushIdentifier });
 
         await this.runtime.multiAccountController.updatePushIdentifierForAccount(address, devicePushIdentifier);
-    }
-
-    public getNotificationTokenFromConfig(): Result<string> {
-        const pushTokenResult = this.runtime.nativeEnvironment.configAccess.get("pushToken");
-        if (pushTokenResult.isError) {
-            Result.fail(pushTokenResult.error);
-        }
-        return Result.ok(pushTokenResult.value);
     }
 }

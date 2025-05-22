@@ -1,7 +1,6 @@
 import { NodeLoggerFactory } from "@js-soft/node-logger";
 import { Result } from "@js-soft/ts-utils";
 import { INativeBootstrapper, INativeEnvironment } from "../../../src";
-import { FakeNativeConfigAccess } from "./FakeNativeConfigAccess";
 import { FakeNativeDatabaseFactory } from "./FakeNativeDatabaseFactory";
 import { FakeNativeNotificationAccess } from "./FakeNativeNotificationAccess";
 
@@ -40,7 +39,6 @@ export class FakeNativeBootstrapper implements INativeBootstrapper {
         const nativeLogger = loggerFactory.getLogger("FakeNatives");
 
         this._nativeEnvironment = {
-            configAccess: new FakeNativeConfigAccess(),
             databaseFactory: new FakeNativeDatabaseFactory(),
             loggerFactory,
             notificationAccess: new FakeNativeNotificationAccess(nativeLogger)

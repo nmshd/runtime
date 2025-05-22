@@ -1,13 +1,10 @@
 import { CoreDate } from "@nmshd/core-types";
 import { IdentityDeletionProcessStatus, IdentityDeletionProcessStatusChangedEvent } from "@nmshd/runtime";
-import { AppRuntimeError } from "../../AppRuntimeError";
 import { LocalAccountDeletionDateChangedEvent } from "../../events";
 import { LocalAccountMapper } from "../../multiAccount/data/LocalAccountMapper";
 import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "../AppRuntimeModule";
 
 export interface IdentityDeletionProcessStatusChangedModuleConfig extends AppRuntimeModuleConfiguration {}
-
-export class IdentityDeletionProcessChangedModuleError extends AppRuntimeError {}
 
 export class IdentityDeletionProcessStatusChangedModule extends AppRuntimeModule<IdentityDeletionProcessStatusChangedModuleConfig> {
     public async init(): Promise<void> {
