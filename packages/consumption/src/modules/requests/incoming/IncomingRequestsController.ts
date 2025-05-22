@@ -269,7 +269,6 @@ export class IncomingRequestsController extends ConsumptionBaseController {
 
             return await processor.canReject(requestItem, params, request);
         } catch (e) {
-            console.log(e);
             if (e instanceof ServalError) {
                 return ValidationResult.error(ConsumptionCoreErrors.requests.servalErrorDuringRequestItemProcessing(e));
             }
