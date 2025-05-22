@@ -124,7 +124,9 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
             );
 
             decideRequestItemParameters = updatedRequestItemParameters;
-            if (!containsItem(decideRequestItemParameters, (element) => element === undefined)) {
+
+            const allItemsAutomaticallyDecided = !containsItem(decideRequestItemParameters, (element) => element === undefined);
+            if (allItemsAutomaticallyDecided) {
                 const decideRequestResult = await this.decideRequest(event, decideRequestItemParameters);
                 return decideRequestResult;
             }
@@ -138,7 +140,8 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         const services = await this.runtime.getServices(event.eventTargetAddress);
         const request = event.data.request;
 
-        if (!containsItem(decideRequestItemParameters, isAcceptResponseConfig)) {
+        const allItemsRejected = !containsItem(decideRequestItemParameters, isAcceptResponseConfig);
+        if (allItemsRejected) {
             return await this.rejectRequest(services, request, decideRequestItemParameters);
         }
 
