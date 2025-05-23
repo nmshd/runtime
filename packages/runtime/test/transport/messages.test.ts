@@ -179,6 +179,33 @@ describe("Message errors", () => {
         requestId = createRequestResult.id;
     });
 
+    test("should throw correct error for duplicate recipient in the Message", async () => {
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client2.address, client2.address],
+            content: {
+                "@type": "Mail",
+                to: [],
+                subject: "A Subject",
+                body: "A Body"
+            }
+        });
+        expect(result).toBeAnError("recipients must NOT have duplicate items", "error.runtime.validation.invalidPropertyValue");
+    });
+
+    test("should throw correct error for duplicate attachment in the Message", async () => {
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client2.address],
+            content: {
+                "@type": "Mail",
+                to: [],
+                subject: "A Subject",
+                body: "A Body"
+            },
+            attachments: ["FIL12345678901234567", "FIL12345678901234567"]
+        });
+        expect(result).toBeAnError("attachments must NOT have duplicate items", "error.runtime.validation.invalidPropertyValue");
+    });
+
     test("should throw correct error for empty 'to' in the Message", async () => {
         const result = await client1.transport.messages.sendMessage({
             recipients: [client2.address],
