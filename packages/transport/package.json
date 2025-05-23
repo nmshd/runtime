@@ -71,7 +71,7 @@
         "@js-soft/simple-logger": "1.0.5",
         "@js-soft/ts-utils": "^2.3.3",
         "@nmshd/core-types": "*",
-        "@nmshd/crypto": "2.1.1",
+        "@nmshd/crypto": "2.1.2",
         "axios": "^1.9.0",
         "fast-json-patch": "^3.1.1",
         "form-data": "^4.0.2",
@@ -96,7 +96,7 @@
         "@types/uuid": "^10.0.0",
         "correlation-id": "^5.2.0",
         "expect": "^29.7.0",
-        "testcontainers": "^10.27.0",
+        "testcontainers": "^10.28.0",
         "ts-mockito": "^2.6.1"
     },
     "publishConfig": {
