@@ -7,7 +7,7 @@ export interface InternalDecideRequestParametersJSON {
     requestId: string;
     items: (DecideRequestItemParametersJSON | DecideRequestItemGroupParametersJSON)[];
     accept: boolean;
-    isDecidedByAutomation?: true;
+    decidedByAutomation?: true;
 }
 
 @type("InternalDecideRequestParameters")
@@ -26,7 +26,7 @@ export class InternalDecideRequestParameters extends Serializable {
 
     @serialize()
     @validate({ nullable: true })
-    public isDecidedByAutomation?: true;
+    public decidedByAutomation?: true;
 
     public static from(value: InternalDecideRequestParametersJSON): InternalDecideRequestParameters {
         return this.fromAny(value);

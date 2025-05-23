@@ -137,7 +137,7 @@ export const AcceptIncomingRequestRequest: any = {
                         ]
                     }
                 },
-                "isDecidedByAutomation": {
+                "decidedByAutomation": {
                     "type": "boolean",
                     "const": true
                 }
@@ -3356,7 +3356,7 @@ export const RejectIncomingRequestRequest: any = {
                         ]
                     }
                 },
-                "isDecidedByAutomation": {
+                "decidedByAutomation": {
                     "type": "boolean",
                     "const": true
                 }

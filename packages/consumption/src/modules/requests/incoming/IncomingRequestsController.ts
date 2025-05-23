@@ -304,7 +304,7 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         request.response = localResponse;
         request.changeStatus(LocalRequestStatus.Decided);
 
-        if (params.isDecidedByAutomation) request.wasAutomaticallyDecided = true;
+        if (params.decidedByAutomation) request.wasAutomaticallyDecided = true;
 
         await this.update(request);
 

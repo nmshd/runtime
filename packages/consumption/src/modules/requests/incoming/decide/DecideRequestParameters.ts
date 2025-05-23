@@ -4,5 +4,5 @@ import { DecideRequestItemParametersJSON } from "./DecideRequestItemParameters";
 export interface DecideRequestParametersJSON {
     requestId: string;
     items: (DecideRequestItemParametersJSON | DecideRequestItemGroupParametersJSON)[];
-    isDecidedByAutomation?: true;
+    decidedByAutomation?: true;
 }

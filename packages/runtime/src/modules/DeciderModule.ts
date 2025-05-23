@@ -161,7 +161,7 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         const rejectResult = await services.consumptionServices.incomingRequests.reject({
             requestId: request.id,
             items: decideRequestItemParameters.items,
-            isDecidedByAutomation: true
+            decidedByAutomation: true
         });
         if (rejectResult.isError) {
             this.logger.error(`An error occured trying to reject Request ${request.id}`, rejectResult.error);
@@ -184,7 +184,7 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         const acceptResult = await services.consumptionServices.incomingRequests.accept({
             requestId: request.id,
             items: decideRequestItemParameters.items,
-            isDecidedByAutomation: true
+            decidedByAutomation: true
         });
         if (acceptResult.isError) {
             this.logger.error(`An error occured trying to accept Request ${request.id}`, acceptResult.error);
