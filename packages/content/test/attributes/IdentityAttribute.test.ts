@@ -232,4 +232,17 @@ describe("IdentityAttribute", function () {
         expect(affiliationAttribute.value.role).toBeInstanceOf(AffiliationRole);
         expect(affiliationAttribute.value.unit).toBeInstanceOf(AffiliationUnit);
     });
+
+    test("should validate uniqueness of tags", function () {
+        expect(() =>
+            IdentityAttribute.from({
+                value: {
+                    "@type": "Nationality",
+                    value: "DE"
+                },
+                owner: CoreAddress.from("address"),
+                tags: ["tag1", "tag1"]
+            })
+        ).toThrow("IdentityAttribute.tags:Array :: The tags are not unique");
+    });
 });

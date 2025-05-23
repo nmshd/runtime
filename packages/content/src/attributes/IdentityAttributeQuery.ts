@@ -1,6 +1,7 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { AbstractAttributeQuery, AbstractAttributeQueryJSON, IAbstractAttributeQuery } from "./AbstractAttributeQuery";
 import { AttributeValues } from "./AttributeValueTypes";
+import { IdentityAttribute } from "./IdentityAttribute";
 
 export interface IdentityAttributeQueryJSON extends AbstractAttributeQueryJSON {
     "@type": "IdentityAttributeQuery";
@@ -22,7 +23,7 @@ export class IdentityAttributeQuery extends AbstractAttributeQuery implements II
     public valueType: AttributeValues.Identity.TypeName;
 
     @serialize({ type: String })
-    @validate({ nullable: true, customValidator: IdentityAttributeQuery.validateTags })
+    @validate({ nullable: true, customValidator: IdentityAttribute.validateTags })
     public tags?: string[];
 
     public static from(value: IIdentityAttributeQuery | Omit<IdentityAttributeQueryJSON, "@type">): IdentityAttributeQuery {
@@ -31,17 +32,5 @@ export class IdentityAttributeQuery extends AbstractAttributeQuery implements II
 
     public override toJSON(verbose?: boolean | undefined, serializeAsString?: boolean | undefined): IdentityAttributeQueryJSON {
         return super.toJSON(verbose, serializeAsString) as IdentityAttributeQueryJSON;
-    }
-
-    private static validateTags(tags: string[]) {
-        if (tags.length > 20) {
-            return "The maximum number of tags is 20.";
-        }
-
-        if (tags.some((tag) => tag.length > 250)) {
-            return "The maximum length of a tag is 250 characters.";
-        }
-
-        return undefined;
     }
 }

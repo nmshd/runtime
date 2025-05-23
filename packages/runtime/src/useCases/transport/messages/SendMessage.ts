@@ -13,10 +13,13 @@ import { MessageMapper } from "./MessageMapper";
 export interface SendMessageRequest {
     /**
      * @minItems 1
+     * @uniqueItems true
      */
     recipients: AddressString[];
     content: any;
-
+    /**
+     * @uniqueItems true
+     */
     attachments?: FileIdString[];
 }
 

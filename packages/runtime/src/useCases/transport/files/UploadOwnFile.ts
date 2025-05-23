@@ -16,6 +16,9 @@ export interface UploadOwnFileRequest {
     expiresAt?: ISO8601DateTimeString;
     title?: string;
     description?: string;
+    /**
+     * @uniqueItems true
+     */
     tags?: string[];
 }
 
