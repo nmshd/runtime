@@ -18,6 +18,7 @@ export interface LocalRequestDVO extends DataViewObject {
     decider: IdentityDVO;
     isDecidable: boolean;
     items: (RequestItemDVO | RequestItemGroupDVO)[];
+    wasAutomaticallyDecided?: true;
 }
 
 export interface LocalRequestSourceDVO {

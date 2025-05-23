@@ -27,7 +27,8 @@ export class RequestMapper {
                           : undefined
                   }
                 : undefined,
-            status: request.status
+            status: request.status,
+            wasAutomaticallyDecided: request.wasAutomaticallyDecided
         };
     }
 

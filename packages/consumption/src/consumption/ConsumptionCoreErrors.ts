@@ -358,6 +358,13 @@ class Requests {
         );
     }
 
+    public cannotSetWasAutomaticallyDecided(id: string, status: string) {
+        return new CoreError(
+            "error.consumption.requests.cannotSetWasAutomaticallyDecided",
+            `The incoming Request '${id}' has status '${status}', but it must have status 'Decided' to set wasAutomaticallyDecided.`
+        );
+    }
+
     private static readonly _decideValidation = class {
         public invalidNumberOfItems(message: string) {
             return new ApplicationError("error.consumption.requests.decide.validation.invalidNumberOfItems", message);

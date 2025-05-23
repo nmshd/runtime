@@ -125,6 +125,10 @@ export const AcceptIncomingRequestRequest: any = {
                             }
                         ]
                     }
+                },
+                "decidedByAutomation": {
+                    "type": "boolean",
+                    "const": true
                 }
             },
             "required": [
@@ -3226,6 +3230,10 @@ export const RejectIncomingRequestRequest: any = {
                             }
                         ]
                     }
+                },
+                "decidedByAutomation": {
+                    "type": "boolean",
+                    "const": true
                 }
             },
             "required": [
