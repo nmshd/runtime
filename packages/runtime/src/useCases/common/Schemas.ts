@@ -11760,6 +11760,9 @@ export const GetIncomingRequestsRequest: any = {
                         }
                     ]
                 },
+                "wasAutomaticallyDecided": {
+                    "type": "string"
+                },
                 "content.expiresAt": {
                     "anyOf": [
                         {
