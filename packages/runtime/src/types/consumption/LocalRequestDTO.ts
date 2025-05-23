@@ -19,6 +19,7 @@ export interface LocalRequestDTO {
     content: RequestJSON;
     source?: LocalRequestSourceDTO;
     response?: LocalResponseDTO;
+    wasAutomaticallyDecided?: true;
 }
 
 export interface LocalRequestSourceDTO {
