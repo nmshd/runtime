@@ -260,7 +260,7 @@ describe("IdentityAttribute", function () {
         expect(affiliationAttribute.value.unit).toBeInstanceOf(AffiliationUnit);
     });
 
-    test("should validate tags", function () {
+    test("should validate uniqueness of tags", function () {
         expect(() =>
             IdentityAttribute.from({
                 value: {
