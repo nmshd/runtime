@@ -304,6 +304,8 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         request.response = localResponse;
         request.changeStatus(LocalRequestStatus.Decided);
 
+        if (params.isDecidedByAutomation) request.wasAutomaticallyDecided = true;
+
         await this.update(request);
 
         this.eventBus.publish(
@@ -475,16 +477,6 @@ export class IncomingRequestsController extends ConsumptionBaseController {
     private async updateRequestExpiry(request: LocalRequest) {
         const statusUpdated = request.updateStatusBasedOnExpiration();
         if (statusUpdated) await this.update(request);
-        return request;
-    }
-
-    public async setWasAutomaticallyDecided(request: LocalRequest): Promise<LocalRequest> {
-        if (request.status !== LocalRequestStatus.Decided) {
-            throw ConsumptionCoreErrors.requests.cannotSetWasAutomaticallyDecided(request.id.toString(), request.status);
-        }
-
-        request.wasAutomaticallyDecided = true;
-        await this.update(request);
         return request;
     }
 }
