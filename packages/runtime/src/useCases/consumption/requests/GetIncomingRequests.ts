@@ -18,6 +18,7 @@ export interface GetIncomingRequestsRequestQuery {
     peer?: string | string[];
     createdAt?: string | string[];
     status?: string | string[];
+    wasAutomaticallyDecided?: string;
     "content.expiresAt"?: string | string[];
     "content.items.@type"?: string | string[];
     "source.type"?: string | string[];
@@ -44,6 +45,9 @@ export class GetIncomingRequestsUseCase extends UseCase<GetIncomingRequestsReque
 
             // status
             [nameof<LocalRequestDTO>((x) => x.status)]: true,
+
+            // wasAutomaticallyDecided
+            [nameof<LocalRequestDTO>((x) => x.wasAutomaticallyDecided)]: true,
 
             // content.expiresAt
             [`${nameof<LocalRequestDTO>((x) => x.content)}.${nameof<RequestJSON>((x) => x.expiresAt)}`]: true,
@@ -92,6 +96,9 @@ export class GetIncomingRequestsUseCase extends UseCase<GetIncomingRequestsReque
 
             // status
             [nameof<LocalRequestDTO>((x) => x.status)]: nameof<LocalRequest>((x) => x.status),
+
+            // wasAutomaticallyDecided
+            [nameof<LocalRequestDTO>((x) => x.wasAutomaticallyDecided)]: nameof<LocalRequest>((x) => x.wasAutomaticallyDecided),
 
             // content.expiresAt
             [`${nameof<LocalRequestDTO>((x) => x.content)}.${nameof<RequestJSON>((x) => x.expiresAt)}`]: `${nameof<LocalRequest>((x) => x.content)}.${nameof<RequestJSON>(
