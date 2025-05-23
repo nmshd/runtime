@@ -25,7 +25,7 @@ export class InternalDecideRequestParameters extends Serializable {
     public accept: boolean;
 
     @serialize()
-    @validate()
+    @validate({ nullable: true })
     public isDecidedByAutomation?: true;
 
     public static from(value: InternalDecideRequestParametersJSON): InternalDecideRequestParameters {
