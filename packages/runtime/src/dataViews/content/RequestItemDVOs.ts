@@ -54,6 +54,7 @@ export interface ShareAttributeRequestItemDVO extends RequestItemDVO {
 
 export interface AuthenticationRequestItemDVO extends RequestItemDVO {
     type: "AuthenticationRequestItemDVO";
+    title: string;
 }
 
 export interface ConsentRequestItemDVO extends RequestItemDVO {
@@ -66,11 +67,6 @@ export interface ConsentRequestItemDVO extends RequestItemDVO {
 export interface RegisterAttributeListenerRequestItemDVO extends RequestItemDVO {
     type: "RegisterAttributeListenerRequestItemDVO";
     query: IdentityAttributeQueryDVO | ThirdPartyRelationshipAttributeQueryDVO;
-}
-
-export interface FreeTextRequestItemDVO extends RequestItemDVO {
-    type: "FreeTextRequestItemDVO";
-    freeText: string;
 }
 
 export interface FormFieldRequestItemDVO extends RequestItemDVO {

@@ -58,7 +58,7 @@ beforeAll(async () => {
     await establishRelationship(sTransportServices, rTransportServices);
 
     const file = await uploadFile(sTransportServices);
-    truncatedFileReference = file.truncatedReference;
+    truncatedFileReference = file.reference.truncated;
 
     requestContent = {
         content: {

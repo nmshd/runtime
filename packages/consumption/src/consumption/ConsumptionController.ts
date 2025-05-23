@@ -4,7 +4,6 @@ import {
     CreateAttributeRequestItem,
     DeleteAttributeRequestItem,
     FormFieldRequestItem,
-    FreeTextRequestItem,
     OwnSharedAttributeDeletedByOwnerNotificationItem,
     PeerSharedAttributeDeletedByPeerNotificationItem,
     PeerSharedAttributeSucceededNotificationItem,
@@ -24,7 +23,6 @@ import {
     DeleteAttributeRequestItemProcessor,
     DraftsController,
     FormFieldRequestItemProcessor,
-    FreeTextRequestItemProcessor,
     GenericRequestItemProcessor,
     IdentityMetadataController,
     IncomingRequestsController,
@@ -162,7 +160,6 @@ export class ConsumptionController {
             [ConsentRequestItem, GenericRequestItemProcessor],
             [AuthenticationRequestItem, GenericRequestItemProcessor],
             [RegisterAttributeListenerRequestItem, RegisterAttributeListenerRequestItemProcessor],
-            [FreeTextRequestItem, FreeTextRequestItemProcessor],
             [FormFieldRequestItem, FormFieldRequestItemProcessor],
             [TransferFileOwnershipRequestItem, TransferFileOwnershipRequestItemProcessor]
         ]);

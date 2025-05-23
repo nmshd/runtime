@@ -29,7 +29,7 @@ export class AppStringProcessor {
         url = url.trim();
 
         const parsed = new URL(url);
-        const allowedProtocols = ["http:", "https:", "nmshd:"];
+        const allowedProtocols = ["http:", "https:"];
         if (!allowedProtocols.includes(parsed.protocol)) return Result.fail(AppRuntimeErrors.appStringProcessor.wrongURL());
 
         return await this.processReference(url, account);
