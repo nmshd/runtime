@@ -179,7 +179,7 @@ describe("Message errors", () => {
         requestId = createRequestResult.id;
     });
 
-    test("should throw correct error for duplicate 'recipient' in the Message", async () => {
+    test("should throw correct error for duplicate recipient in the Message", async () => {
         const result = await client1.transport.messages.sendMessage({
             recipients: [client2.address, client2.address],
             content: {
