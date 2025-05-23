@@ -21800,7 +21800,8 @@ export const UploadOwnFileRequest: any = {
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "uniqueItems": true
                 }
             },
             "required": [
@@ -21844,7 +21845,8 @@ export const UploadOwnFileValidatableRequest: any = {
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "uniqueItems": true
                 },
                 "content": {
                     "type": "object"
@@ -22179,14 +22181,16 @@ export const SendMessageRequest: any = {
                     "items": {
                         "$ref": "#/definitions/AddressString"
                     },
-                    "minItems": 1
+                    "minItems": 1,
+                    "uniqueItems": true
                 },
                 "content": {},
                 "attachments": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/FileIdString"
-                    }
+                    },
+                    "uniqueItems": true
                 }
             },
             "required": [

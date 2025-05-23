@@ -128,6 +128,11 @@ describe("File upload", () => {
         const response = await transportServices1.files.uploadOwnFile(await makeUploadRequest({ expiresAt: "" }));
         expect(response).toBeAnError("expiresAt must match ISO8601 datetime format", "error.runtime.validation.invalidPropertyValue");
     });
+
+    test("cannot upload a file with a duplicate tag", async () => {
+        const response = await transportServices1.files.uploadOwnFile(await makeUploadRequest({ tags: ["tag1", "tag1"] }));
+        expect(response).toBeAnError("tags must NOT have duplicate items", "error.runtime.validation.invalidPropertyValue");
+    });
 });
 
 describe("Get file", () => {
