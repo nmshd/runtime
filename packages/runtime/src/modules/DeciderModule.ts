@@ -158,13 +158,16 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
             return { wasDecided: false };
         }
 
-        const rejectResult = await services.consumptionServices.incomingRequests.reject({ requestId: request.id, items: decideRequestItemParameters.items });
+        const rejectResult = await services.consumptionServices.incomingRequests.reject({
+            requestId: request.id,
+            items: decideRequestItemParameters.items,
+            isDecidedByAutomation: true
+        });
         if (rejectResult.isError) {
             this.logger.error(`An error occured trying to reject Request ${request.id}`, rejectResult.error);
             return { wasDecided: false };
         }
 
-        await services.consumptionServices.incomingRequests.setWasAutomaticallyDecided({ id: request.id });
         return { wasDecided: true };
     }
 
@@ -178,13 +181,16 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
             return { wasDecided: false };
         }
 
-        const acceptResult = await services.consumptionServices.incomingRequests.accept({ requestId: request.id, items: decideRequestItemParameters.items });
+        const acceptResult = await services.consumptionServices.incomingRequests.accept({
+            requestId: request.id,
+            items: decideRequestItemParameters.items,
+            isDecidedByAutomation: true
+        });
         if (acceptResult.isError) {
             this.logger.error(`An error occured trying to accept Request ${request.id}`, acceptResult.error);
             return { wasDecided: false };
         }
 
-        await services.consumptionServices.incomingRequests.setWasAutomaticallyDecided({ id: request.id });
         return { wasDecided: true };
     }
 
