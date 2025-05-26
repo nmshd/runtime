@@ -33,6 +33,7 @@ describe("Announcements", () => {
         const response = await createAnnouncement({
             expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(),
             severity: AnnouncementSeverity.High,
+            isSilent: false,
             texts: [
                 {
                     language: "en",
