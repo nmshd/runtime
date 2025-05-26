@@ -652,9 +652,8 @@ export class DataViewExpander {
             case "TransferFileOwnershipRequestItem":
                 const transferFileOwnershipRequestItem = requestItem as TransferFileOwnershipRequestItemJSON;
 
-                await this.transport.files.getOrLoadFile({ reference: transferFileOwnershipRequestItem.fileReference });
                 const fileReference = FileReference.from(transferFileOwnershipRequestItem.fileReference);
-                const file = await this.expandFileId(fileReference.id.toString());
+                const file = await this.expandFileReference(fileReference);
 
                 return {
                     ...transferFileOwnershipRequestItem,
@@ -1887,6 +1886,20 @@ export class DataViewExpander {
     public async expandFileIds(ids: string[]): Promise<FileDVO[]> {
         const filePromises = ids.map((id) => this.expandFileId(id));
         return await Promise.all(filePromises);
+    }
+
+    private async expandFileReference(fileReference: FileReference) {
+        const existingFileResult = await this.transport.files.getFile({ id: fileReference.id.toString() });
+        if (existingFileResult.isSuccess) {
+            return await this.expandFileDTO(existingFileResult.value);
+        }
+
+        if (existingFileResult.isError && !existingFileResult.error.equals(RuntimeErrors.general.recordNotFound())) {
+            throw existingFileResult.error;
+        }
+
+        const loadedFileResult = await this.transport.files.getOrLoadFile({ reference: fileReference.truncate() });
+        return await this.expandFileDTO(loadedFileResult.value);
     }
 
     public async expandFileDTO(file: FileDTO): Promise<FileDVO> {
