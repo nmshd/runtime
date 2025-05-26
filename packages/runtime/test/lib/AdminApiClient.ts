@@ -65,6 +65,7 @@ export async function createAnnouncement(request: CreateAnnouncementRequest): Pr
 export interface CreateAnnouncementRequest {
     severity: AnnouncementSeverity;
     texts: { language: string; title: string; body: string }[];
+    isSilent: boolean;
     expiresAt?: string;
     recipients?: string[];
 }

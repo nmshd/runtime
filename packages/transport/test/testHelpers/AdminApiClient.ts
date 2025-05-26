@@ -65,6 +65,7 @@ export class AdminApiClient {
 
 export interface CreateAnnouncementRequest {
     severity: AnnouncementSeverity;
+    isSilent: boolean;
     texts: { language: string; title: string; body: string }[];
     expiresAt?: string;
     recipients?: string[];

@@ -77,6 +77,7 @@ describe("AnnouncementController", function () {
             const response = await AdminApiClient.createAnnouncement({
                 expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(),
                 severity: AnnouncementSeverity.High,
+                isSilent: false,
                 recipients: forIdentity ? [forIdentity.toString()] : [],
                 texts: [
                     {
