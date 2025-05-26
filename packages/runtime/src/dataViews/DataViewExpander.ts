@@ -652,7 +652,6 @@ export class DataViewExpander {
             case "TransferFileOwnershipRequestItem":
                 const transferFileOwnershipRequestItem = requestItem as TransferFileOwnershipRequestItemJSON;
 
-                await this.transport.files.getOrLoadFile({ reference: transferFileOwnershipRequestItem.fileReference });
                 const fileReference = FileReference.from(transferFileOwnershipRequestItem.fileReference);
                 const file = await this.expandFileId(fileReference.id.toString());
 
