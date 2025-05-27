@@ -30,6 +30,6 @@ export class FileClient extends RESTClientAuthenticate {
     }
 
     public async regenerateOwnershipToken(id: string): Promise<ClientResult<{ newOwnershipToken: string }>> {
-        return await this.patch(`/api/v1/Files/${id}/RegenerateOwnershipToken`, {});
+        return await this.patch(`/api/v1/Files/${id}/RegenerateOwnershipToken`);
     }
 }

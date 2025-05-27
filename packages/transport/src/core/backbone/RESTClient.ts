@@ -457,7 +457,7 @@ export class RESTClient {
         }
 
         try {
-            const response = await this.axiosInstance.put<PlatformResponse<T>>(path, data, conf);
+            const response = await this.axiosInstance.patch<PlatformResponse<T>>(path, data, conf);
             return this.getResult("PATCH", path, response, id);
         } catch (e: any) {
             const err = RequestError.fromAxiosError("PATCH", path, e, id);
