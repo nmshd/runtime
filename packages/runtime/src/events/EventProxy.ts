@@ -24,6 +24,7 @@ import {
 } from "./consumption";
 import {
     DatawalletSynchronizedEvent,
+    FileOwnershipIsLockedEvent,
     IdentityDeletionProcessStatusChangedEvent,
     MessageDeliveredEvent,
     MessageReceivedEvent,
@@ -122,6 +123,10 @@ export class EventProxy {
             this.targetEventBus.publish(
                 new RelationshipTemplateAllocationsExhaustedEvent(event.eventTargetAddress, RelationshipTemplateMapper.toRelationshipTemplateDTO(event.data))
             );
+        });
+
+        this.subscribeToSourceEvent(transport.FileOwnershipIsLockedEvent, (event) => {
+            this.targetEventBus.publish(new FileOwnershipIsLockedEvent(event.eventTargetAddress, { fileId: event.data.fileId.toString() }));
         });
     }
 
