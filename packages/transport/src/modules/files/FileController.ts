@@ -50,7 +50,6 @@ export class FileController extends TransportController {
         await this.files.delete(file);
     }
 
-    // TODO: delete this?
     public async fetchCaches(ids: CoreId[]): Promise<{ id: CoreId; cache: CachedFile }[]> {
         if (ids.length === 0) return [];
 
@@ -279,5 +278,18 @@ export class FileController extends TransportController {
         }
 
         return decrypt;
+    }
+
+    // TODO: review (also below)
+    public async isValidOwnershipToken(id: CoreId, ownershipToken: string): Promise<boolean> {
+        const response = await this.client.validateOwnershipToken(id.toString(), ownershipToken);
+        if (response.isError) throw response.error;
+        return response.value.isValid;
+    }
+
+    public async regenerateOwnershipToken(id: CoreId): Promise<string> {
+        const response = await this.client.regenerateOwnershipToken(id.toString());
+        if (response.isError) throw response.error;
+        return response.value.newOwnershipToken;
     }
 }

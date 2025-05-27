@@ -154,4 +154,31 @@ describe("FileController", function () {
             expect(localFile).toBeUndefined();
         });
     });
+
+    describe.only("File ownership", function () {
+        test("should return an ownershipToken when sending a File", async function () {
+            const content = CoreBuffer.fromUtf8("Test");
+            const sentFile = await TestUtil.uploadFile(sender, content);
+            expect(sentFile.cache!.ownershipToken).toBeDefined();
+        });
+
+        test("should validate an ownershipToken", async function () {
+            const content = CoreBuffer.fromUtf8("Test");
+            const sentFile = await TestUtil.uploadFile(sender, content);
+            const ownershipToken = sentFile.cache!.ownershipToken!;
+
+            const result = await sender.files.isValidOwnershipToken(sentFile.id, ownershipToken);
+            expect(result).toBe(true);
+        });
+
+        test("should regenerate an ownershipToken", async function () {
+            const content = CoreBuffer.fromUtf8("Test");
+            const sentFile = await TestUtil.uploadFile(sender, content);
+            const previousOwnershipToken = sentFile.cache!.ownershipToken!;
+
+            const newOwnershipToken = await sender.files.regenerateOwnershipToken(sentFile.id);
+            expect(newOwnershipToken).toBeDefined();
+            expect(newOwnershipToken).not.toBe(previousOwnershipToken);
+        });
+    });
 });
