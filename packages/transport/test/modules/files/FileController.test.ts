@@ -179,12 +179,9 @@ describe("FileController", function () {
         });
 
         test("should regenerate an ownershipToken as the owner", async function () {
-            const newOwnershipToken = await sender.files.regenerateOwnershipToken(senderFile.id);
-            expect(newOwnershipToken).toBeDefined();
-            expect(newOwnershipToken).not.toBe(ownershipToken);
-
-            const updatedFile = await sender.files.getFile(senderFile.id);
-            expect(updatedFile!.cache!.ownershipToken).toBe(newOwnershipToken);
+            const updatedFile = await sender.files.regenerateOwnershipToken(senderFile.id);
+            expect(updatedFile.cache!.ownershipToken).toBeDefined();
+            expect(updatedFile.cache!.ownershipToken).not.toBe(ownershipToken);
         });
 
         test("should not regenerate an ownershipToken as not the owner", async function () {

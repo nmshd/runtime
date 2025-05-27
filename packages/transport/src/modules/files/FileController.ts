@@ -289,12 +289,12 @@ export class FileController extends TransportController {
         return response.value.isValid;
     }
 
-    public async regenerateOwnershipToken(id: CoreId): Promise<string> {
+    public async regenerateOwnershipToken(id: CoreId): Promise<File> {
         const response = await this.client.regenerateOwnershipToken(id.toString());
         if (response.isError) throw response.error;
 
-        await this.updateCacheOfExistingFileInDb(id.toString(), undefined, response.value.newOwnershipToken);
-        return response.value.newOwnershipToken;
+        const updatedFile = await this.updateCacheOfExistingFileInDb(id.toString(), undefined, response.value.newOwnershipToken);
+        return updatedFile;
     }
 
     public async claimOwnership(id: CoreId, ownershipToken: string): Promise<File> {
