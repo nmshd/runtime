@@ -156,29 +156,36 @@ describe("FileController", function () {
     });
 
     describe.only("File ownership", function () {
-        test("should return an ownershipToken when sending a File", async function () {
+        let senderFile: File;
+        let ownershipToken: string;
+
+        beforeEach(async function () {
             const content = CoreBuffer.fromUtf8("Test");
-            const sentFile = await TestUtil.uploadFile(sender, content);
-            expect(sentFile.cache!.ownershipToken).toBeDefined();
+            senderFile = await TestUtil.uploadFile(sender, content);
+            ownershipToken = senderFile.cache!.ownershipToken!;
         });
 
-        test("should validate an ownershipToken", async function () {
-            const content = CoreBuffer.fromUtf8("Test");
-            const sentFile = await TestUtil.uploadFile(sender, content);
-            const ownershipToken = sentFile.cache!.ownershipToken!;
+        test("should return an ownershipToken when sending a File", function () {
+            expect(ownershipToken).toBeDefined();
+        });
 
-            const result = await sender.files.isValidOwnershipToken(sentFile.id, ownershipToken);
+        test("should validate an ownershipToken as the owner", async function () {
+            const result = await sender.files.isValidOwnershipToken(senderFile.id, ownershipToken);
             expect(result).toBe(true);
         });
 
-        test("should regenerate an ownershipToken", async function () {
-            const content = CoreBuffer.fromUtf8("Test");
-            const sentFile = await TestUtil.uploadFile(sender, content);
-            const previousOwnershipToken = sentFile.cache!.ownershipToken!;
+        test("should not validate an ownershipToken as not the owner", async function () {
+            await TestUtil.expectThrowsRequestErrorAsync(recipient.files.regenerateOwnershipToken(senderFile.id), "error.platform.unexpected", 403);
+        });
 
-            const newOwnershipToken = await sender.files.regenerateOwnershipToken(sentFile.id);
+        test("should regenerate an ownershipToken as the owner", async function () {
+            const newOwnershipToken = await sender.files.regenerateOwnershipToken(senderFile.id);
             expect(newOwnershipToken).toBeDefined();
-            expect(newOwnershipToken).not.toBe(previousOwnershipToken);
+            expect(newOwnershipToken).not.toBe(ownershipToken);
+        });
+
+        test("should not regenerate an ownershipToken as not the owner", async function () {
+            await TestUtil.expectThrowsRequestErrorAsync(recipient.files.regenerateOwnershipToken(senderFile.id), "error.platform.unexpected", 403);
         });
     });
 });
