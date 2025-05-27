@@ -221,11 +221,28 @@ describe("FileController", function () {
             expect(updatedFile.cache!.ownershipToken).not.toBe(ownershipToken);
         });
 
-        test("should not claim the ownership of a File with an invalid ownershipToken", async function () {
+        // TODO: check this
+        // test("should not claim the ownership of a File with an invalid ownershipToken", async function () {
+        //     const events: FileOwnershipIsLockedEvent[] = [];
+        //     transport.eventBus.subscribe(FileOwnershipIsLockedEvent, function (event) {
+        //         events.push(event);
+        //     });
+
+        //     await TestUtil.expectThrowsRequestErrorAsync(recipient.files.claimOwnership(senderFile.id, "invalid-token"), "error.platform.unexpected", 403);
+
+        //     const validateResult = await sender.files.isValidOwnershipToken(senderFile.id, ownershipToken);
+        //     expect(validateResult).toBe(false);
+
+        //     expect(events).toHaveLength(1);
+        // });
+
+        test("should not claim the ownership of a File that is locked", async function () {
             await TestUtil.expectThrowsRequestErrorAsync(recipient.files.claimOwnership(senderFile.id, "invalid-token"), "error.platform.unexpected", 403);
 
             const validateResult = await sender.files.isValidOwnershipToken(senderFile.id, ownershipToken);
             expect(validateResult).toBe(false);
+
+            await TestUtil.expectThrowsRequestErrorAsync(recipient.files.claimOwnership(senderFile.id, ownershipToken), "error.platform.unexpected", 403);
         });
     });
 });
