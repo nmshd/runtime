@@ -26,7 +26,7 @@ export class FileClient extends RESTClientAuthenticate {
     }
 
     public async validateOwnershipToken(id: string, ownershipToken: string): Promise<ClientResult<{ isValid: boolean }>> {
-        return await this.post(`/api/v1/Files/${id}/ValidateOwnershipToken`, { fileOwnershipToken: ownershipToken });
+        return await this.post(`/api/v1/Files/${id}/ValidateOwnershipToken`, { ownershipToken });
     }
 
     public async regenerateOwnershipToken(id: string): Promise<ClientResult<{ newOwnershipToken: string }>> {
