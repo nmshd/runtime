@@ -21746,6 +21746,29 @@ export const GetOrLoadFileRequest: any = {
     }
 }
 
+export const RegenerateFileOwnershipTokenRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/RegenerateFileOwnershipTokenRequest",
+    "definitions": {
+        "RegenerateFileOwnershipTokenRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/FileIdString"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "additionalProperties": false
+        },
+        "FileIdString": {
+            "type": "string",
+            "pattern": "FIL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
 export const UploadOwnFileRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/UploadOwnFileRequest",
@@ -21874,6 +21897,35 @@ export const UploadOwnFileValidatableRequest: any = {
             "type": "string",
             "errorMessage": "must match ISO8601 datetime format",
             "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
+        }
+    }
+}
+
+export const ValidateFileOwnershipTokenRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/ValidateFileOwnershipTokenRequest",
+    "definitions": {
+        "ValidateFileOwnershipTokenRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/FileIdString"
+                },
+                "ownershipToken": {
+                    "type": "string",
+                    "minLength": 20,
+                    "maxLength": 20
+                }
+            },
+            "required": [
+                "id",
+                "ownershipToken"
+            ],
+            "additionalProperties": false
+        },
+        "FileIdString": {
+            "type": "string",
+            "pattern": "FIL[A-Za-z0-9]{17}"
         }
     }
 }
