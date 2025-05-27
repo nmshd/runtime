@@ -282,23 +282,23 @@ export class FileController extends TransportController {
     }
 
     // TODO: review (also below)
-    public async isValidOwnershipToken(id: CoreId, ownershipToken: string): Promise<boolean> {
-        const response = await this.client.validateOwnershipToken(id.toString(), ownershipToken);
+    public async validateFileOwnershipToken(id: CoreId, ownershipToken: string): Promise<boolean> {
+        const response = await this.client.validateFileOwnershipToken(id.toString(), ownershipToken);
         if (response.isError) throw response.error;
 
         return response.value.isValid;
     }
 
-    public async regenerateOwnershipToken(id: CoreId): Promise<File> {
-        const response = await this.client.regenerateOwnershipToken(id.toString());
+    public async regenerateFileOwnershipToken(id: CoreId): Promise<File> {
+        const response = await this.client.regenerateFileOwnershipToken(id.toString());
         if (response.isError) throw response.error;
 
         const updatedFile = await this.updateCacheOfExistingFileInDb(id.toString(), undefined, response.value.newOwnershipToken);
         return updatedFile;
     }
 
-    public async claimOwnership(id: CoreId, ownershipToken: string): Promise<File> {
-        const response = await this.client.claimOwnership(id.toString(), ownershipToken);
+    public async claimFileOwnership(id: CoreId, ownershipToken: string): Promise<File> {
+        const response = await this.client.claimFileOwnership(id.toString(), ownershipToken);
         if (response.isError) throw response.error;
 
         const updatedFile = await this.updateCacheOfExistingFileInDb(id.toString(), undefined, response.value.newOwnershipToken);

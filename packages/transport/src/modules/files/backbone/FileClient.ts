@@ -25,15 +25,15 @@ export class FileClient extends RESTClientAuthenticate {
         return await this.download(`/api/v1/Files/${id}`);
     }
 
-    public async validateOwnershipToken(id: string, ownershipToken: string): Promise<ClientResult<{ isValid: boolean }>> {
+    public async validateFileOwnershipToken(id: string, ownershipToken: string): Promise<ClientResult<{ isValid: boolean }>> {
         return await this.post(`/api/v1/Files/${id}/ValidateOwnershipToken`, { ownershipToken });
     }
 
-    public async regenerateOwnershipToken(id: string): Promise<ClientResult<{ newOwnershipToken: string }>> {
+    public async regenerateFileOwnershipToken(id: string): Promise<ClientResult<{ newOwnershipToken: string }>> {
         return await this.patch(`/api/v1/Files/${id}/RegenerateOwnershipToken`);
     }
 
-    public async claimOwnership(id: string, ownershipToken: string): Promise<ClientResult<{ newOwnershipToken: string }>> {
+    public async claimFileOwnership(id: string, ownershipToken: string): Promise<ClientResult<{ newOwnershipToken: string }>> {
         return await this.patch(`/api/v1/Files/${id}/ClaimOwnership`, { ownershipToken });
     }
 }

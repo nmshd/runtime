@@ -35,7 +35,7 @@ export class ValidateFileOwnershipTokenUseCase extends UseCase<ValidateFileOwner
         const file = await this.fileController.getFile(CoreId.from(request.id));
         if (!file) return Result.fail(RuntimeErrors.general.recordNotFound(File));
 
-        const isValid = await this.fileController.isValidOwnershipToken(file.id, request.ownershipToken);
+        const isValid = await this.fileController.validateFileOwnershipToken(file.id, request.ownershipToken);
         return Result.ok({ isValid });
     }
 }
