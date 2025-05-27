@@ -175,17 +175,57 @@ describe("FileController", function () {
         });
 
         test("should not validate an ownershipToken as not the owner", async function () {
-            await TestUtil.expectThrowsRequestErrorAsync(recipient.files.regenerateOwnershipToken(senderFile.id), "error.platform.unexpected", 403);
+            await TestUtil.expectThrowsRequestErrorAsync(recipient.files.isValidOwnershipToken(senderFile.id, ownershipToken), "error.platform.unexpected", 403);
         });
 
         test("should regenerate an ownershipToken as the owner", async function () {
             const newOwnershipToken = await sender.files.regenerateOwnershipToken(senderFile.id);
             expect(newOwnershipToken).toBeDefined();
             expect(newOwnershipToken).not.toBe(ownershipToken);
+
+            const updatedFile = await sender.files.getFile(senderFile.id);
+            expect(updatedFile!.cache!.ownershipToken).toBe(newOwnershipToken);
         });
 
         test("should not regenerate an ownershipToken as not the owner", async function () {
             await TestUtil.expectThrowsRequestErrorAsync(recipient.files.regenerateOwnershipToken(senderFile.id), "error.platform.unexpected", 403);
+        });
+
+        test("should claim the ownership of a File with a valid ownershipToken as not the owner after loading it", async function () {
+            await recipient.files.getOrLoadFile(senderFile.id, senderFile.secretKey);
+
+            const updatedFile = await recipient.files.claimOwnership(senderFile.id, ownershipToken);
+            expect(updatedFile.cache!.owner).toStrictEqual(recipient.identity.address);
+            expect(updatedFile.isOwn).toBe(true);
+
+            expect(updatedFile.cache!.ownershipToken).toBeDefined();
+            expect(updatedFile.cache!.ownershipToken).not.toBe(ownershipToken);
+        });
+
+        // TODO: do we want this to actually work?
+        // test("should claim the ownership of a File with a valid ownershipToken as not the owner before loading it", async function () {
+        //     const updatedFile = await recipient.files.claimOwnership(senderFile.id, ownershipToken);
+        //     expect(updatedFile.cache!.owner).toStrictEqual(recipient.identity.address);
+        //     expect(updatedFile.isOwn).toBe(true);
+
+        //     expect(updatedFile.cache!.ownershipToken).toBeDefined();
+        //     expect(updatedFile.cache!.ownershipToken).not.toBe(ownershipToken);
+        // });
+
+        test("should claim the ownership of a File with a valid ownershipToken as the owner after loading it", async function () {
+            const updatedFile = await sender.files.claimOwnership(senderFile.id, ownershipToken);
+            expect(updatedFile.cache!.owner).toStrictEqual(sender.identity.address);
+            expect(updatedFile.isOwn).toBe(true);
+
+            expect(updatedFile.cache!.ownershipToken).toBeDefined();
+            expect(updatedFile.cache!.ownershipToken).not.toBe(ownershipToken);
+        });
+
+        test("should not claim the ownership of a File with an invalid ownershipToken", async function () {
+            await TestUtil.expectThrowsRequestErrorAsync(recipient.files.claimOwnership(senderFile.id, "invalid-token"), "error.platform.unexpected", 403);
+
+            const validateResult = await sender.files.isValidOwnershipToken(senderFile.id, ownershipToken);
+            expect(validateResult).toBe(false);
         });
     });
 });

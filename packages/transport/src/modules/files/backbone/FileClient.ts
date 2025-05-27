@@ -32,4 +32,8 @@ export class FileClient extends RESTClientAuthenticate {
     public async regenerateOwnershipToken(id: string): Promise<ClientResult<{ newOwnershipToken: string }>> {
         return await this.patch(`/api/v1/Files/${id}/RegenerateOwnershipToken`);
     }
+
+    public async claimOwnership(id: string, ownershipToken: string): Promise<ClientResult<{ newOwnershipToken: string }>> {
+        return await this.patch(`/api/v1/Files/${id}/ClaimOwnership`, { ownershipToken });
+    }
 }
