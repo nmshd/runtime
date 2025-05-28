@@ -438,8 +438,15 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
     }
 
     private async updateRequestExpiry(request: LocalRequest) {
+        const oldStatus = request.status;
+
         const statusUpdated = request.updateStatusBasedOnExpiration();
-        if (statusUpdated) await this.update(request);
+        if (statusUpdated) {
+            await this.update(request);
+
+            this.eventBus.publish(new OutgoingRequestStatusChangedEvent(this.identity.address.toString(), { request: request, oldStatus, newStatus: request.status }));
+        }
+
         return request;
     }
 }
