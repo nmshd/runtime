@@ -29,6 +29,8 @@ export class RegenerateFileOwnershipTokenUseCase extends UseCase<RegenerateFileO
         const file = await this.fileController.getFile(CoreId.from(request.id));
         if (!file) return Result.fail(RuntimeErrors.general.recordNotFound(File));
 
+        if (!file.isOwn) return Result.fail(RuntimeErrors.files.notOwnedByYou());
+
         const updatedFile = await this.fileController.regenerateFileOwnershipToken(file.id);
 
         await this.accountController.syncDatawallet();
