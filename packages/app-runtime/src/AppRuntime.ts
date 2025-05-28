@@ -29,8 +29,8 @@ import { SessionStorage } from "./SessionStorage";
 
 export class AppRuntime extends Runtime<AppConfig> {
     public constructor(
-        loggerFactory: ILoggerFactory,
         appConfig: AppConfig,
+        loggerFactory: ILoggerFactory,
         public readonly notificationAccess: INotificationAccess,
         private readonly databaseFactory?: ILokiJsDatabaseFactory,
         eventBus?: EventBus
@@ -191,8 +191,8 @@ export class AppRuntime extends Runtime<AppConfig> {
     }
 
     public static async create(
-        loggerFactory: ILoggerFactory,
         appConfig: AppConfigOverwrite | AppConfig = {},
+        loggerFactory: ILoggerFactory,
         notificationAccess: INotificationAccess,
         eventBus?: EventBus,
         databaseFactory?: ILokiJsDatabaseFactory
@@ -201,7 +201,7 @@ export class AppRuntime extends Runtime<AppConfig> {
 
         const mergedConfig = createAppConfig(appConfig);
 
-        const runtime = new AppRuntime(loggerFactory, mergedConfig, notificationAccess, databaseFactory, eventBus);
+        const runtime = new AppRuntime(mergedConfig, loggerFactory, notificationAccess, databaseFactory, eventBus);
         await runtime.init();
         runtime.logger.trace("Runtime initialized");
 

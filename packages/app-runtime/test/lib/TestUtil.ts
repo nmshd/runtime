@@ -64,7 +64,7 @@ export class TestUtil {
 
         const config = this.createAppConfig(configOverride);
 
-        const runtime = await AppRuntime.create(this.loggerFactory, config, new FakeNotificationAccess(this.loggerFactory.getLogger("Fakes")), eventBus, new TestDatabaseFactory());
+        const runtime = await AppRuntime.create(config, this.loggerFactory, new FakeNotificationAccess(this.loggerFactory.getLogger("Fakes")), eventBus, new TestDatabaseFactory());
         runtime.registerUIBridge(uiBridge);
 
         return runtime;
@@ -72,7 +72,7 @@ export class TestUtil {
 
     public static createRuntimeWithoutInit(configOverride?: AppConfigOverwrite): AppRuntime {
         const config = this.createAppConfig(configOverride);
-        const runtime = new AppRuntime(this.loggerFactory, config, new FakeNotificationAccess(this.loggerFactory.getLogger("Fakes")), new TestDatabaseFactory());
+        const runtime = new AppRuntime(config, this.loggerFactory, new FakeNotificationAccess(this.loggerFactory.getLogger("Fakes")), new TestDatabaseFactory());
 
         return runtime;
     }
