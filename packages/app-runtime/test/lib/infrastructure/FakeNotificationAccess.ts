@@ -1,8 +1,8 @@
 import { ILogger } from "@js-soft/logging-abstractions";
 import { Result } from "@js-soft/ts-utils";
-import { INativeNotificationAccess, INativeNotificationScheduleOptions } from "../../../src";
+import { INotificationAccess, INotificationScheduleOptions } from "../../../src";
 
-export class FakeNativeNotificationAccess implements INativeNotificationAccess {
+export class FakeNotificationAccess implements INotificationAccess {
     public constructor(private readonly logger: ILogger) {}
 
     public getPushToken(): Promise<Result<string>> {
@@ -10,13 +10,13 @@ export class FakeNativeNotificationAccess implements INativeNotificationAccess {
         return Promise.resolve(Result.ok("fake-push-token"));
     }
 
-    public schedule(title: string, body: string, options?: INativeNotificationScheduleOptions): Promise<Result<number>> {
+    public schedule(title: string, body: string, options?: INotificationScheduleOptions): Promise<Result<number>> {
         this.logger.info(`NativeNotificationAccess.schedule(${title},${body},${options})`);
 
         return Promise.resolve(Result.ok(0));
     }
 
-    public update(id: number, title: string, body: string, options?: INativeNotificationScheduleOptions): Promise<Result<void>> {
+    public update(id: number, title: string, body: string, options?: INotificationScheduleOptions): Promise<Result<void>> {
         this.logger.info(`NativeNotificationAccess.update(${id},${title},${body},${options})`);
         return Promise.resolve(Result.ok(undefined));
     }

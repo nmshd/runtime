@@ -4,6 +4,6 @@ export * from "./AppRuntimeErrors";
 export * from "./buildInformation";
 export * from "./events";
 export * from "./extensibility";
+export * from "./infrastructure";
 export * from "./modules";
 export * from "./multiAccount";
-export * from "./natives";
