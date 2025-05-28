@@ -434,3 +434,50 @@ describe("Load peer file with the FileReference", () => {
         expect(response.value).toContainEqual({ ...file, isOwn: false });
     });
 });
+
+describe("File ownershipToken", () => {
+    let file: FileDTO;
+
+    beforeEach(async () => {
+        file = (await transportServices1.files.uploadOwnFile(await makeUploadRequest())).value;
+    });
+
+    test("should validate a valid ownershipToken of a File", async () => {
+        const result = await transportServices1.files.validateFileOwnershipToken({ id: file.id, ownershipToken: file.ownershipToken! });
+        expect(result.value.isValid).toBe(true);
+    });
+
+    test("should validate an invalid ownershipToken of a File", async () => {
+        const result = await transportServices1.files.validateFileOwnershipToken({ id: file.id, ownershipToken: "20-chars-long-string" });
+        expect(result.value.isValid).toBe(false);
+    });
+
+    test("should regenerate the ownershipToken of a File", async () => {
+        const previousOwnershipToken = file.ownershipToken;
+
+        const newOwnershipToken = (await transportServices1.files.regenerateFileOwnershipToken({ id: file.id })).value.ownershipToken;
+        expect(newOwnershipToken).toBeDefined();
+        expect(newOwnershipToken).not.toBe(previousOwnershipToken);
+    });
+
+    test("should validate format of an ownershipToken of a File", async () => {
+        const result = await transportServices1.files.validateFileOwnershipToken({ id: file.id, ownershipToken: "invalid-ownershipToken-format" });
+        expect(result.isError).toBe(true);
+        expect(result.error.code).toBe("error.runtime.validation.invalidPropertyValue");
+        expect(result).toBeAnError("ownershipToken must NOT have more than 20 characters", "error.runtime.validation.invalidPropertyValue");
+    });
+
+    test("should not allow to validate an ownershipToken if not the owner", async () => {
+        await transportServices2.files.getOrLoadFile({ reference: file.reference.truncated });
+
+        const result = await transportServices2.files.validateFileOwnershipToken({ id: file.id, ownershipToken: file.ownershipToken! });
+        expect(result).toBeAnError("Only the owner of the File can perform this action.", "error.runtime.files.notOwnedByYou");
+    });
+
+    test("should not allow to regenerate an ownershipToken if not the owner", async () => {
+        await transportServices2.files.getOrLoadFile({ reference: file.reference.truncated });
+
+        const result = await transportServices2.files.regenerateFileOwnershipToken({ id: file.id });
+        expect(result).toBeAnError("Only the owner of the File can perform this action.", "error.runtime.files.notOwnedByYou");
+    });
+});
