@@ -1,5 +1,5 @@
 export * from "./DatawalletSynchronizedEvent";
-export * from "./FileOwnershipIsLockedEvent";
+export * from "./FileOwnershipLockedEvent";
 export * from "./IdentityDeletionProcessStatusChangedEvent";
 export * from "./MessageDeliveredEvent";
 export * from "./MessageReceivedEvent";

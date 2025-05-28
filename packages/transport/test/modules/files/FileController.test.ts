@@ -1,7 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
-import { AccountController, File, FileOwnershipIsLockedEvent, Transport } from "../../../src";
+import { AccountController, File, FileOwnershipLockedEvent, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("FileController", function () {
@@ -155,7 +155,7 @@ describe("FileController", function () {
         });
     });
 
-    describe.only("File ownership", function () {
+    describe("File ownership", function () {
         let senderFile: File;
         let ownershipToken: string;
 
@@ -199,16 +199,6 @@ describe("FileController", function () {
             expect(updatedFile.cache!.ownershipToken).not.toBe(ownershipToken);
         });
 
-        // TODO: do we want this to actually work? -> in this case claimFileOwnership would need to be passed the secretKey of the file
-        // test("should claim the ownership of a File with a valid ownershipToken as not the owner before loading it", async function () {
-        //     const updatedFile = await recipient.files.claimFileOwnership(senderFile.id, ownershipToken);
-        //     expect(updatedFile.cache!.owner).toStrictEqual(recipient.identity.address);
-        //     expect(updatedFile.isOwn).toBe(true);
-
-        //     expect(updatedFile.cache!.ownershipToken).toBeDefined();
-        //     expect(updatedFile.cache!.ownershipToken).not.toBe(ownershipToken);
-        // });
-
         test("should claim the ownership of a File with a valid ownershipToken as the owner after loading it", async function () {
             const updatedFile = await sender.files.claimFileOwnership(senderFile.id, ownershipToken);
             expect(updatedFile.cache!.owner).toStrictEqual(sender.identity.address);
@@ -219,9 +209,9 @@ describe("FileController", function () {
         });
 
         // TODO: check this
-        test("should not claim the ownership of a File with an invalid ownershipToken", async function () {
-            const events: FileOwnershipIsLockedEvent[] = [];
-            transport.eventBus.subscribe(FileOwnershipIsLockedEvent, (event) => {
+        test.only("should not claim the ownership of a File with an invalid ownershipToken", async function () {
+            const events: FileOwnershipLockedEvent[] = [];
+            transport.eventBus.subscribe(FileOwnershipLockedEvent, (event) => {
                 events.push(event);
             });
 

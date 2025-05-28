@@ -33,7 +33,7 @@ import {
 } from "./consumption";
 import {
     DatawalletSynchronizedEvent,
-    FileOwnershipIsLockedEvent,
+    FileOwnershipLockedEvent,
     IdentityDeletionProcessStatusChangedEvent,
     MessageDeliveredEvent,
     MessageReceivedEvent,
@@ -134,8 +134,8 @@ export class EventProxy {
             );
         });
 
-        this.subscribeToSourceEvent(transport.FileOwnershipIsLockedEvent, (event) => {
-            this.targetEventBus.publish(new FileOwnershipIsLockedEvent(event.eventTargetAddress, FileMapper.toFileDTO(event.data)));
+        this.subscribeToSourceEvent(transport.FileOwnershipLockedEvent, (event) => {
+            this.targetEventBus.publish(new FileOwnershipLockedEvent(event.eventTargetAddress, FileMapper.toFileDTO(event.data)));
         });
     }
 
