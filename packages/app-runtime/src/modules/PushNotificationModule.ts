@@ -1,6 +1,5 @@
 import { AppRuntimeErrors } from "../AppRuntimeErrors";
-import { AccountSelectedEvent, ExternalEventReceivedEvent } from "../events";
-import { RemoteNotificationEvent, RemoteNotificationRegistrationEvent } from "../natives";
+import { AccountSelectedEvent, ExternalEventReceivedEvent, RemoteNotificationEvent, RemoteNotificationRegistrationEvent } from "../events";
 import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "./AppRuntimeModule";
 
 enum BackboneEventName {
@@ -78,7 +77,7 @@ export class PushNotificationModule extends AppRuntimeModule<PushNotificationMod
 
     private async handleAccountSelected(event: AccountSelectedEvent) {
         this.logger.trace("PushNotificationModule.handleAccountSelected", event);
-        const tokenResult = await this.runtime.nativeEnvironment.notificationAccess.getPushToken();
+        const tokenResult = await this.runtime.notificationAccess.getPushToken();
         if (tokenResult.isError) {
             this.logger.error(tokenResult.error);
             return;
@@ -109,6 +108,8 @@ export class PushNotificationModule extends AppRuntimeModule<PushNotificationMod
         const handle = token;
         const platform = this.runtime.config.pushService;
         const environment = this.runtime.config.applePushEnvironment;
+
+        if (platform === "none") return;
 
         const result = await services.transportServices.account.registerPushNotificationToken({
             platform,

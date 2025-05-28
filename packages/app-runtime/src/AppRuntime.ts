@@ -1,5 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { LokiJsConnection } from "@js-soft/docdb-access-loki";
+import { ILokiJsDatabaseFactory, LokiJsConnection } from "@js-soft/docdb-access-loki";
+import { ILoggerFactory } from "@js-soft/logging-abstractions";
 import { EventBus, Result } from "@js-soft/ts-utils";
 import { ConsumptionController } from "@nmshd/consumption";
 import { CoreId, ICoreAddress } from "@nmshd/core-types";
@@ -9,6 +10,7 @@ import { AppRuntimeErrors } from "./AppRuntimeErrors";
 import { AppStringProcessor } from "./AppStringProcessor";
 import { AccountSelectedEvent } from "./events";
 import { IUIBridge } from "./extensibility";
+import { INotificationAccess } from "./infrastructure/INotificationAccess";
 import {
     AppRuntimeModuleConfiguration,
     AppSyncModule,
@@ -23,16 +25,17 @@ import {
     SSEModule
 } from "./modules";
 import { AccountServices, LocalAccountMapper, LocalAccountSession, MultiAccountController } from "./multiAccount";
-import { INativeBootstrapper, INativeEnvironment } from "./natives";
 import { SessionStorage } from "./SessionStorage";
 
 export class AppRuntime extends Runtime<AppConfig> {
     public constructor(
-        private readonly _nativeEnvironment: INativeEnvironment,
+        loggerFactory: ILoggerFactory,
         appConfig: AppConfig,
+        public readonly notificationAccess: INotificationAccess,
+        private readonly databaseFactory?: ILokiJsDatabaseFactory,
         eventBus?: EventBus
     ) {
-        super(appConfig, _nativeEnvironment.loggerFactory, eventBus);
+        super(appConfig, loggerFactory, eventBus);
 
         this._stringProcessor = new AppStringProcessor(this, this.loggerFactory);
     }
@@ -78,10 +81,6 @@ export class AppRuntime extends Runtime<AppConfig> {
     private _accountServices: AccountServices;
     public get accountServices(): AccountServices {
         return this._accountServices;
-    }
-
-    public get nativeEnvironment(): INativeEnvironment {
-        return this._nativeEnvironment;
     }
 
     private readonly sessionStorage = new SessionStorage();
@@ -191,35 +190,27 @@ export class AppRuntime extends Runtime<AppConfig> {
         this._accountServices = new AccountServices(this._multiAccountController);
     }
 
-    public static async create(nativeBootstrapper: INativeBootstrapper, appConfig: AppConfigOverwrite | AppConfig = {}, eventBus?: EventBus): Promise<AppRuntime> {
+    public static async create(
+        loggerFactory: ILoggerFactory,
+        appConfig: AppConfigOverwrite | AppConfig = {},
+        notificationAccess: INotificationAccess,
+        eventBus?: EventBus,
+        databaseFactory?: ILokiJsDatabaseFactory
+    ): Promise<AppRuntime> {
         // TODO: JSSNMSHDD-2524 (validate app config)
-
-        if (!nativeBootstrapper.isInitialized) {
-            const result = await nativeBootstrapper.init();
-            if (!result.isSuccess) {
-                throw AppRuntimeErrors.startup.bootstrapError(result.error);
-            }
-        }
 
         const mergedConfig = createAppConfig(appConfig);
 
-        const runtime = new AppRuntime(nativeBootstrapper.nativeEnvironment, mergedConfig, eventBus);
+        const runtime = new AppRuntime(loggerFactory, mergedConfig, notificationAccess, databaseFactory, eventBus);
         await runtime.init();
         runtime.logger.trace("Runtime initialized");
 
         return runtime;
     }
 
-    public static async createAndStart(nativeBootstrapper: INativeBootstrapper, appConfig?: AppConfigOverwrite): Promise<AppRuntime> {
-        const runtime = await this.create(nativeBootstrapper, appConfig);
-        await runtime.start();
-        runtime.logger.trace("Runtime started");
-        return runtime;
-    }
-
     protected createDatabaseConnection(): Promise<IDatabaseConnection> {
         this.logger.trace("Creating DatabaseConnection to LokiJS");
-        const lokiConnection = new LokiJsConnection(this.config.databaseFolder, this.nativeEnvironment.databaseFactory);
+        const lokiConnection = new LokiJsConnection(this.config.databaseFolder, this.databaseFactory);
         this.logger.trace("Finished initialization of LokiJS connection.");
 
         return Promise.resolve(lokiConnection);
