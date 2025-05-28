@@ -208,10 +208,11 @@ describe("FileController", function () {
             expect(updatedFile.cache!.ownershipToken).not.toBe(ownershipToken);
         });
 
-        // TODO: check this
+        // TODO: check the event
         test.only("should not claim the ownership of a File with an invalid ownershipToken", async function () {
             const events: FileOwnershipLockedEvent[] = [];
-            transport.eventBus.subscribe(FileOwnershipLockedEvent, (event) => {
+            // transport.eventBus.subscribe(FileOwnershipLockedEvent, (event) => {
+            sender.transport.eventBus.subscribe(FileOwnershipLockedEvent, (event) => {
                 events.push(event);
             });
 
