@@ -8,6 +8,4 @@ export interface IAppRuntimeModuleConstructor {
 
 export interface AppRuntimeModuleConfiguration extends ModuleConfiguration {}
 
-export abstract class AppRuntimeModule<TConfig extends AppRuntimeModuleConfiguration = AppRuntimeModuleConfiguration> extends RuntimeModule<TConfig, AppRuntime> {
-    private readonly nativeEventSubscriptionIds: number[] = [];
-}
+export abstract class AppRuntimeModule<TConfig extends AppRuntimeModuleConfiguration = AppRuntimeModuleConfiguration> extends RuntimeModule<TConfig, AppRuntime> {}
