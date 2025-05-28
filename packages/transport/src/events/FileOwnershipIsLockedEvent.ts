@@ -1,14 +1,10 @@
-import { CoreId } from "@nmshd/core-types";
+import { File } from "../modules";
 import { TransportDataEvent } from "./TransportDataEvent";
 
-export interface FileOwnershipIsLockedEventData {
-    fileId: CoreId;
-}
-
-export class FileOwnershipIsLockedEvent extends TransportDataEvent<FileOwnershipIsLockedEventData> {
+export class FileOwnershipIsLockedEvent extends TransportDataEvent<File> {
     public static readonly namespace = "transport.fileOwnershipIsLocked";
 
-    public constructor(eventTargetAddress: string, data: FileOwnershipIsLockedEventData) {
+    public constructor(eventTargetAddress: string, data: File) {
         super(FileOwnershipIsLockedEvent.namespace, eventTargetAddress, data);
     }
 }

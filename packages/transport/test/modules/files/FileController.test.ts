@@ -1,7 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
-import { AccountController, File, Transport } from "../../../src";
+import { AccountController, File, FileOwnershipIsLockedEvent, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("FileController", function () {
@@ -219,19 +219,19 @@ describe("FileController", function () {
         });
 
         // TODO: check this
-        // test("should not claim the ownership of a File with an invalid ownershipToken", async function () {
-        //     const events: FileOwnershipIsLockedEvent[] = [];
-        //     transport.eventBus.subscribe(FileOwnershipIsLockedEvent, (event) => {
-        //         events.push(event);
-        //     });
+        test("should not claim the ownership of a File with an invalid ownershipToken", async function () {
+            const events: FileOwnershipIsLockedEvent[] = [];
+            transport.eventBus.subscribe(FileOwnershipIsLockedEvent, (event) => {
+                events.push(event);
+            });
 
-        //     await TestUtil.expectThrowsRequestErrorAsync(recipient.files.claimFileOwnership(senderFile.id, "invalid-token"), "error.platform.unexpected", 403);
+            await TestUtil.expectThrowsRequestErrorAsync(recipient.files.claimFileOwnership(senderFile.id, "invalid-token"), "error.platform.unexpected", 403);
 
-        //     const validateResult = await sender.files.validateFileOwnershipToken(senderFile.id, ownershipToken);
-        //     expect(validateResult.isValid).toBe(false);
+            const validateResult = await sender.files.validateFileOwnershipToken(senderFile.id, ownershipToken);
+            expect(validateResult.isValid).toBe(false);
 
-        //     expect(events).toHaveLength(1);
-        // });
+            expect(events).toHaveLength(1);
+        });
 
         test("should not claim the ownership of a File that is locked", async function () {
             await TestUtil.expectThrowsRequestErrorAsync(recipient.files.claimFileOwnership(senderFile.id, "invalid-token"), "error.platform.unexpected", 403);

@@ -1,7 +1,16 @@
 import { EventBus, EventHandler, SubscriptionTarget } from "@js-soft/ts-utils";
 import * as consumption from "@nmshd/consumption";
 import * as transport from "@nmshd/transport";
-import { AttributeListenerMapper, AttributeMapper, IdentityDeletionProcessMapper, MessageMapper, RelationshipMapper, RelationshipTemplateMapper, RequestMapper } from "../useCases";
+import {
+    AttributeListenerMapper,
+    AttributeMapper,
+    FileMapper,
+    IdentityDeletionProcessMapper,
+    MessageMapper,
+    RelationshipMapper,
+    RelationshipTemplateMapper,
+    RequestMapper
+} from "../useCases";
 import {
     AttributeCreatedEvent,
     AttributeDeletedEvent,
@@ -126,7 +135,7 @@ export class EventProxy {
         });
 
         this.subscribeToSourceEvent(transport.FileOwnershipIsLockedEvent, (event) => {
-            this.targetEventBus.publish(new FileOwnershipIsLockedEvent(event.eventTargetAddress, { fileId: event.data.fileId.toString() }));
+            this.targetEventBus.publish(new FileOwnershipIsLockedEvent(event.eventTargetAddress, FileMapper.toFileDTO(event.data)));
         });
     }
 
