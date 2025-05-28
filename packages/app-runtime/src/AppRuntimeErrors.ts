@@ -70,36 +70,12 @@ class General {
 }
 
 class Startup {
-    public bootstrapError(bootstrapError?: Error): ApplicationError {
-        return new ApplicationError("error.runtime.startup.BootstrapError", "There was an error while bootstrapping.", bootstrapError);
-    }
-
-    public bootstrapperNotInitialized(): ApplicationError {
-        return new ApplicationError("error.runtime.startup.BootstrapNotInitialized", "The given bootstrapper is not initialized.");
-    }
-
     public uiBridgeAlreadyRegistered(): ApplicationError {
         return new ApplicationError("error.appruntime.startup.uiBridgeAlreadyRegistered", "The UI bridge was already registered for this Runtime instance.");
     }
 }
 
 class PushNotificationModule {
-    public subscriptionNotPossible(details: string, rootError?: Error): ApplicationError {
-        return new ApplicationError(
-            "error.runtime.module.PushNotificationModule.SubscriptionNotPossible",
-            `Subscribing to the NativeEventBus was not possible. Root cause: '${details}'`,
-            rootError
-        );
-    }
-
-    public unsubscriptionNotPossible(details: string, rootError?: Error): ApplicationError {
-        return new ApplicationError(
-            "error.runtime.module.PushNotificationModule.UnsubscriptionNotPossible",
-            `Unsubscribing from the NativeEventBus was not possible. Root cause: '${details}'`,
-            rootError
-        );
-    }
-
     public tokenRegistrationNotPossible(details: string, rootError?: Error): ApplicationError {
         return new ApplicationError(
             "error.runtime.module.PushNotificationModule.TokenRegistrationNotPossible",

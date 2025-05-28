@@ -1,4 +1,4 @@
-import { NativeEvent } from "../NativeEvent";
+import { Event } from "@js-soft/ts-utils";
 
 export interface RemoteNotification {
     content: any;
@@ -7,7 +7,7 @@ export interface RemoteNotification {
     limitedProcessingTime?: string;
 }
 
-export class RemoteNotificationEvent extends NativeEvent {
+export class RemoteNotificationEvent extends Event {
     public static namespace = "RemoteNotification";
     public constructor(public readonly notification: RemoteNotification) {
         super(RemoteNotificationEvent.namespace);

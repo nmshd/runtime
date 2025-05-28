@@ -8,8 +8,8 @@ describe("RuntimeModuleLoading", function () {
     let moduleStarted = false;
     let moduleStopped = false;
 
-    beforeAll(async function () {
-        runtime = await TestUtil.createRuntimeWithoutInit({
+    beforeAll(function () {
+        runtime = TestUtil.createRuntimeWithoutInit({
             modules: {
                 testModule: { enabled: true, location: "testModule" }
             }
