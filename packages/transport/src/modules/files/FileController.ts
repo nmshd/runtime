@@ -281,12 +281,11 @@ export class FileController extends TransportController {
         return decrypt;
     }
 
-    // TODO: review (also below)
-    public async validateFileOwnershipToken(id: CoreId, ownershipToken: string): Promise<boolean> {
+    public async validateFileOwnershipToken(id: CoreId, ownershipToken: string): Promise<{ isValid: boolean }> {
         const response = await this.client.validateFileOwnershipToken(id.toString(), ownershipToken);
         if (response.isError) throw response.error;
 
-        return response.value.isValid;
+        return response.value;
     }
 
     public async regenerateFileOwnershipToken(id: CoreId): Promise<File> {
