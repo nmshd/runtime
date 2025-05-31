@@ -16,7 +16,6 @@ import { RuntimeErrors } from "../useCases/common/RuntimeErrors";
 import {
     isAcceptResponseConfig,
     isDeleteAttributeAcceptResponseConfig,
-    isFreeTextAcceptResponseConfig,
     isGeneralRequestConfig,
     isProposeAttributeWithNewAttributeAcceptResponseConfig,
     isReadAttributeWithNewAttributeAcceptResponseConfig,
@@ -59,8 +58,6 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         switch (requestConfig["content.item.@type"]) {
             case "DeleteAttributeRequestItem":
                 return isDeleteAttributeAcceptResponseConfig(responseConfig);
-            case "FreeTextRequestItem":
-                return isFreeTextAcceptResponseConfig(responseConfig);
             case "ProposeAttributeRequestItem":
                 return isProposeAttributeWithNewAttributeAcceptResponseConfig(responseConfig);
             case "ReadAttributeRequestItem":
@@ -353,7 +350,7 @@ async function checkCompatibility(
             continue;
         }
 
-        if (property.endsWith("At") || property.endsWith("From") || property.endsWith("To")) {
+        if (property.endsWith("At")) {
             compatible &&= checkDatesCompatibility(requestConfigProperty, requestProperty);
             if (!compatible) break;
             continue;

@@ -42,6 +42,17 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
             );
         }
 
+        if (foundFile.cache!.tags && foundFile.cache!.tags.length > 0) {
+            const tagValidationResult = await this.consumptionController.attributes.validateTagsForType(foundFile.cache!.tags, "IdentityFileReference");
+            if (tagValidationResult.isError()) {
+                return ValidationResult.error(
+                    ConsumptionCoreErrors.requests.invalidRequestItem(
+                        `You cannot request the transfer of ownership of the File with ID '${requestItem.fileReference.id.toString()}' since it has invalid tags. ${tagValidationResult.error.message}`
+                    )
+                );
+            }
+        }
+
         return ValidationResult.success();
     }
 
@@ -55,7 +66,7 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
             file = await this.accountController.files.getOrLoadFileByReference(requestItem.fileReference);
         } catch (_) {
             return ValidationResult.error(
-                ConsumptionCoreErrors.requests.invalidAcceptParameters(
+                ConsumptionCoreErrors.requests.invalidRequestItem(
                     `You cannot accept this RequestItem since the File with the given ID '${requestItem.fileReference.id.toString()}' could not be found.`
                 )
             );
@@ -63,7 +74,7 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
 
         if (file.cache!.expiresAt.isExpired()) {
             return ValidationResult.error(
-                ConsumptionCoreErrors.requests.invalidAcceptParameters(
+                ConsumptionCoreErrors.requests.invalidRequestItem(
                     `You cannot accept this RequestItem since the File with the given ID '${requestItem.fileReference.id.toString()}' is already expired.`
                 )
             );
@@ -71,7 +82,7 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
 
         if (file.isOwn) {
             return ValidationResult.error(
-                ConsumptionCoreErrors.requests.invalidAcceptParameters(
+                ConsumptionCoreErrors.requests.invalidRequestItem(
                     `You cannot accept this RequestItem since the File with the given fileReference '${requestItem.fileReference.id.toString()}' is already owned by you.`
                 )
             );
@@ -79,10 +90,21 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
 
         if (file.cache!.owner.toString() !== requestInfo.peer.toString()) {
             return ValidationResult.error(
-                ConsumptionCoreErrors.requests.invalidAcceptParameters(
+                ConsumptionCoreErrors.requests.invalidRequestItem(
                     `You cannot accept this RequestItem since the File with the given fileReference '${requestItem.fileReference.id.toString()}' is not owned by the peer.`
                 )
             );
+        }
+
+        if (file.cache!.tags && file.cache!.tags.length > 0) {
+            const tagValidationResult = await this.consumptionController.attributes.validateTagsForType(file.cache!.tags, "IdentityFileReference");
+            if (tagValidationResult.isError()) {
+                return ValidationResult.error(
+                    ConsumptionCoreErrors.requests.invalidRequestItem(
+                        `You cannot accept this RequestItem since the File with the given fileReference '${requestItem.fileReference.id.toString()}' has invalid tags. ${tagValidationResult.error.message}`
+                    )
+                );
+            }
         }
 
         return ValidationResult.success();
