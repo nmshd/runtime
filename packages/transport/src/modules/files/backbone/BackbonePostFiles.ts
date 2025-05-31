@@ -23,4 +23,5 @@ export interface BackbonePostFilesResponse {
     cipherSize: number;
     cipherHash: string;
     expiresAt: string;
+    ownershipToken: string;
 }

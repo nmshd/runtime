@@ -15,8 +15,13 @@ import {
     GetFilesUseCase,
     GetOrLoadFileRequest,
     GetOrLoadFileUseCase,
+    RegenerateFileOwnershipTokenRequest,
+    RegenerateFileOwnershipTokenUseCase,
     UploadOwnFileRequest,
-    UploadOwnFileUseCase
+    UploadOwnFileUseCase,
+    ValidateFileOwnershipTokenRequest,
+    ValidateFileOwnershipTokenResponse,
+    ValidateFileOwnershipTokenUseCase
 } from "../../../useCases";
 
 export class FilesFacade {
@@ -27,7 +32,9 @@ export class FilesFacade {
         @Inject private readonly downloadFileUseCase: DownloadFileUseCase,
         @Inject private readonly getFileUseCase: GetFileUseCase,
         @Inject private readonly deleteFileUseCase: DeleteFileUseCase,
-        @Inject private readonly createTokenForFileUseCase: CreateTokenForFileUseCase
+        @Inject private readonly createTokenForFileUseCase: CreateTokenForFileUseCase,
+        @Inject private readonly regenerateFileOwnershipTokenUseCase: RegenerateFileOwnershipTokenUseCase,
+        @Inject private readonly validateFileOwnershipTokenUseCase: ValidateFileOwnershipTokenUseCase
     ) {}
 
     public async getFiles(request: GetFilesRequest): Promise<Result<FileDTO[]>> {
@@ -56,5 +63,13 @@ export class FilesFacade {
 
     public async createTokenForFile(request: CreateTokenForFileRequest): Promise<Result<TokenDTO>> {
         return await this.createTokenForFileUseCase.execute(request);
+    }
+
+    public async regenerateFileOwnershipToken(request: RegenerateFileOwnershipTokenRequest): Promise<Result<FileDTO>> {
+        return await this.regenerateFileOwnershipTokenUseCase.execute(request);
+    }
+
+    public async validateFileOwnershipToken(request: ValidateFileOwnershipTokenRequest): Promise<Result<ValidateFileOwnershipTokenResponse>> {
+        return await this.validateFileOwnershipTokenUseCase.execute(request);
     }
 }

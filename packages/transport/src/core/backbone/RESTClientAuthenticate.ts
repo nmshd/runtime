@@ -76,6 +76,12 @@ export class RESTClientAuthenticate extends RESTClient {
         });
     }
 
+    public override async patch<T>(path: string, data?: any, config: AxiosRequestConfig = {}): Promise<ClientResult<T>> {
+        return await this.runAuthenticated(async (token) => {
+            return await super.patch<T>(path, data, this.buildAuthenticatedConfig(token, config));
+        });
+    }
+
     public override async delete<T>(path: string, config: AxiosRequestConfig = {}): Promise<ClientResult<T>> {
         return await this.runAuthenticated(async (token) => {
             return await super.delete<T>(path, this.buildAuthenticatedConfig(token, config));

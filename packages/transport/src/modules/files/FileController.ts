@@ -88,7 +88,7 @@ export class FileController extends TransportController {
     }
 
     @log()
-    private async updateCacheOfExistingFileInDb(id: string, response?: BackboneGetFilesResponse) {
+    private async updateCacheOfExistingFileInDb(id: string, response?: BackboneGetFilesResponse, ownershipToken?: string): Promise<File> {
         const fileDoc = await this.files.read(id);
         if (!fileDoc) {
             throw TransportCoreErrors.general.recordNotFound(File, id);
@@ -96,22 +96,23 @@ export class FileController extends TransportController {
 
         const file = File.from(fileDoc);
 
-        await this.updateCacheOfFile(file, response);
+        await this.updateCacheOfFile(file, response, ownershipToken);
         await this.files.update(fileDoc, file);
         return file;
     }
 
-    private async updateCacheOfFile(file: File, response?: BackboneGetFilesResponse) {
+    private async updateCacheOfFile(file: File, response?: BackboneGetFilesResponse, ownershipToken?: string): Promise<void> {
         const fileId = file.id.toString();
         if (!response) {
             response = (await this.client.getFile(fileId)).value;
         }
 
         const cachedFile = await this.decryptFile(response, file.secretKey);
+        cachedFile.ownershipToken = ownershipToken ?? cachedFile.ownershipToken;
         file.setCache(cachedFile);
 
         // Update isOwn, as it is possible that the identity receives an attachment with an own File.
-        file.isOwn = this.parent.identity.isMe(cachedFile.createdBy);
+        file.isOwn = this.parent.identity.isMe(cachedFile.owner);
     }
 
     @log()
@@ -234,7 +235,8 @@ export class FileController extends TransportController {
             mimetype: input.mimetype,
             owner: CoreAddress.from(response.owner),
             ownerSignature: signature,
-            plaintextHash: plaintextHash
+            plaintextHash: plaintextHash,
+            ownershipToken: response.ownershipToken
         });
 
         const file = File.from({
@@ -277,5 +279,28 @@ export class FileController extends TransportController {
         }
 
         return decrypt;
+    }
+
+    public async validateFileOwnershipToken(id: CoreId, ownershipToken: string): Promise<{ isValid: boolean }> {
+        const response = await this.client.validateFileOwnershipToken(id.toString(), ownershipToken);
+        if (response.isError) throw response.error;
+
+        return response.value;
+    }
+
+    public async regenerateFileOwnershipToken(id: CoreId): Promise<File> {
+        const response = await this.client.regenerateFileOwnershipToken(id.toString());
+        if (response.isError) throw response.error;
+
+        const updatedFile = await this.updateCacheOfExistingFileInDb(id.toString(), undefined, response.value.newOwnershipToken);
+        return updatedFile;
+    }
+
+    public async claimFileOwnership(id: CoreId, ownershipToken: string): Promise<File> {
+        const response = await this.client.claimFileOwnership(id.toString(), ownershipToken);
+        if (response.isError) throw response.error;
+
+        const updatedFile = await this.updateCacheOfExistingFileInDb(id.toString(), undefined, response.value.newOwnershipToken);
+        return updatedFile;
     }
 }

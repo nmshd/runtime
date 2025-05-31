@@ -444,6 +444,28 @@ export class RESTClient {
         }
     }
 
+    public async patch<T>(path: string, data?: any, config?: AxiosRequestConfig): Promise<ClientResult<T>> {
+        const id = await this.generateRequestId();
+        const conf = _.defaultsDeep({}, config);
+        if (this.logRequest()) {
+            const anyThis = this as any;
+            if (anyThis._username) {
+                this._logger.trace(`Request ${id} by ${anyThis._username}: PATCH ${path}`, data);
+            } else {
+                this._logger.trace(`Request ${id}: PATCH ${path}`, data);
+            }
+        }
+
+        try {
+            const response = await this.axiosInstance.patch<PlatformResponse<T>>(path, data, conf);
+            return this.getResult("PATCH", path, response, id);
+        } catch (e: any) {
+            const err = RequestError.fromAxiosError("PATCH", path, e, id);
+            this._logger.debug(err);
+            return ClientResult.fail<T>(err);
+        }
+    }
+
     public async delete<T>(path: string, config?: AxiosRequestConfig): Promise<ClientResult<T>> {
         const id = await this.generateRequestId();
         const conf = _.defaultsDeep({}, config);
