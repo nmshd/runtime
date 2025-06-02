@@ -233,13 +233,13 @@ describe("FileController", function () {
 
         test("should not claim the ownership of a File with an invalid ownershipToken", async function () {
             const file = await TestUtil.uploadFile(sender, CoreBuffer.fromUtf8("Test"));
-            await TestUtil.expectThrowsRequestErrorAsync(recipient.files.claimFileOwnership(file.id, "anInvalidOwnershipToken"), "error.platform.forbidden", 403);
+            await TestUtil.expectThrowsRequestErrorAsync(recipient.files.claimFileOwnership(file.id, "anInvalidToken"), "error.platform.forbidden", 403);
         });
 
         test("should mark the ownershipToken as invalid if an attempt is made to claim the ownership of a File with an invalid ownershipToken", async function () {
             const file = await TestUtil.uploadFile(sender, CoreBuffer.fromUtf8("Test"));
 
-            await TestUtil.expectThrowsRequestErrorAsync(recipient.files.claimFileOwnership(file.id, "anInvalidOwnershipToken"), "error.platform.forbidden", 403);
+            await TestUtil.expectThrowsRequestErrorAsync(recipient.files.claimFileOwnership(file.id, "anInvalidToken"), "error.platform.forbidden", 403);
 
             const validateResult = await sender.files.validateFileOwnershipToken(file.id, file.ownershipToken!);
             expect(validateResult.isValid).toBe(false);
@@ -253,7 +253,7 @@ describe("FileController", function () {
                 events.push(event);
             });
 
-            await TestUtil.expectThrowsRequestErrorAsync(recipient.files.claimFileOwnership(file.id, "anInvalidOwnershipToken"), "error.platform.forbidden", 403);
+            await TestUtil.expectThrowsRequestErrorAsync(recipient.files.claimFileOwnership(file.id, "anInvalidToken"), "error.platform.forbidden", 403);
 
             await sender.syncEverything();
             expect(events).toHaveLength(1);
@@ -262,7 +262,7 @@ describe("FileController", function () {
         test("should mark the ownership of a File as locked if an attempt is made to claim the ownership of a File with an invalid ownershipToken", async function () {
             const file = await TestUtil.uploadFile(sender, CoreBuffer.fromUtf8("Test"));
 
-            await TestUtil.expectThrowsRequestErrorAsync(recipient.files.claimFileOwnership(file.id, "anInvalidOwnershipToken"), "error.platform.forbidden", 403);
+            await TestUtil.expectThrowsRequestErrorAsync(recipient.files.claimFileOwnership(file.id, "anInvalidToken"), "error.platform.forbidden", 403);
             await sender.syncEverything();
 
             const updatedFile = await sender.files.getFile(file.id);
@@ -272,7 +272,7 @@ describe("FileController", function () {
         test("should not claim the ownership of a File that is locked", async function () {
             const file = await TestUtil.uploadFile(sender, CoreBuffer.fromUtf8("Test"));
 
-            await TestUtil.expectThrowsRequestErrorAsync(recipient.files.claimFileOwnership(file.id, "anInvalidOwnershipToken"), "error.platform.forbidden", 403);
+            await TestUtil.expectThrowsRequestErrorAsync(recipient.files.claimFileOwnership(file.id, "anInvalidToken"), "error.platform.forbidden", 403);
 
             await TestUtil.expectThrowsRequestErrorAsync(recipient.files.claimFileOwnership(file.id, file.ownershipToken!), "error.platform.forbidden", 403);
         });
@@ -280,7 +280,7 @@ describe("FileController", function () {
         test("should unlock the File upon regeneration of an ownershipToken", async function () {
             const file = await TestUtil.uploadFile(sender, CoreBuffer.fromUtf8("Test"));
 
-            await TestUtil.expectThrowsRequestErrorAsync(recipient.files.claimFileOwnership(file.id, "anInvalidOwnershipToken"), "error.platform.forbidden", 403);
+            await TestUtil.expectThrowsRequestErrorAsync(recipient.files.claimFileOwnership(file.id, "anInvalidToken"), "error.platform.forbidden", 403);
             await sender.syncEverything();
 
             const lockedFile = await sender.files.getFile(file.id);
