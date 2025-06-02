@@ -338,7 +338,7 @@ describe("Load peer file with token reference", () => {
         const response = await transportServices2.files.getOrLoadFile({ reference: token.truncatedReference });
 
         expect(response).toBeSuccessful();
-        expect(response.value).toMatchObject({ ...file, isOwn: false });
+        expect(response.value).toMatchObject({ ...file, isOwn: false, ownershipToken: undefined });
     });
 
     test("after peer file is loaded the file can be accessed under /Files/{id}", async () => {
@@ -346,7 +346,7 @@ describe("Load peer file with token reference", () => {
 
         const response = await transportServices2.files.getFile({ id: file.id });
         expect(response).toBeSuccessful();
-        expect(response.value).toMatchObject({ ...file, isOwn: false });
+        expect(response.value).toMatchObject({ ...file, isOwn: false, ownershipToken: undefined });
     });
 
     test("after peer file is loaded it can be accessed under /Files", async () => {
@@ -354,7 +354,7 @@ describe("Load peer file with token reference", () => {
 
         const response = await transportServices2.files.getFiles({ query: { createdAt: file.createdAt } });
         expect(response).toBeSuccessful();
-        expect(response.value).toContainEqual({ ...file, isOwn: false });
+        expect(response.value).toContainEqual({ ...file, isOwn: false, ownershipToken: undefined });
     });
 
     test("should load a peer file with its tags", async () => {
@@ -423,7 +423,7 @@ describe("Load peer file with the FileReference", () => {
 
         const response = await transportServices2.files.getFile({ id: file.id });
         expect(response).toBeSuccessful();
-        expect(response.value).toMatchObject({ ...file, isOwn: false });
+        expect(response.value).toMatchObject({ ...file, isOwn: false, ownershipToken: undefined });
     });
 
     test("after peer file is loaded it can be accessed under /Files", async () => {
@@ -431,6 +431,29 @@ describe("Load peer file with the FileReference", () => {
 
         const response = await transportServices2.files.getFiles({ query: { createdAt: file.createdAt } });
         expect(response).toBeSuccessful();
-        expect(response.value).toContainEqual({ ...file, isOwn: false });
+        expect(response.value).toContainEqual({ ...file, isOwn: false, ownershipToken: undefined });
+    });
+});
+
+describe("File ownership", () => {
+    let file: FileDTO;
+
+    beforeEach(async () => {
+        file = await uploadFile(transportServices1);
+    });
+
+    test("should regenerate the ownershipToken of a File", async () => {
+        const previousOwnershipToken = file.ownershipToken;
+
+        const newOwnershipToken = (await transportServices1.files.regenerateFileOwnershipToken({ id: file.id })).value.ownershipToken;
+        expect(newOwnershipToken).toBeDefined();
+        expect(newOwnershipToken).not.toBe(previousOwnershipToken);
+    });
+
+    test("should not allow to regenerate an ownershipToken if not the owner", async () => {
+        await transportServices2.files.getOrLoadFile({ reference: file.reference.truncated });
+
+        const result = await transportServices2.files.regenerateFileOwnershipToken({ id: file.id });
+        expect(result).toBeAnError("Only the owner of the File can perform this action.", "error.runtime.files.notOwnedByYou");
     });
 });

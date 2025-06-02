@@ -214,7 +214,8 @@ export class TestUtil {
         const syncResponse: SyncEverythingResponse = {
             relationships: [],
             messages: [],
-            identityDeletionProcesses: []
+            identityDeletionProcesses: [],
+            files: []
         };
 
         let iterationNumber = 0;
@@ -224,6 +225,7 @@ export class TestUtil {
             syncResponse.messages.push(...newSyncResult.value.messages);
             syncResponse.relationships.push(...newSyncResult.value.relationships);
             syncResponse.identityDeletionProcesses.push(...newSyncResult.value.identityDeletionProcesses);
+            syncResponse.files.push(...newSyncResult.value.files);
             iterationNumber++;
         } while (!until(syncResponse) && iterationNumber < 15);
         return syncResponse;
