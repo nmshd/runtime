@@ -21901,35 +21901,6 @@ export const UploadOwnFileValidatableRequest: any = {
     }
 }
 
-export const ValidateFileOwnershipTokenRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/ValidateFileOwnershipTokenRequest",
-    "definitions": {
-        "ValidateFileOwnershipTokenRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/FileIdString"
-                },
-                "ownershipToken": {
-                    "type": "string",
-                    "minLength": 20,
-                    "maxLength": 20
-                }
-            },
-            "required": [
-                "id",
-                "ownershipToken"
-            ],
-            "additionalProperties": false
-        },
-        "FileIdString": {
-            "type": "string",
-            "pattern": "FIL[A-Za-z0-9]{17}"
-        }
-    }
-}
-
 export const CreateIdentityRecoveryKitRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/CreateIdentityRecoveryKitRequest",

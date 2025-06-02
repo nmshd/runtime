@@ -7,4 +7,3 @@ export * from "./GetFiles";
 export * from "./GetOrLoadFile";
 export * from "./RegenerateFileOwnershipToken";
 export * from "./UploadOwnFile";
-export * from "./ValidateFileOwnershipToken";
