@@ -65,7 +65,7 @@ import { TestRuntimeServices } from "./RuntimeServiceProvider";
 import { TestNotificationItem } from "./TestNotificationItem";
 
 export async function syncUntil(transportServices: TransportServices, until: (syncResult: SyncEverythingResponse) => boolean): Promise<SyncEverythingResponse> {
-    const finalSyncResult: SyncEverythingResponse = { messages: [], relationships: [], identityDeletionProcesses: [] };
+    const finalSyncResult: SyncEverythingResponse = { messages: [], relationships: [], identityDeletionProcesses: [], files: [] };
 
     let iterationNumber = 0;
     let criteriaMet: boolean;
