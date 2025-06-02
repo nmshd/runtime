@@ -15,4 +15,6 @@ export interface FileDTO {
         truncated: string;
         url: string;
     };
+    ownershipToken?: string;
+    ownershipIsLocked?: true;
 }

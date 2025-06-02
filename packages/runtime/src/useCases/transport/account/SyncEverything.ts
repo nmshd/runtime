@@ -1,8 +1,9 @@
 import { Result } from "@js-soft/ts-utils";
 import { AccountController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { IdentityDeletionProcessDTO, MessageDTO, RelationshipDTO } from "../../../types";
+import { FileDTO, IdentityDeletionProcessDTO, MessageDTO, RelationshipDTO } from "../../../types";
 import { UseCase } from "../../common";
+import { FileMapper } from "../files";
 import { IdentityDeletionProcessMapper } from "../identityDeletionProcesses";
 import { MessageMapper } from "../messages/MessageMapper";
 import { RelationshipMapper } from "../relationships/RelationshipMapper";
@@ -11,6 +12,7 @@ export interface SyncEverythingResponse {
     relationships: RelationshipDTO[];
     messages: MessageDTO[];
     identityDeletionProcesses: IdentityDeletionProcessDTO[];
+    files: FileDTO[];
 }
 
 export class SyncEverythingUseCase extends UseCase<void, SyncEverythingResponse> {
@@ -40,11 +42,13 @@ export class SyncEverythingUseCase extends UseCase<void, SyncEverythingResponse>
         const messageDTOs = MessageMapper.toMessageDTOList(changedItems.messages);
         const relationshipDTOs = RelationshipMapper.toRelationshipDTOList(changedItems.relationships);
         const identityDeletionProcessDTOs = IdentityDeletionProcessMapper.toIdentityDeletionProcessDTOList(changedItems.identityDeletionProcesses);
+        const fileDTOs = FileMapper.toFileDTOList(changedItems.files);
 
         return Result.ok({
             messages: messageDTOs,
             relationships: relationshipDTOs,
-            identityDeletionProcesses: identityDeletionProcessDTOs
+            identityDeletionProcesses: identityDeletionProcessDTOs,
+            files: fileDTOs
         });
     }
 }

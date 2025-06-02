@@ -74,6 +74,10 @@ class Files {
             `The given reference '${reference}' is not valid. The reference for a File must start with '${Base64ForIdPrefix.Token}' or '${Base64ForIdPrefix.File}'.`
         );
     }
+
+    public notOwnedByYou(): ApplicationError {
+        return new ApplicationError("error.runtime.files.notOwnedByYou", "Only the owner of the File can perform this action.");
+    }
 }
 
 class RelationshipTemplates {

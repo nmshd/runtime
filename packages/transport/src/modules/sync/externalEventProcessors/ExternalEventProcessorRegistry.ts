@@ -1,5 +1,6 @@
 import { TransportError } from "../../../core";
 import { ExternalEventProcessorConstructor } from "./ExternalEventProcessor";
+import { FileOwnershipLockedExternalEventProcessor } from "./FileOwnershipLockedExternalEventProcessor";
 import { IdentityDeletionProcessStartedExternalEventProcessor } from "./IdentityDeletionProcessStartedExternalEventProcessor";
 import { IdentityDeletionProcessStatusChangedExternalEventProcessor } from "./IdentityDeletionProcessStatusChangedExternalEventProcessor";
 import { MessageDeliveredExternalEventProcessor } from "./MessageDeliveredExternalEventProcessor";
@@ -26,6 +27,7 @@ export class ExternalEventProcessorRegistry {
         this.registerProcessor("PeerDeletionCancelled", PeerDeletionCancelledExternalEventProcessor);
         this.registerProcessor("PeerToBeDeleted", PeerToBeDeletedExternalEventProcessor);
         this.registerProcessor("RelationshipTemplateAllocationsExhausted", RelationshipTemplateAllocationsExhaustedExternalEventProcessor);
+        this.registerProcessor("FileOwnershipLocked", FileOwnershipLockedExternalEventProcessor);
     }
 
     public registerProcessor(externalEventName: string, externalEventProcessor: ExternalEventProcessorConstructor): void {

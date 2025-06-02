@@ -5,4 +5,5 @@ export * from "./FileMapper";
 export * from "./GetFile";
 export * from "./GetFiles";
 export * from "./GetOrLoadFile";
+export * from "./RegenerateFileOwnershipToken";
 export * from "./UploadOwnFile";
