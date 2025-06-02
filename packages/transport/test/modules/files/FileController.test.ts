@@ -196,10 +196,12 @@ describe("FileController", function () {
         });
 
         test("should fetch a File after the ownership was transferred as the previous owner", async function () {
-            await recipient.files.getOrLoadFile(senderFile.id, senderFile.secretKey);
-            await recipient.files.claimFileOwnership(senderFile.id, ownershipToken);
+            const file = await TestUtil.uploadFile(sender, CoreBuffer.fromUtf8("Test"));
 
-            const [fetchedFile] = await sender.files.updateCache([senderFile.id.toString()]);
+            await recipient.files.getOrLoadFile(file.id, file.secretKey);
+            await recipient.files.claimFileOwnership(file.id, file.ownershipToken!);
+
+            const [fetchedFile] = await sender.files.updateCache([file.id.toString()]);
             expect(fetchedFile.isOwn).toBe(false);
             expect(fetchedFile.cache!.owner).toStrictEqual(recipient.identity.address);
         });
