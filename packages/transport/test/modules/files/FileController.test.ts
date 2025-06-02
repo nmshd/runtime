@@ -233,6 +233,7 @@ describe("FileController", function () {
 
         test("should not claim the ownership of a File with an invalid ownershipToken", async function () {
             const file = await TestUtil.uploadFile(sender, CoreBuffer.fromUtf8("Test"));
+
             await TestUtil.expectThrowsRequestErrorAsync(recipient.files.claimFileOwnership(file.id, "anInvalidToken"), "error.platform.forbidden", 403);
         });
 
