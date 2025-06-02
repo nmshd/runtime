@@ -79,4 +79,15 @@ export class File extends CoreSynchronizable implements IFile {
         this.metadataModifiedAt = CoreDate.utc();
         return this;
     }
+
+    public setOwnershipToken(token: string): this {
+        this.ownershipToken = token;
+        this.ownershipIsLocked = undefined;
+        return this;
+    }
+
+    public setOwnershipIsLocked(): this {
+        this.ownershipIsLocked = true;
+        return this;
+    }
 }

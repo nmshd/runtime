@@ -291,7 +291,13 @@ export class FileController extends TransportController {
         const response = await this.client.regenerateFileOwnershipToken(id.toString());
         if (response.isError) throw response.error;
 
-        const updatedFile = await this.updateFile(id.toString(), { ownershipToken: response.value.newOwnershipToken, ownershipIsLocked: false });
+        const file = await this.getFile(id);
+        if (!file) {
+            throw TransportCoreErrors.general.recordNotFound(File, id.toString());
+        }
+
+        const fileWithNewOwnershipToken = file.setOwnershipToken(response.value.newOwnershipToken);
+        const updatedFile = await this.updateFile(fileWithNewOwnershipToken);
         return updatedFile;
     }
 
@@ -301,22 +307,15 @@ export class FileController extends TransportController {
         const response = await this.client.claimFileOwnership(fileId, ownershipToken);
         if (response.isError) throw response.error;
 
-        await this.updateCacheOfExistingFileInDb(fileId);
-        const updatedFile = await this.updateFile(fileId, { ownershipToken: response.value.newOwnershipToken });
+        const fileWithNewOwner = await this.updateCacheOfExistingFileInDb(fileId);
+        const fileWithNewOwnershipToken = fileWithNewOwner.setOwnershipToken(response.value.newOwnershipToken);
+        const updatedFile = await this.updateFile(fileWithNewOwnershipToken);
         return updatedFile;
     }
 
-    public async updateFile(id: string, params?: { ownershipToken?: string; ownershipIsLocked?: boolean }): Promise<File> {
-        const fileDoc = await this.files.read(id);
-        if (!fileDoc) throw TransportCoreErrors.general.recordNotFound(File, id);
-
-        const file = File.from(fileDoc);
-
-        file.ownershipToken = params?.ownershipToken ?? file.ownershipToken;
-
-        if (params?.ownershipIsLocked !== undefined) {
-            file.ownershipIsLocked = params.ownershipIsLocked ? true : undefined;
-        }
+    public async updateFile(file: File): Promise<File> {
+        const fileDoc = await this.files.read(file.id.toString());
+        if (!fileDoc) throw TransportCoreErrors.general.recordNotFound(File, file.id.toString());
 
         await this.files.update(fileDoc, file);
         return file;
