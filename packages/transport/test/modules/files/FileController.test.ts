@@ -208,27 +208,31 @@ describe("FileController", function () {
             expect(updatedFile.cache!.ownershipToken).not.toBe(ownershipToken);
         });
 
-        // TODO: check the event
-        test.only("should not claim the ownership of a File with an invalid ownershipToken", async function () {
+        test("should not claim the ownership of a File with an invalid ownershipToken", async function () {
+            await TestUtil.expectThrowsRequestErrorAsync(recipient.files.claimFileOwnership(senderFile.id, "invalid-token"), "error.platform.unexpected", 403);
+        });
+
+        test("should lock the File if an attempt is made to claim the ownership of a File with an invalid ownershipToken", async function () {
+            await TestUtil.expectThrowsRequestErrorAsync(recipient.files.claimFileOwnership(senderFile.id, "invalid-token"), "error.platform.unexpected", 403);
+
+            const validateResult = await sender.files.validateFileOwnershipToken(senderFile.id, ownershipToken);
+            expect(validateResult.isValid).toBe(false);
+        });
+
+        test("should receive an external event if an attempt is made to claim the ownership of a File with an invalid ownershipToken", async function () {
             const events: FileOwnershipLockedEvent[] = [];
-            // transport.eventBus.subscribe(FileOwnershipLockedEvent, (event) => {
-            sender.transport.eventBus.subscribe(FileOwnershipLockedEvent, (event) => {
+            transport.eventBus.subscribeOnce(FileOwnershipLockedEvent, (event) => {
                 events.push(event);
             });
 
             await TestUtil.expectThrowsRequestErrorAsync(recipient.files.claimFileOwnership(senderFile.id, "invalid-token"), "error.platform.unexpected", 403);
 
-            const validateResult = await sender.files.validateFileOwnershipToken(senderFile.id, ownershipToken);
-            expect(validateResult.isValid).toBe(false);
-
+            await sender.syncEverything();
             expect(events).toHaveLength(1);
         });
 
         test("should not claim the ownership of a File that is locked", async function () {
             await TestUtil.expectThrowsRequestErrorAsync(recipient.files.claimFileOwnership(senderFile.id, "invalid-token"), "error.platform.unexpected", 403);
-
-            const validateResult = await sender.files.validateFileOwnershipToken(senderFile.id, ownershipToken);
-            expect(validateResult.isValid).toBe(false);
 
             await TestUtil.expectThrowsRequestErrorAsync(recipient.files.claimFileOwnership(senderFile.id, ownershipToken), "error.platform.unexpected", 403);
         });
