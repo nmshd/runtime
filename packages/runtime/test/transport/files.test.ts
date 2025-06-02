@@ -435,7 +435,7 @@ describe("Load peer file with the FileReference", () => {
     });
 });
 
-describe("File ownershipToken", () => {
+describe("File ownership", () => {
     let file: FileDTO;
 
     beforeEach(async () => {

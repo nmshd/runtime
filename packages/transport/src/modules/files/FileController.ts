@@ -81,14 +81,14 @@ export class FileController extends TransportController {
         const resultItems = (await this.client.getFiles({ ids })).value;
         const promises = [];
         for await (const resultItem of resultItems) {
-            promises.push(this.updateCacheOfExistingFileInDb(resultItem.id, resultItem));
+            promises.push(this.updateCacheOfExistingFileInDb(resultItem.id, { response: resultItem }));
         }
 
         return await Promise.all(promises);
     }
 
     @log()
-    private async updateCacheOfExistingFileInDb(id: string, response?: BackboneGetFilesResponse, ownershipToken?: string): Promise<File> {
+    public async updateCacheOfExistingFileInDb(id: string, params?: { response?: BackboneGetFilesResponse; ownershipToken?: string; ownershipIsLocked?: boolean }): Promise<File> {
         const fileDoc = await this.files.read(id);
         if (!fileDoc) {
             throw TransportCoreErrors.general.recordNotFound(File, id);
@@ -96,19 +96,24 @@ export class FileController extends TransportController {
 
         const file = File.from(fileDoc);
 
-        await this.updateCacheOfFile(file, response, ownershipToken);
+        await this.updateCacheOfFile(file, params);
         await this.files.update(fileDoc, file);
         return file;
     }
 
-    private async updateCacheOfFile(file: File, response?: BackboneGetFilesResponse, ownershipToken?: string): Promise<void> {
+    private async updateCacheOfFile(file: File, params?: { response?: BackboneGetFilesResponse; ownershipToken?: string; ownershipIsLocked?: boolean }): Promise<void> {
         const fileId = file.id.toString();
-        if (!response) {
-            response = (await this.client.getFile(fileId)).value;
+        const response = params?.response ?? (await this.client.getFile(fileId)).value;
+        const cachedFile = await this.decryptFile(response, file.secretKey);
+
+        cachedFile.ownershipToken = params?.ownershipToken ?? file.cache?.ownershipToken;
+
+        if (params?.ownershipIsLocked !== undefined) {
+            cachedFile.ownershipIsLocked = params.ownershipIsLocked ? true : undefined;
+        } else {
+            cachedFile.ownershipIsLocked = file.cache?.ownershipIsLocked;
         }
 
-        const cachedFile = await this.decryptFile(response, file.secretKey);
-        cachedFile.ownershipToken = ownershipToken ?? cachedFile.ownershipToken;
         file.setCache(cachedFile);
 
         // Update isOwn, as it is possible that the identity receives an attachment with an own File.
@@ -137,7 +142,7 @@ export class FileController extends TransportController {
         const fileDoc = await this.files.read(id.toString());
         if (fileDoc) {
             if (fileDoc.cache) return File.from(fileDoc);
-            return await this.updateCacheOfExistingFileInDb(id.toString());
+            return await this.updateCacheOfExistingFileInDb(id.toString(), {});
         }
 
         const file = File.from({
@@ -292,7 +297,7 @@ export class FileController extends TransportController {
         const response = await this.client.regenerateFileOwnershipToken(id.toString());
         if (response.isError) throw response.error;
 
-        const updatedFile = await this.updateCacheOfExistingFileInDb(id.toString(), undefined, response.value.newOwnershipToken);
+        const updatedFile = await this.updateCacheOfExistingFileInDb(id.toString(), { ownershipToken: response.value.newOwnershipToken, ownershipIsLocked: false });
         return updatedFile;
     }
 
@@ -300,7 +305,7 @@ export class FileController extends TransportController {
         const response = await this.client.claimFileOwnership(id.toString(), ownershipToken);
         if (response.isError) throw response.error;
 
-        const updatedFile = await this.updateCacheOfExistingFileInDb(id.toString(), undefined, response.value.newOwnershipToken);
+        const updatedFile = await this.updateCacheOfExistingFileInDb(id.toString(), { ownershipToken: response.value.newOwnershipToken });
         return updatedFile;
     }
 }

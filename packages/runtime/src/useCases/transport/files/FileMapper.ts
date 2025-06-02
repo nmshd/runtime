@@ -45,7 +45,8 @@ export class FileMapper {
                 truncated: reference.truncate(),
                 url: reference.toUrl()
             },
-            ownershipToken: file.cache.ownershipToken
+            ownershipToken: file.cache.ownershipToken,
+            ownershipIsLocked: file.cache.ownershipIsLocked
         };
     }
 

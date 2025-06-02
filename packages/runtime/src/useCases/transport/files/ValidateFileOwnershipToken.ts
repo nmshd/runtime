@@ -23,6 +23,7 @@ class Validator extends SchemaValidator<ValidateFileOwnershipTokenRequest> {
     }
 }
 
+// TODO: maybe don't expose this as use case in general
 export class ValidateFileOwnershipTokenUseCase extends UseCase<ValidateFileOwnershipTokenRequest, ValidateFileOwnershipTokenResponse> {
     public constructor(
         @Inject private readonly fileController: FileController,
