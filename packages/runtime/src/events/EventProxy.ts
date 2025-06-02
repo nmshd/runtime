@@ -1,7 +1,16 @@
 import { EventBus, EventHandler, SubscriptionTarget } from "@js-soft/ts-utils";
 import * as consumption from "@nmshd/consumption";
 import * as transport from "@nmshd/transport";
-import { AttributeListenerMapper, AttributeMapper, IdentityDeletionProcessMapper, MessageMapper, RelationshipMapper, RelationshipTemplateMapper, RequestMapper } from "../useCases";
+import {
+    AttributeListenerMapper,
+    AttributeMapper,
+    FileMapper,
+    IdentityDeletionProcessMapper,
+    MessageMapper,
+    RelationshipMapper,
+    RelationshipTemplateMapper,
+    RequestMapper
+} from "../useCases";
 import {
     AttributeCreatedEvent,
     AttributeDeletedEvent,
@@ -24,6 +33,7 @@ import {
 } from "./consumption";
 import {
     DatawalletSynchronizedEvent,
+    FileOwnershipLockedEvent,
     IdentityDeletionProcessStatusChangedEvent,
     MessageDeliveredEvent,
     MessageReceivedEvent,
@@ -122,6 +132,10 @@ export class EventProxy {
             this.targetEventBus.publish(
                 new RelationshipTemplateAllocationsExhaustedEvent(event.eventTargetAddress, RelationshipTemplateMapper.toRelationshipTemplateDTO(event.data))
             );
+        });
+
+        this.subscribeToSourceEvent(transport.FileOwnershipLockedEvent, (event) => {
+            this.targetEventBus.publish(new FileOwnershipLockedEvent(event.eventTargetAddress, FileMapper.toFileDTO(event.data)));
         });
     }
 

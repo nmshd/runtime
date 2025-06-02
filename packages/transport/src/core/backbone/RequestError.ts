@@ -97,6 +97,18 @@ export class RequestError extends ApplicationError {
                 );
             }
 
+            if (axiosError.response.status === 403) {
+                return new RequestError(
+                    method,
+                    path,
+                    platformParameters,
+                    "error.platform.forbidden",
+                    "You are not allowed to perform this action due to insufficient privileges.",
+                    requestId,
+                    axiosError.response.status
+                ).setObject(this.cleanAxiosError(axiosError));
+            }
+
             return new RequestError(
                 method,
                 path,

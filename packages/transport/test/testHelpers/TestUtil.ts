@@ -487,6 +487,7 @@ export class TestUtil {
             syncResult.messages.push(...newSyncResult.messages);
             syncResult.relationships.push(...newSyncResult.relationships);
             syncResult.identityDeletionProcesses.push(...newSyncResult.identityDeletionProcesses);
+            syncResult.files.push(...newSyncResult.files);
             iterationNumber++;
         } while (!until(syncResult) && iterationNumber < 20);
 
