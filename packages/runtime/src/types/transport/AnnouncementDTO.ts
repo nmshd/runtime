@@ -5,6 +5,7 @@ export interface AnnouncementDTO {
     severity: AnnouncementSeverity;
     title: string;
     body: string;
+    iqlQuery?: string;
 }
 
 export enum AnnouncementSeverity {
