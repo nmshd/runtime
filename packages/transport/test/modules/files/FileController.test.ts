@@ -195,6 +195,15 @@ describe("FileController", function () {
             await TestUtil.expectThrowsRequestErrorAsync(recipient.files.regenerateFileOwnershipToken(file.id), "error.platform.forbidden", 403);
         });
 
+        test("should fetch a File after the ownership was transferred as the previous owner", async function () {
+            await recipient.files.getOrLoadFile(senderFile.id, senderFile.secretKey);
+            await recipient.files.claimFileOwnership(senderFile.id, ownershipToken);
+
+            const [fetchedFile] = await sender.files.updateCache([senderFile.id.toString()]);
+            expect(fetchedFile.isOwn).toBe(false);
+            expect(fetchedFile.cache!.owner).toStrictEqual(recipient.identity.address);
+        });
+
         test("should claim the ownership of a File with a valid ownershipToken as not the owner after loading it", async function () {
             const file = await TestUtil.uploadFile(sender, CoreBuffer.fromUtf8("Test"));
 

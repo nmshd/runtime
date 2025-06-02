@@ -110,7 +110,7 @@ export class FileController extends TransportController {
         const cachedFile = await this.decryptFile(response, file.secretKey);
         file.setCache(cachedFile);
 
-        // Update isOwn, as it is possible that the identity receives an attachment with an own File.
+        // Update isOwn, as it is possible that the identity receives an attachment with an own File or the ownership was transferred.
         file.isOwn = this.parent.identity.isMe(cachedFile.owner);
     }
 
