@@ -1,6 +1,6 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { DeviceOnboardingInfoDTO, FileDVO, IdentityDVO, LocalRequestDVO, MailDVO, MessageDVO, RequestMessageDVO } from "@nmshd/runtime";
-import { IUIBridge, LocalAccountDTO, UserfriendlyApplicationError } from "../../src";
+import { IUIBridge, LocalAccountDTO } from "../../src";
 
 export type MockUIBridgeCall =
     | { method: "showMessage"; account: LocalAccountDTO; relationship: IdentityDVO; message: MessageDVO | MailDVO | RequestMessageDVO }
@@ -8,9 +8,9 @@ export type MockUIBridgeCall =
     | { method: "showFile"; account: LocalAccountDTO; file: FileDVO }
     | { method: "showDeviceOnboarding"; deviceOnboardingInfo: DeviceOnboardingInfoDTO }
     | { method: "showRequest"; account: LocalAccountDTO; request: LocalRequestDVO }
-    | { method: "showError"; error: UserfriendlyApplicationError; account?: LocalAccountDTO }
+    | { method: "showError"; error: ApplicationError; account?: LocalAccountDTO }
     | { method: "requestAccountSelection"; possibleAccounts: LocalAccountDTO[]; title?: string; description?: string }
-    | { method: "enterPassword"; passwordType: "pw" | "pin"; pinLength?: number; attempt?: number };
+    | { method: "enterPassword"; passwordType: "pw" | "pin"; pinLength?: number; attempt?: number; passwordLocationIndicator?: number };
 
 export class MockUIBridge implements IUIBridge {
     private _accountIdToReturn: string | undefined;
@@ -65,7 +65,7 @@ export class MockUIBridge implements IUIBridge {
         return Promise.resolve(Result.ok(undefined));
     }
 
-    public showError(error: UserfriendlyApplicationError, account?: LocalAccountDTO): Promise<Result<void>> {
+    public showError(error: ApplicationError, account?: LocalAccountDTO): Promise<Result<void>> {
         this._calls.push({ method: "showError", error, account });
 
         return Promise.resolve(Result.ok(undefined));
@@ -82,8 +82,8 @@ export class MockUIBridge implements IUIBridge {
         return Promise.resolve(Result.ok(foundAccount));
     }
 
-    public enterPassword(passwordType: "pw" | "pin", pinLength?: number, attempt?: number): Promise<Result<string>> {
-        this._calls.push({ method: "enterPassword", passwordType, pinLength, attempt });
+    public enterPassword(passwordType: "pw" | "pin", pinLength?: number, attempt?: number, passwordLocationIndicator?: number): Promise<Result<string>> {
+        this._calls.push({ method: "enterPassword", passwordType, pinLength, attempt, passwordLocationIndicator });
 
         const password = this._passwordToReturnForAttempt[attempt ?? 1];
         if (!password) return Promise.resolve(Result.fail(new ApplicationError("code", "message")));

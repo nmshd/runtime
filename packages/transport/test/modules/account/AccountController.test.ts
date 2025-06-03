@@ -11,11 +11,11 @@ describe("AccountController", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 1);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 1);
         account = accounts[0];
     });
 
@@ -25,8 +25,8 @@ describe("AccountController", function () {
         await connection.close();
     });
 
-    // eslint-disable-next-line jest/expect-expect
     test("should init a second time", async function () {
-        await account!.init();
+        const promise = account!.init();
+        await expect(promise).resolves.not.toThrow();
     });
 });

@@ -4,10 +4,11 @@ import { CachedToken, PasswordProtection, Token, TokenController } from "@nmshd/
 import { Inject } from "@nmshd/typescript-ioc";
 import { nameof } from "ts-simple-nameof";
 import { TokenDTO } from "../../../types";
-import { OwnerRestriction, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { OwnerRestriction, PasswordProtectionMapper, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { TokenMapper } from "./TokenMapper";
 
 export interface GetTokensQuery {
+    isOwn?: string | string[];
     createdAt?: string | string[];
     createdBy?: string | string[];
     createdByDevice?: string | string[];
@@ -16,6 +17,7 @@ export interface GetTokensQuery {
     passwordProtection?: "" | "!";
     "passwordProtection.password"?: string | string[];
     "passwordProtection.passwordIsPin"?: "true" | "!";
+    "passwordProtection.passwordLocationIndicator"?: string | string[];
 }
 
 export interface GetTokensRequest {
@@ -32,6 +34,7 @@ class Validator extends SchemaValidator<GetTokensRequest> {
 export class GetTokensUseCase extends UseCase<GetTokensRequest, TokenDTO[]> {
     private static readonly queryTranslator = new QueryTranslator({
         whitelist: {
+            [nameof<TokenDTO>((r) => r.isOwn)]: true,
             [nameof<TokenDTO>((t) => t.createdAt)]: true,
             [nameof<TokenDTO>((t) => t.createdBy)]: true,
             [nameof<TokenDTO>((t) => t.createdByDevice)]: true,
@@ -39,9 +42,11 @@ export class GetTokensUseCase extends UseCase<GetTokensRequest, TokenDTO[]> {
             [nameof<TokenDTO>((t) => t.forIdentity)]: true,
             [nameof<TokenDTO>((r) => r.passwordProtection)]: true,
             [`${nameof<TokenDTO>((r) => r.passwordProtection)}.password`]: true,
-            [`${nameof<TokenDTO>((r) => r.passwordProtection)}.passwordIsPin`]: true
+            [`${nameof<TokenDTO>((r) => r.passwordProtection)}.passwordIsPin`]: true,
+            [`${nameof<TokenDTO>((r) => r.passwordProtection)}.passwordLocationIndicator`]: true
         },
         alias: {
+            [nameof<TokenDTO>((r) => r.isOwn)]: nameof<Token>((r) => r.isOwn),
             [nameof<TokenDTO>((t) => t.createdAt)]: `${nameof<Token>((t) => t.cache)}.${[nameof<CachedToken>((t) => t.createdAt)]}`,
             [nameof<TokenDTO>((t) => t.createdBy)]: `${nameof<Token>((t) => t.cache)}.${[nameof<CachedToken>((t) => t.createdBy)]}`,
             [nameof<TokenDTO>((t) => t.createdByDevice)]: `${nameof<Token>((t) => t.cache)}.${[nameof<CachedToken>((t) => t.createdByDevice)]}`,
@@ -50,7 +55,7 @@ export class GetTokensUseCase extends UseCase<GetTokensRequest, TokenDTO[]> {
             [nameof<TokenDTO>((r) => r.passwordProtection)]: nameof<Token>((r) => r.passwordProtection)
         },
         custom: {
-            [`${nameof<TokenDTO>((r) => r.passwordProtection)}.password`]: (query: any, input: string) => {
+            [`${nameof<TokenDTO>((r) => r.passwordProtection)}.password`]: (query: any, input: string | string[]) => {
                 query[`${nameof<Token>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.password)}`] = input;
             },
             [`${nameof<TokenDTO>((t) => t.passwordProtection)}.passwordIsPin`]: (query: any, input: string) => {
@@ -62,6 +67,10 @@ export class GetTokensUseCase extends UseCase<GetTokensRequest, TokenDTO[]> {
                 if (input === "!") {
                     query[`${nameof<Token>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordType)}`] = "pw";
                 }
+            },
+            [`${nameof<TokenDTO>((r) => r.passwordProtection)}.passwordLocationIndicator`]: (query: any, input: string | string[]) => {
+                const queryValue = PasswordProtectionMapper.mapPasswordLocationIndicatorFromQuery(input);
+                query[`${nameof<Token>((t) => t.passwordProtection)}.${nameof<PasswordProtection>((t) => t.passwordLocationIndicator)}`] = queryValue;
             }
         }
     });

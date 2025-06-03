@@ -136,6 +136,10 @@ export const AcceptIncomingRequestRequest: any = {
                             }
                         ]
                     }
+                },
+                "decidedByAutomation": {
+                    "type": "boolean",
+                    "const": true
                 }
             },
             "required": [
@@ -332,7 +336,13 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/FreeTextRequestItemJSON"
                 },
                 {
+                    "$ref": "#/definitions/FormFieldRequestItemJSON"
+                },
+                {
                     "$ref": "#/definitions/RegisterAttributeListenerRequestItemJSON"
+                },
+                {
+                    "$ref": "#/definitions/TransferFileOwnershipRequestItemJSON"
                 }
             ]
         },
@@ -1064,7 +1074,8 @@ export const CanCreateOutgoingRequestRequest: any = {
             "type": "object",
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "Consent"
                 },
                 "@context": {
                     "type": "string"
@@ -1076,6 +1087,9 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "link": {
+                    "type": "string"
+                },
+                "linkDisplayText": {
                     "type": "string"
                 }
             },
@@ -2800,22 +2814,11 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "owner": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/ThirdPartyRelationshipAttributeQueryOwner"
-                        },
-                        {
-                            "type": "string",
-                            "const": "thirdParty"
-                        },
-                        {
-                            "type": "string",
-                            "const": "recipient"
-                        },
-                        {
-                            "type": "string",
-                            "const": ""
-                        }
+                    "type": "string",
+                    "enum": [
+                        "thirdParty",
+                        "recipient",
+                        ""
                     ]
                 },
                 "thirdParty": {
@@ -2838,14 +2841,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "thirdParty"
             ],
             "additionalProperties": false
-        },
-        "ThirdPartyRelationshipAttributeQueryOwner": {
-            "type": "string",
-            "enum": [
-                "thirdParty",
-                "recipient",
-                ""
-            ]
         },
         "ConsentRequestItemJSON": {
             "type": "object",
@@ -2884,6 +2879,9 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "link": {
+                    "type": "string"
+                },
+                "linkDisplayText": {
                     "type": "string"
                 }
             },
@@ -2978,6 +2976,260 @@ export const CanCreateOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
+        "FormFieldRequestItemJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "FormFieldRequestItem"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "requireManualDecision": {
+                    "type": "boolean",
+                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                },
+                "settings": {
+                    "$ref": "#/definitions/FormFieldSettingsJSONDerivations"
+                }
+            },
+            "required": [
+                "@type",
+                "mustBeAccepted",
+                "settings",
+                "title"
+            ],
+            "additionalProperties": false
+        },
+        "FormFieldSettingsJSONDerivations": {
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/StringFormFieldSettingsJSON"
+                },
+                {
+                    "$ref": "#/definitions/IntegerFormFieldSettingsJSON"
+                },
+                {
+                    "$ref": "#/definitions/DoubleFormFieldSettingsJSON"
+                },
+                {
+                    "$ref": "#/definitions/BooleanFormFieldSettingsJSON"
+                },
+                {
+                    "$ref": "#/definitions/DateFormFieldSettingsJSON"
+                },
+                {
+                    "$ref": "#/definitions/SelectionFormFieldSettingsJSON"
+                },
+                {
+                    "$ref": "#/definitions/RatingFormFieldSettingsJSON"
+                }
+            ]
+        },
+        "StringFormFieldSettingsJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "StringFormFieldSettings"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "allowNewlines": {
+                    "type": "boolean",
+                    "const": true
+                },
+                "min": {
+                    "type": "number"
+                },
+                "max": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "@type"
+            ],
+            "additionalProperties": false
+        },
+        "IntegerFormFieldSettingsJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "IntegerFormFieldSettings"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "unit": {
+                    "type": "string"
+                },
+                "min": {
+                    "type": "number"
+                },
+                "max": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "@type"
+            ],
+            "additionalProperties": false
+        },
+        "DoubleFormFieldSettingsJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "DoubleFormFieldSettings"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "unit": {
+                    "type": "string"
+                },
+                "min": {
+                    "type": "number"
+                },
+                "max": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "@type"
+            ],
+            "additionalProperties": false
+        },
+        "BooleanFormFieldSettingsJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "BooleanFormFieldSettings"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type"
+            ],
+            "additionalProperties": false
+        },
+        "DateFormFieldSettingsJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "DateFormFieldSettings"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type"
+            ],
+            "additionalProperties": false
+        },
+        "SelectionFormFieldSettingsJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "SelectionFormFieldSettings"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "options": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "allowMultipleSelection": {
+                    "type": "boolean",
+                    "const": true
+                }
+            },
+            "required": [
+                "@type",
+                "options"
+            ],
+            "additionalProperties": false
+        },
+        "RatingFormFieldSettingsJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "RatingFormFieldSettings"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "maxRating": {
+                    "type": "number",
+                    "enum": [
+                        5,
+                        6,
+                        7,
+                        8,
+                        9,
+                        10
+                    ]
+                }
+            },
+            "required": [
+                "@type",
+                "maxRating"
+            ],
+            "additionalProperties": false
+        },
         "RegisterAttributeListenerRequestItemJSON": {
             "type": "object",
             "properties": {
@@ -3029,6 +3281,50 @@ export const CanCreateOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
+        "TransferFileOwnershipRequestItemJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "TransferFileOwnershipRequestItem"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "requireManualDecision": {
+                    "type": "boolean",
+                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                },
+                "fileReference": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "fileReference",
+                "mustBeAccepted"
+            ],
+            "additionalProperties": false
+        },
         "AddressString": {
             "type": "string",
             "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
@@ -3059,6 +3355,10 @@ export const RejectIncomingRequestRequest: any = {
                             }
                         ]
                     }
+                },
+                "decidedByAutomation": {
+                    "type": "boolean",
+                    "const": true
                 }
             },
             "required": [
@@ -3325,6 +3625,12 @@ export const CompleteOutgoingRequestRequest: any = {
                 },
                 {
                     "$ref": "#/definitions/FreeTextAcceptResponseItemJSON"
+                },
+                {
+                    "$ref": "#/definitions/FormFieldAcceptResponseItemJSON"
+                },
+                {
+                    "$ref": "#/definitions/TransferFileOwnershipAcceptResponseItemJSON"
                 }
             ]
         },
@@ -5303,7 +5609,8 @@ export const CompleteOutgoingRequestRequest: any = {
             "type": "object",
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "Consent"
                 },
                 "@context": {
                     "type": "string"
@@ -5315,6 +5622,9 @@ export const CompleteOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "link": {
+                    "type": "string"
+                },
+                "linkDisplayText": {
                     "type": "string"
                 }
             },
@@ -5521,6 +5831,82 @@ export const CompleteOutgoingRequestRequest: any = {
             "required": [
                 "@type",
                 "freeText",
+                "result"
+            ],
+            "additionalProperties": false
+        },
+        "FormFieldAcceptResponseItemJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "FormFieldAcceptResponseItem"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "result": {
+                    "type": "string",
+                    "const": "Accepted"
+                },
+                "response": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "number"
+                        },
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "@type",
+                "response",
+                "result"
+            ],
+            "additionalProperties": false
+        },
+        "TransferFileOwnershipAcceptResponseItemJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "TransferFileOwnershipAcceptResponseItem"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "result": {
+                    "type": "string",
+                    "const": "Accepted"
+                },
+                "attributeId": {
+                    "type": "string"
+                },
+                "attribute": {
+                    "$ref": "#/definitions/IdentityAttributeJSON"
+                }
+            },
+            "required": [
+                "@type",
+                "attribute",
+                "attributeId",
                 "result"
             ],
             "additionalProperties": false
@@ -5758,6 +6144,12 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                 },
                 {
                     "$ref": "#/definitions/FreeTextAcceptResponseItemJSON"
+                },
+                {
+                    "$ref": "#/definitions/FormFieldAcceptResponseItemJSON"
+                },
+                {
+                    "$ref": "#/definitions/TransferFileOwnershipAcceptResponseItemJSON"
                 }
             ]
         },
@@ -7736,7 +8128,8 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
             "type": "object",
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "Consent"
                 },
                 "@context": {
                     "type": "string"
@@ -7748,6 +8141,9 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                     "type": "string"
                 },
                 "link": {
+                    "type": "string"
+                },
+                "linkDisplayText": {
                     "type": "string"
                 }
             },
@@ -7958,6 +8354,82 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
             ],
             "additionalProperties": false
         },
+        "FormFieldAcceptResponseItemJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "FormFieldAcceptResponseItem"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "result": {
+                    "type": "string",
+                    "const": "Accepted"
+                },
+                "response": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "number"
+                        },
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "@type",
+                "response",
+                "result"
+            ],
+            "additionalProperties": false
+        },
+        "TransferFileOwnershipAcceptResponseItemJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "TransferFileOwnershipAcceptResponseItem"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "result": {
+                    "type": "string",
+                    "const": "Accepted"
+                },
+                "attributeId": {
+                    "type": "string"
+                },
+                "attribute": {
+                    "$ref": "#/definitions/IdentityAttributeJSON"
+                }
+            },
+            "required": [
+                "@type",
+                "attribute",
+                "attributeId",
+                "result"
+            ],
+            "additionalProperties": false
+        },
         "RejectResponseItemJSONDerivations": {
             "$ref": "#/definitions/RejectResponseItemJSON"
         },
@@ -8159,7 +8631,13 @@ export const CreateOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/FreeTextRequestItemJSON"
                 },
                 {
+                    "$ref": "#/definitions/FormFieldRequestItemJSON"
+                },
+                {
                     "$ref": "#/definitions/RegisterAttributeListenerRequestItemJSON"
+                },
+                {
+                    "$ref": "#/definitions/TransferFileOwnershipRequestItemJSON"
                 }
             ]
         },
@@ -8891,7 +9369,8 @@ export const CreateOutgoingRequestRequest: any = {
             "type": "object",
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "Consent"
                 },
                 "@context": {
                     "type": "string"
@@ -8903,6 +9382,9 @@ export const CreateOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "link": {
+                    "type": "string"
+                },
+                "linkDisplayText": {
                     "type": "string"
                 }
             },
@@ -10627,22 +11109,11 @@ export const CreateOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "owner": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/ThirdPartyRelationshipAttributeQueryOwner"
-                        },
-                        {
-                            "type": "string",
-                            "const": "thirdParty"
-                        },
-                        {
-                            "type": "string",
-                            "const": "recipient"
-                        },
-                        {
-                            "type": "string",
-                            "const": ""
-                        }
+                    "type": "string",
+                    "enum": [
+                        "thirdParty",
+                        "recipient",
+                        ""
                     ]
                 },
                 "thirdParty": {
@@ -10665,14 +11136,6 @@ export const CreateOutgoingRequestRequest: any = {
                 "thirdParty"
             ],
             "additionalProperties": false
-        },
-        "ThirdPartyRelationshipAttributeQueryOwner": {
-            "type": "string",
-            "enum": [
-                "thirdParty",
-                "recipient",
-                ""
-            ]
         },
         "ConsentRequestItemJSON": {
             "type": "object",
@@ -10711,6 +11174,9 @@ export const CreateOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "link": {
+                    "type": "string"
+                },
+                "linkDisplayText": {
                     "type": "string"
                 }
             },
@@ -10805,6 +11271,260 @@ export const CreateOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
+        "FormFieldRequestItemJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "FormFieldRequestItem"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "requireManualDecision": {
+                    "type": "boolean",
+                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                },
+                "settings": {
+                    "$ref": "#/definitions/FormFieldSettingsJSONDerivations"
+                }
+            },
+            "required": [
+                "@type",
+                "mustBeAccepted",
+                "settings",
+                "title"
+            ],
+            "additionalProperties": false
+        },
+        "FormFieldSettingsJSONDerivations": {
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/StringFormFieldSettingsJSON"
+                },
+                {
+                    "$ref": "#/definitions/IntegerFormFieldSettingsJSON"
+                },
+                {
+                    "$ref": "#/definitions/DoubleFormFieldSettingsJSON"
+                },
+                {
+                    "$ref": "#/definitions/BooleanFormFieldSettingsJSON"
+                },
+                {
+                    "$ref": "#/definitions/DateFormFieldSettingsJSON"
+                },
+                {
+                    "$ref": "#/definitions/SelectionFormFieldSettingsJSON"
+                },
+                {
+                    "$ref": "#/definitions/RatingFormFieldSettingsJSON"
+                }
+            ]
+        },
+        "StringFormFieldSettingsJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "StringFormFieldSettings"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "allowNewlines": {
+                    "type": "boolean",
+                    "const": true
+                },
+                "min": {
+                    "type": "number"
+                },
+                "max": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "@type"
+            ],
+            "additionalProperties": false
+        },
+        "IntegerFormFieldSettingsJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "IntegerFormFieldSettings"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "unit": {
+                    "type": "string"
+                },
+                "min": {
+                    "type": "number"
+                },
+                "max": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "@type"
+            ],
+            "additionalProperties": false
+        },
+        "DoubleFormFieldSettingsJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "DoubleFormFieldSettings"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "unit": {
+                    "type": "string"
+                },
+                "min": {
+                    "type": "number"
+                },
+                "max": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "@type"
+            ],
+            "additionalProperties": false
+        },
+        "BooleanFormFieldSettingsJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "BooleanFormFieldSettings"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type"
+            ],
+            "additionalProperties": false
+        },
+        "DateFormFieldSettingsJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "DateFormFieldSettings"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type"
+            ],
+            "additionalProperties": false
+        },
+        "SelectionFormFieldSettingsJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "SelectionFormFieldSettings"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "options": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "allowMultipleSelection": {
+                    "type": "boolean",
+                    "const": true
+                }
+            },
+            "required": [
+                "@type",
+                "options"
+            ],
+            "additionalProperties": false
+        },
+        "RatingFormFieldSettingsJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "RatingFormFieldSettings"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "maxRating": {
+                    "type": "number",
+                    "enum": [
+                        5,
+                        6,
+                        7,
+                        8,
+                        9,
+                        10
+                    ]
+                }
+            },
+            "required": [
+                "@type",
+                "maxRating"
+            ],
+            "additionalProperties": false
+        },
         "RegisterAttributeListenerRequestItemJSON": {
             "type": "object",
             "properties": {
@@ -10853,6 +11573,50 @@ export const CreateOutgoingRequestRequest: any = {
                 "@type",
                 "mustBeAccepted",
                 "query"
+            ],
+            "additionalProperties": false
+        },
+        "TransferFileOwnershipRequestItemJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "TransferFileOwnershipRequestItem"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "requireManualDecision": {
+                    "type": "boolean",
+                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                },
+                "fileReference": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "fileReference",
+                "mustBeAccepted"
             ],
             "additionalProperties": false
         },
@@ -10995,6 +11759,9 @@ export const GetIncomingRequestsRequest: any = {
                             }
                         }
                     ]
+                },
+                "wasAutomaticallyDecided": {
+                    "type": "string"
                 },
                 "content.expiresAt": {
                     "anyOf": [
@@ -11510,7 +12277,13 @@ export const ReceivedIncomingRequestRequest: any = {
                     "$ref": "#/definitions/FreeTextRequestItemJSON"
                 },
                 {
+                    "$ref": "#/definitions/FormFieldRequestItemJSON"
+                },
+                {
                     "$ref": "#/definitions/RegisterAttributeListenerRequestItemJSON"
+                },
+                {
+                    "$ref": "#/definitions/TransferFileOwnershipRequestItemJSON"
                 }
             ]
         },
@@ -12242,7 +13015,8 @@ export const ReceivedIncomingRequestRequest: any = {
             "type": "object",
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "Consent"
                 },
                 "@context": {
                     "type": "string"
@@ -12254,6 +13028,9 @@ export const ReceivedIncomingRequestRequest: any = {
                     "type": "string"
                 },
                 "link": {
+                    "type": "string"
+                },
+                "linkDisplayText": {
                     "type": "string"
                 }
             },
@@ -13978,22 +14755,11 @@ export const ReceivedIncomingRequestRequest: any = {
                     "type": "string"
                 },
                 "owner": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/ThirdPartyRelationshipAttributeQueryOwner"
-                        },
-                        {
-                            "type": "string",
-                            "const": "thirdParty"
-                        },
-                        {
-                            "type": "string",
-                            "const": "recipient"
-                        },
-                        {
-                            "type": "string",
-                            "const": ""
-                        }
+                    "type": "string",
+                    "enum": [
+                        "thirdParty",
+                        "recipient",
+                        ""
                     ]
                 },
                 "thirdParty": {
@@ -14016,14 +14782,6 @@ export const ReceivedIncomingRequestRequest: any = {
                 "thirdParty"
             ],
             "additionalProperties": false
-        },
-        "ThirdPartyRelationshipAttributeQueryOwner": {
-            "type": "string",
-            "enum": [
-                "thirdParty",
-                "recipient",
-                ""
-            ]
         },
         "ConsentRequestItemJSON": {
             "type": "object",
@@ -14062,6 +14820,9 @@ export const ReceivedIncomingRequestRequest: any = {
                     "type": "string"
                 },
                 "link": {
+                    "type": "string"
+                },
+                "linkDisplayText": {
                     "type": "string"
                 }
             },
@@ -14156,6 +14917,260 @@ export const ReceivedIncomingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
+        "FormFieldRequestItemJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "FormFieldRequestItem"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "requireManualDecision": {
+                    "type": "boolean",
+                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                },
+                "settings": {
+                    "$ref": "#/definitions/FormFieldSettingsJSONDerivations"
+                }
+            },
+            "required": [
+                "@type",
+                "mustBeAccepted",
+                "settings",
+                "title"
+            ],
+            "additionalProperties": false
+        },
+        "FormFieldSettingsJSONDerivations": {
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/StringFormFieldSettingsJSON"
+                },
+                {
+                    "$ref": "#/definitions/IntegerFormFieldSettingsJSON"
+                },
+                {
+                    "$ref": "#/definitions/DoubleFormFieldSettingsJSON"
+                },
+                {
+                    "$ref": "#/definitions/BooleanFormFieldSettingsJSON"
+                },
+                {
+                    "$ref": "#/definitions/DateFormFieldSettingsJSON"
+                },
+                {
+                    "$ref": "#/definitions/SelectionFormFieldSettingsJSON"
+                },
+                {
+                    "$ref": "#/definitions/RatingFormFieldSettingsJSON"
+                }
+            ]
+        },
+        "StringFormFieldSettingsJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "StringFormFieldSettings"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "allowNewlines": {
+                    "type": "boolean",
+                    "const": true
+                },
+                "min": {
+                    "type": "number"
+                },
+                "max": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "@type"
+            ],
+            "additionalProperties": false
+        },
+        "IntegerFormFieldSettingsJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "IntegerFormFieldSettings"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "unit": {
+                    "type": "string"
+                },
+                "min": {
+                    "type": "number"
+                },
+                "max": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "@type"
+            ],
+            "additionalProperties": false
+        },
+        "DoubleFormFieldSettingsJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "DoubleFormFieldSettings"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "unit": {
+                    "type": "string"
+                },
+                "min": {
+                    "type": "number"
+                },
+                "max": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "@type"
+            ],
+            "additionalProperties": false
+        },
+        "BooleanFormFieldSettingsJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "BooleanFormFieldSettings"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type"
+            ],
+            "additionalProperties": false
+        },
+        "DateFormFieldSettingsJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "DateFormFieldSettings"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type"
+            ],
+            "additionalProperties": false
+        },
+        "SelectionFormFieldSettingsJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "SelectionFormFieldSettings"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "options": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "allowMultipleSelection": {
+                    "type": "boolean",
+                    "const": true
+                }
+            },
+            "required": [
+                "@type",
+                "options"
+            ],
+            "additionalProperties": false
+        },
+        "RatingFormFieldSettingsJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "RatingFormFieldSettings"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "maxRating": {
+                    "type": "number",
+                    "enum": [
+                        5,
+                        6,
+                        7,
+                        8,
+                        9,
+                        10
+                    ]
+                }
+            },
+            "required": [
+                "@type",
+                "maxRating"
+            ],
+            "additionalProperties": false
+        },
         "RegisterAttributeListenerRequestItemJSON": {
             "type": "object",
             "properties": {
@@ -14204,6 +15219,50 @@ export const ReceivedIncomingRequestRequest: any = {
                 "@type",
                 "mustBeAccepted",
                 "query"
+            ],
+            "additionalProperties": false
+        },
+        "TransferFileOwnershipRequestItemJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "TransferFileOwnershipRequestItem"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string",
+                    "description": "The human-readable title of this item."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "requireManualDecision": {
+                    "type": "boolean",
+                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                },
+                "fileReference": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "fileReference",
+                "mustBeAccepted"
             ],
             "additionalProperties": false
         },
@@ -14948,7 +16007,8 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
             "type": "object",
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "Consent"
                 },
                 "@context": {
                     "type": "string"
@@ -14960,6 +16020,9 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
                     "type": "string"
                 },
                 "link": {
+                    "type": "string"
+                },
+                "linkDisplayText": {
                     "type": "string"
                 }
             },
@@ -15596,22 +16659,11 @@ export const ExecuteThirdPartyRelationshipAttributeQueryRequest: any = {
                     "type": "string"
                 },
                 "owner": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/ThirdPartyRelationshipAttributeQueryOwner"
-                        },
-                        {
-                            "type": "string",
-                            "const": "thirdParty"
-                        },
-                        {
-                            "type": "string",
-                            "const": "recipient"
-                        },
-                        {
-                            "type": "string",
-                            "const": ""
-                        }
+                    "type": "string",
+                    "enum": [
+                        "thirdParty",
+                        "recipient",
+                        ""
                     ]
                 },
                 "thirdParty": {
@@ -15634,14 +16686,6 @@ export const ExecuteThirdPartyRelationshipAttributeQueryRequest: any = {
                 "thirdParty"
             ],
             "additionalProperties": false
-        },
-        "ThirdPartyRelationshipAttributeQueryOwner": {
-            "type": "string",
-            "enum": [
-                "thirdParty",
-                "recipient",
-                ""
-            ]
         }
     }
 }
@@ -16614,6 +17658,29 @@ export const NotifyPeerAboutRepositoryAttributeSuccessionRequest: any = {
     }
 }
 
+export const SetAttributeDeletionInfoOfDeletionProposedRelationshipRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/SetAttributeDeletionInfoOfDeletionProposedRelationshipRequest",
+    "definitions": {
+        "SetAttributeDeletionInfoOfDeletionProposedRelationshipRequest": {
+            "type": "object",
+            "properties": {
+                "relationshipId": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                }
+            },
+            "required": [
+                "relationshipId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
 export const ShareRepositoryAttributeRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/ShareRepositoryAttributeRequest",
@@ -17319,7 +18386,8 @@ export const SucceedRelationshipAttributeAndNotifyPeerRequest: any = {
             "type": "object",
             "properties": {
                 "@type": {
-                    "type": "string"
+                    "type": "string",
+                    "const": "Consent"
                 },
                 "@context": {
                     "type": "string"
@@ -17331,6 +18399,9 @@ export const SucceedRelationshipAttributeAndNotifyPeerRequest: any = {
                     "type": "string"
                 },
                 "link": {
+                    "type": "string"
+                },
+                "linkDisplayText": {
                     "type": "string"
                 }
             },
@@ -19393,11 +20464,11 @@ export const DownloadFileRequest: any = {
     }
 }
 
-export const LoadItemFromTruncatedReferenceRequest: any = {
+export const LoadItemFromReferenceRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/LoadItemFromTruncatedReferenceRequest",
+    "$ref": "#/definitions/LoadItemFromReferenceRequest",
     "definitions": {
-        "LoadItemFromTruncatedReferenceRequest": {
+        "LoadItemFromReferenceRequest": {
             "type": "object",
             "properties": {
                 "reference": {
@@ -19471,6 +20542,479 @@ export const RegisterPushNotificationTokenRequest: any = {
     }
 }
 
+export const CreateTokenForFileRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/CreateTokenForFileRequest",
+    "definitions": {
+        "CreateTokenForFileRequest": {
+            "type": "object",
+            "properties": {
+                "fileId": {
+                    "$ref": "#/definitions/FileIdString"
+                },
+                "expiresAt": {
+                    "$ref": "#/definitions/ISO8601DateTimeString"
+                },
+                "ephemeral": {
+                    "type": "boolean"
+                },
+                "forIdentity": {
+                    "$ref": "#/definitions/AddressString"
+                },
+                "passwordProtection": {
+                    "type": "object",
+                    "properties": {
+                        "password": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "passwordIsPin": {
+                            "type": "boolean",
+                            "const": true
+                        },
+                        "passwordLocationIndicator": {}
+                    },
+                    "required": [
+                        "password"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "fileId"
+            ],
+            "additionalProperties": false
+        },
+        "FileIdString": {
+            "type": "string",
+            "pattern": "FIL[A-Za-z0-9]{17}"
+        },
+        "ISO8601DateTimeString": {
+            "type": "string",
+            "errorMessage": "must match ISO8601 datetime format",
+            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
+        },
+        "AddressString": {
+            "type": "string",
+            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
+        }
+    }
+}
+
+export const DeleteFileRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/DeleteFileRequest",
+    "definitions": {
+        "DeleteFileRequest": {
+            "type": "object",
+            "properties": {
+                "fileId": {
+                    "$ref": "#/definitions/FileIdString"
+                }
+            },
+            "required": [
+                "fileId"
+            ],
+            "additionalProperties": false
+        },
+        "FileIdString": {
+            "type": "string",
+            "pattern": "FIL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const GetFileRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetFileRequest",
+    "definitions": {
+        "GetFileRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/FileIdString"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "additionalProperties": false
+        },
+        "FileIdString": {
+            "type": "string",
+            "pattern": "FIL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const GetFilesRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetFilesRequest",
+    "definitions": {
+        "GetFilesRequest": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "$ref": "#/definitions/GetFilesQuery"
+                },
+                "ownerRestriction": {
+                    "$ref": "#/definitions/OwnerRestriction"
+                }
+            },
+            "additionalProperties": false
+        },
+        "GetFilesQuery": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "createdBy": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "createdByDevice": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "description": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "expiresAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "filename": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "filesize": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "mimetype": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "title": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "isOwn": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "tags": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": false
+        },
+        "OwnerRestriction": {
+            "type": "string",
+            "enum": [
+                "o",
+                "p"
+            ]
+        }
+    }
+}
+
+export const GetOrLoadFileRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetOrLoadFileRequest",
+    "definitions": {
+        "GetOrLoadFileRequest": {
+            "type": "object",
+            "properties": {
+                "reference": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/TokenReferenceString"
+                        },
+                        {
+                            "$ref": "#/definitions/FileReferenceString"
+                        }
+                    ]
+                },
+                "password": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "reference"
+            ],
+            "additionalProperties": false,
+            "errorMessage": "token / file reference invalid"
+        },
+        "TokenReferenceString": {
+            "type": "string",
+            "pattern": "VE9L.{84}"
+        },
+        "FileReferenceString": {
+            "type": "string",
+            "pattern": "RklM.{84}"
+        }
+    }
+}
+
+export const RegenerateFileOwnershipTokenRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/RegenerateFileOwnershipTokenRequest",
+    "definitions": {
+        "RegenerateFileOwnershipTokenRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/FileIdString"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "additionalProperties": false
+        },
+        "FileIdString": {
+            "type": "string",
+            "pattern": "FIL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const UploadOwnFileRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/UploadOwnFileRequest",
+    "definitions": {
+        "UploadOwnFileRequest": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "object",
+                    "properties": {
+                        "BYTES_PER_ELEMENT": {
+                            "type": "number"
+                        },
+                        "buffer": {
+                            "type": "object",
+                            "properties": {
+                                "byteLength": {
+                                    "type": "number"
+                                }
+                            },
+                            "required": [
+                                "byteLength"
+                            ],
+                            "additionalProperties": false
+                        },
+                        "byteLength": {
+                            "type": "number"
+                        },
+                        "byteOffset": {
+                            "type": "number"
+                        },
+                        "length": {
+                            "type": "number"
+                        }
+                    },
+                    "required": [
+                        "BYTES_PER_ELEMENT",
+                        "buffer",
+                        "byteLength",
+                        "byteOffset",
+                        "length"
+                    ],
+                    "additionalProperties": {
+                        "type": "number"
+                    }
+                },
+                "filename": {
+                    "type": "string"
+                },
+                "mimetype": {
+                    "type": "string"
+                },
+                "expiresAt": {
+                    "$ref": "#/definitions/ISO8601DateTimeString"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "uniqueItems": true
+                }
+            },
+            "required": [
+                "content",
+                "filename",
+                "mimetype"
+            ],
+            "additionalProperties": false
+        },
+        "ISO8601DateTimeString": {
+            "type": "string",
+            "errorMessage": "must match ISO8601 datetime format",
+            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
+        }
+    }
+}
+
+export const UploadOwnFileValidatableRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/UploadOwnFileValidatableRequest",
+    "definitions": {
+        "UploadOwnFileValidatableRequest": {
+            "type": "object",
+            "properties": {
+                "filename": {
+                    "type": "string"
+                },
+                "mimetype": {
+                    "type": "string"
+                },
+                "expiresAt": {
+                    "$ref": "#/definitions/ISO8601DateTimeString"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "uniqueItems": true
+                },
+                "content": {
+                    "type": "object"
+                }
+            },
+            "required": [
+                "content",
+                "filename",
+                "mimetype"
+            ],
+            "additionalProperties": false
+        },
+        "ISO8601DateTimeString": {
+            "type": "string",
+            "errorMessage": "must match ISO8601 datetime format",
+            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
+        }
+    }
+}
+
 export const GetIdentityDeletionProcessRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/GetIdentityDeletionProcessRequest",
@@ -19537,6 +21081,213 @@ export const DownloadAttachmentRequest: any = {
         "FileIdString": {
             "type": "string",
             "pattern": "FIL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const GetAnnouncementsRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetAnnouncementsRequest",
+    "definitions": {
+        "GetAnnouncementsRequest": {
+            "type": "object",
+            "properties": {
+                "language": {
+                    "$ref": "#/definitions/LanguageISO639"
+                }
+            },
+            "required": [
+                "language"
+            ],
+            "additionalProperties": false
+        },
+        "LanguageISO639": {
+            "type": "string",
+            "enum": [
+                "aa",
+                "ab",
+                "ae",
+                "af",
+                "ak",
+                "am",
+                "an",
+                "ar",
+                "as",
+                "av",
+                "ay",
+                "az",
+                "ba",
+                "be",
+                "bg",
+                "bi",
+                "bm",
+                "bn",
+                "bo",
+                "br",
+                "bs",
+                "ca",
+                "ce",
+                "ch",
+                "co",
+                "cr",
+                "cs",
+                "cu",
+                "cv",
+                "cy",
+                "da",
+                "de",
+                "dv",
+                "dz",
+                "ee",
+                "el",
+                "en",
+                "eo",
+                "es",
+                "et",
+                "eu",
+                "fa",
+                "ff",
+                "fi",
+                "fj",
+                "fo",
+                "fr",
+                "fy",
+                "ga",
+                "gd",
+                "gl",
+                "gn",
+                "gu",
+                "gv",
+                "ha",
+                "he",
+                "hi",
+                "ho",
+                "hr",
+                "ht",
+                "hu",
+                "hy",
+                "hz",
+                "ia",
+                "id",
+                "ie",
+                "ig",
+                "ii",
+                "ik",
+                "io",
+                "is",
+                "it",
+                "iu",
+                "ja",
+                "jv",
+                "ka",
+                "kg",
+                "ki",
+                "kj",
+                "kk",
+                "kl",
+                "km",
+                "kn",
+                "ko",
+                "kr",
+                "ks",
+                "ku",
+                "kv",
+                "kw",
+                "ky",
+                "la",
+                "lb",
+                "lg",
+                "li",
+                "ln",
+                "lo",
+                "lt",
+                "lu",
+                "lv",
+                "mg",
+                "mh",
+                "mi",
+                "mk",
+                "ml",
+                "mn",
+                "mr",
+                "ms",
+                "mt",
+                "my",
+                "na",
+                "nb",
+                "nd",
+                "ne",
+                "ng",
+                "nl",
+                "nn",
+                "no",
+                "nr",
+                "nv",
+                "ny",
+                "oc",
+                "oj",
+                "om",
+                "or",
+                "os",
+                "pa",
+                "pi",
+                "pl",
+                "ps",
+                "pt",
+                "qu",
+                "rm",
+                "rn",
+                "ro",
+                "ru",
+                "rw",
+                "sa",
+                "sc",
+                "sd",
+                "se",
+                "sg",
+                "si",
+                "sk",
+                "sl",
+                "sm",
+                "sn",
+                "so",
+                "sq",
+                "sr",
+                "ss",
+                "st",
+                "su",
+                "sv",
+                "sw",
+                "ta",
+                "te",
+                "tg",
+                "th",
+                "ti",
+                "tk",
+                "tl",
+                "tn",
+                "to",
+                "tr",
+                "ts",
+                "tt",
+                "tw",
+                "ty",
+                "ug",
+                "uk",
+                "ur",
+                "uz",
+                "ve",
+                "vi",
+                "vo",
+                "wa",
+                "wo",
+                "xh",
+                "yi",
+                "yo",
+                "za",
+                "zh",
+                "zu"
+            ]
         }
     }
 }
@@ -19810,12 +21561,14 @@ export const CreateDeviceOnboardingTokenRequest: any = {
                     "type": "object",
                     "properties": {
                         "password": {
-                            "type": "string"
+                            "type": "string",
+                            "minLength": 1
                         },
                         "passwordIsPin": {
                             "type": "boolean",
                             "const": true
-                        }
+                        },
+                        "passwordLocationIndicator": {}
                     },
                     "required": [
                         "password"
@@ -20144,531 +21897,6 @@ export const UpdateDeviceRequest: any = {
         "DeviceIdString": {
             "type": "string",
             "pattern": "DVC[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const CreateQRCodeForFileRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CreateQRCodeForFileRequest",
-    "definitions": {
-        "CreateQRCodeForFileRequest": {
-            "type": "object",
-            "properties": {
-                "fileId": {
-                    "$ref": "#/definitions/FileIdString"
-                }
-            },
-            "required": [
-                "fileId"
-            ],
-            "additionalProperties": false
-        },
-        "FileIdString": {
-            "type": "string",
-            "pattern": "FIL[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const CreateTokenForFileRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CreateTokenForFileRequest",
-    "definitions": {
-        "CreateTokenForFileRequest": {
-            "type": "object",
-            "properties": {
-                "fileId": {
-                    "$ref": "#/definitions/FileIdString"
-                },
-                "expiresAt": {
-                    "$ref": "#/definitions/ISO8601DateTimeString"
-                },
-                "ephemeral": {
-                    "type": "boolean"
-                },
-                "forIdentity": {
-                    "$ref": "#/definitions/AddressString"
-                },
-                "passwordProtection": {
-                    "type": "object",
-                    "properties": {
-                        "password": {
-                            "type": "string",
-                            "minLength": 1
-                        },
-                        "passwordIsPin": {
-                            "type": "boolean",
-                            "const": true
-                        }
-                    },
-                    "required": [
-                        "password"
-                    ],
-                    "additionalProperties": false
-                }
-            },
-            "required": [
-                "fileId"
-            ],
-            "additionalProperties": false
-        },
-        "FileIdString": {
-            "type": "string",
-            "pattern": "FIL[A-Za-z0-9]{17}"
-        },
-        "ISO8601DateTimeString": {
-            "type": "string",
-            "errorMessage": "must match ISO8601 datetime format",
-            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
-        },
-        "AddressString": {
-            "type": "string",
-            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
-        }
-    }
-}
-
-export const CreateTokenQRCodeForFileRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CreateTokenQRCodeForFileRequest",
-    "definitions": {
-        "CreateTokenQRCodeForFileRequest": {
-            "type": "object",
-            "properties": {
-                "fileId": {
-                    "$ref": "#/definitions/FileIdString"
-                },
-                "expiresAt": {
-                    "$ref": "#/definitions/ISO8601DateTimeString"
-                },
-                "forIdentity": {
-                    "$ref": "#/definitions/AddressString"
-                },
-                "passwordProtection": {
-                    "type": "object",
-                    "properties": {
-                        "password": {
-                            "type": "string",
-                            "minLength": 1
-                        },
-                        "passwordIsPin": {
-                            "type": "boolean",
-                            "const": true
-                        }
-                    },
-                    "required": [
-                        "password"
-                    ],
-                    "additionalProperties": false
-                }
-            },
-            "required": [
-                "fileId"
-            ],
-            "additionalProperties": false
-        },
-        "FileIdString": {
-            "type": "string",
-            "pattern": "FIL[A-Za-z0-9]{17}"
-        },
-        "ISO8601DateTimeString": {
-            "type": "string",
-            "errorMessage": "must match ISO8601 datetime format",
-            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
-        },
-        "AddressString": {
-            "type": "string",
-            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
-        }
-    }
-}
-
-export const DeleteFileRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/DeleteFileRequest",
-    "definitions": {
-        "DeleteFileRequest": {
-            "type": "object",
-            "properties": {
-                "fileId": {
-                    "$ref": "#/definitions/FileIdString"
-                }
-            },
-            "required": [
-                "fileId"
-            ],
-            "additionalProperties": false
-        },
-        "FileIdString": {
-            "type": "string",
-            "pattern": "FIL[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const GetFileRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetFileRequest",
-    "definitions": {
-        "GetFileRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/FileIdString"
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "additionalProperties": false
-        },
-        "FileIdString": {
-            "type": "string",
-            "pattern": "FIL[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const GetFilesRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetFilesRequest",
-    "definitions": {
-        "GetFilesRequest": {
-            "type": "object",
-            "properties": {
-                "query": {
-                    "$ref": "#/definitions/GetFilesQuery"
-                },
-                "ownerRestriction": {
-                    "$ref": "#/definitions/OwnerRestriction"
-                }
-            },
-            "additionalProperties": false
-        },
-        "GetFilesQuery": {
-            "type": "object",
-            "properties": {
-                "createdAt": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "createdBy": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "createdByDevice": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "description": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "expiresAt": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "filename": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "filesize": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "mimetype": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "title": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "isOwn": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "tags": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                }
-            },
-            "additionalProperties": false
-        },
-        "OwnerRestriction": {
-            "type": "string",
-            "enum": [
-                "o",
-                "p"
-            ]
-        }
-    }
-}
-
-export const GetOrLoadFileRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetOrLoadFileRequest",
-    "definitions": {
-        "GetOrLoadFileRequest": {
-            "type": "object",
-            "properties": {
-                "reference": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/TokenReferenceString"
-                        },
-                        {
-                            "$ref": "#/definitions/FileReferenceString"
-                        }
-                    ]
-                },
-                "password": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "reference"
-            ],
-            "additionalProperties": false,
-            "errorMessage": "token / file reference invalid"
-        },
-        "TokenReferenceString": {
-            "type": "string",
-            "pattern": "VE9L.{84}"
-        },
-        "FileReferenceString": {
-            "type": "string",
-            "pattern": "RklM.{84}"
-        }
-    }
-}
-
-export const UploadOwnFileRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/UploadOwnFileRequest",
-    "definitions": {
-        "UploadOwnFileRequest": {
-            "type": "object",
-            "properties": {
-                "content": {
-                    "type": "object",
-                    "properties": {
-                        "BYTES_PER_ELEMENT": {
-                            "type": "number"
-                        },
-                        "buffer": {
-                            "type": "object",
-                            "properties": {
-                                "byteLength": {
-                                    "type": "number"
-                                }
-                            },
-                            "required": [
-                                "byteLength"
-                            ],
-                            "additionalProperties": false
-                        },
-                        "byteLength": {
-                            "type": "number"
-                        },
-                        "byteOffset": {
-                            "type": "number"
-                        },
-                        "length": {
-                            "type": "number"
-                        }
-                    },
-                    "required": [
-                        "BYTES_PER_ELEMENT",
-                        "buffer",
-                        "byteLength",
-                        "byteOffset",
-                        "length"
-                    ],
-                    "additionalProperties": {
-                        "type": "number"
-                    }
-                },
-                "filename": {
-                    "type": "string"
-                },
-                "mimetype": {
-                    "type": "string"
-                },
-                "expiresAt": {
-                    "$ref": "#/definitions/ISO8601DateTimeString"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "tags": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            },
-            "required": [
-                "content",
-                "filename",
-                "mimetype"
-            ],
-            "additionalProperties": false
-        },
-        "ISO8601DateTimeString": {
-            "type": "string",
-            "errorMessage": "must match ISO8601 datetime format",
-            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
-        }
-    }
-}
-
-export const UploadOwnFileValidatableRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/UploadOwnFileValidatableRequest",
-    "definitions": {
-        "UploadOwnFileValidatableRequest": {
-            "type": "object",
-            "properties": {
-                "filename": {
-                    "type": "string"
-                },
-                "mimetype": {
-                    "type": "string"
-                },
-                "expiresAt": {
-                    "$ref": "#/definitions/ISO8601DateTimeString"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "tags": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "content": {
-                    "type": "object"
-                }
-            },
-            "required": [
-                "content",
-                "filename",
-                "mimetype"
-            ],
-            "additionalProperties": false
-        },
-        "ISO8601DateTimeString": {
-            "type": "string",
-            "errorMessage": "must match ISO8601 datetime format",
-            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
         }
     }
 }
@@ -21002,14 +22230,16 @@ export const SendMessageRequest: any = {
                     "items": {
                         "$ref": "#/definitions/AddressString"
                     },
-                    "minItems": 1
+                    "minItems": 1,
+                    "uniqueItems": true
                 },
                 "content": {},
                 "attachments": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/FileIdString"
-                    }
+                    },
+                    "uniqueItems": true
                 }
             },
             "required": [
@@ -21450,7 +22680,8 @@ export const CreateOwnRelationshipTemplateRequest: any = {
                         "passwordIsPin": {
                             "type": "boolean",
                             "const": true
-                        }
+                        },
+                        "passwordLocationIndicator": {}
                     },
                     "required": [
                         "password"
@@ -21476,34 +22707,11 @@ export const CreateOwnRelationshipTemplateRequest: any = {
     }
 }
 
-export const CreateQRCodeForOwnTemplateRequest: any = {
+export const CreateTokenForOwnRelationshipTemplateRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CreateQRCodeForOwnTemplateRequest",
+    "$ref": "#/definitions/CreateTokenForOwnRelationshipTemplateRequest",
     "definitions": {
-        "CreateQRCodeForOwnTemplateRequest": {
-            "type": "object",
-            "properties": {
-                "templateId": {
-                    "$ref": "#/definitions/RelationshipTemplateIdString"
-                }
-            },
-            "required": [
-                "templateId"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipTemplateIdString": {
-            "type": "string",
-            "pattern": "RLT[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const CreateTokenForOwnTemplateRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CreateTokenForOwnTemplateRequest",
-    "definitions": {
-        "CreateTokenForOwnTemplateRequest": {
+        "CreateTokenForOwnRelationshipTemplateRequest": {
             "type": "object",
             "properties": {
                 "templateId": {
@@ -21528,62 +22736,8 @@ export const CreateTokenForOwnTemplateRequest: any = {
                         "passwordIsPin": {
                             "type": "boolean",
                             "const": true
-                        }
-                    },
-                    "required": [
-                        "password"
-                    ],
-                    "additionalProperties": false
-                }
-            },
-            "required": [
-                "templateId"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipTemplateIdString": {
-            "type": "string",
-            "pattern": "RLT[A-Za-z0-9]{17}"
-        },
-        "ISO8601DateTimeString": {
-            "type": "string",
-            "errorMessage": "must match ISO8601 datetime format",
-            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
-        },
-        "AddressString": {
-            "type": "string",
-            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
-        }
-    }
-}
-
-export const CreateTokenQRCodeForOwnTemplateRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CreateTokenQRCodeForOwnTemplateRequest",
-    "definitions": {
-        "CreateTokenQRCodeForOwnTemplateRequest": {
-            "type": "object",
-            "properties": {
-                "templateId": {
-                    "$ref": "#/definitions/RelationshipTemplateIdString"
-                },
-                "expiresAt": {
-                    "$ref": "#/definitions/ISO8601DateTimeString"
-                },
-                "forIdentity": {
-                    "$ref": "#/definitions/AddressString"
-                },
-                "passwordProtection": {
-                    "type": "object",
-                    "properties": {
-                        "password": {
-                            "type": "string",
-                            "minLength": 1
                         },
-                        "passwordIsPin": {
-                            "type": "boolean",
-                            "const": true
-                        }
+                        "passwordLocationIndicator": {}
                     },
                     "required": [
                         "password"
@@ -21794,6 +22948,19 @@ export const GetRelationshipTemplatesRequest: any = {
                         "true",
                         "!"
                     ]
+                },
+                "passwordProtection.passwordLocationIndicator": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
                 }
             },
             "additionalProperties": false
@@ -21873,7 +23040,8 @@ export const CreateOwnTokenRequest: any = {
                         "passwordIsPin": {
                             "type": "boolean",
                             "const": true
-                        }
+                        },
+                        "passwordLocationIndicator": {}
                     },
                     "required": [
                         "password"
@@ -21913,29 +23081,6 @@ export const DeleteTokenRequest: any = {
             },
             "required": [
                 "tokenId"
-            ],
-            "additionalProperties": false
-        },
-        "TokenIdString": {
-            "type": "string",
-            "pattern": "TOK[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const GetQRCodeForTokenRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetQRCodeForTokenRequest",
-    "definitions": {
-        "GetQRCodeForTokenRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/TokenIdString"
-                }
-            },
-            "required": [
-                "id"
             ],
             "additionalProperties": false
         },
@@ -21988,6 +23133,19 @@ export const GetTokensRequest: any = {
         "GetTokensQuery": {
             "type": "object",
             "properties": {
+                "isOwn": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
                 "createdAt": {
                     "anyOf": [
                         {
@@ -22078,6 +23236,19 @@ export const GetTokensRequest: any = {
                     "enum": [
                         "true",
                         "!"
+                    ]
+                },
+                "passwordProtection.passwordLocationIndicator": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
                     ]
                 }
             },

@@ -25,10 +25,10 @@ describe("ThirdPartyRelationshipAttributeDeletedByPeerNotificationItemProcessor"
 
     beforeAll(async function () {
         connection = await TestUtil.createConnection();
-        transport = TestUtil.createTransport(connection, mockEventBus);
+        transport = TestUtil.createTransport(mockEventBus);
         await transport.init();
 
-        const account = (await TestUtil.provideAccounts(transport, 1))[0];
+        const account = (await TestUtil.provideAccounts(transport, connection, 1))[0];
         ({ accountController: testAccount, consumptionController } = account);
     });
 

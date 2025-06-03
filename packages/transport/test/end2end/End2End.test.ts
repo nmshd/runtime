@@ -1,8 +1,8 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { JSONWrapper, Serializable } from "@js-soft/ts-serval";
-import { CoreDate, CoreId } from "@nmshd/core-types";
+import { CoreDate, CoreId, FileReference } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
-import { AccountController, FileReference, RelationshipAuditLogEntryReason, RelationshipStatus, TokenContentRelationshipTemplate, Transport } from "../../src";
+import { AccountController, RelationshipAuditLogEntryReason, RelationshipStatus, TokenContentRelationshipTemplate, Transport } from "../../src";
 import { TestUtil } from "../testHelpers/TestUtil";
 
 describe("AccountTest", function () {
@@ -11,7 +11,7 @@ describe("AccountTest", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
         await transport.init();
     });
 
@@ -20,7 +20,7 @@ describe("AccountTest", function () {
     });
 
     test("should close an account", async function () {
-        const account = await TestUtil.createAccount(transport);
+        const account = await TestUtil.createAccount(transport, connection);
         await expect(account.close()).resolves.not.toThrow();
     });
 });
@@ -33,11 +33,11 @@ describe("RelationshipTest: Accept", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 2);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 2);
         from = accounts[0];
         to = accounts[1];
     });
@@ -69,9 +69,9 @@ describe("RelationshipTest: Accept", function () {
             ephemeral: false
         });
 
-        const tokenRef = token.truncate();
+        const tokenRef = token.toTokenReference(from.config.baseUrl);
 
-        const receivedToken = await to.tokens.loadPeerTokenByTruncated(tokenRef, false);
+        const receivedToken = await to.tokens.loadPeerTokenByReference(tokenRef, false);
 
         if (!(receivedToken.cache!.content instanceof TokenContentRelationshipTemplate)) {
             throw new Error("token content not instanceof TokenContentRelationshipTemplate");
@@ -148,11 +148,11 @@ describe("RelationshipTest: Reject", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 2);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 2);
         from = accounts[0];
         to = accounts[1];
     });
@@ -183,9 +183,8 @@ describe("RelationshipTest: Reject", function () {
             ephemeral: false
         });
 
-        const tokenRef = token.truncate();
-
-        const receivedToken = await to.tokens.loadPeerTokenByTruncated(tokenRef, false);
+        const tokenRef = token.toTokenReference(from.config.baseUrl);
+        const receivedToken = await to.tokens.loadPeerTokenByReference(tokenRef, false);
 
         if (!(receivedToken.cache!.content instanceof TokenContentRelationshipTemplate)) {
             throw new Error("token content not instanceof TokenContentRelationshipTemplate");
@@ -256,11 +255,11 @@ describe("RelationshipTest: Revoke", function () {
 
     beforeEach(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 2);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 2);
         templator = accounts[0];
         requestor = accounts[1];
     });
@@ -292,9 +291,9 @@ describe("RelationshipTest: Revoke", function () {
             ephemeral: false
         });
 
-        const tokenRef = token.truncate();
+        const tokenRef = token.toTokenReference(templator.config.baseUrl);
 
-        const receivedToken = await requestor.tokens.loadPeerTokenByTruncated(tokenRef, false);
+        const receivedToken = await requestor.tokens.loadPeerTokenByReference(tokenRef, false);
 
         if (!(receivedToken.cache!.content instanceof TokenContentRelationshipTemplate)) {
             throw new Error("token content not instanceof TokenContentRelationshipTemplate");
@@ -378,9 +377,9 @@ describe("RelationshipTest: Revoke", function () {
             ephemeral: false
         });
 
-        const tokenRef = token.truncate();
+        const tokenRef = token.toTokenReference(templator.config.baseUrl);
 
-        const receivedToken = await requestor.tokens.loadPeerTokenByTruncated(tokenRef, false);
+        const receivedToken = await requestor.tokens.loadPeerTokenByReference(tokenRef, false);
 
         const receivedTemplateToken = TokenContentRelationshipTemplate.from(receivedToken.cache!.content as TokenContentRelationshipTemplate);
 
@@ -418,11 +417,11 @@ describe("RelationshipTest: Terminate", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 2);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 2);
         from = accounts[0];
         to = accounts[1];
     });
@@ -463,11 +462,11 @@ describe("RelationshipTest: Request Reactivation", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 2);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 2);
         from = accounts[0];
         to = accounts[1];
         relationshipId = (await TestUtil.addRelationship(from, to)).acceptedRelationshipFromSelf.id;
@@ -510,11 +509,11 @@ describe("RelationshipTest: Accept Reactivation", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 2);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 2);
         from = accounts[0];
         to = accounts[1];
         relationshipId = (await TestUtil.addRelationship(from, to)).acceptedRelationshipFromSelf.id;
@@ -558,11 +557,11 @@ describe("RelationshipTest: Reject Reactivation", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 2);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 2);
         from = accounts[0];
         to = accounts[1];
         relationshipId = (await TestUtil.addRelationship(from, to)).acceptedRelationshipFromSelf.id;
@@ -606,11 +605,11 @@ describe("RelationshipTest: Revoke Reactivation", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 2);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 2);
         from = accounts[0];
         to = accounts[1];
         relationshipId = (await TestUtil.addRelationship(from, to)).acceptedRelationshipFromSelf.id;
@@ -653,11 +652,11 @@ describe("RelationshipTest: Decompose", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 2);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 2);
         from = accounts[0];
         to = accounts[1];
     });
@@ -699,11 +698,11 @@ describe("RelationshipTest: validations for non-existent record", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 1);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 1);
         from = accounts[0];
     });
 
@@ -759,11 +758,11 @@ describe("RelationshipTest: validations (on terminated relationship)", function 
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 2);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 2);
         from = accounts[0];
         to = accounts[1];
         relationshipId = (await TestUtil.addRelationship(from, to)).acceptedRelationshipFromSelf.id;
@@ -832,11 +831,11 @@ describe("RelationshipTest: operation executioner validation (on pending relatio
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 2);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 2);
         from = accounts[0];
         to = accounts[1];
 
@@ -859,9 +858,9 @@ describe("RelationshipTest: operation executioner validation (on pending relatio
             ephemeral: false
         });
 
-        const tokenRef = token.truncate();
+        const tokenRef = token.toTokenReference(from.config.baseUrl);
 
-        const receivedToken = await to.tokens.loadPeerTokenByTruncated(tokenRef, false);
+        const receivedToken = await to.tokens.loadPeerTokenByReference(tokenRef, false);
 
         if (!(receivedToken.cache!.content instanceof TokenContentRelationshipTemplate)) {
             throw new Error("token content not instanceof TokenContentRelationshipTemplate");
@@ -908,11 +907,11 @@ describe("RelationshipTest: relationship status validation (on active relationsh
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 2);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 2);
         from = accounts[0];
         to = accounts[1];
         relationshipId = (await TestUtil.addRelationship(from, to)).acceptedRelationshipFromSelf.id;
@@ -966,11 +965,11 @@ describe("MessageTest", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 2);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 2);
 
         from = accounts[0];
         to = accounts[1];
@@ -1002,11 +1001,11 @@ describe("TokenTest", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 1);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 1);
         from = accounts[0];
     });
 
@@ -1037,11 +1036,11 @@ describe("FileTest", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 2);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 2);
 
         from = accounts[0];
         to = accounts[1];
@@ -1058,7 +1057,7 @@ describe("FileTest", function () {
         const content = CoreBuffer.fromUtf8("abcd");
 
         const file = await TestUtil.uploadFile(from, content);
-        const ref: any = file.toFileReference().toJSON();
+        const ref: any = file.toFileReference(from.config.baseUrl).toJSON();
 
         const parcelRef = FileReference.from(ref);
 
@@ -1074,7 +1073,7 @@ describe("FileTest", function () {
 
         const file = await TestUtil.uploadFile(from, content);
 
-        const ref: any = file.toFileReference().toJSON();
+        const ref: any = file.toFileReference(from.config.baseUrl).toJSON();
 
         const parcelRef = FileReference.from(ref);
 

@@ -14,15 +14,14 @@ export class AnonymousTokenController {
         this.client = new AnonymousTokenClient(config, correlator);
     }
 
-    public async loadPeerTokenByTruncated(truncated: string, password?: string): Promise<Token> {
-        const reference = TokenReference.fromTruncated(truncated);
-
+    public async loadPeerTokenByReference(reference: TokenReference, password?: string): Promise<Token> {
         if (reference.passwordProtection && !password) throw TransportCoreErrors.general.noPasswordProvided();
         const passwordProtection = reference.passwordProtection
             ? PasswordProtection.from({
                   salt: reference.passwordProtection.salt,
                   passwordType: reference.passwordProtection.passwordType,
-                  password: password!
+                  password: password!,
+                  passwordLocationIndicator: reference.passwordProtection.passwordLocationIndicator
               })
             : undefined;
 

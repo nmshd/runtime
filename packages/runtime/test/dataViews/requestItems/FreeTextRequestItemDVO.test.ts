@@ -121,7 +121,7 @@ describe("FreeTextRequestItemDVO", () => {
         expect(dvo.request.content.items).toHaveLength(1);
         expect(dvo.request.isDecidable).toBe(true);
         const requestItemDVO = dvo.request.content.items[0] as FreeTextRequestItemDVO;
-        expect(requestItemDVO.type).toBe("DecidableFreeTextRequestItemDVO");
+        expect(requestItemDVO.type).toBe("FreeTextRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(true);
         expect(requestItemDVO.freeText).toBe("Please accept this free text.");
         expect(requestItemDVO.mustBeAccepted).toBe(true);

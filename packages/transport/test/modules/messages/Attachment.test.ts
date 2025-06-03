@@ -21,11 +21,11 @@ describe("AttachmentTest", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 3);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 3);
 
         content = CoreBuffer.fromUtf8("abcd");
         content2 = CoreBuffer.fromUtf8("dcbadcba");

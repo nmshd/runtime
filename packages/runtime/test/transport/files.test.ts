@@ -2,7 +2,7 @@ import { CoreDate } from "@nmshd/core-types";
 import fs from "fs";
 import { DateTime } from "luxon";
 import { FileDTO, GetFilesQuery, OwnerRestriction, TransportServices } from "../../src";
-import { createToken, exchangeFile, makeUploadRequest, QueryParamConditions, RuntimeServiceProvider, uploadFile } from "../lib";
+import { exchangeFile, makeUploadRequest, QueryParamConditions, RuntimeServiceProvider, uploadFile } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let transportServices1: TransportServices;
@@ -127,6 +127,11 @@ describe("File upload", () => {
     test("cannot upload a file with empty expiry date", async () => {
         const response = await transportServices1.files.uploadOwnFile(await makeUploadRequest({ expiresAt: "" }));
         expect(response).toBeAnError("expiresAt must match ISO8601 datetime format", "error.runtime.validation.invalidPropertyValue");
+    });
+
+    test("cannot upload a file with a duplicate tag", async () => {
+        const response = await transportServices1.files.uploadOwnFile(await makeUploadRequest({ tags: ["tag1", "tag1"] }));
+        expect(response).toBeAnError("tags must NOT have duplicate items", "error.runtime.validation.invalidPropertyValue");
     });
 });
 
@@ -268,10 +273,7 @@ describe("Files query", () => {
     });
 });
 
-describe.each([
-    ["create token for file", "file" as "file" | "qrcode"],
-    ["create token QR code for file", "qrcode" as "file" | "qrcode"]
-])("Can %s", (_description: string, tokenType) => {
+describe("Can create token for file", () => {
     let file: FileDTO;
 
     beforeAll(async () => {
@@ -279,37 +281,37 @@ describe.each([
     });
 
     test("can generate token for uploaded file", async () => {
-        const response = await createToken(transportServices1, { fileId: file.id }, tokenType);
+        const response = await transportServices1.files.createTokenForFile({ fileId: file.id });
         expect(response).toBeSuccessful();
     });
 
     test("can generate token for uploaded file with explicit expiration date", async () => {
         const expiresAt = DateTime.now().plus({ minutes: 5 }).toString();
-        const response = await createToken(transportServices1, { fileId: file.id, expiresAt }, tokenType);
+        const response = await transportServices1.files.createTokenForFile({ fileId: file.id, expiresAt });
 
         expect(response).toBeSuccessful();
     });
 
     test("cannot generate token for uploaded file with wrong expiration date", async () => {
-        const response = await createToken(transportServices1, { fileId: file.id, expiresAt: "invalid date" }, tokenType);
+        const response = await transportServices1.files.createTokenForFile({ fileId: file.id, expiresAt: "invalid date" });
 
         expect(response).toBeAnError("expiresAt must match ISO8601 datetime format", "error.runtime.validation.invalidPropertyValue");
     });
 
     test("cannot generate token with wrong type of id", async () => {
-        const response = await createToken(transportServices1, { fileId: UNKNOWN_TOKEN_ID }, tokenType);
+        const response = await transportServices1.files.createTokenForFile({ fileId: UNKNOWN_TOKEN_ID });
 
         expect(response).toBeAnError("fileId must match pattern FIL.*", "error.runtime.validation.invalidPropertyValue");
     });
 
     test("cannot generate token for non-existant file", async () => {
-        const response = await createToken(transportServices1, { fileId: UNKNOWN_FILE_ID }, tokenType);
+        const response = await transportServices1.files.createTokenForFile({ fileId: UNKNOWN_FILE_ID });
 
         expect(response).toBeAnError("File not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
     });
 
     test("cannot generate token for invalid file id", async () => {
-        const response = await createToken(transportServices1, { fileId: "INVALID FILE ID" }, tokenType);
+        const response = await transportServices1.files.createTokenForFile({ fileId: "INVALID FILE ID" });
 
         expect(response).toBeAnError("fileId must match pattern FIL.*", "error.runtime.validation.invalidPropertyValue");
     });
@@ -336,7 +338,7 @@ describe("Load peer file with token reference", () => {
         const response = await transportServices2.files.getOrLoadFile({ reference: token.truncatedReference });
 
         expect(response).toBeSuccessful();
-        expect(response.value).toMatchObject({ ...file, isOwn: false });
+        expect(response.value).toMatchObject({ ...file, isOwn: false, ownershipToken: undefined });
     });
 
     test("after peer file is loaded the file can be accessed under /Files/{id}", async () => {
@@ -344,7 +346,7 @@ describe("Load peer file with token reference", () => {
 
         const response = await transportServices2.files.getFile({ id: file.id });
         expect(response).toBeSuccessful();
-        expect(response.value).toMatchObject({ ...file, isOwn: false });
+        expect(response.value).toMatchObject({ ...file, isOwn: false, ownershipToken: undefined });
     });
 
     test("after peer file is loaded it can be accessed under /Files", async () => {
@@ -352,7 +354,7 @@ describe("Load peer file with token reference", () => {
 
         const response = await transportServices2.files.getFiles({ query: { createdAt: file.createdAt } });
         expect(response).toBeSuccessful();
-        expect(response.value).toContainEqual({ ...file, isOwn: false });
+        expect(response.value).toContainEqual({ ...file, isOwn: false, ownershipToken: undefined });
     });
 
     test("should load a peer file with its tags", async () => {
@@ -421,7 +423,7 @@ describe("Load peer file with the FileReference", () => {
 
         const response = await transportServices2.files.getFile({ id: file.id });
         expect(response).toBeSuccessful();
-        expect(response.value).toMatchObject({ ...file, isOwn: false });
+        expect(response.value).toMatchObject({ ...file, isOwn: false, ownershipToken: undefined });
     });
 
     test("after peer file is loaded it can be accessed under /Files", async () => {
@@ -429,6 +431,29 @@ describe("Load peer file with the FileReference", () => {
 
         const response = await transportServices2.files.getFiles({ query: { createdAt: file.createdAt } });
         expect(response).toBeSuccessful();
-        expect(response.value).toContainEqual({ ...file, isOwn: false });
+        expect(response.value).toContainEqual({ ...file, isOwn: false, ownershipToken: undefined });
+    });
+});
+
+describe("File ownership", () => {
+    let file: FileDTO;
+
+    beforeEach(async () => {
+        file = await uploadFile(transportServices1);
+    });
+
+    test("should regenerate the ownershipToken of a File", async () => {
+        const previousOwnershipToken = file.ownershipToken;
+
+        const newOwnershipToken = (await transportServices1.files.regenerateFileOwnershipToken({ id: file.id })).value.ownershipToken;
+        expect(newOwnershipToken).toBeDefined();
+        expect(newOwnershipToken).not.toBe(previousOwnershipToken);
+    });
+
+    test("should not allow to regenerate an ownershipToken if not the owner", async () => {
+        await transportServices2.files.getOrLoadFile({ reference: file.reference.truncated });
+
+        const result = await transportServices2.files.regenerateFileOwnershipToken({ id: file.id });
+        expect(result).toBeAnError("Only the owner of the File can perform this action.", "error.runtime.files.notOwnedByYou");
     });
 });

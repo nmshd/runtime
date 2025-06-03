@@ -112,37 +112,26 @@ export class SyncController extends TransportController {
     private async _sync(whatToSync: WhatToSync, changedItems: ChangedItems): Promise<void> {
         if (whatToSync === "OnlyDatawallet") return await this.syncDatawallet(changedItems);
 
-        const externalEventSyncResult = await this.syncExternalEvents(changedItems);
+        await this.syncExternalEvents(changedItems);
 
         await this.setLastCompletedSyncTime();
-
-        if (externalEventSyncResult.some((r) => r.errorCode !== undefined)) {
-            throw new CoreError(
-                "error.transport.errorWhileApplyingExternalEvents",
-                externalEventSyncResult
-                    .filter((r) => r.errorCode !== undefined)
-                    .map((r) => r.errorCode)
-                    .join(" | ")
-            );
-        }
 
         if (this.datawalletEnabled && (await this.unpushedDatawalletModifications.exists())) {
             await this.syncDatawallet(changedItems).catch((e) => this.log.error(e));
         }
     }
 
-    private async syncExternalEvents(changedItems: ChangedItems): Promise<FinalizeSyncRunRequestExternalEventResult[]> {
+    private async syncExternalEvents(changedItems: ChangedItems): Promise<void> {
         const syncRunWasStarted = await this.startExternalEventsSyncRun();
 
         if (!syncRunWasStarted) {
             await this.syncDatawallet(changedItems);
-            return [];
+            return;
         }
 
         await this.applyIncomingDatawalletModifications();
         const result = await this.applyIncomingExternalEvents(changedItems);
         await this.finalizeExternalEventsSyncRun(result);
-        return result;
     }
 
     @log()
@@ -272,23 +261,6 @@ export class SyncController extends TransportController {
         await this.updateLocalDatawalletModificationIndex(encryptedIncomingModifications.sort(descending)[0].index);
 
         return datawalletModificationsProcessor.changedObjectIdentifiers;
-    }
-
-    private async promiseAllWithProgess<T>(promises: Promise<T>[], callback: (percentage: number) => void) {
-        callback(0);
-
-        let processedItemCount = 0;
-        for (const promise of promises) {
-            // eslint-disable-next-line no-loop-func,no-void
-            void promise.then(() => {
-                processedItemCount++;
-
-                const percentage = Math.round((processedItemCount / promises.length) * 100);
-                callback(percentage);
-            });
-        }
-
-        return await Promise.all(promises);
     }
 
     private async decryptDatawalletModifications(encryptedModifications: BackboneDatawalletModification[]): Promise<DatawalletModification[]> {

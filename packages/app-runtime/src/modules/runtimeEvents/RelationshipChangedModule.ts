@@ -1,11 +1,8 @@
 import { RelationshipAuditLogEntryReason, RelationshipChangedEvent } from "@nmshd/runtime";
-import { AppRuntimeError } from "../../AppRuntimeError";
 import { OnboardingChangeReceivedEvent } from "../../events";
 import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "../AppRuntimeModule";
 
 export interface RelationshipChangedModuleConfig extends AppRuntimeModuleConfiguration {}
-
-export class RelationshipChangedModuleError extends AppRuntimeError {}
 
 export class RelationshipChangedModule extends AppRuntimeModule<RelationshipChangedModuleConfig> {
     public async init(): Promise<void> {

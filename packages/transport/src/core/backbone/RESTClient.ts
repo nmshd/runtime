@@ -1,11 +1,11 @@
 import { ILogger } from "@js-soft/logging-abstractions";
+import { CoreIdHelper } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import formDataLib from "form-data";
 import { AgentOptions } from "http";
 import { AgentOptions as HTTPSAgentOptions } from "https";
 import _ from "lodash";
-import { CoreIdHelper } from "../CoreIdHelper";
 import { ICorrelator } from "../ICorrelator";
 import { TransportLoggerFactory } from "../TransportLoggerFactory";
 import { ClientResult } from "./ClientResult";
@@ -179,7 +179,7 @@ export class RESTClient {
 
         this._logResponse(response, platformParameters, requestId, method, path);
 
-        // Rare case: We receive status 400 JSON error from backbone when downloading a file
+        // Rare case: We receive status 400 JSON error from Backbone when downloading a file
         if (response.status === 400 && !response.data?.error && response.headers["content-type"] === "application/json; charset=utf-8") {
             try {
                 const errorText = CoreBuffer.from(response.data).toUtf8();
@@ -200,6 +200,10 @@ export class RESTClient {
         }
 
         if (response.status === 204) {
+            return ClientResult.ok<T>({} as T, platformParameters);
+        }
+
+        if (response.status === 304) {
             return ClientResult.ok<T>({} as T, platformParameters);
         }
 
@@ -440,6 +444,28 @@ export class RESTClient {
         }
     }
 
+    public async patch<T>(path: string, data?: any, config?: AxiosRequestConfig): Promise<ClientResult<T>> {
+        const id = await this.generateRequestId();
+        const conf = _.defaultsDeep({}, config);
+        if (this.logRequest()) {
+            const anyThis = this as any;
+            if (anyThis._username) {
+                this._logger.trace(`Request ${id} by ${anyThis._username}: PATCH ${path}`, data);
+            } else {
+                this._logger.trace(`Request ${id}: PATCH ${path}`, data);
+            }
+        }
+
+        try {
+            const response = await this.axiosInstance.patch<PlatformResponse<T>>(path, data, conf);
+            return this.getResult("PATCH", path, response, id);
+        } catch (e: any) {
+            const err = RequestError.fromAxiosError("PATCH", path, e, id);
+            this._logger.debug(err);
+            return ClientResult.fail<T>(err);
+        }
+    }
+
     public async delete<T>(path: string, config?: AxiosRequestConfig): Promise<ClientResult<T>> {
         const id = await this.generateRequestId();
         const conf = _.defaultsDeep({}, config);
@@ -495,7 +521,9 @@ export class RESTClient {
             responseDuration: response.headers["x-response-duration-ms"],
             responseTime: response.headers["x-response-time"],
             traceId: response.headers["x-trace-id"],
-            correlationId: response.headers["x-correlation-id"]
+            correlationId: response.headers["x-correlation-id"],
+            responseStatus: response.status,
+            etag: response.headers["etag"]
         };
     }
 

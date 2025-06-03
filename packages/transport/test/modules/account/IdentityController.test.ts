@@ -10,11 +10,11 @@ describe("IdentityController", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        [account1, account2] = await TestUtil.provideAccounts(transport, 2);
+        [account1, account2] = await TestUtil.provideAccounts(transport, connection, 2);
         await account1.init();
         await account2.init();
     });

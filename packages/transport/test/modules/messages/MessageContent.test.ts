@@ -14,11 +14,11 @@ describe("MessageContent", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 3);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 3);
 
         recipient1 = accounts[0];
         recipient2 = accounts[1];

@@ -10,7 +10,7 @@ describe("Runtime Startup", function () {
     let localAccount: LocalAccountDTO;
 
     beforeAll(async function () {
-        runtime = await TestUtil.createRuntimeWithoutInit();
+        runtime = TestUtil.createRuntimeWithoutInit();
 
         eventListener = new EventListener(runtime, [
             "runtime.initializing",

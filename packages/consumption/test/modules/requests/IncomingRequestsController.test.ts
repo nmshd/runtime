@@ -15,8 +15,8 @@ import {
     ResponseItemGroup,
     ResponseItemResult
 } from "@nmshd/content";
-import { CoreDate, CoreId } from "@nmshd/core-types";
-import { CoreIdHelper, TransportLoggerFactory } from "@nmshd/transport";
+import { CoreDate, CoreId, CoreIdHelper } from "@nmshd/core-types";
+import { TransportLoggerFactory } from "@nmshd/transport";
 import {
     AcceptReadAttributeRequestItemParametersWithNewAttributeJSON,
     ConsumptionIds,
@@ -26,7 +26,7 @@ import {
     IncomingRequestStatusChangedEvent,
     LocalRequestStatus
 } from "../../../src";
-import { TestUtil, loggerFactory } from "../../core/TestUtil";
+import { loggerFactory, TestUtil } from "../../core/TestUtil";
 import { RequestsGiven, RequestsTestsContext, RequestsThen, RequestsWhen } from "./RequestsIntegrationTest";
 import { TestObjectFactory } from "./testHelpers/TestObjectFactory";
 import { ITestRequestItem, TestRequestItem } from "./testHelpers/TestRequestItem";

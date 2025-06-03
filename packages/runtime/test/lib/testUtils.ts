@@ -14,7 +14,6 @@ import {
     ArbitraryRelationshipTemplateContentJSON,
     INotificationItem,
     Notification,
-    RelationshipCreationContent,
     RelationshipTemplateContentJSON,
     Request,
     RequestItemGroupJSON,
@@ -24,7 +23,7 @@ import {
     ShareAttributeAcceptResponseItemJSON,
     ShareAttributeRequestItem
 } from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId, PasswordLocationIndicator } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
 import { IdentityUtil } from "@nmshd/transport";
 import fs from "fs";
@@ -35,8 +34,6 @@ import {
     CreateAndShareRelationshipAttributeRequest,
     CreateOutgoingRequestRequest,
     CreateRepositoryAttributeRequest,
-    CreateTokenForFileRequest,
-    CreateTokenQRCodeForFileRequest,
     FileDTO,
     IdentityDeletionProcessDTO,
     IncomingRequestStatusChangedEvent,
@@ -68,7 +65,7 @@ import { TestRuntimeServices } from "./RuntimeServiceProvider";
 import { TestNotificationItem } from "./TestNotificationItem";
 
 export async function syncUntil(transportServices: TransportServices, until: (syncResult: SyncEverythingResponse) => boolean): Promise<SyncEverythingResponse> {
-    const finalSyncResult: SyncEverythingResponse = { messages: [], relationships: [], identityDeletionProcesses: [] };
+    const finalSyncResult: SyncEverythingResponse = { messages: [], relationships: [], identityDeletionProcesses: [], files: [] };
 
     let iterationNumber = 0;
     let criteriaMet: boolean;
@@ -166,7 +163,7 @@ export async function syncUntilHasEvent<TEvent extends Event>(
 export async function uploadOwnToken(
     transportServices: TransportServices,
     forIdentity?: string,
-    passwordProtection?: { password: string; passwordIsPin?: true }
+    passwordProtection?: { password: string; passwordIsPin?: true; passwordLocationIndicator?: PasswordLocationIndicator }
 ): Promise<TokenDTO> {
     const response = await transportServices.tokens.createOwnToken({
         content: { aKey: "aValue" },
@@ -189,27 +186,14 @@ export async function uploadFile(transportServices: TransportServices): Promise<
     return response.value;
 }
 
-export function createToken(
-    transportServices: TransportServices,
-    request: CreateTokenForFileRequest | CreateTokenQRCodeForFileRequest,
-    tokenType: "file" | "qrcode"
-): Promise<any> {
-    switch (tokenType) {
-        case "file":
-            return transportServices.files.createTokenForFile(request as CreateTokenForFileRequest);
-        case "qrcode":
-            return transportServices.files.createTokenQRCodeForFile(request as CreateTokenQRCodeForFileRequest);
-    }
-}
-
 // Override the default upload request with values
 export async function makeUploadRequest(values: object = {}): Promise<UploadOwnFileRequest> {
     return {
-        title: "File Title",
-        filename: "test.txt",
+        title: "aTitle",
+        filename: "aFileName",
         content: await fs.promises.readFile(`${__dirname}/../__assets__/test.txt`),
-        mimetype: "text/plain",
-        description: "This is a valid file description",
+        mimetype: "aMimetype",
+        description: "aDescription",
         expiresAt: DateTime.utc().plus({ minutes: 5 }).toString(),
         ...values
     };
@@ -222,7 +206,7 @@ export const emptyRelationshipCreationContent: ArbitraryRelationshipCreationCont
 export async function createTemplate(
     transportServices: TransportServices,
     body?: RelationshipTemplateContentJSON,
-    passwordProtection?: { password: string; passwordIsPin?: true },
+    passwordProtection?: { password: string; passwordIsPin?: true; passwordLocationIndicator?: PasswordLocationIndicator },
     templateExpiresAt?: DateTime
 ): Promise<RelationshipTemplateDTO> {
     const defaultExpirationDateTime = DateTime.utc().plus({ minutes: 10 }).toString();
@@ -398,42 +382,16 @@ export async function establishRelationship(transportServices1: TransportService
 export async function establishRelationshipWithContents(
     runtimeServices1: TestRuntimeServices,
     runtimeServices2: TestRuntimeServices,
-    templateContent?: RelationshipTemplateContentJSON,
-    acceptRequestItemsParameters?: (AcceptRequestItemParametersJSON | DecideRequestItemGroupParametersJSON)[]
+    templateContent: RelationshipTemplateContentJSON,
+    acceptRequestItemsParameters: (AcceptRequestItemParametersJSON | DecideRequestItemGroupParametersJSON)[]
 ): Promise<void> {
     const template = await exchangeTemplate(runtimeServices1.transport, runtimeServices2.transport, templateContent);
-    let creationContent;
+    await runtimeServices2.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.request.source!.reference === template.id);
 
-    if (templateContent && acceptRequestItemsParameters) {
-        const receivedRequest = (
-            await runtimeServices2.consumption.incomingRequests.received({
-                receivedRequest: templateContent.onNewRelationship,
-                requestSourceId: template.id
-            })
-        ).value;
+    const requestId = (await runtimeServices2.consumption.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
 
-        const checkedRequest = (
-            await runtimeServices2.consumption.incomingRequests.checkPrerequisites({
-                requestId: receivedRequest.id
-            })
-        ).value;
-
-        const manualDecisionRequiredRequest = (
-            await runtimeServices2.consumption.incomingRequests.requireManualDecision({
-                requestId: checkedRequest.id
-            })
-        ).value;
-
-        const acceptedRequest = await runtimeServices2.consumption.incomingRequests.accept({ requestId: manualDecisionRequiredRequest.id, items: acceptRequestItemsParameters });
-
-        creationContent = RelationshipCreationContent.from({ response: acceptedRequest.value.response!.content }).toJSON();
-    }
-
-    const createRelationshipResponse = await runtimeServices2.transport.relationships.createRelationship({
-        templateId: template.id,
-        creationContent: creationContent ?? emptyRelationshipCreationContent
-    });
-    expect(createRelationshipResponse).toBeSuccessful();
+    const acceptRequestResult = await runtimeServices2.consumption.incomingRequests.accept({ requestId, items: acceptRequestItemsParameters });
+    expect(acceptRequestResult).toBeSuccessful();
 
     const relationships = await syncUntilHasRelationships(runtimeServices1.transport);
     expect(relationships).toHaveLength(1);

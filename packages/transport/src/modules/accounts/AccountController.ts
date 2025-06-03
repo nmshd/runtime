@@ -10,6 +10,7 @@ import { DependencyOverrides } from "../../core/DependencyOverrides";
 import { TransportLoggerFactory } from "../../core/TransportLoggerFactory";
 import { IdentityDeletionProcessStatusChangedEvent } from "../../events/IdentityDeletionProcessStatusChangedEvent";
 import { PasswordGenerator } from "../../util";
+import { AnnouncementController } from "../announcements/AnnouncementController";
 import { CertificateController } from "../certificates/CertificateController";
 import { CertificateIssuer } from "../certificates/CertificateIssuer";
 import { CertificateValidator } from "../certificates/CertificateValidator";
@@ -52,6 +53,7 @@ export class AccountController {
 
     public info: IDatabaseMap;
 
+    public announcements: AnnouncementController;
     public challenges: ChallengeController;
     public certificates: CertificateController;
     public certificateIssuer: CertificateIssuer;
@@ -201,6 +203,7 @@ export class AccountController {
     private async initControllers() {
         this._log.trace("Initializing controllers...");
 
+        this.announcements = await new AnnouncementController(this).init();
         this.relationshipSecrets = await new RelationshipSecretController(this).init();
         this.devices = await new DevicesController(this).init();
         this.certificates = await new CertificateController(this).init();
@@ -279,7 +282,7 @@ export class AccountController {
         this._log.trace("Challenge signed. Creating device...");
 
         const [createIdentityResponse, privSync, localAddress, deviceInfo] = await Promise.all([
-            // Register first device (and identity) on backbone
+            // Register first device (and identity) on Backbone
             this.identityClient.createIdentity({
                 devicePassword: devicePwdD1,
                 identityPublicKey: identityKeypair.publicKey.toBase64(),
@@ -308,7 +311,7 @@ export class AccountController {
         this._log.trace(`Registered identity with address ${createdIdentity.address}, device id is ${createdIdentity.device.id}.`);
 
         if (!localAddress.equals(createdIdentity.address)) {
-            throw new TransportError(`The backbone address '${createdIdentity.address}' does not match the local address '${localAddress.toString()}'.`);
+            throw new TransportError(`The Backbone address '${createdIdentity.address}' does not match the local address '${localAddress.toString()}'.`);
         }
 
         const identity = Identity.from({

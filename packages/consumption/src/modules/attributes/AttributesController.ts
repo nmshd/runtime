@@ -1,3 +1,4 @@
+import { IDatabaseCollection } from "@js-soft/docdb-access-abstractions";
 import { EventBus } from "@js-soft/ts-utils";
 import {
     AbstractAttributeValue,
@@ -16,7 +17,7 @@ import {
 } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId, ICoreDate, ICoreId } from "@nmshd/core-types";
 import * as iql from "@nmshd/iql";
-import { SynchronizedCollection, TagClient, TransportCoreErrors } from "@nmshd/transport";
+import { Relationship, RelationshipStatus, SynchronizedCollection, TagClient, TransportCoreErrors } from "@nmshd/transport";
 import _ from "lodash";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
@@ -40,13 +41,19 @@ import { CreateRepositoryAttributeParams, ICreateRepositoryAttributeParams } fro
 import { CreateSharedLocalAttributeCopyParams, ICreateSharedLocalAttributeCopyParams } from "./local/CreateSharedLocalAttributeCopyParams";
 import { ICreateSharedLocalAttributeParams } from "./local/CreateSharedLocalAttributeParams";
 import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./local/LocalAttribute";
-import { LocalAttributeDeletionStatus } from "./local/LocalAttributeDeletionInfo";
+import { LocalAttributeDeletionInfo, LocalAttributeDeletionStatus } from "./local/LocalAttributeDeletionInfo";
 import { LocalAttributeShareInfo } from "./local/LocalAttributeShareInfo";
 import { IdentityAttributeQueryTranslator, RelationshipAttributeQueryTranslator, ThirdPartyRelationshipAttributeQueryTranslator } from "./local/QueryTranslator";
 
 export class AttributesController extends ConsumptionBaseController {
     private attributes: SynchronizedCollection;
+    private tagCollection: IDatabaseCollection;
     private attributeTagClient: TagClient;
+    private readTagCollectionPromise: Promise<AttributeTagCollection> | undefined;
+
+    private readonly ETAG_DB_KEY = "etag";
+    private readonly CACHE_TIMESTAMP_DB_KEY = "cacheTimestamp";
+    private readonly TAG_COLLECTION_DB_KEY = "tagCollection";
 
     public constructor(
         parent: ConsumptionController,
@@ -61,7 +68,18 @@ export class AttributesController extends ConsumptionBaseController {
         await super.init();
 
         this.attributes = await this.parent.accountController.getSynchronizedCollection("Attributes");
+        this.tagCollection = await this.parent.accountController.db.getCollection("TagCollection");
         this.attributeTagClient = new TagClient(this.parent.transport.config, this.parent.accountController.authenticator, this.parent.transport.correlator);
+
+        const tagDefinitionCacheExists = await this.tagCollection.exists({ name: this.TAG_COLLECTION_DB_KEY });
+        if (!tagDefinitionCacheExists) {
+            await this.tagCollection.create({
+                name: this.TAG_COLLECTION_DB_KEY,
+                value: AttributeTagCollection.from({ supportedLanguages: [], tagsForAttributeValueTypes: {} }).toJSON()
+            });
+        }
+        await this.tagCollection.create({ name: this.ETAG_DB_KEY, value: "" });
+        await this.tagCollection.create({ name: this.CACHE_TIMESTAMP_DB_KEY, value: undefined });
 
         return this;
     }
@@ -244,6 +262,12 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         const parsedParams = CreateRepositoryAttributeParams.from(params);
+        const trimmedAttribute = {
+            ...parsedParams.content.toJSON(),
+            value: this.trimAttributeValue(parsedParams.content.value.toJSON() as AttributeValues.Identity.Json)
+        };
+        parsedParams.content = IdentityAttribute.from(trimmedAttribute);
+
         let localAttribute = LocalAttribute.from({
             id: parsedParams.id ?? (await ConsumptionIds.attribute.generate()),
             createdAt: CoreDate.utc(),
@@ -405,6 +429,11 @@ export class AttributesController extends ConsumptionBaseController {
         validate = true
     ): Promise<{ predecessor: LocalAttribute; successor: LocalAttribute }> {
         const parsedSuccessorParams = AttributeSuccessorParams.from(successorParams);
+        const trimmedAttribute = {
+            ...parsedSuccessorParams.content.toJSON(),
+            value: this.trimAttributeValue(parsedSuccessorParams.content.value.toJSON() as AttributeValues.Identity.Json)
+        };
+        parsedSuccessorParams.content = IdentityAttribute.from(trimmedAttribute);
 
         if (validate) {
             const validationResult = await this.validateRepositoryAttributeSuccession(predecessorId, parsedSuccessorParams);
@@ -1301,20 +1330,48 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async getRepositoryAttributeWithSameValue(value: AttributeValues.Identity.Json): Promise<LocalAttribute | undefined> {
+        const trimmedValue = this.trimAttributeValue(value);
         const queryForRepositoryAttributeDuplicates = flattenObject({
             content: {
                 "@type": "IdentityAttribute",
                 owner: this.identity.address.toString(),
-                value: value
+                value: trimmedValue
             }
         });
         queryForRepositoryAttributeDuplicates["succeededBy"] = { $exists: false };
         queryForRepositoryAttributeDuplicates["shareInfo"] = { $exists: false };
 
-        const matchingRepositoryAttributes = await this.getLocalAttributes(queryForRepositoryAttributeDuplicates);
+        return await this.getAttributeWithSameValue(trimmedValue, queryForRepositoryAttributeDuplicates);
+    }
 
-        const repositoryAttributeDuplicate = matchingRepositoryAttributes.find((duplicate) => _.isEqual(duplicate.content.value.toJSON(), value));
-        return repositoryAttributeDuplicate;
+    public async getPeerSharedIdentityAttributeWithSameValue(value: AttributeValues.Identity.Json, peer: string): Promise<LocalAttribute | undefined> {
+        const trimmedValue = this.trimAttributeValue(value);
+        const queryForPeerSharedAttributeDuplicates = flattenObject({
+            content: {
+                "@type": "IdentityAttribute",
+                owner: peer,
+                value: trimmedValue
+            },
+            shareInfo: {
+                peer
+            }
+        });
+        queryForPeerSharedAttributeDuplicates["succeededBy"] = { $exists: false };
+        queryForPeerSharedAttributeDuplicates["shareInfo.sourceAttribute"] = { $exists: false };
+
+        return await this.getAttributeWithSameValue(trimmedValue, queryForPeerSharedAttributeDuplicates);
+    }
+
+    private async getAttributeWithSameValue(value: AttributeValues.Identity.Json, query: any): Promise<LocalAttribute | undefined> {
+        const matchingAttributes = await this.getLocalAttributes(query);
+
+        const attributeDuplicate = matchingAttributes.find((duplicate) => _.isEqual(duplicate.content.value.toJSON(), value));
+        return attributeDuplicate;
+    }
+
+    private trimAttributeValue(value: AttributeValues.Identity.Json): AttributeValues.Identity.Json {
+        const trimmedEntries = Object.entries(value).map((entry) => (typeof entry[1] === "string" ? [entry[0], entry[1].trim()] : entry));
+        return Object.fromEntries(trimmedEntries) as AttributeValues.Identity.Json;
     }
 
     public async getRelationshipAttributesOfValueTypeToPeerWithGivenKeyAndOwner(key: string, owner: CoreAddress, valueType: string, peer: CoreAddress): Promise<LocalAttribute[]> {
@@ -1337,7 +1394,125 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async getAttributeTagCollection(): Promise<AttributeTagCollection> {
-        const backboneTagCollection = (await this.attributeTagClient.getTagCollection()).value;
-        return AttributeTagCollection.from(backboneTagCollection);
+        if (this.readTagCollectionPromise) {
+            return await this.readTagCollectionPromise;
+        }
+
+        this.readTagCollectionPromise = this._getAttributeTagCollection();
+
+        try {
+            return await this.readTagCollectionPromise;
+        } finally {
+            this.readTagCollectionPromise = undefined;
+        }
+    }
+
+    private async _getAttributeTagCollection(): Promise<AttributeTagCollection> {
+        const isCacheValid = await this.isTagCollectionCacheValid();
+        if (isCacheValid) {
+            return await this.getTagCollection();
+        }
+
+        const backboneTagCollection = await this.attributeTagClient.getTagCollection(await this.getETag());
+        if (!backboneTagCollection) {
+            return await this.getTagCollection();
+        }
+
+        await this.setETag(backboneTagCollection.etag ?? "");
+        await this.updateCacheTimestamp();
+        const attributeTagCollection = AttributeTagCollection.from(backboneTagCollection.value);
+        await this.setTagCollection(attributeTagCollection);
+
+        return attributeTagCollection;
+    }
+
+    private async getTagCollection(): Promise<AttributeTagCollection> {
+        const newLocal = await this.tagCollection.findOne({ name: this.TAG_COLLECTION_DB_KEY });
+        return AttributeTagCollection.from(newLocal.value);
+    }
+
+    private async setTagCollection(tagCollection: AttributeTagCollection): Promise<void> {
+        await this.tagCollection.update(await this.tagCollection.findOne({ name: this.TAG_COLLECTION_DB_KEY }), {
+            name: this.TAG_COLLECTION_DB_KEY,
+            value: tagCollection.toJSON()
+        });
+    }
+
+    private async getETag(): Promise<string | undefined> {
+        return (await this.tagCollection.findOne({ name: this.ETAG_DB_KEY }))?.value;
+    }
+
+    private async setETag(etag: string): Promise<void> {
+        await this.tagCollection.update(await this.tagCollection.findOne({ name: this.ETAG_DB_KEY }), { name: this.ETAG_DB_KEY, value: etag });
+    }
+
+    private async isTagCollectionCacheValid(): Promise<boolean> {
+        return (await this.getCacheTimestamp())?.isSameOrAfter(CoreDate.utc().subtract({ minutes: this.parent.accountController.config.tagCacheLifetimeInMinutes })) ?? false;
+    }
+
+    private async getCacheTimestamp(): Promise<CoreDate | undefined> {
+        try {
+            return CoreDate.from((await this.tagCollection.findOne({ name: this.CACHE_TIMESTAMP_DB_KEY })).value);
+        } catch {
+            return undefined;
+        }
+    }
+
+    private async updateCacheTimestamp(): Promise<void> {
+        await this.tagCollection.update(await this.tagCollection.findOne({ name: this.CACHE_TIMESTAMP_DB_KEY }), {
+            name: this.CACHE_TIMESTAMP_DB_KEY,
+            value: CoreDate.utc().toJSON()
+        });
+    }
+
+    public async setAttributeDeletionInfoOfDeletionProposedRelationship(relationshipId: CoreId): Promise<void> {
+        const relationship = await this.parent.accountController.relationships.getRelationship(relationshipId);
+        if (!relationship) throw TransportCoreErrors.general.recordNotFound(Relationship, relationshipId.toString());
+
+        if (relationship.status !== RelationshipStatus.DeletionProposed) {
+            throw ConsumptionCoreErrors.attributes.wrongRelationshipStatusToSetDeletionInfo();
+        }
+
+        const deletionDate = relationship.cache!.auditLog[relationship.cache!.auditLog.length - 1].createdAt;
+
+        await this.setDeletionInfoOfOwnSharedAttributes(relationship.peer.address.toString(), deletionDate);
+        await this.setDeletionInfoOfPeerSharedAttributes(relationship.peer.address.toString(), deletionDate);
+    }
+
+    private async setDeletionInfoOfOwnSharedAttributes(peer: String, deletionDate: CoreDate): Promise<void> {
+        const ownSharedAttributeDeletionInfo = LocalAttributeDeletionInfo.from({
+            deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
+            deletionDate
+        });
+
+        const ownSharedAttributes = await this.getLocalAttributes({
+            "shareInfo.peer": peer,
+            "content.owner": this.identity.address.toString(),
+            "deletionInfo.deletionStatus": { $ne: LocalAttributeDeletionStatus.DeletedByPeer }
+        });
+
+        await this.setDeletionInfoOfAttributes(ownSharedAttributes, ownSharedAttributeDeletionInfo);
+    }
+
+    private async setDeletionInfoOfPeerSharedAttributes(peer: String, deletionDate: CoreDate): Promise<void> {
+        const peerSharedAttributeDeletionInfo = LocalAttributeDeletionInfo.from({
+            deletionStatus: LocalAttributeDeletionStatus.DeletedByOwner,
+            deletionDate
+        });
+
+        const peerSharedAttributes = await this.getLocalAttributes({
+            "shareInfo.peer": peer,
+            "content.owner": peer,
+            "deletionInfo.deletionStatus": { $ne: LocalAttributeDeletionStatus.DeletedByOwner }
+        });
+
+        await this.setDeletionInfoOfAttributes(peerSharedAttributes, peerSharedAttributeDeletionInfo);
+    }
+
+    private async setDeletionInfoOfAttributes(attributes: LocalAttribute[], deletionInfo: LocalAttributeDeletionInfo): Promise<void> {
+        for (const attribute of attributes) {
+            attribute.setDeletionInfo(deletionInfo, this.identity.address);
+            await this.updateAttributeUnsafe(attribute);
+        }
     }
 }

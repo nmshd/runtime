@@ -13,10 +13,13 @@ import { MessageMapper } from "./MessageMapper";
 export interface SendMessageRequest {
     /**
      * @minItems 1
+     * @uniqueItems true
      */
     recipients: AddressString[];
     content: any;
-
+    /**
+     * @uniqueItems true
+     */
     attachments?: FileIdString[];
 }
 
@@ -77,6 +80,9 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
         const recipientsValidationError = await this.validateMessageRecipients(transformedContent, recipients);
         if (recipientsValidationError) return recipientsValidationError;
 
+        const mailRecipientsValidationError = this.validateMailRecipients(transformedContent, recipients);
+        if (mailRecipientsValidationError) return mailRecipientsValidationError;
+
         if (transformedContent instanceof Request) {
             const requestValidationError = await this.validateRequestAsMessageContent(transformedContent, CoreAddress.from(recipients[0]));
             if (requestValidationError) return requestValidationError;
@@ -129,6 +135,35 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
         }
 
         if (deletedPeers.length > 0) return TransportCoreErrors.messages.peerIsDeleted(deletedPeers);
+
+        return;
+    }
+
+    private validateMailRecipients(content: Serializable, messageRecipients: string[]): ApplicationError | undefined {
+        if (!(content instanceof Mail)) return;
+
+        const ccRecipients = content.cc?.map((address) => address.toString()) ?? [];
+        if (ccRecipients.length !== new Set(ccRecipients).size) {
+            return RuntimeErrors.general.invalidPropertyValue("Some recipients in 'cc' are listed multiple times.");
+        }
+
+        const toRecipients = content.to.map((address) => address.toString());
+        if (toRecipients.length !== new Set(toRecipients).size) {
+            return RuntimeErrors.general.invalidPropertyValue("Some recipients in 'to' are listed multiple times.");
+        }
+
+        const duplicatesInToAndCc = _.intersection(ccRecipients, toRecipients);
+        if (duplicatesInToAndCc.length > 0) {
+            return RuntimeErrors.general.invalidPropertyValue(`The recipients '${duplicatesInToAndCc.join("', '")}' are put into both 'to' and 'cc'.`);
+        }
+
+        const mailRecipients = _.union(ccRecipients, toRecipients);
+        const mismatchBetweenMailAndMessageRecipients = _.xor(messageRecipients, mailRecipients);
+        if (mismatchBetweenMailAndMessageRecipients.length > 0) {
+            return RuntimeErrors.general.invalidPropertyValue(
+                `The identities '${mismatchBetweenMailAndMessageRecipients.join("', '")}' are not listed among both the Message recipients and the recipients in 'to'/'cc'.`
+            );
+        }
 
         return;
     }

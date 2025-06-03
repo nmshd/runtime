@@ -20,6 +20,7 @@ import {
     RelationshipStatus,
     RelationshipTemplate,
     TokenContentRelationshipTemplate,
+    TokenReference,
     Transport,
     TransportLoggerFactory
 } from "@nmshd/transport";
@@ -132,16 +133,17 @@ export class TestUtil {
     }
 
     public static createTransport(
-        connection: IDatabaseConnection,
         eventBus: EventBus = new EventEmitter2EventBus(() => {
             // ignore errors
-        })
+        }),
+        configOverwrite?: Partial<IConfigOverwrite>
     ): Transport {
-        return new Transport(connection, this.createConfig(), eventBus, loggerFactory);
+        return new Transport({ ...this.createConfig(), ...configOverwrite }, eventBus, loggerFactory);
     }
 
     public static async provideAccounts(
         transport: Transport,
+        connection: IDatabaseConnection,
         count: number,
         requestItemProcessors = new Map<RequestItemConstructor, RequestItemProcessorConstructor>(),
         notificationItemProcessors = new Map<NotificationItemConstructor, NotificationItemProcessorConstructor>(),
@@ -150,7 +152,7 @@ export class TestUtil {
         const accounts = [];
 
         for (let i = 0; i < count; i++) {
-            const account = await this.createAccount(transport, requestItemProcessors, notificationItemProcessors, customConsumptionConfig);
+            const account = await this.createAccount(connection, transport, requestItemProcessors, notificationItemProcessors, customConsumptionConfig);
             accounts.push(account);
         }
 
@@ -158,12 +160,13 @@ export class TestUtil {
     }
 
     private static async createAccount(
+        connection: IDatabaseConnection,
         transport: Transport,
         requestItemProcessors = new Map<RequestItemConstructor, RequestItemProcessorConstructor>(),
         notificationItemProcessors = new Map<NotificationItemConstructor, NotificationItemProcessorConstructor>(),
         customConsumptionConfig?: ConsumptionConfig
     ): Promise<{ accountController: AccountController; consumptionController: ConsumptionController }> {
-        const db = await transport.createDatabase(`x${Math.random().toString(36).substring(7)}`);
+        const db = await connection.getDatabase(`x${Math.random().toString(36).substring(7)}`);
         const accountController = new AccountController(transport, db, transport.config);
         await accountController.init();
 
@@ -187,8 +190,8 @@ export class TestUtil {
             maxNumberOfAllocations: 1
         });
 
-        const reference = templateFrom.toRelationshipTemplateReference().truncate();
-        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(reference);
+        const reference = templateFrom.toRelationshipTemplateReference(from.config.baseUrl);
+        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByReference(reference);
 
         await to.relationships.sendRelationship({
             template: templateTo,
@@ -234,9 +237,9 @@ export class TestUtil {
             ephemeral: false
         });
 
-        const tokenRef = token.truncate();
+        const tokenRef = token.toTokenReference(from.config.baseUrl);
 
-        const receivedToken = await to.tokens.loadPeerTokenByTruncated(tokenRef, false);
+        const receivedToken = await to.tokens.loadPeerTokenByReference(tokenRef, false);
 
         if (!(receivedToken.cache!.content instanceof TokenContentRelationshipTemplate)) {
             throw new Error("token content not instanceof TokenContentRelationshipTemplate");
@@ -347,7 +350,7 @@ export class TestUtil {
     }
 
     /**
-     * SyncEvents in the backbone are only enventually consistent. This means that if you send a message now and
+     * SyncEvents in the Backbone are only enventually consistent. This means that if you send a message now and
      * get all SyncEvents right after, you cannot rely on getting a NewMessage SyncEvent right away. So instead
      * this method executes the syncEverything()-method of the synchronization controller until the condition
      * specified in the `until` callback is met.
@@ -414,7 +417,7 @@ export class TestUtil {
             ephemeral: false
         });
 
-        const tokenRef = token.truncate();
+        const tokenRef = token.toTokenReference(account.config.baseUrl).truncate();
         return tokenRef;
     }
 
@@ -427,7 +430,7 @@ export class TestUtil {
     }
 
     public static async fetchRelationshipTemplateFromTokenReference(account: AccountController, tokenReference: string): Promise<RelationshipTemplate> {
-        const receivedToken = await account.tokens.loadPeerTokenByTruncated(tokenReference, false);
+        const receivedToken = await account.tokens.loadPeerTokenByReference(TokenReference.from(tokenReference), false);
 
         if (!(receivedToken.cache!.content instanceof TokenContentRelationshipTemplate)) {
             throw new Error("token content not instanceof TokenContentRelationshipTemplate");
@@ -462,15 +465,16 @@ export class TestUtil {
         });
     }
 
-    public static async uploadFile(from: AccountController, fileContent: CoreBuffer): Promise<File> {
+    public static async uploadFile(from: AccountController, parameters?: { fileContent?: CoreBuffer; expiresAt?: CoreDate; tags?: string[] }): Promise<File> {
         const params: ISendFileParameters = {
-            buffer: fileContent,
-            title: "aFileName",
-            description: "Dies ist eine Beschreibung",
-            filename: "Test.bin",
+            buffer: parameters?.fileContent ?? CoreBuffer.from("test"),
+            title: "aTitle",
+            description: "aDescription",
+            filename: "aFilename",
             filemodified: CoreDate.from("2019-09-30T00:00:00.000Z"),
-            mimetype: "application/json",
-            expiresAt: CoreDate.utc().add({ minutes: 5 })
+            mimetype: "aMimetype",
+            expiresAt: parameters?.expiresAt ?? CoreDate.utc().add({ minutes: 5 }),
+            tags: parameters?.tags
         };
 
         const file = await from.files.sendFile(params);

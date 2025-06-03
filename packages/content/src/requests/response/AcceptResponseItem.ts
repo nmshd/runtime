@@ -6,16 +6,20 @@ import {
     AttributeSuccessionAcceptResponseItemJSON,
     CreateAttributeAcceptResponseItem,
     CreateAttributeAcceptResponseItemJSON,
+    FormFieldAcceptResponseItem,
+    FormFieldAcceptResponseItemJSON,
     FreeTextAcceptResponseItem,
     FreeTextAcceptResponseItemJSON,
     IAttributeAlreadySharedAcceptResponseItem,
     IAttributeSuccessionAcceptResponseItem,
     ICreateAttributeAcceptResponseItem,
+    IFormFieldAcceptResponseItem,
     IFreeTextAcceptResponseItem,
     IProposeAttributeAcceptResponseItem,
     IReadAttributeAcceptResponseItem,
     IRegisterAttributeListenerAcceptResponseItem,
     IShareAttributeAcceptResponseItem,
+    ITransferFileOwnershipAcceptResponseItem,
     ProposeAttributeAcceptResponseItem,
     ProposeAttributeAcceptResponseItemJSON,
     ReadAttributeAcceptResponseItem,
@@ -23,7 +27,9 @@ import {
     RegisterAttributeListenerAcceptResponseItem,
     RegisterAttributeListenerAcceptResponseItemJSON,
     ShareAttributeAcceptResponseItem,
-    ShareAttributeAcceptResponseItemJSON
+    ShareAttributeAcceptResponseItemJSON,
+    TransferFileOwnershipAcceptResponseItem,
+    TransferFileOwnershipAcceptResponseItemJSON
 } from "../items";
 import { IResponseItem, ResponseItem, ResponseItemJSON } from "./ResponseItem";
 import { ResponseItemResult } from "./ResponseItemResult";
@@ -41,7 +47,9 @@ export type AcceptResponseItemJSONDerivations =
     | ProposeAttributeAcceptResponseItemJSON
     | ReadAttributeAcceptResponseItemJSON
     | RegisterAttributeListenerAcceptResponseItemJSON
-    | FreeTextAcceptResponseItemJSON;
+    | FreeTextAcceptResponseItemJSON
+    | FormFieldAcceptResponseItemJSON
+    | TransferFileOwnershipAcceptResponseItemJSON;
 
 export interface IAcceptResponseItem extends IResponseItem {
     result: ResponseItemResult.Accepted;
@@ -56,7 +64,9 @@ export type IAcceptResponseItemDerivations =
     | IProposeAttributeAcceptResponseItem
     | IReadAttributeAcceptResponseItem
     | IRegisterAttributeListenerAcceptResponseItem
-    | IFreeTextAcceptResponseItem;
+    | IFreeTextAcceptResponseItem
+    | IFormFieldAcceptResponseItem
+    | ITransferFileOwnershipAcceptResponseItem;
 
 @type("AcceptResponseItem")
 export class AcceptResponseItem extends ResponseItem implements IAcceptResponseItem {
@@ -80,4 +90,6 @@ export type AcceptResponseItemDerivations =
     | ProposeAttributeAcceptResponseItem
     | ReadAttributeAcceptResponseItem
     | RegisterAttributeListenerAcceptResponseItem
-    | FreeTextAcceptResponseItem;
+    | FreeTextAcceptResponseItem
+    | FormFieldAcceptResponseItem
+    | TransferFileOwnershipAcceptResponseItem;

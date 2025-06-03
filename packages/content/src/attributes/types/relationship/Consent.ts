@@ -1,15 +1,19 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
+import { Serializable, serialize, type, validate, ValidationError } from "@js-soft/ts-serval";
+import { nameof } from "ts-simple-nameof";
 import { AbstractAttributeValue, AbstractAttributeValueJSON, IAbstractAttributeValue } from "../../AbstractAttributeValue";
 import { RenderHints, RenderHintsDataType, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../../hints";
 
 export interface ConsentJSON extends AbstractAttributeValueJSON {
+    "@type": "Consent";
     consent: string;
     link?: string;
+    linkDisplayText?: string;
 }
 
 export interface IConsent extends IAbstractAttributeValue {
     consent: string;
     link?: string;
+    linkDisplayText?: string;
 }
 
 @type("Consent")
@@ -30,6 +34,24 @@ export class Consent extends AbstractAttributeValue implements IConsent {
     })
     public link?: string;
 
+    @serialize()
+    @validate({ nullable: true, min: 3, max: 30 })
+    public linkDisplayText?: string;
+
+    protected static override postFrom<T extends Serializable>(value: T): T {
+        if (!(value instanceof Consent)) throw new Error("this should never happen");
+
+        if (typeof value.linkDisplayText === "string" && value.link === undefined) {
+            throw new ValidationError(
+                Consent.name,
+                nameof<Consent>((x) => x.linkDisplayText),
+                `A ${nameof<Consent>((x) => x.linkDisplayText)} can only be defined if a ${nameof<Consent>((x) => x.link)} is defined too.`
+            );
+        }
+
+        return value;
+    }
+
     public static from(value: IConsent | Omit<ConsentJSON, "@type">): Consent {
         return this.fromAny(value);
     }
@@ -42,10 +64,8 @@ export class Consent extends AbstractAttributeValue implements IConsent {
         return ValueHints.from({
             propertyHints: {
                 consent: { max: 2000 },
-                link: {
-                    min: 3,
-                    max: 1024
-                }
+                link: { min: 3, max: 1024 },
+                linkDisplayText: { min: 3, max: 30 }
             }
         });
     }

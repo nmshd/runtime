@@ -6,9 +6,6 @@ import {
     CreateOwnTokenUseCase,
     DeleteTokenRequest,
     DeleteTokenUseCase,
-    GetQRCodeForTokenRequest,
-    GetQRCodeForTokenResponse,
-    GetQRCodeForTokenUseCase,
     GetTokenRequest,
     GetTokensRequest,
     GetTokensUseCase,
@@ -23,8 +20,7 @@ export class TokensFacade {
         @Inject private readonly loadPeerTokenUseCase: LoadPeerTokenUseCase,
         @Inject private readonly getTokensUseCase: GetTokensUseCase,
         @Inject private readonly getTokenUseCase: GetTokenUseCase,
-        @Inject private readonly deleteTokenUseCase: DeleteTokenUseCase,
-        @Inject private readonly getQRCodeForTokenUseCase: GetQRCodeForTokenUseCase
+        @Inject private readonly deleteTokenUseCase: DeleteTokenUseCase
     ) {}
 
     public async createOwnToken(request: CreateOwnTokenRequest): Promise<Result<TokenDTO>> {
@@ -45,9 +41,5 @@ export class TokensFacade {
 
     public async deleteToken(request: DeleteTokenRequest): Promise<Result<void>> {
         return await this.deleteTokenUseCase.execute(request);
-    }
-
-    public async getQRCodeForToken(request: GetQRCodeForTokenRequest): Promise<Result<GetQRCodeForTokenResponse>> {
-        return await this.getQRCodeForTokenUseCase.execute(request);
     }
 }

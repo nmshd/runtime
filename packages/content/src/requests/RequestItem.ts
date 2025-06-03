@@ -9,17 +9,21 @@ import {
     CreateAttributeRequestItemJSON,
     DeleteAttributeRequestItem,
     DeleteAttributeRequestItemJSON,
+    FormFieldRequestItem,
+    FormFieldRequestItemJSON,
     FreeTextRequestItem,
     FreeTextRequestItemJSON,
     IAuthenticationRequestItem,
     IConsentRequestItem,
     ICreateAttributeRequestItem,
     IDeleteAttributeRequestItem,
+    IFormFieldRequestItem,
     IFreeTextRequestItem,
     IProposeAttributeRequestItem,
     IReadAttributeRequestItem,
     IRegisterAttributeListenerRequestItem,
     IShareAttributeRequestItem,
+    ITransferFileOwnershipRequestItem,
     ProposeAttributeRequestItem,
     ProposeAttributeRequestItemJSON,
     ReadAttributeRequestItem,
@@ -27,7 +31,9 @@ import {
     RegisterAttributeListenerRequestItem,
     RegisterAttributeListenerRequestItemJSON,
     ShareAttributeRequestItem,
-    ShareAttributeRequestItemJSON
+    ShareAttributeRequestItemJSON,
+    TransferFileOwnershipRequestItem,
+    TransferFileOwnershipRequestItemJSON
 } from "./items";
 
 export interface RequestItemJSON extends ContentJSON {
@@ -72,7 +78,9 @@ export type RequestItemJSONDerivations =
     | ConsentRequestItemJSON
     | AuthenticationRequestItemJSON
     | FreeTextRequestItemJSON
-    | RegisterAttributeListenerRequestItemJSON;
+    | FormFieldRequestItemJSON
+    | RegisterAttributeListenerRequestItemJSON
+    | TransferFileOwnershipRequestItemJSON;
 
 export interface IRequestItem extends ISerializable {
     /**
@@ -116,7 +124,9 @@ export type IRequestItemDerivations =
     | IConsentRequestItem
     | IAuthenticationRequestItem
     | IFreeTextRequestItem
-    | IRegisterAttributeListenerRequestItem;
+    | IFormFieldRequestItem
+    | IRegisterAttributeListenerRequestItem
+    | ITransferFileOwnershipRequestItem;
 
 export abstract class RequestItem extends Serializable {
     @serialize()
@@ -154,7 +164,9 @@ export type RequestItemDerivations =
     | ConsentRequestItem
     | AuthenticationRequestItem
     | FreeTextRequestItem
-    | RegisterAttributeListenerRequestItem;
+    | FormFieldRequestItem
+    | RegisterAttributeListenerRequestItem
+    | TransferFileOwnershipRequestItem;
 
 export function isRequestItemDerivation(input: any): input is RequestItemDerivations {
     return (
@@ -167,6 +179,8 @@ export function isRequestItemDerivation(input: any): input is RequestItemDerivat
         input["@type"] === "ConsentRequestItem" ||
         input["@type"] === "AuthenticationRequestItem" ||
         input["@type"] === "FreeTextRequestItem" ||
-        input["@type"] === "RegisterAttributeListenerRequestItem"
+        input["@type"] === "FormFieldRequestItem" ||
+        input["@type"] === "RegisterAttributeListenerRequestItem" ||
+        input["@type"] === "TransferFileOwnershipRequestItem"
     );
 }

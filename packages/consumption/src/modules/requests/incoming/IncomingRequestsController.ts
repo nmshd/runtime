@@ -304,6 +304,8 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         request.response = localResponse;
         request.changeStatus(LocalRequestStatus.Decided);
 
+        if (params.decidedByAutomation) request.wasAutomaticallyDecided = true;
+
         await this.update(request);
 
         this.eventBus.publish(
@@ -473,8 +475,15 @@ export class IncomingRequestsController extends ConsumptionBaseController {
     }
 
     private async updateRequestExpiry(request: LocalRequest) {
+        const oldStatus = request.status;
+
         const statusUpdated = request.updateStatusBasedOnExpiration();
-        if (statusUpdated) await this.update(request);
+        if (statusUpdated) {
+            await this.update(request);
+
+            this.eventBus.publish(new IncomingRequestStatusChangedEvent(this.identity.address.toString(), { request, oldStatus, newStatus: request.status }));
+        }
+
         return request;
     }
 }

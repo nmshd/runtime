@@ -39,12 +39,16 @@ export class IdentityAttribute<TValueClass extends AttributeValues.Identity.Clas
     }
 
     public static validateTags(tags: string[]): string | undefined {
+        if (new Set(tags).size !== tags.length) {
+            return "The tags are not unique.";
+        }
+
         if (tags.length > 20) {
             return "The maximum number of tags is 20.";
         }
 
-        if (tags.some((tag) => tag.length > 100)) {
-            return "The maximum length of a tag is 100 characters.";
+        if (tags.some((tag) => tag.length > 250)) {
+            return "The maximum length of a tag is 250 characters.";
         }
 
         return undefined;

@@ -10,6 +10,7 @@ import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptReq
  */
 export interface AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON extends AcceptRequestItemParametersJSON {
     attributeId: string;
+    tags?: string[];
 }
 
 /**
@@ -28,6 +29,10 @@ export class AcceptProposeAttributeRequestItemParameters extends Serializable {
     @serialize()
     @validate({ nullable: true })
     public attributeId?: CoreId;
+
+    @serialize({ type: String })
+    @validate({ nullable: true, customValidator: IdentityAttribute.validateTags })
+    public tags?: string[];
 
     @serialize({ unionTypes: [IdentityAttribute, RelationshipAttribute] })
     @validate({ nullable: true })
@@ -57,6 +62,16 @@ export class AcceptProposeAttributeRequestItemParameters extends Serializable {
                 `You cannot specify both ${nameof<AcceptProposeAttributeRequestItemParameters>(
                     (x) => x.attribute
                 )} and ${nameof<AcceptProposeAttributeRequestItemParameters>((x) => x.attributeId)}.`
+            );
+        }
+
+        if (value.attribute && value.tags) {
+            throw new ValidationError(
+                AcceptProposeAttributeRequestItemParameters.name,
+                nameof<AcceptProposeAttributeRequestItemParameters>((x) => x.attribute),
+                `You cannot specify both ${nameof<AcceptProposeAttributeRequestItemParameters>(
+                    (x) => x.attribute
+                )} and ${nameof<AcceptProposeAttributeRequestItemParameters>((x) => x.tags)}.`
             );
         }
 

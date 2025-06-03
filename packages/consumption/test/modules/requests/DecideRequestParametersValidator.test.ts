@@ -1,6 +1,5 @@
 import { Request, RequestItemGroup } from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
-import { CoreIdHelper } from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId, CoreIdHelper } from "@nmshd/core-types";
 import {
     DecideRequestItemGroupParametersJSON,
     DecideRequestItemParametersJSON,
@@ -87,7 +86,6 @@ describe("DecideRequestParametersValidator", function () {
             const validationResult = validator.validateRequest(data.input.response, localRequest);
 
             if (!data.expectedError) {
-                // eslint-disable-next-line jest/no-conditional-expect
                 expect(
                     validationResult.isError(),
                     `expected success, but received the error '${
@@ -103,9 +101,7 @@ describe("DecideRequestParametersValidator", function () {
             const errorIndexPath = data.expectedError.indexPath;
             if (!errorIndexPath) {
                 // no error path provided, so we expect the error to be at the root
-                // eslint-disable-next-line jest/no-conditional-expect
                 expect(validationResult.error.code).toStrictEqual(data.expectedError.code);
-                // eslint-disable-next-line jest/no-conditional-expect
                 expect(validationResult.error.message).toStrictEqual(data.expectedError.message);
                 return;
             }
@@ -351,7 +347,6 @@ describe("DecideRequestParametersValidator", function () {
             const validationResult = validator.validateItems(data.input.response, localRequest);
 
             if (!data.expectedError) {
-                // eslint-disable-next-line jest/no-conditional-expect
                 expect(
                     validationResult.isError(),
                     `expected success, but received the error '${
@@ -367,9 +362,9 @@ describe("DecideRequestParametersValidator", function () {
             const errorIndexPath = data.expectedError.indexPath;
             if (!errorIndexPath) {
                 // no error path provided, so we expect the error to be at the root
-                // eslint-disable-next-line jest/no-conditional-expect
+
                 expect(validationResult.error.code).toStrictEqual(data.expectedError.code);
-                // eslint-disable-next-line jest/no-conditional-expect
+
                 expect(validationResult.error.message).toStrictEqual(data.expectedError.message);
                 return;
             }

@@ -1,20 +1,21 @@
 import { Result } from "@js-soft/ts-utils";
-import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
-import {
-    AccountController,
-    PasswordProtectionCreationParameters,
-    RelationshipTemplate,
-    RelationshipTemplateController,
-    SharedPasswordProtection,
-    TokenContentRelationshipTemplate,
-    TokenController
-} from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId, PasswordLocationIndicator, SharedPasswordProtection } from "@nmshd/core-types";
+import { AccountController, RelationshipTemplate, RelationshipTemplateController, TokenContentRelationshipTemplate, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { TokenDTO } from "../../../types";
-import { AddressString, ISO8601DateTimeString, RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, TokenAndTemplateCreationValidator, UseCase } from "../../common";
+import {
+    AddressString,
+    ISO8601DateTimeString,
+    PasswordProtectionMapper,
+    RelationshipTemplateIdString,
+    RuntimeErrors,
+    SchemaRepository,
+    TokenAndTemplateCreationValidator,
+    UseCase
+} from "../../common";
 import { TokenMapper } from "../tokens/TokenMapper";
 
-export interface CreateTokenForOwnTemplateRequest {
+export interface SchemaValidatableCreateTokenForOwnRelationshipTemplateRequest {
     templateId: RelationshipTemplateIdString;
     expiresAt?: ISO8601DateTimeString;
     ephemeral?: boolean;
@@ -25,16 +26,21 @@ export interface CreateTokenForOwnTemplateRequest {
          */
         password: string;
         passwordIsPin?: true;
+        passwordLocationIndicator?: unknown;
     };
 }
 
-class Validator extends TokenAndTemplateCreationValidator<CreateTokenForOwnTemplateRequest> {
+export type CreateTokenForOwnRelationshipTemplateRequest = SchemaValidatableCreateTokenForOwnRelationshipTemplateRequest & {
+    passwordProtection?: { passwordLocationIndicator?: PasswordLocationIndicator };
+};
+
+class Validator extends TokenAndTemplateCreationValidator<CreateTokenForOwnRelationshipTemplateRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
-        super(schemaRepository.getSchema("CreateTokenForOwnTemplateRequest"));
+        super(schemaRepository.getSchema("CreateTokenForOwnRelationshipTemplateRequest"));
     }
 }
 
-export class CreateTokenForOwnTemplateUseCase extends UseCase<CreateTokenForOwnTemplateRequest, TokenDTO> {
+export class CreateTokenForOwnRelationshipTemplateUseCase extends UseCase<CreateTokenForOwnRelationshipTemplateRequest, TokenDTO> {
     public constructor(
         @Inject private readonly templateController: RelationshipTemplateController,
         @Inject private readonly tokenController: TokenController,
@@ -44,7 +50,7 @@ export class CreateTokenForOwnTemplateUseCase extends UseCase<CreateTokenForOwnT
         super(validator);
     }
 
-    protected async executeInternal(request: CreateTokenForOwnTemplateRequest): Promise<Result<TokenDTO>> {
+    protected async executeInternal(request: CreateTokenForOwnRelationshipTemplateRequest): Promise<Result<TokenDTO>> {
         const template = await this.templateController.getRelationshipTemplate(CoreId.from(request.templateId));
 
         if (!template) {
@@ -59,7 +65,9 @@ export class CreateTokenForOwnTemplateUseCase extends UseCase<CreateTokenForOwnT
             return Result.fail(RuntimeErrors.relationshipTemplates.personalizationMustBeInherited());
         }
 
-        if (template.passwordProtection && !template.passwordProtection.matchesInputForNewPasswordProtection(request.passwordProtection)) {
+        const passwordProtectionCreationParameters = PasswordProtectionMapper.toPasswordProtectionCreationParameters(request.passwordProtection);
+
+        if (template.passwordProtection && !template.passwordProtection.matchesPasswordProtectionParameters(passwordProtectionCreationParameters)) {
             return Result.fail(RuntimeErrors.relationshipTemplates.passwordProtectionMustBeInherited());
         }
 
@@ -72,15 +80,17 @@ export class CreateTokenForOwnTemplateUseCase extends UseCase<CreateTokenForOwnT
             passwordProtection
         });
 
-        const ephemeral = request.ephemeral ?? true;
         const defaultTokenExpiry = template.cache?.expiresAt ?? CoreDate.utc().add({ days: 12 });
         const tokenExpiry = request.expiresAt ? CoreDate.from(request.expiresAt) : defaultTokenExpiry;
+
+        const ephemeral = request.ephemeral ?? true;
+
         const token = await this.tokenController.sendToken({
             content: tokenContent,
             expiresAt: tokenExpiry,
             ephemeral,
             forIdentity: request.forIdentity ? CoreAddress.from(request.forIdentity) : undefined,
-            passwordProtection: PasswordProtectionCreationParameters.create(request.passwordProtection)
+            passwordProtection: passwordProtectionCreationParameters
         });
 
         if (!ephemeral) {

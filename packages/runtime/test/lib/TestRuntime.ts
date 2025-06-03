@@ -5,6 +5,7 @@ import { NodeLoggerFactory } from "@js-soft/node-logger";
 import { ConsumptionConfig, ConsumptionController, GenericRequestItemProcessor } from "@nmshd/consumption";
 import { ICoreAddress } from "@nmshd/core-types";
 import { AccountController } from "@nmshd/transport";
+import assert from "assert";
 import { ConsumptionServices, DataViewExpander, ModuleConfiguration, Runtime, RuntimeConfig, RuntimeHealth, RuntimeServices, TransportServices } from "../../src";
 import { AbstractCorrelator } from "../../src/useCases/common/AbstractCorrelator";
 import { MockEventBus } from "./MockEventBus";
@@ -56,13 +57,12 @@ export class TestRuntime extends Runtime {
 
     public async getServices(address: string | ICoreAddress): Promise<RuntimeServices> {
         // allow empty address to be passed (this is used in the RuntimeServiceProvider to create the services)
-        // when an actual address is passed, it must match the current runtime's address
+        // when an actual address is passed, it must match the current Runtime's address
         if (address !== "") {
             const currentAddress = (await this._transportServices.account.getIdentityInfo()).value.address;
 
             const givenAddressString = typeof address === "string" ? address : address.address;
-            // eslint-disable-next-line jest/no-standalone-expect
-            expect(givenAddressString).toStrictEqual(currentAddress);
+            assert(givenAddressString === currentAddress);
         }
 
         return {
@@ -89,7 +89,7 @@ export class TestRuntime extends Runtime {
 
     protected async initAccount(): Promise<void> {
         const randomAccountName = Math.random().toString(36).substring(7);
-        const db = await this.transport.createDatabase(`acc-${randomAccountName}`);
+        const db = await this.dbConnection!.getDatabase(`acc-${randomAccountName}`);
 
         const accountController = await new AccountController(this.transport, db, this.transport.config).init();
 
@@ -116,7 +116,7 @@ export class TestRuntime extends Runtime {
     }
 
     public override async stop(): Promise<void> {
-        if (this.isInitialized) {
+        if (this.isInitialized && this.isStarted) {
             try {
                 await super.stop();
             } catch (e) {

@@ -6,7 +6,6 @@ import {
     ConsumptionServices,
     CreateOutgoingRequestRequest,
     DataViewExpander,
-    DecidableDeleteAttributeRequestItemDVO,
     DeleteAttributeRequestItemDVO,
     IncomingRequestStatusChangedEvent,
     LocalRequestStatus,
@@ -147,8 +146,8 @@ describe("DeleteAttributeRequestItemDVO", () => {
         expect(dvo.request.content.type).toBe("RequestDVO");
         expect(dvo.request.content.items).toHaveLength(1);
         expect(dvo.request.isDecidable).toBe(true);
-        const requestItemDVO = dvo.request.content.items[0] as DecidableDeleteAttributeRequestItemDVO;
-        expect(requestItemDVO.type).toBe("DecidableDeleteAttributeRequestItemDVO");
+        const requestItemDVO = dvo.request.content.items[0] as DeleteAttributeRequestItemDVO;
+        expect(requestItemDVO.type).toBe("DeleteAttributeRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(true);
         expect(requestItemDVO.attribute.type).toBe("PeerAttributeDVO");
         const value = requestItemDVO.attribute.value as AbstractStringJSON;

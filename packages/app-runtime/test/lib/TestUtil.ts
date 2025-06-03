@@ -1,5 +1,7 @@
 /* eslint-disable jest/no-standalone-expect */
+import { ILokiJsDatabaseFactory } from "@js-soft/docdb-access-loki";
 import { ILoggerFactory } from "@js-soft/logging-abstractions";
+import { NodeLoggerFactory } from "@js-soft/node-logger";
 import { SimpleLoggerFactory } from "@js-soft/simple-logger";
 import { EventBus, Result, sleep } from "@js-soft/ts-utils";
 import { ArbitraryMessageContent, ArbitraryRelationshipCreationContent, ArbitraryRelationshipTemplateContent } from "@nmshd/content";
@@ -17,14 +19,42 @@ import {
 import { IConfigOverwrite, TransportLoggerFactory } from "@nmshd/transport";
 import fs from "fs";
 import { defaultsDeep } from "lodash";
+import loki from "lokijs";
 import path from "path";
 import { GenericContainer, Wait } from "testcontainers";
 import { LogLevel } from "typescript-logging";
 import { AppConfig, AppConfigOverwrite, AppRuntime, IUIBridge, LocalAccountDTO, LocalAccountSession, createAppConfig as runtime_createAppConfig } from "../../src";
 import { FakeUIBridge } from "./FakeUIBridge";
-import { FakeNativeBootstrapper } from "./natives/FakeNativeBootstrapper";
+import { FakeNotificationAccess } from "./infrastructure/FakeNotificationAccess";
+
+export class TestDatabaseFactory implements ILokiJsDatabaseFactory {
+    public create(name: string, options?: Partial<LokiConstructorOptions> & Partial<LokiConfigOptions> & Partial<ThrottledSaveDrainOptions>): Loki {
+        return new loki(name, { ...options, persistenceMethod: "memory" });
+    }
+}
 
 export class TestUtil {
+    private static readonly loggerFactory = new NodeLoggerFactory({
+        appenders: {
+            consoleAppender: {
+                type: "stdout",
+                layout: { type: "pattern", pattern: "%[[%p] %c - %m%]" }
+            },
+            console: {
+                type: "logLevelFilter",
+                level: "Warn",
+                appender: "consoleAppender"
+            }
+        },
+
+        categories: {
+            default: {
+                appenders: ["console"],
+                level: "TRACE"
+            }
+        }
+    });
+
     public static async createRuntime(configOverride?: AppConfigOverwrite, uiBridge: IUIBridge = new FakeUIBridge(), eventBus?: EventBus): Promise<AppRuntime> {
         configOverride = defaultsDeep(configOverride, {
             modules: {
@@ -34,20 +64,15 @@ export class TestUtil {
 
         const config = this.createAppConfig(configOverride);
 
-        const nativeBootstrapper = new FakeNativeBootstrapper();
-        await nativeBootstrapper.init();
-        const runtime = await AppRuntime.create(nativeBootstrapper, config, eventBus);
+        const runtime = await AppRuntime.create(config, this.loggerFactory, new FakeNotificationAccess(this.loggerFactory.getLogger("Fakes")), eventBus, new TestDatabaseFactory());
         runtime.registerUIBridge(uiBridge);
 
         return runtime;
     }
 
-    public static async createRuntimeWithoutInit(configOverride?: AppConfigOverwrite): Promise<AppRuntime> {
+    public static createRuntimeWithoutInit(configOverride?: AppConfigOverwrite): AppRuntime {
         const config = this.createAppConfig(configOverride);
-
-        const nativeBootstrapper = new FakeNativeBootstrapper();
-        await nativeBootstrapper.init();
-        const runtime = new AppRuntime(nativeBootstrapper.nativeEnvironment, config);
+        const runtime = new AppRuntime(config, this.loggerFactory, new FakeNotificationAccess(this.loggerFactory.getLogger("Fakes")), new TestDatabaseFactory());
 
         return runtime;
     }
@@ -180,7 +205,7 @@ export class TestUtil {
     }
 
     /**
-     * SyncEvents in the backbone are only eventually consistent. This means that if you send a message now and
+     * SyncEvents in the Backbone are only eventually consistent. This means that if you send a message now and
      * get all SyncEvents right after, you cannot rely on getting a NewMessage SyncEvent right away. So instead
      * this method executes the syncEverything()-method of the synchronization controller until the condition
      * specified in the `until` callback is met.
@@ -189,7 +214,8 @@ export class TestUtil {
         const syncResponse: SyncEverythingResponse = {
             relationships: [],
             messages: [],
-            identityDeletionProcesses: []
+            identityDeletionProcesses: [],
+            files: []
         };
 
         let iterationNumber = 0;
@@ -199,6 +225,7 @@ export class TestUtil {
             syncResponse.messages.push(...newSyncResult.value.messages);
             syncResponse.relationships.push(...newSyncResult.value.relationships);
             syncResponse.identityDeletionProcesses.push(...newSyncResult.value.identityDeletionProcesses);
+            syncResponse.files.push(...newSyncResult.value.files);
             iterationNumber++;
         } while (!until(syncResponse) && iterationNumber < 15);
         return syncResponse;
@@ -278,13 +305,12 @@ export class TestUtil {
     private static getBackboneVersion() {
         if (process.env.BACKBONE_VERSION) return process.env.BACKBONE_VERSION;
 
-        const envFile = fs.readFileSync(path.resolve(`${__dirname}/../../../../.dev/compose.backbone.env`));
-        const env = envFile
-            .toString()
-            .split("\n")
-            .map((line) => line.split("="))
-            .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {} as Record<string, string>);
+        const composeFile = fs.readFileSync(path.resolve(`${__dirname}/../../../../.dev/compose.backbone.yml`));
 
-        return env["BACKBONE_VERSION"];
+        const regex = /image: ghcr\.io\/nmshd\/backbone-consumer-api:(?<version>[^\r\n]*)/;
+        const match = composeFile.toString().match(regex);
+        if (!match?.groups?.version) throw new Error("Could not find backbone version in compose file");
+
+        return match.groups.version;
     }
 }

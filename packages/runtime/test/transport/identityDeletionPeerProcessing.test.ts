@@ -53,7 +53,7 @@ describe("IdentityDeletionProcess", () => {
 
     test("peer should be notified about cancelled deletion process", async function () {
         await services1.transport.identityDeletionProcesses.initiateIdentityDeletionProcess();
-        // This should not be necessary and can be removed once the backbone external events arrive in the right order
+        // This should not be necessary and can be removed once the Backbone external events arrive in the right order
         await syncUntilHasEvent(services2, PeerToBeDeletedEvent, (e) => e.data.id === relationshipId);
 
         await services1.transport.identityDeletionProcesses.cancelIdentityDeletionProcess();
