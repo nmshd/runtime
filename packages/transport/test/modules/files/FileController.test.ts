@@ -207,7 +207,7 @@ describe("FileController", function () {
             const fetchedFile = (await sender.files.getFile(file.id))!;
             expect(fetchedFile.isOwn).toBe(false);
             expect(fetchedFile.cache!.owner).toStrictEqual(recipient.identity.address);
-            expect(fetchedFile.ownershipToken).toBeDefined();
+            expect(fetchedFile.ownershipToken).toBeUndefined();
         });
 
         test("should claim the ownership of a File with a valid ownershipToken as not the owner after loading it", async function () {
