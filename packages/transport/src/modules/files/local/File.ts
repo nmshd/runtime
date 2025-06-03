@@ -81,6 +81,8 @@ export class File extends CoreSynchronizable implements IFile {
     }
 
     public setOwnershipToken(token: string): this {
+        if (!this.isOwn) throw new Error("Cannot set ownership token on peer file.");
+
         this.ownershipToken = token;
         this.ownershipIsLocked = undefined;
         return this;
@@ -88,6 +90,14 @@ export class File extends CoreSynchronizable implements IFile {
 
     public setOwnershipIsLocked(): this {
         this.ownershipIsLocked = true;
+        return this;
+    }
+
+    public clearOwnershipToken(): this {
+        if (this.isOwn) throw new Error("Cannot clear ownership token on own file.");
+
+        this.ownershipToken = undefined;
+        this.ownershipIsLocked = undefined;
         return this;
     }
 }
