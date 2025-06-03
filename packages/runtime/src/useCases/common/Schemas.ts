@@ -3327,6 +3327,9 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "fileReference": {
                     "type": "string"
+                },
+                "ownershipToken": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -11622,6 +11625,9 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 "fileReference": {
                     "type": "string"
+                },
+                "ownershipToken": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -15267,6 +15273,9 @@ export const ReceivedIncomingRequestRequest: any = {
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
                 "fileReference": {
+                    "type": "string"
+                },
+                "ownershipToken": {
                     "type": "string"
                 }
             },

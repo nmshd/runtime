@@ -6,10 +6,12 @@ import { IRequestItem, RequestItem } from "../../RequestItem";
 export interface TransferFileOwnershipRequestItemJSON extends RequestItemJSON {
     "@type": "TransferFileOwnershipRequestItem";
     fileReference: string;
+    ownershipToken?: string;
 }
 
 export interface ITransferFileOwnershipRequestItem extends IRequestItem {
     fileReference: IFileReference;
+    ownershipToken?: string;
 }
 
 @type("TransferFileOwnershipRequestItem")
@@ -17,6 +19,10 @@ export class TransferFileOwnershipRequestItem extends RequestItem implements ITr
     @serialize({ enforceString: true, customDeserializer: (value: string) => FileReference.from(value), customSerializer: (value: FileReference) => value.truncate() })
     @validate()
     public fileReference: FileReference;
+
+    @serialize()
+    @validate({ nullable: true })
+    public ownershipToken?: string;
 
     public static from(
         value: ITransferFileOwnershipRequestItem | Omit<TransferFileOwnershipRequestItemJSON, "@type"> | TransferFileOwnershipRequestItemJSON
