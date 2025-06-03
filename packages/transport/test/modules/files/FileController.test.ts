@@ -223,17 +223,6 @@ describe("FileController", function () {
             expect(updatedFile.ownershipToken).not.toBe(file.ownershipToken);
         });
 
-        test("should claim the ownership of a File with a valid ownershipToken as the owner after loading it", async function () {
-            const file = await TestUtil.uploadFile(sender, CoreBuffer.fromUtf8("Test"));
-
-            const updatedFile = await sender.files.claimFileOwnership(file.id, file.ownershipToken!);
-            expect(updatedFile.cache!.owner).toStrictEqual(sender.identity.address);
-            expect(updatedFile.isOwn).toBe(true);
-
-            expect(updatedFile.ownershipToken).toBeDefined();
-            expect(updatedFile.ownershipToken).not.toBe(file.ownershipToken);
-        });
-
         test("should not claim the ownership of a File with an invalid ownershipToken", async function () {
             const file = await TestUtil.uploadFile(sender, CoreBuffer.fromUtf8("Test"));
 
