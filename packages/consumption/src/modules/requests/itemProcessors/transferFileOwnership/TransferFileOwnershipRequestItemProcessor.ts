@@ -117,21 +117,9 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
     ): Promise<TransferFileOwnershipAcceptResponseItem> {
         const peerFile = await this.accountController.files.getOrLoadFileByReference(requestItem.fileReference);
 
-        let ownFile: File;
-        if (requestItem.ownershipToken) {
-            ownFile = await this.accountController.files.claimFileOwnership(peerFile.id, requestItem.ownershipToken);
-        } else {
-            const fileContent = await this.accountController.files.downloadFileContent(peerFile);
-            ownFile = await this.accountController.files.sendFile({
-                buffer: fileContent,
-                title: peerFile.cache!.title,
-                description: peerFile.cache!.description,
-                filename: peerFile.cache!.filename,
-                mimetype: peerFile.cache!.mimetype,
-                expiresAt: CoreDate.from("9999-12-31T00:00:00.000Z"),
-                tags: peerFile.cache!.tags
-            });
-        }
+        const ownFile = requestItem.ownershipToken
+            ? await this.accountController.files.claimFileOwnership(peerFile.id, requestItem.ownershipToken)
+            : await this.transferFileOwnershipByReupload(peerFile);
 
         const repositoryAttribute = await this.consumptionController.attributes.createRepositoryAttribute({
             content: IdentityAttribute.from({
@@ -153,6 +141,19 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
             result: ResponseItemResult.Accepted,
             attributeId: ownSharedIdentityAttribute.id,
             attribute: ownSharedIdentityAttribute.content as IdentityAttribute
+        });
+    }
+
+    private async transferFileOwnershipByReupload(peerFile: File) {
+        const fileContent = await this.accountController.files.downloadFileContent(peerFile);
+        return await this.accountController.files.sendFile({
+            buffer: fileContent,
+            title: peerFile.cache!.title,
+            description: peerFile.cache!.description,
+            filename: peerFile.cache!.filename,
+            mimetype: peerFile.cache!.mimetype,
+            expiresAt: CoreDate.from("9999-12-31T00:00:00.000Z"),
+            tags: peerFile.cache!.tags
         });
     }
 
