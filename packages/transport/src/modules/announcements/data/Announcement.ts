@@ -8,6 +8,7 @@ export interface IAnnouncement extends ISerializable {
     severity: AnnouncementSeverity;
     title: string;
     body: string;
+    iqlQuery?: string;
 }
 
 export enum AnnouncementSeverity {
@@ -41,6 +42,10 @@ export class Announcement extends Serializable implements IAnnouncement {
     @validate()
     @serialize()
     public body: string;
+
+    @validate({ nullable: true })
+    @serialize()
+    public iqlQuery?: string;
 
     public static from(value: IAnnouncement): Announcement {
         return this.fromAny(value);
