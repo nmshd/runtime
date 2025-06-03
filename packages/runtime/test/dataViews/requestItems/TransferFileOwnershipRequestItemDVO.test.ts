@@ -56,7 +56,9 @@ beforeAll(async () => {
     rAddress = (await rTransportServices.account.getIdentityInfo()).value.address;
 
     await establishRelationship(sTransportServices, rTransportServices);
+}, 30000);
 
+beforeEach(async () => {
     const file = await uploadFile(sTransportServices);
     truncatedFileReference = file.reference.truncated;
 
@@ -66,7 +68,8 @@ beforeAll(async () => {
                 {
                     "@type": "TransferFileOwnershipRequestItem",
                     mustBeAccepted: true,
-                    fileReference: truncatedFileReference
+                    fileReference: truncatedFileReference,
+                    ownershipToken: file.ownershipToken
                 } as TransferFileOwnershipRequestItemJSON
             ]
         },
@@ -74,9 +77,7 @@ beforeAll(async () => {
     };
 
     responseItems = [{ accept: true }] as any;
-}, 30000);
 
-beforeEach(async () => {
     await cleanupAttributes([sRuntimeServices, rRuntimeServices]);
 
     rEventBus.reset();
@@ -111,6 +112,7 @@ describe("TransferFileOwnershipRequestItemDVO", () => {
         expect(requestItemDVO.fileReference).toBe(truncatedFileReference);
         expect(requestItemDVO.file.type).toBe("FileDVO");
         expect(requestItemDVO.file.reference.truncated).toBe(truncatedFileReference);
+        expect(requestItemDVO.ownershipToken).toBeDefined();
     });
 
     test("check the MessageDVO for the recipient", async () => {

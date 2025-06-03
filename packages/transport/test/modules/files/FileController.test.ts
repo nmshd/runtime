@@ -182,6 +182,28 @@ describe("FileController", function () {
             expect(validationResult.isValid).toBe(true);
         });
 
+        test("should mark the ownership of a File as locked if validating the ownershipToken as not the owner fails", async function () {
+            const file = await TestUtil.uploadFile(sender, CoreBuffer.fromUtf8("Test"));
+
+            const validationResult = await recipient.files.validateFileOwnershipToken(file.id, "anInvalidToken");
+            expect(validationResult.isValid).toBe(false);
+
+            await sender.syncEverything();
+            const updatedFile = await sender.files.getFile(file.id);
+            expect(updatedFile!.ownershipIsLocked).toBe(true);
+        });
+
+        test("should not mark the ownership of a File as locked if validating the ownershipToken as the owner fails", async function () {
+            const file = await TestUtil.uploadFile(sender, CoreBuffer.fromUtf8("Test"));
+
+            const validationResult = await sender.files.validateFileOwnershipToken(file.id, "anInvalidToken");
+            expect(validationResult.isValid).toBe(false);
+
+            await sender.syncEverything();
+            const updatedFile = await sender.files.getFile(file.id);
+            expect(updatedFile!.ownershipIsLocked).toBeUndefined();
+        });
+
         test("should regenerate an ownershipToken as the owner", async function () {
             const file = await TestUtil.uploadFile(sender, CoreBuffer.fromUtf8("Test"));
 
@@ -202,10 +224,12 @@ describe("FileController", function () {
             await recipient.files.getOrLoadFile(file.id, file.secretKey);
             await recipient.files.claimFileOwnership(file.id, file.ownershipToken!);
 
-            const [fetchedFile] = await sender.files.updateCache([file.id.toString()]);
+            await sender.syncEverything();
+
+            const fetchedFile = (await sender.files.getFile(file.id))!;
             expect(fetchedFile.isOwn).toBe(false);
             expect(fetchedFile.cache!.owner).toStrictEqual(recipient.identity.address);
-            // TODO: check that ownershipToken is undefined as soon as this is implemented
+            expect(fetchedFile.ownershipToken).toBeUndefined();
         });
 
         test("should claim the ownership of a File with a valid ownershipToken as not the owner after loading it", async function () {
@@ -221,15 +245,10 @@ describe("FileController", function () {
             expect(updatedFile.ownershipToken).not.toBe(file.ownershipToken);
         });
 
-        test("should claim the ownership of a File with a valid ownershipToken as the owner after loading it", async function () {
+        test("should not be able to claim the ownership of a File with a valid ownershipToken as the owner", async function () {
             const file = await TestUtil.uploadFile(sender, CoreBuffer.fromUtf8("Test"));
 
-            const updatedFile = await sender.files.claimFileOwnership(file.id, file.ownershipToken!);
-            expect(updatedFile.cache!.owner).toStrictEqual(sender.identity.address);
-            expect(updatedFile.isOwn).toBe(true);
-
-            expect(updatedFile.ownershipToken).toBeDefined();
-            expect(updatedFile.ownershipToken).not.toBe(file.ownershipToken);
+            await expect(() => sender.files.claimFileOwnership(file.id, file.ownershipToken!)).rejects.toThrow("error.platform.validation.file.cannotClaimOwnershipOfOwnFile");
         });
 
         test("should not claim the ownership of a File with an invalid ownershipToken", async function () {
