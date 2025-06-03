@@ -22,6 +22,9 @@ import {
     SchemaRepository,
     SchemaValidator,
     TokenReferenceString,
+    URLFileReferenceString,
+    URLRelationshipTemplateReferenceString,
+    URLTokenReferenceString,
     UseCase
 } from "../../common";
 import { DeviceMapper } from "../devices/DeviceMapper";
@@ -30,7 +33,13 @@ import { RelationshipTemplateMapper } from "../relationshipTemplates/Relationshi
 import { TokenMapper } from "../tokens/TokenMapper";
 
 export interface LoadItemFromReferenceRequest {
-    reference: TokenReferenceString | FileReferenceString | RelationshipTemplateReferenceString;
+    reference:
+        | TokenReferenceString
+        | FileReferenceString
+        | RelationshipTemplateReferenceString
+        | URLTokenReferenceString
+        | URLFileReferenceString
+        | URLRelationshipTemplateReferenceString;
     password?: string;
 }
 

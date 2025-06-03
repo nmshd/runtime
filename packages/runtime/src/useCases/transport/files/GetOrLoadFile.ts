@@ -4,14 +4,24 @@ import { CryptoSecretKey } from "@nmshd/crypto";
 import { AccountController, FileController, Token, TokenContentFile, TokenController, TokenReference } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { FileDTO } from "../../../types";
-import { Base64ForIdPrefix, FileReferenceString, RuntimeErrors, SchemaRepository, SchemaValidator, TokenReferenceString, UseCase } from "../../common";
+import {
+    Base64ForIdPrefix,
+    FileReferenceString,
+    RuntimeErrors,
+    SchemaRepository,
+    SchemaValidator,
+    TokenReferenceString,
+    URLFileReferenceString,
+    URLTokenReferenceString,
+    UseCase
+} from "../../common";
 import { FileMapper } from "./FileMapper";
 
 /**
  * @errorMessage token / file reference invalid
  */
 export interface GetOrLoadFileRequest {
-    reference: TokenReferenceString | FileReferenceString;
+    reference: TokenReferenceString | FileReferenceString | URLTokenReferenceString | URLFileReferenceString;
     password?: string;
 }
 

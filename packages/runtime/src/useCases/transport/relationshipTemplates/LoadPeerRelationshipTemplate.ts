@@ -10,14 +10,24 @@ import {
 } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { RelationshipTemplateDTO } from "../../../types";
-import { Base64ForIdPrefix, RelationshipTemplateReferenceString, RuntimeErrors, SchemaRepository, SchemaValidator, TokenReferenceString, UseCase } from "../../common";
+import {
+    Base64ForIdPrefix,
+    RelationshipTemplateReferenceString,
+    RuntimeErrors,
+    SchemaRepository,
+    SchemaValidator,
+    TokenReferenceString,
+    URLRelationshipTemplateReferenceString,
+    URLTokenReferenceString,
+    UseCase
+} from "../../common";
 import { RelationshipTemplateMapper } from "./RelationshipTemplateMapper";
 
 /**
  * @errorMessage token / relationship template reference invalid
  */
 export interface LoadPeerRelationshipTemplateRequest {
-    reference: TokenReferenceString | RelationshipTemplateReferenceString;
+    reference: TokenReferenceString | RelationshipTemplateReferenceString | URLTokenReferenceString | URLRelationshipTemplateReferenceString;
     password?: string;
 }
 
