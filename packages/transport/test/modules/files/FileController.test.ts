@@ -182,7 +182,7 @@ describe("FileController", function () {
             expect(validationResult.isValid).toBe(true);
         });
 
-        test("should lock the File if validating the ownershipToken as not the owner fails", async function () {
+        test("should mark the ownership of a File as locked if validating the ownershipToken as not the owner fails", async function () {
             const file = await TestUtil.uploadFile(sender, CoreBuffer.fromUtf8("Test"));
 
             const validationResult = await recipient.files.validateFileOwnershipToken(file.id, "anInvalidToken");
@@ -193,7 +193,7 @@ describe("FileController", function () {
             expect(updatedFile!.ownershipIsLocked).toBe(true);
         });
 
-        test("should not lock the File if validating the ownershipToken as the owner fails", async function () {
+        test("should not mark the ownership of a File as locked if validating the ownershipToken as the owner fails", async function () {
             const file = await TestUtil.uploadFile(sender, CoreBuffer.fromUtf8("Test"));
 
             const validationResult = await sender.files.validateFileOwnershipToken(file.id, "anInvalidToken");
