@@ -19,8 +19,8 @@ export class FileOwnershipClaimedExternalEventProcessor extends ExternalEventPro
 
         const file = files[0];
 
-        const fileWithClearedOwnership = file.clearOwnershipToken();
-        const updatedFile = await this.accountController.files.updateFile(fileWithClearedOwnership);
+        file.clearOwnershipToken();
+        const updatedFile = await this.accountController.files.updateFile(file);
 
         this.eventBus.publish(new FileOwnershipClaimedEvent(this.ownAddress, updatedFile));
         return updatedFile;
