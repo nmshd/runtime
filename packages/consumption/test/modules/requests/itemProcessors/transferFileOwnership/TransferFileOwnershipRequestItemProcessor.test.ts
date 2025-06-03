@@ -19,10 +19,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
     let recipientConsumptionController: ConsumptionController;
     let recipientProcessor: TransferFileOwnershipRequestItemProcessor;
 
-    let senderTrucatedFileReference: string;
-    let senderExpiredTrucatedFileReference: string;
-    let recipientTrucatedFileReference: string;
-    let thirdPartyTrucatedFileReference: string;
+    let thirdPartyAccountController: AccountController;
 
     beforeAll(async function () {
         connection = await TestUtil.createConnection();
@@ -38,20 +35,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
         recipient = recipientAccountController.identity.address;
         recipientProcessor = new TransferFileOwnershipRequestItemProcessor(recipientConsumptionController);
 
-        const thirdPartyAccountController = accounts[2].accountController;
-
-        const senderFile = await TestUtil.uploadFile(senderAccountController, { tags: ["x+%+tag"] });
-        senderTrucatedFileReference = senderFile.toFileReference(senderAccountController.config.baseUrl).truncate();
-
-        const senderExpiredFile = await TestUtil.uploadFile(senderAccountController, { expiresAt: CoreDate.utc().add({ seconds: 1 }) });
-        senderExpiredTrucatedFileReference = senderExpiredFile.toFileReference(senderAccountController.config.baseUrl).truncate();
-        await sleep(2000);
-
-        const recipientFile = await TestUtil.uploadFile(recipientAccountController, { tags: ["x+%+tag"] });
-        recipientTrucatedFileReference = recipientFile.toFileReference(recipientAccountController.config.baseUrl).truncate();
-
-        const thirdPartyFile = await TestUtil.uploadFile(thirdPartyAccountController);
-        thirdPartyTrucatedFileReference = thirdPartyFile.toFileReference(thirdPartyAccountController.config.baseUrl).truncate();
+        thirdPartyAccountController = accounts[2].accountController;
     });
 
     beforeEach(async () => {
@@ -63,9 +47,11 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
 
     describe("canCreateOutgoingRequestItem", function () {
         test("returns success if the ownership of an own File should be transferred entering a truncatedFileReference", async function () {
+            const senderFile = await TestUtil.uploadFile(senderAccountController, { tags: ["x+%+tag"] });
+
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
-                fileReference: senderTrucatedFileReference
+                fileReference: senderFile.toFileReference(senderAccountController.config.baseUrl).truncate()
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -74,9 +60,11 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
         });
 
         test("returns success if the ownership of an own File should be transferred entering a FileReference", async function () {
+            const senderFile = await TestUtil.uploadFile(senderAccountController, { tags: ["x+%+tag"] });
+
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
-                fileReference: FileReference.from(senderTrucatedFileReference)
+                fileReference: senderFile.toFileReference(senderAccountController.config.baseUrl)
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -85,9 +73,11 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
         });
 
         test("returns error if the ownership of a File should be transferred that is not known by the sender", async function () {
+            const thirdPartyFile = await TestUtil.uploadFile(thirdPartyAccountController);
+
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
-                fileReference: thirdPartyTrucatedFileReference
+                fileReference: thirdPartyFile.toFileReference(thirdPartyAccountController.config.baseUrl)
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -99,11 +89,13 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
         });
 
         test("returns error if the ownership of a File should be transferred that is not owned by the sender", async function () {
-            const thirdPartyFile = await senderAccountController.files.getOrLoadFileByReference(FileReference.from(thirdPartyTrucatedFileReference));
+            const thirdPartyFile = await TestUtil.uploadFile(thirdPartyAccountController);
+            const thirdPartyFileReference = thirdPartyFile.toFileReference(thirdPartyAccountController.config.baseUrl);
+            await senderAccountController.files.getOrLoadFileByReference(thirdPartyFileReference);
 
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
-                fileReference: thirdPartyFile.toFileReference(senderAccountController.config.baseUrl).truncate()
+                fileReference: thirdPartyFileReference
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -115,9 +107,12 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
         });
 
         test("returns error if the ownership of a File should be transferred that is expired", async function () {
+            const senderExpiredFile = await TestUtil.uploadFile(senderAccountController, { expiresAt: CoreDate.utc().add({ seconds: 1 }) });
+            await sleep(2000);
+
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
-                fileReference: senderExpiredTrucatedFileReference
+                fileReference: senderExpiredFile.toFileReference(senderAccountController.config.baseUrl)
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -131,9 +126,11 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
 
     describe("canAccept", function () {
         test("returns success when checking if the transfer of ownership of a File can be accepted that is owned by the sender", async function () {
+            const senderFile = await TestUtil.uploadFile(senderAccountController, { tags: ["x+%+tag"] });
+
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
-                fileReference: senderTrucatedFileReference
+                fileReference: senderFile.toFileReference(senderAccountController.config.baseUrl)
             });
 
             const incomingRequest = LocalRequest.from({
@@ -151,9 +148,12 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
         });
 
         test("returns error when checking if the transfer of ownership of a File can be accepted that is expired", async function () {
+            const senderExpiredFile = await TestUtil.uploadFile(senderAccountController, { expiresAt: CoreDate.utc().add({ seconds: 1 }) });
+            await sleep(2000);
+
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
-                fileReference: senderExpiredTrucatedFileReference
+                fileReference: senderExpiredFile.toFileReference(senderAccountController.config.baseUrl)
             });
 
             const incomingRequest = LocalRequest.from({
@@ -174,9 +174,11 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
         });
 
         test("returns error when checking if the transfer of ownership of a File can be accepted that is already owned by the recipient", async function () {
+            const recipientFile = await TestUtil.uploadFile(recipientAccountController, { tags: ["x+%+tag"] });
+
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
-                fileReference: recipientTrucatedFileReference
+                fileReference: recipientFile.toFileReference(recipientAccountController.config.baseUrl)
             });
 
             const incomingRequest = LocalRequest.from({
@@ -197,9 +199,11 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
         });
 
         test("returns error when checking if the transfer of ownership of a File can be accepted that is not owned by the sender", async function () {
+            const thirdPartyFile = await TestUtil.uploadFile(thirdPartyAccountController);
+
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
-                fileReference: thirdPartyTrucatedFileReference
+                fileReference: thirdPartyFile.toFileReference(thirdPartyAccountController.config.baseUrl)
             });
 
             const incomingRequest = LocalRequest.from({
@@ -222,9 +226,11 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
 
     describe("accept", function () {
         test("creates a RepositoryAttribute with tags and an own shared IdentityAttribute and responds with a TransferFileOwnershipAcceptResponseItem if the sender requests an Attribute copy", async function () {
+            const senderFile = await TestUtil.uploadFile(senderAccountController, { tags: ["x+%+tag"] });
+
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
-                fileReference: senderTrucatedFileReference
+                fileReference: senderFile.toFileReference(senderAccountController.config.baseUrl)
             });
 
             const incomingRequest = LocalRequest.from({
@@ -260,9 +266,11 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
 
     describe("applyIncomingResponseItem", function () {
         test("creates peer shared IdentityAttribute in case of a TransferFileOwnershipAcceptResponseItem", async function () {
+            const senderFile = await TestUtil.uploadFile(senderAccountController, { tags: ["x+%+tag"] });
+
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
-                fileReference: senderTrucatedFileReference
+                fileReference: senderFile.toFileReference(senderAccountController.config.baseUrl)
             });
 
             const requestInfo = {
@@ -270,12 +278,13 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
                 peer: recipient
             };
 
+            const recipientFile = await TestUtil.uploadFile(recipientAccountController, { tags: ["x+%+tag"] });
             const responseItem = TransferFileOwnershipAcceptResponseItem.from({
                 result: ResponseItemResult.Accepted,
                 attributeId: await ConsumptionIds.attribute.generate(),
                 attribute: IdentityAttribute.from({
                     value: IdentityFileReference.from({
-                        value: recipientTrucatedFileReference
+                        value: recipientFile.toFileReference(recipientAccountController.config.baseUrl).truncate()
                     }),
                     owner: recipient,
                     tags: ["x+%+tag"]
