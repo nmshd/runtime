@@ -9,8 +9,7 @@ export class AnnouncementMapper {
             expiresAt: announcement.expiresAt?.toString(),
             severity: announcement.severity,
             title: announcement.title,
-            body: announcement.body,
-            iqlQuery: announcement.iqlQuery
+            body: announcement.body
         };
     }
 }
