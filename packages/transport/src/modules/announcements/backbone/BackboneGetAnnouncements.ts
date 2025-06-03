@@ -9,4 +9,5 @@ export interface BackboneGetAnnouncementsResponse {
     severity: string;
     title: string;
     body: string;
+    iqlQuery?: string | null;
 }

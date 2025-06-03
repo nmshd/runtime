@@ -19,6 +19,14 @@ export class AnnouncementController extends TransportController {
 
     public async getAnnouncements(language: LanguageISO639): Promise<Announcement[]> {
         const response = await this.client.getAnnouncements({ language });
-        return this.parseArray<Announcement>(response.value, Announcement);
+
+        const announcements = response.value.map((value) =>
+            Announcement.fromAny({
+                ...value,
+                iqlQuery: value.iqlQuery ?? undefined
+            })
+        );
+
+        return announcements;
     }
 }
