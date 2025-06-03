@@ -175,10 +175,11 @@ describe("FileController", function () {
             expect(result.isValid).toBe(true);
         });
 
-        test("should not validate an ownershipToken as not the owner", async function () {
+        test("should validate an ownershipToken as not the owner", async function () {
             const file = await TestUtil.uploadFile(sender, CoreBuffer.fromUtf8("Test"));
 
-            await TestUtil.expectThrowsRequestErrorAsync(recipient.files.validateFileOwnershipToken(file.id, file.ownershipToken!), "error.platform.forbidden", 403);
+            const validationResult = await recipient.files.validateFileOwnershipToken(file.id, file.ownershipToken!);
+            expect(validationResult.isValid).toBe(true);
         });
 
         test("should regenerate an ownershipToken as the owner", async function () {
