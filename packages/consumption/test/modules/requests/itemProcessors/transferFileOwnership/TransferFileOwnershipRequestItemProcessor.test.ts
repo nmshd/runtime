@@ -443,6 +443,8 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
 
             const loadedSenderFile = await recipientAccountController.files.getOrLoadFileByReference(requestItem.fileReference);
             const recipientFile = await recipientAccountController.files.claimFileOwnership(loadedSenderFile.id, senderFile.ownershipToken!);
+            await senderAccountController.syncEverything();
+
             const responseItem = TransferFileOwnershipAcceptResponseItem.from({
                 result: ResponseItemResult.Accepted,
                 attributeId: await ConsumptionIds.attribute.generate(),

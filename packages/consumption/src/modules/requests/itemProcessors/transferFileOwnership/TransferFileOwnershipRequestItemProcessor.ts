@@ -158,7 +158,7 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
 
     public override async applyIncomingResponseItem(
         responseItem: TransferFileOwnershipAcceptResponseItem | AcceptResponseItem | RejectResponseItem,
-        requestItem: TransferFileOwnershipRequestItem,
+        _requestItem: TransferFileOwnershipRequestItem,
         requestInfo: LocalRequestInfo
     ): Promise<void> {
         if (!(responseItem instanceof TransferFileOwnershipAcceptResponseItem)) {
@@ -171,9 +171,5 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
             requestReference: requestInfo.id,
             peer: requestInfo.peer
         });
-
-        if (!requestItem.ownershipToken) return;
-
-        await this.accountController.files.updateCache([requestItem.fileReference.id.toString()]);
     }
 }
