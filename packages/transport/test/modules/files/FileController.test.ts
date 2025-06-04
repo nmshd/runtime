@@ -188,9 +188,8 @@ describe("FileController", function () {
             const validationResult = await recipient.files.validateFileOwnershipToken(file.id, "anInvalidToken");
             expect(validationResult.isValid).toBe(false);
 
-            await sender.syncEverything();
-            const updatedFile = await sender.files.getFile(file.id);
-            expect(updatedFile!.ownershipIsLocked).toBe(true);
+            const updatedFile = (await TestUtil.syncUntilHasFile(sender, file.id))[0];
+            expect(updatedFile.ownershipIsLocked).toBe(true);
         });
 
         test("should not mark the ownership of a File as locked if validating the ownershipToken as the owner fails", async function () {
@@ -218,18 +217,16 @@ describe("FileController", function () {
             await TestUtil.expectThrowsRequestErrorAsync(recipient.files.regenerateFileOwnershipToken(file.id), "error.platform.forbidden", 403);
         });
 
-        test("should fetch a File after the ownership was transferred as the previous owner", async function () {
+        test("should update a File after the ownership was transferred as the previous owner", async function () {
             const file = await TestUtil.uploadFile(sender, CoreBuffer.fromUtf8("Test"));
 
             await recipient.files.getOrLoadFile(file.id, file.secretKey);
             await recipient.files.claimFileOwnership(file.id, file.ownershipToken!);
 
-            await sender.syncEverything();
-
-            const fetchedFile = (await sender.files.getFile(file.id))!;
-            expect(fetchedFile.isOwn).toBe(false);
-            expect(fetchedFile.cache!.owner).toStrictEqual(recipient.identity.address);
-            expect(fetchedFile.ownershipToken).toBeUndefined();
+            const updatedFile = (await TestUtil.syncUntilHasFile(sender, file.id))[0];
+            expect(updatedFile.isOwn).toBe(false);
+            expect(updatedFile.cache!.owner).toStrictEqual(recipient.identity.address);
+            expect(updatedFile.ownershipToken).toBeUndefined();
         });
 
         test("should claim the ownership of a File with a valid ownershipToken as not the owner after loading it", async function () {
@@ -275,8 +272,7 @@ describe("FileController", function () {
             });
 
             await TestUtil.expectThrowsRequestErrorAsync(recipient.files.claimFileOwnership(file.id, "anInvalidToken"), "error.platform.forbidden", 403);
-
-            await sender.syncEverything();
+            await TestUtil.syncUntilHasFile(sender, file.id);
             expect(events).toHaveLength(1);
         });
 
@@ -284,10 +280,9 @@ describe("FileController", function () {
             const file = await TestUtil.uploadFile(sender, CoreBuffer.fromUtf8("Test"));
 
             await TestUtil.expectThrowsRequestErrorAsync(recipient.files.claimFileOwnership(file.id, "anInvalidToken"), "error.platform.forbidden", 403);
-            await sender.syncEverything();
 
-            const updatedFile = await sender.files.getFile(file.id);
-            expect(updatedFile!.ownershipIsLocked).toBe(true);
+            const updatedFile = (await TestUtil.syncUntilHasFile(sender, file.id))[0];
+            expect(updatedFile.ownershipIsLocked).toBe(true);
         });
 
         test("should not claim the ownership of a File that is locked", async function () {
@@ -298,14 +293,13 @@ describe("FileController", function () {
             await TestUtil.expectThrowsRequestErrorAsync(recipient.files.claimFileOwnership(file.id, file.ownershipToken!), "error.platform.forbidden", 403);
         });
 
-        test("should unlock the File upon regeneration of an ownershipToken", async function () {
+        test("should mark a File as unlocked upon the regeneration of an ownershipToken", async function () {
             const file = await TestUtil.uploadFile(sender, CoreBuffer.fromUtf8("Test"));
 
             await TestUtil.expectThrowsRequestErrorAsync(recipient.files.claimFileOwnership(file.id, "anInvalidToken"), "error.platform.forbidden", 403);
-            await sender.syncEverything();
 
-            const lockedFile = await sender.files.getFile(file.id);
-            expect(lockedFile!.ownershipIsLocked).toBe(true);
+            const lockedFile = (await TestUtil.syncUntilHasFile(sender, file.id))[0];
+            expect(lockedFile.ownershipIsLocked).toBe(true);
 
             const updatedFile = await sender.files.regenerateFileOwnershipToken(file.id);
             expect(updatedFile.ownershipIsLocked).toBeUndefined();
