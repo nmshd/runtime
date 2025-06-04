@@ -37,7 +37,7 @@ describe("Tokens", () => {
         expect(getTokenResponse).toBeAnError("Token not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
     });
 
-    test("load peer token by truncated reference", async () => {
+    test("load peer Token by truncated reference", async () => {
         const uploadedToken = await uploadOwnToken(runtimeServices1.transport);
         const result = await runtimeServices2.transport.tokens.loadPeerToken({ reference: uploadedToken.truncatedReference, ephemeral: false });
         expect(result).toBeSuccessful();
@@ -46,7 +46,7 @@ describe("Tokens", () => {
         expect(token.content).toStrictEqual(uploadedToken.content);
     });
 
-    test("load peer token by url reference", async () => {
+    test("load peer Token by url reference", async () => {
         const uploadedToken = await uploadOwnToken(runtimeServices1.transport);
         const result = await runtimeServices2.transport.tokens.loadPeerToken({ reference: uploadedToken.reference.url, ephemeral: false });
         expect(result).toBeSuccessful();

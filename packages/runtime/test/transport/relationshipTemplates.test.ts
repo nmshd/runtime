@@ -27,7 +27,7 @@ describe("RelationshipTemplate Tests", () => {
         expect(response).toBeSuccessful();
     });
 
-    test("load peer relationship template by truncated reference", async () => {
+    test("load peer RelationshipTemplate by truncated reference", async () => {
         const uploadedTemplate = (
             await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
                 maxNumberOfAllocations: 1,
@@ -43,7 +43,7 @@ describe("RelationshipTemplate Tests", () => {
         expect(tempalte.content).toStrictEqual(uploadedTemplate.content);
     });
 
-    test("load peer relationship template by url reference", async () => {
+    test("load peer RelationshipTemplate by url reference", async () => {
         const uploadedTemplate = (
             await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
                 maxNumberOfAllocations: 1,
