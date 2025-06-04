@@ -79,7 +79,7 @@ export type IdentityDeletionProcessIdString = string;
 export type TokenReferenceString = string;
 
 /**
- * @pattern https?:\/\/.*\/r\/TOK[a-zA-Z0-9]+(\?app\=.+)?#[a-zA-Z0-9-_]+$
+ * @pattern ^https?:\/\/.*\/r\/TOK[a-zA-Z0-9]+(\?app=.+)?#[a-zA-Z0-9-_]+$
  */
 export type URLTokenReferenceString = string;
 
@@ -89,7 +89,7 @@ export type URLTokenReferenceString = string;
 export type FileReferenceString = string;
 
 /**
- * @pattern https?:\/\/.*\/r\/FIL[a-zA-Z0-9]+(\?app\=.+)?#[a-zA-Z0-9-_]+$
+ * @pattern ^https?:\/\/.*\/r\/FIL[a-zA-Z0-9]+(\?app=.+)?#[a-zA-Z0-9-_]+$
  */
 export type URLFileReferenceString = string;
 
@@ -99,7 +99,7 @@ export type URLFileReferenceString = string;
 export type RelationshipTemplateReferenceString = string;
 
 /**
- * @pattern https?:\/\/.*\/r\/RLT[a-zA-Z0-9]+(\?app\=.+)?#[a-zA-Z0-9-_]+$
+ * @pattern ^https?:\/\/.*\/r\/RLT[a-zA-Z0-9]+(\?app=.+)?#[a-zA-Z0-9-_]+$
  */
 export type URLRelationshipTemplateReferenceString = string;
 
