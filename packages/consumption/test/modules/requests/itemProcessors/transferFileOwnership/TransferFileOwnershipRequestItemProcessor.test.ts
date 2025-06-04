@@ -47,7 +47,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
 
     describe("canCreateOutgoingRequestItem", function () {
         test("returns success if the ownership of an own File should be transferred entering a truncatedFileReference", async function () {
-            const senderFile = await TestUtil.uploadFile(senderAccountController, { tags: ["x+%+tag"] });
+            const senderFile = await TestUtil.uploadFile(senderAccountController, { tags: ["x:tag"] });
 
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
@@ -60,7 +60,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
         });
 
         test("returns success if the ownership of an own File should be transferred entering a FileReference", async function () {
-            const senderFile = await TestUtil.uploadFile(senderAccountController, { tags: ["x+%+tag"] });
+            const senderFile = await TestUtil.uploadFile(senderAccountController, { tags: ["x:tag"] });
 
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
@@ -73,7 +73,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
         });
 
         test("returns success if the ownership of an own File should be transferred using an ownershipToken", async function () {
-            const senderFile = await TestUtil.uploadFile(senderAccountController, { tags: ["x+%+tag"] });
+            const senderFile = await TestUtil.uploadFile(senderAccountController, { tags: ["x:tag"] });
 
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
@@ -138,7 +138,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
         });
 
         test("returns error if the ownership of an own File should be transferred using a wrong ownershipToken", async function () {
-            const senderFile = await TestUtil.uploadFile(senderAccountController, { tags: ["x+%+tag"] });
+            const senderFile = await TestUtil.uploadFile(senderAccountController, { tags: ["x:tag"] });
 
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
@@ -157,7 +157,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
 
     describe("canAccept", function () {
         test("returns success when checking if the transfer of ownership of a File can be accepted that is owned by the sender", async function () {
-            const senderFile = await TestUtil.uploadFile(senderAccountController, { tags: ["x+%+tag"] });
+            const senderFile = await TestUtil.uploadFile(senderAccountController, { tags: ["x:tag"] });
 
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
@@ -179,7 +179,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
         });
 
         test("returns success when checking if the transfer of ownership of a File can be accepted with an ownershipToken", async function () {
-            const senderFile = await TestUtil.uploadFile(senderAccountController, { tags: ["x+%+tag"] });
+            const senderFile = await TestUtil.uploadFile(senderAccountController, { tags: ["x:tag"] });
 
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
@@ -228,7 +228,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
         });
 
         test("returns error when checking if the transfer of ownership of a File can be accepted that is already owned by the recipient", async function () {
-            const recipientFile = await TestUtil.uploadFile(recipientAccountController, { tags: ["x+%+tag"] });
+            const recipientFile = await TestUtil.uploadFile(recipientAccountController, { tags: ["x:tag"] });
 
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
@@ -278,7 +278,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
         });
 
         test("returns error when checking if the transfer of ownership of a File can be accepted with an invalid ownershipToken", async function () {
-            const senderFile = await TestUtil.uploadFile(senderAccountController, { tags: ["x+%+tag"] });
+            const senderFile = await TestUtil.uploadFile(senderAccountController, { tags: ["x:tag"] });
 
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
@@ -306,7 +306,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
 
     describe("accept", function () {
         test("creates a RepositoryAttribute with tags and an own shared IdentityAttribute and responds with a TransferFileOwnershipAcceptResponseItem", async function () {
-            const senderFile = await TestUtil.uploadFile(senderAccountController, { tags: ["x+%+tag"] });
+            const senderFile = await TestUtil.uploadFile(senderAccountController, { tags: ["x:tag"] });
 
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
@@ -330,21 +330,21 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
             expect(ownSharedIdentityAttribute!.shareInfo!.peer).toStrictEqual(sender);
             expect(ownSharedIdentityAttribute!.shareInfo!.requestReference).toStrictEqual(incomingRequest.id);
             expect(ownSharedIdentityAttribute!.content.value).toBeInstanceOf(IdentityFileReference);
-            expect((ownSharedIdentityAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x+%+tag"]);
+            expect((ownSharedIdentityAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x:tag"]);
 
             const repositoryAttribute = await recipientConsumptionController.attributes.getLocalAttribute(ownSharedIdentityAttribute!.shareInfo!.sourceAttribute!);
             expect(repositoryAttribute!.shareInfo).toBeUndefined();
             expect(repositoryAttribute!.content.value).toBeInstanceOf(IdentityFileReference);
-            expect((repositoryAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x+%+tag"]);
+            expect((repositoryAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x:tag"]);
 
             const fileReference = FileReference.from((repositoryAttribute!.content.value as IdentityFileReference).value);
             const file = await recipientAccountController.files.getFile(fileReference.id);
             expect(file!.isOwn).toBe(true);
-            expect(file!.cache!.tags).toStrictEqual(["x+%+tag"]);
+            expect(file!.cache!.tags).toStrictEqual(["x:tag"]);
         });
 
         test("claims the ownership of the sender's file", async function () {
-            const senderFile = await TestUtil.uploadFile(senderAccountController, { tags: ["x+%+tag"] });
+            const senderFile = await TestUtil.uploadFile(senderAccountController, { tags: ["x:tag"] });
             const senderFileReference = senderFile.toFileReference(senderAccountController.config.baseUrl);
 
             const requestItem = TransferFileOwnershipRequestItem.from({
@@ -376,19 +376,19 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
             expect(ownSharedIdentityAttribute!.shareInfo!.requestReference).toStrictEqual(incomingRequest.id);
             expect(ownSharedIdentityAttribute!.content.value).toBeInstanceOf(IdentityFileReference);
             expect((ownSharedIdentityAttribute!.content.value as IdentityFileReference).value).toStrictEqual(senderFileReference.truncate());
-            expect((ownSharedIdentityAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x+%+tag"]);
+            expect((ownSharedIdentityAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x:tag"]);
 
             const repositoryAttribute = await recipientConsumptionController.attributes.getLocalAttribute(ownSharedIdentityAttribute!.shareInfo!.sourceAttribute!);
             expect(repositoryAttribute!.shareInfo).toBeUndefined();
             expect(repositoryAttribute!.content.value).toBeInstanceOf(IdentityFileReference);
             expect((ownSharedIdentityAttribute!.content.value as IdentityFileReference).value).toStrictEqual(senderFileReference.truncate());
-            expect((repositoryAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x+%+tag"]);
+            expect((repositoryAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x:tag"]);
         });
     });
 
     describe("applyIncomingResponseItem", function () {
         test("creates peer shared IdentityAttribute in case of a TransferFileOwnershipAcceptResponseItem", async function () {
-            const senderFile = await TestUtil.uploadFile(senderAccountController, { tags: ["x+%+tag"] });
+            const senderFile = await TestUtil.uploadFile(senderAccountController, { tags: ["x:tag"] });
 
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
@@ -400,7 +400,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
                 peer: recipient
             };
 
-            const recipientFile = await TestUtil.uploadFile(recipientAccountController, { tags: ["x+%+tag"] });
+            const recipientFile = await TestUtil.uploadFile(recipientAccountController, { tags: ["x:tag"] });
             const responseItem = TransferFileOwnershipAcceptResponseItem.from({
                 result: ResponseItemResult.Accepted,
                 attributeId: await ConsumptionIds.attribute.generate(),
@@ -409,7 +409,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
                         value: recipientFile.toFileReference(recipientAccountController.config.baseUrl).truncate()
                     }),
                     owner: recipient,
-                    tags: ["x+%+tag"]
+                    tags: ["x:tag"]
                 })
             });
 
@@ -423,11 +423,11 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
             const truncatedFileReference = (peerSharedIdentityAttribute!.content.value as IdentityFileReference).value;
             const file = await senderAccountController.files.getOrLoadFileByReference(FileReference.from(truncatedFileReference));
             expect(file.isOwn).toBe(false);
-            expect(file.cache!.tags).toStrictEqual(["x+%+tag"]);
+            expect(file.cache!.tags).toStrictEqual(["x:tag"]);
         });
 
         test("updates the File whose ownership was claimed", async function () {
-            const senderFile = await TestUtil.uploadFile(senderAccountController, { tags: ["x+%+tag"] });
+            const senderFile = await TestUtil.uploadFile(senderAccountController, { tags: ["x:tag"] });
             const senderTruncatedFileReference = senderFile.toFileReference(senderAccountController.config.baseUrl).truncate();
 
             const requestItem = TransferFileOwnershipRequestItem.from({
@@ -453,7 +453,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
                         value: recipientFile.toFileReference(recipientAccountController.config.baseUrl).truncate()
                     }),
                     owner: recipient,
-                    tags: ["x+%+tag"]
+                    tags: ["x:tag"]
                 })
             });
 
