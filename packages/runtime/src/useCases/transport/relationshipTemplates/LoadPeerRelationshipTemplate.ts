@@ -1,4 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
+import { Reference } from "@nmshd/core-types";
 import {
     AccountController,
     RelationshipTemplateController,
@@ -11,7 +12,6 @@ import {
 import { Inject } from "@nmshd/typescript-ioc";
 import { RelationshipTemplateDTO } from "../../../types";
 import {
-    Base64ForIdPrefix,
     RelationshipTemplateReferenceString,
     RuntimeErrors,
     SchemaRepository,
@@ -55,25 +55,27 @@ export class LoadPeerRelationshipTemplateUseCase extends UseCase<LoadPeerRelatio
         return result;
     }
 
-    private async loadRelationshipTemplateFromReference(reference: string, password?: string): Promise<Result<RelationshipTemplateDTO>> {
-        if (reference.startsWith(Base64ForIdPrefix.RelationshipTemplate)) {
-            return await this.loadRelationshipTemplateFromRelationshipTemplateReference(reference, password);
+    private async loadRelationshipTemplateFromReference(referenceString: string, password?: string): Promise<Result<RelationshipTemplateDTO>> {
+        const reference = Reference.from(referenceString);
+
+        if (reference.id.toString().startsWith("RLT")) {
+            return await this.loadRelationshipTemplateFromRelationshipTemplateReference(RelationshipTemplateReference.from(reference), password);
         }
 
-        if (reference.startsWith(Base64ForIdPrefix.Token)) {
-            return await this.loadRelationshipTemplateFromTokenReference(reference, password);
+        if (reference.id.toString().startsWith("TOK")) {
+            return await this.loadRelationshipTemplateFromTokenReference(TokenReference.from(reference), password);
         }
 
-        throw RuntimeErrors.relationshipTemplates.invalidReference(reference);
+        throw RuntimeErrors.general.invalidReference();
     }
 
-    private async loadRelationshipTemplateFromRelationshipTemplateReference(reference: string, password?: string): Promise<Result<RelationshipTemplateDTO>> {
-        const template = await this.templateController.loadPeerRelationshipTemplateByReference(RelationshipTemplateReference.from(reference), password);
+    private async loadRelationshipTemplateFromRelationshipTemplateReference(reference: RelationshipTemplateReference, password?: string): Promise<Result<RelationshipTemplateDTO>> {
+        const template = await this.templateController.loadPeerRelationshipTemplateByReference(reference, password);
         return Result.ok(RelationshipTemplateMapper.toRelationshipTemplateDTO(template));
     }
 
-    private async loadRelationshipTemplateFromTokenReference(tokenReference: string, password?: string): Promise<Result<RelationshipTemplateDTO>> {
-        const token = await this.tokenController.loadPeerTokenByReference(TokenReference.from(tokenReference), true, password);
+    private async loadRelationshipTemplateFromTokenReference(reference: TokenReference, password?: string): Promise<Result<RelationshipTemplateDTO>> {
+        const token = await this.tokenController.loadPeerTokenByReference(reference, true, password);
 
         if (!token.cache) {
             throw RuntimeErrors.general.cacheEmpty(Token, token.id.toString());

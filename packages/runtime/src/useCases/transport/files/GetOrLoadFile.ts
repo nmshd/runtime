@@ -1,11 +1,10 @@
 import { Result } from "@js-soft/ts-utils";
-import { CoreId, FileReference } from "@nmshd/core-types";
+import { CoreId, FileReference, Reference } from "@nmshd/core-types";
 import { CryptoSecretKey } from "@nmshd/crypto";
 import { AccountController, FileController, Token, TokenContentFile, TokenController, TokenReference } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { FileDTO } from "../../../types";
 import {
-    Base64ForIdPrefix,
     FileReferenceString,
     RuntimeErrors,
     SchemaRepository,
@@ -49,24 +48,26 @@ export class GetOrLoadFileUseCase extends UseCase<GetOrLoadFileRequest, FileDTO>
         return result;
     }
 
-    private async loadFileFromReference(reference: string, password?: string): Promise<Result<FileDTO>> {
-        if (reference.startsWith(Base64ForIdPrefix.File)) {
-            return await this.loadFileFromFileReference(reference);
+    private async loadFileFromReference(referenceString: string, password?: string): Promise<Result<FileDTO>> {
+        const reference = Reference.from(referenceString);
+
+        if (reference.id.toString().startsWith("FIL")) {
+            return await this.loadFileFromFileReference(FileReference.from(reference));
         }
 
-        if (reference.startsWith(Base64ForIdPrefix.Token)) {
-            return await this.loadFileFromTokenReference(reference, password);
+        if (reference.id.toString().startsWith("TOK")) {
+            return await this.loadFileFromTokenReference(TokenReference.from(reference), password);
         }
 
-        throw RuntimeErrors.files.invalidReference(reference);
+        throw RuntimeErrors.general.invalidReference();
     }
 
-    private async loadFileFromFileReference(reference: string): Promise<Result<FileDTO>> {
-        const file = await this.fileController.getOrLoadFileByReference(FileReference.from(reference));
+    private async loadFileFromFileReference(reference: FileReference): Promise<Result<FileDTO>> {
+        const file = await this.fileController.getOrLoadFileByReference(reference);
         return Result.ok(FileMapper.toFileDTO(file));
     }
 
-    private async loadFileFromTokenReference(reference: string, password?: string): Promise<Result<FileDTO>> {
+    private async loadFileFromTokenReference(reference: TokenReference, password?: string): Promise<Result<FileDTO>> {
         const token = await this.tokenController.loadPeerTokenByReference(TokenReference.from(reference), true, password);
 
         if (!token.cache) {
