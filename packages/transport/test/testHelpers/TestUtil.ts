@@ -533,6 +533,14 @@ export class TestUtil {
         return await TestUtil.syncUntilHas(accountController, id, "messages");
     }
 
+    public static async syncUntilHasFiles(accountController: AccountController, expectedNumberOfFiles = 1): Promise<File[]> {
+        return await TestUtil.syncUntilHasMany(accountController, "files", expectedNumberOfFiles);
+    }
+
+    public static async syncUntilHasFile(accountController: AccountController, id: CoreId): Promise<File[]> {
+        return await TestUtil.syncUntilHas(accountController, id, "files");
+    }
+
     public static async syncUntilHasError(accountController: AccountController): Promise<any> {
         try {
             await TestUtil.syncUntilHasMessages(accountController, 100);
