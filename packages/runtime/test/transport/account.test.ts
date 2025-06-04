@@ -1,6 +1,6 @@
 import { CoreDate } from "@nmshd/core-types";
 import { DateTime } from "luxon";
-import { DatawalletSynchronizedEvent, DeviceDTO, DeviceOnboardingInfoDTO, TransportServices } from "../../src";
+import { DatawalletSynchronizedEvent, DeviceDTO, DeviceOnboardingInfoDTO, FileDTO, RelationshipTemplateDTO, TokenDTO, TransportServices } from "../../src";
 import { emptyRelationshipTemplateContent, MockEventBus, RuntimeServiceProvider, uploadFile } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
@@ -92,67 +92,89 @@ describe("IdentityInfo", () => {
 
 describe("LoadItemFromReference", () => {
     describe("File", () => {
-        let fileReference: string;
-        let fileTokenReference: string;
+        let file: FileDTO;
+        let fileToken: TokenDTO;
 
         beforeAll(async () => {
-            const file = await uploadFile(sTransportServices);
-            fileReference = file.truncatedReference;
-            fileTokenReference = (await sTransportServices.files.createTokenForFile({ fileId: file.id })).value.truncatedReference;
+            file = await uploadFile(sTransportServices);
+            fileToken = (await sTransportServices.files.createTokenForFile({ fileId: file.id })).value;
         });
 
         test("loads the File with the truncated reference", async () => {
-            const result = await rTransportServices.account.loadItemFromReference({ reference: fileReference });
+            const result = await rTransportServices.account.loadItemFromReference({ reference: file.reference.truncated });
+            expect(result).toBeSuccessful();
+            expect(result.value.type).toBe("File");
+        });
+
+        test("loads the File with the url reference", async () => {
+            const result = await rTransportServices.account.loadItemFromReference({ reference: file.reference.url });
             expect(result).toBeSuccessful();
             expect(result.value.type).toBe("File");
         });
 
         test("loads the File with the truncated Token reference", async () => {
-            const result = await rTransportServices.account.loadItemFromReference({ reference: fileTokenReference });
+            const result = await rTransportServices.account.loadItemFromReference({ reference: fileToken.reference.truncated });
+            expect(result).toBeSuccessful();
+            expect(result.value.type).toBe("File");
+        });
+
+        test("loads the File with the url Token reference", async () => {
+            const result = await rTransportServices.account.loadItemFromReference({ reference: fileToken.reference.url });
             expect(result).toBeSuccessful();
             expect(result.value.type).toBe("File");
         });
     });
 
     describe("RelationshipTemplate", () => {
-        let relationshipTemplateReference: string;
-        let relationshipTemplateTokenReference: string;
+        let relationshipTemplate: RelationshipTemplateDTO;
+        let relationshipTemplateToken: TokenDTO;
 
         beforeAll(async () => {
-            const relationshipTemplate = (
+            relationshipTemplate = (
                 await sTransportServices.relationshipTemplates.createOwnRelationshipTemplate({
                     content: emptyRelationshipTemplateContent,
                     expiresAt: CoreDate.utc().add({ days: 1 }).toISOString()
                 })
             ).value;
-            relationshipTemplateReference = relationshipTemplate.truncatedReference;
-            relationshipTemplateTokenReference = (await sTransportServices.relationshipTemplates.createTokenForOwnRelationshipTemplate({ templateId: relationshipTemplate.id }))
-                .value.truncatedReference;
+            relationshipTemplateToken = (await sTransportServices.relationshipTemplates.createTokenForOwnRelationshipTemplate({ templateId: relationshipTemplate.id })).value;
         });
 
         test("loads the RelationshipTemplate with the truncated reference", async () => {
-            const result = await rTransportServices.account.loadItemFromReference({ reference: relationshipTemplateReference });
+            const result = await rTransportServices.account.loadItemFromReference({ reference: relationshipTemplate.reference.truncated });
+            expect(result).toBeSuccessful();
+            expect(result.value.type).toBe("RelationshipTemplate");
+        });
+
+        test("loads the RelationshipTemplate with the url reference", async () => {
+            const result = await rTransportServices.account.loadItemFromReference({ reference: relationshipTemplate.reference.url });
             expect(result).toBeSuccessful();
             expect(result.value.type).toBe("RelationshipTemplate");
         });
 
         test("loads the RelationshipTemplate with the truncated Token reference", async () => {
-            const result = await rTransportServices.account.loadItemFromReference({ reference: relationshipTemplateTokenReference });
+            const result = await rTransportServices.account.loadItemFromReference({ reference: relationshipTemplateToken.reference.truncated });
+            expect(result).toBeSuccessful();
+            expect(result.value.type).toBe("RelationshipTemplate");
+        });
+
+        test("loads the RelationshipTemplate with the url Token reference", async () => {
+            const result = await rTransportServices.account.loadItemFromReference({ reference: relationshipTemplateToken.reference.url });
             expect(result).toBeSuccessful();
             expect(result.value.type).toBe("RelationshipTemplate");
         });
     });
 
     describe("Token", () => {
-        let tokenReference: string;
-
-        beforeAll(async () => {
+        test("loads the Token with the truncated Token reference", async () => {
             const token = (await sTransportServices.tokens.createOwnToken({ content: {}, expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(), ephemeral: true })).value;
-            tokenReference = token.truncatedReference;
+            const result = await rTransportServices.account.loadItemFromReference({ reference: token.reference.truncated });
+            expect(result).toBeSuccessful();
+            expect(result.value.type).toBe("Token");
         });
 
-        test("loads the Token with the truncated Token reference", async () => {
-            const result = await rTransportServices.account.loadItemFromReference({ reference: tokenReference });
+        test("loads the Token with the url Token reference", async () => {
+            const token = (await sTransportServices.tokens.createOwnToken({ content: {}, expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(), ephemeral: true })).value;
+            const result = await rTransportServices.account.loadItemFromReference({ reference: token.reference.url });
             expect(result).toBeSuccessful();
             expect(result.value.type).toBe("Token");
         });
