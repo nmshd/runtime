@@ -341,6 +341,16 @@ describe("Load peer file with token reference", () => {
         expect(response.value).toMatchObject({ ...file, isOwn: false, ownershipToken: undefined });
     });
 
+    test("peer file can be loaded with url token reference", async () => {
+        expect(file).toBeDefined();
+
+        const token = (await transportServices1.files.createTokenForFile({ fileId: file.id })).value;
+        const response = await transportServices2.files.getOrLoadFile({ reference: token.reference.url });
+
+        expect(response).toBeSuccessful();
+        expect(response.value).toMatchObject({ ...file, isOwn: false, ownershipToken: undefined });
+    });
+
     test("after peer file is loaded the file can be accessed under /Files/{id}", async () => {
         expect(file).toBeDefined();
 
@@ -413,8 +423,13 @@ describe("Load peer file with the FileReference", () => {
         expect(response).toBeAnError("File not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
     });
 
-    test("load the file using the FileReference", async () => {
+    test("load the file using the truncated reference", async () => {
         const fileResult = await transportServices2.files.getOrLoadFile({ reference: file.truncatedReference });
+        expect(fileResult).toBeSuccessful();
+    });
+
+    test("load the file using the url reference", async () => {
+        const fileResult = await transportServices2.files.getOrLoadFile({ reference: file.reference.url });
         expect(fileResult).toBeSuccessful();
     });
 

@@ -6,7 +6,14 @@ export const LoadPeerTokenAnonymousRequest: any = {
             "type": "object",
             "properties": {
                 "reference": {
-                    "$ref": "#/definitions/TokenReferenceString"
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/TokenReferenceString"
+                        },
+                        {
+                            "$ref": "#/definitions/URLTokenReferenceString"
+                        }
+                    ]
                 },
                 "password": {
                     "type": "string"
@@ -20,6 +27,10 @@ export const LoadPeerTokenAnonymousRequest: any = {
         "TokenReferenceString": {
             "type": "string",
             "pattern": "VE9L.{84}"
+        },
+        "URLTokenReferenceString": {
+            "type": "string",
+            "pattern": "^https?:\\/\\/.*\\/r\\/TOK[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
         }
     }
 }
@@ -20490,6 +20501,15 @@ export const LoadItemFromReferenceRequest: any = {
                         },
                         {
                             "$ref": "#/definitions/RelationshipTemplateReferenceString"
+                        },
+                        {
+                            "$ref": "#/definitions/URLTokenReferenceString"
+                        },
+                        {
+                            "$ref": "#/definitions/URLFileReferenceString"
+                        },
+                        {
+                            "$ref": "#/definitions/URLRelationshipTemplateReferenceString"
                         }
                     ]
                 },
@@ -20513,6 +20533,18 @@ export const LoadItemFromReferenceRequest: any = {
         "RelationshipTemplateReferenceString": {
             "type": "string",
             "pattern": "UkxU.{84}"
+        },
+        "URLTokenReferenceString": {
+            "type": "string",
+            "pattern": "^https?:\\/\\/.*\\/r\\/TOK[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
+        },
+        "URLFileReferenceString": {
+            "type": "string",
+            "pattern": "^https?:\\/\\/.*\\/r\\/FIL[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
+        },
+        "URLRelationshipTemplateReferenceString": {
+            "type": "string",
+            "pattern": "^https?:\\/\\/.*\\/r\\/RLT[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
         }
     }
 }
@@ -20845,6 +20877,12 @@ export const GetOrLoadFileRequest: any = {
                         },
                         {
                             "$ref": "#/definitions/FileReferenceString"
+                        },
+                        {
+                            "$ref": "#/definitions/URLTokenReferenceString"
+                        },
+                        {
+                            "$ref": "#/definitions/URLFileReferenceString"
                         }
                     ]
                 },
@@ -20865,6 +20903,14 @@ export const GetOrLoadFileRequest: any = {
         "FileReferenceString": {
             "type": "string",
             "pattern": "RklM.{84}"
+        },
+        "URLTokenReferenceString": {
+            "type": "string",
+            "pattern": "^https?:\\/\\/.*\\/r\\/TOK[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
+        },
+        "URLFileReferenceString": {
+            "type": "string",
+            "pattern": "^https?:\\/\\/.*\\/r\\/FIL[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
         }
     }
 }
@@ -22983,6 +23029,12 @@ export const LoadPeerRelationshipTemplateRequest: any = {
                         },
                         {
                             "$ref": "#/definitions/RelationshipTemplateReferenceString"
+                        },
+                        {
+                            "$ref": "#/definitions/URLTokenReferenceString"
+                        },
+                        {
+                            "$ref": "#/definitions/URLRelationshipTemplateReferenceString"
                         }
                     ]
                 },
@@ -23003,6 +23055,14 @@ export const LoadPeerRelationshipTemplateRequest: any = {
         "RelationshipTemplateReferenceString": {
             "type": "string",
             "pattern": "UkxU.{84}"
+        },
+        "URLTokenReferenceString": {
+            "type": "string",
+            "pattern": "^https?:\\/\\/.*\\/r\\/TOK[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
+        },
+        "URLRelationshipTemplateReferenceString": {
+            "type": "string",
+            "pattern": "^https?:\\/\\/.*\\/r\\/RLT[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
         }
     }
 }
@@ -23266,7 +23326,14 @@ export const LoadPeerTokenRequest: any = {
             "type": "object",
             "properties": {
                 "reference": {
-                    "$ref": "#/definitions/TokenReferenceString"
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/TokenReferenceString"
+                        },
+                        {
+                            "$ref": "#/definitions/URLTokenReferenceString"
+                        }
+                    ]
                 },
                 "ephemeral": {
                     "type": "boolean"
@@ -23285,6 +23352,10 @@ export const LoadPeerTokenRequest: any = {
         "TokenReferenceString": {
             "type": "string",
             "pattern": "VE9L.{84}"
+        },
+        "URLTokenReferenceString": {
+            "type": "string",
+            "pattern": "^https?:\\/\\/.*\\/r\\/TOK[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
         }
     }
 }
