@@ -315,10 +315,9 @@ describe("TokenController", function () {
 
         const reference = sentToken.toTokenReference(sender.config.baseUrl);
         reference.forIdentityTruncated = undefined;
-        const truncatedReference = reference;
 
         await expect(async () => {
-            await recipient.tokens.loadPeerTokenByReference(truncatedReference, true);
+            await recipient.tokens.loadPeerTokenByReference(reference, true);
         }).rejects.toThrow("error.platform.recordNotFound");
     });
 

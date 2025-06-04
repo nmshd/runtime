@@ -3,7 +3,7 @@ import { Serializable } from "@js-soft/ts-serval";
 import { EventBus, Result } from "@js-soft/ts-utils";
 import { ICoreAddress, Reference, SharedPasswordProtection } from "@nmshd/core-types";
 import { AnonymousServices, DeviceMapper, RuntimeServices } from "@nmshd/runtime";
-import { TokenContentDeviceSharedSecret } from "@nmshd/transport";
+import { BackboneIds, TokenContentDeviceSharedSecret } from "@nmshd/transport";
 import { AppRuntimeErrors } from "./AppRuntimeErrors";
 import { IUIBridge } from "./extensibility";
 import { AccountServices, LocalAccountDTO, LocalAccountSession } from "./multiAccount";
@@ -48,7 +48,7 @@ export class AppStringProcessor {
         if (account) return await this._handleReference(reference, account);
 
         // process Files and RelationshipTemplates and ask for an account
-        if (reference.id.toString().startsWith("FIL") || reference.id.toString().startsWith("RLT")) {
+        if (BackboneIds.file.validate(reference.id) || BackboneIds.relationshipTemplate.validate(reference.id)) {
             const result = await this.selectAccount(reference.forIdentityTruncated);
             if (result.isError) {
                 this.logger.info("Could not query account", result.error);
@@ -63,7 +63,7 @@ export class AppStringProcessor {
             return await this._handleReference(reference, result.value);
         }
 
-        if (!reference.id.toString().startsWith("TOK")) {
+        if (!BackboneIds.token.validate(reference.id)) {
             const error = AppRuntimeErrors.appStringProcessor.wrongCode();
             return Result.fail(error);
         }
@@ -153,7 +153,7 @@ export class AppStringProcessor {
             return Result.fail(AppRuntimeErrors.appStringProcessor.invalidReference());
         }
 
-        if (!reference.id.toString().startsWith("TOK")) return Result.fail(AppRuntimeErrors.appStringProcessor.noDeviceOnboardingCode());
+        if (!BackboneIds.token.validate(reference.id)) return Result.fail(AppRuntimeErrors.appStringProcessor.noDeviceOnboardingCode());
 
         const tokenResultHolder = reference.passwordProtection
             ? await this._fetchPasswordProtectedItemWithRetry(
