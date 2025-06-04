@@ -1,7 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
 import { CoreId, FileReference, Reference } from "@nmshd/core-types";
 import { CryptoSecretKey } from "@nmshd/crypto";
-import { AccountController, FileController, Token, TokenContentFile, TokenController, TokenReference } from "@nmshd/transport";
+import { AccountController, BackboneIds, FileController, Token, TokenContentFile, TokenController, TokenReference } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { FileDTO } from "../../../types";
 import {
@@ -51,11 +51,11 @@ export class GetOrLoadFileUseCase extends UseCase<GetOrLoadFileRequest, FileDTO>
     private async loadFileFromReference(referenceString: string, password?: string): Promise<Result<FileDTO>> {
         const reference = Reference.from(referenceString);
 
-        if (reference.id.toString().startsWith("FIL")) {
+        if (BackboneIds.file.validate(reference.id)) {
             return await this.loadFileFromFileReference(FileReference.from(reference));
         }
 
-        if (reference.id.toString().startsWith("TOK")) {
+        if (BackboneIds.token.validate(reference.id)) {
             return await this.loadFileFromTokenReference(TokenReference.from(reference), password);
         }
 

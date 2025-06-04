@@ -2,6 +2,7 @@ import { Result } from "@js-soft/ts-utils";
 import { Reference } from "@nmshd/core-types";
 import {
     AccountController,
+    BackboneIds,
     RelationshipTemplateController,
     RelationshipTemplateReference,
     Token,
@@ -58,11 +59,11 @@ export class LoadPeerRelationshipTemplateUseCase extends UseCase<LoadPeerRelatio
     private async loadRelationshipTemplateFromReference(referenceString: string, password?: string): Promise<Result<RelationshipTemplateDTO>> {
         const reference = Reference.from(referenceString);
 
-        if (reference.id.toString().startsWith("RLT")) {
+        if (BackboneIds.relationshipTemplate.validate(reference.id)) {
             return await this.loadRelationshipTemplateFromRelationshipTemplateReference(RelationshipTemplateReference.from(reference), password);
         }
 
-        if (reference.id.toString().startsWith("TOK")) {
+        if (BackboneIds.token.validate(reference.id)) {
             return await this.loadRelationshipTemplateFromTokenReference(TokenReference.from(reference), password);
         }
 

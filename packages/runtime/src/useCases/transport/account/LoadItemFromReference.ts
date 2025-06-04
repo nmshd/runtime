@@ -2,6 +2,7 @@ import { Result } from "@js-soft/ts-utils";
 import { FileReference, Reference } from "@nmshd/core-types";
 import {
     AccountController,
+    BackboneIds,
     FileController,
     RelationshipTemplateController,
     RelationshipTemplateReference,
@@ -76,7 +77,7 @@ export class LoadItemFromReferenceUseCase extends UseCase<LoadItemFromReferenceR
     private async _executeInternal(request: LoadItemFromReferenceRequest): Promise<Result<LoadItemFromReferenceResponse>> {
         const reference = Reference.from(request.reference);
 
-        if (reference.id.toString().startsWith("RLT")) {
+        if (BackboneIds.relationshipTemplate.validate(reference.id)) {
             const template = await this.templateController.loadPeerRelationshipTemplateByReference(RelationshipTemplateReference.from(reference), request.password);
             return Result.ok({
                 type: "RelationshipTemplate",
@@ -84,7 +85,7 @@ export class LoadItemFromReferenceUseCase extends UseCase<LoadItemFromReferenceR
             });
         }
 
-        if (reference.id.toString().startsWith("FIL")) {
+        if (BackboneIds.file.validate(reference.id.toString())) {
             const file = await this.fileController.getOrLoadFileByReference(FileReference.from(reference));
             return Result.ok({
                 type: "File",
