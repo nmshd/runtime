@@ -51,7 +51,8 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
 
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
-                fileReference: senderFile.toFileReference(senderAccountController.config.baseUrl).truncate()
+                fileReference: senderFile.toFileReference(senderAccountController.config.baseUrl).truncate(),
+                ownershipToken: senderFile.ownershipToken!
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -64,7 +65,8 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
 
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
-                fileReference: senderFile.toFileReference(senderAccountController.config.baseUrl)
+                fileReference: senderFile.toFileReference(senderAccountController.config.baseUrl),
+                ownershipToken: senderFile.ownershipToken!
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -78,7 +80,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
                 fileReference: senderFile.toFileReference(senderAccountController.config.baseUrl),
-                ownershipToken: senderFile.ownershipToken
+                ownershipToken: senderFile.ownershipToken!
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -91,7 +93,8 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
 
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
-                fileReference: thirdPartyFile.toFileReference(thirdPartyAccountController.config.baseUrl)
+                fileReference: thirdPartyFile.toFileReference(thirdPartyAccountController.config.baseUrl),
+                ownershipToken: thirdPartyFile.ownershipToken!
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -109,7 +112,8 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
 
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
-                fileReference: thirdPartyFileReference
+                fileReference: thirdPartyFileReference,
+                ownershipToken: thirdPartyFile.ownershipToken!
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -126,7 +130,8 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
 
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
-                fileReference: senderExpiredFile.toFileReference(senderAccountController.config.baseUrl)
+                fileReference: senderExpiredFile.toFileReference(senderAccountController.config.baseUrl),
+                ownershipToken: senderExpiredFile.ownershipToken!
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -161,7 +166,8 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
 
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
-                fileReference: senderFile.toFileReference(senderAccountController.config.baseUrl)
+                fileReference: senderFile.toFileReference(senderAccountController.config.baseUrl),
+                ownershipToken: senderFile.ownershipToken!
             });
 
             const incomingRequest = LocalRequest.from({
@@ -184,7 +190,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
                 fileReference: senderFile.toFileReference(senderAccountController.config.baseUrl),
-                ownershipToken: senderFile.ownershipToken
+                ownershipToken: senderFile.ownershipToken!
             });
 
             const incomingRequest = LocalRequest.from({
@@ -207,7 +213,8 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
 
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
-                fileReference: senderExpiredFile.toFileReference(senderAccountController.config.baseUrl)
+                fileReference: senderExpiredFile.toFileReference(senderAccountController.config.baseUrl),
+                ownershipToken: senderExpiredFile.ownershipToken!
             });
 
             const incomingRequest = LocalRequest.from({
@@ -232,7 +239,8 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
 
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
-                fileReference: recipientFile.toFileReference(recipientAccountController.config.baseUrl)
+                fileReference: recipientFile.toFileReference(recipientAccountController.config.baseUrl),
+                ownershipToken: recipientFile.ownershipToken!
             });
 
             const incomingRequest = LocalRequest.from({
@@ -257,7 +265,8 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
 
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
-                fileReference: thirdPartyFile.toFileReference(thirdPartyAccountController.config.baseUrl)
+                fileReference: thirdPartyFile.toFileReference(thirdPartyAccountController.config.baseUrl),
+                ownershipToken: thirdPartyFile.ownershipToken!
             });
 
             const incomingRequest = LocalRequest.from({
@@ -310,7 +319,8 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
 
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
-                fileReference: senderFile.toFileReference(senderAccountController.config.baseUrl)
+                fileReference: senderFile.toFileReference(senderAccountController.config.baseUrl),
+                ownershipToken: senderFile.ownershipToken!
             });
 
             const incomingRequest = LocalRequest.from({
@@ -350,7 +360,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
                 fileReference: senderFileReference,
-                ownershipToken: senderFile.ownershipToken
+                ownershipToken: senderFile.ownershipToken!
             });
 
             const incomingRequest = LocalRequest.from({
@@ -392,7 +402,8 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
 
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
-                fileReference: senderFile.toFileReference(senderAccountController.config.baseUrl)
+                fileReference: senderFile.toFileReference(senderAccountController.config.baseUrl),
+                ownershipToken: senderFile.ownershipToken!
             });
 
             const requestInfo = {
@@ -433,7 +444,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
             const requestItem = TransferFileOwnershipRequestItem.from({
                 mustBeAccepted: false,
                 fileReference: senderTruncatedFileReference,
-                ownershipToken: senderFile.ownershipToken
+                ownershipToken: senderFile.ownershipToken!
             });
 
             const requestInfo = {

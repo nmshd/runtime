@@ -3210,7 +3210,8 @@ export const CanCreateOutgoingRequestRequest: any = {
             "required": [
                 "@type",
                 "fileReference",
-                "mustBeAccepted"
+                "mustBeAccepted",
+                "ownershipToken"
             ],
             "additionalProperties": false
         },
@@ -11308,7 +11309,8 @@ export const CreateOutgoingRequestRequest: any = {
             "required": [
                 "@type",
                 "fileReference",
-                "mustBeAccepted"
+                "mustBeAccepted",
+                "ownershipToken"
             ],
             "additionalProperties": false
         },
@@ -14843,7 +14845,8 @@ export const ReceivedIncomingRequestRequest: any = {
             "required": [
                 "@type",
                 "fileReference",
-                "mustBeAccepted"
+                "mustBeAccepted",
+                "ownershipToken"
             ],
             "additionalProperties": false
         },

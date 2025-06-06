@@ -8,7 +8,7 @@ import {
     TransferFileOwnershipAcceptResponseItem,
     TransferFileOwnershipRequestItem
 } from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { File } from "@nmshd/transport";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import { ValidationResult } from "../../../common/ValidationResult";
@@ -53,15 +53,11 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
             }
         }
 
-        if (requestItem.ownershipToken) {
-            const validationResult = await this.accountController.files.validateFileOwnershipToken(foundFile.id, requestItem.ownershipToken);
-            if (!validationResult.isValid) {
-                return ValidationResult.error(
-                    ConsumptionCoreErrors.requests.invalidRequestItem(
-                        `The specified ownershipToken is not valid for the File with ID '${requestItem.fileReference.id.toString()}'.`
-                    )
-                );
-            }
+        const validationResult = await this.accountController.files.validateFileOwnershipToken(foundFile.id, requestItem.ownershipToken);
+        if (!validationResult.isValid) {
+            return ValidationResult.error(
+                ConsumptionCoreErrors.requests.invalidRequestItem(`The specified ownershipToken is not valid for the File with ID '${requestItem.fileReference.id.toString()}'.`)
+            );
         }
 
         return ValidationResult.success();
@@ -118,15 +114,13 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
             }
         }
 
-        if (requestItem.ownershipToken) {
-            const validationResult = await this.accountController.files.validateFileOwnershipToken(file.id, requestItem.ownershipToken);
-            if (!validationResult.isValid) {
-                return ValidationResult.error(
-                    ConsumptionCoreErrors.requests.invalidRequestItem(
-                        `You cannot accept this RequestItem since the specified ownershipToken is not valid for the File with ID '${requestItem.fileReference.id.toString()}'.`
-                    )
-                );
-            }
+        const validationResult = await this.accountController.files.validateFileOwnershipToken(file.id, requestItem.ownershipToken);
+        if (!validationResult.isValid) {
+            return ValidationResult.error(
+                ConsumptionCoreErrors.requests.invalidRequestItem(
+                    `You cannot accept this RequestItem since the specified ownershipToken is not valid for the File with ID '${requestItem.fileReference.id.toString()}'.`
+                )
+            );
         }
 
         return ValidationResult.success();
@@ -139,9 +133,7 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
     ): Promise<TransferFileOwnershipAcceptResponseItem> {
         const peerFile = await this.accountController.files.getOrLoadFileByReference(requestItem.fileReference);
 
-        const ownFile = requestItem.ownershipToken
-            ? await this.accountController.files.claimFileOwnership(peerFile.id, requestItem.ownershipToken)
-            : await this.transferFileOwnershipByReupload(peerFile);
+        const ownFile = await this.accountController.files.claimFileOwnership(peerFile.id, requestItem.ownershipToken);
 
         const repositoryAttribute = await this.consumptionController.attributes.createRepositoryAttribute({
             content: IdentityAttribute.from({
@@ -163,19 +155,6 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
             result: ResponseItemResult.Accepted,
             attributeId: ownSharedIdentityAttribute.id,
             attribute: ownSharedIdentityAttribute.content as IdentityAttribute
-        });
-    }
-
-    private async transferFileOwnershipByReupload(peerFile: File) {
-        const fileContent = await this.accountController.files.downloadFileContent(peerFile);
-        return await this.accountController.files.sendFile({
-            buffer: fileContent,
-            title: peerFile.cache!.title,
-            description: peerFile.cache!.description,
-            filename: peerFile.cache!.filename,
-            mimetype: peerFile.cache!.mimetype,
-            expiresAt: CoreDate.from("9999-12-31T00:00:00.000Z"),
-            tags: peerFile.cache!.tags
         });
     }
 
