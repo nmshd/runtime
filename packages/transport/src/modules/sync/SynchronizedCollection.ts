@@ -1,4 +1,4 @@
-import { DatabaseType, IDatabaseCollection } from "@js-soft/docdb-access-abstractions";
+import { DatabasePaginationOptions, DatabaseSortOptions, DatabaseType, IDatabaseCollection } from "@js-soft/docdb-access-abstractions";
 import { Serializable } from "@js-soft/ts-serval";
 import jsonpatch from "fast-json-patch";
 import _ from "lodash";
@@ -210,8 +210,8 @@ ${new Error().stack}`);
         return await this.parent.list();
     }
 
-    public async find(query?: any): Promise<any[]> {
-        return await this.parent.find(query);
+    public async find(query?: any, paginationOptions?: DatabasePaginationOptions, sortOptions?: DatabaseSortOptions): Promise<any[]> {
+        return await this.parent.find(query, paginationOptions, sortOptions);
     }
 
     public async count(query?: any): Promise<number> {
