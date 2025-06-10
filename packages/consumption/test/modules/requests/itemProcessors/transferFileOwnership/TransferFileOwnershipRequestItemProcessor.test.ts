@@ -362,6 +362,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
             expect(peerSharedIdentityAttribute!.shareInfo!.peer).toStrictEqual(recipient);
             expect(peerSharedIdentityAttribute!.shareInfo!.requestReference).toStrictEqual(requestInfo.id);
             expect(peerSharedIdentityAttribute!.shareInfo!.sourceAttribute).toBeUndefined();
+            expect((peerSharedIdentityAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x:tag"]);
 
             const peerTruncatedFileReference = (peerSharedIdentityAttribute!.content.value as IdentityFileReference).value;
             expect(peerTruncatedFileReference).toStrictEqual(senderTruncatedFileReference);
