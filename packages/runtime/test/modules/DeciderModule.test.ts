@@ -2111,7 +2111,8 @@ describe("DeciderModule", () => {
                         {
                             "@type": "TransferFileOwnershipRequestItem",
                             mustBeAccepted: true,
-                            fileReference: file.reference.truncated
+                            fileReference: file.reference.truncated,
+                            ownershipToken: file.ownershipToken
                         }
                     ]
                 },
