@@ -9,6 +9,7 @@ import {
     GetAttachmentMetadataUseCase,
     GetMessageRequest,
     GetMessagesRequest,
+    GetMessagesResponse,
     GetMessagesUseCase,
     GetMessageUseCase,
     MarkMessageAsReadRequest,
@@ -34,7 +35,7 @@ export class MessagesFacade {
         return await this.sendMessageUseCase.execute(request);
     }
 
-    public async getMessages(request: GetMessagesRequest): Promise<Result<MessageDTO[]>> {
+    public async getMessages(request: GetMessagesRequest): Promise<Result<GetMessagesResponse>> {
         return await this.getMessagesUseCase.execute(request);
     }
 
