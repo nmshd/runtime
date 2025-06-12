@@ -18,7 +18,7 @@ export interface IConsentRequestItem extends IRequestItem {
 @type("ConsentRequestItem")
 export class ConsentRequestItem extends RequestItem implements IConsentRequestItem {
     @serialize()
-    @validate({ max: 2000 })
+    @validate({ max: 10000 })
     public consent: string;
 
     @serialize()
