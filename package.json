@@ -38,7 +38,7 @@
         "madge": "^8.0.0",
         "npm-check-updates": "^18.0.1",
         "prettier": "^3.5.3",
-        "ts-jest": "^29.3.4",
+        "ts-jest": "^29.4.0",
         "ts-node": "^10.9.2",
         "tsconfig-paths": "^4.2.0",
         "typescript": "^5.8.3"
