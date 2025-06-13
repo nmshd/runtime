@@ -38,9 +38,8 @@ export class FileMapper {
             createdByDevice: file.cache.createdByDevice.toString(),
             expiresAt: file.cache.expiresAt.toString(),
             mimetype: file.cache.mimetype,
-            title: file.cache.title ?? "",
+            title: file.cache.title,
             description: file.cache.description,
-            truncatedReference: reference.truncate(),
             reference: {
                 truncated: reference.truncate(),
                 url: reference.toUrl()
