@@ -1,12 +1,13 @@
 import { CoreDate } from "@nmshd/core-types";
 import fs from "fs";
 import { DateTime } from "luxon";
-import { FileDTO, GetFilesQuery, OwnerRestriction, TransportServices } from "../../src";
-import { exchangeFile, makeUploadRequest, QueryParamConditions, RuntimeServiceProvider, uploadFile } from "../lib";
+import { FileDTO, FileWasViewedAtChangedEvent, GetFilesQuery, OwnerRestriction, TransportServices } from "../../src";
+import { exchangeFile, makeUploadRequest, MockEventBus, QueryParamConditions, RuntimeServiceProvider, uploadFile } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let transportServices1: TransportServices;
 let transportServices2: TransportServices;
+let eventBus1: MockEventBus;
 
 const UNKNOWN_FILE_ID = "FILXXXXXXXXXXXXXXXXX";
 const UNKNOWN_TOKEN_ID = "TOKXXXXXXXXXXXXXXXXX";
@@ -15,7 +16,10 @@ beforeAll(async () => {
     const runtimeServices = await serviceProvider.launch(2);
     transportServices1 = runtimeServices[0].transport;
     transportServices2 = runtimeServices[1].transport;
+
+    eventBus1 = runtimeServices[0].eventBus;
 }, 30000);
+
 afterAll(async () => await serviceProvider.stop());
 
 describe("File upload", () => {
@@ -470,5 +474,33 @@ describe("File ownership", () => {
 
         const result = await transportServices2.files.regenerateFileOwnershipToken({ id: file.id });
         expect(result).toBeAnError("Only the owner of the File can perform this action.", "error.runtime.files.notOwnedByYou");
+    });
+});
+
+describe("Mark File as un-/viewed", () => {
+    test("Mark File as viewed", async () => {
+        const file = (await transportServices1.files.uploadOwnFile(await makeUploadRequest())).value;
+        expect(file.wasViewedAt).toBeUndefined();
+
+        const timeBeforeViewing = CoreDate.utc();
+        const viewedFile = (await transportServices1.files.markFileAsViewed({ id: file.id })).value;
+
+        expect(viewedFile.wasViewedAt).toBeDefined();
+        const timeOfViewing = CoreDate.from(viewedFile.wasViewedAt!);
+        expect(timeOfViewing.isSameOrAfter(timeBeforeViewing)).toBe(true);
+
+        await expect(eventBus1).toHavePublished(FileWasViewedAtChangedEvent, (m) => m.data.id === file.id);
+    });
+
+    test("Mark File as unviewed", async () => {
+        const file = (await transportServices1.files.uploadOwnFile(await makeUploadRequest())).value;
+        const viewedFile = (await transportServices1.files.markFileAsViewed({ id: file.id })).value;
+        expect(viewedFile.wasViewedAt).toBeDefined();
+        eventBus1.reset();
+
+        const unviewedFile = (await transportServices1.files.markFileAsUnviewed({ id: file.id })).value;
+        expect(unviewedFile.wasViewedAt).toBeUndefined();
+
+        await expect(eventBus1).toHavePublished(FileWasViewedAtChangedEvent, (m) => m.data.id === file.id);
     });
 });
