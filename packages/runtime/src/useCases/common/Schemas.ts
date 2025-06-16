@@ -20915,6 +20915,52 @@ export const GetOrLoadFileRequest: any = {
     }
 }
 
+export const MarkFileAsUnviewedRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/MarkFileAsUnviewedRequest",
+    "definitions": {
+        "MarkFileAsUnviewedRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/FileIdString"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "additionalProperties": false
+        },
+        "FileIdString": {
+            "type": "string",
+            "pattern": "FIL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const MarkFileAsViewedRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/MarkFileAsViewedRequest",
+    "definitions": {
+        "MarkFileAsViewedRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/FileIdString"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "additionalProperties": false
+        },
+        "FileIdString": {
+            "type": "string",
+            "pattern": "FIL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
 export const RegenerateFileOwnershipTokenRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/RegenerateFileOwnershipTokenRequest",
