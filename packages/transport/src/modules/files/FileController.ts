@@ -5,6 +5,7 @@ import { CoreBuffer, CryptoCipher, CryptoHash, CryptoHashAlgorithm, CryptoSecret
 import { CoreCrypto, CoreHash, TransportCoreErrors } from "../../core";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { ControllerName, TransportController } from "../../core/TransportController";
+import { FileWasViewedAtChangedEvent } from "../../events";
 import { AccountController } from "../accounts/AccountController";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
 import { BackboneGetFilesResponse } from "./backbone/BackboneGetFiles";
@@ -318,6 +319,40 @@ export class FileController extends TransportController {
         if (!fileDoc) throw TransportCoreErrors.general.recordNotFound(File, file.id.toString());
 
         await this.files.update(fileDoc, file);
+        return file;
+    }
+
+    public async markFileAsViewed(id: CoreId): Promise<File> {
+        const fileDoc = await this.files.read(id.toString());
+        if (!fileDoc) {
+            throw TransportCoreErrors.general.recordNotFound(File, id.toString());
+        }
+
+        const file = File.from(fileDoc);
+        if (file.wasViewedAt) return file;
+
+        file.wasViewedAt = CoreDate.utc();
+        await this.files.update(fileDoc, file);
+
+        this.eventBus.publish(new FileWasViewedAtChangedEvent(this.parent.identity.address.toString(), file));
+
+        return file;
+    }
+
+    public async markFileAsUnviewed(id: CoreId): Promise<File> {
+        const fileDoc = await this.files.read(id.toString());
+        if (!fileDoc) {
+            throw TransportCoreErrors.general.recordNotFound(File, id.toString());
+        }
+
+        const file = File.from(fileDoc);
+        if (!file.wasViewedAt) return file;
+
+        file.wasViewedAt = undefined;
+        await this.files.update(fileDoc, file);
+
+        this.eventBus.publish(new FileWasViewedAtChangedEvent(this.parent.identity.address.toString(), file));
+
         return file;
     }
 }
