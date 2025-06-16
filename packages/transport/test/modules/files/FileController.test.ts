@@ -124,6 +124,28 @@ describe("FileController", function () {
         expect(file.metadataModifiedAt!.isSameOrAfter(creationTime.subtract({ seconds: 2 }))).toBe(true);
     });
 
+    test("should marked File as viewed", async function () {
+        const file = await TestUtil.uploadFile(sender, CoreBuffer.fromUtf8("Test"));
+        expect(file.wasViewedAt).toBeUndefined();
+
+        const timeBeforeViewing = CoreDate.utc();
+        const viewedFile = await sender.files.markFileAsViewed(file.id);
+        const timeAfterViewing = CoreDate.utc();
+
+        expect(viewedFile.wasViewedAt).toBeDefined();
+        expect(viewedFile.wasViewedAt!.isSameOrAfter(timeBeforeViewing)).toBe(true);
+        expect(viewedFile.wasViewedAt!.isSameOrBefore(timeAfterViewing)).toBe(true);
+    });
+
+    test("should marked File as unviewed", async function () {
+        const file = await TestUtil.uploadFile(sender, CoreBuffer.fromUtf8("Test"));
+        const viewedFile = await sender.files.markFileAsViewed(file.id);
+        expect(viewedFile.wasViewedAt).toBeDefined();
+
+        const unviewedFile = await sender.files.markFileAsUnviewed(file.id);
+        expect(unviewedFile.wasViewedAt).toBeUndefined();
+    });
+
     describe("File deletion", function () {
         let sentFile: File;
         let receivedFile: File;
