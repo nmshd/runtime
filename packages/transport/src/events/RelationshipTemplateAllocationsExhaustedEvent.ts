@@ -1,4 +1,4 @@
-import { RelationshipTemplate } from "../modules/relationshipTemplates/local/RelationshipTemplate";
+import { RelationshipTemplate } from "../modules";
 import { TransportDataEvent } from "./TransportDataEvent";
 
 export class RelationshipTemplateAllocationsExhaustedEvent extends TransportDataEvent<RelationshipTemplate> {
