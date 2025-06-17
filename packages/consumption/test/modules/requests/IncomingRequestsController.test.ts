@@ -118,14 +118,22 @@ describe("IncomingRequestsController", function () {
 
         test("cannot create incoming Request with an outgoing Message as source", async function () {
             const outgoingMessage = TestObjectFactory.createOutgoingMessage(context.currentIdentity);
-            await When.iTryToCreateAnIncomingRequestWith({ sourceObject: outgoingMessage });
+            await When.iTryToCreateAnIncomingRequestWith({ requestSourceObject: outgoingMessage });
             await Then.itThrowsAnErrorWithTheErrorMessage("Cannot create incoming Request from own Message");
         });
 
         test("cannot create incoming Request with an outgoing RelationshipTemplate as source", async function () {
             const outgoingTemplate = TestObjectFactory.createOutgoingRelationshipTemplate(context.currentIdentity);
-            await When.iTryToCreateAnIncomingRequestWith({ sourceObject: outgoingTemplate });
+            await When.iTryToCreateAnIncomingRequestWith({ requestSourceObject: outgoingTemplate });
             await Then.itThrowsAnErrorWithTheErrorMessage("Cannot create incoming Request from own Relationship Template");
+        });
+
+        test("cannot create incoming Request with same id as an already existing Request", async function () {
+            const request = TestObjectFactory.createRequestWithOneItem({ id: CoreId.from("anId") });
+            await When.iCreateAnIncomingRequestWith({ receivedRequest: request });
+
+            await When.iTryToCreateAnIncomingRequestWith({ receivedRequest: request });
+            await Then.itThrowsAnErrorWithTheErrorMessage("You cannot create the Request since there already is a Request with the id 'anId'.");
         });
 
         test("throws on syntactically invalid input", async function () {

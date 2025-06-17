@@ -447,7 +447,7 @@ describe("Message errors", () => {
         expect(client2ExpiredRequestResult.value.status).toBe(LocalRequestStatus.Expired);
     });
 
-    test.only("should throw correct error for trying to send multiple Messages with the same Request", async () => {
+    test("should throw correct error for trying to send multiple Messages with the same Request", async () => {
         const result1 = await client1.transport.messages.sendMessage({
             recipients: [client2.address],
             content: {
