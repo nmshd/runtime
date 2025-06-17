@@ -487,7 +487,7 @@ describe("File ownership", () => {
     });
 });
 
-describe("Mark File as un-/viewed", () => {
+describe("Mark File as unviewed/viewed", () => {
     test("Mark File as viewed", async () => {
         const file = await uploadFile(transportServices1);
         expect(file.wasViewedAt).toBeUndefined();
