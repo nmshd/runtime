@@ -20849,6 +20849,19 @@ export const GetFilesRequest: any = {
                             }
                         }
                     ]
+                },
+                "wasViewedAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
                 }
             },
             "additionalProperties": false
