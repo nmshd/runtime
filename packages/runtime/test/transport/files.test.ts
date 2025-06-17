@@ -1,7 +1,7 @@
 import { CoreDate } from "@nmshd/core-types";
 import fs from "fs";
 import { DateTime } from "luxon";
-import { FileDTO, GetFilesQuery, OwnerRestriction, TransportServices } from "../../src";
+import { GetFilesQuery, OwnerRestriction, TransportServices } from "../../src";
 import { cleanupFiles, exchangeFile, makeUploadRequest, QueryParamConditions, RuntimeServiceProvider, TestRuntimeServices, uploadFile } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
@@ -447,13 +447,8 @@ describe("Load peer file with the FileReference", () => {
 });
 
 describe("File ownership", () => {
-    let file: FileDTO;
-
-    beforeEach(async () => {
-        file = await uploadFile(transportServices1);
-    });
-
     test("should regenerate the ownershipToken of a File", async () => {
+        const file = await uploadFile(transportServices1);
         const previousOwnershipToken = file.ownershipToken;
 
         const newOwnershipToken = (await transportServices1.files.regenerateFileOwnershipToken({ id: file.id })).value.ownershipToken;
@@ -462,6 +457,7 @@ describe("File ownership", () => {
     });
 
     test("should not allow to regenerate an ownershipToken if not the owner", async () => {
+        const file = await uploadFile(transportServices1);
         await transportServices2.files.getOrLoadFile({ reference: file.reference.truncated });
 
         const result = await transportServices2.files.regenerateFileOwnershipToken({ id: file.id });
