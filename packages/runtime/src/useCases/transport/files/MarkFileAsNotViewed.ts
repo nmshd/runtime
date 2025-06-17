@@ -6,17 +6,17 @@ import { FileDTO } from "../../../types";
 import { FileIdString, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { FileMapper } from "./FileMapper";
 
-export interface MarkFileAsUnviewedRequest {
+export interface MarkFileAsNotViewedRequest {
     id: FileIdString;
 }
 
-class Validator extends SchemaValidator<MarkFileAsUnviewedRequest> {
+class Validator extends SchemaValidator<MarkFileAsNotViewedRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
-        super(schemaRepository.getSchema("MarkFileAsUnviewedRequest"));
+        super(schemaRepository.getSchema("MarkFileAsNotViewedRequest"));
     }
 }
 
-export class MarkFileAsUnviewedUseCase extends UseCase<MarkFileAsUnviewedRequest, FileDTO> {
+export class MarkFileAsNotViewedUseCase extends UseCase<MarkFileAsNotViewedRequest, FileDTO> {
     public constructor(
         @Inject private readonly fileController: FileController,
         @Inject private readonly accountController: AccountController,
@@ -25,8 +25,8 @@ export class MarkFileAsUnviewedUseCase extends UseCase<MarkFileAsUnviewedRequest
         super(validator);
     }
 
-    protected async executeInternal(request: MarkFileAsUnviewedRequest): Promise<Result<FileDTO>> {
-        const updatedFile = await this.fileController.markFileAsUnviewed(CoreId.from(request.id));
+    protected async executeInternal(request: MarkFileAsNotViewedRequest): Promise<Result<FileDTO>> {
+        const updatedFile = await this.fileController.markFileAsNotViewed(CoreId.from(request.id));
 
         await this.accountController.syncDatawallet();
 

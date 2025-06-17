@@ -20928,11 +20928,11 @@ export const GetOrLoadFileRequest: any = {
     }
 }
 
-export const MarkFileAsUnviewedRequest: any = {
+export const MarkFileAsNotViewedRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/MarkFileAsUnviewedRequest",
+    "$ref": "#/definitions/MarkFileAsNotViewedRequest",
     "definitions": {
-        "MarkFileAsUnviewedRequest": {
+        "MarkFileAsNotViewedRequest": {
             "type": "object",
             "properties": {
                 "id": {

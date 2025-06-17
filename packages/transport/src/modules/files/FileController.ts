@@ -339,7 +339,7 @@ export class FileController extends TransportController {
         return file;
     }
 
-    public async markFileAsUnviewed(id: CoreId): Promise<File> {
+    public async markFileAsNotViewed(id: CoreId): Promise<File> {
         const fileDoc = await this.files.read(id.toString());
         if (!fileDoc) {
             throw TransportCoreErrors.general.recordNotFound(File, id.toString());

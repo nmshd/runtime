@@ -15,8 +15,8 @@ import {
     GetFilesUseCase,
     GetOrLoadFileRequest,
     GetOrLoadFileUseCase,
-    MarkFileAsUnviewedRequest,
-    MarkFileAsUnviewedUseCase,
+    MarkFileAsNotViewedRequest,
+    MarkFileAsNotViewedUseCase,
     MarkFileAsViewedRequest,
     MarkFileAsViewedUseCase,
     RegenerateFileOwnershipTokenRequest,
@@ -36,7 +36,7 @@ export class FilesFacade {
         @Inject private readonly createTokenForFileUseCase: CreateTokenForFileUseCase,
         @Inject private readonly regenerateFileOwnershipTokenUseCase: RegenerateFileOwnershipTokenUseCase,
         @Inject private readonly markFileAsViewedUseCase: MarkFileAsViewedUseCase,
-        @Inject private readonly markFileAsUnviewedUseCase: MarkFileAsUnviewedUseCase
+        @Inject private readonly markFileAsNotViewedUseCase: MarkFileAsNotViewedUseCase
     ) {}
 
     public async getFiles(request: GetFilesRequest): Promise<Result<FileDTO[]>> {
@@ -75,7 +75,7 @@ export class FilesFacade {
         return await this.markFileAsViewedUseCase.execute(request);
     }
 
-    public async markFileAsUnviewed(request: MarkFileAsUnviewedRequest): Promise<Result<FileDTO>> {
-        return await this.markFileAsUnviewedUseCase.execute(request);
+    public async markFileAsNotViewed(request: MarkFileAsNotViewedRequest): Promise<Result<FileDTO>> {
+        return await this.markFileAsNotViewedUseCase.execute(request);
     }
 }
