@@ -2,14 +2,13 @@ import { CoreDate } from "@nmshd/core-types";
 import fs from "fs";
 import { DateTime } from "luxon";
 import { FileDTO, GetFilesQuery, OwnerRestriction, TransportServices } from "../../src";
-import { cleanupFiles, exchangeFile, makeUploadRequest, MockEventBus, QueryParamConditions, RuntimeServiceProvider, TestRuntimeServices, uploadFile } from "../lib";
+import { cleanupFiles, exchangeFile, makeUploadRequest, QueryParamConditions, RuntimeServiceProvider, TestRuntimeServices, uploadFile } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 
 let runtimeServices: TestRuntimeServices[];
 let transportServices1: TransportServices;
 let transportServices2: TransportServices;
-let eventBus1: MockEventBus;
 
 const UNKNOWN_FILE_ID = "FILXXXXXXXXXXXXXXXXX";
 const UNKNOWN_TOKEN_ID = "TOKXXXXXXXXXXXXXXXXX";
@@ -18,13 +17,10 @@ beforeAll(async () => {
     runtimeServices = await serviceProvider.launch(2);
     transportServices1 = runtimeServices[0].transport;
     transportServices2 = runtimeServices[1].transport;
-
-    eventBus1 = runtimeServices[0].eventBus;
 }, 30000);
 
 beforeEach(async () => {
     await cleanupFiles(runtimeServices);
-    eventBus1.reset();
 });
 
 afterAll(async () => await serviceProvider.stop());
