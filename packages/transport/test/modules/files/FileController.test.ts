@@ -146,6 +146,17 @@ describe("FileController", function () {
         expect(unviewedFile.wasViewedAt).toBeUndefined();
     });
 
+    test("should not change wasViewedAt of a viewed File", async function () {
+        const file = await TestUtil.uploadFile(sender, CoreBuffer.fromUtf8("Test"));
+
+        const viewedFile = await sender.files.markFileAsViewed(file.id);
+        const firstViewedAt = viewedFile.wasViewedAt;
+
+        const unchangedFile = await sender.files.markFileAsViewed(file.id);
+        expect(unchangedFile.wasViewedAt).toBeDefined();
+        expect(unchangedFile.wasViewedAt!.equals(firstViewedAt!)).toBe(true);
+    });
+
     describe("File deletion", function () {
         let sentFile: File;
         let receivedFile: File;
