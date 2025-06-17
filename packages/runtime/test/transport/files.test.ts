@@ -493,7 +493,7 @@ describe("File ownership", () => {
 
 describe("Mark File as un-/viewed", () => {
     test("Mark File as viewed", async () => {
-        const file = (await transportServices1.files.uploadOwnFile(await makeUploadRequest())).value;
+        const file = await uploadFile(transportServices1);
         expect(file.wasViewedAt).toBeUndefined();
 
         const timeBeforeViewing = CoreDate.utc();
@@ -507,7 +507,7 @@ describe("Mark File as un-/viewed", () => {
     });
 
     test("Mark File as unviewed", async () => {
-        const file = (await transportServices1.files.uploadOwnFile(await makeUploadRequest())).value;
+        const file = await uploadFile(transportServices1);
         const viewedFile = (await transportServices1.files.markFileAsViewed({ id: file.id })).value;
         expect(viewedFile.wasViewedAt).toBeDefined();
         eventBus1.reset();
