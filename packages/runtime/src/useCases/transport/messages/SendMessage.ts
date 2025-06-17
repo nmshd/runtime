@@ -184,6 +184,11 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
 
         if (!recipient.equals(localRequest.peer)) return RuntimeErrors.general.invalidPropertyValue("The recipient does not match the Request's peer.");
 
+        const messagesWithSameRequest = await this.messageController.getMessages({ "cache.content.@type": "Request", "cache.content.id": request.id.toString() });
+        if (messagesWithSameRequest.length > 0) {
+            return RuntimeErrors.messages.cannotSendRequestThatWasAlreadySent(messagesWithSameRequest[0].id.toString());
+        }
+
         return;
     }
 

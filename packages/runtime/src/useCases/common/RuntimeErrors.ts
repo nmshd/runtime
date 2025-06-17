@@ -138,6 +138,13 @@ class Messages {
         );
     }
 
+    public cannotSendRequestThatWasAlreadySent(messageId: string) {
+        return new ApplicationError(
+            "error.runtime.messages.cannotSendRequestThatWasAlreadySent",
+            `The Message cannot be sent as the contained Request has already been sent via another Message with id '${messageId}'. Please create a new Request and try again.`
+        );
+    }
+
     public peerIsInDeletion(addresses: string[]) {
         return new ApplicationError(
             "error.runtime.messages.peerIsInDeletion",

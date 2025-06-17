@@ -447,6 +447,31 @@ describe("Message errors", () => {
         expect(client2ExpiredRequestResult.value.status).toBe(LocalRequestStatus.Expired);
     });
 
+    test.only("should throw correct error for trying to send multiple Messages with the same Request", async () => {
+        const result1 = await client1.transport.messages.sendMessage({
+            recipients: [client2.address],
+            content: {
+                "@type": "Request",
+                id: requestId,
+                items: [requestItem]
+            }
+        });
+        expect(result1).toBeSuccessful();
+
+        const result2 = await client1.transport.messages.sendMessage({
+            recipients: [client2.address],
+            content: {
+                "@type": "Request",
+                id: requestId,
+                items: [requestItem]
+            }
+        });
+        expect(result2).toBeAnError(
+            `The Message cannot be sent as the contained Request has already been sent via another Message with id '${result1.value.id}'. Please create a new Request and try again.`,
+            "error.runtime.messages.cannotSendRequestThatWasAlreadySent"
+        );
+    });
+
     describe("Message errors for Relationships that are not active", () => {
         test("should throw correct error for trying to send a Message if there are recipients to which no Relationship exists", async () => {
             const result = await client1.transport.messages.sendMessage({
@@ -819,6 +844,7 @@ describe("Message query", () => {
             .addStringSet("content.@type")
             .addStringSet("content.subject")
             .addStringSet("content.body")
+            .addStringSet("content.id")
             .addStringSet("createdByDevice")
             .addStringArraySet("attachments")
             .addStringSet("recipients.relationshipId")

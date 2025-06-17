@@ -14,6 +14,7 @@ export interface GetMessagesQuery {
     "content.@type"?: string | string[];
     "content.body"?: string | string[];
     "content.subject"?: string | string[];
+    "content.id"?: string | string[];
     attachments?: string | string[];
     "recipients.address"?: string | string[];
     "recipients.relationshipId"?: string | string[];
@@ -40,6 +41,7 @@ export class GetMessagesUseCase extends UseCase<GetMessagesRequest, MessageDTO[]
             [`${nameof<MessageDTO>((m) => m.content)}.@type`]: true,
             [`${nameof<MessageDTO>((m) => m.content)}.body`]: true,
             [`${nameof<MessageDTO>((m) => m.content)}.subject`]: true,
+            [`${nameof<MessageDTO>((m) => m.content)}.id`]: true,
             [nameof<MessageDTO>((m) => m.attachments)]: true,
             [`${nameof<MessageDTO>((m) => m.recipients)}.${nameof<RecipientDTO>((r) => r.address)}`]: true,
             [`${nameof<MessageDTO>((m) => m.recipients)}.${nameof<RecipientDTO>((r) => r.relationshipId)}`]: true,
@@ -58,6 +60,7 @@ export class GetMessagesUseCase extends UseCase<GetMessagesRequest, MessageDTO[]
             [`${nameof<MessageDTO>((m) => m.content)}.@type`]: `${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.content)}.@type`,
             [`${nameof<MessageDTO>((m) => m.content)}.body`]: `${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.content)}.body`,
             [`${nameof<MessageDTO>((m) => m.content)}.subject`]: `${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.content)}.subject`,
+            [`${nameof<MessageDTO>((m) => m.content)}.id`]: `${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.content)}.id`,
             [nameof<MessageDTO>((m) => m.wasReadAt)]: nameof<Message>((m) => m.wasReadAt)
         },
 
