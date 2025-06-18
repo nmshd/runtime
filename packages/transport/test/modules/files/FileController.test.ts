@@ -126,35 +126,19 @@ describe("FileController", function () {
 
     test("should mark File as viewed", async function () {
         const file = await TestUtil.uploadFile(sender, CoreBuffer.fromUtf8("Test"));
-        expect(file.wasViewedAt).toBeUndefined();
+        expect(file.wasViewed).toBeUndefined();
 
-        const timeBeforeViewing = CoreDate.utc();
         const viewedFile = await sender.files.markFileAsViewed(file.id);
-        const timeAfterViewing = CoreDate.utc();
-
-        expect(viewedFile.wasViewedAt).toBeDefined();
-        expect(viewedFile.wasViewedAt!.isSameOrAfter(timeBeforeViewing)).toBe(true);
-        expect(viewedFile.wasViewedAt!.isSameOrBefore(timeAfterViewing)).toBe(true);
+        expect(viewedFile.wasViewed).toBe(true);
     });
 
     test("should mark File as not viewed", async function () {
         const file = await TestUtil.uploadFile(sender, CoreBuffer.fromUtf8("Test"));
         const viewedFile = await sender.files.markFileAsViewed(file.id);
-        expect(viewedFile.wasViewedAt).toBeDefined();
+        expect(viewedFile.wasViewed).toBeDefined();
 
-        const notViewedFile = await sender.files.markFileAsNotViewed(file.id);
-        expect(notViewedFile.wasViewedAt).toBeUndefined();
-    });
-
-    test("should not change wasViewedAt of a viewed File", async function () {
-        const file = await TestUtil.uploadFile(sender, CoreBuffer.fromUtf8("Test"));
-
-        const viewedFile = await sender.files.markFileAsViewed(file.id);
-        const firstViewedAt = viewedFile.wasViewedAt;
-
-        const unchangedFile = await sender.files.markFileAsViewed(file.id);
-        expect(unchangedFile.wasViewedAt).toBeDefined();
-        expect(unchangedFile.wasViewedAt!.equals(firstViewedAt!)).toBe(true);
+        const fileNotViewed = await sender.files.markFileAsNotViewed(file.id);
+        expect(fileNotViewed.wasViewed).toBeUndefined();
     });
 
     describe("File deletion", function () {

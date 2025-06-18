@@ -14,7 +14,7 @@ export interface IFile extends ICoreSynchronizable {
     metadataModifiedAt?: ICoreDate;
     ownershipToken?: string;
     ownershipIsLocked?: true;
-    wasViewedAt?: ICoreDate;
+    wasViewed?: true;
 }
 
 @type("File")
@@ -29,7 +29,7 @@ export class File extends CoreSynchronizable implements IFile {
     ];
     public override readonly metadataProperties = [nameof<File>((r) => r.metadata), nameof<File>((r) => r.metadataModifiedAt)];
 
-    public override readonly userdataProperties = [nameof<File>((r) => r.wasViewedAt)];
+    public override readonly userdataProperties = [nameof<File>((r) => r.wasViewed)];
 
     @validate()
     @serialize()
@@ -65,7 +65,7 @@ export class File extends CoreSynchronizable implements IFile {
 
     @validate({ nullable: true })
     @serialize()
-    public wasViewedAt?: CoreDate;
+    public wasViewed?: true;
 
     public static from(value: IFile): File {
         return this.fromAny(value);

@@ -19,7 +19,7 @@ export interface GetFilesQuery {
     title?: string | string[];
     isOwn?: string | string[];
     tags?: string | string[];
-    wasViewedAt?: string | string[];
+    wasViewed?: string;
 }
 
 export interface GetFilesRequest {
@@ -47,7 +47,7 @@ export class GetFilesUseCase extends UseCase<GetFilesRequest, FileDTO[]> {
             [nameof<FileDTO>((c) => c.title)]: true,
             [nameof<FileDTO>((c) => c.tags)]: true,
             [nameof<FileDTO>((c) => c.isOwn)]: true,
-            [nameof<FileDTO>((c) => c.wasViewedAt)]: true
+            [nameof<FileDTO>((c) => c.wasViewed)]: true
         },
         alias: {
             [nameof<FileDTO>((c) => c.createdAt)]: `${nameof<File>((f) => f.cache)}.${nameof<CachedFile>((c) => c.createdAt)}`,
@@ -61,7 +61,7 @@ export class GetFilesUseCase extends UseCase<GetFilesRequest, FileDTO[]> {
             [nameof<FileDTO>((c) => c.title)]: `${nameof<File>((f) => f.cache)}.${nameof<CachedFile>((c) => c.title)}`,
             [nameof<FileDTO>((c) => c.tags)]: `${nameof<File>((f) => f.cache)}.${nameof<CachedFile>((c) => c.tags)}`,
             [nameof<FileDTO>((c) => c.isOwn)]: nameof<File>((f) => f.isOwn),
-            [nameof<FileDTO>((c) => c.wasViewedAt)]: nameof<File>((f) => f.wasViewedAt)
+            [nameof<FileDTO>((c) => c.wasViewed)]: nameof<File>((f) => f.wasViewed)
         },
         custom: {
             // content.tags

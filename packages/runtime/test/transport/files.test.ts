@@ -1,7 +1,7 @@
 import { CoreDate } from "@nmshd/core-types";
 import fs from "fs";
 import { DateTime } from "luxon";
-import { FileWasViewedAtChangedEvent, GetFilesQuery, OwnerRestriction, TransportServices } from "../../src";
+import { FileWasViewedChangedEvent, GetFilesQuery, OwnerRestriction, TransportServices } from "../../src";
 import { cleanupFiles, exchangeFile, makeUploadRequest, MockEventBus, QueryParamConditions, RuntimeServiceProvider, TestRuntimeServices, uploadFile } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
@@ -282,18 +282,18 @@ describe("Files query", () => {
     test("files can be queried by wasViewedAt", async () => {
         const file = await uploadFile(transportServices1);
 
-        const viewedFilesBeforeViewing = await transportServices1.files.getFiles({ query: { wasViewedAt: "" } });
+        const viewedFilesBeforeViewing = await transportServices1.files.getFiles({ query: { wasViewed: "" } });
         expect(viewedFilesBeforeViewing.value).toHaveLength(0);
 
-        const notViewedFilesBeforeViewing = await transportServices1.files.getFiles({ query: { wasViewedAt: "!" } });
+        const notViewedFilesBeforeViewing = await transportServices1.files.getFiles({ query: { wasViewed: "!" } });
         expect(notViewedFilesBeforeViewing.value).toHaveLength(1);
 
         await transportServices1.files.markFileAsViewed({ id: file.id });
 
-        const viewedFilesAfterViewing = await transportServices1.files.getFiles({ query: { wasViewedAt: "" } });
+        const viewedFilesAfterViewing = await transportServices1.files.getFiles({ query: { wasViewed: "" } });
         expect(viewedFilesAfterViewing.value).toHaveLength(1);
 
-        const notViewedFilesAfterViewing = await transportServices1.files.getFiles({ query: { wasViewedAt: "!" } });
+        const notViewedFilesAfterViewing = await transportServices1.files.getFiles({ query: { wasViewed: "!" } });
         expect(notViewedFilesAfterViewing.value).toHaveLength(0);
     });
 });
@@ -490,27 +490,23 @@ describe("File ownership", () => {
 describe("Mark File as (not) viewed", () => {
     test("Mark File as viewed", async () => {
         const file = await uploadFile(transportServices1);
-        expect(file.wasViewedAt).toBeUndefined();
+        expect(file.wasViewed).toBeUndefined();
 
-        const timeBeforeViewing = CoreDate.utc();
         const viewedFile = (await transportServices1.files.markFileAsViewed({ id: file.id })).value;
+        expect(viewedFile.wasViewed).toBe(true);
 
-        expect(viewedFile.wasViewedAt).toBeDefined();
-        const timeOfViewing = CoreDate.from(viewedFile.wasViewedAt!);
-        expect(timeOfViewing.isSameOrAfter(timeBeforeViewing)).toBe(true);
-
-        await expect(eventBus1).toHavePublished(FileWasViewedAtChangedEvent, (m) => m.data.id === file.id);
+        await expect(eventBus1).toHavePublished(FileWasViewedChangedEvent, (m) => m.data.id === file.id);
     });
 
     test("Mark File as not viewed", async () => {
         const file = await uploadFile(transportServices1);
         const viewedFile = (await transportServices1.files.markFileAsViewed({ id: file.id })).value;
-        expect(viewedFile.wasViewedAt).toBeDefined();
+        expect(viewedFile.wasViewed).toBeDefined();
         eventBus1.reset();
 
         const notViewedFile = (await transportServices1.files.markFileAsNotViewed({ id: file.id })).value;
-        expect(notViewedFile.wasViewedAt).toBeUndefined();
+        expect(notViewedFile.wasViewed).toBeUndefined();
 
-        await expect(eventBus1).toHavePublished(FileWasViewedAtChangedEvent, (m) => m.data.id === file.id);
+        await expect(eventBus1).toHavePublished(FileWasViewedChangedEvent, (m) => m.data.id === file.id);
     });
 });

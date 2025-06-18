@@ -5,7 +5,7 @@ import { CoreBuffer, CryptoCipher, CryptoHash, CryptoHashAlgorithm, CryptoSecret
 import { CoreCrypto, CoreHash, TransportCoreErrors } from "../../core";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { ControllerName, TransportController } from "../../core/TransportController";
-import { FileWasViewedAtChangedEvent } from "../../events";
+import { FileWasViewedChangedEvent } from "../../events";
 import { AccountController } from "../accounts/AccountController";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
 import { BackboneGetFilesResponse } from "./backbone/BackboneGetFiles";
@@ -329,12 +329,12 @@ export class FileController extends TransportController {
         }
 
         const file = File.from(fileDoc);
-        if (file.wasViewedAt) return file;
+        if (file.wasViewed) return file;
 
-        file.wasViewedAt = CoreDate.utc();
+        file.wasViewed = true;
         await this.files.update(fileDoc, file);
 
-        this.eventBus.publish(new FileWasViewedAtChangedEvent(this.parent.identity.address.toString(), file));
+        this.eventBus.publish(new FileWasViewedChangedEvent(this.parent.identity.address.toString(), file));
 
         return file;
     }
@@ -346,12 +346,12 @@ export class FileController extends TransportController {
         }
 
         const file = File.from(fileDoc);
-        if (!file.wasViewedAt) return file;
+        if (!file.wasViewed) return file;
 
-        file.wasViewedAt = undefined;
+        file.wasViewed = undefined;
         await this.files.update(fileDoc, file);
 
-        this.eventBus.publish(new FileWasViewedAtChangedEvent(this.parent.identity.address.toString(), file));
+        this.eventBus.publish(new FileWasViewedChangedEvent(this.parent.identity.address.toString(), file));
 
         return file;
     }

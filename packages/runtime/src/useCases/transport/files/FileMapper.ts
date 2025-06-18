@@ -47,7 +47,7 @@ export class FileMapper {
             },
             ownershipToken: file.ownershipToken,
             ownershipIsLocked: file.ownershipIsLocked,
-            wasViewedAt: file.wasViewedAt?.toString()
+            wasViewed: file.wasViewed
         };
     }
 
