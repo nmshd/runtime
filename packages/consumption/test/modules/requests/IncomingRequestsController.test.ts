@@ -128,6 +128,14 @@ describe("IncomingRequestsController", function () {
             await Then.itThrowsAnErrorWithTheErrorMessage("Cannot create incoming Request from own Relationship Template");
         });
 
+        test("cannot create incoming Request with same id as an already existing Request", async function () {
+            const request = TestObjectFactory.createRequestWithOneItem({ id: CoreId.from("anId") });
+            await When.iCreateAnIncomingRequestWith({ receivedRequest: request });
+
+            await When.iTryToCreateAnIncomingRequestWith({ receivedRequest: request });
+            await Then.itThrowsAnErrorWithTheErrorMessage("You cannot create the Request since there already is a Request with the id 'anId'.");
+        });
+
         test("throws on syntactically invalid input", async function () {
             await When.iTryToCallReceivedWithoutSource();
             await Then.itThrowsAnErrorWithTheErrorMessage("*requestSourceObject*Value is not defined*");

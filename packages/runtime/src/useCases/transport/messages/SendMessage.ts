@@ -1,6 +1,6 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { ApplicationError, Result } from "@js-soft/ts-utils";
-import { OutgoingRequestsController } from "@nmshd/consumption";
+import { LocalRequestStatus, OutgoingRequestsController } from "@nmshd/consumption";
 import { ArbitraryMessageContent, Mail, Notification, Request, ResponseWrapper } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreError, CoreId } from "@nmshd/core-types";
 import { AccountController, File, FileController, MessageController, PeerDeletionStatus, RelationshipsController, RelationshipStatus, TransportCoreErrors } from "@nmshd/transport";
@@ -183,6 +183,8 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
         }
 
         if (!recipient.equals(localRequest.peer)) return RuntimeErrors.general.invalidPropertyValue("The recipient does not match the Request's peer.");
+
+        if (localRequest.status !== LocalRequestStatus.Draft) return RuntimeErrors.messages.cannotSendRequestThatWasAlreadySent();
 
         return;
     }
