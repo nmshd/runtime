@@ -14,6 +14,7 @@ import {
     MessageReceivedEvent,
     MessageSentEvent,
     MessageWasReadAtChangedEvent,
+    OutgoingRequestStatusChangedEvent,
     OwnSharedAttributeSucceededEvent,
     PeerDeletionCancelledEvent,
     PeerToBeDeletedEvent,
@@ -457,6 +458,8 @@ describe("Message errors", () => {
             }
         });
         expect(result1).toBeSuccessful();
+
+        await syncUntilHasEvent(client1, OutgoingRequestStatusChangedEvent, (e) => e.data.request.id === requestId);
 
         const result2 = await client1.transport.messages.sendMessage({
             recipients: [client2.address],
