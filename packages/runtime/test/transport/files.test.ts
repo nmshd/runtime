@@ -1,7 +1,7 @@
 import { CoreDate } from "@nmshd/core-types";
 import fs from "fs";
 import { DateTime } from "luxon";
-import { FileWasViewedChangedEvent, GetFilesQuery, OwnerRestriction, TransportServices } from "../../src";
+import { FileWasViewedEvent, GetFilesQuery, OwnerRestriction, TransportServices } from "../../src";
 import { cleanupFiles, exchangeFile, makeUploadRequest, MockEventBus, QueryParamConditions, RuntimeServiceProvider, TestRuntimeServices, uploadFile } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
@@ -495,6 +495,6 @@ describe("Mark File as viewed", () => {
         const viewedFile = (await transportServices1.files.markFileAsViewed({ id: file.id })).value;
         expect(viewedFile.wasViewed).toBe(true);
 
-        await expect(eventBus1).toHavePublished(FileWasViewedChangedEvent, (m) => m.data.id === file.id);
+        await expect(eventBus1).toHavePublished(FileWasViewedEvent, (m) => m.data.id === file.id);
     });
 });
