@@ -138,10 +138,10 @@ class Messages {
         );
     }
 
-    public cannotSendRequestThatWasAlreadySent(messageId: string) {
+    public cannotSendRequestThatWasAlreadySent() {
         return new ApplicationError(
             "error.runtime.messages.cannotSendRequestThatWasAlreadySent",
-            `The Message cannot be sent as the contained Request has already been sent via another Message with id '${messageId}'. Please create a new Request and try again.`
+            "The Message cannot be sent as the contained Request has already been sent. Please create a new Request and try again."
         );
     }
 

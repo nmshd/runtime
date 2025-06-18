@@ -22141,19 +22141,6 @@ export const GetMessagesRequest: any = {
                         }
                     ]
                 },
-                "content.id": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
                 "attachments": {
                     "anyOf": [
                         {

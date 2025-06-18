@@ -467,7 +467,7 @@ describe("Message errors", () => {
             }
         });
         expect(result2).toBeAnError(
-            `The Message cannot be sent as the contained Request has already been sent via another Message with id '${result1.value.id}'. Please create a new Request and try again.`,
+            `The Message cannot be sent as the contained Request has already been sent. Please create a new Request and try again.`,
             "error.runtime.messages.cannotSendRequestThatWasAlreadySent"
         );
     });
@@ -851,11 +851,6 @@ describe("Message query", () => {
                 key: "participant",
                 value: [updatedMessage.createdBy, "did:e:a-domain:dids:0000000000000000000000"],
                 expectedResult: true
-            })
-            .addSingleCondition({
-                key: "content.id",
-                value: "",
-                expectedResult: false
             });
 
         await conditions.executeTests((c, q) => c.messages.getMessages({ query: q }));
