@@ -50,6 +50,8 @@ export class IncomingRequestsController extends ConsumptionBaseController {
     public async received(params: IReceivedIncomingRequestParameters): Promise<LocalRequest> {
         const parsedParams = ReceivedIncomingRequestParameters.from(params);
 
+        await this.validateRequestUniqueness(parsedParams.receivedRequest.id);
+
         const infoFromSource = this.extractInfoFromSource(parsedParams.requestSourceObject);
 
         const request = LocalRequest.from({
@@ -73,6 +75,13 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         this.eventBus.publish(new IncomingRequestReceivedEvent(this.identity.address.toString(), request));
 
         return request;
+    }
+
+    private async validateRequestUniqueness(requestId?: CoreId): Promise<void> {
+        if (!requestId) return;
+
+        const existingRequestWithSameId = await this.getIncomingRequest(requestId);
+        if (existingRequestWithSameId) throw ConsumptionCoreErrors.requests.cannotCreateRequestWithDuplicateId(requestId.toString());
     }
 
     private extractInfoFromSource(source: Message | RelationshipTemplate): InfoFromSource {

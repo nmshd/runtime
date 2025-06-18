@@ -14,6 +14,7 @@ import {
     MessageReceivedEvent,
     MessageSentEvent,
     MessageWasReadAtChangedEvent,
+    OutgoingRequestStatusChangedEvent,
     OwnSharedAttributeSucceededEvent,
     PeerDeletionCancelledEvent,
     PeerToBeDeletedEvent,
@@ -446,6 +447,33 @@ describe("Message errors", () => {
 
         const client2ExpiredRequestResult = await client2.consumption.incomingRequests.getRequest({ id: createRequestResult.id });
         expect(client2ExpiredRequestResult.value.status).toBe(LocalRequestStatus.Expired);
+    });
+
+    test("should throw correct error for trying to send multiple Messages with the same Request", async () => {
+        const result1 = await client1.transport.messages.sendMessage({
+            recipients: [client2.address],
+            content: {
+                "@type": "Request",
+                id: requestId,
+                items: [requestItem]
+            }
+        });
+        expect(result1).toBeSuccessful();
+
+        await syncUntilHasEvent(client1, OutgoingRequestStatusChangedEvent, (e) => e.data.request.id === requestId);
+
+        const result2 = await client1.transport.messages.sendMessage({
+            recipients: [client2.address],
+            content: {
+                "@type": "Request",
+                id: requestId,
+                items: [requestItem]
+            }
+        });
+        expect(result2).toBeAnError(
+            `The Message cannot be sent as the contained Request has already been sent. Please create a new Request and try again.`,
+            "error.runtime.messages.cannotSendRequestThatWasAlreadySent"
+        );
     });
 
     describe("Message errors for Relationships that are not active", () => {

@@ -878,6 +878,18 @@ export async function cleanupAttributes(services: TestRuntimeServices[], onlySha
     );
 }
 
+export async function cleanupFiles(services: TestRuntimeServices[]): Promise<void> {
+    await Promise.all(
+        services.map(async (services) => {
+            const servicesFileController = services.transport.files["getFilesUseCase"]["fileController"];
+            const files = await servicesFileController.getFiles({});
+            for (const file of files) {
+                await servicesFileController.deleteFile(file);
+            }
+        })
+    );
+}
+
 export async function createRelationshipWithStatusPending(
     templator: TestRuntimeServices,
     requestor: TestRuntimeServices,

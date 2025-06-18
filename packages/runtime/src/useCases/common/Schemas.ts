@@ -20237,6 +20237,9 @@ export const GetFilesRequest: any = {
                             }
                         }
                     ]
+                },
+                "wasViewed": {
+                    "type": "string"
                 }
             },
             "additionalProperties": false
@@ -20299,6 +20302,29 @@ export const GetOrLoadFileRequest: any = {
         "URLFileReferenceString": {
             "type": "string",
             "pattern": "^https?:\\/\\/.*\\/r\\/FIL[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
+        }
+    }
+}
+
+export const MarkFileAsViewedRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/MarkFileAsViewedRequest",
+    "definitions": {
+        "MarkFileAsViewedRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/FileIdString"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "additionalProperties": false
+        },
+        "FileIdString": {
+            "type": "string",
+            "pattern": "FIL[A-Za-z0-9]{17}"
         }
     }
 }
