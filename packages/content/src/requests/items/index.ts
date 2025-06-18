@@ -9,8 +9,6 @@ export * from "./deleteAttribute/DeleteAttributeRequestItem";
 export * from "./formField/FormFieldAcceptResponseItem";
 export * from "./formField/FormFieldRequestItem";
 export * from "./formField/settings";
-export * from "./freeText/FreeTextAcceptResponseItem";
-export * from "./freeText/FreeTextRequestItem";
 export * from "./proposeAttribute/ProposeAttributeAcceptResponseItem";
 export * from "./proposeAttribute/ProposeAttributeRequestItem";
 export * from "./readAttribute/ReadAttributeAcceptResponseItem";
