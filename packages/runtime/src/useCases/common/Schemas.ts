@@ -20850,18 +20850,8 @@ export const GetFilesRequest: any = {
                         }
                     ]
                 },
-                "wasViewedAt": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
+                "wasViewed": {
+                    "type": "string"
                 }
             },
             "additionalProperties": false
@@ -20924,29 +20914,6 @@ export const GetOrLoadFileRequest: any = {
         "URLFileReferenceString": {
             "type": "string",
             "pattern": "^https?:\\/\\/.*\\/r\\/FIL[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
-        }
-    }
-}
-
-export const MarkFileAsNotViewedRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/MarkFileAsNotViewedRequest",
-    "definitions": {
-        "MarkFileAsNotViewedRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/FileIdString"
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "additionalProperties": false
-        },
-        "FileIdString": {
-            "type": "string",
-            "pattern": "FIL[A-Za-z0-9]{17}"
         }
     }
 }

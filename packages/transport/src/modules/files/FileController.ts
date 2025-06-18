@@ -338,21 +338,4 @@ export class FileController extends TransportController {
 
         return file;
     }
-
-    public async markFileAsNotViewed(id: CoreId): Promise<File> {
-        const fileDoc = await this.files.read(id.toString());
-        if (!fileDoc) {
-            throw TransportCoreErrors.general.recordNotFound(File, id.toString());
-        }
-
-        const file = File.from(fileDoc);
-        if (!file.wasViewed) return file;
-
-        file.wasViewed = undefined;
-        await this.files.update(fileDoc, file);
-
-        this.eventBus.publish(new FileWasViewedChangedEvent(this.parent.identity.address.toString(), file));
-
-        return file;
-    }
 }

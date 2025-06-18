@@ -132,15 +132,6 @@ describe("FileController", function () {
         expect(viewedFile.wasViewed).toBe(true);
     });
 
-    test("should mark File as not viewed", async function () {
-        const file = await TestUtil.uploadFile(sender, CoreBuffer.fromUtf8("Test"));
-        const viewedFile = await sender.files.markFileAsViewed(file.id);
-        expect(viewedFile.wasViewed).toBeDefined();
-
-        const fileNotViewed = await sender.files.markFileAsNotViewed(file.id);
-        expect(fileNotViewed.wasViewed).toBeUndefined();
-    });
-
     describe("File deletion", function () {
         let sentFile: File;
         let receivedFile: File;

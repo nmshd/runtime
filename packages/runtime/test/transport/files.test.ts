@@ -285,16 +285,16 @@ describe("Files query", () => {
         const viewedFilesBeforeViewing = await transportServices1.files.getFiles({ query: { wasViewed: "" } });
         expect(viewedFilesBeforeViewing.value).toHaveLength(0);
 
-        const notViewedFilesBeforeViewing = await transportServices1.files.getFiles({ query: { wasViewed: "!" } });
-        expect(notViewedFilesBeforeViewing.value).toHaveLength(1);
+        const unviewedFilesBeforeViewing = await transportServices1.files.getFiles({ query: { wasViewed: "!" } });
+        expect(unviewedFilesBeforeViewing.value).toHaveLength(1);
 
         await transportServices1.files.markFileAsViewed({ id: file.id });
 
         const viewedFilesAfterViewing = await transportServices1.files.getFiles({ query: { wasViewed: "" } });
         expect(viewedFilesAfterViewing.value).toHaveLength(1);
 
-        const notViewedFilesAfterViewing = await transportServices1.files.getFiles({ query: { wasViewed: "!" } });
-        expect(notViewedFilesAfterViewing.value).toHaveLength(0);
+        const unviewedFilesAfterViewing = await transportServices1.files.getFiles({ query: { wasViewed: "!" } });
+        expect(unviewedFilesAfterViewing.value).toHaveLength(0);
     });
 });
 
@@ -487,25 +487,13 @@ describe("File ownership", () => {
     });
 });
 
-describe("Mark File as (not) viewed", () => {
+describe("Mark File as viewed", () => {
     test("Mark File as viewed", async () => {
         const file = await uploadFile(transportServices1);
         expect(file.wasViewed).toBeUndefined();
 
         const viewedFile = (await transportServices1.files.markFileAsViewed({ id: file.id })).value;
         expect(viewedFile.wasViewed).toBe(true);
-
-        await expect(eventBus1).toHavePublished(FileWasViewedChangedEvent, (m) => m.data.id === file.id);
-    });
-
-    test("Mark File as not viewed", async () => {
-        const file = await uploadFile(transportServices1);
-        const viewedFile = (await transportServices1.files.markFileAsViewed({ id: file.id })).value;
-        expect(viewedFile.wasViewed).toBeDefined();
-        eventBus1.reset();
-
-        const notViewedFile = (await transportServices1.files.markFileAsNotViewed({ id: file.id })).value;
-        expect(notViewedFile.wasViewed).toBeUndefined();
 
         await expect(eventBus1).toHavePublished(FileWasViewedChangedEvent, (m) => m.data.id === file.id);
     });
