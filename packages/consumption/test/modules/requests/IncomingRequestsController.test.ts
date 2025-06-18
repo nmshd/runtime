@@ -118,13 +118,13 @@ describe("IncomingRequestsController", function () {
 
         test("cannot create incoming Request with an outgoing Message as source", async function () {
             const outgoingMessage = TestObjectFactory.createOutgoingMessage(context.currentIdentity);
-            await When.iTryToCreateAnIncomingRequestWith({ sourceObject: outgoingMessage });
+            await When.iTryToCreateAnIncomingRequestWith({ requestSourceObject: outgoingMessage });
             await Then.itThrowsAnErrorWithTheErrorMessage("Cannot create incoming Request from own Message");
         });
 
         test("cannot create incoming Request with an outgoing RelationshipTemplate as source", async function () {
             const outgoingTemplate = TestObjectFactory.createOutgoingRelationshipTemplate(context.currentIdentity);
-            await When.iTryToCreateAnIncomingRequestWith({ sourceObject: outgoingTemplate });
+            await When.iTryToCreateAnIncomingRequestWith({ requestSourceObject: outgoingTemplate });
             await Then.itThrowsAnErrorWithTheErrorMessage("Cannot create incoming Request from own Relationship Template");
         });
 
