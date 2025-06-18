@@ -279,21 +279,21 @@ describe("Files query", () => {
         await conditions.executeTests((c, q) => c.files.getFiles({ query: q, ownerRestriction: OwnerRestriction.Peer }));
     });
 
-    test("files can be queried by wasViewedAt", async () => {
+    test("files can be queried by wasViewed", async () => {
         const file = await uploadFile(transportServices1);
 
-        const viewedFilesBeforeViewing = await transportServices1.files.getFiles({ query: { wasViewed: "" } });
+        const viewedFilesBeforeViewing = await transportServices1.files.getFiles({ query: { wasViewed: "true" } });
         expect(viewedFilesBeforeViewing.value).toHaveLength(0);
 
-        const unviewedFilesBeforeViewing = await transportServices1.files.getFiles({ query: { wasViewed: "!" } });
+        const unviewedFilesBeforeViewing = await transportServices1.files.getFiles({ query: { wasViewed: "!true" } });
         expect(unviewedFilesBeforeViewing.value).toHaveLength(1);
 
         await transportServices1.files.markFileAsViewed({ id: file.id });
 
-        const viewedFilesAfterViewing = await transportServices1.files.getFiles({ query: { wasViewed: "" } });
+        const viewedFilesAfterViewing = await transportServices1.files.getFiles({ query: { wasViewed: "true" } });
         expect(viewedFilesAfterViewing.value).toHaveLength(1);
 
-        const unviewedFilesAfterViewing = await transportServices1.files.getFiles({ query: { wasViewed: "!" } });
+        const unviewedFilesAfterViewing = await transportServices1.files.getFiles({ query: { wasViewed: "!true" } });
         expect(unviewedFilesAfterViewing.value).toHaveLength(0);
     });
 });
@@ -487,7 +487,7 @@ describe("File ownership", () => {
     });
 });
 
-describe("Mark File as viewed", () => {
+describe("File viewed indicator", () => {
     test("Mark File as viewed", async () => {
         const file = await uploadFile(transportServices1);
         expect(file.wasViewed).toBeUndefined();
