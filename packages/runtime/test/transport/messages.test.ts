@@ -844,7 +844,6 @@ describe("Message query", () => {
             .addStringSet("content.@type")
             .addStringSet("content.subject")
             .addStringSet("content.body")
-            .addStringSet("content.id")
             .addStringSet("createdByDevice")
             .addStringArraySet("attachments")
             .addStringSet("recipients.relationshipId")
@@ -852,6 +851,11 @@ describe("Message query", () => {
                 key: "participant",
                 value: [updatedMessage.createdBy, "did:e:a-domain:dids:0000000000000000000000"],
                 expectedResult: true
+            })
+            .addSingleCondition({
+                key: "content.id",
+                value: "",
+                expectedResult: false
             });
 
         await conditions.executeTests((c, q) => c.messages.getMessages({ query: q }));
