@@ -8,7 +8,7 @@ import { AttributeIdString, SchemaRepository, SchemaValidator, UseCase } from ".
 import { AttributeMapper } from "./AttributeMapper";
 
 export interface MarkAttributeAsViewedRequest {
-    id: AttributeIdString;
+    attributeId: AttributeIdString;
 }
 
 class Validator extends SchemaValidator<MarkAttributeAsViewedRequest> {
@@ -27,7 +27,7 @@ export class MarkAttributeAsViewedUseCase extends UseCase<MarkAttributeAsViewedR
     }
 
     protected async executeInternal(request: MarkAttributeAsViewedRequest): Promise<Result<LocalAttributeDTO>> {
-        const updatedAttribute = await this.attributesController.markAttributeAsViewed(CoreId.from(request.id));
+        const updatedAttribute = await this.attributesController.markAttributeAsViewed(CoreId.from(request.attributeId));
 
         await this.accountController.syncDatawallet();
 

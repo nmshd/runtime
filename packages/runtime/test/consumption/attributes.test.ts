@@ -3533,7 +3533,7 @@ describe(MarkAttributeAsViewedUseCase.name, () => {
         expect(localAttribute.wasViewedAt).toBeUndefined();
 
         const expectedViewingTime = CoreDate.utc();
-        const updatedLocalAttribute = (await services1.consumption.attributes.markAttributeAsViewed({ id: localAttribute.id })).value;
+        const updatedLocalAttribute = (await services1.consumption.attributes.markAttributeAsViewed({ attributeId: localAttribute.id })).value;
 
         expect(updatedLocalAttribute.wasViewedAt).toBeDefined();
         const actualViewingTime = CoreDate.from(updatedLocalAttribute.wasViewedAt!);

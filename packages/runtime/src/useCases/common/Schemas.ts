@@ -17667,12 +17667,12 @@ export const MarkAttributeAsViewedRequest: any = {
         "MarkAttributeAsViewedRequest": {
             "type": "object",
             "properties": {
-                "id": {
+                "attributeId": {
                     "$ref": "#/definitions/AttributeIdString"
                 }
             },
             "required": [
-                "id"
+                "attributeId"
             ],
             "additionalProperties": false
         },
