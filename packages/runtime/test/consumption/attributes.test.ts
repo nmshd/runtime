@@ -22,6 +22,7 @@ import { CoreDate, CoreId, CoreIdHelper } from "@nmshd/core-types";
 import assert from "assert";
 import {
     AttributeCreatedEvent,
+    AttributeWasViewedAtChangedEvent,
     CanCreateRepositoryAttributeRequest,
     CanCreateRepositoryAttributeUseCase,
     ChangeDefaultRepositoryAttributeUseCase,
@@ -46,6 +47,7 @@ import {
     GetVersionsOfAttributeUseCase,
     LocalAttributeDTO,
     LocalAttributeDeletionStatus,
+    MarkAttributeAsViewedUseCase,
     NotifyPeerAboutRepositoryAttributeSuccessionUseCase,
     OwnSharedAttributeDeletedByOwnerEvent,
     PeerSharedAttributeDeletedByPeerEvent,
@@ -3514,5 +3516,29 @@ describe(SetAttributeDeletionInfoOfDeletionProposedRelationshipUseCase.name, () 
             "In order to manually set the deletionInfo of an Attribute, the corresponding Relationship must have status 'DeletionProposed'.",
             "error.consumption.attributes.wrongRelationshipStatusToSetDeletionInfo"
         );
+    });
+});
+
+describe(MarkAttributeAsViewedUseCase.name, () => {
+    test("should mark an Attribute as viewed", async () => {
+        const request: CreateRepositoryAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "aGivenName"
+                }
+            }
+        };
+        const localAttribute = (await services1.consumption.attributes.createRepositoryAttribute(request)).value;
+        expect(localAttribute.wasViewedAt).toBeUndefined();
+
+        const expectedViewingTime = CoreDate.utc();
+        const updatedLocalAttribute = (await services1.consumption.attributes.markAttributeAsViewed({ id: localAttribute.id })).value;
+
+        expect(updatedLocalAttribute.wasViewedAt).toBeDefined();
+        const actualViewingTime = CoreDate.from(updatedLocalAttribute.wasViewedAt!);
+        expect(actualViewingTime.isSameOrAfter(expectedViewingTime)).toBe(true);
+
+        await expect(services1.eventBus).toHavePublished(AttributeWasViewedAtChangedEvent, (m) => m.data.id === localAttribute.id);
     });
 });
