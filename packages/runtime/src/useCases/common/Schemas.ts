@@ -16800,6 +16800,19 @@ export const GetAttributesRequest: any = {
                 "isDefault": {
                     "type": "string"
                 },
+                "wasViewedAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
                 "content.@type": {
                     "anyOf": [
                         {
@@ -17637,6 +17650,29 @@ export const GetVersionsOfAttributeRequest: any = {
             },
             "required": [
                 "attributeId"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeIdString": {
+            "type": "string",
+            "pattern": "ATT[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const MarkAttributeAsViewedRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/MarkAttributeAsViewedRequest",
+    "definitions": {
+        "MarkAttributeAsViewedRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/AttributeIdString"
+                }
+            },
+            "required": [
+                "id"
             ],
             "additionalProperties": false
         },

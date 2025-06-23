@@ -15,6 +15,7 @@ import {
     AttributeCreatedEvent,
     AttributeDeletedEvent,
     AttributeListenerCreatedEvent,
+    AttributeWasViewedAtChangedEvent,
     IncomingRequestReceivedEvent,
     IncomingRequestStatusChangedEvent,
     OutgoingRequestCreatedAndCompletedEvent,
@@ -206,6 +207,10 @@ export class EventProxy {
                     successor: AttributeMapper.toAttributeDTO(event.data.successor)
                 })
             );
+        });
+
+        this.subscribeToSourceEvent(consumption.AttributeWasViewedAtChangedEvent, (event) => {
+            this.targetEventBus.publish(new AttributeWasViewedAtChangedEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
         });
 
         this.subscribeToSourceEvent(consumption.IncomingRequestReceivedEvent, (event) => {

@@ -47,6 +47,8 @@ import {
     GetSharedVersionsOfAttributeUseCase,
     GetVersionsOfAttributeRequest,
     GetVersionsOfAttributeUseCase,
+    MarkAttributeAsViewedRequest,
+    MarkAttributeAsViewedUseCase,
     NotifyPeerAboutRepositoryAttributeSuccessionRequest,
     NotifyPeerAboutRepositoryAttributeSuccessionResponse,
     NotifyPeerAboutRepositoryAttributeSuccessionUseCase,
@@ -93,7 +95,8 @@ export class AttributesFacade {
         @Inject private readonly deleteRepositoryAttributeUseCase: DeleteRepositoryAttributeUseCase,
         @Inject private readonly deleteSharedAttributesForRejectedOrRevokedRelationshipUseCase: DeleteSharedAttributesForRejectedOrRevokedRelationshipUseCase,
         @Inject private readonly getAttributeTagCollectionUseCase: GetAttributeTagCollectionUseCase,
-        @Inject private readonly setAttributeDeletionInfoOfDeletionProposedRelationshipUseCase: SetAttributeDeletionInfoOfDeletionProposedRelationshipUseCase
+        @Inject private readonly setAttributeDeletionInfoOfDeletionProposedRelationshipUseCase: SetAttributeDeletionInfoOfDeletionProposedRelationshipUseCase,
+        @Inject private readonly markAttributeAsViewedUseCase: MarkAttributeAsViewedUseCase
     ) {}
 
     public async canCreateRepositoryAttribute(request: CanCreateRepositoryAttributeRequest): Promise<Result<CanCreateRepositoryAttributeResponse>> {
@@ -219,5 +222,9 @@ export class AttributesFacade {
 
     public async setAttributeDeletionInfoOfDeletionProposedRelationship(request: SetAttributeDeletionInfoOfDeletionProposedRelationshipRequest): Promise<Result<void>> {
         return await this.setAttributeDeletionInfoOfDeletionProposedRelationshipUseCase.execute(request);
+    }
+
+    public async markAttributeAsViewed(request: MarkAttributeAsViewedRequest): Promise<Result<LocalAttributeDTO>> {
+        return await this.markAttributeAsViewedUseCase.execute(request);
     }
 }
