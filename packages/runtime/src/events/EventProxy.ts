@@ -35,7 +35,6 @@ import {
     DatawalletSynchronizedEvent,
     FileOwnershipClaimedEvent,
     FileOwnershipLockedEvent,
-    FileWasViewedEvent,
     IdentityDeletionProcessStatusChangedEvent,
     MessageDeliveredEvent,
     MessageReceivedEvent,
@@ -142,10 +141,6 @@ export class EventProxy {
 
         this.subscribeToSourceEvent(transport.FileOwnershipClaimedEvent, (event) => {
             this.targetEventBus.publish(new FileOwnershipClaimedEvent(event.eventTargetAddress, FileMapper.toFileDTO(event.data)));
-        });
-
-        this.subscribeToSourceEvent(transport.FileWasViewedEvent, (event) => {
-            this.targetEventBus.publish(new FileWasViewedEvent(event.eventTargetAddress, FileMapper.toFileDTO(event.data)));
         });
     }
 
