@@ -238,7 +238,13 @@ describe("Files query", () => {
             .addNumberSet("filesize")
             .addStringSet("mimetype")
             .addStringSet("title")
-            .addBooleanSet("isOwn");
+            .addBooleanSet("isOwn")
+            .addStringSet("ownershipToken")
+            .addSingleCondition({
+                key: "ownershipIsLocked",
+                value: "!",
+                expectedResult: true
+            });
 
         await conditions.executeTests((c, q) => c.files.getFiles({ query: q }));
     });
