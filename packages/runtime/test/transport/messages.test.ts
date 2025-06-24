@@ -21,6 +21,7 @@ import {
     RelationshipStatus
 } from "../../src";
 import {
+    cleanupMessages,
     emptyRelationshipCreationContent,
     ensureActiveRelationship,
     establishRelationship,
@@ -64,7 +65,8 @@ beforeAll(async () => {
     await ensureActiveRelationship(client1.transport, client3.transport);
 }, 30000);
 
-beforeEach(() => {
+beforeEach(async () => {
+    await cleanupMessages([client1, client2, client3, client4, client5]);
     client1.eventBus.reset();
 });
 
@@ -840,6 +842,7 @@ describe("Message query", () => {
         const message = await exchangeMessageWithAttachment(client1.transport, client2.transport);
         const updatedMessage = (await client2.transport.messages.markMessageAsRead({ id: message.id })).value;
         const conditions = new QueryParamConditions<GetMessagesQuery>(updatedMessage, client2.transport)
+            .addStringSet("isOwn", "false")
             .addDateSet("createdAt")
             .addStringSet("createdBy")
             .addDateSet("wasReadAt")
@@ -857,6 +860,12 @@ describe("Message query", () => {
             });
 
         await conditions.executeTests((c, q) => c.messages.getMessages({ query: q }));
+    });
+
+    test("query own messages", async () => {
+        await exchangeMessageWithAttachment(client1.transport, client2.transport);
+        const ownMessages = (await client1.transport.messages.getMessages({ query: { isOwn: "true" } })).value;
+        expect(ownMessages).toHaveLength(1);
     });
 
     test("query messages by relationship ids", async () => {
