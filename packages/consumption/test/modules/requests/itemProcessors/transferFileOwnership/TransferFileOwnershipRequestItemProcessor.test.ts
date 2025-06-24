@@ -2,7 +2,7 @@ import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { sleep } from "@js-soft/ts-utils";
 import { IdentityAttribute, IdentityFileReference, Request, ResponseItemResult, TransferFileOwnershipAcceptResponseItem, TransferFileOwnershipRequestItem } from "@nmshd/content";
 import { CoreAddress, CoreDate, FileReference } from "@nmshd/core-types";
-import { AccountController } from "@nmshd/transport";
+import { AccountController, FileOwnershipClaimedEvent } from "@nmshd/transport";
 import { ConsumptionController, ConsumptionIds, LocalRequest, LocalRequestStatus, TransferFileOwnershipRequestItemProcessor } from "../../../../../src";
 import { TestUtil } from "../../../../core/TestUtil";
 
@@ -383,6 +383,37 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
             expect(repositoryAttribute!.content.value).toBeInstanceOf(IdentityFileReference);
             expect((ownSharedIdentityAttribute!.content.value as IdentityFileReference).value).toStrictEqual(senderFileReference.truncate());
             expect((repositoryAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x:tag"]);
+        });
+
+        test("sender should receive an external event when ownership of their File is claimed", async function () {
+            const senderFile = await TestUtil.uploadFile(senderAccountController, { tags: ["x:tag"] });
+            const senderFileReference = senderFile.toFileReference(senderAccountController.config.baseUrl);
+
+            const requestItem = TransferFileOwnershipRequestItem.from({
+                mustBeAccepted: false,
+                fileReference: senderFileReference,
+                ownershipToken: senderFile.ownershipToken
+            });
+
+            const incomingRequest = LocalRequest.from({
+                id: await ConsumptionIds.request.generate(),
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({ items: [requestItem] }),
+                statusLog: []
+            });
+
+            const events: FileOwnershipClaimedEvent[] = [];
+            senderAccountController.transport.eventBus.subscribeOnce(FileOwnershipClaimedEvent, (event) => {
+                events.push(event);
+            });
+
+            await recipientProcessor.accept(requestItem, { accept: true }, incomingRequest);
+
+            await TestUtil.syncUntilHasFile(senderAccountController, senderFile.id);
+            expect(events).toHaveLength(1);
         });
     });
 
