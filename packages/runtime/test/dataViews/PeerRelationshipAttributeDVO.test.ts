@@ -69,5 +69,6 @@ describe("PeerRelationshipAttributeDVO", () => {
         expect(dvo.valueType).toBe(rPeerSharedRelationshipAttribute.content.value["@type"]);
         expect(dvo.deletionStatus).toBe(rPeerSharedRelationshipAttribute.deletionInfo?.deletionStatus);
         expect(dvo.deletionDate).toBe(rPeerSharedRelationshipAttribute.deletionInfo?.deletionDate);
+        expect(dvo.wasViewedAt).toBeUndefined();
     });
 });

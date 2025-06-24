@@ -1135,7 +1135,8 @@ export class DataViewExpander {
                         valueType,
                         isTechnical: relationshipAttribute.isTechnical,
                         deletionStatus: localAttribute.deletionInfo?.deletionStatus,
-                        deletionDate: localAttribute.deletionInfo?.deletionDate.toString()
+                        deletionDate: localAttribute.deletionInfo?.deletionDate.toString(),
+                        wasViewedAt: attribute.wasViewedAt
                     };
                 }
                 // Own shared RelationshipAttribute
@@ -1164,7 +1165,8 @@ export class DataViewExpander {
                     valueType,
                     isTechnical: relationshipAttribute.isTechnical,
                     deletionStatus: localAttribute.deletionInfo?.deletionStatus,
-                    deletionDate: localAttribute.deletionInfo?.deletionDate.toString()
+                    deletionDate: localAttribute.deletionInfo?.deletionDate.toString(),
+                    wasViewedAt: attribute.wasViewedAt
                 };
             }
             const identityAttribute = localAttribute.content;
@@ -1192,7 +1194,8 @@ export class DataViewExpander {
                     tags: identityAttribute.tags,
                     valueType,
                     deletionStatus: localAttribute.deletionInfo?.deletionStatus,
-                    deletionDate: localAttribute.deletionInfo?.deletionDate.toString()
+                    deletionDate: localAttribute.deletionInfo?.deletionDate.toString(),
+                    wasViewedAt: attribute.wasViewedAt
                 };
             }
             // Own Shared IdentityAttribute
@@ -1218,7 +1221,8 @@ export class DataViewExpander {
                 tags: identityAttribute.tags,
                 valueType,
                 deletionStatus: localAttribute.deletionInfo?.deletionStatus,
-                deletionDate: localAttribute.deletionInfo?.deletionDate.toString()
+                deletionDate: localAttribute.deletionInfo?.deletionDate.toString(),
+                wasViewedAt: attribute.wasViewedAt
             };
         }
         const identityAttribute = localAttribute.content as IdentityAttribute;
@@ -1245,7 +1249,8 @@ export class DataViewExpander {
             sharedWith: sharedToPeerDVOs as SharedToPeerAttributeDVO[],
             tags: identityAttribute.tags,
             valueType,
-            isDefault: attribute.isDefault
+            isDefault: attribute.isDefault,
+            wasViewedAt: attribute.wasViewedAt
         };
     }
 

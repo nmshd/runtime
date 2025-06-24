@@ -68,5 +68,6 @@ describe("OwnRelationshipAttributeDVO", () => {
         expect(dvo.valueType).toBe(ownSharedRelationshipAttribute.content.value["@type"]);
         expect(dvo.deletionStatus).toBe(ownSharedRelationshipAttribute.deletionInfo?.deletionStatus);
         expect(dvo.deletionDate).toBe(ownSharedRelationshipAttribute.deletionInfo?.deletionDate);
+        expect(dvo.wasViewedAt).toBeUndefined();
     });
 });

@@ -22,6 +22,7 @@ export interface LocalAttributeDVO extends DataViewObject {
     isValid: boolean;
 
     createdAt: string;
+    wasViewedAt?: string;
     succeeds?: string;
     succeededBy?: string;
 }
