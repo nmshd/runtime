@@ -192,6 +192,20 @@ describe("FileController", function () {
             expect(updatedFile.ownershipIsLocked).toBe(true);
         });
 
+        test("should receive an external event if an attempt is made to validate the ownershipToken with an invalid ownershipToken", async function () {
+            const file = await TestUtil.uploadFile(sender, CoreBuffer.fromUtf8("Test"));
+
+            const events: FileOwnershipLockedEvent[] = [];
+            transport.eventBus.subscribeOnce(FileOwnershipLockedEvent, (event) => {
+                events.push(event);
+            });
+
+            await recipient.files.validateFileOwnershipToken(file.id, "anInvalidToken");
+
+            await TestUtil.syncUntilHasFile(sender, file.id);
+            expect(events).toHaveLength(1);
+        });
+
         test("should not mark the ownership of a File as locked if validating the ownershipToken as the owner fails", async function () {
             const file = await TestUtil.uploadFile(sender, CoreBuffer.fromUtf8("Test"));
 
