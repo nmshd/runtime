@@ -2755,7 +2755,7 @@ describe("AttributesController", function () {
         });
     });
 
-    describe("mark Atttributes as read", () => {
+    describe("mark Attributes as read", () => {
         test("should mark an Attribute as read", async () => {
             const attributeParams: ICreateRepositoryAttributeParams = {
                 content: IdentityAttribute.from({
