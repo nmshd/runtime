@@ -22089,6 +22089,9 @@ export const GetMessagesRequest: any = {
         "GetMessagesQuery": {
             "type": "object",
             "properties": {
+                "isOwn": {
+                    "type": "string"
+                },
                 "createdBy": {
                     "anyOf": [
                         {
