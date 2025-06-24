@@ -32,4 +32,5 @@ export interface LocalAttributeDTO {
     shareInfo?: LocalAttributeShareInfoDTO;
     deletionInfo?: LocalAttributeDeletionInfoDTO;
     isDefault?: true;
+    wasViewedAt?: string;
 }

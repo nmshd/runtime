@@ -124,14 +124,6 @@ describe("FileController", function () {
         expect(file.metadataModifiedAt!.isSameOrAfter(creationTime.subtract({ seconds: 2 }))).toBe(true);
     });
 
-    test("should mark File as viewed", async function () {
-        const file = await TestUtil.uploadFile(sender, CoreBuffer.fromUtf8("Test"));
-        expect(file.wasViewed).toBeUndefined();
-
-        const viewedFile = await sender.files.markFileAsViewed(file.id);
-        expect(viewedFile.wasViewed).toBe(true);
-    });
-
     describe("File deletion", function () {
         let sentFile: File;
         let receivedFile: File;

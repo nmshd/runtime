@@ -16323,6 +16323,19 @@ export const GetAttributesRequest: any = {
                 "isDefault": {
                     "type": "string"
                 },
+                "wasViewedAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
                 "content.@type": {
                     "anyOf": [
                         {
@@ -17042,6 +17055,29 @@ export const GetVersionsOfAttributeRequest: any = {
     "$ref": "#/definitions/GetVersionsOfAttributeRequest",
     "definitions": {
         "GetVersionsOfAttributeRequest": {
+            "type": "object",
+            "properties": {
+                "attributeId": {
+                    "$ref": "#/definitions/AttributeIdString"
+                }
+            },
+            "required": [
+                "attributeId"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeIdString": {
+            "type": "string",
+            "pattern": "ATT[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const MarkAttributeAsViewedRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/MarkAttributeAsViewedRequest",
+    "definitions": {
+        "MarkAttributeAsViewedRequest": {
             "type": "object",
             "properties": {
                 "attributeId": {
@@ -20237,9 +20273,6 @@ export const GetFilesRequest: any = {
                             }
                         }
                     ]
-                },
-                "wasViewed": {
-                    "type": "string"
                 }
             },
             "additionalProperties": false
@@ -20302,29 +20335,6 @@ export const GetOrLoadFileRequest: any = {
         "URLFileReferenceString": {
             "type": "string",
             "pattern": "^https?:\\/\\/.*\\/r\\/FIL[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
-        }
-    }
-}
-
-export const MarkFileAsViewedRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/MarkFileAsViewedRequest",
-    "definitions": {
-        "MarkFileAsViewedRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/FileIdString"
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "additionalProperties": false
-        },
-        "FileIdString": {
-            "type": "string",
-            "pattern": "FIL[A-Za-z0-9]{17}"
         }
     }
 }
@@ -21477,6 +21487,9 @@ export const GetMessagesRequest: any = {
         "GetMessagesQuery": {
             "type": "object",
             "properties": {
+                "isOwn": {
+                    "type": "string"
+                },
                 "createdBy": {
                     "anyOf": [
                         {

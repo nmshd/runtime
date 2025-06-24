@@ -17,5 +17,4 @@ export interface FileDTO {
     };
     ownershipToken?: string;
     ownershipIsLocked?: true;
-    wasViewed?: true;
 }

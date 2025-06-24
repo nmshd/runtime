@@ -1,15 +1,14 @@
 import { CoreDate } from "@nmshd/core-types";
 import fs from "fs";
 import { DateTime } from "luxon";
-import { FileWasViewedEvent, GetFilesQuery, OwnerRestriction, TransportServices } from "../../src";
-import { cleanupFiles, exchangeFile, makeUploadRequest, MockEventBus, QueryParamConditions, RuntimeServiceProvider, TestRuntimeServices, uploadFile } from "../lib";
+import { GetFilesQuery, OwnerRestriction, TransportServices } from "../../src";
+import { cleanupFiles, exchangeFile, makeUploadRequest, QueryParamConditions, RuntimeServiceProvider, TestRuntimeServices, uploadFile } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 
 let runtimeServices: TestRuntimeServices[];
 let transportServices1: TransportServices;
 let transportServices2: TransportServices;
-let eventBus1: MockEventBus;
 
 const UNKNOWN_FILE_ID = "FILXXXXXXXXXXXXXXXXX";
 const UNKNOWN_TOKEN_ID = "TOKXXXXXXXXXXXXXXXXX";
@@ -18,13 +17,10 @@ beforeAll(async () => {
     runtimeServices = await serviceProvider.launch(2);
     transportServices1 = runtimeServices[0].transport;
     transportServices2 = runtimeServices[1].transport;
-
-    eventBus1 = runtimeServices[0].eventBus;
 }, 30000);
 
 beforeEach(async () => {
     await cleanupFiles(runtimeServices);
-    eventBus1.reset();
 });
 
 afterAll(async () => await serviceProvider.stop());
@@ -283,24 +279,6 @@ describe("Files query", () => {
 
         await conditions.executeTests((c, q) => c.files.getFiles({ query: q, ownerRestriction: OwnerRestriction.Peer }));
     });
-
-    test("files can be queried by wasViewed", async () => {
-        const file = await uploadFile(transportServices1);
-
-        const viewedFilesBeforeViewing = await transportServices1.files.getFiles({ query: { wasViewed: "true" } });
-        expect(viewedFilesBeforeViewing.value).toHaveLength(0);
-
-        const unviewedFilesBeforeViewing = await transportServices1.files.getFiles({ query: { wasViewed: "!true" } });
-        expect(unviewedFilesBeforeViewing.value).toHaveLength(1);
-
-        await transportServices1.files.markFileAsViewed({ id: file.id });
-
-        const viewedFilesAfterViewing = await transportServices1.files.getFiles({ query: { wasViewed: "true" } });
-        expect(viewedFilesAfterViewing.value).toHaveLength(1);
-
-        const unviewedFilesAfterViewing = await transportServices1.files.getFiles({ query: { wasViewed: "!true" } });
-        expect(unviewedFilesAfterViewing.value).toHaveLength(0);
-    });
 });
 
 describe("Can create token for file", () => {
@@ -489,17 +467,5 @@ describe("File ownership", () => {
 
         const result = await transportServices2.files.regenerateFileOwnershipToken({ id: file.id });
         expect(result).toBeAnError("Only the owner of the File can perform this action.", "error.runtime.files.notOwnedByYou");
-    });
-});
-
-describe("File viewed indicator", () => {
-    test("Mark File as viewed", async () => {
-        const file = await uploadFile(transportServices1);
-        expect(file.wasViewed).toBeUndefined();
-
-        const viewedFile = (await transportServices1.files.markFileAsViewed({ id: file.id })).value;
-        expect(viewedFile.wasViewed).toBe(true);
-
-        await expect(eventBus1).toHavePublished(FileWasViewedEvent, (m) => m.data.id === file.id);
     });
 });

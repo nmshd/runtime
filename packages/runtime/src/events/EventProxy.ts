@@ -15,6 +15,7 @@ import {
     AttributeCreatedEvent,
     AttributeDeletedEvent,
     AttributeListenerCreatedEvent,
+    AttributeWasViewedAtChangedEvent,
     IncomingRequestReceivedEvent,
     IncomingRequestStatusChangedEvent,
     OutgoingRequestCreatedAndCompletedEvent,
@@ -34,7 +35,6 @@ import {
     DatawalletSynchronizedEvent,
     FileOwnershipClaimedEvent,
     FileOwnershipLockedEvent,
-    FileWasViewedEvent,
     IdentityDeletionProcessStatusChangedEvent,
     MessageDeliveredEvent,
     MessageReceivedEvent,
@@ -142,10 +142,6 @@ export class EventProxy {
         this.subscribeToSourceEvent(transport.FileOwnershipClaimedEvent, (event) => {
             this.targetEventBus.publish(new FileOwnershipClaimedEvent(event.eventTargetAddress, FileMapper.toFileDTO(event.data)));
         });
-
-        this.subscribeToSourceEvent(transport.FileWasViewedEvent, (event) => {
-            this.targetEventBus.publish(new FileWasViewedEvent(event.eventTargetAddress, FileMapper.toFileDTO(event.data)));
-        });
     }
 
     private proxyConsumptionEvents() {
@@ -209,6 +205,10 @@ export class EventProxy {
                     successor: AttributeMapper.toAttributeDTO(event.data.successor)
                 })
             );
+        });
+
+        this.subscribeToSourceEvent(consumption.AttributeWasViewedAtChangedEvent, (event) => {
+            this.targetEventBus.publish(new AttributeWasViewedAtChangedEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
         });
 
         this.subscribeToSourceEvent(consumption.IncomingRequestReceivedEvent, (event) => {

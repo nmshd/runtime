@@ -2750,6 +2750,44 @@ describe("AttributesController", function () {
         });
     });
 
+    describe("mark Attributes as read", () => {
+        test("should mark an Attribute as read", async () => {
+            const attributeParams: ICreateRepositoryAttributeParams = {
+                content: IdentityAttribute.from({
+                    value: DisplayName.from({ value: "aDisplayName" }),
+                    owner: consumptionController.accountController.identity.address
+                })
+            };
+            const localAttribute = await consumptionController.attributes.createRepositoryAttribute(attributeParams);
+            expect(localAttribute.wasViewedAt).toBeUndefined();
+
+            const timeBeforeRead = CoreDate.utc();
+            const updatedLocalAttribute = await consumptionController.attributes.markAttributeAsViewed(localAttribute.id);
+            const timeAfterRead = CoreDate.utc();
+
+            expect(updatedLocalAttribute.wasViewedAt).toBeDefined();
+            expect(updatedLocalAttribute.wasViewedAt!.isSameOrAfter(timeBeforeRead)).toBe(true);
+            expect(updatedLocalAttribute.wasViewedAt!.isSameOrBefore(timeAfterRead)).toBe(true);
+        });
+
+        test("should not change wasViewedAt of a viewed Attribute", async function () {
+            const attributeParams: ICreateRepositoryAttributeParams = {
+                content: IdentityAttribute.from({
+                    value: DisplayName.from({ value: "aDisplayName" }),
+                    owner: consumptionController.accountController.identity.address
+                })
+            };
+            const localAttribute = await consumptionController.attributes.createRepositoryAttribute(attributeParams);
+
+            const updatedLocalAttribute = await consumptionController.attributes.markAttributeAsViewed(localAttribute.id);
+            const firstViewedAt = updatedLocalAttribute.wasViewedAt;
+
+            const unchangedLocalAttribute = await consumptionController.attributes.markAttributeAsViewed(localAttribute.id);
+            expect(unchangedLocalAttribute.wasViewedAt).toBeDefined();
+            expect(unchangedLocalAttribute.wasViewedAt!.equals(firstViewedAt!)).toBe(true);
+        });
+    });
+
     describe("get Attributes", function () {
         beforeEach(async function () {
             await consumptionController.attributes.createSharedLocalAttribute({

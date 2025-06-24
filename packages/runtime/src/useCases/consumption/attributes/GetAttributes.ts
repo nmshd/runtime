@@ -20,6 +20,7 @@ export interface GetAttributesRequestQuery {
     succeeds?: string | string[];
     succeededBy?: string | string[];
     isDefault?: string;
+    wasViewedAt?: string | string[];
     "content.@type"?: string | string[];
     "content.tags"?: string | string[];
     "content.owner"?: string | string[];
@@ -46,6 +47,7 @@ export class GetAttributesUseCase extends UseCase<GetAttributesRequest, LocalAtt
             [nameof<LocalAttributeDTO>((x) => x.succeeds)]: true,
             [nameof<LocalAttributeDTO>((x) => x.succeededBy)]: true,
             [nameof<LocalAttributeDTO>((x) => x.isDefault)]: true,
+            [nameof<LocalAttributeDTO>((x) => x.wasViewedAt)]: true,
 
             // content.abstractAttribute
             [`${nameof<LocalAttributeDTO>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.owner)}`]: true,
@@ -78,6 +80,7 @@ export class GetAttributesUseCase extends UseCase<GetAttributesRequest, LocalAtt
             [nameof<LocalAttributeDTO>((x) => x.succeeds)]: nameof<LocalAttribute>((x) => x.succeeds),
             [nameof<LocalAttributeDTO>((x) => x.succeededBy)]: nameof<LocalAttribute>((x) => x.succeededBy),
             [nameof<LocalAttributeDTO>((x) => x.isDefault)]: nameof<LocalAttribute>((x) => x.isDefault),
+            [nameof<LocalAttributeDTO>((x) => x.wasViewedAt)]: nameof<LocalAttribute>((x) => x.wasViewedAt),
 
             // content.abstractAttribute
             [`${nameof<LocalAttributeDTO>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.owner)}`]: `${nameof<LocalAttribute>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.owner)}`,

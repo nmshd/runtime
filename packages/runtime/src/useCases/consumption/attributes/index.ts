@@ -21,6 +21,7 @@ export * from "./GetPeerSharedAttributes";
 export * from "./GetRepositoryAttributes";
 export * from "./GetSharedVersionsOfAttribute";
 export * from "./GetVersionsOfAttribute";
+export * from "./MarkAttributeAsViewed";
 export * from "./NotifyPeerAboutRepositoryAttributeSuccession";
 export * from "./SetAttributeDeletionInfoOfDeletionProposedRelationship";
 export * from "./ShareRepositoryAttribute";

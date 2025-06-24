@@ -890,6 +890,18 @@ export async function cleanupFiles(services: TestRuntimeServices[]): Promise<voi
     );
 }
 
+export async function cleanupMessages(services: TestRuntimeServices[]): Promise<void> {
+    await Promise.all(
+        services.map(async (services) => {
+            const servicesMessageController = services.transport.messages["getMessagesUseCase"]["messageController"];
+            const messages = await servicesMessageController.getMessages({});
+            for (const message of messages) {
+                await servicesMessageController["messages"].delete(message);
+            }
+        })
+    );
+}
+
 export async function createRelationshipWithStatusPending(
     templator: TestRuntimeServices,
     requestor: TestRuntimeServices,
