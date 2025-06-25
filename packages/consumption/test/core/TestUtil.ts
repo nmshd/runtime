@@ -390,6 +390,16 @@ export class TestUtil {
         return syncResult.messages;
     }
 
+    public static async syncUntilHasFiles(accountController: AccountController, expectedNumberOfFiles = 1): Promise<File[]> {
+        const syncResult = await TestUtil.syncUntil(accountController, (syncResult) => syncResult.files.length >= expectedNumberOfFiles);
+        return syncResult.files;
+    }
+
+    public static async syncUntilHasFile(accountController: AccountController, id: CoreId): Promise<File[]> {
+        const syncResult = await TestUtil.syncUntil(accountController, (syncResult) => syncResult.files.some((m) => m.id.equals(id)));
+        return syncResult.files;
+    }
+
     public static async sendRelationshipTemplate(from: AccountController, content?: ISerializable): Promise<RelationshipTemplate> {
         return await from.relationshipTemplates.sendRelationshipTemplate({
             content: content ?? { content: "template" },
