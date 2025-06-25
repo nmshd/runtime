@@ -20885,6 +20885,22 @@ export const GetFilesRequest: any = {
                             }
                         }
                     ]
+                },
+                "ownershipToken": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "ownershipIsLocked": {
+                    "type": "string"
                 }
             },
             "additionalProperties": false
