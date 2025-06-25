@@ -23,7 +23,16 @@ import loki from "lokijs";
 import path from "path";
 import { GenericContainer, Wait } from "testcontainers";
 import { LogLevel } from "typescript-logging";
-import { AppConfig, AppConfigOverwrite, AppRuntime, IUIBridge, LocalAccountDTO, LocalAccountSession, createAppConfig as runtime_createAppConfig } from "../../src";
+import {
+    AppConfig,
+    AppConfigOverwrite,
+    AppRuntime,
+    ILanguageProvider,
+    IUIBridge,
+    LocalAccountDTO,
+    LocalAccountSession,
+    createAppConfig as runtime_createAppConfig
+} from "../../src";
 import { FakeUIBridge } from "./FakeUIBridge";
 import { FakeLanguageProvider } from "./infrastructure/FakeLanguageProvider";
 import { FakeNotificationAccess } from "./infrastructure/FakeNotificationAccess";
@@ -56,7 +65,12 @@ export class TestUtil {
         }
     });
 
-    public static async createRuntime(configOverride?: AppConfigOverwrite, uiBridge: IUIBridge = new FakeUIBridge(), eventBus?: EventBus): Promise<AppRuntime> {
+    public static async createRuntime(
+        configOverride?: AppConfigOverwrite,
+        uiBridge: IUIBridge = new FakeUIBridge(),
+        eventBus?: EventBus,
+        languageProvider?: ILanguageProvider
+    ): Promise<AppRuntime> {
         configOverride = defaultsDeep(configOverride, {
             modules: {
                 pushNotification: { enabled: false }
@@ -69,7 +83,7 @@ export class TestUtil {
             config,
             this.loggerFactory,
             new FakeNotificationAccess(this.loggerFactory.getLogger("Fakes")),
-            new FakeLanguageProvider(),
+            languageProvider ?? new FakeLanguageProvider(),
             eventBus,
             new TestDatabaseFactory()
         );
