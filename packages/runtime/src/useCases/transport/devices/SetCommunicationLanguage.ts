@@ -5,7 +5,7 @@ import { Inject } from "@nmshd/typescript-ioc";
 import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
 export interface SetCommunicationLanguageRequest {
-    communicationLanguage: LanguageISO639;
+    communicationLanguage: keyof typeof LanguageISO639;
 }
 
 class Validator extends SchemaValidator<SetCommunicationLanguageRequest> {

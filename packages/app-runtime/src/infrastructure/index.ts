@@ -1,2 +1,2 @@
-export * from "./ILanguageProvider";
+export * from "./IAppLanguageProvider";
 export * from "./INotificationAccess";
