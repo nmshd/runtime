@@ -34,7 +34,7 @@ import {
     createAppConfig as runtime_createAppConfig
 } from "../../src";
 import { FakeUIBridge } from "./FakeUIBridge";
-import { FakeLanguageProvider as FakeAppLanguageProvider } from "./infrastructure/FakeAppLanguageProvider";
+import { FakeAppLanguageProvider } from "./infrastructure/FakeAppLanguageProvider";
 import { FakeNotificationAccess } from "./infrastructure/FakeNotificationAccess";
 
 export class TestDatabaseFactory implements ILokiJsDatabaseFactory {
