@@ -39,6 +39,8 @@ Set the following environment variables:
 - `NMSHD_TEST_BASEURL` (the Backbone baseUrl to test against)
 - `NMSHD_TEST_CLIENTID` (the Backbone clientId for the configured baseUrl)
 - `NMSHD_TEST_CLIENTSECRET` (the Backbone clientSecret for the configured baseUrl)
+- `NMSHD_TEST_BASEURL_ADMIN_API` (the Backbone admin API baseUrl to test against)
+- `NMSHD_TEST_ADMIN_API_KEY` (the Backbone admin API key for the configured baseUrl)
 
 > We recommend to persist these variables for example in your `.bashrc` / `.zshrc` or in the Windows environment variables.
 
