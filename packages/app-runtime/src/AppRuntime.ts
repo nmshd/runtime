@@ -12,6 +12,7 @@ import { AccountSelectedEvent } from "./events";
 import { IUIBridge } from "./extensibility";
 import { ILanguageProvider, INotificationAccess } from "./infrastructure";
 import {
+    AppLanguageModule,
     AppRuntimeModuleConfiguration,
     AppSyncModule,
     IAppRuntimeModuleConstructor,
@@ -220,6 +221,7 @@ export class AppRuntime extends Runtime<AppConfig> {
 
     private static moduleRegistry: Record<string, IAppRuntimeModuleConstructor | undefined> = {
         appSync: AppSyncModule,
+        appLanguage: AppLanguageModule,
         identityDeletionProcessStatusChanged: IdentityDeletionProcessStatusChangedModule,
         mailReceived: MailReceivedModule,
         messageReceived: MessageReceivedModule,
