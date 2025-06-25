@@ -27,14 +27,14 @@ import {
     AppConfig,
     AppConfigOverwrite,
     AppRuntime,
-    ILanguageProvider,
+    IAppLanguageProvider,
     IUIBridge,
     LocalAccountDTO,
     LocalAccountSession,
     createAppConfig as runtime_createAppConfig
 } from "../../src";
 import { FakeUIBridge } from "./FakeUIBridge";
-import { FakeLanguageProvider } from "./infrastructure/FakeLanguageProvider";
+import { FakeLanguageProvider as FakeAppLanguageProvider } from "./infrastructure/FakeAppLanguageProvider";
 import { FakeNotificationAccess } from "./infrastructure/FakeNotificationAccess";
 
 export class TestDatabaseFactory implements ILokiJsDatabaseFactory {
@@ -69,7 +69,7 @@ export class TestUtil {
         configOverride?: AppConfigOverwrite,
         uiBridge: IUIBridge = new FakeUIBridge(),
         eventBus?: EventBus,
-        languageProvider?: ILanguageProvider
+        appLanguageProvider?: IAppLanguageProvider
     ): Promise<AppRuntime> {
         configOverride = defaultsDeep(configOverride, {
             modules: {
@@ -83,7 +83,7 @@ export class TestUtil {
             config,
             this.loggerFactory,
             new FakeNotificationAccess(this.loggerFactory.getLogger("Fakes")),
-            languageProvider ?? new FakeLanguageProvider(),
+            appLanguageProvider ?? new FakeAppLanguageProvider(),
             eventBus,
             new TestDatabaseFactory()
         );
@@ -98,7 +98,7 @@ export class TestUtil {
             config,
             this.loggerFactory,
             new FakeNotificationAccess(this.loggerFactory.getLogger("Fakes")),
-            new FakeLanguageProvider(),
+            new FakeAppLanguageProvider(),
             new TestDatabaseFactory()
         );
 

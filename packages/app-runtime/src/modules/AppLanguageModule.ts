@@ -28,7 +28,7 @@ export class AppLanguageModule extends AppRuntimeModule<AppLanguageModuleConfig>
 
     private async handleAccountSelected(event: AccountSelectedEvent) {
         this.logger.trace("AppLanguageModule.handleAccountSelected", event);
-        const languageResult = await this.runtime.languageProvider.getAppLanguage();
+        const languageResult = await this.runtime.appLanguageProvider.getAppLanguage();
         if (languageResult.isError) {
             this.logger.error(languageResult.error);
             return;

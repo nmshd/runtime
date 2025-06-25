@@ -1,8 +1,8 @@
 import { Result } from "@js-soft/ts-utils";
 import { LanguageISO639 } from "@nmshd/core-types";
-import { ILanguageProvider } from "../../src";
+import { IAppLanguageProvider } from "../../../src";
 
-export class MockLanguageProvider implements ILanguageProvider {
+export class MockAppLanguageProvider implements IAppLanguageProvider {
     #language: LanguageISO639 = LanguageISO639.en;
 
     public set language(language: LanguageISO639) {

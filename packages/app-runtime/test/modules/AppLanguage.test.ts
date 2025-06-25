@@ -2,7 +2,7 @@ import { LanguageISO639 } from "@nmshd/core-types";
 import { DeviceAuthClient } from "@nmshd/transport";
 import { AppLanguageChangedEvent, AppRuntime, LocalAccountSession } from "../../src";
 import { MockEventBus, TestUtil } from "../lib";
-import { MockLanguageProvider } from "../lib/MockLanguageProvider";
+import { MockAppLanguageProvider } from "../lib/infrastructure/MockAppLanguageProvider";
 
 describe("AppLanguageModuleTest", function () {
     const eventBus = new MockEventBus();
@@ -11,10 +11,10 @@ describe("AppLanguageModuleTest", function () {
     let session: LocalAccountSession;
     let devicesClient: DeviceAuthClient;
 
-    const languageProvider = new MockLanguageProvider();
+    const appLanguageProvider = new MockAppLanguageProvider();
 
     beforeAll(async function () {
-        runtime = await TestUtil.createRuntime({ pushService: "dummy", modules: { pushNotification: { enabled: true } } }, undefined, eventBus, languageProvider);
+        runtime = await TestUtil.createRuntime({ pushService: "dummy", modules: { pushNotification: { enabled: true } } }, undefined, eventBus, appLanguageProvider);
         await runtime.start();
 
         const accounts = await TestUtil.provideAccounts(runtime, 1);
@@ -41,7 +41,7 @@ describe("AppLanguageModuleTest", function () {
     });
 
     test("should persist the app language via an AccountSelectedEvent", async function () {
-        languageProvider.language = LanguageISO639.es;
+        appLanguageProvider.language = LanguageISO639.es;
 
         await runtime.selectAccount(session.account.id);
         await eventBus.waitForRunningEventHandlers();

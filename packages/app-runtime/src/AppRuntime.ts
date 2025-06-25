@@ -10,7 +10,7 @@ import { AppRuntimeErrors } from "./AppRuntimeErrors";
 import { AppStringProcessor } from "./AppStringProcessor";
 import { AccountSelectedEvent } from "./events";
 import { IUIBridge } from "./extensibility";
-import { ILanguageProvider, INotificationAccess } from "./infrastructure";
+import { IAppLanguageProvider, INotificationAccess } from "./infrastructure";
 import {
     AppLanguageModule,
     AppRuntimeModuleConfiguration,
@@ -33,7 +33,7 @@ export class AppRuntime extends Runtime<AppConfig> {
         appConfig: AppConfig,
         loggerFactory: ILoggerFactory,
         public readonly notificationAccess: INotificationAccess,
-        public readonly languageProvider: ILanguageProvider,
+        public readonly appLanguageProvider: IAppLanguageProvider,
         private readonly databaseFactory?: ILokiJsDatabaseFactory,
         eventBus?: EventBus
     ) {
@@ -196,7 +196,7 @@ export class AppRuntime extends Runtime<AppConfig> {
         appConfig: AppConfigOverwrite | AppConfig = {},
         loggerFactory: ILoggerFactory,
         notificationAccess: INotificationAccess,
-        languageProvider: ILanguageProvider,
+        appLanguageProvider: IAppLanguageProvider,
         eventBus?: EventBus,
         databaseFactory?: ILokiJsDatabaseFactory
     ): Promise<AppRuntime> {
@@ -204,7 +204,7 @@ export class AppRuntime extends Runtime<AppConfig> {
 
         const mergedConfig = createAppConfig(appConfig);
 
-        const runtime = new AppRuntime(mergedConfig, loggerFactory, notificationAccess, languageProvider, databaseFactory, eventBus);
+        const runtime = new AppRuntime(mergedConfig, loggerFactory, notificationAccess, appLanguageProvider, databaseFactory, eventBus);
         await runtime.init();
         runtime.logger.trace("Runtime initialized");
 
