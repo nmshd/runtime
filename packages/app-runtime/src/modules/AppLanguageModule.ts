@@ -40,8 +40,6 @@ export class AppLanguageModule extends AppRuntimeModule<AppLanguageModuleConfig>
     private async updateLanguageForLocalAccount(address: string, language: keyof typeof LanguageISO639): Promise<void> {
         const services = await this.runtime.getServices(address);
 
-        this.logger.info(`Updating communication language for account '${address}' to '${language}'`);
-
         const result = await services.transportServices.devices.setCommunicationLanguage({
             communicationLanguage: language
         });
