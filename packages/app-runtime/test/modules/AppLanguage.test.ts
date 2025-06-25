@@ -41,7 +41,7 @@ describe("AppLanguageModuleTest", function () {
     });
 
     test("should persist the app language via an AccountSelectedEvent", async function () {
-        appLanguageProvider.language = LanguageISO639.es;
+        appLanguageProvider.appLanguage = LanguageISO639.es;
 
         await runtime.selectAccount(session.account.id);
         await eventBus.waitForRunningEventHandlers();
