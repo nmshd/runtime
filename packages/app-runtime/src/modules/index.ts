@@ -1,4 +1,5 @@
 export * from "./appEvents";
+export * from "./AppLanguageModule";
 export * from "./AppRuntimeModule";
 export * from "./AppSyncModule";
 export * from "./PushNotificationModule";

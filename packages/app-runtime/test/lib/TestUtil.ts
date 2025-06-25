@@ -25,6 +25,7 @@ import { GenericContainer, Wait } from "testcontainers";
 import { LogLevel } from "typescript-logging";
 import { AppConfig, AppConfigOverwrite, AppRuntime, IUIBridge, LocalAccountDTO, LocalAccountSession, createAppConfig as runtime_createAppConfig } from "../../src";
 import { FakeUIBridge } from "./FakeUIBridge";
+import { FakeLanguageProvider } from "./infrastructure/FakeLanguageProvider";
 import { FakeNotificationAccess } from "./infrastructure/FakeNotificationAccess";
 
 export class TestDatabaseFactory implements ILokiJsDatabaseFactory {
@@ -64,7 +65,14 @@ export class TestUtil {
 
         const config = this.createAppConfig(configOverride);
 
-        const runtime = await AppRuntime.create(config, this.loggerFactory, new FakeNotificationAccess(this.loggerFactory.getLogger("Fakes")), eventBus, new TestDatabaseFactory());
+        const runtime = await AppRuntime.create(
+            config,
+            this.loggerFactory,
+            new FakeNotificationAccess(this.loggerFactory.getLogger("Fakes")),
+            new FakeLanguageProvider(),
+            eventBus,
+            new TestDatabaseFactory()
+        );
         runtime.registerUIBridge(uiBridge);
 
         return runtime;
@@ -72,7 +80,13 @@ export class TestUtil {
 
     public static createRuntimeWithoutInit(configOverride?: AppConfigOverwrite): AppRuntime {
         const config = this.createAppConfig(configOverride);
-        const runtime = new AppRuntime(config, this.loggerFactory, new FakeNotificationAccess(this.loggerFactory.getLogger("Fakes")), new TestDatabaseFactory());
+        const runtime = new AppRuntime(
+            config,
+            this.loggerFactory,
+            new FakeNotificationAccess(this.loggerFactory.getLogger("Fakes")),
+            new FakeLanguageProvider(),
+            new TestDatabaseFactory()
+        );
 
         return runtime;
     }
