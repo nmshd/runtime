@@ -1,4 +1,5 @@
 export * from "./AccountSelectedEvent";
+export * from "./AppLanguageChangedEvent";
 export * from "./ExternalEventReceivedEvent";
 export * from "./LocalAccountDeletionDateChangedEvent";
 export * from "./MailReceivedEvent";
