@@ -4,7 +4,7 @@ import { AppLanguageChangedEvent, AppRuntime, LocalAccountSession } from "../../
 import { MockEventBus, TestUtil } from "../lib";
 import { MockLanguageProvider } from "../lib/MockLanguageProvider";
 
-describe("PushNotificationModuleTest", function () {
+describe("AppLanguageModuleTest", function () {
     const eventBus = new MockEventBus();
 
     let runtime: AppRuntime;
@@ -28,7 +28,7 @@ describe("PushNotificationModuleTest", function () {
 
     afterEach(() => eventBus.reset());
 
-    test("should persist push identifier", async function () {
+    test("should persist the app language via an AppLanguageChangedEvent", async function () {
         runtime.eventBus.publish(new AppLanguageChangedEvent("de" as any));
         await eventBus.waitForRunningEventHandlers();
         let device = await devicesClient.getCurrentDevice();
@@ -40,7 +40,7 @@ describe("PushNotificationModuleTest", function () {
         expect(device.value.communicationLanguage).toBe(LanguageISO639.sl);
     });
 
-    test("should update language for local account", async function () {
+    test("should persist the app language via an AccountSelectedEvent", async function () {
         languageProvider.language = LanguageISO639.es;
 
         await runtime.selectAccount(session.account.id);
