@@ -37,18 +37,20 @@ export class AppLanguageModule extends AppRuntimeModule<AppLanguageModuleConfig>
         await this.updateLanguageForLocalAccount(event.data.address, languageResult.value);
     }
 
-    private async updateLanguageForLocalAccount(address: string, language: LanguageISO639): Promise<void> {
+    private async updateLanguageForLocalAccount(address: string, language: keyof typeof LanguageISO639): Promise<void> {
         const services = await this.runtime.getServices(address);
+
+        this.logger.info(`Updating communication language for account '${address}' to '${language}'`);
 
         const result = await services.transportServices.devices.setCommunicationLanguage({
             communicationLanguage: language
         });
 
         if (result.isError) {
-            this.logger.error(result.error);
+            this.logger.error(`Could not update the communication language for account '${address}': ${result.error}`);
             return;
         }
 
-        this.logger.info(`Updated communication language for account ${address} to ${language}`);
+        this.logger.info(`Updated communication language for account '${address}' to '${language}'`);
     }
 }
