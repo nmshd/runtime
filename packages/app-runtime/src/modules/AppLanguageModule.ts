@@ -45,7 +45,7 @@ export class AppLanguageModule extends AppRuntimeModule<AppLanguageModuleConfig>
         });
 
         if (result.isError) {
-            this.logger.error(`Could not update the communication language for account '${address}': ${result.error}`);
+            this.logger.error(`Could not update the communication language for account '${address}' to '${language}': ${result.error}`);
             return;
         }
 
