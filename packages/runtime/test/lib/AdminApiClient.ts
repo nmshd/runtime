@@ -68,6 +68,7 @@ export interface CreateAnnouncementRequest {
     isSilent: boolean;
     expiresAt?: string;
     recipients?: string[];
+    actions: { displayName: Record<string, string>; link: string }[];
 }
 
 export interface CreateAnnouncementResponse {
