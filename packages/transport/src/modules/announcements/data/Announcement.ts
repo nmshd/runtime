@@ -9,6 +9,12 @@ export interface IAnnouncement extends ISerializable {
     title: string;
     body: string;
     iqlQuery?: string;
+    actions: IAnnouncementAction[];
+}
+
+export interface IAnnouncementAction {
+    displayName: string;
+    link: string;
 }
 
 export enum AnnouncementSeverity {
@@ -47,7 +53,26 @@ export class Announcement extends Serializable implements IAnnouncement {
     @serialize()
     public iqlQuery?: string;
 
+    @validate()
+    @serialize()
+    public actions: AnnouncementAction[];
+
     public static from(value: IAnnouncement): Announcement {
+        return this.fromAny(value);
+    }
+}
+
+@type("Announcement")
+export class AnnouncementAction extends Serializable implements IAnnouncementAction {
+    @validate()
+    @serialize()
+    public displayName: string;
+
+    @validate()
+    @serialize()
+    public link: string;
+
+    public static from(value: IAnnouncementAction): AnnouncementAction {
         return this.fromAny(value);
     }
 }

@@ -10,4 +10,10 @@ export interface BackboneGetAnnouncementsResponse {
     title: string;
     body: string;
     iqlQuery?: string | null;
+    actions: BackboneGetAnnouncementsActionResponse[];
+}
+
+export interface BackboneGetAnnouncementsActionResponse {
+    displayName: string;
+    link: string;
 }

@@ -69,6 +69,7 @@ export interface CreateAnnouncementRequest {
     texts: { language: string; title: string; body: string }[];
     expiresAt?: string;
     recipients?: string[];
+    actions: { displayName: Record<string, string>; link: string }[];
 }
 
 export interface CreateAnnouncementResponse {
