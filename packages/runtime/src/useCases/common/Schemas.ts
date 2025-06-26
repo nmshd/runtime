@@ -16576,6 +16576,19 @@ export const GetOwnSharedAttributesRequest: any = {
                 "createdAt": {
                     "type": "string"
                 },
+                "wasViewedAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
                 "content.@type": {
                     "anyOf": [
                         {
@@ -16790,6 +16803,19 @@ export const GetPeerSharedAttributesRequest: any = {
                 "createdAt": {
                     "type": "string"
                 },
+                "wasViewedAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
                 "content.@type": {
                     "anyOf": [
                         {
@@ -16980,6 +17006,19 @@ export const GetRepositoryAttributesRequest: any = {
                 },
                 "isDefault": {
                     "type": "string"
+                },
+                "wasViewedAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
                 },
                 "content.tags": {
                     "anyOf": [

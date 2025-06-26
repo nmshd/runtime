@@ -20,6 +20,7 @@ export interface GetOwnSharedAttributesRequest {
 
 export interface GetOwnSharedAttributeRequestQuery {
     createdAt?: string;
+    wasViewedAt?: string | string[];
     "content.@type"?: string | string[];
     "content.tags"?: string | string[];
     "content.key"?: string | string[];
