@@ -17542,6 +17542,19 @@ export const GetRepositoryAttributesRequest: any = {
                 "isDefault": {
                     "type": "string"
                 },
+                "wasViewedAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
                 "content.tags": {
                     "anyOf": [
                         {
