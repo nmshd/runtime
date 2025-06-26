@@ -20,6 +20,7 @@ export interface GetPeerSharedAttributesRequest {
 
 export interface GetPeerSharedAttributesRequestQuery {
     createdAt?: string;
+    wasViewedAt?: string | string[];
     "content.@type"?: string | string[];
     "content.tags"?: string | string[];
     "content.validFrom"?: string | string[];
