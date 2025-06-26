@@ -2,7 +2,7 @@ import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { JSONWrapper, Serializable } from "@js-soft/ts-serval";
 import { CoreDate, CoreId, FileReference } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
-import { AccountController, RelationshipAuditLogEntryReason, RelationshipStatus, TokenContentRelationshipTemplate, Transport } from "../../src";
+import { AccountController, RelationshipAuditLogEntryReason, RelationshipChangedEvent, RelationshipStatus, TokenContentRelationshipTemplate, Transport } from "../../src";
 import { TestUtil } from "../testHelpers/TestUtil";
 
 describe("AccountTest", function () {
@@ -536,6 +536,7 @@ describe("RelationshipTest: Accept Reactivation", function () {
         expect(acceptedReactivatedRelationshipPeer.cache?.auditLog).toHaveLength(5);
         expect(acceptedReactivatedRelationshipPeer.cache!.auditLog[4].reason).toBe(RelationshipAuditLogEntryReason.AcceptanceOfReactivation);
 
+        await TestUtil.syncUntilHasEvent(to, RelationshipChangedEvent, (e) => e.data.id === relationshipId);
         const syncedRelationshipsFromSelf = await TestUtil.syncUntilHasRelationships(from);
         expect(syncedRelationshipsFromSelf).toHaveLength(1);
         const acceptedReactivatedRelationshipFromSelf = syncedRelationshipsFromSelf[0];
@@ -584,6 +585,7 @@ describe("RelationshipTest: Reject Reactivation", function () {
         expect(rejectedReactivatedRelationshipPeer.cache?.auditLog).toHaveLength(5);
         expect(rejectedReactivatedRelationshipPeer.cache!.auditLog[4].reason).toBe(RelationshipAuditLogEntryReason.RejectionOfReactivation);
 
+        await TestUtil.syncUntilHasEvent(to, RelationshipChangedEvent, (e) => e.data.id === relationshipId);
         const syncedRelationshipsFromSelf = await TestUtil.syncUntilHasRelationships(from);
         expect(syncedRelationshipsFromSelf).toHaveLength(1);
         const rejectedReactivatedRelationshipFromSelf = syncedRelationshipsFromSelf[0];
@@ -632,6 +634,7 @@ describe("RelationshipTest: Revoke Reactivation", function () {
         expect(revokedReactivatedRelationshipFromSelf.cache?.auditLog).toHaveLength(5);
         expect(revokedReactivatedRelationshipFromSelf.cache!.auditLog[4].reason).toBe(RelationshipAuditLogEntryReason.RevocationOfReactivation);
 
+        await TestUtil.syncUntilHasEvent(to, RelationshipChangedEvent, (e) => e.data.id === relationshipId);
         const syncedRelationshipsPeer = await TestUtil.syncUntilHasRelationships(to);
         expect(syncedRelationshipsPeer).toHaveLength(1);
         const revokedReactivatedRelationshipPeer = syncedRelationshipsPeer[0];
