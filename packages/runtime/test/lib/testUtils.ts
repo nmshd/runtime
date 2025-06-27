@@ -240,7 +240,7 @@ export async function exchangeTemplate(
 ): Promise<RelationshipTemplateDTO> {
     const template = await createTemplate(transportServicesCreator, content, undefined, templateExpiresAt);
 
-    const response = await transportServicesRecipient.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
+    const response = await transportServicesRecipient.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.reference.truncated });
     expect(response).toBeSuccessful();
 
     return response.value;
@@ -249,7 +249,7 @@ export async function exchangeTemplate(
 export async function exchangeFile(transportServicesCreator: TransportServices, transportServicesRecipient: TransportServices): Promise<FileDTO> {
     const fileToken = await getFileToken(transportServicesCreator);
 
-    const response = await transportServicesRecipient.files.getOrLoadFile({ reference: fileToken.truncatedReference });
+    const response = await transportServicesRecipient.files.getOrLoadFile({ reference: fileToken.reference.truncated });
     expect(response).toBeSuccessful();
 
     return response.value;
@@ -259,7 +259,7 @@ export async function exchangeToken(transportServicesCreator: TransportServices,
     const token = await uploadOwnToken(transportServicesCreator);
 
     const response = await transportServicesRecipient.tokens.loadPeerToken({
-        reference: token.truncatedReference,
+        reference: token.reference.truncated,
         ephemeral: false
     });
     expect(response).toBeSuccessful();
@@ -272,8 +272,8 @@ export async function sendMessage(transportServices: TransportServices, recipien
         recipients: [recipient],
         content: content ?? {
             "@type": "Mail",
-            subject: "This is the mail subject",
-            body: "This is the mail body",
+            subject: "aSubject",
+            body: "aBody",
             cc: [],
             to: [recipient]
         },
@@ -294,8 +294,8 @@ export async function sendMessageToMultipleRecipients(
         recipients,
         content: content ?? {
             "@type": "Mail",
-            subject: "This is the mail subject",
-            body: "This is the mail body",
+            subject: "aSubject",
+            body: "aBody",
             cc: [],
             to: recipients
         },
@@ -475,7 +475,8 @@ export async function ensureActiveRelationship(sTransportServices: TransportServ
         await rTransportServices.relationships.decomposeRelationship({ relationshipId: relationship.id });
         await establishRelationship(sTransportServices, rTransportServices);
     } else if (sRelationships[0].status === RelationshipStatus.Pending) {
-        if (sRelationships[0].template.isOwn) {
+        const sRelationshipTemplate = await sTransportServices.relationshipTemplates.getRelationshipTemplate({ id: sRelationships[0].templateId });
+        if (sRelationshipTemplate.value.isOwn) {
             const relationship = sRelationships[0];
             await sTransportServices.relationships.acceptRelationship({ relationshipId: relationship.id });
             await syncUntilHasRelationships(rTransportServices, 1);
@@ -635,7 +636,7 @@ export async function executeFullShareRepositoryAttributeFlow(sender: TestRuntim
 export async function acceptIncomingShareAttributeRequest(sender: TestRuntimeServices, recipient: TestRuntimeServices, requestId: string): Promise<LocalAttributeDTO> {
     await syncUntilHasMessageWithRequest(recipient.transport, requestId);
     await recipient.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => {
-        return e.data.request.id === requestId && e.data.newStatus === LocalRequestStatus.ManualDecisionRequired;
+        return e.data.request.id === requestId && (e.data.newStatus === LocalRequestStatus.ManualDecisionRequired || e.data.newStatus === LocalRequestStatus.Decided);
     });
     await recipient.consumption.incomingRequests.accept({ requestId: requestId, items: [{ accept: true }] });
 
@@ -913,7 +914,7 @@ export async function createRelationshipWithStatusPending(
     });
 
     const loadedPeerTemplateResult = await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({
-        reference: relationshipTemplateResult.value.truncatedReference
+        reference: relationshipTemplateResult.value.reference.truncated
     });
 
     await requestor.eventBus.waitForEvent(RelationshipTemplateProcessedEvent, (event) => {
