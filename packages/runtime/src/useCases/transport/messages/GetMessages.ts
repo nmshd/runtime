@@ -1,3 +1,4 @@
+import { DatabasePaginationOptions } from "@js-soft/docdb-access-abstractions";
 import { QueryTranslator } from "@js-soft/docdb-querytranslator";
 import { Result } from "@js-soft/ts-utils";
 import { CachedMessage, CachedMessageRecipient, Message, MessageController, MessageEnvelopeRecipient } from "@nmshd/transport";
@@ -24,6 +25,12 @@ export interface GetMessagesQuery {
 
 export interface GetMessagesRequest {
     query?: GetMessagesQuery;
+    paginationOptions?: DatabasePaginationOptions; // an upper bound for limit could be appropriate
+}
+
+export interface GetMessagesResponse {
+    messages: MessageDTO[];
+    messageCount: number;
 }
 
 class Validator extends SchemaValidator<GetMessagesRequest> {
@@ -32,7 +39,7 @@ class Validator extends SchemaValidator<GetMessagesRequest> {
     }
 }
 
-export class GetMessagesUseCase extends UseCase<GetMessagesRequest, MessageDTO[]> {
+export class GetMessagesUseCase extends UseCase<GetMessagesRequest, GetMessagesResponse> {
     private static readonly queryTranslator = new QueryTranslator({
         whitelist: {
             [nameof<MessageDTO>((m) => m.isOwn)]: true,
@@ -121,11 +128,14 @@ export class GetMessagesUseCase extends UseCase<GetMessagesRequest, MessageDTO[]
         super(validator);
     }
 
-    protected async executeInternal(request: GetMessagesRequest): Promise<Result<MessageDTO[]>> {
+    protected async executeInternal(request: GetMessagesRequest): Promise<Result<GetMessagesResponse>> {
         const query = GetMessagesUseCase.queryTranslator.parse(request.query);
 
-        const messages = await this.messageController.getMessages(query);
+        const getMessagesResult = await this.messageController.getMessages(query, request.paginationOptions);
 
-        return Result.ok(MessageMapper.toMessageDTOList(messages));
+        return Result.ok({
+            messages: MessageMapper.toMessageDTOList(getMessagesResult.messages),
+            messageCount: getMessagesResult.messageCount
+        });
     }
 }
