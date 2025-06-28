@@ -1,6 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { CoreDate } from "@nmshd/core-types";
-import { RelationshipStatus } from "../../../src";
+import { RelationshipChangedEvent, RelationshipStatus } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("RelationshipSync", function () {
@@ -203,6 +203,7 @@ describe("RelationshipSync", function () {
         await templator.syncEverything();
 
         await requestor.relationships.decompose(relationshipId);
+        await TestUtil.syncUntilHasEvent(templator, RelationshipChangedEvent, (e) => e.data.id === relationshipId);
         await templator.relationships.decompose(relationshipId);
 
         const template = await templator.relationshipTemplates.getRelationshipTemplate(templateId);

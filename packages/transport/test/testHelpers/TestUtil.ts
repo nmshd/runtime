@@ -6,7 +6,7 @@ import { ILoggerFactory } from "@js-soft/logging-abstractions";
 import { NodeLoggerFactory } from "@js-soft/node-logger";
 import { SimpleLoggerFactory } from "@js-soft/simple-logger";
 import { ISerializable, Serializable } from "@js-soft/ts-serval";
-import { EventEmitter2EventBus, sleep } from "@js-soft/ts-utils";
+import { Event, EventEmitter2EventBus, sleep, SubscriptionTarget } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
 import fs from "fs";
@@ -28,6 +28,7 @@ import {
     ISendFileParameters,
     Message,
     Relationship,
+    RelationshipChangedEvent,
     RelationshipStatus,
     RelationshipTemplate,
     RequestError,
@@ -417,6 +418,7 @@ export class TestUtil {
     ): Promise<{ revokedRelationshipFromSelf: Relationship; revokedRelationshipPeer: Relationship }> {
         const relationshipId = (await to.relationships.getRelationshipToIdentity(from.identity.address))!.id;
         const revokedRelationshipPeer = await to.relationships.revoke(relationshipId);
+        await TestUtil.syncUntilHasEvent(from, RelationshipChangedEvent, (e) => e.data.id === relationshipId);
         const revokedRelationshipFromSelf = (await TestUtil.syncUntil(from, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
 
         return { revokedRelationshipFromSelf, revokedRelationshipPeer };
@@ -428,6 +430,7 @@ export class TestUtil {
     ): Promise<{ terminatedRelationshipFromSelf: Relationship; terminatedRelationshipPeer: Relationship }> {
         const relationshipId = (await from.relationships.getRelationshipToIdentity(to.identity.address))!.id;
         const terminatedRelationshipFromSelf = await from.relationships.terminate(relationshipId);
+        await TestUtil.syncUntilHasEvent(from, RelationshipChangedEvent, (e) => e.data.id === relationshipId);
         const terminatedRelationshipPeer = (await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
 
         return { terminatedRelationshipFromSelf, terminatedRelationshipPeer };
@@ -441,6 +444,7 @@ export class TestUtil {
         await from.relationships.requestReactivation(relationshipId);
         await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0);
         const reactivatedRelationshipFromSelf = await to.relationships.acceptReactivation(relationshipId);
+        await TestUtil.syncUntilHasEvent(from, RelationshipChangedEvent, (e) => e.data.id === relationshipId);
         const reactivatedRelationshipPeer = (await TestUtil.syncUntil(from, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
 
         return { reactivatedRelationshipFromSelf, reactivatedRelationshipPeer };
@@ -450,6 +454,7 @@ export class TestUtil {
         const relationship = (await from.relationships.getRelationshipToIdentity(to.identity.address))!;
         await from.relationships.decompose(relationship.id);
         await from.cleanupDataOfDecomposedRelationship(relationship);
+        await TestUtil.syncUntilHasEvent(from, RelationshipChangedEvent, (e) => e.data.id === relationship.id);
         const decomposedRelationshipPeer = (await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
 
         return decomposedRelationshipPeer;
@@ -549,6 +554,36 @@ export class TestUtil {
         }
 
         throw new Error("no error occured");
+    }
+
+    public static async syncUntilHasEvent<TEvent extends Event>(
+        accountController: AccountController,
+        subscriptionTarget: SubscriptionTarget<TEvent> & { namespace: string },
+        predicate?: (event: TEvent) => boolean
+    ): Promise<Event> {
+        let iterationNumber = 0;
+        let event: Event | undefined;
+        do {
+            await sleep(iterationNumber * 25);
+
+            const publishedEvents: any[] = []; // TODO: be more precise
+            accountController.transport.eventBus.subscribe(subscriptionTarget, function (event) {
+                publishedEvents.push(event);
+            });
+
+            await accountController.syncEverything();
+
+            event = publishedEvents.find(
+                (e) =>
+                    e.namespace === subscriptionTarget.namespace &&
+                    (typeof subscriptionTarget === "string" || e instanceof subscriptionTarget) &&
+                    (!predicate || predicate(e as TEvent))
+            ) as TEvent | undefined;
+
+            iterationNumber++;
+        } while (!event && iterationNumber < 15);
+        if (!event) throw new Error("syncUntil timed out.");
+        return event;
     }
 
     public static async sendRelationshipTemplate(from: AccountController, body?: ISerializable): Promise<RelationshipTemplate> {
