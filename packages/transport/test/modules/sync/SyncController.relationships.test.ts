@@ -1,6 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { CoreDate } from "@nmshd/core-types";
-import { RelationshipChangedEvent, RelationshipStatus } from "../../../src";
+import { RelationshipStatus } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("RelationshipSync", function () {
@@ -187,7 +187,7 @@ describe("RelationshipSync", function () {
         // This is a regression test. In the past, an error was thrown when synchronizing after both parties had decomposed the relationship.
         // This was because an external event for the decomposition of the peer was received during the sync, and the template didn't exist
         // anymore at this time.
-        // The important thing here is that after the peer as decomposed, no sync has happened before the other identity decomposes.
+        // The important thing here is that after the peer has decomposed, no sync has happened before the other identity decomposes.
 
         const transport = TestUtil.createTransport();
         const [templator, requestor] = await TestUtil.provideAccounts(transport, connection, 2);
@@ -200,10 +200,9 @@ describe("RelationshipSync", function () {
         await requestor.syncEverything();
 
         await requestor.relationships.terminate(relationshipId);
-        await templator.syncEverything();
+        await TestUtil.syncUntilHasRelationship(templator, relationshipId);
 
         await requestor.relationships.decompose(relationshipId);
-        await TestUtil.syncUntilHasEvent(templator, RelationshipChangedEvent, (e) => e.data.id === relationshipId);
         await templator.relationships.decompose(relationshipId);
 
         const template = await templator.relationshipTemplates.getRelationshipTemplate(templateId);
