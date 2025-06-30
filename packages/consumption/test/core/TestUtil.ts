@@ -255,7 +255,7 @@ export class TestUtil {
         });
 
         // Accept relationship
-        const syncedRelationships = await TestUtil.syncUntilHasRelationships(from);
+        const syncedRelationships = await TestUtil.syncUntilHasRelationship(from, relRequest.id);
         expect(syncedRelationships).toHaveLength(1);
         const pendingRelationship = syncedRelationships[0];
         expect(pendingRelationship.status).toStrictEqual(RelationshipStatus.Pending);

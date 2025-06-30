@@ -109,6 +109,10 @@ export async function syncUntilHasRelationships(transportServices: TransportServ
     return await syncUntilHasMany(transportServices, "relationships", expectedNumberOfRelationships);
 }
 
+export async function syncUntilHasRelationship(transportServices: TransportServices, relationshipId: string | CoreId): Promise<RelationshipDTO> {
+    return await syncUntilHas(transportServices, "relationships", (r) => r.id === relationshipId.toString());
+}
+
 export async function syncUntilHasMessages(transportServices: TransportServices, expectedNumberOfMessages = 1): Promise<MessageDTO[]> {
     return await syncUntilHasMany(transportServices, "messages", expectedNumberOfMessages);
 }

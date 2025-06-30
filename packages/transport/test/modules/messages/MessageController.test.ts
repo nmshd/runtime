@@ -117,8 +117,7 @@ describe("MessageController", function () {
             tempDate = CoreDate.utc().subtract(TestUtil.tempDateThreshold);
             const sentMessage = await TestUtil.sendMessage(sender, recipient);
 
-            const messages = await TestUtil.syncUntilHasMessages(recipient, 1);
-            const receivedMessage = messages[0];
+            const receivedMessage = (await TestUtil.syncUntilHasMessage(recipient, sentMessage.id))[0];
 
             tempId1 = sentMessage.id;
 
