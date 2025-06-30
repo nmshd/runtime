@@ -356,8 +356,8 @@ export class TestUtil {
      * specified in the `until` callback is met.
      */
     public static async syncUntil(accountController: AccountController, until: (syncResult: ChangedItems) => boolean): Promise<ChangedItems> {
-        const { messages, relationships } = await accountController.syncEverything();
-        const syncResult = new ChangedItems([...relationships], [...messages]);
+        const { messages, relationships, identityDeletionProcesses, files } = await accountController.syncEverything();
+        const syncResult = new ChangedItems([...relationships], [...messages], [...identityDeletionProcesses], [...files]);
 
         let iterationNumber = 0;
         while (!until(syncResult) && iterationNumber < 15) {

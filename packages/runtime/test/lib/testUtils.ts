@@ -77,6 +77,7 @@ export async function syncUntil(transportServices: TransportServices, until: (sy
         finalSyncResult.messages.push(...currentIterationSyncResult.messages);
         finalSyncResult.relationships.push(...currentIterationSyncResult.relationships);
         finalSyncResult.identityDeletionProcesses.push(...currentIterationSyncResult.identityDeletionProcesses);
+        finalSyncResult.files.push(...currentIterationSyncResult.files);
 
         iterationNumber++;
         criteriaMet = until(finalSyncResult);
