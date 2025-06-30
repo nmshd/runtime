@@ -439,7 +439,7 @@ export class TestUtil {
     ): Promise<{ reactivatedRelationshipFromSelf: Relationship; reactivatedRelationshipPeer: Relationship }> {
         const relationshipId = (await from.relationships.getRelationshipToIdentity(to.identity.address))!.id;
         await from.relationships.requestReactivation(relationshipId);
-        await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0);
+        await this.syncUntilHasRelationship(to, relationshipId);
         const reactivatedRelationshipFromSelf = await to.relationships.acceptReactivation(relationshipId);
         const reactivatedRelationshipPeer = (await this.syncUntilHasRelationship(from, relationshipId))[0];
 
