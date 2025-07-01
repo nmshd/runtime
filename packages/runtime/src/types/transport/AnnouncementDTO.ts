@@ -5,10 +5,16 @@ export interface AnnouncementDTO {
     severity: AnnouncementSeverity;
     title: string;
     body: string;
+    actions: AnnouncementActionDTO[];
 }
 
 export enum AnnouncementSeverity {
     Low = "Low",
     Medium = "Medium",
     High = "High"
+}
+
+export interface AnnouncementActionDTO {
+    displayName: string;
+    link: string;
 }
