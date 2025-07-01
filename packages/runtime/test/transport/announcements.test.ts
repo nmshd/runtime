@@ -24,12 +24,11 @@ describe("Announcements", () => {
         const getAnnouncementsResult = await client.transport.announcements.getAnnouncements({ language: LanguageISO639.en });
         expect(getAnnouncementsResult).toBeSuccessful();
 
-        const containsCreatedAnnouncement = getAnnouncementsResult.value.some((a) => a.id === idOfCreatedAnnouncement);
+        const announcement = getAnnouncementsResult.value.find((a) => a.id === idOfCreatedAnnouncement);
 
-        expect(containsCreatedAnnouncement).toBeTruthy();
+        expect(announcement).toBeDefined();
 
-        const announcement = getAnnouncementsResult.value.find((a) => a.id === idOfCreatedAnnouncement)!;
-        expect(announcement.actions).toHaveLength(1);
+        expect(announcement!.actions).toHaveLength(1);
     });
 
     async function createTestAnnouncement(): Promise<string> {
