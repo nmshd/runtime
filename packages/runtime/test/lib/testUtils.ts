@@ -23,7 +23,7 @@ import {
     ShareAttributeAcceptResponseItemJSON,
     ShareAttributeRequestItem
 } from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId, PasswordLocationIndicator } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
 import { IdentityUtil } from "@nmshd/transport";
 import fs from "fs";
@@ -65,7 +65,7 @@ import { TestRuntimeServices } from "./RuntimeServiceProvider";
 import { TestNotificationItem } from "./TestNotificationItem";
 
 export async function syncUntil(transportServices: TransportServices, until: (syncResult: SyncEverythingResponse) => boolean): Promise<SyncEverythingResponse> {
-    const finalSyncResult: SyncEverythingResponse = { messages: [], relationships: [], identityDeletionProcesses: [] };
+    const finalSyncResult: SyncEverythingResponse = { messages: [], relationships: [], identityDeletionProcesses: [], files: [] };
 
     let iterationNumber = 0;
     let criteriaMet: boolean;
@@ -163,7 +163,7 @@ export async function syncUntilHasEvent<TEvent extends Event>(
 export async function uploadOwnToken(
     transportServices: TransportServices,
     forIdentity?: string,
-    passwordProtection?: { password: string; passwordIsPin?: true }
+    passwordProtection?: { password: string; passwordIsPin?: true; passwordLocationIndicator?: PasswordLocationIndicator }
 ): Promise<TokenDTO> {
     const response = await transportServices.tokens.createOwnToken({
         content: { aKey: "aValue" },
@@ -206,7 +206,7 @@ export const emptyRelationshipCreationContent: ArbitraryRelationshipCreationCont
 export async function createTemplate(
     transportServices: TransportServices,
     body?: RelationshipTemplateContentJSON,
-    passwordProtection?: { password: string; passwordIsPin?: true },
+    passwordProtection?: { password: string; passwordIsPin?: true; passwordLocationIndicator?: PasswordLocationIndicator },
     templateExpiresAt?: DateTime
 ): Promise<RelationshipTemplateDTO> {
     const defaultExpirationDateTime = DateTime.utc().plus({ minutes: 10 }).toString();
@@ -872,6 +872,30 @@ export async function cleanupAttributes(services: TestRuntimeServices[], onlySha
             const servicesAttributesResult = await services.consumption.attributes.getAttributes({ query });
             for (const attribute of servicesAttributesResult.value) {
                 await servicesAttributeController.deleteAttributeUnsafe(CoreId.from(attribute.id));
+            }
+        })
+    );
+}
+
+export async function cleanupFiles(services: TestRuntimeServices[]): Promise<void> {
+    await Promise.all(
+        services.map(async (services) => {
+            const servicesFileController = services.transport.files["getFilesUseCase"]["fileController"];
+            const files = await servicesFileController.getFiles({});
+            for (const file of files) {
+                await servicesFileController.deleteFile(file);
+            }
+        })
+    );
+}
+
+export async function cleanupMessages(services: TestRuntimeServices[]): Promise<void> {
+    await Promise.all(
+        services.map(async (services) => {
+            const servicesMessageController = services.transport.messages["getMessagesUseCase"]["messageController"];
+            const messages = await servicesMessageController.getMessages({});
+            for (const message of messages) {
+                await servicesMessageController["messages"].delete(message);
             }
         })
     );

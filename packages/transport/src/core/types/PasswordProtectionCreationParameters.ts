@@ -3,6 +3,7 @@ import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-se
 export interface IPasswordProtectionCreationParameters extends ISerializable {
     passwordType: "pw" | `pin${number}`;
     password: string;
+    passwordLocationIndicator?: number;
 }
 
 export class PasswordProtectionCreationParameters extends Serializable implements IPasswordProtectionCreationParameters {
@@ -14,16 +15,21 @@ export class PasswordProtectionCreationParameters extends Serializable implement
     @serialize()
     public password: string;
 
+    @validate({ nullable: true, min: 0, max: 99, customValidator: (v) => (!Number.isInteger(v) ? "This value must be an integer." : undefined) })
+    @serialize({ any: true })
+    public passwordLocationIndicator?: number;
+
     public static from(value: IPasswordProtectionCreationParameters): PasswordProtectionCreationParameters {
         return this.fromAny(value);
     }
 
-    public static create(params: { password: string; passwordIsPin?: true } | undefined): PasswordProtectionCreationParameters | undefined {
+    public static create(params: { password: string; passwordIsPin?: true; passwordLocationIndicator?: number } | undefined): PasswordProtectionCreationParameters | undefined {
         if (!params) return;
 
         return PasswordProtectionCreationParameters.from({
             password: params.password,
-            passwordType: params.passwordIsPin ? `pin${params.password.length}` : "pw"
+            passwordType: params.passwordIsPin ? `pin${params.password.length}` : "pw",
+            passwordLocationIndicator: params.passwordLocationIndicator
         });
     }
 }

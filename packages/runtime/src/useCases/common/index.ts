@@ -1,6 +1,6 @@
-export * from "./Base64ForIdPrefix";
 export * from "./flattenObject";
 export * from "./OwnerRestriction";
+export * from "./PasswordProtectionMapper";
 export * from "./RuntimeErrors";
 export * from "./SchemaRepository";
 export * from "./UseCase";

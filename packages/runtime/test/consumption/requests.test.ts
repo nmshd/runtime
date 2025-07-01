@@ -101,9 +101,9 @@ describe("Requests", () => {
             expect((sLocalRequest.content.items[0] as TestRequestItemJSON).mustBeAccepted).toBe(false);
         });
 
-        // eslint-disable-next-line jest/expect-expect
         test("sender: send the outgoing Request via Message", async () => {
-            await sendMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
+            const promise = sendMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
+            await expect(promise).resolves.not.toThrow();
         });
 
         test("sender: mark the outgoing Request as sent", async () => {
@@ -648,7 +648,8 @@ describe("Requests", () => {
             expect(rLocalRequest.status).toBe(LocalRequestStatus.Expired);
             expect(rLocalRequest.response).toBeUndefined();
 
-            expect(triggeredEvent).toBeUndefined();
+            expect(triggeredEvent).toBeDefined();
+            expect(triggeredEvent!.data.newStatus).toBe(LocalRequestStatus.Expired);
         });
 
         test("change status of Request when querying Requests if the underlying RelationshipTemplate is expired", async () => {
@@ -670,7 +671,8 @@ describe("Requests", () => {
             expect(rLocalRequest.status).toBe(LocalRequestStatus.Expired);
             expect(rLocalRequest.response).toBeUndefined();
 
-            expect(triggeredEvent).toBeUndefined();
+            expect(triggeredEvent).toBeDefined();
+            expect(triggeredEvent!.data.newStatus).toBe(LocalRequestStatus.Expired);
         });
 
         test("can not delete a Request when it is not expired", async () => {
@@ -735,7 +737,8 @@ describe("Requests", () => {
                 expect(rLocalRequest.status).toBe(LocalRequestStatus.Expired);
                 expect(rLocalRequest.response).toBeUndefined();
 
-                expect(triggeredEvent).toBeUndefined();
+                expect(triggeredEvent).toBeDefined();
+                expect(triggeredEvent!.data.newStatus).toBe(LocalRequestStatus.Expired);
             });
         });
     });

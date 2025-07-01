@@ -2,6 +2,7 @@ import { PasswordProtectionDTO } from "./PasswordProtectionDTO";
 
 export interface TokenDTO {
     id: string;
+    isOwn: boolean;
     createdBy: string;
     createdByDevice: string;
     content: any;
@@ -10,5 +11,9 @@ export interface TokenDTO {
     forIdentity?: string;
     passwordProtection?: PasswordProtectionDTO;
     truncatedReference: string;
+    reference: {
+        truncated: string;
+        url: string;
+    };
     isEphemeral: boolean;
 }

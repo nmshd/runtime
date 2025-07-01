@@ -1,12 +1,12 @@
-import { IdentityDeletionProcessStatus } from "@nmshd/runtime";
-import { AppRuntime, AppRuntimeServices } from "../../src";
+import { IdentityDeletionProcessStatus, RuntimeServices } from "@nmshd/runtime";
+import { AppRuntime } from "../../src";
 import { TestUtil } from "../lib";
 
 describe("Offboarding", function () {
     let runtime: AppRuntime;
 
-    let services1: AppRuntimeServices;
-    let services2: AppRuntimeServices;
+    let services1: RuntimeServices;
+    let services2: RuntimeServices;
     let localAccount2Id: string;
     let device2Id: string;
 

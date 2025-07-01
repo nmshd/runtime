@@ -15,4 +15,8 @@ export interface RelationshipTemplateDTO {
     expiresAt?: string;
     maxNumberOfAllocations?: number;
     truncatedReference: string;
+    reference: {
+        truncated: string;
+        url: string;
+    };
 }

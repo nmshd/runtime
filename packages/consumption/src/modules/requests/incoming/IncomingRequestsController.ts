@@ -50,6 +50,8 @@ export class IncomingRequestsController extends ConsumptionBaseController {
     public async received(params: IReceivedIncomingRequestParameters): Promise<LocalRequest> {
         const parsedParams = ReceivedIncomingRequestParameters.from(params);
 
+        await this.validateRequestUniqueness(parsedParams.receivedRequest.id);
+
         const infoFromSource = this.extractInfoFromSource(parsedParams.requestSourceObject);
 
         const request = LocalRequest.from({
@@ -73,6 +75,13 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         this.eventBus.publish(new IncomingRequestReceivedEvent(this.identity.address.toString(), request));
 
         return request;
+    }
+
+    private async validateRequestUniqueness(requestId?: CoreId): Promise<void> {
+        if (!requestId) return;
+
+        const existingRequestWithSameId = await this.getIncomingRequest(requestId);
+        if (existingRequestWithSameId) throw ConsumptionCoreErrors.requests.cannotCreateRequestWithDuplicateId(requestId.toString());
     }
 
     private extractInfoFromSource(source: Message | RelationshipTemplate): InfoFromSource {
@@ -304,6 +313,8 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         request.response = localResponse;
         request.changeStatus(LocalRequestStatus.Decided);
 
+        if (params.decidedByAutomation) request.wasAutomaticallyDecided = true;
+
         await this.update(request);
 
         this.eventBus.publish(
@@ -422,7 +433,7 @@ export class IncomingRequestsController extends ConsumptionBaseController {
             isOwn: false
         });
 
-        const requestPromises = requestDocs.map((r) => this.updateRequestExpiry(LocalRequest.from(r)));
+        const requestPromises = requestDocs.map((r) => this.updateRequestExpiry(r, LocalRequest.from(r)));
         return await Promise.all(requestPromises);
     }
 
@@ -432,7 +443,7 @@ export class IncomingRequestsController extends ConsumptionBaseController {
 
         const localRequest = LocalRequest.from(requestDoc);
 
-        return await this.updateRequestExpiry(localRequest);
+        return await this.updateRequestExpiry(requestDoc, localRequest);
     }
 
     private async getOrThrow(id: CoreId | string) {
@@ -472,9 +483,16 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         }
     }
 
-    private async updateRequestExpiry(request: LocalRequest) {
+    private async updateRequestExpiry(requestDoc: any, request: LocalRequest) {
+        const oldStatus = request.status;
+
         const statusUpdated = request.updateStatusBasedOnExpiration();
-        if (statusUpdated) await this.update(request);
+        if (statusUpdated) {
+            await this.localRequests.update(requestDoc, request);
+
+            this.eventBus.publish(new IncomingRequestStatusChangedEvent(this.identity.address.toString(), { request, oldStatus, newStatus: request.status }));
+        }
+
         return request;
     }
 }

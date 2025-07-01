@@ -195,6 +195,7 @@ describe("DeciderModule", () => {
 
             const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
             expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Decided);
+            expect(requestAfterAction.wasAutomaticallyDecided).toBe(true);
             expect(requestAfterAction.response).toBeDefined();
 
             const responseContent = requestAfterAction.response!.content;
@@ -276,6 +277,7 @@ describe("DeciderModule", () => {
 
             const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
             expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Decided);
+            expect(requestAfterAction.wasAutomaticallyDecided).toBe(true);
             expect(requestAfterAction.response).toBeDefined();
 
             const responseContent = requestAfterAction.response!.content;
@@ -443,6 +445,11 @@ describe("DeciderModule", () => {
                 MessageProcessedEvent,
                 (e) => e.data.result === MessageProcessedResult.ManualRequestDecisionRequired && e.data.message.id === message.id
             );
+
+            const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
+            expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.ManualDecisionRequired);
+            expect(requestAfterAction.wasAutomaticallyDecided).toBeUndefined();
+            expect(requestAfterAction.response).toBeUndefined();
         });
 
         test("cannot decide a Request given a GeneralRequestConfig with an expiration date too high", async () => {

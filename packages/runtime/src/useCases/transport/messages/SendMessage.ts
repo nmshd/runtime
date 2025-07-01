@@ -1,6 +1,6 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { ApplicationError, Result } from "@js-soft/ts-utils";
-import { OutgoingRequestsController } from "@nmshd/consumption";
+import { LocalRequestStatus, OutgoingRequestsController } from "@nmshd/consumption";
 import { ArbitraryMessageContent, Mail, Notification, Request, ResponseWrapper } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreError, CoreId } from "@nmshd/core-types";
 import { AccountController, File, FileController, MessageController, PeerDeletionStatus, RelationshipsController, RelationshipStatus, TransportCoreErrors } from "@nmshd/transport";
@@ -13,10 +13,13 @@ import { MessageMapper } from "./MessageMapper";
 export interface SendMessageRequest {
     /**
      * @minItems 1
+     * @uniqueItems true
      */
     recipients: AddressString[];
     content: any;
-
+    /**
+     * @uniqueItems true
+     */
     attachments?: FileIdString[];
 }
 
@@ -77,6 +80,9 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
         const recipientsValidationError = await this.validateMessageRecipients(transformedContent, recipients);
         if (recipientsValidationError) return recipientsValidationError;
 
+        const mailRecipientsValidationError = this.validateMailRecipients(transformedContent, recipients);
+        if (mailRecipientsValidationError) return mailRecipientsValidationError;
+
         if (transformedContent instanceof Request) {
             const requestValidationError = await this.validateRequestAsMessageContent(transformedContent, CoreAddress.from(recipients[0]));
             if (requestValidationError) return requestValidationError;
@@ -133,6 +139,35 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
         return;
     }
 
+    private validateMailRecipients(content: Serializable, messageRecipients: string[]): ApplicationError | undefined {
+        if (!(content instanceof Mail)) return;
+
+        const ccRecipients = content.cc?.map((address) => address.toString()) ?? [];
+        if (ccRecipients.length !== new Set(ccRecipients).size) {
+            return RuntimeErrors.general.invalidPropertyValue("Some recipients in 'cc' are listed multiple times.");
+        }
+
+        const toRecipients = content.to.map((address) => address.toString());
+        if (toRecipients.length !== new Set(toRecipients).size) {
+            return RuntimeErrors.general.invalidPropertyValue("Some recipients in 'to' are listed multiple times.");
+        }
+
+        const duplicatesInToAndCc = _.intersection(ccRecipients, toRecipients);
+        if (duplicatesInToAndCc.length > 0) {
+            return RuntimeErrors.general.invalidPropertyValue(`The recipients '${duplicatesInToAndCc.join("', '")}' are put into both 'to' and 'cc'.`);
+        }
+
+        const mailRecipients = _.union(ccRecipients, toRecipients);
+        const mismatchBetweenMailAndMessageRecipients = _.xor(messageRecipients, mailRecipients);
+        if (mismatchBetweenMailAndMessageRecipients.length > 0) {
+            return RuntimeErrors.general.invalidPropertyValue(
+                `The identities '${mismatchBetweenMailAndMessageRecipients.join("', '")}' are not listed among both the Message recipients and the recipients in 'to'/'cc'.`
+            );
+        }
+
+        return;
+    }
+
     private async validateRequestAsMessageContent(request: Request, recipient: CoreAddress): Promise<ApplicationError | undefined> {
         if (!request.id) return RuntimeErrors.general.invalidPropertyValue("The Request must have an id.");
 
@@ -148,6 +183,8 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
         }
 
         if (!recipient.equals(localRequest.peer)) return RuntimeErrors.general.invalidPropertyValue("The recipient does not match the Request's peer.");
+
+        if (localRequest.status !== LocalRequestStatus.Draft) return RuntimeErrors.messages.cannotSendRequestThatWasAlreadySent();
 
         return;
     }

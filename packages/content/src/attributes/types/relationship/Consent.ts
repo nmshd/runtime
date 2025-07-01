@@ -4,6 +4,7 @@ import { AbstractAttributeValue, AbstractAttributeValueJSON, IAbstractAttributeV
 import { RenderHints, RenderHintsDataType, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../../hints";
 
 export interface ConsentJSON extends AbstractAttributeValueJSON {
+    "@type": "Consent";
     consent: string;
     link?: string;
     linkDisplayText?: string;
@@ -18,7 +19,7 @@ export interface IConsent extends IAbstractAttributeValue {
 @type("Consent")
 export class Consent extends AbstractAttributeValue implements IConsent {
     @serialize()
-    @validate({ max: 2000 })
+    @validate({ max: 10000 })
     public consent: string;
 
     @serialize()
@@ -40,7 +41,7 @@ export class Consent extends AbstractAttributeValue implements IConsent {
     protected static override postFrom<T extends Serializable>(value: T): T {
         if (!(value instanceof Consent)) throw new Error("this should never happen");
 
-        if (typeof value.linkDisplayText === "string" && typeof value.link === "undefined") {
+        if (typeof value.linkDisplayText === "string" && value.link === undefined) {
             throw new ValidationError(
                 Consent.name,
                 nameof<Consent>((x) => x.linkDisplayText),
@@ -62,7 +63,7 @@ export class Consent extends AbstractAttributeValue implements IConsent {
     public static get valueHints(): ValueHints {
         return ValueHints.from({
             propertyHints: {
-                consent: { max: 2000 },
+                consent: { max: 10000 },
                 link: { min: 3, max: 1024 },
                 linkDisplayText: { min: 3, max: 30 }
             }

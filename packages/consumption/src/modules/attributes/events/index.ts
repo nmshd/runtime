@@ -1,6 +1,7 @@
 export * from "./AttributeCreatedEvent";
 export * from "./AttributeDeletedEvent";
 export * from "./AttributeSucceededEventData";
+export * from "./AttributeWasViewedAtChangedEvent";
 export * from "./OwnSharedAttributeDeletedByOwnerEvent";
 export * from "./OwnSharedAttributeSucceededEvent";
 export * from "./PeerSharedAttributeDeletedByPeerEvent";

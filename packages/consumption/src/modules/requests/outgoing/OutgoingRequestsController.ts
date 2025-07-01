@@ -396,7 +396,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
             isOwn: true
         });
 
-        const requestPromises = requestDocs.map((r) => this.updateRequestExpiry(LocalRequest.from(r)));
+        const requestPromises = requestDocs.map((r) => this.updateRequestExpiry(r, LocalRequest.from(r)));
         return await Promise.all(requestPromises);
     }
 
@@ -412,7 +412,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         if (!requestDoc) return;
 
         const localRequest = LocalRequest.from(requestDoc);
-        return await this.updateRequestExpiry(localRequest);
+        return await this.updateRequestExpiry(requestDoc, localRequest);
     }
 
     private async getOrThrow(id: CoreId) {
@@ -437,9 +437,16 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         }
     }
 
-    private async updateRequestExpiry(request: LocalRequest) {
+    private async updateRequestExpiry(requestDoc: any, request: LocalRequest) {
+        const oldStatus = request.status;
+
         const statusUpdated = request.updateStatusBasedOnExpiration();
-        if (statusUpdated) await this.update(request);
+        if (statusUpdated) {
+            await this.localRequests.update(requestDoc, request);
+
+            this.eventBus.publish(new OutgoingRequestStatusChangedEvent(this.identity.address.toString(), { request: request, oldStatus, newStatus: request.status }));
+        }
+
         return request;
     }
 }

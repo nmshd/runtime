@@ -18,7 +18,7 @@ import {
 } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId, ICoreDate, ICoreId } from "@nmshd/core-types";
 import * as iql from "@nmshd/iql";
-import { SynchronizedCollection, TagClient, TransportCoreErrors } from "@nmshd/transport";
+import { Relationship, RelationshipStatus, SynchronizedCollection, TagClient, TransportCoreErrors } from "@nmshd/transport";
 import _ from "lodash";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
@@ -31,6 +31,7 @@ import { flattenObject, ValidationResult } from "../common";
 import {
     AttributeCreatedEvent,
     AttributeDeletedEvent,
+    AttributeWasViewedAtChangedEvent,
     OwnSharedAttributeSucceededEvent,
     RepositoryAttributeSucceededEvent,
     SharedAttributeCopyCreatedEvent,
@@ -42,7 +43,7 @@ import { CreateRepositoryAttributeParams, ICreateRepositoryAttributeParams } fro
 import { CreateSharedLocalAttributeCopyParams, ICreateSharedLocalAttributeCopyParams } from "./local/CreateSharedLocalAttributeCopyParams";
 import { ICreateSharedLocalAttributeParams } from "./local/CreateSharedLocalAttributeParams";
 import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./local/LocalAttribute";
-import { LocalAttributeDeletionStatus } from "./local/LocalAttributeDeletionInfo";
+import { LocalAttributeDeletionInfo, LocalAttributeDeletionStatus } from "./local/LocalAttributeDeletionInfo";
 import { LocalAttributeShareInfo } from "./local/LocalAttributeShareInfo";
 import { IdentityAttributeQueryTranslator, RelationshipAttributeQueryTranslator, ThirdPartyRelationshipAttributeQueryTranslator } from "./local/QueryTranslator";
 
@@ -1484,5 +1485,73 @@ export class AttributesController extends ConsumptionBaseController {
 
         const nonDescriptiveEntries = Object.entries(attribute.value.toJSON()).filter((entry) => !["title", "description"].includes(entry[0]));
         return nonDescriptiveEntries.every((entry) => typeof entry[1] !== "string" || regex.test(entry[1]));
+    }
+
+    public async setAttributeDeletionInfoOfDeletionProposedRelationship(relationshipId: CoreId): Promise<void> {
+        const relationship = await this.parent.accountController.relationships.getRelationship(relationshipId);
+        if (!relationship) throw TransportCoreErrors.general.recordNotFound(Relationship, relationshipId.toString());
+
+        if (relationship.status !== RelationshipStatus.DeletionProposed) {
+            throw ConsumptionCoreErrors.attributes.wrongRelationshipStatusToSetDeletionInfo();
+        }
+
+        const deletionDate = relationship.cache!.auditLog[relationship.cache!.auditLog.length - 1].createdAt;
+
+        await this.setDeletionInfoOfOwnSharedAttributes(relationship.peer.address.toString(), deletionDate);
+        await this.setDeletionInfoOfPeerSharedAttributes(relationship.peer.address.toString(), deletionDate);
+    }
+
+    private async setDeletionInfoOfOwnSharedAttributes(peer: String, deletionDate: CoreDate): Promise<void> {
+        const ownSharedAttributeDeletionInfo = LocalAttributeDeletionInfo.from({
+            deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
+            deletionDate
+        });
+
+        const ownSharedAttributes = await this.getLocalAttributes({
+            "shareInfo.peer": peer,
+            "content.owner": this.identity.address.toString(),
+            "deletionInfo.deletionStatus": { $ne: LocalAttributeDeletionStatus.DeletedByPeer }
+        });
+
+        await this.setDeletionInfoOfAttributes(ownSharedAttributes, ownSharedAttributeDeletionInfo);
+    }
+
+    private async setDeletionInfoOfPeerSharedAttributes(peer: String, deletionDate: CoreDate): Promise<void> {
+        const peerSharedAttributeDeletionInfo = LocalAttributeDeletionInfo.from({
+            deletionStatus: LocalAttributeDeletionStatus.DeletedByOwner,
+            deletionDate
+        });
+
+        const peerSharedAttributes = await this.getLocalAttributes({
+            "shareInfo.peer": peer,
+            "content.owner": peer,
+            "deletionInfo.deletionStatus": { $ne: LocalAttributeDeletionStatus.DeletedByOwner }
+        });
+
+        await this.setDeletionInfoOfAttributes(peerSharedAttributes, peerSharedAttributeDeletionInfo);
+    }
+
+    private async setDeletionInfoOfAttributes(attributes: LocalAttribute[], deletionInfo: LocalAttributeDeletionInfo): Promise<void> {
+        for (const attribute of attributes) {
+            attribute.setDeletionInfo(deletionInfo, this.identity.address);
+            await this.updateAttributeUnsafe(attribute);
+        }
+    }
+
+    public async markAttributeAsViewed(id: CoreId): Promise<LocalAttribute> {
+        const localAttributeDoc = await this.attributes.read(id.toString());
+        if (!localAttributeDoc) {
+            throw TransportCoreErrors.general.recordNotFound(LocalAttribute, id.toString());
+        }
+
+        const localAttribute = LocalAttribute.from(localAttributeDoc);
+        if (localAttribute.wasViewedAt) return localAttribute;
+
+        localAttribute.wasViewedAt = CoreDate.utc();
+        await this.attributes.update(localAttributeDoc, localAttribute);
+
+        this.eventBus.publish(new AttributeWasViewedAtChangedEvent(this.identity.address.toString(), localAttribute));
+
+        return localAttribute;
     }
 }

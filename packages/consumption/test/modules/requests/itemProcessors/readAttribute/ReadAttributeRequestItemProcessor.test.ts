@@ -245,11 +245,9 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), CoreAddress.from("recipient"));
 
                 if (testParams.expectedOutput.hasOwnProperty("success")) {
-                    // eslint-disable-next-line jest/no-conditional-expect
                     expect(result).successfulValidationResult();
                 } else {
                     const error = testParams.expectedOutput as { errorCode?: string; errorMessage?: string };
-                    // eslint-disable-next-line jest/no-conditional-expect
                     expect(result).errorValidationResult({
                         code: error.errorCode,
                         message: error.errorMessage
@@ -581,6 +579,37 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 code: "error.consumption.requests.attributeQueryMismatch",
                 message: `The provided IdentityAttribute is outdated. You have already shared the successor '${successorRepositoryAttribute.id}' of it.`
             });
+        });
+
+        test("returns an error trying to answer with a new Attribute that doesn't fulfill the validation criteria", async function () {
+            const requestItem = ReadAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: IdentityAttributeQuery.from({ valueType: "EMailAddress" })
+            });
+            const requestId = await ConsumptionIds.request.generate();
+            const request = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({ id: requestId, items: [requestItem] }),
+                statusLog: []
+            });
+
+            const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                accept: true,
+                newAttribute: {
+                    "@type": "IdentityAttribute",
+                    owner: recipient.toString(),
+                    value: {
+                        "@type": "EMailAddress",
+                        value: "invalid-email-address"
+                    }
+                }
+            };
+
+            await expect(processor.canAccept(requestItem, acceptParams, request)).rejects.toThrow(/EMailAddress.value :: Value does not match regular expression*/);
         });
 
         describe("canAccept ReadAttributeRequestitem with IdentityAttributeQuery", function () {

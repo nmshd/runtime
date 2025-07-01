@@ -47,9 +47,13 @@ import {
     GetSharedVersionsOfAttributeUseCase,
     GetVersionsOfAttributeRequest,
     GetVersionsOfAttributeUseCase,
+    MarkAttributeAsViewedRequest,
+    MarkAttributeAsViewedUseCase,
     NotifyPeerAboutRepositoryAttributeSuccessionRequest,
     NotifyPeerAboutRepositoryAttributeSuccessionResponse,
     NotifyPeerAboutRepositoryAttributeSuccessionUseCase,
+    SetAttributeDeletionInfoOfDeletionProposedRelationshipRequest,
+    SetAttributeDeletionInfoOfDeletionProposedRelationshipUseCase,
     ShareRepositoryAttributeRequest,
     ShareRepositoryAttributeUseCase,
     SucceedRelationshipAttributeAndNotifyPeerRequest,
@@ -90,7 +94,9 @@ export class AttributesFacade {
         @Inject private readonly deleteThirdPartyRelationshipAttributeAndNotifyPeerUseCase: DeleteThirdPartyRelationshipAttributeAndNotifyPeerUseCase,
         @Inject private readonly deleteRepositoryAttributeUseCase: DeleteRepositoryAttributeUseCase,
         @Inject private readonly deleteSharedAttributesForRejectedOrRevokedRelationshipUseCase: DeleteSharedAttributesForRejectedOrRevokedRelationshipUseCase,
-        @Inject private readonly getAttributeTagCollectionUseCase: GetAttributeTagCollectionUseCase
+        @Inject private readonly getAttributeTagCollectionUseCase: GetAttributeTagCollectionUseCase,
+        @Inject private readonly setAttributeDeletionInfoOfDeletionProposedRelationshipUseCase: SetAttributeDeletionInfoOfDeletionProposedRelationshipUseCase,
+        @Inject private readonly markAttributeAsViewedUseCase: MarkAttributeAsViewedUseCase
     ) {}
 
     public async canCreateRepositoryAttribute(request: CanCreateRepositoryAttributeRequest): Promise<Result<CanCreateRepositoryAttributeResponse>> {
@@ -194,7 +200,7 @@ export class AttributesFacade {
     }
 
     /**
-     * @deprecated use deleteThirdPartyRelationshipAttributeAndNotifyPeer instead
+     * @deprecated use {@link deleteThirdPartyRelationshipAttributeAndNotifyPeer} instead
      */
     public async deleteThirdPartyOwnedRelationshipAttributeAndNotifyPeer(
         request: DeleteThirdPartyRelationshipAttributeAndNotifyPeerRequest
@@ -212,5 +218,13 @@ export class AttributesFacade {
 
     public async getAttributeTagCollection(): Promise<Result<AttributeTagCollectionDTO>> {
         return await this.getAttributeTagCollectionUseCase.execute();
+    }
+
+    public async setAttributeDeletionInfoOfDeletionProposedRelationship(request: SetAttributeDeletionInfoOfDeletionProposedRelationshipRequest): Promise<Result<void>> {
+        return await this.setAttributeDeletionInfoOfDeletionProposedRelationshipUseCase.execute(request);
+    }
+
+    public async markAttributeAsViewed(request: MarkAttributeAsViewedRequest): Promise<Result<LocalAttributeDTO>> {
+        return await this.markAttributeAsViewedUseCase.execute(request);
     }
 }

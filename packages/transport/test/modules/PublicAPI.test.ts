@@ -84,7 +84,6 @@ publicFunctions[FileController.name] = [
     nameof<FileController>((r) => r.init),
     nameof<FileController>((r) => r.getFiles),
     nameof<FileController>((r) => r.getFile),
-    nameof<FileController>((r) => r.getOrLoadFileByTruncated),
     nameof<FileController>((r) => r.getOrLoadFileByReference),
     nameof<FileController>((r) => r.getOrLoadFile),
     nameof<FileController>((r) => r.sendFile),
@@ -155,10 +154,10 @@ publicFunctions[TokenController.name] = [
     nameof<TokenController>((r) => r.sendToken),
     nameof<TokenController>((r) => r.getToken),
     nameof<TokenController>((r) => r.updateCache),
-    nameof<TokenController>((r) => r.loadPeerTokenByTruncated)
+    nameof<TokenController>((r) => r.loadPeerTokenByReference)
 ];
 
-publicFunctions[AnonymousTokenController.name] = [nameof<AnonymousTokenController>((r) => r.loadPeerTokenByTruncated)];
+publicFunctions[AnonymousTokenController.name] = [nameof<AnonymousTokenController>((r) => r.loadPeerTokenByReference)];
 
 let account: AccountController;
 const controllers: any = {};

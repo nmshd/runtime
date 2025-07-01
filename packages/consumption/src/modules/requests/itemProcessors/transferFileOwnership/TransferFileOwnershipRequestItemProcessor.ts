@@ -20,7 +20,7 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
     public override async canCreateOutgoingRequestItem(requestItem: TransferFileOwnershipRequestItem, _request: Request, _recipient?: CoreAddress): Promise<ValidationResult> {
         const foundFile = await this.accountController.files.getFile(CoreId.from(requestItem.fileReference.id));
 
-        if (typeof foundFile === "undefined") {
+        if (!foundFile) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidRequestItem(`The File with the given ID '${requestItem.fileReference.id.toString()}' could not be found.`)
             );
@@ -42,6 +42,17 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
             );
         }
 
+        if (requestItem.ownershipToken) {
+            const validationResult = await this.accountController.files.validateFileOwnershipToken(foundFile.id, requestItem.ownershipToken);
+            if (!validationResult.isValid) {
+                return ValidationResult.error(
+                    ConsumptionCoreErrors.requests.invalidRequestItem(
+                        `The specified ownershipToken is not valid for the File with ID '${requestItem.fileReference.id.toString()}'.`
+                    )
+                );
+            }
+        }
+
         return ValidationResult.success();
     }
 
@@ -52,7 +63,7 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
     ): Promise<ValidationResult> {
         let file: File;
         try {
-            file = await this.accountController.files.getOrLoadFileByTruncated(requestItem.fileReference.truncate());
+            file = await this.accountController.files.getOrLoadFileByReference(requestItem.fileReference);
         } catch (_) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidAcceptParameters(
@@ -85,6 +96,17 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
             );
         }
 
+        if (requestItem.ownershipToken) {
+            const validationResult = await this.accountController.files.validateFileOwnershipToken(file.id, requestItem.ownershipToken);
+            if (!validationResult.isValid) {
+                return ValidationResult.error(
+                    ConsumptionCoreErrors.requests.invalidRequestItem(
+                        `You cannot accept this RequestItem since the specified ownershipToken is not valid for the File with ID '${requestItem.fileReference.id.toString()}'.`
+                    )
+                );
+            }
+        }
+
         return ValidationResult.success();
     }
 
@@ -93,26 +115,19 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
         _params: AcceptRequestItemParametersJSON,
         requestInfo: LocalRequestInfo
     ): Promise<TransferFileOwnershipAcceptResponseItem> {
-        const peerFile = await this.accountController.files.getOrLoadFileByTruncated(requestItem.fileReference.truncate());
-        const fileContent = await this.accountController.files.downloadFileContent(peerFile);
+        const peerFile = await this.accountController.files.getOrLoadFileByReference(requestItem.fileReference);
 
-        const ownFile = await this.accountController.files.sendFile({
-            buffer: fileContent,
-            title: peerFile.cache!.title,
-            description: peerFile.cache!.description,
-            filename: peerFile.cache!.filename,
-            mimetype: peerFile.cache!.mimetype,
-            expiresAt: CoreDate.from("9999-12-31T00:00:00.000Z"),
-            tags: peerFile.cache!.tags
-        });
+        const ownFile = requestItem.ownershipToken
+            ? await this.accountController.files.claimFileOwnership(peerFile.id, requestItem.ownershipToken)
+            : await this.transferFileOwnershipByReupload(peerFile);
 
         const repositoryAttribute = await this.consumptionController.attributes.createRepositoryAttribute({
             content: IdentityAttribute.from({
                 value: IdentityFileReference.from({
-                    value: ownFile.truncate()
+                    value: ownFile.toFileReference(this.accountController.config.baseUrl).truncate()
                 }),
                 owner: this.accountController.identity.address,
-                tags: peerFile.cache!.tags
+                tags: ownFile.cache!.tags
             })
         });
 
@@ -126,6 +141,19 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
             result: ResponseItemResult.Accepted,
             attributeId: ownSharedIdentityAttribute.id,
             attribute: ownSharedIdentityAttribute.content as IdentityAttribute
+        });
+    }
+
+    private async transferFileOwnershipByReupload(peerFile: File) {
+        const fileContent = await this.accountController.files.downloadFileContent(peerFile);
+        return await this.accountController.files.sendFile({
+            buffer: fileContent,
+            title: peerFile.cache!.title,
+            description: peerFile.cache!.description,
+            filename: peerFile.cache!.filename,
+            mimetype: peerFile.cache!.mimetype,
+            expiresAt: CoreDate.from("9999-12-31T00:00:00.000Z"),
+            tags: peerFile.cache!.tags
         });
     }
 

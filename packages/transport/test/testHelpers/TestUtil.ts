@@ -32,6 +32,7 @@ import {
     RelationshipTemplate,
     RequestError,
     TokenContentRelationshipTemplate,
+    TokenReference,
     Transport,
     TransportLoggerFactory
 } from "../../src";
@@ -299,8 +300,8 @@ export class TestUtil {
             maxNumberOfAllocations: 1
         });
 
-        const templateReference = templateFrom.toRelationshipTemplateReference().truncate();
-        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(templateReference);
+        const templateReference = templateFrom.toRelationshipTemplateReference(from.config.baseUrl);
+        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByReference(templateReference);
 
         return templateTo;
     }
@@ -314,8 +315,8 @@ export class TestUtil {
             maxNumberOfAllocations: 1
         });
 
-        const reference = templateFrom.toRelationshipTemplateReference().truncate();
-        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(reference);
+        const reference = templateFrom.toRelationshipTemplateReference(from.config.baseUrl);
+        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByReference(reference);
 
         await to.relationships.sendRelationship({
             template: templateTo,
@@ -353,8 +354,8 @@ export class TestUtil {
                 maxNumberOfAllocations: 1
             }));
 
-        const templateReference = templateFrom.toRelationshipTemplateReference().truncate();
-        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(templateReference);
+        const templateReference = templateFrom.toRelationshipTemplateReference(from.config.baseUrl);
+        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByReference(templateReference);
 
         await to.relationships.sendRelationship({
             template: templateTo,
@@ -486,6 +487,7 @@ export class TestUtil {
             syncResult.messages.push(...newSyncResult.messages);
             syncResult.relationships.push(...newSyncResult.relationships);
             syncResult.identityDeletionProcesses.push(...newSyncResult.identityDeletionProcesses);
+            syncResult.files.push(...newSyncResult.files);
             iterationNumber++;
         } while (!until(syncResult) && iterationNumber < 20);
 
@@ -529,6 +531,14 @@ export class TestUtil {
 
     public static async syncUntilHasMessage(accountController: AccountController, id: CoreId): Promise<Message[]> {
         return await TestUtil.syncUntilHas(accountController, id, "messages");
+    }
+
+    public static async syncUntilHasFiles(accountController: AccountController, expectedNumberOfFiles = 1): Promise<File[]> {
+        return await TestUtil.syncUntilHasMany(accountController, "files", expectedNumberOfFiles);
+    }
+
+    public static async syncUntilHasFile(accountController: AccountController, id: CoreId): Promise<File[]> {
+        return await TestUtil.syncUntilHas(accountController, id, "files");
     }
 
     public static async syncUntilHasError(accountController: AccountController): Promise<any> {
@@ -576,7 +586,7 @@ export class TestUtil {
             ephemeral: false
         });
 
-        const tokenRef = token.truncate();
+        const tokenRef = token.toTokenReference(account.config.baseUrl).truncate();
         return tokenRef;
     }
 
@@ -593,7 +603,7 @@ export class TestUtil {
     }
 
     public static async fetchRelationshipTemplateFromTokenReference(account: AccountController, tokenReference: string): Promise<RelationshipTemplate> {
-        const receivedToken = await account.tokens.loadPeerTokenByTruncated(tokenReference, false);
+        const receivedToken = await account.tokens.loadPeerTokenByReference(TokenReference.from(tokenReference), false);
 
         if (!(receivedToken.cache!.content instanceof TokenContentRelationshipTemplate)) {
             throw new Error("token content not instanceof TokenContentRelationshipTemplate");
@@ -671,13 +681,12 @@ export class TestUtil {
     private static getBackboneVersion() {
         if (process.env.BACKBONE_VERSION) return process.env.BACKBONE_VERSION;
 
-        const envFile = fs.readFileSync(path.resolve(`${__dirname}/../../../../.dev/compose.backbone.env`));
-        const env = envFile
-            .toString()
-            .split("\n")
-            .map((line) => line.split("="))
-            .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {} as Record<string, string>);
+        const composeFile = fs.readFileSync(path.resolve(`${__dirname}/../../../../.dev/compose.backbone.yml`));
 
-        return env["BACKBONE_VERSION"];
+        const regex = /image: ghcr\.io\/nmshd\/backbone-consumer-api:(?<version>[^\r\n]*)/;
+        const match = composeFile.toString().match(regex);
+        if (!match?.groups?.version) throw new Error("Could not find backbone version in compose file");
+
+        return match.groups.version;
     }
 }

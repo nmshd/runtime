@@ -20,6 +20,7 @@ import {
     RelationshipStatus,
     RelationshipTemplate,
     TokenContentRelationshipTemplate,
+    TokenReference,
     Transport,
     TransportLoggerFactory
 } from "@nmshd/transport";
@@ -189,8 +190,8 @@ export class TestUtil {
             maxNumberOfAllocations: 1
         });
 
-        const reference = templateFrom.toRelationshipTemplateReference().truncate();
-        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(reference);
+        const reference = templateFrom.toRelationshipTemplateReference(from.config.baseUrl);
+        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByReference(reference);
 
         await to.relationships.sendRelationship({
             template: templateTo,
@@ -236,9 +237,9 @@ export class TestUtil {
             ephemeral: false
         });
 
-        const tokenRef = token.truncate();
+        const tokenRef = token.toTokenReference(from.config.baseUrl);
 
-        const receivedToken = await to.tokens.loadPeerTokenByTruncated(tokenRef, false);
+        const receivedToken = await to.tokens.loadPeerTokenByReference(tokenRef, false);
 
         if (!(receivedToken.cache!.content instanceof TokenContentRelationshipTemplate)) {
             throw new Error("token content not instanceof TokenContentRelationshipTemplate");
@@ -389,6 +390,16 @@ export class TestUtil {
         return syncResult.messages;
     }
 
+    public static async syncUntilHasFiles(accountController: AccountController, expectedNumberOfFiles = 1): Promise<File[]> {
+        const syncResult = await TestUtil.syncUntil(accountController, (syncResult) => syncResult.files.length >= expectedNumberOfFiles);
+        return syncResult.files;
+    }
+
+    public static async syncUntilHasFile(accountController: AccountController, id: CoreId): Promise<File[]> {
+        const syncResult = await TestUtil.syncUntil(accountController, (syncResult) => syncResult.files.some((m) => m.id.equals(id)));
+        return syncResult.files;
+    }
+
     public static async sendRelationshipTemplate(from: AccountController, content?: ISerializable): Promise<RelationshipTemplate> {
         return await from.relationshipTemplates.sendRelationshipTemplate({
             content: content ?? { content: "template" },
@@ -416,7 +427,7 @@ export class TestUtil {
             ephemeral: false
         });
 
-        const tokenRef = token.truncate();
+        const tokenRef = token.toTokenReference(account.config.baseUrl).truncate();
         return tokenRef;
     }
 
@@ -429,7 +440,7 @@ export class TestUtil {
     }
 
     public static async fetchRelationshipTemplateFromTokenReference(account: AccountController, tokenReference: string): Promise<RelationshipTemplate> {
-        const receivedToken = await account.tokens.loadPeerTokenByTruncated(tokenReference, false);
+        const receivedToken = await account.tokens.loadPeerTokenByReference(TokenReference.from(tokenReference), false);
 
         if (!(receivedToken.cache!.content instanceof TokenContentRelationshipTemplate)) {
             throw new Error("token content not instanceof TokenContentRelationshipTemplate");

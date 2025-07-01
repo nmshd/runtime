@@ -94,6 +94,7 @@ describe("RepositoryAttributeDVO", () => {
         expect(dvo.name).toBe("i18n://dvo.attribute.name.GivenName");
         expect(dvo.description).toBe("i18n://dvo.attribute.description.GivenName");
         expect(dvo.date).toStrictEqual(attribute.createdAt);
+        expect(dvo.wasViewedAt).toBeUndefined();
         expect(dvo.content).toStrictEqual(attribute.content);
         const value = dvo.value as AbstractStringJSON;
         expect(value["@type"]).toBe("GivenName");
@@ -119,6 +120,7 @@ describe("RepositoryAttributeDVO", () => {
         expect(dvo.name).toBe("i18n://dvo.attribute.name.Surname");
         expect(dvo.description).toBe("i18n://dvo.attribute.description.Surname");
         expect(dvo.date).toStrictEqual(attribute.createdAt);
+        expect(dvo.wasViewedAt).toBeUndefined();
         expect(dvo.content).toStrictEqual(attribute.content);
         const value = dvo.value as AbstractStringJSON;
         expect(value["@type"]).toBe("Surname");
@@ -144,6 +146,7 @@ describe("RepositoryAttributeDVO", () => {
         expect(dvo.name).toBe("i18n://dvo.attribute.name.BirthDay");
         expect(dvo.description).toBe("i18n://dvo.attribute.description.BirthDay");
         expect(dvo.date).toStrictEqual(attribute.createdAt);
+        expect(dvo.wasViewedAt).toBeUndefined();
         expect(dvo.content).toStrictEqual(attribute.content);
         const value = dvo.value as AbstractIntegerJSON;
         expect(value["@type"]).toBe("BirthDay");
@@ -171,6 +174,7 @@ describe("RepositoryAttributeDVO", () => {
         expect(dvo.name).toBe("i18n://dvo.attribute.name.BirthMonth");
         expect(dvo.description).toBe("i18n://dvo.attribute.description.BirthMonth");
         expect(dvo.date).toStrictEqual(attribute.createdAt);
+        expect(dvo.wasViewedAt).toBeUndefined();
         expect(dvo.content).toStrictEqual(attribute.content);
         const value = dvo.value as AbstractIntegerJSON;
         expect(value["@type"]).toBe("BirthMonth");
@@ -198,6 +202,7 @@ describe("RepositoryAttributeDVO", () => {
         expect(dvo.name).toBe("i18n://dvo.attribute.name.BirthYear");
         expect(dvo.description).toBe("i18n://dvo.attribute.description.BirthYear");
         expect(dvo.date).toStrictEqual(attribute.createdAt);
+        expect(dvo.wasViewedAt).toBeUndefined();
         expect(dvo.content).toStrictEqual(attribute.content);
         const value = dvo.value as AbstractIntegerJSON;
         expect(value["@type"]).toBe("BirthYear");
@@ -225,6 +230,7 @@ describe("RepositoryAttributeDVO", () => {
         expect(dvo.name).toBe("i18n://dvo.attribute.name.Sex");
         expect(dvo.description).toBe("i18n://dvo.attribute.description.Sex");
         expect(dvo.date).toStrictEqual(attribute.createdAt);
+        expect(dvo.wasViewedAt).toBeUndefined();
         expect(dvo.content).toStrictEqual(attribute.content);
         const value = dvo.value as AbstractStringJSON;
         expect(value["@type"]).toBe("Sex");
@@ -255,6 +261,7 @@ describe("RepositoryAttributeDVO", () => {
         expect(dvo.name).toBe("i18n://dvo.attribute.name.Nationality");
         expect(dvo.description).toBe("i18n://dvo.attribute.description.Nationality");
         expect(dvo.date).toStrictEqual(attribute.createdAt);
+        expect(dvo.wasViewedAt).toBeUndefined();
         expect(dvo.content).toStrictEqual(attribute.content);
         const value = dvo.value as AbstractStringJSON;
         expect(value["@type"]).toBe("Nationality");
@@ -284,6 +291,7 @@ describe("RepositoryAttributeDVO", () => {
         expect(dvo.name).toBe("i18n://dvo.attribute.name.CommunicationLanguage");
         expect(dvo.description).toBe("i18n://dvo.attribute.description.CommunicationLanguage");
         expect(dvo.date).toStrictEqual(attribute.createdAt);
+        expect(dvo.wasViewedAt).toBeUndefined();
         expect(dvo.content).toStrictEqual(attribute.content);
         const value = dvo.value as AbstractStringJSON;
         expect(value["@type"]).toBe("CommunicationLanguage");

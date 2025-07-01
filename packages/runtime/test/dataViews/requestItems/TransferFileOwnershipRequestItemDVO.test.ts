@@ -1,5 +1,5 @@
 import { DecideRequestItemParametersJSON } from "@nmshd/consumption";
-import { TransferFileOwnershipRequestItemJSON } from "@nmshd/content";
+import { RequestJSON, TransferFileOwnershipAcceptResponseItemJSON, TransferFileOwnershipRequestItemJSON } from "@nmshd/content";
 import {
     ConsumptionServices,
     CreateOutgoingRequestRequest,
@@ -53,11 +53,14 @@ beforeAll(async () => {
     rConsumptionServices = rRuntimeServices.consumption;
     sEventBus = sRuntimeServices.eventBus;
     rEventBus = rRuntimeServices.eventBus;
-    await establishRelationship(sTransportServices, rTransportServices);
     rAddress = (await rTransportServices.account.getIdentityInfo()).value.address;
 
+    await establishRelationship(sTransportServices, rTransportServices);
+}, 30000);
+
+beforeEach(async () => {
     const file = await uploadFile(sTransportServices);
-    truncatedFileReference = file.truncatedReference;
+    truncatedFileReference = file.reference.truncated;
 
     requestContent = {
         content: {
@@ -65,7 +68,8 @@ beforeAll(async () => {
                 {
                     "@type": "TransferFileOwnershipRequestItem",
                     mustBeAccepted: true,
-                    fileReference: truncatedFileReference
+                    fileReference: truncatedFileReference,
+                    ownershipToken: file.ownershipToken
                 } as TransferFileOwnershipRequestItemJSON
             ]
         },
@@ -73,9 +77,7 @@ beforeAll(async () => {
     };
 
     responseItems = [{ accept: true }] as any;
-}, 30000);
 
-beforeEach(async () => {
     await cleanupAttributes([sRuntimeServices, rRuntimeServices]);
 
     rEventBus.reset();
@@ -109,7 +111,8 @@ describe("TransferFileOwnershipRequestItemDVO", () => {
         expect(requestItemDVO.isDecidable).toBe(false);
         expect(requestItemDVO.fileReference).toBe(truncatedFileReference);
         expect(requestItemDVO.file.type).toBe("FileDVO");
-        expect(requestItemDVO.file.truncatedReference).toBe(truncatedFileReference);
+        expect(requestItemDVO.file.reference.truncated).toBe(truncatedFileReference);
+        expect(requestItemDVO.ownershipToken).toBeDefined();
     });
 
     test("check the MessageDVO for the recipient", async () => {
@@ -136,7 +139,7 @@ describe("TransferFileOwnershipRequestItemDVO", () => {
         expect(requestItemDVO.isDecidable).toBe(true);
         expect(requestItemDVO.fileReference).toBe(truncatedFileReference);
         expect(requestItemDVO.file.type).toBe("FileDVO");
-        expect(requestItemDVO.file.truncatedReference).toBe(truncatedFileReference);
+        expect(requestItemDVO.file.reference.truncated).toBe(truncatedFileReference);
     });
 
     test("check the MessageDVO for the recipient after acceptance", async () => {
@@ -227,5 +230,65 @@ describe("TransferFileOwnershipRequestItemDVO", () => {
         expect(responseItemDVO.sharedAttribute).toBeDefined();
         expect(responseItemDVO.sharedAttributeId).toBe(responseItemDVO.sharedAttribute.id);
         expect(responseItemDVO.id).toBe(responseItemDVO.sharedAttributeId);
+    });
+
+    test("check the MessageDVO for the recipient after they deleted the shared Attribute", async () => {
+        const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
+        const requestId = (senderMessage.content as RequestJSON).id!;
+        const localRequest = (await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: requestId })).value;
+        const sharedAttributeId = (localRequest.response!.content.items[0] as TransferFileOwnershipAcceptResponseItemJSON).attributeId;
+
+        await rRuntimeServices.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: sharedAttributeId });
+
+        const recipientMessage = (await rRuntimeServices.transport.messages.getMessage({ id: senderMessage.id })).value;
+        const dvo = (await rExpander.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
+        const responseItemDVO = dvo.request.response!.content.items[0];
+        expect(responseItemDVO.type).toBe("AttributeAlreadyDeletedAcceptResponseItemDVO");
+    });
+
+    test("check the MessageDVO for the recipient after they deleted the RepositoryAttribute", async () => {
+        const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
+        const requestId = (senderMessage.content as RequestJSON).id!;
+        const localRequest = (await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: requestId })).value;
+        const sharedAttributeId = (localRequest.response!.content.items[0] as TransferFileOwnershipAcceptResponseItemJSON).attributeId;
+        const sharedAttribute = (await rRuntimeServices.consumption.attributes.getAttribute({ id: sharedAttributeId })).value;
+
+        await rRuntimeServices.consumption.attributes.deleteRepositoryAttribute({ attributeId: sharedAttribute.shareInfo!.sourceAttribute! });
+
+        const recipientMessage = (await rRuntimeServices.transport.messages.getMessage({ id: senderMessage.id })).value;
+        const dvo = (await rExpander.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
+        const responseItemDVO = dvo.request.response!.content.items[0] as TransferFileOwnershipAcceptResponseItemDVO;
+        expect(responseItemDVO.type).toBe("TransferFileOwnershipAcceptResponseItemDVO");
+        expect(responseItemDVO.repositoryAttribute).toBeUndefined();
+        expect(responseItemDVO.sharedAttribute).toBeDefined();
+    });
+
+    test("check the MessageDVO for the recipient after they deleted the shared and RepositoryAttribute", async () => {
+        const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
+        const requestId = (senderMessage.content as RequestJSON).id!;
+        const localRequest = (await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: requestId })).value;
+        const sharedAttributeId = (localRequest.response!.content.items[0] as TransferFileOwnershipAcceptResponseItemJSON).attributeId;
+
+        await rRuntimeServices.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: sharedAttributeId });
+        await rRuntimeServices.consumption.attributes.deleteRepositoryAttribute({ attributeId: sharedAttributeId });
+
+        const recipientMessage = (await rRuntimeServices.transport.messages.getMessage({ id: senderMessage.id })).value;
+        const dvo = (await rExpander.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
+        const responseItemDVO = dvo.request.response!.content.items[0];
+        expect(responseItemDVO.type).toBe("AttributeAlreadyDeletedAcceptResponseItemDVO");
+    });
+
+    test("check the MessageDVO for the sender after they deleted the shared Attribute", async () => {
+        const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
+        const requestId = (senderMessage.content as RequestJSON).id!;
+        const localRequest = (await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: requestId })).value;
+        const sharedAttributeId = (localRequest.response!.content.items[0] as TransferFileOwnershipAcceptResponseItemJSON).attributeId;
+
+        await sRuntimeServices.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: sharedAttributeId });
+
+        const senderMessageAfterDeletion = (await sRuntimeServices.transport.messages.getMessage({ id: senderMessage.id })).value;
+        const dvo = (await sExpander.expandMessageDTO(senderMessageAfterDeletion)) as RequestMessageDVO;
+        const responseItemDVO = dvo.request.response!.content.items[0];
+        expect(responseItemDVO.type).toBe("AttributeAlreadyDeletedAcceptResponseItemDVO");
     });
 });

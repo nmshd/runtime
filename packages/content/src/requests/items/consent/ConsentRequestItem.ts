@@ -18,7 +18,7 @@ export interface IConsentRequestItem extends IRequestItem {
 @type("ConsentRequestItem")
 export class ConsentRequestItem extends RequestItem implements IConsentRequestItem {
     @serialize()
-    @validate({ max: 2000 })
+    @validate({ max: 10000 })
     public consent: string;
 
     @serialize()
@@ -40,7 +40,7 @@ export class ConsentRequestItem extends RequestItem implements IConsentRequestIt
     protected static override postFrom<T extends Serializable>(value: T): T {
         if (!(value instanceof ConsentRequestItem)) throw new Error("this should never happen");
 
-        if (typeof value.linkDisplayText === "string" && typeof value.link === "undefined") {
+        if (typeof value.linkDisplayText === "string" && value.link === undefined) {
             throw new ValidationError(
                 ConsentRequestItem.name,
                 nameof<ConsentRequestItem>((x) => x.linkDisplayText),

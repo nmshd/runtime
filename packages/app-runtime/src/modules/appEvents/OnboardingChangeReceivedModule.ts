@@ -1,11 +1,8 @@
 import { RelationshipAuditLogEntryReason } from "@nmshd/runtime";
-import { AppRuntimeError } from "../../AppRuntimeError";
 import { OnboardingChangeReceivedEvent } from "../../events";
 import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "../AppRuntimeModule";
 
 export interface OnboardingChangeReceivedModuleConfig extends AppRuntimeModuleConfiguration {}
-
-export class OnboardingChangeReceivedModuleError extends AppRuntimeError {}
 
 export class OnboardingChangeReceivedModule extends AppRuntimeModule<OnboardingChangeReceivedModuleConfig> {
     public async init(): Promise<void> {
@@ -47,7 +44,7 @@ export class OnboardingChangeReceivedModule extends AppRuntimeModule<OnboardingC
             default:
                 return;
         }
-        await this.runtime.nativeEnvironment.notificationAccess.schedule(title, text, {
+        await this.runtime.notificationAccess.schedule(title, text, {
             callback: async () => {
                 const uiBridge = await this.runtime.uiBridge();
                 await uiBridge.showRelationship(session.account, identity);

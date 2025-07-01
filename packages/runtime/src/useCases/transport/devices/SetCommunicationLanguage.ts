@@ -1,11 +1,11 @@
 import { Result } from "@js-soft/ts-utils";
-import { LanguageISO639 } from "@nmshd/content";
+import { LanguageISO639 } from "@nmshd/core-types";
 import { DeviceController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
 export interface SetCommunicationLanguageRequest {
-    communicationLanguage: LanguageISO639;
+    communicationLanguage: keyof typeof LanguageISO639;
 }
 
 class Validator extends SchemaValidator<SetCommunicationLanguageRequest> {

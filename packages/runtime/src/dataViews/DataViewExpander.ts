@@ -97,6 +97,7 @@ import {
     SharedToPeerAttributeDVO
 } from "./consumption";
 import {
+    AttributeAlreadyDeletedAcceptResponseItemDVO,
     AttributeAlreadySharedAcceptResponseItemDVO,
     AttributeQueryDVO,
     AttributeSuccessionAcceptResponseItemDVO,
@@ -651,9 +652,8 @@ export class DataViewExpander {
             case "TransferFileOwnershipRequestItem":
                 const transferFileOwnershipRequestItem = requestItem as TransferFileOwnershipRequestItemJSON;
 
-                await this.transport.files.getOrLoadFile({ reference: transferFileOwnershipRequestItem.fileReference });
                 const fileReference = FileReference.from(transferFileOwnershipRequestItem.fileReference);
-                const file = await this.expandFileId(fileReference.id.toString());
+                const file = await this.expandFileReference(fileReference);
 
                 return {
                     ...transferFileOwnershipRequestItem,
@@ -726,9 +726,19 @@ export class DataViewExpander {
             switch (responseItem["@type"]) {
                 case "ReadAttributeAcceptResponseItem":
                     const readAttributeResponseItem = responseItem as ReadAttributeAcceptResponseItemJSON;
-                    const localAttributeResultForRead = await this.consumption.attributes.getAttribute({ id: readAttributeResponseItem.attributeId });
-                    const localAttributeDVOForRead = await this.expandLocalAttributeDTO(localAttributeResultForRead.value);
 
+                    const localAttributeResultForRead = await this.consumption.attributes.getAttribute({ id: readAttributeResponseItem.attributeId });
+                    if (localAttributeResultForRead.isError) {
+                        if (!localAttributeResultForRead.error.equals(RuntimeErrors.general.recordNotFound())) throw localAttributeResultForRead.error;
+
+                        return {
+                            type: "AttributeAlreadyDeletedAcceptResponseItemDVO",
+                            id: readAttributeResponseItem.attributeId,
+                            name: name
+                        } as AttributeAlreadyDeletedAcceptResponseItemDVO;
+                    }
+
+                    const localAttributeDVOForRead = await this.expandLocalAttributeDTO(localAttributeResultForRead.value);
                     return {
                         ...readAttributeResponseItem,
                         type: "ReadAttributeAcceptResponseItemDVO",
@@ -739,9 +749,19 @@ export class DataViewExpander {
 
                 case "CreateAttributeAcceptResponseItem":
                     const createAttributeResponseItem = responseItem as CreateAttributeAcceptResponseItemJSON;
-                    const localAttributeResultForCreate = await this.consumption.attributes.getAttribute({ id: createAttributeResponseItem.attributeId });
-                    const localAttributeDVOForCreate = await this.expandLocalAttributeDTO(localAttributeResultForCreate.value);
 
+                    const localAttributeResultForCreate = await this.consumption.attributes.getAttribute({ id: createAttributeResponseItem.attributeId });
+                    if (localAttributeResultForCreate.isError) {
+                        if (!localAttributeResultForCreate.error.equals(RuntimeErrors.general.recordNotFound())) throw localAttributeResultForCreate.error;
+
+                        return {
+                            type: "AttributeAlreadyDeletedAcceptResponseItemDVO",
+                            id: createAttributeResponseItem.attributeId,
+                            name: name
+                        } as AttributeAlreadyDeletedAcceptResponseItemDVO;
+                    }
+
+                    const localAttributeDVOForCreate = await this.expandLocalAttributeDTO(localAttributeResultForCreate.value);
                     return {
                         ...createAttributeResponseItem,
                         type: "CreateAttributeAcceptResponseItemDVO",
@@ -762,9 +782,19 @@ export class DataViewExpander {
 
                 case "ProposeAttributeAcceptResponseItem":
                     const proposeAttributeResponseItem = responseItem as ProposeAttributeAcceptResponseItemJSON;
-                    const localAttributeResultForPropose = await this.consumption.attributes.getAttribute({ id: proposeAttributeResponseItem.attributeId });
-                    const localAttributeDVOForPropose = await this.expandLocalAttributeDTO(localAttributeResultForPropose.value);
 
+                    const localAttributeResultForPropose = await this.consumption.attributes.getAttribute({ id: proposeAttributeResponseItem.attributeId });
+                    if (localAttributeResultForPropose.isError) {
+                        if (!localAttributeResultForPropose.error.equals(RuntimeErrors.general.recordNotFound())) throw localAttributeResultForPropose.error;
+
+                        return {
+                            type: "AttributeAlreadyDeletedAcceptResponseItemDVO",
+                            id: proposeAttributeResponseItem.attributeId,
+                            name: name
+                        } as AttributeAlreadyDeletedAcceptResponseItemDVO;
+                    }
+
+                    const localAttributeDVOForPropose = await this.expandLocalAttributeDTO(localAttributeResultForPropose.value);
                     return {
                         ...proposeAttributeResponseItem,
                         type: "ProposeAttributeAcceptResponseItemDVO",
@@ -775,9 +805,19 @@ export class DataViewExpander {
 
                 case "ShareAttributeAcceptResponseItem":
                     const shareAttributeResponseItem = responseItem as ShareAttributeAcceptResponseItemJSON;
-                    const localAttributeResultForShare = await this.consumption.attributes.getAttribute({ id: shareAttributeResponseItem.attributeId });
-                    const localAttributeDVOForShare = await this.expandLocalAttributeDTO(localAttributeResultForShare.value);
 
+                    const localAttributeResultForShare = await this.consumption.attributes.getAttribute({ id: shareAttributeResponseItem.attributeId });
+                    if (localAttributeResultForShare.isError) {
+                        if (!localAttributeResultForShare.error.equals(RuntimeErrors.general.recordNotFound())) throw localAttributeResultForShare.error;
+
+                        return {
+                            type: "AttributeAlreadyDeletedAcceptResponseItemDVO",
+                            id: shareAttributeResponseItem.attributeId,
+                            name: name
+                        } as AttributeAlreadyDeletedAcceptResponseItemDVO;
+                    }
+
+                    const localAttributeDVOForShare = await this.expandLocalAttributeDTO(localAttributeResultForShare.value);
                     return {
                         ...shareAttributeResponseItem,
                         type: "ShareAttributeAcceptResponseItemDVO",
@@ -808,30 +848,54 @@ export class DataViewExpander {
 
                 case "RegisterAttributeListenerAcceptResponseItem":
                     const registerAttributeListenerResponseItem = responseItem as RegisterAttributeListenerAcceptResponseItemJSON;
+
                     const localAttributeListenerResult = await this.consumption.attributeListeners.getAttributeListener({ id: registerAttributeListenerResponseItem.listenerId });
-                    const localAttributeListener = await this.expandLocalAttributeListenerDTO(localAttributeListenerResult.value);
+                    if (localAttributeListenerResult.isError && !localAttributeListenerResult.error.equals(RuntimeErrors.general.recordNotFound())) {
+                        throw localAttributeListenerResult.error;
+                    }
+
+                    const localAttributeListenerDVO = localAttributeListenerResult.isSuccess
+                        ? await this.expandLocalAttributeListenerDTO(localAttributeListenerResult.value)
+                        : undefined;
 
                     return {
                         ...registerAttributeListenerResponseItem,
                         type: "RegisterAttributeListenerAcceptResponseItemDVO",
                         id: registerAttributeListenerResponseItem.listenerId,
                         name: name,
-                        listener: localAttributeListener
+                        listener: localAttributeListenerDVO
                     } as RegisterAttributeListenerAcceptResponseItemDVO;
 
                 case "TransferFileOwnershipAcceptResponseItem":
                     const transferFileOwnershipResponseItem = responseItem as TransferFileOwnershipAcceptResponseItemJSON;
 
                     const sharedAttributeResultForTransfer = await this.consumption.attributes.getAttribute({ id: transferFileOwnershipResponseItem.attributeId });
-                    const sharedAttributeDVOForTransfer = await this.expandLocalAttributeDTO(sharedAttributeResultForTransfer.value);
+                    if (sharedAttributeResultForTransfer.isError) {
+                        if (!sharedAttributeResultForTransfer.error.equals(RuntimeErrors.general.recordNotFound())) throw sharedAttributeResultForTransfer.error;
 
-                    const repositoryAttributeResultForTransfer = await this.consumption.attributes.getAttribute({
-                        id: sharedAttributeResultForTransfer.value.shareInfo!.sourceAttribute!
-                    });
+                        return {
+                            type: "AttributeAlreadyDeletedAcceptResponseItemDVO",
+                            id: transferFileOwnershipResponseItem.attributeId,
+                            name: name
+                        } as AttributeAlreadyDeletedAcceptResponseItemDVO;
+                    }
+
+                    const sharedAttributeDVOForTransfer = (await this.expandLocalAttributeDTO(sharedAttributeResultForTransfer.value)) as SharedToPeerAttributeDVO;
 
                     let repositoryAttributeDVOForTransfer;
-                    if (repositoryAttributeResultForTransfer.isSuccess) {
-                        repositoryAttributeDVOForTransfer = await this.expandLocalAttributeDTO(repositoryAttributeResultForTransfer.value);
+                    const repositoryAttributeIdForTransferExists = !!sharedAttributeDVOForTransfer.sourceAttribute;
+                    if (repositoryAttributeIdForTransferExists) {
+                        const repositoryAttributeResultForTransfer = await this.consumption.attributes.getAttribute({
+                            id: sharedAttributeDVOForTransfer.sourceAttribute!
+                        });
+
+                        if (repositoryAttributeResultForTransfer.isError && !repositoryAttributeResultForTransfer.error.equals(RuntimeErrors.general.recordNotFound())) {
+                            throw repositoryAttributeResultForTransfer.error;
+                        }
+
+                        if (repositoryAttributeResultForTransfer.isSuccess) {
+                            repositoryAttributeDVOForTransfer = await this.expandLocalAttributeDTO(repositoryAttributeResultForTransfer.value);
+                        }
                     }
 
                     return {
@@ -846,31 +910,55 @@ export class DataViewExpander {
 
                 case "AttributeSuccessionAcceptResponseItem":
                     const attributeSuccessionResponseItem = responseItem as AttributeSuccessionAcceptResponseItemJSON;
-                    const localPredecessorResult = await this.consumption.attributes.getAttribute({ id: attributeSuccessionResponseItem.predecessorId });
-                    const localPredecessorDVOResult = await this.expandLocalAttributeDTO(localPredecessorResult.value);
+
                     const localSuccessorResult = await this.consumption.attributes.getAttribute({ id: attributeSuccessionResponseItem.successorId });
-                    const localSuccessorDVOResult = await this.expandLocalAttributeDTO(localSuccessorResult.value);
+                    if (localSuccessorResult.isError) {
+                        if (!localSuccessorResult.error.equals(RuntimeErrors.general.recordNotFound())) throw localSuccessorResult.error;
+
+                        return {
+                            type: "AttributeAlreadyDeletedAcceptResponseItemDVO",
+                            id: attributeSuccessionResponseItem.successorId,
+                            name: name
+                        } as AttributeAlreadyDeletedAcceptResponseItemDVO;
+                    }
+
+                    const localSuccessorDVO = await this.expandLocalAttributeDTO(localSuccessorResult.value);
+
+                    const localPredecessorResult = await this.consumption.attributes.getAttribute({ id: attributeSuccessionResponseItem.predecessorId });
+                    if (localPredecessorResult.isError && !localPredecessorResult.error.equals(RuntimeErrors.general.recordNotFound())) throw localPredecessorResult.error;
+
+                    const localPredecessorDVO = localPredecessorResult.isSuccess ? await this.expandLocalAttributeDTO(localPredecessorResult.value) : undefined;
 
                     return {
                         ...attributeSuccessionResponseItem,
                         type: "AttributeSuccessionAcceptResponseItemDVO",
                         id: "",
                         name: name,
-                        predecessor: localPredecessorDVOResult,
-                        successor: localSuccessorDVOResult
+                        predecessor: localPredecessorDVO,
+                        successor: localSuccessorDVO
                     } as AttributeSuccessionAcceptResponseItemDVO;
 
                 case "AttributeAlreadySharedAcceptResponseItem":
                     const attributeAlreadySharedResponseItem = responseItem as AttributeAlreadySharedAcceptResponseItemJSON;
-                    const localAttributeResult = await this.consumption.attributes.getAttribute({ id: attributeAlreadySharedResponseItem.attributeId });
-                    const localAttributeDVOResult = await this.expandLocalAttributeDTO(localAttributeResult.value);
 
+                    const localAttributeResult = await this.consumption.attributes.getAttribute({ id: attributeAlreadySharedResponseItem.attributeId });
+                    if (localAttributeResult.isError) {
+                        if (!localAttributeResult.error.equals(RuntimeErrors.general.recordNotFound())) throw localAttributeResult.error;
+
+                        return {
+                            type: "AttributeAlreadyDeletedAcceptResponseItemDVO",
+                            id: attributeAlreadySharedResponseItem.attributeId,
+                            name: name
+                        } as AttributeAlreadyDeletedAcceptResponseItemDVO;
+                    }
+
+                    const localAttributeDVO = await this.expandLocalAttributeDTO(localAttributeResult.value);
                     return {
                         ...attributeAlreadySharedResponseItem,
                         type: "AttributeAlreadySharedAcceptResponseItemDVO",
                         id: "",
                         name: name,
-                        attribute: localAttributeDVOResult
+                        attribute: localAttributeDVO
                     } as AttributeAlreadySharedAcceptResponseItemDVO;
 
                 default:
@@ -1047,7 +1135,8 @@ export class DataViewExpander {
                         valueType,
                         isTechnical: relationshipAttribute.isTechnical,
                         deletionStatus: localAttribute.deletionInfo?.deletionStatus,
-                        deletionDate: localAttribute.deletionInfo?.deletionDate.toString()
+                        deletionDate: localAttribute.deletionInfo?.deletionDate.toString(),
+                        wasViewedAt: attribute.wasViewedAt
                     };
                 }
                 // Own shared RelationshipAttribute
@@ -1076,7 +1165,8 @@ export class DataViewExpander {
                     valueType,
                     isTechnical: relationshipAttribute.isTechnical,
                     deletionStatus: localAttribute.deletionInfo?.deletionStatus,
-                    deletionDate: localAttribute.deletionInfo?.deletionDate.toString()
+                    deletionDate: localAttribute.deletionInfo?.deletionDate.toString(),
+                    wasViewedAt: attribute.wasViewedAt
                 };
             }
             const identityAttribute = localAttribute.content;
@@ -1104,7 +1194,8 @@ export class DataViewExpander {
                     tags: identityAttribute.tags,
                     valueType,
                     deletionStatus: localAttribute.deletionInfo?.deletionStatus,
-                    deletionDate: localAttribute.deletionInfo?.deletionDate.toString()
+                    deletionDate: localAttribute.deletionInfo?.deletionDate.toString(),
+                    wasViewedAt: attribute.wasViewedAt
                 };
             }
             // Own Shared IdentityAttribute
@@ -1130,7 +1221,8 @@ export class DataViewExpander {
                 tags: identityAttribute.tags,
                 valueType,
                 deletionStatus: localAttribute.deletionInfo?.deletionStatus,
-                deletionDate: localAttribute.deletionInfo?.deletionDate.toString()
+                deletionDate: localAttribute.deletionInfo?.deletionDate.toString(),
+                wasViewedAt: attribute.wasViewedAt
             };
         }
         const identityAttribute = localAttribute.content as IdentityAttribute;
@@ -1157,7 +1249,8 @@ export class DataViewExpander {
             sharedWith: sharedToPeerDVOs as SharedToPeerAttributeDVO[],
             tags: identityAttribute.tags,
             valueType,
-            isDefault: attribute.isDefault
+            isDefault: attribute.isDefault,
+            wasViewedAt: attribute.wasViewedAt
         };
     }
 
@@ -1800,6 +1893,20 @@ export class DataViewExpander {
         return await Promise.all(filePromises);
     }
 
+    private async expandFileReference(fileReference: FileReference) {
+        const existingFileResult = await this.transport.files.getFile({ id: fileReference.id.toString() });
+        if (existingFileResult.isSuccess) {
+            return await this.expandFileDTO(existingFileResult.value);
+        }
+
+        if (existingFileResult.isError && !existingFileResult.error.equals(RuntimeErrors.general.recordNotFound())) {
+            throw existingFileResult.error;
+        }
+
+        const loadedFileResult = await this.transport.files.getOrLoadFile({ reference: fileReference.truncate() });
+        return await this.expandFileDTO(loadedFileResult.value);
+    }
+
     public async expandFileDTO(file: FileDTO): Promise<FileDVO> {
         return {
             ...file,
@@ -1811,7 +1918,7 @@ export class DataViewExpander {
             filename: file.filename,
             filesize: file.filesize,
             createdBy: await this.expandAddress(file.createdBy),
-            truncatedReference: file.truncatedReference
+            reference: file.reference
         };
     }
 

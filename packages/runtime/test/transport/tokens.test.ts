@@ -37,6 +37,24 @@ describe("Tokens", () => {
         expect(getTokenResponse).toBeAnError("Token not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
     });
 
+    test("load peer Token by truncated reference", async () => {
+        const uploadedToken = await uploadOwnToken(runtimeServices1.transport);
+        const result = await runtimeServices2.transport.tokens.loadPeerToken({ reference: uploadedToken.truncatedReference, ephemeral: false });
+        expect(result).toBeSuccessful();
+
+        const token = result.value;
+        expect(token.content).toStrictEqual(uploadedToken.content);
+    });
+
+    test("load peer Token by url reference", async () => {
+        const uploadedToken = await uploadOwnToken(runtimeServices1.transport);
+        const result = await runtimeServices2.transport.tokens.loadPeerToken({ reference: uploadedToken.reference.url, ephemeral: false });
+        expect(result).toBeSuccessful();
+
+        const token = result.value;
+        expect(token.content).toStrictEqual(uploadedToken.content);
+    });
+
     describe("Delete Token", () => {
         test("accessing invalid Token id causes an error", async () => {
             const response = await runtimeServices1.transport.tokens.deleteToken({ tokenId: UNKNOWN_TOKEN_ID });
@@ -112,6 +130,56 @@ describe("Tokens query", () => {
                 expectedResult: false,
                 key: "passwordProtection.passwordIsPin",
                 value: "!"
+            });
+        await conditions.executeTests((c, q) => c.tokens.getTokens({ query: q, ownerRestriction: OwnerRestriction.Own }));
+    });
+
+    test("query own PIN-protected tokens with passwordLocationIndicator that is a number", async () => {
+        const token = await uploadOwnToken(runtimeServices1.transport, runtimeServices1.address, {
+            password: "1234",
+            passwordIsPin: true,
+            passwordLocationIndicator: 50
+        });
+        const conditions = new QueryParamConditions<GetTokensQuery>(token, runtimeServices1.transport)
+            .addSingleCondition({
+                expectedResult: true,
+                key: "passwordProtection.passwordLocationIndicator",
+                value: "50"
+            })
+            .addSingleCondition({
+                expectedResult: false,
+                key: "passwordProtection.passwordLocationIndicator",
+                value: "0"
+            })
+            .addSingleCondition({
+                expectedResult: false,
+                key: "passwordProtection.passwordLocationIndicator",
+                value: "anotherString"
+            });
+        await conditions.executeTests((c, q) => c.tokens.getTokens({ query: q, ownerRestriction: OwnerRestriction.Own }));
+    });
+
+    test("query own PIN-protected tokens with passwordLocationIndicator that is a string", async () => {
+        const token = await uploadOwnToken(runtimeServices1.transport, runtimeServices1.address, {
+            password: "1234",
+            passwordIsPin: true,
+            passwordLocationIndicator: "Letter"
+        });
+        const conditions = new QueryParamConditions<GetTokensQuery>(token, runtimeServices1.transport)
+            .addSingleCondition({
+                expectedResult: true,
+                key: "passwordProtection.passwordLocationIndicator",
+                value: "Letter"
+            })
+            .addSingleCondition({
+                expectedResult: true,
+                key: "passwordProtection.passwordLocationIndicator",
+                value: "2"
+            })
+            .addSingleCondition({
+                expectedResult: false,
+                key: "passwordProtection.passwordLocationIndicator",
+                value: "anotherString"
             });
         await conditions.executeTests((c, q) => c.tokens.getTokens({ query: q, ownerRestriction: OwnerRestriction.Own }));
     });

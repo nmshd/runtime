@@ -54,12 +54,12 @@
     "dependencies": {
         "@js-soft/docdb-access-loki": "^1.2.0",
         "@nmshd/runtime": "*",
-        "eventsource": "^3.0.6",
+        "eventsource": "^4.0.0",
         "lodash": "^4.17.21"
     },
     "devDependencies": {
         "@js-soft/node-logger": "^1.2.0",
-        "@types/lodash": "^4.17.16",
+        "@types/lodash": "^4.17.19",
         "@types/lokijs": "^1.5.14",
         "@types/luxon": "^3.6.2"
     },

@@ -229,6 +229,13 @@ class Attributes {
         );
     }
 
+    public wrongRelationshipStatusToSetDeletionInfo() {
+        return new CoreError(
+            "error.consumption.attributes.wrongRelationshipStatusToSetDeletionInfo",
+            "In order to manually set the deletionInfo of an Attribute, the corresponding Relationship must have status 'DeletionProposed'."
+        );
+    }
+
     public wrongOwnerOfRepositoryAttribute() {
         return new CoreError(
             "error.consumption.attributes.wrongOwnerOfRepositoryAttribute",
@@ -342,6 +349,13 @@ class Requests {
 
     public cannotCreateRequestWithExpirationDateInPast() {
         return new CoreError("error.consumption.requests.cannotCreateRequestWithExpirationDateInPast", "You cannot create a Request with an expiration date that is in the past.");
+    }
+
+    public cannotCreateRequestWithDuplicateId(id: string) {
+        return new CoreError(
+            "error.consumption.requests.cannotCreateRequestWithDuplicateId",
+            `You cannot create the Request since there already is a Request with the id '${id}'.`
+        );
     }
 
     public canOnlyDeleteIncomingRequestThatIsExpired(id: string, status: string) {

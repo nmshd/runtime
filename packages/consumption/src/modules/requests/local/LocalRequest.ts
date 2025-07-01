@@ -38,6 +38,7 @@ export interface ILocalRequest extends ICoreSynchronizable {
     response?: ILocalResponse;
     status: LocalRequestStatus;
     statusLog: ILocalRequestStatusLogEntry[];
+    wasAutomaticallyDecided?: true;
 }
 
 @type("LocalRequest")
@@ -50,7 +51,8 @@ export class LocalRequest extends CoreSynchronizable implements ILocalRequest {
         nameof<LocalRequest>((r) => r.createdAt),
         nameof<LocalRequest>((r) => r.source),
         nameof<LocalRequest>((r) => r.status),
-        nameof<LocalRequest>((r) => r.statusLog)
+        nameof<LocalRequest>((r) => r.statusLog),
+        nameof<LocalRequest>((r) => r.wasAutomaticallyDecided)
     ];
 
     public override readonly userdataProperties = [nameof<LocalRequest>((r) => r.content), nameof<LocalRequest>((r) => r.response)];
@@ -86,6 +88,10 @@ export class LocalRequest extends CoreSynchronizable implements ILocalRequest {
     @serialize({ type: LocalRequestStatusLogEntry })
     @validate()
     public statusLog: LocalRequestStatusLogEntry[];
+
+    @serialize()
+    @validate({ nullable: true })
+    public wasAutomaticallyDecided?: true;
 
     public changeStatus(newStatus: LocalRequestStatus): void {
         if (this.status === newStatus) throw new ConsumptionError("cannot change status to the same status");

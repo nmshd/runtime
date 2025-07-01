@@ -1,12 +1,12 @@
 import { Result } from "@js-soft/ts-utils";
-import { AnonymousTokenController } from "@nmshd/transport";
+import { AnonymousTokenController, TokenReference } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { TokenDTO } from "../../../types";
-import { SchemaRepository, SchemaValidator, TokenReferenceString, UseCase } from "../../common";
+import { SchemaRepository, SchemaValidator, TokenReferenceString, URLTokenReferenceString, UseCase } from "../../common";
 import { TokenMapper } from "../../transport/tokens/TokenMapper";
 
 export interface LoadPeerTokenAnonymousRequest {
-    reference: TokenReferenceString;
+    reference: TokenReferenceString | URLTokenReferenceString;
     password?: string;
 }
 
@@ -25,7 +25,7 @@ export class LoadPeerTokenAnonymousUseCase extends UseCase<LoadPeerTokenAnonymou
     }
 
     protected async executeInternal(request: LoadPeerTokenAnonymousRequest): Promise<Result<TokenDTO>> {
-        const createdToken = await this.anonymousTokenController.loadPeerTokenByTruncated(request.reference, request.password);
+        const createdToken = await this.anonymousTokenController.loadPeerTokenByReference(TokenReference.from(request.reference), request.password);
         return Result.ok(TokenMapper.toTokenDTO(createdToken, true));
     }
 }

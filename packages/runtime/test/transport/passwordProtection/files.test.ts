@@ -44,6 +44,15 @@ describe("Password-protected tokens for files", () => {
         expect(loadResult).toBeSuccessful();
     });
 
+    test("send a file via token with passwordLocationIndicator", async () => {
+        const createResult = await runtimeServices1.transport.files.createTokenForFile({
+            fileId,
+            passwordProtection: { password: "password", passwordLocationIndicator: 50 }
+        });
+        expect(createResult).toBeSuccessful();
+        expect(createResult.value.passwordProtection!.passwordLocationIndicator).toBe(50);
+    });
+
     test("error when loading the file with a wrong password", async () => {
         const createResult = await runtimeServices1.transport.files.createTokenForFile({
             fileId,
@@ -85,13 +94,57 @@ describe("Password-protected tokens for files", () => {
         );
     });
 
-    describe("LoadItemFromTruncatedReferenceUseCase", () => {
+    test("validation error when creating a token with a PasswordLocationIndicator that is an invalid string", async () => {
+        const createResult = await runtimeServices1.transport.files.createTokenForFile({
+            fileId,
+            passwordProtection: { password: "password", passwordLocationIndicator: "invalid-password-location-indicator" as any }
+        });
+        expect(createResult).toBeAnError(
+            /^must be a number from 50 to 99 or one of the following strings: Self, Letter, RegistrationLetter, Email, SMS, Website$/,
+            "error.runtime.validation.invalidPropertyValue"
+        );
+    });
+
+    test("validation error when creating a token with a PasswordLocationIndicator that is an invalid number", async () => {
+        const createResult = await runtimeServices1.transport.files.createTokenForFile({
+            fileId,
+            passwordProtection: { password: "password", passwordLocationIndicator: 1000 as any }
+        });
+        expect(createResult).toBeAnError(
+            "must be a number from 50 to 99 or one of the following strings: Self, Letter, RegistrationLetter, Email, SMS, Website",
+            "error.runtime.validation.invalidPropertyValue"
+        );
+    });
+
+    test("validation error when creating a token with a PasswordLocationIndicator that is a number mapping to a PasswordLocationIndicatorOption", async () => {
+        const createResult = await runtimeServices1.transport.files.createTokenForFile({
+            fileId,
+            passwordProtection: { password: "password", passwordLocationIndicator: 1 as any }
+        });
+        expect(createResult).toBeAnError(
+            "must be a number from 50 to 99 or one of the following strings: Self, Letter, RegistrationLetter, Email, SMS, Website",
+            "error.runtime.validation.invalidPropertyValue"
+        );
+    });
+
+    test("validation error when creating a token with a PasswordLocationIndicator that is a number mapping to a RecoveryKit", async () => {
+        const createResult = await runtimeServices1.transport.files.createTokenForFile({
+            fileId,
+            passwordProtection: { password: "password", passwordLocationIndicator: 1 as any }
+        });
+        expect(createResult).toBeAnError(
+            "must be a number from 50 to 99 or one of the following strings: Self, Letter, RegistrationLetter, Email, SMS, Website",
+            "error.runtime.validation.invalidPropertyValue"
+        );
+    });
+
+    describe("LoadItemFromReferenceUseCase", () => {
         test("send and receive a file via password-protected token", async () => {
             const createResult = await runtimeServices1.transport.files.createTokenForFile({
                 fileId,
                 passwordProtection: { password: "password" }
             });
-            const loadResult = await runtimeServices2.transport.account.loadItemFromTruncatedReference({ reference: createResult.value.truncatedReference, password: "password" });
+            const loadResult = await runtimeServices2.transport.account.loadItemFromReference({ reference: createResult.value.truncatedReference, password: "password" });
             expect(loadResult).toBeSuccessful();
             expect(loadResult.value.type).toBe("File");
         });
@@ -101,7 +154,7 @@ describe("Password-protected tokens for files", () => {
                 fileId,
                 passwordProtection: { password: "password" }
             });
-            const loadResult = await runtimeServices2.transport.account.loadItemFromTruncatedReference({
+            const loadResult = await runtimeServices2.transport.account.loadItemFromReference({
                 reference: createResult.value.truncatedReference,
                 password: "wrong-password"
             });
@@ -113,7 +166,7 @@ describe("Password-protected tokens for files", () => {
                 fileId,
                 passwordProtection: { password: "password" }
             });
-            const loadResult = await runtimeServices2.transport.account.loadItemFromTruncatedReference({ reference: createResult.value.truncatedReference });
+            const loadResult = await runtimeServices2.transport.account.loadItemFromReference({ reference: createResult.value.truncatedReference });
             expect(loadResult).toBeAnError(/.*/, "error.transport.noPasswordProvided");
         });
     });

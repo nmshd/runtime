@@ -18,7 +18,7 @@ import {
     ResponseResult
 } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId, CoreIdHelper, ICoreId } from "@nmshd/core-types";
-import { IConfigOverwrite, IMessage, IRelationshipTemplate, Message, Relationship, RelationshipTemplate, SynchronizedCollection, Transport } from "@nmshd/transport";
+import { IConfigOverwrite, IMessage, IRelationshipTemplate, Relationship, SynchronizedCollection, Transport } from "@nmshd/transport";
 import {
     ConsumptionController,
     ConsumptionIds,
@@ -771,15 +771,6 @@ export class RequestsWhen {
         this.context.localRequestAfterAction = await this.context.outgoingRequestsController.sent(sentParams);
     }
 
-    public async iCreateAnIncomingRequestWithSource(sourceObject: Message | RelationshipTemplate): Promise<void> {
-        const request = TestObjectFactory.createRequestWithOneItem();
-
-        this.context.localRequestAfterAction = await this.context.incomingRequestsController.received({
-            receivedRequest: request,
-            requestSourceObject: sourceObject
-        });
-    }
-
     public async iCreateAnIncomingRequestWith(params: Partial<IReceivedIncomingRequestParameters>): Promise<void> {
         params.receivedRequest ??= TestObjectFactory.createRequestWithOneItem();
         params.requestSourceObject ??= TestObjectFactory.createIncomingMessage(this.context.currentIdentity);
@@ -790,8 +781,8 @@ export class RequestsWhen {
         });
     }
 
-    public iTryToCreateAnIncomingRequestWith(params: { sourceObject: Message | RelationshipTemplate }): Promise<void> {
-        this.context.actionToTry = async () => await this.iCreateAnIncomingRequestWithSource(params.sourceObject);
+    public iTryToCreateAnIncomingRequestWith(params: Partial<IReceivedIncomingRequestParameters>): Promise<void> {
+        this.context.actionToTry = async () => await this.iCreateAnIncomingRequestWith(params);
         return Promise.resolve();
     }
 
