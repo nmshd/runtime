@@ -1,4 +1,4 @@
-import { CoreId } from "@nmshd/core-types";
+import { CoreId, LanguageISO639 } from "@nmshd/core-types";
 import axios, { Axios } from "axios";
 import { AccountController, IdentityDeletionProcess, IdentityDeletionProcessStatus } from "../../src";
 import { AnnouncementSeverity } from "../../src/modules/announcements/data/Announcement";
@@ -69,7 +69,7 @@ export interface CreateAnnouncementRequest {
     texts: { language: string; title: string; body: string }[];
     expiresAt?: string;
     recipients?: string[];
-    actions: { displayName: Record<string, string>; link: string }[];
+    actions: { displayName: Record<keyof typeof LanguageISO639, string>; link: string }[];
 }
 
 export interface CreateAnnouncementResponse {
