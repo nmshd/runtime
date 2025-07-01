@@ -54,6 +54,7 @@ export interface ShareAttributeRequestItemDVO extends RequestItemDVO {
 
 export interface AuthenticationRequestItemDVO extends RequestItemDVO {
     type: "AuthenticationRequestItemDVO";
+    title: string;
 }
 
 export interface ConsentRequestItemDVO extends RequestItemDVO {
@@ -68,11 +69,6 @@ export interface RegisterAttributeListenerRequestItemDVO extends RequestItemDVO 
     query: IdentityAttributeQueryDVO | ThirdPartyRelationshipAttributeQueryDVO;
 }
 
-export interface FreeTextRequestItemDVO extends RequestItemDVO {
-    type: "FreeTextRequestItemDVO";
-    freeText: string;
-}
-
 export interface FormFieldRequestItemDVO extends RequestItemDVO {
     type: "FormFieldRequestItemDVO";
     title: string;
@@ -83,5 +79,5 @@ export interface TransferFileOwnershipRequestItemDVO extends RequestItemDVO {
     type: "TransferFileOwnershipRequestItemDVO";
     fileReference: string;
     file: FileDVO;
-    ownershipToken?: string;
+    ownershipToken: string;
 }

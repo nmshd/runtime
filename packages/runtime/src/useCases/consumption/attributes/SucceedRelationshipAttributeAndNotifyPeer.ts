@@ -5,7 +5,7 @@ import { CoreId } from "@nmshd/core-types";
 import { AccountController, MessageController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { LocalAttributeDTO } from "../../../types";
-import { AttributeIdString, ISO8601DateTimeString, NotificationIdString, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { AttributeIdString, NotificationIdString, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { AttributeMapper } from "./AttributeMapper";
 
 export interface SucceedRelationshipAttributeAndNotifyPeerResponse {
@@ -18,8 +18,6 @@ export interface SucceedRelationshipAttributeAndNotifyPeerRequest {
     predecessorId: AttributeIdString;
     successorContent: {
         value: AttributeValues.Relationship.Json;
-        validFrom?: ISO8601DateTimeString;
-        validTo?: ISO8601DateTimeString;
     };
 }
 

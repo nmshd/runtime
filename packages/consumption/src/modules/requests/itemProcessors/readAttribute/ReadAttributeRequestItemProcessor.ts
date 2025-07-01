@@ -30,7 +30,7 @@ import { AcceptReadAttributeRequestItemParameters, AcceptReadAttributeRequestIte
 
 export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcessor<ReadAttributeRequestItem, AcceptReadAttributeRequestItemParametersJSON> {
     public override async canCreateOutgoingRequestItem(requestItem: ReadAttributeRequestItem, _request: Request, recipient?: CoreAddress): Promise<ValidationResult> {
-        const queryValidationResult = this.validateQuery(requestItem, recipient);
+        const queryValidationResult = await this.validateQuery(requestItem, recipient);
         if (queryValidationResult.isError()) {
             return queryValidationResult;
         }
@@ -56,7 +56,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         return ValidationResult.success();
     }
 
-    private validateQuery(requestItem: ReadAttributeRequestItem, recipient?: CoreAddress) {
+    private async validateQuery(requestItem: ReadAttributeRequestItem, recipient?: CoreAddress) {
         const commonQueryValidationResult = validateQuery(requestItem.query, this.currentIdentityAddress, recipient);
         if (commonQueryValidationResult.isError()) {
             return commonQueryValidationResult;
@@ -73,6 +73,11 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                     )
                 );
             }
+        }
+
+        const tagValidationResult = await this.consumptionController.attributes.validateAttributeQueryTags(requestItem.query);
+        if (tagValidationResult.isError()) {
+            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem(tagValidationResult.error.message));
         }
 
         return ValidationResult.success();
@@ -259,6 +264,11 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                     "The confidentiality of the provided RelationshipAttribute is private. Therefore you are not allowed to share it."
                 )
             );
+        }
+
+        const tagValidationResult = await this.consumptionController.attributes.validateTagsOfAttribute(attribute);
+        if (tagValidationResult.isError()) {
+            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters(tagValidationResult.error.message));
         }
 
         return ValidationResult.success();

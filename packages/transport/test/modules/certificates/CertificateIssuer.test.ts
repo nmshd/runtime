@@ -45,11 +45,11 @@ describe("CertificateIssuer", function () {
                 items: [
                     CertificatePublicAttributeItem.from({
                         name: "Person.givenName",
-                        value: "Herbert"
+                        value: "aGivenName"
                     }),
                     CertificatePublicAttributeItem.from({
                         name: "Person.familyName",
-                        value: "Müller"
+                        value: "aFamilyName"
                     }),
                     CertificatePublicAttributeItem.from({
                         name: "Person.birthDate",

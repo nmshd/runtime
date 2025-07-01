@@ -5,6 +5,7 @@ import {
     GivenName,
     IdentityAttribute,
     IdentityAttributeQuery,
+    IQLQuery,
     ProposeAttributeAcceptResponseItem,
     ProposeAttributeRequestItem,
     ProprietaryInteger,
@@ -17,6 +18,7 @@ import {
 } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId, CoreIdHelper } from "@nmshd/core-types";
 import { AccountController, Transport } from "@nmshd/transport";
+import { anything, reset, spy, when } from "ts-mockito";
 import {
     AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON,
     AcceptProposeAttributeRequestItemParametersWithNewAttributeJSON,
@@ -28,7 +30,8 @@ import {
     LocalRequest,
     LocalRequestStatus,
     PeerSharedAttributeSucceededEvent,
-    ProposeAttributeRequestItemProcessor
+    ProposeAttributeRequestItemProcessor,
+    ValidationResult
 } from "../../../../../src";
 import { TestUtil } from "../../../../core/TestUtil";
 import { TestObjectFactory } from "../../testHelpers/TestObjectFactory";
@@ -75,6 +78,29 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), recipient);
 
             expect(result).successfulValidationResult();
+        });
+
+        test("returns an error when proposing an Identity Attribute with invalid tag", async () => {
+            const recipient = CoreAddress.from("Recipient");
+
+            const requestItem = ProposeAttributeRequestItem.from({
+                mustBeAccepted: false,
+                attribute: TestObjectFactory.createIdentityAttribute({
+                    value: GivenName.fromAny({ value: "aGivenName" }),
+                    owner: CoreAddress.from(""),
+                    tags: ["invalidTag"]
+                }),
+                query: IdentityAttributeQuery.from({
+                    valueType: "GivenName"
+                })
+            });
+
+            const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), recipient);
+
+            expect(result).errorValidationResult({
+                code: "error.consumption.requests.invalidRequestItem",
+                message: "Detected invalidity of the following tags: 'invalidTag'."
+            });
         });
 
         test("returns success when proposing a Relationship Attribute", async () => {
@@ -174,6 +200,8 @@ describe("ProposeAttributeRequestItemProcessor", function () {
 
         describe("query", function () {
             describe("IdentityAttributeQuery", function () {
+                const recipient = CoreAddress.from("Recipient");
+
                 test("simple query", async () => {
                     const requestItem = ProposeAttributeRequestItem.from({
                         mustBeAccepted: false,
@@ -188,6 +216,61 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), recipient);
 
                     expect(result).successfulValidationResult();
+                });
+
+                test("cannot query invalid tag", async () => {
+                    const requestItem = ProposeAttributeRequestItem.from({
+                        mustBeAccepted: false,
+                        attribute: TestObjectFactory.createIdentityAttribute({
+                            owner: CoreAddress.from("")
+                        }),
+                        query: IdentityAttributeQuery.from({
+                            valueType: "GivenName",
+                            tags: ["invalidTag"]
+                        })
+                    });
+
+                    const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), recipient);
+
+                    expect(result).errorValidationResult({
+                        code: "error.consumption.requests.invalidRequestItem",
+                        message: "Detected invalidity of the following tags: 'invalidTag'."
+                    });
+                });
+            });
+
+            describe("IQLQuery", function () {
+                const recipient = CoreAddress.from("Recipient");
+
+                test("simple query", async () => {
+                    const requestItem = ProposeAttributeRequestItem.from({
+                        mustBeAccepted: false,
+                        attribute: TestObjectFactory.createIdentityAttribute({
+                            owner: CoreAddress.from("")
+                        }),
+                        query: IQLQuery.from({ queryString: "GivenName", attributeCreationHints: { valueType: "GivenName" } })
+                    });
+
+                    const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), recipient);
+
+                    expect(result).successfulValidationResult();
+                });
+
+                test("cannot query invalid tag", async () => {
+                    const requestItem = ProposeAttributeRequestItem.from({
+                        mustBeAccepted: false,
+                        attribute: TestObjectFactory.createIdentityAttribute({
+                            owner: CoreAddress.from("")
+                        }),
+                        query: IQLQuery.from({ queryString: "GivenName", attributeCreationHints: { valueType: "GivenName", tags: ["invalidTag"] } })
+                    });
+
+                    const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), recipient);
+
+                    expect(result).errorValidationResult({
+                        code: "error.consumption.requests.invalidRequestItem",
+                        message: "Detected invalidity of the following tags: 'invalidTag'."
+                    });
                 });
             });
 
@@ -853,6 +936,74 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 message: `The provided IdentityAttribute is outdated. You have already shared the successor '${successorRepositoryAttribute.id}' of it.`
             });
         });
+
+        test("returns an error if accepting would accept an Attribute with an invalid tag", async function () {
+            const attributesControllerSpy = spy(consumptionController.attributes);
+            when(attributesControllerSpy.validateTagsOfAttribute(anything())).thenResolve(ValidationResult.success());
+
+            const existingAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                content: TestObjectFactory.createIdentityAttribute({
+                    tags: ["invalidTag"],
+                    owner: accountController.identity.address
+                })
+            });
+
+            reset(attributesControllerSpy);
+
+            const sender = CoreAddress.from("Sender");
+            const newAttribute = TestObjectFactory.createIdentityAttribute({
+                tags: ["invalidTag"],
+                owner: accountController.identity.address
+            });
+
+            const proposeAttributeRequestItem = ProposeAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
+                attribute: newAttribute
+            });
+
+            const requestId = await ConsumptionIds.request.generate();
+            const request = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [proposeAttributeRequestItem]
+                }),
+                statusLog: []
+            });
+
+            const canAcceptWithNewAttributeResult = await processor.canAccept(
+                proposeAttributeRequestItem,
+                {
+                    accept: true,
+                    attribute: newAttribute.toJSON()
+                },
+                request
+            );
+
+            expect(canAcceptWithNewAttributeResult).errorValidationResult({
+                code: "error.consumption.requests.invalidAcceptParameters",
+                message: "Detected invalidity of the following tags: 'invalidTag'."
+            });
+
+            const canAcceptWithExistingAttributeResult = await processor.canAccept(
+                proposeAttributeRequestItem,
+                {
+                    accept: true,
+                    attributeId: existingAttribute.id.toString()
+                },
+                request
+            );
+
+            expect(canAcceptWithExistingAttributeResult).errorValidationResult({
+                code: "error.consumption.requests.invalidAcceptParameters",
+                message: "Detected invalidity of the following tags: 'invalidTag'."
+            });
+        });
     });
 
     describe("accept", function () {
@@ -973,7 +1124,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: accountController.identity.address,
                         value: GivenName.fromAny({ value: "aGivenName" }),
-                        tags: ["anExistingTag"]
+                        tags: ["x:anExistingTag"]
                     })
                 });
 
@@ -987,17 +1138,17 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     content: IdentityAttribute.from({
                         owner: accountController.identity.address,
                         value: GivenName.fromAny({ value: "aNewGivenName" }),
-                        tags: ["anExistingTag"]
+                        tags: ["x:anExistingTag"]
                     })
                 });
 
                 const requestItem = ProposeAttributeRequestItem.from({
                     mustBeAccepted: true,
-                    query: IdentityAttributeQuery.from({ tags: ["aNewTag", "anotherNewTag"], valueType: "GivenName" }),
+                    query: IdentityAttributeQuery.from({ tags: ["x:aNewTag", "x:anotherNewTag"], valueType: "GivenName" }),
                     attribute: IdentityAttribute.from({
                         value: GivenName.fromAny({ value: "aGivenName" }),
                         owner: CoreAddress.from(""),
-                        tags: ["aNewTag", "anotherNewTag"]
+                        tags: ["x:aNewTag", "x:anotherNewTag"]
                     })
                 });
                 const requestId = await ConsumptionIds.request.generate();
@@ -1014,7 +1165,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 const acceptParams: AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON = {
                     accept: true,
                     attributeId: successorRepositoryAttribute.id.toString(),
-                    tags: ["aNewTag"]
+                    tags: ["x:aNewTag"]
                 };
 
                 const result = await processor.accept(requestItem, acceptParams, incomingRequest);
@@ -1023,7 +1174,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 const successorOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute((result as AttributeSuccessionAcceptResponseItem).successorId);
                 const sourceAttribute = await consumptionController.attributes.getLocalAttribute(successorOwnSharedIdentityAttribute!.shareInfo!.sourceAttribute!);
                 expect(sourceAttribute!.succeeds).toStrictEqual(successorRepositoryAttribute.id);
-                expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["anExistingTag", "aNewTag"]);
+                expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x:anExistingTag", "x:aNewTag"]);
             });
 
             test("accept with existing IdentityAttribute whose predecessor was already shared but is DeletedByPeer", async function () {
@@ -1211,7 +1362,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: accountController.identity.address,
-                        tags: ["anExistingTag"]
+                        tags: ["x:anExistingTag"]
                     })
                 });
 
@@ -1223,11 +1374,11 @@ describe("ProposeAttributeRequestItemProcessor", function () {
 
                 const requestItem = ProposeAttributeRequestItem.from({
                     mustBeAccepted: true,
-                    query: IdentityAttributeQuery.from({ tags: ["aNewTag", "anotherNewTag"], valueType: "GivenName" }),
+                    query: IdentityAttributeQuery.from({ tags: ["x:aNewTag", "x:anotherNewTag"], valueType: "GivenName" }),
                     attribute: IdentityAttribute.from({
                         value: GivenName.fromAny({ value: "aGivenName" }),
                         owner: CoreAddress.from(""),
-                        tags: ["aNewTag", "anotherNewTag"]
+                        tags: ["x:aNewTag", "x:anotherNewTag"]
                     })
                 });
                 const requestId = await ConsumptionIds.request.generate();
@@ -1244,7 +1395,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 const acceptParams: AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON = {
                     accept: true,
                     attributeId: repositoryAttribute.id.toString(),
-                    tags: ["aNewTag"]
+                    tags: ["x:aNewTag"]
                 };
 
                 const result = await processor.accept(requestItem, acceptParams, incomingRequest);
@@ -1253,7 +1404,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 const successorOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute((result as AttributeSuccessionAcceptResponseItem).successorId);
                 const sourceAttribute = await consumptionController.attributes.getLocalAttribute(successorOwnSharedIdentityAttribute!.shareInfo!.sourceAttribute!);
                 expect(sourceAttribute!.succeeds).toStrictEqual(repositoryAttribute.id);
-                expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["anExistingTag", "aNewTag"]);
+                expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x:anExistingTag", "x:aNewTag"]);
             });
 
             test("accept with existing IdentityAttribute that is already shared and the latest shared version but is DeletedByPeer", async function () {
@@ -2156,7 +2307,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 successorId: successorId,
                 successorContent: TestObjectFactory.createIdentityAttribute({
                     owner: sender,
-                    tags: ["aNewTag"]
+                    tags: ["x:aNewTag"]
                 })
             });
 

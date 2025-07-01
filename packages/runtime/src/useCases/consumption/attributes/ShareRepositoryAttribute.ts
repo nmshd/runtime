@@ -18,7 +18,6 @@ export interface ShareRepositoryAttributeRequest {
         expiresAt?: ISO8601DateTimeString;
     };
     requestItemMetadata?: {
-        title?: string;
         description?: string;
         metadata?: Record<string, any>;
         requireManualDecision?: boolean;

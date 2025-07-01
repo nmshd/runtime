@@ -91,7 +91,6 @@ describe("Request", function () {
                 {
                     "@type": "TestRequestItem",
                     mustBeAccepted: true,
-                    title: "outer item - title",
                     description: "outer item - description",
                     metadata: {
                         aMetadataKey: "outer item - metadata value"
@@ -108,7 +107,6 @@ describe("Request", function () {
                         {
                             "@type": "TestRequestItem",
                             mustBeAccepted: true,
-                            title: "inner item - title",
                             description: "inner item - description",
                             metadata: {
                                 aMetadataKey: "inner item - metadata value"

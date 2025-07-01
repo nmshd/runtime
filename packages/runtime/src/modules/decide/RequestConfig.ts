@@ -17,13 +17,13 @@ export interface RelationshipRequestConfig extends GeneralRequestConfig {
 export interface RequestItemConfig extends GeneralRequestConfig {
     "content.item.@type"?: string | string[];
     "content.item.mustBeAccepted"?: boolean;
-    "content.item.title"?: string | string[];
     "content.item.description"?: string | string[];
     "content.item.metadata"?: object | object[];
 }
 
 export interface AuthenticationRequestItemConfig extends RequestItemConfig {
     "content.item.@type": "AuthenticationRequestItem";
+    "content.item.title"?: string | string[];
 }
 
 export interface ConsentRequestItemConfig extends RequestItemConfig {
@@ -36,8 +36,6 @@ export interface CreateAttributeRequestItemConfig extends RequestItemConfig {
     "content.item.@type": "CreateAttributeRequestItem";
     "content.item.attribute.@type"?: "IdentityAttribute" | "RelationshipAttribute";
     "content.item.attribute.owner"?: string | string[];
-    "content.item.attribute.validFrom"?: string | string[];
-    "content.item.attribute.validTo"?: string | string[];
     "content.item.attribute.tags"?: string[];
     "content.item.attribute.key"?: string | string[];
     "content.item.attribute.isTechnical"?: boolean;
@@ -52,16 +50,9 @@ export interface DeleteAttributeRequestItemConfig extends RequestItemConfig {
     "content.item.@type": "DeleteAttributeRequestItem";
 }
 
-export interface FreeTextRequestItemConfig extends RequestItemConfig {
-    "content.item.@type": "FreeTextRequestItem";
-    "content.item.freeText"?: string | string[];
-}
-
 export interface ProposeAttributeRequestItemConfig extends RequestItemConfig {
     "content.item.@type": "ProposeAttributeRequestItem";
     "content.item.attribute.@type"?: "IdentityAttribute" | "RelationshipAttribute";
-    "content.item.attribute.validFrom"?: string | string[];
-    "content.item.attribute.validTo"?: string | string[];
     "content.item.attribute.tags"?: string[];
     "content.item.attribute.key"?: string | string[];
     "content.item.attribute.isTechnical"?: boolean;
@@ -71,8 +62,6 @@ export interface ProposeAttributeRequestItemConfig extends RequestItemConfig {
     "content.item.attribute.value.title"?: string | string[];
     "content.item.attribute.value.description"?: string | string[];
     "content.item.query.@type"?: "IdentityAttributeQuery" | "RelationshipAttributeQuery" | "IQLQuery";
-    "content.item.query.validFrom"?: string | string[];
-    "content.item.query.validTo"?: string | string[];
     "content.item.query.valueType"?: string | string[];
     "content.item.query.tags"?: string[];
     "content.item.query.key"?: string | string[];
@@ -87,8 +76,6 @@ export interface ProposeAttributeRequestItemConfig extends RequestItemConfig {
 export interface ReadAttributeRequestItemConfig extends RequestItemConfig {
     "content.item.@type": "ReadAttributeRequestItem";
     "content.item.query.@type"?: "IdentityAttributeQuery" | "RelationshipAttributeQuery" | "IQLQuery";
-    "content.item.query.validFrom"?: string | string[];
-    "content.item.query.validTo"?: string | string[];
     "content.item.query.valueType"?: string | string[];
     "content.item.query.tags"?: string[];
     "content.item.query.key"?: string | string[];
@@ -104,8 +91,6 @@ export interface ReadAttributeRequestItemConfig extends RequestItemConfig {
 export interface RegisterAttributeListenerRequestItemConfig extends RequestItemConfig {
     "content.item.@type": "RegisterAttributeListenerRequestItem";
     "content.item.query.@type"?: "IdentityAttributeQuery";
-    "content.item.query.validFrom"?: string | string[];
-    "content.item.query.validTo"?: string | string[];
     "content.item.query.valueType"?: string | string[];
     "content.item.query.tags"?: string[];
 }
@@ -114,8 +99,6 @@ export interface ShareAttributeRequestItemConfig extends RequestItemConfig {
     "content.item.@type": "ShareAttributeRequestItem";
     "content.item.attribute.@type"?: "IdentityAttribute" | "RelationshipAttribute";
     "content.item.attribute.owner"?: string | string[];
-    "content.item.attribute.validFrom"?: string | string[];
-    "content.item.attribute.validTo"?: string | string[];
     "content.item.attribute.tags"?: string[];
     "content.item.attribute.key"?: string | string[];
     "content.item.attribute.isTechnical"?: boolean;
@@ -136,7 +119,6 @@ export type RequestItemDerivationConfig =
     | ConsentRequestItemConfig
     | CreateAttributeRequestItemConfig
     | DeleteAttributeRequestItemConfig
-    | FreeTextRequestItemConfig
     | ProposeAttributeRequestItemConfig
     | ReadAttributeRequestItemConfig
     | RegisterAttributeListenerRequestItemConfig

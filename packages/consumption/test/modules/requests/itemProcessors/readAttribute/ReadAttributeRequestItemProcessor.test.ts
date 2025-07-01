@@ -19,6 +19,7 @@ import {
 } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId, CoreIdHelper } from "@nmshd/core-types";
 import { AccountController, Transport } from "@nmshd/transport";
+import { anything, reset, spy, when } from "ts-mockito";
 import {
     AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON,
     AcceptReadAttributeRequestItemParametersWithNewAttributeJSON,
@@ -30,7 +31,8 @@ import {
     LocalRequest,
     LocalRequestStatus,
     PeerSharedAttributeSucceededEvent,
-    ReadAttributeRequestItemProcessor
+    ReadAttributeRequestItemProcessor,
+    ValidationResult
 } from "../../../../../src";
 import { TestUtil } from "../../../../core/TestUtil";
 import { TestObjectFactory } from "../../testHelpers/TestObjectFactory";
@@ -88,6 +90,56 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), CoreAddress.from("recipient"));
 
                 expect(result).successfulValidationResult();
+            });
+
+            test("cannot query invalid tag", async () => {
+                const query = IdentityAttributeQuery.from({
+                    valueType: "GivenName",
+                    tags: ["invalidTag"]
+                });
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: false,
+                    query: query
+                });
+
+                const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), CoreAddress.from("recipient"));
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidRequestItem",
+                    message: "Detected invalidity of the following tags: 'invalidTag'."
+                });
+            });
+        });
+
+        describe("IQLQuery", function () {
+            test("simple query", async () => {
+                const query = IQLQuery.from({ queryString: "GivenName", attributeCreationHints: { valueType: "GivenName" } });
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: false,
+                    query: query
+                });
+
+                const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), CoreAddress.from("recipient"));
+
+                expect(result).successfulValidationResult();
+            });
+
+            test("cannot query invalid tag", async () => {
+                const query = IQLQuery.from({ queryString: "GivenName", attributeCreationHints: { valueType: "GivenName", tags: ["invalidTag"] } });
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: false,
+                    query: query
+                });
+
+                const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), CoreAddress.from("recipient"));
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidRequestItem",
+                    message: "Detected invalidity of the following tags: 'invalidTag'."
+                });
             });
         });
 
@@ -400,7 +452,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         "@type": "GivenName",
                         value: "aGivenName"
                     },
-                    tags: ["aTag"]
+                    tags: ["x:aTag"]
                 }
             };
 
@@ -581,6 +633,72 @@ describe("ReadAttributeRequestItemProcessor", function () {
             });
         });
 
+        test("returns an error when the given Attribute has an invalid tag", async function () {
+            const attributesControllerSpy = spy(consumptionController.attributes);
+            when(attributesControllerSpy.validateTagsOfAttribute(anything())).thenResolve(ValidationResult.success());
+
+            const existingAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                content: TestObjectFactory.createIdentityAttribute({
+                    tags: ["invalidTag"],
+                    owner: accountController.identity.address
+                })
+            });
+
+            reset(attributesControllerSpy);
+
+            const sender = CoreAddress.from("Sender");
+
+            const requestItem = ReadAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: IdentityAttributeQuery.from({ valueType: "GivenName" })
+            });
+            const requestId = await ConsumptionIds.request.generate();
+            const request = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const canAcceptWithExistingAttributeResult = await processor.canAccept(
+                requestItem,
+                {
+                    accept: true,
+                    existingAttributeId: existingAttribute.id.toString()
+                },
+                request
+            );
+
+            expect(canAcceptWithExistingAttributeResult).errorValidationResult({
+                code: "error.consumption.requests.invalidAcceptParameters",
+                message: "Detected invalidity of the following tags: 'invalidTag'."
+            });
+
+            const canAcceptWithNewAttributeResult = await processor.canAccept(
+                requestItem,
+                {
+                    accept: true,
+                    newAttribute: TestObjectFactory.createIdentityAttribute({
+                        value: GivenName.fromAny({ value: "anotherGivenName" }),
+                        tags: ["invalidTag"],
+                        owner: accountController.identity.address
+                    }).toJSON()
+                },
+                request
+            );
+
+            expect(canAcceptWithNewAttributeResult).errorValidationResult({
+                code: "error.consumption.requests.invalidAcceptParameters",
+                message: "Detected invalidity of the following tags: 'invalidTag'."
+            });
+        });
+
         test("returns an error trying to answer with a new Attribute that doesn't fulfill the validation criteria", async function () {
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
@@ -711,7 +829,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             test("returns success responding with a new Attribute that has additional tags than those requested by the IdentityAttributeQuery", async function () {
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
-                    query: IdentityAttributeQuery.from({ tags: ["aTag"], valueType: "GivenName" })
+                    query: IdentityAttributeQuery.from({ tags: ["x:aTag"], valueType: "GivenName" })
                 });
                 const requestId = await ConsumptionIds.request.generate();
                 const request = LocalRequest.from({
@@ -732,7 +850,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     newAttribute: {
                         "@type": "IdentityAttribute",
                         owner: recipient.toString(),
-                        tags: ["aTag", "AnotherTag"],
+                        tags: ["x:aTag", "x:AnotherTag"],
                         value: {
                             "@type": "GivenName",
                             value: "aGivenName"
@@ -750,13 +868,13 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: recipient,
                         value: GivenName.fromAny({ value: "aGivenName" }),
-                        tags: ["anExistingTag"]
+                        tags: ["x:anExistingTag"]
                     })
                 });
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
-                    query: IdentityAttributeQuery.from({ tags: ["aNewTag", "anotherNewTag"], valueType: "GivenName" })
+                    query: IdentityAttributeQuery.from({ tags: ["x:aNewTag", "x:anotherNewTag"], valueType: "GivenName" })
                 });
                 const requestId = await ConsumptionIds.request.generate();
                 const request = LocalRequest.from({
@@ -775,7 +893,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
                     accept: true,
                     existingAttributeId: repositoryAttribute.id.toString(),
-                    tags: ["aNewTag"]
+                    tags: ["x:aNewTag"]
                 };
 
                 const result = await processor.canAccept(requestItem, acceptParams, request);
@@ -788,7 +906,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             test("can be called with property tags used in the IQLQuery", async function () {
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
-                    query: IQLQuery.from({ queryString: "GivenName", attributeCreationHints: { valueType: "GivenName", tags: ["tagA", "tagB", "tagC"] } })
+                    query: IQLQuery.from({ queryString: "GivenName", attributeCreationHints: { valueType: "GivenName", tags: ["x:tagA", "x:tagB", "x:tagC"] } })
                 });
                 const requestId = await ConsumptionIds.request.generate();
                 const request = LocalRequest.from({
@@ -809,7 +927,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     newAttribute: {
                         "@type": "IdentityAttribute",
                         owner: recipient.toString(),
-                        tags: ["tagA", "tagD", "tagE"],
+                        tags: ["x:tagA", "x:tagD", "x:tagE"],
                         value: {
                             "@type": "GivenName",
                             value: "aGivenName"
@@ -1034,57 +1152,6 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         value: {
                             "@type": "Consent",
                             consent: "aConsent"
-                        }
-                    }
-                };
-
-                const result = await processor.canAccept(requestItem, acceptParams, request);
-
-                expect(result).successfulValidationResult();
-            });
-
-            test("can be called with properties validFrom and validTo used in the query", async function () {
-                const requestItem = ReadAttributeRequestItem.from({
-                    mustBeAccepted: true,
-                    query: RelationshipAttributeQuery.from({
-                        owner: sender.toString(),
-                        key: "aKey",
-                        validFrom: "2024-02-14T08:47:35.077Z",
-                        validTo: "2024-02-14T09:35:12.824Z",
-                        attributeCreationHints: {
-                            valueType: "ProprietaryString",
-                            title: "aTitle",
-                            confidentiality: RelationshipAttributeConfidentiality.Public
-                        }
-                    })
-                });
-                const requestId = await ConsumptionIds.request.generate();
-                const request = LocalRequest.from({
-                    id: requestId,
-                    createdAt: CoreDate.utc(),
-                    isOwn: false,
-                    peer: sender,
-                    status: LocalRequestStatus.DecisionRequired,
-                    content: Request.from({
-                        id: requestId,
-                        items: [requestItem]
-                    }),
-                    statusLog: []
-                });
-
-                const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
-                    accept: true,
-                    newAttribute: {
-                        "@type": "RelationshipAttribute",
-                        key: "aKey",
-                        confidentiality: RelationshipAttributeConfidentiality.Public,
-                        owner: sender.toString(),
-                        validFrom: "2024-02-14T08:40:35.077Z",
-                        validTo: "2024-02-14T09:35:12.824Z",
-                        value: {
-                            "@type": "ProprietaryString",
-                            title: "aTitle",
-                            value: "aStringValue"
                         }
                     }
                 };
@@ -1507,13 +1574,13 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: accountController.identity.address,
-                        tags: ["anExistingTag"]
+                        tags: ["x:anExistingTag"]
                     })
                 });
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
-                    query: IdentityAttributeQuery.from({ tags: ["aNewTag", "anotherNewTag"], valueType: "GivenName" })
+                    query: IdentityAttributeQuery.from({ tags: ["x:aNewTag", "x:anotherNewTag"], valueType: "GivenName" })
                 });
                 const requestId = await ConsumptionIds.request.generate();
                 const incomingRequest = LocalRequest.from({
@@ -1532,7 +1599,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
                     accept: true,
                     existingAttributeId: repositoryAttribute.id.toString(),
-                    tags: ["aNewTag"]
+                    tags: ["x:aNewTag"]
                 };
 
                 const result = await processor.accept(requestItem, acceptParams, incomingRequest);
@@ -1541,7 +1608,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const ownSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute((result as ReadAttributeAcceptResponseItem).attributeId);
                 const sourceAttribute = await consumptionController.attributes.getLocalAttribute(ownSharedIdentityAttribute!.shareInfo!.sourceAttribute!);
                 expect(sourceAttribute!.succeeds).toBeDefined();
-                expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["anExistingTag", "aNewTag"]);
+                expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x:anExistingTag", "x:aNewTag"]);
             });
 
             test("accept with existing IdentityAttribute whose predecessor was already shared", async function () {
@@ -1610,7 +1677,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: accountController.identity.address,
                         value: GivenName.fromAny({ value: "aGivenName" }),
-                        tags: ["anExistingTag"]
+                        tags: ["x:anExistingTag"]
                     })
                 });
 
@@ -1624,13 +1691,13 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     content: IdentityAttribute.from({
                         owner: accountController.identity.address,
                         value: GivenName.fromAny({ value: "aNewGivenName" }),
-                        tags: ["anExistingTag"]
+                        tags: ["x:anExistingTag"]
                     })
                 });
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
-                    query: IdentityAttributeQuery.from({ tags: ["aNewTag", "anotherNewTag"], valueType: "GivenName" })
+                    query: IdentityAttributeQuery.from({ tags: ["x:aNewTag", "x:anotherNewTag"], valueType: "GivenName" })
                 });
                 const requestId = await ConsumptionIds.request.generate();
                 const incomingRequest = LocalRequest.from({
@@ -1649,7 +1716,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
                     accept: true,
                     existingAttributeId: successorRepositoryAttribute.id.toString(),
-                    tags: ["aNewTag"]
+                    tags: ["x:aNewTag"]
                 };
 
                 const result = await processor.accept(requestItem, acceptParams, incomingRequest);
@@ -1658,7 +1725,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const successorOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute((result as AttributeSuccessionAcceptResponseItem).successorId);
                 const sourceAttribute = await consumptionController.attributes.getLocalAttribute(successorOwnSharedIdentityAttribute!.shareInfo!.sourceAttribute!);
                 expect(sourceAttribute!.succeeds).toStrictEqual(successorRepositoryAttribute.id);
-                expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["anExistingTag", "aNewTag"]);
+                expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x:anExistingTag", "x:aNewTag"]);
             });
 
             test("accept with existing IdentityAttribute whose predecessor was already shared but is DeletedByPeer", async function () {
@@ -1834,7 +1901,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: accountController.identity.address,
-                        tags: ["anExistingTag"]
+                        tags: ["x:anExistingTag"]
                     })
                 });
 
@@ -1846,7 +1913,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
-                    query: IdentityAttributeQuery.from({ tags: ["aNewTag", "anotherNewTag"], valueType: "GivenName" })
+                    query: IdentityAttributeQuery.from({ tags: ["x:aNewTag", "x:anotherNewTag"], valueType: "GivenName" })
                 });
                 const requestId = await ConsumptionIds.request.generate();
                 const incomingRequest = LocalRequest.from({
@@ -1865,7 +1932,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
                     accept: true,
                     existingAttributeId: repositoryAttribute.id.toString(),
-                    tags: ["aNewTag"]
+                    tags: ["x:aNewTag"]
                 };
 
                 const result = await processor.accept(requestItem, acceptParams, incomingRequest);
@@ -1874,7 +1941,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const successorOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute((result as AttributeSuccessionAcceptResponseItem).successorId);
                 const sourceAttribute = await consumptionController.attributes.getLocalAttribute(successorOwnSharedIdentityAttribute!.shareInfo!.sourceAttribute!);
                 expect(sourceAttribute!.succeeds).toStrictEqual(repositoryAttribute.id);
-                expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["anExistingTag", "aNewTag"]);
+                expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x:anExistingTag", "x:aNewTag"]);
             });
 
             test("accept with existing IdentityAttribute that is already shared and the latest shared version but is DeletedByPeer", async function () {
@@ -2411,7 +2478,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: recipient,
                         value: GivenName.fromAny({ value: "aGivenName" }),
-                        tags: ["tag1"]
+                        tags: ["x:tag1"]
                     })
                 });
 
@@ -2442,7 +2509,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                             "@type": "GivenName",
                             value: "aGivenName"
                         },
-                        tags: ["tag2"]
+                        tags: ["x:tag2"]
                     }
                 };
 
@@ -2452,7 +2519,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const createdSharedAttribute = await consumptionController.attributes.getLocalAttribute((result as ReadAttributeAcceptResponseItem).attributeId);
                 const sourceAttribute = await consumptionController.attributes.getLocalAttribute(createdSharedAttribute!.shareInfo!.sourceAttribute!);
                 expect(sourceAttribute!.succeeds).toStrictEqual(existingRepositoryAttribute.id);
-                expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["tag1", "tag2"]);
+                expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x:tag1", "x:tag2"]);
             });
 
             test("accept with new IdentityAttribute that is a duplicate after trimming with different tags", async function () {
@@ -2460,7 +2527,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: recipient,
                         value: GivenName.fromAny({ value: "aGivenName" }),
-                        tags: ["tag1"]
+                        tags: ["x:tag1"]
                     })
                 });
 
@@ -2491,7 +2558,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                             "@type": "GivenName",
                             value: " aGivenName "
                         },
-                        tags: ["tag2"]
+                        tags: ["x:tag2"]
                     }
                 };
 
@@ -2501,7 +2568,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const createdSharedAttribute = await consumptionController.attributes.getLocalAttribute((result as ReadAttributeAcceptResponseItem).attributeId);
                 const sourceAttribute = await consumptionController.attributes.getLocalAttribute(createdSharedAttribute!.shareInfo!.sourceAttribute!);
                 expect(sourceAttribute!.succeeds).toStrictEqual(existingRepositoryAttribute.id);
-                expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["tag1", "tag2"]);
+                expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x:tag1", "x:tag2"]);
             });
 
             test("accept with new IdentityAttribute that is already shared", async function () {
@@ -2607,7 +2674,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: recipient,
                         value: GivenName.fromAny({ value: "aGivenName" }),
-                        tags: ["tag1"]
+                        tags: ["x:tag1"]
                     })
                 });
 
@@ -2644,7 +2711,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                             "@type": "GivenName",
                             value: "aGivenName"
                         },
-                        tags: ["tag2"]
+                        tags: ["x:tag2"]
                     }
                 };
 
@@ -2655,7 +2722,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const succeededOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute((result as AttributeSuccessionAcceptResponseItem).successorId);
                 const sourceAttribute = await consumptionController.attributes.getLocalAttribute(succeededOwnSharedIdentityAttribute!.shareInfo!.sourceAttribute!);
                 expect(sourceAttribute!.succeeds).toStrictEqual(existingRepositoryAttribute.id);
-                expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["tag1", "tag2"]);
+                expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x:tag1", "x:tag2"]);
             });
 
             test("accept with new IdentityAttribute that is already shared after trimming with different tags", async function () {
@@ -2663,7 +2730,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: recipient,
                         value: GivenName.fromAny({ value: "aGivenName" }),
-                        tags: ["tag1"]
+                        tags: ["x:tag1"]
                     })
                 });
 
@@ -2700,7 +2767,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                             "@type": "GivenName",
                             value: " aGivenName "
                         },
-                        tags: ["tag2"]
+                        tags: ["x:tag2"]
                     }
                 };
 
@@ -2711,7 +2778,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const succeededOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute((result as AttributeSuccessionAcceptResponseItem).successorId);
                 const sourceAttribute = await consumptionController.attributes.getLocalAttribute(succeededOwnSharedIdentityAttribute!.shareInfo!.sourceAttribute!);
                 expect(sourceAttribute!.succeeds).toStrictEqual(existingRepositoryAttribute.id);
-                expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["tag1", "tag2"]);
+                expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x:tag1", "x:tag2"]);
             });
 
             test("accept with new IdentityAttribute whose predecessor is already shared", async function () {
@@ -2794,7 +2861,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         content: IdentityAttribute.from({
                             value: GivenName.fromAny({ value: "aSucceededGivenName" }),
                             owner: recipient,
-                            tags: ["tag1"]
+                            tags: ["x:tag1"]
                         })
                     })
                 ).successor;
@@ -2826,7 +2893,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                             "@type": "GivenName",
                             value: "aSucceededGivenName"
                         },
-                        tags: ["tag2"]
+                        tags: ["x:tag2"]
                     }
                 };
 
@@ -2837,7 +2904,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const succeededOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute((result as AttributeSuccessionAcceptResponseItem).successorId);
                 const sourceAttribute = await consumptionController.attributes.getLocalAttribute(succeededOwnSharedIdentityAttribute!.shareInfo!.sourceAttribute!);
                 expect(sourceAttribute!.succeeds).toStrictEqual(existingRepositoryAttributeSuccessor.id);
-                expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["tag1", "tag2"]);
+                expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x:tag1", "x:tag2"]);
             });
         });
     });
@@ -2918,7 +2985,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 successorId: successorId,
                 successorContent: TestObjectFactory.createIdentityAttribute({
                     owner: recipient,
-                    tags: ["aNewTag"]
+                    tags: ["x:aNewTag"]
                 })
             });
 

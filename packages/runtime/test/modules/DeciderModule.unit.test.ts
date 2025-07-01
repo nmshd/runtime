@@ -7,8 +7,6 @@ import {
     CreateAttributeRequestItemConfig,
     DeleteAttributeAcceptResponseConfig,
     DeleteAttributeRequestItemConfig,
-    FreeTextAcceptResponseConfig,
-    FreeTextRequestItemConfig,
     GeneralRequestConfig,
     ProposeAttributeRequestItemConfig,
     ProposeAttributeWithNewAttributeAcceptResponseConfig,
@@ -69,11 +67,6 @@ describe("DeciderModule unit tests", () => {
             deletionDate: "deletionDate"
         };
 
-        const freeTextAcceptResponseConfig: FreeTextAcceptResponseConfig = {
-            accept: true,
-            freeText: "freeText"
-        };
-
         const proposeAttributeWithNewAttributeAcceptResponseConfig: ProposeAttributeWithNewAttributeAcceptResponseConfig = {
             accept: true,
             attribute: IdentityAttribute.from({
@@ -116,11 +109,6 @@ describe("DeciderModule unit tests", () => {
             "content.item.@type": "DeleteAttributeRequestItem"
         };
 
-        const freeTextRequestItemConfig: FreeTextRequestItemConfig = {
-            "content.item.@type": "FreeTextRequestItem",
-            "content.item.freeText": "A free text"
-        };
-
         const proposeAttributeRequestItemConfig: ProposeAttributeRequestItemConfig = {
             "content.item.@type": "ProposeAttributeRequestItem"
         };
@@ -141,70 +129,54 @@ describe("DeciderModule unit tests", () => {
             [generalRequestConfig, rejectResponseConfig, true],
             [generalRequestConfig, simpleAcceptResponseConfig, true],
             [generalRequestConfig, deleteAttributeAcceptResponseConfig, false],
-            [generalRequestConfig, freeTextAcceptResponseConfig, false],
             [generalRequestConfig, proposeAttributeWithNewAttributeAcceptResponseConfig, false],
             [generalRequestConfig, readAttributeWithNewAttributeAcceptResponseConfig, false],
 
             [authenticationRequestItemConfig, rejectResponseConfig, true],
             [authenticationRequestItemConfig, simpleAcceptResponseConfig, true],
             [authenticationRequestItemConfig, deleteAttributeAcceptResponseConfig, false],
-            [authenticationRequestItemConfig, freeTextAcceptResponseConfig, false],
             [authenticationRequestItemConfig, proposeAttributeWithNewAttributeAcceptResponseConfig, false],
             [authenticationRequestItemConfig, readAttributeWithNewAttributeAcceptResponseConfig, false],
 
             [consentRequestItemConfig, rejectResponseConfig, true],
             [consentRequestItemConfig, simpleAcceptResponseConfig, true],
             [consentRequestItemConfig, deleteAttributeAcceptResponseConfig, false],
-            [consentRequestItemConfig, freeTextAcceptResponseConfig, false],
             [consentRequestItemConfig, proposeAttributeWithNewAttributeAcceptResponseConfig, false],
             [consentRequestItemConfig, readAttributeWithNewAttributeAcceptResponseConfig, false],
 
             [createAttributeRequestItemConfig, rejectResponseConfig, true],
             [createAttributeRequestItemConfig, simpleAcceptResponseConfig, true],
             [createAttributeRequestItemConfig, deleteAttributeAcceptResponseConfig, false],
-            [createAttributeRequestItemConfig, freeTextAcceptResponseConfig, false],
             [createAttributeRequestItemConfig, proposeAttributeWithNewAttributeAcceptResponseConfig, false],
             [createAttributeRequestItemConfig, readAttributeWithNewAttributeAcceptResponseConfig, false],
 
             [deleteAttributeRequestItemConfig, rejectResponseConfig, true],
             [deleteAttributeRequestItemConfig, simpleAcceptResponseConfig, false],
             [deleteAttributeRequestItemConfig, deleteAttributeAcceptResponseConfig, true],
-            [deleteAttributeRequestItemConfig, freeTextAcceptResponseConfig, false],
             [deleteAttributeRequestItemConfig, proposeAttributeWithNewAttributeAcceptResponseConfig, false],
             [deleteAttributeRequestItemConfig, readAttributeWithNewAttributeAcceptResponseConfig, false],
-
-            [freeTextRequestItemConfig, rejectResponseConfig, true],
-            [freeTextRequestItemConfig, simpleAcceptResponseConfig, false],
-            [freeTextRequestItemConfig, deleteAttributeAcceptResponseConfig, false],
-            [freeTextRequestItemConfig, freeTextAcceptResponseConfig, true],
-            [freeTextRequestItemConfig, proposeAttributeWithNewAttributeAcceptResponseConfig, false],
-            [freeTextRequestItemConfig, readAttributeWithNewAttributeAcceptResponseConfig, false],
 
             [proposeAttributeRequestItemConfig, rejectResponseConfig, true],
             [proposeAttributeRequestItemConfig, simpleAcceptResponseConfig, false],
             [proposeAttributeRequestItemConfig, deleteAttributeAcceptResponseConfig, false],
-            [proposeAttributeRequestItemConfig, freeTextAcceptResponseConfig, false],
             [proposeAttributeRequestItemConfig, proposeAttributeWithNewAttributeAcceptResponseConfig, true],
             [proposeAttributeRequestItemConfig, readAttributeWithNewAttributeAcceptResponseConfig, false],
 
             [readAttributeRequestItemConfig, rejectResponseConfig, true],
             [readAttributeRequestItemConfig, simpleAcceptResponseConfig, false],
             [readAttributeRequestItemConfig, deleteAttributeAcceptResponseConfig, false],
-            [readAttributeRequestItemConfig, freeTextAcceptResponseConfig, false],
             [readAttributeRequestItemConfig, proposeAttributeWithNewAttributeAcceptResponseConfig, false],
             [readAttributeRequestItemConfig, readAttributeWithNewAttributeAcceptResponseConfig, true],
 
             [registerAttributeListenerRequestItemConfig, rejectResponseConfig, true],
             [registerAttributeListenerRequestItemConfig, simpleAcceptResponseConfig, true],
             [registerAttributeListenerRequestItemConfig, deleteAttributeAcceptResponseConfig, false],
-            [registerAttributeListenerRequestItemConfig, freeTextAcceptResponseConfig, false],
             [registerAttributeListenerRequestItemConfig, proposeAttributeWithNewAttributeAcceptResponseConfig, false],
             [registerAttributeListenerRequestItemConfig, readAttributeWithNewAttributeAcceptResponseConfig, false],
 
             [shareAttributeRequestItemConfig, rejectResponseConfig, true],
             [shareAttributeRequestItemConfig, simpleAcceptResponseConfig, true],
             [shareAttributeRequestItemConfig, deleteAttributeAcceptResponseConfig, false],
-            [shareAttributeRequestItemConfig, freeTextAcceptResponseConfig, false],
             [shareAttributeRequestItemConfig, proposeAttributeWithNewAttributeAcceptResponseConfig, false],
             [shareAttributeRequestItemConfig, readAttributeWithNewAttributeAcceptResponseConfig, false]
         ])("%p and %p should return %p as validation result", (requestConfig, responseConfig, expectedCompatibility) => {

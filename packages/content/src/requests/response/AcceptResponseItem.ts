@@ -8,13 +8,10 @@ import {
     CreateAttributeAcceptResponseItemJSON,
     FormFieldAcceptResponseItem,
     FormFieldAcceptResponseItemJSON,
-    FreeTextAcceptResponseItem,
-    FreeTextAcceptResponseItemJSON,
     IAttributeAlreadySharedAcceptResponseItem,
     IAttributeSuccessionAcceptResponseItem,
     ICreateAttributeAcceptResponseItem,
     IFormFieldAcceptResponseItem,
-    IFreeTextAcceptResponseItem,
     IProposeAttributeAcceptResponseItem,
     IReadAttributeAcceptResponseItem,
     IRegisterAttributeListenerAcceptResponseItem,
@@ -47,7 +44,6 @@ export type AcceptResponseItemJSONDerivations =
     | ProposeAttributeAcceptResponseItemJSON
     | ReadAttributeAcceptResponseItemJSON
     | RegisterAttributeListenerAcceptResponseItemJSON
-    | FreeTextAcceptResponseItemJSON
     | FormFieldAcceptResponseItemJSON
     | TransferFileOwnershipAcceptResponseItemJSON;
 
@@ -64,7 +60,6 @@ export type IAcceptResponseItemDerivations =
     | IProposeAttributeAcceptResponseItem
     | IReadAttributeAcceptResponseItem
     | IRegisterAttributeListenerAcceptResponseItem
-    | IFreeTextAcceptResponseItem
     | IFormFieldAcceptResponseItem
     | ITransferFileOwnershipAcceptResponseItem;
 
@@ -90,6 +85,5 @@ export type AcceptResponseItemDerivations =
     | ProposeAttributeAcceptResponseItem
     | ReadAttributeAcceptResponseItem
     | RegisterAttributeListenerAcceptResponseItem
-    | FreeTextAcceptResponseItem
     | FormFieldAcceptResponseItem
     | TransferFileOwnershipAcceptResponseItem;

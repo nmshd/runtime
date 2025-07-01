@@ -90,9 +90,7 @@ describe("Reference", () => {
 
     test.each([
         "https://backbone.example.com/r/ANID1234?app=anAppName#M3xsZXJKeVg4eWRKREVYb3dxMlBNTW50UlhYQTI3d2dISllBX0JqbkZ4NTVZfHw",
-        "QU5JRDEyMzRAaHR0cHM6Ly9iYWNrYm9uZS5leGFtcGxlLmNvbXwzfGxlckp5WDh5ZEpERVhvd3EyUE1NbnRSWFhBMjd3Z0hKWUFfQmpuRng1NVl8fA",
-        "nmshd://qr#QU5JRDEyMzRAaHR0cHM6Ly9iYWNrYm9uZS5leGFtcGxlLmNvbXwzfGxlckp5WDh5ZEpERVhvd3EyUE1NbnRSWFhBMjd3Z0hKWUFfQmpuRng1NVl8fA",
-        "nmshd://tr#QU5JRDEyMzRAaHR0cHM6Ly9iYWNrYm9uZS5leGFtcGxlLmNvbXwzfGxlckp5WDh5ZEpERVhvd3EyUE1NbnRSWFhBMjd3Z0hKWUFfQmpuRng1NVl8fA"
+        "QU5JRDEyMzRAaHR0cHM6Ly9iYWNrYm9uZS5leGFtcGxlLmNvbXwzfGxlckp5WDh5ZEpERVhvd3EyUE1NbnRSWFhBMjd3Z0hKWUFfQmpuRng1NVl8fA"
     ])("Reference#from called with %s", (value) => {
         const reference = Reference.from(value);
 

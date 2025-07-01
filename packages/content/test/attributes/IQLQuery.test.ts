@@ -36,7 +36,7 @@ describe("IQLQuery", function () {
     test("can be created with creation hints that include tags", function () {
         const hint: IQLQueryCreationHintsJSON = {
             valueType: "GivenName",
-            tags: ["foo", "bar"]
+            tags: ["x:tag1", "x:tag2"]
         };
 
         const serializable = IQLQuery.from({

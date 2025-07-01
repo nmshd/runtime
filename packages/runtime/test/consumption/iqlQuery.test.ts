@@ -50,7 +50,7 @@ describe("IQL Query", () => {
                         "@type": "GivenName",
                         value: "aGivenName1"
                     },
-                    tags: ["language:de"]
+                    tags: ["x:language:de"]
                 }
             })
         ).value;
@@ -62,7 +62,7 @@ describe("IQL Query", () => {
                         "@type": "GivenName",
                         value: "aGivenName2"
                     },
-                    tags: ["language:en"]
+                    tags: ["x:language:en"]
                 }
             })
         ).value;
@@ -73,7 +73,7 @@ describe("IQL Query", () => {
                     "@type": "GivenName",
                     value: "aGivenName3"
                 },
-                tags: ["content:someContent"]
+                tags: ["x:content:someContent"]
             }
         });
 
@@ -85,7 +85,7 @@ describe("IQL Query", () => {
                         mustBeAccepted: false,
                         query: {
                             "@type": "IQLQuery",
-                            queryString: "#language:de"
+                            queryString: "#x:language:de"
                         }
                     }
                 ],
