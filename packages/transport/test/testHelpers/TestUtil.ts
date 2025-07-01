@@ -14,6 +14,7 @@ import fs from "fs";
 import { DurationLike } from "luxon";
 import path from "path";
 import { GenericContainer, Wait } from "testcontainers";
+import * as tmp from "tmp";
 import { LogLevel } from "typescript-logging";
 import {
     AccountController,
@@ -40,6 +41,7 @@ import {
 import { ALL_CRYPTO_PROVIDERS } from "../../src/core/CryptoProviderMapping";
 
 export class TestUtil {
+    private static readonly rootTempDir = tmp.dirSync({ unsafeCleanup: true });
     private static readonly fatalLogger = new SimpleLoggerFactory(LogLevel.Fatal);
     private static oldLogger: ILoggerFactory;
     public static loggerFactory = new NodeLoggerFactory({
@@ -165,9 +167,7 @@ export class TestUtil {
 
         const config = TestUtil.createConfig();
 
-        const randomDigits = Math.floor(Math.random() * 1000)
-            .toString()
-            .padStart(3, "0");
+        const transportSpecificDir = fs.mkdtempSync(path.join(TestUtil.rootTempDir.name, "transport-"));
 
         const calConfig: CryptoLayerConfig = {
             factoryFunctions: { getAllProviders, createProvider, createProviderFromName, getProviderCapabilities },
@@ -176,10 +176,13 @@ export class TestUtil {
                 {
                     // eslint-disable-next-line @typescript-eslint/naming-convention
                     additional_config: [
-                        // eslint-disable-next-line @typescript-eslint/naming-convention
-                        { StorageConfigPass: "12345678" },
-                        // eslint-disable-next-line @typescript-eslint/naming-convention
-                        { FileStoreConfig: { db_dir: `./testDB/cal_db_${name}_${randomDigits}` } }
+                        {
+                            // eslint-disable-next-line @typescript-eslint/naming-convention
+                            FileStoreConfig: {
+                                // eslint-disable-next-line @typescript-eslint/naming-convention
+                                db_dir: path.join(transportSpecificDir, `cal_db_${name}`)
+                            }
+                        }
                     ]
                 }
             ])

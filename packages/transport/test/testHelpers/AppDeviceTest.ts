@@ -2,6 +2,9 @@ import { ILogger } from "@js-soft/logging-abstractions";
 import { EventEmitter2EventBus } from "@js-soft/ts-utils";
 import { CryptoLayerConfig } from "@nmshd/crypto";
 import { createProvider, createProviderFromName, getAllProviders, getProviderCapabilities } from "@nmshd/rs-crypto-node";
+import fs from "fs";
+import path from "path";
+import * as tmp from "tmp";
 import { AccountController, DeviceSharedSecret, Transport } from "../../src";
 import { ALL_CRYPTO_PROVIDERS } from "../../src/core/CryptoProviderMapping";
 import { DeviceTestParameters } from "./DeviceTestParameters";
@@ -15,11 +18,12 @@ export class AppDeviceTest {
 
     private readonly createdAccounts: AccountController[] = [];
 
+    private static readonly rootTempDir = tmp.dirSync({ unsafeCleanup: true });
+
     public constructor(parameters: DeviceTestParameters) {
         this.parameters = parameters;
-        const randomDigits = Math.floor(Math.random() * 1000)
-            .toString()
-            .padStart(3, "0");
+        const transportSpecificDir = fs.mkdtempSync(path.join(AppDeviceTest.rootTempDir.name, "transport-"));
+
         const calConfig: CryptoLayerConfig = {
             factoryFunctions: { getAllProviders, createProvider, createProviderFromName, getProviderCapabilities },
             providersToBeInitialized: ALL_CRYPTO_PROVIDERS.map((name) => [
@@ -27,10 +31,13 @@ export class AppDeviceTest {
                 {
                     // eslint-disable-next-line @typescript-eslint/naming-convention
                     additional_config: [
-                        // eslint-disable-next-line @typescript-eslint/naming-convention
-                        { StorageConfigPass: "12345678" },
-                        // eslint-disable-next-line @typescript-eslint/naming-convention
-                        { FileStoreConfig: { db_dir: `./testDB/cal_db_${name}_${randomDigits}` } }
+                        {
+                            // eslint-disable-next-line @typescript-eslint/naming-convention
+                            FileStoreConfig: {
+                                // eslint-disable-next-line @typescript-eslint/naming-convention
+                                db_dir: path.join(transportSpecificDir, `cal_db_${name}`)
+                            }
+                        }
                     ]
                 }
             ])
