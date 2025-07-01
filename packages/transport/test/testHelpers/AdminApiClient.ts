@@ -69,7 +69,7 @@ export interface CreateAnnouncementRequest {
     texts: { language: string; title: string; body: string }[];
     expiresAt?: string;
     recipients?: string[];
-    actions: { displayName: Record<keyof typeof LanguageISO639, string>; link: string }[];
+    actions: { displayName: Partial<Record<keyof typeof LanguageISO639, string>>; link: string }[];
 }
 
 export interface CreateAnnouncementResponse {

@@ -1,4 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
+import { LanguageISO639 } from "@nmshd/core-types";
 import axios, { Axios } from "axios";
 import { AnnouncementSeverity, IdentityDeletionProcessDTO, TransportServices } from "../../src";
 import { syncUntilHasIdentityDeletionProcess } from "./testUtils";
@@ -68,7 +69,7 @@ export interface CreateAnnouncementRequest {
     isSilent: boolean;
     expiresAt?: string;
     recipients?: string[];
-    actions: { displayName: Record<string, string>; link: string }[];
+    actions: { displayName: Partial<Record<keyof typeof LanguageISO639, string>>; link: string }[];
 }
 
 export interface CreateAnnouncementResponse {
