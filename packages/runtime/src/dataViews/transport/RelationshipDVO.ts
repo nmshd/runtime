@@ -1,4 +1,4 @@
-import { PeerDeletionStatus, RelationshipAuditLogDTO, RelationshipCreationContentDerivation } from "../../types/transport/RelationshipDTO";
+import { PeerDeletionStatus, RelationshipAuditLogDTO, RelationshipCreationContentDerivation } from "@nmshd/runtime-types";
 import { DataViewObject } from "../DataViewObject";
 import { LocalAttributeDVO } from "../consumption";
 

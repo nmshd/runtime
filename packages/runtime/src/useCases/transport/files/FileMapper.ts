@@ -1,8 +1,8 @@
 import { CoreBuffer } from "@nmshd/crypto";
+import { FileDTO } from "@nmshd/runtime-types";
 import { File } from "@nmshd/transport";
 import { Container } from "@nmshd/typescript-ioc";
 import { ConfigHolder } from "../../../ConfigHolder";
-import { FileDTO } from "../../../types";
 import { RuntimeErrors } from "../../common";
 import { DownloadFileResponse } from "./DownloadFile";
 

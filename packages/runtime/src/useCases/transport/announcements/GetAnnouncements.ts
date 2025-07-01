@@ -1,8 +1,8 @@
 import { Result } from "@js-soft/ts-utils";
 import { LanguageISO639 } from "@nmshd/core-types";
+import { AnnouncementDTO } from "@nmshd/runtime-types";
 import { AnnouncementController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { AnnouncementDTO } from "../../../types";
 import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { AnnouncementMapper } from "./AnnouncementMapper";
 

@@ -1,7 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
+import { TokenDTO } from "@nmshd/runtime-types";
 import { AnonymousTokenController, TokenReference } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { TokenDTO } from "../../../types";
 import { SchemaRepository, SchemaValidator, TokenReferenceString, URLTokenReferenceString, UseCase } from "../../common";
 import { TokenMapper } from "../../transport/tokens/TokenMapper";
 

@@ -1,8 +1,8 @@
 import { Result } from "@js-soft/ts-utils";
 import { DraftsController } from "@nmshd/consumption";
+import { DraftDTO } from "@nmshd/runtime-types";
 import { AccountController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { DraftDTO } from "../../../types";
 import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { DraftMapper } from "./DraftMapper";
 

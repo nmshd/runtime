@@ -1,5 +1,5 @@
+import { IdentityDeletionProcessDTO } from "@nmshd/runtime-types";
 import { IdentityDeletionProcess } from "@nmshd/transport";
-import { IdentityDeletionProcessDTO } from "../../../types/transport/IdentityDeletionProcessDTO";
 import { RuntimeErrors } from "../../common";
 
 export class IdentityDeletionProcessMapper {

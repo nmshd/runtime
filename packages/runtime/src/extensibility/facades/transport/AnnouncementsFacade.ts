@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
+import { AnnouncementDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { AnnouncementDTO } from "../../../types";
 import { GetAnnouncementsRequest, GetAnnouncementsUseCase } from "../../../useCases";
 
 export class AnnouncementsFacade {
