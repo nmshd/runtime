@@ -24,9 +24,11 @@ describe("Announcements", () => {
         const getAnnouncementsResult = await client.transport.announcements.getAnnouncements({ language: LanguageISO639.en });
         expect(getAnnouncementsResult).toBeSuccessful();
 
-        const containsCreatedAnnouncement = getAnnouncementsResult.value.some((a) => a.id === idOfCreatedAnnouncement);
+        const announcement = getAnnouncementsResult.value.find((a) => a.id === idOfCreatedAnnouncement);
 
-        expect(containsCreatedAnnouncement).toBeTruthy();
+        expect(announcement).toBeDefined();
+
+        expect(announcement!.actions).toHaveLength(1);
     });
 
     async function createTestAnnouncement(): Promise<string> {
@@ -39,6 +41,15 @@ describe("Announcements", () => {
                     language: "en",
                     title: "English Title",
                     body: "English Body"
+                }
+            ],
+            actions: [
+                {
+                    displayName: {
+                        en: "English Action Display Name",
+                        de: "Deutscher Action Anzeigename"
+                    },
+                    link: "https://example.com/some-action"
                 }
             ]
         });
