@@ -295,9 +295,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
                 value: GivenName.from({ value: "aGivenName😀" })
             });
 
-            await expect(When.iCallCanAccept()).rejects.toThrow(
-                "error.consumption.attributes.forbiddenCharactersInAttribute: 'The RequestItem contains an Attribute with forbidden characters.'"
-            );
+            await expect(When.iCallCanAccept()).rejects.toThrow("error.consumption.attributes.forbiddenCharactersInAttribute: 'The Attribute contains forbidden characters.'");
         });
 
         test("cannot create another RelationshipAttribute with same key", async function () {
