@@ -10,6 +10,7 @@
         "packages/transport",
         "packages/content",
         "packages/consumption",
+        "packages/runtime-types",
         "packages/runtime",
         "packages/app-runtime"
     ],
