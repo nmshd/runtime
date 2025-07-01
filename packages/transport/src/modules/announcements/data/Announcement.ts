@@ -62,7 +62,7 @@ export class Announcement extends Serializable implements IAnnouncement {
     }
 }
 
-@type("Announcement")
+@type("AnnouncementAction")
 export class AnnouncementAction extends Serializable implements IAnnouncementAction {
     @validate()
     @serialize()
