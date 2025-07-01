@@ -42,7 +42,7 @@ export const CryptoObject = {
 } as const;
 type CryptoObject = (typeof CryptoObject)[keyof typeof CryptoObject];
 
-export const ALL_CRYPTO_PROVIDERS = ["SoftwareProvider"];
+export const ALL_CRYPTO_PROVIDERS = ["SoftwareProvider", "AndroidProvider"];
 
 const CRYPTO_OPERATION_OBJECT_MAP: Partial<Record<CryptoObject, CryptoKeyType[]>> = {
     [CryptoObject.AccountController]: [CryptoKeyType.Encryption, CryptoKeyType.Signature],
