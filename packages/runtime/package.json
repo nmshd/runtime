@@ -67,7 +67,7 @@
         "@nmshd/consumption": "*",
         "@nmshd/content": "*",
         "@nmshd/core-types": "*",
-        "@nmshd/crypto": "2.1.2",
+        "@nmshd/crypto": "2.2.0-alpha.2",
         "@nmshd/iql": "^1.0.3",
         "@nmshd/transport": "*",
         "@nmshd/typescript-ioc": "3.2.4",

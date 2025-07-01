@@ -1,7 +1,7 @@
 import { ILogger, ILoggerFactory } from "@js-soft/logging-abstractions";
 import { SimpleLoggerFactory } from "@js-soft/simple-logger";
 import { EventBus } from "@js-soft/ts-utils";
-import { SodiumWrapper } from "@nmshd/crypto";
+import { CryptoLayerConfig, initCryptoLayerProviders, SodiumWrapper } from "@nmshd/crypto";
 import { AgentOptions } from "http";
 import { AgentOptions as HTTPSAgentOptions } from "https";
 import _ from "lodash";
@@ -86,7 +86,8 @@ export class Transport {
         customConfig: IConfigOverwrite,
         public readonly eventBus: EventBus,
         loggerFactory: ILoggerFactory = new SimpleLoggerFactory(),
-        public readonly correlator?: ICorrelator
+        public readonly correlator?: ICorrelator,
+        public readonly cryptoLayerConfig?: CryptoLayerConfig
     ) {
         this._config = _.defaultsDeep({}, customConfig, Transport.defaultConfig);
 
@@ -120,7 +121,20 @@ export class Transport {
 
     public async init(): Promise<Transport> {
         log.trace("Initializing Libsodium...");
-        await SodiumWrapper.ready();
+        const sodium = SodiumWrapper.ready();
+
+        if (this.cryptoLayerConfig) {
+            log.trace("Initializing Crypto Layer...");
+            try {
+                await initCryptoLayerProviders(this.cryptoLayerConfig);
+                log.trace("Crypto Layer initialized successfully");
+            } catch (error) {
+                log.warn("Failed to initialize Crypto Layer, continuing without it.", error);
+            }
+            log.trace("Crypto Layer initialized");
+        }
+
+        await sodium;
         log.trace("Libsodium initialized");
 
         log.info("Transport initialized");

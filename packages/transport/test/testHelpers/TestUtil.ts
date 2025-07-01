@@ -8,7 +8,8 @@ import { SimpleLoggerFactory } from "@js-soft/simple-logger";
 import { ISerializable, Serializable } from "@js-soft/ts-serval";
 import { EventEmitter2EventBus, sleep } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
-import { CoreBuffer } from "@nmshd/crypto";
+import { CoreBuffer, CryptoLayerConfig } from "@nmshd/crypto";
+import { createProvider, createProviderFromName, getAllProviders, getProviderCapabilities } from "@nmshd/rs-crypto-node";
 import fs from "fs";
 import { DurationLike } from "luxon";
 import path from "path";
@@ -36,6 +37,7 @@ import {
     Transport,
     TransportLoggerFactory
 } from "../../src";
+import { ALL_CRYPTO_PROVIDERS } from "../../src/core/CryptoProviderMapping";
 
 export class TestUtil {
     private static readonly fatalLogger = new SimpleLoggerFactory(LogLevel.Fatal);
@@ -163,7 +165,26 @@ export class TestUtil {
 
         const config = TestUtil.createConfig();
 
-        return new Transport({ ...config, ...configOverwrite }, eventBus, TestUtil.loggerFactory, correlator);
+        const randomDigits = Math.floor(Math.random() * 1000)
+            .toString()
+            .padStart(3, "0");
+
+        const calConfig: CryptoLayerConfig = {
+            factoryFunctions: { getAllProviders, createProvider, createProviderFromName, getProviderCapabilities },
+            providersToBeInitialized: ALL_CRYPTO_PROVIDERS.map((name) => [
+                { providerName: name },
+                {
+                    // eslint-disable-next-line @typescript-eslint/naming-convention
+                    additional_config: [
+                        // eslint-disable-next-line @typescript-eslint/naming-convention
+                        { StorageConfigPass: "12345678" },
+                        // eslint-disable-next-line @typescript-eslint/naming-convention
+                        { FileStoreConfig: { db_dir: `./testDB/cal_db_${name}_${randomDigits}` } }
+                    ]
+                }
+            ])
+        };
+        return new Transport({ ...config, ...configOverwrite }, eventBus, TestUtil.loggerFactory, correlator, calConfig);
     }
 
     public static createEventBus(): EventEmitter2EventBus {
@@ -548,7 +569,7 @@ export class TestUtil {
             return e;
         }
 
-        throw new Error("no error occured");
+        throw new Error("no error occurred");
     }
 
     public static async sendRelationshipTemplate(from: AccountController, body?: ISerializable): Promise<RelationshipTemplate> {
