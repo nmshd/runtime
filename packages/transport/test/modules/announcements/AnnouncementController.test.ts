@@ -35,6 +35,9 @@ describe("AnnouncementController", function () {
 
             const containsCreatedAnnouncement = announcements.some((a) => a.id.equals(idOfCreatedAnnouncement));
             expect(containsCreatedAnnouncement).toBeTruthy();
+
+            const announcement = announcements.find((a) => a.id.equals(idOfCreatedAnnouncement))!;
+            expect(announcement.actions).toHaveLength(1);
         });
 
         test("returns announcements in correct language", async function () {
@@ -89,6 +92,15 @@ describe("AnnouncementController", function () {
                         language: LanguageISO639.de,
                         title: "Deutscher Titel",
                         body: "Deutscher Body"
+                    }
+                ],
+                actions: [
+                    {
+                        displayName: {
+                            en: "English Action Display Name",
+                            de: "Deutscher Action Anzeigename"
+                        },
+                        link: "https://example.com/some-action"
                     }
                 ]
             });
