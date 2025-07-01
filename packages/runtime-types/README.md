@@ -1,4 +1,4 @@
-# Core Types
+# Runtime Types
 
 [![npm version](https://badge.fury.io/js/@nmshd%2fruntime-types.svg)](https://www.npmjs.com/package/@nmshd/runtime-types)
 
