@@ -5,8 +5,7 @@ import { createProvider, createProviderFromName, getAllProviders, getProviderCap
 import fs from "fs";
 import path from "path";
 import * as tmp from "tmp";
-import { AccountController, DeviceSharedSecret, Transport } from "../../src";
-import { ALL_CRYPTO_PROVIDERS } from "../../src/core/CryptoProviderMapping";
+import { AccountController, ALL_CRYPTO_PROVIDERS, DeviceSharedSecret, Transport } from "../../src";
 import { DeviceTestParameters } from "./DeviceTestParameters";
 import { TestUtil } from "./TestUtil";
 

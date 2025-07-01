@@ -5,6 +5,7 @@ import { CryptoLayerConfig, initCryptoLayerProviders, SodiumWrapper } from "@nms
 import { AgentOptions } from "http";
 import { AgentOptions as HTTPSAgentOptions } from "https";
 import _ from "lodash";
+import { CryptoOperationPreferences, DEFAULT_CRYPTO_OPERATION_PREFERENCES } from "./CryptoProviderMapping";
 import { ICorrelator } from "./ICorrelator";
 import { TransportCoreErrors } from "./TransportCoreErrors";
 import { TransportError } from "./TransportError";
@@ -31,6 +32,7 @@ export interface IConfig {
     httpAgentOptions: AgentOptions;
     httpsAgentOptions: HTTPSAgentOptions;
     tagCacheLifetimeInMinutes: number;
+    cryptoOperationPreferences: CryptoOperationPreferences;
 }
 
 export interface IConfigOverwrite {
@@ -49,6 +51,7 @@ export interface IConfigOverwrite {
     httpAgentOptions?: AgentOptions;
     httpsAgentOptions?: HTTPSAgentOptions;
     tagCacheLifetimeInMinutes?: number;
+    cryptoOperationPreferences?: CryptoOperationPreferences;
 }
 
 export class Transport {
@@ -79,7 +82,8 @@ export class Transport {
             keepAlive: true,
             maxFreeSockets: 2
         },
-        tagCacheLifetimeInMinutes: 5
+        tagCacheLifetimeInMinutes: 5,
+        cryptoOperationPreferences: DEFAULT_CRYPTO_OPERATION_PREFERENCES
     };
 
     public constructor(
@@ -121,7 +125,7 @@ export class Transport {
 
     public async init(): Promise<Transport> {
         log.trace("Initializing Libsodium...");
-        const sodium = SodiumWrapper.ready();
+        await SodiumWrapper.ready();
 
         if (this.cryptoLayerConfig) {
             log.trace("Initializing Crypto Layer...");
@@ -134,7 +138,6 @@ export class Transport {
             log.trace("Crypto Layer initialized");
         }
 
-        await sodium;
         log.trace("Libsodium initialized");
 
         log.info("Transport initialized");

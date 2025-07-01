@@ -59,14 +59,7 @@ export class DeviceSecretController extends TransportController {
     }
 
     public async storeSecret(
-        secret:
-            | DeviceSecretCredentials
-            | CryptoExchangeKeypair
-            | CryptoExchangePrivateKey
-            | CryptoSignatureKeypair
-            | CryptoSignaturePrivateKey
-            | CryptoSecretKey
-            | DeviceBoundKeyHandle,
+        secret: DeviceSecretCredentials | CryptoExchangeKeypair | CryptoExchangePrivateKey | CryptoSignatureKeypair | CryptoSignaturePrivateKey | CryptoSecretKey,
         name: string
     ): Promise<SecretContainerCipher> {
         const plainString = secret.serialize();
@@ -74,11 +67,12 @@ export class DeviceSecretController extends TransportController {
 
         let encryptionKey;
         let cipher;
-        if (this.getBaseKey() instanceof DeviceBoundKeyHandle) {
-            encryptionKey = await CoreCrypto.generateDeviceBoundDerivationHandle(this.getBaseKey() as DeviceBoundKeyHandle, 1, DeviceSecretController.secretContext);
+        const baseKey = this.getBaseKey();
+        if (baseKey instanceof DeviceBoundKeyHandle) {
+            encryptionKey = await CoreCrypto.generateDeviceBoundDerivationHandle(baseKey, 1, DeviceSecretController.secretContext);
             cipher = await CryptoEncryptionHandle.encrypt(plainBuffer, encryptionKey);
         } else {
-            encryptionKey = await CoreCrypto.deriveKeyFromBase(this.getBaseKey() as CryptoSecretKey, 1, DeviceSecretController.secretContext);
+            encryptionKey = await CoreCrypto.deriveKeyFromBase(baseKey, 1, DeviceSecretController.secretContext);
             cipher = await CoreCrypto.encrypt(plainBuffer, encryptionKey);
         }
 
@@ -106,11 +100,12 @@ export class DeviceSecretController extends TransportController {
         const secret = SecretContainerCipher.from(secretObj);
         let decryptionKey;
         let plainBuffer;
-        if (this.getBaseKey() instanceof DeviceBoundKeyHandle) {
-            decryptionKey = await CoreCrypto.generateDeviceBoundDerivationHandle(this.getBaseKey() as DeviceBoundKeyHandle, 1, DeviceSecretController.secretContext);
+        const baseKey = this.getBaseKey();
+        if (baseKey instanceof DeviceBoundKeyHandle) {
+            decryptionKey = await CoreCrypto.generateDeviceBoundDerivationHandle(baseKey, 1, DeviceSecretController.secretContext);
             plainBuffer = await CryptoEncryptionHandle.decrypt(secret.cipher, decryptionKey);
         } else {
-            decryptionKey = await CoreCrypto.deriveKeyFromBase(this.getBaseKey() as CryptoSecretKey, 1, DeviceSecretController.secretContext);
+            decryptionKey = await CoreCrypto.deriveKeyFromBase(baseKey, 1, DeviceSecretController.secretContext);
             plainBuffer = await CoreCrypto.decrypt(secret.cipher, decryptionKey);
         }
 

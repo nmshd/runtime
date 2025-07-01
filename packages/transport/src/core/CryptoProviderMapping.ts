@@ -7,13 +7,12 @@ export const CryptoProviderTypes = {
     Software: "Software",
     Hardware: "Hardware",
     Network: "Network",
-    LEGACY: "LEGACY"
+    Legacy: "Legacy"
 } as const;
 
 export const CryptoPurpose = {
     DeviceKeyPair: "deviceKeyPair",
-    BaseKey: "baseKey",
-    Default: "default"
+    BaseKey: "baseKey"
 } as const;
 type CryptoPurpose = (typeof CryptoPurpose)[keyof typeof CryptoPurpose];
 
@@ -42,45 +41,16 @@ export const CryptoObject = {
 } as const;
 type CryptoObject = (typeof CryptoObject)[keyof typeof CryptoObject];
 
-export const ALL_CRYPTO_PROVIDERS = ["SoftwareProvider", "AndroidProvider"];
-
-const CRYPTO_OPERATION_OBJECT_MAP: Partial<Record<CryptoObject, CryptoKeyType[]>> = {
-    [CryptoObject.AccountController]: [CryptoKeyType.Encryption, CryptoKeyType.Signature],
-    [CryptoObject.AnonymousTokenController]: [CryptoKeyType.Derivation],
-    [CryptoObject.Certificate]: [CryptoKeyType.Encryption],
-    [CryptoObject.DeviceController]: [CryptoKeyType.Signature, CryptoKeyType.Encryption],
-    [CryptoObject.DeviceSecretController]: [CryptoKeyType.Derivation],
-    [CryptoObject.FileController]: [CryptoKeyType.Encryption],
-    [CryptoObject.IdentityController]: [CryptoKeyType.Encryption],
-    [CryptoObject.MessageController]: [CryptoKeyType.Encryption],
-    [CryptoObject.RelationshipTemplateController]: [CryptoKeyType.Derivation, CryptoKeyType.Encryption],
-    [CryptoObject.RelationshipsController]: [CryptoKeyType.Encryption],
-    [CryptoObject.RelationshipSecretController]: [CryptoKeyType.Encryption],
-    [CryptoObject.SecretController]: [CryptoKeyType.Encryption],
-    [CryptoObject.TokenController]: [CryptoKeyType.Encryption]
-};
-
-const OBJECT_OPERATION_PREFERENCES: Partial<
+export type CryptoOperationPreferences = Partial<
     Record<CryptoObject, Partial<Record<CryptoKeyType, SecurityLevel | Partial<Record<Exclude<CryptoPurpose, undefined>, SecurityLevel>>>>>
-> = {
-    [CryptoObject.AccountController]: {
-        [CryptoKeyType.Signature]: {
-            [CryptoPurpose.DeviceKeyPair]: CryptoProviderTypes.Hardware,
-            [CryptoPurpose.Default]: CryptoProviderTypes.Software
-        },
-        [CryptoKeyType.Encryption]: {
-            [CryptoPurpose.BaseKey]: CryptoProviderTypes.Hardware,
-            [CryptoPurpose.Default]: CryptoProviderTypes.Software
-        }
-    },
-    [CryptoObject.AnonymousTokenController]: {
-        [CryptoKeyType.Derivation]: CryptoProviderTypes.Software
-    },
+>;
+
+export const DEFAULT_CRYPTO_OPERATION_PREFERENCES: CryptoOperationPreferences = {
+    [CryptoObject.AccountController]: {},
+    [CryptoObject.AnonymousTokenController]: {},
     [CryptoObject.Certificate]: {},
     [CryptoObject.DeviceController]: {},
-    [CryptoObject.DeviceSecretController]: {
-        [CryptoKeyType.Encryption]: CryptoProviderTypes.Hardware
-    },
+    [CryptoObject.DeviceSecretController]: {},
     [CryptoObject.FileController]: {
         [CryptoKeyType.Encryption]: CryptoProviderTypes.Software
     },
@@ -101,73 +71,102 @@ const OBJECT_OPERATION_PREFERENCES: Partial<
     }
 };
 
-const DEFAULT_OPERATION_PREFERENCES: Partial<Record<CryptoKeyType, SecurityLevel>> = {
-    [CryptoKeyType.Derivation]: CryptoProviderTypes.Software,
-    [CryptoKeyType.Signature]: CryptoProviderTypes.Hardware,
-    [CryptoKeyType.Encryption]: CryptoProviderTypes.Software,
-    [CryptoKeyType.Exchange]: CryptoProviderTypes.Software
-};
+// To be removed after initialization of ts-crypto is adjusted
+export const ALL_CRYPTO_PROVIDERS = ["SoftwareProvider"];
 
-const FALLBACK_PREFERENCE: SecurityLevel = CryptoProviderTypes.Software;
+export class CryptoProviderMapping {
+    private static readonly ALLOWED_CRYPTO_OPERATIONS: Partial<Record<CryptoObject, CryptoKeyType[]>> = {
+        [CryptoObject.AccountController]: [CryptoKeyType.Encryption, CryptoKeyType.Signature],
+        [CryptoObject.AnonymousTokenController]: [CryptoKeyType.Derivation],
+        [CryptoObject.Certificate]: [CryptoKeyType.Encryption],
+        [CryptoObject.DeviceController]: [CryptoKeyType.Signature, CryptoKeyType.Encryption],
+        [CryptoObject.DeviceSecretController]: [CryptoKeyType.Derivation],
+        [CryptoObject.FileController]: [CryptoKeyType.Encryption],
+        [CryptoObject.IdentityController]: [CryptoKeyType.Encryption],
+        [CryptoObject.MessageController]: [CryptoKeyType.Encryption],
+        [CryptoObject.RelationshipTemplateController]: [CryptoKeyType.Derivation, CryptoKeyType.Encryption],
+        [CryptoObject.RelationshipsController]: [CryptoKeyType.Encryption],
+        [CryptoObject.RelationshipSecretController]: [CryptoKeyType.Encryption],
+        [CryptoObject.SecretController]: [CryptoKeyType.Encryption],
+        [CryptoObject.TokenController]: [CryptoKeyType.Encryption]
+    };
 
-export function getPreferredProviderLevel(cryptoObject: CryptoObject, cryptoOperation: CryptoKeyType, purpose?: Exclude<CryptoPurpose, undefined>): SecurityLevel {
-    const allowedOps = CRYPTO_OPERATION_OBJECT_MAP[cryptoObject];
-    if (allowedOps && !allowedOps.includes(cryptoOperation)) {
-        throw new Error(`Operation '${cryptoOperation}' is not supported for object '${cryptoObject}'.`);
+    private static readonly DEFAULT_OPERATION_PREFERENCES: Partial<Record<CryptoKeyType, SecurityLevel>> = {
+        [CryptoKeyType.Derivation]: CryptoProviderTypes.Software,
+        [CryptoKeyType.Signature]: CryptoProviderTypes.Hardware,
+        [CryptoKeyType.Encryption]: CryptoProviderTypes.Hardware,
+        [CryptoKeyType.Exchange]: CryptoProviderTypes.Software
+    };
+
+    private static readonly FALLBACK_PREFERENCE: SecurityLevel = CryptoProviderTypes.Software;
+
+    private readonly _objectOperationPreferences: CryptoOperationPreferences;
+
+    public constructor(preferences: CryptoOperationPreferences = DEFAULT_CRYPTO_OPERATION_PREFERENCES) {
+        this._objectOperationPreferences = preferences;
     }
 
-    let chosenSecurityLevel: SecurityLevel | undefined;
-    const objectPrefs = OBJECT_OPERATION_PREFERENCES[cryptoObject];
-    if (objectPrefs) {
-        const operationPrefOrMap = objectPrefs[cryptoOperation];
-        if (operationPrefOrMap) {
-            if (typeof operationPrefOrMap === "object") {
-                if (purpose && operationPrefOrMap[purpose]) {
-                    chosenSecurityLevel = operationPrefOrMap[purpose];
+    private getPreferredProviderLevel(cryptoObject: CryptoObject, cryptoOperation: CryptoKeyType, purpose?: Exclude<CryptoPurpose, undefined>): SecurityLevel {
+        const allowedOps = CryptoProviderMapping.ALLOWED_CRYPTO_OPERATIONS[cryptoObject];
+        if (allowedOps && !allowedOps.includes(cryptoOperation)) {
+            throw new Error(`Operation '${cryptoOperation}' is not supported for object '${cryptoObject}'.`);
+        }
+
+        let chosenSecurityLevel: SecurityLevel | undefined;
+        const objectPrefs = this._objectOperationPreferences[cryptoObject];
+        if (objectPrefs) {
+            const operationPrefOrMap = objectPrefs[cryptoOperation];
+            if (operationPrefOrMap) {
+                if (typeof operationPrefOrMap === "object") {
+                    if (purpose && operationPrefOrMap[purpose]) {
+                        chosenSecurityLevel = operationPrefOrMap[purpose];
+                    }
+                } else {
+                    chosenSecurityLevel = operationPrefOrMap;
                 }
-            } else {
-                chosenSecurityLevel = operationPrefOrMap;
             }
         }
-    }
 
-    if (!chosenSecurityLevel) {
-        const operationPref = DEFAULT_OPERATION_PREFERENCES[cryptoOperation];
-        chosenSecurityLevel = operationPref ?? FALLBACK_PREFERENCE;
-    }
-
-    if (!hasProviderForSecurityLevel(chosenSecurityLevel)) {
-        if (chosenSecurityLevel !== FALLBACK_PREFERENCE && !hasProviderForSecurityLevel(FALLBACK_PREFERENCE)) {
-            throw new Error(`No provider available for either ${chosenSecurityLevel} or fallback ${FALLBACK_PREFERENCE} for operation ${cryptoOperation}.`);
+        if (!chosenSecurityLevel) {
+            const operationPref = CryptoProviderMapping.DEFAULT_OPERATION_PREFERENCES[cryptoOperation];
+            chosenSecurityLevel = operationPref ?? CryptoProviderMapping.FALLBACK_PREFERENCE;
         }
-        return FALLBACK_PREFERENCE;
+
+        if (!hasProviderForSecurityLevel(chosenSecurityLevel)) {
+            if (chosenSecurityLevel !== CryptoProviderMapping.FALLBACK_PREFERENCE && !hasProviderForSecurityLevel(CryptoProviderMapping.FALLBACK_PREFERENCE)) {
+                throw new Error(
+                    `No provider available for either ${chosenSecurityLevel} or fallback ${CryptoProviderMapping.FALLBACK_PREFERENCE} for operation ${cryptoOperation}.`
+                );
+            }
+            return CryptoProviderMapping.FALLBACK_PREFERENCE;
+        }
+
+        return chosenSecurityLevel;
     }
 
-    return chosenSecurityLevel;
-}
+    public async getPreferredProviderKeyHandle(
+        cryptoObject: CryptoObject,
+        cryptoOperation: CryptoKeyType,
+        isPortable: boolean,
+        purpose?: CryptoPurpose
+    ): Promise<DeviceBoundKeyHandle | PortableKeyHandle> {
+        const securityLevel = this.getPreferredProviderLevel(cryptoObject, cryptoOperation, purpose);
 
-export async function getPreferredProviderKeyHandle(
-    cryptoObject: CryptoObject,
-    cryptoOperation: CryptoKeyType,
-    isPortable: boolean,
-    purpose?: CryptoPurpose
-): Promise<DeviceBoundKeyHandle | PortableKeyHandle> {
-    const securityLevel = getPreferredProviderLevel(cryptoObject, cryptoOperation, purpose);
+        switch (securityLevel) {
+            case CryptoProviderTypes.Hardware:
+                if (isPortable) {
+                    return await CoreCrypto.generatePortableKeyHandle({ securityLevel });
+                }
+                return await CoreCrypto.generateDeviceBoundKeyHandle({ securityLevel });
 
-    switch (securityLevel) {
-        case CryptoProviderTypes.Hardware:
-            if (isPortable) {
-                return await CoreCrypto.generatePortableKeyHandle({ securityLevel });
-            }
-            return await CoreCrypto.generateDeviceBoundKeyHandle({ securityLevel });
+            case CryptoProviderTypes.Software:
+                if (isPortable) {
+                    return await CoreCrypto.generatePortableKeyHandle({ securityLevel });
+                }
+                return await CoreCrypto.generateDeviceBoundKeyHandle({ securityLevel });
 
-        case CryptoProviderTypes.Software:
-            if (isPortable) {
-                return await CoreCrypto.generatePortableKeyHandle({ securityLevel });
-            }
-            return await CoreCrypto.generateDeviceBoundKeyHandle({ securityLevel });
-
-        default:
-            throw new Error(`Unsupported SecurityLevel '${securityLevel}' encountered for key handle generation.`);
+            default:
+                throw new Error(`Unsupported SecurityLevel '${securityLevel}' encountered for key handle generation.`);
+        }
     }
 }

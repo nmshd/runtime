@@ -18,6 +18,7 @@ import * as tmp from "tmp";
 import { LogLevel } from "typescript-logging";
 import {
     AccountController,
+    ALL_CRYPTO_PROVIDERS,
     ChangedItems,
     DependencyOverrides,
     DeviceSharedSecret,
@@ -38,7 +39,6 @@ import {
     Transport,
     TransportLoggerFactory
 } from "../../src";
-import { ALL_CRYPTO_PROVIDERS } from "../../src/core/CryptoProviderMapping";
 
 export class TestUtil {
     private static readonly rootTempDir = tmp.dirSync({ unsafeCleanup: true });
