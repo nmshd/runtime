@@ -1303,7 +1303,7 @@ describe("AttributesController", function () {
                             value: "aGivenName"
                         },
                         owner: consumptionController.accountController.identity.address,
-                        tags: ["aTag"]
+                        tags: ["x:aTag"]
                     })
                 });
 
@@ -1314,7 +1314,7 @@ describe("AttributesController", function () {
                             value: "aGivenName😀"
                         },
                         owner: consumptionController.accountController.identity.address,
-                        tags: ["aTag"]
+                        tags: ["x:aTag"]
                     })
                 };
 
