@@ -88,13 +88,6 @@ export interface ReadAttributeRequestItemConfig extends RequestItemConfig {
     "content.item.query.attributeCreationHints.tags"?: string[];
 }
 
-export interface RegisterAttributeListenerRequestItemConfig extends RequestItemConfig {
-    "content.item.@type": "RegisterAttributeListenerRequestItem";
-    "content.item.query.@type"?: "IdentityAttributeQuery";
-    "content.item.query.valueType"?: string | string[];
-    "content.item.query.tags"?: string[];
-}
-
 export interface ShareAttributeRequestItemConfig extends RequestItemConfig {
     "content.item.@type": "ShareAttributeRequestItem";
     "content.item.attribute.@type"?: "IdentityAttribute" | "RelationshipAttribute";
@@ -121,7 +114,6 @@ export type RequestItemDerivationConfig =
     | DeleteAttributeRequestItemConfig
     | ProposeAttributeRequestItemConfig
     | ReadAttributeRequestItemConfig
-    | RegisterAttributeListenerRequestItemConfig
     | ShareAttributeRequestItemConfig
     | TransferFileOwnershipRequestItemConfig;
 

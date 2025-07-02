@@ -18,15 +18,12 @@ import {
     IFormFieldRequestItem,
     IProposeAttributeRequestItem,
     IReadAttributeRequestItem,
-    IRegisterAttributeListenerRequestItem,
     IShareAttributeRequestItem,
     ITransferFileOwnershipRequestItem,
     ProposeAttributeRequestItem,
     ProposeAttributeRequestItemJSON,
     ReadAttributeRequestItem,
     ReadAttributeRequestItemJSON,
-    RegisterAttributeListenerRequestItem,
-    RegisterAttributeListenerRequestItemJSON,
     ShareAttributeRequestItem,
     ShareAttributeRequestItemJSON,
     TransferFileOwnershipRequestItem,
@@ -70,7 +67,6 @@ export type RequestItemJSONDerivations =
     | ConsentRequestItemJSON
     | AuthenticationRequestItemJSON
     | FormFieldRequestItemJSON
-    | RegisterAttributeListenerRequestItemJSON
     | TransferFileOwnershipRequestItemJSON;
 
 export interface IRequestItem extends ISerializable {
@@ -110,7 +106,6 @@ export type IRequestItemDerivations =
     | IConsentRequestItem
     | IAuthenticationRequestItem
     | IFormFieldRequestItem
-    | IRegisterAttributeListenerRequestItem
     | ITransferFileOwnershipRequestItem;
 
 export abstract class RequestItem extends Serializable {
@@ -145,7 +140,6 @@ export type RequestItemDerivations =
     | ConsentRequestItem
     | AuthenticationRequestItem
     | FormFieldRequestItem
-    | RegisterAttributeListenerRequestItem
     | TransferFileOwnershipRequestItem;
 
 export function isRequestItemDerivation(input: any): input is RequestItemDerivations {
@@ -159,7 +153,6 @@ export function isRequestItemDerivation(input: any): input is RequestItemDerivat
         input["@type"] === "ConsentRequestItem" ||
         input["@type"] === "AuthenticationRequestItem" ||
         input["@type"] === "FormFieldRequestItem" ||
-        input["@type"] === "RegisterAttributeListenerRequestItem" ||
         input["@type"] === "TransferFileOwnershipRequestItem"
     );
 }

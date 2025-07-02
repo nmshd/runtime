@@ -9,7 +9,6 @@ import {
     PeerSharedAttributeSucceededNotificationItem,
     ProposeAttributeRequestItem,
     ReadAttributeRequestItem,
-    RegisterAttributeListenerRequestItem,
     ShareAttributeRequestItem,
     ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem,
     TransferFileOwnershipRequestItem
@@ -17,7 +16,6 @@ import {
 import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { AccountController, Transport } from "@nmshd/transport";
 import {
-    AttributeListenersController,
     AttributesController,
     CreateAttributeRequestItemProcessor,
     DeleteAttributeRequestItemProcessor,
@@ -36,7 +34,6 @@ import {
     PeerSharedAttributeSucceededNotificationItemProcessor,
     ProposeAttributeRequestItemProcessor,
     ReadAttributeRequestItemProcessor,
-    RegisterAttributeListenerRequestItemProcessor,
     RequestItemConstructor,
     RequestItemProcessorConstructor,
     RequestItemProcessorRegistry,
@@ -77,11 +74,6 @@ export class ConsumptionController {
     private _settings: SettingsController;
     public get settings(): SettingsController {
         return this._settings;
-    }
-
-    private _attributeListeners: AttributeListenersController;
-    public get attributeListeners(): AttributeListenersController {
-        return this._attributeListeners;
     }
 
     private _notifications: NotificationsController;
@@ -146,7 +138,6 @@ export class ConsumptionController {
         this._identityMetadata = await new IdentityMetadataController(this).init();
 
         this._settings = await new SettingsController(this).init();
-        this._attributeListeners = await new AttributeListenersController(this, this.transport.eventBus, this.accountController.identity).init();
         return this;
     }
 
@@ -159,7 +150,6 @@ export class ConsumptionController {
             [ProposeAttributeRequestItem, ProposeAttributeRequestItemProcessor],
             [ConsentRequestItem, GenericRequestItemProcessor],
             [AuthenticationRequestItem, GenericRequestItemProcessor],
-            [RegisterAttributeListenerRequestItem, RegisterAttributeListenerRequestItemProcessor],
             [FormFieldRequestItem, FormFieldRequestItemProcessor],
             [TransferFileOwnershipRequestItem, TransferFileOwnershipRequestItemProcessor]
         ]);
@@ -179,7 +169,6 @@ export class ConsumptionController {
         await this.outgoingRequests.deleteRequestsToPeer(peer);
         await this.incomingRequests.deleteRequestsFromPeer(peer);
         await this.settings.deleteSettingsForRelationship(relationshipId);
-        await this.attributeListeners.deletePeerAttributeListeners(peer);
         await this.notifications.deleteNotificationsExchangedWithPeer(peer);
         await this.identityMetadata.deleteIdentityMetadataReferencedWithPeer(peer);
     }

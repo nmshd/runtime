@@ -1,5 +1,5 @@
 import { ResponseItemResult } from "@nmshd/content";
-import { LocalAttributeDVO, LocalAttributeListenerDVO } from "../consumption";
+import { LocalAttributeDVO } from "../consumption";
 import { DataViewObject } from "../DataViewObject";
 
 export interface ResponseItemGroupDVO {
@@ -34,7 +34,6 @@ export interface AcceptResponseItemDVO extends ResponseItemDVO {
         | "DeleteAttributeAcceptResponseItemDVO"
         | "ShareAttributeAcceptResponseItemDVO"
         | "FormFieldAcceptResponseItemDVO"
-        | "RegisterAttributeListenerAcceptResponseItemDVO"
         | "TransferFileOwnershipAcceptResponseItemDVO"
         | "AttributeSuccessionAcceptResponseItemDVO"
         | "AttributeAlreadySharedAcceptResponseItemDVO"
@@ -75,12 +74,6 @@ export interface ShareAttributeAcceptResponseItemDVO extends AcceptResponseItemD
 export interface FormFieldAcceptResponseItemDVO extends AcceptResponseItemDVO {
     type: "FormFieldAcceptResponseItemDVO";
     response: string | number | boolean | string[];
-}
-
-export interface RegisterAttributeListenerAcceptResponseItemDVO extends AcceptResponseItemDVO {
-    type: "RegisterAttributeListenerAcceptResponseItemDVO";
-    listenerId: string;
-    listener?: LocalAttributeListenerDVO;
 }
 
 export interface TransferFileOwnershipAcceptResponseItemDVO extends AcceptResponseItemDVO {
