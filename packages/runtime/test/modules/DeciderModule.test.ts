@@ -279,7 +279,7 @@ describe("DeciderModule", () => {
             expect(responseContent.items[0]["@type"]).toBe("AcceptResponseItem");
             expect(responseContent.items[1]["@type"]).toBe("AcceptResponseItem");
             expect(responseContent.items[2]["@type"]).toBe("CreateAttributeAcceptResponseItem");
-            expect(responseContent.items[4]["@type"]).toBe("ShareAttributeAcceptResponseItem");
+            expect(responseContent.items[3]["@type"]).toBe("ShareAttributeAcceptResponseItem");
         });
 
         test("decides a Request given a GeneralRequestConfig with all fields set", async () => {
