@@ -24,8 +24,6 @@ import {
     ProposeAttributeRequestItemJSON,
     ReadAttributeAcceptResponseItemJSON,
     ReadAttributeRequestItemJSON,
-    RegisterAttributeListenerAcceptResponseItemJSON,
-    RegisterAttributeListenerRequestItemJSON,
     RejectResponseItemJSON,
     RelationshipAttribute,
     RelationshipAttributeJSON,
@@ -58,7 +56,6 @@ import {
     FileDTO,
     IdentityDTO,
     LocalAttributeDTO,
-    LocalAttributeListenerDTO,
     LocalRequestDTO,
     LocalResponseDTO,
     MessageDTO,
@@ -78,7 +75,6 @@ import { DataViewTranslateable } from "./DataViewTranslateable";
 import { DVOError } from "./common";
 import {
     LocalAttributeDVO,
-    LocalAttributeListenerDVO,
     LocalRequestDVO,
     LocalResponseDVO,
     OwnRelationshipAttributeDVO,
@@ -117,8 +113,6 @@ import {
     ProposeAttributeRequestItemDVO,
     ReadAttributeAcceptResponseItemDVO,
     ReadAttributeRequestItemDVO,
-    RegisterAttributeListenerAcceptResponseItemDVO,
-    RegisterAttributeListenerRequestItemDVO,
     RejectResponseItemDVO,
     RelationshipAttributeQueryDVO,
     RequestDVO,
@@ -617,22 +611,6 @@ export class DataViewExpander {
                     response: responseItemDVO
                 } as FormFieldRequestItemDVO;
 
-            case "RegisterAttributeListenerRequestItem":
-                const registerAttributeListenerRequestItem = requestItem as RegisterAttributeListenerRequestItemJSON;
-                const queryDVO = (await this.expandAttributeQuery(registerAttributeListenerRequestItem.query)) as
-                    | IdentityAttributeQueryDVO
-                    | ThirdPartyRelationshipAttributeQueryDVO;
-
-                return {
-                    ...registerAttributeListenerRequestItem,
-                    type: "RegisterAttributeListenerRequestItemDVO",
-                    id: "",
-                    query: queryDVO,
-                    name: this.generateRequestItemName(requestItem["@type"], isDecidable),
-                    isDecidable,
-                    response: responseItemDVO
-                } as RegisterAttributeListenerRequestItemDVO;
-
             case "TransferFileOwnershipRequestItem":
                 const transferFileOwnershipRequestItem = requestItem as TransferFileOwnershipRequestItemJSON;
 
@@ -821,26 +799,6 @@ export class DataViewExpander {
                         name: name
                     } as FormFieldAcceptResponseItemDVO;
 
-                case "RegisterAttributeListenerAcceptResponseItem":
-                    const registerAttributeListenerResponseItem = responseItem as RegisterAttributeListenerAcceptResponseItemJSON;
-
-                    const localAttributeListenerResult = await this.consumption.attributeListeners.getAttributeListener({ id: registerAttributeListenerResponseItem.listenerId });
-                    if (localAttributeListenerResult.isError && !localAttributeListenerResult.error.equals(RuntimeErrors.general.recordNotFound())) {
-                        throw localAttributeListenerResult.error;
-                    }
-
-                    const localAttributeListenerDVO = localAttributeListenerResult.isSuccess
-                        ? await this.expandLocalAttributeListenerDTO(localAttributeListenerResult.value)
-                        : undefined;
-
-                    return {
-                        ...registerAttributeListenerResponseItem,
-                        type: "RegisterAttributeListenerAcceptResponseItemDVO",
-                        id: registerAttributeListenerResponseItem.listenerId,
-                        name: name,
-                        listener: localAttributeListenerDVO
-                    } as RegisterAttributeListenerAcceptResponseItemDVO;
-
                 case "TransferFileOwnershipAcceptResponseItem":
                     const transferFileOwnershipResponseItem = responseItem as TransferFileOwnershipAcceptResponseItemJSON;
 
@@ -961,19 +919,6 @@ export class DataViewExpander {
                 name: "i18n://dvo.responseItem.error"
             } as ErrorResponseItemDVO;
         }
-    }
-
-    public async expandLocalAttributeListenerDTO(attributeListener: LocalAttributeListenerDTO): Promise<LocalAttributeListenerDVO> {
-        const query = (await this.expandAttributeQuery(attributeListener.query)) as IdentityAttributeQueryDVO | ThirdPartyRelationshipAttributeQueryDVO;
-        const peer = await this.expandAddress(attributeListener.peer);
-        return {
-            type: "LocalAttributeListenerDVO",
-            name: "dvo.localAttributeListener.name",
-            description: "dvo.localAttributeListener.description",
-            ...attributeListener,
-            query,
-            peer
-        };
     }
 
     public async expandResponseGroupOrItem(responseGroupOrItem: ResponseItemGroupJSON | ResponseItemJSON): Promise<ResponseItemGroupDVO | ResponseItemDVO> {

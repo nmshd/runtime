@@ -2,7 +2,7 @@ import { FormFieldSettingsJSONDerivations } from "@nmshd/content";
 import { LocalAttributeDVO } from "../consumption";
 import { DataViewObject } from "../DataViewObject";
 import { FileDVO } from "../transport";
-import { AttributeQueryDVO, DraftIdentityAttributeDVO, DraftRelationshipAttributeDVO, IdentityAttributeQueryDVO, ThirdPartyRelationshipAttributeQueryDVO } from "./AttributeDVOs";
+import { AttributeQueryDVO, DraftIdentityAttributeDVO, DraftRelationshipAttributeDVO } from "./AttributeDVOs";
 import { ResponseItemDVO, ResponseItemGroupDVO } from "./ResponseItemDVOs";
 
 export interface RequestItemGroupDVO {
@@ -62,11 +62,6 @@ export interface ConsentRequestItemDVO extends RequestItemDVO {
     consent: string;
     link?: string;
     linkDisplayText?: string;
-}
-
-export interface RegisterAttributeListenerRequestItemDVO extends RequestItemDVO {
-    type: "RegisterAttributeListenerRequestItemDVO";
-    query: IdentityAttributeQueryDVO | ThirdPartyRelationshipAttributeQueryDVO;
 }
 
 export interface FormFieldRequestItemDVO extends RequestItemDVO {

@@ -35,29 +35,6 @@ export const LoadPeerTokenAnonymousRequest: any = {
     }
 }
 
-export const GetAttributeListenerRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetAttributeListenerRequest",
-    "definitions": {
-        "GetAttributeListenerRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/AttributeListenerIdString"
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "additionalProperties": false
-        },
-        "AttributeListenerIdString": {
-            "type": "string",
-            "pattern": "ATL[A-Za-z0-9]{17}"
-        }
-    }
-}
-
 export const CanCreateRepositoryAttributeRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/CanCreateRepositoryAttributeRequest",
@@ -334,9 +311,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 {
                     "$ref": "#/definitions/FormFieldRequestItemJSON"
-                },
-                {
-                    "$ref": "#/definitions/RegisterAttributeListenerRequestItemJSON"
                 },
                 {
                     "$ref": "#/definitions/TransferFileOwnershipRequestItemJSON"
@@ -3121,53 +3095,6 @@ export const CanCreateOutgoingRequestRequest: any = {
             "required": [
                 "@type",
                 "maxRating"
-            ],
-            "additionalProperties": false
-        },
-        "RegisterAttributeListenerRequestItemJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "RegisterAttributeListenerRequestItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
-                },
-                "query": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/IdentityAttributeQueryJSON"
-                        },
-                        {
-                            "$ref": "#/definitions/ThirdPartyRelationshipAttributeQueryJSON"
-                        }
-                    ]
-                }
-            },
-            "required": [
-                "@type",
-                "mustBeAccepted",
-                "query"
             ],
             "additionalProperties": false
         },
@@ -3511,9 +3438,6 @@ export const CompleteOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/ReadAttributeAcceptResponseItemJSON"
                 },
                 {
-                    "$ref": "#/definitions/RegisterAttributeListenerAcceptResponseItemJSON"
-                },
-                {
                     "$ref": "#/definitions/FormFieldAcceptResponseItemJSON"
                 },
                 {
@@ -5650,34 +5574,6 @@ export const CompleteOutgoingRequestRequest: any = {
                 "@type",
                 "attribute",
                 "attributeId",
-                "result"
-            ],
-            "additionalProperties": false
-        },
-        "RegisterAttributeListenerAcceptResponseItemJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "RegisterAttributeListenerAcceptResponseItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "result": {
-                    "type": "string",
-                    "const": "Accepted"
-                },
-                "listenerId": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "listenerId",
                 "result"
             ],
             "additionalProperties": false
@@ -5987,9 +5883,6 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                     "$ref": "#/definitions/ReadAttributeAcceptResponseItemJSON"
                 },
                 {
-                    "$ref": "#/definitions/RegisterAttributeListenerAcceptResponseItemJSON"
-                },
-                {
                     "$ref": "#/definitions/FormFieldAcceptResponseItemJSON"
                 },
                 {
@@ -8130,34 +8023,6 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
             ],
             "additionalProperties": false
         },
-        "RegisterAttributeListenerAcceptResponseItemJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "RegisterAttributeListenerAcceptResponseItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "result": {
-                    "type": "string",
-                    "const": "Accepted"
-                },
-                "listenerId": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "listenerId",
-                "result"
-            ],
-            "additionalProperties": false
-        },
         "FormFieldAcceptResponseItemJSON": {
             "type": "object",
             "properties": {
@@ -8433,9 +8298,6 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 {
                     "$ref": "#/definitions/FormFieldRequestItemJSON"
-                },
-                {
-                    "$ref": "#/definitions/RegisterAttributeListenerRequestItemJSON"
                 },
                 {
                     "$ref": "#/definitions/TransferFileOwnershipRequestItemJSON"
@@ -11220,53 +11082,6 @@ export const CreateOutgoingRequestRequest: any = {
             "required": [
                 "@type",
                 "maxRating"
-            ],
-            "additionalProperties": false
-        },
-        "RegisterAttributeListenerRequestItemJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "RegisterAttributeListenerRequestItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
-                },
-                "query": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/IdentityAttributeQueryJSON"
-                        },
-                        {
-                            "$ref": "#/definitions/ThirdPartyRelationshipAttributeQueryJSON"
-                        }
-                    ]
-                }
-            },
-            "required": [
-                "@type",
-                "mustBeAccepted",
-                "query"
             ],
             "additionalProperties": false
         },
@@ -11971,9 +11786,6 @@ export const ReceivedIncomingRequestRequest: any = {
                     "$ref": "#/definitions/FormFieldRequestItemJSON"
                 },
                 {
-                    "$ref": "#/definitions/RegisterAttributeListenerRequestItemJSON"
-                },
-                {
                     "$ref": "#/definitions/TransferFileOwnershipRequestItemJSON"
                 }
             ]
@@ -14756,53 +14568,6 @@ export const ReceivedIncomingRequestRequest: any = {
             "required": [
                 "@type",
                 "maxRating"
-            ],
-            "additionalProperties": false
-        },
-        "RegisterAttributeListenerRequestItemJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "RegisterAttributeListenerRequestItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
-                },
-                "query": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/IdentityAttributeQueryJSON"
-                        },
-                        {
-                            "$ref": "#/definitions/ThirdPartyRelationshipAttributeQueryJSON"
-                        }
-                    ]
-                }
-            },
-            "required": [
-                "@type",
-                "mustBeAccepted",
-                "query"
             ],
             "additionalProperties": false
         },

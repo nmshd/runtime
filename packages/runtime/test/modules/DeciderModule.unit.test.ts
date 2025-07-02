@@ -12,7 +12,6 @@ import {
     ProposeAttributeWithNewAttributeAcceptResponseConfig,
     ReadAttributeRequestItemConfig,
     ReadAttributeWithNewAttributeAcceptResponseConfig,
-    RegisterAttributeListenerRequestItemConfig,
     RejectResponseConfig,
     ShareAttributeRequestItemConfig
 } from "src/modules/decide";
@@ -117,10 +116,6 @@ describe("DeciderModule unit tests", () => {
             "content.item.@type": "ReadAttributeRequestItem"
         };
 
-        const registerAttributeListenerRequestItemConfig: RegisterAttributeListenerRequestItemConfig = {
-            "content.item.@type": "RegisterAttributeListenerRequestItem"
-        };
-
         const shareAttributeRequestItemConfig: ShareAttributeRequestItemConfig = {
             "content.item.@type": "ShareAttributeRequestItem"
         };
@@ -167,12 +162,6 @@ describe("DeciderModule unit tests", () => {
             [readAttributeRequestItemConfig, deleteAttributeAcceptResponseConfig, false],
             [readAttributeRequestItemConfig, proposeAttributeWithNewAttributeAcceptResponseConfig, false],
             [readAttributeRequestItemConfig, readAttributeWithNewAttributeAcceptResponseConfig, true],
-
-            [registerAttributeListenerRequestItemConfig, rejectResponseConfig, true],
-            [registerAttributeListenerRequestItemConfig, simpleAcceptResponseConfig, true],
-            [registerAttributeListenerRequestItemConfig, deleteAttributeAcceptResponseConfig, false],
-            [registerAttributeListenerRequestItemConfig, proposeAttributeWithNewAttributeAcceptResponseConfig, false],
-            [registerAttributeListenerRequestItemConfig, readAttributeWithNewAttributeAcceptResponseConfig, false],
 
             [shareAttributeRequestItemConfig, rejectResponseConfig, true],
             [shareAttributeRequestItemConfig, simpleAcceptResponseConfig, true],

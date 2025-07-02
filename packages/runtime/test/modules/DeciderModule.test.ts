@@ -10,7 +10,6 @@ import {
     ProprietaryFileReferenceJSON,
     ProprietaryStringJSON,
     ReadAttributeAcceptResponseItemJSON,
-    RegisterAttributeListenerAcceptResponseItemJSON,
     RejectResponseItemJSON,
     RelationshipAttribute,
     RelationshipAttributeConfidentiality,
@@ -246,14 +245,6 @@ describe("DeciderModule", () => {
                             mustBeAccepted: true
                         },
                         {
-                            "@type": "RegisterAttributeListenerRequestItem",
-                            query: {
-                                "@type": "IdentityAttributeQuery",
-                                valueType: "Nationality"
-                            },
-                            mustBeAccepted: true
-                        },
-                        {
                             "@type": "ShareAttributeRequestItem",
                             sourceAttributeId: "sourceAttributeId",
                             attribute: {
@@ -288,7 +279,6 @@ describe("DeciderModule", () => {
             expect(responseContent.items[0]["@type"]).toBe("AcceptResponseItem");
             expect(responseContent.items[1]["@type"]).toBe("AcceptResponseItem");
             expect(responseContent.items[2]["@type"]).toBe("CreateAttributeAcceptResponseItem");
-            expect(responseContent.items[3]["@type"]).toBe("RegisterAttributeListenerAcceptResponseItem");
             expect(responseContent.items[4]["@type"]).toBe("ShareAttributeAcceptResponseItem");
         });
 
@@ -1880,61 +1870,6 @@ describe("DeciderModule", () => {
             expect(readAttribute.content.owner).toBe(recipient.address);
             expect(readAttribute.content.value["@type"]).toBe("GivenName");
             expect((readAttribute.content.value as GivenNameJSON).value).toBe("Given name of recipient");
-        });
-
-        test("accepts a RegisterAttributeListenerRequestItem given a RegisterAttributeListenerRequestItemConfig with all fields set for an IdentityAttributeQuery and lower bounds for dates", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            "content.item.@type": "RegisterAttributeListenerRequestItem",
-                            "content.item.query.@type": "IdentityAttributeQuery",
-                            "content.item.query.valueType": "GivenName",
-                            "content.item.query.tags": ["x:tag1", "x:tag2"]
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
-                    }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
-            await establishRelationship(sender.transport, recipient.transport);
-
-            const message = await exchangeMessage(sender.transport, recipient.transport);
-            const receivedRequestResult = await recipient.consumption.incomingRequests.received({
-                receivedRequest: {
-                    "@type": "Request",
-                    items: [
-                        {
-                            "@type": "RegisterAttributeListenerRequestItem",
-                            query: {
-                                "@type": "IdentityAttributeQuery",
-                                valueType: "GivenName",
-                                tags: ["x:tag1", "x:tag3"]
-                            },
-                            mustBeAccepted: true
-                        }
-                    ]
-                },
-                requestSourceId: message.id
-            });
-            await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
-
-            await expect(recipient.eventBus).toHavePublished(
-                MessageProcessedEvent,
-                (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
-            );
-
-            const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
-            expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Decided);
-            expect(requestAfterAction.response).toBeDefined();
-
-            const responseContent = requestAfterAction.response!.content;
-            expect(responseContent.result).toBe(ResponseResult.Accepted);
-            expect(responseContent.items).toHaveLength(1);
-            expect(responseContent.items[0]["@type"]).toBe("RegisterAttributeListenerAcceptResponseItem");
-            expect((responseContent.items[0] as RegisterAttributeListenerAcceptResponseItemJSON).listenerId).toBeDefined();
         });
 
         test("accepts a ShareAttributeRequestItem given a ShareAttributeRequestItemConfig with all fields set for an IdentityAttribute and upper bounds for dates", async () => {

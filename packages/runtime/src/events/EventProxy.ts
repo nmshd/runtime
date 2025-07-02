@@ -1,20 +1,10 @@
 import { EventBus, EventHandler, SubscriptionTarget } from "@js-soft/ts-utils";
 import * as consumption from "@nmshd/consumption";
 import * as transport from "@nmshd/transport";
-import {
-    AttributeListenerMapper,
-    AttributeMapper,
-    FileMapper,
-    IdentityDeletionProcessMapper,
-    MessageMapper,
-    RelationshipMapper,
-    RelationshipTemplateMapper,
-    RequestMapper
-} from "../useCases";
+import { AttributeMapper, FileMapper, IdentityDeletionProcessMapper, MessageMapper, RelationshipMapper, RelationshipTemplateMapper, RequestMapper } from "../useCases";
 import {
     AttributeCreatedEvent,
     AttributeDeletedEvent,
-    AttributeListenerCreatedEvent,
     AttributeWasViewedAtChangedEvent,
     IncomingRequestReceivedEvent,
     IncomingRequestStatusChangedEvent,
@@ -247,10 +237,6 @@ export class EventProxy {
                     newStatus: event.data.newStatus
                 })
             );
-        });
-
-        this.subscribeToSourceEvent(consumption.AttributeListenerCreatedEvent, (event) => {
-            this.targetEventBus.publish(new AttributeListenerCreatedEvent(event.eventTargetAddress, AttributeListenerMapper.toAttributeListenerDTO(event.data)));
         });
     }
 

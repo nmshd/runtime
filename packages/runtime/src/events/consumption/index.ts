@@ -1,7 +1,5 @@
 export * from "./AttributeCreatedEvent";
 export * from "./AttributeDeletedEvent";
-export * from "./AttributeListenerCreatedEvent";
-export * from "./AttributeListenerTriggeredEvent";
 export * from "./AttributeWasViewedAtChangedEvent";
 export * from "./IncomingRequestReceivedEvent";
 export * from "./IncomingRequestStatusChangedEvent";
