@@ -1,7 +1,7 @@
-import { PasswordLocationIndicator } from "@nmshd/core-types";
+import { PasswordLocationIndicatorOptions } from "@nmshd/core-types";
 
 export interface PasswordProtectionDTO {
     password: string;
     passwordIsPin?: true;
-    passwordLocationIndicator?: PasswordLocationIndicator;
+    passwordLocationIndicator?: keyof typeof PasswordLocationIndicatorOptions | number;
 }
