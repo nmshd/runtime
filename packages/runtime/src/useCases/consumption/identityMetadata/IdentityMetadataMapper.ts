@@ -1,5 +1,5 @@
 import { IdentityMetadata } from "@nmshd/consumption";
-import { IdentityMetadataDTO } from "../../../types";
+import { IdentityMetadataDTO } from "@nmshd/runtime-types";
 
 export class IdentityMetadataMapper {
     public static toIdentityMetadataDTO(identityMetadata: IdentityMetadata): IdentityMetadataDTO {

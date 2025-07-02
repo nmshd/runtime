@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
+import { ChallengeDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { ChallengeDTO } from "../../../types";
 import { CreateChallengeRequest, CreateChallengeUseCase, ValidateChallengeRequest, ValidateChallengeResponse, ValidateChallengeUseCase } from "../../../useCases";
 
 export class ChallengesFacade {

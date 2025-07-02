@@ -1,10 +1,10 @@
 import { Result } from "@js-soft/ts-utils";
 import { CoreError } from "@nmshd/core-types";
 import { CryptoSignature } from "@nmshd/crypto";
+import { RelationshipDTO } from "@nmshd/runtime-types";
 import { Challenge, ChallengeController, ChallengeSigned } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { nameof } from "ts-simple-nameof";
-import { RelationshipDTO } from "../../../types";
 import { RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationFailure, ValidationResult } from "../../common";
 import { RelationshipMapper } from "../relationships/RelationshipMapper";
 

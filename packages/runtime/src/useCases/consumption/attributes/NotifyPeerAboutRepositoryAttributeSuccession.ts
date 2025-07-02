@@ -2,9 +2,9 @@ import { Result } from "@js-soft/ts-utils";
 import { AttributesController, ConsumptionIds, IAttributeSuccessorParams, LocalAttribute, LocalAttributeDeletionStatus } from "@nmshd/consumption";
 import { Notification, PeerSharedAttributeSucceededNotificationItem } from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
+import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { AccountController, MessageController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { LocalAttributeDTO } from "../../../types";
 import { AddressString, AttributeIdString, NotificationIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { AttributeMapper } from "./AttributeMapper";
 

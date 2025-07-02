@@ -1,5 +1,5 @@
 import { Draft } from "@nmshd/consumption";
-import { DraftDTO } from "../../../types";
+import { DraftDTO } from "@nmshd/runtime-types";
 
 export class DraftMapper {
     public static toDraftDTO(attribute: Draft): DraftDTO {

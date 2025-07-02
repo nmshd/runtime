@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
+import { RelationshipDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { RelationshipDTO } from "../../../types";
 import {
     AcceptRelationshipReactivationRequest,
     AcceptRelationshipReactivationUseCase,

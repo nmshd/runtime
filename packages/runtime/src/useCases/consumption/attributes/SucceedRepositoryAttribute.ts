@@ -2,9 +2,9 @@ import { Result } from "@js-soft/ts-utils";
 import { AttributesController, AttributeSuccessorParamsJSON, ConsumptionCoreErrors } from "@nmshd/consumption";
 import { AttributeValues } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
+import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { AccountController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { LocalAttributeDTO } from "../../../types";
 import { ISO8601DateTimeString, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { AttributeMapper } from "./AttributeMapper";
 

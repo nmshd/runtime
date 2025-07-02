@@ -1,5 +1,5 @@
 import { LocalAttributeListener } from "@nmshd/consumption";
-import { LocalAttributeListenerDTO } from "../../../types";
+import { LocalAttributeListenerDTO } from "@nmshd/runtime-types";
 
 export class AttributeListenerMapper {
     public static toAttributeListenerDTO(attribute: LocalAttributeListener): LocalAttributeListenerDTO {

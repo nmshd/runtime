@@ -1,9 +1,9 @@
 import { Result } from "@js-soft/ts-utils";
 import { CoreId, FileReference, Reference } from "@nmshd/core-types";
 import { CryptoSecretKey } from "@nmshd/crypto";
+import { FileDTO } from "@nmshd/runtime-types";
 import { AccountController, BackboneIds, FileController, Token, TokenContentFile, TokenController, TokenReference } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { FileDTO } from "../../../types";
 import {
     FileReferenceString,
     RuntimeErrors,

@@ -1,8 +1,8 @@
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController } from "@nmshd/consumption";
 import { RelationshipAttributeQuery, RelationshipAttributeQueryJSON } from "@nmshd/content";
+import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { LocalAttributeDTO } from "../../../types";
 import { RuntimeErrors, UseCase } from "../../common";
 import { AttributeMapper } from "./AttributeMapper";
 
