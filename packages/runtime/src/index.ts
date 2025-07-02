@@ -1,3 +1,4 @@
+export * from "@nmshd/runtime-types";
 export * from "./buildInformation";
 export * from "./dataViews";
 export * from "./events";
@@ -6,5 +7,4 @@ export * from "./modules";
 export * from "./Runtime";
 export * from "./RuntimeConfig";
 export * from "./RuntimeLoggerFactory";
-export * from "./types";
 export * from "./useCases";

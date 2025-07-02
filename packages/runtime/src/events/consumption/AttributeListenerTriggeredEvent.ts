@@ -1,4 +1,4 @@
-import { LocalAttributeDTO, LocalAttributeListenerDTO, LocalRequestDTO } from "../../types";
+import { LocalAttributeDTO, LocalAttributeListenerDTO, LocalRequestDTO } from "@nmshd/runtime-types";
 import { DataEvent } from "../DataEvent";
 
 export interface AttributeListenerTriggeredEventData {

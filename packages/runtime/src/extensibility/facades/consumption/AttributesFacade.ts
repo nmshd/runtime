@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
+import { AttributeTagCollectionDTO, LocalAttributeDTO, LocalRequestDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { AttributeTagCollectionDTO, LocalAttributeDTO, LocalRequestDTO } from "../../../types";
 import {
     CanCreateRepositoryAttributeRequest,
     CanCreateRepositoryAttributeResponse,

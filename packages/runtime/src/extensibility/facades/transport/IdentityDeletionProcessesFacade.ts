@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
+import { IdentityDeletionProcessDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { IdentityDeletionProcessDTO } from "../../../types";
 import {
     ApproveIdentityDeletionProcessUseCase,
     CancelIdentityDeletionProcessUseCase,

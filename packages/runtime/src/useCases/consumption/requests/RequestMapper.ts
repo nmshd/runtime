@@ -1,5 +1,5 @@
 import { LocalRequest } from "@nmshd/consumption";
-import { LocalRequestDTO } from "../../../types";
+import { LocalRequestDTO } from "@nmshd/runtime-types";
 
 export class RequestMapper {
     public static toLocalRequestDTO(request: LocalRequest): LocalRequestDTO {

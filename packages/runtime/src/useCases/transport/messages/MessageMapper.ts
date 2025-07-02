@@ -1,8 +1,8 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { ArbitraryMessageContent, Mail, Notification, Request, ResponseWrapper } from "@nmshd/content";
 import { CoreBuffer } from "@nmshd/crypto";
+import { MessageDTO, MessageWithAttachmentsDTO } from "@nmshd/runtime-types";
 import { CachedMessageRecipient, File, Message } from "@nmshd/transport";
-import { MessageDTO, MessageWithAttachmentsDTO } from "../../../types";
 import { RuntimeErrors } from "../../common";
 import { FileMapper } from "../files/FileMapper";
 import { DownloadAttachmentResponse } from "./DownloadAttachment";

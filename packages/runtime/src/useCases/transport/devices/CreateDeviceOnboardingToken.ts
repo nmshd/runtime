@@ -1,8 +1,8 @@
 import { Result } from "@js-soft/ts-utils";
 import { CoreDate, CoreId, PasswordLocationIndicator } from "@nmshd/core-types";
+import { TokenDTO } from "@nmshd/runtime-types";
 import { DevicesController, TokenContentDeviceSharedSecret, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { TokenDTO } from "../../../types";
 import { DeviceIdString, ISO8601DateTimeString, PasswordProtectionMapper, SchemaRepository, TokenAndTemplateCreationValidator, UseCase } from "../../common";
 import { TokenMapper } from "../tokens/TokenMapper";
 

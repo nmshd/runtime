@@ -69,6 +69,7 @@
         "@nmshd/core-types": "*",
         "@nmshd/crypto": "2.1.2",
         "@nmshd/iql": "^1.0.3",
+        "@nmshd/runtime-types": "*",
         "@nmshd/transport": "*",
         "@nmshd/typescript-ioc": "3.2.4",
         "ajv": "^8.17.1",

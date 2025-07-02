@@ -1,9 +1,9 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { ArbitraryRelationshipTemplateContent, RelationshipTemplateContent } from "@nmshd/content";
+import { RelationshipTemplateDTO } from "@nmshd/runtime-types";
 import { RelationshipTemplate } from "@nmshd/transport";
 import { Container } from "@nmshd/typescript-ioc";
 import { ConfigHolder } from "../../../ConfigHolder";
-import { RelationshipTemplateDTO } from "../../../types";
 import { PasswordProtectionMapper, RuntimeErrors } from "../../common";
 
 export class RelationshipTemplateMapper {

@@ -1,4 +1,4 @@
-import { RelationshipDTO } from "../../types";
+import { RelationshipDTO } from "@nmshd/runtime-types";
 import { DataEvent } from "../DataEvent";
 
 export class RelationshipReactivationRequestedEvent extends DataEvent<RelationshipDTO> {
