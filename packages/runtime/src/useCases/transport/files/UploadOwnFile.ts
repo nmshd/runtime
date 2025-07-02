@@ -2,10 +2,10 @@ import { Result } from "@js-soft/ts-utils";
 import { AttributesController } from "@nmshd/consumption";
 import { CoreDate } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
+import { FileDTO } from "@nmshd/runtime-types";
 import { AccountController, FileController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { nameof } from "ts-simple-nameof";
-import { FileDTO } from "../../../types";
 import { ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationFailure, ValidationResult } from "../../common";
 import { FileMapper } from "./FileMapper";
 

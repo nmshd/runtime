@@ -1,6 +1,6 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
+import { DeviceDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { DeviceDTO } from "../../../types";
 import {
     CheckIfIdentityIsDeletedResponse,
     CheckIfIdentityIsDeletedUseCase,

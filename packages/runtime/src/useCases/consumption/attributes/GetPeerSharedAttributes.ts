@@ -1,7 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController } from "@nmshd/consumption";
+import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { LocalAttributeDTO } from "../../../types";
 import { AddressString, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { flattenObject } from "../../common/flattenObject";
 import { AttributeMapper } from "./AttributeMapper";

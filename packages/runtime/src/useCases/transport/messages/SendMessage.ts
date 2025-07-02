@@ -3,10 +3,10 @@ import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { LocalRequestStatus, OutgoingRequestsController } from "@nmshd/consumption";
 import { ArbitraryMessageContent, Mail, Notification, Request, ResponseWrapper } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreError, CoreId } from "@nmshd/core-types";
+import { MessageDTO } from "@nmshd/runtime-types";
 import { AccountController, File, FileController, MessageController, PeerDeletionStatus, RelationshipsController, RelationshipStatus, TransportCoreErrors } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import _ from "lodash";
-import { MessageDTO } from "../../../types";
 import { AddressString, FileIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { MessageMapper } from "./MessageMapper";
 

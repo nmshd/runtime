@@ -2,6 +2,7 @@ import { ApplicationError } from "@js-soft/ts-utils";
 import { LocalRequestStatus } from "@nmshd/consumption";
 import { isRequestItemDerivation, RequestItemGroupJSON, RequestItemJSONDerivations } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
+import { LocalRequestDTO } from "@nmshd/runtime-types";
 import {
     IncomingRequestStatusChangedEvent,
     MessageProcessedEvent,
@@ -11,7 +12,6 @@ import {
 } from "../events";
 import { ModuleConfiguration, RuntimeModule } from "../extensibility";
 import { RuntimeServices } from "../Runtime";
-import { LocalRequestDTO } from "../types";
 import { RuntimeErrors } from "../useCases/common/RuntimeErrors";
 import {
     isAcceptResponseConfig,

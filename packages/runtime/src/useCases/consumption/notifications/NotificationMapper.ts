@@ -1,5 +1,5 @@
 import { LocalNotification } from "@nmshd/consumption";
-import { LocalNotificationDTO } from "../../../types";
+import { LocalNotificationDTO } from "@nmshd/runtime-types";
 
 export class NotificationMapper {
     public static toNotificationDTO(notification: LocalNotification): LocalNotificationDTO {

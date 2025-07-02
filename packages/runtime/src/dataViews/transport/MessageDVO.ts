@@ -1,4 +1,4 @@
-import { MessageContentDerivation } from "../../types/transport/MessageDTO";
+import { MessageContentDerivation } from "@nmshd/runtime-types";
 import { DataViewObject } from "../DataViewObject";
 import { FileDVO } from "./FileDVO";
 import { IdentityDVO } from "./IdentityDVO";

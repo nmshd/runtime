@@ -1,6 +1,6 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
+import { SettingDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { SettingDTO } from "../../../types";
 import {
     CreateSettingRequest,
     CreateSettingUseCase,

@@ -1,9 +1,9 @@
 import { QueryTranslator } from "@js-soft/docdb-querytranslator";
 import { Result } from "@js-soft/ts-utils";
+import { RelationshipDTO } from "@nmshd/runtime-types";
 import { CachedRelationship, Identity, Relationship, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { nameof } from "ts-simple-nameof";
-import { RelationshipDTO } from "../../../types";
 import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { RelationshipMapper } from "./RelationshipMapper";
 

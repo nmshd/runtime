@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
+import { LocalRequestDTO, RequestValidationResultDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { LocalRequestDTO, RequestValidationResultDTO } from "../../../types";
 import {
     CanCreateOutgoingRequestRequest,
     CanCreateOutgoingRequestUseCase,

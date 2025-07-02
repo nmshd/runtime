@@ -2,8 +2,8 @@ import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { OutgoingRequestsController } from "@nmshd/consumption";
 import { RequestJSON } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
+import { LocalRequestDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { LocalRequestDTO } from "../../../types";
 import { AddressString, UseCase } from "../../common";
 import { RequestMapper } from "./RequestMapper";
 
