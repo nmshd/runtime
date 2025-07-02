@@ -52,6 +52,7 @@ import {
     sendAndReceiveNotification,
     sendMessageToMultipleRecipients,
     syncUntilHasMessageWithNotification,
+    syncUntilHasRelationship,
     syncUntilHasRelationships
 } from "../lib";
 
@@ -945,12 +946,12 @@ describe("RelationshipTermination", () => {
     describe("Validating relationship operations on terminated relationship with requested reactivation", () => {
         beforeAll(async () => {
             await services1.transport.relationships.requestRelationshipReactivation({ relationshipId });
-            await syncUntilHasRelationships(services2.transport);
+            await syncUntilHasRelationship(services2.transport, relationshipId);
         });
 
         afterAll(async () => {
             await services1.transport.relationships.revokeRelationshipReactivation({ relationshipId });
-            await syncUntilHasRelationships(services2.transport);
+            await syncUntilHasRelationship(services2.transport, relationshipId);
         });
 
         test("reactivation acceptance should fail when the wrong side accepts it", async () => {
