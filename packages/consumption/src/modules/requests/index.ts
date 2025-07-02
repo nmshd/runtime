@@ -26,7 +26,6 @@ export {
     AcceptReadAttributeRequestItemParametersWithNewAttributeJSON
 } from "./itemProcessors/readAttribute/AcceptReadAttributeRequestItemParameters";
 export * from "./itemProcessors/readAttribute/ReadAttributeRequestItemProcessor";
-export * from "./itemProcessors/registerAttributeListener/RegisterAttributeListenerRequestItemProcessor";
 export * from "./itemProcessors/RequestItemConstructor";
 export * from "./itemProcessors/RequestItemProcessorConstructor";
 export * from "./itemProcessors/RequestItemProcessorRegistry";
