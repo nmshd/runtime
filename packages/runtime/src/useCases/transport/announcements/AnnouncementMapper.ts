@@ -1,5 +1,5 @@
+import { AnnouncementDTO } from "@nmshd/runtime-types";
 import { Announcement } from "@nmshd/transport";
-import { AnnouncementDTO } from "../../../types";
 
 export class AnnouncementMapper {
     public static toAnnouncementDTO(announcement: Announcement): AnnouncementDTO {

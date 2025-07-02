@@ -1,4 +1,4 @@
-import { LocalAttributeDTO } from "../../types";
+import { LocalAttributeDTO } from "@nmshd/runtime-types";
 
 export interface SuccessionEventData {
     predecessor: LocalAttributeDTO;

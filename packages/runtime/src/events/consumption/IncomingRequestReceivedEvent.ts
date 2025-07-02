@@ -1,4 +1,4 @@
-import { LocalRequestDTO } from "../../types";
+import { LocalRequestDTO } from "@nmshd/runtime-types";
 import { DataEvent } from "../DataEvent";
 
 export class IncomingRequestReceivedEvent extends DataEvent<LocalRequestDTO> {

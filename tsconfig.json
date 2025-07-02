@@ -1,9 +1,11 @@
 {
     "files": [],
     "references": [
+        { "path": "packages/core-types" },
         { "path": "packages/transport" },
         { "path": "packages/content" },
         { "path": "packages/consumption" },
+        { "path": "packages/runtime-types" },
         { "path": "packages/runtime" },
         { "path": "packages/app-runtime" }
     ]

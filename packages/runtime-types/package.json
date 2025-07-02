@@ -1,0 +1,29 @@
+{
+    "name": "@nmshd/runtime-types",
+    "description": "The enmeshed runtime types.",
+    "homepage": "https://enmeshed.eu",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/nmshd/runtime.git",
+        "directory": "packages/runtime"
+    },
+    "license": "MIT",
+    "author": "j&s-soft AG",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "tsc",
+        "build:ci": "tsc",
+        "cdep": "tsc && madge --circular dist",
+        "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit"
+    },
+    "dependencies": {},
+    "devDependencies": {},
+    "publishConfig": {
+        "access": "public",
+        "provenance": true
+    }
+}

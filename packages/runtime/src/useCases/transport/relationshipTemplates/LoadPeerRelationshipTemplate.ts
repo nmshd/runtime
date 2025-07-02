@@ -1,5 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
 import { Reference } from "@nmshd/core-types";
+import { RelationshipTemplateDTO } from "@nmshd/runtime-types";
 import {
     AccountController,
     BackboneIds,
@@ -11,7 +12,6 @@ import {
     TokenReference
 } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { RelationshipTemplateDTO } from "../../../types";
 import {
     RelationshipTemplateReferenceString,
     RuntimeErrors,

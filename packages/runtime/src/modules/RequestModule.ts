@@ -1,6 +1,7 @@
 import { LocalRequestStatus } from "@nmshd/consumption";
 import { RelationshipCreationContent, RequestJSON, ResponseJSON, ResponseResult, ResponseWrapper } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
+import { LocalRequestDTO, RelationshipStatus } from "@nmshd/runtime-types";
 import {
     IncomingRequestStatusChangedEvent,
     MessageProcessedEvent,
@@ -13,7 +14,6 @@ import {
 import { RelationshipTemplateProcessedEvent, RelationshipTemplateProcessedResult } from "../events/consumption/RelationshipTemplateProcessedEvent";
 import { RuntimeModule } from "../extensibility/modules/RuntimeModule";
 import { RuntimeServices } from "../Runtime";
-import { LocalRequestDTO, RelationshipStatus } from "../types";
 
 export class RequestModule extends RuntimeModule {
     public init(): void {

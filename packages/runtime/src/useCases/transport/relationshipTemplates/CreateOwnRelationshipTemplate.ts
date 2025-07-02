@@ -3,9 +3,9 @@ import { Result } from "@js-soft/ts-utils";
 import { OutgoingRequestsController } from "@nmshd/consumption";
 import { ArbitraryRelationshipTemplateContent, RelationshipTemplateContent } from "@nmshd/content";
 import { CoreAddress, CoreDate, PasswordLocationIndicator } from "@nmshd/core-types";
+import { RelationshipTemplateDTO } from "@nmshd/runtime-types";
 import { AccountController, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { RelationshipTemplateDTO } from "../../../types";
 import { AddressString, ISO8601DateTimeString, PasswordProtectionMapper, RuntimeErrors, SchemaRepository, TokenAndTemplateCreationValidator, UseCase } from "../../common";
 import { RelationshipTemplateMapper } from "./RelationshipTemplateMapper";
 

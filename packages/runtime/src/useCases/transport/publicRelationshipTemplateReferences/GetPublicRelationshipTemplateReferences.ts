@@ -1,7 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
+import { PublicRelationshipTemplateReferenceDTO } from "@nmshd/runtime-types";
 import { PublicRelationshipTemplateReferencesController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { PublicRelationshipTemplateReferenceDTO } from "../../../types";
 import { UseCase } from "../../common";
 import { PublicRelationshipTemplateReferenceMapper } from "./PublicRelationshipTemplateReferenceMapper";
 

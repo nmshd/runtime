@@ -1,8 +1,8 @@
 import { Result } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId, PasswordLocationIndicator, SharedPasswordProtection } from "@nmshd/core-types";
+import { TokenDTO } from "@nmshd/runtime-types";
 import { AccountController, RelationshipTemplate, RelationshipTemplateController, TokenContentRelationshipTemplate, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { TokenDTO } from "../../../types";
 import {
     AddressString,
     ISO8601DateTimeString,

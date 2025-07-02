@@ -1,8 +1,8 @@
 import { Result } from "@js-soft/ts-utils";
 import { CoreId } from "@nmshd/core-types";
+import { RelationshipDTO } from "@nmshd/runtime-types";
 import { Relationship, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { RelationshipDTO } from "../../../types";
 import { RelationshipIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { RelationshipMapper } from "./RelationshipMapper";
 

@@ -1,5 +1,5 @@
 import { AttributeTag, AttributeTagCollection } from "@nmshd/consumption";
-import { AttributeTagCollectionDTO, AttributeTagDTO } from "../../../types";
+import { AttributeTagCollectionDTO, AttributeTagDTO } from "@nmshd/runtime-types";
 
 export class AttributeTagCollectionMapper {
     public static toAttributeTagCollectionDTO(tagList: AttributeTagCollection): AttributeTagCollectionDTO {

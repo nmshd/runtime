@@ -1,11 +1,11 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, PasswordLocationIndicator } from "@nmshd/core-types";
+import { TokenDTO } from "@nmshd/runtime-types";
 import { AccountController, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { DateTime } from "luxon";
 import { nameof } from "ts-simple-nameof";
-import { TokenDTO } from "../../../types";
 import {
     AddressString,
     ISO8601DateTimeString,

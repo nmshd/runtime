@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
+import { FileDTO, MessageDTO, MessageWithAttachmentsDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { FileDTO, MessageDTO, MessageWithAttachmentsDTO } from "../../../types";
 import {
     DownloadAttachmentRequest,
     DownloadAttachmentResponse,

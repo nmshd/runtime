@@ -56,10 +56,6 @@ import {
     isRequestItemDerivation
 } from "@nmshd/content";
 import { CoreAddress, CoreId, FileReference } from "@nmshd/core-types";
-import { IdentityController } from "@nmshd/transport";
-import { Inject } from "@nmshd/typescript-ioc";
-import _ from "lodash";
-import { ConsumptionServices, TransportServices } from "../extensibility";
 import {
     FileDTO,
     IdentityDTO,
@@ -73,7 +69,11 @@ import {
     RelationshipDTO,
     RelationshipStatus,
     RelationshipTemplateDTO
-} from "../types";
+} from "@nmshd/runtime-types";
+import { IdentityController } from "@nmshd/transport";
+import { Inject } from "@nmshd/typescript-ioc";
+import _ from "lodash";
+import { ConsumptionServices, TransportServices } from "../extensibility";
 import { RuntimeErrors } from "../useCases";
 import { DataViewObject } from "./DataViewObject";
 import { DataViewTranslateable } from "./DataViewTranslateable";
