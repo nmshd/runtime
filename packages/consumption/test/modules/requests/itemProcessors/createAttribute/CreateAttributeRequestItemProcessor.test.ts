@@ -152,6 +152,19 @@ describe("CreateAttributeRequestItemProcessor", function () {
             });
         });
 
+        test("returns Error when passing an IdentityAttribute with a forbidden character", async function () {
+            const identityAttributeOfRecipient = TestObjectFactory.createIdentityAttribute({
+                owner: TestIdentity.PEER,
+                value: GivenName.from({ value: "aGivenName😀" })
+            });
+
+            await When.iCallCanCreateOutgoingRequestItemWith({ attribute: identityAttributeOfRecipient });
+            await Then.theCanCreateResultShouldBeAnErrorWith({
+                code: "error.consumption.requests.invalidRequestItem",
+                message: "The Attribute contains forbidden characters."
+            });
+        });
+
         test("returns Error when passing a RelationshipAttribute with same key as an already existing RelationshipAttribute of this Relationship", async function () {
             const relationshipAttributeOfSender = TestObjectFactory.createRelationshipAttribute({
                 owner: TestIdentity.CURRENT_IDENTITY,
@@ -274,6 +287,15 @@ describe("CreateAttributeRequestItemProcessor", function () {
 
             await When.iCallCanAccept();
             await Then.theCanAcceptResultShouldBeASuccess();
+        });
+
+        test("cannot create an IdentityAttribute with a forbidden character", async function () {
+            await Given.aRequestItemWithAnIdentityAttribute({
+                attributeOwner: TestIdentity.PEER,
+                value: GivenName.from({ value: "aGivenName😀" })
+            });
+
+            await expect(When.iCallCanAccept()).rejects.toThrow("error.consumption.attributes.forbiddenCharactersInAttribute: 'The Attribute contains forbidden characters.'");
         });
 
         test("cannot create another RelationshipAttribute with same key", async function () {

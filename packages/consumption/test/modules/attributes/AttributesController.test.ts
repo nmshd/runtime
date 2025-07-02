@@ -13,6 +13,7 @@ import {
     IIQLQuery,
     IRelationshipAttributeQuery,
     Nationality,
+    ProprietaryString,
     RelationshipAttribute,
     RelationshipAttributeConfidentiality,
     Street,
@@ -108,6 +109,22 @@ describe("AttributesController", function () {
             expect(attributesAfterCreate).toHaveLength(1);
 
             mockEventBus.expectPublishedEvents(AttributeCreatedEvent);
+        });
+
+        test("should not create a new attribute with a forbidden character", async function () {
+            const params: ICreateRepositoryAttributeParams = {
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "DisplayName",
+                        value: "aDisplayName😀"
+                    },
+                    owner: consumptionController.accountController.identity.address
+                })
+            };
+
+            await expect(consumptionController.attributes.createRepositoryAttribute(params)).rejects.toThrow(
+                "error.consumption.attributes.forbiddenCharactersInAttribute: 'The Attribute contains forbidden characters.'"
+            );
         });
 
         test("should trim whitespace for a RepositoryAttribute", async function () {
@@ -1278,6 +1295,35 @@ describe("AttributesController", function () {
 
     describe("succeed Attributes", function () {
         describe("Common validator", function () {
+            test("should catch a forbidden character in the successor", async function () {
+                const predecessor = await consumptionController.attributes.createRepositoryAttribute({
+                    content: IdentityAttribute.from({
+                        value: {
+                            "@type": "GivenName",
+                            value: "aGivenName"
+                        },
+                        owner: consumptionController.accountController.identity.address,
+                        tags: ["x:aTag"]
+                    })
+                });
+
+                const successorData: IAttributeSuccessorParams = {
+                    content: IdentityAttribute.from({
+                        value: {
+                            "@type": "GivenName",
+                            value: "aGivenName😀"
+                        },
+                        owner: consumptionController.accountController.identity.address,
+                        tags: ["x:aTag"]
+                    })
+                };
+
+                const validationResult = await consumptionController.attributes.validateAttributeSuccessionCommon(predecessor.id, successorData);
+                expect(validationResult).errorValidationResult({
+                    code: "error.consumption.attributes.forbiddenCharactersInAttribute"
+                });
+            });
+
             test("should catch if content doesn't change", async function () {
                 const predecessor = await consumptionController.attributes.createRepositoryAttribute({
                     content: IdentityAttribute.from({
@@ -3680,6 +3726,45 @@ describe("AttributesController", function () {
 
             verify(attributeTagClientSpy.getTagCollection(anything())).twice();
             verify(attributesControllerSpy["setTagCollection"](anything())).twice();
+        });
+    });
+
+    describe("validate attribute values", function () {
+        test("should catch forbidden characters in an IdentityAttribute", function () {
+            expect(
+                consumptionController.attributes.validateAttributeCharacters(
+                    IdentityAttribute.from({
+                        owner: CoreAddress.from("anAddress"),
+                        value: City.from({ value: "aCity😀" })
+                    })
+                )
+            ).toBe(false);
+        });
+
+        test("should catch forbidden characters in a RelationshipAttribute", function () {
+            expect(
+                consumptionController.attributes.validateAttributeCharacters(
+                    RelationshipAttribute.from({
+                        key: "aKey",
+                        owner: CoreAddress.from("anAddress"),
+                        confidentiality: RelationshipAttributeConfidentiality.Public,
+                        value: ProprietaryString.from({ title: "aTitle", value: "aProprietaryStringValue😀" })
+                    })
+                )
+            ).toBe(false);
+        });
+
+        test("should allow all characters in a RelationshipAttribute's title and description", function () {
+            expect(
+                consumptionController.attributes.validateAttributeCharacters(
+                    RelationshipAttribute.from({
+                        key: "aKey",
+                        owner: CoreAddress.from("anAddress"),
+                        confidentiality: RelationshipAttributeConfidentiality.Public,
+                        value: ProprietaryString.from({ title: "aTitle😀", value: "aProprietaryStringValue", description: "aDescription😀" })
+                    })
+                )
+            ).toBe(true);
         });
     });
 });

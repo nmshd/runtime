@@ -539,6 +539,46 @@ describe("ReadAttributeRequestItemProcessor", function () {
             });
         });
 
+        test("returns an error when the attribute contains a forbidden character", async function () {
+            const requestItem = ReadAttributeRequestItem.from({
+                mustBeAccepted: true,
+                query: IdentityAttributeQuery.from({ valueType: "GivenName" })
+            });
+            const requestId = await ConsumptionIds.request.generate();
+            const request = LocalRequest.from({
+                id: requestId,
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({
+                    id: requestId,
+                    items: [requestItem]
+                }),
+                statusLog: []
+            });
+
+            const acceptParams: AcceptReadAttributeRequestItemParametersWithNewAttributeJSON = {
+                accept: true,
+                newAttribute: {
+                    "@type": "IdentityAttribute",
+                    owner: recipient.toString(),
+                    value: {
+                        "@type": "GivenName",
+                        value: "aGivenName😀"
+                    },
+                    tags: ["aTag"]
+                }
+            };
+
+            const result = await processor.canAccept(requestItem, acceptParams, request);
+
+            expect(result).errorValidationResult({
+                code: "error.consumption.requests.invalidAcceptParameters",
+                message: "The Attribute contains forbidden characters."
+            });
+        });
+
         test("returns an error trying to share the predecessor of an already shared Attribute", async function () {
             const predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
                 content: TestObjectFactory.createIdentityAttribute({

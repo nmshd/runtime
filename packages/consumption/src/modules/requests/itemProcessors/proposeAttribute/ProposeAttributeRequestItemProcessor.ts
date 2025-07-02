@@ -76,6 +76,9 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
                 )
             );
         }
+        if (!this.consumptionController.attributes.validateAttributeCharacters(attribute)) {
+            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("The Attribute contains forbidden characters."));
+        }
 
         const tagValidationResult = await this.consumptionController.attributes.validateTagsOfAttribute(attribute);
         if (tagValidationResult.isError()) {
@@ -189,6 +192,10 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
                     )} or ${nameof<AcceptProposeAttributeRequestItemParameters>((x) => x.attributeId)}.`
                 )
             );
+        }
+
+        if (!this.consumptionController.attributes.validateAttributeCharacters(attribute)) {
+            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters("The Attribute contains forbidden characters."));
         }
 
         const answerToQueryValidationResult = validateAttributeMatchesWithQuery(requestItem.query, attribute, this.currentIdentityAddress, requestInfo.peer);
