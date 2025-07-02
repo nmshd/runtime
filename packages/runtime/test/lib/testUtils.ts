@@ -77,6 +77,7 @@ export async function syncUntil(transportServices: TransportServices, until: (sy
         finalSyncResult.messages.push(...currentIterationSyncResult.messages);
         finalSyncResult.relationships.push(...currentIterationSyncResult.relationships);
         finalSyncResult.identityDeletionProcesses.push(...currentIterationSyncResult.identityDeletionProcesses);
+        finalSyncResult.files.push(...currentIterationSyncResult.files);
 
         iterationNumber++;
         criteriaMet = until(finalSyncResult);
@@ -106,6 +107,10 @@ async function syncUntilHasMany<T extends keyof SyncEverythingResponse>(
 
 export async function syncUntilHasRelationships(transportServices: TransportServices, expectedNumberOfRelationships = 1): Promise<RelationshipDTO[]> {
     return await syncUntilHasMany(transportServices, "relationships", expectedNumberOfRelationships);
+}
+
+export async function syncUntilHasRelationship(transportServices: TransportServices, relationshipId: string | CoreId): Promise<RelationshipDTO> {
+    return await syncUntilHas(transportServices, "relationships", (r) => r.id === relationshipId.toString());
 }
 
 export async function syncUntilHasMessages(transportServices: TransportServices, expectedNumberOfMessages = 1): Promise<MessageDTO[]> {
