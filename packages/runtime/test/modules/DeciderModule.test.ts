@@ -275,7 +275,7 @@ describe("DeciderModule", () => {
 
             const responseContent = requestAfterAction.response!.content;
             expect(responseContent.result).toBe(ResponseResult.Accepted);
-            expect(responseContent.items).toHaveLength(5);
+            expect(responseContent.items).toHaveLength(4);
             expect(responseContent.items[0]["@type"]).toBe("AcceptResponseItem");
             expect(responseContent.items[1]["@type"]).toBe("AcceptResponseItem");
             expect(responseContent.items[2]["@type"]).toBe("CreateAttributeAcceptResponseItem");
