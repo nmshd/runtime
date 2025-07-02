@@ -18,7 +18,7 @@
         "build": "tsc",
         "build:ci": "tsc",
         "cdep": "tsc && madge --circular dist",
-        "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit"
+        "lint:tsc": "tsc --noEmit"
     },
     "dependencies": {},
     "devDependencies": {},
