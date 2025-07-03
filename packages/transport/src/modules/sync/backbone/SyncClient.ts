@@ -19,8 +19,6 @@ export interface ISyncClient {
 
     finalizeExternalEventSync(id: string, request: FinalizeExternalEventSyncRequest): Promise<ClientResult<FinalizeExternalEventSyncResponse>>;
 
-    finalizeExternalEventSync(id: string, request: FinalizeExternalEventSyncRequest): Promise<ClientResult<FinalizeExternalEventSyncResponse>>;
-
     finalizeDatawalletVersionUpgrade(id: string, request: FinalizeDatawalletVersionUpgradeRequest): Promise<ClientResult<FinalizeDatawalletVersionUpgradeResponse>>;
 
     getExternalEventsOfSyncRun(syncRunId: string, progessCallback?: PaginatorPercentageCallback): Promise<ClientResult<Paginator<BackboneExternalEvent>>>;
