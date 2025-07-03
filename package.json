@@ -34,7 +34,7 @@
         "@types/node": "^22.16.0",
         "enhanced-publish": "^1.1.3",
         "eslint": "^8.57.1",
-        "jest": "^30.0.3",
+        "jest": "^30.0.4",
         "jest-expect-message": "^1.1.3",
         "madge": "^8.0.0",
         "npm-check-updates": "^18.0.1",
