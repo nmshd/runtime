@@ -139,7 +139,7 @@ export class AccountController {
         if (!availableIdentityDoc && !availableDeviceDoc) {
             if (!deviceSharedSecret) {
                 if (!this.config.allowIdentityCreation) {
-                    throw new TransportError("No Identity found and identity creation is not allowed.");
+                    throw TransportCoreErrors.general.noIdentityFound();
                 }
 
                 // Identity creation
