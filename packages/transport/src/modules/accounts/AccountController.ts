@@ -1,6 +1,6 @@
 import { IDatabaseCollection, IDatabaseCollectionProvider, IDatabaseMap } from "@js-soft/docdb-access-abstractions";
 import { ILogger } from "@js-soft/logging-abstractions";
-import { log } from "@js-soft/ts-utils";
+import { log, sleep } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CryptoSecretKey } from "@nmshd/crypto";
 import { AbstractAuthenticator, Authenticator, ControllerName, IConfig, Transport, TransportCoreErrors, TransportError } from "../../core";
@@ -347,15 +347,35 @@ export class AccountController {
             password: devicePwdD1
         });
 
+        const storeSecretWithRetry = async (fn: () => Promise<any>) => {
+            let retryCount = 0;
+
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-constant-condition
+            while (true) {
+                try {
+                    return await fn();
+                } catch (error: any) {
+                    if (retryCount >= 10) {
+                        throw new TransportError(`Failed to store secret after '${retryCount}' retries: ${error.message}`, { cause: error });
+                    }
+
+                    retryCount++;
+
+                    await sleep(500 * retryCount);
+                    this._log.error(`Retrying due to error: ${error.message}. Attempt ${retryCount}`);
+                }
+            }
+        };
+
         await Promise.all([
-            this.info.set("device", device.toJSON()),
-            this.info.set("identity", identity.toJSON()),
-            this.info.set("baseKey", privBaseDevice.toJSON()),
-            this.activeDevice.secrets.storeSecret(privBaseShared, DeviceSecretType.SharedSecretBaseKey),
-            this.activeDevice.secrets.storeSecret(privSync, DeviceSecretType.IdentitySynchronizationMaster),
-            this.activeDevice.secrets.storeSecret(identityKeypair.privateKey, DeviceSecretType.IdentitySignature),
-            this.activeDevice.secrets.storeSecret(deviceKeypair.privateKey, DeviceSecretType.DeviceSignature),
-            this.activeDevice.secrets.storeSecret(deviceCredentials, DeviceSecretType.DeviceCredentials)
+            storeSecretWithRetry(() => this.info.set("device", device.toJSON())),
+            storeSecretWithRetry(() => this.info.set("identity", identity.toJSON())),
+            storeSecretWithRetry(() => this.info.set("baseKey", privBaseDevice.toJSON())),
+            storeSecretWithRetry(() => this.activeDevice.secrets.storeSecret(privBaseShared, DeviceSecretType.SharedSecretBaseKey)),
+            storeSecretWithRetry(() => this.activeDevice.secrets.storeSecret(privSync, DeviceSecretType.IdentitySynchronizationMaster)),
+            storeSecretWithRetry(() => this.activeDevice.secrets.storeSecret(identityKeypair.privateKey, DeviceSecretType.IdentitySignature)),
+            storeSecretWithRetry(() => this.activeDevice.secrets.storeSecret(deviceKeypair.privateKey, DeviceSecretType.DeviceSignature)),
+            storeSecretWithRetry(() => this.activeDevice.secrets.storeSecret(deviceCredentials, DeviceSecretType.DeviceCredentials))
         ]);
 
         return { identity, device };
