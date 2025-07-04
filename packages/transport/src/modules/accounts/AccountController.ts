@@ -347,6 +347,26 @@ export class AccountController {
             password: devicePwdD1
         });
 
+        const storeSecretWithRetry = async (fn: () => Promise<any>) => {
+            let retryCount = 0;
+
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-constant-condition
+            while (true) {
+                try {
+                    return await fn();
+                } catch (error: any) {
+                    if (retryCount >= 10) {
+                        throw new TransportError(`Failed to store secret after '${retryCount}' retries: ${error.message}`, { cause: error });
+                    }
+
+                    retryCount++;
+
+                    await sleep(500 * retryCount);
+                    this._log.warn(`Retrying due to error: ${error.message}. Attempt ${retryCount}`);
+                }
+            }
+        };
+
         await Promise.all([
             this.info.set("device", device.toJSON()),
             this.info.set("identity", identity.toJSON()),
