@@ -122,16 +122,21 @@ export class SyncController extends TransportController {
     }
 
     private async syncExternalEvents(changedItems: ChangedItems): Promise<void> {
-        const syncRunWasStarted = await this.startExternalEventsSyncRun();
+        let newUnsyncedExternalEventsExist = false;
+        do {
+            const syncRunWasStarted = await this.startExternalEventsSyncRun();
 
-        if (!syncRunWasStarted) {
-            await this.syncDatawallet(changedItems);
-            return;
-        }
+            if (!syncRunWasStarted) {
+                await this.syncDatawallet(changedItems);
+                return;
+            }
 
-        await this.applyIncomingDatawalletModifications();
-        const result = await this.applyIncomingExternalEvents(changedItems);
-        await this.finalizeExternalEventsSyncRun(result);
+            await this.applyIncomingDatawalletModifications();
+            const result = await this.applyIncomingExternalEvents(changedItems);
+            const finalizeResult = await this.finalizeExternalEventsSyncRun(result);
+
+            newUnsyncedExternalEventsExist = finalizeResult.newUnsyncedExternalEventsExist;
+        } while (newUnsyncedExternalEventsExist);
     }
 
     @log()
@@ -384,7 +389,7 @@ export class SyncController extends TransportController {
         return results;
     }
 
-    private async finalizeExternalEventsSyncRun(externalEventResults: FinalizeSyncRunRequestExternalEventResult[]): Promise<void> {
+    private async finalizeExternalEventsSyncRun(externalEventResults: FinalizeSyncRunRequestExternalEventResult[]): Promise<{ newUnsyncedExternalEventsExist: boolean }> {
         if (!this.currentSyncRun) {
             throw new TransportError("There is no active sync run to finalize");
         }
@@ -404,6 +409,8 @@ export class SyncController extends TransportController {
         await this.updateLocalDatawalletModificationIndex(newDatawalletModificationIndex);
 
         this.currentSyncRun = undefined;
+
+        return { newUnsyncedExternalEventsExist: response.value.newUnsyncedExternalEventsExist };
     }
 
     private async finalizeDatawalletVersionUpgradeSyncRun(newDatawalletVersion: number): Promise<void> {

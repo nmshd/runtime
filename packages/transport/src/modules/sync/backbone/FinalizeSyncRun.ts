@@ -22,6 +22,7 @@ export interface FinalizeExternalEventSyncResponse {
         index: number;
         createdAt: string;
     }[];
+    newUnsyncedExternalEventsExist: boolean;
 }
 
 export interface FinalizeDatawalletVersionUpgradeResponse {
