@@ -212,13 +212,7 @@ export class TestUtil {
     }
 
     public static async addRelationship(from: AccountController, to: AccountController, templateContent?: any, requestContent?: any): Promise<Relationship[]> {
-        if (!templateContent) {
-            templateContent = {
-                metadata: {
-                    mycontent: "template"
-                }
-            };
-        }
+        templateContent ??= { metadata: { mycontent: "template" } };
 
         const templateFrom = await from.relationshipTemplates.sendRelationshipTemplate({
             content: templateContent,
