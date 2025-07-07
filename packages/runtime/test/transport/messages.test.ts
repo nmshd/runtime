@@ -53,8 +53,7 @@ let client5: TestRuntimeServices;
 beforeAll(async () => {
     const runtimeServices = await serviceProvider.launch(5, {
         enableRequestModule: true,
-        enableDeciderModule: true,
-        enableNotificationModule: true
+        enableDeciderModule: true
     });
     client1 = runtimeServices[0];
     client2 = runtimeServices[1];
@@ -651,7 +650,7 @@ describe("Postponed Notifications via Messages", () => {
 
             const postponedMessages = await syncUntilHasMessages(client5.transport);
             expect(postponedMessages).toHaveLength(1);
-            await client5.eventBus.waitForRunningEventHandlers();
+            await client5.consumption.notifications.receivedNotification({ messageId: postponedMessages[0].id });
             const postponedNotification = await client5.consumption.notifications.getNotification({ id: notificationId.toString() });
             expect(postponedNotification).toBeSuccessful();
         });
@@ -706,11 +705,14 @@ describe("Postponed Notifications via Messages", () => {
 
             const postponedMessages = await syncUntilHasMessages(client5.transport);
             expect(postponedMessages).toHaveLength(2);
-            await client5.eventBus.waitForRunningEventHandlers();
-            const postponedSuccessionNotification = await client5.consumption.notifications.getNotification({ id: notifyAboutSuccessionResult.notificationId });
-            expect(postponedSuccessionNotification).toBeSuccessful();
-            const postponedDeletionNotification = await client5.consumption.notifications.getNotification({ id: notifyAboutDeletionResult.notificationId! });
-            expect(postponedDeletionNotification).toBeSuccessful();
+
+            const postponedSuccessionNotification = (await client5.consumption.notifications.receivedNotification({ messageId: postponedMessages[0].id })).value;
+            const processedSuccessionNotificationResult = await client5.consumption.notifications.processNotificationById({ notificationId: postponedSuccessionNotification.id });
+            expect(processedSuccessionNotificationResult).toBeSuccessful();
+
+            const postponedDeletionNotification = (await client5.consumption.notifications.receivedNotification({ messageId: postponedMessages[1].id })).value;
+            const processedDeletionNotificationResult = await client5.consumption.notifications.processNotificationById({ notificationId: postponedDeletionNotification.id });
+            expect(processedDeletionNotificationResult).toBeSuccessful();
 
             const peerSharedIdentityAttribute = (await client5.consumption.attributes.getAttribute({ id: ownSharedIdentityAttribute.id })).value;
             assert(peerSharedIdentityAttribute.succeededBy);

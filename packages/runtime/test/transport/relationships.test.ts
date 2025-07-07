@@ -63,7 +63,7 @@ let services3: TestRuntimeServices;
 let services4: TestRuntimeServices;
 
 beforeAll(async () => {
-    const runtimeServices = await serviceProvider.launch(3, { enableRequestModule: true, enableDeciderModule: true, enableNotificationModule: true });
+    const runtimeServices = await serviceProvider.launch(3, { enableRequestModule: true, enableDeciderModule: true });
     const runtimeServicesWithDisabledRequestModule = await serviceProvider.launch(1, { enableRequestModule: false, enableDeciderModule: true, enableNotificationModule: true });
     services1 = runtimeServices[0];
     services2 = runtimeServices[1];
@@ -617,6 +617,8 @@ describe("Relationships query", () => {
 });
 
 describe("Attributes for the relationship", () => {
+    let services1: TestRuntimeServices;
+    let services2: TestRuntimeServices;
     let relationshipId: string;
     let ownSharedIdentityAttributeV0: LocalAttributeDTO;
     let ownSharedIdentityAttributeV1: LocalAttributeDTO;
@@ -627,6 +629,12 @@ describe("Attributes for the relationship", () => {
     let peerSharedRelationshipAttributeV0: LocalAttributeDTO;
     let peerSharedRelationshipAttributeV1: LocalAttributeDTO;
     beforeAll(async () => {
+        [services1, services2] = await serviceProvider.launch(2, {
+            enableRequestModule: true,
+            enableDeciderModule: true,
+            enableNotificationModule: true
+        });
+
         await ensureActiveRelationship(services1.transport, services2.transport);
 
         const relationship = await getRelationship(services1.transport);
@@ -1097,6 +1105,7 @@ describe("RelationshipTermination", () => {
 });
 
 describe("RelationshipDecomposition", () => {
+    let services1: TestRuntimeServices;
     let services3: TestRuntimeServices;
     let relationshipId: string;
     let templateId: string;
@@ -1105,6 +1114,8 @@ describe("RelationshipDecomposition", () => {
     let multipleRecipientsMessageId: string;
 
     beforeAll(async () => {
+        [services1] = await serviceProvider.launch(1, { enableRequestModule: true, enableDeciderModule: true, enableNotificationModule: true });
+
         await cleanupAttributes([services1, services2]);
 
         const relationship = await ensureActiveRelationship(services1.transport, services2.transport);
@@ -1113,7 +1124,7 @@ describe("RelationshipDecomposition", () => {
 
         await createRelationshipData(services1, services2);
 
-        const runtimeServices = await serviceProvider.launch(1, { enableRequestModule: true, enableDeciderModule: true, enableNotificationModule: true });
+        const runtimeServices = await serviceProvider.launch(1, { enableRequestModule: true, enableDeciderModule: true });
         services3 = runtimeServices[0];
         const relationship2 = await establishRelationship(services1.transport, services3.transport);
         relationshipId2 = relationship2.id;

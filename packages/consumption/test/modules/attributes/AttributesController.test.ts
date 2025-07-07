@@ -457,6 +457,22 @@ describe("AttributesController", function () {
 
             expect(thirdPartyLocalAttributeCopy.shareInfo?.thirdPartyAddress?.toString()).toBe(thirdPartyAddress.toString());
         });
+
+        test("should not create a new attribute with a duplicate id", async function () {
+            const params: ICreateRepositoryAttributeParams = {
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "DisplayName",
+                        value: "aDisplayName"
+                    },
+                    owner: consumptionController.accountController.identity.address
+                }),
+                id: CoreId.from("duplicateId")
+            };
+
+            await consumptionController.attributes.createRepositoryAttribute(params);
+            await expect(consumptionController.attributes.createRepositoryAttribute(params)).rejects.toThrow(/[Dd]uplicate key/);
+        });
     });
 
     describe("query Attributes", function () {
