@@ -459,7 +459,7 @@ export class AccountController {
     }
 
     public async getSynchronizedCollection(collectionName: string): Promise<SynchronizedCollection> {
-        const collection = await this.db.getCollection(collectionName);
+        const collection = await this.db.getCollection(collectionName, ["id"]);
         if (!this.config.datawalletEnabled) {
             return new SynchronizedCollection(collection, this.config.supportedDatawalletVersion);
         }
