@@ -60,9 +60,8 @@ export class CoreDate extends Serializable {
     }
 
     public isWithin(rangeMinusOrBoth: number | Duration | DurationLike, rangePlus?: number | Duration | DurationLike, other?: CoreDate, granularity?: DateTimeUnit): boolean {
-        if (!rangePlus) rangePlus = rangeMinusOrBoth;
-
-        if (!other) other = CoreDate.utc();
+        rangePlus ??= rangeMinusOrBoth;
+        other ??= CoreDate.utc();
 
         const start = other.subtract(rangeMinusOrBoth);
         const end = other.add(rangePlus);

@@ -103,9 +103,7 @@ export class FileController extends TransportController {
 
     private async updateCacheOfFile(file: File, response?: BackboneGetFilesResponse): Promise<void> {
         const fileId = file.id.toString();
-        if (!response) {
-            response = (await this.client.getFile(fileId)).value;
-        }
+        response ??= (await this.client.getFile(fileId)).value;
 
         const cachedFile = await this.decryptFile(response, file.secretKey);
         file.setCache(cachedFile);

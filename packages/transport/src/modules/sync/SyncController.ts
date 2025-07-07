@@ -30,16 +30,15 @@ export class SyncController extends TransportController {
 
     private _cacheFetcher?: CacheFetcher;
     private get cacheFetcher() {
-        if (!this._cacheFetcher) {
-            this._cacheFetcher = new CacheFetcher(
-                this.parent.files,
-                this.parent.messages,
-                this.parent.relationshipTemplates,
-                this.parent.relationships,
-                this.parent.tokens,
-                this.parent.identityDeletionProcess
-            );
-        }
+        this._cacheFetcher ??= new CacheFetcher(
+            this.parent.files,
+            this.parent.messages,
+            this.parent.relationshipTemplates,
+            this.parent.relationships,
+            this.parent.tokens,
+            this.parent.identityDeletionProcess
+        );
+
         return this._cacheFetcher;
     }
 
@@ -405,7 +404,7 @@ export class SyncController extends TransportController {
         await this.deleteUnpushedDatawalletModifications(localModificationIds);
 
         const oldDatawalletModificationIndex = await this.getLocalDatawalletModificationIndex();
-        const newDatawalletModificationIndex = (oldDatawalletModificationIndex || -1) + backboneModifications.length;
+        const newDatawalletModificationIndex = (oldDatawalletModificationIndex ?? -1) + backboneModifications.length;
         await this.updateLocalDatawalletModificationIndex(newDatawalletModificationIndex);
 
         this.currentSyncRun = undefined;
@@ -430,7 +429,7 @@ export class SyncController extends TransportController {
         await this.deleteUnpushedDatawalletModifications(localModificationIds);
 
         const oldDatawalletModificationIndex = await this.getLocalDatawalletModificationIndex();
-        const newDatawalletModificationIndex = (oldDatawalletModificationIndex || -1) + backboneModifications.length;
+        const newDatawalletModificationIndex = (oldDatawalletModificationIndex ?? -1) + backboneModifications.length;
         await this.updateLocalDatawalletModificationIndex(newDatawalletModificationIndex);
 
         this.currentSyncRun = undefined;

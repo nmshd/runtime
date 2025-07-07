@@ -134,7 +134,7 @@ export class RESTClient {
     private addAxiosLoggingInterceptors(axiosInstance: AxiosInstance) {
         axiosInstance.interceptors.request.use((config) => {
             const requestAsAny = config as any;
-            requestAsAny.meta = (config as any).meta || {};
+            requestAsAny.meta = (config as any).meta ?? {};
             requestAsAny.meta.startTime = new Date().getTime();
             return config;
         });
@@ -294,14 +294,12 @@ export class RESTClient {
             return ClientResult.fail<Paginator<T>>(error, platformParameters);
         }
 
-        if (!response.data.pagination) {
-            response.data.pagination = {
-                pageNumber: 1,
-                pageSize: response.data.result.length,
-                totalPages: 1,
-                totalRecords: response.data.result.length
-            };
-        }
+        response.data.pagination ??= {
+            pageNumber: 1,
+            pageSize: response.data.result.length,
+            totalPages: 1,
+            totalRecords: response.data.result.length
+        };
 
         const paginationDataSource = new RestPaginationDataSource<T>(this, path, args);
         const paginator = new Paginator<T>(response.data.result, response.data.pagination, paginationDataSource, progessCallback);
@@ -397,7 +395,7 @@ export class RESTClient {
         let sendData = formData;
         if (typeof formData.getHeaders !== "undefined") {
             const h = formData.getHeaders();
-            conf["headers"] = conf["headers"] || {};
+            conf["headers"] = conf["headers"] ?? {};
             for (const key in h) {
                 conf["headers"][key] = h[key];
             }

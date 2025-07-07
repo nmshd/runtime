@@ -552,11 +552,8 @@ export class TestUtil {
     }
 
     public static async sendRelationshipTemplate(from: AccountController, body?: ISerializable): Promise<RelationshipTemplate> {
-        if (!body) {
-            body = {
-                content: "template"
-            };
-        }
+        body ??= { content: "template" };
+
         return await from.relationshipTemplates.sendRelationshipTemplate({
             content: body,
             expiresAt: CoreDate.utc().add({ minutes: 5 }),
@@ -565,11 +562,8 @@ export class TestUtil {
     }
 
     public static async sendRelationshipTemplateAndToken(account: AccountController, body?: ISerializable): Promise<string> {
-        if (!body) {
-            body = {
-                content: "template"
-            };
-        }
+        body ??= { content: "template" };
+
         const template = await account.relationshipTemplates.sendRelationshipTemplate({
             content: body,
             expiresAt: CoreDate.utc().add({ minutes: 5 }),
@@ -591,11 +585,8 @@ export class TestUtil {
     }
 
     public static async sendRelationship(account: AccountController, template: RelationshipTemplate, body?: ISerializable): Promise<Relationship> {
-        if (!body) {
-            body = {
-                content: "request"
-            };
-        }
+        body ??= { content: "request" };
+
         return await account.relationships.sendRelationship({
             template: template,
             creationContent: body
@@ -630,9 +621,9 @@ export class TestUtil {
         for (const controller of recipients) {
             recipientAddresses.push(controller.identity.address);
         }
-        if (!content) {
-            content = Serializable.fromAny({ content: "TestContent" });
-        }
+
+        content ??= Serializable.fromAny({ content: "TestContent" });
+
         return await from.messages.sendMessage({
             recipients: recipientAddresses,
             content: content,
