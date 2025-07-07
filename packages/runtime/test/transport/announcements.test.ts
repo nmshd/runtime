@@ -29,6 +29,8 @@ describe("Announcements", () => {
         expect(announcement).toBeDefined();
 
         expect(announcement!.actions).toHaveLength(1);
+        expect(announcement!.actions[0].displayName).toBe("English Action Display Name");
+        expect(announcement!.actions[0].link).toBe("https://example.com/some-action");
     });
 
     async function createTestAnnouncement(): Promise<string> {
