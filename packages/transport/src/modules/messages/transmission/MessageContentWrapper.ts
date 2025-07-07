@@ -37,7 +37,7 @@ export class MessageContentWrapper extends Serializable implements IMessageConte
     public recipients: CoreAddress[];
 
     protected static override preFrom(value: any): any {
-        if (!value.attachments) value.attachments = [];
+        value.attachments ??= [];
 
         return value;
     }
