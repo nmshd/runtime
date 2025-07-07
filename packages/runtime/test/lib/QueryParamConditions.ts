@@ -22,9 +22,7 @@ export class QueryParamConditions<TQuery extends PartialRecord<keyof TQuery, str
     }
 
     public addDateSet(key: string & keyof TQuery, positiveValue?: string): this {
-        if (!positiveValue) {
-            positiveValue = this.getValueByKey(key);
-        }
+        positiveValue ??= this.getValueByKey(key);
 
         if (!positiveValue) {
             return this;
@@ -54,9 +52,7 @@ export class QueryParamConditions<TQuery extends PartialRecord<keyof TQuery, str
     }
 
     public addBooleanSet(key: string & keyof TQuery, positiveValue?: boolean): this {
-        if (positiveValue === undefined) {
-            positiveValue = this.getValueByKey(key) as boolean | undefined;
-        }
+        positiveValue ??= this.getValueByKey(key) as boolean | undefined;
 
         if (positiveValue === undefined) {
             return this;
@@ -78,9 +74,7 @@ export class QueryParamConditions<TQuery extends PartialRecord<keyof TQuery, str
     }
 
     public addNumberSet(key: string & keyof TQuery, positiveValue?: number): this {
-        if (!positiveValue) {
-            positiveValue = this.getValueByKey(key);
-        }
+        positiveValue ??= this.getValueByKey(key);
 
         if (!positiveValue) {
             return this;
@@ -108,9 +102,7 @@ export class QueryParamConditions<TQuery extends PartialRecord<keyof TQuery, str
     }
 
     public addStringSet(key: string & keyof TQuery, positiveValue?: string): this {
-        if (!positiveValue) {
-            positiveValue = this.getValueByKey(key);
-        }
+        positiveValue ??= this.getValueByKey(key);
 
         if (!positiveValue) {
             return this;

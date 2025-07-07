@@ -18,7 +18,7 @@ class RuntimeDatabaseSchemaMetadata extends Serializable {
     public version: number;
 
     protected static override preFrom(value: any) {
-        if (!value.id) value.id = RuntimeDatabaseSchemaMetadata.DATABASE_SCHEMA_ID;
+        value.id ??= RuntimeDatabaseSchemaMetadata.DATABASE_SCHEMA_ID;
         return value;
     }
 

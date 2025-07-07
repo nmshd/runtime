@@ -91,7 +91,7 @@ export class GetMessagesUseCase extends UseCase<GetMessagesRequest, MessageDTO[]
                         switch (parsed.field) {
                             case "$containsAny":
                             case "$containsNone":
-                                participantQuery[parsed.field] = participantQuery[parsed.field] || [];
+                                participantQuery[parsed.field] = participantQuery[parsed.field] ?? [];
                                 participantQuery[parsed.field].push(parsed.value);
                                 break;
                             default:
