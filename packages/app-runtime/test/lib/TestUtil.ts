@@ -289,9 +289,7 @@ export class TestUtil {
         attachments: string[],
         content?: MessageContentDerivation
     ): Promise<MessageDTO> {
-        if (!content) {
-            content = ArbitraryMessageContent.from({ value: "TestContent" }).toJSON();
-        }
+        content ??= ArbitraryMessageContent.from({ value: "TestContent" }).toJSON();
 
         const result = await from.transportServices.messages.sendMessage({
             recipients: recipients.map((r) => r.address),

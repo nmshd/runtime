@@ -386,9 +386,7 @@ export class RelationshipsController extends TransportController {
     }
 
     private async updateCacheOfRelationship(relationship: Relationship, response?: BackboneRelationship) {
-        if (!response) {
-            response = (await this.client.getRelationship(relationship.id.toString())).value;
-        }
+        response ??= (await this.client.getRelationship(relationship.id.toString())).value;
 
         const cachedRelationship = await this.decryptRelationship(response, relationship.relationshipSecretId);
 
