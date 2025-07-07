@@ -1,6 +1,5 @@
 import { ILogger } from "@js-soft/logging-abstractions";
 import { EventEmitter2EventBus } from "@js-soft/ts-utils";
-import { CryptoLayerConfig } from "@nmshd/crypto";
 import { createProvider, createProviderFromName, getAllProviders, getProviderCapabilities } from "@nmshd/rs-crypto-node";
 import fs from "fs";
 import path from "path";
@@ -23,7 +22,7 @@ export class AppDeviceTest {
         this.parameters = parameters;
         const transportSpecificDir = fs.mkdtempSync(path.join(AppDeviceTest.rootTempDir.name, "transport-"));
 
-        const calConfig: CryptoLayerConfig = {
+        this.parameters.config.calConfig = {
             factoryFunctions: { getAllProviders, createProvider, createProviderFromName, getProviderCapabilities },
             providersToBeInitialized: ALL_CRYPTO_PROVIDERS.map((name) => [
                 { providerName: name },
@@ -41,14 +40,13 @@ export class AppDeviceTest {
                 }
             ])
         };
+
         this.transport = new Transport(
             this.parameters.config,
             new EventEmitter2EventBus(() => {
                 // ignore errors
             }),
-            this.parameters.loggerFactory,
-            undefined,
-            calConfig
+            this.parameters.loggerFactory
         );
     }
 

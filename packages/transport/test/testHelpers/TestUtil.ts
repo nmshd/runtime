@@ -8,7 +8,7 @@ import { SimpleLoggerFactory } from "@js-soft/simple-logger";
 import { ISerializable, Serializable } from "@js-soft/ts-serval";
 import { EventEmitter2EventBus, sleep } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
-import { CoreBuffer, CryptoLayerConfig } from "@nmshd/crypto";
+import { CoreBuffer } from "@nmshd/crypto";
 import { createProvider, createProviderFromName, getAllProviders, getProviderCapabilities } from "@nmshd/rs-crypto-node";
 import fs from "fs";
 import { DurationLike } from "luxon";
@@ -167,27 +167,7 @@ export class TestUtil {
 
         const config = TestUtil.createConfig();
 
-        const transportSpecificDir = fs.mkdtempSync(path.join(TestUtil.rootTempDir.name, "transport-"));
-
-        const calConfig: CryptoLayerConfig = {
-            factoryFunctions: { getAllProviders, createProvider, createProviderFromName, getProviderCapabilities },
-            providersToBeInitialized: ALL_CRYPTO_PROVIDERS.map((name) => [
-                { providerName: name },
-                {
-                    // eslint-disable-next-line @typescript-eslint/naming-convention
-                    additional_config: [
-                        {
-                            // eslint-disable-next-line @typescript-eslint/naming-convention
-                            FileStoreConfig: {
-                                // eslint-disable-next-line @typescript-eslint/naming-convention
-                                db_dir: path.join(transportSpecificDir, `cal_db_${name}`)
-                            }
-                        }
-                    ]
-                }
-            ])
-        };
-        return new Transport({ ...config, ...configOverwrite }, eventBus, TestUtil.loggerFactory, correlator, calConfig);
+        return new Transport({ ...config, ...configOverwrite }, eventBus, TestUtil.loggerFactory, correlator);
     }
 
     public static createEventBus(): EventEmitter2EventBus {
@@ -198,6 +178,7 @@ export class TestUtil {
 
     public static createConfig(): IConfigOverwrite {
         const notDefinedEnvironmentVariables = ["NMSHD_TEST_BASEURL", "NMSHD_TEST_CLIENTID", "NMSHD_TEST_CLIENTSECRET"].filter((env) => !process.env[env]);
+        const transportSpecificDir = fs.mkdtempSync(path.join(TestUtil.rootTempDir.name, "transport-"));
 
         if (notDefinedEnvironmentVariables.length > 0) {
             throw new Error(`Missing environment variable(s): ${notDefinedEnvironmentVariables.join(", ")}}`);
@@ -209,7 +190,25 @@ export class TestUtil {
             platformClientSecret: globalThis.process.env.NMSHD_TEST_CLIENTSECRET!,
             addressGenerationHostnameOverride: globalThis.process.env.NMSHD_TEST_ADDRESS_GENERATION_HOSTNAME_OVERRIDE,
             debug: true,
-            supportedIdentityVersion: 1
+            supportedIdentityVersion: 1,
+            calConfig: {
+                factoryFunctions: { getAllProviders, createProvider, createProviderFromName, getProviderCapabilities },
+                providersToBeInitialized: ALL_CRYPTO_PROVIDERS.map((name) => [
+                    { providerName: name },
+                    {
+                        // eslint-disable-next-line @typescript-eslint/naming-convention
+                        additional_config: [
+                            {
+                                // eslint-disable-next-line @typescript-eslint/naming-convention
+                                FileStoreConfig: {
+                                    // eslint-disable-next-line @typescript-eslint/naming-convention
+                                    db_dir: path.join(transportSpecificDir, `cal_db_${name}`)
+                                }
+                            }
+                        ]
+                    }
+                ])
+            }
         };
     }
 

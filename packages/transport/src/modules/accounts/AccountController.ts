@@ -296,7 +296,15 @@ export class AccountController {
         // Generate device basekey
         let privBaseDevice: CryptoSecretKey | DeviceBoundKeyHandle;
         let dbKey;
-        const isBaseKeyStoredOnHardware = hasProviderForSecurityLevel("Hardware");
+
+        let isBaseKeyStoredOnHardware;
+        try {
+            isBaseKeyStoredOnHardware = hasProviderForSecurityLevel("Hardware");
+        } catch (error) {
+            this._log.warn("Crypto Layer not initialized, continuing without it.", error);
+            isBaseKeyStoredOnHardware = false;
+        }
+
         if (isBaseKeyStoredOnHardware) {
             privBaseDevice = (await providerMapping.getPreferredProviderKeyHandle(
                 CryptoObject.AccountController,
@@ -432,7 +440,15 @@ export class AccountController {
         // Generate device basekey
         let privBaseDevice: CryptoSecretKey | DeviceBoundKeyHandle;
         let dbKey;
-        const isBaseKeyStoredOnHardware = hasProviderForSecurityLevel("Hardware");
+
+        let isBaseKeyStoredOnHardware;
+        try {
+            isBaseKeyStoredOnHardware = hasProviderForSecurityLevel("Hardware");
+        } catch (error) {
+            this._log.warn("Crypto Layer not initialized, continuing without it.", error);
+            isBaseKeyStoredOnHardware = false;
+        }
+
         if (isBaseKeyStoredOnHardware) {
             privBaseDevice = (await providerMapping.getPreferredProviderKeyHandle(
                 CryptoObject.AccountController,

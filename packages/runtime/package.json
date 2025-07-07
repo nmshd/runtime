@@ -68,6 +68,7 @@
         "@nmshd/content": "*",
         "@nmshd/core-types": "*",
         "@nmshd/crypto": "2.2.0-alpha.3",
+        "@nmshd/rs-crypto-node": "0.14.0",
         "@nmshd/iql": "^1.0.3",
         "@nmshd/runtime-types": "*",
         "@nmshd/transport": "*",

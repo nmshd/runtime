@@ -2,10 +2,14 @@ import { ILogger, ILoggerFactory } from "@js-soft/logging-abstractions";
 import { SimpleLoggerFactory } from "@js-soft/simple-logger";
 import { EventBus } from "@js-soft/ts-utils";
 import { CryptoLayerConfig, initCryptoLayerProviders, SodiumWrapper } from "@nmshd/crypto";
+import { createProvider, createProviderFromName, getAllProviders, getProviderCapabilities } from "@nmshd/rs-crypto-node";
+import fs from "fs";
 import { AgentOptions } from "http";
 import { AgentOptions as HTTPSAgentOptions } from "https";
 import _ from "lodash";
-import { CryptoOperationPreferences, DEFAULT_CRYPTO_OPERATION_PREFERENCES } from "./CryptoProviderMapping";
+import path from "path";
+import * as tmp from "tmp";
+import { ALL_CRYPTO_PROVIDERS, CryptoOperationPreferences, DEFAULT_CRYPTO_OPERATION_PREFERENCES } from "./CryptoProviderMapping";
 import { ICorrelator } from "./ICorrelator";
 import { TransportCoreErrors } from "./TransportCoreErrors";
 import { TransportError } from "./TransportError";
@@ -33,6 +37,7 @@ export interface IConfig {
     httpsAgentOptions: HTTPSAgentOptions;
     tagCacheLifetimeInMinutes: number;
     cryptoOperationPreferences: CryptoOperationPreferences;
+    calConfig: CryptoLayerConfig;
 }
 
 export interface IConfigOverwrite {
@@ -52,10 +57,12 @@ export interface IConfigOverwrite {
     httpsAgentOptions?: HTTPSAgentOptions;
     tagCacheLifetimeInMinutes?: number;
     cryptoOperationPreferences?: CryptoOperationPreferences;
+    calConfig?: CryptoLayerConfig;
 }
 
 export class Transport {
     private readonly _config: IConfig;
+    private static readonly rootTempDir = tmp.dirSync({ unsafeCleanup: true });
     public get config(): IConfig {
         return this._config;
     }
@@ -83,15 +90,32 @@ export class Transport {
             maxFreeSockets: 2
         },
         tagCacheLifetimeInMinutes: 5,
-        cryptoOperationPreferences: DEFAULT_CRYPTO_OPERATION_PREFERENCES
+        cryptoOperationPreferences: DEFAULT_CRYPTO_OPERATION_PREFERENCES,
+        calConfig: {
+            factoryFunctions: { getAllProviders, createProvider, createProviderFromName, getProviderCapabilities },
+            providersToBeInitialized: ALL_CRYPTO_PROVIDERS.map((name) => [
+                { providerName: name },
+                {
+                    // eslint-disable-next-line @typescript-eslint/naming-convention
+                    additional_config: [
+                        {
+                            // eslint-disable-next-line @typescript-eslint/naming-convention
+                            FileStoreConfig: {
+                                // eslint-disable-next-line @typescript-eslint/naming-convention
+                                db_dir: path.join(fs.mkdtempSync(path.join(Transport.rootTempDir.name, "transport-")), `cal_db_${name}`)
+                            }
+                        }
+                    ]
+                }
+            ])
+        }
     };
 
     public constructor(
         customConfig: IConfigOverwrite,
         public readonly eventBus: EventBus,
         loggerFactory: ILoggerFactory = new SimpleLoggerFactory(),
-        public readonly correlator?: ICorrelator,
-        public readonly cryptoLayerConfig?: CryptoLayerConfig
+        public readonly correlator?: ICorrelator
     ) {
         this._config = _.defaultsDeep({}, customConfig, Transport.defaultConfig);
 
@@ -127,16 +151,16 @@ export class Transport {
         log.trace("Initializing Libsodium...");
         await SodiumWrapper.ready();
 
-        if (this.cryptoLayerConfig) {
-            log.trace("Initializing Crypto Layer...");
-            try {
-                await initCryptoLayerProviders(this.cryptoLayerConfig);
-                log.trace("Crypto Layer initialized successfully");
-            } catch (error) {
-                log.warn("Failed to initialize Crypto Layer, continuing without it.", error);
-            }
-            log.trace("Crypto Layer initialized");
+        log.trace("Initializing Crypto Layer...");
+        // New version of ts-crypto will have flag to verify if cal was already initialized.
+        // Until then tests probably throw "Providers cannot be initialized again."
+        try {
+            await initCryptoLayerProviders(this._config.calConfig);
+            log.trace("Crypto Layer initialized successfully");
+        } catch (error) {
+            log.warn("Failed to initialize Crypto Layer, continuing without it.", error);
         }
+        log.trace("Crypto Layer initialized");
 
         log.trace("Libsodium initialized");
 
