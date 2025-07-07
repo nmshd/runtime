@@ -82,7 +82,7 @@ describe("RelationshipTemplate Tests", () => {
             expiresAt: relationshipTemplateExpirationDate
         });
 
-        expect(response.isSuccess).toBe(true);
+        expect(response).toBeSuccessful();
         expect((response.value.content as RelationshipTemplateContentJSON).onNewRelationship.expiresAt).toStrictEqual(relationshipTemplateExpirationDate);
     });
 
