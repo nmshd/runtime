@@ -9,6 +9,7 @@ export * from "./accounts/IdentityDeletionProcessController";
 export * from "./accounts/IdentityUtil";
 export * from "./announcements/AnnouncementController";
 export * from "./announcements/data/Announcement";
+export * from "./announcements/data/AnnouncementAction";
 export * from "./backboneCompatibility/backbone/GetBackboneVersionResponse";
 export * from "./backboneCompatibility/backbone/VersionClient";
 export * from "./backboneCompatibility/BackboneCompatibilityController";
