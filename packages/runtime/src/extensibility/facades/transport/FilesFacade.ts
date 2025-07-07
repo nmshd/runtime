@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
+import { FileDTO, TokenDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { FileDTO, TokenDTO } from "../../../types";
 import {
     CreateTokenForFileRequest,
     CreateTokenForFileUseCase,

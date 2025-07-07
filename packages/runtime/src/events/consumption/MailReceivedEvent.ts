@@ -1,5 +1,5 @@
 import { Mail } from "@nmshd/content";
-import { MessageDTO } from "../../types";
+import { MessageDTO } from "@nmshd/runtime-types";
 import { DataEvent } from "../DataEvent";
 
 export class MailReceivedEvent extends DataEvent<MessageDTO> {

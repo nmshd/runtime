@@ -2,9 +2,9 @@ import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { IncomingRequestsController } from "@nmshd/consumption";
 import { Request, RequestJSON } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
+import { LocalRequestDTO } from "@nmshd/runtime-types";
 import { Message, MessageController, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { LocalRequestDTO } from "../../../types";
 import { MessageIdString, RelationshipTemplateIdString, RuntimeErrors, UseCase } from "../../common";
 import { RequestMapper } from "./RequestMapper";
 

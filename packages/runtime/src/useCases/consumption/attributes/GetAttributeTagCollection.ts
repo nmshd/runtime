@@ -1,7 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController } from "@nmshd/consumption";
+import { AttributeTagCollectionDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { AttributeTagCollectionDTO } from "../../../types";
 import { UseCase } from "../../common";
 import { AttributeTagCollectionMapper } from "./AttributeTagCollectionMapper";
 

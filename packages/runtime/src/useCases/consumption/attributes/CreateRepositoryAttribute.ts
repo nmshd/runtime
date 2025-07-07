@@ -1,9 +1,9 @@
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController, CreateRepositoryAttributeParams } from "@nmshd/consumption";
 import { AttributeValues } from "@nmshd/content";
+import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { AccountController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { LocalAttributeDTO } from "../../../types";
 import { ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationResult } from "../../common";
 import { IValidator } from "../../common/validation/IValidator";
 import { AttributeMapper } from "./AttributeMapper";

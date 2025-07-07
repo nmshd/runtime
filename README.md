@@ -4,14 +4,15 @@
 
 This monorepo consolidates the following packages:
 
-| Package                              | Version                                                                                                           |
-| :----------------------------------- | :---------------------------------------------------------------------------------------------------------------- |
-| [core-types](packages/core-types/)   | [![version](https://badge.fury.io/js/@nmshd%2fcore-types.svg)](https://www.npmjs.com/package/@nmshd/core-types)   |
-| [transport](packages/transport/)     | [![version](https://badge.fury.io/js/@nmshd%2ftransport.svg)](https://www.npmjs.com/package/@nmshd/transport)     |
-| [content](packages/content/)         | [![version](https://badge.fury.io/js/@nmshd%2fcontent.svg)](https://www.npmjs.com/package/@nmshd/content)         |
-| [consumption](packages/consumption/) | [![version](https://badge.fury.io/js/@nmshd%2fconsumption.svg)](https://www.npmjs.com/package/@nmshd/consumption) |
-| [runtime](packages/runtime/)         | [![version](https://badge.fury.io/js/@nmshd%2fruntime.svg)](https://www.npmjs.com/package/@nmshd/runtime)         |
-| [app-runtime](packages/app-runtime/) | [![version](https://badge.fury.io/js/@nmshd%2fapp-runtime.svg)](https://www.npmjs.com/package/@nmshd/app-runtime) |
+| Package                                  | Version                                                                                                               |
+| :--------------------------------------- | :-------------------------------------------------------------------------------------------------------------------- |
+| [core-types](packages/core-types/)       | [![version](https://badge.fury.io/js/@nmshd%2fcore-types.svg)](https://www.npmjs.com/package/@nmshd/core-types)       |
+| [transport](packages/transport/)         | [![version](https://badge.fury.io/js/@nmshd%2ftransport.svg)](https://www.npmjs.com/package/@nmshd/transport)         |
+| [content](packages/content/)             | [![version](https://badge.fury.io/js/@nmshd%2fcontent.svg)](https://www.npmjs.com/package/@nmshd/content)             |
+| [consumption](packages/consumption/)     | [![version](https://badge.fury.io/js/@nmshd%2fconsumption.svg)](https://www.npmjs.com/package/@nmshd/consumption)     |
+| [runtime-types](packages/runtime-types/) | [![version](https://badge.fury.io/js/@nmshd%2fruntime-types.svg)](https://www.npmjs.com/package/@nmshd/runtime-types) |
+| [runtime](packages/runtime/)             | [![version](https://badge.fury.io/js/@nmshd%2fruntime.svg)](https://www.npmjs.com/package/@nmshd/runtime)             |
+| [app-runtime](packages/app-runtime/)     | [![version](https://badge.fury.io/js/@nmshd%2fapp-runtime.svg)](https://www.npmjs.com/package/@nmshd/app-runtime)     |
 
 ## Documentation
 

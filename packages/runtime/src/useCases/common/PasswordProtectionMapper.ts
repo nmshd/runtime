@@ -1,6 +1,6 @@
 import { PasswordLocationIndicator, PasswordLocationIndicatorOptions } from "@nmshd/core-types";
+import { PasswordProtectionDTO } from "@nmshd/runtime-types";
 import { PasswordProtection, PasswordProtectionCreationParameters } from "@nmshd/transport";
-import { PasswordProtectionDTO } from "../../types";
 
 export class PasswordProtectionMapper {
     public static toPasswordProtectionDTO(passwordProtection?: PasswordProtection): PasswordProtectionDTO | undefined {

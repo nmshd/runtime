@@ -1,5 +1,5 @@
+import { ChallengeDTO } from "@nmshd/runtime-types";
 import { ChallengeSigned } from "@nmshd/transport";
-import { ChallengeDTO } from "../../../types";
 
 export class ChallengeMapper {
     public static toChallengeDTO(signedChallenge: ChallengeSigned): ChallengeDTO {

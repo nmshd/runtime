@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
+import { DraftDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { DraftDTO } from "../../../types";
 import {
     CreateDraftRequest,
     CreateDraftUseCase,

@@ -1,5 +1,5 @@
+import { AnnouncementDTO } from "@nmshd/runtime-types";
 import { Announcement } from "@nmshd/transport";
-import { AnnouncementDTO } from "../../../types";
 
 export class AnnouncementMapper {
     public static toAnnouncementDTO(announcement: Announcement): AnnouncementDTO {
@@ -9,7 +9,11 @@ export class AnnouncementMapper {
             expiresAt: announcement.expiresAt?.toString(),
             severity: announcement.severity,
             title: announcement.title,
-            body: announcement.body
+            body: announcement.body,
+            actions: announcement.actions.map((action) => ({
+                displayName: action.displayName,
+                link: action.link
+            }))
         };
     }
 }

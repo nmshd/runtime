@@ -1,7 +1,7 @@
+import { TokenDTO } from "@nmshd/runtime-types";
 import { Token } from "@nmshd/transport";
 import { Container } from "@nmshd/typescript-ioc";
 import { ConfigHolder } from "../../../ConfigHolder";
-import { TokenDTO } from "../../../types";
 import { PasswordProtectionMapper, RuntimeErrors } from "../../common";
 
 export class TokenMapper {

@@ -1,9 +1,9 @@
 import { RelationshipAttributeConfidentiality, ShareAttributeRequestItemJSON } from "@nmshd/content";
+import { LocalAttributeDTO, LocalAttributeListenerDTO, RelationshipStatus } from "@nmshd/runtime-types";
 import { RelationshipAuditLogEntryReason } from "@nmshd/transport";
 import { AttributeCreatedEvent, AttributeListenerTriggeredEvent, RelationshipChangedEvent } from "../events";
 import { RuntimeModule } from "../extensibility";
 import { RuntimeServices } from "../Runtime";
-import { LocalAttributeDTO, LocalAttributeListenerDTO, RelationshipStatus } from "../types";
 
 export class AttributeListenerModule extends RuntimeModule {
     public init(): void {

@@ -1,7 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
+import { FileDTO, IdentityDeletionProcessDTO, MessageDTO, RelationshipDTO } from "@nmshd/runtime-types";
 import { AccountController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { FileDTO, IdentityDeletionProcessDTO, MessageDTO, RelationshipDTO } from "../../../types";
 import { UseCase } from "../../common";
 import { FileMapper } from "../files";
 import { IdentityDeletionProcessMapper } from "../identityDeletionProcesses";

@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
+import { IdentityMetadataDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { IdentityMetadataDTO } from "../../../types";
 import {
     DeleteIdentityMetadataRequest,
     DeleteIdentityMetadataUseCase,

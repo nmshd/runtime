@@ -441,7 +441,7 @@ export class TestUtil {
     ): Promise<{ revokedRelationshipFromSelf: Relationship; revokedRelationshipPeer: Relationship }> {
         const relationshipId = (await to.relationships.getRelationshipToIdentity(from.identity.address))!.id;
         const revokedRelationshipPeer = await to.relationships.revoke(relationshipId);
-        const revokedRelationshipFromSelf = (await TestUtil.syncUntil(from, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
+        const revokedRelationshipFromSelf = (await this.syncUntilHasRelationship(from, relationshipId))[0];
 
         return { revokedRelationshipFromSelf, revokedRelationshipPeer };
     }
@@ -452,7 +452,7 @@ export class TestUtil {
     ): Promise<{ terminatedRelationshipFromSelf: Relationship; terminatedRelationshipPeer: Relationship }> {
         const relationshipId = (await from.relationships.getRelationshipToIdentity(to.identity.address))!.id;
         const terminatedRelationshipFromSelf = await from.relationships.terminate(relationshipId);
-        const terminatedRelationshipPeer = (await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
+        const terminatedRelationshipPeer = (await this.syncUntilHasRelationship(to, relationshipId))[0];
 
         return { terminatedRelationshipFromSelf, terminatedRelationshipPeer };
     }
@@ -463,9 +463,9 @@ export class TestUtil {
     ): Promise<{ reactivatedRelationshipFromSelf: Relationship; reactivatedRelationshipPeer: Relationship }> {
         const relationshipId = (await from.relationships.getRelationshipToIdentity(to.identity.address))!.id;
         await from.relationships.requestReactivation(relationshipId);
-        await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0);
+        await this.syncUntilHasRelationship(to, relationshipId);
         const reactivatedRelationshipFromSelf = await to.relationships.acceptReactivation(relationshipId);
-        const reactivatedRelationshipPeer = (await TestUtil.syncUntil(from, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
+        const reactivatedRelationshipPeer = (await this.syncUntilHasRelationship(from, relationshipId))[0];
 
         return { reactivatedRelationshipFromSelf, reactivatedRelationshipPeer };
     }
@@ -474,7 +474,7 @@ export class TestUtil {
         const relationship = (await from.relationships.getRelationshipToIdentity(to.identity.address))!;
         await from.relationships.decompose(relationship.id);
         await from.cleanupDataOfDecomposedRelationship(relationship);
-        const decomposedRelationshipPeer = (await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
+        const decomposedRelationshipPeer = (await this.syncUntilHasRelationship(to, relationship.id))[0];
 
         return decomposedRelationshipPeer;
     }

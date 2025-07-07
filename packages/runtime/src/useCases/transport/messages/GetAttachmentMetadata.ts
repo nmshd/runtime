@@ -1,8 +1,8 @@
 import { Result } from "@js-soft/ts-utils";
 import { CoreId } from "@nmshd/core-types";
+import { FileDTO } from "@nmshd/runtime-types";
 import { File, FileController, Message, MessageController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { FileDTO } from "../../../types";
 import { FileIdString, MessageIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { FileMapper } from "../files/FileMapper";
 
