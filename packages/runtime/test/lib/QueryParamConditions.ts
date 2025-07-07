@@ -158,7 +158,6 @@ export class QueryParamConditions<TQuery extends PartialRecord<keyof TQuery, str
             const response: Result<any> = await queryFunction(this.services, { [condition.key]: condition.value });
 
             expect(response).toBeSuccessful();
-            
 
             if (condition.expectedResult) {
                 expect(response.value, `Positive match failed for key "${condition.key}" and value "${condition.value}".`).toContainEqual(this.object);
