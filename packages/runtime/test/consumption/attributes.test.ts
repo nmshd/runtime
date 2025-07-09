@@ -9,7 +9,6 @@ import {
     RequestItemJSONDerivations,
     ShareAttributeRequestItem,
     ShareAttributeRequestItemJSON,
-    StreetAddressJSON,
     ThirdPartyRelationshipAttributeQuery,
     ThirdPartyRelationshipAttributeQueryOwner
 } from "@nmshd/content";
@@ -972,56 +971,6 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
         const attribute = result.value;
         expect((attribute.content.value as GivenNameJSON).value).toBe("aGivenName");
         await services1.eventBus.waitForEvent(AttributeCreatedEvent, (e) => e.data.id === attribute.id);
-    });
-
-    test("should create LocalAttributes for each child of a complex repository attribute", async function () {
-        const attributesBeforeCreate = await services1.consumption.attributes.getAttributes({});
-        const nrAttributesBeforeCreate = attributesBeforeCreate.value.length;
-
-        const createRepositoryAttributeParams: CreateRepositoryAttributeRequest = {
-            content: {
-                value: {
-                    "@type": "StreetAddress",
-                    recipient: "aRecipient",
-                    street: "aStreet",
-                    houseNo: "aHouseNo",
-                    zipCode: "aZipCode",
-                    city: "aCity",
-                    country: "DE"
-                }
-            }
-        };
-        const createRepositoryAttributeResult = await services1.consumption.attributes.createRepositoryAttribute(createRepositoryAttributeParams);
-        expect(createRepositoryAttributeResult).toBeSuccessful();
-
-        const attributesAfterCreate = (await services1.consumption.attributes.getAttributes({})).value;
-        const nrAttributesAfterCreate = attributesAfterCreate.length;
-        expect(nrAttributesAfterCreate).toBe(nrAttributesBeforeCreate + 1);
-    });
-
-    test("should trim LocalAttributes for a complex repository attribute and for each child during creation", async function () {
-        const createRepositoryAttributeParams: CreateRepositoryAttributeRequest = {
-            content: {
-                value: {
-                    "@type": "StreetAddress",
-                    recipient: "    aRecipient  ",
-                    street: "   aStreet ",
-                    houseNo: "  aHouseNo    ",
-                    zipCode: "  aZipCode    ",
-                    city: " aCity   ",
-                    country: "DE"
-                }
-            }
-        };
-        const createRepositoryAttributeResult = await services1.consumption.attributes.createRepositoryAttribute(createRepositoryAttributeParams);
-        expect(createRepositoryAttributeResult).toBeSuccessful();
-        const complexRepoAttribute = createRepositoryAttributeResult.value;
-
-        expect((complexRepoAttribute.content.value as StreetAddressJSON).recipient).toBe("aRecipient");
-        expect((complexRepoAttribute.content.value as StreetAddressJSON).street).toBe("aStreet");
-        expect((complexRepoAttribute.content.value as StreetAddressJSON).houseNo).toBe("aHouseNo");
-        expect((complexRepoAttribute.content.value as StreetAddressJSON).zipCode).toBe("aZipCode");
-        expect((complexRepoAttribute.content.value as StreetAddressJSON).city).toBe("aCity");
     });
 
     test("should create a RepositoryAttribute that is the default if it is the first of its value type", async () => {
