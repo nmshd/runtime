@@ -2,12 +2,9 @@ import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { sleep } from "@js-soft/ts-utils";
 import {
     BirthDate,
-    BirthYear,
     City,
-    Country,
     DisplayName,
     EMailAddress,
-    HouseNumber,
     IdentityAttribute,
     IIdentityAttributeQuery,
     IIQLQuery,
@@ -16,10 +13,8 @@ import {
     ProprietaryString,
     RelationshipAttribute,
     RelationshipAttributeConfidentiality,
-    Street,
     StreetAddress,
-    ThirdPartyRelationshipAttributeQueryOwner,
-    ZipCode
+    ThirdPartyRelationshipAttributeQueryOwner
 } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { AccountController, ClientResult, TagClient, Transport } from "@nmshd/transport";
@@ -185,18 +180,8 @@ describe("AttributesController", function () {
             expect(address).toBeInstanceOf(LocalAttribute);
             expect(address.content).toBeInstanceOf(IdentityAttribute);
 
-            const childAttributes = await consumptionController.attributes.getLocalAttributes({
-                parentId: address.id.toString()
-            });
-            expect(childAttributes).toHaveLength(5);
-            expect(childAttributes[0].content.value).toBeInstanceOf(Street);
-            expect(childAttributes[1].content.value).toBeInstanceOf(HouseNumber);
-            expect(childAttributes[2].content.value).toBeInstanceOf(ZipCode);
-            expect(childAttributes[3].content.value).toBeInstanceOf(City);
-            expect(childAttributes[4].content.value).toBeInstanceOf(Country);
-
             const attributesAfterCreate = await consumptionController.attributes.getLocalAttributes();
-            expect(attributesAfterCreate).toHaveLength(6);
+            expect(attributesAfterCreate).toHaveLength(1);
         });
 
         test("should trim whitespace when creating a complex RepositoryAttribute and its children", async function () {
@@ -222,42 +207,6 @@ describe("AttributesController", function () {
             expect((address.content.value as StreetAddress).houseNo.value).toBe("aHouseNo");
             expect((address.content.value as StreetAddress).zipCode.value).toBe("aZipCode");
             expect((address.content.value as StreetAddress).city.value).toBe("aCity");
-
-            const childAttributes = await consumptionController.attributes.getLocalAttributes({
-                parentId: address.id.toString()
-            });
-            expect((childAttributes[0].content.value as Street).value).toBe("aStreet");
-            expect((childAttributes[1].content.value as HouseNumber).value).toBe("aHouseNo");
-            expect((childAttributes[2].content.value as ZipCode).value).toBe("aZipCode");
-            expect((childAttributes[3].content.value as City).value).toBe("aCity");
-        });
-
-        test("should trigger an AttributeCreatedEvent for each created child Attribute of a complex Attribute", async function () {
-            await consumptionController.attributes.getLocalAttributes();
-
-            const identityAttribute = IdentityAttribute.from({
-                value: {
-                    "@type": "StreetAddress",
-                    recipient: "aRecipient",
-                    street: "aStreet",
-                    houseNo: "aHouseNo",
-                    zipCode: "aZipCode",
-                    city: "aCity",
-                    country: "DE"
-                },
-                owner: consumptionController.accountController.identity.address
-            });
-
-            await consumptionController.attributes.createRepositoryAttribute({ content: identityAttribute });
-
-            mockEventBus.expectPublishedEvents(
-                AttributeCreatedEvent,
-                AttributeCreatedEvent,
-                AttributeCreatedEvent,
-                AttributeCreatedEvent,
-                AttributeCreatedEvent,
-                AttributeCreatedEvent
-            );
         });
 
         test("should set an Attribute as default if it is the only of its value type and setDefaultRepositoryAttributes is true", async function () {
@@ -300,61 +249,6 @@ describe("AttributesController", function () {
             };
             const attribute = await consumptionController.attributes.createRepositoryAttribute(attributeParams);
             expect(attribute.isDefault).toBeUndefined();
-        });
-
-        test("should set a child Attribute of a complex default attribute as default if setDefaultRepositoryAttributes is true", async function () {
-            const complexBirthDate = await appConsumptionController.attributes.createRepositoryAttribute({
-                content: IdentityAttribute.from({
-                    value: BirthDate.from({
-                        day: 28,
-                        month: 2,
-                        year: 2000
-                    }),
-                    owner: appConsumptionController.accountController.identity.address
-                })
-            });
-            expect(complexBirthDate.isDefault).toBe(true);
-
-            const childBirthYear = await appConsumptionController.attributes.getLocalAttributes({
-                parentId: complexBirthDate.id.toString(),
-                "content.value.@type": "BirthYear"
-            });
-            expect(childBirthYear).toHaveLength(1);
-            expect(childBirthYear[0].isDefault).toBe(true);
-        });
-
-        test("should set a child Attribute of a complex default attribute as default if setDefaultRepositoryAttributes is true, even if already another attribute with that value type exists", async function () {
-            const independentBirthYear = await appConsumptionController.attributes.createRepositoryAttribute({
-                content: IdentityAttribute.from({
-                    value: BirthYear.from({
-                        value: 2000
-                    }),
-                    owner: appConsumptionController.accountController.identity.address
-                })
-            });
-            expect(independentBirthYear.isDefault).toBe(true);
-
-            const complexBirthDate = await appConsumptionController.attributes.createRepositoryAttribute({
-                content: IdentityAttribute.from({
-                    value: BirthDate.from({
-                        day: 28,
-                        month: 2,
-                        year: 2000
-                    }),
-                    owner: appConsumptionController.accountController.identity.address
-                })
-            });
-            expect(complexBirthDate.isDefault).toBe(true);
-
-            const childBirthYear = await appConsumptionController.attributes.getLocalAttributes({
-                parentId: complexBirthDate.id.toString(),
-                "content.value.@type": "BirthYear"
-            });
-            expect(childBirthYear).toHaveLength(1);
-            expect(childBirthYear[0].isDefault).toBe(true);
-
-            const updatedIndependentBirthYear = await appConsumptionController.attributes.getLocalAttribute(independentBirthYear.id);
-            expect(updatedIndependentBirthYear!.isDefault).toBeUndefined();
         });
 
         test("should allow to create a shared attribute copy", async function () {
@@ -940,22 +834,14 @@ describe("AttributesController", function () {
             expect(createdAttribute).toBeDefined();
             expect(createdAttribute).toStrictEqual(complexAttribute);
 
-            const childAttributes = await consumptionController.attributes.getLocalAttributes({ parentId: complexAttribute.id.toString() });
-            expect(childAttributes).toHaveLength(3);
-
             await consumptionController.attributes.deleteAttribute(complexAttribute);
-            expect(mockEventBus.publishedEvents).toHaveLength(1 + childAttributes.length);
+            expect(mockEventBus.publishedEvents).toHaveLength(1);
             for (const event of mockEventBus.publishedEvents) {
                 expect(event.namespace).toBe(AttributeDeletedEvent.namespace);
             }
 
             const deletedAttribute = await consumptionController.attributes.getLocalAttribute(complexAttribute.id);
             expect(deletedAttribute).toBeUndefined();
-
-            for (const childAttribute of childAttributes) {
-                const deletedChildAttribute = await consumptionController.attributes.getLocalAttribute(childAttribute.id);
-                expect(deletedChildAttribute).toBeUndefined();
-            }
         });
 
         test("should delete attributes exchanged with peer", async function () {
@@ -1182,131 +1068,6 @@ describe("AttributesController", function () {
                 expect(defaultAttributes).toHaveLength(0);
             });
         });
-
-        describe("should validate and execute full attribute deletion process for child attribute", function () {
-            let predecessorComplexAttribute: LocalAttribute;
-            let successorComplexAttribute: LocalAttribute;
-
-            let predecessorChildAttribute: LocalAttribute;
-            let successorChildAttribute: LocalAttribute;
-
-            let predecessorChildOwnSharedIdentityAttribute: LocalAttribute;
-
-            beforeEach(async () => {
-                predecessorComplexAttribute = await consumptionController.attributes.createRepositoryAttribute({
-                    content: IdentityAttribute.from({
-                        value: BirthDate.from({
-                            day: 29,
-                            month: 2,
-                            year: 2000
-                        }),
-                        owner: consumptionController.accountController.identity.address
-                    })
-                });
-
-                const successorParams: IAttributeSuccessorParams = {
-                    content: IdentityAttribute.from({
-                        value: BirthDate.from({
-                            day: 28,
-                            month: 2,
-                            year: 2000
-                        }),
-                        owner: consumptionController.accountController.identity.address
-                    })
-                };
-                ({ predecessor: predecessorComplexAttribute, successor: successorComplexAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(
-                    predecessorComplexAttribute.id,
-                    successorParams
-                ));
-
-                predecessorChildAttribute = (
-                    await consumptionController.attributes.getLocalAttributes({
-                        parentId: predecessorComplexAttribute.id.toString(),
-                        "content.value.@type": "BirthDay"
-                    })
-                )[0];
-                successorChildAttribute = (
-                    await consumptionController.attributes.getLocalAttributes({
-                        parentId: successorComplexAttribute.id.toString(),
-                        "content.value.@type": "BirthDay"
-                    })
-                )[0];
-
-                predecessorChildOwnSharedIdentityAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
-                    sourceAttributeId: predecessorChildAttribute.id,
-                    peer: CoreAddress.from("peer"),
-                    requestReference: CoreId.from("reqRef")
-                });
-            });
-
-            test("should return validation success for full attribute deletion process of valid succeeded child attribute", async function () {
-                const result = await consumptionController.attributes.validateFullAttributeDeletionProcess(successorComplexAttribute);
-                expect(result.isSuccess()).toBe(true);
-            });
-
-            test("should return validation error for full attribute deletion process of child attribute with invalid succeededBy field", async function () {
-                const invalidChildPredecessor = await consumptionController.attributes.createAttributeUnsafe({
-                    content: IdentityAttribute.from({
-                        value: BirthDate.from({
-                            day: 28,
-                            month: 2,
-                            year: 2000
-                        }),
-                        owner: consumptionController.accountController.identity.address
-                    }),
-                    parentId: predecessorComplexAttribute.id,
-                    succeededBy: CoreId.from("invalidSuccessorId")
-                });
-
-                const result = await consumptionController.attributes.validateFullAttributeDeletionProcess(invalidChildPredecessor);
-                expect(result).errorValidationResult({ message: "The successor does not exist.", code: "error.consumption.attributes.successorDoesNotExist" });
-            });
-
-            test("should delete the child attribute", async function () {
-                const childAttributeBeforeDeletion = await consumptionController.attributes.getLocalAttribute(successorChildAttribute.id);
-                expect(childAttributeBeforeDeletion).toStrictEqual(successorChildAttribute);
-
-                await consumptionController.attributes.executeFullAttributeDeletionProcess(successorComplexAttribute);
-                const result = await consumptionController.attributes.getLocalAttribute(successorChildAttribute.id);
-                expect(result).toBeUndefined();
-            });
-
-            test("should detach successor of deleted child attribute", async function () {
-                const childSuccessorBeforeDeletion = await consumptionController.attributes.getLocalAttribute(successorChildAttribute.id);
-                expect(childSuccessorBeforeDeletion!.succeeds).toStrictEqual(predecessorChildAttribute.id);
-
-                await consumptionController.attributes.executeFullAttributeDeletionProcess(predecessorComplexAttribute);
-                const updatedSuccessorChildAttribute = await consumptionController.attributes.getLocalAttribute(successorChildAttribute.id);
-                expect(updatedSuccessorChildAttribute!.succeeds).toBeUndefined();
-            });
-
-            test("should detach shared attribute copies of deleted child attribute", async function () {
-                const sharedChildAttributeBeforeDeletion = await consumptionController.attributes.getLocalAttribute(predecessorChildOwnSharedIdentityAttribute.id);
-                expect(sharedChildAttributeBeforeDeletion!.shareInfo!.sourceAttribute).toStrictEqual(predecessorChildAttribute.id);
-
-                await consumptionController.attributes.executeFullAttributeDeletionProcess(predecessorComplexAttribute);
-                const updatedChildPredecessorOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute(predecessorChildOwnSharedIdentityAttribute.id);
-                expect(updatedChildPredecessorOwnSharedIdentityAttribute!.shareInfo!.sourceAttribute).toBeUndefined();
-            });
-
-            test("should delete predecessors of deleted child attribute", async function () {
-                const predecessorBeforeDeletion = await consumptionController.attributes.getLocalAttribute(predecessorChildAttribute.id);
-                expect(JSON.stringify(predecessorBeforeDeletion)).toStrictEqual(JSON.stringify(predecessorChildAttribute));
-
-                await consumptionController.attributes.executeFullAttributeDeletionProcess(successorComplexAttribute);
-                const result = await consumptionController.attributes.getLocalAttribute(predecessorChildAttribute.id);
-                expect(result).toBeUndefined();
-            });
-
-            test("should detach shared attribute copies of predecessors of deleted child attribute", async function () {
-                const sharedChildPredecessorBeforeDeletion = await consumptionController.attributes.getLocalAttribute(predecessorChildOwnSharedIdentityAttribute.id);
-                expect(sharedChildPredecessorBeforeDeletion!.shareInfo!.sourceAttribute).toStrictEqual(predecessorChildAttribute.id);
-
-                await consumptionController.attributes.executeFullAttributeDeletionProcess(successorComplexAttribute);
-                const updatedChildPredecessorOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute(predecessorChildOwnSharedIdentityAttribute.id);
-                expect(updatedChildPredecessorOwnSharedIdentityAttribute!.shareInfo!.sourceAttribute).toBeUndefined();
-            });
-        });
     });
 
     describe("succeed Attributes", function () {
@@ -1451,33 +1212,6 @@ describe("AttributesController", function () {
                 });
             });
 
-            test("should catch if the successor has parent", async function () {
-                const predecessor = await consumptionController.attributes.createRepositoryAttribute({
-                    content: IdentityAttribute.from({
-                        value: {
-                            "@type": "Nationality",
-                            value: "DE"
-                        },
-                        owner: consumptionController.accountController.identity.address
-                    })
-                });
-                const successorData: IAttributeSuccessorParams = {
-                    content: IdentityAttribute.from({
-                        value: {
-                            "@type": "Nationality",
-                            value: "US"
-                        },
-                        owner: consumptionController.accountController.identity.address
-                    }),
-                    parentId: CoreId.from("parentId")
-                };
-
-                const validationResult = await consumptionController.attributes.validateAttributeSuccessionCommon(predecessor.id, successorData);
-                expect(validationResult).errorValidationResult({
-                    code: "error.consumption.attributes.cannotSucceedChildOfComplexAttribute"
-                });
-            });
-
             test("should catch if the predecessor does not exist", async function () {
                 const successorData: IAttributeSuccessorParams = {
                     content: IdentityAttribute.from({
@@ -1519,33 +1253,6 @@ describe("AttributesController", function () {
                 const validationResult = await consumptionController.attributes.validateAttributeSuccessionCommon(predecessor.id, successorData);
                 expect(validationResult).errorValidationResult({
                     code: "error.consumption.attributes.cannotSucceedAttributesWithASuccessor"
-                });
-            });
-
-            test("should catch if the predecessor has parent", async function () {
-                const predecessor = await consumptionController.attributes.createAttributeUnsafe({
-                    parentId: CoreId.from("parentId"),
-                    content: IdentityAttribute.from({
-                        value: {
-                            "@type": "Nationality",
-                            value: "DE"
-                        },
-                        owner: consumptionController.accountController.identity.address
-                    })
-                });
-                const successorData: IAttributeSuccessorParams = {
-                    content: IdentityAttribute.from({
-                        value: {
-                            "@type": "Nationality",
-                            value: "US"
-                        },
-                        owner: consumptionController.accountController.identity.address
-                    })
-                };
-
-                const validationResult = await consumptionController.attributes.validateAttributeSuccessionCommon(predecessor.id, successorData);
-                expect(validationResult).errorValidationResult({
-                    code: "error.consumption.attributes.cannotSucceedChildOfComplexAttribute"
                 });
             });
 
@@ -2184,33 +1891,10 @@ describe("AttributesController", function () {
 
                     expect((updatedRepoVersion0.content.value as StreetAddress).recipient).toBe("aRecipient");
                     expect((repoVersion1.content.value as StreetAddress).recipient).toBe("aNewRecipient");
-
-                    const repoVersion0ChildAttributes = await consumptionController.attributes.getLocalAttributes({
-                        parentId: repoVersion0.id.toString()
-                    });
-                    const repoVersion1ChildAttributes = await consumptionController.attributes.getLocalAttributes({
-                        parentId: repoVersion1.id.toString()
-                    });
-
-                    const numberOfChildAttributes = version0ChildValues.length;
-                    expect(repoVersion0ChildAttributes).toHaveLength(numberOfChildAttributes);
-                    expect(repoVersion1ChildAttributes).toHaveLength(numberOfChildAttributes);
-
-                    for (let i = 0; i < numberOfChildAttributes; i++) {
-                        expect(repoVersion0ChildAttributes[i].succeededBy).toStrictEqual(repoVersion1ChildAttributes[i].id);
-                        expect(repoVersion1ChildAttributes[i].succeeds).toStrictEqual(repoVersion0ChildAttributes[i].id);
-
-                        expect(repoVersion0ChildAttributes[i].parentId).toStrictEqual(repoVersion0.id);
-                        expect(repoVersion1ChildAttributes[i].parentId).toStrictEqual(repoVersion1.id);
-
-                        expect(repoVersion0ChildAttributes[i].content.value.toString()).toStrictEqual(version0ChildValues[i]);
-                        expect(repoVersion1ChildAttributes[i].content.value.toString()).toStrictEqual(version1ChildValues[i]);
-                    }
                 });
 
                 test("should trim whitespace when succeeding a complex repository attribute", async function () {
                     const version1ChildValues = ["  aNewStreet  ", "  aNewHouseNo ", "    aNewZipCode ", "    aNewCity    ", "DE"];
-                    const trimmedVersion1ChildValues = version1ChildValues.map((value) => value.trim());
 
                     const repoVersion1Params = {
                         content: IdentityAttribute.from({
@@ -2234,17 +1918,6 @@ describe("AttributesController", function () {
                     expect((repoVersion1.content.value as StreetAddress).zipCode.value).toBe("aNewZipCode");
                     expect((repoVersion1.content.value as StreetAddress).city.value).toBe("aNewCity");
                     expect((repoVersion1.content.value as StreetAddress).country.value).toBe("DE");
-
-                    const repoVersion1ChildAttributes = await consumptionController.attributes.getLocalAttributes({
-                        parentId: repoVersion1.id.toString()
-                    });
-
-                    const numberOfChildAttributes = version0ChildValues.length;
-                    expect(repoVersion1ChildAttributes).toHaveLength(numberOfChildAttributes);
-
-                    for (let i = 0; i < numberOfChildAttributes; i++) {
-                        expect(repoVersion1ChildAttributes[i].content.value.toString()).toStrictEqual(trimmedVersion1ChildValues[i]);
-                    }
                 });
 
                 test("should succeed a complex repository attribute adding an optional child", async function () {
@@ -2273,21 +1946,6 @@ describe("AttributesController", function () {
                     expect(repoVersion0.id.equals(updatedRepoVersion0.id)).toBe(true);
                     expect(updatedRepoVersion0.succeededBy!.equals(repoVersion1.id)).toBe(true);
                     expect(repoVersion1.succeeds!.equals(updatedRepoVersion0.id)).toBe(true);
-
-                    const repoVersion0ChildAttributes = await consumptionController.attributes.getLocalAttributes({
-                        parentId: repoVersion0.id.toString()
-                    });
-                    const repoVersion1ChildAttributes = await consumptionController.attributes.getLocalAttributes({
-                        parentId: repoVersion1.id.toString()
-                    });
-
-                    const minNumberOfChildAttributes = version0ChildValues.length;
-                    expect(repoVersion0ChildAttributes).toHaveLength(minNumberOfChildAttributes);
-                    expect(repoVersion1ChildAttributes).toHaveLength(minNumberOfChildAttributes + 1);
-
-                    expect(repoVersion1ChildAttributes[minNumberOfChildAttributes].content.value.toString()).toBe("Berlin");
-                    expect(repoVersion1ChildAttributes[minNumberOfChildAttributes].parentId).toStrictEqual(repoVersion1.id);
-                    expect(repoVersion1ChildAttributes[minNumberOfChildAttributes].succeeds).toBeUndefined();
                 });
 
                 test("should succeed a complex repository attribute omitting an optional child", async function () {
@@ -2318,21 +1976,6 @@ describe("AttributesController", function () {
                     expect(repoVersion0.id.equals(updatedRepoVersion0.id)).toBe(true);
                     expect(updatedRepoVersion0.succeededBy!.equals(repoVersion1.id)).toBe(true);
                     expect(repoVersion1.succeeds!.equals(updatedRepoVersion0.id)).toBe(true);
-
-                    const repoVersion0ChildAttributes = await consumptionController.attributes.getLocalAttributes({
-                        parentId: repoVersion0.id.toString()
-                    });
-                    const repoVersion1ChildAttributes = await consumptionController.attributes.getLocalAttributes({
-                        parentId: repoVersion1.id.toString()
-                    });
-
-                    const minNumberOfChildAttributes = version0ChildValues.length;
-                    expect(repoVersion0ChildAttributes).toHaveLength(minNumberOfChildAttributes + 1);
-                    expect(repoVersion1ChildAttributes).toHaveLength(minNumberOfChildAttributes);
-
-                    expect(repoVersion0ChildAttributes[minNumberOfChildAttributes].content.value.toString()).toBe("Berlin");
-                    expect(repoVersion0ChildAttributes[minNumberOfChildAttributes].parentId).toStrictEqual(repoVersion0.id);
-                    expect(repoVersion0ChildAttributes[minNumberOfChildAttributes].succeededBy).toBeUndefined();
                 });
 
                 test("should succeed a complex repository attribute re-adding an optional child", async function () {
@@ -2370,26 +2013,8 @@ describe("AttributesController", function () {
                             owner: consumptionController.accountController.identity.address
                         })
                     };
-                    const { successor: repoVersion2 } = await consumptionController.attributes.succeedRepositoryAttribute(repoVersion1.id, repoVersion2Params);
 
-                    const repoVersion0ChildAttributes = await consumptionController.attributes.getLocalAttributes({
-                        parentId: repoVersion0.id.toString()
-                    });
-                    const repoVersion1ChildAttributes = await consumptionController.attributes.getLocalAttributes({
-                        parentId: repoVersion1.id.toString()
-                    });
-                    const repoVersion2ChildAttributes = await consumptionController.attributes.getLocalAttributes({
-                        parentId: repoVersion2.id.toString()
-                    });
-
-                    const minNumberOfChildAttributes = version0ChildValues.length;
-                    expect(repoVersion0ChildAttributes).toHaveLength(minNumberOfChildAttributes + 1);
-                    expect(repoVersion1ChildAttributes).toHaveLength(minNumberOfChildAttributes);
-                    expect(repoVersion2ChildAttributes).toHaveLength(minNumberOfChildAttributes + 1);
-
-                    expect(repoVersion2ChildAttributes[minNumberOfChildAttributes].content.value.toString()).toBe("Berlin");
-                    expect(repoVersion2ChildAttributes[minNumberOfChildAttributes].parentId).toStrictEqual(repoVersion2.id);
-                    expect(repoVersion2ChildAttributes[minNumberOfChildAttributes].succeeds).toStrictEqual(repoVersion0ChildAttributes[minNumberOfChildAttributes].id);
+                    await expect(consumptionController.attributes.succeedRepositoryAttribute(repoVersion1.id, repoVersion2Params)).resolves.toBeDefined();
                 });
 
                 test("should succeed a complex own shared identity attribute", async function () {

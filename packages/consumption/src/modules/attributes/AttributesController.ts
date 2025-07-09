@@ -945,27 +945,19 @@ export class AttributesController extends ConsumptionBaseController {
         const validationResult = await this.validateFullAttributeDeletionProcess(attribute);
         if (validationResult.isError()) throw validationResult.error;
 
-        const childAttributes = await this.getLocalAttributes({ parentId: attribute.id.toString() });
-        const parentAndChildAttributes = [attribute, ...childAttributes];
-        for (const attr of parentAndChildAttributes) {
-            if (attr.succeededBy) {
-                const successor = await this.getLocalAttribute(attr.succeededBy);
-                if (!successor) {
-                    throw ConsumptionCoreErrors.attributes.successorDoesNotExist();
-                }
-                await this.detachSuccessor(successor);
+        if (attribute.succeededBy) {
+            const successor = await this.getLocalAttribute(attribute.succeededBy);
+            if (!successor) {
+                throw ConsumptionCoreErrors.attributes.successorDoesNotExist();
             }
+            await this.detachSuccessor(successor);
         }
 
-        const copiesOfParentAndChildAttributes = await this.getLocalAttributes({
-            ["shareInfo.sourceAttribute"]: { $in: parentAndChildAttributes.map((attribute) => attribute.id.toString()) }
+        const copiesOfAttribute = await this.getLocalAttributes({
+            ["shareInfo.sourceAttribute"]: attribute.id.toString()
         });
-        const predecessorCopiesOfParentAndChildAttributes = [];
-        for (const attr of parentAndChildAttributes) {
-            const predecessorCopies = await this.getSharedPredecessorsOfAttribute(attr);
-            predecessorCopiesOfParentAndChildAttributes.push(...predecessorCopies);
-        }
-        const attributeCopiesToDetach = [...copiesOfParentAndChildAttributes, ...predecessorCopiesOfParentAndChildAttributes];
+        const predecessorCopies = await this.getSharedPredecessorsOfAttribute(attribute);
+        const attributeCopiesToDetach = [...copiesOfAttribute, ...predecessorCopies];
         await this.detachAttributeCopies(attributeCopiesToDetach);
 
         await this.deletePredecessorsOfAttribute(attribute.id);
@@ -978,24 +970,16 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async validateFullAttributeDeletionProcess(attribute: LocalAttribute): Promise<ValidationResult> {
-        const childAttributes = await this.getLocalAttributes({ parentId: attribute.id.toString() });
-        const parentAndChildAttributes = [attribute, ...childAttributes];
-        for (const attr of parentAndChildAttributes) {
-            const validateSuccessorResult = await this.validateSuccessor(attr);
-            if (validateSuccessorResult.isError()) {
-                return validateSuccessorResult;
-            }
+        const validateSuccessorResult = await this.validateSuccessor(attribute);
+        if (validateSuccessorResult.isError()) {
+            return validateSuccessorResult;
         }
 
-        const copiesOfParentAndChildAttributes = await this.getLocalAttributes({
-            ["shareInfo.sourceAttribute"]: { $in: parentAndChildAttributes.map((attribute) => attribute.id.toString()) }
-        });
-        const predecessorCopiesOfParentAndChildAttributes = [];
-        for (const attr of parentAndChildAttributes) {
-            const predecessorCopies = await this.getSharedPredecessorsOfAttribute(attr);
-            predecessorCopiesOfParentAndChildAttributes.push(...predecessorCopies);
-        }
-        const attributeCopiesToDetach = [...copiesOfParentAndChildAttributes, ...predecessorCopiesOfParentAndChildAttributes];
+        const copiesOfAttribute = await this.getLocalAttributes({ ["shareInfo.sourceAttribute"]: attribute.id.toString() });
+
+        const predecessorCopies = await this.getSharedPredecessorsOfAttribute(attribute);
+
+        const attributeCopiesToDetach = [...copiesOfAttribute, ...predecessorCopies];
 
         const validateSharedAttributesResult = this.validateSharedAttributes(attributeCopiesToDetach);
         return validateSharedAttributesResult;
