@@ -183,10 +183,6 @@ class Attributes {
         );
     }
 
-    public invalidParentSuccessor(parentSuccessorId: string | CoreId) {
-        return new CoreError("error.consumption.attributes.invalidParentSuccessor", `The complex parent successor (id: '${parentSuccessorId}') does not exist.`);
-    }
-
     public cannotSucceedAttributesWithDeletionInfo() {
         return new CoreError(
             "error.consumption.attributes.cannotSucceedAttributesWithDeletionInfo",
