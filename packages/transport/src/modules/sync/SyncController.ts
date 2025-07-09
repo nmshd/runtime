@@ -30,16 +30,15 @@ export class SyncController extends TransportController {
 
     private _cacheFetcher?: CacheFetcher;
     private get cacheFetcher() {
-        if (!this._cacheFetcher) {
-            this._cacheFetcher = new CacheFetcher(
-                this.parent.files,
-                this.parent.messages,
-                this.parent.relationshipTemplates,
-                this.parent.relationships,
-                this.parent.tokens,
-                this.parent.identityDeletionProcess
-            );
-        }
+        this._cacheFetcher ??= new CacheFetcher(
+            this.parent.files,
+            this.parent.messages,
+            this.parent.relationshipTemplates,
+            this.parent.relationships,
+            this.parent.tokens,
+            this.parent.identityDeletionProcess
+        );
+
         return this._cacheFetcher;
     }
 
@@ -112,37 +111,31 @@ export class SyncController extends TransportController {
     private async _sync(whatToSync: WhatToSync, changedItems: ChangedItems): Promise<void> {
         if (whatToSync === "OnlyDatawallet") return await this.syncDatawallet(changedItems);
 
-        const externalEventSyncResult = await this.syncExternalEvents(changedItems);
+        await this.syncExternalEvents(changedItems);
 
         await this.setLastCompletedSyncTime();
-
-        if (externalEventSyncResult.some((r) => r.errorCode !== undefined)) {
-            throw new CoreError(
-                "error.transport.errorWhileApplyingExternalEvents",
-                externalEventSyncResult
-                    .filter((r) => r.errorCode !== undefined)
-                    .map((r) => r.errorCode)
-                    .join(" | ")
-            );
-        }
 
         if (this.datawalletEnabled && (await this.unpushedDatawalletModifications.exists())) {
             await this.syncDatawallet(changedItems).catch((e) => this.log.error(e));
         }
     }
 
-    private async syncExternalEvents(changedItems: ChangedItems): Promise<FinalizeSyncRunRequestExternalEventResult[]> {
-        const syncRunWasStarted = await this.startExternalEventsSyncRun();
+    private async syncExternalEvents(changedItems: ChangedItems): Promise<void> {
+        let newUnsyncedExternalEventsExist = false;
+        do {
+            const syncRunWasStarted = await this.startExternalEventsSyncRun();
 
-        if (!syncRunWasStarted) {
-            await this.syncDatawallet(changedItems);
-            return [];
-        }
+            if (!syncRunWasStarted) {
+                await this.syncDatawallet(changedItems);
+                return;
+            }
 
-        await this.applyIncomingDatawalletModifications();
-        const result = await this.applyIncomingExternalEvents(changedItems);
-        await this.finalizeExternalEventsSyncRun(result);
-        return result;
+            await this.applyIncomingDatawalletModifications();
+            const result = await this.applyIncomingExternalEvents(changedItems);
+            const finalizeResult = await this.finalizeExternalEventsSyncRun(result);
+
+            newUnsyncedExternalEventsExist = finalizeResult.newUnsyncedExternalEventsExist;
+        } while (newUnsyncedExternalEventsExist);
     }
 
     @log()
@@ -274,23 +267,6 @@ export class SyncController extends TransportController {
         return datawalletModificationsProcessor.changedObjectIdentifiers;
     }
 
-    private async promiseAllWithProgess<T>(promises: Promise<T>[], callback: (percentage: number) => void) {
-        callback(0);
-
-        let processedItemCount = 0;
-        for (const promise of promises) {
-            // eslint-disable-next-line no-loop-func,no-void
-            void promise.then(() => {
-                processedItemCount++;
-
-                const percentage = Math.round((processedItemCount / promises.length) * 100);
-                callback(percentage);
-            });
-        }
-
-        return await Promise.all(promises);
-    }
-
     private async decryptDatawalletModifications(encryptedModifications: BackboneDatawalletModification[]): Promise<DatawalletModification[]> {
         const promises = encryptedModifications.map((m) => this.decryptDatawalletModification(m));
         return await Promise.all(promises);
@@ -412,7 +388,7 @@ export class SyncController extends TransportController {
         return results;
     }
 
-    private async finalizeExternalEventsSyncRun(externalEventResults: FinalizeSyncRunRequestExternalEventResult[]): Promise<void> {
+    private async finalizeExternalEventsSyncRun(externalEventResults: FinalizeSyncRunRequestExternalEventResult[]): Promise<{ newUnsyncedExternalEventsExist: boolean }> {
         if (!this.currentSyncRun) {
             throw new TransportError("There is no active sync run to finalize");
         }
@@ -428,10 +404,12 @@ export class SyncController extends TransportController {
         await this.deleteUnpushedDatawalletModifications(localModificationIds);
 
         const oldDatawalletModificationIndex = await this.getLocalDatawalletModificationIndex();
-        const newDatawalletModificationIndex = (oldDatawalletModificationIndex || -1) + backboneModifications.length;
+        const newDatawalletModificationIndex = (oldDatawalletModificationIndex ?? -1) + backboneModifications.length;
         await this.updateLocalDatawalletModificationIndex(newDatawalletModificationIndex);
 
         this.currentSyncRun = undefined;
+
+        return { newUnsyncedExternalEventsExist: response.value.newUnsyncedExternalEventsExist };
     }
 
     private async finalizeDatawalletVersionUpgradeSyncRun(newDatawalletVersion: number): Promise<void> {
@@ -451,7 +429,7 @@ export class SyncController extends TransportController {
         await this.deleteUnpushedDatawalletModifications(localModificationIds);
 
         const oldDatawalletModificationIndex = await this.getLocalDatawalletModificationIndex();
-        const newDatawalletModificationIndex = (oldDatawalletModificationIndex || -1) + backboneModifications.length;
+        const newDatawalletModificationIndex = (oldDatawalletModificationIndex ?? -1) + backboneModifications.length;
         await this.updateLocalDatawalletModificationIndex(newDatawalletModificationIndex);
 
         this.currentSyncRun = undefined;

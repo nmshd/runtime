@@ -1,5 +1,5 @@
 import { ResponseItemResult } from "@nmshd/content";
-import { LocalAttributeDVO, LocalAttributeListenerDVO } from "../consumption";
+import { LocalAttributeDVO } from "../consumption";
 import { DataViewObject } from "../DataViewObject";
 
 export interface ResponseItemGroupDVO {
@@ -33,10 +33,11 @@ export interface AcceptResponseItemDVO extends ResponseItemDVO {
         | "CreateAttributeAcceptResponseItemDVO"
         | "DeleteAttributeAcceptResponseItemDVO"
         | "ShareAttributeAcceptResponseItemDVO"
-        | "FreeTextAcceptResponseItemDVO"
-        | "RegisterAttributeListenerAcceptResponseItemDVO"
+        | "FormFieldAcceptResponseItemDVO"
+        | "TransferFileOwnershipAcceptResponseItemDVO"
         | "AttributeSuccessionAcceptResponseItemDVO"
-        | "AttributeAlreadySharedAcceptResponseItemDVO";
+        | "AttributeAlreadySharedAcceptResponseItemDVO"
+        | "AttributeAlreadyDeletedAcceptResponseItemDVO";
     result: ResponseItemResult.Accepted;
 }
 
@@ -70,22 +71,23 @@ export interface ShareAttributeAcceptResponseItemDVO extends AcceptResponseItemD
     attribute: LocalAttributeDVO;
 }
 
-export interface FreeTextAcceptResponseItemDVO extends AcceptResponseItemDVO {
-    type: "FreeTextAcceptResponseItemDVO";
-    freeText: string;
+export interface FormFieldAcceptResponseItemDVO extends AcceptResponseItemDVO {
+    type: "FormFieldAcceptResponseItemDVO";
+    response: string | number | boolean | string[];
 }
 
-export interface RegisterAttributeListenerAcceptResponseItemDVO extends AcceptResponseItemDVO {
-    type: "RegisterAttributeListenerAcceptResponseItemDVO";
-    listenerId: string;
-    listener: LocalAttributeListenerDVO;
+export interface TransferFileOwnershipAcceptResponseItemDVO extends AcceptResponseItemDVO {
+    type: "TransferFileOwnershipAcceptResponseItemDVO";
+    repositoryAttribute?: LocalAttributeDVO;
+    sharedAttributeId: string;
+    sharedAttribute: LocalAttributeDVO;
 }
 
 export interface AttributeSuccessionAcceptResponseItemDVO extends AcceptResponseItemDVO {
     type: "AttributeSuccessionAcceptResponseItemDVO";
     predecessorId: string;
     successorId: string;
-    predecessor: LocalAttributeDVO;
+    predecessor?: LocalAttributeDVO;
     successor: LocalAttributeDVO;
 }
 
@@ -93,4 +95,8 @@ export interface AttributeAlreadySharedAcceptResponseItemDVO extends AcceptRespo
     type: "AttributeAlreadySharedAcceptResponseItemDVO";
     attributeId: string;
     attribute: LocalAttributeDVO;
+}
+
+export interface AttributeAlreadyDeletedAcceptResponseItemDVO extends AcceptResponseItemDVO {
+    type: "AttributeAlreadyDeletedAcceptResponseItemDVO";
 }

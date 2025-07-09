@@ -1,6 +1,6 @@
 import { ISerializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
-import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId, FileReference } from "@nmshd/core-types";
 import { CoreBuffer, CryptoCipher, CryptoHash, CryptoHashAlgorithm, CryptoSecretKey, Encoding } from "@nmshd/crypto";
 import { CoreCrypto, CoreHash, TransportCoreErrors } from "../../core";
 import { DbCollectionName } from "../../core/DbCollectionName";
@@ -14,7 +14,6 @@ import { CachedFile } from "./local/CachedFile";
 import { File } from "./local/File";
 import { ISendFileParameters, SendFileParameters } from "./local/SendFileParameters";
 import { FileMetadata } from "./transmission/FileMetadata";
-import { FileReference } from "./transmission/FileReference";
 
 export class FileController extends TransportController {
     private client: FileClient;
@@ -40,6 +39,15 @@ export class FileController extends TransportController {
     public async getFile(id: CoreId): Promise<File | undefined> {
         const doc = await this.files.read(id.toString());
         return doc ? File.from(doc) : undefined;
+    }
+
+    public async deleteFile(file: File): Promise<void> {
+        if (file.isOwn) {
+            const response = await this.client.deleteFile(file.id.toString());
+            if (response.isError) throw response.error;
+        }
+
+        await this.files.delete(file);
     }
 
     public async fetchCaches(ids: CoreId[]): Promise<{ id: CoreId; cache: CachedFile }[]> {
@@ -80,7 +88,7 @@ export class FileController extends TransportController {
     }
 
     @log()
-    private async updateCacheOfExistingFileInDb(id: string, response?: BackboneGetFilesResponse) {
+    private async updateCacheOfExistingFileInDb(id: string, response?: BackboneGetFilesResponse): Promise<File> {
         const fileDoc = await this.files.read(id);
         if (!fileDoc) {
             throw TransportCoreErrors.general.recordNotFound(File, id);
@@ -93,17 +101,15 @@ export class FileController extends TransportController {
         return file;
     }
 
-    private async updateCacheOfFile(file: File, response?: BackboneGetFilesResponse) {
+    private async updateCacheOfFile(file: File, response?: BackboneGetFilesResponse): Promise<void> {
         const fileId = file.id.toString();
-        if (!response) {
-            response = (await this.client.getFile(fileId)).value;
-        }
+        response ??= (await this.client.getFile(fileId)).value;
 
         const cachedFile = await this.decryptFile(response, file.secretKey);
         file.setCache(cachedFile);
 
-        // Update isOwn, as it is possible that the identity receives an attachment with an own File.
-        file.isOwn = this.parent.identity.isMe(cachedFile.createdBy);
+        // Update isOwn, as it is possible that the identity receives an attachment with an own File or the ownership was transferred.
+        file.isOwn = this.parent.identity.isMe(cachedFile.owner);
     }
 
     @log()
@@ -118,11 +124,6 @@ export class FileController extends TransportController {
 
         const cachedFile = CachedFile.fromBackbone(response, plaintextMetadata);
         return cachedFile;
-    }
-
-    public async getOrLoadFileByTruncated(truncated: string): Promise<File> {
-        const reference = FileReference.fromTruncated(truncated);
-        return await this.getOrLoadFileByReference(reference);
     }
 
     public async getOrLoadFileByReference(fileReference: FileReference): Promise<File> {
@@ -237,7 +238,8 @@ export class FileController extends TransportController {
         const file = File.from({
             id: CoreId.from(response.id),
             secretKey: metadataKey,
-            isOwn: true
+            isOwn: true,
+            ownershipToken: response.ownershipToken
         });
         file.setCache(cachedFile);
 
@@ -274,5 +276,46 @@ export class FileController extends TransportController {
         }
 
         return decrypt;
+    }
+
+    public async validateFileOwnershipToken(id: CoreId, ownershipToken: string): Promise<{ isValid: boolean }> {
+        const response = await this.client.validateFileOwnershipToken(id.toString(), ownershipToken);
+        if (response.isError) throw response.error;
+
+        return response.value;
+    }
+
+    public async regenerateFileOwnershipToken(id: CoreId): Promise<File> {
+        const response = await this.client.regenerateFileOwnershipToken(id.toString());
+        if (response.isError) throw response.error;
+
+        const file = await this.getFile(id);
+        if (!file) {
+            throw TransportCoreErrors.general.recordNotFound(File, id.toString());
+        }
+
+        const fileWithNewOwnershipToken = file.setOwnershipToken(response.value.newOwnershipToken);
+        const updatedFile = await this.updateFile(fileWithNewOwnershipToken);
+        return updatedFile;
+    }
+
+    public async claimFileOwnership(id: CoreId, ownershipToken: string): Promise<File> {
+        const fileId = id.toString();
+
+        const response = await this.client.claimFileOwnership(fileId, ownershipToken);
+        if (response.isError) throw response.error;
+
+        const fileWithNewOwner = await this.updateCacheOfExistingFileInDb(fileId);
+        const fileWithNewOwnershipToken = fileWithNewOwner.setOwnershipToken(response.value.newOwnershipToken);
+        const updatedFile = await this.updateFile(fileWithNewOwnershipToken);
+        return updatedFile;
+    }
+
+    public async updateFile(file: File): Promise<File> {
+        const fileDoc = await this.files.read(file.id.toString());
+        if (!fileDoc) throw TransportCoreErrors.general.recordNotFound(File, file.id.toString());
+
+        await this.files.update(fileDoc, file);
+        return file;
     }
 }

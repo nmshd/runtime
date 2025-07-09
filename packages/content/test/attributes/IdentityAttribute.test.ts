@@ -1,4 +1,4 @@
-import { CoreAddress, CoreDate } from "@nmshd/core-types";
+import { CoreAddress } from "@nmshd/core-types";
 import {
     Affiliation,
     AffiliationOrganization,
@@ -165,12 +165,7 @@ describe("IdentityAttribute", function () {
             month: 2,
             year: 2022
         };
-        const birthDate = IdentityAttribute.from<BirthDate, IBirthDate, BirthDateJSON>({
-            value: birthDateContent,
-            validFrom: CoreDate.utc().subtract({ years: 1 }),
-            validTo: CoreDate.utc().add({ years: 1 }),
-            owner: CoreAddress.from("address")
-        });
+        const birthDate = IdentityAttribute.from<BirthDate, IBirthDate, BirthDateJSON>({ value: birthDateContent, owner: CoreAddress.from("address") });
 
         expect(birthDate).toBeInstanceOf(IdentityAttribute);
         expect(birthDate.value).toBeInstanceOf(BirthDate);
@@ -198,14 +193,7 @@ describe("IdentityAttribute", function () {
     test("should validate attribute values from JSON", function () {
         expect(() =>
             IdentityAttribute.from({
-                value: {
-                    "@type": "BirthDate",
-                    day: { value: 22 },
-                    month: { value: 13 },
-                    year: { value: 2022 }
-                },
-                validFrom: CoreDate.utc().subtract({ years: 1 }),
-                validTo: CoreDate.utc().add({ years: 1 }),
+                value: { "@type": "BirthDate", day: { value: 22 }, month: { value: 13 }, year: { value: 2022 } },
                 owner: CoreAddress.from("address")
             })
         ).toThrow("BirthMonth.value:Number :: must be an integer value between 1 and 12");
@@ -248,17 +236,25 @@ describe("IdentityAttribute", function () {
         const affiliationInstance = Affiliation.fromAny(affiliation);
         expect(affiliationInstance).toBeInstanceOf(Affiliation);
 
-        const affiliationAttribute = IdentityAttribute.from<Affiliation>({
-            value: affiliation,
-            validFrom: CoreDate.utc().subtract({ years: 1 }),
-            validTo: CoreDate.utc().add({ years: 1 }),
-            owner: CoreAddress.from("address")
-        });
+        const affiliationAttribute = IdentityAttribute.from<Affiliation>({ value: affiliation, owner: CoreAddress.from("address") });
 
         expect(affiliationAttribute.value).toBeInstanceOf(Affiliation);
         expect(affiliationAttribute.value.organization).toBeInstanceOf(AffiliationOrganization);
 
         expect(affiliationAttribute.value.role).toBeInstanceOf(AffiliationRole);
         expect(affiliationAttribute.value.unit).toBeInstanceOf(AffiliationUnit);
+    });
+
+    test("should validate uniqueness of tags", function () {
+        expect(() =>
+            IdentityAttribute.from({
+                value: {
+                    "@type": "Nationality",
+                    value: "DE"
+                },
+                owner: CoreAddress.from("address"),
+                tags: ["tag1", "tag1"]
+            })
+        ).toThrow("IdentityAttribute.tags:Array :: The tags are not unique");
     });
 });

@@ -1,17 +1,13 @@
 import { Result } from "@js-soft/ts-utils";
+import { RelationshipTemplateDTO, TokenDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { RelationshipTemplateDTO, TokenDTO } from "../../../types";
 import {
     CreateOwnRelationshipTemplateRequest,
     CreateOwnRelationshipTemplateUseCase,
-    CreateQRCodeForOwnTemplateRequest,
-    CreateQRCodeForOwnTemplateResponse,
-    CreateQRCodeForOwnTemplateUseCase,
-    CreateTokenForOwnTemplateRequest,
-    CreateTokenForOwnTemplateUseCase,
-    CreateTokenQRCodeForOwnTemplateRequest,
-    CreateTokenQRCodeForOwnTemplateResponse,
-    CreateTokenQRCodeForOwnTemplateUseCase,
+    CreateTokenForOwnRelationshipTemplateRequest,
+    CreateTokenForOwnRelationshipTemplateUseCase,
+    DeleteRelationshipTemplateRequest,
+    DeleteRelationshipTemplateUseCase,
     GetRelationshipTemplateRequest,
     GetRelationshipTemplateUseCase,
     GetRelationshipTemplatesRequest,
@@ -26,9 +22,8 @@ export class RelationshipTemplatesFacade {
         @Inject private readonly loadPeerRelationshipTemplateUseCase: LoadPeerRelationshipTemplateUseCase,
         @Inject private readonly getRelationshipTemplatesUseCase: GetRelationshipTemplatesUseCase,
         @Inject private readonly getRelationshipTemplateUseCase: GetRelationshipTemplateUseCase,
-        @Inject private readonly createQRCodeForOwnTemplateUseCase: CreateQRCodeForOwnTemplateUseCase,
-        @Inject private readonly createTokenQRCodeForOwnTemplateUseCase: CreateTokenQRCodeForOwnTemplateUseCase,
-        @Inject private readonly createTokenForOwnTemplateUseCase: CreateTokenForOwnTemplateUseCase
+        @Inject private readonly deleteRelationshipTemplateUseCase: DeleteRelationshipTemplateUseCase,
+        @Inject private readonly createTokenForOwnRelationshipTemplateUseCase: CreateTokenForOwnRelationshipTemplateUseCase
     ) {}
 
     public async createOwnRelationshipTemplate(request: CreateOwnRelationshipTemplateRequest): Promise<Result<RelationshipTemplateDTO>> {
@@ -47,15 +42,11 @@ export class RelationshipTemplatesFacade {
         return await this.getRelationshipTemplateUseCase.execute(request);
     }
 
-    public async createQRCodeForOwnTemplate(request: CreateQRCodeForOwnTemplateRequest): Promise<Result<CreateQRCodeForOwnTemplateResponse>> {
-        return await this.createQRCodeForOwnTemplateUseCase.execute(request);
+    public async deleteRelationshipTemplate(request: DeleteRelationshipTemplateRequest): Promise<Result<void>> {
+        return await this.deleteRelationshipTemplateUseCase.execute(request);
     }
 
-    public async createTokenQRCodeForOwnTemplate(request: CreateTokenQRCodeForOwnTemplateRequest): Promise<Result<CreateTokenQRCodeForOwnTemplateResponse>> {
-        return await this.createTokenQRCodeForOwnTemplateUseCase.execute(request);
-    }
-
-    public async createTokenForOwnTemplate(request: CreateTokenForOwnTemplateRequest): Promise<Result<TokenDTO>> {
-        return await this.createTokenForOwnTemplateUseCase.execute(request);
+    public async createTokenForOwnRelationshipTemplate(request: CreateTokenForOwnRelationshipTemplateRequest): Promise<Result<TokenDTO>> {
+        return await this.createTokenForOwnRelationshipTemplateUseCase.execute(request);
     }
 }

@@ -177,6 +177,10 @@ class Tokens {
 }
 
 class General {
+    public noIdentityFound() {
+        return new CoreError("error.transport.general.noIdentityFound", "No Identity was found and the identity creation is not enabled.");
+    }
+
     public baseUrlNotSet() {
         return new CoreError("error.transport.general.baseUrlNotSet", "The baseUrl was not set.");
     }
@@ -207,10 +211,6 @@ class General {
 
     public notSupported() {
         return new CoreError("error.transport.notSupported", "The method is not yet supported.");
-    }
-
-    public invalidTruncatedReference(message: string) {
-        return new CoreError("error.transport.files.invalidTruncatedReference", message);
     }
 
     public notIntendedForYou(id: string) {

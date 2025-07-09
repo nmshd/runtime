@@ -1,6 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { CoreDate, CoreId } from "@nmshd/core-types";
-import { AccountController, CachedRelationship, Identity, Relationship, RelationshipStatus, RelationshipTemplate, Transport } from "../../../src";
+import { AccountController, CachedRelationship, Identity, Relationship, RelationshipStatus, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("RelationshipsController", function () {
@@ -23,7 +23,7 @@ describe("RelationshipsController", function () {
         expect(relationship.peer).toBeInstanceOf(Identity);
         expect(relationship.peer.address).toStrictEqual(peerAccount.identity.address);
 
-        expect(relationship.cache!.template).toBeInstanceOf(RelationshipTemplate);
+        expect(relationship.cache!.templateId).toBeInstanceOf(CoreId);
 
         expect(relationship.cache).toBeInstanceOf(CachedRelationship);
         expect(relationship.cachedAt).toBeInstanceOf(CoreDate);
@@ -37,11 +37,11 @@ describe("RelationshipsController", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 4);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 4);
         sender = accounts[0];
         recipient1 = accounts[1];
         recipient2 = accounts[2];

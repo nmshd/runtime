@@ -9,6 +9,7 @@ import { ConsumptionControllerName } from "../../../consumption/ConsumptionContr
 import { ConsumptionCoreErrors } from "../../../consumption/ConsumptionCoreErrors";
 import { ConsumptionError } from "../../../consumption/ConsumptionError";
 import { ConsumptionIds } from "../../../consumption/ConsumptionIds";
+import { mergeResults } from "../../common";
 import { ValidationResult } from "../../common/ValidationResult";
 import { IncomingRequestReceivedEvent, IncomingRequestStatusChangedEvent } from "../events";
 import { RequestItemProcessorRegistry } from "../itemProcessors/RequestItemProcessorRegistry";
@@ -49,6 +50,8 @@ export class IncomingRequestsController extends ConsumptionBaseController {
     public async received(params: IReceivedIncomingRequestParameters): Promise<LocalRequest> {
         const parsedParams = ReceivedIncomingRequestParameters.from(params);
 
+        await this.validateRequestUniqueness(parsedParams.receivedRequest.id);
+
         const infoFromSource = this.extractInfoFromSource(parsedParams.requestSourceObject);
 
         const request = LocalRequest.from({
@@ -72,6 +75,13 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         this.eventBus.publish(new IncomingRequestReceivedEvent(this.identity.address.toString(), request));
 
         return request;
+    }
+
+    private async validateRequestUniqueness(requestId?: CoreId): Promise<void> {
+        if (!requestId) return;
+
+        const existingRequestWithSameId = await this.getIncomingRequest(requestId);
+        if (existingRequestWithSameId) throw ConsumptionCoreErrors.requests.cannotCreateRequestWithDuplicateId(requestId.toString());
     }
 
     private extractInfoFromSource(source: Message | RelationshipTemplate): InfoFromSource {
@@ -214,12 +224,22 @@ export class IncomingRequestsController extends ConsumptionBaseController {
             );
         }
 
-        const validationResult = this.decideRequestParamsValidator.validate(params, request);
-        if (validationResult.isError()) return validationResult;
+        const validateRequestResult = this.decideRequestParamsValidator.validateRequest(params, request);
+        if (validateRequestResult.isError()) return validateRequestResult;
 
-        const itemResults = await this.canDecideItems(params.items, request.content.items, request);
+        const validateItemsResult = this.decideRequestParamsValidator.validateItems(params, request);
 
-        return ValidationResult.fromItems(itemResults);
+        const canDecideItemsResults = await this.canDecideItems(params.items, request.content.items, request);
+        const canDecideItemsResult = ValidationResult.fromItems(canDecideItemsResults);
+
+        try {
+            return mergeResults(validateItemsResult, canDecideItemsResult);
+        } catch (_) {
+            this._log.error(
+                `Merging '${JSON.stringify(validateItemsResult)}' and '${JSON.stringify(canDecideItemsResult)}' was not possible because their dimensions don't match.`
+            );
+            return validateItemsResult.isError() ? validateItemsResult : canDecideItemsResult;
+        }
     }
 
     private async canDecideGroup(params: DecideRequestItemGroupParametersJSON, requestItemGroup: RequestItemGroup, request: LocalRequest) {
@@ -292,6 +312,8 @@ export class IncomingRequestsController extends ConsumptionBaseController {
 
         request.response = localResponse;
         request.changeStatus(LocalRequestStatus.Decided);
+
+        if (params.decidedByAutomation) request.wasAutomaticallyDecided = true;
 
         await this.update(request);
 
@@ -411,7 +433,7 @@ export class IncomingRequestsController extends ConsumptionBaseController {
             isOwn: false
         });
 
-        const requestPromises = requestDocs.map((r) => this.updateRequestExpiry(LocalRequest.from(r)));
+        const requestPromises = requestDocs.map((r) => this.updateRequestExpiry(r, LocalRequest.from(r)));
         return await Promise.all(requestPromises);
     }
 
@@ -421,7 +443,7 @@ export class IncomingRequestsController extends ConsumptionBaseController {
 
         const localRequest = LocalRequest.from(requestDoc);
 
-        return await this.updateRequestExpiry(localRequest);
+        return await this.updateRequestExpiry(requestDoc, localRequest);
     }
 
     private async getOrThrow(id: CoreId | string) {
@@ -440,6 +462,14 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         await this.localRequests.update(requestDoc, request);
     }
 
+    public async delete(request: LocalRequest): Promise<void> {
+        if (request.status !== LocalRequestStatus.Expired) {
+            throw ConsumptionCoreErrors.requests.canOnlyDeleteIncomingRequestThatIsExpired(request.id.toString(), request.status);
+        }
+
+        await this.localRequests.delete(request);
+    }
+
     public async deleteRequestsFromPeer(peer: CoreAddress): Promise<void> {
         const requests = await this.getIncomingRequests({ peer: peer.toString() });
         for (const request of requests) {
@@ -453,9 +483,16 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         }
     }
 
-    private async updateRequestExpiry(request: LocalRequest) {
+    private async updateRequestExpiry(requestDoc: any, request: LocalRequest) {
+        const oldStatus = request.status;
+
         const statusUpdated = request.updateStatusBasedOnExpiration();
-        if (statusUpdated) await this.update(request);
+        if (statusUpdated) {
+            await this.localRequests.update(requestDoc, request);
+
+            this.eventBus.publish(new IncomingRequestStatusChangedEvent(this.identity.address.toString(), { request, oldStatus, newStatus: request.status }));
+        }
+
         return request;
     }
 }

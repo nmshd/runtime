@@ -173,7 +173,7 @@ export class RelationshipsController extends TransportController {
 
         const backboneResponse = result.value;
 
-        const newRelationship = Relationship.fromBackboneAndCreationContent(backboneResponse, template, template.cache.identity, parameters.creationContent, secretId);
+        const newRelationship = Relationship.fromBackboneAndCreationContent(backboneResponse, template.cache.identity, parameters.creationContent, secretId);
 
         await this.relationships.create(newRelationship);
 
@@ -386,9 +386,7 @@ export class RelationshipsController extends TransportController {
     }
 
     private async updateCacheOfRelationship(relationship: Relationship, response?: BackboneRelationship) {
-        if (!response) {
-            response = (await this.client.getRelationship(relationship.id.toString())).value;
-        }
+        response ??= (await this.client.getRelationship(relationship.id.toString())).value;
 
         const cachedRelationship = await this.decryptRelationship(response, relationship.relationshipSecretId);
 
@@ -400,19 +398,13 @@ export class RelationshipsController extends TransportController {
 
         const templateId = CoreId.from(response.relationshipTemplateId);
 
-        this._log.trace(`Parsing relationship template ${templateId} for ${response.id}...`);
-        const template = await this.parent.relationshipTemplates.getRelationshipTemplate(templateId);
-        if (!template) {
-            throw TransportCoreErrors.general.recordNotFound(RelationshipTemplate, templateId.toString());
-        }
-
         this._log.trace(`Parsing relationship creation content of ${response.id}...`);
 
         const creationContent = await this.decryptCreationContent(response.creationContent, CoreAddress.from(response.from), relationshipSecretId);
 
         const cachedRelationship = CachedRelationship.from({
             creationContent: creationContent.content,
-            template,
+            templateId,
             auditLog: RelationshipAuditLog.fromBackboneAuditLog(response.auditLog)
         });
 
@@ -503,8 +495,15 @@ export class RelationshipsController extends TransportController {
     }
 
     @log()
-    private async createNewRelationshipByIncomingCreation(relationshipId: string): Promise<Relationship> {
-        const backboneRelationship = (await this.client.getRelationship(relationshipId)).value;
+    private async createNewRelationshipByIncomingCreation(relationshipId: string): Promise<Relationship | undefined> {
+        const backboneRelationshipResponse = await this.client.getRelationship(relationshipId);
+
+        if (backboneRelationshipResponse.isError && backboneRelationshipResponse.error.code === "error.platform.validation.relationship.relationshipAlreadyDecomposed") {
+            return undefined;
+        }
+
+        const backboneRelationship = backboneRelationshipResponse.value;
+
         if (!backboneRelationship.creationContent) throw new TransportError("Creation content is missing");
 
         const templateId = CoreId.from(backboneRelationship.relationshipTemplateId);
@@ -518,16 +517,19 @@ export class RelationshipsController extends TransportController {
         await this.secrets.createTemplatorSecrets(secretId, template.cache, creationContentCipher.publicCreationContentCrypto);
 
         const creationContent = await this.decryptCreationContent(backboneRelationship.creationContent, CoreAddress.from(backboneRelationship.from), secretId);
-        const relationship = Relationship.fromBackboneAndCreationContent(backboneRelationship, template, creationContent.identity, creationContent.content, secretId);
+        const relationship = Relationship.fromBackboneAndCreationContent(backboneRelationship, creationContent.identity, creationContent.content, secretId);
 
         await this.relationships.create(relationship);
         return relationship;
     }
 
-    public async applyRelationshipChangedEvent(relationshipId: string): Promise<{ oldRelationship?: Relationship; changedRelationship: Relationship }> {
+    public async applyRelationshipChangedEvent(relationshipId: string): Promise<{ oldRelationship?: Relationship; changedRelationship?: Relationship }> {
         const relationshipDoc = await this.relationships.read(relationshipId);
         if (!relationshipDoc) {
             const changedRelationship = await this.createNewRelationshipByIncomingCreation(relationshipId);
+
+            if (changedRelationship === undefined) return { changedRelationship: undefined };
+
             if (changedRelationship.status === RelationshipStatus.Pending) return { changedRelationship };
 
             const relationshipDoc = await this.relationships.read(relationshipId);

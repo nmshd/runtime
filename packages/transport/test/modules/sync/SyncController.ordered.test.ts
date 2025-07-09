@@ -14,11 +14,11 @@ describe("SyncController.ordered", function () {
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
 
-        transport = TestUtil.createTransport(connection, { datawalletEnabled: true });
+        transport = TestUtil.createTransport({ datawalletEnabled: true });
         await transport.init();
 
-        sender = await TestUtil.createAccount(transport);
-        recipient = await TestUtil.createAccount(transport);
+        sender = await TestUtil.createAccount(transport, connection);
+        recipient = await TestUtil.createAccount(transport, connection);
     });
 
     afterAll(async () => {
@@ -29,7 +29,6 @@ describe("SyncController.ordered", function () {
         await connection.close();
     });
 
-    // eslint-disable-next-line jest/expect-expect -- no assertions are needed because it is sufficient that the onboarding does not throw an error
     test("onboarding does not throw an exception because datawallet modifications are executed in the correct order", async function () {
         const template = await sender!.relationshipTemplates.sendRelationshipTemplate({ content: {}, expiresAt: CoreDate.utc().add({ days: 1 }) });
 
@@ -43,6 +42,10 @@ describe("SyncController.ordered", function () {
         // onboard a second device for the recipient
         const newDevice = await recipient!.devices.sendDevice({ name: "Test2", isAdmin: true });
         await recipient!.syncDatawallet();
-        recipientSecondDevice = await TestUtil.onboardDevice(transport, await recipient!.devices.getSharedSecret(newDevice.id));
+        const promise = TestUtil.onboardDevice(transport, connection, await recipient!.devices.getSharedSecret(newDevice.id));
+
+        await expect(promise).resolves.not.toThrow();
+
+        recipientSecondDevice = await promise;
     });
 });

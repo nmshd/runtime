@@ -16,11 +16,11 @@ let secretController: SecretController;
 describe("SecretController", function () {
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 2);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 2);
         account = accounts[0];
         subject = accounts[1];
         secretController = await new SecretController(account).init();
@@ -91,19 +91,14 @@ describe("SecretController", function () {
 
             if (secret.secret instanceof CryptoSignatureKeypair) {
                 const loadedSecret = secret.secret;
-                // eslint-disable-next-line jest/no-conditional-expect
                 expect(loadedSecret.privateKey.toBase64()).toStrictEqual(signatureKeypair.privateKey.toBase64());
-                // eslint-disable-next-line jest/no-conditional-expect
                 expect(loadedSecret.publicKey.toBase64()).toStrictEqual(signatureKeypair.publicKey.toBase64());
             } else if (secret.secret instanceof CryptoExchangeKeypair) {
                 const loadedSecret = secret.secret;
-                // eslint-disable-next-line jest/no-conditional-expect
                 expect(loadedSecret.privateKey.toBase64()).toStrictEqual(exchangeKeypair.privateKey.toBase64());
-                // eslint-disable-next-line jest/no-conditional-expect
                 expect(loadedSecret.publicKey.toBase64()).toStrictEqual(exchangeKeypair.publicKey.toBase64());
             } else if (secret.secret instanceof CryptoSecretKey) {
                 const loadedSecret = secret.secret;
-                // eslint-disable-next-line jest/no-conditional-expect
                 expect(loadedSecret.secretKey.toBase64()).toStrictEqual(secretKey.secretKey.toBase64());
             } else {
                 throw new Error("Secret type mismatch!");

@@ -8,15 +8,10 @@ describe("RuntimeModuleLoading", function () {
     let moduleStarted = false;
     let moduleStopped = false;
 
-    beforeAll(async function () {
-        runtime = await TestUtil.createRuntimeWithoutInit({
+    beforeAll(function () {
+        runtime = TestUtil.createRuntimeWithoutInit({
             modules: {
-                testModule: {
-                    name: "testModule",
-                    displayName: "A Test Module",
-                    location: "testModule",
-                    enabled: true
-                }
+                testModule: { enabled: true, location: "testModule" }
             }
         });
 
@@ -29,7 +24,7 @@ describe("RuntimeModuleLoading", function () {
                 moduleStarted = true;
             }
 
-            public stop(): void {
+            public override stop(): void {
                 moduleStopped = true;
             }
         }

@@ -1,4 +1,4 @@
-import { LocalAttributeDTO } from "../../types";
+import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { DataEvent } from "../DataEvent";
 
 export class PeerSharedAttributeDeletedByPeerEvent extends DataEvent<LocalAttributeDTO> {

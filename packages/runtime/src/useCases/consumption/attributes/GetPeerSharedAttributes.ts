@@ -1,7 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController } from "@nmshd/consumption";
+import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { LocalAttributeDTO } from "../../../types";
 import { AddressString, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { flattenObject } from "../../common/flattenObject";
 import { AttributeMapper } from "./AttributeMapper";
@@ -9,7 +9,6 @@ import { GetAttributesRequestQuery, GetAttributesUseCase } from "./GetAttributes
 
 export interface GetPeerSharedAttributesRequest {
     peer: AddressString;
-    onlyValid?: boolean;
     query?: GetPeerSharedAttributesRequestQuery;
     hideTechnical?: boolean;
     /**
@@ -20,10 +19,9 @@ export interface GetPeerSharedAttributesRequest {
 
 export interface GetPeerSharedAttributesRequestQuery {
     createdAt?: string;
+    wasViewedAt?: string | string[];
     "content.@type"?: string | string[];
     "content.tags"?: string | string[];
-    "content.validFrom"?: string | string[];
-    "content.validTo"?: string | string[];
     "content.key"?: string | string[];
     "content.isTechnical"?: string;
     "content.confidentiality"?: string | string[];
@@ -62,7 +60,7 @@ export class GetPeerSharedAttributesUseCase extends UseCase<GetPeerSharedAttribu
             dbQuery["succeededBy"] = { $exists: false };
         }
 
-        const attributes = await this.attributeController.getLocalAttributes(dbQuery, request.hideTechnical, request.onlyValid);
+        const attributes = await this.attributeController.getLocalAttributes(dbQuery, request.hideTechnical);
 
         return Result.ok(AttributeMapper.toAttributeDTOList(attributes));
     }

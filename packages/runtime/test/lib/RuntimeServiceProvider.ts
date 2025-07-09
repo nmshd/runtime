@@ -1,3 +1,4 @@
+import { IConfigOverwrite } from "@nmshd/transport";
 import correlator from "correlation-id";
 import { AnonymousServices, ConsumptionServices, DataViewExpander, DeciderModuleConfigurationOverwrite, RuntimeConfig, TransportServices } from "../../src";
 import { MockEventBus } from "./MockEventBus";
@@ -17,7 +18,6 @@ export interface LaunchConfiguration {
     enableDeciderModule?: boolean;
     configureDeciderModule?: DeciderModuleConfigurationOverwrite;
     enableRequestModule?: boolean;
-    enableAttributeListenerModule?: boolean;
     enableNotificationModule?: boolean;
     enableDefaultRepositoryAttributes?: boolean;
     useCorrelator?: boolean;
@@ -26,39 +26,22 @@ export interface LaunchConfiguration {
 export class RuntimeServiceProvider {
     private readonly runtimes: TestRuntime[] = [];
 
-    private static readonly _runtimeConfig: RuntimeConfig = {
-        transportLibrary: {
+    public static get transportConfig(): Omit<IConfigOverwrite, "supportedIdentityVersion"> {
+        return {
             baseUrl: process.env.NMSHD_TEST_BASEURL!,
             platformClientId: process.env.NMSHD_TEST_CLIENTID!,
             platformClientSecret: process.env.NMSHD_TEST_CLIENTSECRET!,
             addressGenerationHostnameOverride: globalThis.process.env.NMSHD_TEST_ADDRESS_GENERATION_HOSTNAME_OVERRIDE,
             debug: true
-        },
+        };
+    }
+
+    private static readonly _runtimeConfig: RuntimeConfig = {
+        transportLibrary: this.transportConfig,
         modules: {
-            decider: {
-                enabled: false,
-                displayName: "Decider Module",
-                name: "DeciderModule",
-                location: "@nmshd/runtime:DeciderModule"
-            },
-            request: {
-                enabled: false,
-                displayName: "Request Module",
-                name: "RequestModule",
-                location: "@nmshd/runtime:RequestModule"
-            },
-            attributeListener: {
-                enabled: false,
-                displayName: "Attribute Listener Module",
-                name: "AttributeListenerModule",
-                location: "@nmshd/runtime:AttributeListenerModule"
-            },
-            notification: {
-                enabled: false,
-                displayName: "Notification Module",
-                name: "NotificationModule",
-                location: "@nmshd/runtime:NotificationModule"
-            }
+            decider: { enabled: false, location: "@nmshd/runtime:DeciderModule" },
+            request: { enabled: false, location: "@nmshd/runtime:RequestModule" },
+            notification: { enabled: false, location: "@nmshd/runtime:NotificationModule" }
         }
     };
 
@@ -85,7 +68,6 @@ export class RuntimeServiceProvider {
 
             if (launchConfiguration.enableRequestModule) config.modules.request.enabled = true;
             if (launchConfiguration.enableDeciderModule) config.modules.decider.enabled = true;
-            if (launchConfiguration.enableAttributeListenerModule) config.modules.attributeListener.enabled = true;
             if (launchConfiguration.enableNotificationModule) config.modules.notification.enabled = true;
 
             config.modules.decider.automationConfig = launchConfiguration.configureDeciderModule?.automationConfig;

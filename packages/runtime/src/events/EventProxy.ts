@@ -1,11 +1,11 @@
 import { EventBus, EventHandler, SubscriptionTarget } from "@js-soft/ts-utils";
 import * as consumption from "@nmshd/consumption";
 import * as transport from "@nmshd/transport";
-import { AttributeListenerMapper, AttributeMapper, IdentityDeletionProcessMapper, MessageMapper, RelationshipMapper, RelationshipTemplateMapper, RequestMapper } from "../useCases";
+import { AttributeMapper, FileMapper, IdentityDeletionProcessMapper, MessageMapper, RelationshipMapper, RelationshipTemplateMapper, RequestMapper } from "../useCases";
 import {
     AttributeCreatedEvent,
     AttributeDeletedEvent,
-    AttributeListenerCreatedEvent,
+    AttributeWasViewedAtChangedEvent,
     IncomingRequestReceivedEvent,
     IncomingRequestStatusChangedEvent,
     OutgoingRequestCreatedAndCompletedEvent,
@@ -17,13 +17,14 @@ import {
     PeerSharedAttributeDeletedByPeerEvent,
     PeerSharedAttributeSucceededEvent,
     RepositoryAttributeSucceededEvent,
-    ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent,
     ThirdPartyOwnedRelationshipAttributeSucceededEvent,
     ThirdPartyRelationshipAttributeDeletedByPeerEvent,
     ThirdPartyRelationshipAttributeSucceededEvent
 } from "./consumption";
 import {
     DatawalletSynchronizedEvent,
+    FileOwnershipClaimedEvent,
+    FileOwnershipLockedEvent,
     IdentityDeletionProcessStatusChangedEvent,
     MessageDeliveredEvent,
     MessageReceivedEvent,
@@ -36,7 +37,8 @@ import {
     RelationshipChangedEvent,
     RelationshipDecomposedBySelfEvent,
     RelationshipReactivationCompletedEvent,
-    RelationshipReactivationRequestedEvent
+    RelationshipReactivationRequestedEvent,
+    RelationshipTemplateAllocationsExhaustedEvent
 } from "./transport";
 
 export class EventProxy {
@@ -116,6 +118,20 @@ export class EventProxy {
         this.subscribeToSourceEvent(transport.DatawalletSynchronizedEvent, (event) => {
             this.targetEventBus.publish(new DatawalletSynchronizedEvent(event.eventTargetAddress));
         });
+
+        this.subscribeToSourceEvent(transport.RelationshipTemplateAllocationsExhaustedEvent, (event) => {
+            this.targetEventBus.publish(
+                new RelationshipTemplateAllocationsExhaustedEvent(event.eventTargetAddress, RelationshipTemplateMapper.toRelationshipTemplateDTO(event.data))
+            );
+        });
+
+        this.subscribeToSourceEvent(transport.FileOwnershipLockedEvent, (event) => {
+            this.targetEventBus.publish(new FileOwnershipLockedEvent(event.eventTargetAddress, FileMapper.toFileDTO(event.data)));
+        });
+
+        this.subscribeToSourceEvent(transport.FileOwnershipClaimedEvent, (event) => {
+            this.targetEventBus.publish(new FileOwnershipClaimedEvent(event.eventTargetAddress, FileMapper.toFileDTO(event.data)));
+        });
     }
 
     private proxyConsumptionEvents() {
@@ -137,7 +153,6 @@ export class EventProxy {
 
         this.subscribeToSourceEvent(consumption.ThirdPartyRelationshipAttributeDeletedByPeerEvent, (event) => {
             this.targetEventBus.publish(new ThirdPartyRelationshipAttributeDeletedByPeerEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
-            this.targetEventBus.publish(new ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
         });
 
         this.subscribeToSourceEvent(consumption.OwnSharedAttributeSucceededEvent, (event) => {
@@ -182,6 +197,10 @@ export class EventProxy {
             );
         });
 
+        this.subscribeToSourceEvent(consumption.AttributeWasViewedAtChangedEvent, (event) => {
+            this.targetEventBus.publish(new AttributeWasViewedAtChangedEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
+        });
+
         this.subscribeToSourceEvent(consumption.IncomingRequestReceivedEvent, (event) => {
             this.targetEventBus.publish(new IncomingRequestReceivedEvent(event.eventTargetAddress, RequestMapper.toLocalRequestDTO(event.data)));
         });
@@ -218,10 +237,6 @@ export class EventProxy {
                     newStatus: event.data.newStatus
                 })
             );
-        });
-
-        this.subscribeToSourceEvent(consumption.AttributeListenerCreatedEvent, (event) => {
-            this.targetEventBus.publish(new AttributeListenerCreatedEvent(event.eventTargetAddress, AttributeListenerMapper.toAttributeListenerDTO(event.data)));
         });
     }
 

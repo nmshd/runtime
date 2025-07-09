@@ -6,6 +6,8 @@ const serviceProvider = new RuntimeServiceProvider();
 let runtimeServices1: TestRuntimeServices;
 let runtimeServices2: TestRuntimeServices;
 
+const UNKNOWN_TOKEN_ID = "TOKXXXXXXXXXXXXXXXXX";
+
 beforeAll(async () => {
     const runtimeServices = await serviceProvider.launch(2);
     runtimeServices1 = runtimeServices[0];
@@ -33,6 +35,41 @@ describe("Tokens", () => {
 
         const getTokenResponse = await runtimeServices1.transport.tokens.getToken({ id: response.value.id });
         expect(getTokenResponse).toBeAnError("Token not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
+    });
+
+    test("load peer Token by truncated reference", async () => {
+        const uploadedToken = await uploadOwnToken(runtimeServices1.transport);
+        const result = await runtimeServices2.transport.tokens.loadPeerToken({ reference: uploadedToken.reference.truncated, ephemeral: false });
+        expect(result).toBeSuccessful();
+
+        const token = result.value;
+        expect(token.content).toStrictEqual(uploadedToken.content);
+    });
+
+    test("load peer Token by url reference", async () => {
+        const uploadedToken = await uploadOwnToken(runtimeServices1.transport);
+        const result = await runtimeServices2.transport.tokens.loadPeerToken({ reference: uploadedToken.reference.url, ephemeral: false });
+        expect(result).toBeSuccessful();
+
+        const token = result.value;
+        expect(token.content).toStrictEqual(uploadedToken.content);
+    });
+
+    describe("Delete Token", () => {
+        test("accessing invalid Token id causes an error", async () => {
+            const response = await runtimeServices1.transport.tokens.deleteToken({ tokenId: UNKNOWN_TOKEN_ID });
+            expect(response).toBeAnError("Token not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
+        });
+
+        test("successfully delete Token", async () => {
+            const token = await uploadOwnToken(runtimeServices1.transport);
+
+            const deleteTokenResponse = await runtimeServices1.transport.tokens.deleteToken({ tokenId: token.id });
+            expect(deleteTokenResponse).toBeSuccessful();
+
+            const getTokenResponse = await runtimeServices1.transport.tokens.getToken({ id: token.id });
+            expect(getTokenResponse).toBeAnError("Token not found. Make sure the ID exists and the record is not expired.", "error.runtime.recordNotFound");
+        });
     });
 });
 
@@ -97,6 +134,56 @@ describe("Tokens query", () => {
         await conditions.executeTests((c, q) => c.tokens.getTokens({ query: q, ownerRestriction: OwnerRestriction.Own }));
     });
 
+    test("query own PIN-protected tokens with passwordLocationIndicator that is a number", async () => {
+        const token = await uploadOwnToken(runtimeServices1.transport, runtimeServices1.address, {
+            password: "1234",
+            passwordIsPin: true,
+            passwordLocationIndicator: 50
+        });
+        const conditions = new QueryParamConditions<GetTokensQuery>(token, runtimeServices1.transport)
+            .addSingleCondition({
+                expectedResult: true,
+                key: "passwordProtection.passwordLocationIndicator",
+                value: "50"
+            })
+            .addSingleCondition({
+                expectedResult: false,
+                key: "passwordProtection.passwordLocationIndicator",
+                value: "0"
+            })
+            .addSingleCondition({
+                expectedResult: false,
+                key: "passwordProtection.passwordLocationIndicator",
+                value: "anotherString"
+            });
+        await conditions.executeTests((c, q) => c.tokens.getTokens({ query: q, ownerRestriction: OwnerRestriction.Own }));
+    });
+
+    test("query own PIN-protected tokens with passwordLocationIndicator that is a string", async () => {
+        const token = await uploadOwnToken(runtimeServices1.transport, runtimeServices1.address, {
+            password: "1234",
+            passwordIsPin: true,
+            passwordLocationIndicator: "Letter"
+        });
+        const conditions = new QueryParamConditions<GetTokensQuery>(token, runtimeServices1.transport)
+            .addSingleCondition({
+                expectedResult: true,
+                key: "passwordProtection.passwordLocationIndicator",
+                value: "Letter"
+            })
+            .addSingleCondition({
+                expectedResult: true,
+                key: "passwordProtection.passwordLocationIndicator",
+                value: "2"
+            })
+            .addSingleCondition({
+                expectedResult: false,
+                key: "passwordProtection.passwordLocationIndicator",
+                value: "anotherString"
+            });
+        await conditions.executeTests((c, q) => c.tokens.getTokens({ query: q, ownerRestriction: OwnerRestriction.Own }));
+    });
+
     test("query peer tokens", async () => {
         const token = await exchangeToken(runtimeServices1.transport, runtimeServices2.transport);
         const conditions = new QueryParamConditions<GetTokensQuery>(token, runtimeServices2.transport)
@@ -127,7 +214,7 @@ describe("Personalized tokens", () => {
         });
         expect(createResult).toBeSuccessful();
 
-        const loadResult = await runtimeServices2.transport.tokens.loadPeerToken({ reference: createResult.value.truncatedReference, ephemeral: true });
+        const loadResult = await runtimeServices2.transport.tokens.loadPeerToken({ reference: createResult.value.reference.truncated, ephemeral: true });
         expect(loadResult).toBeSuccessful();
         expect(loadResult.value.forIdentity).toBe(runtimeServices2.address);
     });
@@ -141,7 +228,7 @@ describe("Personalized tokens", () => {
         });
         expect(createResult).toBeSuccessful();
 
-        const loadResult = await runtimeServices2.transport.tokens.loadPeerToken({ reference: createResult.value.truncatedReference, ephemeral: true });
+        const loadResult = await runtimeServices2.transport.tokens.loadPeerToken({ reference: createResult.value.reference.truncated, ephemeral: true });
         expect(loadResult).toBeAnError(/.*/, "error.transport.general.notIntendedForYou");
     });
 });

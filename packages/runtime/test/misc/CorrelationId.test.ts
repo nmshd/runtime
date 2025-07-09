@@ -23,7 +23,7 @@ describe("CorrelationId", function () {
         await runtimeServiceProvider.stop();
     });
 
-    test("should send correlation id to the backbone when given", async function () {
+    test("should send correlation id to the Backbone when given", async function () {
         interceptor.start();
         await correlator.withId("test-correlation-id", async () => {
             await runtime.transport.account.syncEverything();
@@ -33,7 +33,7 @@ describe("CorrelationId", function () {
         expect(requests.at(-1)!.headers!["x-correlation-id"]).toBe("test-correlation-id");
     });
 
-    test("should send a generated correlation id to the backbone", async function () {
+    test("should send a generated correlation id to the Backbone", async function () {
         interceptor.start();
 
         await runtime.transport.account.syncEverything();

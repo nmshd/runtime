@@ -1,8 +1,8 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { ArbitraryMessageContent, Mail, Notification, Request, ResponseWrapper } from "@nmshd/content";
 import { CoreBuffer } from "@nmshd/crypto";
+import { MessageDTO, MessageWithAttachmentsDTO } from "@nmshd/runtime-types";
 import { CachedMessageRecipient, File, Message } from "@nmshd/transport";
-import { MessageDTO, MessageWithAttachmentsDTO } from "../../../types";
 import { RuntimeErrors } from "../../common";
 import { FileMapper } from "../files/FileMapper";
 import { DownloadAttachmentResponse } from "./DownloadAttachment";
@@ -27,13 +27,13 @@ export class MessageMapper {
 
         return {
             id: message.id.toString(),
+            isOwn: message.isOwn,
             content: this.toMessageContent(message.cache.content),
             createdBy: message.cache.createdBy.toString(),
             createdByDevice: message.cache.createdByDevice.toString(),
             recipients: this.toRecipients(message.cache.recipients),
             createdAt: message.cache.createdAt.toString(),
             attachments: attachments.map((f) => FileMapper.toFileDTO(f)),
-            isOwn: message.isOwn,
             wasReadAt: message.wasReadAt?.toString()
         };
     }
@@ -45,13 +45,13 @@ export class MessageMapper {
 
         return {
             id: message.id.toString(),
+            isOwn: message.isOwn,
             content: this.toMessageContent(message.cache.content),
             createdBy: message.cache.createdBy.toString(),
             createdByDevice: message.cache.createdByDevice.toString(),
             recipients: this.toRecipients(message.cache.recipients),
             createdAt: message.cache.createdAt.toString(),
             attachments: message.cache.attachments.map((a) => a.toString()),
-            isOwn: message.isOwn,
             wasReadAt: message.wasReadAt?.toString()
         };
     }

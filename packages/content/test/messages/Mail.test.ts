@@ -7,8 +7,8 @@ describe("Mail", function () {
             "@type": "Mail",
             to: ["did:e:a-domain:dids:anidentity"],
             cc: [],
-            subject: "A Subject",
-            body: "A Body"
+            subject: "aSubject",
+            body: "aBody"
         });
 
         expect(mail).toBeInstanceOf(Mail);
@@ -18,8 +18,8 @@ describe("Mail", function () {
         const mail = Serializable.fromUnknown({
             "@type": "Mail",
             to: ["did:e:a-domain:dids:anidentity"],
-            subject: "A Subject",
-            body: "A Body"
+            subject: "aSubject",
+            body: "aBody"
         });
 
         expect(mail).toBeInstanceOf(Mail);
@@ -33,8 +33,8 @@ describe("Mail", function () {
                 "@type": "Mail",
                 to: [],
                 cc: [],
-                subject: "A Subject",
-                body: "A Body"
+                subject: "aSubject",
+                body: "aBody"
             });
         } catch (e) {
             error = e;
@@ -51,8 +51,8 @@ describe("Mail", function () {
             Serializable.fromUnknown({
                 "@type": "Mail",
                 cc: [],
-                subject: "A Subject",
-                body: "A Body"
+                subject: "aSubject",
+                body: "aBody"
             });
         } catch (e) {
             error = e;

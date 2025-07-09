@@ -1,7 +1,7 @@
 import { AcceptReadAttributeRequestItemParametersJSON } from "@nmshd/consumption";
-import { GivenName, IdentityAttribute, ReadAttributeRequestItem, RelationshipTemplateContent } from "@nmshd/content";
+import { GivenName, IdentityAttribute, ReadAttributeRequestItem, RelationshipAttributeConfidentiality, RelationshipTemplateContent } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
-import { establishRelationshipWithContents, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
+import { establishRelationshipWithContents, executeFullCreateAndShareRelationshipAttributeFlow, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 
@@ -9,7 +9,7 @@ let runtimeServices1: TestRuntimeServices;
 let runtimeServices2: TestRuntimeServices;
 
 beforeAll(async () => {
-    const runtimeServices = await serviceProvider.launch(2);
+    const runtimeServices = await serviceProvider.launch(2, { enableRequestModule: true, enableDeciderModule: true });
     runtimeServices1 = runtimeServices[0];
     runtimeServices2 = runtimeServices[1];
 
@@ -62,7 +62,7 @@ describe("RelationshipDVO", () => {
         expect(dvo.relationship!.status).toBe("Active");
         expect(dvo.relationship!.statusText).toBe("i18n://dvo.relationship.Active");
 
-        expect(dvo.relationship!.templateId).toBe(dto.template.id);
+        expect(dvo.relationship!.templateId).toBe(dto.templateId);
     });
 
     test("check the relationship dvo for the requestor", async () => {
@@ -82,7 +82,7 @@ describe("RelationshipDVO", () => {
         expect(dvo.relationship!.status).toBe("Active");
         expect(dvo.relationship!.statusText).toBe("i18n://dvo.relationship.Active");
 
-        expect(dvo.relationship!.templateId).toBe(dto.template.id);
+        expect(dvo.relationship!.templateId).toBe(dto.templateId);
     });
 
     test("check the relationship dvo for the templator with active relationshipSetting", async () => {
@@ -103,5 +103,32 @@ describe("RelationshipDVO", () => {
         expect(dvo.name).toBe("aTitle");
         expect(dvo.originalName).toBe("i18n://dvo.identity.unknown");
         expect(dvo.description).toBe("aDescription");
+    });
+
+    test("check the relationship dvo for the templator with send mail ensabled", async () => {
+        const dtos = (await runtimeServices1.transport.relationships.getRelationships({})).value;
+        const dvo = await runtimeServices1.expander.expandRelationshipDTO(dtos[0]);
+
+        expect(dvo).toBeDefined();
+        expect(dvo.relationship!.sendMailDisabled).toBe(false);
+    });
+
+    test("check the relationship dvo for the templator with send mail disabled", async () => {
+        await executeFullCreateAndShareRelationshipAttributeFlow(runtimeServices2, runtimeServices1, {
+            content: {
+                key: "__App_Contact_sendMailDisabled",
+                confidentiality: RelationshipAttributeConfidentiality.Public,
+                value: {
+                    "@type": "Consent",
+                    consent: "aConsentText"
+                },
+                isTechnical: true
+            }
+        });
+
+        const dtos = (await runtimeServices1.transport.relationships.getRelationships({})).value;
+        const dvo = await runtimeServices1.expander.expandRelationshipDTO(dtos[0]);
+        expect(dvo).toBeDefined();
+        expect(dvo.relationship!.sendMailDisabled).toBe(true);
     });
 });

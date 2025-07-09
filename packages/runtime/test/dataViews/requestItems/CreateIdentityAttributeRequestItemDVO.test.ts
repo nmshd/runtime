@@ -1,12 +1,11 @@
 import { DecideRequestItemParametersJSON } from "@nmshd/consumption";
-import { AbstractStringJSON, DisplayNameJSON } from "@nmshd/content";
+import { AbstractStringJSON, CreateAttributeAcceptResponseItemJSON, DisplayNameJSON, RequestJSON } from "@nmshd/content";
 import {
     ConsumptionServices,
     CreateAttributeAcceptResponseItemDVO,
     CreateAttributeRequestItemDVO,
     CreateOutgoingRequestRequest,
     DataViewExpander,
-    DecidableCreateAttributeRequestItemDVO,
     IncomingRequestStatusChangedEvent,
     LocalRequestStatus,
     OutgoingRequestStatusChangedEvent,
@@ -82,7 +81,7 @@ beforeAll(async () => {
 afterAll(() => serviceProvider.stop());
 
 beforeEach(async function () {
-    await cleanupAttributes(sRuntimeServices, rRuntimeServices);
+    await cleanupAttributes([sRuntimeServices, rRuntimeServices]);
     rEventBus.reset();
     sEventBus.reset();
 });
@@ -138,8 +137,8 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
         expect(dvo.request.content.type).toBe("RequestDVO");
         expect(dvo.request.content.items).toHaveLength(1);
         expect(dvo.request.isDecidable).toBe(true);
-        const requestItemDVO = dvo.request.content.items[0] as DecidableCreateAttributeRequestItemDVO;
-        expect(requestItemDVO.type).toBe("DecidableCreateAttributeRequestItemDVO");
+        const requestItemDVO = dvo.request.content.items[0] as CreateAttributeRequestItemDVO;
+        expect(requestItemDVO.type).toBe("CreateAttributeRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(true);
         expect(requestItemDVO.attribute.type).toBe("DraftIdentityAttributeDVO");
         const value = requestItemDVO.attribute.value as AbstractStringJSON;
@@ -307,5 +306,33 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
         const numberOfItems = dvo.items!.length;
         expect(dvo.name).toBe("Richard Receiver");
         expect(numberOfItems - baselineNumberOfItems).toBe(1);
+    });
+
+    test("check the MessageDVO for the recipient after they deleted the shared Attribute", async () => {
+        const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
+        const requestId = (senderMessage.content as RequestJSON).id!;
+        const localRequest = (await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: requestId })).value;
+        const sharedAttributeId = (localRequest.response!.content.items[0] as CreateAttributeAcceptResponseItemJSON).attributeId;
+
+        await rRuntimeServices.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: sharedAttributeId });
+
+        const recipientMessage = (await rRuntimeServices.transport.messages.getMessage({ id: senderMessage.id })).value;
+        const dvo = (await rExpander.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
+        const responseItemDVO = dvo.request.response!.content.items[0];
+        expect(responseItemDVO.type).toBe("AttributeAlreadyDeletedAcceptResponseItemDVO");
+    });
+
+    test("check the MessageDVO for the sender after they deleted the shared Attribute", async () => {
+        const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
+        const requestId = (senderMessage.content as RequestJSON).id!;
+        const localRequest = (await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: requestId })).value;
+        const sharedAttributeId = (localRequest.response!.content.items[0] as CreateAttributeAcceptResponseItemJSON).attributeId;
+
+        await sRuntimeServices.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: sharedAttributeId });
+
+        const senderMessageAfterDeletion = (await sRuntimeServices.transport.messages.getMessage({ id: senderMessage.id })).value;
+        const dvo = (await sExpander.expandMessageDTO(senderMessageAfterDeletion)) as RequestMessageDVO;
+        const responseItemDVO = dvo.request.response!.content.items[0];
+        expect(responseItemDVO.type).toBe("AttributeAlreadyDeletedAcceptResponseItemDVO");
     });
 });

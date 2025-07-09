@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
+import { AttributeTagCollectionDTO, LocalAttributeDTO, LocalRequestDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { AttributeTagCollectionDTO, LocalAttributeDTO, LocalRequestDTO } from "../../../types";
 import {
     CanCreateRepositoryAttributeRequest,
     CanCreateRepositoryAttributeResponse,
@@ -47,9 +47,13 @@ import {
     GetSharedVersionsOfAttributeUseCase,
     GetVersionsOfAttributeRequest,
     GetVersionsOfAttributeUseCase,
+    MarkAttributeAsViewedRequest,
+    MarkAttributeAsViewedUseCase,
     NotifyPeerAboutRepositoryAttributeSuccessionRequest,
     NotifyPeerAboutRepositoryAttributeSuccessionResponse,
     NotifyPeerAboutRepositoryAttributeSuccessionUseCase,
+    SetAttributeDeletionInfoOfDeletionProposedRelationshipRequest,
+    SetAttributeDeletionInfoOfDeletionProposedRelationshipUseCase,
     ShareRepositoryAttributeRequest,
     ShareRepositoryAttributeUseCase,
     SucceedRelationshipAttributeAndNotifyPeerRequest,
@@ -90,7 +94,9 @@ export class AttributesFacade {
         @Inject private readonly deleteThirdPartyRelationshipAttributeAndNotifyPeerUseCase: DeleteThirdPartyRelationshipAttributeAndNotifyPeerUseCase,
         @Inject private readonly deleteRepositoryAttributeUseCase: DeleteRepositoryAttributeUseCase,
         @Inject private readonly deleteSharedAttributesForRejectedOrRevokedRelationshipUseCase: DeleteSharedAttributesForRejectedOrRevokedRelationshipUseCase,
-        @Inject private readonly getAttributeTagCollectionUseCase: GetAttributeTagCollectionUseCase
+        @Inject private readonly getAttributeTagCollectionUseCase: GetAttributeTagCollectionUseCase,
+        @Inject private readonly setAttributeDeletionInfoOfDeletionProposedRelationshipUseCase: SetAttributeDeletionInfoOfDeletionProposedRelationshipUseCase,
+        @Inject private readonly markAttributeAsViewedUseCase: MarkAttributeAsViewedUseCase
     ) {}
 
     public async canCreateRepositoryAttribute(request: CanCreateRepositoryAttributeRequest): Promise<Result<CanCreateRepositoryAttributeResponse>> {
@@ -193,15 +199,6 @@ export class AttributesFacade {
         return await this.deleteThirdPartyRelationshipAttributeAndNotifyPeerUseCase.execute(request);
     }
 
-    /**
-     * @deprecated use deleteThirdPartyRelationshipAttributeAndNotifyPeer instead
-     */
-    public async deleteThirdPartyOwnedRelationshipAttributeAndNotifyPeer(
-        request: DeleteThirdPartyRelationshipAttributeAndNotifyPeerRequest
-    ): Promise<Result<DeleteThirdPartyRelationshipAttributeAndNotifyPeerResponse>> {
-        return await this.deleteThirdPartyRelationshipAttributeAndNotifyPeer(request);
-    }
-
     public async deleteRepositoryAttribute(request: DeleteRepositoryAttributeRequest): Promise<Result<void>> {
         return await this.deleteRepositoryAttributeUseCase.execute(request);
     }
@@ -212,5 +209,13 @@ export class AttributesFacade {
 
     public async getAttributeTagCollection(): Promise<Result<AttributeTagCollectionDTO>> {
         return await this.getAttributeTagCollectionUseCase.execute();
+    }
+
+    public async setAttributeDeletionInfoOfDeletionProposedRelationship(request: SetAttributeDeletionInfoOfDeletionProposedRelationshipRequest): Promise<Result<void>> {
+        return await this.setAttributeDeletionInfoOfDeletionProposedRelationshipUseCase.execute(request);
+    }
+
+    public async markAttributeAsViewed(request: MarkAttributeAsViewedRequest): Promise<Result<LocalAttributeDTO>> {
+        return await this.markAttributeAsViewedUseCase.execute(request);
     }
 }

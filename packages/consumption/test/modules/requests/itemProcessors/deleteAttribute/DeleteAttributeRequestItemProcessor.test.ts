@@ -10,8 +10,8 @@ import {
     Request,
     ResponseItemResult
 } from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
-import { AccountController, CoreIdHelper, Transport } from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId, CoreIdHelper } from "@nmshd/core-types";
+import { AccountController, Transport } from "@nmshd/transport";
 import {
     AcceptDeleteAttributeRequestItemParametersJSON,
     ConsumptionController,
@@ -36,10 +36,10 @@ describe("DeleteAttributeRequestItemProcessor", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 2);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 2);
         ({ accountController, consumptionController } = accounts[0]);
 
         peerAddress = CoreAddress.from("peerAddress");

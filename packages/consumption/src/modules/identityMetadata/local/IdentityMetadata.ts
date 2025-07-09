@@ -4,6 +4,7 @@ import { CoreSynchronizable, ICoreSynchronizable } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
 
 export interface IdentityMetadataJSON {
+    id: string;
     key?: string;
     reference: string;
     value: any;

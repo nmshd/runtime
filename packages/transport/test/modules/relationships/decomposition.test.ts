@@ -21,11 +21,11 @@ describe("Data cleanup after relationship decomposition", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 3);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 3);
         sender = accounts[0];
         recipient1 = accounts[1];
         recipient2 = accounts[2];
@@ -47,8 +47,8 @@ describe("Data cleanup after relationship decomposition", function () {
             expiresAt,
             ephemeral: false
         });
-        const reference = sentToken.toTokenReference().truncate();
-        tokenId = (await sender.tokens.loadPeerTokenByTruncated(reference, false)).id;
+        const reference = sentToken.toTokenReference(sender.config.baseUrl);
+        tokenId = (await sender.tokens.loadPeerTokenByReference(reference, false)).id;
 
         await TestUtil.terminateRelationship(sender, recipient1);
         await TestUtil.decomposeRelationship(sender, recipient1);
@@ -62,7 +62,7 @@ describe("Data cleanup after relationship decomposition", function () {
     });
 
     test("templates should be deleted", async function () {
-        const templateForRelationship = await sender.relationshipTemplates.getRelationshipTemplate(relationship.cache!.template.id);
+        const templateForRelationship = await sender.relationshipTemplates.getRelationshipTemplate(relationship.cache!.templateId);
         const otherTemplate = await sender.relationshipTemplates.getRelationshipTemplate(templateId);
         expect(templateForRelationship).toBeUndefined();
         expect(otherTemplate).toBeUndefined();
@@ -90,7 +90,7 @@ describe("Data cleanup after relationship decomposition", function () {
             datawalletEnabled: true
         });
 
-        const accounts = await TestUtil.provideAccounts(transport, 2);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 2);
         const recipient1 = accounts[0];
         const recipient2 = accounts[1];
 
@@ -128,11 +128,11 @@ describe("Relationship decomposition due to Identity deletion", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 2);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 2);
         sender = accounts[0];
         recipient = accounts[1];
 

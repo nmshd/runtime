@@ -14,7 +14,6 @@ import {
     ArbitraryRelationshipTemplateContentJSON,
     INotificationItem,
     Notification,
-    RelationshipCreationContent,
     RelationshipTemplateContentJSON,
     Request,
     RequestItemGroupJSON,
@@ -24,7 +23,7 @@ import {
     ShareAttributeAcceptResponseItemJSON,
     ShareAttributeRequestItem
 } from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId, PasswordLocationIndicator } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
 import { IdentityUtil } from "@nmshd/transport";
 import fs from "fs";
@@ -35,8 +34,6 @@ import {
     CreateAndShareRelationshipAttributeRequest,
     CreateOutgoingRequestRequest,
     CreateRepositoryAttributeRequest,
-    CreateTokenForFileRequest,
-    CreateTokenQRCodeForFileRequest,
     FileDTO,
     IdentityDeletionProcessDTO,
     IncomingRequestStatusChangedEvent,
@@ -68,7 +65,7 @@ import { TestRuntimeServices } from "./RuntimeServiceProvider";
 import { TestNotificationItem } from "./TestNotificationItem";
 
 export async function syncUntil(transportServices: TransportServices, until: (syncResult: SyncEverythingResponse) => boolean): Promise<SyncEverythingResponse> {
-    const finalSyncResult: SyncEverythingResponse = { messages: [], relationships: [], identityDeletionProcesses: [] };
+    const finalSyncResult: SyncEverythingResponse = { messages: [], relationships: [], identityDeletionProcesses: [], files: [] };
 
     let iterationNumber = 0;
     let criteriaMet: boolean;
@@ -80,6 +77,7 @@ export async function syncUntil(transportServices: TransportServices, until: (sy
         finalSyncResult.messages.push(...currentIterationSyncResult.messages);
         finalSyncResult.relationships.push(...currentIterationSyncResult.relationships);
         finalSyncResult.identityDeletionProcesses.push(...currentIterationSyncResult.identityDeletionProcesses);
+        finalSyncResult.files.push(...currentIterationSyncResult.files);
 
         iterationNumber++;
         criteriaMet = until(finalSyncResult);
@@ -109,6 +107,10 @@ async function syncUntilHasMany<T extends keyof SyncEverythingResponse>(
 
 export async function syncUntilHasRelationships(transportServices: TransportServices, expectedNumberOfRelationships = 1): Promise<RelationshipDTO[]> {
     return await syncUntilHasMany(transportServices, "relationships", expectedNumberOfRelationships);
+}
+
+export async function syncUntilHasRelationship(transportServices: TransportServices, relationshipId: string | CoreId): Promise<RelationshipDTO> {
+    return await syncUntilHas(transportServices, "relationships", (r) => r.id === relationshipId.toString());
 }
 
 export async function syncUntilHasMessages(transportServices: TransportServices, expectedNumberOfMessages = 1): Promise<MessageDTO[]> {
@@ -166,7 +168,7 @@ export async function syncUntilHasEvent<TEvent extends Event>(
 export async function uploadOwnToken(
     transportServices: TransportServices,
     forIdentity?: string,
-    passwordProtection?: { password: string; passwordIsPin?: true }
+    passwordProtection?: { password: string; passwordIsPin?: true; passwordLocationIndicator?: PasswordLocationIndicator }
 ): Promise<TokenDTO> {
     const response = await transportServices.tokens.createOwnToken({
         content: { aKey: "aValue" },
@@ -189,27 +191,14 @@ export async function uploadFile(transportServices: TransportServices): Promise<
     return response.value;
 }
 
-export function createToken(
-    transportServices: TransportServices,
-    request: CreateTokenForFileRequest | CreateTokenQRCodeForFileRequest,
-    tokenType: "file" | "qrcode"
-): Promise<any> {
-    switch (tokenType) {
-        case "file":
-            return transportServices.files.createTokenForFile(request as CreateTokenForFileRequest);
-        case "qrcode":
-            return transportServices.files.createTokenQRCodeForFile(request as CreateTokenQRCodeForFileRequest);
-    }
-}
-
 // Override the default upload request with values
 export async function makeUploadRequest(values: object = {}): Promise<UploadOwnFileRequest> {
     return {
-        title: "File Title",
-        filename: "test.txt",
+        title: "aTitle",
+        filename: "aFileName",
         content: await fs.promises.readFile(`${__dirname}/../__assets__/test.txt`),
-        mimetype: "text/plain",
-        description: "This is a valid file description",
+        mimetype: "aMimetype",
+        description: "aDescription",
         expiresAt: DateTime.utc().plus({ minutes: 5 }).toString(),
         ...values
     };
@@ -222,7 +211,7 @@ export const emptyRelationshipCreationContent: ArbitraryRelationshipCreationCont
 export async function createTemplate(
     transportServices: TransportServices,
     body?: RelationshipTemplateContentJSON,
-    passwordProtection?: { password: string; passwordIsPin?: true },
+    passwordProtection?: { password: string; passwordIsPin?: true; passwordLocationIndicator?: PasswordLocationIndicator },
     templateExpiresAt?: DateTime
 ): Promise<RelationshipTemplateDTO> {
     const defaultExpirationDateTime = DateTime.utc().plus({ minutes: 10 }).toString();
@@ -256,7 +245,7 @@ export async function exchangeTemplate(
 ): Promise<RelationshipTemplateDTO> {
     const template = await createTemplate(transportServicesCreator, content, undefined, templateExpiresAt);
 
-    const response = await transportServicesRecipient.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
+    const response = await transportServicesRecipient.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.reference.truncated });
     expect(response).toBeSuccessful();
 
     return response.value;
@@ -265,7 +254,7 @@ export async function exchangeTemplate(
 export async function exchangeFile(transportServicesCreator: TransportServices, transportServicesRecipient: TransportServices): Promise<FileDTO> {
     const fileToken = await getFileToken(transportServicesCreator);
 
-    const response = await transportServicesRecipient.files.getOrLoadFile({ reference: fileToken.truncatedReference });
+    const response = await transportServicesRecipient.files.getOrLoadFile({ reference: fileToken.reference.truncated });
     expect(response).toBeSuccessful();
 
     return response.value;
@@ -275,7 +264,7 @@ export async function exchangeToken(transportServicesCreator: TransportServices,
     const token = await uploadOwnToken(transportServicesCreator);
 
     const response = await transportServicesRecipient.tokens.loadPeerToken({
-        reference: token.truncatedReference,
+        reference: token.reference.truncated,
         ephemeral: false
     });
     expect(response).toBeSuccessful();
@@ -288,8 +277,8 @@ export async function sendMessage(transportServices: TransportServices, recipien
         recipients: [recipient],
         content: content ?? {
             "@type": "Mail",
-            subject: "This is the mail subject",
-            body: "This is the mail body",
+            subject: "aSubject",
+            body: "aBody",
             cc: [],
             to: [recipient]
         },
@@ -310,8 +299,8 @@ export async function sendMessageToMultipleRecipients(
         recipients,
         content: content ?? {
             "@type": "Mail",
-            subject: "This is the mail subject",
-            body: "This is the mail body",
+            subject: "aSubject",
+            body: "aBody",
             cc: [],
             to: recipients
         },
@@ -398,42 +387,16 @@ export async function establishRelationship(transportServices1: TransportService
 export async function establishRelationshipWithContents(
     runtimeServices1: TestRuntimeServices,
     runtimeServices2: TestRuntimeServices,
-    templateContent?: RelationshipTemplateContentJSON,
-    acceptRequestItemsParameters?: (AcceptRequestItemParametersJSON | DecideRequestItemGroupParametersJSON)[]
+    templateContent: RelationshipTemplateContentJSON,
+    acceptRequestItemsParameters: (AcceptRequestItemParametersJSON | DecideRequestItemGroupParametersJSON)[]
 ): Promise<void> {
     const template = await exchangeTemplate(runtimeServices1.transport, runtimeServices2.transport, templateContent);
-    let creationContent;
+    await runtimeServices2.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.request.source!.reference === template.id);
 
-    if (templateContent && acceptRequestItemsParameters) {
-        const receivedRequest = (
-            await runtimeServices2.consumption.incomingRequests.received({
-                receivedRequest: templateContent.onNewRelationship,
-                requestSourceId: template.id
-            })
-        ).value;
+    const requestId = (await runtimeServices2.consumption.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
 
-        const checkedRequest = (
-            await runtimeServices2.consumption.incomingRequests.checkPrerequisites({
-                requestId: receivedRequest.id
-            })
-        ).value;
-
-        const manualDecisionRequiredRequest = (
-            await runtimeServices2.consumption.incomingRequests.requireManualDecision({
-                requestId: checkedRequest.id
-            })
-        ).value;
-
-        const acceptedRequest = await runtimeServices2.consumption.incomingRequests.accept({ requestId: manualDecisionRequiredRequest.id, items: acceptRequestItemsParameters });
-
-        creationContent = RelationshipCreationContent.from({ response: acceptedRequest.value.response!.content }).toJSON();
-    }
-
-    const createRelationshipResponse = await runtimeServices2.transport.relationships.createRelationship({
-        templateId: template.id,
-        creationContent: creationContent ?? emptyRelationshipCreationContent
-    });
-    expect(createRelationshipResponse).toBeSuccessful();
+    const acceptRequestResult = await runtimeServices2.consumption.incomingRequests.accept({ requestId, items: acceptRequestItemsParameters });
+    expect(acceptRequestResult).toBeSuccessful();
 
     const relationships = await syncUntilHasRelationships(runtimeServices1.transport);
     expect(relationships).toHaveLength(1);
@@ -517,7 +480,8 @@ export async function ensureActiveRelationship(sTransportServices: TransportServ
         await rTransportServices.relationships.decomposeRelationship({ relationshipId: relationship.id });
         await establishRelationship(sTransportServices, rTransportServices);
     } else if (sRelationships[0].status === RelationshipStatus.Pending) {
-        if (sRelationships[0].template.isOwn) {
+        const sRelationshipTemplate = await sTransportServices.relationshipTemplates.getRelationshipTemplate({ id: sRelationships[0].templateId });
+        if (sRelationshipTemplate.value.isOwn) {
             const relationship = sRelationships[0];
             await sTransportServices.relationships.acceptRelationship({ relationshipId: relationship.id });
             await syncUntilHasRelationships(rTransportServices, 1);
@@ -677,7 +641,7 @@ export async function executeFullShareRepositoryAttributeFlow(sender: TestRuntim
 export async function acceptIncomingShareAttributeRequest(sender: TestRuntimeServices, recipient: TestRuntimeServices, requestId: string): Promise<LocalAttributeDTO> {
     await syncUntilHasMessageWithRequest(recipient.transport, requestId);
     await recipient.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => {
-        return e.data.request.id === requestId && e.data.newStatus === LocalRequestStatus.ManualDecisionRequired;
+        return e.data.request.id === requestId && (e.data.newStatus === LocalRequestStatus.ManualDecisionRequired || e.data.newStatus === LocalRequestStatus.Decided);
     });
     await recipient.consumption.incomingRequests.accept({ requestId: requestId, items: [{ accept: true }] });
 
@@ -905,14 +869,39 @@ export async function generateAddressPseudonym(backboneBaseUrl: string): Promise
     return pseudonym;
 }
 
-export async function cleanupAttributes(...services: TestRuntimeServices[]): Promise<void> {
+export async function cleanupAttributes(services: TestRuntimeServices[], onlyShared = false): Promise<void> {
+    const query = onlyShared ? { "shareInfo.sourceAttribute": "" } : {};
     await Promise.all(
         services.map(async (services) => {
             const servicesAttributeController = services.consumption.attributes["getAttributeUseCase"]["attributeController"];
 
-            const servicesAttributesResult = await services.consumption.attributes.getAttributes({});
+            const servicesAttributesResult = await services.consumption.attributes.getAttributes({ query });
             for (const attribute of servicesAttributesResult.value) {
                 await servicesAttributeController.deleteAttributeUnsafe(CoreId.from(attribute.id));
+            }
+        })
+    );
+}
+
+export async function cleanupFiles(services: TestRuntimeServices[]): Promise<void> {
+    await Promise.all(
+        services.map(async (services) => {
+            const servicesFileController = services.transport.files["getFilesUseCase"]["fileController"];
+            const files = await servicesFileController.getFiles({});
+            for (const file of files) {
+                await servicesFileController.deleteFile(file);
+            }
+        })
+    );
+}
+
+export async function cleanupMessages(services: TestRuntimeServices[]): Promise<void> {
+    await Promise.all(
+        services.map(async (services) => {
+            const servicesMessageController = services.transport.messages["getMessagesUseCase"]["messageController"];
+            const messages = await servicesMessageController.getMessages({});
+            for (const message of messages) {
+                await servicesMessageController["messages"].delete(message);
             }
         })
     );
@@ -930,7 +919,7 @@ export async function createRelationshipWithStatusPending(
     });
 
     const loadedPeerTemplateResult = await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({
-        reference: relationshipTemplateResult.value.truncatedReference
+        reference: relationshipTemplateResult.value.reference.truncated
     });
 
     await requestor.eventBus.waitForEvent(RelationshipTemplateProcessedEvent, (event) => {

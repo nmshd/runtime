@@ -9,33 +9,28 @@ import {
     CreateAttributeRequestItemJSON,
     DeleteAttributeRequestItem,
     DeleteAttributeRequestItemJSON,
-    FreeTextRequestItem,
-    FreeTextRequestItemJSON,
+    FormFieldRequestItem,
+    FormFieldRequestItemJSON,
     IAuthenticationRequestItem,
     IConsentRequestItem,
     ICreateAttributeRequestItem,
     IDeleteAttributeRequestItem,
-    IFreeTextRequestItem,
+    IFormFieldRequestItem,
     IProposeAttributeRequestItem,
     IReadAttributeRequestItem,
-    IRegisterAttributeListenerRequestItem,
     IShareAttributeRequestItem,
+    ITransferFileOwnershipRequestItem,
     ProposeAttributeRequestItem,
     ProposeAttributeRequestItemJSON,
     ReadAttributeRequestItem,
     ReadAttributeRequestItemJSON,
-    RegisterAttributeListenerRequestItem,
-    RegisterAttributeListenerRequestItemJSON,
     ShareAttributeRequestItem,
-    ShareAttributeRequestItemJSON
+    ShareAttributeRequestItemJSON,
+    TransferFileOwnershipRequestItem,
+    TransferFileOwnershipRequestItemJSON
 } from "./items";
 
 export interface RequestItemJSON extends ContentJSON {
-    /**
-     * The human-readable title of this item.
-     */
-    title?: string;
-
     /**
      * The human-readable description of this item.
      */
@@ -71,15 +66,10 @@ export type RequestItemJSONDerivations =
     | ReadAttributeRequestItemJSON
     | ConsentRequestItemJSON
     | AuthenticationRequestItemJSON
-    | FreeTextRequestItemJSON
-    | RegisterAttributeListenerRequestItemJSON;
+    | FormFieldRequestItemJSON
+    | TransferFileOwnershipRequestItemJSON;
 
 export interface IRequestItem extends ISerializable {
-    /**
-     * The human-readable title of this item.
-     */
-    title?: string;
-
     /**
      * The human-readable description of this item.
      */
@@ -115,14 +105,10 @@ export type IRequestItemDerivations =
     | IReadAttributeRequestItem
     | IConsentRequestItem
     | IAuthenticationRequestItem
-    | IFreeTextRequestItem
-    | IRegisterAttributeListenerRequestItem;
+    | IFormFieldRequestItem
+    | ITransferFileOwnershipRequestItem;
 
 export abstract class RequestItem extends Serializable {
-    @serialize()
-    @validate({ nullable: true, max: 200 })
-    public title?: string;
-
     @serialize()
     @validate({ nullable: true, max: 500 })
     public description?: string;
@@ -153,8 +139,8 @@ export type RequestItemDerivations =
     | ReadAttributeRequestItem
     | ConsentRequestItem
     | AuthenticationRequestItem
-    | FreeTextRequestItem
-    | RegisterAttributeListenerRequestItem;
+    | FormFieldRequestItem
+    | TransferFileOwnershipRequestItem;
 
 export function isRequestItemDerivation(input: any): input is RequestItemDerivations {
     return (
@@ -166,7 +152,7 @@ export function isRequestItemDerivation(input: any): input is RequestItemDerivat
         input["@type"] === "ReadAttributeRequestItem" ||
         input["@type"] === "ConsentRequestItem" ||
         input["@type"] === "AuthenticationRequestItem" ||
-        input["@type"] === "FreeTextRequestItem" ||
-        input["@type"] === "RegisterAttributeListenerRequestItem"
+        input["@type"] === "FormFieldRequestItem" ||
+        input["@type"] === "TransferFileOwnershipRequestItem"
     );
 }

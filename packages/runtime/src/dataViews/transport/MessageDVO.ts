@@ -1,4 +1,4 @@
-import { MessageContentDerivation } from "../../types/transport/MessageDTO";
+import { MessageContentDerivation } from "@nmshd/runtime-types";
 import { DataViewObject } from "../DataViewObject";
 import { FileDVO } from "./FileDVO";
 import { IdentityDVO } from "./IdentityDVO";
@@ -23,12 +23,12 @@ export interface MessageDVO extends DataViewObject {
 
     /**
      * The device id of the sender's device which sent the message to
-     * the backbone
+     * the Backbone
      */
     createdByDevice: string;
 
     /**
-     * The point in time the message has been created on the backbone
+     * The point in time the message has been created on the Backbone
      * (in ISO format)
      */
     createdAt: string;

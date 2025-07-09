@@ -4,7 +4,7 @@ export * from "./EnableAutoSync";
 export * from "./GetDeviceInfo";
 export * from "./GetIdentityInfo";
 export * from "./GetSyncInfo";
-export * from "./LoadItemFromTruncatedReference";
+export * from "./LoadItemFromReference";
 export * from "./RegisterPushNotificationToken";
 export * from "./SyncDatawallet";
 export * from "./SyncEverything";

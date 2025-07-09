@@ -1,7 +1,6 @@
 export * from "./AttributeCreatedEvent";
 export * from "./AttributeDeletedEvent";
-export * from "./AttributeListenerCreatedEvent";
-export * from "./AttributeListenerTriggeredEvent";
+export * from "./AttributeWasViewedAtChangedEvent";
 export * from "./IncomingRequestReceivedEvent";
 export * from "./IncomingRequestStatusChangedEvent";
 export * from "./MailReceivedEvent";
@@ -18,7 +17,6 @@ export * from "./RelationshipEvent";
 export * from "./RelationshipTemplateProcessedEvent";
 export * from "./RepositoryAttributeSucceededEvent";
 export * from "./SuccessionEventData";
-export * from "./ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent";
 export * from "./ThirdPartyOwnedRelationshipAttributeSucceededEvent";
 export * from "./ThirdPartyRelationshipAttributeDeletedByPeerEvent";
 export * from "./ThirdPartyRelationshipAttributeSucceededEvent";

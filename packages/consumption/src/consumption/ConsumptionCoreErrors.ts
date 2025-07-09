@@ -229,6 +229,13 @@ class Attributes {
         );
     }
 
+    public wrongRelationshipStatusToSetDeletionInfo() {
+        return new CoreError(
+            "error.consumption.attributes.wrongRelationshipStatusToSetDeletionInfo",
+            "In order to manually set the deletionInfo of an Attribute, the corresponding Relationship must have status 'DeletionProposed'."
+        );
+    }
+
     public wrongOwnerOfRepositoryAttribute() {
         return new CoreError(
             "error.consumption.attributes.wrongOwnerOfRepositoryAttribute",
@@ -265,6 +272,14 @@ class Attributes {
 
     public setDefaultRepositoryAttributesIsDisabled() {
         return new CoreError("error.consumption.attributes.setDefaultRepositoryAttributesIsDisabled", "Setting default RepositoryAttributes is disabled for this Account.");
+    }
+
+    public invalidTags(tags: string[]): ApplicationError {
+        return new ApplicationError("error.consumption.attributes.invalidTags", `Detected invalidity of the following tags: '${tags.join("', '")}'.`);
+    }
+
+    public forbiddenCharactersInAttribute(message: string) {
+        return new CoreError("error.consumption.attributes.forbiddenCharactersInAttribute", message);
     }
 }
 
@@ -338,6 +353,20 @@ class Requests {
 
     public cannotCreateRequestWithExpirationDateInPast() {
         return new CoreError("error.consumption.requests.cannotCreateRequestWithExpirationDateInPast", "You cannot create a Request with an expiration date that is in the past.");
+    }
+
+    public cannotCreateRequestWithDuplicateId(id: string) {
+        return new CoreError(
+            "error.consumption.requests.cannotCreateRequestWithDuplicateId",
+            `You cannot create the Request since there already is a Request with the id '${id}'.`
+        );
+    }
+
+    public canOnlyDeleteIncomingRequestThatIsExpired(id: string, status: string) {
+        return new CoreError(
+            "error.consumption.requests.canOnlyDeleteIncomingRequestThatIsExpired",
+            `The incoming Request '${id}' is in status '${status}'. At the moment, you can only delete incoming Requests that are expired.`
+        );
     }
 
     private static readonly _decideValidation = class {

@@ -1,9 +1,9 @@
 import { QueryTranslator } from "@js-soft/docdb-querytranslator";
 import { Result } from "@js-soft/ts-utils";
+import { FileDTO } from "@nmshd/runtime-types";
 import { CachedFile, File, FileController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { nameof } from "ts-simple-nameof";
-import { FileDTO } from "../../../types";
 import { OwnerRestriction, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { FileMapper } from "./FileMapper";
 
@@ -19,6 +19,8 @@ export interface GetFilesQuery {
     title?: string | string[];
     isOwn?: string | string[];
     tags?: string | string[];
+    ownershipToken?: string | string[];
+    ownershipIsLocked?: string;
 }
 
 export interface GetFilesRequest {
@@ -45,7 +47,9 @@ export class GetFilesUseCase extends UseCase<GetFilesRequest, FileDTO[]> {
             [nameof<FileDTO>((c) => c.mimetype)]: true,
             [nameof<FileDTO>((c) => c.title)]: true,
             [nameof<FileDTO>((c) => c.tags)]: true,
-            [nameof<FileDTO>((c) => c.isOwn)]: true
+            [nameof<FileDTO>((c) => c.isOwn)]: true,
+            [nameof<FileDTO>((c) => c.ownershipToken)]: true,
+            [nameof<FileDTO>((c) => c.ownershipIsLocked)]: true
         },
         alias: {
             [nameof<FileDTO>((c) => c.createdAt)]: `${nameof<File>((f) => f.cache)}.${nameof<CachedFile>((c) => c.createdAt)}`,
@@ -58,7 +62,9 @@ export class GetFilesUseCase extends UseCase<GetFilesRequest, FileDTO[]> {
             [nameof<FileDTO>((c) => c.mimetype)]: `${nameof<File>((f) => f.cache)}.${nameof<CachedFile>((c) => c.mimetype)}`,
             [nameof<FileDTO>((c) => c.title)]: `${nameof<File>((f) => f.cache)}.${nameof<CachedFile>((c) => c.title)}`,
             [nameof<FileDTO>((c) => c.tags)]: `${nameof<File>((f) => f.cache)}.${nameof<CachedFile>((c) => c.tags)}`,
-            [nameof<FileDTO>((c) => c.isOwn)]: nameof<File>((f) => f.isOwn)
+            [nameof<FileDTO>((c) => c.isOwn)]: nameof<File>((f) => f.isOwn),
+            [nameof<FileDTO>((c) => c.ownershipToken)]: nameof<File>((f) => f.ownershipToken),
+            [nameof<FileDTO>((c) => c.ownershipIsLocked)]: nameof<File>((f) => f.ownershipIsLocked)
         },
         custom: {
             // content.tags

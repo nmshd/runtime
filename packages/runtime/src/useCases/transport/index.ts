@@ -1,4 +1,5 @@
 export * from "./account";
+export * from "./announcements";
 export * from "./challenges";
 export * from "./devices";
 export * from "./files";

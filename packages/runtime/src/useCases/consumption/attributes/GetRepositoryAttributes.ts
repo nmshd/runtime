@@ -1,7 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController } from "@nmshd/consumption";
+import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { LocalAttributeDTO } from "../../../types";
 import { SchemaRepository, SchemaValidator, UseCase, flattenObject } from "../../common";
 import { AttributeMapper } from "./AttributeMapper";
 import { GetAttributesRequestQuery, GetAttributesUseCase } from "./GetAttributes";
@@ -17,9 +17,8 @@ export interface GetRepositoryAttributesRequest {
 export interface GetRepositoryAttributesRequestQuery {
     createdAt?: string;
     isDefault?: string;
+    wasViewedAt?: string | string[];
     "content.tags"?: string | string[];
-    "content.validFrom"?: string | string[];
-    "content.validTo"?: string | string[];
     "content.value.@type"?: string | string[];
 }
 

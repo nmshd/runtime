@@ -65,6 +65,7 @@ describe("PeerAttributeDVO", () => {
         expect(dvo.valueType).toBe(rPeerSharedIdentityAttribute.content.value["@type"]);
         expect(dvo.deletionStatus).toBe(rPeerSharedIdentityAttribute.deletionInfo?.deletionStatus);
         expect(dvo.deletionDate).toBe(rPeerSharedIdentityAttribute.deletionInfo?.deletionDate);
+        expect(dvo.wasViewedAt).toBeUndefined();
     });
 
     test("check the Sex", async () => {
@@ -113,6 +114,7 @@ describe("PeerAttributeDVO", () => {
         expect(dvo.valueType).toBe(rPeerSharedIdentityAttribute.content.value["@type"]);
         expect(dvo.deletionStatus).toBe(rPeerSharedIdentityAttribute.deletionInfo?.deletionStatus);
         expect(dvo.deletionDate).toBe(rPeerSharedIdentityAttribute.deletionInfo?.deletionDate);
+        expect(dvo.wasViewedAt).toBeUndefined();
     });
 
     test("check the Nationality", async () => {
@@ -161,6 +163,7 @@ describe("PeerAttributeDVO", () => {
         expect(dvo.valueType).toBe(rPeerSharedIdentityAttribute.content.value["@type"]);
         expect(dvo.deletionStatus).toBe(rPeerSharedIdentityAttribute.deletionInfo?.deletionStatus);
         expect(dvo.deletionDate).toBe(rPeerSharedIdentityAttribute.deletionInfo?.deletionDate);
+        expect(dvo.wasViewedAt).toBeUndefined();
     });
 
     test("check the CommunicationLanguage", async () => {
@@ -210,5 +213,6 @@ describe("PeerAttributeDVO", () => {
         expect(dvo.valueType).toBe(rPeerSharedIdentityAttribute.content.value["@type"]);
         expect(dvo.deletionStatus).toBe(rPeerSharedIdentityAttribute.deletionInfo?.deletionStatus);
         expect(dvo.deletionDate).toBe(rPeerSharedIdentityAttribute.deletionInfo?.deletionDate);
+        expect(dvo.wasViewedAt).toBeUndefined();
     });
 });

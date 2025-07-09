@@ -1,14 +1,21 @@
-import { type } from "@js-soft/ts-serval";
+import { serialize, type, validate } from "@js-soft/ts-serval";
 import { IRequestItem, RequestItem, RequestItemJSON } from "../../RequestItem";
 
 export interface AuthenticationRequestItemJSON extends RequestItemJSON {
     "@type": "AuthenticationRequestItem";
+    title: string;
 }
 
-export interface IAuthenticationRequestItem extends IRequestItem {}
+export interface IAuthenticationRequestItem extends IRequestItem {
+    title: string;
+}
 
 @type("AuthenticationRequestItem")
 export class AuthenticationRequestItem extends RequestItem implements IAuthenticationRequestItem {
+    @serialize()
+    @validate({ max: 200 })
+    public title: string;
+
     public static from(value: IAuthenticationRequestItem | Omit<AuthenticationRequestItemJSON, "@type"> | AuthenticationRequestItemJSON): AuthenticationRequestItem {
         return this.fromAny(value);
     }

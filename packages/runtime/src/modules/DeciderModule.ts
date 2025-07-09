@@ -2,6 +2,7 @@ import { ApplicationError } from "@js-soft/ts-utils";
 import { LocalRequestStatus } from "@nmshd/consumption";
 import { isRequestItemDerivation, RequestItemGroupJSON, RequestItemJSONDerivations } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
+import { LocalRequestDTO } from "@nmshd/runtime-types";
 import {
     IncomingRequestStatusChangedEvent,
     MessageProcessedEvent,
@@ -11,12 +12,10 @@ import {
 } from "../events";
 import { ModuleConfiguration, RuntimeModule } from "../extensibility";
 import { RuntimeServices } from "../Runtime";
-import { LocalRequestDTO } from "../types";
 import { RuntimeErrors } from "../useCases/common/RuntimeErrors";
 import {
     isAcceptResponseConfig,
     isDeleteAttributeAcceptResponseConfig,
-    isFreeTextAcceptResponseConfig,
     isGeneralRequestConfig,
     isProposeAttributeWithNewAttributeAcceptResponseConfig,
     isReadAttributeWithNewAttributeAcceptResponseConfig,
@@ -59,8 +58,6 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         switch (requestConfig["content.item.@type"]) {
             case "DeleteAttributeRequestItem":
                 return isDeleteAttributeAcceptResponseConfig(responseConfig);
-            case "FreeTextRequestItem":
-                return isFreeTextAcceptResponseConfig(responseConfig);
             case "ProposeAttributeRequestItem":
                 return isProposeAttributeWithNewAttributeAcceptResponseConfig(responseConfig);
             case "ReadAttributeRequestItem":
@@ -124,7 +121,9 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
             );
 
             decideRequestItemParameters = updatedRequestItemParameters;
-            if (!containsItem(decideRequestItemParameters, (element) => element === undefined)) {
+
+            const allItemsAutomaticallyDecided = !containsItem(decideRequestItemParameters, (element) => element === undefined);
+            if (allItemsAutomaticallyDecided) {
                 const decideRequestResult = await this.decideRequest(event, decideRequestItemParameters);
                 return decideRequestResult;
             }
@@ -138,25 +137,38 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         const services = await this.runtime.getServices(event.eventTargetAddress);
         const request = event.data.request;
 
-        if (!containsItem(decideRequestItemParameters, isAcceptResponseConfig)) {
-            const canRejectResult = await services.consumptionServices.incomingRequests.canReject({ requestId: request.id, items: decideRequestItemParameters.items });
-            if (canRejectResult.isError) {
-                this.logger.error(`Can not reject Request ${request.id}`, canRejectResult.value.code, canRejectResult.error);
-                return { wasDecided: false };
-            } else if (!canRejectResult.value.isSuccess) {
-                this.logger.warn(`Can not reject Request ${request.id}`, canRejectResult.value.code, canRejectResult.value.message);
-                return { wasDecided: false };
-            }
-
-            const rejectResult = await services.consumptionServices.incomingRequests.reject({ requestId: request.id, items: decideRequestItemParameters.items });
-            if (rejectResult.isError) {
-                this.logger.error(`An error occured trying to reject Request ${request.id}`, rejectResult.error);
-                return { wasDecided: false };
-            }
-
-            return { wasDecided: true };
+        const allItemsRejected = !containsItem(decideRequestItemParameters, isAcceptResponseConfig);
+        if (allItemsRejected) {
+            return await this.rejectRequest(services, request, decideRequestItemParameters);
         }
 
+        return await this.acceptRequest(services, request, decideRequestItemParameters);
+    }
+
+    private async rejectRequest(services: RuntimeServices, request: LocalRequestDTO, decideRequestItemParameters: { items: any[] }): Promise<{ wasDecided: boolean }> {
+        const canRejectResult = await services.consumptionServices.incomingRequests.canReject({ requestId: request.id, items: decideRequestItemParameters.items });
+        if (canRejectResult.isError) {
+            this.logger.error(`Can not reject Request ${request.id}`, canRejectResult.value.code, canRejectResult.error);
+            return { wasDecided: false };
+        } else if (!canRejectResult.value.isSuccess) {
+            this.logger.warn(`Can not reject Request ${request.id}`, canRejectResult.value.code, canRejectResult.value.message);
+            return { wasDecided: false };
+        }
+
+        const rejectResult = await services.consumptionServices.incomingRequests.reject({
+            requestId: request.id,
+            items: decideRequestItemParameters.items,
+            decidedByAutomation: true
+        });
+        if (rejectResult.isError) {
+            this.logger.error(`An error occured trying to reject Request ${request.id}`, rejectResult.error);
+            return { wasDecided: false };
+        }
+
+        return { wasDecided: true };
+    }
+
+    private async acceptRequest(services: RuntimeServices, request: LocalRequestDTO, decideRequestItemParameters: { items: any[] }): Promise<{ wasDecided: boolean }> {
         const canAcceptResult = await services.consumptionServices.incomingRequests.canAccept({ requestId: request.id, items: decideRequestItemParameters.items });
         if (canAcceptResult.isError) {
             this.logger.error(`Can not accept Request ${request.id}.`, canAcceptResult.error);
@@ -166,7 +178,11 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
             return { wasDecided: false };
         }
 
-        const acceptResult = await services.consumptionServices.incomingRequests.accept({ requestId: request.id, items: decideRequestItemParameters.items });
+        const acceptResult = await services.consumptionServices.incomingRequests.accept({
+            requestId: request.id,
+            items: decideRequestItemParameters.items,
+            decidedByAutomation: true
+        });
         if (acceptResult.isError) {
             this.logger.error(`An error occured trying to accept Request ${request.id}`, acceptResult.error);
             return { wasDecided: false };
@@ -239,10 +255,6 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
                 break;
         }
     }
-
-    public stop(): void {
-        this.unsubscribeFromAllEvents();
-    }
 }
 
 function containsItem(objectWithItems: { items: any[] }, callback: (element: any) => boolean): boolean {
@@ -306,9 +318,10 @@ async function checkCompatibility(
 
     for (const property in requestConfigElement) {
         const unformattedRequestConfigProperty = requestConfigElement[property as keyof RequestConfig];
-        if (typeof unformattedRequestConfigProperty === "undefined") {
+        if (unformattedRequestConfigProperty === undefined) {
             continue;
         }
+
         const requestConfigProperty = makeObjectsToStrings(unformattedRequestConfigProperty);
 
         if (property === "relationshipAlreadyExists") {
@@ -325,7 +338,7 @@ async function checkCompatibility(
         }
 
         const unformattedRequestProperty = getNestedProperty(requestOrRequestItem, property);
-        if (typeof unformattedRequestProperty === "undefined") {
+        if (unformattedRequestProperty === undefined) {
             compatible = false;
             break;
         }
@@ -337,7 +350,7 @@ async function checkCompatibility(
             continue;
         }
 
-        if (property.endsWith("At") || property.endsWith("From") || property.endsWith("To")) {
+        if (property.endsWith("At")) {
             compatible &&= checkDatesCompatibility(requestConfigProperty, requestProperty);
             if (!compatible) break;
             continue;
@@ -421,13 +434,7 @@ async function checkRequestItemCompatibilityAndApplyResponseConfig(
             }
 
             if (isGeneralRequestConfig(requestConfigElement) && responseConfigElement.accept) {
-                const requestItemsWithSimpleAccept = [
-                    "AuthenticationRequestItem",
-                    "ConsentRequestItem",
-                    "CreateAttributeRequestItem",
-                    "RegisterAttributeListenerRequestItem",
-                    "ShareAttributeRequestItem"
-                ];
+                const requestItemsWithSimpleAccept = ["AuthenticationRequestItem", "ConsentRequestItem", "CreateAttributeRequestItem", "ShareAttributeRequestItem"];
                 if (!requestItemsWithSimpleAccept.includes(item["@type"])) continue;
             }
 

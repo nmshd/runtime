@@ -1,13 +1,14 @@
 import { QueryTranslator } from "@js-soft/docdb-querytranslator";
 import { Result } from "@js-soft/ts-utils";
+import { MessageDTO, RecipientDTO } from "@nmshd/runtime-types";
 import { CachedMessage, CachedMessageRecipient, Message, MessageController, MessageEnvelopeRecipient } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { nameof } from "ts-simple-nameof";
-import { MessageDTO, RecipientDTO } from "../../../types";
 import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { MessageMapper } from "./MessageMapper";
 
 export interface GetMessagesQuery {
+    isOwn?: string;
     createdBy?: string | string[];
     createdByDevice?: string | string[];
     createdAt?: string | string[];
@@ -34,6 +35,7 @@ class Validator extends SchemaValidator<GetMessagesRequest> {
 export class GetMessagesUseCase extends UseCase<GetMessagesRequest, MessageDTO[]> {
     private static readonly queryTranslator = new QueryTranslator({
         whitelist: {
+            [nameof<MessageDTO>((m) => m.isOwn)]: true,
             [nameof<MessageDTO>((m) => m.createdBy)]: true,
             [nameof<MessageDTO>((m) => m.createdByDevice)]: true,
             [nameof<MessageDTO>((m) => m.createdAt)]: true,
@@ -48,6 +50,7 @@ export class GetMessagesUseCase extends UseCase<GetMessagesRequest, MessageDTO[]
         },
 
         alias: {
+            [nameof<MessageDTO>((m) => m.isOwn)]: nameof<Message>((m) => m.isOwn),
             [nameof<MessageDTO>((m) => m.createdBy)]: `${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.createdBy)}`,
             [nameof<MessageDTO>((m) => m.createdByDevice)]: `${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.createdByDevice)}`,
             [nameof<MessageDTO>((m) => m.createdAt)]: `${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.createdAt)}`,
@@ -88,7 +91,7 @@ export class GetMessagesUseCase extends UseCase<GetMessagesRequest, MessageDTO[]
                         switch (parsed.field) {
                             case "$containsAny":
                             case "$containsNone":
-                                participantQuery[parsed.field] = participantQuery[parsed.field] || [];
+                                participantQuery[parsed.field] = participantQuery[parsed.field] ?? [];
                                 participantQuery[parsed.field].push(parsed.value);
                                 break;
                             default:

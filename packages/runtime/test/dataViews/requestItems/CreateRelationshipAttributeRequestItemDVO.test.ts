@@ -1,13 +1,11 @@
 import { DecideRequestItemParametersJSON } from "@nmshd/consumption";
 import { AbstractStringJSON, ProprietaryStringJSON, RelationshipAttributeConfidentiality } from "@nmshd/content";
-import { CoreId } from "@nmshd/core-types";
 import {
     ConsumptionServices,
     CreateAttributeAcceptResponseItemDVO,
     CreateAttributeRequestItemDVO,
     CreateOutgoingRequestRequest,
     DataViewExpander,
-    DecidableCreateAttributeRequestItemDVO,
     IncomingRequestStatusChangedEvent,
     LocalRequestStatus,
     OutgoingRequestStatusChangedEvent,
@@ -15,6 +13,7 @@ import {
     TransportServices
 } from "../../../src";
 import {
+    cleanupAttributes,
     establishRelationship,
     exchangeAndAcceptRequestByMessage,
     exchangeMessageWithRequest,
@@ -87,30 +86,14 @@ beforeAll(async () => {
 afterAll(() => serviceProvider.stop());
 
 beforeEach(async () => {
+    await Promise.all([sEventBus.waitForRunningEventHandlers(), rEventBus.waitForRunningEventHandlers()]);
+
     rEventBus.reset();
     sEventBus.reset();
-
-    await cleanupAttributes();
+    await cleanupAttributes([sRuntimeServices, rRuntimeServices]);
 });
 
-async function cleanupAttributes() {
-    await Promise.all(
-        [sRuntimeServices, rRuntimeServices].map(async (services) => {
-            const servicesAttributeController = services.consumption.attributes["getAttributeUseCase"]["attributeController"];
-
-            const servicesAttributesResult = await services.consumption.attributes.getAttributes({});
-            for (const attribute of servicesAttributesResult.value) {
-                await servicesAttributeController.deleteAttributeUnsafe(CoreId.from(attribute.id));
-            }
-        })
-    );
-}
-
 describe("CreateRelationshipAttributeRequestItemDVO", () => {
-    afterEach(async () => {
-        await cleanupAttributes();
-    });
-
     test("check the MessageDVO for the sender", async () => {
         const senderMessage = await sendMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
         await syncUntilHasMessageWithRequest(rTransportServices, senderMessage.content.id!);
@@ -161,8 +144,8 @@ describe("CreateRelationshipAttributeRequestItemDVO", () => {
         expect(dvo.request.content.type).toBe("RequestDVO");
         expect(dvo.request.content.items).toHaveLength(1);
         expect(dvo.request.isDecidable).toBe(true);
-        const requestItemDVO = dvo.request.content.items[0] as DecidableCreateAttributeRequestItemDVO;
-        expect(requestItemDVO.type).toBe("DecidableCreateAttributeRequestItemDVO");
+        const requestItemDVO = dvo.request.content.items[0] as CreateAttributeRequestItemDVO;
+        expect(requestItemDVO.type).toBe("CreateAttributeRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(true);
         expect(requestItemDVO.attribute.type).toBe("DraftRelationshipAttributeDVO");
         const value = requestItemDVO.attribute.value as AbstractStringJSON;
@@ -242,11 +225,9 @@ describe("CreateRelationshipAttributeRequestItemDVO", () => {
     });
 
     test("check the sender's dvo for the recipient", async () => {
-        const baselineNumberOfItems = (await rExpander.expandAddress(sAddress)).items!.length;
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
         const dvo = await rExpander.expandAddress(senderMessage.createdBy);
-        const numberOfItems = dvo.items!.length;
-        expect(numberOfItems - baselineNumberOfItems).toBe(1);
+        expect(dvo.items).toHaveLength(1);
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {

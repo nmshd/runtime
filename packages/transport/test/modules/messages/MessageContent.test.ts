@@ -14,11 +14,11 @@ describe("MessageContent", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 3);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 3);
 
         recipient1 = accounts[0];
         recipient2 = accounts[1];
@@ -88,8 +88,8 @@ describe("MessageContent", function () {
     describe("Mail", function () {
         test("should send the message", async function () {
             const value = Mail.from({
-                body: "Test",
-                subject: "Test Subject",
+                body: "aBody",
+                subject: "aSubject",
                 to: [recipient1.identity.address]
             });
             const message = await TestUtil.sendMessage(sender, recipient1, value);
@@ -103,8 +103,8 @@ describe("MessageContent", function () {
             const message = messages[1];
             expect(message.cache!.content).toBeInstanceOf(Mail);
             const content = message.cache!.content as Mail;
-            expect(content.body).toBe("Test");
-            expect(content.subject).toBe("Test Subject");
+            expect(content.body).toBe("aBody");
+            expect(content.subject).toBe("aSubject");
             expect(content.to).toBeInstanceOf(Array);
             expect(content.to[0]).toBeInstanceOf(CoreAddress);
             expect(content.to[0].toString()).toBe(recipient1.identity.address.toString());
@@ -117,8 +117,8 @@ describe("MessageContent", function () {
             expect(messages).toHaveLength(2);
             const message = messages[1];
             const content = message.cache!.content as Mail;
-            expect(content.body).toBe("Test");
-            expect(content.subject).toBe("Test Subject");
+            expect(content.body).toBe("aBody");
+            expect(content.subject).toBe("aSubject");
             expect(content.to).toBeInstanceOf(Array);
             expect(content.to[0]).toBeInstanceOf(CoreAddress);
             expect(content.to[0].toString()).toBe(recipient1.identity.address.toString());
@@ -152,7 +152,7 @@ class Mail extends Serializable implements IMail {
     public body: string;
 
     protected static override preFrom(value: any): any {
-        if (!value.cc) value.cc = [];
+        value.cc ??= [];
 
         if (!value.body && value.content) {
             value.body = value.content;

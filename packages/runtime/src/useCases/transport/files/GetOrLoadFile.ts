@@ -1,17 +1,26 @@
 import { Result } from "@js-soft/ts-utils";
-import { CoreId } from "@nmshd/core-types";
+import { CoreId, FileReference, Reference } from "@nmshd/core-types";
 import { CryptoSecretKey } from "@nmshd/crypto";
-import { AccountController, FileController, Token, TokenContentFile, TokenController } from "@nmshd/transport";
+import { FileDTO } from "@nmshd/runtime-types";
+import { AccountController, BackboneIds, FileController, Token, TokenContentFile, TokenController, TokenReference } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { FileDTO } from "../../../types";
-import { Base64ForIdPrefix, FileReferenceString, RuntimeErrors, SchemaRepository, SchemaValidator, TokenReferenceString, UseCase } from "../../common";
+import {
+    FileReferenceString,
+    RuntimeErrors,
+    SchemaRepository,
+    SchemaValidator,
+    TokenReferenceString,
+    URLFileReferenceString,
+    URLTokenReferenceString,
+    UseCase
+} from "../../common";
 import { FileMapper } from "./FileMapper";
 
 /**
  * @errorMessage token / file reference invalid
  */
 export interface GetOrLoadFileRequest {
-    reference: TokenReferenceString | FileReferenceString;
+    reference: TokenReferenceString | FileReferenceString | URLTokenReferenceString | URLFileReferenceString;
     password?: string;
 }
 
@@ -39,25 +48,27 @@ export class GetOrLoadFileUseCase extends UseCase<GetOrLoadFileRequest, FileDTO>
         return result;
     }
 
-    private async loadFileFromReference(reference: string, password?: string): Promise<Result<FileDTO>> {
-        if (reference.startsWith(Base64ForIdPrefix.File)) {
-            return await this.loadFileFromFileReference(reference);
+    private async loadFileFromReference(referenceString: string, password?: string): Promise<Result<FileDTO>> {
+        const reference = Reference.from(referenceString);
+
+        if (BackboneIds.file.validate(reference.id)) {
+            return await this.loadFileFromFileReference(FileReference.from(reference));
         }
 
-        if (reference.startsWith(Base64ForIdPrefix.Token)) {
-            return await this.loadFileFromTokenReference(reference, password);
+        if (BackboneIds.token.validate(reference.id)) {
+            return await this.loadFileFromTokenReference(TokenReference.from(reference), password);
         }
 
-        throw RuntimeErrors.files.invalidReference(reference);
+        throw RuntimeErrors.general.invalidReference();
     }
 
-    private async loadFileFromFileReference(truncatedReference: string): Promise<Result<FileDTO>> {
-        const file = await this.fileController.getOrLoadFileByTruncated(truncatedReference);
+    private async loadFileFromFileReference(reference: FileReference): Promise<Result<FileDTO>> {
+        const file = await this.fileController.getOrLoadFileByReference(reference);
         return Result.ok(FileMapper.toFileDTO(file));
     }
 
-    private async loadFileFromTokenReference(truncatedReference: string, password?: string): Promise<Result<FileDTO>> {
-        const token = await this.tokenController.loadPeerTokenByTruncated(truncatedReference, true, password);
+    private async loadFileFromTokenReference(reference: TokenReference, password?: string): Promise<Result<FileDTO>> {
+        const token = await this.tokenController.loadPeerTokenByReference(TokenReference.from(reference), true, password);
 
         if (!token.cache) {
             throw RuntimeErrors.general.cacheEmpty(Token, token.id.toString());

@@ -3,6 +3,7 @@ import {
     AttributeSuccessionAcceptResponseItem,
     IdentityAttribute,
     IdentityAttributeQuery,
+    IQLQuery,
     ProposeAttributeAcceptResponseItem,
     ProposeAttributeRequestItem,
     RejectResponseItem,
@@ -15,23 +16,24 @@ import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { TransportCoreErrors } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { AttributeSuccessorParams, LocalAttributeDeletionStatus, LocalAttributeShareInfo, PeerSharedAttributeSucceededEvent } from "../../../attributes";
+import { AttributeSuccessorParams, IAttributeSuccessorParams, LocalAttributeDeletionStatus, LocalAttributeShareInfo, PeerSharedAttributeSucceededEvent } from "../../../attributes";
 import { LocalAttribute } from "../../../attributes/local/LocalAttribute";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 import { LocalRequestInfo } from "../IRequestItemProcessor";
+import createAppropriateResponseItem from "../utility/createAppropriateResponseItem";
 import validateAttributeMatchesWithQuery from "../utility/validateAttributeMatchesWithQuery";
 import validateQuery from "../utility/validateQuery";
 import { AcceptProposeAttributeRequestItemParameters, AcceptProposeAttributeRequestItemParametersJSON } from "./AcceptProposeAttributeRequestItemParameters";
 
 export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProcessor<ProposeAttributeRequestItem, AcceptProposeAttributeRequestItemParametersJSON> {
     public override async canCreateOutgoingRequestItem(requestItem: ProposeAttributeRequestItem, _request: Request, recipient?: CoreAddress): Promise<ValidationResult> {
-        const queryValidationResult = this.validateQuery(requestItem, recipient);
+        const queryValidationResult = await this.validateQuery(requestItem, recipient);
         if (queryValidationResult.isError()) {
             return queryValidationResult;
         }
 
-        const attributeValidationResult = ProposeAttributeRequestItemProcessor.validateAttribute(requestItem.attribute);
+        const attributeValidationResult = await this.validateAttribute(requestItem.attribute);
         if (attributeValidationResult.isError()) {
             return attributeValidationResult;
         }
@@ -46,7 +48,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             return proposedAttributeMatchesWithQueryValidationResult;
         }
 
-        if (requestItem.query instanceof RelationshipAttributeQuery && typeof recipient !== "undefined") {
+        if (requestItem.query instanceof RelationshipAttributeQuery && recipient) {
             const relationshipAttributesWithSameKey = await this.consumptionController.attributes.getRelationshipAttributesOfValueTypeToPeerWithGivenKeyAndOwner(
                 requestItem.query.key,
                 recipient,
@@ -66,7 +68,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
         return ValidationResult.success();
     }
 
-    private static validateAttribute(attribute: IdentityAttribute | RelationshipAttribute) {
+    private async validateAttribute(attribute: IdentityAttribute | RelationshipAttribute) {
         if (attribute.owner.toString() !== "") {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidRequestItem(
@@ -74,11 +76,19 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
                 )
             );
         }
+        if (!this.consumptionController.attributes.validateAttributeCharacters(attribute)) {
+            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("The Attribute contains forbidden characters."));
+        }
+
+        const tagValidationResult = await this.consumptionController.attributes.validateTagsOfAttribute(attribute);
+        if (tagValidationResult.isError()) {
+            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem(tagValidationResult.error.message));
+        }
 
         return ValidationResult.success();
     }
 
-    private validateQuery(requestItem: ProposeAttributeRequestItem, recipient?: CoreAddress) {
+    private async validateQuery(requestItem: ProposeAttributeRequestItem, recipient?: CoreAddress) {
         const commonQueryValidationResult = validateQuery(requestItem.query, this.currentIdentityAddress, recipient);
         if (commonQueryValidationResult.isError()) {
             return commonQueryValidationResult;
@@ -90,6 +100,11 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
                     "The owner of the given `query` can only be an empty string. This is because you can only propose Attributes where the Recipient of the Request is the owner anyway. And in order to avoid mistakes, the owner will be automatically filled for you."
                 )
             );
+        }
+
+        const tagValidationResult = await this.consumptionController.attributes.validateAttributeQueryTags(requestItem.query);
+        if (tagValidationResult.isError()) {
+            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem(tagValidationResult.error.message));
         }
 
         return ValidationResult.success();
@@ -118,7 +133,11 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
 
             attribute = foundLocalAttribute.content;
 
-            if (requestItem.query instanceof IdentityAttributeQuery && attribute instanceof IdentityAttribute && this.accountController.identity.isMe(attribute.owner)) {
+            if (
+                (requestItem.query instanceof IdentityAttributeQuery || requestItem.query instanceof IQLQuery) &&
+                attribute instanceof IdentityAttribute &&
+                this.accountController.identity.isMe(attribute.owner)
+            ) {
                 if (foundLocalAttribute.isShared()) {
                     return ValidationResult.error(
                         ConsumptionCoreErrors.requests.attributeQueryMismatch(
@@ -151,6 +170,10 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
                         )
                     );
                 }
+
+                if (parsedParams.tags && parsedParams.tags.length > 0) {
+                    attribute.tags = attribute.tags ? [...attribute.tags, ...parsedParams.tags] : parsedParams.tags;
+                }
             }
         } else if (parsedParams.isWithNewAttribute()) {
             attribute = parsedParams.attribute;
@@ -161,7 +184,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             }
         }
 
-        if (typeof attribute === "undefined") {
+        if (attribute === undefined) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidAcceptParameters(
                     `You have to specify either ${nameof<AcceptProposeAttributeRequestItemParameters>(
@@ -169,6 +192,10 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
                     )} or ${nameof<AcceptProposeAttributeRequestItemParameters>((x) => x.attributeId)}.`
                 )
             );
+        }
+
+        if (!this.consumptionController.attributes.validateAttributeCharacters(attribute)) {
+            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters("The Attribute contains forbidden characters."));
         }
 
         const answerToQueryValidationResult = validateAttributeMatchesWithQuery(requestItem.query, attribute, this.currentIdentityAddress, requestInfo.peer);
@@ -197,6 +224,11 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             }
         }
 
+        const tagValidationResult = await this.consumptionController.attributes.validateTagsOfAttribute(attribute);
+        if (tagValidationResult.isError()) {
+            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidAcceptParameters(tagValidationResult.error.message));
+        }
+
         return ValidationResult.success();
     }
 
@@ -209,21 +241,37 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
         let sharedLocalAttribute;
 
         if (parsedParams.isWithExistingAttribute()) {
-            const existingSourceAttribute = await this.consumptionController.attributes.getLocalAttribute(parsedParams.attributeId);
+            let existingSourceAttribute = await this.consumptionController.attributes.getLocalAttribute(parsedParams.attributeId);
             if (!existingSourceAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, parsedParams.attributeId.toString());
 
-            const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfAttribute(parsedParams.attributeId, [requestInfo.peer], true);
+            if (parsedParams.tags && parsedParams.tags.length > 0 && existingSourceAttribute.content instanceof IdentityAttribute) {
+                const mergedTags = existingSourceAttribute.content.tags ? [...existingSourceAttribute.content.tags, ...parsedParams.tags] : parsedParams.tags;
+                existingSourceAttribute.content.tags = mergedTags;
+
+                const successorParams: IAttributeSuccessorParams = {
+                    content: existingSourceAttribute.content
+                };
+                const attributesAfterSuccession = await this.consumptionController.attributes.succeedRepositoryAttribute(parsedParams.attributeId, successorParams);
+                existingSourceAttribute = attributesAfterSuccession.successor;
+            }
+
+            const query = {
+                "deletionInfo.deletionStatus": {
+                    $nin: [
+                        LocalAttributeDeletionStatus.DeletedByPeer,
+                        LocalAttributeDeletionStatus.DeletedByOwner,
+                        LocalAttributeDeletionStatus.ToBeDeletedByPeer,
+                        LocalAttributeDeletionStatus.ToBeDeleted
+                    ]
+                }
+            };
+            const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfAttribute(parsedParams.attributeId, [requestInfo.peer], true, query);
 
             const wasSharedBefore = latestSharedVersion.length > 0;
-            const wasDeletedByPeerOrOwner =
-                latestSharedVersion[0]?.deletionInfo?.deletionStatus === LocalAttributeDeletionStatus.DeletedByPeer ||
-                latestSharedVersion[0]?.deletionInfo?.deletionStatus === LocalAttributeDeletionStatus.DeletedByOwner ||
-                latestSharedVersion[0]?.deletionInfo?.deletionStatus === LocalAttributeDeletionStatus.ToBeDeletedByPeer ||
-                latestSharedVersion[0]?.deletionInfo?.deletionStatus === LocalAttributeDeletionStatus.ToBeDeleted;
             const isLatestSharedVersion = latestSharedVersion[0]?.shareInfo?.sourceAttribute?.toString() === existingSourceAttribute.id.toString();
             const predecessorWasSharedBefore = wasSharedBefore && !isLatestSharedVersion;
 
-            if (!wasSharedBefore || wasDeletedByPeerOrOwner) {
+            if (!wasSharedBefore) {
                 sharedLocalAttribute = await this.consumptionController.attributes.createSharedLocalAttributeCopy({
                     sourceAttributeId: CoreId.from(existingSourceAttribute.id),
                     peer: CoreAddress.from(requestInfo.peer),
@@ -251,74 +299,52 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
                     );
                 }
 
-                const predecessorSourceAttribute = await this.consumptionController.attributes.getLocalAttribute(sharedPredecessor.shareInfo.sourceAttribute);
-                if (!predecessorSourceAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, sharedPredecessor.shareInfo.sourceAttribute.toString());
-
-                if (await this.consumptionController.attributes.isSubsequentInSuccession(predecessorSourceAttribute, existingSourceAttribute)) {
-                    if (existingSourceAttribute.isRepositoryAttribute(this.currentIdentityAddress)) {
-                        const successorSharedAttribute = await this.performOwnSharedIdentityAttributeSuccession(sharedPredecessor.id, existingSourceAttribute, requestInfo);
-                        return AttributeSuccessionAcceptResponseItem.from({
-                            result: ResponseItemResult.Accepted,
-                            successorId: successorSharedAttribute.id,
-                            successorContent: successorSharedAttribute.content,
-                            predecessorId: sharedPredecessor.id
-                        });
-                    }
+                if (existingSourceAttribute.isRepositoryAttribute(this.currentIdentityAddress)) {
+                    const successorParams = {
+                        content: existingSourceAttribute.content,
+                        shareInfo: LocalAttributeShareInfo.from({
+                            peer: requestInfo.peer,
+                            requestReference: requestInfo.id,
+                            sourceAttribute: existingSourceAttribute.id
+                        })
+                    };
+                    const successorSharedAttribute = (await this.consumptionController.attributes.succeedOwnSharedIdentityAttribute(sharedPredecessor.id, successorParams))
+                        .successor;
+                    return AttributeSuccessionAcceptResponseItem.from({
+                        result: ResponseItemResult.Accepted,
+                        successorId: successorSharedAttribute.id,
+                        successorContent: successorSharedAttribute.content,
+                        predecessorId: sharedPredecessor.id
+                    });
                 }
             }
         } else if (parsedParams.isWithNewAttribute()) {
             if (parsedParams.attribute.owner.equals("")) {
                 parsedParams.attribute.owner = this.currentIdentityAddress;
             }
-            sharedLocalAttribute = await this.createNewAttribute(parsedParams.attribute, requestInfo);
+
+            if (parsedParams.attribute instanceof RelationshipAttribute) {
+                const ownSharedRelationshipAttribute = await this.consumptionController.attributes.createSharedLocalAttribute({
+                    content: parsedParams.attribute,
+                    peer: requestInfo.peer,
+                    requestReference: CoreId.from(requestInfo.id)
+                });
+
+                return ProposeAttributeAcceptResponseItem.from({
+                    result: ResponseItemResult.Accepted,
+                    attributeId: ownSharedRelationshipAttribute.id,
+                    attribute: ownSharedRelationshipAttribute.content
+                });
+            }
+
+            return await createAppropriateResponseItem(parsedParams.attribute, requestInfo, this.consumptionController.attributes, "Propose");
         }
 
-        if (!sharedLocalAttribute) {
-            throw new Error(
-                `You have to specify either ${nameof<AcceptProposeAttributeRequestItemParameters>(
-                    (x) => x.attribute
-                )} or ${nameof<AcceptProposeAttributeRequestItemParameters>((x) => x.attributeId)}.`
-            );
-        }
-
-        return ProposeAttributeAcceptResponseItem.from({
-            result: ResponseItemResult.Accepted,
-            attributeId: sharedLocalAttribute.id,
-            attribute: sharedLocalAttribute.content
-        });
-    }
-
-    private async performOwnSharedIdentityAttributeSuccession(sharedPredecessorId: CoreId, sourceSuccessor: LocalAttribute, requestInfo: LocalRequestInfo) {
-        const successorParams = {
-            content: sourceSuccessor.content,
-            shareInfo: LocalAttributeShareInfo.from({
-                peer: requestInfo.peer,
-                requestReference: requestInfo.id,
-                sourceAttribute: sourceSuccessor.id
-            })
-        };
-        const { successor } = await this.consumptionController.attributes.succeedOwnSharedIdentityAttribute(sharedPredecessorId, successorParams);
-        return successor;
-    }
-
-    private async createNewAttribute(attribute: IdentityAttribute | RelationshipAttribute, requestInfo: LocalRequestInfo) {
-        if (attribute instanceof IdentityAttribute) {
-            const repositoryAttribute = await this.consumptionController.attributes.createRepositoryAttribute({
-                content: attribute
-            });
-
-            return await this.consumptionController.attributes.createSharedLocalAttributeCopy({
-                sourceAttributeId: CoreId.from(repositoryAttribute.id),
-                peer: CoreAddress.from(requestInfo.peer),
-                requestReference: CoreId.from(requestInfo.id)
-            });
-        }
-
-        return await this.consumptionController.attributes.createSharedLocalAttribute({
-            content: attribute,
-            peer: requestInfo.peer,
-            requestReference: CoreId.from(requestInfo.id)
-        });
+        throw new Error(
+            `You have to specify either ${nameof<AcceptProposeAttributeRequestItemParameters>(
+                (x) => x.attribute
+            )} or ${nameof<AcceptProposeAttributeRequestItemParameters>((x) => x.attributeId)}.`
+        );
     }
 
     public override async applyIncomingResponseItem(

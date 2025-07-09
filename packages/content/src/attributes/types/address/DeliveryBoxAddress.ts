@@ -1,7 +1,7 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
+import { COUNTRIES_ALPHA2_TO_ENGLISH_NAME } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
 import { AbstractAttributeValue } from "../../AbstractAttributeValue";
-import { COUNTRIES_ALPHA2_TO_ENGLISH_NAME } from "../../constants";
 import { RenderHints, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../../hints";
 import { IPhoneNumber, PhoneNumber } from "../communication";
 import { AbstractAddress, AbstractAddressJSON, IAbstractAddress } from "./AbstractAddress";
@@ -112,7 +112,7 @@ export class DeliveryBoxAddress extends AbstractAddress implements IDeliveryBoxA
             value.push(this.state.toString());
         }
         const countryName = COUNTRIES_ALPHA2_TO_ENGLISH_NAME.get(this.country.value);
-        value.push(countryName ? countryName : this.country.toString());
+        value.push(countryName ?? this.country.toString());
 
         return value.join("\n");
     }

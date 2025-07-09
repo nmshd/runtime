@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
+import { LocalRequestDTO, RequestValidationResultDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { LocalRequestDTO, RequestValidationResultDTO } from "../../../types";
 import {
     AcceptIncomingRequestRequest,
     AcceptIncomingRequestUseCase,
@@ -10,6 +10,8 @@ import {
     CheckPrerequisitesOfIncomingRequestUseCase,
     CompleteIncomingRequestRequest,
     CompleteIncomingRequestUseCase,
+    DeleteIncomingRequestRequest,
+    DeleteIncomingRequestUseCase,
     GetIncomingRequestRequest,
     GetIncomingRequestsRequest,
     GetIncomingRequestsUseCase,
@@ -33,7 +35,8 @@ export class IncomingRequestsFacade {
         @Inject private readonly rejectUseCase: RejectIncomingRequestUseCase,
         @Inject private readonly completeUseCase: CompleteIncomingRequestUseCase,
         @Inject private readonly getRequestUseCase: GetIncomingRequestUseCase,
-        @Inject private readonly getRequestsUseCase: GetIncomingRequestsUseCase
+        @Inject private readonly getRequestsUseCase: GetIncomingRequestsUseCase,
+        @Inject private readonly deleteUseCase: DeleteIncomingRequestUseCase
     ) {}
 
     public async received(request: ReceivedIncomingRequestRequest): Promise<Result<LocalRequestDTO>> {
@@ -74,5 +77,9 @@ export class IncomingRequestsFacade {
 
     public async getRequests(request: GetIncomingRequestsRequest): Promise<Result<LocalRequestDTO[]>> {
         return await this.getRequestsUseCase.execute(request);
+    }
+
+    public async delete(request: DeleteIncomingRequestRequest): Promise<Result<void>> {
+        return await this.deleteUseCase.execute(request);
     }
 }

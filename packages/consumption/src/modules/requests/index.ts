@@ -14,8 +14,8 @@ export * from "./itemProcessors/AbstractRequestItemProcessor";
 export * from "./itemProcessors/createAttribute/CreateAttributeRequestItemProcessor";
 export * from "./itemProcessors/deleteAttribute/AcceptDeleteAttributeRequestItemParameters";
 export * from "./itemProcessors/deleteAttribute/DeleteAttributeRequestItemProcessor";
-export * from "./itemProcessors/freeText/AcceptFreeTextRequestItemParameters";
-export * from "./itemProcessors/freeText/FreeTextRequestItemProcessor";
+export * from "./itemProcessors/formField/AcceptFormFieldRequestItemParameters";
+export * from "./itemProcessors/formField/FormFieldRequestItemProcessor";
 export * from "./itemProcessors/GenericRequestItemProcessor";
 export * from "./itemProcessors/IRequestItemProcessor";
 export * from "./itemProcessors/proposeAttribute/AcceptProposeAttributeRequestItemParameters";
@@ -26,11 +26,11 @@ export {
     AcceptReadAttributeRequestItemParametersWithNewAttributeJSON
 } from "./itemProcessors/readAttribute/AcceptReadAttributeRequestItemParameters";
 export * from "./itemProcessors/readAttribute/ReadAttributeRequestItemProcessor";
-export * from "./itemProcessors/registerAttributeListener/RegisterAttributeListenerRequestItemProcessor";
 export * from "./itemProcessors/RequestItemConstructor";
 export * from "./itemProcessors/RequestItemProcessorConstructor";
 export * from "./itemProcessors/RequestItemProcessorRegistry";
 export * from "./itemProcessors/shareAttribute/ShareAttributeRequestItemProcessor";
+export * from "./itemProcessors/transferFileOwnership/TransferFileOwnershipRequestItemProcessor";
 export * from "./local/LocalRequest";
 export * from "./local/LocalRequestStatus";
 export * from "./local/LocalRequestStatusLogEntry";

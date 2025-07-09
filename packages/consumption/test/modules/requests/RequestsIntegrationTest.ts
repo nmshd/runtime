@@ -17,8 +17,8 @@ import {
     ResponseItemResult,
     ResponseResult
 } from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId, ICoreId } from "@nmshd/core-types";
-import { CoreIdHelper, IConfigOverwrite, IMessage, IRelationshipTemplate, Message, Relationship, RelationshipTemplate, SynchronizedCollection, Transport } from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId, CoreIdHelper, ICoreId } from "@nmshd/core-types";
+import { IConfigOverwrite, IMessage, IRelationshipTemplate, Relationship, SynchronizedCollection, Transport } from "@nmshd/transport";
 import {
     ConsumptionController,
     ConsumptionIds,
@@ -75,7 +75,6 @@ export class RequestsTestsContext {
         const context = new RequestsTestsContext();
 
         const transport = await new Transport(
-            dbConnection,
             config,
             new EventEmitter2EventBus(() => {
                 // noop
@@ -85,7 +84,7 @@ export class RequestsTestsContext {
         const database = await dbConnection.getDatabase(`x${Math.random().toString(36).substring(7)}`);
         const collection = new SynchronizedCollection(await database.getCollection("Requests"), 0);
 
-        const account = (await TestUtil.provideAccounts(transport, 1))[0];
+        const account = (await TestUtil.provideAccounts(transport, dbConnection, 1))[0];
         context.consumptionController = account.consumptionController;
 
         const processorRegistry = new RequestItemProcessorRegistry(
@@ -772,15 +771,6 @@ export class RequestsWhen {
         this.context.localRequestAfterAction = await this.context.outgoingRequestsController.sent(sentParams);
     }
 
-    public async iCreateAnIncomingRequestWithSource(sourceObject: Message | RelationshipTemplate): Promise<void> {
-        const request = TestObjectFactory.createRequestWithOneItem();
-
-        this.context.localRequestAfterAction = await this.context.incomingRequestsController.received({
-            receivedRequest: request,
-            requestSourceObject: sourceObject
-        });
-    }
-
     public async iCreateAnIncomingRequestWith(params: Partial<IReceivedIncomingRequestParameters>): Promise<void> {
         params.receivedRequest ??= TestObjectFactory.createRequestWithOneItem();
         params.requestSourceObject ??= TestObjectFactory.createIncomingMessage(this.context.currentIdentity);
@@ -791,8 +781,8 @@ export class RequestsWhen {
         });
     }
 
-    public iTryToCreateAnIncomingRequestWith(params: { sourceObject: Message | RelationshipTemplate }): Promise<void> {
-        this.context.actionToTry = async () => await this.iCreateAnIncomingRequestWithSource(params.sourceObject);
+    public iTryToCreateAnIncomingRequestWith(params: Partial<IReceivedIncomingRequestParameters>): Promise<void> {
+        this.context.actionToTry = async () => await this.iCreateAnIncomingRequestWith(params);
         return Promise.resolve();
     }
 

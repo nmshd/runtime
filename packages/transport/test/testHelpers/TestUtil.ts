@@ -32,6 +32,7 @@ import {
     RelationshipTemplate,
     RequestError,
     TokenContentRelationshipTemplate,
+    TokenReference,
     Transport,
     TransportLoggerFactory
 } from "../../src";
@@ -157,12 +158,12 @@ export class TestUtil {
         return dbConnection;
     }
 
-    public static createTransport(connection: IDatabaseConnection, configOverwrite: Partial<IConfigOverwrite> = {}, correlator?: ICorrelator): Transport {
+    public static createTransport(configOverwrite: Partial<IConfigOverwrite> = {}, correlator?: ICorrelator): Transport {
         const eventBus = TestUtil.createEventBus();
 
         const config = TestUtil.createConfig();
 
-        return new Transport(connection, { ...config, ...configOverwrite }, eventBus, TestUtil.loggerFactory, correlator);
+        return new Transport({ ...config, ...configOverwrite }, eventBus, TestUtil.loggerFactory, correlator);
     }
 
     public static createEventBus(): EventEmitter2EventBus {
@@ -188,9 +189,9 @@ export class TestUtil {
         };
     }
 
-    public static async createAccount(transport: Transport, dependencyOverrides?: DependencyOverrides): Promise<AccountController> {
+    public static async createAccount(transport: Transport, connection: IDatabaseConnection, dependencyOverrides?: DependencyOverrides): Promise<AccountController> {
         const randomAccountName = Math.random().toString(36).substring(7);
-        const db = await transport.createDatabase(`acc-${randomAccountName}`);
+        const db = await connection.getDatabase(`acc-${randomAccountName}`);
 
         const accountController = new AccountController(transport, db, transport.config, dependencyOverrides);
 
@@ -200,10 +201,10 @@ export class TestUtil {
     }
 
     public static async createIdentityWithOneDevice(connection: IDatabaseConnection, config: Partial<IConfigOverwrite>): Promise<AccountController> {
-        const transport = TestUtil.createTransport(connection, config);
+        const transport = TestUtil.createTransport(config);
 
         await transport.init();
-        const deviceAccount = await TestUtil.createAccount(transport);
+        const deviceAccount = await TestUtil.createAccount(transport, connection);
         return deviceAccount;
     }
 
@@ -214,11 +215,11 @@ export class TestUtil {
         device1: AccountController;
         device2: AccountController;
     }> {
-        // Create Device1 Controller    transport = TestUtil.createTransport(connection);
-        const transport = TestUtil.createTransport(connection, config);
+        // Create Device1 Controller    transport = TestUtil.createTransport();
+        const transport = TestUtil.createTransport(config);
 
         await transport.init();
-        const device1Account = await TestUtil.createAccount(transport);
+        const device1Account = await TestUtil.createAccount(transport, connection);
 
         // Prepare Device2
         const device2 = await device1Account.devices.sendDevice({ name: "Device2" });
@@ -226,7 +227,7 @@ export class TestUtil {
         await device1Account.syncDatawallet();
 
         // Create Device2 Controller
-        const device2Account = await TestUtil.onboardDevice(transport, sharedSecret);
+        const device2Account = await TestUtil.onboardDevice(transport, connection, sharedSecret);
 
         await device1Account.syncEverything();
         await device2Account.syncEverything();
@@ -235,9 +236,9 @@ export class TestUtil {
     }
 
     public static async createIdentityWithNDevices(n: number, connection: IDatabaseConnection, config: Partial<IConfigOverwrite>): Promise<AccountController[]> {
-        const transport = TestUtil.createTransport(connection, config);
+        const transport = TestUtil.createTransport(config);
         await transport.init();
-        const device1Account = await TestUtil.createAccount(transport);
+        const device1Account = await TestUtil.createAccount(transport, connection);
 
         const devices = [device1Account];
 
@@ -247,7 +248,7 @@ export class TestUtil {
             await device1Account.syncDatawallet();
 
             // Create Device2 Controller
-            const device2Account = await TestUtil.onboardDevice(transport, sharedSecret);
+            const device2Account = await TestUtil.onboardDevice(transport, connection, sharedSecret);
 
             devices.push(device2Account);
         }
@@ -259,11 +260,11 @@ export class TestUtil {
         return devices;
     }
 
-    public static async provideAccounts(transport: Transport, count: number): Promise<AccountController[]> {
+    public static async provideAccounts(transport: Transport, connection: IDatabaseConnection, count: number): Promise<AccountController[]> {
         const accounts: AccountController[] = [];
 
         for (let i = 0; i < count; i++) {
-            accounts.push(await this.createAccount(transport));
+            accounts.push(await this.createAccount(transport, connection));
         }
 
         return accounts;
@@ -281,9 +282,9 @@ export class TestUtil {
         };
     }
 
-    public static async onboardDevice(transport: Transport, deviceSharedSecret: DeviceSharedSecret): Promise<AccountController> {
+    public static async onboardDevice(transport: Transport, connection: IDatabaseConnection, deviceSharedSecret: DeviceSharedSecret): Promise<AccountController> {
         const randomId = Math.random().toString(36).substring(7);
-        const db = await transport.createDatabase(`acc-${randomId}`);
+        const db = await connection.getDatabase(`acc-${randomId}`);
         const accountController = new AccountController(transport, db, transport.config);
         await accountController.init(deviceSharedSecret);
 
@@ -299,8 +300,8 @@ export class TestUtil {
             maxNumberOfAllocations: 1
         });
 
-        const templateReference = templateFrom.toRelationshipTemplateReference().truncate();
-        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(templateReference);
+        const templateReference = templateFrom.toRelationshipTemplateReference(from.config.baseUrl);
+        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByReference(templateReference);
 
         return templateTo;
     }
@@ -314,8 +315,8 @@ export class TestUtil {
             maxNumberOfAllocations: 1
         });
 
-        const reference = templateFrom.toRelationshipTemplateReference().truncate();
-        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(reference);
+        const reference = templateFrom.toRelationshipTemplateReference(from.config.baseUrl);
+        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByReference(reference);
 
         await to.relationships.sendRelationship({
             template: templateTo,
@@ -353,8 +354,8 @@ export class TestUtil {
                 maxNumberOfAllocations: 1
             }));
 
-        const templateReference = templateFrom.toRelationshipTemplateReference().truncate();
-        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByTruncated(templateReference);
+        const templateReference = templateFrom.toRelationshipTemplateReference(from.config.baseUrl);
+        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByReference(templateReference);
 
         await to.relationships.sendRelationship({
             template: templateTo,
@@ -416,7 +417,7 @@ export class TestUtil {
     ): Promise<{ revokedRelationshipFromSelf: Relationship; revokedRelationshipPeer: Relationship }> {
         const relationshipId = (await to.relationships.getRelationshipToIdentity(from.identity.address))!.id;
         const revokedRelationshipPeer = await to.relationships.revoke(relationshipId);
-        const revokedRelationshipFromSelf = (await TestUtil.syncUntil(from, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
+        const revokedRelationshipFromSelf = (await this.syncUntilHasRelationship(from, relationshipId))[0];
 
         return { revokedRelationshipFromSelf, revokedRelationshipPeer };
     }
@@ -427,7 +428,7 @@ export class TestUtil {
     ): Promise<{ terminatedRelationshipFromSelf: Relationship; terminatedRelationshipPeer: Relationship }> {
         const relationshipId = (await from.relationships.getRelationshipToIdentity(to.identity.address))!.id;
         const terminatedRelationshipFromSelf = await from.relationships.terminate(relationshipId);
-        const terminatedRelationshipPeer = (await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
+        const terminatedRelationshipPeer = (await this.syncUntilHasRelationship(to, relationshipId))[0];
 
         return { terminatedRelationshipFromSelf, terminatedRelationshipPeer };
     }
@@ -438,9 +439,9 @@ export class TestUtil {
     ): Promise<{ reactivatedRelationshipFromSelf: Relationship; reactivatedRelationshipPeer: Relationship }> {
         const relationshipId = (await from.relationships.getRelationshipToIdentity(to.identity.address))!.id;
         await from.relationships.requestReactivation(relationshipId);
-        await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0);
+        await this.syncUntilHasRelationship(to, relationshipId);
         const reactivatedRelationshipFromSelf = await to.relationships.acceptReactivation(relationshipId);
-        const reactivatedRelationshipPeer = (await TestUtil.syncUntil(from, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
+        const reactivatedRelationshipPeer = (await this.syncUntilHasRelationship(from, relationshipId))[0];
 
         return { reactivatedRelationshipFromSelf, reactivatedRelationshipPeer };
     }
@@ -449,7 +450,7 @@ export class TestUtil {
         const relationship = (await from.relationships.getRelationshipToIdentity(to.identity.address))!;
         await from.relationships.decompose(relationship.id);
         await from.cleanupDataOfDecomposedRelationship(relationship);
-        const decomposedRelationshipPeer = (await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
+        const decomposedRelationshipPeer = (await this.syncUntilHasRelationship(to, relationship.id))[0];
 
         return decomposedRelationshipPeer;
     }
@@ -471,7 +472,7 @@ export class TestUtil {
     }
 
     /**
-     * SyncEvents in the backbone are only eventually consistent. This means that if you send a message now and
+     * SyncEvents in the Backbone are only eventually consistent. This means that if you send a message now and
      * get all SyncEvents right after, you cannot rely on getting a NewMessage SyncEvent right away. So instead
      * this method executes the syncEverything()-method of the account controller until the condition specified in
      * the `until` callback is met.
@@ -486,6 +487,7 @@ export class TestUtil {
             syncResult.messages.push(...newSyncResult.messages);
             syncResult.relationships.push(...newSyncResult.relationships);
             syncResult.identityDeletionProcesses.push(...newSyncResult.identityDeletionProcesses);
+            syncResult.files.push(...newSyncResult.files);
             iterationNumber++;
         } while (!until(syncResult) && iterationNumber < 20);
 
@@ -531,6 +533,14 @@ export class TestUtil {
         return await TestUtil.syncUntilHas(accountController, id, "messages");
     }
 
+    public static async syncUntilHasFiles(accountController: AccountController, expectedNumberOfFiles = 1): Promise<File[]> {
+        return await TestUtil.syncUntilHasMany(accountController, "files", expectedNumberOfFiles);
+    }
+
+    public static async syncUntilHasFile(accountController: AccountController, id: CoreId): Promise<File[]> {
+        return await TestUtil.syncUntilHas(accountController, id, "files");
+    }
+
     public static async syncUntilHasError(accountController: AccountController): Promise<any> {
         try {
             await TestUtil.syncUntilHasMessages(accountController, 100);
@@ -542,11 +552,8 @@ export class TestUtil {
     }
 
     public static async sendRelationshipTemplate(from: AccountController, body?: ISerializable): Promise<RelationshipTemplate> {
-        if (!body) {
-            body = {
-                content: "template"
-            };
-        }
+        body ??= { content: "template" };
+
         return await from.relationshipTemplates.sendRelationshipTemplate({
             content: body,
             expiresAt: CoreDate.utc().add({ minutes: 5 }),
@@ -555,11 +562,8 @@ export class TestUtil {
     }
 
     public static async sendRelationshipTemplateAndToken(account: AccountController, body?: ISerializable): Promise<string> {
-        if (!body) {
-            body = {
-                content: "template"
-            };
-        }
+        body ??= { content: "template" };
+
         const template = await account.relationshipTemplates.sendRelationshipTemplate({
             content: body,
             expiresAt: CoreDate.utc().add({ minutes: 5 }),
@@ -576,16 +580,13 @@ export class TestUtil {
             ephemeral: false
         });
 
-        const tokenRef = token.truncate();
+        const tokenRef = token.toTokenReference(account.config.baseUrl).truncate();
         return tokenRef;
     }
 
     public static async sendRelationship(account: AccountController, template: RelationshipTemplate, body?: ISerializable): Promise<Relationship> {
-        if (!body) {
-            body = {
-                content: "request"
-            };
-        }
+        body ??= { content: "request" };
+
         return await account.relationships.sendRelationship({
             template: template,
             creationContent: body
@@ -593,7 +594,7 @@ export class TestUtil {
     }
 
     public static async fetchRelationshipTemplateFromTokenReference(account: AccountController, tokenReference: string): Promise<RelationshipTemplate> {
-        const receivedToken = await account.tokens.loadPeerTokenByTruncated(tokenReference, false);
+        const receivedToken = await account.tokens.loadPeerTokenByReference(TokenReference.from(tokenReference), false);
 
         if (!(receivedToken.cache!.content instanceof TokenContentRelationshipTemplate)) {
             throw new Error("token content not instanceof TokenContentRelationshipTemplate");
@@ -620,9 +621,9 @@ export class TestUtil {
         for (const controller of recipients) {
             recipientAddresses.push(controller.identity.address);
         }
-        if (!content) {
-            content = Serializable.fromAny({ content: "TestContent" });
-        }
+
+        content ??= Serializable.fromAny({ content: "TestContent" });
+
         return await from.messages.sendMessage({
             recipients: recipientAddresses,
             content: content,
@@ -671,13 +672,12 @@ export class TestUtil {
     private static getBackboneVersion() {
         if (process.env.BACKBONE_VERSION) return process.env.BACKBONE_VERSION;
 
-        const envFile = fs.readFileSync(path.resolve(`${__dirname}/../../../../.dev/compose.backbone.env`));
-        const env = envFile
-            .toString()
-            .split("\n")
-            .map((line) => line.split("="))
-            .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {} as Record<string, string>);
+        const composeFile = fs.readFileSync(path.resolve(`${__dirname}/../../../../.dev/compose.backbone.yml`));
 
-        return env["BACKBONE_VERSION"];
+        const regex = /image: ghcr\.io\/nmshd\/backbone-consumer-api:(?<version>[^\r\n]*)/;
+        const match = composeFile.toString().match(regex);
+        if (!match?.groups?.version) throw new Error("Could not find backbone version in compose file");
+
+        return match.groups.version;
     }
 }

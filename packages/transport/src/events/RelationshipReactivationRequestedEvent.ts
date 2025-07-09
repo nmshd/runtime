@@ -1,4 +1,4 @@
-import { Relationship } from "../modules/relationships/local/Relationship";
+import { Relationship } from "../modules";
 import { TransportDataEvent } from "./TransportDataEvent";
 
 export class RelationshipReactivationRequestedEvent extends TransportDataEvent<Relationship> {

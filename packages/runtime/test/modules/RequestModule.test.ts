@@ -1,3 +1,4 @@
+import { sleep } from "@js-soft/ts-utils";
 import { DecideRequestItemParametersJSON } from "@nmshd/consumption";
 import {
     GivenName,
@@ -11,7 +12,7 @@ import {
     ResponseResult,
     ResponseWrapperJSON
 } from "@nmshd/content";
-import { CoreAddress } from "@nmshd/core-types";
+import { CoreAddress, CoreDate } from "@nmshd/core-types";
 import {
     CreateOutgoingRequestRequest,
     IncomingRequestReceivedEvent,
@@ -34,6 +35,7 @@ import {
     MockEventBus,
     RuntimeServiceProvider,
     TestRuntimeServices,
+    createTemplate,
     ensureActiveRelationship,
     establishPendingRelationshipWithRequestFlow,
     exchangeAndAcceptRequestByMessage,
@@ -87,7 +89,7 @@ describe("RequestModule", () => {
 
         async function ensureActiveRelationshipWithTemplate(sRuntimeServices: TestRuntimeServices, rRuntimeServices: TestRuntimeServices, template: RelationshipTemplateDTO) {
             if ((await sRuntimeServices.transport.relationships.getRelationships({})).value.length === 0) {
-                await rRuntimeServices.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
+                await rRuntimeServices.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.reference.truncated });
                 const requestId = (await rRuntimeServices.consumption.incomingRequests.getRequests({ query: { "source.reference": template.id } })).value[0].id;
                 await rRuntimeServices.consumption.incomingRequests.accept({ requestId, items: [{ accept: true }] });
                 const relationship = (await syncUntilHasRelationships(sRuntimeServices.transport, 1))[0];
@@ -110,7 +112,7 @@ describe("RequestModule", () => {
         });
 
         test("does not create a second Request from the same Template if an open Request exists", async () => {
-            await rRuntimeServices.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
+            await rRuntimeServices.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.reference.truncated });
 
             await expect(rRuntimeServices.eventBus).toHavePublished(
                 RelationshipTemplateProcessedEvent,
@@ -164,7 +166,7 @@ describe("RequestModule", () => {
                 await rRuntimeServices.consumption.incomingRequests.accept({ requestId, items: [{ accept: true }] });
                 await rRuntimeServices.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
             }
-            await rRuntimeServices.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
+            await rRuntimeServices.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.reference.truncated });
 
             await expect(rRuntimeServices.eventBus).toHavePublished(
                 RelationshipTemplateProcessedEvent,
@@ -204,7 +206,7 @@ describe("RequestModule", () => {
         test("does not create a second Request from the same Template if an active Relationship exists", async () => {
             await ensureActiveRelationship(sRuntimeServices.transport, rRuntimeServices.transport);
             rRuntimeServices.eventBus.reset();
-            await rRuntimeServices.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
+            await rRuntimeServices.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.reference.truncated });
 
             await expect(rRuntimeServices.eventBus).not.toHavePublished(IncomingRequestReceivedEvent);
 
@@ -217,7 +219,7 @@ describe("RequestModule", () => {
             await ensureActiveRelationshipWithTemplate(sRuntimeServices, rRuntimeServices, template);
 
             rRuntimeServices.eventBus.reset();
-            await rRuntimeServices.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
+            await rRuntimeServices.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.reference.truncated });
 
             await expect(rRuntimeServices.eventBus).toHavePublished(
                 RelationshipTemplateProcessedEvent,
@@ -232,7 +234,7 @@ describe("RequestModule", () => {
             await rRuntimeServices.transport.relationships.terminateRelationship({ relationshipId });
 
             rRuntimeServices.eventBus.reset();
-            await rRuntimeServices.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
+            await rRuntimeServices.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.reference.truncated });
 
             await expect(rRuntimeServices.eventBus).toHavePublished(
                 RelationshipTemplateProcessedEvent,
@@ -251,11 +253,32 @@ describe("RequestModule", () => {
             await syncUntilHasRelationships(rRuntimeServices.transport, 1);
 
             rRuntimeServices.eventBus.reset();
-            await rRuntimeServices.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
+            await rRuntimeServices.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.reference.truncated });
 
             await expect(rRuntimeServices.eventBus).toHavePublished(
                 RelationshipTemplateProcessedEvent,
                 (e) => e.data.result === RelationshipTemplateProcessedResult.RelationshipExists
+            );
+        });
+
+        test("triggers RelationshipTemplateProcessedEvent if the Request is expired", async () => {
+            const runtimeServices = await runtimeServiceProvider.launch(2, { enableRequestModule: true });
+            const sRuntimeServices = runtimeServices[0];
+            const rRuntimeServices = runtimeServices[1];
+
+            const templateContent = RelationshipTemplateContent.from({
+                onNewRelationship: { "@type": "Request", items: [{ "@type": "TestRequestItem", mustBeAccepted: false }], expiresAt: CoreDate.utc().add({ seconds: 2 }).toString() }
+            }).toJSON();
+            const templateWithExpiredRequest = await createTemplate(sRuntimeServices.transport, templateContent);
+
+            await sleep(3000);
+            await rRuntimeServices.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templateWithExpiredRequest.reference.truncated });
+
+            await rRuntimeServices.eventBus.waitForRunningEventHandlers();
+
+            await expect(rRuntimeServices.eventBus).toHavePublished(
+                RelationshipTemplateProcessedEvent,
+                (e) => e.data.result === RelationshipTemplateProcessedResult.RequestExpired
             );
         });
     });
@@ -281,11 +304,36 @@ describe("RequestModule", () => {
         test("triggers RelationshipTemplateProcessedEvent if an active Relationship exists", async () => {
             const template = await exchangeRelationshipTemplate();
 
-            await rRuntimeServices.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.truncatedReference });
+            await rRuntimeServices.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.reference.truncated });
 
             await expect(rRuntimeServices.eventBus).toHavePublished(
                 RelationshipTemplateProcessedEvent,
                 (e) => e.data.result === RelationshipTemplateProcessedResult.NonCompletedRequestExists
+            );
+        });
+
+        test("triggers RelationshipTemplateProcessedEvent if the Request is expired", async () => {
+            const templateContent = RelationshipTemplateContent.from({
+                onNewRelationship: {
+                    "@type": "Request",
+                    items: [{ "@type": "TestRequestItem", mustBeAccepted: false }]
+                },
+                onExistingRelationship: {
+                    "@type": "Request",
+                    items: [{ "@type": "TestRequestItem", mustBeAccepted: false }],
+                    expiresAt: CoreDate.utc().add({ seconds: 2 }).toString()
+                }
+            }).toJSON();
+            const templateWithExpiredRequest = await createTemplate(sRuntimeServices.transport, templateContent);
+
+            await sleep(3000);
+            await rRuntimeServices.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templateWithExpiredRequest.reference.truncated });
+
+            await rRuntimeServices.eventBus.waitForRunningEventHandlers();
+
+            await expect(rRuntimeServices.eventBus).toHavePublished(
+                RelationshipTemplateProcessedEvent,
+                (e) => e.data.result === RelationshipTemplateProcessedResult.RequestExpired
             );
         });
 

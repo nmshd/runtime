@@ -1,4 +1,4 @@
-import { PeerDeletionStatus, RelationshipAuditLogDTO, RelationshipCreationContentDerivation } from "../../types/transport/RelationshipDTO";
+import { PeerDeletionStatus, RelationshipAuditLogDTO, RelationshipCreationContentDerivation } from "@nmshd/runtime-types";
 import { DataViewObject } from "../DataViewObject";
 import { LocalAttributeDVO } from "../consumption";
 
@@ -23,6 +23,7 @@ export interface RelationshipDVO extends DataViewObject {
     nameMap: Record<string, undefined | string>;
     templateId: string;
     originalName?: string;
+    sendMailDisabled: boolean;
 }
 
 export interface RelationshipTheme {

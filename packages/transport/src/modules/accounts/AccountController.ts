@@ -1,6 +1,6 @@
 import { IDatabaseCollection, IDatabaseCollectionProvider, IDatabaseMap } from "@js-soft/docdb-access-abstractions";
 import { ILogger } from "@js-soft/logging-abstractions";
-import { log } from "@js-soft/ts-utils";
+import { log, sleep } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CryptoSecretKey } from "@nmshd/crypto";
 import { AbstractAuthenticator, Authenticator, ControllerName, IConfig, Transport, TransportCoreErrors, TransportError } from "../../core";
@@ -10,6 +10,7 @@ import { DependencyOverrides } from "../../core/DependencyOverrides";
 import { TransportLoggerFactory } from "../../core/TransportLoggerFactory";
 import { IdentityDeletionProcessStatusChangedEvent } from "../../events/IdentityDeletionProcessStatusChangedEvent";
 import { PasswordGenerator } from "../../util";
+import { AnnouncementController } from "../announcements/AnnouncementController";
 import { CertificateController } from "../certificates/CertificateController";
 import { CertificateIssuer } from "../certificates/CertificateIssuer";
 import { CertificateValidator } from "../certificates/CertificateValidator";
@@ -52,6 +53,7 @@ export class AccountController {
 
     public info: IDatabaseMap;
 
+    public announcements: AnnouncementController;
     public challenges: ChallengeController;
     public certificates: CertificateController;
     public certificateIssuer: CertificateIssuer;
@@ -137,7 +139,7 @@ export class AccountController {
         if (!availableIdentityDoc && !availableDeviceDoc) {
             if (!deviceSharedSecret) {
                 if (!this.config.allowIdentityCreation) {
-                    throw new TransportError("No Identity found and identity creation is not allowed.");
+                    throw TransportCoreErrors.general.noIdentityFound();
                 }
 
                 // Identity creation
@@ -201,6 +203,7 @@ export class AccountController {
     private async initControllers() {
         this._log.trace("Initializing controllers...");
 
+        this.announcements = await new AnnouncementController(this).init();
         this.relationshipSecrets = await new RelationshipSecretController(this).init();
         this.devices = await new DevicesController(this).init();
         this.certificates = await new CertificateController(this).init();
@@ -279,7 +282,7 @@ export class AccountController {
         this._log.trace("Challenge signed. Creating device...");
 
         const [createIdentityResponse, privSync, localAddress, deviceInfo] = await Promise.all([
-            // Register first device (and identity) on backbone
+            // Register first device (and identity) on Backbone
             this.identityClient.createIdentity({
                 devicePassword: devicePwdD1,
                 identityPublicKey: identityKeypair.publicKey.toBase64(),
@@ -308,7 +311,7 @@ export class AccountController {
         this._log.trace(`Registered identity with address ${createdIdentity.address}, device id is ${createdIdentity.device.id}.`);
 
         if (!localAddress.equals(createdIdentity.address)) {
-            throw new TransportError(`The backbone address '${createdIdentity.address}' does not match the local address '${localAddress.toString()}'.`);
+            throw new TransportError(`The Backbone address '${createdIdentity.address}' does not match the local address '${localAddress.toString()}'.`);
         }
 
         const identity = Identity.from({
@@ -344,15 +347,35 @@ export class AccountController {
             password: devicePwdD1
         });
 
+        const storeSecretWithRetry = async (fn: () => Promise<any>) => {
+            let retryCount = 0;
+
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-constant-condition
+            while (true) {
+                try {
+                    return await fn();
+                } catch (error: any) {
+                    if (retryCount >= 10) {
+                        throw new TransportError(`Failed to store secret after '${retryCount}' retries: ${error.message}`, { cause: error });
+                    }
+
+                    retryCount++;
+
+                    await sleep(500 * retryCount);
+                    this._log.error(`Retrying due to error: ${error.message}. Attempt ${retryCount}`);
+                }
+            }
+        };
+
         await Promise.all([
-            this.info.set("device", device.toJSON()),
-            this.info.set("identity", identity.toJSON()),
-            this.info.set("baseKey", privBaseDevice.toJSON()),
-            this.activeDevice.secrets.storeSecret(privBaseShared, DeviceSecretType.SharedSecretBaseKey),
-            this.activeDevice.secrets.storeSecret(privSync, DeviceSecretType.IdentitySynchronizationMaster),
-            this.activeDevice.secrets.storeSecret(identityKeypair.privateKey, DeviceSecretType.IdentitySignature),
-            this.activeDevice.secrets.storeSecret(deviceKeypair.privateKey, DeviceSecretType.DeviceSignature),
-            this.activeDevice.secrets.storeSecret(deviceCredentials, DeviceSecretType.DeviceCredentials)
+            storeSecretWithRetry(() => this.info.set("device", device.toJSON())),
+            storeSecretWithRetry(() => this.info.set("identity", identity.toJSON())),
+            storeSecretWithRetry(() => this.info.set("baseKey", privBaseDevice.toJSON())),
+            storeSecretWithRetry(() => this.activeDevice.secrets.storeSecret(privBaseShared, DeviceSecretType.SharedSecretBaseKey)),
+            storeSecretWithRetry(() => this.activeDevice.secrets.storeSecret(privSync, DeviceSecretType.IdentitySynchronizationMaster)),
+            storeSecretWithRetry(() => this.activeDevice.secrets.storeSecret(identityKeypair.privateKey, DeviceSecretType.IdentitySignature)),
+            storeSecretWithRetry(() => this.activeDevice.secrets.storeSecret(deviceKeypair.privateKey, DeviceSecretType.DeviceSignature)),
+            storeSecretWithRetry(() => this.activeDevice.secrets.storeSecret(deviceCredentials, DeviceSecretType.DeviceCredentials))
         ]);
 
         return { identity, device };
@@ -372,7 +395,7 @@ export class AccountController {
 
         const device = Device.from({
             id: deviceSharedSecret.id,
-            name: deviceSharedSecret.name ? deviceSharedSecret.name : "",
+            name: deviceSharedSecret.name ?? "",
             description: deviceSharedSecret.description,
             lastLoginAt: CoreDate.utc(),
             createdAt: deviceSharedSecret.createdAt,
@@ -436,7 +459,7 @@ export class AccountController {
     }
 
     public async getSynchronizedCollection(collectionName: string): Promise<SynchronizedCollection> {
-        const collection = await this.db.getCollection(collectionName);
+        const collection = await this.db.getCollection(collectionName, ["id"]);
         if (!this.config.datawalletEnabled) {
             return new SynchronizedCollection(collection, this.config.supportedDatawalletVersion);
         }

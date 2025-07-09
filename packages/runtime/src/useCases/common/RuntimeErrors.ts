@@ -1,7 +1,6 @@
 import { ApplicationError } from "@js-soft/ts-utils";
 import { LocalAttribute } from "@nmshd/consumption";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
-import { Base64ForIdPrefix } from "./Base64ForIdPrefix";
 
 class General {
     public unknown(message: string, data?: any) {
@@ -9,19 +8,19 @@ class General {
     }
 
     public alreadyInitialized() {
-        return new ApplicationError("error.runtime.alreadyInitialized", "The runtime is already initialized. The init method can only be executed once.");
+        return new ApplicationError("error.runtime.alreadyInitialized", "The Runtime is already initialized. The init method can only be executed once.");
     }
 
     public notInitialized() {
-        return new ApplicationError("error.runtime.notInitialized", "The runtime is not initialized. You must run init before you can start or stop the runtime.");
+        return new ApplicationError("error.runtime.notInitialized", "The Runtime is not initialized. You must run init before you can start or stop the Runtime.");
     }
 
     public alreadyStarted() {
-        return new ApplicationError("error.runtime.alreadyStarted", "The runtime is already started. You should stop it first for a restart.");
+        return new ApplicationError("error.runtime.alreadyStarted", "The Runtime is already started. You should stop it first for a restart.");
     }
 
     public notStarted() {
-        return new ApplicationError("error.runtime.notStarted", "The runtime is not started. You can only stop the runtime if you executed start before.");
+        return new ApplicationError("error.runtime.notStarted", "The Runtime is not started. You can only stop the Runtime if you executed start before.");
     }
 
     public recordNotFound(entityName?: string | Function): ApplicationError {
@@ -51,6 +50,10 @@ class General {
     public cacheEmpty(entityName: string | Function, id: string) {
         return new ApplicationError("error.runtime.cacheEmpty", `The cache of ${entityName instanceof Function ? entityName.name : entityName} with id '${id}' is empty.`);
     }
+
+    public invalidReference(): ApplicationError {
+        return new ApplicationError("error.runtime.invalidReference", "The given reference is invalid for performing the requested action.");
+    }
 }
 
 class Serval {
@@ -68,11 +71,8 @@ class Serval {
 }
 
 class Files {
-    public invalidReference(reference: string): ApplicationError {
-        return new ApplicationError(
-            "error.runtime.files.invalidReference",
-            `The given reference '${reference}' is not valid. The reference for a File must start with '${Base64ForIdPrefix.Token}' or '${Base64ForIdPrefix.File}'.`
-        );
+    public notOwnedByYou(): ApplicationError {
+        return new ApplicationError("error.runtime.files.notOwnedByYou", "Only the owner of the File can perform this action.");
     }
 }
 
@@ -93,17 +93,6 @@ class RelationshipTemplates {
 
     public cannotCreateTokenForPeerTemplate(): ApplicationError {
         return new ApplicationError("error.runtime.relationshipTemplates.cannotCreateTokenForPeerTemplate", "You cannot create a Token for a peer RelationshipTemplate.");
-    }
-
-    public cannotCreateQRCodeForPeerTemplate(): ApplicationError {
-        return new ApplicationError("error.runtime.relationshipTemplates.cannotCreateQRCodeForPeerTemplate", "You cannot create a QR code for a peer RelationshipTemplate.");
-    }
-
-    public invalidReference(reference: string): ApplicationError {
-        return new ApplicationError(
-            "error.runtime.relationshipTemplates.invalidReference",
-            `The given reference '${reference}' is not valid. The reference for a RelationshipTemplate must start with '${Base64ForIdPrefix.Token}' or '${Base64ForIdPrefix.RelationshipTemplate}'.`
-        );
     }
 
     public requestCannotExpireAfterRelationshipTemplate(): ApplicationError {
@@ -149,6 +138,13 @@ class Messages {
         );
     }
 
+    public cannotSendRequestThatWasAlreadySent() {
+        return new ApplicationError(
+            "error.runtime.messages.cannotSendRequestThatWasAlreadySent",
+            "The Message cannot be sent as the contained Request has already been sent. Please create a new Request and try again."
+        );
+    }
+
     public peerIsInDeletion(addresses: string[]) {
         return new ApplicationError(
             "error.runtime.messages.peerIsInDeletion",
@@ -181,7 +177,7 @@ class Challenges {
     }
 
     public invalidChallengeString(): ApplicationError {
-        return new ApplicationError("error.runtime.challenges.invalidChallenge", "The challengeString is invalid.");
+        return new ApplicationError("error.runtime.challenges.invalidChallengeString", "The challengeString is invalid.");
     }
 }
 
@@ -247,6 +243,13 @@ class Attributes {
         return new ApplicationError(
             "error.runtime.attributes.hasSuccessor",
             `Attribute '${predecessor.id.toString()}' already has a successor ${predecessor.succeededBy?.toString()}.`
+        );
+    }
+
+    public cannotSucceedAttributesWithDeletionInfo(ownSharedIdentityAttributeIds: CoreId[] | string[]): ApplicationError {
+        return new ApplicationError(
+            "error.runtime.attributes.cannotSucceedAttributesWithDeletionInfo",
+            `The own shared IdentityAttribute predecessor(s) ${ownSharedIdentityAttributeIds.map((ownSharedIdentityAttributeId) => `'${ownSharedIdentityAttributeId.toString()}'`).join(", ")} can't be succeeded due to set deletionInfo.`
         );
     }
 

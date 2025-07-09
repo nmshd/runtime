@@ -60,7 +60,7 @@ export class SSEModule extends AppRuntimeModule<SSEModuleConfiguration> {
 
                 const result = await fetch(url, {
                     ...options,
-                    headers: { ...options?.headers, authorization: `Bearer ${token}` }
+                    headers: { ...options.headers, authorization: `Bearer ${token}` }
                 });
 
                 this.logger.info(`SSE fetch result: ${result.status}`);
@@ -100,9 +100,9 @@ export class SSEModule extends AppRuntimeModule<SSEModuleConfiguration> {
         }
     }
 
-    public stop(): void {
-        for (const eventsource of Object.values(this.eventSource).filter((eventsource) => typeof eventsource !== "undefined")) {
-            eventsource.close();
+    public override stop(): void {
+        for (const eventsource of Object.values(this.eventSource)) {
+            eventsource?.close();
         }
     }
 }

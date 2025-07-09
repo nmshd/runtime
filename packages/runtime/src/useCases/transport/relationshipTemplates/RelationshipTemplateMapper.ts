@@ -1,14 +1,19 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { ArbitraryRelationshipTemplateContent, RelationshipTemplateContent } from "@nmshd/content";
+import { RelationshipTemplateDTO } from "@nmshd/runtime-types";
 import { RelationshipTemplate } from "@nmshd/transport";
-import { RelationshipTemplateDTO } from "../../../types";
-import { RuntimeErrors } from "../../common";
+import { Container } from "@nmshd/typescript-ioc";
+import { ConfigHolder } from "../../../ConfigHolder";
+import { PasswordProtectionMapper, RuntimeErrors } from "../../common";
 
 export class RelationshipTemplateMapper {
     public static toRelationshipTemplateDTO(template: RelationshipTemplate): RelationshipTemplateDTO {
         if (!template.cache) {
             throw RuntimeErrors.general.cacheEmpty(RelationshipTemplate, template.id.toString());
         }
+
+        const backboneBaseUrl = Container.get<ConfigHolder>(ConfigHolder).getConfig().transportLibrary.baseUrl;
+        const reference = template.toRelationshipTemplateReference(backboneBaseUrl);
 
         return {
             id: template.id.toString(),
@@ -17,16 +22,14 @@ export class RelationshipTemplateMapper {
             createdByDevice: template.cache.createdByDevice.toString(),
             createdAt: template.cache.createdAt.toString(),
             forIdentity: template.cache.forIdentity?.toString(),
-            passwordProtection: template.passwordProtection
-                ? {
-                      password: template.passwordProtection.password,
-                      passwordIsPin: template.passwordProtection.passwordType.startsWith("pin") ? true : undefined
-                  }
-                : undefined,
+            passwordProtection: PasswordProtectionMapper.toPasswordProtectionDTO(template.passwordProtection),
             content: this.toTemplateContent(template.cache.content),
             expiresAt: template.cache.expiresAt?.toString(),
             maxNumberOfAllocations: template.cache.maxNumberOfAllocations,
-            truncatedReference: template.truncate()
+            reference: {
+                truncated: reference.truncate(),
+                url: reference.toUrl()
+            }
         };
     }
 

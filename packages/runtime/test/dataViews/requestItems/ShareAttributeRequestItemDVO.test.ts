@@ -1,12 +1,10 @@
 import { DecideRequestItemParametersJSON } from "@nmshd/consumption";
-import { AbstractStringJSON, DisplayNameJSON, ShareAttributeRequestItemJSON } from "@nmshd/content";
-import { CoreId } from "@nmshd/core-types";
+import { AbstractStringJSON, DisplayNameJSON, RequestJSON, ShareAttributeAcceptResponseItemJSON, ShareAttributeRequestItemJSON } from "@nmshd/content";
 import {
     AcceptResponseItemDVO,
     ConsumptionServices,
     CreateOutgoingRequestRequest,
     DataViewExpander,
-    DecidableShareAttributeRequestItemDVO,
     IncomingRequestStatusChangedEvent,
     LocalRequestStatus,
     OutgoingRequestStatusChangedEvent,
@@ -15,6 +13,7 @@ import {
     TransportServices
 } from "../../../src";
 import {
+    cleanupAttributes,
     establishRelationship,
     exchangeAndAcceptRequestByMessage,
     exchangeMessageWithRequest,
@@ -68,7 +67,7 @@ beforeEach(async () => {
         content: {
             value: {
                 "@type": "DisplayName",
-                value: "Dr. Theodor Munchkin von Reichenhardt"
+                value: "aDisplayName"
             }
         }
     });
@@ -91,22 +90,7 @@ beforeEach(async () => {
     sEventBus.reset();
 });
 
-afterEach(async () => {
-    await cleanupAttributes();
-});
-
-async function cleanupAttributes() {
-    await Promise.all(
-        [sRuntimeServices, rRuntimeServices].map(async (services) => {
-            const servicesAttributeController = services.consumption.attributes["getAttributeUseCase"]["attributeController"];
-
-            const servicesAttributesResult = await services.consumption.attributes.getAttributes({});
-            for (const attribute of servicesAttributesResult.value) {
-                await servicesAttributeController.deleteAttributeUnsafe(CoreId.from(attribute.id));
-            }
-        })
-    );
-}
+afterEach(async () => await cleanupAttributes([sRuntimeServices, rRuntimeServices]));
 
 describe("ShareAttributeRequestItemDVO", () => {
     test("check the MessageDVO for the sender", async () => {
@@ -133,7 +117,7 @@ describe("ShareAttributeRequestItemDVO", () => {
         expect(requestItemDVO.attribute.type).toBe("DraftIdentityAttributeDVO");
         const value = requestItemDVO.attribute.value as AbstractStringJSON;
         expect(value["@type"]).toBe("DisplayName");
-        expect(value.value).toBe("Dr. Theodor Munchkin von Reichenhardt");
+        expect(value.value).toBe("aDisplayName");
         expect(requestItemDVO.attribute.renderHints.editType).toBe("InputLike");
         expect(requestItemDVO.attribute.valueHints.max).toBe(100);
         expect(requestItemDVO.attribute.isDraft).toBe(true);
@@ -159,13 +143,13 @@ describe("ShareAttributeRequestItemDVO", () => {
         expect(dvo.request.content.type).toBe("RequestDVO");
         expect(dvo.request.content.items).toHaveLength(1);
         expect(dvo.request.isDecidable).toBe(true);
-        const requestItemDVO = dvo.request.content.items[0] as DecidableShareAttributeRequestItemDVO;
-        expect(requestItemDVO.type).toBe("DecidableShareAttributeRequestItemDVO");
+        const requestItemDVO = dvo.request.content.items[0] as ShareAttributeRequestItemDVO;
+        expect(requestItemDVO.type).toBe("ShareAttributeRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(true);
         expect(requestItemDVO.attribute.type).toBe("DraftIdentityAttributeDVO");
         const value = requestItemDVO.attribute.value as AbstractStringJSON;
         expect(value["@type"]).toBe("DisplayName");
-        expect(value.value).toBe("Dr. Theodor Munchkin von Reichenhardt");
+        expect(value.value).toBe("aDisplayName");
         expect(requestItemDVO.attribute.renderHints.technicalType).toBe("String");
         expect(requestItemDVO.attribute.renderHints.editType).toBe("InputLike");
         expect(requestItemDVO.attribute.valueHints.max).toBe(100);
@@ -203,7 +187,7 @@ describe("ShareAttributeRequestItemDVO", () => {
         expect(requestItemDVO.attribute.type).toBe("DraftIdentityAttributeDVO");
         const value = requestItemDVO.attribute.value as AbstractStringJSON;
         expect(value["@type"]).toBe("DisplayName");
-        expect(value.value).toBe("Dr. Theodor Munchkin von Reichenhardt");
+        expect(value.value).toBe("aDisplayName");
         expect(requestItemDVO.attribute.renderHints.technicalType).toBe("String");
         expect(requestItemDVO.attribute.renderHints.editType).toBe("InputLike");
         expect(requestItemDVO.attribute.valueHints.max).toBe(100);
@@ -228,7 +212,7 @@ describe("ShareAttributeRequestItemDVO", () => {
         expect(attributeResult).toBeSuccessful();
         expect(attributeResult.value).toHaveLength(1);
         expect(attributeResult.value[0].id).toBeDefined();
-        expect((attributeResult.value[0].content.value as DisplayNameJSON).value).toBe("Dr. Theodor Munchkin von Reichenhardt");
+        expect((attributeResult.value[0].content.value as DisplayNameJSON).value).toBe("aDisplayName");
 
         await syncUntilHasMessageWithResponse(sTransportServices, recipientMessage.content.id!);
         await sEventBus.waitForEvent(OutgoingRequestStatusChangedEvent);
@@ -238,7 +222,7 @@ describe("ShareAttributeRequestItemDVO", () => {
         const baselineNumberOfItems = (await rExpander.expandAddress(sAddress)).items?.length ?? 0;
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
         const dvo = await rExpander.expandAddress(senderMessage.createdBy);
-        expect(dvo.name).toBe("Dr. Theodor Munchkin von Reichenhardt");
+        expect(dvo.name).toBe("aDisplayName");
         const numberOfItems = dvo.items!.length;
         expect(numberOfItems - baselineNumberOfItems).toBe(1);
     });
@@ -271,7 +255,7 @@ describe("ShareAttributeRequestItemDVO", () => {
         expect(requestItemDVO.attribute.type).toBe("DraftIdentityAttributeDVO");
         const value = requestItemDVO.attribute.value as AbstractStringJSON;
         expect(value["@type"]).toBe("DisplayName");
-        expect(value.value).toBe("Dr. Theodor Munchkin von Reichenhardt");
+        expect(value.value).toBe("aDisplayName");
         expect(requestItemDVO.attribute.renderHints.technicalType).toBe("String");
         expect(requestItemDVO.attribute.renderHints.editType).toBe("InputLike");
         expect(requestItemDVO.attribute.valueHints.max).toBe(100);
@@ -299,7 +283,7 @@ describe("ShareAttributeRequestItemDVO", () => {
         const numberOfAttributes = attributeResult.value.length;
         expect(numberOfAttributes - baselineNumberOfAttributes).toBe(1);
         expect(attributeResult.value[numberOfAttributes - 1].id).toBeDefined();
-        expect((attributeResult.value[numberOfAttributes - 1].content.value as DisplayNameJSON).value).toBe("Dr. Theodor Munchkin von Reichenhardt");
+        expect((attributeResult.value[numberOfAttributes - 1].content.value as DisplayNameJSON).value).toBe("aDisplayName");
     });
 
     test("check the attributes for the sender", async () => {
@@ -314,7 +298,7 @@ describe("ShareAttributeRequestItemDVO", () => {
         const numberOfAttributes = attributeResult.value.length;
         expect(numberOfAttributes - baselineNumberOfAttributes).toBe(1);
         expect(attributeResult.value[numberOfAttributes - 1].id).toBeDefined();
-        expect((attributeResult.value[numberOfAttributes - 1].content.value as DisplayNameJSON).value).toBe("Dr. Theodor Munchkin von Reichenhardt");
+        expect((attributeResult.value[numberOfAttributes - 1].content.value as DisplayNameJSON).value).toBe("aDisplayName");
     });
 
     test("check the recipient's dvo for the sender", async () => {
@@ -323,5 +307,33 @@ describe("ShareAttributeRequestItemDVO", () => {
 
         expect(dvo.name).toBe("i18n://dvo.identity.unknown");
         expect(dvo.items).toHaveLength(0);
+    });
+
+    test("check the MessageDVO for the recipient after they deleted the shared Attribute", async () => {
+        const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
+        const requestId = (senderMessage.content as RequestJSON).id!;
+        const localRequest = (await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: requestId })).value;
+        const sharedAttributeId = (localRequest.response!.content.items[0] as ShareAttributeAcceptResponseItemJSON).attributeId;
+
+        await rRuntimeServices.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: sharedAttributeId });
+
+        const recipientMessage = (await rRuntimeServices.transport.messages.getMessage({ id: senderMessage.id })).value;
+        const dvo = (await rExpander.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
+        const responseItemDVO = dvo.request.response!.content.items[0];
+        expect(responseItemDVO.type).toBe("AttributeAlreadyDeletedAcceptResponseItemDVO");
+    });
+
+    test("check the MessageDVO for the sender after they deleted the shared Attribute", async () => {
+        const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
+        const requestId = (senderMessage.content as RequestJSON).id!;
+        const localRequest = (await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: requestId })).value;
+        const sharedAttributeId = (localRequest.response!.content.items[0] as ShareAttributeAcceptResponseItemJSON).attributeId;
+
+        await sRuntimeServices.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: sharedAttributeId });
+
+        const senderMessageAfterDeletion = (await sRuntimeServices.transport.messages.getMessage({ id: senderMessage.id })).value;
+        const dvo = (await sExpander.expandMessageDTO(senderMessageAfterDeletion)) as RequestMessageDVO;
+        const responseItemDVO = dvo.request.response!.content.items[0];
+        expect(responseItemDVO.type).toBe("AttributeAlreadyDeletedAcceptResponseItemDVO");
     });
 });

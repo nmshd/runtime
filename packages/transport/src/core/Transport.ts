@@ -1,4 +1,3 @@
-import { IDatabaseCollectionProvider, IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { ILogger, ILoggerFactory } from "@js-soft/logging-abstractions";
 import { SimpleLoggerFactory } from "@js-soft/simple-logger";
 import { EventBus } from "@js-soft/ts-utils";
@@ -31,6 +30,7 @@ export interface IConfig {
     datawalletEnabled: boolean;
     httpAgentOptions: AgentOptions;
     httpsAgentOptions: HTTPSAgentOptions;
+    tagCacheLifetimeInMinutes: number;
 }
 
 export interface IConfigOverwrite {
@@ -48,11 +48,10 @@ export interface IConfigOverwrite {
     datawalletEnabled?: boolean;
     httpAgentOptions?: AgentOptions;
     httpsAgentOptions?: HTTPSAgentOptions;
+    tagCacheLifetimeInMinutes?: number;
 }
 
 export class Transport {
-    private readonly databaseConnection: IDatabaseConnection;
-
     private readonly _config: IConfig;
     public get config(): IConfig {
         return this._config;
@@ -79,17 +78,16 @@ export class Transport {
         httpsAgentOptions: {
             keepAlive: true,
             maxFreeSockets: 2
-        }
+        },
+        tagCacheLifetimeInMinutes: 5
     };
 
     public constructor(
-        databaseConnection: IDatabaseConnection,
         customConfig: IConfigOverwrite,
         public readonly eventBus: EventBus,
         loggerFactory: ILoggerFactory = new SimpleLoggerFactory(),
         public readonly correlator?: ICorrelator
     ) {
-        this.databaseConnection = databaseConnection;
         this._config = _.defaultsDeep({}, customConfig, Transport.defaultConfig);
 
         TransportLoggerFactory.init(loggerFactory);
@@ -128,9 +126,5 @@ export class Transport {
         log.info("Transport initialized");
 
         return this;
-    }
-
-    public async createDatabase(name: string): Promise<IDatabaseCollectionProvider> {
-        return await this.databaseConnection.getDatabase(name);
     }
 }

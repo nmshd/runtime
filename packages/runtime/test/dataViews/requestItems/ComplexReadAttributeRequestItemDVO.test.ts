@@ -1,10 +1,13 @@
-import { AcceptReadAttributeRequestItemParametersWithNewAttributeJSON, DecideRequestItemParametersJSON } from "@nmshd/consumption";
+import {
+    AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON,
+    AcceptReadAttributeRequestItemParametersWithNewAttributeJSON,
+    DecideRequestItemParametersJSON
+} from "@nmshd/consumption";
 import { IdentityAttributeQuery, IQLQuery, PersonName, PersonNameJSON, ReadAttributeRequestItem } from "@nmshd/content";
 import {
     ConsumptionServices,
     CreateOutgoingRequestRequest,
     DataViewExpander,
-    DecidableReadAttributeRequestItemDVO,
     IdentityAttributeQueryDVO,
     IncomingRequestStatusChangedEvent,
     IQLQueryDVO,
@@ -18,6 +21,7 @@ import {
     TransportServices
 } from "../../../src";
 import {
+    cleanupAttributes,
     establishRelationship,
     exchangeAndAcceptRequestByMessage,
     exchangeMessageWithRequest,
@@ -47,9 +51,10 @@ let responseItems: DecideRequestItemParametersJSON[];
 
 afterAll(() => serviceProvider.stop());
 
-beforeEach(function () {
+beforeEach(async function () {
     eventBus1.reset();
     eventBus2.reset();
+    await cleanupAttributes([runtimeServices1, runtimeServices2], true);
 });
 
 describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () => {
@@ -69,17 +74,19 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         await establishRelationship(transportServices1, transportServices2);
         address1 = (await transportServices1.account.getIdentityInfo()).value.address;
         address2 = (await transportServices2.account.getIdentityInfo()).value.address;
-        const attribute = await consumptionServices2.attributes.createRepositoryAttribute({
-            content: {
-                value: PersonName.from({
-                    honorificPrefix: "Dr.",
-                    givenName: "Heinz",
-                    middleName: "Gerhard",
-                    surname: "Ranzig",
-                    honorificSuffix: "von Warnermünde"
-                }).toJSON()
-            }
-        });
+        const repositoryAttribute = (
+            await consumptionServices2.attributes.createRepositoryAttribute({
+                content: {
+                    value: PersonName.from({
+                        honorificPrefix: "anHonorificPrefix",
+                        givenName: "aGivenName",
+                        middleName: "aMiddleName",
+                        surname: "aSurname",
+                        honorificSuffix: "anHonorificSuffix"
+                    }).toJSON()
+                }
+            })
+        ).value;
 
         requestContent = {
             content: {
@@ -96,7 +103,7 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
             peer: address2
         };
 
-        responseItems = [{ accept: true, newAttribute: attribute.value.content }] as AcceptReadAttributeRequestItemParametersWithNewAttributeJSON[];
+        responseItems = [{ accept: true, existingAttributeId: repositoryAttribute.id }] as AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON[];
     }, 30000);
 
     test("check the MessageDVO for the sender", async () => {
@@ -149,8 +156,8 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         expect(dvo.request.content.type).toBe("RequestDVO");
         expect(dvo.request.content.items).toHaveLength(1);
         expect(dvo.request.isDecidable).toBe(true);
-        const requestItemDVO = dvo.request.content.items[0] as DecidableReadAttributeRequestItemDVO;
-        expect(requestItemDVO.type).toBe("DecidableReadAttributeRequestItemDVO");
+        const requestItemDVO = dvo.request.content.items[0] as ReadAttributeRequestItemDVO;
+        expect(requestItemDVO.type).toBe("ReadAttributeRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(true);
         expect(requestItemDVO.query).toBeDefined();
         expect(requestItemDVO.query.type).toBe("ProcessedIdentityAttributeQueryDVO");
@@ -166,11 +173,11 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         expect(resultItem.type).toBe("RepositoryAttributeDVO");
         expect(resultItem.content["@type"]).toBe("IdentityAttribute");
         expect(resultItem.content.value["@type"]).toBe("PersonName");
-        expect((resultItem.content.value as PersonNameJSON).givenName).toBe("Heinz");
-        expect((resultItem.content.value as PersonNameJSON).surname).toBe("Ranzig");
-        expect((resultItem.content.value as PersonNameJSON).middleName).toBe("Gerhard");
-        expect((resultItem.content.value as PersonNameJSON).honorificPrefix).toBe("Dr.");
-        expect((resultItem.content.value as PersonNameJSON).honorificSuffix).toBe("von Warnermünde");
+        expect((resultItem.content.value as PersonNameJSON).givenName).toBe("aGivenName");
+        expect((resultItem.content.value as PersonNameJSON).surname).toBe("aSurname");
+        expect((resultItem.content.value as PersonNameJSON).middleName).toBe("aMiddleName");
+        expect((resultItem.content.value as PersonNameJSON).honorificPrefix).toBe("anHonorificPrefix");
+        expect((resultItem.content.value as PersonNameJSON).honorificSuffix).toBe("anHonorificSuffix");
     });
 
     test("check the MessageDVO for the recipient after acceptance", async () => {
@@ -232,11 +239,11 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
 
         const attributeValue = responseItem.attribute.value as PersonNameJSON;
         expect(attributeValue["@type"]).toBe("PersonName");
-        expect(attributeValue.givenName).toBe("Heinz");
-        expect(attributeValue.surname).toBe("Ranzig");
-        expect(attributeValue.middleName).toBe("Gerhard");
-        expect(attributeValue.honorificPrefix).toBe("Dr.");
-        expect(attributeValue.honorificSuffix).toBe("von Warnermünde");
+        expect(attributeValue.givenName).toBe("aGivenName");
+        expect(attributeValue.surname).toBe("aSurname");
+        expect(attributeValue.middleName).toBe("aMiddleName");
+        expect(attributeValue.honorificPrefix).toBe("anHonorificPrefix");
+        expect(attributeValue.honorificSuffix).toBe("anHonorificSuffix");
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         const attributeResult = await consumptionServices2.attributes.getAttributes({
@@ -249,11 +256,11 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
 
         const returnedValue = attributeResult.value[numberOfAttributes - 1].content.value as PersonNameJSON;
         expect(returnedValue["@type"]).toBe("PersonName");
-        expect(returnedValue.givenName).toBe("Heinz");
-        expect(returnedValue.surname).toBe("Ranzig");
-        expect(returnedValue.middleName).toBe("Gerhard");
-        expect(returnedValue.honorificPrefix).toBe("Dr.");
-        expect(returnedValue.honorificSuffix).toBe("von Warnermünde");
+        expect(returnedValue.givenName).toBe("aGivenName");
+        expect(returnedValue.surname).toBe("aSurname");
+        expect(returnedValue.middleName).toBe("aMiddleName");
+        expect(returnedValue.honorificPrefix).toBe("anHonorificPrefix");
+        expect(returnedValue.honorificSuffix).toBe("anHonorificSuffix");
 
         expect(responseItem.attributeId).toStrictEqual(attributeResult.value[numberOfAttributes - 1].id);
         expect(returnedValue).toStrictEqual(attributeValue);
@@ -317,11 +324,11 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
 
         const returnedValue = attributeResult.value[numberOfAttributes - 1].content.value as PersonNameJSON;
         expect(returnedValue["@type"]).toBe("PersonName");
-        expect(returnedValue.givenName).toBe("Heinz");
-        expect(returnedValue.surname).toBe("Ranzig");
-        expect(returnedValue.middleName).toBe("Gerhard");
-        expect(returnedValue.honorificPrefix).toBe("Dr.");
-        expect(returnedValue.honorificSuffix).toBe("von Warnermünde");
+        expect(returnedValue.givenName).toBe("aGivenName");
+        expect(returnedValue.surname).toBe("aSurname");
+        expect(returnedValue.middleName).toBe("aMiddleName");
+        expect(returnedValue.honorificPrefix).toBe("anHonorificPrefix");
+        expect(returnedValue.honorificSuffix).toBe("anHonorificSuffix");
 
         expect(responseItem.attributeId).toStrictEqual(attributeResult.value[numberOfAttributes - 1].id);
         expect(returnedValue).toStrictEqual(responseItem.attribute.content.value);
@@ -348,11 +355,11 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
         const attribute = await consumptionServices2.attributes.createRepositoryAttribute({
             content: {
                 value: PersonName.from({
-                    honorificPrefix: "Dr.",
-                    givenName: "Heinz",
-                    middleName: "Gerhard",
-                    surname: "Ranzig",
-                    honorificSuffix: "von Warnermünde"
+                    honorificPrefix: "anHonorificPrefix",
+                    givenName: "aGivenName",
+                    middleName: "aMiddleName",
+                    surname: "aSurname",
+                    honorificSuffix: "anHonorificSuffix"
                 }).toJSON()
             }
         });
@@ -420,8 +427,8 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
         expect(dvo.request.content.type).toBe("RequestDVO");
         expect(dvo.request.content.items).toHaveLength(1);
         expect(dvo.request.isDecidable).toBe(true);
-        const requestItemDVO = dvo.request.content.items[0] as DecidableReadAttributeRequestItemDVO;
-        expect(requestItemDVO.type).toBe("DecidableReadAttributeRequestItemDVO");
+        const requestItemDVO = dvo.request.content.items[0] as ReadAttributeRequestItemDVO;
+        expect(requestItemDVO.type).toBe("ReadAttributeRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(true);
         expect(requestItemDVO.query).toBeDefined();
         expect(requestItemDVO.query.type).toBe("ProcessedIQLQueryDVO");
@@ -432,11 +439,11 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
         expect(resultItem.type).toBe("RepositoryAttributeDVO");
         expect(resultItem.content["@type"]).toBe("IdentityAttribute");
         expect(resultItem.content.value["@type"]).toBe("PersonName");
-        expect((resultItem.content.value as PersonNameJSON).givenName).toBe("Heinz");
-        expect((resultItem.content.value as PersonNameJSON).surname).toBe("Ranzig");
-        expect((resultItem.content.value as PersonNameJSON).middleName).toBe("Gerhard");
-        expect((resultItem.content.value as PersonNameJSON).honorificPrefix).toBe("Dr.");
-        expect((resultItem.content.value as PersonNameJSON).honorificSuffix).toBe("von Warnermünde");
+        expect((resultItem.content.value as PersonNameJSON).givenName).toBe("aGivenName");
+        expect((resultItem.content.value as PersonNameJSON).surname).toBe("aSurname");
+        expect((resultItem.content.value as PersonNameJSON).middleName).toBe("aMiddleName");
+        expect((resultItem.content.value as PersonNameJSON).honorificPrefix).toBe("anHonorificPrefix");
+        expect((resultItem.content.value as PersonNameJSON).honorificSuffix).toBe("anHonorificSuffix");
     });
 
     test("check the MessageDVO for the recipient after acceptance", async () => {
@@ -487,11 +494,11 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
 
         const attributeValue = responseItem.attribute.value as PersonNameJSON;
         expect(attributeValue["@type"]).toBe("PersonName");
-        expect(attributeValue.givenName).toBe("Heinz");
-        expect(attributeValue.surname).toBe("Ranzig");
-        expect(attributeValue.middleName).toBe("Gerhard");
-        expect(attributeValue.honorificPrefix).toBe("Dr.");
-        expect(attributeValue.honorificSuffix).toBe("von Warnermünde");
+        expect(attributeValue.givenName).toBe("aGivenName");
+        expect(attributeValue.surname).toBe("aSurname");
+        expect(attributeValue.middleName).toBe("aMiddleName");
+        expect(attributeValue.honorificPrefix).toBe("anHonorificPrefix");
+        expect(attributeValue.honorificSuffix).toBe("anHonorificSuffix");
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         const attributeResult = await consumptionServices2.attributes.getAttributes({
@@ -503,11 +510,11 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
 
         const returnedValue = attributeResult.value[0].content.value as PersonNameJSON;
         expect(returnedValue["@type"]).toBe("PersonName");
-        expect(returnedValue.givenName).toBe("Heinz");
-        expect(returnedValue.surname).toBe("Ranzig");
-        expect(returnedValue.middleName).toBe("Gerhard");
-        expect(returnedValue.honorificPrefix).toBe("Dr.");
-        expect(returnedValue.honorificSuffix).toBe("von Warnermünde");
+        expect(returnedValue.givenName).toBe("aGivenName");
+        expect(returnedValue.surname).toBe("aSurname");
+        expect(returnedValue.middleName).toBe("aMiddleName");
+        expect(returnedValue.honorificPrefix).toBe("anHonorificPrefix");
+        expect(returnedValue.honorificSuffix).toBe("anHonorificSuffix");
 
         expect(responseItem.attributeId).toStrictEqual(attributeResult.value[0].id);
         expect(returnedValue).toStrictEqual(attributeValue);
@@ -565,11 +572,11 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
 
         const returnedValue = attributeResult.value[numberOfAttributes - 1].content.value as PersonNameJSON;
         expect(returnedValue["@type"]).toBe("PersonName");
-        expect(returnedValue.givenName).toBe("Heinz");
-        expect(returnedValue.surname).toBe("Ranzig");
-        expect(returnedValue.middleName).toBe("Gerhard");
-        expect(returnedValue.honorificPrefix).toBe("Dr.");
-        expect(returnedValue.honorificSuffix).toBe("von Warnermünde");
+        expect(returnedValue.givenName).toBe("aGivenName");
+        expect(returnedValue.surname).toBe("aSurname");
+        expect(returnedValue.middleName).toBe("aMiddleName");
+        expect(returnedValue.honorificPrefix).toBe("anHonorificPrefix");
+        expect(returnedValue.honorificSuffix).toBe("anHonorificSuffix");
 
         expect(responseItem.attributeId).toStrictEqual(attributeResult.value[numberOfAttributes - 1].id);
         expect(returnedValue).toStrictEqual(responseItem.attribute.content.value);

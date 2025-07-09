@@ -1,4 +1,3 @@
-import { TokenDTO } from "../../src";
 import { NoLoginTestRuntime, RuntimeServiceProvider, TestRuntime, TestRuntimeServices, uploadOwnToken } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
@@ -18,14 +17,21 @@ afterAll(async () => {
 });
 
 describe("Anonymous tokens", () => {
-    let uploadedToken: TokenDTO;
-    beforeAll(async () => {
-        uploadedToken = await uploadOwnToken(runtimeService.transport);
+    test("should load the token anonymous by truncated reference", async () => {
+        const uploadedToken = await uploadOwnToken(runtimeService.transport);
+        const result = await noLoginRuntime.anonymousServices.tokens.loadPeerToken({
+            reference: uploadedToken.reference.truncated
+        });
+        expect(result).toBeSuccessful();
+
+        const token = result.value;
+        expect(token.content).toStrictEqual(uploadedToken.content);
     });
 
-    test("should get the token anonymous by truncated reference", async () => {
+    test("should load the token anonymous by url reference", async () => {
+        const uploadedToken = await uploadOwnToken(runtimeService.transport);
         const result = await noLoginRuntime.anonymousServices.tokens.loadPeerToken({
-            reference: uploadedToken.truncatedReference
+            reference: uploadedToken.reference.url
         });
         expect(result).toBeSuccessful();
 
@@ -36,7 +42,7 @@ describe("Anonymous tokens", () => {
     test("should catch a personalized token", async () => {
         const uploadedPersonalizedToken = await uploadOwnToken(runtimeService.transport, runtimeService.address);
         const result = await noLoginRuntime.anonymousServices.tokens.loadPeerToken({
-            reference: uploadedPersonalizedToken.truncatedReference
+            reference: uploadedPersonalizedToken.reference.truncated
         });
         expect(result).toBeAnError(/.*/, "error.transport.general.notIntendedForYou");
     });
@@ -45,7 +51,7 @@ describe("Anonymous tokens", () => {
         let tokenReference: string;
 
         beforeAll(async () => {
-            tokenReference = (await uploadOwnToken(runtimeService.transport, undefined, { password: "password" })).truncatedReference;
+            tokenReference = (await uploadOwnToken(runtimeService.transport, undefined, { password: "password" })).reference.truncated;
         });
 
         test("send and receive a password-protected token", async () => {

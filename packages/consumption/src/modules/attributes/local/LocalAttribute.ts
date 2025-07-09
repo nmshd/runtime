@@ -17,6 +17,7 @@ import { ILocalAttributeDeletionInfo, LocalAttributeDeletionInfo, LocalAttribute
 import { ILocalAttributeShareInfo, LocalAttributeShareInfo, LocalAttributeShareInfoJSON } from "./LocalAttributeShareInfo";
 
 export interface LocalAttributeJSON {
+    id: string;
     content: IdentityAttributeJSON | RelationshipAttributeJSON;
     createdAt: string;
     succeeds?: string;
@@ -25,6 +26,7 @@ export interface LocalAttributeJSON {
     deletionInfo?: LocalAttributeDeletionInfoJSON;
     parentId?: string;
     isDefault?: true;
+    wasViewedAt?: string;
 }
 
 export interface ILocalAttribute extends ICoreSynchronizable {
@@ -36,6 +38,7 @@ export interface ILocalAttribute extends ICoreSynchronizable {
     deletionInfo?: ILocalAttributeDeletionInfo;
     parentId?: ICoreId;
     isDefault?: true;
+    wasViewedAt?: ICoreDate;
 }
 
 export type OwnSharedIdentityAttribute = LocalAttribute & {
@@ -92,7 +95,8 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
         nameof<LocalAttribute>((r) => r.shareInfo),
         nameof<LocalAttribute>((r) => r.deletionInfo),
         nameof<LocalAttribute>((r) => r.parentId),
-        nameof<LocalAttribute>((r) => r.isDefault)
+        nameof<LocalAttribute>((r) => r.isDefault),
+        nameof<LocalAttribute>((r) => r.wasViewedAt)
     ];
 
     public override readonly userdataProperties = [nameof<LocalAttribute>((r) => r.content)];
@@ -128,6 +132,10 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
     @validate({ nullable: true })
     @serialize()
     public isDefault?: true;
+
+    @validate({ nullable: true })
+    @serialize()
+    public wasViewedAt?: CoreDate;
 
     public isOwnSharedIdentityAttribute(ownAddress: CoreAddress, peerAddress?: CoreAddress): this is OwnSharedIdentityAttribute {
         return this.isIdentityAttribute() && this.isOwnSharedAttribute(ownAddress, peerAddress);

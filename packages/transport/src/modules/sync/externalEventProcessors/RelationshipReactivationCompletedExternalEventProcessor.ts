@@ -16,6 +16,8 @@ export class RelationshipReactivationCompletedExternalEventProcessor extends Rel
         const result = await this.accountController.relationships.applyRelationshipChangedEvent(payload.relationshipId);
         const changedRelationship = result.changedRelationship;
 
+        if (!changedRelationship) return undefined;
+
         this.eventBus.publish(new RelationshipReactivationCompletedEvent(this.ownAddress, changedRelationship));
 
         this.triggerRelationshipChangedEvent(changedRelationship, result.oldRelationship);

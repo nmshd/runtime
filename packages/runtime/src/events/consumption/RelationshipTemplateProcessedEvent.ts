@@ -1,4 +1,4 @@
-import { RelationshipTemplateDTO } from "../../types";
+import { RelationshipTemplateDTO } from "@nmshd/runtime-types";
 import { DataEvent } from "../DataEvent";
 
 export class RelationshipTemplateProcessedEvent extends DataEvent<RelationshipTemplateProcessedEventData> {
@@ -17,7 +17,8 @@ export enum RelationshipTemplateProcessedResult {
     NonCompletedRequestExists = "NonCompletedRequestExists",
     RelationshipExists = "RelationshipExists",
     NoRequest = "NoRequest",
-    Error = "Error"
+    Error = "Error",
+    RequestExpired = "RequestExpired"
 }
 
 export type RelationshipTemplateProcessedEventData =
@@ -48,4 +49,8 @@ export type RelationshipTemplateProcessedEventData =
     | {
           template: RelationshipTemplateDTO;
           result: RelationshipTemplateProcessedResult.Error;
+      }
+    | {
+          template: RelationshipTemplateDTO;
+          result: RelationshipTemplateProcessedResult.RequestExpired;
       };

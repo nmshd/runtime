@@ -167,7 +167,7 @@ describe("RelationshipTemplateDVO", () => {
         expect(dvo.date).toStrictEqual(dto.createdAt);
         expect(dvo.expiresAt).toStrictEqual(dto.expiresAt);
         expect(dvo.createdBy.id).toStrictEqual(dto.createdBy);
-        expect(dvo.name).toStrictEqual(dto.content.title ? dto.content.title : "i18n://dvo.template.outgoing.name");
+        expect(dvo.name).toStrictEqual(dto.content.title ?? "i18n://dvo.template.outgoing.name");
         expect(dvo.isOwn).toBe(true);
         expect(dvo.maxNumberOfAllocations).toBe(1);
         expect(dvo.forIdentity).toBe(requestor.address);
@@ -193,7 +193,7 @@ describe("RelationshipTemplateDVO", () => {
     test("TemplateDVO for requestor", async () => {
         const requestorTemplate = (
             await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({
-                reference: templatorTemplate.truncatedReference,
+                reference: templatorTemplate.reference.truncated,
                 password: "password"
             })
         ).value as RelationshipTemplateDTO & { content: RelationshipTemplateContentJSON };
@@ -209,7 +209,7 @@ describe("RelationshipTemplateDVO", () => {
         expect(dvo.date).toStrictEqual(dto.createdAt);
         expect(dvo.expiresAt).toStrictEqual(dto.expiresAt);
         expect(dvo.createdBy.id).toStrictEqual(dto.createdBy);
-        expect(dvo.name).toStrictEqual(dto.content.title ? dto.content.title : "i18n://dvo.template.incoming.name");
+        expect(dvo.name).toStrictEqual(dto.content.title ?? "i18n://dvo.template.incoming.name");
         expect(dvo.isOwn).toBe(false);
         expect(dvo.maxNumberOfAllocations).toBe(1);
         expect(dvo.forIdentity).toBe(requestor.address);
@@ -239,7 +239,7 @@ describe("RelationshipTemplateDVO", () => {
                 "source.reference": templateId
             }
         });
-        await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.truncatedReference });
+        await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.reference.truncated });
         if (requestResult.value.length === 0) {
             await requestor.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
             requestResult = await requestor.consumption.incomingRequests.getRequests({
@@ -274,7 +274,7 @@ describe("RelationshipTemplateDVO", () => {
         });
         const requestorTemplate = (
             await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({
-                reference: templatorTemplate.truncatedReference,
+                reference: templatorTemplate.reference.truncated,
                 password: "password"
             })
         ).value as RelationshipTemplateDTO & { content: RelationshipTemplateContentJSON };
@@ -320,7 +320,7 @@ describe("RelationshipTemplateDVO", () => {
         expect(dvo.date).toStrictEqual(dto.createdAt);
         expect(dvo.expiresAt).toStrictEqual(dto.expiresAt);
         expect(dvo.createdBy.id).toStrictEqual(dto.createdBy);
-        expect(dvo.name).toStrictEqual(dto.content.title ? dto.content.title : "i18n://dvo.template.incoming.name");
+        expect(dvo.name).toStrictEqual(dto.content.title ?? "i18n://dvo.template.incoming.name");
         expect(dvo.isOwn).toBe(false);
         expect(dvo.maxNumberOfAllocations).toBe(1);
 

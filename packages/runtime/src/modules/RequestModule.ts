@@ -1,5 +1,7 @@
 import { LocalRequestStatus } from "@nmshd/consumption";
 import { RelationshipCreationContent, RequestJSON, ResponseJSON, ResponseResult, ResponseWrapper } from "@nmshd/content";
+import { CoreDate } from "@nmshd/core-types";
+import { LocalRequestDTO, RelationshipStatus } from "@nmshd/runtime-types";
 import {
     IncomingRequestStatusChangedEvent,
     MessageProcessedEvent,
@@ -12,7 +14,6 @@ import {
 import { RelationshipTemplateProcessedEvent, RelationshipTemplateProcessedResult } from "../events/consumption/RelationshipTemplateProcessedEvent";
 import { RuntimeModule } from "../extensibility/modules/RuntimeModule";
 import { RuntimeServices } from "../Runtime";
-import { LocalRequestDTO, RelationshipStatus } from "../types";
 
 export class RequestModule extends RuntimeModule {
     public init(): void {
@@ -92,6 +93,14 @@ export class RequestModule extends RuntimeModule {
         const activeRelationships = relationshipsToPeer.filter((r) => r.status === RelationshipStatus.Active);
         if (activeRelationships.length !== 0) {
             if (body.onExistingRelationship) {
+                if (body.onExistingRelationship.expiresAt && CoreDate.from(body.onExistingRelationship.expiresAt).isExpired()) {
+                    this.runtime.eventBus.publish(
+                        new RelationshipTemplateProcessedEvent(event.eventTargetAddress, { template, result: RelationshipTemplateProcessedResult.RequestExpired })
+                    );
+
+                    return;
+                }
+
                 const requestCreated = await this.createIncomingRequest(services, body.onExistingRelationship, template.id);
                 if (!requestCreated) {
                     this.runtime.eventBus.publish(
@@ -134,6 +143,14 @@ export class RequestModule extends RuntimeModule {
                     requestId: otherRequestsThatWouldLeadToARelationship[0].id
                 })
             );
+            return;
+        }
+
+        if (body.onNewRelationship.expiresAt && CoreDate.from(body.onNewRelationship.expiresAt).isExpired()) {
+            this.runtime.eventBus.publish(
+                new RelationshipTemplateProcessedEvent(event.eventTargetAddress, { template, result: RelationshipTemplateProcessedResult.RequestExpired })
+            );
+
             return;
         }
 
@@ -307,38 +324,50 @@ export class RequestModule extends RuntimeModule {
     }
 
     private async handleRelationshipChangedEvent(event: RelationshipChangedEvent) {
-        const createdRelationship = event.data;
+        const relationship = event.data;
         const services = await this.runtime.getServices(event.eventTargetAddress);
 
-        if (createdRelationship.status === RelationshipStatus.Rejected || createdRelationship.status === RelationshipStatus.Revoked) {
-            await services.consumptionServices.attributes.deleteSharedAttributesForRejectedOrRevokedRelationship({ relationshipId: createdRelationship.id });
+        if (relationship.status === RelationshipStatus.Rejected || relationship.status === RelationshipStatus.Revoked) {
+            await services.consumptionServices.attributes.deleteSharedAttributesForRejectedOrRevokedRelationship({ relationshipId: relationship.id });
             return;
         }
 
-        // only trigger for new relationships that were created from an own template
-        if (createdRelationship.status !== RelationshipStatus.Pending || !createdRelationship.template.isOwn) return;
+        if (relationship.status === RelationshipStatus.DeletionProposed) {
+            await services.consumptionServices.attributes.setAttributeDeletionInfoOfDeletionProposedRelationship({
+                relationshipId: relationship.id
+            });
+        }
 
-        const template = createdRelationship.template;
-        const templateId = template.id;
+        // only trigger for new relationships that were created from an own template
+        const relationshipIsNotPending = relationship.status !== RelationshipStatus.Pending;
+        const relationshipIsCreatedByCurrentAccount = relationship.auditLog[0].createdBy === event.eventTargetAddress;
+        if (relationshipIsNotPending || relationshipIsCreatedByCurrentAccount) return;
+
+        const templateId = relationship.templateId;
+
+        const templateResult = await services.transportServices.relationshipTemplates.getRelationshipTemplate({ id: templateId });
+        if (templateResult.isError) {
+            this.logger.error(`Could not get template with id '${templateId}'. Root error:`, templateResult.error);
+            return;
+        }
+
+        const template = templateResult.value;
+
         // do not trigger for templates without the correct content type
         if (template.content["@type"] !== "RelationshipTemplateContent") return;
-        if (createdRelationship.creationContent["@type"] !== "RelationshipCreationContent") {
-            this.logger.error(`The creation content of relationshipId ${createdRelationship.id} is not of type RelationshipCreationContent.`);
+        if (relationship.creationContent["@type"] !== "RelationshipCreationContent") {
+            this.logger.error(`The creation content of relationshipId ${relationship.id} is not of type RelationshipCreationContent.`);
             return;
         }
 
         const result = await services.consumptionServices.outgoingRequests.createAndCompleteFromRelationshipTemplateResponse({
             templateId,
-            responseSourceId: createdRelationship.id,
-            response: createdRelationship.creationContent.response
+            responseSourceId: relationship.id,
+            response: relationship.creationContent.response
         });
         if (result.isError) {
-            this.logger.error(`Could not create and complete request for templateId '${templateId}' and relationshipId '${createdRelationship.id}'. Root error:`, result.error);
+            this.logger.error(`Could not create and complete request for templateId '${templateId}' and relationshipId '${relationship.id}'. Root error:`, result.error);
             return;
         }
-    }
-
-    public stop(): void {
-        this.unsubscribeFromAllEvents();
     }
 }

@@ -1,15 +1,11 @@
 import { Result } from "@js-soft/ts-utils";
+import { FileDTO, TokenDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { FileDTO, TokenDTO } from "../../../types";
 import {
-    CreateQRCodeForFileRequest,
-    CreateQRCodeForFileResponse,
-    CreateQRCodeForFileUseCase,
     CreateTokenForFileRequest,
     CreateTokenForFileUseCase,
-    CreateTokenQRCodeForFileRequest,
-    CreateTokenQRCodeForFileResponse,
-    CreateTokenQRCodeForFileUseCase,
+    DeleteFileRequest,
+    DeleteFileUseCase,
     DownloadFileRequest,
     DownloadFileResponse,
     DownloadFileUseCase,
@@ -19,6 +15,8 @@ import {
     GetFilesUseCase,
     GetOrLoadFileRequest,
     GetOrLoadFileUseCase,
+    RegenerateFileOwnershipTokenRequest,
+    RegenerateFileOwnershipTokenUseCase,
     UploadOwnFileRequest,
     UploadOwnFileUseCase
 } from "../../../useCases";
@@ -30,9 +28,9 @@ export class FilesFacade {
         @Inject private readonly getFilesUseCase: GetFilesUseCase,
         @Inject private readonly downloadFileUseCase: DownloadFileUseCase,
         @Inject private readonly getFileUseCase: GetFileUseCase,
-        @Inject private readonly createQRCodeForFileUseCase: CreateQRCodeForFileUseCase,
+        @Inject private readonly deleteFileUseCase: DeleteFileUseCase,
         @Inject private readonly createTokenForFileUseCase: CreateTokenForFileUseCase,
-        @Inject private readonly createTokenQRCodeForFileUseCase: CreateTokenQRCodeForFileUseCase
+        @Inject private readonly regenerateFileOwnershipTokenUseCase: RegenerateFileOwnershipTokenUseCase
     ) {}
 
     public async getFiles(request: GetFilesRequest): Promise<Result<FileDTO[]>> {
@@ -55,15 +53,15 @@ export class FilesFacade {
         return await this.uploadOwnFileUseCase.execute(request);
     }
 
-    public async createQRCodeForFile(request: CreateQRCodeForFileRequest): Promise<Result<CreateQRCodeForFileResponse>> {
-        return await this.createQRCodeForFileUseCase.execute(request);
+    public async deleteFile(request: DeleteFileRequest): Promise<Result<void>> {
+        return await this.deleteFileUseCase.execute(request);
     }
 
     public async createTokenForFile(request: CreateTokenForFileRequest): Promise<Result<TokenDTO>> {
         return await this.createTokenForFileUseCase.execute(request);
     }
 
-    public async createTokenQRCodeForFile(request: CreateTokenQRCodeForFileRequest): Promise<Result<CreateTokenQRCodeForFileResponse>> {
-        return await this.createTokenQRCodeForFileUseCase.execute(request);
+    public async regenerateFileOwnershipToken(request: RegenerateFileOwnershipTokenRequest): Promise<Result<FileDTO>> {
+        return await this.regenerateFileOwnershipTokenUseCase.execute(request);
     }
 }

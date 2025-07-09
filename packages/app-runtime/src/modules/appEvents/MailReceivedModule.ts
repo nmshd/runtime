@@ -1,10 +1,7 @@
-import { AppRuntimeError } from "../../AppRuntimeError";
 import { MailReceivedEvent } from "../../events";
 import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "../AppRuntimeModule";
 
 export interface MailReceivedModuleConfig extends AppRuntimeModuleConfiguration {}
-
-export class MailReceivedModuleError extends AppRuntimeError {}
 
 export class MailReceivedModule extends AppRuntimeModule<MailReceivedModuleConfig> {
     public async init(): Promise<void> {
@@ -21,15 +18,11 @@ export class MailReceivedModule extends AppRuntimeModule<MailReceivedModuleConfi
         const mail = event.data;
         const sender = mail.createdBy;
 
-        await this.runtime.nativeEnvironment.notificationAccess.schedule(mail.name, mail.createdBy.name, {
+        await this.runtime.notificationAccess.schedule(mail.name, mail.createdBy.name, {
             callback: async () => {
                 const uiBridge = await this.runtime.uiBridge();
                 await uiBridge.showMessage(session.account, sender, mail);
             }
         });
-    }
-
-    public stop(): void {
-        this.unsubscribeFromAllEvents();
     }
 }

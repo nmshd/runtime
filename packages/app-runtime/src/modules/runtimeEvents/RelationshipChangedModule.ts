@@ -1,11 +1,8 @@
 import { RelationshipAuditLogEntryReason, RelationshipChangedEvent } from "@nmshd/runtime";
-import { AppRuntimeError } from "../../AppRuntimeError";
 import { OnboardingChangeReceivedEvent } from "../../events";
 import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "../AppRuntimeModule";
 
 export interface RelationshipChangedModuleConfig extends AppRuntimeModuleConfiguration {}
-
-export class RelationshipChangedModuleError extends AppRuntimeError {}
 
 export class RelationshipChangedModule extends AppRuntimeModule<RelationshipChangedModuleConfig> {
     public async init(): Promise<void> {
@@ -40,9 +37,5 @@ export class RelationshipChangedModule extends AppRuntimeModule<RelationshipChan
 
         const eventToPublish = new OnboardingChangeReceivedEvent(event.eventTargetAddress, relationship, lastAuditLogEntry, relationshipDVO);
         this.runtime.eventBus.publish(eventToPublish);
-    }
-
-    public stop(): void {
-        this.unsubscribeFromAllEvents();
     }
 }

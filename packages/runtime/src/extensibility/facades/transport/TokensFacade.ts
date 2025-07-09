@@ -1,12 +1,11 @@
 import { Result } from "@js-soft/ts-utils";
+import { TokenDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { TokenDTO } from "../../../types";
 import {
     CreateOwnTokenRequest,
     CreateOwnTokenUseCase,
-    GetQRCodeForTokenRequest,
-    GetQRCodeForTokenResponse,
-    GetQRCodeForTokenUseCase,
+    DeleteTokenRequest,
+    DeleteTokenUseCase,
     GetTokenRequest,
     GetTokensRequest,
     GetTokensUseCase,
@@ -21,7 +20,7 @@ export class TokensFacade {
         @Inject private readonly loadPeerTokenUseCase: LoadPeerTokenUseCase,
         @Inject private readonly getTokensUseCase: GetTokensUseCase,
         @Inject private readonly getTokenUseCase: GetTokenUseCase,
-        @Inject private readonly getQRCodeForTokenUseCase: GetQRCodeForTokenUseCase
+        @Inject private readonly deleteTokenUseCase: DeleteTokenUseCase
     ) {}
 
     public async createOwnToken(request: CreateOwnTokenRequest): Promise<Result<TokenDTO>> {
@@ -40,7 +39,7 @@ export class TokensFacade {
         return await this.getTokenUseCase.execute(request);
     }
 
-    public async getQRCodeForToken(request: GetQRCodeForTokenRequest): Promise<Result<GetQRCodeForTokenResponse>> {
-        return await this.getQRCodeForTokenUseCase.execute(request);
+    public async deleteToken(request: DeleteTokenRequest): Promise<Result<void>> {
+        return await this.deleteTokenUseCase.execute(request);
     }
 }

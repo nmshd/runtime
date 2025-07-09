@@ -16,7 +16,7 @@ This workspace provides two types of scripts:
 
     These can be run by `npm run <scriptname>` from the package directory or by `npm run -w packages/<package> <scriptname>` from the root of the project.
 
-    Additionally, you can run a script in all workspaces by `npm run -ws --if-present <scriptname>`.
+    Additionally, you can run a script in all workspaces by `npm run --workspaces --if-present <scriptname>`.
 
 ## Linting
 
@@ -39,6 +39,8 @@ Set the following environment variables:
 - `NMSHD_TEST_BASEURL` (the Backbone baseUrl to test against)
 - `NMSHD_TEST_CLIENTID` (the Backbone clientId for the configured baseUrl)
 - `NMSHD_TEST_CLIENTSECRET` (the Backbone clientSecret for the configured baseUrl)
+- `NMSHD_TEST_BASEURL_ADMIN_API` (the Backbone admin API baseUrl to test against)
+- `NMSHD_TEST_ADMIN_API_KEY` (the Backbone admin API key for the configured baseUrl)
 
 > We recommend to persist these variables for example in your `.bashrc` / `.zshrc` or in the Windows environment variables.
 
@@ -55,6 +57,8 @@ Set the following environment variables:
 - `NMSHD_TEST_BASEURL` to `http://localhost:8090`
 - `NMSHD_TEST_CLIENTID` to `test`
 - `NMSHD_TEST_CLIENTSECRET` to `test`
+- `NMSHD_TEST_BASEURL_ADMIN_API` to `http://localhost:8091`
+- `NMSHD_TEST_ADMIN_API_KEY` to `test`
 
 > We recommend to persist these variables for example in your `.bashrc` / `.zshrc` or in the Windows environment variables.
 

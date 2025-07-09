@@ -1,11 +1,8 @@
 import { MessageReceivedEvent } from "@nmshd/runtime";
-import { AppRuntimeError } from "../../AppRuntimeError";
 import { MailReceivedEvent } from "../../events";
 import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "../AppRuntimeModule";
 
 export interface MessageReceivedModuleConfig extends AppRuntimeModuleConfiguration {}
-
-export class MessageReceivedModuleError extends AppRuntimeError {}
 
 export class MessageReceivedModule extends AppRuntimeModule<MessageReceivedModuleConfig> {
     public async init(): Promise<void> {
@@ -27,9 +24,5 @@ export class MessageReceivedModule extends AppRuntimeModule<MessageReceivedModul
             default:
                 break;
         }
-    }
-
-    public stop(): void {
-        this.unsubscribeFromAllEvents();
     }
 }

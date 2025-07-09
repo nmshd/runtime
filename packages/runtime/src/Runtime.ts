@@ -2,7 +2,6 @@ import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { ILogger, ILoggerFactory } from "@js-soft/logging-abstractions";
 import { EventBus, EventEmitter2EventBus } from "@js-soft/ts-utils";
 import {
-    AttributeListenersController,
     AttributesController,
     ConsumptionController,
     DraftsController,
@@ -13,8 +12,10 @@ import {
     SettingsController
 } from "@nmshd/consumption";
 import { ICoreAddress } from "@nmshd/core-types";
+import { RuntimeHealth } from "@nmshd/runtime-types";
 import {
     AccountController,
+    AnnouncementController,
     AnonymousTokenController,
     BackboneCompatibilityController,
     ChallengeController,
@@ -33,15 +34,15 @@ import {
 } from "@nmshd/transport";
 import { Container, Scope } from "@nmshd/typescript-ioc";
 import { buildInformation } from "./buildInformation";
+import { ConfigHolder } from "./ConfigHolder";
 import { DatabaseSchemaUpgrader } from "./DatabaseSchemaUpgrader";
 import { DataViewExpander } from "./dataViews";
 import { ModulesInitializedEvent, ModulesLoadedEvent, ModulesStartedEvent, RuntimeInitializedEvent, RuntimeInitializingEvent } from "./events";
 import { EventProxy } from "./events/EventProxy";
-import { AnonymousServices, ConsumptionServices, ModuleConfiguration, RuntimeModule, RuntimeModuleRegistry, TransportServices } from "./extensibility";
-import { AttributeListenerModule, DeciderModule, MessageModule, NotificationModule, RequestModule } from "./modules";
+import { AnonymousServices, ConsumptionServices, ModuleConfiguration, RuntimeModuleRegistry, TransportServices } from "./extensibility";
+import { DeciderModule, MessageModule, NotificationModule, RequestModule } from "./modules";
 import { RuntimeConfig } from "./RuntimeConfig";
 import { RuntimeLoggerFactory } from "./RuntimeLoggerFactory";
-import { RuntimeHealth } from "./types";
 import { RuntimeErrors } from "./useCases";
 import { AbstractCorrelator } from "./useCases/common/AbstractCorrelator";
 import { SchemaRepository } from "./useCases/common/SchemaRepository";
@@ -58,6 +59,7 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
         return this._logger;
     }
 
+    protected databaseConnection: IDatabaseConnection;
     protected transport: Transport;
 
     private _anonymousServices: AnonymousServices;
@@ -121,7 +123,7 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
         this._eventBus =
             eventBus ??
             new EventEmitter2EventBus((error, namespace) => {
-                this.logger.error(`An error was thrown in an event handler of the runtime event bus (namespace: '${namespace}'). Root error: ${error}`);
+                this.logger.error(`An error was thrown in an event handler of the Runtime event bus (namespace: '${namespace}'). Root error: ${error}`);
             });
     }
 
@@ -138,6 +140,8 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
         this.eventBus.publish(new RuntimeInitializingEvent());
 
         await this.initDIContainer();
+
+        this.databaseConnection = await this.createDatabaseConnection();
 
         await this.initTransportLibrary();
         await this.initAccount();
@@ -176,8 +180,6 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
     private async initTransportLibrary() {
         this.logger.debug("Initializing Database connection... ");
 
-        const databaseConnection = await this.createDatabaseConnection();
-
         const transportConfig = this.createTransportConfigWithAdditionalHeaders({
             ...this.runtimeConfig.transportLibrary,
             supportedIdentityVersion: 1
@@ -187,7 +189,7 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
             this.logger.error(`An error was thrown in an event handler of the transport event bus (namespace: '${namespace}'). Root error: ${error}`);
         });
 
-        this.transport = new Transport(databaseConnection, transportConfig, eventBus, this.loggerFactory, this.correlator);
+        this.transport = new Transport(transportConfig, eventBus, this.loggerFactory, this.correlator);
 
         this.logger.debug("Initializing Transport Library...");
         await this.transport.init();
@@ -211,6 +213,10 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
                 .scope(Scope.Request);
         }
 
+        Container.bind(ConfigHolder)
+            .factory(() => new ConfigHolder(this.runtimeConfig))
+            .scope(Scope.Request);
+
         Container.bind(EventBus)
             .factory(() => this.eventBus)
             .scope(Scope.Singleton);
@@ -221,6 +227,10 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
 
         Container.bind(AccountController)
             .factory(() => this.getAccountController())
+            .scope(Scope.Request);
+
+        Container.bind(AnnouncementController)
+            .factory(() => this.getAccountController().announcements)
             .scope(Scope.Request);
 
         Container.bind(DevicesController)
@@ -275,10 +285,6 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
             .factory(() => this.getConsumptionController().attributes)
             .scope(Scope.Request);
 
-        Container.bind(AttributeListenersController)
-            .factory(() => this.getConsumptionController().attributeListeners)
-            .scope(Scope.Request);
-
         Container.bind(DraftsController)
             .factory(() => this.getConsumptionController().drafts)
             .scope(Scope.Request);
@@ -321,16 +327,16 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
     private async loadModules() {
         this.logger.info("Loading modules...");
 
-        for (const moduleName in this.runtimeConfig.modules) {
-            const moduleConfiguration = this.runtimeConfig.modules[moduleName];
+        for (const key in this.runtimeConfig.modules) {
+            const moduleConfiguration = this.runtimeConfig.modules[key];
 
             if (!moduleConfiguration.enabled) {
-                this.logger.debug(`Skip loading module '${this.getModuleName(moduleConfiguration)}' because it is not enabled.`);
+                this.logger.debug(`Skip loading module at location '${moduleConfiguration.location}' because it is not enabled.`);
                 continue;
             }
 
             if (!moduleConfiguration.location) {
-                this.logger.error(`Skip loading module '${this.getModuleName(moduleConfiguration)}' because has no location.`);
+                this.logger.error(`Skip loading module because the location '${moduleConfiguration.location}' is invalid.`);
                 continue;
             }
 
@@ -341,6 +347,18 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
             }
 
             await this.loadModule(moduleConfiguration);
+        }
+
+        // iterate modules and check if they are allowed to be loaded multiple times
+        for (const module of this.modules) {
+            if (!(module.constructor as Function & { denyMultipleInstances: boolean }).denyMultipleInstances) continue;
+
+            const instances = this.modules.toArray().filter((m) => m.constructor === module.constructor);
+            if (instances.length === 1) continue;
+
+            throw new Error(
+                `The Module '${module.displayName}' at location '${module.configuration.location}' is not allowed to be used multiple times, but it has ${instances.length} instances.`
+            );
         }
 
         this.eventBus.publish(new ModulesLoadedEvent());
@@ -362,16 +380,12 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
                 const messageModule = new MessageModule(this, moduleConfiguration, this.loggerFactory.getLogger(MessageModule));
                 this.modules.add(messageModule);
                 break;
-            case "AttributeListenerModule":
-                const attributeListenerModule = new AttributeListenerModule(this, moduleConfiguration, this.loggerFactory.getLogger(AttributeListenerModule));
-                this.modules.add(attributeListenerModule);
-                break;
             case "NotificationModule":
                 const notificationModule = new NotificationModule(this, moduleConfiguration, this.loggerFactory.getLogger(NotificationModule));
                 this.modules.add(notificationModule);
                 break;
             default:
-                throw new Error(`Module ${moduleConfiguration.name} is not a builtin module.`);
+                throw new Error(`Module ${moduleConfiguration.location} is not a builtin module.`);
         }
     }
 
@@ -383,9 +397,9 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
         for (const module of this.modules.toArray()) {
             try {
                 await module.init();
-                this.logger.info(`Module '${this.getModuleName(module)}' was initialized successfully.`);
+                this.logger.info(`Module '${module.displayName}' was initialized successfully.`);
             } catch (e) {
-                this.logger.error(`Module '${this.getModuleName(module)}' could not be initialized.`, e);
+                this.logger.error(`Module '${module.displayName}' could not be initialized.`, e);
                 throw e;
             }
         }
@@ -452,9 +466,9 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
         for (const module of this.modules.toArray()) {
             try {
                 await module.stop();
-                this.logger.info(`Module '${this.getModuleName(module)}' was stopped successfully.`);
+                this.logger.info(`Module '${module.displayName}' was stopped successfully.`);
             } catch (e) {
-                this.logger.error(`An Error occured while stopping module '${this.getModuleName(module)}': `, e);
+                this.logger.error(`An Error occured while stopping module '${module.displayName}': `, e);
             }
         }
 
@@ -467,18 +481,14 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
         for (const module of this.modules.toArray()) {
             try {
                 await module.start();
-                this.logger.info(`Module '${this.getModuleName(module)}' was started successfully.`);
+                this.logger.info(`Module '${module.displayName}' was started successfully.`);
             } catch (e) {
-                this.logger.error(`Module '${this.getModuleName(module)}' could not be started.`, e);
+                this.logger.error(`Module '${module.displayName}' could not be started.`, e);
                 throw e;
             }
         }
 
         this.eventBus.publish(new ModulesStartedEvent());
         this.logger.info("Started all modules.");
-    }
-
-    protected getModuleName(moduleConfiguration: ModuleConfiguration | RuntimeModule): string {
-        return moduleConfiguration.displayName || moduleConfiguration.name || JSON.stringify(moduleConfiguration);
     }
 }

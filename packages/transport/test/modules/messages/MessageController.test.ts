@@ -42,11 +42,11 @@ describe("MessageController", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 4);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 4);
         sender = accounts[0];
         recipient = accounts[1];
         recipient2 = accounts[2];
@@ -117,8 +117,7 @@ describe("MessageController", function () {
             tempDate = CoreDate.utc().subtract(TestUtil.tempDateThreshold);
             const sentMessage = await TestUtil.sendMessage(sender, recipient);
 
-            const messages = await TestUtil.syncUntilHasMessages(recipient, 1);
-            const receivedMessage = messages[0];
+            const receivedMessage = (await TestUtil.syncUntilHasMessage(recipient, sentMessage.id))[0];
 
             tempId1 = sentMessage.id;
 

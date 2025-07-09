@@ -101,9 +101,9 @@ describe("Requests", () => {
             expect((sLocalRequest.content.items[0] as TestRequestItemJSON).mustBeAccepted).toBe(false);
         });
 
-        // eslint-disable-next-line jest/expect-expect
         test("sender: send the outgoing Request via Message", async () => {
-            await sendMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
+            const promise = sendMessageWithRequest(sRuntimeServices, rRuntimeServices, requestContent);
+            await expect(promise).resolves.not.toThrow();
         });
 
         test("sender: mark the outgoing Request as sent", async () => {
@@ -581,7 +581,7 @@ describe("Requests", () => {
             const completionResult = await sConsumptionServices.outgoingRequests.createAndCompleteFromRelationshipTemplateResponse({
                 responseSourceId: sRelationship.id,
                 response: (sRelationship.creationContent as RelationshipCreationContentJSON).response,
-                templateId: relationship!.template.id
+                templateId: relationship!.templateId
             });
 
             expect(completionResult).toBeSuccessful();
@@ -648,7 +648,8 @@ describe("Requests", () => {
             expect(rLocalRequest.status).toBe(LocalRequestStatus.Expired);
             expect(rLocalRequest.response).toBeUndefined();
 
-            expect(triggeredEvent).toBeUndefined();
+            expect(triggeredEvent).toBeDefined();
+            expect(triggeredEvent!.data.newStatus).toBe(LocalRequestStatus.Expired);
         });
 
         test("change status of Request when querying Requests if the underlying RelationshipTemplate is expired", async () => {
@@ -670,7 +671,32 @@ describe("Requests", () => {
             expect(rLocalRequest.status).toBe(LocalRequestStatus.Expired);
             expect(rLocalRequest.response).toBeUndefined();
 
-            expect(triggeredEvent).toBeUndefined();
+            expect(triggeredEvent).toBeDefined();
+            expect(triggeredEvent!.data.newStatus).toBe(LocalRequestStatus.Expired);
+        });
+
+        test("can not delete a Request when it is not expired", async () => {
+            const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent)).request;
+
+            await expect(rConsumptionServices.incomingRequests.delete({ requestId: request.id })).resolves.toBeAnError(
+                "is in status 'ManualDecisionRequired'. At the moment, you can only delete incoming Requests that are expired.",
+                "error.consumption.requests.canOnlyDeleteIncomingRequestThatIsExpired"
+            );
+        });
+
+        test("can delete a Request when it is expired", async () => {
+            const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent, DateTime.utc().plus({ seconds: 3 })))
+                .request;
+
+            await sleep(3000);
+
+            const rLocalRequest = (await rConsumptionServices.incomingRequests.getRequest({ id: request.id })).value;
+            expect(rLocalRequest.status).toBe(LocalRequestStatus.Expired);
+
+            await expect(rConsumptionServices.incomingRequests.delete({ requestId: request.id })).resolves.toBeSuccessful();
+
+            const rLocalRequestAfterDelete = await rConsumptionServices.incomingRequests.getRequest({ id: request.id });
+            expect(rLocalRequestAfterDelete).toBeAnError("LocalRequest not found.", "error.runtime.recordNotFound");
         });
 
         describe.each([
@@ -711,7 +737,8 @@ describe("Requests", () => {
                 expect(rLocalRequest.status).toBe(LocalRequestStatus.Expired);
                 expect(rLocalRequest.response).toBeUndefined();
 
-                expect(triggeredEvent).toBeUndefined();
+                expect(triggeredEvent).toBeDefined();
+                expect(triggeredEvent!.data.newStatus).toBe(LocalRequestStatus.Expired);
             });
         });
     });

@@ -14,12 +14,14 @@ import {
     MessageReceivedEvent,
     MessageSentEvent,
     MessageWasReadAtChangedEvent,
+    OutgoingRequestStatusChangedEvent,
     OwnSharedAttributeSucceededEvent,
     PeerDeletionCancelledEvent,
     PeerToBeDeletedEvent,
     RelationshipStatus
 } from "../../src";
 import {
+    cleanupMessages,
     emptyRelationshipCreationContent,
     ensureActiveRelationship,
     establishRelationship,
@@ -51,8 +53,7 @@ let client5: TestRuntimeServices;
 beforeAll(async () => {
     const runtimeServices = await serviceProvider.launch(5, {
         enableRequestModule: true,
-        enableDeciderModule: true,
-        enableNotificationModule: true
+        enableDeciderModule: true
     });
     client1 = runtimeServices[0];
     client2 = runtimeServices[1];
@@ -63,7 +64,8 @@ beforeAll(async () => {
     await ensureActiveRelationship(client1.transport, client3.transport);
 }, 30000);
 
-beforeEach(() => {
+beforeEach(async () => {
+    await cleanupMessages([client1, client2, client3, client4, client5]);
     client1.eventBus.reset();
 });
 
@@ -84,9 +86,9 @@ describe("Messaging", () => {
             recipients: [client2.address],
             content: {
                 "@type": "Mail",
-                body: "b",
+                body: "aBody",
                 cc: [],
-                subject: "a",
+                subject: "aSubject",
                 to: [client2.address]
             },
             attachments: [fileId]
@@ -104,8 +106,8 @@ describe("Messaging", () => {
         expect(message.id).toStrictEqual(messageId);
         expect(message.content).toStrictEqual({
             "@type": "Mail",
-            subject: "This is the mail subject",
-            body: "This is the mail body",
+            subject: "aSubject",
+            body: "aBody",
             cc: [],
             to: [client2.address]
         });
@@ -124,8 +126,8 @@ describe("Messaging", () => {
         expect(message.id).toStrictEqual(messageId);
         expect(message.content).toStrictEqual({
             "@type": "Mail",
-            subject: "This is the mail subject",
-            body: "This is the mail body",
+            subject: "aSubject",
+            body: "aBody",
             cc: [],
             to: [client2.address]
         });
@@ -145,9 +147,9 @@ describe("Messaging", () => {
             recipients: [client2.address, client3.address],
             content: {
                 "@type": "Mail",
-                body: "b",
+                body: "aBody",
                 cc: [client3.address],
-                subject: "a",
+                subject: "aSubject",
                 to: [client2.address]
             },
             attachments: [fileId]
@@ -179,7 +181,20 @@ describe("Message errors", () => {
         requestId = createRequestResult.id;
     });
 
-    test("should throw correct error for empty 'to' in the Message", async () => {
+    test("should throw correct error for duplicate recipient in the Message", async () => {
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client2.address, client2.address],
+            content: {
+                "@type": "Mail",
+                to: [],
+                subject: "A Subject",
+                body: "A Body"
+            }
+        });
+        expect(result).toBeAnError("recipients must NOT have duplicate items", "error.runtime.validation.invalidPropertyValue");
+    });
+
+    test("should throw correct error for duplicate attachment in the Message", async () => {
         const result = await client1.transport.messages.sendMessage({
             recipients: [client2.address],
             content: {
@@ -187,6 +202,20 @@ describe("Message errors", () => {
                 to: [],
                 subject: "A Subject",
                 body: "A Body"
+            },
+            attachments: ["FIL12345678901234567", "FIL12345678901234567"]
+        });
+        expect(result).toBeAnError("attachments must NOT have duplicate items", "error.runtime.validation.invalidPropertyValue");
+    });
+
+    test("should throw correct error for empty 'to' in the Message", async () => {
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client2.address],
+            content: {
+                "@type": "Mail",
+                to: [],
+                subject: "aSubject",
+                body: "aBody"
             }
         });
         expect(result).toBeAnError("Mail.to:Array :: may not be empty", "error.runtime.requestDeserialization");
@@ -197,11 +226,101 @@ describe("Message errors", () => {
             recipients: [client2.address],
             content: {
                 "@type": "Mail",
+                subject: "aSubject",
+                body: "aBody"
+            }
+        });
+        expect(result).toBeAnError("Mail.to :: Value is not defined", "error.runtime.requestDeserialization");
+    });
+
+    test("should throw correct error for a Mail recipient listed multiple times in 'to'", async () => {
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client2.address],
+            content: {
+                "@type": "Mail",
+                to: [client2.address, client2.address],
                 subject: "A Subject",
                 body: "A Body"
             }
         });
-        expect(result).toBeAnError("Mail.to :: Value is not defined", "error.runtime.requestDeserialization");
+        expect(result).toBeAnError("Some recipients in 'to' are listed multiple times.", "error.runtime.validation.invalidPropertyValue");
+    });
+
+    test("should throw correct error for a Mail recipient listed multiple times in 'cc'", async () => {
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client2.address],
+            content: {
+                "@type": "Mail",
+                to: [client2.address],
+                cc: ["did:e:a-domain:dids:an-identity", "did:e:a-domain:dids:an-identity"],
+                subject: "A Subject",
+                body: "A Body"
+            }
+        });
+        expect(result).toBeAnError("Some recipients in 'cc' are listed multiple times.", "error.runtime.validation.invalidPropertyValue");
+    });
+
+    test("should throw correct error for a Message recipient not listed in 'to' or 'cc'", async () => {
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client2.address, client3.address],
+            content: {
+                "@type": "Mail",
+                to: [client2.address],
+                subject: "A Subject",
+                body: "A Body"
+            }
+        });
+        expect(result).toBeAnError(
+            `The identities '${client3.address}' are not listed among both the Message recipients and the recipients in 'to'/'cc'.`,
+            "error.runtime.validation.invalidPropertyValue"
+        );
+    });
+
+    test("should throw correct error for an identity in 'to' not listed as Message recipient", async () => {
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client2.address],
+            content: {
+                "@type": "Mail",
+                to: [client2.address, "did:e:a-domain:dids:an-identity"],
+                subject: "A Subject",
+                body: "A Body"
+            }
+        });
+        expect(result).toBeAnError(
+            "The identities 'did:e:a-domain:dids:an-identity' are not listed among both the Message recipients and the recipients in 'to'/'cc'.",
+            "error.runtime.validation.invalidPropertyValue"
+        );
+    });
+
+    test("should throw correct error for an identity in 'cc' not listed as Message recipient", async () => {
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client2.address],
+            content: {
+                "@type": "Mail",
+                to: [client2.address],
+                cc: ["did:e:a-domain:dids:an-identity"],
+                subject: "A Subject",
+                body: "A Body"
+            }
+        });
+        expect(result).toBeAnError(
+            "The identities 'did:e:a-domain:dids:an-identity' are not listed among both the Message recipients and the recipients in 'to'/'cc'.",
+            "error.runtime.validation.invalidPropertyValue"
+        );
+    });
+
+    test("should throw correct error for an identity in both 'to' and 'cc'", async () => {
+        const result = await client1.transport.messages.sendMessage({
+            recipients: [client2.address],
+            content: {
+                "@type": "Mail",
+                to: [client2.address],
+                cc: [client2.address],
+                subject: "A Subject",
+                body: "A Body"
+            }
+        });
+        expect(result).toBeAnError(`The recipients '${client2.address}' are put into both 'to' and 'cc'.`, "error.runtime.validation.invalidPropertyValue");
     });
 
     test("should throw correct error for false content type", async () => {
@@ -250,6 +369,7 @@ describe("Message errors", () => {
     test("should throw correct error for trying to send a Message with a Request content that doesn't match the content of the LocalRequest", async () => {
         const wrongRequestItem = {
             "@type": "AuthenticationRequestItem",
+            title: "aTitle",
             mustBeAccepted: true
         };
         const result = await client1.transport.messages.sendMessage({
@@ -330,15 +450,42 @@ describe("Message errors", () => {
         expect(client2ExpiredRequestResult.value.status).toBe(LocalRequestStatus.Expired);
     });
 
+    test("should throw correct error for trying to send multiple Messages with the same Request", async () => {
+        const result1 = await client1.transport.messages.sendMessage({
+            recipients: [client2.address],
+            content: {
+                "@type": "Request",
+                id: requestId,
+                items: [requestItem]
+            }
+        });
+        expect(result1).toBeSuccessful();
+
+        await syncUntilHasEvent(client1, OutgoingRequestStatusChangedEvent, (e) => e.data.request.id === requestId);
+
+        const result2 = await client1.transport.messages.sendMessage({
+            recipients: [client2.address],
+            content: {
+                "@type": "Request",
+                id: requestId,
+                items: [requestItem]
+            }
+        });
+        expect(result2).toBeAnError(
+            `The Message cannot be sent as the contained Request has already been sent. Please create a new Request and try again.`,
+            "error.runtime.messages.cannotSendRequestThatWasAlreadySent"
+        );
+    });
+
     describe("Message errors for Relationships that are not active", () => {
         test("should throw correct error for trying to send a Message if there are recipients to which no Relationship exists", async () => {
             const result = await client1.transport.messages.sendMessage({
                 recipients: [client4.address, client5.address],
                 content: {
                     "@type": "Mail",
-                    body: "b",
+                    body: "aBody",
                     cc: [client4.address],
-                    subject: "a",
+                    subject: "aSubject",
                     to: [client5.address]
                 }
             });
@@ -363,9 +510,9 @@ describe("Message errors", () => {
                 recipients: [client2.address, client4.address],
                 content: {
                     "@type": "Mail",
-                    body: "b",
+                    body: "aBody",
                     cc: [client2.address],
-                    subject: "a",
+                    subject: "aSubject",
                     to: [client4.address]
                 }
             });
@@ -387,9 +534,9 @@ describe("Message errors", () => {
                 recipients: [client3.address],
                 content: {
                     "@type": "Mail",
-                    body: "b",
+                    body: "aBody",
                     cc: [],
-                    subject: "a",
+                    subject: "aSubject",
                     to: [client3.address]
                 }
             });
@@ -503,7 +650,7 @@ describe("Postponed Notifications via Messages", () => {
 
             const postponedMessages = await syncUntilHasMessages(client5.transport);
             expect(postponedMessages).toHaveLength(1);
-            await client5.eventBus.waitForRunningEventHandlers();
+            await client5.consumption.notifications.receivedNotification({ messageId: postponedMessages[0].id });
             const postponedNotification = await client5.consumption.notifications.getNotification({ id: notificationId.toString() });
             expect(postponedNotification).toBeSuccessful();
         });
@@ -513,7 +660,7 @@ describe("Postponed Notifications via Messages", () => {
                 content: {
                     value: {
                         "@type": "GivenName",
-                        value: "A given name"
+                        value: "aGivenName"
                     }
                 }
             });
@@ -528,7 +675,7 @@ describe("Postponed Notifications via Messages", () => {
                     successorContent: {
                         value: {
                             "@type": "GivenName",
-                            value: "A new given name"
+                            value: "aNewGivenName"
                         }
                     }
                 })
@@ -558,11 +705,14 @@ describe("Postponed Notifications via Messages", () => {
 
             const postponedMessages = await syncUntilHasMessages(client5.transport);
             expect(postponedMessages).toHaveLength(2);
-            await client5.eventBus.waitForRunningEventHandlers();
-            const postponedSuccessionNotification = await client5.consumption.notifications.getNotification({ id: notifyAboutSuccessionResult.notificationId });
-            expect(postponedSuccessionNotification).toBeSuccessful();
-            const postponedDeletionNotification = await client5.consumption.notifications.getNotification({ id: notifyAboutDeletionResult.notificationId! });
-            expect(postponedDeletionNotification).toBeSuccessful();
+
+            const postponedSuccessionNotification = (await client5.consumption.notifications.receivedNotification({ messageId: postponedMessages[0].id })).value;
+            const processedSuccessionNotificationResult = await client5.consumption.notifications.processNotificationById({ notificationId: postponedSuccessionNotification.id });
+            expect(processedSuccessionNotificationResult).toBeSuccessful();
+
+            const postponedDeletionNotification = (await client5.consumption.notifications.receivedNotification({ messageId: postponedMessages[1].id })).value;
+            const processedDeletionNotificationResult = await client5.consumption.notifications.processNotificationById({ notificationId: postponedDeletionNotification.id });
+            expect(processedDeletionNotificationResult).toBeSuccessful();
 
             const peerSharedIdentityAttribute = (await client5.consumption.attributes.getAttribute({ id: ownSharedIdentityAttribute.id })).value;
             assert(peerSharedIdentityAttribute.succeededBy);
@@ -644,9 +794,9 @@ describe("Mark Message as un-/read", () => {
             recipients: [client2.address],
             content: {
                 "@type": "Mail",
-                body: "A body",
+                body: "aBody",
                 cc: [],
-                subject: "A subject",
+                subject: "aSubject",
                 to: [client2.address]
             }
         });
@@ -695,6 +845,7 @@ describe("Message query", () => {
         const message = await exchangeMessageWithAttachment(client1.transport, client2.transport);
         const updatedMessage = (await client2.transport.messages.markMessageAsRead({ id: message.id })).value;
         const conditions = new QueryParamConditions<GetMessagesQuery>(updatedMessage, client2.transport)
+            .addStringSet("isOwn", "false")
             .addDateSet("createdAt")
             .addStringSet("createdBy")
             .addDateSet("wasReadAt")
@@ -712,6 +863,12 @@ describe("Message query", () => {
             });
 
         await conditions.executeTests((c, q) => c.messages.getMessages({ query: q }));
+    });
+
+    test("query own messages", async () => {
+        await exchangeMessageWithAttachment(client1.transport, client2.transport);
+        const ownMessages = (await client1.transport.messages.getMessages({ query: { isOwn: "true" } })).value;
+        expect(ownMessages).toHaveLength(1);
     });
 
     test("query messages by relationship ids", async () => {

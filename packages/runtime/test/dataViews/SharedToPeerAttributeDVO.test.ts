@@ -7,7 +7,7 @@ let services1: TestRuntimeServices;
 let services2: TestRuntimeServices;
 
 beforeEach(async () => {
-    await cleanupAttributes(services1, services2);
+    await cleanupAttributes([services1, services2]);
 });
 
 beforeAll(async () => {
@@ -67,6 +67,7 @@ describe("SharedToPeerAttributeDVO", () => {
         expect(dvo.valueType).toBe(ownSharedIdentityAttribute.content.value["@type"]);
         expect(dvo.deletionStatus).toBe(ownSharedIdentityAttribute.deletionInfo?.deletionStatus);
         expect(dvo.deletionDate).toBe(ownSharedIdentityAttribute.deletionInfo?.deletionDate);
+        expect(dvo.wasViewedAt).toBeUndefined();
     });
 
     test("check the Sex", async () => {
@@ -113,6 +114,7 @@ describe("SharedToPeerAttributeDVO", () => {
         expect(dvo.valueType).toBe(ownSharedIdentityAttribute.content.value["@type"]);
         expect(dvo.deletionStatus).toBe(ownSharedIdentityAttribute.deletionInfo?.deletionStatus);
         expect(dvo.deletionDate).toBe(ownSharedIdentityAttribute.deletionInfo?.deletionDate);
+        expect(dvo.wasViewedAt).toBeUndefined();
     });
 
     test("check the Nationality", async () => {
@@ -158,6 +160,7 @@ describe("SharedToPeerAttributeDVO", () => {
         expect(dvo.valueType).toBe(ownSharedIdentityAttribute.content.value["@type"]);
         expect(dvo.deletionStatus).toBe(ownSharedIdentityAttribute.deletionInfo?.deletionStatus);
         expect(dvo.deletionDate).toBe(ownSharedIdentityAttribute.deletionInfo?.deletionDate);
+        expect(dvo.wasViewedAt).toBeUndefined();
     });
 
     test("check the CommunicationLanguage", async () => {
@@ -204,6 +207,7 @@ describe("SharedToPeerAttributeDVO", () => {
         expect(dvo.valueType).toBe(ownSharedIdentityAttribute.content.value["@type"]);
         expect(dvo.deletionStatus).toBe(ownSharedIdentityAttribute.deletionInfo?.deletionStatus);
         expect(dvo.deletionDate).toBe(ownSharedIdentityAttribute.deletionInfo?.deletionDate);
+        expect(dvo.wasViewedAt).toBeUndefined();
     });
 
     test("check the CommunicationLanguage after the RepositoryAttribute was deleted", async () => {
@@ -253,5 +257,6 @@ describe("SharedToPeerAttributeDVO", () => {
         expect(dvo.valueType).toBe(updatedOwnSharedIdentityAttribute.content.value["@type"]);
         expect(dvo.deletionStatus).toBe(updatedOwnSharedIdentityAttribute.deletionInfo?.deletionStatus);
         expect(dvo.deletionDate).toBe(updatedOwnSharedIdentityAttribute.deletionInfo?.deletionDate);
+        expect(dvo.wasViewedAt).toBeUndefined();
     });
 });

@@ -11,9 +11,9 @@ describe("CorrelationId", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        const transport = TestUtil.createTransport(connection, undefined, correlator);
+        const transport = TestUtil.createTransport(undefined, correlator);
         await transport.init();
-        const accounts = await TestUtil.provideAccounts(transport, 1);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 1);
         testAccount = accounts[0];
         interceptor = new RequestInterceptor((testAccount as any).synchronization.client);
     });
@@ -23,7 +23,7 @@ describe("CorrelationId", function () {
         await connection.close();
     });
 
-    test("should send correlation id to the backbone when given", async function () {
+    test("should send correlation id to the Backbone when given", async function () {
         interceptor.start();
         await correlator.withId("test-correlation-id", async () => {
             await testAccount.syncEverything();

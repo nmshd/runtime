@@ -1,4 +1,4 @@
-import { IdentityDeletionProcessDTO } from "../../types/transport/IdentityDeletionProcessDTO";
+import { IdentityDeletionProcessDTO } from "@nmshd/runtime-types";
 import { DataEvent } from "../DataEvent";
 
 export class IdentityDeletionProcessStatusChangedEvent extends DataEvent<IdentityDeletionProcessDTO | undefined> {

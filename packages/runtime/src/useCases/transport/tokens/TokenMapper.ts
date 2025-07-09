@@ -1,6 +1,8 @@
+import { TokenDTO } from "@nmshd/runtime-types";
 import { Token } from "@nmshd/transport";
-import { TokenDTO } from "../../../types";
-import { RuntimeErrors } from "../../common";
+import { Container } from "@nmshd/typescript-ioc";
+import { ConfigHolder } from "../../../ConfigHolder";
+import { PasswordProtectionMapper, RuntimeErrors } from "../../common";
 
 export class TokenMapper {
     public static toTokenDTO(token: Token, ephemeral: boolean): TokenDTO {
@@ -8,27 +10,28 @@ export class TokenMapper {
             throw RuntimeErrors.general.cacheEmpty(Token, token.id.toString());
         }
 
-        const reference = token.toTokenReference();
+        const backboneBaseUrl = Container.get<ConfigHolder>(ConfigHolder).getConfig().transportLibrary.baseUrl;
+        const reference = token.toTokenReference(backboneBaseUrl);
+
         return {
             id: token.id.toString(),
+            isOwn: token.isOwn,
             createdBy: token.cache.createdBy.toString(),
             createdByDevice: token.cache.createdByDevice.toString(),
             content: token.cache.content.toJSON(),
             createdAt: token.cache.createdAt.toString(),
             expiresAt: token.cache.expiresAt.toString(),
-            truncatedReference: reference.truncate(),
-            isEphemeral: ephemeral,
             forIdentity: token.cache.forIdentity?.toString(),
-            passwordProtection: token.passwordProtection
-                ? {
-                      password: token.passwordProtection.password,
-                      passwordIsPin: token.passwordProtection.passwordType.startsWith("pin") ? true : undefined
-                  }
-                : undefined
+            passwordProtection: PasswordProtectionMapper.toPasswordProtectionDTO(token.passwordProtection),
+            reference: {
+                truncated: reference.truncate(),
+                url: reference.toUrl()
+            },
+            isEphemeral: ephemeral
         };
     }
 
     public static toTokenDTOList(tokens: Token[], ephemeral: boolean): TokenDTO[] {
-        return tokens.map((t) => TokenMapper.toTokenDTO(t, ephemeral));
+        return tokens.map((t) => this.toTokenDTO(t, ephemeral));
     }
 }

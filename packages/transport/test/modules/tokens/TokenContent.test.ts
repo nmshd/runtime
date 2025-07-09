@@ -1,17 +1,8 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { JSONWrapper, Serializable } from "@js-soft/ts-serval";
-import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId, CoreIdHelper } from "@nmshd/core-types";
 import { CoreBuffer, CryptoEncryption, CryptoSecretKey } from "@nmshd/crypto";
-import {
-    AccountController,
-    CoreCrypto,
-    CoreIdHelper,
-    DeviceSharedSecret,
-    TokenContentDeviceSharedSecret,
-    TokenContentFile,
-    TokenContentRelationshipTemplate,
-    Transport
-} from "../../../src";
+import { AccountController, CoreCrypto, DeviceSharedSecret, TokenContentDeviceSharedSecret, TokenContentFile, TokenContentRelationshipTemplate, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("TokenContent", function () {
@@ -22,11 +13,11 @@ describe("TokenContent", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection, { datawalletEnabled: true });
+        transport = TestUtil.createTransport({ datawalletEnabled: true });
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 3);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 3);
 
         account = accounts[0];
     });
@@ -241,7 +232,7 @@ describe("TokenContent", function () {
             expect(deserialized).toBeInstanceOf(Serializable);
             expect(deserialized).toBeInstanceOf(TokenContentDeviceSharedSecret);
             expect(deserialized.sharedSecret).toBeInstanceOf(DeviceSharedSecret);
-            await TestUtil.onboardDevice(transport, deserialized.sharedSecret);
+            await TestUtil.onboardDevice(transport, connection, deserialized.sharedSecret);
         });
 
         test("should serialize and deserialize correctly (no type information)", async function () {
@@ -264,7 +255,7 @@ describe("TokenContent", function () {
             expect(deserialized).toBeInstanceOf(Serializable);
             expect(deserialized).toBeInstanceOf(TokenContentDeviceSharedSecret);
             expect(deserialized.sharedSecret).toBeInstanceOf(DeviceSharedSecret);
-            await TestUtil.onboardDevice(transport, deserialized.sharedSecret);
+            await TestUtil.onboardDevice(transport, connection, deserialized.sharedSecret);
         });
 
         test("should serialize and deserialize correctly (from unknown type)", async function () {
@@ -288,7 +279,7 @@ describe("TokenContent", function () {
             expect(deserialized).toBeInstanceOf(Serializable);
             expect(deserialized).toBeInstanceOf(TokenContentDeviceSharedSecret);
             expect(deserialized.sharedSecret).toBeInstanceOf(DeviceSharedSecret);
-            await TestUtil.onboardDevice(transport, deserialized.sharedSecret);
+            await TestUtil.onboardDevice(transport, connection, deserialized.sharedSecret);
         });
     });
 

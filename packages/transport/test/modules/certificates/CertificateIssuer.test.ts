@@ -13,11 +13,11 @@ describe("CertificateIssuer", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createDatabaseConnection();
-        transport = TestUtil.createTransport(connection);
+        transport = TestUtil.createTransport();
 
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, 2);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 2);
         issuer = accounts[0];
         subject = accounts[1];
     });
@@ -45,11 +45,11 @@ describe("CertificateIssuer", function () {
                 items: [
                     CertificatePublicAttributeItem.from({
                         name: "Person.givenName",
-                        value: "Herbert"
+                        value: "aGivenName"
                     }),
                     CertificatePublicAttributeItem.from({
                         name: "Person.familyName",
-                        value: "Müller"
+                        value: "aFamilyName"
                     }),
                     CertificatePublicAttributeItem.from({
                         name: "Person.birthDate",

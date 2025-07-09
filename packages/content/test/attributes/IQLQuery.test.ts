@@ -16,8 +16,7 @@ describe("IQLQuery", function () {
             IQLQuery.from({
                 queryString: q
             });
-            // eslint-disable-next-line jest/require-to-throw-message
-        }).toThrow();
+        }).toThrow("invalid IQL query at character offset");
     });
 
     test("can be created with creation hints", function () {
@@ -35,7 +34,7 @@ describe("IQLQuery", function () {
     test("can be created with creation hints that include tags", function () {
         const hint: IQLQueryCreationHintsJSON = {
             valueType: "GivenName",
-            tags: ["foo", "bar"]
+            tags: ["x:tag1", "x:tag2"]
         };
 
         const serializable = IQLQuery.from({

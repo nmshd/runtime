@@ -59,11 +59,6 @@ export type DeviceIdString = string;
 export type FileIdString = string;
 
 /**
- * @pattern ATL[A-Za-z0-9]{17}
- */
-export type AttributeListenerIdString = string;
-
-/**
  * @pattern NOT[A-Za-z0-9]{17}
  */
 export type NotificationIdString = string;
@@ -79,14 +74,29 @@ export type IdentityDeletionProcessIdString = string;
 export type TokenReferenceString = string;
 
 /**
+ * @pattern ^https?:\/\/.*\/r\/TOK[a-zA-Z0-9]+(\?app=.+)?#[a-zA-Z0-9-_]+$
+ */
+export type URLTokenReferenceString = string;
+
+/**
  * @pattern RklM.{84}
  */
 export type FileReferenceString = string;
 
 /**
+ * @pattern ^https?:\/\/.*\/r\/FIL[a-zA-Z0-9]+(\?app=.+)?#[a-zA-Z0-9-_]+$
+ */
+export type URLFileReferenceString = string;
+
+/**
  * @pattern UkxU.{84}
  */
 export type RelationshipTemplateReferenceString = string;
+
+/**
+ * @pattern ^https?:\/\/.*\/r\/RLT[a-zA-Z0-9]+(\?app=.+)?#[a-zA-Z0-9-_]+$
+ */
+export type URLRelationshipTemplateReferenceString = string;
 
 // the pattern is an ISO 8601 date string regex from https://stackoverflow.com/a/14322189/10029378
 /**

@@ -2,9 +2,9 @@ import { Result } from "@js-soft/ts-utils";
 import { CreateOutgoingRequestParameters, OutgoingRequestsController } from "@nmshd/consumption";
 import { AttributeValues, CreateAttributeRequestItem, RelationshipAttribute, RelationshipAttributeConfidentiality, Request } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
+import { LocalRequestDTO } from "@nmshd/runtime-types";
 import { AccountController, MessageController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { LocalRequestDTO } from "../../../types";
 import { AddressString, ISO8601DateTimeString, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { RequestMapper } from "../requests";
 
@@ -14,8 +14,6 @@ export interface CreateAndShareRelationshipAttributeRequest {
         key: string;
         confidentiality: RelationshipAttributeConfidentiality;
         isTechnical?: boolean;
-        validFrom?: ISO8601DateTimeString;
-        validTo?: ISO8601DateTimeString;
     };
     peer: AddressString;
     requestMetadata?: {
@@ -25,7 +23,6 @@ export interface CreateAndShareRelationshipAttributeRequest {
         expiresAt?: ISO8601DateTimeString;
     };
     requestItemMetadata?: {
-        title?: string;
         description?: string;
         metadata?: Record<string, any>;
         requireManualDecision?: boolean;

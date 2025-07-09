@@ -1,5 +1,5 @@
 export * from "./CreateOwnToken";
-export * from "./GetQRCodeForToken";
+export * from "./DeleteToken";
 export * from "./GetToken";
 export * from "./GetTokens";
 export * from "./LoadPeerToken";

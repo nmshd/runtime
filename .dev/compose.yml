@@ -11,7 +11,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: example
 
   runtime-postgres:
-    image: ghcr.io/ferretdb/postgres-documentdb:16
+    image: ghcr.io/ferretdb/postgres-documentdb:17
     container_name: runtime-postgres
     hostname: postgres
     # documentdb does currently not support arm64

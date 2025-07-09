@@ -15,6 +15,8 @@ export class RelationshipStatusChangedExternalEventProcessor extends Relationshi
         const result = await this.accountController.relationships.applyRelationshipChangedEvent(payload.relationshipId);
         const changedRelationship = result.changedRelationship;
 
+        if (!changedRelationship) return undefined;
+
         this.triggerRelationshipChangedEvent(changedRelationship, result.oldRelationship);
 
         return changedRelationship;

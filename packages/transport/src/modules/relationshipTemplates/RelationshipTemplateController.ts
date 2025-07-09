@@ -26,7 +26,7 @@ export class RelationshipTemplateController extends TransportController {
     protected readonly secrets: RelationshipSecretController;
 
     public constructor(parent: AccountController, secrets: RelationshipSecretController, controllerName?: ControllerName) {
-        super(controllerName ? controllerName : ControllerName.RelationshipTemplate, parent);
+        super(controllerName ?? ControllerName.RelationshipTemplate, parent);
         this.secrets = secrets;
         this.client = new RelationshipTemplateClient(this.config, this.parent.authenticator, this.transport.correlator);
     }
@@ -92,7 +92,8 @@ export class RelationshipTemplateController extends TransportController {
             ? PasswordProtection.from({
                   password: parameters.passwordProtection.password,
                   passwordType: parameters.passwordProtection.passwordType,
-                  salt: salt!
+                  salt: salt!,
+                  passwordLocationIndicator: parameters.passwordProtection.passwordLocationIndicator
               })
             : undefined;
 
@@ -112,8 +113,10 @@ export class RelationshipTemplateController extends TransportController {
     }
 
     public async deleteRelationshipTemplate(template: RelationshipTemplate): Promise<void> {
-        const response = await this.client.deleteRelationshipTemplate(template.id.toString());
-        if (response.isError) throw response.error;
+        if (template.isOwn) {
+            const response = await this.client.deleteRelationshipTemplate(template.id.toString());
+            if (response.isError) throw response.error;
+        }
 
         await this.templates.delete(template);
     }
@@ -277,15 +280,14 @@ export class RelationshipTemplateController extends TransportController {
         return template;
     }
 
-    public async loadPeerRelationshipTemplateByTruncated(truncated: string, password?: string): Promise<RelationshipTemplate> {
-        const reference = RelationshipTemplateReference.fromTruncated(truncated);
-
+    public async loadPeerRelationshipTemplateByReference(reference: RelationshipTemplateReference, password?: string): Promise<RelationshipTemplate> {
         if (reference.passwordProtection && !password) throw TransportCoreErrors.general.noPasswordProvided();
         const passwordProtection = reference.passwordProtection
             ? PasswordProtection.from({
                   salt: reference.passwordProtection.salt,
                   passwordType: reference.passwordProtection.passwordType,
-                  password: password!
+                  password: password!,
+                  passwordLocationIndicator: reference.passwordProtection.passwordLocationIndicator
               })
             : undefined;
 
@@ -298,7 +300,8 @@ export class RelationshipTemplateController extends TransportController {
             ? PasswordProtection.from({
                   salt: tokenContent.passwordProtection.salt,
                   passwordType: tokenContent.passwordProtection.passwordType,
-                  password: password!
+                  password: password!,
+                  passwordLocationIndicator: tokenContent.passwordProtection.passwordLocationIndicator
               })
             : undefined;
 
@@ -342,9 +345,8 @@ export class RelationshipTemplateController extends TransportController {
     }
 
     public async cleanupTemplatesOfDecomposedRelationship(relationship: Relationship): Promise<void> {
-        const templateOfRelationship = relationship.cache!.template;
-
-        if (!templateOfRelationship.isOwn || templateOfRelationship.cache!.maxNumberOfAllocations === 1) {
+        const templateOfRelationship = await this.getRelationshipTemplate(relationship.cache!.templateId);
+        if (templateOfRelationship && (!templateOfRelationship.isOwn || templateOfRelationship.cache!.maxNumberOfAllocations === 1)) {
             await this.templates.delete(templateOfRelationship);
         }
 

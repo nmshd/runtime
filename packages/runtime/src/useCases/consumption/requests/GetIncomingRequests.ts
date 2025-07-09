@@ -2,9 +2,9 @@ import { QueryTranslator } from "@js-soft/docdb-querytranslator";
 import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { IncomingRequestsController, LocalRequest, LocalRequestSource, LocalResponse, LocalResponseSource } from "@nmshd/consumption";
 import { RequestItemGroupJSON, RequestJSON, ResponseItemGroupJSON, ResponseJSON } from "@nmshd/content";
+import { LocalRequestDTO, LocalRequestSourceDTO, LocalResponseDTO, LocalResponseSourceDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
 import { nameof } from "ts-simple-nameof";
-import { LocalRequestDTO, LocalRequestSourceDTO, LocalResponseDTO, LocalResponseSourceDTO } from "../../../types";
 import { UseCase } from "../../common";
 import { flattenObject } from "../../common/flattenObject";
 import { RequestMapper } from "./RequestMapper";
@@ -18,6 +18,7 @@ export interface GetIncomingRequestsRequestQuery {
     peer?: string | string[];
     createdAt?: string | string[];
     status?: string | string[];
+    wasAutomaticallyDecided?: string;
     "content.expiresAt"?: string | string[];
     "content.items.@type"?: string | string[];
     "source.type"?: string | string[];
@@ -44,6 +45,9 @@ export class GetIncomingRequestsUseCase extends UseCase<GetIncomingRequestsReque
 
             // status
             [nameof<LocalRequestDTO>((x) => x.status)]: true,
+
+            // wasAutomaticallyDecided
+            [nameof<LocalRequestDTO>((x) => x.wasAutomaticallyDecided)]: true,
 
             // content.expiresAt
             [`${nameof<LocalRequestDTO>((x) => x.content)}.${nameof<RequestJSON>((x) => x.expiresAt)}`]: true,
@@ -92,6 +96,9 @@ export class GetIncomingRequestsUseCase extends UseCase<GetIncomingRequestsReque
 
             // status
             [nameof<LocalRequestDTO>((x) => x.status)]: nameof<LocalRequest>((x) => x.status),
+
+            // wasAutomaticallyDecided
+            [nameof<LocalRequestDTO>((x) => x.wasAutomaticallyDecided)]: nameof<LocalRequest>((x) => x.wasAutomaticallyDecided),
 
             // content.expiresAt
             [`${nameof<LocalRequestDTO>((x) => x.content)}.${nameof<RequestJSON>((x) => x.expiresAt)}`]: `${nameof<LocalRequest>((x) => x.content)}.${nameof<RequestJSON>(

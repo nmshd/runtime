@@ -1,6 +1,6 @@
 import { ISerializable } from "@js-soft/ts-serval";
 import { log, Result } from "@js-soft/ts-utils";
-import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreId } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId, FileReference, ICoreAddress, ICoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
 import { CoreCrypto, TransportCoreErrors, TransportError } from "../../core";
@@ -10,7 +10,6 @@ import { MessageSentEvent, MessageWasReadAtChangedEvent } from "../../events";
 import { AccountController } from "../accounts/AccountController";
 import { IdentityUtil } from "../accounts/IdentityUtil";
 import { File } from "../files/local/File";
-import { FileReference } from "../files/transmission/FileReference";
 import { RelationshipSecretController } from "../relationships/RelationshipSecretController";
 import { RelationshipsController } from "../relationships/RelationshipsController";
 import { PeerDeletionStatus } from "../relationships/local/PeerDeletionInfo";
@@ -179,9 +178,7 @@ export class MessageController extends TransportController {
     private async updateCacheOfMessage(message: Message, response?: BackboneGetMessagesResponse) {
         const messageId = message.id.toString();
 
-        if (!response) {
-            response = (await this.client.getMessage(messageId)).value;
-        }
+        response ??= (await this.client.getMessage(messageId)).value;
 
         const envelope = this.getEnvelopeFromBackboneGetMessagesResponse(response);
         const [cachedMessage, messageKey] = await this.decryptMessage(envelope, message.secretKey);
@@ -290,7 +287,7 @@ export class MessageController extends TransportController {
     @log()
     public async sendMessage(parameters: ISendMessageParameters): Promise<Message> {
         const parsedParams = SendMessageParameters.from(parameters);
-        if (!parsedParams.attachments) parsedParams.attachments = [];
+        parsedParams.attachments ??= [];
 
         const validationResult = await this.validateMessageRecipients(parsedParams.recipients);
         if (validationResult.isError) throw validationResult.error;
@@ -321,7 +318,7 @@ export class MessageController extends TransportController {
         const fileReferences: FileReference[] = [];
         for (const fileObject of parsedParams.attachments) {
             const file = File.from(fileObject);
-            fileReferences.push(file.toFileReference());
+            fileReferences.push(file.toFileReference(this.transport.config.baseUrl));
             publicAttachmentArray.push(file.id);
         }
 
@@ -531,7 +528,7 @@ export class MessageController extends TransportController {
                 recipients.push(
                     CachedMessageRecipient.from({
                         // make sure to save the pseudonym instead of the real address if the relationship was removed
-                        // in cases the backbone did not already process the relationship termination
+                        // in cases the Backbone did not already process the relationship termination
                         address: relationship ? recipient.address : pseudonym,
                         encryptedKey: recipient.encryptedKey,
                         receivedAt: recipient.receivedAt,

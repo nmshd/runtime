@@ -9,9 +9,7 @@ export interface ICondition<TQuery> {
     expectedResult: boolean;
 }
 
-type PartialRecord<K extends keyof any, T> = {
-    [P in K]?: T;
-};
+type PartialRecord<K extends keyof any, T> = Partial<Record<K, T>>;
 
 export class QueryParamConditions<TQuery extends PartialRecord<keyof TQuery, string | string[]>, TServices = TransportServices> {
     private readonly _conditions: ICondition<TQuery>[];
@@ -24,9 +22,7 @@ export class QueryParamConditions<TQuery extends PartialRecord<keyof TQuery, str
     }
 
     public addDateSet(key: string & keyof TQuery, positiveValue?: string): this {
-        if (!positiveValue) {
-            positiveValue = this.getValueByKey(key);
-        }
+        positiveValue ??= this.getValueByKey(key);
 
         if (!positiveValue) {
             return this;
@@ -56,9 +52,7 @@ export class QueryParamConditions<TQuery extends PartialRecord<keyof TQuery, str
     }
 
     public addBooleanSet(key: string & keyof TQuery, positiveValue?: boolean): this {
-        if (positiveValue === undefined) {
-            positiveValue = this.getValueByKey(key) as boolean | undefined;
-        }
+        positiveValue ??= this.getValueByKey(key) as boolean | undefined;
 
         if (positiveValue === undefined) {
             return this;
@@ -80,9 +74,7 @@ export class QueryParamConditions<TQuery extends PartialRecord<keyof TQuery, str
     }
 
     public addNumberSet(key: string & keyof TQuery, positiveValue?: number): this {
-        if (!positiveValue) {
-            positiveValue = this.getValueByKey(key);
-        }
+        positiveValue ??= this.getValueByKey(key);
 
         if (!positiveValue) {
             return this;
@@ -110,9 +102,7 @@ export class QueryParamConditions<TQuery extends PartialRecord<keyof TQuery, str
     }
 
     public addStringSet(key: string & keyof TQuery, positiveValue?: string): this {
-        if (!positiveValue) {
-            positiveValue = this.getValueByKey(key);
-        }
+        positiveValue ??= this.getValueByKey(key);
 
         if (!positiveValue) {
             return this;
@@ -167,7 +157,7 @@ export class QueryParamConditions<TQuery extends PartialRecord<keyof TQuery, str
         for (const condition of this._conditions) {
             const response: Result<any> = await queryFunction(this.services, { [condition.key]: condition.value });
 
-            expect(response.isSuccess).toBeTruthy();
+            expect(response).toBeSuccessful();
 
             if (condition.expectedResult) {
                 expect(response.value, `Positive match failed for key "${condition.key}" and value "${condition.value}".`).toContainEqual(this.object);

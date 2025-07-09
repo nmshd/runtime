@@ -67,7 +67,7 @@ describe("BackboneConcurrency", function () {
         expect(successResults).toHaveLength(1);
         expect(errorResults).toHaveLength(numberOfDevices - successResults.length - noNewEventsResults.length);
 
-        // TODO (jkoenig134) backbone error
+        // TODO (jkoenig134) Backbone error
         const code = "error.platform.validation.syncRun.cannotStartSyncRunWhenAnotherSyncRunIsRunning";
         for (const result of errorResults) {
             expect(result.error.code).toStrictEqual(code);

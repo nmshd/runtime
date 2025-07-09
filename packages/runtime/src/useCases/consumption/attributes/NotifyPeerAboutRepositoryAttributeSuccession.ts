@@ -1,10 +1,10 @@
 import { Result } from "@js-soft/ts-utils";
-import { AttributesController, ConsumptionIds, IAttributeSuccessorParams, LocalAttribute } from "@nmshd/consumption";
+import { AttributesController, ConsumptionIds, IAttributeSuccessorParams, LocalAttribute, LocalAttributeDeletionStatus } from "@nmshd/consumption";
 import { Notification, PeerSharedAttributeSucceededNotificationItem } from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
+import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { AccountController, MessageController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { LocalAttributeDTO } from "../../../types";
 import { AddressString, AttributeIdString, NotificationIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { AttributeMapper } from "./AttributeMapper";
 
@@ -54,11 +54,21 @@ export class NotifyPeerAboutRepositoryAttributeSuccessionUseCase extends UseCase
             return Result.fail(RuntimeErrors.attributes.noPreviousVersionOfRepositoryAttributeHasBeenSharedWithPeerBefore(repositoryAttributeSuccessorId, request.peer));
         }
 
-        if (candidatePredecessors[0].shareInfo?.sourceAttribute?.toString() === request.attributeId) {
-            return Result.fail(RuntimeErrors.attributes.repositoryAttributeHasAlreadyBeenSharedWithPeer(request.attributeId, request.peer, candidatePredecessors[0].id));
+        const ownSharedIdentityAttributePredecessor = candidatePredecessors.find(
+            (attribute) =>
+                attribute.deletionInfo?.deletionStatus !== LocalAttributeDeletionStatus.DeletedByPeer &&
+                attribute.deletionInfo?.deletionStatus !== LocalAttributeDeletionStatus.ToBeDeletedByPeer
+        );
+
+        if (!ownSharedIdentityAttributePredecessor) {
+            return Result.fail(RuntimeErrors.attributes.cannotSucceedAttributesWithDeletionInfo(candidatePredecessors.map((attribute) => attribute.id)));
         }
 
-        const ownSharedIdentityAttributePredecessor = candidatePredecessors[0];
+        if (ownSharedIdentityAttributePredecessor.shareInfo?.sourceAttribute?.toString() === request.attributeId) {
+            return Result.fail(
+                RuntimeErrors.attributes.repositoryAttributeHasAlreadyBeenSharedWithPeer(request.attributeId, request.peer, ownSharedIdentityAttributePredecessor.id)
+            );
+        }
 
         const notificationId = await ConsumptionIds.notification.generate();
         const successorParams: IAttributeSuccessorParams = {

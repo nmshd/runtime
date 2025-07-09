@@ -1,8 +1,10 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
+import { sleep } from "@js-soft/ts-utils";
 import {
     BirthDate,
     City,
     Country,
+    DisplayName,
     EMailAddress,
     HouseNumber,
     IdentityAttribute,
@@ -10,6 +12,7 @@ import {
     IIQLQuery,
     IRelationshipAttributeQuery,
     Nationality,
+    ProprietaryString,
     RelationshipAttribute,
     RelationshipAttributeConfidentiality,
     Street,
@@ -18,10 +21,13 @@ import {
     ZipCode
 } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
-import { AccountController, Transport } from "@nmshd/transport";
+import { AccountController, ClientResult, TagClient, Transport } from "@nmshd/transport";
+import { anything, reset, spy, verify, when } from "ts-mockito";
 import {
     AttributeCreatedEvent,
     AttributeDeletedEvent,
+    AttributesController,
+    AttributeTagCollection,
     ConsumptionController,
     IAttributeSuccessorParams,
     ICreateRepositoryAttributeParams,
@@ -50,13 +56,13 @@ describe("AttributesController", function () {
 
     beforeAll(async function () {
         connection = await TestUtil.createConnection();
-        transport = TestUtil.createTransport(connection, mockEventBus);
+        transport = TestUtil.createTransport(mockEventBus);
         await transport.init();
 
-        const connectorAccount = (await TestUtil.provideAccounts(transport, 1))[0];
+        const connectorAccount = (await TestUtil.provideAccounts(transport, connection, 1))[0];
         ({ accountController: testAccount, consumptionController } = connectorAccount);
 
-        const appAccount = (await TestUtil.provideAccounts(transport, 1, undefined, undefined, { setDefaultRepositoryAttributes: true }))[0];
+        const appAccount = (await TestUtil.provideAccounts(transport, connection, 1, undefined, undefined, { setDefaultRepositoryAttributes: true }))[0];
         ({ accountController: appTestAccount, consumptionController: appConsumptionController } = appAccount);
     });
 
@@ -104,6 +110,37 @@ describe("AttributesController", function () {
             mockEventBus.expectPublishedEvents(AttributeCreatedEvent);
         });
 
+        test("should not create a new attribute with a forbidden character", async function () {
+            const params: ICreateRepositoryAttributeParams = {
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "DisplayName",
+                        value: "aDisplayName😀"
+                    },
+                    owner: consumptionController.accountController.identity.address
+                })
+            };
+
+            await expect(consumptionController.attributes.createRepositoryAttribute(params)).rejects.toThrow(
+                "error.consumption.attributes.forbiddenCharactersInAttribute: 'The Attribute contains forbidden characters.'"
+            );
+        });
+
+        test("should trim whitespace for a RepositoryAttribute", async function () {
+            const params: ICreateRepositoryAttributeParams = {
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "DisplayName",
+                        value: "  aDisplayName\n"
+                    },
+                    owner: consumptionController.accountController.identity.address
+                })
+            };
+
+            const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute(params);
+            expect((repositoryAttribute.content.value as DisplayName).value).toBe("aDisplayName");
+        });
+
         test("should create a new attribute of type SchematizedXML", async function () {
             const params: ICreateRepositoryAttributeParams = {
                 content: IdentityAttribute.from({
@@ -137,7 +174,6 @@ describe("AttributesController", function () {
                     city: "aCity",
                     country: "DE"
                 },
-                validTo: CoreDate.utc(),
                 owner: consumptionController.accountController.identity.address
             });
 
@@ -162,6 +198,39 @@ describe("AttributesController", function () {
             expect(attributesAfterCreate).toHaveLength(6);
         });
 
+        test("should trim whitespace when creating a complex RepositoryAttribute and its children", async function () {
+            const identityAttribute = IdentityAttribute.from({
+                value: {
+                    "@type": "StreetAddress",
+                    recipient: "\taRecipient\r",
+                    street: "\vaStreet\f",
+                    houseNo: " aHouseNo\u00a0",
+                    zipCode: "  aZipCode\u2028",
+                    city: " aCity  ",
+                    country: "DE"
+                },
+                owner: consumptionController.accountController.identity.address
+            });
+
+            const address = await consumptionController.attributes.createRepositoryAttribute({
+                content: identityAttribute
+            });
+
+            expect((address.content.value as StreetAddress).recipient).toBe("aRecipient");
+            expect((address.content.value as StreetAddress).street.value).toBe("aStreet");
+            expect((address.content.value as StreetAddress).houseNo.value).toBe("aHouseNo");
+            expect((address.content.value as StreetAddress).zipCode.value).toBe("aZipCode");
+            expect((address.content.value as StreetAddress).city.value).toBe("aCity");
+
+            const childAttributes = await consumptionController.attributes.getLocalAttributes({
+                parentId: address.id.toString()
+            });
+            expect((childAttributes[0].content.value as Street).value).toBe("aStreet");
+            expect((childAttributes[1].content.value as HouseNumber).value).toBe("aHouseNo");
+            expect((childAttributes[2].content.value as ZipCode).value).toBe("aZipCode");
+            expect((childAttributes[3].content.value as City).value).toBe("aCity");
+        });
+
         test("should trigger an AttributeCreatedEvent for each created child Attribute of a complex Attribute", async function () {
             await consumptionController.attributes.getLocalAttributes();
 
@@ -175,7 +244,6 @@ describe("AttributesController", function () {
                     city: "aCity",
                     country: "DE"
                 },
-                validTo: CoreDate.utc(),
                 owner: consumptionController.accountController.identity.address
             });
 
@@ -354,7 +422,24 @@ describe("AttributesController", function () {
 
             expect(thirdPartyLocalAttributeCopy.shareInfo?.thirdPartyAddress?.toString()).toBe(thirdPartyAddress.toString());
         });
+
+        test("should not create a new attribute with a duplicate id", async function () {
+            const params: ICreateRepositoryAttributeParams = {
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "DisplayName",
+                        value: "aDisplayName"
+                    },
+                    owner: consumptionController.accountController.identity.address
+                }),
+                id: CoreId.from("duplicateId")
+            };
+
+            await consumptionController.attributes.createRepositoryAttribute(params);
+            await expect(consumptionController.attributes.createRepositoryAttribute(params)).rejects.toThrow(/[Dd]uplicate key/);
+        });
     });
+
     describe("query Attributes", function () {
         test("should allow to query relationship attributes with empty owner", async function () {
             const relationshipAttributeParams: ICreateSharedLocalAttributeParams = {
@@ -838,6 +923,44 @@ describe("AttributesController", function () {
             }
         });
 
+        test("should delete attributes exchanged with peer", async function () {
+            const ownRelationshipAttribute = await consumptionController.attributes.createSharedLocalAttribute({
+                content: RelationshipAttribute.from({
+                    key: "aKey",
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "Some value",
+                        title: "Some title"
+                    },
+                    owner: consumptionController.accountController.identity.address,
+                    confidentiality: RelationshipAttributeConfidentiality.Public
+                }),
+                peer: CoreAddress.from("peerAddress"),
+                requestReference: CoreId.from("reqRef123")
+            });
+
+            const peerRelationshipAttribute = await consumptionController.attributes.createSharedLocalAttribute({
+                content: RelationshipAttribute.from({
+                    key: "aKey",
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "Some value",
+                        title: "Some title"
+                    },
+                    owner: consumptionController.accountController.identity.address,
+                    confidentiality: RelationshipAttributeConfidentiality.Public
+                }),
+                peer: CoreAddress.from("peerAddress"),
+                requestReference: CoreId.from("reqRef123")
+            });
+
+            await consumptionController.attributes.deleteAttributesExchangedWithPeer(CoreAddress.from("peerAddress"));
+            const ownAttribute = await consumptionController.attributes.getLocalAttribute(ownRelationshipAttribute.id);
+            const peerAttribute = await consumptionController.attributes.getLocalAttribute(peerRelationshipAttribute.id);
+            expect(ownAttribute).toBeUndefined();
+            expect(peerAttribute).toBeUndefined();
+        });
+
         describe("should validate and execute full attribute deletion process", function () {
             let predecessorRepositoryAttribute: LocalAttribute;
             let successorRepositoryAttribute: LocalAttribute;
@@ -1153,6 +1276,35 @@ describe("AttributesController", function () {
 
     describe("succeed Attributes", function () {
         describe("Common validator", function () {
+            test("should catch a forbidden character in the successor", async function () {
+                const predecessor = await consumptionController.attributes.createRepositoryAttribute({
+                    content: IdentityAttribute.from({
+                        value: {
+                            "@type": "GivenName",
+                            value: "aGivenName"
+                        },
+                        owner: consumptionController.accountController.identity.address,
+                        tags: ["x:aTag"]
+                    })
+                });
+
+                const successorData: IAttributeSuccessorParams = {
+                    content: IdentityAttribute.from({
+                        value: {
+                            "@type": "GivenName",
+                            value: "aGivenName😀"
+                        },
+                        owner: consumptionController.accountController.identity.address,
+                        tags: ["x:aTag"]
+                    })
+                };
+
+                const validationResult = await consumptionController.attributes.validateAttributeSuccessionCommon(predecessor.id, successorData);
+                expect(validationResult).errorValidationResult({
+                    code: "error.consumption.attributes.forbiddenCharactersInAttribute"
+                });
+            });
+
             test("should catch if content doesn't change", async function () {
                 const predecessor = await consumptionController.attributes.createRepositoryAttribute({
                     content: IdentityAttribute.from({
@@ -1161,7 +1313,7 @@ describe("AttributesController", function () {
                             value: "DE"
                         },
                         owner: consumptionController.accountController.identity.address,
-                        tags: ["aTag"]
+                        tags: ["x:aTag"]
                     })
                 });
 
@@ -1172,7 +1324,7 @@ describe("AttributesController", function () {
                             value: "DE"
                         },
                         owner: consumptionController.accountController.identity.address,
-                        tags: ["aTag"]
+                        tags: ["x:aTag"]
                     })
                 };
 
@@ -1422,7 +1574,7 @@ describe("AttributesController", function () {
                     content: IdentityAttribute.from({
                         value: {
                             "@type": "BirthName",
-                            value: "Müller"
+                            value: "aBirthName"
                         },
                         owner: consumptionController.accountController.identity.address
                     })
@@ -1742,6 +1894,31 @@ describe("AttributesController", function () {
                 expect((successor.content.value.toJSON() as any).value).toBe("US");
             });
 
+            test("should trim whitespace when succeeding a repository attribute", async function () {
+                const predecessor = await consumptionController.attributes.createRepositoryAttribute({
+                    content: IdentityAttribute.from({
+                        value: {
+                            "@type": "GivenName",
+                            value: "    aGivenName  "
+                        },
+                        owner: consumptionController.accountController.identity.address
+                    })
+                });
+                const successorParams: IAttributeSuccessorParams = {
+                    content: IdentityAttribute.from({
+                        value: {
+                            "@type": "GivenName",
+                            value: "    anotherGivenName    "
+                        },
+                        owner: consumptionController.accountController.identity.address
+                    })
+                };
+
+                const { successor } = await consumptionController.attributes.succeedRepositoryAttribute(predecessor.id, successorParams);
+                expect(successor).toBeDefined();
+                expect((successor.content.value.toJSON() as any).value).toBe("anotherGivenName");
+            });
+
             test("should succeed a repository attribute updating tags but not the value", async function () {
                 const predecessor = await consumptionController.attributes.createRepositoryAttribute({
                     content: IdentityAttribute.from({
@@ -1750,7 +1927,7 @@ describe("AttributesController", function () {
                             value: "DE"
                         },
                         owner: consumptionController.accountController.identity.address,
-                        tags: ["aTag"]
+                        tags: ["x:aTag"]
                     })
                 });
 
@@ -1761,7 +1938,7 @@ describe("AttributesController", function () {
                             value: "DE"
                         },
                         owner: consumptionController.accountController.identity.address,
-                        tags: ["aTag", "anotherTag"]
+                        tags: ["x:aTag", "x:anotherTag"]
                     })
                 };
 
@@ -1773,8 +1950,8 @@ describe("AttributesController", function () {
                 expect(successor.succeeds!.equals(updatedPredecessor.id)).toBe(true);
                 expect((updatedPredecessor.content.value.toJSON() as any).value).toBe("DE");
                 expect((successor.content.value.toJSON() as any).value).toBe("DE");
-                expect((updatedPredecessor.content as IdentityAttribute).tags).toStrictEqual(["aTag"]);
-                expect((successor.content as IdentityAttribute).tags).toStrictEqual(["aTag", "anotherTag"]);
+                expect((updatedPredecessor.content as IdentityAttribute).tags).toStrictEqual(["x:aTag"]);
+                expect((successor.content as IdentityAttribute).tags).toStrictEqual(["x:aTag", "x:anotherTag"]);
             });
 
             test("should make successor default succeeding a default repository attribute", async function () {
@@ -1996,6 +2173,45 @@ describe("AttributesController", function () {
                     }
                 });
 
+                test("should trim whitespace when succeeding a complex repository attribute", async function () {
+                    const version1ChildValues = ["  aNewStreet  ", "  aNewHouseNo ", "    aNewZipCode ", "    aNewCity    ", "DE"];
+                    const trimmedVersion1ChildValues = version1ChildValues.map((value) => value.trim());
+
+                    const repoVersion1Params = {
+                        content: IdentityAttribute.from({
+                            value: {
+                                "@type": "StreetAddress",
+                                recipient: "    aNewRecipient   ",
+                                street: version1ChildValues[0],
+                                houseNo: version1ChildValues[1],
+                                zipCode: version1ChildValues[2],
+                                city: version1ChildValues[3],
+                                country: version1ChildValues[4]
+                            },
+                            owner: consumptionController.accountController.identity.address
+                        })
+                    };
+
+                    const { successor: repoVersion1 } = await consumptionController.attributes.succeedRepositoryAttribute(repoVersion0.id, repoVersion1Params);
+                    expect((repoVersion1.content.value as StreetAddress).recipient).toBe("aNewRecipient");
+                    expect((repoVersion1.content.value as StreetAddress).street.value).toBe("aNewStreet");
+                    expect((repoVersion1.content.value as StreetAddress).houseNo.value).toBe("aNewHouseNo");
+                    expect((repoVersion1.content.value as StreetAddress).zipCode.value).toBe("aNewZipCode");
+                    expect((repoVersion1.content.value as StreetAddress).city.value).toBe("aNewCity");
+                    expect((repoVersion1.content.value as StreetAddress).country.value).toBe("DE");
+
+                    const repoVersion1ChildAttributes = await consumptionController.attributes.getLocalAttributes({
+                        parentId: repoVersion1.id.toString()
+                    });
+
+                    const numberOfChildAttributes = version0ChildValues.length;
+                    expect(repoVersion1ChildAttributes).toHaveLength(numberOfChildAttributes);
+
+                    for (let i = 0; i < numberOfChildAttributes; i++) {
+                        expect(repoVersion1ChildAttributes[i].content.value.toString()).toStrictEqual(trimmedVersion1ChildValues[i]);
+                    }
+                });
+
                 test("should succeed a complex repository attribute adding an optional child", async function () {
                     repoVersion1Params = {
                         content: IdentityAttribute.from({
@@ -2051,7 +2267,6 @@ describe("AttributesController", function () {
                             country: version0ChildValues[4],
                             state: "Berlin"
                         },
-                        validTo: CoreDate.utc(),
                         owner: consumptionController.accountController.identity.address
                     });
 
@@ -2250,7 +2465,6 @@ describe("AttributesController", function () {
                             city: version0ChildValues[3],
                             country: version0ChildValues[4]
                         },
-                        validTo: CoreDate.utc(),
                         owner: CoreAddress.from("peer")
                     });
 
@@ -2563,6 +2777,44 @@ describe("AttributesController", function () {
         });
     });
 
+    describe("mark Attributes as read", () => {
+        test("should mark an Attribute as read", async () => {
+            const attributeParams: ICreateRepositoryAttributeParams = {
+                content: IdentityAttribute.from({
+                    value: DisplayName.from({ value: "aDisplayName" }),
+                    owner: consumptionController.accountController.identity.address
+                })
+            };
+            const localAttribute = await consumptionController.attributes.createRepositoryAttribute(attributeParams);
+            expect(localAttribute.wasViewedAt).toBeUndefined();
+
+            const timeBeforeRead = CoreDate.utc();
+            const updatedLocalAttribute = await consumptionController.attributes.markAttributeAsViewed(localAttribute.id);
+            const timeAfterRead = CoreDate.utc();
+
+            expect(updatedLocalAttribute.wasViewedAt).toBeDefined();
+            expect(updatedLocalAttribute.wasViewedAt!.isSameOrAfter(timeBeforeRead)).toBe(true);
+            expect(updatedLocalAttribute.wasViewedAt!.isSameOrBefore(timeAfterRead)).toBe(true);
+        });
+
+        test("should not change wasViewedAt of a viewed Attribute", async function () {
+            const attributeParams: ICreateRepositoryAttributeParams = {
+                content: IdentityAttribute.from({
+                    value: DisplayName.from({ value: "aDisplayName" }),
+                    owner: consumptionController.accountController.identity.address
+                })
+            };
+            const localAttribute = await consumptionController.attributes.createRepositoryAttribute(attributeParams);
+
+            const updatedLocalAttribute = await consumptionController.attributes.markAttributeAsViewed(localAttribute.id);
+            const firstViewedAt = updatedLocalAttribute.wasViewedAt;
+
+            const unchangedLocalAttribute = await consumptionController.attributes.markAttributeAsViewed(localAttribute.id);
+            expect(unchangedLocalAttribute.wasViewedAt).toBeDefined();
+            expect(unchangedLocalAttribute.wasViewedAt!.equals(firstViewedAt!)).toBe(true);
+        });
+    });
+
     describe("get Attributes", function () {
         beforeEach(async function () {
             await consumptionController.attributes.createSharedLocalAttribute({
@@ -2612,6 +2864,7 @@ describe("AttributesController", function () {
                 peer: CoreAddress.from("peer")
             });
         });
+
         test("should list all attributes", async function () {
             const attributes = await consumptionController.attributes.getLocalAttributes();
             expect(attributes).toHaveLength(3);
@@ -3101,6 +3354,15 @@ describe("AttributesController", function () {
             }
         });
 
+        test("should return all shared versions that match query", async function () {
+            const query = { "content.value.value": "US" };
+            const ownSharedAttributeVersionsWithValueMatchingQuery = [ownSharedIdentityAttributeV1PeerA, ownSharedIdentityAttributeV1PeerB];
+
+            const result = await consumptionController.attributes.getSharedVersionsOfAttribute(repositoryAttributeV2.id, undefined, false, query);
+            expect(result).toHaveLength(2);
+            expect(result).toStrictEqual(expect.arrayContaining(ownSharedAttributeVersionsWithValueMatchingQuery));
+        });
+
         test("should return all shared versions for a single peer", async function () {
             const allRepositoryAttributeVersions = [repositoryAttributeV0, repositoryAttributeV1, repositoryAttributeV2];
             const allOwnSharedAttributeVersionsPeerB = [ownSharedIdentityAttributeV2PeerB, ownSharedIdentityAttributeV1PeerB];
@@ -3174,41 +3436,316 @@ describe("AttributesController", function () {
         });
     });
 
-    test("should delete attributes exchanged with peer", async function () {
-        const ownRelationshipAttribute = await consumptionController.attributes.createSharedLocalAttribute({
-            content: RelationshipAttribute.from({
-                key: "aKey",
-                value: {
-                    "@type": "ProprietaryString",
-                    value: "Some value",
-                    title: "Some title"
-                },
-                owner: consumptionController.accountController.identity.address,
-                confidentiality: RelationshipAttributeConfidentiality.Public
-            }),
-            peer: CoreAddress.from("peerAddress"),
-            requestReference: CoreId.from("reqRef123")
+    describe("get Attribute with same value", function () {
+        test("should return an existing RepositoryAttribute duplicate", async function () {
+            const existingRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "GivenName",
+                        value: "aGivenName"
+                    },
+                    owner: testAccount.identity.address
+                })
+            });
+
+            const duplicate = await consumptionController.attributes.getRepositoryAttributeWithSameValue({
+                "@type": "GivenName",
+                value: "aGivenName"
+            });
+
+            expect(duplicate).toStrictEqual(existingRepositoryAttribute);
         });
 
-        const peerRelationshipAttribute = await consumptionController.attributes.createSharedLocalAttribute({
-            content: RelationshipAttribute.from({
-                key: "aKey",
-                value: {
-                    "@type": "ProprietaryString",
-                    value: "Some value",
-                    title: "Some title"
-                },
-                owner: consumptionController.accountController.identity.address,
-                confidentiality: RelationshipAttributeConfidentiality.Public
-            }),
-            peer: CoreAddress.from("peerAddress"),
-            requestReference: CoreId.from("reqRef123")
+        test("should return undefined if no RepositoryAttribute duplicate exists", async function () {
+            await consumptionController.attributes.createRepositoryAttribute({
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "GivenName",
+                        value: "aGivenName"
+                    },
+                    owner: testAccount.identity.address
+                })
+            });
+
+            const duplicate = await consumptionController.attributes.getRepositoryAttributeWithSameValue({
+                "@type": "GivenName",
+                value: "anotherGivenName"
+            });
+
+            expect(duplicate).toBeUndefined();
         });
 
-        await consumptionController.attributes.deleteAttributesExchangedWithPeer(CoreAddress.from("peerAddress"));
-        const ownAttribute = await consumptionController.attributes.getLocalAttribute(ownRelationshipAttribute.id);
-        const peerAttribute = await consumptionController.attributes.getLocalAttribute(peerRelationshipAttribute.id);
-        expect(ownAttribute).toBeUndefined();
-        expect(peerAttribute).toBeUndefined();
+        test("should return an existing peer shared IdentityAttribute duplicate", async function () {
+            const existingPeerSharedIdentityAttribute = await consumptionController.attributes.createSharedLocalAttribute({
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "GivenName",
+                        value: "aGivenName"
+                    },
+                    owner: CoreAddress.from("peer")
+                }),
+                requestReference: CoreId.from("reqRef"),
+                peer: CoreAddress.from("peer")
+            });
+
+            const duplicate = await consumptionController.attributes.getPeerSharedIdentityAttributeWithSameValue(
+                {
+                    "@type": "GivenName",
+                    value: "aGivenName"
+                },
+                "peer"
+            );
+
+            expect(duplicate).toStrictEqual(existingPeerSharedIdentityAttribute);
+        });
+
+        test("should return undefined if no peer shared IdentityAttribute duplicate exists", async function () {
+            await consumptionController.attributes.createSharedLocalAttribute({
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "GivenName",
+                        value: "aGivenName"
+                    },
+                    owner: CoreAddress.from("peer")
+                }),
+                requestReference: CoreId.from("reqRef"),
+                peer: CoreAddress.from("peer")
+            });
+
+            const duplicate = await consumptionController.attributes.getPeerSharedIdentityAttributeWithSameValue(
+                {
+                    "@type": "GivenName",
+                    value: "anotherGivenName"
+                },
+                "peer"
+            );
+
+            expect(duplicate).toBeUndefined();
+        });
+    });
+
+    describe("validate tags", function () {
+        /* eslint-disable @typescript-eslint/naming-convention */
+        const mockedTagCollection: AttributeTagCollection = AttributeTagCollection.from({
+            supportedLanguages: ["de", "en"],
+            tagsForAttributeValueTypes: {
+                PhoneNumber: {
+                    emergency: {
+                        displayNames: {
+                            de: "Notfallkontakt",
+                            en: "Emergency Contact"
+                        },
+                        children: {
+                            first: {
+                                displayNames: {
+                                    de: "Erster Notfallkontakt",
+                                    en: "First Emergency Contact"
+                                }
+                            },
+                            second: {
+                                displayNames: {
+                                    de: "Zweiter Notfallkontakt",
+                                    en: "Second Emergency Contact"
+                                }
+                            }
+                        }
+                    },
+                    private: {
+                        displayNames: {
+                            de: "Privat",
+                            en: "Private"
+                        }
+                    }
+                }
+            }
+        });
+        /* eslint-enable @typescript-eslint/naming-convention */
+
+        test("should validate valid tags", function () {
+            expect(consumptionController.attributes["isValidTag"]("bkb:private", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(true);
+            expect(consumptionController.attributes["isValidTag"]("bkb:emergency:first", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(true);
+            expect(consumptionController.attributes["isValidTag"]("bkb:emergency:second", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(true);
+            expect(consumptionController.attributes["isValidTag"]("x:my:custom:tag", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(true);
+            expect(consumptionController.attributes["isValidTag"]("X:my:custom:tag", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(true);
+            expect(consumptionController.attributes["isValidTag"]("mimetype:x/x", {})).toBe(true);
+            expect(consumptionController.attributes["isValidTag"]("urn:aUrnTag", {})).toBe(true);
+            expect(consumptionController.attributes["isValidTag"]("language:de", {})).toBe(true);
+        });
+
+        test("should validate invalid tags", function () {
+            expect(consumptionController.attributes["isValidTag"]("bkb:nonexistent", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(false);
+            expect(consumptionController.attributes["isValidTag"]("bkb:emergency", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(false);
+            expect(consumptionController.attributes["isValidTag"]("bkb:private", mockedTagCollection.tagsForAttributeValueTypes["nonexistent"])).toBe(false);
+            expect(consumptionController.attributes["isValidTag"]("bkb:emergency:nonexistent", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(false);
+            expect(consumptionController.attributes["isValidTag"]("bkb:emergency:first:nonexistent", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(false);
+            expect(consumptionController.attributes["isValidTag"]("mimetype:/x", {})).toBe(false);
+            expect(consumptionController.attributes["isValidTag"]("Urn:invalidUrn", {})).toBe(false);
+            expect(consumptionController.attributes["isValidTag"]("language:invalid", {})).toBe(false);
+            expect(consumptionController.attributes["isValidTag"]("unsupportedPrefix:invalid", {})).toBe(false);
+        });
+    });
+
+    describe("tag definition caching by time", function () {
+        let connection: IDatabaseConnection;
+        let transport: Transport;
+        let testAccount: AccountController;
+        let consumptionController: ConsumptionController;
+        let attributeTagClientSpy: TagClient;
+        beforeEach(async function () {
+            connection = await TestUtil.createConnection();
+            transport = TestUtil.createTransport(mockEventBus, {
+                tagCacheLifetimeInMinutes: 1 / 60
+            });
+            await transport.init();
+
+            const connectorAccount = (await TestUtil.provideAccounts(transport, connection, 1))[0];
+            ({ accountController: testAccount, consumptionController } = connectorAccount);
+            const attributeTagClient = consumptionController.attributes["attributeTagClient"];
+
+            attributeTagClientSpy = spy(attributeTagClient);
+            when(attributeTagClientSpy.get("/api/v1/Tags", anything(), anything())).thenResolve(
+                ClientResult.ok(
+                    AttributeTagCollection.from({
+                        supportedLanguages: ["en"],
+                        tagsForAttributeValueTypes: {}
+                    }).toJSON(),
+                    {
+                        etag: "some-e-tag"
+                    }
+                )
+            );
+        });
+
+        afterEach(async function () {
+            await testAccount.close();
+            await connection.close();
+            reset(attributeTagClientSpy);
+        });
+
+        test("should cache the tag definitions when called twice within tagCachingDurationInMinutes", async function () {
+            await consumptionController.attributes.getAttributeTagCollection();
+            await consumptionController.attributes.getAttributeTagCollection();
+
+            verify(attributeTagClientSpy.getTagCollection(anything())).once();
+            reset(attributeTagClientSpy);
+        });
+
+        test("should not cache the tag definitions when the tagCachingDurationInMinutes was reached", async function () {
+            await consumptionController.attributes.getAttributeTagCollection();
+            await sleep(1100);
+            await consumptionController.attributes.getAttributeTagCollection();
+
+            verify(attributeTagClientSpy.getTagCollection(anything())).twice();
+            reset(attributeTagClientSpy);
+        });
+    });
+
+    describe("tag definition caching by e-tag", function () {
+        let connection: IDatabaseConnection;
+        let transport: Transport;
+        let testAccount: AccountController;
+        let consumptionController: ConsumptionController;
+        let attributeTagClientSpy: TagClient;
+        let attributesControllerSpy: AttributesController;
+        let etag: string;
+        beforeEach(async function () {
+            connection = await TestUtil.createConnection();
+            transport = TestUtil.createTransport(mockEventBus, {
+                tagCacheLifetimeInMinutes: 0
+            });
+            await transport.init();
+
+            const connectorAccount = (await TestUtil.provideAccounts(transport, connection, 1))[0];
+            ({ accountController: testAccount, consumptionController } = connectorAccount);
+            const attributeTagClient = consumptionController.attributes["attributeTagClient"];
+
+            attributeTagClientSpy = spy(attributeTagClient);
+            attributesControllerSpy = spy(consumptionController.attributes);
+
+            etag = "some-e-tag";
+            when(attributeTagClientSpy.get("/api/v1/Tags", anything(), anything())).thenCall((_path, _params, config) => {
+                const etagMatched = etag === config?.headers?.["if-none-match"];
+                const platformParameters = {
+                    etag,
+                    responseStatus: etagMatched ? 304 : 200
+                };
+                return Promise.resolve(
+                    ClientResult.ok(
+                        etagMatched
+                            ? undefined
+                            : AttributeTagCollection.from({
+                                  supportedLanguages: ["en"],
+                                  tagsForAttributeValueTypes: {}
+                              }).toJSON(),
+                        platformParameters
+                    )
+                );
+            });
+        });
+
+        afterEach(async function () {
+            await testAccount.close();
+            await connection.close();
+            reset(attributeTagClientSpy);
+            reset(attributesControllerSpy);
+        });
+
+        test("should cache the tag definitions when called twice without new etag", async function () {
+            await consumptionController.attributes.getAttributeTagCollection();
+            await sleep(100);
+            await consumptionController.attributes.getAttributeTagCollection();
+
+            verify(attributeTagClientSpy.getTagCollection(anything())).twice();
+            verify(attributesControllerSpy["setTagCollection"](anything())).once();
+        });
+
+        test("should not cache the tag definitions when called twice with new etag", async function () {
+            await consumptionController.attributes.getAttributeTagCollection();
+            await sleep(100);
+            etag = "some-other-e-tag";
+            await consumptionController.attributes.getAttributeTagCollection();
+
+            verify(attributeTagClientSpy.getTagCollection(anything())).twice();
+            verify(attributesControllerSpy["setTagCollection"](anything())).twice();
+        });
+    });
+
+    describe("validate attribute values", function () {
+        test("should catch forbidden characters in an IdentityAttribute", function () {
+            expect(
+                consumptionController.attributes.validateAttributeCharacters(
+                    IdentityAttribute.from({
+                        owner: CoreAddress.from("anAddress"),
+                        value: City.from({ value: "aCity😀" })
+                    })
+                )
+            ).toBe(false);
+        });
+
+        test("should catch forbidden characters in a RelationshipAttribute", function () {
+            expect(
+                consumptionController.attributes.validateAttributeCharacters(
+                    RelationshipAttribute.from({
+                        key: "aKey",
+                        owner: CoreAddress.from("anAddress"),
+                        confidentiality: RelationshipAttributeConfidentiality.Public,
+                        value: ProprietaryString.from({ title: "aTitle", value: "aProprietaryStringValue😀" })
+                    })
+                )
+            ).toBe(false);
+        });
+
+        test("should allow all characters in a RelationshipAttribute's title and description", function () {
+            expect(
+                consumptionController.attributes.validateAttributeCharacters(
+                    RelationshipAttribute.from({
+                        key: "aKey",
+                        owner: CoreAddress.from("anAddress"),
+                        confidentiality: RelationshipAttributeConfidentiality.Public,
+                        value: ProprietaryString.from({ title: "aTitle😀", value: "aProprietaryStringValue", description: "aDescription😀" })
+                    })
+                )
+            ).toBe(true);
+        });
     });
 });
