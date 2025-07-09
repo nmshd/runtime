@@ -1,8 +1,6 @@
 import { IDatabaseCollection } from "@js-soft/docdb-access-abstractions";
 import { EventBus } from "@js-soft/ts-utils";
 import {
-    AbstractAttributeValue,
-    AbstractComplexValue,
     AttributeValues,
     IdentityAttribute,
     IdentityAttributeQuery,
@@ -240,8 +238,7 @@ export class AttributesController extends ConsumptionBaseController {
         let localAttribute = LocalAttribute.from({
             id: parsedParams.id ?? (await ConsumptionIds.attribute.generate()),
             createdAt: CoreDate.utc(),
-            content: parsedParams.content,
-            parentId: parsedParams.parentId
+            content: parsedParams.content
         });
 
         await this.attributes.create(localAttribute);
@@ -250,33 +247,9 @@ export class AttributesController extends ConsumptionBaseController {
             localAttribute = await this.setAsDefaultRepositoryAttribute(localAttribute, true);
         }
 
-        if (localAttribute.content.value instanceof AbstractComplexValue) {
-            await this.createLocalAttributesForChildrenOfComplexAttribute(localAttribute);
-        }
-
         this.eventBus.publish(new AttributeCreatedEvent(this.identity.address.toString(), localAttribute));
 
         return localAttribute;
-    }
-
-    private async createLocalAttributesForChildrenOfComplexAttribute(localAttribute: LocalAttribute): Promise<void> {
-        if (!(localAttribute.content instanceof IdentityAttribute)) {
-            throw new ConsumptionError("Only IdentityAttributes may have child Attributes.");
-        }
-
-        const childAttributeValues = Object.values(localAttribute.content.value).filter((p) => p instanceof AbstractAttributeValue) as AttributeValues.Identity.Class[];
-
-        for (const propertyValue of childAttributeValues) {
-            const childAttribute = IdentityAttribute.from({
-                ...localAttribute.content.toJSON(),
-                value: propertyValue.toJSON() as AttributeValues.Identity.Json
-            });
-
-            await this.createRepositoryAttribute({
-                content: childAttribute,
-                parentId: localAttribute.id
-            });
-        }
     }
 
     public async setAsDefaultRepositoryAttribute(newDefaultAttribute: LocalAttribute, skipOverwrite?: boolean): Promise<LocalAttribute> {
@@ -287,12 +260,6 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         if (newDefaultAttribute.isDefault) return newDefaultAttribute;
-
-        if (newDefaultAttribute.parentId) {
-            const parentAttribute = await this.getLocalAttribute(newDefaultAttribute.parentId);
-            if (!parentAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, newDefaultAttribute.parentId.toString());
-            if (parentAttribute.isDefault) skipOverwrite = false;
-        }
 
         const valueType = newDefaultAttribute.content.value.constructor.name;
         const query = {
@@ -369,10 +336,6 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async deleteAttribute(attribute: LocalAttribute): Promise<void> {
-        if (attribute.content instanceof IdentityAttribute && attribute.content.value instanceof AbstractComplexValue) {
-            await this.deleteChildAttributesOfComplexAttribute(attribute);
-        }
-
         await this.deleteAttributeUnsafe(attribute.id);
 
         this.eventBus.publish(new AttributeDeletedEvent(this.identity.address.toString(), attribute));
@@ -382,17 +345,6 @@ export class AttributesController extends ConsumptionBaseController {
         const attributes = await this.getLocalAttributes({ "shareInfo.peer": peer.toString() });
         for (const attribute of attributes) {
             await this.deleteAttributeUnsafe(attribute.id);
-        }
-    }
-
-    private async deleteChildAttributesOfComplexAttribute(complexAttribute: LocalAttribute): Promise<void> {
-        if (!(complexAttribute.content instanceof IdentityAttribute)) {
-            throw new ConsumptionError("Only IdentityAttributes may have child Attributes.");
-        }
-
-        const childAttributes = await this.getLocalAttributes({ parentId: complexAttribute.id.toString() });
-        for (const childAttribute of childAttributes) {
-            await this.deleteAttribute(childAttribute);
         }
     }
 
@@ -418,14 +370,9 @@ export class AttributesController extends ConsumptionBaseController {
             content: parsedSuccessorParams.content,
             succeeds: predecessorId,
             shareInfo: parsedSuccessorParams.shareInfo,
-            parentId: parsedSuccessorParams.parentId,
             createdAt: parsedSuccessorParams.createdAt,
             succeededBy: parsedSuccessorParams.succeededBy
         });
-
-        if (predecessor.isComplexAttribute()) {
-            await this.succeedChildrenOfComplexAttribute(successor.id);
-        }
 
         this.eventBus.publish(new RepositoryAttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
 
@@ -449,7 +396,6 @@ export class AttributesController extends ConsumptionBaseController {
             content: parsedSuccessorParams.content,
             succeeds: predecessorId,
             shareInfo: parsedSuccessorParams.shareInfo,
-            parentId: parsedSuccessorParams.parentId,
             createdAt: parsedSuccessorParams.createdAt,
             succeededBy: parsedSuccessorParams.succeededBy
         });
@@ -476,7 +422,6 @@ export class AttributesController extends ConsumptionBaseController {
             content: parsedSuccessorParams.content,
             succeeds: predecessorId,
             shareInfo: parsedSuccessorParams.shareInfo,
-            parentId: parsedSuccessorParams.parentId,
             createdAt: parsedSuccessorParams.createdAt,
             succeededBy: parsedSuccessorParams.succeededBy
         });
@@ -503,7 +448,6 @@ export class AttributesController extends ConsumptionBaseController {
             content: parsedSuccessorParams.content,
             succeeds: predecessorId,
             shareInfo: parsedSuccessorParams.shareInfo,
-            parentId: parsedSuccessorParams.parentId,
             createdAt: parsedSuccessorParams.createdAt,
             succeededBy: parsedSuccessorParams.succeededBy
         });
@@ -530,7 +474,6 @@ export class AttributesController extends ConsumptionBaseController {
             content: parsedSuccessorParams.content,
             succeeds: predecessorId,
             shareInfo: parsedSuccessorParams.shareInfo,
-            parentId: parsedSuccessorParams.parentId,
             createdAt: parsedSuccessorParams.createdAt,
             succeededBy: parsedSuccessorParams.succeededBy
         });
@@ -559,7 +502,6 @@ export class AttributesController extends ConsumptionBaseController {
             content: parsedSuccessorParams.content,
             succeeds: predecessorId,
             shareInfo: parsedSuccessorParams.shareInfo,
-            parentId: parsedSuccessorParams.parentId,
             createdAt: parsedSuccessorParams.createdAt,
             succeededBy: parsedSuccessorParams.succeededBy
         });
@@ -567,55 +509,6 @@ export class AttributesController extends ConsumptionBaseController {
         this.eventBus.publish(new ThirdPartyRelationshipAttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
 
         return { predecessor, successor };
-    }
-
-    private async succeedChildrenOfComplexAttribute(parentSuccessorId: CoreId) {
-        const parentSuccessor = await this.getLocalAttribute(parentSuccessorId);
-        if (!parentSuccessor) throw ConsumptionCoreErrors.attributes.invalidParentSuccessor(parentSuccessorId);
-
-        const childAttributeValues: AbstractAttributeValue[] = Object.values(parentSuccessor.content.value).filter((elem) => elem instanceof AbstractAttributeValue);
-
-        for (const childAttributeValue of childAttributeValues) {
-            let currentParent = await this.getLocalAttribute(parentSuccessorId);
-
-            let child;
-            while (!child && currentParent?.succeeds) {
-                const currentPredecessor = (await this.getLocalAttribute(currentParent.succeeds))!;
-                currentParent = currentPredecessor;
-                child = await this.getChildAttributesByValueType(currentParent.id, childAttributeValue.constructor);
-            }
-
-            const childPredecessorId = child?.id;
-            if (childPredecessorId) {
-                await this._succeedAttributeUnsafe(childPredecessorId, {
-                    content: IdentityAttribute.from({
-                        value: childAttributeValue.toJSON() as AttributeValues.Identity.Json,
-                        owner: this.identity.address
-                    }),
-                    parentId: parentSuccessorId,
-                    createdAt: parentSuccessor.createdAt
-                });
-            } else {
-                await this.createAttributeUnsafe({
-                    content: IdentityAttribute.from({
-                        value: childAttributeValue.toJSON() as AttributeValues.Identity.Json,
-                        owner: this.identity.address
-                    }),
-                    parentId: parentSuccessorId,
-                    createdAt: parentSuccessor.createdAt
-                });
-            }
-        }
-    }
-
-    private async getChildAttributesByValueType(parentId: CoreId, valueType: AbstractAttributeValue["constructor"]): Promise<LocalAttribute | undefined> {
-        const children = await this.getLocalAttributes({
-            parentId: parentId.toString()
-        });
-
-        /** We currently assume that all of the child attributes of a complex
-         * attribute have distinct types. */
-        return children.find((elem) => elem.content.value instanceof valueType);
     }
 
     private async _succeedAttributeUnsafe(
@@ -630,7 +523,6 @@ export class AttributesController extends ConsumptionBaseController {
             content: successorParams.content,
             succeeds: predecessorId,
             shareInfo: successorParams.shareInfo,
-            parentId: successorParams.parentId,
             createdAt: successorParams.createdAt,
             succeededBy: successorParams.succeededBy,
             isDefault: predecessor.isDefault
@@ -674,8 +566,7 @@ export class AttributesController extends ConsumptionBaseController {
             createdAt: parsedSuccessorParams.createdAt ?? CoreDate.utc(),
             succeeds: parsedSuccessorParams.succeeds,
             succeededBy: parsedSuccessorParams.succeededBy,
-            shareInfo: parsedSuccessorParams.shareInfo,
-            parentId: parsedSuccessorParams.parentId
+            shareInfo: parsedSuccessorParams.shareInfo
         });
 
         if (!predecessor.isRepositoryAttribute(this.identity.address)) {
@@ -710,8 +601,7 @@ export class AttributesController extends ConsumptionBaseController {
             createdAt: parsedSuccessorParams.createdAt ?? CoreDate.utc(),
             succeeds: parsedSuccessorParams.succeeds,
             succeededBy: parsedSuccessorParams.succeededBy,
-            shareInfo: parsedSuccessorParams.shareInfo,
-            parentId: parsedSuccessorParams.parentId
+            shareInfo: parsedSuccessorParams.shareInfo
         });
 
         if (!predecessor.isOwnSharedIdentityAttribute(this.identity.address)) {
@@ -783,8 +673,7 @@ export class AttributesController extends ConsumptionBaseController {
             createdAt: parsedSuccessorParams.createdAt ?? CoreDate.utc(),
             succeeds: parsedSuccessorParams.succeeds,
             succeededBy: parsedSuccessorParams.succeededBy,
-            shareInfo: parsedSuccessorParams.shareInfo,
-            parentId: parsedSuccessorParams.parentId
+            shareInfo: parsedSuccessorParams.shareInfo
         });
 
         if (!predecessor.isOwnSharedRelationshipAttribute(this.identity.address)) {
@@ -827,8 +716,7 @@ export class AttributesController extends ConsumptionBaseController {
             createdAt: parsedSuccessorParams.createdAt ?? CoreDate.utc(),
             succeeds: parsedSuccessorParams.succeeds,
             succeededBy: parsedSuccessorParams.succeededBy,
-            shareInfo: parsedSuccessorParams.shareInfo,
-            parentId: parsedSuccessorParams.parentId
+            shareInfo: parsedSuccessorParams.shareInfo
         });
 
         if (!predecessor.isPeerSharedIdentityAttribute()) {
@@ -867,8 +755,7 @@ export class AttributesController extends ConsumptionBaseController {
             createdAt: parsedSuccessorParams.createdAt ?? CoreDate.utc(),
             succeeds: parsedSuccessorParams.succeeds,
             succeededBy: parsedSuccessorParams.succeededBy,
-            shareInfo: parsedSuccessorParams.shareInfo,
-            parentId: parsedSuccessorParams.parentId
+            shareInfo: parsedSuccessorParams.shareInfo
         });
 
         if (!predecessor.isPeerSharedRelationshipAttribute()) {
@@ -911,8 +798,7 @@ export class AttributesController extends ConsumptionBaseController {
             createdAt: parsedSuccessorParams.createdAt ?? CoreDate.utc(),
             succeeds: parsedSuccessorParams.succeeds,
             succeededBy: parsedSuccessorParams.succeededBy,
-            shareInfo: parsedSuccessorParams.shareInfo,
-            parentId: parsedSuccessorParams.parentId
+            shareInfo: parsedSuccessorParams.shareInfo
         });
 
         if (!predecessor.isThirdPartyRelationshipAttribute()) {
@@ -955,8 +841,7 @@ export class AttributesController extends ConsumptionBaseController {
             createdAt: parsedSuccessorParams.createdAt ?? CoreDate.utc(),
             succeeds: parsedSuccessorParams.succeeds,
             succeededBy: parsedSuccessorParams.succeededBy,
-            shareInfo: parsedSuccessorParams.shareInfo,
-            parentId: parsedSuccessorParams.parentId
+            shareInfo: parsedSuccessorParams.shareInfo
         });
 
         if (parsedSuccessorParams.id) {
@@ -968,10 +853,6 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successorMustNotHaveASuccessor());
         }
 
-        if (successor.parentId) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedChildOfComplexAttribute(predecessorId.toString()));
-        }
-
         const predecessor = await this.getLocalAttribute(predecessorId);
         if (!predecessor) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.predecessorDoesNotExist());
@@ -979,10 +860,6 @@ export class AttributesController extends ConsumptionBaseController {
 
         if (predecessor.succeededBy) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedAttributesWithASuccessor(predecessor.succeededBy.toString()));
-        }
-
-        if (predecessor.parentId) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedChildOfComplexAttribute(predecessorId.toString()));
         }
 
         if (
@@ -1028,7 +905,6 @@ export class AttributesController extends ConsumptionBaseController {
             content: attributeData.content,
             createdAt: attributeData.createdAt ?? CoreDate.utc(),
             shareInfo: attributeData.shareInfo,
-            parentId: attributeData.parentId,
             succeededBy: attributeData.succeededBy,
             succeeds: attributeData.succeeds,
             deletionInfo: attributeData.deletionInfo,
@@ -1050,7 +926,6 @@ export class AttributesController extends ConsumptionBaseController {
             id: attributeParams.id,
             content: attributeParams.content,
             createdAt: attributeParams.createdAt,
-            parentId: attributeParams.parentId,
             shareInfo: attributeParams.shareInfo,
             succeededBy: attributeParams.succeededBy,
             succeeds: attributeParams.succeeds,
