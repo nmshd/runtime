@@ -13,6 +13,7 @@ import {
     SettingsController
 } from "@nmshd/consumption";
 import { ICoreAddress } from "@nmshd/core-types";
+import { CryptoLayerProviderToBeInitialized, initializeNewProviders, loadProviderFromConfig } from "@nmshd/crypto";
 import { RuntimeHealth } from "@nmshd/runtime-types";
 import {
     AccountController,
@@ -143,6 +144,25 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
         await this.initDIContainer();
 
         this.databaseConnection = await this.createDatabaseConnection();
+
+        if (this.runtimeConfig.calFactory && this.runtimeConfig.calStorageConfig) {
+            this.logger.trace("Initializing Crypto Layer");
+            const calDB = await this.databaseConnection.getDatabase("cryptoConfig");
+            const calMap = await calDB.getMap("calConfig");
+            const calConfig = await calMap.get("initializedProviders");
+            if (calConfig === null) {
+                this.logger.trace("Initializing Crypto Layer with new config");
+                const calConfig = await initializeNewProviders(this.runtimeConfig.calStorageConfig, this.runtimeConfig.calFactory);
+                await calMap.set("initializedProviders", calConfig);
+            } else {
+                this.logger.trace("Initializing Crypto Layer with saved config");
+                const calConfigloaded = await CryptoLayerProviderToBeInitialized.deserialize(calConfig);
+                await loadProviderFromConfig(calConfigloaded, this.runtimeConfig.calStorageConfig, this.runtimeConfig.calFactory);
+            }
+            this.logger.trace("Crypto Layer initialized");
+        } else {
+            this.logger.trace("No Crypto Layer configuration provided, skipping initialization.");
+        }
 
         await this.initTransportLibrary();
         await this.initAccount();

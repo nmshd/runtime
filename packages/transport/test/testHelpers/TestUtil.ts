@@ -8,7 +8,7 @@ import { SimpleLoggerFactory } from "@js-soft/simple-logger";
 import { ISerializable, Serializable } from "@js-soft/ts-serval";
 import { EventEmitter2EventBus, sleep } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
-import { CoreBuffer } from "@nmshd/crypto";
+import { CoreBuffer, initializeNewProviders } from "@nmshd/crypto";
 import { createProvider, createProviderFromName, getAllProviders, getProviderCapabilities } from "@nmshd/rs-crypto-node";
 import fs from "fs";
 import { DurationLike } from "luxon";
@@ -18,7 +18,6 @@ import * as tmp from "tmp";
 import { LogLevel } from "typescript-logging";
 import {
     AccountController,
-    ALL_CRYPTO_PROVIDERS,
     ChangedItems,
     DependencyOverrides,
     DeviceSharedSecret,
@@ -178,37 +177,27 @@ export class TestUtil {
 
     public static createConfig(): IConfigOverwrite {
         const notDefinedEnvironmentVariables = ["NMSHD_TEST_BASEURL", "NMSHD_TEST_CLIENTID", "NMSHD_TEST_CLIENTSECRET"].filter((env) => !process.env[env]);
-        const transportSpecificDir = fs.mkdtempSync(path.join(TestUtil.rootTempDir.name, "transport-"));
 
         if (notDefinedEnvironmentVariables.length > 0) {
             throw new Error(`Missing environment variable(s): ${notDefinedEnvironmentVariables.join(", ")}}`);
         }
 
+        if (process.env["NMSHD_TEST_CAL"]) {
+            const transportSpecificDir = fs.mkdtempSync(path.join(TestUtil.rootTempDir.name, "transport-"));
+            const factoryFunctions = { getAllProviders, createProvider, createProviderFromName, getProviderCapabilities };
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            const storageConfig = { FileStoreConfig: { db_dir: transportSpecificDir } };
+            initializeNewProviders(storageConfig, factoryFunctions).catch((err) => {
+                throw new Error(`Failed to initialize crypto providers: ${err.message}`);
+            });
+        }
         return {
             baseUrl: globalThis.process.env.NMSHD_TEST_BASEURL!,
             platformClientId: globalThis.process.env.NMSHD_TEST_CLIENTID!,
             platformClientSecret: globalThis.process.env.NMSHD_TEST_CLIENTSECRET!,
             addressGenerationHostnameOverride: globalThis.process.env.NMSHD_TEST_ADDRESS_GENERATION_HOSTNAME_OVERRIDE,
             debug: true,
-            supportedIdentityVersion: 1,
-            calConfig: {
-                factoryFunctions: { getAllProviders, createProvider, createProviderFromName, getProviderCapabilities },
-                providersToBeInitialized: ALL_CRYPTO_PROVIDERS.map((name) => [
-                    { providerName: name },
-                    {
-                        // eslint-disable-next-line @typescript-eslint/naming-convention
-                        additional_config: [
-                            {
-                                // eslint-disable-next-line @typescript-eslint/naming-convention
-                                FileStoreConfig: {
-                                    // eslint-disable-next-line @typescript-eslint/naming-convention
-                                    db_dir: path.join(transportSpecificDir, `cal_db_${name}`)
-                                }
-                            }
-                        ]
-                    }
-                ])
-            }
+            supportedIdentityVersion: 1
         };
     }
 

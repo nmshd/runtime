@@ -67,7 +67,7 @@
         "@nmshd/consumption": "*",
         "@nmshd/content": "*",
         "@nmshd/core-types": "*",
-        "@nmshd/crypto": "2.2.0-alpha.3",
+        "@nmshd/crypto": "2.2.0-alpha.6",
         "@nmshd/iql": "^1.0.3",
         "@nmshd/runtime-types": "*",
         "@nmshd/transport": "*",

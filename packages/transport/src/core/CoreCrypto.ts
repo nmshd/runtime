@@ -26,7 +26,7 @@ import {
     Encoding,
     PortableDerivedKeyHandle,
     PortableKeyHandle,
-    ProviderIdentifier
+    CryptoLayerProviderIdentifier as ProviderIdentifier
 } from "@nmshd/crypto";
 import { PasswordGenerator } from "../util";
 import { TransportError } from "./TransportError";

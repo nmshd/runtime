@@ -1,7 +1,7 @@
 import { ILogger, ILoggerFactory } from "@js-soft/logging-abstractions";
 import { SimpleLoggerFactory } from "@js-soft/simple-logger";
 import { EventBus } from "@js-soft/ts-utils";
-import { CryptoLayerConfig, initCryptoLayerProviders, SodiumWrapper } from "@nmshd/crypto";
+import { SodiumWrapper } from "@nmshd/crypto";
 import { AgentOptions } from "http";
 import { AgentOptions as HTTPSAgentOptions } from "https";
 import _ from "lodash";
@@ -33,7 +33,6 @@ export interface IConfig {
     httpsAgentOptions: HTTPSAgentOptions;
     tagCacheLifetimeInMinutes: number;
     cryptoOperationPreferences: CryptoOperationPreferences;
-    calConfig?: CryptoLayerConfig;
 }
 
 export interface IConfigOverwrite {
@@ -53,7 +52,6 @@ export interface IConfigOverwrite {
     httpsAgentOptions?: HTTPSAgentOptions;
     tagCacheLifetimeInMinutes?: number;
     cryptoOperationPreferences?: CryptoOperationPreferences;
-    calConfig?: CryptoLayerConfig;
 }
 
 export class Transport {
@@ -127,21 +125,6 @@ export class Transport {
     public async init(): Promise<Transport> {
         log.trace("Initializing Libsodium...");
         await SodiumWrapper.ready();
-        log.trace("Initializing Crypto Layer...");
-        // New version of ts-crypto will have flag to verify if cal was already initialized.
-        // Until then tests probably throw "Providers cannot be initialized again."
-        try {
-            if (this._config.calConfig) {
-                await initCryptoLayerProviders(this._config.calConfig);
-                log.trace("Crypto Layer initialized successfully");
-            } else {
-                log.warn("Crypto Layer not intialized, no configuration provided.");
-            }
-        } catch (error) {
-            log.warn("Failed to initialize Crypto Layer, continuing without it.", error);
-        }
-        log.trace("Crypto Layer initialized");
-
         log.trace("Libsodium initialized");
 
         log.info("Transport initialized");
