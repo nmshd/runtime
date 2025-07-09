@@ -52,13 +52,6 @@ class Attributes {
         );
     }
 
-    public cannotSucceedChildOfComplexAttribute(parentId: string | CoreId) {
-        return new CoreError(
-            "error.consumption.attributes.cannotSucceedChildOfComplexAttribute",
-            `The Attribute you want to succeed is a child Attribute of a complex Attribute (id: '${parentId}'), and cannot be succeeded on its own. Instead, succeed the parent which will implicitly succeed all its children.`
-        );
-    }
-
     public successorMustNotYetExist() {
         return new CoreError(
             "error.consumption.attributes.successorMustNotYetExist",
