@@ -953,11 +953,11 @@ export class AttributesController extends ConsumptionBaseController {
             await this.detachSuccessor(successor);
         }
 
-        const copiesOfAttribute = await this.getLocalAttributes({
+        const attributeCopies = await this.getLocalAttributes({
             ["shareInfo.sourceAttribute"]: attribute.id.toString()
         });
         const predecessorCopies = await this.getSharedPredecessorsOfAttribute(attribute);
-        const attributeCopiesToDetach = [...copiesOfAttribute, ...predecessorCopies];
+        const attributeCopiesToDetach = [...attributeCopies, ...predecessorCopies];
         await this.detachAttributeCopies(attributeCopiesToDetach);
 
         await this.deletePredecessorsOfAttribute(attribute.id);
@@ -975,11 +975,11 @@ export class AttributesController extends ConsumptionBaseController {
             return validateSuccessorResult;
         }
 
-        const copiesOfAttribute = await this.getLocalAttributes({ ["shareInfo.sourceAttribute"]: attribute.id.toString() });
+        const attributeCopies = await this.getLocalAttributes({ ["shareInfo.sourceAttribute"]: attribute.id.toString() });
 
         const predecessorCopies = await this.getSharedPredecessorsOfAttribute(attribute);
 
-        const attributeCopiesToDetach = [...copiesOfAttribute, ...predecessorCopies];
+        const attributeCopiesToDetach = [...attributeCopies, ...predecessorCopies];
 
         const validateSharedAttributesResult = this.validateSharedAttributes(attributeCopiesToDetach);
         return validateSharedAttributesResult;
