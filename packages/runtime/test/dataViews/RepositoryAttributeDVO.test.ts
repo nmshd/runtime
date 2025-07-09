@@ -1,4 +1,4 @@
-import { AbstractIntegerJSON, AbstractStringJSON, BiologicalSex, BirthMonth } from "@nmshd/content";
+import { AbstractIntegerJSON, AbstractStringJSON, BiologicalSex } from "@nmshd/content";
 import { ConsumptionServices, CreateRepositoryAttributeRequest, DataViewExpander, RepositoryAttributeDVO } from "../../src";
 import { RuntimeServiceProvider } from "../lib";
 
@@ -32,29 +32,6 @@ describe("RepositoryAttributeDVO", () => {
                     value: {
                         "@type": "Surname",
                         value: "aSurname"
-                    }
-                }
-            },
-            {
-                content: {
-                    value: {
-                        "@type": "BirthDay",
-                        value: 17
-                    }
-                }
-            },
-            {
-                content: {
-                    value: BirthMonth.from({
-                        value: 11
-                    }).toJSON()
-                }
-            },
-            {
-                content: {
-                    value: {
-                        "@type": "BirthYear",
-                        value: 2001
                     }
                 }
             },
