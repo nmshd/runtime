@@ -153,9 +153,16 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
             if (calConfig === null) {
                 this.logger.trace("Initializing Crypto Layer with new config");
                 const calConfig = await initializeNewProviders(this.runtimeConfig.calStorageConfig, this.runtimeConfig.calFactory);
-                await calMap.set("initializedProviders", calConfig);
+                if (!calConfig) {
+                    throw RuntimeErrors.startup.failedCalInit();
+                }
+                const serializedConfig = calConfig.serialize();
+                console.log("New Crypto Layer configuration initialized:", serializedConfig);
+                await calMap.set("initializedProviders", serializedConfig);
             } else {
                 this.logger.trace("Initializing Crypto Layer with saved config");
+                // eslint-disable-next-line no-console
+                console.log("Crypto Layer configuration loaded:", calConfig);
                 const calConfigloaded = await CryptoLayerProviderToBeInitialized.deserialize(calConfig);
                 await loadProviderFromConfig(calConfigloaded, this.runtimeConfig.calStorageConfig, this.runtimeConfig.calFactory);
             }

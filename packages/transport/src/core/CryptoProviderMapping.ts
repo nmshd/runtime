@@ -151,13 +151,12 @@ export class CryptoProviderMapping {
         purpose?: CryptoPurpose
     ): Promise<DeviceBoundKeyHandle | PortableKeyHandle> {
         const securityLevel = this.getPreferredProviderLevel(cryptoObject, cryptoOperation, purpose);
-
         switch (securityLevel) {
             case CryptoProviderTypes.Hardware:
                 if (isPortable) {
-                    return await CoreCrypto.generatePortableKeyHandle({ securityLevel });
+                    return await CoreCrypto.generatePortableKeyHandle({ securityLevel: "Software" });
                 }
-                return await CoreCrypto.generateDeviceBoundKeyHandle({ securityLevel });
+                return await CoreCrypto.generateDeviceBoundKeyHandle({ securityLevel: "Software" });
 
             case CryptoProviderTypes.Software:
                 if (isPortable) {
