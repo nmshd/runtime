@@ -1083,7 +1083,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
             };
             const result = await services1.consumption.attributes.createRepositoryAttribute(request);
             expect(result.error.message).toBe("BirthMonth.value:Number :: must be an integer value between 1 and 12");
-            expect(result.error.code).toBe("error.runtime.validation.invalidPropertyValue");
+            expect(result.error.code).toBe("error.runtime.requestDeserialization");
         });
 
         test("should not accept an additional property", async () => {
