@@ -5,7 +5,6 @@ export class AttributeMapper {
     public static toAttributeDTO(attribute: LocalAttribute): LocalAttributeDTO {
         return {
             id: attribute.id.toString(),
-            parentId: attribute.parentId?.toString(),
             content: attribute.content.toJSON(),
             createdAt: attribute.createdAt.toString(),
             succeeds: attribute.succeeds?.toString(),
