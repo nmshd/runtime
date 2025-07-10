@@ -1,8 +1,8 @@
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController, LocalAttribute } from "@nmshd/consumption";
 import { CoreId } from "@nmshd/core-types";
+import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { LocalAttributeDTO } from "../../../types";
 import { AttributeIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { AttributeMapper } from "./AttributeMapper";
 

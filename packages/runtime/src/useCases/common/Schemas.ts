@@ -6,7 +6,14 @@ export const LoadPeerTokenAnonymousRequest: any = {
             "type": "object",
             "properties": {
                 "reference": {
-                    "$ref": "#/definitions/TokenReferenceString"
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/TokenReferenceString"
+                        },
+                        {
+                            "$ref": "#/definitions/URLTokenReferenceString"
+                        }
+                    ]
                 },
                 "password": {
                     "type": "string"
@@ -20,6 +27,10 @@ export const LoadPeerTokenAnonymousRequest: any = {
         "TokenReferenceString": {
             "type": "string",
             "pattern": "VE9L.{84}"
+        },
+        "URLTokenReferenceString": {
+            "type": "string",
+            "pattern": "^https?:\\/\\/.*\\/r\\/TOK[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
         }
     }
 }
@@ -3315,6 +3326,9 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
                 "fileReference": {
+                    "type": "string"
+                },
+                "ownershipToken": {
                     "type": "string"
                 }
             },
@@ -11611,6 +11625,9 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 "fileReference": {
                     "type": "string"
+                },
+                "ownershipToken": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -15257,6 +15274,9 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "fileReference": {
                     "type": "string"
+                },
+                "ownershipToken": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -16780,6 +16800,19 @@ export const GetAttributesRequest: any = {
                 "isDefault": {
                     "type": "string"
                 },
+                "wasViewedAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
                 "content.@type": {
                     "anyOf": [
                         {
@@ -17049,6 +17082,19 @@ export const GetOwnSharedAttributesRequest: any = {
                 "createdAt": {
                     "type": "string"
                 },
+                "wasViewedAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
                 "content.@type": {
                     "anyOf": [
                         {
@@ -17292,6 +17338,19 @@ export const GetPeerSharedAttributesRequest: any = {
                 "createdAt": {
                     "type": "string"
                 },
+                "wasViewedAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
                 "content.@type": {
                     "anyOf": [
                         {
@@ -17509,6 +17568,19 @@ export const GetRepositoryAttributesRequest: any = {
                 "isDefault": {
                     "type": "string"
                 },
+                "wasViewedAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
                 "content.tags": {
                     "anyOf": [
                         {
@@ -17609,6 +17681,29 @@ export const GetVersionsOfAttributeRequest: any = {
     "$ref": "#/definitions/GetVersionsOfAttributeRequest",
     "definitions": {
         "GetVersionsOfAttributeRequest": {
+            "type": "object",
+            "properties": {
+                "attributeId": {
+                    "$ref": "#/definitions/AttributeIdString"
+                }
+            },
+            "required": [
+                "attributeId"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeIdString": {
+            "type": "string",
+            "pattern": "ATT[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const MarkAttributeAsViewedRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/MarkAttributeAsViewedRequest",
+    "definitions": {
+        "MarkAttributeAsViewedRequest": {
             "type": "object",
             "properties": {
                 "attributeId": {
@@ -20481,6 +20576,15 @@ export const LoadItemFromReferenceRequest: any = {
                         },
                         {
                             "$ref": "#/definitions/RelationshipTemplateReferenceString"
+                        },
+                        {
+                            "$ref": "#/definitions/URLTokenReferenceString"
+                        },
+                        {
+                            "$ref": "#/definitions/URLFileReferenceString"
+                        },
+                        {
+                            "$ref": "#/definitions/URLRelationshipTemplateReferenceString"
                         }
                     ]
                 },
@@ -20504,6 +20608,18 @@ export const LoadItemFromReferenceRequest: any = {
         "RelationshipTemplateReferenceString": {
             "type": "string",
             "pattern": "UkxU.{84}"
+        },
+        "URLTokenReferenceString": {
+            "type": "string",
+            "pattern": "^https?:\\/\\/.*\\/r\\/TOK[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
+        },
+        "URLFileReferenceString": {
+            "type": "string",
+            "pattern": "^https?:\\/\\/.*\\/r\\/FIL[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
+        },
+        "URLRelationshipTemplateReferenceString": {
+            "type": "string",
+            "pattern": "^https?:\\/\\/.*\\/r\\/RLT[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
         }
     }
 }
@@ -20808,6 +20924,22 @@ export const GetFilesRequest: any = {
                             }
                         }
                     ]
+                },
+                "ownershipToken": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "ownershipIsLocked": {
+                    "type": "string"
                 }
             },
             "additionalProperties": false
@@ -20836,6 +20968,12 @@ export const GetOrLoadFileRequest: any = {
                         },
                         {
                             "$ref": "#/definitions/FileReferenceString"
+                        },
+                        {
+                            "$ref": "#/definitions/URLTokenReferenceString"
+                        },
+                        {
+                            "$ref": "#/definitions/URLFileReferenceString"
                         }
                     ]
                 },
@@ -20856,6 +20994,14 @@ export const GetOrLoadFileRequest: any = {
         "FileReferenceString": {
             "type": "string",
             "pattern": "RklM.{84}"
+        },
+        "URLTokenReferenceString": {
+            "type": "string",
+            "pattern": "^https?:\\/\\/.*\\/r\\/TOK[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
+        },
+        "URLFileReferenceString": {
+            "type": "string",
+            "pattern": "^https?:\\/\\/.*\\/r\\/FIL[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
         }
     }
 }
@@ -21673,201 +21819,198 @@ export const SetCommunicationLanguageRequest: any = {
             "type": "object",
             "properties": {
                 "communicationLanguage": {
-                    "$ref": "#/definitions/LanguageISO639"
+                    "type": "string",
+                    "enum": [
+                        "aa",
+                        "ab",
+                        "ae",
+                        "af",
+                        "ak",
+                        "am",
+                        "an",
+                        "ar",
+                        "as",
+                        "av",
+                        "ay",
+                        "az",
+                        "ba",
+                        "be",
+                        "bg",
+                        "bi",
+                        "bm",
+                        "bn",
+                        "bo",
+                        "br",
+                        "bs",
+                        "ca",
+                        "ce",
+                        "ch",
+                        "co",
+                        "cr",
+                        "cs",
+                        "cu",
+                        "cv",
+                        "cy",
+                        "da",
+                        "de",
+                        "dv",
+                        "dz",
+                        "ee",
+                        "el",
+                        "en",
+                        "eo",
+                        "es",
+                        "et",
+                        "eu",
+                        "fa",
+                        "ff",
+                        "fi",
+                        "fj",
+                        "fo",
+                        "fr",
+                        "fy",
+                        "ga",
+                        "gd",
+                        "gl",
+                        "gn",
+                        "gu",
+                        "gv",
+                        "ha",
+                        "he",
+                        "hi",
+                        "ho",
+                        "hr",
+                        "ht",
+                        "hu",
+                        "hy",
+                        "hz",
+                        "ia",
+                        "id",
+                        "ie",
+                        "ig",
+                        "ii",
+                        "ik",
+                        "io",
+                        "is",
+                        "it",
+                        "iu",
+                        "ja",
+                        "jv",
+                        "ka",
+                        "kg",
+                        "ki",
+                        "kj",
+                        "kk",
+                        "kl",
+                        "km",
+                        "kn",
+                        "ko",
+                        "kr",
+                        "ks",
+                        "ku",
+                        "kv",
+                        "kw",
+                        "ky",
+                        "la",
+                        "lb",
+                        "lg",
+                        "li",
+                        "ln",
+                        "lo",
+                        "lt",
+                        "lu",
+                        "lv",
+                        "mg",
+                        "mh",
+                        "mi",
+                        "mk",
+                        "ml",
+                        "mn",
+                        "mr",
+                        "ms",
+                        "mt",
+                        "my",
+                        "na",
+                        "nb",
+                        "nd",
+                        "ne",
+                        "ng",
+                        "nl",
+                        "nn",
+                        "no",
+                        "nr",
+                        "nv",
+                        "ny",
+                        "oc",
+                        "oj",
+                        "om",
+                        "or",
+                        "os",
+                        "pa",
+                        "pi",
+                        "pl",
+                        "ps",
+                        "pt",
+                        "qu",
+                        "rm",
+                        "rn",
+                        "ro",
+                        "ru",
+                        "rw",
+                        "sa",
+                        "sc",
+                        "sd",
+                        "se",
+                        "sg",
+                        "si",
+                        "sk",
+                        "sl",
+                        "sm",
+                        "sn",
+                        "so",
+                        "sq",
+                        "sr",
+                        "ss",
+                        "st",
+                        "su",
+                        "sv",
+                        "sw",
+                        "ta",
+                        "te",
+                        "tg",
+                        "th",
+                        "ti",
+                        "tk",
+                        "tl",
+                        "tn",
+                        "to",
+                        "tr",
+                        "ts",
+                        "tt",
+                        "tw",
+                        "ty",
+                        "ug",
+                        "uk",
+                        "ur",
+                        "uz",
+                        "ve",
+                        "vi",
+                        "vo",
+                        "wa",
+                        "wo",
+                        "xh",
+                        "yi",
+                        "yo",
+                        "za",
+                        "zh",
+                        "zu"
+                    ]
                 }
             },
             "required": [
                 "communicationLanguage"
             ],
             "additionalProperties": false
-        },
-        "LanguageISO639": {
-            "type": "string",
-            "enum": [
-                "aa",
-                "ab",
-                "ae",
-                "af",
-                "ak",
-                "am",
-                "an",
-                "ar",
-                "as",
-                "av",
-                "ay",
-                "az",
-                "ba",
-                "be",
-                "bg",
-                "bi",
-                "bm",
-                "bn",
-                "bo",
-                "br",
-                "bs",
-                "ca",
-                "ce",
-                "ch",
-                "co",
-                "cr",
-                "cs",
-                "cu",
-                "cv",
-                "cy",
-                "da",
-                "de",
-                "dv",
-                "dz",
-                "ee",
-                "el",
-                "en",
-                "eo",
-                "es",
-                "et",
-                "eu",
-                "fa",
-                "ff",
-                "fi",
-                "fj",
-                "fo",
-                "fr",
-                "fy",
-                "ga",
-                "gd",
-                "gl",
-                "gn",
-                "gu",
-                "gv",
-                "ha",
-                "he",
-                "hi",
-                "ho",
-                "hr",
-                "ht",
-                "hu",
-                "hy",
-                "hz",
-                "ia",
-                "id",
-                "ie",
-                "ig",
-                "ii",
-                "ik",
-                "io",
-                "is",
-                "it",
-                "iu",
-                "ja",
-                "jv",
-                "ka",
-                "kg",
-                "ki",
-                "kj",
-                "kk",
-                "kl",
-                "km",
-                "kn",
-                "ko",
-                "kr",
-                "ks",
-                "ku",
-                "kv",
-                "kw",
-                "ky",
-                "la",
-                "lb",
-                "lg",
-                "li",
-                "ln",
-                "lo",
-                "lt",
-                "lu",
-                "lv",
-                "mg",
-                "mh",
-                "mi",
-                "mk",
-                "ml",
-                "mn",
-                "mr",
-                "ms",
-                "mt",
-                "my",
-                "na",
-                "nb",
-                "nd",
-                "ne",
-                "ng",
-                "nl",
-                "nn",
-                "no",
-                "nr",
-                "nv",
-                "ny",
-                "oc",
-                "oj",
-                "om",
-                "or",
-                "os",
-                "pa",
-                "pi",
-                "pl",
-                "ps",
-                "pt",
-                "qu",
-                "rm",
-                "rn",
-                "ro",
-                "ru",
-                "rw",
-                "sa",
-                "sc",
-                "sd",
-                "se",
-                "sg",
-                "si",
-                "sk",
-                "sl",
-                "sm",
-                "sn",
-                "so",
-                "sq",
-                "sr",
-                "ss",
-                "st",
-                "su",
-                "sv",
-                "sw",
-                "ta",
-                "te",
-                "tg",
-                "th",
-                "ti",
-                "tk",
-                "tl",
-                "tn",
-                "to",
-                "tr",
-                "ts",
-                "tt",
-                "tw",
-                "ty",
-                "ug",
-                "uk",
-                "ur",
-                "uz",
-                "ve",
-                "vi",
-                "vo",
-                "wa",
-                "wo",
-                "xh",
-                "yi",
-                "yo",
-                "za",
-                "zh",
-                "zu"
-            ]
         }
     }
 }
@@ -22011,6 +22154,9 @@ export const GetMessagesRequest: any = {
         "GetMessagesQuery": {
             "type": "object",
             "properties": {
+                "isOwn": {
+                    "type": "string"
+                },
                 "createdBy": {
                     "anyOf": [
                         {
@@ -22989,6 +23135,12 @@ export const LoadPeerRelationshipTemplateRequest: any = {
                         },
                         {
                             "$ref": "#/definitions/RelationshipTemplateReferenceString"
+                        },
+                        {
+                            "$ref": "#/definitions/URLTokenReferenceString"
+                        },
+                        {
+                            "$ref": "#/definitions/URLRelationshipTemplateReferenceString"
                         }
                     ]
                 },
@@ -23009,6 +23161,14 @@ export const LoadPeerRelationshipTemplateRequest: any = {
         "RelationshipTemplateReferenceString": {
             "type": "string",
             "pattern": "UkxU.{84}"
+        },
+        "URLTokenReferenceString": {
+            "type": "string",
+            "pattern": "^https?:\\/\\/.*\\/r\\/TOK[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
+        },
+        "URLRelationshipTemplateReferenceString": {
+            "type": "string",
+            "pattern": "^https?:\\/\\/.*\\/r\\/RLT[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
         }
     }
 }
@@ -23272,7 +23432,14 @@ export const LoadPeerTokenRequest: any = {
             "type": "object",
             "properties": {
                 "reference": {
-                    "$ref": "#/definitions/TokenReferenceString"
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/TokenReferenceString"
+                        },
+                        {
+                            "$ref": "#/definitions/URLTokenReferenceString"
+                        }
+                    ]
                 },
                 "ephemeral": {
                     "type": "boolean"
@@ -23291,6 +23458,10 @@ export const LoadPeerTokenRequest: any = {
         "TokenReferenceString": {
             "type": "string",
             "pattern": "VE9L.{84}"
+        },
+        "URLTokenReferenceString": {
+            "type": "string",
+            "pattern": "^https?:\\/\\/.*\\/r\\/TOK[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
         }
     }
 }

@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
+import { RelationshipTemplateDTO, TokenDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { RelationshipTemplateDTO, TokenDTO } from "../../../types";
 import {
     CreateOwnRelationshipTemplateRequest,
     CreateOwnRelationshipTemplateUseCase,

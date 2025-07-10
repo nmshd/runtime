@@ -1,5 +1,5 @@
 import { Setting } from "@nmshd/consumption";
-import { SettingDTO } from "../../../types";
+import { SettingDTO } from "@nmshd/runtime-types";
 
 export class SettingMapper {
     public static toSettingDTO(setting: Setting): SettingDTO {

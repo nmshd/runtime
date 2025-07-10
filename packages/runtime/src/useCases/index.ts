@@ -1,6 +1,5 @@
 export * from "./anonymous";
 export * from "./common/AbstractCorrelator";
-export * from "./common/Base64ForIdPrefix";
 export * from "./common/OwnerRestriction";
 export * from "./common/PasswordProtectionMapper";
 export * from "./common/RuntimeErrors";

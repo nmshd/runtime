@@ -18,8 +18,8 @@ export class FileOwnershipLockedExternalEventProcessor extends ExternalEventProc
 
         if (!file) return;
 
-        const fileWithLockedOwnership = file.setOwnershipIsLocked();
-        const updatedFile = await this.accountController.files.updateFile(fileWithLockedOwnership);
+        file.setOwnershipIsLocked();
+        const updatedFile = await this.accountController.files.updateFile(file);
 
         this.eventBus.publish(new FileOwnershipLockedEvent(this.ownAddress, updatedFile));
         return updatedFile;

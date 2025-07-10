@@ -1,15 +1,15 @@
 import { Result } from "@js-soft/ts-utils";
+import { TokenDTO } from "@nmshd/runtime-types";
 import { AccountController, TokenController, TokenReference } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { TokenDTO } from "../../../types";
-import { SchemaRepository, SchemaValidator, TokenReferenceString, UseCase } from "../../common";
+import { SchemaRepository, SchemaValidator, TokenReferenceString, URLTokenReferenceString, UseCase } from "../../common";
 import { TokenMapper } from "./TokenMapper";
 
 /**
  * @errorMessage token reference invalid
  */
 export interface LoadPeerTokenRequest {
-    reference: TokenReferenceString;
+    reference: TokenReferenceString | URLTokenReferenceString;
     ephemeral: boolean;
     password?: string;
 }

@@ -1,5 +1,6 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreAddress, CoreDate, CoreId, ICoreId } from "@nmshd/core-types";
+import { AnnouncementAction, IAnnouncementAction } from "./AnnouncementAction";
 
 export interface IAnnouncement extends ISerializable {
     id: ICoreId;
@@ -9,6 +10,7 @@ export interface IAnnouncement extends ISerializable {
     title: string;
     body: string;
     iqlQuery?: string;
+    actions: IAnnouncementAction[];
 }
 
 export enum AnnouncementSeverity {
@@ -46,6 +48,10 @@ export class Announcement extends Serializable implements IAnnouncement {
     @validate({ nullable: true })
     @serialize()
     public iqlQuery?: string;
+
+    @validate()
+    @serialize({ type: AnnouncementAction })
+    public actions: AnnouncementAction[];
 
     public static from(value: IAnnouncement): Announcement {
         return this.fromAny(value);

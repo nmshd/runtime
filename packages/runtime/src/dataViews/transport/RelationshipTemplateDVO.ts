@@ -1,5 +1,4 @@
-import { PasswordProtectionDTO } from "../../types";
-import { RelationshipTemplateContentDerivation } from "../../types/transport/RelationshipTemplateDTO";
+import { PasswordProtectionDTO, RelationshipTemplateContentDerivation } from "@nmshd/runtime-types";
 import { DataViewObject } from "../DataViewObject";
 import { LocalRequestDVO } from "../consumption/LocalRequestDVO";
 import { RequestDVO } from "../content";

@@ -13,6 +13,7 @@ import {
     SettingsController
 } from "@nmshd/consumption";
 import { ICoreAddress } from "@nmshd/core-types";
+import { RuntimeHealth } from "@nmshd/runtime-types";
 import {
     AccountController,
     AnnouncementController,
@@ -43,7 +44,6 @@ import { AnonymousServices, ConsumptionServices, ModuleConfiguration, RuntimeMod
 import { AttributeListenerModule, DeciderModule, MessageModule, NotificationModule, RequestModule } from "./modules";
 import { RuntimeConfig } from "./RuntimeConfig";
 import { RuntimeLoggerFactory } from "./RuntimeLoggerFactory";
-import { RuntimeHealth } from "./types";
 import { RuntimeErrors } from "./useCases";
 import { AbstractCorrelator } from "./useCases/common/AbstractCorrelator";
 import { SchemaRepository } from "./useCases/common/SchemaRepository";

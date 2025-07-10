@@ -27,6 +27,38 @@ describe("RelationshipTemplate Tests", () => {
         expect(response).toBeSuccessful();
     });
 
+    test("load peer RelationshipTemplate by truncated reference", async () => {
+        const uploadedTemplate = (
+            await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                maxNumberOfAllocations: 1,
+                expiresAt: DateTime.utc().plus({ minutes: 10 }).toString(),
+                content: emptyRelationshipTemplateContent
+            })
+        ).value;
+
+        const result = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: uploadedTemplate.reference.truncated });
+        expect(result).toBeSuccessful();
+
+        const tempalte = result.value;
+        expect(tempalte.content).toStrictEqual(uploadedTemplate.content);
+    });
+
+    test("load peer RelationshipTemplate by url reference", async () => {
+        const uploadedTemplate = (
+            await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
+                maxNumberOfAllocations: 1,
+                expiresAt: DateTime.utc().plus({ minutes: 10 }).toString(),
+                content: emptyRelationshipTemplateContent
+            })
+        ).value;
+
+        const result = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: uploadedTemplate.reference.url });
+        expect(result).toBeSuccessful();
+
+        const template = result.value;
+        expect(template.content).toStrictEqual(uploadedTemplate.content);
+    });
+
     test("error when creating a RelationshipTemplate with undefined expiresAt", async () => {
         const response = await runtimeServices1.transport.relationshipTemplates.createOwnRelationshipTemplate({
             content: emptyRelationshipTemplateContent,
@@ -50,7 +82,7 @@ describe("RelationshipTemplate Tests", () => {
             expiresAt: relationshipTemplateExpirationDate
         });
 
-        expect(response.isSuccess).toBe(true);
+        expect(response).toBeSuccessful();
         expect((response.value.content as RelationshipTemplateContentJSON).onNewRelationship.expiresAt).toStrictEqual(relationshipTemplateExpirationDate);
     });
 

@@ -1,4 +1,3 @@
-export * from "./Base64ForIdPrefix";
 export * from "./flattenObject";
 export * from "./OwnerRestriction";
 export * from "./PasswordProtectionMapper";

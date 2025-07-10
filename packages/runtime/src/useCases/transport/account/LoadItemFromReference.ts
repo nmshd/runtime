@@ -1,7 +1,9 @@
 import { Result } from "@js-soft/ts-utils";
-import { FileReference } from "@nmshd/core-types";
+import { FileReference, Reference } from "@nmshd/core-types";
+import { DeviceOnboardingInfoDTO, FileDTO, RelationshipTemplateDTO, TokenDTO } from "@nmshd/runtime-types";
 import {
     AccountController,
+    BackboneIds,
     FileController,
     RelationshipTemplateController,
     RelationshipTemplateReference,
@@ -13,15 +15,16 @@ import {
     TokenReference
 } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { DeviceOnboardingInfoDTO, FileDTO, RelationshipTemplateDTO, TokenDTO } from "../../../types";
 import {
-    Base64ForIdPrefix,
     FileReferenceString,
     RelationshipTemplateReferenceString,
     RuntimeErrors,
     SchemaRepository,
     SchemaValidator,
     TokenReferenceString,
+    URLFileReferenceString,
+    URLRelationshipTemplateReferenceString,
+    URLTokenReferenceString,
     UseCase
 } from "../../common";
 import { DeviceMapper } from "../devices/DeviceMapper";
@@ -30,7 +33,13 @@ import { RelationshipTemplateMapper } from "../relationshipTemplates/Relationshi
 import { TokenMapper } from "../tokens/TokenMapper";
 
 export interface LoadItemFromReferenceRequest {
-    reference: TokenReferenceString | FileReferenceString | RelationshipTemplateReferenceString;
+    reference:
+        | TokenReferenceString
+        | FileReferenceString
+        | RelationshipTemplateReferenceString
+        | URLTokenReferenceString
+        | URLFileReferenceString
+        | URLRelationshipTemplateReferenceString;
     password?: string;
 }
 
@@ -66,9 +75,9 @@ export class LoadItemFromReferenceUseCase extends UseCase<LoadItemFromReferenceR
     }
 
     private async _executeInternal(request: LoadItemFromReferenceRequest): Promise<Result<LoadItemFromReferenceResponse>> {
-        const reference = request.reference;
+        const reference = Reference.from(request.reference);
 
-        if (reference.startsWith(Base64ForIdPrefix.RelationshipTemplate)) {
+        if (BackboneIds.relationshipTemplate.validate(reference.id)) {
             const template = await this.templateController.loadPeerRelationshipTemplateByReference(RelationshipTemplateReference.from(reference), request.password);
             return Result.ok({
                 type: "RelationshipTemplate",
@@ -76,7 +85,7 @@ export class LoadItemFromReferenceUseCase extends UseCase<LoadItemFromReferenceR
             });
         }
 
-        if (reference.startsWith(Base64ForIdPrefix.File)) {
+        if (BackboneIds.file.validate(reference.id.toString())) {
             const file = await this.fileController.getOrLoadFileByReference(FileReference.from(reference));
             return Result.ok({
                 type: "File",
@@ -84,11 +93,11 @@ export class LoadItemFromReferenceUseCase extends UseCase<LoadItemFromReferenceR
             });
         }
 
-        return await this.handleTokenReference(reference, request.password);
+        return await this.handleTokenReference(TokenReference.from(request.reference), request.password);
     }
 
-    private async handleTokenReference(tokenReference: string, password?: string): Promise<Result<LoadItemFromReferenceResponse>> {
-        const token = await this.tokenController.loadPeerTokenByReference(TokenReference.from(tokenReference), true, password);
+    private async handleTokenReference(tokenReference: TokenReference, password?: string): Promise<Result<LoadItemFromReferenceResponse>> {
+        const token = await this.tokenController.loadPeerTokenByReference(tokenReference, true, password);
 
         if (!token.cache) {
             throw RuntimeErrors.general.cacheEmpty(Token, token.id.toString());

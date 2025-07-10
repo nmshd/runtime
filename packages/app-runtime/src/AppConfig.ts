@@ -32,6 +32,7 @@ export function createAppConfig(...configs: (AppConfigOverwrite | AppConfig)[]):
         databaseFolder: "./data",
         transportLibrary: { datawalletEnabled: true },
         modules: {
+            appLanguage: { enabled: true, location: "appLanguage" },
             pushNotification: { enabled: true, location: "pushNotification" },
             mailReceived: { enabled: true, location: "mailReceived" },
             onboardingChangeReceived: { enabled: true, location: "onboardingChangeReceived" },

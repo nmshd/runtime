@@ -1,8 +1,8 @@
 import { Result } from "@js-soft/ts-utils";
 import { IdentityMetadataController } from "@nmshd/consumption";
 import { CoreAddress } from "@nmshd/core-types";
+import { IdentityMetadataDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { IdentityMetadataDTO } from "../../../types";
 import { AddressString, RuntimeErrors, SchemaRepository, SchemaValidator } from "../../common";
 import { UseCase } from "../../common/UseCase";
 import { IdentityMetadataMapper } from "./IdentityMetadataMapper";

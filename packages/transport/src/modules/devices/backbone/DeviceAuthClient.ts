@@ -1,5 +1,6 @@
 import { RESTClientAuthenticate, RESTClientLogDirective } from "../../../core";
 import { ClientResult } from "../../../core/backbone/ClientResult";
+import { BackboneGetDevicesResponse } from "./BackboneGetDevices";
 import { BackbonePostDevicesRequest, BackbonePostDevicesResponse } from "./BackbonePostDevices";
 import { BackboneUpdateDeviceRequest } from "./BackboneUpdateDevice";
 
@@ -44,5 +45,9 @@ export class DeviceAuthClient extends RESTClientAuthenticate {
 
     public async updateCurrentDevice(value: BackboneUpdateDeviceRequest): Promise<ClientResult<void>> {
         return await this.put<void>("/api/v1/Devices/Self", value);
+    }
+
+    public async getCurrentDevice(): Promise<ClientResult<BackboneGetDevicesResponse>> {
+        return await this.get<BackboneGetDevicesResponse>("/api/v1/Devices/Self");
     }
 }

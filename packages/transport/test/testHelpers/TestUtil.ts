@@ -417,7 +417,7 @@ export class TestUtil {
     ): Promise<{ revokedRelationshipFromSelf: Relationship; revokedRelationshipPeer: Relationship }> {
         const relationshipId = (await to.relationships.getRelationshipToIdentity(from.identity.address))!.id;
         const revokedRelationshipPeer = await to.relationships.revoke(relationshipId);
-        const revokedRelationshipFromSelf = (await TestUtil.syncUntil(from, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
+        const revokedRelationshipFromSelf = (await this.syncUntilHasRelationship(from, relationshipId))[0];
 
         return { revokedRelationshipFromSelf, revokedRelationshipPeer };
     }
@@ -428,7 +428,7 @@ export class TestUtil {
     ): Promise<{ terminatedRelationshipFromSelf: Relationship; terminatedRelationshipPeer: Relationship }> {
         const relationshipId = (await from.relationships.getRelationshipToIdentity(to.identity.address))!.id;
         const terminatedRelationshipFromSelf = await from.relationships.terminate(relationshipId);
-        const terminatedRelationshipPeer = (await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
+        const terminatedRelationshipPeer = (await this.syncUntilHasRelationship(to, relationshipId))[0];
 
         return { terminatedRelationshipFromSelf, terminatedRelationshipPeer };
     }
@@ -439,9 +439,9 @@ export class TestUtil {
     ): Promise<{ reactivatedRelationshipFromSelf: Relationship; reactivatedRelationshipPeer: Relationship }> {
         const relationshipId = (await from.relationships.getRelationshipToIdentity(to.identity.address))!.id;
         await from.relationships.requestReactivation(relationshipId);
-        await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0);
+        await this.syncUntilHasRelationship(to, relationshipId);
         const reactivatedRelationshipFromSelf = await to.relationships.acceptReactivation(relationshipId);
-        const reactivatedRelationshipPeer = (await TestUtil.syncUntil(from, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
+        const reactivatedRelationshipPeer = (await this.syncUntilHasRelationship(from, relationshipId))[0];
 
         return { reactivatedRelationshipFromSelf, reactivatedRelationshipPeer };
     }
@@ -450,7 +450,7 @@ export class TestUtil {
         const relationship = (await from.relationships.getRelationshipToIdentity(to.identity.address))!;
         await from.relationships.decompose(relationship.id);
         await from.cleanupDataOfDecomposedRelationship(relationship);
-        const decomposedRelationshipPeer = (await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0)).relationships[0];
+        const decomposedRelationshipPeer = (await this.syncUntilHasRelationship(to, relationship.id))[0];
 
         return decomposedRelationshipPeer;
     }
@@ -533,6 +533,14 @@ export class TestUtil {
         return await TestUtil.syncUntilHas(accountController, id, "messages");
     }
 
+    public static async syncUntilHasFiles(accountController: AccountController, expectedNumberOfFiles = 1): Promise<File[]> {
+        return await TestUtil.syncUntilHasMany(accountController, "files", expectedNumberOfFiles);
+    }
+
+    public static async syncUntilHasFile(accountController: AccountController, id: CoreId): Promise<File[]> {
+        return await TestUtil.syncUntilHas(accountController, id, "files");
+    }
+
     public static async syncUntilHasError(accountController: AccountController): Promise<any> {
         try {
             await TestUtil.syncUntilHasMessages(accountController, 100);
@@ -544,11 +552,8 @@ export class TestUtil {
     }
 
     public static async sendRelationshipTemplate(from: AccountController, body?: ISerializable): Promise<RelationshipTemplate> {
-        if (!body) {
-            body = {
-                content: "template"
-            };
-        }
+        body ??= { content: "template" };
+
         return await from.relationshipTemplates.sendRelationshipTemplate({
             content: body,
             expiresAt: CoreDate.utc().add({ minutes: 5 }),
@@ -557,11 +562,8 @@ export class TestUtil {
     }
 
     public static async sendRelationshipTemplateAndToken(account: AccountController, body?: ISerializable): Promise<string> {
-        if (!body) {
-            body = {
-                content: "template"
-            };
-        }
+        body ??= { content: "template" };
+
         const template = await account.relationshipTemplates.sendRelationshipTemplate({
             content: body,
             expiresAt: CoreDate.utc().add({ minutes: 5 }),
@@ -583,11 +585,8 @@ export class TestUtil {
     }
 
     public static async sendRelationship(account: AccountController, template: RelationshipTemplate, body?: ISerializable): Promise<Relationship> {
-        if (!body) {
-            body = {
-                content: "request"
-            };
-        }
+        body ??= { content: "request" };
+
         return await account.relationships.sendRelationship({
             template: template,
             creationContent: body
@@ -622,9 +621,9 @@ export class TestUtil {
         for (const controller of recipients) {
             recipientAddresses.push(controller.identity.address);
         }
-        if (!content) {
-            content = Serializable.fromAny({ content: "TestContent" });
-        }
+
+        content ??= Serializable.fromAny({ content: "TestContent" });
+
         return await from.messages.sendMessage({
             recipients: recipientAddresses,
             content: content,

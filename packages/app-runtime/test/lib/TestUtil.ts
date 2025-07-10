@@ -23,8 +23,18 @@ import loki from "lokijs";
 import path from "path";
 import { GenericContainer, Wait } from "testcontainers";
 import { LogLevel } from "typescript-logging";
-import { AppConfig, AppConfigOverwrite, AppRuntime, IUIBridge, LocalAccountDTO, LocalAccountSession, createAppConfig as runtime_createAppConfig } from "../../src";
+import {
+    AppConfig,
+    AppConfigOverwrite,
+    AppRuntime,
+    IAppLanguageProvider,
+    IUIBridge,
+    LocalAccountDTO,
+    LocalAccountSession,
+    createAppConfig as runtime_createAppConfig
+} from "../../src";
 import { FakeUIBridge } from "./FakeUIBridge";
+import { FakeAppLanguageProvider } from "./infrastructure/FakeAppLanguageProvider";
 import { FakeNotificationAccess } from "./infrastructure/FakeNotificationAccess";
 
 export class TestDatabaseFactory implements ILokiJsDatabaseFactory {
@@ -55,7 +65,12 @@ export class TestUtil {
         }
     });
 
-    public static async createRuntime(configOverride?: AppConfigOverwrite, uiBridge: IUIBridge = new FakeUIBridge(), eventBus?: EventBus): Promise<AppRuntime> {
+    public static async createRuntime(
+        configOverride?: AppConfigOverwrite,
+        uiBridge: IUIBridge = new FakeUIBridge(),
+        eventBus?: EventBus,
+        appLanguageProvider?: IAppLanguageProvider
+    ): Promise<AppRuntime> {
         configOverride = defaultsDeep(configOverride, {
             modules: {
                 pushNotification: { enabled: false }
@@ -64,7 +79,14 @@ export class TestUtil {
 
         const config = this.createAppConfig(configOverride);
 
-        const runtime = await AppRuntime.create(config, this.loggerFactory, new FakeNotificationAccess(this.loggerFactory.getLogger("Fakes")), eventBus, new TestDatabaseFactory());
+        const runtime = await AppRuntime.create(
+            config,
+            this.loggerFactory,
+            new FakeNotificationAccess(this.loggerFactory.getLogger("Fakes")),
+            appLanguageProvider ?? new FakeAppLanguageProvider(),
+            eventBus,
+            new TestDatabaseFactory()
+        );
         runtime.registerUIBridge(uiBridge);
 
         return runtime;
@@ -72,7 +94,13 @@ export class TestUtil {
 
     public static createRuntimeWithoutInit(configOverride?: AppConfigOverwrite): AppRuntime {
         const config = this.createAppConfig(configOverride);
-        const runtime = new AppRuntime(config, this.loggerFactory, new FakeNotificationAccess(this.loggerFactory.getLogger("Fakes")), new TestDatabaseFactory());
+        const runtime = new AppRuntime(
+            config,
+            this.loggerFactory,
+            new FakeNotificationAccess(this.loggerFactory.getLogger("Fakes")),
+            new FakeAppLanguageProvider(),
+            new TestDatabaseFactory()
+        );
 
         return runtime;
     }
@@ -261,9 +289,7 @@ export class TestUtil {
         attachments: string[],
         content?: MessageContentDerivation
     ): Promise<MessageDTO> {
-        if (!content) {
-            content = ArbitraryMessageContent.from({ value: "TestContent" }).toJSON();
-        }
+        content ??= ArbitraryMessageContent.from({ value: "TestContent" }).toJSON();
 
         const result = await from.transportServices.messages.sendMessage({
             recipients: recipients.map((r) => r.address),

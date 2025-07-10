@@ -14,12 +14,14 @@ import {
     MessageReceivedEvent,
     MessageSentEvent,
     MessageWasReadAtChangedEvent,
+    OutgoingRequestStatusChangedEvent,
     OwnSharedAttributeSucceededEvent,
     PeerDeletionCancelledEvent,
     PeerToBeDeletedEvent,
     RelationshipStatus
 } from "../../src";
 import {
+    cleanupMessages,
     emptyRelationshipCreationContent,
     ensureActiveRelationship,
     establishRelationship,
@@ -63,7 +65,8 @@ beforeAll(async () => {
     await ensureActiveRelationship(client1.transport, client3.transport);
 }, 30000);
 
-beforeEach(() => {
+beforeEach(async () => {
+    await cleanupMessages([client1, client2, client3, client4, client5]);
     client1.eventBus.reset();
 });
 
@@ -479,6 +482,33 @@ describe("Message errors", () => {
         expect(client2ExpiredRequestResult.value.status).toBe(LocalRequestStatus.Expired);
     });
 
+    test("should throw correct error for trying to send multiple Messages with the same Request", async () => {
+        const result1 = await client1.transport.messages.sendMessage({
+            recipients: [client2.address],
+            content: {
+                "@type": "Request",
+                id: requestId,
+                items: [requestItem]
+            }
+        });
+        expect(result1).toBeSuccessful();
+
+        await syncUntilHasEvent(client1, OutgoingRequestStatusChangedEvent, (e) => e.data.request.id === requestId);
+
+        const result2 = await client1.transport.messages.sendMessage({
+            recipients: [client2.address],
+            content: {
+                "@type": "Request",
+                id: requestId,
+                items: [requestItem]
+            }
+        });
+        expect(result2).toBeAnError(
+            `The Message cannot be sent as the contained Request has already been sent. Please create a new Request and try again.`,
+            "error.runtime.messages.cannotSendRequestThatWasAlreadySent"
+        );
+    });
+
     describe("Message errors for Relationships that are not active", () => {
         test("should throw correct error for trying to send a Message if there are recipients to which no Relationship exists", async () => {
             const result = await client1.transport.messages.sendMessage({
@@ -844,6 +874,7 @@ describe("Message query", () => {
         const message = await exchangeMessageWithAttachment(client1.transport, client2.transport);
         const updatedMessage = (await client2.transport.messages.markMessageAsRead({ id: message.id })).value;
         const conditions = new QueryParamConditions<GetMessagesQuery>(updatedMessage, client2.transport)
+            .addStringSet("isOwn", "false")
             .addDateSet("createdAt")
             .addStringSet("createdBy")
             .addDateSet("wasReadAt")
@@ -866,6 +897,12 @@ describe("Message query", () => {
                 return Result.ok(result.value.messages);
             })
         );
+    });
+
+    test("query own messages", async () => {
+        await exchangeMessageWithAttachment(client1.transport, client2.transport);
+        const ownMessages = (await client1.transport.messages.getMessages({ query: { isOwn: "true" } })).value;
+        expect(ownMessages).toHaveLength(1);
     });
 
     test("query messages by relationship ids", async () => {

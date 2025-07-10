@@ -1,4 +1,4 @@
-import { PasswordProtectionDTO } from "../../types";
+import { PasswordProtectionDTO } from "@nmshd/runtime-types";
 import { RequestDVO } from "../content";
 import { DataViewObject } from "../DataViewObject";
 import { IdentityDVO } from "../transport";

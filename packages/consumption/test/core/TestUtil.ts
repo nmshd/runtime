@@ -212,13 +212,7 @@ export class TestUtil {
     }
 
     public static async addRelationship(from: AccountController, to: AccountController, templateContent?: any, requestContent?: any): Promise<Relationship[]> {
-        if (!templateContent) {
-            templateContent = {
-                metadata: {
-                    mycontent: "template"
-                }
-            };
-        }
+        templateContent ??= { metadata: { mycontent: "template" } };
 
         const templateFrom = await from.relationshipTemplates.sendRelationshipTemplate({
             content: templateContent,
@@ -255,7 +249,7 @@ export class TestUtil {
         });
 
         // Accept relationship
-        const syncedRelationships = await TestUtil.syncUntilHasRelationships(from);
+        const syncedRelationships = await TestUtil.syncUntilHasRelationship(from, relRequest.id);
         expect(syncedRelationships).toHaveLength(1);
         const pendingRelationship = syncedRelationships[0];
         expect(pendingRelationship.status).toStrictEqual(RelationshipStatus.Pending);
@@ -356,8 +350,8 @@ export class TestUtil {
      * specified in the `until` callback is met.
      */
     public static async syncUntil(accountController: AccountController, until: (syncResult: ChangedItems) => boolean): Promise<ChangedItems> {
-        const { messages, relationships } = await accountController.syncEverything();
-        const syncResult = new ChangedItems([...relationships], [...messages]);
+        const { messages, relationships, identityDeletionProcesses, files } = await accountController.syncEverything();
+        const syncResult = new ChangedItems([...relationships], [...messages], [...identityDeletionProcesses], [...files]);
 
         let iterationNumber = 0;
         while (!until(syncResult) && iterationNumber < 15) {
@@ -388,6 +382,16 @@ export class TestUtil {
     public static async syncUntilHasMessage(accountController: AccountController, id: CoreId): Promise<Message[]> {
         const syncResult = await TestUtil.syncUntil(accountController, (syncResult) => syncResult.messages.some((m) => m.id.equals(id)));
         return syncResult.messages;
+    }
+
+    public static async syncUntilHasFiles(accountController: AccountController, expectedNumberOfFiles = 1): Promise<File[]> {
+        const syncResult = await TestUtil.syncUntil(accountController, (syncResult) => syncResult.files.length >= expectedNumberOfFiles);
+        return syncResult.files;
+    }
+
+    public static async syncUntilHasFile(accountController: AccountController, id: CoreId): Promise<File[]> {
+        const syncResult = await TestUtil.syncUntil(accountController, (syncResult) => syncResult.files.some((m) => m.id.equals(id)));
+        return syncResult.files;
     }
 
     public static async sendRelationshipTemplate(from: AccountController, content?: ISerializable): Promise<RelationshipTemplate> {

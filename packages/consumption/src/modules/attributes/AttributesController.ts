@@ -30,6 +30,7 @@ import { flattenObject, ValidationResult } from "../common";
 import {
     AttributeCreatedEvent,
     AttributeDeletedEvent,
+    AttributeWasViewedAtChangedEvent,
     OwnSharedAttributeSucceededEvent,
     RepositoryAttributeSucceededEvent,
     SharedAttributeCopyCreatedEvent,
@@ -1514,5 +1515,22 @@ export class AttributesController extends ConsumptionBaseController {
             attribute.setDeletionInfo(deletionInfo, this.identity.address);
             await this.updateAttributeUnsafe(attribute);
         }
+    }
+
+    public async markAttributeAsViewed(id: CoreId): Promise<LocalAttribute> {
+        const localAttributeDoc = await this.attributes.read(id.toString());
+        if (!localAttributeDoc) {
+            throw TransportCoreErrors.general.recordNotFound(LocalAttribute, id.toString());
+        }
+
+        const localAttribute = LocalAttribute.from(localAttributeDoc);
+        if (localAttribute.wasViewedAt) return localAttribute;
+
+        localAttribute.wasViewedAt = CoreDate.utc();
+        await this.attributes.update(localAttributeDoc, localAttribute);
+
+        this.eventBus.publish(new AttributeWasViewedAtChangedEvent(this.identity.address.toString(), localAttribute));
+
+        return localAttribute;
     }
 }

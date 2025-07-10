@@ -1,4 +1,4 @@
-import { Message } from "../modules/messages/local/Message";
+import { Message } from "../modules";
 import { TransportDataEvent } from "./TransportDataEvent";
 
 export class MessageReceivedEvent extends TransportDataEvent<Message> {

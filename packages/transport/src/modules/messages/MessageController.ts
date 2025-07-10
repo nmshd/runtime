@@ -192,9 +192,7 @@ export class MessageController extends TransportController {
     private async updateCacheOfMessage(message: Message, response?: BackboneGetMessagesResponse) {
         const messageId = message.id.toString();
 
-        if (!response) {
-            response = (await this.client.getMessage(messageId)).value;
-        }
+        response ??= (await this.client.getMessage(messageId)).value;
 
         const envelope = this.getEnvelopeFromBackboneGetMessagesResponse(response);
         const [cachedMessage, messageKey] = await this.decryptMessage(envelope, message.secretKey);
@@ -303,7 +301,7 @@ export class MessageController extends TransportController {
     @log()
     public async sendMessage(parameters: ISendMessageParameters): Promise<Message> {
         const parsedParams = SendMessageParameters.from(parameters);
-        if (!parsedParams.attachments) parsedParams.attachments = [];
+        parsedParams.attachments ??= [];
 
         const validationResult = await this.validateMessageRecipients(parsedParams.recipients);
         if (validationResult.isError) throw validationResult.error;
