@@ -8,8 +8,10 @@ import {
     GetAttachmentMetadataRequest,
     GetAttachmentMetadataUseCase,
     GetMessageRequest,
+    GetMessagesPagedRequest,
+    GetMessagesPagedResponse,
+    GetMessagesPagedUseCase,
     GetMessagesRequest,
-    GetMessagesResponse,
     GetMessagesUseCase,
     GetMessageUseCase,
     MarkMessageAsReadRequest,
@@ -26,6 +28,7 @@ export class MessagesFacade {
         @Inject private readonly getAttachmentMetadataUseCase: GetAttachmentMetadataUseCase,
         @Inject private readonly getMessageUseCase: GetMessageUseCase,
         @Inject private readonly getMessagesUseCase: GetMessagesUseCase,
+        @Inject private readonly getMessagesPagedUseCase: GetMessagesPagedUseCase,
         @Inject private readonly markMessageAsReadUseCase: MarkMessageAsReadUseCase,
         @Inject private readonly markMessageAsUnreadUseCase: MarkMessageAsUnreadUseCase,
         @Inject private readonly sendMessageUseCase: SendMessageUseCase
@@ -35,8 +38,12 @@ export class MessagesFacade {
         return await this.sendMessageUseCase.execute(request);
     }
 
-    public async getMessages(request: GetMessagesRequest): Promise<Result<GetMessagesResponse>> {
+    public async getMessages(request: GetMessagesRequest): Promise<Result<MessageDTO[]>> {
         return await this.getMessagesUseCase.execute(request);
+    }
+
+    public async getMessagesPaged(request: GetMessagesPagedRequest): Promise<Result<GetMessagesPagedResponse>> {
+        return await this.getMessagesPagedUseCase.execute(request);
     }
 
     public async getMessage(request: GetMessageRequest): Promise<Result<MessageWithAttachmentsDTO>> {

@@ -1,4 +1,4 @@
-import { Result, sleep } from "@js-soft/ts-utils";
+import { sleep } from "@js-soft/ts-utils";
 import { ConsumptionIds } from "@nmshd/consumption";
 import { ConsentRequestItemJSON, Notification } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
@@ -80,38 +80,6 @@ describe("Messaging", () => {
         fileId = file.id;
     });
 
-    test("pagination", async () => {
-        const messageIds = [];
-        for (let index = 0; index < 3; index++) {
-            const result = await client1.transport.messages.sendMessage({
-                recipients: [client2.address],
-                content: {
-                    "@type": "Mail",
-                    body: "b",
-                    cc: [],
-                    subject: "a",
-                    to: [client2.address]
-                },
-                attachments: [fileId]
-            });
-            expect(result).toBeSuccessful();
-
-            messageIds.push(result.value.id);
-        }
-
-        const messagesResult1 = (await client1.transport.messages.getMessages({ paginationOptions: { limit: 2, skip: 0 } })).value;
-        expect(messagesResult1.messageCount).toBe(3);
-        expect(messagesResult1.messages).toHaveLength(2);
-        expect(messagesResult1.messages[0].id).toBe(messageIds[2]);
-        expect(messagesResult1.messages[1].id).toBe(messageIds[1]);
-
-        const messagesResult2 = (await client1.transport.messages.getMessages({ paginationOptions: { limit: 3, skip: 1 } })).value;
-        expect(messagesResult2.messageCount).toBe(3);
-        expect(messagesResult2.messages).toHaveLength(2);
-        expect(messagesResult2.messages[0].id).toBe(messageIds[1]);
-        expect(messagesResult2.messages[1].id).toBe(messageIds[0]);
-    });
-
     test("send a Message from client1.transport to client2.transport", async () => {
         expect(fileId).toBeDefined();
 
@@ -147,15 +115,15 @@ describe("Messaging", () => {
     });
 
     test("receive the message on TransportService2 in /Messages", async () => {
-        const baselineNumberOfMessages = (await client2.transport.messages.getMessages({})).value.messageCount;
+        const baselineNumberOfMessages = (await client2.transport.messages.getMessages({})).value.length;
         const messageId = (await exchangeMessage(client1.transport, client2.transport, [fileId])).id;
 
         const response = await client2.transport.messages.getMessages({});
         expect(response).toBeSuccessful();
-        const numberOfMessages = response.value.messageCount;
+        const numberOfMessages = response.value.length;
         expect(numberOfMessages - baselineNumberOfMessages).toBe(1);
 
-        const message = response.value.messages[0];
+        const message = response.value[numberOfMessages - 1];
         expect(message.id).toStrictEqual(messageId);
         expect(message.content).toStrictEqual({
             "@type": "Mail",
@@ -674,7 +642,7 @@ describe("Postponed Notifications via Messages", () => {
 
             await client5.transport.account.syncEverything();
             const getMessagesResponse = await client5.transport.messages.getMessages({});
-            expect(getMessagesResponse.value.messageCount).toBe(0);
+            expect(getMessagesResponse.value).toHaveLength(0);
             const getNotificationResponse = await client5.consumption.notifications.getNotification({ id: notificationId.toString() });
             expect(getNotificationResponse).toBeAnError(/.*/, "error.transport.recordNotFound");
 
@@ -891,12 +859,7 @@ describe("Message query", () => {
                 expectedResult: true
             });
 
-        await conditions.executeTests((c, q) =>
-            c.messages.getMessages({ query: q }).then((result) => {
-                if (result.isError) return result;
-                return Result.ok(result.value.messages);
-            })
-        );
+        await conditions.executeTests((c, q) => c.messages.getMessages({ query: q }));
     });
 
     test("query own messages", async () => {
@@ -928,9 +891,9 @@ describe("Message query", () => {
             query: { "recipients.relationshipId": [relationshipToRecipient1.value.id, relationshipToRecipient2.value.id] }
         });
 
-        expect(messagesToRecipient1.value.messageCount).toBe(1);
-        expect(messagesToRecipient2.value.messageCount).toBe(1);
-        expect(messagesToRecipient1Or2.value.messageCount).toBe(2);
+        expect(messagesToRecipient1.value).toHaveLength(1);
+        expect(messagesToRecipient2.value).toHaveLength(1);
+        expect(messagesToRecipient1Or2.value).toHaveLength(2);
     });
 
     test("query Messages withAttachments", async () => {
@@ -939,9 +902,9 @@ describe("Message query", () => {
 
         const messages = await client2.transport.messages.getMessages({ query: { attachments: "+" } });
 
-        expect(messages.value.messages.every((m) => m.attachments.length > 0)).toBe(true);
+        expect(messages.value.every((m) => m.attachments.length > 0)).toBe(true);
 
-        const messageIds = messages.value.messages.map((m) => m.id);
+        const messageIds = messages.value.map((m) => m.id);
         expect(messageIds).toContain(messageWithAttachment.id);
         expect(messageIds).not.toContain(messageWithoutAttachment.id);
     });

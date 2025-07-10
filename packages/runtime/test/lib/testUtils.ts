@@ -898,8 +898,8 @@ export async function cleanupMessages(services: TestRuntimeServices[]): Promise<
     await Promise.all(
         services.map(async (services) => {
             const servicesMessageController = services.transport.messages["getMessagesUseCase"]["messageController"];
-            const messages = await servicesMessageController.getMessages({});
-            for (const message of messages) {
+            const result = await servicesMessageController.getMessages({});
+            for (const message of result.messages) {
                 await servicesMessageController["messages"].delete(message);
             }
         })
