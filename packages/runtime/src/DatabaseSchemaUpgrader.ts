@@ -151,7 +151,7 @@ export const UPGRADE_LOGIC = Object.freeze<Record<number, UpgradeLogicFunction |
             }
 
             const technicalModificationPayload = extractPayloadFromObject(attribute, attribute.technicalProperties);
-            if (!("succeededBy" in technicalModificationPayload) && !("shareInfo" in technicalModificationPayload) && !("parentId" in technicalModificationPayload)) {
+            if (!("succeededBy" in technicalModificationPayload) && !("shareInfo" in technicalModificationPayload)) {
                 logger.info(`Attribute '${attributeDoc.id}' does not contain any new technical properties. Skipping.`);
                 continue;
             }

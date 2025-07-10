@@ -9,7 +9,6 @@ import {
     RequestItemJSONDerivations,
     ShareAttributeRequestItem,
     ShareAttributeRequestItemJSON,
-    StreetAddressJSON,
     ThirdPartyRelationshipAttributeQuery,
     ThirdPartyRelationshipAttributeQueryOwner
 } from "@nmshd/content";
@@ -980,31 +979,6 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
         const attribute = result.value;
         expect((attribute.content.value as GivenNameJSON).value).toBe("aGivenName");
         await services1.eventBus.waitForEvent(AttributeCreatedEvent, (e) => e.data.id === attribute.id);
-    });
-
-    test("should trim LocalAttributes for a complex repository attribute and for each child during creation", async function () {
-        const createRepositoryAttributeParams: CreateRepositoryAttributeRequest = {
-            content: {
-                value: {
-                    "@type": "StreetAddress",
-                    recipient: "    aRecipient  ",
-                    street: "   aStreet ",
-                    houseNo: "  aHouseNo    ",
-                    zipCode: "  aZipCode    ",
-                    city: " aCity   ",
-                    country: "DE"
-                }
-            }
-        };
-        const createRepositoryAttributeResult = await services1.consumption.attributes.createRepositoryAttribute(createRepositoryAttributeParams);
-        expect(createRepositoryAttributeResult).toBeSuccessful();
-        const complexRepoAttribute = createRepositoryAttributeResult.value;
-
-        expect((complexRepoAttribute.content.value as StreetAddressJSON).recipient).toBe("aRecipient");
-        expect((complexRepoAttribute.content.value as StreetAddressJSON).street).toBe("aStreet");
-        expect((complexRepoAttribute.content.value as StreetAddressJSON).houseNo).toBe("aHouseNo");
-        expect((complexRepoAttribute.content.value as StreetAddressJSON).zipCode).toBe("aZipCode");
-        expect((complexRepoAttribute.content.value as StreetAddressJSON).city).toBe("aCity");
     });
 
     test("should create a RepositoryAttribute that is the default if it is the first of its value type", async () => {
@@ -2652,39 +2626,6 @@ describe("DeleteAttributeUseCases", () => {
             const unknownAttributeId = "ATTxxxxxxxxxxxxxxxxx";
             const result = await services1.consumption.attributes.deleteRepositoryAttribute({ attributeId: unknownAttributeId });
             expect(result).toBeAnError(/.*/, "error.runtime.recordNotFound");
-        });
-
-        test("should throw trying to call with a child of a complex attribute", async () => {
-            const complexAttribute = (
-                await services1.consumption.attributes.createRepositoryAttribute({
-                    content: {
-                        value: {
-                            "@type": "StreetAddress",
-                            recipient: "aRecipient",
-                            street: "aStreet",
-                            houseNo: "aHouseNo",
-                            zipCode: "aZipCode",
-                            city: "aCity",
-                            country: "DE"
-                        }
-                    }
-                })
-            ).value;
-
-            const childAttributes = (
-                await services1.consumption.attributes.getAttributes({
-                    query: {
-                        parentId: complexAttribute.id
-                    }
-                })
-            ).value;
-            expect(childAttributes).toHaveLength(5);
-
-            const result = await services1.consumption.attributes.deleteRepositoryAttribute({ attributeId: childAttributes[0].id });
-            expect(result).toBeAnError(
-                `Attribute '${childAttributes[0].id.toString()}' is a child of a complex Attribute. If you want to delete it, you must delete its parent.`,
-                "error.runtime.attributes.cannotSeparatelyDeleteChildOfComplexAttribute"
-            );
         });
     });
 

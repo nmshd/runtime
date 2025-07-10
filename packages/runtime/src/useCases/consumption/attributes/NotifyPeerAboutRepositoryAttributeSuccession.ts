@@ -74,8 +74,7 @@ export class NotifyPeerAboutRepositoryAttributeSuccessionUseCase extends UseCase
         const successorParams: IAttributeSuccessorParams = {
             content: repositoryAttributeSuccessor.content,
             succeeds: ownSharedIdentityAttributePredecessor.id,
-            shareInfo: { peer: ownSharedIdentityAttributePredecessor.shareInfo!.peer, sourceAttribute: repositoryAttributeSuccessor.id, notificationReference: notificationId },
-            parentId: repositoryAttributeSuccessor.parentId
+            shareInfo: { peer: ownSharedIdentityAttributePredecessor.shareInfo!.peer, sourceAttribute: repositoryAttributeSuccessor.id, notificationReference: notificationId }
         };
 
         const validationResult = await this.attributeController.validateOwnSharedIdentityAttributeSuccession(ownSharedIdentityAttributePredecessor.id, successorParams);
