@@ -20463,16 +20463,16 @@ export const MiddleName: any = {
     }
 }
 
-export const Surname: any = {
+export const Pseudonym: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/Surname",
+    "$ref": "#/definitions/Pseudonym",
     "definitions": {
-        "Surname": {
+        "Pseudonym": {
             "type": "object",
             "properties": {
                 "@type": {
                     "type": "string",
-                    "const": "Surname"
+                    "const": "Pseudonym"
                 },
                 "@context": {
                     "type": "string"
@@ -20493,16 +20493,16 @@ export const Surname: any = {
     }
 }
 
-export const Pseudonym: any = {
+export const Surname: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/Pseudonym",
+    "$ref": "#/definitions/Surname",
     "definitions": {
-        "Pseudonym": {
+        "Surname": {
             "type": "object",
             "properties": {
                 "@type": {
                     "type": "string",
-                    "const": "Pseudonym"
+                    "const": "Surname"
                 },
                 "@context": {
                     "type": "string"
