@@ -122,11 +122,9 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         expect(requestItemDVO.query).toBeDefined();
         expect(requestItemDVO.query.type).toBe("IdentityAttributeQueryDVO");
         const identityAttributeQueryDVO = requestItemDVO.query as IdentityAttributeQueryDVO;
-        expect(identityAttributeQueryDVO.renderHints.technicalType).toBe("Object");
-        expect(identityAttributeQueryDVO.renderHints.editType).toBe("Complex");
-        expect(identityAttributeQueryDVO.renderHints.propertyHints!["surname"].technicalType).toBe("String");
-        expect(identityAttributeQueryDVO.renderHints.propertyHints!["surname"].editType).toBe("InputLike");
-        expect(identityAttributeQueryDVO.valueHints.propertyHints!["surname"].max).toBe(100);
+        expect(identityAttributeQueryDVO.renderHints.technicalType).toBe("String");
+        expect(identityAttributeQueryDVO.renderHints.editType).toBe("InputLike");
+        expect(identityAttributeQueryDVO.valueHints.max).toBe(100);
         expect(requestItemDVO.mustBeAccepted).toBe(true);
     });
 
@@ -155,11 +153,9 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         expect(requestItemDVO.query.type).toBe("ProcessedIdentityAttributeQueryDVO");
         const identityAttributeQueryDVO = requestItemDVO.query as ProcessedIdentityAttributeQueryDVO;
         expect(identityAttributeQueryDVO.results).toHaveLength(1);
-        expect(identityAttributeQueryDVO.renderHints.technicalType).toBe("Object");
-        expect(identityAttributeQueryDVO.renderHints.editType).toBe("Complex");
-        expect(identityAttributeQueryDVO.renderHints.propertyHints!["surname"].technicalType).toBe("String");
-        expect(identityAttributeQueryDVO.renderHints.propertyHints!["surname"].editType).toBe("InputLike");
-        expect(identityAttributeQueryDVO.valueHints.propertyHints!["surname"].max).toBe(100);
+        expect(identityAttributeQueryDVO.renderHints.technicalType).toBe("String");
+        expect(identityAttributeQueryDVO.renderHints.editType).toBe("InputLike");
+        expect(identityAttributeQueryDVO.valueHints.max).toBe(100);
         expect(requestItemDVO.mustBeAccepted).toBe(true);
         const resultItem = identityAttributeQueryDVO.results[0];
         expect(resultItem.type).toBe("RepositoryAttributeDVO");
@@ -203,11 +199,9 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         expect(requestItemDVO.query).toBeDefined();
         expect(requestItemDVO.query.type).toBe("IdentityAttributeQueryDVO");
         const identityAttributeQueryDVO = requestItemDVO.query as IdentityAttributeQueryDVO;
-        expect(identityAttributeQueryDVO.renderHints.technicalType).toBe("Object");
-        expect(identityAttributeQueryDVO.renderHints.editType).toBe("Complex");
-        expect(identityAttributeQueryDVO.renderHints.propertyHints!["surname"].technicalType).toBe("String");
-        expect(identityAttributeQueryDVO.renderHints.propertyHints!["surname"].editType).toBe("InputLike");
-        expect(identityAttributeQueryDVO.valueHints.propertyHints!["surname"].max).toBe(100);
+        expect(identityAttributeQueryDVO.renderHints.technicalType).toBe("String");
+        expect(identityAttributeQueryDVO.renderHints.editType).toBe("InputLike");
+        expect(identityAttributeQueryDVO.valueHints.max).toBe(100);
         expect(requestItemDVO.mustBeAccepted).toBe(true);
 
         const response = dvo.request.response;
@@ -274,11 +268,9 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         expect(requestItemDVO.query).toBeDefined();
         expect(requestItemDVO.query.type).toBe("IdentityAttributeQueryDVO");
         const identityAttributeQueryDVO = requestItemDVO.query as IdentityAttributeQueryDVO;
-        expect(identityAttributeQueryDVO.renderHints.technicalType).toBe("Object");
-        expect(identityAttributeQueryDVO.renderHints.editType).toBe("Complex");
-        expect(identityAttributeQueryDVO.renderHints.propertyHints!["surname"].technicalType).toBe("String");
-        expect(identityAttributeQueryDVO.renderHints.propertyHints!["surname"].editType).toBe("InputLike");
-        expect(identityAttributeQueryDVO.valueHints.propertyHints!["surname"].max).toBe(100);
+        expect(identityAttributeQueryDVO.renderHints.technicalType).toBe("String");
+        expect(identityAttributeQueryDVO.renderHints.editType).toBe("InputLike");
+        expect(identityAttributeQueryDVO.valueHints.max).toBe(100);
 
         expect(requestItemDVO.mustBeAccepted).toBe(true);
         const response = dvo.request.response;
