@@ -59,7 +59,7 @@
     },
     "devDependencies": {
         "@types/luxon": "^3.6.2",
-        "@nmshd/crypto": "2.2.0-alpha.6"
+        "@nmshd/crypto": "2.2.0-alpha.7"
     },
     "publishConfig": {
         "access": "public",

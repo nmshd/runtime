@@ -51,7 +51,7 @@
     "dependencies": {
         "@js-soft/logging-abstractions": "^1.0.1",
         "@js-soft/ts-serval": "2.0.12",
-        "@nmshd/crypto": "2.2.0-alpha.6",
+        "@nmshd/crypto": "2.2.0-alpha.7",
         "json-stringify-safe": "^5.0.1",
         "luxon": "^3.6.1"
     },

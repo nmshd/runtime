@@ -142,7 +142,9 @@ export class AccountController {
         this._activeDevice = new DeviceController(this);
         this.challenges = await new ChallengeController(this).init();
 
-        const [availableIdentityDoc, availableDeviceDoc, availableBaseKeyDoc] = await Promise.all([this.info.get("identity"), this.info.get("device"), this.info.get("baseKey")]);
+        const isStoredOnHardware = await this.info.get("isBaseKeyStoredOnHardware");
+        const baseKeyName = isStoredOnHardware ? "baseKeyHandle" : "baseKey";
+        const [availableIdentityDoc, availableDeviceDoc, availableBaseKeyDoc] = await Promise.all([this.info.get("identity"), this.info.get("device"), this.info.get(baseKeyName)]);
 
         let device: Device;
         let identityCreated = false;
@@ -175,7 +177,7 @@ export class AccountController {
             const availableIdentity = Identity.from(availableIdentityDoc);
             const availableDevice = Device.from(availableDeviceDoc);
             let availableBaseKey;
-            if (await this.info.get("isBaseKeyStoredOnHardware")) {
+            if (isStoredOnHardware) {
                 availableBaseKey = await DeviceBoundKeyHandle.fromJSON(availableBaseKeyDoc);
             } else {
                 availableBaseKey = CryptoSecretKey.fromJSON(availableBaseKeyDoc);

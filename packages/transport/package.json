@@ -71,7 +71,7 @@
         "@js-soft/simple-logger": "1.0.5",
         "@js-soft/ts-utils": "^2.3.3",
         "@nmshd/core-types": "*",
-        "@nmshd/crypto": "2.2.0-alpha.6",
+        "@nmshd/crypto": "2.2.0-alpha.7",
         "axios": "^1.10.0",
         "fast-json-patch": "^3.1.1",
         "form-data": "^4.0.3",

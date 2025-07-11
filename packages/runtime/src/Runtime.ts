@@ -13,7 +13,7 @@ import {
     SettingsController
 } from "@nmshd/consumption";
 import { ICoreAddress } from "@nmshd/core-types";
-import { CryptoLayerProviderToBeInitialized, initializeNewProviders, loadProviderFromConfig } from "@nmshd/crypto";
+import { initializeNewProviders, loadProviderFromConfig, ProviderInitConfig } from "@nmshd/crypto";
 import { RuntimeHealth } from "@nmshd/runtime-types";
 import {
     AccountController,
@@ -157,13 +157,10 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
                     throw RuntimeErrors.startup.failedCalInit();
                 }
                 const serializedConfig = calConfig.serialize();
-                console.log("New Crypto Layer configuration initialized:", serializedConfig);
                 await calMap.set("initializedProviders", serializedConfig);
             } else {
                 this.logger.trace("Initializing Crypto Layer with saved config");
-                // eslint-disable-next-line no-console
-                console.log("Crypto Layer configuration loaded:", calConfig);
-                const calConfigloaded = await CryptoLayerProviderToBeInitialized.deserialize(calConfig);
+                const calConfigloaded = ProviderInitConfig.deserialize(calConfig);
                 await loadProviderFromConfig(calConfigloaded, this.runtimeConfig.calStorageConfig, this.runtimeConfig.calFactory);
             }
             this.logger.trace("Crypto Layer initialized");
