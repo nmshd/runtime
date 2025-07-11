@@ -119,38 +119,43 @@ describe("IdentityAttribute", function () {
         ).toThrow("Nationality.value :: Value is not defined");
     });
 
-    // eslint-disable-next-line jest/no-commented-out-tests
-    // test("should allow to validate integer values", function () {
-    //     let age = IdentityAttribute.from<BirthMonth>({
-    //         value: {
-    //             "@type": "BirthMonth",
-    //             value: 10
-    //         },
-    //         owner: CoreAddress.from("address")
-    //     });
-    //     expect(age).toBeInstanceOf(IdentityAttribute);
-    //     expect(age.value).toBeInstanceOf(BirthMonth);
+    test("should allow to validate integer values", function () {
+        let age = IdentityAttribute.from<BirthDate>({
+            value: {
+                "@type": "BirthDate",
+                day: 1,
+                month: 10,
+                year: 2000
+            },
+            owner: CoreAddress.from("address")
+        });
+        expect(age).toBeInstanceOf(IdentityAttribute);
+        expect(age.value).toBeInstanceOf(BirthDate);
 
-    //     age = IdentityAttribute.from({
-    //         value: {
-    //             "@type": "BirthMonth",
-    //             value: 10
-    //         },
-    //         owner: CoreAddress.from("address")
-    //     });
-    //     expect(age).toBeInstanceOf(IdentityAttribute);
-    //     expect(age.value).toBeInstanceOf(BirthMonth);
+        age = IdentityAttribute.from({
+            value: {
+                "@type": "BirthDate",
+                day: 1,
+                month: 10,
+                year: 2000
+            },
+            owner: CoreAddress.from("address")
+        });
+        expect(age).toBeInstanceOf(IdentityAttribute);
+        expect(age.value).toBeInstanceOf(BirthDate);
 
-    //     expect(() =>
-    //         IdentityAttribute.from({
-    //             value: {
-    //                 "@type": "BirthMonth",
-    //                 value: "10"
-    //             },
-    //             owner: CoreAddress.from("address")
-    //         })
-    //     ).toThrow("BirthMonth.value :: Value is not a number");
-    // });
+        expect(() =>
+            IdentityAttribute.from({
+                value: {
+                    "@type": "BirthDate",
+                    month: "10" as any,
+                    day: 1,
+                    year: 2000
+                },
+                owner: CoreAddress.from("address")
+            })
+        ).toThrow("BirthMonth.value :: Value is not a number");
+    });
 
     test("should allow to create new attributes from JSON", function () {
         const birthDateContent = {
@@ -199,32 +204,31 @@ describe("IdentityAttribute", function () {
         ).toThrow("BirthMonth.value:Number :: must be an integer value between 1 and 12");
     });
 
-    // eslint-disable-next-line jest/no-commented-out-tests
-    // test("should validate attribute values from objects", function () {
-    //     expect(() =>
-    //         IdentityAttribute.from({
-    //             value: {
-    //                 "@type": "BirthMonth",
-    //                 value: "13"
-    //             },
-    //             validFrom: CoreDate.utc().subtract({ years: 1 }),
-    //             validTo: CoreDate.utc().add({ years: 1 }),
-    //             owner: CoreAddress.from("address")
-    //         })
-    //     ).toThrow("BirthMonth.value :: Value is not a number.");
+    test("should validate attribute values from objects", function () {
+        expect(() =>
+            IdentityAttribute.from({
+                value: {
+                    "@type": "BirthDate",
+                    month: "12" as any,
+                    day: 1,
+                    year: 2000
+                },
+                owner: CoreAddress.from("address")
+            })
+        ).toThrow("BirthMonth.value :: Value is not a number.");
 
-    //     expect(() =>
-    //         IdentityAttribute.from({
-    //             value: {
-    //                 "@type": "BirthMonth",
-    //                 value: 13
-    //             },
-    //             validFrom: CoreDate.utc().subtract({ years: 1 }),
-    //             validTo: CoreDate.utc().add({ years: 1 }),
-    //             owner: CoreAddress.from("address")
-    //         })
-    //     ).toThrow("BirthMonth.value:Number :: must be an integer value between 1 and 12");
-    // });
+        expect(() =>
+            IdentityAttribute.from({
+                value: {
+                    "@type": "BirthDate",
+                    month: 13,
+                    day: 1,
+                    year: 2000
+                },
+                owner: CoreAddress.from("address")
+            })
+        ).toThrow("BirthMonth.value:Number :: must be an integer value between 1 and 12");
+    });
 
     test("should allow the creation of nested attributes", function () {
         const affiliation = {
