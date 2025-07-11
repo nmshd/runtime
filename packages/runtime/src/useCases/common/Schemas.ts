@@ -16046,19 +16046,6 @@ export const GetAttributesRequest: any = {
                 "createdAt": {
                     "type": "string"
                 },
-                "parentId": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
                 "succeeds": {
                     "anyOf": [
                         {
