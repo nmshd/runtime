@@ -1,7 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { sleep } from "@js-soft/ts-utils";
 import {
-    City,
+    BirthPlace,
     DisplayName,
     EMailAddress,
     IdentityAttribute,
@@ -1244,8 +1244,9 @@ describe("AttributesController", function () {
                 const successorData: IAttributeSuccessorParams = {
                     content: IdentityAttribute.from({
                         value: {
-                            "@type": "BirthCountry",
-                            value: "DE"
+                            "@type": "BirthPlace",
+                            city: "aCity",
+                            country: "DE"
                         },
                         owner: consumptionController.accountController.identity.address
                     })
@@ -2958,7 +2959,7 @@ describe("AttributesController", function () {
                 consumptionController.attributes.validateAttributeCharacters(
                     IdentityAttribute.from({
                         owner: CoreAddress.from("anAddress"),
-                        value: City.from({ value: "aCity😀" })
+                        value: BirthPlace.from({ city: "aCity😀", country: "DE" })
                     })
                 )
             ).toBe(false);
