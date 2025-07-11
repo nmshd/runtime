@@ -16,7 +16,7 @@ export class AbstractBoolean extends AbstractAttributeValue implements IAbstract
     public value: boolean;
 
     public static override preFrom(value: any): any {
-        if (typeof value === "boolean") value = { value };
+        if (typeof value !== "object") value = { value };
         return value;
     }
 
