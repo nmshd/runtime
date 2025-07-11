@@ -1,6 +1,6 @@
 import { log } from "@js-soft/ts-utils";
 import { CoreDate, CoreId } from "@nmshd/core-types";
-import { CoreBuffer, CryptoSecretKey, CryptoSignature, CryptoSignaturePrivateKey, CryptoSignaturePublicKey } from "@nmshd/crypto";
+import { CoreBuffer, CryptoSecretKey, CryptoSignature, CryptoSignaturePrivateKey, CryptoSignaturePublicKey, DeviceBoundKeyHandle } from "@nmshd/crypto";
 import { ControllerName, CoreCrypto, CredentialsBasic, TransportController, TransportCoreErrors, TransportError } from "../../core";
 import { AccountController } from "../accounts/AccountController";
 import { DeviceSecretController, DeviceSecretType } from "./DeviceSecretController";
@@ -59,7 +59,7 @@ export class DeviceController extends TransportController {
     }
 
     @log()
-    public override async init(baseKey: CryptoSecretKey, device: Device): Promise<DeviceController> {
+    public override async init(baseKey: DeviceBoundKeyHandle | CryptoSecretKey, device: Device): Promise<DeviceController> {
         await super.init();
 
         this._device = device;

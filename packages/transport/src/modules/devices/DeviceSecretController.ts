@@ -2,7 +2,17 @@ import { IDatabaseMap } from "@js-soft/docdb-access-abstractions";
 import { Serializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
 import { CoreDate } from "@nmshd/core-types";
-import { CoreBuffer, CryptoCipher, CryptoExchangeKeypair, CryptoExchangePrivateKey, CryptoSecretKey, CryptoSignatureKeypair, CryptoSignaturePrivateKey } from "@nmshd/crypto";
+import {
+    CoreBuffer,
+    CryptoCipher,
+    CryptoEncryptionHandle,
+    CryptoExchangeKeypair,
+    CryptoExchangePrivateKey,
+    CryptoSecretKey,
+    CryptoSignatureKeypair,
+    CryptoSignaturePrivateKey,
+    DeviceBoundKeyHandle
+} from "@nmshd/crypto";
 import { CoreCrypto, TransportCoreErrors } from "../../core";
 import { ControllerName, TransportController } from "../../core/TransportController";
 import { TransportIds } from "../../core/TransportIds";
@@ -33,9 +43,9 @@ export class DeviceSecretController extends TransportController {
 
     private static readonly secretContext: string = "DEVICE01";
 
-    private readonly baseKey?: CryptoSecretKey;
+    private readonly baseKey?: DeviceBoundKeyHandle | CryptoSecretKey;
 
-    public constructor(parent: AccountController, baseKey: CryptoSecretKey) {
+    public constructor(parent: AccountController, baseKey: DeviceBoundKeyHandle | CryptoSecretKey) {
         super(ControllerName.DeviceSecret, parent);
         this.baseKey = baseKey;
     }
@@ -55,9 +65,17 @@ export class DeviceSecretController extends TransportController {
         const plainString = secret.serialize();
         const plainBuffer = CoreBuffer.fromUtf8(plainString);
 
-        const encryptionKey = await CoreCrypto.deriveKeyFromBase(this.getBaseKey(), 1, DeviceSecretController.secretContext);
+        let encryptionKey;
+        let cipher;
+        const baseKey = this.getBaseKey();
+        if (baseKey instanceof DeviceBoundKeyHandle) {
+            encryptionKey = await CoreCrypto.generateDeviceBoundDerivationHandle(baseKey, 1, DeviceSecretController.secretContext);
+            cipher = await CryptoEncryptionHandle.encrypt(plainBuffer, encryptionKey);
+        } else {
+            encryptionKey = await CoreCrypto.deriveKeyFromBase(baseKey, 1, DeviceSecretController.secretContext);
+            cipher = await CoreCrypto.encrypt(plainBuffer, encryptionKey);
+        }
 
-        const cipher = await CoreCrypto.encrypt(plainBuffer, encryptionKey);
         const date = CoreDate.utc();
         const container = SecretContainerCipher.from({
             cipher: cipher,
@@ -79,10 +97,18 @@ export class DeviceSecretController extends TransportController {
         const secretObj = await this.secrets.get(name);
         if (!secretObj) return;
 
-        const baseKey = this.getBaseKey();
         const secret = SecretContainerCipher.from(secretObj);
-        const decryptionKey = await CoreCrypto.deriveKeyFromBase(baseKey, 1, DeviceSecretController.secretContext);
-        const plainBuffer = await CoreCrypto.decrypt(secret.cipher, decryptionKey);
+        let decryptionKey;
+        let plainBuffer;
+        const baseKey = this.getBaseKey();
+        if (baseKey instanceof DeviceBoundKeyHandle) {
+            decryptionKey = await CoreCrypto.generateDeviceBoundDerivationHandle(baseKey, 1, DeviceSecretController.secretContext);
+            plainBuffer = await CryptoEncryptionHandle.decrypt(secret.cipher, decryptionKey);
+        } else {
+            decryptionKey = await CoreCrypto.deriveKeyFromBase(baseKey, 1, DeviceSecretController.secretContext);
+            plainBuffer = await CoreCrypto.decrypt(secret.cipher, decryptionKey);
+        }
+
         const plainString = plainBuffer.toUtf8();
 
         const decryptedSecret = Serializable.deserializeUnknown(plainString);
@@ -192,7 +218,7 @@ export class DeviceSecretController extends TransportController {
     }
 
     @log()
-    private getBaseKey(): CryptoSecretKey {
+    private getBaseKey(): DeviceBoundKeyHandle | CryptoSecretKey {
         if (!this.baseKey) {
             throw TransportCoreErrors.general.recordNotFound(CryptoSecretKey, DeviceSecretType.SharedSecretBaseKey);
         }

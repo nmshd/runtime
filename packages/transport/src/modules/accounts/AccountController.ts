@@ -2,8 +2,20 @@ import { IDatabaseCollection, IDatabaseCollectionProvider, IDatabaseMap } from "
 import { ILogger } from "@js-soft/logging-abstractions";
 import { log, sleep } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
-import { CryptoSecretKey } from "@nmshd/crypto";
-import { AbstractAuthenticator, Authenticator, ControllerName, IConfig, Transport, TransportCoreErrors, TransportError } from "../../core";
+import { CryptoSecretKey, DeviceBoundKeyHandle, hasProviderForSecurityLevel } from "@nmshd/crypto";
+import {
+    AbstractAuthenticator,
+    Authenticator,
+    ControllerName,
+    CryptoKeyType,
+    CryptoObject,
+    CryptoProviderMapping,
+    CryptoPurpose,
+    IConfig,
+    Transport,
+    TransportCoreErrors,
+    TransportError
+} from "../../core";
 import { CoreCrypto } from "../../core/CoreCrypto";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { DependencyOverrides } from "../../core/DependencyOverrides";
@@ -130,7 +142,9 @@ export class AccountController {
         this._activeDevice = new DeviceController(this);
         this.challenges = await new ChallengeController(this).init();
 
-        const [availableIdentityDoc, availableDeviceDoc, availableBaseKeyDoc] = await Promise.all([this.info.get("identity"), this.info.get("device"), this.info.get("baseKey")]);
+        const isStoredOnHardware = await this.info.get("isBaseKeyStoredOnHardware");
+        const baseKeyName = isStoredOnHardware ? "baseKeyHandle" : "baseKey";
+        const [availableIdentityDoc, availableDeviceDoc, availableBaseKeyDoc] = await Promise.all([this.info.get("identity"), this.info.get("device"), this.info.get(baseKeyName)]);
 
         let device: Device;
         let identityCreated = false;
@@ -162,7 +176,12 @@ export class AccountController {
 
             const availableIdentity = Identity.from(availableIdentityDoc);
             const availableDevice = Device.from(availableDeviceDoc);
-            const availableBaseKey = CryptoSecretKey.fromJSON(availableBaseKeyDoc);
+            let availableBaseKey;
+            if (isStoredOnHardware) {
+                availableBaseKey = await DeviceBoundKeyHandle.fromJSON(availableBaseKeyDoc);
+            } else {
+                availableBaseKey = CryptoSecretKey.fromJSON(availableBaseKeyDoc);
+            }
 
             await this.identity.init(availableIdentity);
             await this.identityDeletionProcess.init();
@@ -263,7 +282,7 @@ export class AccountController {
 
     @log()
     private async createIdentityAndDevice(): Promise<{ identity: Identity; device: Device }> {
-        const [identityKeypair, devicePwdD1, deviceKeypair, privBaseShared, privBaseDevice] = await Promise.all([
+        const [identityKeypair, devicePwdD1, deviceKeypair, privBaseShared] = await Promise.all([
             // Generate identity keypair
             CoreCrypto.generateSignatureKeypair(),
             // Generate strong device password
@@ -271,10 +290,36 @@ export class AccountController {
             // Generate device keypair
             CoreCrypto.generateSignatureKeypair(),
             // Generate Shared Base Key
-            CoreCrypto.generateSecretKey(),
-            // Generate Device Base Key
             CoreCrypto.generateSecretKey()
         ]);
+
+        const providerMapping = new CryptoProviderMapping(this._transport.config.cryptoOperationPreferences);
+
+        // Generate device basekey
+        let privBaseDevice: CryptoSecretKey | DeviceBoundKeyHandle;
+        let dbKey;
+
+        let isBaseKeyStoredOnHardware;
+        try {
+            isBaseKeyStoredOnHardware = hasProviderForSecurityLevel("Hardware");
+        } catch (error) {
+            this._log.warn("Crypto Layer not initialized, continuing without it.", error);
+            isBaseKeyStoredOnHardware = false;
+        }
+
+        if (isBaseKeyStoredOnHardware) {
+            privBaseDevice = (await providerMapping.getPreferredProviderKeyHandle(
+                CryptoObject.AccountController,
+                CryptoKeyType.Encryption,
+                false,
+                CryptoPurpose.BaseKey
+            )) as DeviceBoundKeyHandle;
+            dbKey = "baseKeyHandle";
+        } else {
+            privBaseDevice = await CoreCrypto.generateSecretKey();
+            dbKey = "baseKey";
+        }
+
         this._log.trace("Created keys. Requesting challenge...");
 
         // Sign Challenge
@@ -370,7 +415,8 @@ export class AccountController {
         await Promise.all([
             storeSecretWithRetry(() => this.info.set("device", device.toJSON())),
             storeSecretWithRetry(() => this.info.set("identity", identity.toJSON())),
-            storeSecretWithRetry(() => this.info.set("baseKey", privBaseDevice.toJSON())),
+            storeSecretWithRetry(() => this.info.set(dbKey, privBaseDevice.toJSON())),
+            storeSecretWithRetry(() => this.info.set("isBaseKeyStoredOnHardware", isBaseKeyStoredOnHardware)),
             storeSecretWithRetry(() => this.activeDevice.secrets.storeSecret(privBaseShared, DeviceSecretType.SharedSecretBaseKey)),
             storeSecretWithRetry(() => this.activeDevice.secrets.storeSecret(privSync, DeviceSecretType.IdentitySynchronizationMaster)),
             storeSecretWithRetry(() => this.activeDevice.secrets.storeSecret(identityKeypair.privateKey, DeviceSecretType.IdentitySignature)),
@@ -383,15 +429,40 @@ export class AccountController {
 
     public async onboardDevice(deviceSharedSecret: DeviceSharedSecret): Promise<Device> {
         this._log.trace("Onboarding device for existing identity...");
-        const [devicePwdDn, deviceKeypair, deviceInfo, privBaseDevice] = await Promise.all([
+        const [devicePwdDn, deviceKeypair, deviceInfo] = await Promise.all([
             // Generate strong device password
             PasswordGenerator.createStrongPassword(45, 50),
             // Generate device keypair
             CoreCrypto.generateSignatureKeypair(),
-            this.fetchDeviceInfo(),
-            // Generate device basekey
-            CoreCrypto.generateSecretKey()
+            this.fetchDeviceInfo()
         ]);
+
+        const providerMapping = new CryptoProviderMapping(this._transport.config.cryptoOperationPreferences);
+
+        // Generate device basekey
+        let privBaseDevice: CryptoSecretKey | DeviceBoundKeyHandle;
+        let dbKey;
+
+        let isBaseKeyStoredOnHardware;
+        try {
+            isBaseKeyStoredOnHardware = hasProviderForSecurityLevel("Hardware");
+        } catch (error) {
+            this._log.warn("Crypto Layer not initialized, continuing without it.", error);
+            isBaseKeyStoredOnHardware = false;
+        }
+
+        if (isBaseKeyStoredOnHardware) {
+            privBaseDevice = (await providerMapping.getPreferredProviderKeyHandle(
+                CryptoObject.AccountController,
+                CryptoKeyType.Encryption,
+                false,
+                CryptoPurpose.BaseKey
+            )) as DeviceBoundKeyHandle;
+            dbKey = "baseKeyHandle";
+        } else {
+            privBaseDevice = await CoreCrypto.generateSecretKey();
+            dbKey = "baseKey";
+        }
 
         const device = Device.from({
             id: deviceSharedSecret.id,
@@ -423,7 +494,8 @@ export class AccountController {
         await Promise.all([
             this.info.set("device", device.toJSON()),
             this.info.set("identity", deviceSharedSecret.identity.toJSON()),
-            this.info.set("baseKey", privBaseDevice.toJSON()),
+            this.info.set(dbKey, privBaseDevice.toJSON()),
+            this.info.set("isBaseKeyStoredOnHardware", isBaseKeyStoredOnHardware),
             this.info.set(SecretController.secretNonceKey, deviceSharedSecret.deviceIndex * 1000000),
             this.activeDevice.secrets.storeSecret(deviceSharedSecret.secretBaseKey, DeviceSecretType.SharedSecretBaseKey),
             this.activeDevice.secrets.storeSecret(deviceSharedSecret.synchronizationKey, DeviceSecretType.IdentitySynchronizationMaster),

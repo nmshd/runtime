@@ -1,5 +1,6 @@
 import { ILogger } from "@js-soft/logging-abstractions";
 import { EventEmitter2EventBus } from "@js-soft/ts-utils";
+import * as tmp from "tmp";
 import { AccountController, DeviceSharedSecret, Transport } from "../../src";
 import { DeviceTestParameters } from "./DeviceTestParameters";
 import { TestUtil } from "./TestUtil";
@@ -12,8 +13,11 @@ export class AppDeviceTest {
 
     private readonly createdAccounts: AccountController[] = [];
 
+    private static readonly rootTempDir = tmp.dirSync({ unsafeCleanup: true });
+
     public constructor(parameters: DeviceTestParameters) {
         this.parameters = parameters;
+
         this.transport = new Transport(
             this.parameters.config,
             new EventEmitter2EventBus(() => {
