@@ -91,9 +91,8 @@ describe("AnonymousTokenController", function () {
 
         const reference = sentToken.toTokenReference(sender.config.baseUrl);
         reference.forIdentityTruncated = undefined;
-        const truncatedReference = reference;
 
-        await expect(anonymousTokenController.loadPeerTokenByReference(truncatedReference)).rejects.toThrow("error.platform.recordNotFound");
+        await expect(anonymousTokenController.loadPeerTokenByReference(reference)).rejects.toThrow("error.platform.recordNotFound");
     });
 
     test("should load a password-protected token", async function () {

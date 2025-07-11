@@ -11,25 +11,19 @@ import {
     DeleteAttributeRequestItemJSON,
     FormFieldRequestItem,
     FormFieldRequestItemJSON,
-    FreeTextRequestItem,
-    FreeTextRequestItemJSON,
     IAuthenticationRequestItem,
     IConsentRequestItem,
     ICreateAttributeRequestItem,
     IDeleteAttributeRequestItem,
     IFormFieldRequestItem,
-    IFreeTextRequestItem,
     IProposeAttributeRequestItem,
     IReadAttributeRequestItem,
-    IRegisterAttributeListenerRequestItem,
     IShareAttributeRequestItem,
     ITransferFileOwnershipRequestItem,
     ProposeAttributeRequestItem,
     ProposeAttributeRequestItemJSON,
     ReadAttributeRequestItem,
     ReadAttributeRequestItemJSON,
-    RegisterAttributeListenerRequestItem,
-    RegisterAttributeListenerRequestItemJSON,
     ShareAttributeRequestItem,
     ShareAttributeRequestItemJSON,
     TransferFileOwnershipRequestItem,
@@ -37,11 +31,6 @@ import {
 } from "./items";
 
 export interface RequestItemJSON extends ContentJSON {
-    /**
-     * The human-readable title of this item.
-     */
-    title?: string;
-
     /**
      * The human-readable description of this item.
      */
@@ -77,17 +66,10 @@ export type RequestItemJSONDerivations =
     | ReadAttributeRequestItemJSON
     | ConsentRequestItemJSON
     | AuthenticationRequestItemJSON
-    | FreeTextRequestItemJSON
     | FormFieldRequestItemJSON
-    | RegisterAttributeListenerRequestItemJSON
     | TransferFileOwnershipRequestItemJSON;
 
 export interface IRequestItem extends ISerializable {
-    /**
-     * The human-readable title of this item.
-     */
-    title?: string;
-
     /**
      * The human-readable description of this item.
      */
@@ -123,16 +105,10 @@ export type IRequestItemDerivations =
     | IReadAttributeRequestItem
     | IConsentRequestItem
     | IAuthenticationRequestItem
-    | IFreeTextRequestItem
     | IFormFieldRequestItem
-    | IRegisterAttributeListenerRequestItem
     | ITransferFileOwnershipRequestItem;
 
 export abstract class RequestItem extends Serializable {
-    @serialize()
-    @validate({ nullable: true, max: 200 })
-    public title?: string;
-
     @serialize()
     @validate({ nullable: true, max: 500 })
     public description?: string;
@@ -163,9 +139,7 @@ export type RequestItemDerivations =
     | ReadAttributeRequestItem
     | ConsentRequestItem
     | AuthenticationRequestItem
-    | FreeTextRequestItem
     | FormFieldRequestItem
-    | RegisterAttributeListenerRequestItem
     | TransferFileOwnershipRequestItem;
 
 export function isRequestItemDerivation(input: any): input is RequestItemDerivations {
@@ -178,9 +152,7 @@ export function isRequestItemDerivation(input: any): input is RequestItemDerivat
         input["@type"] === "ReadAttributeRequestItem" ||
         input["@type"] === "ConsentRequestItem" ||
         input["@type"] === "AuthenticationRequestItem" ||
-        input["@type"] === "FreeTextRequestItem" ||
         input["@type"] === "FormFieldRequestItem" ||
-        input["@type"] === "RegisterAttributeListenerRequestItem" ||
         input["@type"] === "TransferFileOwnershipRequestItem"
     );
 }

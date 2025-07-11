@@ -156,7 +156,7 @@ describe("DatabaseSchemaUpgrader", () => {
 
             await requestsCollection.create(
                 LocalRequest.from({
-                    id: CoreId.from("REQ123"),
+                    id: CoreId.from("REQ456"),
                     content: { items: [TestRequestItem.from({ mustBeAccepted: false })] },
                     isOwn: true,
                     createdAt: CoreDate.utc(),
@@ -241,7 +241,7 @@ describe("DatabaseSchemaUpgrader", () => {
 
             await attributesCollection.create(
                 LocalAttribute.from({
-                    id: CoreId.from("ATT123"),
+                    id: CoreId.from("ATT456"),
                     content: IdentityAttribute.from({
                         owner: CoreAddress.from(""),
                         value: DisplayName.from("Test")

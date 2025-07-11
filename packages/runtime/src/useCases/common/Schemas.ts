@@ -35,29 +35,6 @@ export const LoadPeerTokenAnonymousRequest: any = {
     }
 }
 
-export const GetAttributeListenerRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetAttributeListenerRequest",
-    "definitions": {
-        "GetAttributeListenerRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/AttributeListenerIdString"
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "additionalProperties": false
-        },
-        "AttributeListenerIdString": {
-            "type": "string",
-            "pattern": "ATL[A-Za-z0-9]{17}"
-        }
-    }
-}
-
 export const CanCreateRepositoryAttributeRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/CanCreateRepositoryAttributeRequest",
@@ -75,12 +52,6 @@ export const CanCreateRepositoryAttributeRequest: any = {
                             "items": {
                                 "type": "string"
                             }
-                        },
-                        "validFrom": {
-                            "$ref": "#/definitions/ISO8601DateTimeString"
-                        },
-                        "validTo": {
-                            "$ref": "#/definitions/ISO8601DateTimeString"
                         }
                     },
                     "required": [
@@ -92,11 +63,6 @@ export const CanCreateRepositoryAttributeRequest: any = {
             "required": [
                 "content"
             ]
-        },
-        "ISO8601DateTimeString": {
-            "type": "string",
-            "errorMessage": "must match ISO8601 datetime format",
-            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
         }
     }
 }
@@ -344,13 +310,7 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/AuthenticationRequestItemJSON"
                 },
                 {
-                    "$ref": "#/definitions/FreeTextRequestItemJSON"
-                },
-                {
                     "$ref": "#/definitions/FormFieldRequestItemJSON"
-                },
-                {
-                    "$ref": "#/definitions/RegisterAttributeListenerRequestItemJSON"
                 },
                 {
                     "$ref": "#/definitions/TransferFileOwnershipRequestItemJSON"
@@ -368,10 +328,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "@version": {
                     "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
                 },
                 "description": {
                     "type": "string",
@@ -408,10 +364,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "@version": {
                     "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
                 },
                 "description": {
                     "type": "string",
@@ -461,12 +413,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "owner": {
-                    "type": "string"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
                     "type": "string"
                 },
                 "value": {
@@ -1132,12 +1078,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "owner": {
-                    "type": "string"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
                     "type": "string"
                 },
                 "value": {
@@ -2374,10 +2314,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "@version": {
                     "type": "string"
                 },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
                 "description": {
                     "type": "string",
                     "description": "The human-readable description of this item."
@@ -2417,10 +2353,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "@version": {
                     "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
                 },
                 "description": {
                     "type": "string",
@@ -2475,10 +2407,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "@version": {
                     "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
                 },
                 "description": {
                     "type": "string",
@@ -2549,12 +2477,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "items": {
                         "type": "string"
                     }
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -2646,12 +2568,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "attributeCreationHints": {
                     "$ref": "#/definitions/RelationshipAttributeCreationHintsJSON"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -2764,10 +2680,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "@version": {
                     "type": "string"
                 },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
                 "description": {
                     "type": "string",
                     "description": "The human-readable description of this item."
@@ -2837,12 +2749,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "items": {
                         "type": "string"
                     }
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -2865,10 +2771,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "@version": {
                     "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
                 },
                 "description": {
                     "type": "string",
@@ -2916,50 +2818,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "@version": {
                     "type": "string"
                 },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
-                }
-            },
-            "required": [
-                "@type",
-                "mustBeAccepted"
-            ],
-            "additionalProperties": false
-        },
-        "FreeTextRequestItemJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "FreeTextRequestItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
                 "description": {
                     "type": "string",
                     "description": "The human-readable description of this item."
@@ -2976,14 +2834,14 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "type": "boolean",
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
-                "freeText": {
+                "title": {
                     "type": "string"
                 }
             },
             "required": [
                 "@type",
-                "freeText",
-                "mustBeAccepted"
+                "mustBeAccepted",
+                "title"
             ],
             "additionalProperties": false
         },
@@ -3000,10 +2858,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "@version": {
                     "type": "string"
                 },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
                 "description": {
                     "type": "string",
                     "description": "The human-readable description of this item."
@@ -3019,6 +2873,9 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "requireManualDecision": {
                     "type": "boolean",
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                },
+                "title": {
+                    "type": "string"
                 },
                 "settings": {
                     "$ref": "#/definitions/FormFieldSettingsJSONDerivations"
@@ -3241,57 +3098,6 @@ export const CanCreateOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
-        "RegisterAttributeListenerRequestItemJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "RegisterAttributeListenerRequestItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
-                },
-                "query": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/IdentityAttributeQueryJSON"
-                        },
-                        {
-                            "$ref": "#/definitions/ThirdPartyRelationshipAttributeQueryJSON"
-                        }
-                    ]
-                }
-            },
-            "required": [
-                "@type",
-                "mustBeAccepted",
-                "query"
-            ],
-            "additionalProperties": false
-        },
         "TransferFileOwnershipRequestItemJSON": {
             "type": "object",
             "properties": {
@@ -3304,10 +3110,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "@version": {
                     "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
                 },
                 "description": {
                     "type": "string",
@@ -3335,7 +3137,8 @@ export const CanCreateOutgoingRequestRequest: any = {
             "required": [
                 "@type",
                 "fileReference",
-                "mustBeAccepted"
+                "mustBeAccepted",
+                "ownershipToken"
             ],
             "additionalProperties": false
         },
@@ -3635,12 +3438,6 @@ export const CompleteOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/ReadAttributeAcceptResponseItemJSON"
                 },
                 {
-                    "$ref": "#/definitions/RegisterAttributeListenerAcceptResponseItemJSON"
-                },
-                {
-                    "$ref": "#/definitions/FreeTextAcceptResponseItemJSON"
-                },
-                {
                     "$ref": "#/definitions/FormFieldAcceptResponseItemJSON"
                 },
                 {
@@ -3756,12 +3553,6 @@ export const CompleteOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "owner": {
-                    "type": "string"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
                     "type": "string"
                 },
                 "value": {
@@ -5001,12 +4792,6 @@ export const CompleteOutgoingRequestRequest: any = {
                 "owner": {
                     "type": "string"
                 },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
-                },
                 "value": {
                     "$ref": "#/definitions/AttributeValues.Relationship.Json"
                 },
@@ -5789,62 +5574,6 @@ export const CompleteOutgoingRequestRequest: any = {
                 "@type",
                 "attribute",
                 "attributeId",
-                "result"
-            ],
-            "additionalProperties": false
-        },
-        "RegisterAttributeListenerAcceptResponseItemJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "RegisterAttributeListenerAcceptResponseItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "result": {
-                    "type": "string",
-                    "const": "Accepted"
-                },
-                "listenerId": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "listenerId",
-                "result"
-            ],
-            "additionalProperties": false
-        },
-        "FreeTextAcceptResponseItemJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "FreeTextAcceptResponseItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "result": {
-                    "type": "string",
-                    "const": "Accepted"
-                },
-                "freeText": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "freeText",
                 "result"
             ],
             "additionalProperties": false
@@ -6154,12 +5883,6 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                     "$ref": "#/definitions/ReadAttributeAcceptResponseItemJSON"
                 },
                 {
-                    "$ref": "#/definitions/RegisterAttributeListenerAcceptResponseItemJSON"
-                },
-                {
-                    "$ref": "#/definitions/FreeTextAcceptResponseItemJSON"
-                },
-                {
                     "$ref": "#/definitions/FormFieldAcceptResponseItemJSON"
                 },
                 {
@@ -6275,12 +5998,6 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                     "type": "string"
                 },
                 "owner": {
-                    "type": "string"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
                     "type": "string"
                 },
                 "value": {
@@ -7520,12 +7237,6 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                 "owner": {
                     "type": "string"
                 },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
-                },
                 "value": {
                     "$ref": "#/definitions/AttributeValues.Relationship.Json"
                 },
@@ -8312,62 +8023,6 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
             ],
             "additionalProperties": false
         },
-        "RegisterAttributeListenerAcceptResponseItemJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "RegisterAttributeListenerAcceptResponseItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "result": {
-                    "type": "string",
-                    "const": "Accepted"
-                },
-                "listenerId": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "listenerId",
-                "result"
-            ],
-            "additionalProperties": false
-        },
-        "FreeTextAcceptResponseItemJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "FreeTextAcceptResponseItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "result": {
-                    "type": "string",
-                    "const": "Accepted"
-                },
-                "freeText": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "freeText",
-                "result"
-            ],
-            "additionalProperties": false
-        },
         "FormFieldAcceptResponseItemJSON": {
             "type": "object",
             "properties": {
@@ -8642,13 +8297,7 @@ export const CreateOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/AuthenticationRequestItemJSON"
                 },
                 {
-                    "$ref": "#/definitions/FreeTextRequestItemJSON"
-                },
-                {
                     "$ref": "#/definitions/FormFieldRequestItemJSON"
-                },
-                {
-                    "$ref": "#/definitions/RegisterAttributeListenerRequestItemJSON"
                 },
                 {
                     "$ref": "#/definitions/TransferFileOwnershipRequestItemJSON"
@@ -8666,10 +8315,6 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 "@version": {
                     "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
                 },
                 "description": {
                     "type": "string",
@@ -8706,10 +8351,6 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 "@version": {
                     "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
                 },
                 "description": {
                     "type": "string",
@@ -8759,12 +8400,6 @@ export const CreateOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "owner": {
-                    "type": "string"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
                     "type": "string"
                 },
                 "value": {
@@ -9430,12 +9065,6 @@ export const CreateOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "owner": {
-                    "type": "string"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
                     "type": "string"
                 },
                 "value": {
@@ -10672,10 +10301,6 @@ export const CreateOutgoingRequestRequest: any = {
                 "@version": {
                     "type": "string"
                 },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
                 "description": {
                     "type": "string",
                     "description": "The human-readable description of this item."
@@ -10715,10 +10340,6 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 "@version": {
                     "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
                 },
                 "description": {
                     "type": "string",
@@ -10773,10 +10394,6 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 "@version": {
                     "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
                 },
                 "description": {
                     "type": "string",
@@ -10847,12 +10464,6 @@ export const CreateOutgoingRequestRequest: any = {
                     "items": {
                         "type": "string"
                     }
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -10944,12 +10555,6 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 "attributeCreationHints": {
                     "$ref": "#/definitions/RelationshipAttributeCreationHintsJSON"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -11062,10 +10667,6 @@ export const CreateOutgoingRequestRequest: any = {
                 "@version": {
                     "type": "string"
                 },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
                 "description": {
                     "type": "string",
                     "description": "The human-readable description of this item."
@@ -11135,12 +10736,6 @@ export const CreateOutgoingRequestRequest: any = {
                     "items": {
                         "type": "string"
                     }
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -11163,10 +10758,6 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 "@version": {
                     "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
                 },
                 "description": {
                     "type": "string",
@@ -11214,50 +10805,6 @@ export const CreateOutgoingRequestRequest: any = {
                 "@version": {
                     "type": "string"
                 },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
-                }
-            },
-            "required": [
-                "@type",
-                "mustBeAccepted"
-            ],
-            "additionalProperties": false
-        },
-        "FreeTextRequestItemJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "FreeTextRequestItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
                 "description": {
                     "type": "string",
                     "description": "The human-readable description of this item."
@@ -11274,14 +10821,14 @@ export const CreateOutgoingRequestRequest: any = {
                     "type": "boolean",
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
-                "freeText": {
+                "title": {
                     "type": "string"
                 }
             },
             "required": [
                 "@type",
-                "freeText",
-                "mustBeAccepted"
+                "mustBeAccepted",
+                "title"
             ],
             "additionalProperties": false
         },
@@ -11298,10 +10845,6 @@ export const CreateOutgoingRequestRequest: any = {
                 "@version": {
                     "type": "string"
                 },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
                 "description": {
                     "type": "string",
                     "description": "The human-readable description of this item."
@@ -11317,6 +10860,9 @@ export const CreateOutgoingRequestRequest: any = {
                 "requireManualDecision": {
                     "type": "boolean",
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                },
+                "title": {
+                    "type": "string"
                 },
                 "settings": {
                     "$ref": "#/definitions/FormFieldSettingsJSONDerivations"
@@ -11539,57 +11085,6 @@ export const CreateOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
-        "RegisterAttributeListenerRequestItemJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "RegisterAttributeListenerRequestItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
-                },
-                "query": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/IdentityAttributeQueryJSON"
-                        },
-                        {
-                            "$ref": "#/definitions/ThirdPartyRelationshipAttributeQueryJSON"
-                        }
-                    ]
-                }
-            },
-            "required": [
-                "@type",
-                "mustBeAccepted",
-                "query"
-            ],
-            "additionalProperties": false
-        },
         "TransferFileOwnershipRequestItemJSON": {
             "type": "object",
             "properties": {
@@ -11602,10 +11097,6 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 "@version": {
                     "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
                 },
                 "description": {
                     "type": "string",
@@ -11633,7 +11124,8 @@ export const CreateOutgoingRequestRequest: any = {
             "required": [
                 "@type",
                 "fileReference",
-                "mustBeAccepted"
+                "mustBeAccepted",
+                "ownershipToken"
             ],
             "additionalProperties": false
         },
@@ -12291,13 +11783,7 @@ export const ReceivedIncomingRequestRequest: any = {
                     "$ref": "#/definitions/AuthenticationRequestItemJSON"
                 },
                 {
-                    "$ref": "#/definitions/FreeTextRequestItemJSON"
-                },
-                {
                     "$ref": "#/definitions/FormFieldRequestItemJSON"
-                },
-                {
-                    "$ref": "#/definitions/RegisterAttributeListenerRequestItemJSON"
                 },
                 {
                     "$ref": "#/definitions/TransferFileOwnershipRequestItemJSON"
@@ -12315,10 +11801,6 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "@version": {
                     "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
                 },
                 "description": {
                     "type": "string",
@@ -12355,10 +11837,6 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "@version": {
                     "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
                 },
                 "description": {
                     "type": "string",
@@ -12408,12 +11886,6 @@ export const ReceivedIncomingRequestRequest: any = {
                     "type": "string"
                 },
                 "owner": {
-                    "type": "string"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
                     "type": "string"
                 },
                 "value": {
@@ -13079,12 +12551,6 @@ export const ReceivedIncomingRequestRequest: any = {
                     "type": "string"
                 },
                 "owner": {
-                    "type": "string"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
                     "type": "string"
                 },
                 "value": {
@@ -14321,10 +13787,6 @@ export const ReceivedIncomingRequestRequest: any = {
                 "@version": {
                     "type": "string"
                 },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
                 "description": {
                     "type": "string",
                     "description": "The human-readable description of this item."
@@ -14364,10 +13826,6 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "@version": {
                     "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
                 },
                 "description": {
                     "type": "string",
@@ -14422,10 +13880,6 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "@version": {
                     "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
                 },
                 "description": {
                     "type": "string",
@@ -14496,12 +13950,6 @@ export const ReceivedIncomingRequestRequest: any = {
                     "items": {
                         "type": "string"
                     }
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -14593,12 +14041,6 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "attributeCreationHints": {
                     "$ref": "#/definitions/RelationshipAttributeCreationHintsJSON"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -14711,10 +14153,6 @@ export const ReceivedIncomingRequestRequest: any = {
                 "@version": {
                     "type": "string"
                 },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
                 "description": {
                     "type": "string",
                     "description": "The human-readable description of this item."
@@ -14784,12 +14222,6 @@ export const ReceivedIncomingRequestRequest: any = {
                     "items": {
                         "type": "string"
                     }
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -14812,10 +14244,6 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "@version": {
                     "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
                 },
                 "description": {
                     "type": "string",
@@ -14863,50 +14291,6 @@ export const ReceivedIncomingRequestRequest: any = {
                 "@version": {
                     "type": "string"
                 },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
-                }
-            },
-            "required": [
-                "@type",
-                "mustBeAccepted"
-            ],
-            "additionalProperties": false
-        },
-        "FreeTextRequestItemJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "FreeTextRequestItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
                 "description": {
                     "type": "string",
                     "description": "The human-readable description of this item."
@@ -14923,14 +14307,14 @@ export const ReceivedIncomingRequestRequest: any = {
                     "type": "boolean",
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
-                "freeText": {
+                "title": {
                     "type": "string"
                 }
             },
             "required": [
                 "@type",
-                "freeText",
-                "mustBeAccepted"
+                "mustBeAccepted",
+                "title"
             ],
             "additionalProperties": false
         },
@@ -14947,10 +14331,6 @@ export const ReceivedIncomingRequestRequest: any = {
                 "@version": {
                     "type": "string"
                 },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
                 "description": {
                     "type": "string",
                     "description": "The human-readable description of this item."
@@ -14966,6 +14346,9 @@ export const ReceivedIncomingRequestRequest: any = {
                 "requireManualDecision": {
                     "type": "boolean",
                     "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
+                },
+                "title": {
+                    "type": "string"
                 },
                 "settings": {
                     "$ref": "#/definitions/FormFieldSettingsJSONDerivations"
@@ -15188,57 +14571,6 @@ export const ReceivedIncomingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
-        "RegisterAttributeListenerRequestItemJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "RegisterAttributeListenerRequestItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
-                },
-                "description": {
-                    "type": "string",
-                    "description": "The human-readable description of this item."
-                },
-                "metadata": {
-                    "type": "object",
-                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
-                },
-                "mustBeAccepted": {
-                    "type": "boolean",
-                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
-                },
-                "query": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/IdentityAttributeQueryJSON"
-                        },
-                        {
-                            "$ref": "#/definitions/ThirdPartyRelationshipAttributeQueryJSON"
-                        }
-                    ]
-                }
-            },
-            "required": [
-                "@type",
-                "mustBeAccepted",
-                "query"
-            ],
-            "additionalProperties": false
-        },
         "TransferFileOwnershipRequestItemJSON": {
             "type": "object",
             "properties": {
@@ -15251,10 +14583,6 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "@version": {
                     "type": "string"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "The human-readable title of this item."
                 },
                 "description": {
                     "type": "string",
@@ -15282,7 +14610,8 @@ export const ReceivedIncomingRequestRequest: any = {
             "required": [
                 "@type",
                 "fileReference",
-                "mustBeAccepted"
+                "mustBeAccepted",
+                "ownershipToken"
             ],
             "additionalProperties": false
         },
@@ -15372,12 +14701,6 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
                         },
                         "isTechnical": {
                             "type": "boolean"
-                        },
-                        "validFrom": {
-                            "$ref": "#/definitions/ISO8601DateTimeString"
-                        },
-                        "validTo": {
-                            "$ref": "#/definitions/ISO8601DateTimeString"
                         }
                     },
                     "required": [
@@ -15411,9 +14734,6 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
                 "requestItemMetadata": {
                     "type": "object",
                     "properties": {
-                        "title": {
-                            "type": "string"
-                        },
                         "description": {
                             "type": "string"
                         },
@@ -16060,14 +15380,14 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
                 "protected"
             ]
         },
+        "AddressString": {
+            "type": "string",
+            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
+        },
         "ISO8601DateTimeString": {
             "type": "string",
             "errorMessage": "must match ISO8601 datetime format",
             "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
-        },
-        "AddressString": {
-            "type": "string",
-            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
         }
     }
 }
@@ -16089,12 +15409,6 @@ export const CreateRepositoryAttributeRequest: any = {
                             "items": {
                                 "type": "string"
                             }
-                        },
-                        "validFrom": {
-                            "$ref": "#/definitions/ISO8601DateTimeString"
-                        },
-                        "validTo": {
-                            "$ref": "#/definitions/ISO8601DateTimeString"
                         }
                     },
                     "required": [
@@ -16106,11 +15420,6 @@ export const CreateRepositoryAttributeRequest: any = {
             "required": [
                 "content"
             ]
-        },
-        "ISO8601DateTimeString": {
-            "type": "string",
-            "errorMessage": "must match ISO8601 datetime format",
-            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
         }
     }
 }
@@ -16267,12 +15576,6 @@ export const ExecuteIdentityAttributeQueryRequest: any = {
                     "items": {
                         "type": "string"
                     }
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -16504,12 +15807,6 @@ export const ExecuteRelationshipAttributeQueryRequest: any = {
                 },
                 "attributeCreationHints": {
                     "$ref": "#/definitions/RelationshipAttributeCreationHintsJSON"
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -16691,12 +15988,6 @@ export const ExecuteThirdPartyRelationshipAttributeQueryRequest: any = {
                     "items": {
                         "type": "string"
                     }
-                },
-                "validFrom": {
-                    "type": "string"
-                },
-                "validTo": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -16742,9 +16033,6 @@ export const GetAttributesRequest: any = {
             "properties": {
                 "query": {
                     "$ref": "#/definitions/GetAttributesRequestQuery"
-                },
-                "onlyValid": {
-                    "type": "boolean"
                 },
                 "hideTechnical": {
                     "type": "boolean"
@@ -16840,32 +16128,6 @@ export const GetAttributesRequest: any = {
                     ]
                 },
                 "content.owner": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.validFrom": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.validTo": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -17053,9 +16315,6 @@ export const GetOwnSharedAttributesRequest: any = {
                 "peer": {
                     "$ref": "#/definitions/AddressString"
                 },
-                "onlyValid": {
-                    "type": "boolean"
-                },
                 "query": {
                     "$ref": "#/definitions/GetOwnSharedAttributeRequestQuery"
                 },
@@ -17109,32 +16368,6 @@ export const GetOwnSharedAttributesRequest: any = {
                     ]
                 },
                 "content.tags": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.validFrom": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.validTo": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -17309,9 +16542,6 @@ export const GetPeerSharedAttributesRequest: any = {
                 "peer": {
                     "$ref": "#/definitions/AddressString"
                 },
-                "onlyValid": {
-                    "type": "boolean"
-                },
                 "query": {
                     "$ref": "#/definitions/GetPeerSharedAttributesRequestQuery"
                 },
@@ -17365,32 +16595,6 @@ export const GetPeerSharedAttributesRequest: any = {
                     ]
                 },
                 "content.tags": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.validFrom": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.validTo": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -17594,32 +16798,6 @@ export const GetRepositoryAttributesRequest: any = {
                         }
                     ]
                 },
-                "content.validFrom": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.validTo": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
                 "content.value.@type": {
                     "anyOf": [
                         {
@@ -17810,9 +16988,6 @@ export const ShareRepositoryAttributeRequest: any = {
                 "requestItemMetadata": {
                     "type": "object",
                     "properties": {
-                        "title": {
-                            "type": "string"
-                        },
                         "description": {
                             "type": "string"
                         },
@@ -17863,12 +17038,6 @@ export const SucceedRelationshipAttributeAndNotifyPeerRequest: any = {
                     "properties": {
                         "value": {
                             "$ref": "#/definitions/AttributeValues.Relationship.Json"
-                        },
-                        "validFrom": {
-                            "$ref": "#/definitions/ISO8601DateTimeString"
-                        },
-                        "validTo": {
-                            "$ref": "#/definitions/ISO8601DateTimeString"
                         }
                     },
                     "required": [
@@ -18505,11 +17674,6 @@ export const SucceedRelationshipAttributeAndNotifyPeerRequest: any = {
                 "consent"
             ],
             "additionalProperties": false
-        },
-        "ISO8601DateTimeString": {
-            "type": "string",
-            "errorMessage": "must match ISO8601 datetime format",
-            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
         }
     }
 }
@@ -18535,12 +17699,6 @@ export const SucceedRepositoryAttributeRequest: any = {
                             "items": {
                                 "type": "string"
                             }
-                        },
-                        "validFrom": {
-                            "$ref": "#/definitions/ISO8601DateTimeString"
-                        },
-                        "validTo": {
-                            "$ref": "#/definitions/ISO8601DateTimeString"
                         }
                     },
                     "required": [
@@ -19758,11 +18916,6 @@ export const SucceedRepositoryAttributeRequest: any = {
                 "value"
             ],
             "additionalProperties": false
-        },
-        "ISO8601DateTimeString": {
-            "type": "string",
-            "errorMessage": "must match ISO8601 datetime format",
-            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
         }
     }
 }
@@ -22626,7 +21779,7 @@ export const GetRelationshipsRequest: any = {
                         }
                     ]
                 },
-                "template.id": {
+                "templateId": {
                     "anyOf": [
                         {
                             "type": "string"
