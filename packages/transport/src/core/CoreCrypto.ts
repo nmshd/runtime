@@ -3,8 +3,10 @@ import {
     CryptoCipher,
     CryptoDerivation,
     CryptoDerivationAlgorithm,
+    CryptoDerivationHandle,
     CryptoEncryption,
     CryptoEncryptionAlgorithm,
+    CryptoEncryptionHandle,
     CryptoExchange,
     CryptoExchangeAlgorithm,
     CryptoExchangeKeypair,
@@ -19,7 +21,12 @@ import {
     CryptoSignaturePrivateKey,
     CryptoSignaturePublicKey,
     CryptoSignatures,
-    Encoding
+    DeviceBoundDerivedKeyHandle,
+    DeviceBoundKeyHandle,
+    Encoding,
+    PortableDerivedKeyHandle,
+    PortableKeyHandle,
+    CryptoLayerProviderIdentifier as ProviderIdentifier
 } from "@nmshd/crypto";
 import { PasswordGenerator } from "../util";
 import { TransportError } from "./TransportError";
@@ -79,6 +86,74 @@ export abstract class CoreCrypto {
             default:
                 throw this.invalidVersion(version);
         }
+    }
+
+    /**
+     * Generates a handle-based secret key for symmetric encryption.
+     * Depending on the given version, different algorithms are used:
+     *
+     * v1: AES256_GCM
+     *
+     * @param providerIdent The provider identifier
+     * @param version The version which should be used, "latest" is the default.
+     * @returns A Promise object resolving into a new CryptoSecretKeyHandle.
+     */
+    public static async generateDeviceBoundKeyHandle(providerIdent: ProviderIdentifier, version: TransportVersion = TransportVersion.Latest): Promise<DeviceBoundKeyHandle> {
+        switch (version) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+            case TransportVersion.V1:
+                return await CryptoEncryptionHandle.generateDeviceBoundKeyHandle(providerIdent, CryptoEncryptionAlgorithm.XCHACHA20_POLY1305, CryptoHashAlgorithm.SHA512);
+            default:
+                throw this.invalidVersion(version);
+        }
+    }
+
+    /**
+     * Generates a handle-based secret key for symmetric encryption.
+     * Depending on the given version, different algorithms are used:
+     *
+     * v1: AES256_GCM
+     *
+     * @param providerIdent The provider identifier
+     * @param version The version which should be used, "latest" is the default.
+     * @returns A Promise object resolving into a new CryptoSecretKeyHandle.
+     */
+    public static async generatePortableKeyHandle(providerIdent: ProviderIdentifier, version: TransportVersion = TransportVersion.Latest): Promise<PortableKeyHandle> {
+        switch (version) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+            case TransportVersion.V1:
+                return await CryptoEncryptionHandle.generatePortableKeyHandle(providerIdent, CryptoEncryptionAlgorithm.XCHACHA20_POLY1305, CryptoHashAlgorithm.SHA512);
+            default:
+                throw this.invalidVersion(version);
+        }
+    }
+
+    /**
+     * Generates a handle-based secret key for symmetric encryption.
+     * Depending on the given version, different algorithms are used:
+     *
+     * v1: AES256_GCM
+     *
+     * @param providerIdent The provider identifier
+     * @param version The version which should be used, "latest" is the default.
+     * @returns A Promise object resolving into a new CryptoSecretKeyHandle.
+     */
+    public static async generateDeviceBoundDerivationHandle(baseKey: DeviceBoundKeyHandle, keyId: number, context: string): Promise<DeviceBoundDerivedKeyHandle> {
+        return await CryptoDerivationHandle.deriveDeviceBoundKeyHandle(baseKey, keyId, context);
+    }
+
+    /**
+     * Generates a handle-based secret key for symmetric encryption.
+     * Depending on the given version, different algorithms are used:
+     *
+     * v1: AES256_GCM
+     *
+     * @param providerIdent The provider identifier
+     * @param version The version which should be used, "latest" is the default.
+     * @returns A Promise object resolving into a new CryptoSecretKeyHandle.
+     */
+    public static async generatePortableDerivationHandle(baseKey: PortableKeyHandle, keyId: number, context: string): Promise<PortableDerivedKeyHandle> {
+        return await CryptoDerivationHandle.derivePortableKeyHandle(baseKey, keyId, context);
     }
 
     /**

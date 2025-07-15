@@ -8,11 +8,13 @@ import { SimpleLoggerFactory } from "@js-soft/simple-logger";
 import { ISerializable, Serializable } from "@js-soft/ts-serval";
 import { EventEmitter2EventBus, sleep } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
-import { CoreBuffer } from "@nmshd/crypto";
+import { CoreBuffer, initializeNewProviders } from "@nmshd/crypto";
+import { createProvider, createProviderFromName, getAllProviders, getProviderCapabilities } from "@nmshd/rs-crypto-node";
 import fs from "fs";
 import { DurationLike } from "luxon";
 import path from "path";
 import { GenericContainer, Wait } from "testcontainers";
+import * as tmp from "tmp";
 import { LogLevel } from "typescript-logging";
 import {
     AccountController,
@@ -38,6 +40,7 @@ import {
 } from "../../src";
 
 export class TestUtil {
+    private static readonly rootTempDir = tmp.dirSync({ unsafeCleanup: true });
     private static readonly fatalLogger = new SimpleLoggerFactory(LogLevel.Fatal);
     private static oldLogger: ILoggerFactory;
     public static loggerFactory = new NodeLoggerFactory({
@@ -179,6 +182,15 @@ export class TestUtil {
             throw new Error(`Missing environment variable(s): ${notDefinedEnvironmentVariables.join(", ")}}`);
         }
 
+        if (process.env["NMSHD_TEST_CAL"]) {
+            const transportSpecificDir = fs.mkdtempSync(path.join(TestUtil.rootTempDir.name, "transport-"));
+            const factoryFunctions = { getAllProviders, createProvider, createProviderFromName, getProviderCapabilities };
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            const storageConfig = { FileStoreConfig: { db_dir: transportSpecificDir } };
+            initializeNewProviders(storageConfig, factoryFunctions).catch((err) => {
+                throw new Error(`Failed to initialize crypto providers: ${err.message}`);
+            });
+        }
         return {
             baseUrl: globalThis.process.env.NMSHD_TEST_BASEURL!,
             platformClientId: globalThis.process.env.NMSHD_TEST_CLIENTID!,
@@ -548,7 +560,7 @@ export class TestUtil {
             return e;
         }
 
-        throw new Error("no error occured");
+        throw new Error("no error occurred");
     }
 
     public static async sendRelationshipTemplate(from: AccountController, body?: ISerializable): Promise<RelationshipTemplate> {

@@ -2,6 +2,7 @@ export * from "./backbone";
 export * from "./CoreCrypto";
 export * from "./CoreSynchronizable";
 export * from "./CoreUtil";
+export * from "./CryptoProviderMapping";
 export * from "./DbCollectionName";
 export * from "./DependencyOverrides";
 export * from "./ICorrelator";

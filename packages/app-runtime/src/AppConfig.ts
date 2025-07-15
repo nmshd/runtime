@@ -1,3 +1,5 @@
+import { StorageConfig } from "@nmshd/crypto";
+import { ProviderFactoryFunctions } from "@nmshd/rs-crypto-types";
 import { RuntimeConfig } from "@nmshd/runtime";
 import { IConfigOverwrite } from "@nmshd/transport";
 import { defaultsDeep } from "lodash";
@@ -20,6 +22,8 @@ export interface AppConfigOverwrite {
     allowMultipleAccountsWithSameAddress?: boolean;
     databaseFolder?: string;
     modules?: Record<string, { enabled?: boolean; [x: string | number | symbol]: unknown }>;
+    calFactory?: ProviderFactoryFunctions;
+    calStorageConfig?: StorageConfig;
 }
 
 export function createAppConfig(...configs: (AppConfigOverwrite | AppConfig)[]): AppConfig {

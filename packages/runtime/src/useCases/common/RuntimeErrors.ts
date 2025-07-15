@@ -169,6 +169,10 @@ class Startup {
     public noActiveExpander(): ApplicationError {
         return new ApplicationError("error.runtime.startup.noActiveExpander", "No DataViewExpander could be found. You might have to login first.");
     }
+
+    public failedCalInit(): ApplicationError {
+        return new ApplicationError("error.runtime.startup.failedCalInit", "Initialising Crypto Abtraction Layer failed.");
+    }
 }
 
 class Challenges {
