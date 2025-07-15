@@ -18,7 +18,7 @@
         "build:node": "tsc --build",
         "build:watch": "tsc --build -w",
         "lint": "npm run lint:eslint && npm run lint:prettier && npm run lint:tsc",
-        "lint:eslint": "eslint --ext .ts ./packages/*/src ./packages/*/test",
+        "lint:eslint": "eslint",
         "lint:prettier": "prettier --check .",
         "lint:tsc": "npm run --workspaces lint:tsc",
         "outdated": "ncu -i && ncu -i --workspaces",
