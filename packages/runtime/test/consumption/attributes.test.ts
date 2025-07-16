@@ -715,18 +715,20 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
             const request: CanCreateRepositoryAttributeRequest = {
                 content: {
                     value: {
-                        "@type": "BirthMonth",
-                        value: 14
+                        "@type": "BirthDate",
+                        day: 14,
+                        month: 14,
+                        year: 1990
                     },
                     tags: ["x:tag1", "x:tag2"]
-                } as any
+                }
             };
             const result = await services1.consumption.attributes.canCreateRepositoryAttribute(request);
 
             assert(!result.value.isSuccess);
 
             expect(result.value.isSuccess).toBe(false);
-            expect(result.value.message).toBe("BirthMonth :: value must be equal to one of the allowed values");
+            expect(result.value.message).toBe("BirthMonth.value:Number :: must be an integer value between 1 and 12");
             expect(result.value.code).toBe("error.runtime.validation.invalidPropertyValue");
         });
 
@@ -889,10 +891,14 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
         const createAttributeWithOptionalPropertyRequest: CreateRepositoryAttributeRequest = {
             content: {
                 value: {
-                    "@type": "PersonName",
-                    givenName: "aGivenName",
-                    surname: "aSurname",
-                    middleName: "aMiddleName"
+                    "@type": "StreetAddress",
+                    street: "aStreet",
+                    houseNo: "aHouseNo",
+                    zipCode: "aZipCode",
+                    city: "aCity",
+                    country: "DE",
+                    state: "aState",
+                    recipient: "aRecipient"
                 },
                 tags: ["x:tag1", "x:tag2"]
             }
@@ -901,9 +907,13 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
         const canCreateAttributeWithoutOptionalPropertyRequest: CanCreateRepositoryAttributeRequest = {
             content: {
                 value: {
-                    "@type": "PersonName",
-                    givenName: "aGivenName",
-                    surname: "aSurname"
+                    "@type": "StreetAddress",
+                    street: "aStreet",
+                    houseNo: "aHouseNo",
+                    zipCode: "aZipCode",
+                    city: "aCity",
+                    country: "DE",
+                    recipient: "aRecipient"
                 },
                 tags: ["x:tag1", "x:tag2"]
             }
@@ -1063,15 +1073,17 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
             const request: CreateRepositoryAttributeRequest = {
                 content: {
                     value: {
-                        "@type": "BirthMonth",
-                        value: 14
+                        "@type": "BirthDate",
+                        day: 14,
+                        month: 14,
+                        year: 1990
                     },
                     tags: ["x:tag1", "x:tag2"]
-                } as any
+                }
             };
             const result = await services1.consumption.attributes.createRepositoryAttribute(request);
-            expect(result.error.message).toBe("BirthMonth :: value must be equal to one of the allowed values");
-            expect(result.error.code).toBe("error.runtime.validation.invalidPropertyValue");
+            expect(result.error.message).toBe("BirthMonth.value:Number :: must be an integer value between 1 and 12");
+            expect(result.error.code).toBe("error.runtime.requestDeserialization");
         });
 
         test("should not accept an additional property", async () => {
@@ -1189,10 +1201,14 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
         const request: CreateRepositoryAttributeRequest = {
             content: {
                 value: {
-                    "@type": "PersonName",
-                    givenName: "aGivenName",
-                    surname: "aSurname",
-                    middleName: "aMiddleName"
+                    "@type": "StreetAddress",
+                    street: "aStreet",
+                    houseNo: "aHouseNo",
+                    zipCode: "aZipCode",
+                    city: "aCity",
+                    country: "DE",
+                    state: "aState",
+                    recipient: "aRecipient"
                 },
                 tags: ["x:tag1", "x:tag2"]
             }
@@ -1201,9 +1217,13 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
         const request2: CreateRepositoryAttributeRequest = {
             content: {
                 value: {
-                    "@type": "PersonName",
-                    givenName: "aGivenName",
-                    surname: "aSurname"
+                    "@type": "StreetAddress",
+                    street: "aStreet",
+                    houseNo: "aHouseNo",
+                    zipCode: "aZipCode",
+                    city: "aCity",
+                    country: "DE",
+                    recipient: "aRecipient"
                 },
                 tags: ["x:tag1", "x:tag2"]
             }
