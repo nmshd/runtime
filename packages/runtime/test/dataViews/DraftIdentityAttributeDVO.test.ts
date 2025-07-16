@@ -1,4 +1,4 @@
-import { AbstractStringJSON, CommunicationLanguage, GivenName, IdentityAttribute, Nationality, Sex } from "@nmshd/content";
+import { AbstractStringJSON, CommunicationLanguage, GivenName, IdentityAttribute, Nationality, Sex, StreetAddress } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { DataViewExpander, TransportServices } from "../../src";
 import { RuntimeServiceProvider } from "../lib";
@@ -134,5 +134,45 @@ describe("DraftIdentityAttributeDVO", () => {
         expect(dvo.valueHints.max).toBe(2);
         expect(dvo.valueHints.values).toHaveLength(183);
         expect(dvo.valueHints.values![31]).toStrictEqual({ key: "de", displayName: "i18n://attributes.values.languages.de" });
+    });
+
+    test("check a complex StreetAddress", async () => {
+        const attribute = IdentityAttribute.from<StreetAddress>({
+            owner: transportService1Address,
+            value: StreetAddress.from({
+                street: "aStreet",
+                houseNo: "aHouseNo",
+                zipCode: "aZipCode",
+                city: "aCity",
+                country: "DE",
+                recipient: "aRecipient"
+            })
+        }).toJSON();
+        const dvo = await expander1.expandAttribute(attribute);
+        expect(dvo).toBeDefined();
+        expect(dvo.type).toBe("DraftIdentityAttributeDVO");
+        expect(dvo.id).toBe("");
+        expect(dvo.name).toBe("i18n://dvo.attribute.name.StreetAddress");
+        expect(dvo.description).toBe("i18n://dvo.attribute.description.StreetAddress");
+        expect(dvo.content).toStrictEqual(attribute);
+        const value = dvo.value as AbstractStringJSON;
+        expect(value["@type"]).toBe("StreetAddress");
+        expect(dvo.owner.type).toBe("IdentityDVO");
+        expect(dvo.owner.id).toStrictEqual(attribute.owner);
+        expect(dvo.owner.name).toBe("i18n://dvo.identity.self.name");
+        expect(dvo.owner.isSelf).toBe(true);
+
+        expect(dvo.renderHints["@type"]).toBe("RenderHints");
+        expect(dvo.renderHints.technicalType).toBe("Object");
+        expect(dvo.renderHints.editType).toBe("Complex");
+        expect(dvo.renderHints.dataType).toBeUndefined();
+        expect(dvo.renderHints.propertyHints).toBeDefined();
+        expect(dvo.renderHints.propertyHints!["street"]).toBeDefined();
+        expect(dvo.renderHints.propertyHints!["street"].editType).toBe("InputLike");
+        expect(dvo.renderHints.propertyHints!["street"].technicalType).toBe("String");
+
+        expect(dvo.valueHints["@type"]).toBe("ValueHints");
+        expect(dvo.valueHints.propertyHints!["street"]).toBeDefined();
+        expect(dvo.valueHints.propertyHints!["street"].max).toBe(100);
     });
 });
