@@ -32,9 +32,10 @@ export class Message extends CoreSynchronizable implements IMessage {
         nameof<Message>((r) => r.recipients),
         nameof<Message>((r) => r.createdAt),
         nameof<Message>((r) => r.attachments),
-        nameof<Message>((r) => r.receivedByEveryone),
-        nameof<Message>((r) => r.content)
+        nameof<Message>((r) => r.receivedByEveryone)
     ];
+
+    public override readonly contentProperties = [nameof<Message>((r) => r.content)];
 
     public override readonly metadataProperties = [nameof<Message>((r) => r.metadata), nameof<Message>((r) => r.metadataModifiedAt)];
 
