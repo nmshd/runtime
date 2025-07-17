@@ -46,7 +46,7 @@ describe("MessageContent", function () {
             const messages = await sender.messages.getMessagesByAddress(recipient1.identity.address);
             expect(messages).toHaveLength(1);
             const message = messages[0];
-            const content = message.cache!.content as any;
+            const content = message.content as any;
             expect(content).toBeInstanceOf(JSONWrapper);
             expect(content.value.any).toBe("content");
             expect(content.value.submitted).toBe(true);
@@ -68,7 +68,7 @@ describe("MessageContent", function () {
             const messages = await recipient1.messages.getMessagesByAddress(sender.identity.address);
             expect(messages).toHaveLength(1);
             const message = messages[0];
-            const content = message.cache!.content as any;
+            const content = message.content as any;
             expect(content).toBeInstanceOf(JSONWrapper);
             expect(content.value.any).toBe("content");
             expect(content.value.submitted).toBe(true);
@@ -101,8 +101,8 @@ describe("MessageContent", function () {
             const messages = await sender.messages.getMessagesByAddress(recipient1.identity.address);
             expect(messages).toHaveLength(2);
             const message = messages[1];
-            expect(message.cache!.content).toBeInstanceOf(Mail);
-            const content = message.cache!.content as Mail;
+            expect(message.content).toBeInstanceOf(Mail);
+            const content = message.content as Mail;
             expect(content.body).toBe("aBody");
             expect(content.subject).toBe("aSubject");
             expect(content.to).toBeInstanceOf(Array);
@@ -116,7 +116,7 @@ describe("MessageContent", function () {
             const messages = await recipient1.messages.getMessagesByAddress(sender.identity.address);
             expect(messages).toHaveLength(2);
             const message = messages[1];
-            const content = message.cache!.content as Mail;
+            const content = message.content as Mail;
             expect(content.body).toBe("aBody");
             expect(content.subject).toBe("aSubject");
             expect(content.to).toBeInstanceOf(Array);

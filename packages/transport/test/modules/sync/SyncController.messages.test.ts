@@ -204,7 +204,7 @@ describe("MessageSync", function () {
         // MessageDelivered external events are not sent
         // await TestUtil.syncUntilHasMessages(a1, 2)
 
-        await a1.messages.updateCache([a1SentMessage.id.toString(), a2SentMessage.id.toString()]);
+        await a1.messages.updateBackboneData([a1SentMessage.id.toString(), a2SentMessage.id.toString()]);
         await a1.syncDatawallet();
 
         const a1MessageFromA1 = await a1.messages.getMessage(a1SentMessage.id);
@@ -213,8 +213,8 @@ describe("MessageSync", function () {
         expect(a1MessageFromA1).toBeDefined();
         expect(a1MessageFromA2).toBeDefined();
 
-        expect(a1MessageFromA1!.cache?.recipients[0].receivedAt).toBeDefined();
-        expect(a1MessageFromA2!.cache?.recipients[0].receivedAt).toBeDefined();
+        expect(a1MessageFromA1!.recipients[0].receivedAt).toBeDefined();
+        expect(a1MessageFromA2!.recipients[0].receivedAt).toBeDefined();
 
         // A2 receives the CacheChanged modifications and updates its cache
         await a2.syncDatawallet();
@@ -225,8 +225,8 @@ describe("MessageSync", function () {
         expect(a2MessageFromA1).toBeDefined();
         expect(a2MessageFromA2).toBeDefined();
 
-        expect(a2MessageFromA1!.cache?.recipients[0].receivedAt).toBeDefined();
-        expect(a2MessageFromA2!.cache?.recipients[0].receivedAt).toBeDefined();
+        expect(a2MessageFromA1!.recipients[0].receivedAt).toBeDefined();
+        expect(a2MessageFromA2!.recipients[0].receivedAt).toBeDefined();
     });
 
     test("syncDatawallet should sync sent messages", async function () {
@@ -247,8 +247,6 @@ describe("MessageSync", function () {
         await senderDevice2.syncDatawallet();
 
         messageOnDevice2 = await senderDevice2.messages.getMessage(messageOnDevice1.id);
-        expect(messageOnDevice2?.cache).toBeDefined();
-
-        expect(messageOnDevice2!.toJSON()).toStrictEqualExcluding(messageOnDevice1.toJSON() as any, "cachedAt");
+        expect(messageOnDevice2!.toJSON()).toStrictEqual(messageOnDevice1.toJSON());
     });
 });

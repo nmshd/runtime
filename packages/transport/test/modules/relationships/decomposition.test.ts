@@ -77,7 +77,7 @@ describe("Data cleanup after relationship decomposition", function () {
         const messages = await sender.messages.getMessages();
         expect(messages).toHaveLength(1);
 
-        expect(messages[0].cache!.recipients.map((r) => [r.address, r.relationshipId])).toStrictEqual(
+        expect(messages[0].recipients.map((r) => [r.address, r.relationshipId])).toStrictEqual(
             expect.arrayContaining([
                 [await TestUtil.generateAddressPseudonym(process.env.NMSHD_TEST_BASEURL!), undefined],
                 [recipient2.identity.address, relationship2Id]
@@ -110,7 +110,7 @@ describe("Data cleanup after relationship decomposition", function () {
         await sender2.syncDatawallet();
 
         const sender2Messages = await sender2.messages.getMessages();
-        expect(sender2Messages[0].cache?.recipients.map((r) => [r.address, r.relationshipId])).toStrictEqual(
+        expect(sender2Messages[0].recipients.map((r) => [r.address, r.relationshipId])).toStrictEqual(
             expect.arrayContaining([
                 [await TestUtil.generateAddressPseudonym(process.env.NMSHD_TEST_BASEURL!), undefined],
                 [recipient2.identity.address, relationship2Id]
