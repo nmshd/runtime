@@ -130,13 +130,13 @@ export class MessageController extends TransportController {
         const paginator = (await this.client.getMessages({ ids })).value;
         const promises = [];
         for await (const resultItem of paginator) {
-            promises.push(this.updateCacheOfExistingMessageInDb(resultItem.id, resultItem));
+            promises.push(this.updateBackboneDataOfExistingMessageInDb(resultItem.id, resultItem));
         }
         return await Promise.all(promises);
     }
 
     @log()
-    private async updateCacheOfExistingMessageInDb(id: string, response?: BackboneGetMessagesResponse) {
+    private async updateBackboneDataOfExistingMessageInDb(id: string, response?: BackboneGetMessagesResponse) {
         const messageDoc = await this.messages.read(id);
         if (!messageDoc) {
             throw TransportCoreErrors.general.recordNotFound(Message, id);
@@ -144,22 +144,22 @@ export class MessageController extends TransportController {
 
         const message = Message.from(messageDoc);
 
-        await this.updateCacheOfMessage(message, response);
+        await this.updateBackboneDataOfMessage(message, response);
         await this.messages.update(messageDoc, message);
         return message;
     }
 
-    private async updateCacheOfMessage(message: Message, response?: BackboneGetMessagesResponse) {
+    private async updateBackboneDataOfMessage(message: Message, response?: BackboneGetMessagesResponse) {
         const messageId = message.id.toString();
 
         response ??= (await this.client.getMessage(messageId)).value;
 
         const envelope = this.getEnvelopeFromBackboneGetMessagesResponse(response);
-        const [cachedMessage, messageKey] = await this.decryptMessage(envelope, message.secretKey);
+        const [backboneData, messageKey] = await this.decryptMessage(envelope, message.secretKey);
 
         message.secretKey = messageKey;
 
-        message.updateWithBackboneData(cachedMessage);
+        message.updateWithBackboneData(backboneData);
     }
 
     @log()
@@ -167,7 +167,7 @@ export class MessageController extends TransportController {
         const response = (await this.client.getMessage(id.toString())).value;
 
         const envelope = this.getEnvelopeFromBackboneGetMessagesResponse(response);
-        const [cachedMessage, messageKey, relationship] = await this.decryptMessage(envelope);
+        const [backboneData, messageKey, relationship] = await this.decryptMessage(envelope);
 
         if (!relationship) {
             throw TransportCoreErrors.general.recordNotFound(Relationship, envelope.id.toString());
@@ -177,7 +177,7 @@ export class MessageController extends TransportController {
             id: envelope.id,
             isOwn: false,
             secretKey: messageKey,
-            ...cachedMessage
+            ...backboneData
         });
         await this.messages.create(message);
 
@@ -559,7 +559,7 @@ export class MessageController extends TransportController {
 
         this.log.trace("Attachments fetched. Creating message...");
 
-        const cachedMessage = {
+        const backboneData = {
             createdBy: envelope.createdBy,
             createdByDevice: envelope.createdByDevice,
             recipients,
@@ -569,6 +569,6 @@ export class MessageController extends TransportController {
             receivedByEveryone: false
         };
 
-        return [cachedMessage, messageKey, relationship];
+        return [backboneData, messageKey, relationship];
     }
 }

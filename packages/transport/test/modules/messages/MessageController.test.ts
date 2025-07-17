@@ -280,7 +280,7 @@ describe("MessageController", function () {
             const messageId = (await TestUtil.sendMessage(sender, recipient)).id;
             await expect(sender.messages.updateBackboneData([messageId.toString()])).resolves.not.toThrow();
 
-            // TODO: what was the intention of this test?
+            // TODO: what was the intention of this part of the test? Looks like it did exactly nothing
             // await expect(recipient.messages.updateBackboneData([messageId.toString()])).resolves.not.toThrow();
         });
 
