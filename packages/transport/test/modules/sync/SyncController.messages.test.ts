@@ -88,9 +88,9 @@ describe("MessageSync", function () {
         expect(b1MessageFromA1).toBeDefined();
         expect(b1MessageFromA2).toBeDefined();
 
-        expect(b1MessageFromA1!.toJSON()).toStrictEqualExcluding(a1SentMessage.toJSON() as any, "cachedAt", "isOwn", "recipients[0].receivedAt", "recipients[0].receivedByDevice");
+        expect(b1MessageFromA1!.toJSON()).toStrictEqualExcluding(a1SentMessage.toJSON() as any, "isOwn", "recipients[0].receivedAt", "recipients[0].receivedByDevice");
 
-        expect(b1MessageFromA2!.toJSON()).toStrictEqualExcluding(a2SentMessage.toJSON() as any, "cachedAt", "isOwn", "recipients[0].receivedAt", "recipients[0].receivedByDevice");
+        expect(b1MessageFromA2!.toJSON()).toStrictEqualExcluding(a2SentMessage.toJSON() as any, "isOwn", "recipients[0].receivedAt", "recipients[0].receivedByDevice");
 
         // B2 syncs its datawallet
         await b2.syncDatawallet();
@@ -100,9 +100,9 @@ describe("MessageSync", function () {
         expect(b2MessageFromA1).toBeDefined();
         expect(b2MessageFromA2).toBeDefined();
 
-        expect(b2MessageFromA1!.toJSON()).toStrictEqualExcluding(a1SentMessage.toJSON() as any, "cachedAt", "isOwn", "recipients[0].receivedAt", "recipients[0].receivedByDevice");
+        expect(b2MessageFromA1!.toJSON()).toStrictEqualExcluding(a1SentMessage.toJSON() as any, "isOwn", "recipients[0].receivedAt", "recipients[0].receivedByDevice");
 
-        expect(b2MessageFromA2!.toJSON()).toStrictEqualExcluding(a2SentMessage.toJSON() as any, "cachedAt", "isOwn", "recipients[0].receivedAt", "recipients[0].receivedByDevice");
+        expect(b2MessageFromA2!.toJSON()).toStrictEqualExcluding(a2SentMessage.toJSON() as any, "isOwn", "recipients[0].receivedAt", "recipients[0].receivedByDevice");
     });
 
     test("concurrent receive A1 -> B1, A2 -> B1: only one active sync run is allowed", async function () {
@@ -153,9 +153,9 @@ describe("MessageSync", function () {
         expect(b2MessageFromA1).toBeDefined();
         expect(b2MessageFromA2).toBeDefined();
 
-        expect(b2MessageFromA1!.toJSON()).toStrictEqualExcluding(b1MessageFromA1!.toJSON() as any, "cachedAt");
+        expect(b2MessageFromA1!.toJSON()).toStrictEqual(b1MessageFromA1!.toJSON());
 
-        expect(b2MessageFromA2!.toJSON()).toStrictEqualExcluding(b1MessageFromA2!.toJSON() as any, "cachedAt");
+        expect(b2MessageFromA2!.toJSON()).toStrictEqual(b1MessageFromA2!.toJSON());
 
         // A1 receives the updated messages (receivedAt dates were set)
         // MessageDelivered external events are not sent
