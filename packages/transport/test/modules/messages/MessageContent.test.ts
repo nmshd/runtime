@@ -57,9 +57,9 @@ describe("MessageContent", function () {
             expect(messages).toHaveLength(1);
             const message = messages[0];
             const object = message.toJSON() as any;
-            expect(object.cache.content).toBeDefined();
-            expect(object.cache.content.any).toBe("content");
-            expect(object.cache.content.submitted).toBe(true);
+            expect(object.content).toBeDefined();
+            expect(object.content.any).toBe("content");
+            expect(object.content.submitted).toBe(true);
         });
 
         test("should correctly store the message (recipient)", async function () {
@@ -79,9 +79,9 @@ describe("MessageContent", function () {
             expect(messages).toHaveLength(1);
             const message = messages[0];
             const object = message.toJSON() as any;
-            expect(object.cache.content).toBeDefined();
-            expect(object.cache.content.any).toBe("content");
-            expect(object.cache.content.submitted).toBe(true);
+            expect(object.content).toBeDefined();
+            expect(object.content.any).toBe("content");
+            expect(object.content.submitted).toBe(true);
         });
     });
 

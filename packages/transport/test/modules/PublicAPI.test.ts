@@ -94,8 +94,7 @@ publicFunctions[MessageController.name] = [
     nameof<MessageController>((r) => r.init),
     nameof<MessageController>((r) => r.getMessages),
     nameof<MessageController>((r) => r.getMessage),
-    nameof<MessageController>((r) => r.sendMessage),
-    nameof<FileController>((r) => r.updateCache)
+    nameof<MessageController>((r) => r.sendMessage)
 ];
 publicFunctions[RelationshipsController.name] = [
     nameof<RelationshipsController>((r) => r.init),
