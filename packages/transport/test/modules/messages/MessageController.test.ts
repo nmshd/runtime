@@ -287,9 +287,14 @@ describe("MessageController", function () {
         });
 
         test("should decrypt a Message on a terminated Relationship", async function () {
-            const messageId = (await TestUtil.sendMessage(sender, recipient)).id;
-            await expect(sender.messages.fetchCaches([messageId])).resolves.not.toThrow();
-            await expect(recipient.messages.fetchCaches([messageId])).resolves.not.toThrow();
+            const messageId = messageExchangedBeforeTermination.id;
+
+            const result = await sender.messages.fetchCaches([messageId]);
+            // fetchCaches is just returning an empty array if the message is not found
+            expect(result).toHaveLength(1);
+
+            const recipientResult = await recipient.messages.fetchCaches([messageId]);
+            expect(recipientResult).toHaveLength(1);
         });
 
         test("should be able to receive a Message sent on a terminated Relationship after the Relationship was reactivated", async function () {
