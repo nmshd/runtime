@@ -272,7 +272,13 @@ describe("MessageController", function () {
     });
 
     describe("Sending Messages for terminated Relationships", function () {
+        let messageExchangedBeforeTermination: Message;
+
         beforeAll(async function () {
+            const message = await TestUtil.sendMessage(sender, recipient);
+            await TestUtil.syncUntilHasMessage(recipient, message.id);
+            messageExchangedBeforeTermination = message;
+
             await TestUtil.terminateRelationship(sender, recipient);
         });
 
