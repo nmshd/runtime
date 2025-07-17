@@ -1,43 +1,26 @@
-import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-serval";
-import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreDate, ICoreId } from "@nmshd/core-types";
+import { serialize, validate } from "@js-soft/ts-serval";
+import { CoreAddress, ICoreAddress } from "@nmshd/core-types";
+import { AbstractAttributeSharingInfo, AbstractAttributeSharingInfoJSON, IAbstractAttributeSharingInfo } from "./AbstractAttributeSharingInfo";
 import { IPeerAttributeDeletionInfo, PeerAttributeDeletionInfo, PeerAttributeDeletionInfoJSON } from "./PeerAttributeDeletionInfo";
 
-export interface ThirdPartyRelationshipAttributeSharingInfoJSON {
-    peer: string;
-    sourceReference: string;
-    sharedAt: string;
+export interface ThirdPartyRelationshipAttributeSharingInfoJSON extends AbstractAttributeSharingInfoJSON {
     initialAttributePeer: string;
     deletionInfo?: PeerAttributeDeletionInfoJSON;
 }
 
-export interface IThirdPartyRelationshipAttributeSharingInfo extends ISerializable {
-    peer: ICoreAddress;
-    sourceReference: ICoreId;
-    sharedAt: ICoreDate;
+export interface IThirdPartyRelationshipAttributeSharingInfo extends IAbstractAttributeSharingInfo {
     initialAttributePeer: ICoreAddress;
     deletionInfo?: IPeerAttributeDeletionInfo;
 }
 
-export class ThirdPartyRelationshipAttributeSharingInfo extends Serializable implements IThirdPartyRelationshipAttributeSharingInfo {
-    @serialize()
-    @validate()
-    public peer: CoreAddress;
-
-    @serialize()
-    @validate()
-    public sourceReference: CoreId;
-
-    @serialize()
-    @validate()
-    public sharedAt: CoreDate;
-
+export class ThirdPartyRelationshipAttributeSharingInfo extends AbstractAttributeSharingInfo implements IThirdPartyRelationshipAttributeSharingInfo {
     @serialize()
     @validate()
     public initialAttributePeer: CoreAddress;
 
     @serialize()
     @validate({ nullable: true })
-    public deletionInfo?: PeerAttributeDeletionInfo;
+    public override deletionInfo?: PeerAttributeDeletionInfo;
 
     public static from(value: IThirdPartyRelationshipAttributeSharingInfo | ThirdPartyRelationshipAttributeSharingInfoJSON): ThirdPartyRelationshipAttributeSharingInfo {
         return super.fromAny(value) as ThirdPartyRelationshipAttributeSharingInfo;

@@ -1,37 +1,19 @@
-import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-serval";
-import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreDate, ICoreId } from "@nmshd/core-types";
+import { serialize, validate } from "@js-soft/ts-serval";
+import { AbstractAttributeSharingInfo, AbstractAttributeSharingInfoJSON, IAbstractAttributeSharingInfo } from "./AbstractAttributeSharingInfo";
 import { IOwnAttributeDeletionInfo, OwnAttributeDeletionInfo, OwnAttributeDeletionInfoJSON } from "./OwnAttributeDeletionInfo";
 
-export interface OwnIdentityAttributeSharingInfoJSON {
-    peer: string;
-    sourceReference: string;
-    sharedAt: string;
+export interface OwnIdentityAttributeSharingInfoJSON extends AbstractAttributeSharingInfoJSON {
     deletionInfo?: OwnAttributeDeletionInfoJSON;
 }
 
-export interface IOwnIdentityAttributeSharingInfo extends ISerializable {
-    peer: ICoreAddress;
-    sourceReference: ICoreId;
-    sharedAt: ICoreDate;
+export interface IOwnIdentityAttributeSharingInfo extends IAbstractAttributeSharingInfo {
     deletionInfo?: IOwnAttributeDeletionInfo;
 }
 
-export class OwnIdentityAttributeSharingInfo extends Serializable implements IOwnIdentityAttributeSharingInfo {
-    @validate()
-    @serialize()
-    public peer: CoreAddress;
-
-    @serialize()
-    @validate()
-    public sourceReference: CoreId;
-
-    @serialize()
-    @validate()
-    public sharedAt: CoreDate;
-
+export class OwnIdentityAttributeSharingInfo extends AbstractAttributeSharingInfo implements IOwnIdentityAttributeSharingInfo {
     @serialize()
     @validate({ nullable: true })
-    public deletionInfo?: OwnAttributeDeletionInfo;
+    public override deletionInfo?: OwnAttributeDeletionInfo;
 
     public static from(value: IOwnIdentityAttributeSharingInfo | OwnIdentityAttributeSharingInfoJSON): OwnIdentityAttributeSharingInfo {
         return super.fromAny(value) as OwnIdentityAttributeSharingInfo;
