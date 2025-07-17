@@ -267,7 +267,7 @@ describe("MessageController", function () {
         });
     });
 
-    describe("Sending Messages for terminated Relationships", function () {
+    describe("Sending and decrypting Messages for terminated Relationships", function () {
         let messageExchangedBeforeTermination: Message;
 
         beforeAll(async function () {
