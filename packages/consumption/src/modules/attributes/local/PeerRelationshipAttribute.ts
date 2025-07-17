@@ -2,6 +2,7 @@ import { serialize, type, validate } from "@js-soft/ts-serval";
 import { IRelationshipAttribute, RelationshipAttribute, RelationshipAttributeJSON } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
+import { ForwardedRelationshipAttributeDeletionStatus } from "./ForwardedRelationshipAttributeDeletionInfo";
 import {
     ForwardedRelationshipAttributeSharingInfo,
     ForwardedRelationshipAttributeSharingInfoJSON,
@@ -52,7 +53,7 @@ export class PeerRelationshipAttribute extends LocalAttribute implements IPeerRe
 
         if (includeDeletedAndToBeDeleted) return true;
 
-        const excludedDeletionStatuses = ["ToBeDeletedByPeer", "DeletedByPeer"];
+        const excludedDeletionStatuses = [ForwardedRelationshipAttributeDeletionStatus.DeletedByPeer, ForwardedRelationshipAttributeDeletionStatus.ToBeDeletedByPeer];
         return thirdPartySharingInfosWithPeer.some((sharingInfo) => !sharingInfo.deletionInfo || !excludedDeletionStatuses.includes(sharingInfo.deletionInfo.deletionStatus));
     }
 

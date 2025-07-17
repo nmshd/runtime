@@ -3,6 +3,7 @@ import { IdentityAttribute, IdentityAttributeJSON, IIdentityAttribute } from "@n
 import { CoreAddress } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
 import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./LocalAttribute";
+import { OwnAttributeDeletionStatus } from "./OwnAttributeDeletionInfo";
 import { IOwnIdentityAttributeSharingInfo, OwnIdentityAttributeSharingInfo, OwnIdentityAttributeSharingInfoJSON } from "./OwnIdentityAttributeSharingInfo";
 
 export interface OwnIdentityAttributeJSON extends LocalAttributeJSON {
@@ -42,7 +43,7 @@ export class OwnIdentityAttribute extends LocalAttribute implements IOwnIdentity
 
         if (includeDeletedAndToBeDeleted) return true;
 
-        const excludedDeletionStatuses = ["ToBeDeletedByPeer", "DeletedByPeer"];
+        const excludedDeletionStatuses = [OwnAttributeDeletionStatus.DeletedByPeer, OwnAttributeDeletionStatus.ToBeDeletedByPeer];
         return sharingInfosWithPeer.some((sharingInfo) => !sharingInfo.deletionInfo || !excludedDeletionStatuses.includes(sharingInfo.deletionInfo.deletionStatus));
     }
 
