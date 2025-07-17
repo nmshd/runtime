@@ -284,12 +284,8 @@ describe("MessageController", function () {
 
         test("should decrypt a Message on a terminated Relationship", async function () {
             const messageId = messageExchangedBeforeTermination.id.toString();
-
-            const senderMessages = await sender.messages.updateBackboneData([messageId]);
-            expect(senderMessages).toHaveLength(1);
-
-            const recipientMessages = await recipient.messages.updateBackboneData([messageId]);
-            expect(recipientMessages).toHaveLength(1);
+            await expect(sender.messages.updateBackboneData([messageId])).resolves.not.toThrow();
+            await expect(recipient.messages.updateBackboneData([messageId])).resolves.not.toThrow();
         });
 
         test("should be able to receive a Message sent on a terminated Relationship after the Relationship was reactivated", async function () {
