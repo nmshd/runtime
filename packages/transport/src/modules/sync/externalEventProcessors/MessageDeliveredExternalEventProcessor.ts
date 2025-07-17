@@ -13,7 +13,7 @@ class MessageDeliveredExternalEventData extends Serializable {
 export class MessageDeliveredExternalEventProcessor extends ExternalEventProcessor {
     public override async execute(externalEvent: ExternalEvent): Promise<Message> {
         const messageReceivedPayload = MessageDeliveredExternalEventData.fromAny(externalEvent.payload);
-        const updatedMessages = await this.accountController.messages.updateCache([messageReceivedPayload.id]);
+        const updatedMessages = await this.accountController.messages.updateBackboneData([messageReceivedPayload.id]);
 
         const deliveredMessage = updatedMessages[0];
 
