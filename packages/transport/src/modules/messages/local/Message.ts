@@ -68,10 +68,9 @@ export class Message extends CoreSynchronizable implements IMessage {
     @serialize({ type: CoreId })
     public attachments: CoreId[];
 
-    // eslint-disable-next-line @typescript-eslint/no-inferrable-types
     @validate()
     @serialize()
-    public receivedByEveryone: boolean = false;
+    public receivedByEveryone: boolean;
 
     @validate()
     @serialize()
