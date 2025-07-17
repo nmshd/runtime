@@ -5,6 +5,8 @@ export * from "./local/AttributeTagCollection";
 export * from "./local/CreateOwnIdentityAttributeParams";
 export * from "./local/CreateSharedLocalAttributeCopyParams";
 export * from "./local/CreateSharedLocalAttributeParams";
+export * from "./local/ForwardedRelationshipAttributeDeletionInfo";
+export * from "./local/ForwardedRelationshipAttributeSharingInfo";
 export * from "./local/LocalAttribute";
 export * from "./local/OwnAttributeDeletionInfo";
 export * from "./local/OwnIdentityAttribute";

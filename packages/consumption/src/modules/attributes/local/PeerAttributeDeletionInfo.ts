@@ -2,8 +2,6 @@ import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-se
 import { CoreDate, ICoreDate } from "@nmshd/core-types";
 
 export enum PeerAttributeDeletionStatus {
-    DeletionRequestSent = "DeletionRequestSent",
-    DeletionRequestRejected = "DeletionRequestRejected",
     ToBeDeleted = "ToBeDeleted",
     DeletedByOwner = "DeletedByOwner"
 }

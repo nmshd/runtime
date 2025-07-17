@@ -1,5 +1,6 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { IdentityAttribute, IdentityAttributeJSON, IIdentityAttribute } from "@nmshd/content";
+import { CoreAddress } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
 import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./LocalAttribute";
 import { IOwnIdentityAttributeSharingInfo, OwnIdentityAttributeSharingInfo, OwnIdentityAttributeSharingInfoJSON } from "./OwnIdentityAttributeSharingInfo";
@@ -32,6 +33,18 @@ export class OwnIdentityAttribute extends LocalAttribute implements IOwnIdentity
     @serialize()
     @validate({ nullable: true })
     public sharingInfos?: OwnIdentityAttributeSharingInfo[];
+
+    public isSharedWith(peerAddress: CoreAddress, includeDeletedAndToBeDeleted = false): boolean {
+        if (!this.sharingInfos) return false;
+
+        const sharingInfosWithPeer = this.sharingInfos.filter((sharingInfo) => sharingInfo.peer.equals(peerAddress));
+        if (sharingInfosWithPeer.length === 0) return false;
+
+        if (includeDeletedAndToBeDeleted) return true;
+
+        const excludedDeletionStatuses = ["ToBeDeletedByPeer", "DeletedByPeer"];
+        return sharingInfosWithPeer.some((sharingInfo) => !sharingInfo.deletionInfo || !excludedDeletionStatuses.includes(sharingInfo.deletionInfo.deletionStatus));
+    }
 
     public static override from(value: IOwnIdentityAttribute | OwnIdentityAttributeJSON): OwnIdentityAttribute {
         return super.fromAny(value) as OwnIdentityAttribute;

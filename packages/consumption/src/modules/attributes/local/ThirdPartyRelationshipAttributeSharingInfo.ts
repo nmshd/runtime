@@ -6,6 +6,7 @@ export interface ThirdPartyRelationshipAttributeSharingInfoJSON {
     peer: string;
     sourceReference: string;
     sharedAt: string;
+    initialAttributePeer: string;
     deletionInfo?: PeerAttributeDeletionInfoJSON;
 }
 
@@ -13,12 +14,13 @@ export interface IThirdPartyRelationshipAttributeSharingInfo extends ISerializab
     peer: ICoreAddress;
     sourceReference: ICoreId;
     sharedAt: ICoreDate;
+    initialAttributePeer: ICoreAddress;
     deletionInfo?: IPeerAttributeDeletionInfo;
 }
 
 export class ThirdPartyRelationshipAttributeSharingInfo extends Serializable implements IThirdPartyRelationshipAttributeSharingInfo {
-    @validate()
     @serialize()
+    @validate()
     public peer: CoreAddress;
 
     @serialize()
@@ -28,6 +30,10 @@ export class ThirdPartyRelationshipAttributeSharingInfo extends Serializable imp
     @serialize()
     @validate()
     public sharedAt: CoreDate;
+
+    @serialize()
+    @validate()
+    public initialAttributePeer: CoreAddress;
 
     @serialize()
     @validate({ nullable: true })

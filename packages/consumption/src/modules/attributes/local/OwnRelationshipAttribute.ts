@@ -1,25 +1,26 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { IRelationshipAttribute, RelationshipAttribute, RelationshipAttributeJSON } from "@nmshd/content";
+import { CoreAddress } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
+import {
+    ForwardedRelationshipAttributeSharingInfo,
+    ForwardedRelationshipAttributeSharingInfoJSON,
+    IForwardedRelationshipAttributeSharingInfo
+} from "./ForwardedRelationshipAttributeSharingInfo";
 import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./LocalAttribute";
 import { IOwnRelationshipAttributeSharingInfo, OwnRelationshipAttributeSharingInfo, OwnRelationshipAttributeSharingInfoJSON } from "./OwnRelationshipAttributeSharingInfo";
-import {
-    IThirdPartyRelationshipAttributeSharingInfo,
-    ThirdPartyRelationshipAttributeSharingInfo,
-    ThirdPartyRelationshipAttributeSharingInfoJSON
-} from "./ThirdPartyRelationshipAttributeSharingInfo";
 
 export interface OwnRelationshipAttributeJSON extends LocalAttributeJSON {
     "@type": "OwnRelationshipAttribute";
     content: RelationshipAttributeJSON;
     initialSharingInfo: OwnRelationshipAttributeSharingInfoJSON;
-    thirdPartySharingInfos?: ThirdPartyRelationshipAttributeSharingInfoJSON[];
+    thirdPartySharingInfos?: ForwardedRelationshipAttributeSharingInfoJSON[];
 }
 
 export interface IOwnRelationshipAttribute extends ILocalAttribute {
     content: IRelationshipAttribute;
     initialSharingInfo: IOwnRelationshipAttributeSharingInfo;
-    thirdPartySharingInfos?: IThirdPartyRelationshipAttributeSharingInfo[];
+    thirdPartySharingInfos?: IForwardedRelationshipAttributeSharingInfo[];
 }
 
 @type("OwnRelationshipAttribute")
@@ -41,7 +42,19 @@ export class OwnRelationshipAttribute extends LocalAttribute implements IOwnRela
 
     @serialize()
     @validate({ nullable: true })
-    public thirdPartySharingInfos?: ThirdPartyRelationshipAttributeSharingInfo[];
+    public thirdPartySharingInfos?: ForwardedRelationshipAttributeSharingInfo[];
+
+    public isSharedWith(peerAddress: CoreAddress, includeDeletedAndToBeDeleted = false): boolean {
+        if (!this.thirdPartySharingInfos) return false;
+
+        const thirdPartySharingInfosWithPeer = this.thirdPartySharingInfos.filter((sharingInfo) => sharingInfo.peer.equals(peerAddress));
+        if (thirdPartySharingInfosWithPeer.length === 0) return false;
+
+        if (includeDeletedAndToBeDeleted) return true;
+
+        const excludedDeletionStatuses = ["ToBeDeletedByPeer", "DeletedByPeer"];
+        return thirdPartySharingInfosWithPeer.some((sharingInfo) => !sharingInfo.deletionInfo || !excludedDeletionStatuses.includes(sharingInfo.deletionInfo.deletionStatus));
+    }
 
     public static override from(value: IOwnRelationshipAttribute | OwnRelationshipAttributeJSON): OwnRelationshipAttribute {
         return super.fromAny(value) as OwnRelationshipAttribute;

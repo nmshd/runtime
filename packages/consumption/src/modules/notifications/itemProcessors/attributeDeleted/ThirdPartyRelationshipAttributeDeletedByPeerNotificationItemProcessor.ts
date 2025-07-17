@@ -30,7 +30,7 @@ export class ThirdPartyRelationshipAttributeDeletedByPeerNotificationItemProcess
             return ValidationResult.error(ConsumptionCoreErrors.attributes.isNotThirdPartyRelationshipAttribute(notificationItem.attributeId));
         }
 
-        if (!notification.peer.equals(attribute.shareInfo.peer)) {
+        if (!notification.peer.equals(attribute.sharingInfos.peer)) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.senderIsNotPeerOfSharedAttribute(notification.peer, notificationItem.attributeId));
         }
 
