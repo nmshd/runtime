@@ -5,6 +5,16 @@ import { nameof } from "ts-simple-nameof";
 import { CoreSynchronizable, ICoreSynchronizable } from "../../../core";
 import { IMessageRecipient, MessageRecipient } from "./MessageRecipient";
 
+export interface IBackboneMessageContents {
+    createdBy: CoreAddress;
+    createdByDevice: CoreId;
+    recipients: MessageRecipient[];
+    attachments: CoreId[];
+    content: Serializable;
+    createdAt: CoreDate;
+    receivedByEveryone: boolean;
+}
+
 export interface IMessage extends ICoreSynchronizable {
     secretKey: ICryptoSecretKey;
     isOwn: boolean;
@@ -99,15 +109,7 @@ export class Message extends CoreSynchronizable implements IMessage {
         return this;
     }
 
-    public updateWithBackboneData(cachedMessage: {
-        createdBy: CoreAddress;
-        createdByDevice: CoreId;
-        recipients: MessageRecipient[];
-        attachments: CoreId[];
-        content: Serializable;
-        createdAt: CoreDate;
-        receivedByEveryone: boolean;
-    }): void {
+    public updateWithBackboneData(cachedMessage: IBackboneMessageContents): void {
         this.createdBy = cachedMessage.createdBy;
         this.createdByDevice = cachedMessage.createdByDevice;
         this.recipients = cachedMessage.recipients;

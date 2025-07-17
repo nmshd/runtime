@@ -1,4 +1,4 @@
-import { ISerializable, Serializable } from "@js-soft/ts-serval";
+import { ISerializable } from "@js-soft/ts-serval";
 import { log, Result } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId, FileReference, ICoreAddress, ICoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
@@ -19,7 +19,7 @@ import { SynchronizedCollection } from "../sync/SynchronizedCollection";
 import { BackboneGetMessagesResponse } from "./backbone/BackboneGetMessages";
 import { BackbonePostMessagesRecipientRequest } from "./backbone/BackbonePostMessages";
 import { MessageClient } from "./backbone/MessageClient";
-import { Message } from "./local/Message";
+import { IBackboneMessageContents, Message } from "./local/Message";
 import { MessageRecipient } from "./local/MessageRecipient";
 import { ISendMessageParameters, SendMessageParameters } from "./local/SendMessageParameters";
 import { MessageContentWrapper } from "./transmission/MessageContentWrapper";
@@ -471,24 +471,7 @@ export class MessageController extends TransportController {
     }
 
     @log()
-    private async decryptMessage(
-        envelope: MessageEnvelope,
-        secretKey?: CryptoSecretKey
-    ): Promise<
-        [
-            {
-                createdBy: CoreAddress;
-                createdByDevice: CoreId;
-                recipients: MessageRecipient[];
-                attachments: CoreId[];
-                content: Serializable;
-                createdAt: CoreDate;
-                receivedByEveryone: boolean;
-            },
-            CryptoSecretKey,
-            Relationship?
-        ]
-    > {
+    private async decryptMessage(envelope: MessageEnvelope, secretKey?: CryptoSecretKey): Promise<[IBackboneMessageContents, CryptoSecretKey, Relationship?]> {
         this.log.trace(`Decrypting MessageEnvelope with id ${envelope.id}...`);
         let plainMessage: MessageContentWrapper;
         let messageKey: CryptoSecretKey;
