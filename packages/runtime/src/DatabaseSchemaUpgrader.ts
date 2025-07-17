@@ -38,6 +38,12 @@ export class DatabaseSchemaUpgrader {
     public async upgradeSchemaVersion(): Promise<void> {
         let version = await this.getVersionFromDB();
 
+        if (version > this.CURRENT_DATABASE_SCHEMA_VERSION) {
+            throw new Error(
+                `Database schema version ${version} is higher than the current version ${this.CURRENT_DATABASE_SCHEMA_VERSION}. This can happen if you started the application with unsupported data. Please reset the database.`
+            );
+        }
+
         while (version < this.CURRENT_DATABASE_SCHEMA_VERSION) {
             version++;
 
