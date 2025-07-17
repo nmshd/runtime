@@ -37,11 +37,7 @@ export class DownloadAttachmentUseCase extends UseCase<DownloadAttachmentRequest
             return Result.fail(RuntimeErrors.general.recordNotFound(Message));
         }
 
-        if (!message.cache) {
-            throw RuntimeErrors.general.cacheEmpty(Message, message.id.toString());
-        }
-
-        const attachment = message.cache.attachments.find((a) => a.equals(CoreId.from(request.attachmentId)));
+        const attachment = message.attachments.find((a) => a.equals(CoreId.from(request.attachmentId)));
         if (!attachment) {
             return Result.fail(RuntimeErrors.messages.fileNotFoundInMessage(request.attachmentId));
         }
