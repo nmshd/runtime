@@ -119,35 +119,6 @@ export class RelationshipTemplateController extends TransportController {
         return this.parseArray<RelationshipTemplate>(templateDocs, RelationshipTemplate);
     }
 
-    // @log()
-    // private async updateCacheOfExistingTemplateInDb(id: string, response?: BackboneGetRelationshipTemplatesResponse) {
-    //     const templateDoc = await this.templates.read(id);
-    //     if (!templateDoc) {
-    //         throw TransportCoreErrors.general.recordNotFound(RelationshipTemplate, id);
-    //     }
-
-    //     const template = RelationshipTemplate.from(templateDoc);
-
-    //     await this.updateCacheOfTemplate(template, response);
-    //     await this.templates.update(templateDoc, template);
-    //     return template;
-    // }
-
-    // private async updateCacheOfTemplate(template: RelationshipTemplate, response?: BackboneGetRelationshipTemplatesResponse) {
-    //     if (!response) {
-    //         const hashedPassword = template.passwordProtection
-    //             ? (await CoreCrypto.deriveHashOutOfPassword(template.passwordProtection.password, template.passwordProtection.salt)).toBase64()
-    //             : undefined;
-    //         response = (await this.client.getRelationshipTemplate(template.id.toString(), hashedPassword)).value;
-    //     }
-
-    //     const cachedTemplate = await this.decryptRelationshipTemplate(response, template.secretKey);
-    //     template.setCache(cachedTemplate);
-
-    //     // Update isOwn, as it is possible that the identity receives an own template.
-    //     template.isOwn = this.parent.identity.isMe(cachedTemplate.createdBy);
-    // }
-
     public async getRelationshipTemplate(id: CoreId): Promise<RelationshipTemplate | undefined> {
         const templateDoc = await this.templates.read(id.toString());
         if (!templateDoc) {
