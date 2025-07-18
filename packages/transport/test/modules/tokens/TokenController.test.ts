@@ -378,10 +378,11 @@ describe("TokenController", function () {
             const localToken = await sender.tokens.getToken(sentToken.id);
             expect(localToken).toBeUndefined();
 
+            // fetching the token from the Backbone should throw an error as it was deleted
             await expect(recipient.tokens.loadPeerTokenByReference(sentToken.toTokenReference(sender.config.baseUrl), false)).rejects.toThrow("error.platform.recordNotFound");
         });
 
-        test("should delete a token during decomposition", async function () {
+        test("should delete a peer owned token during decomposition", async function () {
             const sentToken = await sender.tokens.sendToken({
                 content: Serializable.fromAny({ content: "TestToken" }),
                 expiresAt: CoreDate.utc().add({ minutes: 5 }),
