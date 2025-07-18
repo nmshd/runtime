@@ -23,7 +23,7 @@ describe("RelationshipsController", function () {
         expect(relationship.peer.address).toStrictEqual(peerAccount.identity.address);
 
         expect(relationship.templateId).toBeInstanceOf(CoreId);
-
+        expect(relationship.creationContent).toBeDefined();
         expect(relationship.lastMessageReceivedAt).toBeUndefined();
         expect(relationship.lastMessageSentAt).toBeUndefined();
         expect(relationship.relationshipSecretId).toBeDefined();
