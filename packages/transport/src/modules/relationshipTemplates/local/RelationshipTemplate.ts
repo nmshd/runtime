@@ -32,6 +32,7 @@ export class RelationshipTemplate extends CoreSynchronizable implements IRelatio
         "@type",
         "@context",
         nameof<RelationshipTemplate>((r) => r.secretKey),
+        nameof<RelationshipTemplate>((r) => r.isOwn),
         nameof<RelationshipTemplate>((r) => r.identity),
         nameof<RelationshipTemplate>((r) => r.createdBy),
         nameof<RelationshipTemplate>((r) => r.createdByDevice),
