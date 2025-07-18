@@ -10,7 +10,7 @@ export class MessageMapper {
     public static toDownloadAttachmentResponse(buffer: CoreBuffer, file: File): DownloadAttachmentResponse {
         return {
             content: buffer.buffer,
-            filename: file.filename ?? file.id.toString(),
+            filename: file.filename,
             mimetype: file.mimetype
         };
     }

@@ -9,7 +9,7 @@ export class FileMapper {
     public static toDownloadFileResponse(buffer: CoreBuffer, file: File): DownloadFileResponse {
         return {
             content: buffer.buffer,
-            filename: file.filename ?? file.id.toString(),
+            filename: file.filename,
             mimetype: file.mimetype
         };
     }
