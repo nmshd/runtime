@@ -232,7 +232,7 @@ describe("RelationshipTemplateController", function () {
             const localTemplate = await sender.relationshipTemplates.getRelationshipTemplate(ownTemplate.id);
             expect(localTemplate).toBeUndefined();
 
-            await expect(recipient.relationshipTemplates.loadPeerRelationshipTemplateByReference(reference)).rejects.toThrow("asd");
+            await expect(recipient.relationshipTemplates.loadPeerRelationshipTemplateByReference(reference)).rejects.toThrow("error.platform.recordNotFound");
         });
 
         test("should delete a peer owned RelationshipTemplate locally", async function () {
