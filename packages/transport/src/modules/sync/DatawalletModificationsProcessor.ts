@@ -7,9 +7,6 @@ import _ from "lodash";
 import { TransportCoreErrors, TransportError, TransportIds } from "../../core";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { ICacheable } from "../../core/ICacheable";
-import { CachedIdentityDeletionProcess } from "../accounts/data/CachedIdentityDeletionProcess";
-import { IdentityDeletionProcess } from "../accounts/data/IdentityDeletionProcess";
-import { IdentityDeletionProcessController } from "../accounts/IdentityDeletionProcessController";
 import { FileController } from "../files/FileController";
 import { CachedFile } from "../files/local/CachedFile";
 import { File } from "../files/local/File";
@@ -42,7 +39,7 @@ export class DatawalletModificationsProcessor {
         this.cacheChanges = modifications.filter((m) => m.type === DatawalletModificationType.CacheChanged);
     }
 
-    private readonly collectionsWithCacheableItems: string[] = [DbCollectionName.Files, DbCollectionName.RelationshipTemplates, DbCollectionName.IdentityDeletionProcess];
+    private readonly collectionsWithCacheableItems: string[] = [DbCollectionName.Files, DbCollectionName.RelationshipTemplates];
 
     public async execute(): Promise<void> {
         await this.applyModifications();
@@ -137,13 +134,11 @@ export class DatawalletModificationsProcessor {
 
         const caches = await this.cacheFetcher.fetchCacheFor({
             files: cacheChangesGroupedByCollection.fileIds,
-            relationshipTemplates: cacheChangesGroupedByCollection.relationshipTemplateIds,
-            identityDeletionProcesses: cacheChangesGroupedByCollection.identityDeletionProcessIds
+            relationshipTemplates: cacheChangesGroupedByCollection.relationshipTemplateIds
         });
 
         await this.saveNewCaches(caches.files, DbCollectionName.Files, File);
         await this.saveNewCaches(caches.relationshipTemplates, DbCollectionName.RelationshipTemplates, RelationshipTemplate);
-        await this.saveNewCaches(caches.identityDeletionProcesses, DbCollectionName.IdentityDeletionProcess, IdentityDeletionProcess);
     }
 
     @log()
@@ -163,13 +158,9 @@ export class DatawalletModificationsProcessor {
         const groups = _.groupBy(cacheChanges, (c) => c.collection);
 
         const fileIds = (groups[DbCollectionName.Files] ?? []).map((m) => m.objectIdentifier);
-        const messageIds = (groups[DbCollectionName.Messages] ?? []).map((m) => m.objectIdentifier);
-        const relationshipIds = (groups[DbCollectionName.Relationships] ?? []).map((m) => m.objectIdentifier);
         const relationshipTemplateIds = (groups[DbCollectionName.RelationshipTemplates] ?? []).map((m) => m.objectIdentifier);
-        const tokenIds = (groups[DbCollectionName.Tokens] ?? []).map((m) => m.objectIdentifier);
-        const identityDeletionProcessIds = (groups[DbCollectionName.IdentityDeletionProcess] ?? []).map((m) => m.objectIdentifier);
 
-        return { fileIds, messageIds, relationshipTemplateIds, tokenIds, relationshipIds, identityDeletionProcessIds };
+        return { fileIds, relationshipTemplateIds };
     }
 
     private async saveNewCaches<T extends ICacheable>(caches: FetchCacheOutputItem<any>[], collectionName: DbCollectionName, constructorOfT: new () => T) {
@@ -191,18 +182,12 @@ export class DatawalletModificationsProcessor {
 export class CacheFetcher {
     public constructor(
         private readonly fileController: FileController,
-        private readonly relationshipTemplateController: RelationshipTemplateController,
-        private readonly identityDeletionProcessController: IdentityDeletionProcessController
+        private readonly relationshipTemplateController: RelationshipTemplateController
     ) {}
 
     public async fetchCacheFor(input: FetchCacheInput): Promise<FetchCacheOutput> {
-        const caches = await Promise.all([
-            this.fetchCaches(this.fileController, input.files),
-            this.fetchCaches(this.relationshipTemplateController, input.relationshipTemplates),
-            this.fetchCaches(this.identityDeletionProcessController, input.identityDeletionProcesses)
-        ]);
-
-        const output: FetchCacheOutput = { files: caches[0], relationshipTemplates: caches[1], identityDeletionProcesses: caches[2] };
+        const caches = await Promise.all([this.fetchCaches(this.fileController, input.files), this.fetchCaches(this.relationshipTemplateController, input.relationshipTemplates)]);
+        const output: FetchCacheOutput = { files: caches[0], relationshipTemplates: caches[1] };
 
         return output;
     }
@@ -225,7 +210,6 @@ interface FetchCacheInput {
 interface FetchCacheOutput {
     files: FetchCacheOutputItem<CachedFile>[];
     relationshipTemplates: FetchCacheOutputItem<CachedRelationshipTemplate>[];
-    identityDeletionProcesses: FetchCacheOutputItem<CachedIdentityDeletionProcess>[];
 }
 
 interface FetchCacheOutputItem<TCache> {
