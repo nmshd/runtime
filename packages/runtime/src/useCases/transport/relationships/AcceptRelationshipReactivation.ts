@@ -31,10 +31,6 @@ export class AcceptRelationshipReactivationUseCase extends UseCase<AcceptRelatio
             return Result.fail(RuntimeErrors.general.recordNotFound(Relationship));
         }
 
-        if (!relationship.cache) {
-            return Result.fail(RuntimeErrors.general.cacheEmpty(Relationship, relationship.id.toString()));
-        }
-
         const updatedRelationship = await this.relationshipsController.acceptReactivation(relationship.id);
 
         await this.accountController.syncDatawallet();

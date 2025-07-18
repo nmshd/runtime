@@ -22,7 +22,6 @@ import {
 import { CoreAddress, CoreDate, CoreId, ICoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoCipher, CryptoEncryptionAlgorithm, CryptoExchangeAlgorithm, CryptoSecretKey, CryptoSignatureAlgorithm, CryptoSignaturePublicKey } from "@nmshd/crypto";
 import {
-    CachedRelationship,
     Identity,
     IMessage,
     IRelationship,
@@ -54,22 +53,17 @@ export class TestObjectFactory {
                 }),
             status: properties?.status ?? RelationshipStatus.Pending,
             relationshipSecretId: properties?.relationshipSecretId ?? CoreId.from("RELSEC1"),
-            cachedAt: properties?.cachedAt ?? CoreDate.from("2020-01-01T00:00:00.000Z"),
-            cache:
-                properties?.cache ??
-                CachedRelationship.from({
-                    creationContent: {},
-                    auditLog: [
-                        {
-                            createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
-                            createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity2"),
-                            createdByDevice: CoreId.from("DVC1"),
-                            reason: RelationshipAuditLogEntryReason.Creation,
-                            newStatus: RelationshipStatus.Pending
-                        }
-                    ],
-                    templateId: { id: "b9uMR7u7lsKLzRfVJNYb" }
-                })
+            creationContent: {},
+            auditLog: [
+                {
+                    createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
+                    createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity2"),
+                    createdByDevice: CoreId.from("DVC1"),
+                    reason: RelationshipAuditLogEntryReason.Creation,
+                    newStatus: RelationshipStatus.Pending
+                }
+            ],
+            templateId: { id: "b9uMR7u7lsKLzRfVJNYb" }
         });
     }
 
@@ -87,31 +81,26 @@ export class TestObjectFactory {
                 }),
             status: properties?.status ?? RelationshipStatus.Active,
             relationshipSecretId: properties?.relationshipSecretId ?? CoreId.from("RELSEC1"),
-            cachedAt: properties?.cachedAt ?? CoreDate.from("2020-01-02T00:00:00.000Z"),
-            cache:
-                properties?.cache ??
-                CachedRelationship.from({
-                    creationContent: {},
-                    auditLog: [
-                        {
-                            createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
-                            createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity2"),
-                            createdByDevice: CoreId.from("DVC1"),
-                            reason: RelationshipAuditLogEntryReason.Creation,
-                            newStatus: RelationshipStatus.Pending
-                        },
+            creationContent: {},
+            auditLog: [
+                {
+                    createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
+                    createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity2"),
+                    createdByDevice: CoreId.from("DVC1"),
+                    reason: RelationshipAuditLogEntryReason.Creation,
+                    newStatus: RelationshipStatus.Pending
+                },
 
-                        {
-                            createdAt: CoreDate.from("2020-01-02T00:00:00.000Z"),
-                            createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
-                            createdByDevice: CoreId.from("DVC1"),
-                            reason: RelationshipAuditLogEntryReason.AcceptanceOfCreation,
-                            oldStatus: RelationshipStatus.Pending,
-                            newStatus: RelationshipStatus.Active
-                        }
-                    ],
-                    templateId: { id: "b9uMR7u7lsKLzRfVJNYb" }
-                })
+                {
+                    createdAt: CoreDate.from("2020-01-02T00:00:00.000Z"),
+                    createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
+                    createdByDevice: CoreId.from("DVC1"),
+                    reason: RelationshipAuditLogEntryReason.AcceptanceOfCreation,
+                    oldStatus: RelationshipStatus.Pending,
+                    newStatus: RelationshipStatus.Active
+                }
+            ],
+            templateId: { id: "b9uMR7u7lsKLzRfVJNYb" }
         });
     }
 
@@ -129,40 +118,35 @@ export class TestObjectFactory {
                 }),
             status: properties?.status ?? RelationshipStatus.Terminated,
             relationshipSecretId: properties?.relationshipSecretId ?? CoreId.from("RELSEC1"),
-            cachedAt: properties?.cachedAt ?? CoreDate.from("2020-01-03T00:00:00.000Z"),
-            cache:
-                properties?.cache ??
-                CachedRelationship.from({
-                    creationContent: {},
-                    auditLog: [
-                        {
-                            createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
-                            createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity2"),
-                            createdByDevice: CoreId.from("DVC1"),
-                            reason: RelationshipAuditLogEntryReason.Creation,
-                            newStatus: RelationshipStatus.Pending
-                        },
+            creationContent: {},
+            auditLog: [
+                {
+                    createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
+                    createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity2"),
+                    createdByDevice: CoreId.from("DVC1"),
+                    reason: RelationshipAuditLogEntryReason.Creation,
+                    newStatus: RelationshipStatus.Pending
+                },
 
-                        {
-                            createdAt: CoreDate.from("2020-01-02T00:00:00.000Z"),
-                            createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
-                            createdByDevice: CoreId.from("DVC1"),
-                            reason: RelationshipAuditLogEntryReason.AcceptanceOfCreation,
-                            oldStatus: RelationshipStatus.Pending,
-                            newStatus: RelationshipStatus.Active
-                        },
+                {
+                    createdAt: CoreDate.from("2020-01-02T00:00:00.000Z"),
+                    createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
+                    createdByDevice: CoreId.from("DVC1"),
+                    reason: RelationshipAuditLogEntryReason.AcceptanceOfCreation,
+                    oldStatus: RelationshipStatus.Pending,
+                    newStatus: RelationshipStatus.Active
+                },
 
-                        {
-                            createdAt: CoreDate.from("2020-01-03T00:00:00.000Z"),
-                            createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
-                            createdByDevice: CoreId.from("DVC1"),
-                            reason: RelationshipAuditLogEntryReason.Termination,
-                            oldStatus: RelationshipStatus.Active,
-                            newStatus: RelationshipStatus.Terminated
-                        }
-                    ],
-                    templateId: { id: "b9uMR7u7lsKLzRfVJNYb" }
-                })
+                {
+                    createdAt: CoreDate.from("2020-01-03T00:00:00.000Z"),
+                    createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
+                    createdByDevice: CoreId.from("DVC1"),
+                    reason: RelationshipAuditLogEntryReason.Termination,
+                    oldStatus: RelationshipStatus.Active,
+                    newStatus: RelationshipStatus.Terminated
+                }
+            ],
+            templateId: { id: "b9uMR7u7lsKLzRfVJNYb" }
         });
     }
 
@@ -186,31 +170,26 @@ export class TestObjectFactory {
                 }),
             status: properties?.status ?? RelationshipStatus.Active,
             relationshipSecretId: properties?.relationshipSecretId ?? CoreId.from("RELSEC1"),
-            cachedAt: properties?.cachedAt ?? CoreDate.from("2020-01-03T00:00:00.000Z"),
-            cache:
-                properties?.cache ??
-                CachedRelationship.from({
-                    creationContent: {},
-                    auditLog: [
-                        {
-                            createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
-                            createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity2"),
-                            createdByDevice: CoreId.from("DVC1"),
-                            reason: RelationshipAuditLogEntryReason.Creation,
-                            newStatus: RelationshipStatus.Pending
-                        },
+            creationContent: {},
+            auditLog: [
+                {
+                    createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
+                    createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity2"),
+                    createdByDevice: CoreId.from("DVC1"),
+                    reason: RelationshipAuditLogEntryReason.Creation,
+                    newStatus: RelationshipStatus.Pending
+                },
 
-                        {
-                            createdAt: CoreDate.from("2020-01-02T00:00:00.000Z"),
-                            createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
-                            createdByDevice: CoreId.from("DVC1"),
-                            reason: RelationshipAuditLogEntryReason.AcceptanceOfCreation,
-                            oldStatus: RelationshipStatus.Pending,
-                            newStatus: RelationshipStatus.Active
-                        }
-                    ],
-                    templateId: CoreId.from("aTemplateId")
-                })
+                {
+                    createdAt: CoreDate.from("2020-01-02T00:00:00.000Z"),
+                    createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
+                    createdByDevice: CoreId.from("DVC1"),
+                    reason: RelationshipAuditLogEntryReason.AcceptanceOfCreation,
+                    oldStatus: RelationshipStatus.Pending,
+                    newStatus: RelationshipStatus.Active
+                }
+            ],
+            templateId: CoreId.from("aTemplateId")
         });
     }
 
@@ -234,40 +213,35 @@ export class TestObjectFactory {
                 }),
             status: properties?.status ?? RelationshipStatus.DeletionProposed,
             relationshipSecretId: properties?.relationshipSecretId ?? CoreId.from("RELSEC1"),
-            cachedAt: properties?.cachedAt ?? CoreDate.from("2022-01-03T00:00:00.000Z"),
-            cache:
-                properties?.cache ??
-                CachedRelationship.from({
-                    creationContent: {},
-                    auditLog: [
-                        {
-                            createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
-                            createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity2"),
-                            createdByDevice: CoreId.from("DVC1"),
-                            reason: RelationshipAuditLogEntryReason.Creation,
-                            newStatus: RelationshipStatus.Pending
-                        },
+            creationContent: {},
+            auditLog: [
+                {
+                    createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
+                    createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity2"),
+                    createdByDevice: CoreId.from("DVC1"),
+                    reason: RelationshipAuditLogEntryReason.Creation,
+                    newStatus: RelationshipStatus.Pending
+                },
 
-                        {
-                            createdAt: CoreDate.from("2020-01-02T00:00:00.000Z"),
-                            createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
-                            createdByDevice: CoreId.from("DVC1"),
-                            reason: RelationshipAuditLogEntryReason.AcceptanceOfCreation,
-                            oldStatus: RelationshipStatus.Pending,
-                            newStatus: RelationshipStatus.Active
-                        },
+                {
+                    createdAt: CoreDate.from("2020-01-02T00:00:00.000Z"),
+                    createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
+                    createdByDevice: CoreId.from("DVC1"),
+                    reason: RelationshipAuditLogEntryReason.AcceptanceOfCreation,
+                    oldStatus: RelationshipStatus.Pending,
+                    newStatus: RelationshipStatus.Active
+                },
 
-                        {
-                            createdAt: CoreDate.from("2022-01-03T00:00:00.000Z"),
-                            createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
-                            createdByDevice: CoreId.from("DVC1"),
-                            reason: RelationshipAuditLogEntryReason.DecompositionDueToIdentityDeletion,
-                            oldStatus: RelationshipStatus.Active,
-                            newStatus: RelationshipStatus.DeletionProposed
-                        }
-                    ],
-                    templateId: CoreId.from("aTemplateId")
-                })
+                {
+                    createdAt: CoreDate.from("2022-01-03T00:00:00.000Z"),
+                    createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
+                    createdByDevice: CoreId.from("DVC1"),
+                    reason: RelationshipAuditLogEntryReason.DecompositionDueToIdentityDeletion,
+                    oldStatus: RelationshipStatus.Active,
+                    newStatus: RelationshipStatus.DeletionProposed
+                }
+            ],
+            templateId: CoreId.from("aTemplateId")
         });
     }
 
@@ -285,49 +259,44 @@ export class TestObjectFactory {
                 }),
             status: properties?.status ?? RelationshipStatus.DeletionProposed,
             relationshipSecretId: properties?.relationshipSecretId ?? CoreId.from("RELSEC1"),
-            cachedAt: properties?.cachedAt ?? CoreDate.from("2020-01-04T00:00:00.000Z"),
-            cache:
-                properties?.cache ??
-                CachedRelationship.from({
-                    creationContent: {},
-                    auditLog: [
-                        {
-                            createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
-                            createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity2"),
-                            createdByDevice: CoreId.from("DVC1"),
-                            reason: RelationshipAuditLogEntryReason.Creation,
-                            newStatus: RelationshipStatus.Pending
-                        },
+            creationContent: {},
+            auditLog: [
+                {
+                    createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
+                    createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity2"),
+                    createdByDevice: CoreId.from("DVC1"),
+                    reason: RelationshipAuditLogEntryReason.Creation,
+                    newStatus: RelationshipStatus.Pending
+                },
 
-                        {
-                            createdAt: CoreDate.from("2020-01-02T00:00:00.000Z"),
-                            createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
-                            createdByDevice: CoreId.from("DVC1"),
-                            reason: RelationshipAuditLogEntryReason.AcceptanceOfCreation,
-                            oldStatus: RelationshipStatus.Pending,
-                            newStatus: RelationshipStatus.Active
-                        },
+                {
+                    createdAt: CoreDate.from("2020-01-02T00:00:00.000Z"),
+                    createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
+                    createdByDevice: CoreId.from("DVC1"),
+                    reason: RelationshipAuditLogEntryReason.AcceptanceOfCreation,
+                    oldStatus: RelationshipStatus.Pending,
+                    newStatus: RelationshipStatus.Active
+                },
 
-                        {
-                            createdAt: CoreDate.from("2020-01-03T00:00:00.000Z"),
-                            createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
-                            createdByDevice: CoreId.from("DVC1"),
-                            reason: RelationshipAuditLogEntryReason.Termination,
-                            oldStatus: RelationshipStatus.Active,
-                            newStatus: RelationshipStatus.Terminated
-                        },
+                {
+                    createdAt: CoreDate.from("2020-01-03T00:00:00.000Z"),
+                    createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
+                    createdByDevice: CoreId.from("DVC1"),
+                    reason: RelationshipAuditLogEntryReason.Termination,
+                    oldStatus: RelationshipStatus.Active,
+                    newStatus: RelationshipStatus.Terminated
+                },
 
-                        {
-                            createdAt: CoreDate.from("2020-01-04T00:00:00.000Z"),
-                            createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity2"),
-                            createdByDevice: CoreId.from("DVC1"),
-                            reason: RelationshipAuditLogEntryReason.Decomposition,
-                            oldStatus: RelationshipStatus.Terminated,
-                            newStatus: RelationshipStatus.DeletionProposed
-                        }
-                    ],
-                    templateId: { id: "b9uMR7u7lsKLzRfVJNYb" }
-                })
+                {
+                    createdAt: CoreDate.from("2020-01-04T00:00:00.000Z"),
+                    createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity2"),
+                    createdByDevice: CoreId.from("DVC1"),
+                    reason: RelationshipAuditLogEntryReason.Decomposition,
+                    oldStatus: RelationshipStatus.Terminated,
+                    newStatus: RelationshipStatus.DeletionProposed
+                }
+            ],
+            templateId: { id: "b9uMR7u7lsKLzRfVJNYb" }
         });
     }
 

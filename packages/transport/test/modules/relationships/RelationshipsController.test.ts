@@ -1,6 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { CoreDate, CoreId } from "@nmshd/core-types";
-import { AccountController, CachedRelationship, Identity, Relationship, RelationshipStatus, Transport } from "../../../src";
+import { CoreId } from "@nmshd/core-types";
+import { AccountController, Identity, Relationship, RelationshipStatus, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("RelationshipsController", function () {
@@ -15,23 +15,17 @@ describe("RelationshipsController", function () {
     let recipient3: AccountController;
     let senderRel: Relationship;
     let recipientRel: Relationship;
-    let tempDate: CoreDate;
 
-    function expectValidActiveFreshRelationship(relationship: Relationship, _: AccountController, peerAccount: AccountController, creationTime: CoreDate) {
+    function expectValidActiveFreshRelationship(relationship: Relationship, _: AccountController, peerAccount: AccountController) {
         expect(relationship.id).toBeInstanceOf(CoreId);
         expect(relationship.status).toStrictEqual(RelationshipStatus.Active);
         expect(relationship.peer).toBeInstanceOf(Identity);
         expect(relationship.peer.address).toStrictEqual(peerAccount.identity.address);
 
-        expect(relationship.cache!.templateId).toBeInstanceOf(CoreId);
-
-        expect(relationship.cache).toBeInstanceOf(CachedRelationship);
-        expect(relationship.cachedAt).toBeInstanceOf(CoreDate);
-        expect(relationship.cachedAt!.isWithin(TestUtil.tempDateThreshold, TestUtil.tempDateThreshold, creationTime)).toBe(true);
-        expect(relationship.cache!.creationContent).toBeDefined();
-
-        expect(relationship.cache!.lastMessageReceivedAt).toBeUndefined();
-        expect(relationship.cache!.lastMessageSentAt).toBeUndefined();
+        expect(relationship.templateId).toBeInstanceOf(CoreId);
+        expect(relationship.creationContent).toBeDefined();
+        expect(relationship.lastMessageReceivedAt).toBeUndefined();
+        expect(relationship.lastMessageSentAt).toBeUndefined();
         expect(relationship.relationshipSecretId).toBeDefined();
     }
 
@@ -62,7 +56,6 @@ describe("RelationshipsController", function () {
     });
 
     test("should create a relationship and get it afterwards by the address", async function () {
-        tempDate = CoreDate.utc();
         await TestUtil.addRelationship(sender, recipient1);
         senderRel = (await sender.relationships.getActiveRelationshipToIdentity(recipient1.identity.address))!;
         relId1 = senderRel.id;
@@ -73,10 +66,10 @@ describe("RelationshipsController", function () {
     });
 
     test("should set all the required relationship properties", function () {
-        expectValidActiveFreshRelationship(senderRel, sender, recipient1, tempDate);
+        expectValidActiveFreshRelationship(senderRel, sender, recipient1);
         expect(senderRel.metadata).toBeUndefined();
         expect(senderRel.metadataModifiedAt).toBeUndefined();
-        expectValidActiveFreshRelationship(recipientRel, recipient1, sender, tempDate);
+        expectValidActiveFreshRelationship(recipientRel, recipient1, sender);
         expect(recipientRel.metadata).toBeUndefined();
         expect(recipientRel.metadataModifiedAt).toBeUndefined();
     });
@@ -84,7 +77,7 @@ describe("RelationshipsController", function () {
     test("should set and get additional metadata", async function () {
         await sender.relationships.setRelationshipMetadata(senderRel, { myprop: true });
         const senderRel2 = (await sender.relationships.getRelationship(senderRel.id))!;
-        expectValidActiveFreshRelationship(senderRel2, sender, recipient1, tempDate);
+        expectValidActiveFreshRelationship(senderRel2, sender, recipient1);
         expect(senderRel2.metadata).toBeDefined();
         expect(senderRel2.metadata["myprop"]).toBe(true);
         expect(senderRel2.metadataModifiedAt).toBeDefined();
@@ -92,24 +85,15 @@ describe("RelationshipsController", function () {
     });
 
     describe("Requestor", function () {
-        test("should get the cached relationships", async function () {
-            const relationships = await sender.relationships.getRelationships();
-            expect(relationships).toHaveLength(1);
-            const rel1 = relationships[0];
-            expect(rel1.cache).toBeDefined();
-            expect(rel1.cachedAt).toBeDefined();
-        });
-
-        test("should access the relationship cache by using get", async function () {
+        test("should access the relationship data by using get", async function () {
             const relationship = await sender.relationships.getRelationship(relId1);
-            expectValidActiveFreshRelationship(relationship!, sender, recipient1, tempDate);
+            expectValidActiveFreshRelationship(relationship!, sender, recipient1);
         });
 
         test("should create a new relationship to another recipient", async function () {
-            tempDate = CoreDate.utc();
             await TestUtil.addRelationship(sender, recipient2);
             senderRel = (await sender.relationships.getActiveRelationshipToIdentity(recipient2.identity.address))!;
-            expectValidActiveFreshRelationship(senderRel, sender, recipient2, tempDate);
+            expectValidActiveFreshRelationship(senderRel, sender, recipient2);
         });
 
         test("should not create new relationship if templator has been deleted after requestor has loaded the template", async function () {
@@ -144,34 +128,24 @@ describe("RelationshipsController", function () {
     });
 
     describe("Templator", function () {
-        test("should get the cached relationships", async function () {
-            const relationships = await recipient1.relationships.getRelationships();
-            expect(relationships).toHaveLength(1);
-            const rel1 = relationships[0];
-            expect(rel1.cache).toBeDefined();
-            expect(rel1.cachedAt).toBeDefined();
-        });
-
-        test("should access the relationship cache by using get", async function () {
+        test("should access the relationship data by using get", async function () {
             const relationship = await recipient1.relationships.getRelationship(relId1);
-            expectValidActiveFreshRelationship(relationship!, recipient1, sender, tempDate);
+            expectValidActiveFreshRelationship(relationship!, recipient1, sender);
         });
 
         test("should create a new relationship to another recipient", async function () {
-            tempDate = CoreDate.utc();
             await TestUtil.addRelationship(recipient1, recipient2);
             senderRel = (await recipient1.relationships.getActiveRelationshipToIdentity(recipient2.identity.address))!;
-            expectValidActiveFreshRelationship(senderRel, recipient1, recipient2, tempDate);
+            expectValidActiveFreshRelationship(senderRel, recipient1, recipient2);
         });
 
-        test("should have cached the relationship to another recipient", async function () {
+        test("should have stored the relationship to another recipient", async function () {
             const relationships = await recipient1.relationships.getRelationships();
             expect(relationships).toHaveLength(2);
             const rel1 = relationships[0];
-            expect(rel1.cache).toBeDefined();
-            expect(rel1.cachedAt).toBeDefined();
+            expect(rel1.templateId).toBeDefined();
             const rel2 = relationships[1];
-            expectValidActiveFreshRelationship(rel2, recipient1, recipient2, tempDate);
+            expectValidActiveFreshRelationship(rel2, recipient1, recipient2);
         });
     });
 });

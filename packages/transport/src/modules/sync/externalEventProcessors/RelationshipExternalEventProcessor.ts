@@ -12,6 +12,6 @@ export abstract class RelationshipExternalEventProcessor extends ExternalEventPr
     private hasRelationshipChanged(changedRelationship: Relationship, oldRelationship?: Relationship): boolean {
         if (!oldRelationship) return true;
 
-        return oldRelationship.cache!.auditLog.length !== changedRelationship.cache!.auditLog.length;
+        return oldRelationship.auditLog.length !== changedRelationship.auditLog.length;
     }
 }

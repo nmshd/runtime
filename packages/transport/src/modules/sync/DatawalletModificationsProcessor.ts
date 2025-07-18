@@ -13,10 +13,6 @@ import { IdentityDeletionProcessController } from "../accounts/IdentityDeletionP
 import { FileController } from "../files/FileController";
 import { CachedFile } from "../files/local/CachedFile";
 import { File } from "../files/local/File";
-import { MessageController } from "../messages/MessageController";
-import { CachedRelationship } from "../relationships/local/CachedRelationship";
-import { Relationship } from "../relationships/local/Relationship";
-import { RelationshipsController } from "../relationships/RelationshipsController";
 import { CachedRelationshipTemplate } from "../relationshipTemplates/local/CachedRelationshipTemplate";
 import { RelationshipTemplate } from "../relationshipTemplates/local/RelationshipTemplate";
 import { RelationshipTemplateController } from "../relationshipTemplates/RelationshipTemplateController";
@@ -46,13 +42,7 @@ export class DatawalletModificationsProcessor {
         this.cacheChanges = modifications.filter((m) => m.type === DatawalletModificationType.CacheChanged);
     }
 
-    private readonly collectionsWithCacheableItems: string[] = [
-        DbCollectionName.Files,
-        DbCollectionName.Messages,
-        DbCollectionName.Relationships,
-        DbCollectionName.RelationshipTemplates,
-        DbCollectionName.IdentityDeletionProcess
-    ];
+    private readonly collectionsWithCacheableItems: string[] = [DbCollectionName.Files, DbCollectionName.RelationshipTemplates, DbCollectionName.IdentityDeletionProcess];
 
     public async execute(): Promise<void> {
         await this.applyModifications();
@@ -154,10 +144,6 @@ export class DatawalletModificationsProcessor {
         await this.saveNewCaches(caches.files, DbCollectionName.Files, File);
         await this.saveNewCaches(caches.relationshipTemplates, DbCollectionName.RelationshipTemplates, RelationshipTemplate);
         await this.saveNewCaches(caches.identityDeletionProcesses, DbCollectionName.IdentityDeletionProcess, IdentityDeletionProcess);
-
-        // Need to fetch the cache for relationships after the cache for relationship templates was fetched, because when building the relationship cache, the cache of thecorresponding relationship template is needed
-        const relationshipCaches = await this.cacheFetcher.fetchCacheFor({ relationships: cacheChangesGroupedByCollection.relationshipIds });
-        await this.saveNewCaches(relationshipCaches.relationships, DbCollectionName.Relationships, Relationship);
     }
 
     @log()
@@ -205,21 +191,18 @@ export class DatawalletModificationsProcessor {
 export class CacheFetcher {
     public constructor(
         private readonly fileController: FileController,
-        private readonly messageController: MessageController,
         private readonly relationshipTemplateController: RelationshipTemplateController,
-        private readonly relationshipController: RelationshipsController,
         private readonly identityDeletionProcessController: IdentityDeletionProcessController
     ) {}
 
     public async fetchCacheFor(input: FetchCacheInput): Promise<FetchCacheOutput> {
         const caches = await Promise.all([
             this.fetchCaches(this.fileController, input.files),
-            this.fetchCaches(this.relationshipController, input.relationships),
             this.fetchCaches(this.relationshipTemplateController, input.relationshipTemplates),
             this.fetchCaches(this.identityDeletionProcessController, input.identityDeletionProcesses)
         ]);
 
-        const output: FetchCacheOutput = { files: caches[0], relationships: caches[1], relationshipTemplates: caches[2], identityDeletionProcesses: caches[3] };
+        const output: FetchCacheOutput = { files: caches[0], relationshipTemplates: caches[1], identityDeletionProcesses: caches[2] };
 
         return output;
     }
@@ -241,7 +224,6 @@ interface FetchCacheInput {
 
 interface FetchCacheOutput {
     files: FetchCacheOutputItem<CachedFile>[];
-    relationships: FetchCacheOutputItem<CachedRelationship>[];
     relationshipTemplates: FetchCacheOutputItem<CachedRelationshipTemplate>[];
     identityDeletionProcesses: FetchCacheOutputItem<CachedIdentityDeletionProcess>[];
 }
