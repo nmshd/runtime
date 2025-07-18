@@ -95,7 +95,7 @@ describe("End2End Request/Response via Relationship Template", function () {
             template: rTemplate,
             creationContent: RelationshipCreationContent.from({ response: rLocalRequest.response!.content })
         });
-        rCreationContent = rRelationship.cache?.creationContent as RelationshipCreationContent;
+        rCreationContent = rRelationship.creationContent as RelationshipCreationContent;
     });
 
     test("recipient: complete Local Request", async function () {
@@ -111,7 +111,7 @@ describe("End2End Request/Response via Relationship Template", function () {
     });
 
     test("sender: create Local Request and Response from Relationship Change", async function () {
-        sCreationContent = sRelationship.cache!.creationContent as RelationshipCreationContent;
+        sCreationContent = sRelationship.creationContent as RelationshipCreationContent;
         const response = sCreationContent.response;
 
         sLocalRequest = await sConsumptionController.outgoingRequests.createAndCompleteFromRelationshipTemplateResponse({
