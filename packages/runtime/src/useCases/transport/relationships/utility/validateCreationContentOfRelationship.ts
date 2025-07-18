@@ -17,13 +17,13 @@ export async function validateCreationContentOfRelationship(
         );
     }
 
-    if (template.cache?.content instanceof ArbitraryRelationshipTemplateContent && !(transformedCreationContent instanceof ArbitraryRelationshipCreationContent)) {
+    if (template.content instanceof ArbitraryRelationshipTemplateContent && !(transformedCreationContent instanceof ArbitraryRelationshipCreationContent)) {
         return RuntimeErrors.general.invalidPropertyValue(
             "The creationContent of a Relationship must be an ArbitraryRelationshipCreationContent if the content of the RelationshipTemplate is an ArbitraryRelationshipTemplateContent."
         );
     }
 
-    if (template.cache?.content instanceof RelationshipTemplateContent) {
+    if (template.content instanceof RelationshipTemplateContent) {
         if (!(transformedCreationContent instanceof RelationshipCreationContent)) {
             return RuntimeErrors.general.invalidPropertyValue(
                 "The creationContent of a Relationship must be a RelationshipCreationContent if the content of the RelationshipTemplate is a RelationshipTemplateContent."
