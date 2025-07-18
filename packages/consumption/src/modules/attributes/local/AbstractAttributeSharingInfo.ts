@@ -1,5 +1,5 @@
 import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-serval";
-import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreDate, ICoreId } from "@nmshd/core-types";
+import { CoreAddress, CoreId, ICoreAddress, ICoreId } from "@nmshd/core-types";
 import {
     ForwardedRelationshipAttributeDeletionInfo,
     ForwardedRelationshipAttributeDeletionInfoJSON,
@@ -16,14 +16,12 @@ import {
 export interface AbstractAttributeSharingInfoJSON {
     peer: string;
     sourceReference: string;
-    sharedAt: string;
     deletionInfo?: OwnAttributeDeletionInfoJSON | PeerAttributeDeletionInfoJSON | ThirdPartyRelationshipAttributeDeletionInfoJSON | ForwardedRelationshipAttributeDeletionInfoJSON;
 }
 
 export interface IAbstractAttributeSharingInfo extends ISerializable {
     peer: ICoreAddress;
     sourceReference: ICoreId;
-    sharedAt: ICoreDate;
     deletionInfo?: IOwnAttributeDeletionInfo | IPeerAttributeDeletionInfo | IThirdPartyRelationshipAttributeDeletionInfo | IForwardedRelationshipAttributeDeletionInfo;
 }
 
@@ -35,10 +33,6 @@ export abstract class AbstractAttributeSharingInfo extends Serializable implemen
     @serialize()
     @validate()
     public sourceReference: CoreId;
-
-    @serialize()
-    @validate()
-    public sharedAt: CoreDate;
 
     @serialize()
     @validate({ nullable: true })
