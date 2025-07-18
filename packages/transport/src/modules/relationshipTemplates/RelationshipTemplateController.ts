@@ -13,7 +13,6 @@ import { SynchronizedCollection } from "../sync/SynchronizedCollection";
 import { TokenContentRelationshipTemplate } from "../tokens/transmission/TokenContentRelationshipTemplate";
 import { BackboneGetRelationshipTemplatesResponse } from "./backbone/BackboneGetRelationshipTemplates";
 import { RelationshipTemplateClient } from "./backbone/RelationshipTemplateClient";
-import { CachedRelationshipTemplate } from "./local/CachedRelationshipTemplate";
 import { RelationshipTemplate } from "./local/RelationshipTemplate";
 import { ISendRelationshipTemplateParameters, SendRelationshipTemplateParameters } from "./local/SendRelationshipTemplateParameters";
 import { RelationshipTemplateContentWrapper } from "./transmission/RelationshipTemplateContentWrapper";
@@ -76,18 +75,6 @@ export class RelationshipTemplateController extends TransportController {
             })
         ).value;
 
-        const templateCache = CachedRelationshipTemplate.from({
-            content: parameters.content,
-            createdAt: CoreDate.from(backboneResponse.createdAt),
-            createdBy: this.parent.identity.address,
-            createdByDevice: this.parent.activeDevice.id,
-            expiresAt: parameters.expiresAt,
-            identity: this.parent.identity.identity,
-            forIdentity: parameters.forIdentity,
-            maxNumberOfAllocations: parameters.maxNumberOfAllocations,
-            templateKey: templateKey
-        });
-
         const passwordProtection = parameters.passwordProtection
             ? PasswordProtection.from({
                   password: parameters.passwordProtection.password,
@@ -102,9 +89,15 @@ export class RelationshipTemplateController extends TransportController {
             secretKey: secretKey,
             isOwn: true,
             passwordProtection,
-
-            cache: templateCache,
-            cachedAt: CoreDate.utc()
+            content: parameters.content,
+            createdAt: CoreDate.from(backboneResponse.createdAt),
+            createdBy: this.parent.identity.address,
+            createdByDevice: this.parent.activeDevice.id,
+            expiresAt: parameters.expiresAt,
+            identity: this.parent.identity.identity,
+            forIdentity: parameters.forIdentity,
+            maxNumberOfAllocations: parameters.maxNumberOfAllocations,
+            templateKey: templateKey
         });
 
         await this.templates.create(template);
@@ -126,136 +119,34 @@ export class RelationshipTemplateController extends TransportController {
         return this.parseArray<RelationshipTemplate>(templateDocs, RelationshipTemplate);
     }
 
-    public async updateCache(ids: string[]): Promise<RelationshipTemplate[]> {
-        if (ids.length < 1) {
-            return [];
-        }
+    // @log()
+    // private async updateCacheOfExistingTemplateInDb(id: string, response?: BackboneGetRelationshipTemplatesResponse) {
+    //     const templateDoc = await this.templates.read(id);
+    //     if (!templateDoc) {
+    //         throw TransportCoreErrors.general.recordNotFound(RelationshipTemplate, id);
+    //     }
 
-        const templates = await this.readRelationshipTemplates(ids);
+    //     const template = RelationshipTemplate.from(templateDoc);
 
-        const resultItems = (
-            await this.client.getRelationshipTemplates({
-                templates: await Promise.all(
-                    templates.map(async (t) => {
-                        const hashedPassword = t.passwordProtection
-                            ? (await CoreCrypto.deriveHashOutOfPassword(t.passwordProtection.password, t.passwordProtection.salt)).toBase64()
-                            : undefined;
-                        return { id: t.id.toString(), password: hashedPassword };
-                    })
-                )
-            })
-        ).value;
+    //     await this.updateCacheOfTemplate(template, response);
+    //     await this.templates.update(templateDoc, template);
+    //     return template;
+    // }
 
-        const promises = [];
-        for await (const resultItem of resultItems) {
-            promises.push(this.updateCacheOfExistingTemplateInDb(resultItem.id, resultItem));
-        }
+    // private async updateCacheOfTemplate(template: RelationshipTemplate, response?: BackboneGetRelationshipTemplatesResponse) {
+    //     if (!response) {
+    //         const hashedPassword = template.passwordProtection
+    //             ? (await CoreCrypto.deriveHashOutOfPassword(template.passwordProtection.password, template.passwordProtection.salt)).toBase64()
+    //             : undefined;
+    //         response = (await this.client.getRelationshipTemplate(template.id.toString(), hashedPassword)).value;
+    //     }
 
-        return await Promise.all(promises);
-    }
+    //     const cachedTemplate = await this.decryptRelationshipTemplate(response, template.secretKey);
+    //     template.setCache(cachedTemplate);
 
-    public async fetchCaches(ids: CoreId[]): Promise<{ id: CoreId; cache: CachedRelationshipTemplate }[]> {
-        if (ids.length === 0) return [];
-        const templates = await this.readRelationshipTemplates(ids.map((id) => id.toString()));
-
-        const backboneRelationshipTemplates = await (
-            await this.client.getRelationshipTemplates({
-                templates: await Promise.all(
-                    templates.map(async (t) => {
-                        const hashedPassword = t.passwordProtection
-                            ? (await CoreCrypto.deriveHashOutOfPassword(t.passwordProtection.password, t.passwordProtection.salt)).toBase64()
-                            : undefined;
-                        return { id: t.id.toString(), password: hashedPassword };
-                    })
-                )
-            })
-        ).value.collect();
-
-        const decryptionPromises = backboneRelationshipTemplates.map(async (t) => {
-            const template = templates.find((template) => template.id.toString() === t.id);
-            if (!template) return;
-            return { id: CoreId.from(t.id), cache: await this.decryptRelationshipTemplate(t, template.secretKey) };
-        });
-
-        const caches = await Promise.all(decryptionPromises);
-        return caches.filter((c) => c !== undefined);
-    }
-
-    private async readRelationshipTemplates(ids: string[]): Promise<RelationshipTemplate[]> {
-        const templatePromises = ids.map(async (id) => {
-            const templateDoc = await this.templates.read(id);
-            if (!templateDoc) {
-                this._log.error(`Template '${id}' not found in local database. This should not happen and might be a bug in the application logic.`);
-                return;
-            }
-
-            return RelationshipTemplate.from(templateDoc);
-        });
-
-        return (await Promise.all(templatePromises)).filter((t) => t !== undefined);
-    }
-
-    @log()
-    private async updateCacheOfExistingTemplateInDb(id: string, response?: BackboneGetRelationshipTemplatesResponse) {
-        const templateDoc = await this.templates.read(id);
-        if (!templateDoc) {
-            throw TransportCoreErrors.general.recordNotFound(RelationshipTemplate, id);
-        }
-
-        const template = RelationshipTemplate.from(templateDoc);
-
-        await this.updateCacheOfTemplate(template, response);
-        await this.templates.update(templateDoc, template);
-        return template;
-    }
-
-    private async updateCacheOfTemplate(template: RelationshipTemplate, response?: BackboneGetRelationshipTemplatesResponse) {
-        if (!response) {
-            const hashedPassword = template.passwordProtection
-                ? (await CoreCrypto.deriveHashOutOfPassword(template.passwordProtection.password, template.passwordProtection.salt)).toBase64()
-                : undefined;
-            response = (await this.client.getRelationshipTemplate(template.id.toString(), hashedPassword)).value;
-        }
-
-        const cachedTemplate = await this.decryptRelationshipTemplate(response, template.secretKey);
-        template.setCache(cachedTemplate);
-
-        // Update isOwn, as it is possible that the identity receives an own template.
-        template.isOwn = this.parent.identity.isMe(cachedTemplate.createdBy);
-    }
-
-    @log()
-    private async decryptRelationshipTemplate(response: BackboneGetRelationshipTemplatesResponse, secretKey: CryptoSecretKey) {
-        const cipher = CryptoCipher.fromBase64(response.content);
-        const signedTemplateBuffer = await this.secrets.decryptTemplate(cipher, secretKey);
-
-        const signedTemplate = RelationshipTemplateSigned.deserialize(signedTemplateBuffer.toUtf8());
-        const templateContent = RelationshipTemplateContentWrapper.deserialize(signedTemplate.serializedTemplate);
-
-        const templateSignatureValid = await this.secrets.verifyTemplate(
-            CoreBuffer.fromUtf8(signedTemplate.serializedTemplate),
-            signedTemplate.deviceSignature,
-            templateContent.identity.publicKey
-        );
-
-        if (!templateSignatureValid) {
-            throw TransportCoreErrors.general.signatureNotValid("template");
-        }
-
-        const cachedTemplate = CachedRelationshipTemplate.from({
-            content: templateContent.content,
-            createdBy: CoreAddress.from(response.createdBy),
-            createdByDevice: CoreId.from(response.createdByDevice),
-            createdAt: CoreDate.from(response.createdAt),
-            expiresAt: response.expiresAt ? CoreDate.from(response.expiresAt) : undefined,
-            identity: templateContent.identity,
-            maxNumberOfAllocations: response.maxNumberOfAllocations ?? undefined,
-            forIdentity: response.forIdentity ? CoreAddress.from(response.forIdentity) : undefined,
-            templateKey: templateContent.templateKey
-        });
-
-        return cachedTemplate;
-    }
+    //     // Update isOwn, as it is possible that the identity receives an own template.
+    //     template.isOwn = this.parent.identity.isMe(cachedTemplate.createdBy);
+    // }
 
     public async getRelationshipTemplate(id: CoreId): Promise<RelationshipTemplate | undefined> {
         const templateDoc = await this.templates.read(id.toString());
@@ -320,22 +211,22 @@ export class RelationshipTemplateController extends TransportController {
         }
 
         if (templateDoc) {
-            const template = await this.updateCacheOfExistingTemplateInDb(id.toString());
-
-            if (!template.isOwn) {
-                this.eventBus.publish(new PeerRelationshipTemplateLoadedEvent(this.parent.identity.address.toString(), template));
-            }
-
+            const template = RelationshipTemplate.from(templateDoc);
             return template;
         }
+
+        const backboneResponse = await this.client.getRelationshipTemplate(id.toString(), passwordProtection?.password);
+        const backboneTemplate = backboneResponse.value;
+
+        const decrypted = await this.decryptRelationshipTemplate(backboneTemplate, secretKey);
 
         const relationshipTemplate = RelationshipTemplate.from({
             id: id,
             secretKey: secretKey,
             isOwn: false,
-            passwordProtection
+            passwordProtection,
+            ...decrypted
         });
-        await this.updateCacheOfTemplate(relationshipTemplate);
 
         await this.templates.create(relationshipTemplate);
 
@@ -344,9 +235,40 @@ export class RelationshipTemplateController extends TransportController {
         return relationshipTemplate;
     }
 
+    @log()
+    private async decryptRelationshipTemplate(response: BackboneGetRelationshipTemplatesResponse, secretKey: CryptoSecretKey) {
+        const cipher = CryptoCipher.fromBase64(response.content);
+        const signedTemplateBuffer = await this.secrets.decryptTemplate(cipher, secretKey);
+
+        const signedTemplate = RelationshipTemplateSigned.deserialize(signedTemplateBuffer.toUtf8());
+        const templateContent = RelationshipTemplateContentWrapper.deserialize(signedTemplate.serializedTemplate);
+
+        const templateSignatureValid = await this.secrets.verifyTemplate(
+            CoreBuffer.fromUtf8(signedTemplate.serializedTemplate),
+            signedTemplate.deviceSignature,
+            templateContent.identity.publicKey
+        );
+
+        if (!templateSignatureValid) {
+            throw TransportCoreErrors.general.signatureNotValid("template");
+        }
+
+        return {
+            content: templateContent.content,
+            createdBy: CoreAddress.from(response.createdBy),
+            createdByDevice: CoreId.from(response.createdByDevice),
+            createdAt: CoreDate.from(response.createdAt),
+            expiresAt: response.expiresAt ? CoreDate.from(response.expiresAt) : undefined,
+            identity: templateContent.identity,
+            maxNumberOfAllocations: response.maxNumberOfAllocations ?? undefined,
+            forIdentity: response.forIdentity ? CoreAddress.from(response.forIdentity) : undefined,
+            templateKey: templateContent.templateKey
+        };
+    }
+
     public async cleanupTemplatesOfDecomposedRelationship(relationship: Relationship): Promise<void> {
         const templateOfRelationship = await this.getRelationshipTemplate(relationship.templateId);
-        if (templateOfRelationship && (!templateOfRelationship.isOwn || templateOfRelationship.cache!.maxNumberOfAllocations === 1)) {
+        if (templateOfRelationship && (!templateOfRelationship.isOwn || templateOfRelationship.maxNumberOfAllocations === 1)) {
             await this.templates.delete(templateOfRelationship);
         }
 

@@ -89,7 +89,6 @@ export * from "./relationships/transmission/responses/RelationshipCreationRespon
 export * from "./relationshipTemplates/backbone/BackboneGetRelationshipTemplates";
 export * from "./relationshipTemplates/backbone/BackbonePostRelationshipTemplates";
 export * from "./relationshipTemplates/backbone/RelationshipTemplateClient";
-export * from "./relationshipTemplates/local/CachedRelationshipTemplate";
 export * from "./relationshipTemplates/local/RelationshipTemplate";
 export * from "./relationshipTemplates/local/SendRelationshipTemplateParameters";
 export * from "./relationshipTemplates/RelationshipTemplateController";
