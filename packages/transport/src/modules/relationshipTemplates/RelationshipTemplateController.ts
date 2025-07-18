@@ -272,9 +272,7 @@ export class RelationshipTemplateController extends TransportController {
             await this.templates.delete(templateOfRelationship);
         }
 
-        const otherTemplatesOfPeer = await this.getRelationshipTemplates({
-            "cache.createdBy": relationship.peer.address.toString()
-        });
+        const otherTemplatesOfPeer = await this.getRelationshipTemplates({ createdBy: relationship.peer.address.toString() });
 
         for (const template of otherTemplatesOfPeer) {
             await this.templates.delete(template);
