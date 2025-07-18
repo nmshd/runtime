@@ -51,7 +51,6 @@ export class DatawalletModificationsProcessor {
         DbCollectionName.Messages,
         DbCollectionName.Relationships,
         DbCollectionName.RelationshipTemplates,
-        DbCollectionName.Tokens,
         DbCollectionName.IdentityDeletionProcess
     ];
 
