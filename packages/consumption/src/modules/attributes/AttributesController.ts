@@ -239,7 +239,8 @@ export class AttributesController extends ConsumptionBaseController {
         return this.parseArray(attributes, LocalAttribute);
     }
 
-    public async createOwnIdentityAttribute(content: IdentityAttribute, sharingInfo?: OwnIdentityAttributeSharingInfo): Promise<OwnIdentityAttribute> {
+    // TODO: check if we need to allow creating own IdentityAttributes that contain a sharingInfo immediately
+    public async createOwnIdentityAttribute(content: IdentityAttribute): Promise<OwnIdentityAttribute> {
         if (content.owner.toString() !== this.identity.address.toString()) {
             throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute();
         }
@@ -253,6 +254,7 @@ export class AttributesController extends ConsumptionBaseController {
         };
         content = IdentityAttribute.from(trimmedAttribute);
 
+        // TODO: this should also be done in other create methods
         if (!this.validateAttributeCharacters(content)) {
             throw ConsumptionCoreErrors.attributes.forbiddenCharactersInAttribute("The Attribute contains forbidden characters.");
         }
@@ -260,8 +262,7 @@ export class AttributesController extends ConsumptionBaseController {
         let ownIdentityAttribute = OwnIdentityAttribute.from({
             id: await ConsumptionIds.attribute.generate(),
             createdAt: CoreDate.utc(),
-            content,
-            sharingInfos: sharingInfo ? [sharingInfo] : undefined
+            content
         });
 
         await this.attributes.create(ownIdentityAttribute);
@@ -322,39 +323,48 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     // TODO: refactor parameters such that not sharingInfo is required as a whole, same for other create functions
-    public async createPeerIdentityAttribute(content: IdentityAttribute, sharingInfo: PeerIdentityAttributeSharingInfo, id: CoreId): Promise<PeerIdentityAttribute> {
-        if (content.owner.toString() !== sharingInfo.peer.toString()) {
+    public async createPeerIdentityAttribute(params: { content: IdentityAttribute; peer: CoreAddress; sourceReference: CoreId; id: CoreId }): Promise<PeerIdentityAttribute> {
+        if (params.content.owner.toString() !== params.peer.toString()) {
             throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute();
         }
 
-        const tagValidationResult = await this.validateTagsOfAttribute(content);
+        const tagValidationResult = await this.validateTagsOfAttribute(params.content);
         if (tagValidationResult.isError()) throw tagValidationResult.error;
 
         const trimmedAttribute = {
-            ...content.toJSON(),
-            value: this.trimAttributeValue(content.value.toJSON() as AttributeValues.Identity.Json)
+            ...params.content.toJSON(),
+            value: this.trimAttributeValue(params.content.value.toJSON() as AttributeValues.Identity.Json)
         };
-        content = IdentityAttribute.from(trimmedAttribute);
+        params.content = IdentityAttribute.from(trimmedAttribute);
 
-        const peerIdentityAttribute = PeerIdentityAttribute.from({ id, content, sharingInfo, createdAt: CoreDate.utc() });
+        const sharingInfo = PeerIdentityAttributeSharingInfo.from({
+            peer: params.peer,
+            sourceReference: params.sourceReference
+        });
+        const peerIdentityAttribute = PeerIdentityAttribute.from({ id: params.id, content: params.content, sharingInfo, createdAt: CoreDate.utc() });
         await this.attributes.create(peerIdentityAttribute);
 
         this.eventBus.publish(new AttributeCreatedEvent(this.identity.address.toString(), peerIdentityAttribute));
         return peerIdentityAttribute;
     }
 
-    public async createOwnRelationshipAttribute(
-        content: RelationshipAttribute,
-        initialSharingInfo: OwnRelationshipAttributeSharingInfo,
-        id?: CoreId
-    ): Promise<OwnRelationshipAttribute> {
-        if (content.owner.toString() !== this.identity.address.toString()) {
+    public async createOwnRelationshipAttribute(params: {
+        content: RelationshipAttribute;
+        peer: CoreAddress;
+        sourceReference: CoreId;
+        id?: CoreId;
+    }): Promise<OwnRelationshipAttribute> {
+        if (params.content.owner.toString() !== this.identity.address.toString()) {
             throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute();
         }
 
+        const initialSharingInfo = OwnRelationshipAttributeSharingInfo.from({
+            peer: params.peer,
+            sourceReference: params.sourceReference
+        });
         const ownRelationshipAttribute = OwnRelationshipAttribute.from({
-            id: id ?? (await ConsumptionIds.attribute.generate()),
-            content,
+            id: params.id ?? (await ConsumptionIds.attribute.generate()),
+            content: params.content,
             initialSharingInfo,
             createdAt: CoreDate.utc()
         });
@@ -364,18 +374,23 @@ export class AttributesController extends ConsumptionBaseController {
         return ownRelationshipAttribute;
     }
 
-    public async createPeerRelationshipAttribute(
-        content: RelationshipAttribute,
-        initialSharingInfo: PeerRelationshipAttributeSharingInfo,
-        id?: CoreId
-    ): Promise<PeerRelationshipAttribute> {
-        if (content.owner.toString() !== initialSharingInfo.peer.toString()) {
+    public async createPeerRelationshipAttribute(params: {
+        content: RelationshipAttribute;
+        peer: CoreAddress;
+        sourceReference: CoreId;
+        id?: CoreId;
+    }): Promise<PeerRelationshipAttribute> {
+        if (params.content.owner.toString() !== params.peer.toString()) {
             throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute();
         }
 
+        const initialSharingInfo = PeerRelationshipAttributeSharingInfo.from({
+            peer: params.peer,
+            sourceReference: params.sourceReference
+        });
         const peerRelationshipAttribute = PeerRelationshipAttribute.from({
-            id: id ?? (await ConsumptionIds.attribute.generate()),
-            content,
+            id: params.id ?? (await ConsumptionIds.attribute.generate()),
+            content: params.content,
             initialSharingInfo,
             createdAt: CoreDate.utc()
         });
@@ -386,16 +401,23 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     // TODO: evaluate if input parameters should be expected as an object
-    public async createThirdPartyRelationshipAttribute(
-        content: RelationshipAttribute,
-        sharingInfo: ThirdPartyRelationshipAttributeSharingInfo,
-        id: CoreId
-    ): Promise<ThirdPartyRelationshipAttribute> {
-        if (!(content.owner.toString() === sharingInfo.peer.toString() || content.owner.toString() === sharingInfo.initialAttributePeer.toString())) {
+    public async createThirdPartyRelationshipAttribute(params: {
+        content: RelationshipAttribute;
+        peer: CoreAddress;
+        sourceReference: CoreId;
+        initialAttributePeer: CoreAddress;
+        id: CoreId;
+    }): Promise<ThirdPartyRelationshipAttribute> {
+        if (!(params.content.owner.toString() === params.peer.toString() || params.content.owner.toString() === params.initialAttributePeer.toString())) {
             throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute();
         }
 
-        const thirdPartyRelationshipAttribute = ThirdPartyRelationshipAttribute.from({ id, content, sharingInfo, createdAt: CoreDate.utc() });
+        const sharingInfo = ThirdPartyRelationshipAttributeSharingInfo.from({
+            peer: params.peer,
+            sourceReference: params.sourceReference,
+            initialAttributePeer: params.initialAttributePeer
+        });
+        const thirdPartyRelationshipAttribute = ThirdPartyRelationshipAttribute.from({ id: params.id, content: params.content, sharingInfo, createdAt: CoreDate.utc() });
         await this.attributes.create(thirdPartyRelationshipAttribute);
 
         this.eventBus.publish(new AttributeCreatedEvent(this.identity.address.toString(), thirdPartyRelationshipAttribute));

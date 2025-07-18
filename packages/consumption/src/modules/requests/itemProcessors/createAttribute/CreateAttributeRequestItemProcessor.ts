@@ -11,13 +11,7 @@ import {
 } from "@nmshd/content";
 import { CoreAddress, CoreDate } from "@nmshd/core-types";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import {
-    OwnRelationshipAttributeSharingInfo,
-    PeerIdentityAttribute,
-    PeerIdentityAttributeSharingInfo,
-    PeerRelationshipAttributeSharingInfo,
-    PeerSharedAttributeSucceededEvent
-} from "../../../attributes";
+import { PeerIdentityAttribute, PeerSharedAttributeSucceededEvent } from "../../../attributes";
 import { PeerIdentityAttributeSuccessorParams } from "../../../attributes/local/PeerIdentityAttributeSuccessorParams";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
@@ -137,12 +131,11 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
 
         if (requestItem.attribute instanceof RelationshipAttribute) {
             if (requestItem.attribute.owner === this.currentIdentityAddress) {
-                const sharingInfo = OwnRelationshipAttributeSharingInfo.from({
+                const ownRelationshipAttribute = await this.consumptionController.attributes.createOwnRelationshipAttribute({
+                    content: requestItem.attribute,
                     peer: requestInfo.peer,
-                    sourceReference: requestInfo.id,
-                    sharedAt: CoreDate.utc()
+                    sourceReference: requestInfo.id
                 });
-                const ownRelationshipAttribute = await this.consumptionController.attributes.createOwnRelationshipAttribute(requestItem.attribute, sharingInfo);
 
                 return CreateAttributeAcceptResponseItem.from({
                     result: ResponseItemResult.Accepted,
@@ -150,12 +143,11 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
                 });
             }
 
-            const sharingInfo = PeerRelationshipAttributeSharingInfo.from({
+            const peerRelationshipAttribute = await this.consumptionController.attributes.createPeerRelationshipAttribute({
+                content: requestItem.attribute,
                 peer: requestInfo.peer,
-                sourceReference: requestInfo.id,
-                sharedAt: CoreDate.utc()
+                sourceReference: requestInfo.id
             });
-            const peerRelationshipAttribute = await this.consumptionController.attributes.createPeerRelationshipAttribute(requestItem.attribute, sharingInfo);
 
             return CreateAttributeAcceptResponseItem.from({
                 result: ResponseItemResult.Accepted,
@@ -186,29 +178,32 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
 
         if (responseItem instanceof CreateAttributeAcceptResponseItem) {
             if (requestItem.attribute instanceof IdentityAttribute && isPeerAttribute) {
-                await this.consumptionController.attributes.createPeerIdentityAttribute(
-                    requestItem.attribute,
-                    PeerIdentityAttributeSharingInfo.from(sharingInfo),
-                    responseItem.attributeId
-                );
+                await this.consumptionController.attributes.createPeerIdentityAttribute({
+                    id: responseItem.attributeId,
+                    content: requestItem.attribute,
+                    peer: requestInfo.peer,
+                    sourceReference: requestInfo.id
+                });
                 return;
             }
 
             if (requestItem.attribute instanceof RelationshipAttribute && isPeerAttribute) {
-                await this.consumptionController.attributes.createPeerRelationshipAttribute(
-                    requestItem.attribute,
-                    PeerRelationshipAttributeSharingInfo.from(sharingInfo),
-                    responseItem.attributeId
-                );
+                await this.consumptionController.attributes.createPeerRelationshipAttribute({
+                    id: responseItem.attributeId,
+                    content: requestItem.attribute,
+                    peer: requestInfo.peer,
+                    sourceReference: requestInfo.id
+                });
                 return;
             }
 
             if (requestItem.attribute instanceof RelationshipAttribute && isOwnAttribute) {
-                await this.consumptionController.attributes.createOwnRelationshipAttribute(
-                    requestItem.attribute,
-                    OwnRelationshipAttributeSharingInfo.from(sharingInfo),
-                    responseItem.attributeId
-                );
+                await this.consumptionController.attributes.createOwnRelationshipAttribute({
+                    id: responseItem.attributeId,
+                    content: requestItem.attribute,
+                    peer: requestInfo.peer,
+                    sourceReference: requestInfo.id
+                });
                 return;
             }
         }

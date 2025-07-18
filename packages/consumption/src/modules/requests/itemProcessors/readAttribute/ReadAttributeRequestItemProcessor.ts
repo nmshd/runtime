@@ -14,18 +14,16 @@ import {
     ResponseItemResult,
     ThirdPartyRelationshipAttributeQuery
 } from "@nmshd/content";
-import { CoreAddress, CoreDate } from "@nmshd/core-types";
+import { CoreAddress } from "@nmshd/core-types";
 import { RelationshipStatus, TransportCoreErrors } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import {
     OwnIdentityAttribute,
     OwnRelationshipAttribute,
-    OwnRelationshipAttributeSharingInfo,
     PeerIdentityAttribute,
     PeerIdentityAttributeSharingInfo,
     PeerRelationshipAttribute,
-    PeerRelationshipAttributeSharingInfo,
     PeerSharedAttributeSucceededEvent,
     ThirdPartyRelationshipAttribute,
     ThirdPartyRelationshipAttributeSharingInfo
@@ -338,12 +336,11 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
             if (parsedParams.newAttribute instanceof RelationshipAttribute) {
                 if (parsedParams.newAttribute.owner.toString() === this.currentIdentityAddress.toString()) {
-                    const sharingInfo = OwnRelationshipAttributeSharingInfo.from({
+                    const ownRelationshipAttribute = await this.consumptionController.attributes.createOwnRelationshipAttribute({
+                        content: parsedParams.newAttribute,
                         peer: requestInfo.peer,
-                        sourceReference: requestInfo.id,
-                        sharedAt: CoreDate.utc()
+                        sourceReference: requestInfo.id
                     });
-                    const ownRelationshipAttribute = await this.consumptionController.attributes.createOwnRelationshipAttribute(parsedParams.newAttribute, sharingInfo);
 
                     return ReadAttributeAcceptResponseItem.from({
                         result: ResponseItemResult.Accepted,
@@ -352,12 +349,11 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                     });
                 }
 
-                const sharingInfo = PeerRelationshipAttributeSharingInfo.from({
+                const peerRelationshipAttribute = await this.consumptionController.attributes.createPeerRelationshipAttribute({
+                    content: parsedParams.newAttribute,
                     peer: requestInfo.peer,
-                    sourceReference: requestInfo.id,
-                    sharedAt: CoreDate.utc()
+                    sourceReference: requestInfo.id
                 });
-                const peerRelationshipAttribute = await this.consumptionController.attributes.createPeerRelationshipAttribute(parsedParams.newAttribute, sharingInfo);
 
                 return ReadAttributeAcceptResponseItem.from({
                     result: ResponseItemResult.Accepted,
@@ -383,41 +379,41 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
     ): Promise<PeerSharedAttributeSucceededEvent | void> {
         if (responseItem instanceof ReadAttributeAcceptResponseItem) {
             if (responseItem.attribute instanceof IdentityAttribute) {
-                const sharingInfo = PeerIdentityAttributeSharingInfo.from({
+                await this.consumptionController.attributes.createPeerIdentityAttribute({
+                    id: responseItem.attributeId,
+                    content: responseItem.attribute,
                     peer: requestInfo.peer,
-                    sourceReference: requestInfo.id,
-                    sharedAt: CoreDate.utc()
+                    sourceReference: requestInfo.id
                 });
-                await this.consumptionController.attributes.createPeerIdentityAttribute(responseItem.attribute, sharingInfo, responseItem.attributeId);
                 return;
             }
 
             if (responseItem.thirdPartyAddress) {
-                const sharingInfo = ThirdPartyRelationshipAttributeSharingInfo.from({
+                await this.consumptionController.attributes.createThirdPartyRelationshipAttribute({
+                    id: responseItem.attributeId,
+                    content: responseItem.attribute,
                     peer: requestInfo.peer,
                     sourceReference: requestInfo.id,
-                    sharedAt: CoreDate.utc(),
                     initialAttributePeer: responseItem.thirdPartyAddress
                 });
-                await this.consumptionController.attributes.createThirdPartyRelationshipAttribute(responseItem.attribute, sharingInfo, responseItem.attributeId);
             }
 
             if (responseItem.attribute.owner.toString() === this.currentIdentityAddress.toString()) {
-                const sharingInfo = OwnRelationshipAttributeSharingInfo.from({
+                await this.consumptionController.attributes.createOwnRelationshipAttribute({
+                    id: responseItem.attributeId,
+                    content: responseItem.attribute,
                     peer: requestInfo.peer,
-                    sourceReference: requestInfo.id,
-                    sharedAt: CoreDate.utc()
+                    sourceReference: requestInfo.id
                 });
-                await this.consumptionController.attributes.createOwnRelationshipAttribute(responseItem.attribute, sharingInfo, responseItem.attributeId);
                 return;
             }
 
-            const sharingInfo = PeerRelationshipAttributeSharingInfo.from({
+            await this.consumptionController.attributes.createPeerRelationshipAttribute({
+                id: responseItem.attributeId,
+                content: responseItem.attribute,
                 peer: requestInfo.peer,
-                sourceReference: requestInfo.id,
-                sharedAt: CoreDate.utc()
+                sourceReference: requestInfo.id
             });
-            await this.consumptionController.attributes.createPeerRelationshipAttribute(responseItem.attribute, sharingInfo, responseItem.attributeId);
             return;
         }
 
@@ -430,8 +426,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             if (predecessor instanceof PeerIdentityAttribute && responseItem.successorContent instanceof IdentityAttribute) {
                 const sharingInfo = PeerIdentityAttributeSharingInfo.from({
                     peer: requestInfo.peer,
-                    sourceReference: requestInfo.id,
-                    sharedAt: CoreDate.utc()
+                    sourceReference: requestInfo.id
                 });
 
                 const successorParams = PeerIdentityAttributeSuccessorParams.from({
@@ -449,7 +444,6 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 const sharingInfo = ThirdPartyRelationshipAttributeSharingInfo.from({
                     peer: requestInfo.peer,
                     sourceReference: requestInfo.id,
-                    sharedAt: CoreDate.utc(),
                     initialAttributePeer: predecessor.sharingInfo.initialAttributePeer
                 });
 

@@ -9,17 +9,11 @@ import {
     ShareAttributeAcceptResponseItem,
     ShareAttributeRequestItem
 } from "@nmshd/content";
-import { CoreAddress, CoreDate } from "@nmshd/core-types";
+import { CoreAddress } from "@nmshd/core-types";
 import { RelationshipStatus } from "@nmshd/transport";
 import _ from "lodash";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import {
-    OwnIdentityAttribute,
-    OwnRelationshipAttribute,
-    PeerIdentityAttributeSharingInfo,
-    PeerRelationshipAttribute,
-    ThirdPartyRelationshipAttributeSharingInfo
-} from "../../../attributes";
+import { OwnIdentityAttribute, OwnRelationshipAttribute, PeerRelationshipAttribute } from "../../../attributes";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
@@ -169,17 +163,13 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
     ): Promise<ShareAttributeAcceptResponseItem | AttributeAlreadySharedAcceptResponseItem> {
         const isThirdPartyRelationshipAttribute = !!requestItem.thirdPartyAddress;
         if (isThirdPartyRelationshipAttribute) {
-            const sharingInfo = ThirdPartyRelationshipAttributeSharingInfo.from({
+            const thirdPartyRelationshipAttribute = await this.consumptionController.attributes.createThirdPartyRelationshipAttribute({
+                id: requestItem.sourceAttributeId,
+                content: requestItem.attribute as RelationshipAttribute,
                 peer: requestInfo.peer,
                 sourceReference: requestInfo.id,
-                sharedAt: CoreDate.utc(),
                 initialAttributePeer: requestItem.thirdPartyAddress!
             });
-            const thirdPartyRelationshipAttribute = await this.consumptionController.attributes.createThirdPartyRelationshipAttribute(
-                requestItem.attribute as RelationshipAttribute,
-                sharingInfo,
-                requestItem.sourceAttributeId
-            );
 
             // TODO: returning the attributeId is unnecessary now
             return ShareAttributeAcceptResponseItem.from({
@@ -201,16 +191,12 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             });
         }
 
-        const sharingInfo = PeerIdentityAttributeSharingInfo.from({
+        const localAttribute = await this.consumptionController.attributes.createPeerIdentityAttribute({
+            content: requestItem.attribute as IdentityAttribute,
             peer: requestInfo.peer,
             sourceReference: requestInfo.id,
-            sharedAt: CoreDate.utc()
+            id: requestItem.sourceAttributeId
         });
-        const localAttribute = await this.consumptionController.attributes.createPeerIdentityAttribute(
-            requestItem.attribute as IdentityAttribute,
-            sharingInfo,
-            requestItem.sourceAttributeId
-        );
 
         return ShareAttributeAcceptResponseItem.from({
             attributeId: localAttribute.id,
