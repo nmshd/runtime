@@ -382,6 +382,20 @@ describe("TokenController", function () {
             await expect(recipient.tokens.loadPeerTokenByReference(sentToken.toTokenReference(sender.config.baseUrl), false)).rejects.toThrow("error.platform.recordNotFound");
         });
 
+        test("should delete a peer owned token locally", async function () {
+            const sentToken = await sender.tokens.sendToken({
+                content: Serializable.fromAny({ content: "TestToken" }),
+                expiresAt: CoreDate.utc().add({ minutes: 5 }),
+                ephemeral: false
+            });
+            const receivedToken = await recipient.tokens.loadPeerTokenByReference(sentToken.toTokenReference(sender.config.baseUrl), false);
+
+            await recipient.tokens.delete(receivedToken);
+
+            const localToken = await recipient.tokens.getToken(sentToken.id);
+            expect(localToken).toBeUndefined();
+        });
+
         test("should delete a peer owned token during decomposition", async function () {
             const sentToken = await sender.tokens.sendToken({
                 content: Serializable.fromAny({ content: "TestToken" }),
