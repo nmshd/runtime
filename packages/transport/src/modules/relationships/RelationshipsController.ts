@@ -15,7 +15,6 @@ import { RelationshipTemplate } from "../relationshipTemplates/local/Relationshi
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
 import { RelationshipSecretController } from "./RelationshipSecretController";
 import { BackbonePutRelationshipsResponse } from "./backbone/BackbonePutRelationship";
-import { BackboneRelationship } from "./backbone/BackboneRelationship";
 import { RelationshipClient } from "./backbone/RelationshipClient";
 import { PeerDeletionInfo } from "./local/PeerDeletionInfo";
 import { Relationship } from "./local/Relationship";
@@ -331,22 +330,6 @@ export class RelationshipsController extends TransportController {
         if (status.includes(relationship.status)) return;
 
         throw TransportCoreErrors.relationships.wrongRelationshipStatus(relationship.id.toString(), relationship.status);
-    }
-
-    private async decryptRelationship(response: BackboneRelationship, relationshipSecretId: CoreId) {
-        if (!response.creationContent) throw new TransportError("Creation content is missing");
-
-        const templateId = CoreId.from(response.relationshipTemplateId);
-
-        this._log.trace(`Parsing relationship creation content of ${response.id}...`);
-
-        const creationContent = await this.decryptCreationContent(response.creationContent, CoreAddress.from(response.from), relationshipSecretId);
-
-        return {
-            creationContent: creationContent.content,
-            templateId,
-            auditLog: RelationshipAuditLog.fromBackboneAuditLog(response.auditLog)
-        };
     }
 
     private async prepareCreationContent(relationshipSecretId: CoreId, template: RelationshipTemplate, content: ISerializable): Promise<RelationshipCreationContentCipher> {
