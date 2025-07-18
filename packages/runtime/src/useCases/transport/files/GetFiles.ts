@@ -79,6 +79,9 @@ export class GetFilesUseCase extends UseCase<GetFilesRequest, FileDTO[]> {
                     allowedTags.push(tagQuery);
                 }
                 query["$or"] = allowedTags;
+            },
+            [nameof<FileDTO>((c) => c.ownershipToken)]: (query: any, input: string | string[]) => {
+                query[`${nameof<File>((f) => f.ownershipToken)}`] = input;
             }
         }
     });
