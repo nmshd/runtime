@@ -169,7 +169,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         const response = parsedParams.response;
         const requestId = response.requestId;
 
-        const templateContent = parsedParams.template.cache!.content;
+        const templateContent = parsedParams.template.content;
         if (!(templateContent instanceof RelationshipTemplateContent)) {
             throw new ConsumptionError("The content of the template is not of type RelationshipTemplateContent hence it's not possible to create a request from it.");
         }
