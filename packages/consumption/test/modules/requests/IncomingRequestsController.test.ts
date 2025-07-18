@@ -75,7 +75,7 @@ describe("IncomingRequestsController", function () {
         test("creates an incoming Request with an incoming RelationshipTemplate as source", async function () {
             const incomingTemplate = TestObjectFactory.createIncomingRelationshipTemplate();
             await When.iCreateAnIncomingRequestWith({ requestSourceObject: incomingTemplate });
-            await Then.theCreatedRequestHasAllProperties(incomingTemplate.cache!.createdBy, incomingTemplate.id, "RelationshipTemplate");
+            await Then.theCreatedRequestHasAllProperties(incomingTemplate.createdBy, incomingTemplate.id, "RelationshipTemplate");
             await Then.theRequestIsInStatus(LocalRequestStatus.Open);
             await Then.theNewRequestIsPersistedInTheDatabase();
             await Then.eventHasBeenPublished(IncomingRequestReceivedEvent);

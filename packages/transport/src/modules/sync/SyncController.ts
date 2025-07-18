@@ -30,7 +30,7 @@ export class SyncController extends TransportController {
 
     private _cacheFetcher?: CacheFetcher;
     private get cacheFetcher() {
-        this._cacheFetcher ??= new CacheFetcher(this.parent.files, this.parent.relationshipTemplates);
+        this._cacheFetcher ??= new CacheFetcher(this.parent.files);
 
         return this._cacheFetcher;
     }

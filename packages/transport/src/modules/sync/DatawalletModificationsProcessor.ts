@@ -10,9 +10,6 @@ import { ICacheable } from "../../core/ICacheable";
 import { FileController } from "../files/FileController";
 import { CachedFile } from "../files/local/CachedFile";
 import { File } from "../files/local/File";
-import { CachedRelationshipTemplate } from "../relationshipTemplates/local/CachedRelationshipTemplate";
-import { RelationshipTemplate } from "../relationshipTemplates/local/RelationshipTemplate";
-import { RelationshipTemplateController } from "../relationshipTemplates/RelationshipTemplateController";
 import { DatawalletModification, DatawalletModificationType } from "./local/DatawalletModification";
 
 export class DatawalletModificationsProcessor {
@@ -39,7 +36,7 @@ export class DatawalletModificationsProcessor {
         this.cacheChanges = modifications.filter((m) => m.type === DatawalletModificationType.CacheChanged);
     }
 
-    private readonly collectionsWithCacheableItems: string[] = [DbCollectionName.Files, DbCollectionName.RelationshipTemplates];
+    private readonly collectionsWithCacheableItems: string[] = [DbCollectionName.Files];
 
     public async execute(): Promise<void> {
         await this.applyModifications();
@@ -132,13 +129,9 @@ export class DatawalletModificationsProcessor {
 
         const cacheChangesGroupedByCollection = this.groupCacheChangesByCollection(cacheChangesWithoutDeletes);
 
-        const caches = await this.cacheFetcher.fetchCacheFor({
-            files: cacheChangesGroupedByCollection.fileIds,
-            relationshipTemplates: cacheChangesGroupedByCollection.relationshipTemplateIds
-        });
+        const caches = await this.cacheFetcher.fetchCacheFor({ files: cacheChangesGroupedByCollection.fileIds });
 
         await this.saveNewCaches(caches.files, DbCollectionName.Files, File);
-        await this.saveNewCaches(caches.relationshipTemplates, DbCollectionName.RelationshipTemplates, RelationshipTemplate);
     }
 
     @log()
@@ -180,14 +173,11 @@ export class DatawalletModificationsProcessor {
 }
 
 export class CacheFetcher {
-    public constructor(
-        private readonly fileController: FileController,
-        private readonly relationshipTemplateController: RelationshipTemplateController
-    ) {}
+    public constructor(private readonly fileController: FileController) {}
 
     public async fetchCacheFor(input: FetchCacheInput): Promise<FetchCacheOutput> {
-        const caches = await Promise.all([this.fetchCaches(this.fileController, input.files), this.fetchCaches(this.relationshipTemplateController, input.relationshipTemplates)]);
-        const output: FetchCacheOutput = { files: caches[0], relationshipTemplates: caches[1] };
+        const caches = await Promise.all([this.fetchCaches(this.fileController, input.files)]);
+        const output: FetchCacheOutput = { files: caches[0] };
 
         return output;
     }
@@ -201,15 +191,10 @@ export class CacheFetcher {
 
 interface FetchCacheInput {
     files?: CoreId[];
-    messages?: CoreId[];
-    relationships?: CoreId[];
-    relationshipTemplates?: CoreId[];
-    identityDeletionProcesses?: CoreId[];
 }
 
 interface FetchCacheOutput {
     files: FetchCacheOutputItem<CachedFile>[];
-    relationshipTemplates: FetchCacheOutputItem<CachedRelationshipTemplate>[];
 }
 
 interface FetchCacheOutputItem<TCache> {

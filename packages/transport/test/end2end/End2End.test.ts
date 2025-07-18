@@ -79,8 +79,8 @@ describe("RelationshipTest: Accept", function () {
 
         const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByTokenContent(receivedToken.content);
 
-        expect(templateTo.cache!.content).toBeInstanceOf(JSONWrapper);
-        const templateContent = templateTo.cache!.content as JSONWrapper;
+        expect(templateTo.content).toBeInstanceOf(JSONWrapper);
+        const templateContent = templateTo.content as JSONWrapper;
         expect(templateContent.value).toHaveProperty("mycontent");
         expect(templateContent.value.mycontent).toBe("template");
 
@@ -122,7 +122,7 @@ describe("RelationshipTest: Accept", function () {
         expect(acceptedRelationshipPeer.auditLog).toHaveLength(2);
         expect(acceptedRelationshipPeer.auditLog[1].newStatus).toBe(RelationshipStatus.Active);
         expect(acceptedRelationshipPeer.peer).toBeDefined();
-        expect(acceptedRelationshipPeer.peer.address.toString()).toStrictEqual(templateTo.cache?.identity.address.toString());
+        expect(acceptedRelationshipPeer.peer.address.toString()).toStrictEqual(templateTo.identity.address.toString());
     });
 });
 
@@ -179,8 +179,8 @@ describe("RelationshipTest: Reject", function () {
 
         const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByTokenContent(receivedToken.content);
 
-        expect(templateTo.cache!.content).toBeInstanceOf(JSONWrapper);
-        const templateContent = templateTo.cache!.content as JSONWrapper;
+        expect(templateTo.content).toBeInstanceOf(JSONWrapper);
+        const templateContent = templateTo.content as JSONWrapper;
         expect(templateContent.value).toHaveProperty("mycontent");
         expect(templateContent.value.mycontent).toBe("template");
 
@@ -218,7 +218,7 @@ describe("RelationshipTest: Reject", function () {
         expect(rejectedRelationshipPeer.auditLog).toHaveLength(2);
         expect(rejectedRelationshipPeer.auditLog[1].newStatus).toBe(RelationshipStatus.Rejected);
         expect(rejectedRelationshipPeer.peer).toBeDefined();
-        expect(rejectedRelationshipPeer.peer.address.toString()).toStrictEqual(templateTo.cache?.identity.address.toString());
+        expect(rejectedRelationshipPeer.peer.address.toString()).toStrictEqual(templateTo.identity.address.toString());
     });
 });
 
@@ -276,8 +276,8 @@ describe("RelationshipTest: Revoke", function () {
 
         const templateRequestor = await requestor.relationshipTemplates.loadPeerRelationshipTemplateByTokenContent(receivedToken.content);
 
-        expect(templateRequestor.cache!.content).toBeInstanceOf(JSONWrapper);
-        const templateContent = templateRequestor.cache!.content as JSONWrapper;
+        expect(templateRequestor.content).toBeInstanceOf(JSONWrapper);
+        const templateContent = templateRequestor.content as JSONWrapper;
         expect(templateContent.value).toHaveProperty("mycontent");
         expect(templateContent.value.mycontent).toBe("template");
 
@@ -346,8 +346,8 @@ describe("RelationshipTest: Revoke", function () {
 
         const templateRequestor = await requestor.relationshipTemplates.loadPeerRelationshipTemplateByTokenContent(receivedTemplateToken);
 
-        expect(templateRequestor.cache!.content).toBeInstanceOf(JSONWrapper);
-        const templateContent = templateRequestor.cache!.content as JSONWrapper;
+        expect(templateRequestor.content).toBeInstanceOf(JSONWrapper);
+        const templateContent = templateRequestor.content as JSONWrapper;
         expect(templateContent.value).toHaveProperty("mycontent");
         expect(templateContent.value.mycontent).toBe("template");
 

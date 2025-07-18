@@ -562,26 +562,24 @@ export class TestObjectFactory {
                 secretKey: CoreBuffer.from("ERt3WazEKVtoyjBoBx2JJu1tkkC4QIW3gi9uM00nI3o"),
                 algorithm: CryptoEncryptionAlgorithm.XCHACHA20_POLY1305
             }),
-            cache: {
-                content: {},
-                createdAt: CoreDate.utc(),
-                createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
-                createdByDevice: { id: "senderDeviceId" },
-                maxNumberOfAllocations: 1,
-                expiresAt,
-                identity: {
-                    address: CoreAddress.from("did:e:a-domain:dids:anidentity"),
-                    publicKey: CryptoSignaturePublicKey.from({
-                        algorithm: CryptoSignatureAlgorithm.ECDSA_ED25519,
-                        publicKey: CoreBuffer.fromBase64URL("aS-A8ywidL00DfBlZySOG_1-NdSBW38uGD1il_Ymk5g")
-                    })
-                },
-                templateKey: RelationshipTemplatePublicKey.from({
-                    id: CoreId.from("b9uMR7u7lsKLzRfVJNYb"),
-                    algorithm: CryptoExchangeAlgorithm.ECDH_X25519,
-                    publicKey: CoreBuffer.fromBase64URL("sSguQOayzLgmPMclpfbPzpKU9F8CkPYuzBtuaWgnFyo")
+            content: {},
+            createdAt: CoreDate.utc(),
+            createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
+            createdByDevice: { id: "senderDeviceId" },
+            maxNumberOfAllocations: 1,
+            expiresAt,
+            identity: {
+                address: CoreAddress.from("did:e:a-domain:dids:anidentity"),
+                publicKey: CryptoSignaturePublicKey.from({
+                    algorithm: CryptoSignatureAlgorithm.ECDSA_ED25519,
+                    publicKey: CoreBuffer.fromBase64URL("aS-A8ywidL00DfBlZySOG_1-NdSBW38uGD1il_Ymk5g")
                 })
-            }
+            },
+            templateKey: RelationshipTemplatePublicKey.from({
+                id: CoreId.from("b9uMR7u7lsKLzRfVJNYb"),
+                algorithm: CryptoExchangeAlgorithm.ECDH_X25519,
+                publicKey: CoreBuffer.fromBase64URL("sSguQOayzLgmPMclpfbPzpKU9F8CkPYuzBtuaWgnFyo")
+            })
         };
     }
 
@@ -599,25 +597,23 @@ export class TestObjectFactory {
                 secretKey: CoreBuffer.from("ERt3WazEKVtoyjBoBx2JJu1tkkC4QIW3gi9uM00nI3o"),
                 algorithm: CryptoEncryptionAlgorithm.XCHACHA20_POLY1305
             }),
-            cache: {
-                content: content ?? {},
-                createdAt: CoreDate.utc(),
-                createdBy: creator,
-                createdByDevice: CoreId.from("senderDeviceId"),
-                maxNumberOfAllocations: 1,
-                identity: {
-                    address: creator,
-                    publicKey: CryptoSignaturePublicKey.from({
-                        algorithm: CryptoSignatureAlgorithm.ECDSA_ED25519,
-                        publicKey: CoreBuffer.fromBase64URL("aS-A8ywidL00DfBlZySOG_1-NdSBW38uGD1il_Ymk5g")
-                    })
-                },
-                templateKey: RelationshipTemplatePublicKey.from({
-                    id: CoreId.from("b9uMR7u7lsKLzRfVJNYb"),
-                    algorithm: CryptoExchangeAlgorithm.ECDH_X25519,
-                    publicKey: CoreBuffer.fromBase64URL("sSguQOayzLgmPMclpfbPzpKU9F8CkPYuzBtuaWgnFyo")
+            content: content ?? {},
+            createdAt: CoreDate.utc(),
+            createdBy: creator,
+            createdByDevice: CoreId.from("senderDeviceId"),
+            maxNumberOfAllocations: 1,
+            identity: {
+                address: creator,
+                publicKey: CryptoSignaturePublicKey.from({
+                    algorithm: CryptoSignatureAlgorithm.ECDSA_ED25519,
+                    publicKey: CoreBuffer.fromBase64URL("aS-A8ywidL00DfBlZySOG_1-NdSBW38uGD1il_Ymk5g")
                 })
-            }
+            },
+            templateKey: RelationshipTemplatePublicKey.from({
+                id: CoreId.from("b9uMR7u7lsKLzRfVJNYb"),
+                algorithm: CryptoExchangeAlgorithm.ECDH_X25519,
+                publicKey: CoreBuffer.fromBase64URL("sSguQOayzLgmPMclpfbPzpKU9F8CkPYuzBtuaWgnFyo")
+            })
         };
     }
 }

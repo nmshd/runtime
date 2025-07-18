@@ -133,8 +133,7 @@ publicFunctions[RelationshipTemplateController.name] = [
     nameof<RelationshipTemplateController>((r) => r.sendRelationshipTemplate),
     nameof<RelationshipTemplateController>((r) => r.deleteRelationshipTemplate),
     nameof<RelationshipTemplateController>((r) => r.getRelationshipTemplates),
-    nameof<RelationshipTemplateController>((r) => r.getRelationshipTemplate),
-    nameof<RelationshipTemplateController>((r) => r.updateCache)
+    nameof<RelationshipTemplateController>((r) => r.getRelationshipTemplate)
 ];
 publicFunctions[SecretController.name] = [
     nameof<SecretController>((r) => r.init),

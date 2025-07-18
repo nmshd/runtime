@@ -105,9 +105,6 @@ export class RelationshipsController extends TransportController {
         }
 
         const template = (parameters as SendRelationshipParameters).template;
-        if (!template.cache) {
-            throw this.newCacheEmptyError(RelationshipTemplate, template.id.toString());
-        }
 
         const secretId = await TransportIds.relationshipSecret.generate();
         const creationContentCipher = await this.prepareCreationContent(secretId, template, parameters.creationContent);
@@ -120,7 +117,7 @@ export class RelationshipsController extends TransportController {
 
         const backboneResponse = result.value;
 
-        const newRelationship = Relationship.fromBackboneAndCreationContent(backboneResponse, template.cache.identity, parameters.creationContent, secretId);
+        const newRelationship = Relationship.fromBackboneAndCreationContent(backboneResponse, template.identity, parameters.creationContent, secretId);
 
         await this.relationships.create(newRelationship);
 
@@ -131,11 +128,8 @@ export class RelationshipsController extends TransportController {
 
     public async canSendRelationship(parameters: ISendRelationshipParameters): Promise<Result<void, CoreError>> {
         const template = (parameters as SendRelationshipParameters).template;
-        if (!template.cache) {
-            throw this.newCacheEmptyError(RelationshipTemplate, template.id.toString());
-        }
 
-        const peerAddress = template.cache.createdBy;
+        const peerAddress = template.createdBy;
         const existingRelationshipToPeer = await this.getExistingRelationshipToIdentity(peerAddress);
 
         if (existingRelationshipToPeer) {
@@ -333,11 +327,7 @@ export class RelationshipsController extends TransportController {
     }
 
     private async prepareCreationContent(relationshipSecretId: CoreId, template: RelationshipTemplate, content: ISerializable): Promise<RelationshipCreationContentCipher> {
-        if (!template.cache) {
-            throw this.newCacheEmptyError(RelationshipTemplate, template.id.toString());
-        }
-
-        const publicCreationContentCrypto = await this.secrets.createRequestorSecrets(template.cache, relationshipSecretId);
+        const publicCreationContentCrypto = await this.secrets.createRequestorSecrets(template, relationshipSecretId);
 
         const creationContent: RelationshipCreationContentWrapper = RelationshipCreationContentWrapper.from({
             content,
@@ -431,11 +421,10 @@ export class RelationshipsController extends TransportController {
         const template = await this.parent.relationshipTemplates.getRelationshipTemplate(templateId);
 
         if (!template) throw TransportCoreErrors.general.recordNotFound(RelationshipTemplate, templateId.toString());
-        if (!template.cache) throw this.newCacheEmptyError(RelationshipTemplate, template.id.toString());
 
         const secretId = await TransportIds.relationshipSecret.generate();
         const creationContentCipher = RelationshipCreationContentCipher.fromBase64(backboneRelationship.creationContent);
-        await this.secrets.createTemplatorSecrets(secretId, template.cache, creationContentCipher.publicCreationContentCrypto);
+        await this.secrets.createTemplatorSecrets(secretId, template, creationContentCipher.publicCreationContentCrypto);
 
         const creationContent = await this.decryptCreationContent(backboneRelationship.creationContent, CoreAddress.from(backboneRelationship.from), secretId);
         const relationship = Relationship.fromBackboneAndCreationContent(backboneRelationship, creationContent.identity, creationContent.content, secretId);
