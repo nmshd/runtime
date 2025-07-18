@@ -2,17 +2,12 @@ import { Serializable } from "@js-soft/ts-serval";
 import { ArbitraryRelationshipCreationContent, RelationshipCreationContent } from "@nmshd/content";
 import { RelationshipAuditLogEntryDTO, RelationshipDTO } from "@nmshd/runtime-types";
 import { Relationship, RelationshipAuditLogEntry } from "@nmshd/transport";
-import { RuntimeErrors } from "../../common";
 
 export class RelationshipMapper {
     public static toRelationshipDTO(relationship: Relationship): RelationshipDTO {
-        if (!relationship.cache) {
-            throw RuntimeErrors.general.cacheEmpty(Relationship, relationship.id.toString());
-        }
-
         return {
             id: relationship.id.toString(),
-            templateId: relationship.cache.templateId.toString(),
+            templateId: relationship.templateId.toString(),
             status: relationship.status,
             peer: relationship.peer.address.toString(),
             peerDeletionInfo: relationship.peerDeletionInfo?.toJSON(),
@@ -20,8 +15,8 @@ export class RelationshipMapper {
                 address: relationship.peer.address.toString(),
                 publicKey: relationship.peer.publicKey.toBase64(false)
             },
-            auditLog: relationship.cache.auditLog.map((entry) => this.toAuditLogEntryDTO(entry)),
-            creationContent: this.toCreationContent(relationship.cache.creationContent)
+            auditLog: relationship.auditLog.map((entry) => this.toAuditLogEntryDTO(entry)),
+            creationContent: this.toCreationContent(relationship.creationContent)
         };
     }
 
