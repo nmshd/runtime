@@ -71,7 +71,7 @@ export class FileController extends TransportController {
         );
 
         await this.files.update(fileDoc, updatedFile);
-        return file;
+        return updatedFile;
     }
 
     public async getOrLoadFileByReference(fileReference: FileReference): Promise<File> {
