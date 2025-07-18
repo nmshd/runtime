@@ -28,9 +28,7 @@ describe("MessageSync", function () {
 
     test("default case A1 -> B2: sync should receive message on an onboarded device", async function () {
         const a1 = await TestUtil.createIdentityWithOneDevice(connection, { datawalletEnabled: true });
-        const { device1: b1, device2: b2 } = await TestUtil.createIdentityWithTwoDevices(connection, {
-            datawalletEnabled: true
-        });
+        const { device1: b1, device2: b2 } = await TestUtil.createIdentityWithTwoDevices(connection, { datawalletEnabled: true });
 
         await TestUtil.addRelationship(a1, b1);
 
@@ -44,10 +42,7 @@ describe("MessageSync", function () {
     });
 
     test("default case A2 -> B1: an onboarded device should be able to send messages", async function () {
-        const { device1: a1, device2: a2 } = await TestUtil.createIdentityWithTwoDevices(connection, {
-            datawalletEnabled: true
-        });
-
+        const { device1: a1, device2: a2 } = await TestUtil.createIdentityWithTwoDevices(connection, { datawalletEnabled: true });
         const b1 = await TestUtil.createIdentityWithOneDevice(connection, { datawalletEnabled: true });
 
         await TestUtil.addRelationship(a1, b1);
@@ -62,12 +57,8 @@ describe("MessageSync", function () {
     });
 
     test("concurrent send A1 -> B1, A2 -> B1: sync should receive messages sent parallel to the same identity on all devices", async function () {
-        const { device1: a1, device2: a2 } = await TestUtil.createIdentityWithTwoDevices(connection, {
-            datawalletEnabled: true
-        });
-        const { device1: b1, device2: b2 } = await TestUtil.createIdentityWithTwoDevices(connection, {
-            datawalletEnabled: true
-        });
+        const { device1: a1, device2: a2 } = await TestUtil.createIdentityWithTwoDevices(connection, { datawalletEnabled: true });
+        const { device1: b1, device2: b2 } = await TestUtil.createIdentityWithTwoDevices(connection, { datawalletEnabled: true });
 
         await TestUtil.addRelationship(a1, b1);
         await a2.syncEverything();
