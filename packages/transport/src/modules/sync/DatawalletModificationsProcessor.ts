@@ -20,9 +20,6 @@ import { RelationshipsController } from "../relationships/RelationshipsControlle
 import { CachedRelationshipTemplate } from "../relationshipTemplates/local/CachedRelationshipTemplate";
 import { RelationshipTemplate } from "../relationshipTemplates/local/RelationshipTemplate";
 import { RelationshipTemplateController } from "../relationshipTemplates/RelationshipTemplateController";
-import { CachedToken } from "../tokens/local/CachedToken";
-import { Token } from "../tokens/local/Token";
-import { TokenController } from "../tokens/TokenController";
 import { DatawalletModification, DatawalletModificationType } from "./local/DatawalletModification";
 
 export class DatawalletModificationsProcessor {
@@ -152,13 +149,11 @@ export class DatawalletModificationsProcessor {
         const caches = await this.cacheFetcher.fetchCacheFor({
             files: cacheChangesGroupedByCollection.fileIds,
             relationshipTemplates: cacheChangesGroupedByCollection.relationshipTemplateIds,
-            tokens: cacheChangesGroupedByCollection.tokenIds,
             identityDeletionProcesses: cacheChangesGroupedByCollection.identityDeletionProcessIds
         });
 
         await this.saveNewCaches(caches.files, DbCollectionName.Files, File);
         await this.saveNewCaches(caches.relationshipTemplates, DbCollectionName.RelationshipTemplates, RelationshipTemplate);
-        await this.saveNewCaches(caches.tokens, DbCollectionName.Tokens, Token);
         await this.saveNewCaches(caches.identityDeletionProcesses, DbCollectionName.IdentityDeletionProcess, IdentityDeletionProcess);
 
         // Need to fetch the cache for relationships after the cache for relationship templates was fetched, because when building the relationship cache, the cache of thecorresponding relationship template is needed
@@ -214,7 +209,6 @@ export class CacheFetcher {
         private readonly messageController: MessageController,
         private readonly relationshipTemplateController: RelationshipTemplateController,
         private readonly relationshipController: RelationshipsController,
-        private readonly tokenController: TokenController,
         private readonly identityDeletionProcessController: IdentityDeletionProcessController
     ) {}
 
@@ -223,11 +217,10 @@ export class CacheFetcher {
             this.fetchCaches(this.fileController, input.files),
             this.fetchCaches(this.relationshipController, input.relationships),
             this.fetchCaches(this.relationshipTemplateController, input.relationshipTemplates),
-            this.fetchCaches(this.tokenController, input.tokens),
             this.fetchCaches(this.identityDeletionProcessController, input.identityDeletionProcesses)
         ]);
 
-        const output: FetchCacheOutput = { files: caches[0], relationships: caches[1], relationshipTemplates: caches[2], tokens: caches[3], identityDeletionProcesses: caches[4] };
+        const output: FetchCacheOutput = { files: caches[0], relationships: caches[1], relationshipTemplates: caches[2], identityDeletionProcesses: caches[3] };
 
         return output;
     }
@@ -244,7 +237,6 @@ interface FetchCacheInput {
     messages?: CoreId[];
     relationships?: CoreId[];
     relationshipTemplates?: CoreId[];
-    tokens?: CoreId[];
     identityDeletionProcesses?: CoreId[];
 }
 
@@ -252,7 +244,6 @@ interface FetchCacheOutput {
     files: FetchCacheOutputItem<CachedFile>[];
     relationships: FetchCacheOutputItem<CachedRelationship>[];
     relationshipTemplates: FetchCacheOutputItem<CachedRelationshipTemplate>[];
-    tokens: FetchCacheOutputItem<CachedToken>[];
     identityDeletionProcesses: FetchCacheOutputItem<CachedIdentityDeletionProcess>[];
 }
 

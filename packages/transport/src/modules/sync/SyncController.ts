@@ -35,7 +35,6 @@ export class SyncController extends TransportController {
             this.parent.messages,
             this.parent.relationshipTemplates,
             this.parent.relationships,
-            this.parent.tokens,
             this.parent.identityDeletionProcess
         );
 
