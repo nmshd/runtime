@@ -3,20 +3,15 @@ import { ArbitraryMessageContent, Mail, Notification, Request, ResponseWrapper }
 import { CoreBuffer } from "@nmshd/crypto";
 import { MessageDTO, MessageWithAttachmentsDTO } from "@nmshd/runtime-types";
 import { File, Message, MessageRecipient } from "@nmshd/transport";
-import { RuntimeErrors } from "../../common";
 import { FileMapper } from "../files/FileMapper";
 import { DownloadAttachmentResponse } from "./DownloadAttachment";
 
 export class MessageMapper {
     public static toDownloadAttachmentResponse(buffer: CoreBuffer, file: File): DownloadAttachmentResponse {
-        if (!file.cache) {
-            throw RuntimeErrors.general.cacheEmpty(File, file.id.toString());
-        }
-
         return {
             content: buffer.buffer,
-            filename: file.cache.filename ? file.cache.filename : file.id.toString(),
-            mimetype: file.cache.mimetype
+            filename: file.filename ?? file.id.toString(),
+            mimetype: file.mimetype
         };
     }
 

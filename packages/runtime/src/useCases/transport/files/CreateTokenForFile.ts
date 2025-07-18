@@ -62,7 +62,7 @@ export class CreateTokenForFileUseCase extends UseCase<CreateTokenForFileRequest
             secretKey: file.secretKey
         });
 
-        const defaultTokenExpiry = file.cache?.expiresAt ?? CoreDate.utc().add({ days: 12 });
+        const defaultTokenExpiry = file.expiresAt ?? CoreDate.utc().add({ days: 12 });
         const tokenExpiry = request.expiresAt ? CoreDate.from(request.expiresAt) : defaultTokenExpiry;
 
         const ephemeral = request.ephemeral ?? true;
