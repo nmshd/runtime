@@ -32,10 +32,6 @@ export class DeleteRepositoryAttributeUseCase extends UseCase<DeleteRepositoryAt
             return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(request.attributeId));
         }
 
-        if (repositoryAttribute.parentId) {
-            return Result.fail(RuntimeErrors.attributes.cannotSeparatelyDeleteChildOfComplexAttribute(request.attributeId));
-        }
-
         const validationResult = await this.attributesController.validateFullAttributeDeletionProcess(repositoryAttribute);
         if (validationResult.isError()) {
             return Result.fail(validationResult.error);
