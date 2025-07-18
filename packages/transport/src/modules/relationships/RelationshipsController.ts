@@ -10,6 +10,7 @@ import { TransportCoreErrors } from "../../core/TransportCoreErrors";
 import { TransportIds } from "../../core/TransportIds";
 import { RelationshipChangedEvent, RelationshipDecomposedBySelfEvent, RelationshipReactivationCompletedEvent, RelationshipReactivationRequestedEvent } from "../../events";
 import { AccountController } from "../accounts/AccountController";
+import { Identity } from "../accounts/data/Identity";
 import { RelationshipTemplate } from "../relationshipTemplates/local/RelationshipTemplate";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
 import { RelationshipSecretController } from "./RelationshipSecretController";
@@ -108,7 +109,7 @@ export class RelationshipsController extends TransportController {
     // }
 
     public async getRelationshipToIdentity(address: CoreAddress, status?: RelationshipStatus): Promise<Relationship | undefined> {
-        const query: any = { peerAddress: address.toString() };
+        const query: any = { [`${nameof<Relationship>((r) => r.peer)}.${nameof<Identity>((r) => r.address)}`]: address.toString() };
         if (status) query[`${nameof<Relationship>((r) => r.status)}`] = status;
         const relationships = await this.relationships.find(query);
 
