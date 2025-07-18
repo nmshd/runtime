@@ -215,7 +215,8 @@ export class RelationshipTemplateController extends TransportController {
             return template;
         }
 
-        const backboneResponse = await this.client.getRelationshipTemplate(id.toString(), passwordProtection?.password);
+        const hashedPassword = passwordProtection ? (await CoreCrypto.deriveHashOutOfPassword(passwordProtection.password, passwordProtection.salt)).toBase64() : undefined;
+        const backboneResponse = await this.client.getRelationshipTemplate(id.toString(), hashedPassword);
         const backboneTemplate = backboneResponse.value;
 
         const decrypted = await this.decryptRelationshipTemplate(backboneTemplate, secretKey);
