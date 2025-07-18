@@ -1,7 +1,7 @@
 import { QueryTranslator } from "@js-soft/docdb-querytranslator";
 import { Result } from "@js-soft/ts-utils";
 import { RelationshipDTO } from "@nmshd/runtime-types";
-import { CachedRelationship, Identity, Relationship, RelationshipsController } from "@nmshd/transport";
+import { Identity, Relationship, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { nameof } from "ts-simple-nameof";
 import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
@@ -28,10 +28,10 @@ export class GetRelationshipsUseCase extends UseCase<GetRelationshipsRequest, Re
         whitelist: {
             [nameof<RelationshipDTO>((r) => r.peer)]: true,
             [nameof<RelationshipDTO>((r) => r.status)]: true,
-            [`${nameof<RelationshipDTO>((r) => r.templateId)}`]: true
+            [nameof<RelationshipDTO>((r) => r.templateId)]: true
         },
         alias: {
-            [`${nameof<RelationshipDTO>((r) => r.templateId)}`]: `${nameof<Relationship>((r) => r.cache)}.${nameof<CachedRelationship>((r) => r.templateId)}`,
+            [nameof<RelationshipDTO>((r) => r.templateId)]: `${nameof<Relationship>((r) => r.templateId)}`,
             [nameof<RelationshipDTO>((r) => r.status)]: nameof<Relationship>((r) => r.status),
             [nameof<RelationshipDTO>((r) => r.peer)]: `${nameof<Relationship>((r) => r.peer)}.${nameof<Identity>((r) => r.address)}`
         }
