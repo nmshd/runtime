@@ -16,9 +16,6 @@ import { File } from "../files/local/File";
 import { CachedRelationshipTemplate } from "../relationshipTemplates/local/CachedRelationshipTemplate";
 import { RelationshipTemplate } from "../relationshipTemplates/local/RelationshipTemplate";
 import { RelationshipTemplateController } from "../relationshipTemplates/RelationshipTemplateController";
-import { CachedToken } from "../tokens/local/CachedToken";
-import { Token } from "../tokens/local/Token";
-import { TokenController } from "../tokens/TokenController";
 import { DatawalletModification, DatawalletModificationType } from "./local/DatawalletModification";
 
 export class DatawalletModificationsProcessor {
@@ -45,12 +42,7 @@ export class DatawalletModificationsProcessor {
         this.cacheChanges = modifications.filter((m) => m.type === DatawalletModificationType.CacheChanged);
     }
 
-    private readonly collectionsWithCacheableItems: string[] = [
-        DbCollectionName.Files,
-        DbCollectionName.RelationshipTemplates,
-        DbCollectionName.Tokens,
-        DbCollectionName.IdentityDeletionProcess
-    ];
+    private readonly collectionsWithCacheableItems: string[] = [DbCollectionName.Files, DbCollectionName.RelationshipTemplates, DbCollectionName.IdentityDeletionProcess];
 
     public async execute(): Promise<void> {
         await this.applyModifications();
@@ -146,13 +138,11 @@ export class DatawalletModificationsProcessor {
         const caches = await this.cacheFetcher.fetchCacheFor({
             files: cacheChangesGroupedByCollection.fileIds,
             relationshipTemplates: cacheChangesGroupedByCollection.relationshipTemplateIds,
-            tokens: cacheChangesGroupedByCollection.tokenIds,
             identityDeletionProcesses: cacheChangesGroupedByCollection.identityDeletionProcessIds
         });
 
         await this.saveNewCaches(caches.files, DbCollectionName.Files, File);
         await this.saveNewCaches(caches.relationshipTemplates, DbCollectionName.RelationshipTemplates, RelationshipTemplate);
-        await this.saveNewCaches(caches.tokens, DbCollectionName.Tokens, Token);
         await this.saveNewCaches(caches.identityDeletionProcesses, DbCollectionName.IdentityDeletionProcess, IdentityDeletionProcess);
     }
 
@@ -202,7 +192,6 @@ export class CacheFetcher {
     public constructor(
         private readonly fileController: FileController,
         private readonly relationshipTemplateController: RelationshipTemplateController,
-        private readonly tokenController: TokenController,
         private readonly identityDeletionProcessController: IdentityDeletionProcessController
     ) {}
 
@@ -210,11 +199,10 @@ export class CacheFetcher {
         const caches = await Promise.all([
             this.fetchCaches(this.fileController, input.files),
             this.fetchCaches(this.relationshipTemplateController, input.relationshipTemplates),
-            this.fetchCaches(this.tokenController, input.tokens),
             this.fetchCaches(this.identityDeletionProcessController, input.identityDeletionProcesses)
         ]);
 
-        const output: FetchCacheOutput = { files: caches[0], relationshipTemplates: caches[1], tokens: caches[2], identityDeletionProcesses: caches[3] };
+        const output: FetchCacheOutput = { files: caches[0], relationshipTemplates: caches[1], identityDeletionProcesses: caches[2] };
 
         return output;
     }
@@ -231,14 +219,12 @@ interface FetchCacheInput {
     messages?: CoreId[];
     relationships?: CoreId[];
     relationshipTemplates?: CoreId[];
-    tokens?: CoreId[];
     identityDeletionProcesses?: CoreId[];
 }
 
 interface FetchCacheOutput {
     files: FetchCacheOutputItem<CachedFile>[];
     relationshipTemplates: FetchCacheOutputItem<CachedRelationshipTemplate>[];
-    tokens: FetchCacheOutputItem<CachedToken>[];
     identityDeletionProcesses: FetchCacheOutputItem<CachedIdentityDeletionProcess>[];
 }
 
