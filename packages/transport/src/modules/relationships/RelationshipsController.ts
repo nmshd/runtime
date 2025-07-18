@@ -56,58 +56,6 @@ export class RelationshipsController extends TransportController {
         return relationships;
     }
 
-    // public async updateCache(ids: string[]): Promise<Relationship[]> {
-    //     if (ids.length < 1) {
-    //         return [];
-    //     }
-
-    //     const resultItems = (await this.client.getRelationships({ ids })).value;
-    //     const promises = [];
-    //     for await (const resultItem of resultItems) {
-    //         promises.push(this.updateExistingRelationshipInDb(resultItem.id, resultItem));
-    //     }
-    //     return await Promise.all(promises);
-    // }
-
-    // public async fetchCaches(ids: CoreId[]): Promise<{ id: CoreId; cache: CachedRelationship }[]> {
-    //     if (ids.length === 0) return [];
-
-    //     const backboneRelationships = await (await this.client.getRelationships({ ids: ids.map((id) => id.id) })).value.collect();
-
-    //     const decryptionPromises = backboneRelationships.map(async (r) => {
-    //         const relationshipDoc = await this.relationships.read(r.id);
-    //         if (!relationshipDoc) {
-    //             this._log.error(
-    //                 `Relationship '${r.id}' not found in local database and the cache fetching was therefore skipped. This should not happen and might be a bug in the application logic.`
-    //             );
-    //             return;
-    //         }
-
-    //         const relationship = Relationship.from(relationshipDoc);
-
-    //         return {
-    //             id: CoreId.from(r.id),
-    //             cache: await this.decryptRelationship(r, relationship.relationshipSecretId)
-    //         };
-    //     });
-
-    //     const caches = await Promise.all(decryptionPromises);
-    //     return caches.filter((c) => c !== undefined);
-    // }
-
-    // @log()
-    // private async updateExistingRelationshipInDb(id: string, response: BackboneRelationship) {
-    //     const relationshipDoc = await this.relationships.read(id);
-    //     if (!relationshipDoc) throw TransportCoreErrors.general.recordNotFound(Relationship, id);
-
-    //     const relationship = Relationship.from(relationshipDoc);
-
-    //     await this.updateCacheOfRelationship(relationship, response);
-    //     relationship.status = response.status;
-    //     await this.relationships.update(relationshipDoc, relationship);
-    //     return relationship;
-    // }
-
     public async getRelationshipToIdentity(address: CoreAddress, status?: RelationshipStatus): Promise<Relationship | undefined> {
         const query: any = { [`${nameof<Relationship>((r) => r.peer)}.${nameof<Identity>((r) => r.address)}`]: address.toString() };
         if (status) query[`${nameof<Relationship>((r) => r.status)}`] = status;
@@ -384,14 +332,6 @@ export class RelationshipsController extends TransportController {
 
         throw TransportCoreErrors.relationships.wrongRelationshipStatus(relationship.id.toString(), relationship.status);
     }
-
-    // private async updateCacheOfRelationship(relationship: Relationship, response?: BackboneRelationship) {
-    //     response ??= (await this.client.getRelationship(relationship.id.toString())).value;
-
-    //     const cachedRelationship = await this.decryptRelationship(response, relationship.relationshipSecretId);
-
-    //     relationship.setCache(cachedRelationship);
-    // }
 
     private async decryptRelationship(response: BackboneRelationship, relationshipSecretId: CoreId) {
         if (!response.creationContent) throw new TransportError("Creation content is missing");
