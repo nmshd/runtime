@@ -91,16 +91,6 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
     @serialize()
     public metadataModifiedAt?: CoreDate;
 
-    public override toJSON(verbose?: boolean | undefined, serializeAsString?: boolean | undefined): Object {
-        const json = super.toJSON(verbose, serializeAsString) as any;
-
-        // Adds flattened peerAddress and templateId to the JSON stored in the database.
-        // This helps us to boost the performance of database queries that include these fields.
-        json.peerAddress = this.peer.address.toString();
-
-        return json;
-    }
-
     public static fromBackboneAndCreationContent(
         response: BackboneGetRelationshipResponse,
         peer: IIdentity,
