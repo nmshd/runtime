@@ -11,7 +11,14 @@ import {
 } from "@nmshd/content";
 import { CoreAddress, CoreDate } from "@nmshd/core-types";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { AttributeSuccessorParams, OwnRelationshipAttributeSharingInfo, PeerRelationshipAttributeSharingInfo, PeerSharedAttributeSucceededEvent } from "../../../attributes";
+import {
+    OwnRelationshipAttributeSharingInfo,
+    PeerIdentityAttribute,
+    PeerIdentityAttributeSharingInfo,
+    PeerRelationshipAttributeSharingInfo,
+    PeerSharedAttributeSucceededEvent
+} from "../../../attributes";
+import { PeerIdentityAttributeSuccessorParams } from "../../../attributes/local/PeerIdentityAttributeSuccessorParams";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
@@ -179,30 +186,45 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
 
         if (responseItem instanceof CreateAttributeAcceptResponseItem) {
             if (requestItem.attribute instanceof IdentityAttribute && isPeerAttribute) {
-                await this.consumptionController.attributes.createPeerIdentityAttribute(requestItem.attribute, sharingInfo, responseItem.attributeId);
+                await this.consumptionController.attributes.createPeerIdentityAttribute(
+                    requestItem.attribute,
+                    PeerIdentityAttributeSharingInfo.from(sharingInfo),
+                    responseItem.attributeId
+                );
                 return;
             }
 
             if (requestItem.attribute instanceof RelationshipAttribute && isPeerAttribute) {
-                await this.consumptionController.attributes.createPeerRelationshipAttribute(requestItem.attribute, sharingInfo, responseItem.attributeId);
+                await this.consumptionController.attributes.createPeerRelationshipAttribute(
+                    requestItem.attribute,
+                    PeerRelationshipAttributeSharingInfo.from(sharingInfo),
+                    responseItem.attributeId
+                );
                 return;
             }
 
             if (requestItem.attribute instanceof RelationshipAttribute && isOwnAttribute) {
-                await this.consumptionController.attributes.createOwnRelationshipAttribute(requestItem.attribute, sharingInfo, responseItem.attributeId);
+                await this.consumptionController.attributes.createOwnRelationshipAttribute(
+                    requestItem.attribute,
+                    OwnRelationshipAttributeSharingInfo.from(sharingInfo),
+                    responseItem.attributeId
+                );
                 return;
             }
         }
 
         if (responseItem instanceof AttributeSuccessionAcceptResponseItem && responseItem.successorContent instanceof IdentityAttribute) {
-            const successorParams = AttributeSuccessorParams.from({
+            const predecessor = await this.consumptionController.attributes.getLocalAttribute(responseItem.predecessorId);
+            if (!predecessor || !(predecessor instanceof PeerIdentityAttribute)) return;
+
+            const successorParams = PeerIdentityAttributeSuccessorParams.from({
                 id: responseItem.successorId,
                 content: responseItem.successorContent,
                 sharingInfo
             });
-            const { predecessor, successor } = await this.consumptionController.attributes.succeedAttribute(responseItem.predecessorId, successorParams);
+            const { predecessor: updatedPredecessor, successor } = await this.consumptionController.attributes.succeedPeerIdentityAttribute(predecessor, successorParams);
             // TODO: check publishing of events
-            return new PeerSharedAttributeSucceededEvent(this.currentIdentityAddress.toString(), predecessor, successor);
+            return new PeerSharedAttributeSucceededEvent(this.currentIdentityAddress.toString(), updatedPredecessor, successor);
         }
     }
 }

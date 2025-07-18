@@ -63,7 +63,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                     );
                 }
 
-                const sharedSuccessors = await this.consumptionController.attributes.getSharedSuccessorsOfOwnIdentityAttribute(foundAttribute, recipient);
+                const sharedSuccessors = await this.consumptionController.attributes.getSharedSuccessorsOfAttribute(foundAttribute, recipient);
                 if (sharedSuccessors.length > 0) {
                     return ValidationResult.error(
                         ConsumptionCoreErrors.requests.invalidRequestItem(
@@ -72,7 +72,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                     );
                 }
 
-                const sharedPredecessors = await this.consumptionController.attributes.getSharedPredecessorsOfOwnIdentityAttribute(foundAttribute, recipient);
+                const sharedPredecessors = await this.consumptionController.attributes.getSharedPredecessorsOfAttribute(foundAttribute, recipient);
                 if (sharedPredecessors.length > 0) {
                     return ValidationResult.error(
                         ConsumptionCoreErrors.requests.invalidRequestItem(
@@ -176,9 +176,9 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                 initialAttributePeer: requestItem.thirdPartyAddress!
             });
             const thirdPartyRelationshipAttribute = await this.consumptionController.attributes.createThirdPartyRelationshipAttribute(
-                requestItem.sourceAttributeId,
                 requestItem.attribute as RelationshipAttribute,
-                sharingInfo
+                sharingInfo,
+                requestItem.sourceAttributeId
             );
 
             // TODO: returning the attributeId is unnecessary now
@@ -207,9 +207,9 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             sharedAt: CoreDate.utc()
         });
         const localAttribute = await this.consumptionController.attributes.createPeerIdentityAttribute(
-            requestItem.sourceAttributeId,
             requestItem.attribute as IdentityAttribute,
-            sharingInfo
+            sharingInfo,
+            requestItem.sourceAttributeId
         );
 
         return ShareAttributeAcceptResponseItem.from({
