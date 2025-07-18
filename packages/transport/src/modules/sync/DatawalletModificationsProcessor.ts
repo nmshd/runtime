@@ -13,8 +13,6 @@ import { IdentityDeletionProcessController } from "../accounts/IdentityDeletionP
 import { FileController } from "../files/FileController";
 import { CachedFile } from "../files/local/CachedFile";
 import { File } from "../files/local/File";
-import { MessageController } from "../messages/MessageController";
-import { RelationshipsController } from "../relationships/RelationshipsController";
 import { CachedRelationshipTemplate } from "../relationshipTemplates/local/CachedRelationshipTemplate";
 import { RelationshipTemplate } from "../relationshipTemplates/local/RelationshipTemplate";
 import { RelationshipTemplateController } from "../relationshipTemplates/RelationshipTemplateController";
@@ -49,8 +47,6 @@ export class DatawalletModificationsProcessor {
 
     private readonly collectionsWithCacheableItems: string[] = [
         DbCollectionName.Files,
-        DbCollectionName.Messages,
-        DbCollectionName.Relationships,
         DbCollectionName.RelationshipTemplates,
         DbCollectionName.Tokens,
         DbCollectionName.IdentityDeletionProcess
@@ -205,9 +201,7 @@ export class DatawalletModificationsProcessor {
 export class CacheFetcher {
     public constructor(
         private readonly fileController: FileController,
-        private readonly messageController: MessageController,
         private readonly relationshipTemplateController: RelationshipTemplateController,
-        private readonly relationshipController: RelationshipsController,
         private readonly tokenController: TokenController,
         private readonly identityDeletionProcessController: IdentityDeletionProcessController
     ) {}
