@@ -21,7 +21,6 @@ export interface IFile extends ICoreSynchronizable {
     expiresAt: ICoreDate;
     cipherKey: ICryptoSecretKey;
     description?: string;
-    originalFilename?: string;
     owner: CoreAddress;
     ownerSignature: ICryptoSignature;
     plaintextHash: ICoreHash;
@@ -45,9 +44,24 @@ export class File extends CoreSynchronizable implements IFile {
         nameof<File>((r) => r.secretKey),
         nameof<File>((r) => r.isOwn),
         nameof<File>((r) => r.ownershipToken),
-        nameof<File>((r) => r.ownershipIsLocked)
+        nameof<File>((r) => r.ownershipIsLocked),
+        nameof<File>((f) => f.filesize),
+        nameof<File>((f) => f.filemodified),
+        nameof<File>((f) => f.mimetype),
+        nameof<File>((f) => f.cipherHash),
+        nameof<File>((f) => f.createdAt),
+        nameof<File>((f) => f.expiresAt),
+        nameof<File>((f) => f.cipherKey),
+        nameof<File>((f) => f.owner),
+        nameof<File>((f) => f.ownerSignature),
+        nameof<File>((f) => f.plaintextHash),
+        nameof<File>((f) => f.createdBy),
+        nameof<File>((f) => f.createdByDevice),
+        nameof<File>((f) => f.deletedAt),
+        nameof<File>((f) => f.deletedBy),
+        nameof<File>((f) => f.deletedByDevice)
     ];
-    // TODO: add all props
+    public override readonly contentProperties = [nameof<File>((f) => f.title), nameof<File>((f) => f.description), nameof<File>((f) => f.filename), nameof<File>((f) => f.tags)];
     public override readonly metadataProperties = [nameof<File>((r) => r.metadata), nameof<File>((r) => r.metadataModifiedAt)];
 
     @validate()
