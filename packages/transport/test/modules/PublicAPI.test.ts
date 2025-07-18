@@ -109,8 +109,7 @@ publicFunctions[RelationshipsController.name] = [
     nameof<RelationshipsController>((r) => r.sendRelationship),
     nameof<RelationshipsController>((r) => r.accept),
     nameof<RelationshipsController>((r) => r.reject),
-    nameof<RelationshipsController>((r) => r.revoke),
-    nameof<FileController>((r) => r.updateCache)
+    nameof<RelationshipsController>((r) => r.revoke)
 ];
 publicFunctions[RelationshipSecretController.name] = [
     nameof<RelationshipSecretController>((r) => r.init),
@@ -135,7 +134,7 @@ publicFunctions[RelationshipTemplateController.name] = [
     nameof<RelationshipTemplateController>((r) => r.deleteRelationshipTemplate),
     nameof<RelationshipTemplateController>((r) => r.getRelationshipTemplates),
     nameof<RelationshipTemplateController>((r) => r.getRelationshipTemplate),
-    nameof<FileController>((r) => r.updateCache)
+    nameof<RelationshipTemplateController>((r) => r.updateCache)
 ];
 publicFunctions[SecretController.name] = [
     nameof<SecretController>((r) => r.init),
