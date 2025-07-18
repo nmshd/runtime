@@ -183,6 +183,11 @@ export class RelationshipTemplateController extends TransportController {
 
         if (templateDoc) {
             const template = RelationshipTemplate.from(templateDoc);
+
+            if (!template.isOwn) {
+                this.eventBus.publish(new PeerRelationshipTemplateLoadedEvent(this.parent.identity.address.toString(), template));
+            }
+
             return template;
         }
 
