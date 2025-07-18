@@ -63,7 +63,6 @@ export class GetFilesUseCase extends UseCase<GetFilesRequest, FileDTO[]> {
             [nameof<FileDTO>((c) => c.title)]: `${nameof<File>((f) => f.cache)}.${nameof<CachedFile>((c) => c.title)}`,
             [nameof<FileDTO>((c) => c.tags)]: `${nameof<File>((f) => f.cache)}.${nameof<CachedFile>((c) => c.tags)}`,
             [nameof<FileDTO>((c) => c.isOwn)]: nameof<File>((f) => f.isOwn),
-            [nameof<FileDTO>((c) => c.ownershipToken)]: nameof<File>((f) => f.ownershipToken),
             [nameof<FileDTO>((c) => c.ownershipIsLocked)]: nameof<File>((f) => f.ownershipIsLocked)
         },
         custom: {
@@ -79,6 +78,9 @@ export class GetFilesUseCase extends UseCase<GetFilesRequest, FileDTO[]> {
                     allowedTags.push(tagQuery);
                 }
                 query["$or"] = allowedTags;
+            },
+            [nameof<FileDTO>((c) => c.ownershipToken)]: (query: any, input: string | string[]) => {
+                query[`${nameof<File>((f) => f.ownershipToken)}`] = input;
             }
         }
     });
