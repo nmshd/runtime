@@ -96,7 +96,7 @@ export class IncomingRequestsController extends ConsumptionBaseController {
         if (message.isOwn) throw new ConsumptionError("Cannot create incoming Request from own Message");
 
         return {
-            peer: message.cache!.createdBy,
+            peer: message.createdBy,
             source: {
                 reference: message.id,
                 type: "Message"

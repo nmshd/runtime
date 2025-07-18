@@ -513,23 +513,21 @@ export class TestObjectFactory {
                 secretKey: CoreBuffer.from("lerJyX8ydJDEXowq2PMMntRXXA27wgHJYA_BjnFx55Y"),
                 algorithm: CryptoEncryptionAlgorithm.XCHACHA20_POLY1305
             }),
-            cache: {
-                content: content,
-                createdAt: creationDate,
-                createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
-                createdByDevice: { id: "senderDeviceId" },
-                receivedByEveryone: false,
-                recipients: [
-                    {
-                        address: recipient,
-                        encryptedKey: CryptoCipher.from({
-                            cipher: CoreBuffer.fromUtf8("test"),
-                            algorithm: CryptoEncryptionAlgorithm.XCHACHA20_POLY1305,
-                            nonce: CoreBuffer.fromUtf8("some-arbitrary-nonce....")
-                        })
-                    }
-                ]
-            }
+            content: content,
+            createdAt: creationDate,
+            createdBy: CoreAddress.from("did:e:a-domain:dids:anidentity"),
+            createdByDevice: { id: "senderDeviceId" },
+            receivedByEveryone: false,
+            recipients: [
+                {
+                    address: recipient,
+                    encryptedKey: CryptoCipher.from({
+                        cipher: CoreBuffer.fromUtf8("test"),
+                        algorithm: CryptoEncryptionAlgorithm.XCHACHA20_POLY1305,
+                        nonce: CoreBuffer.fromUtf8("some-arbitrary-nonce....")
+                    })
+                }
+            ]
         };
     }
 
@@ -563,23 +561,21 @@ export class TestObjectFactory {
                 secretKey: CoreBuffer.from("lerJyX8ydJDEXowq2PMMntRXXA27wgHJYA_BjnFx55Y"),
                 algorithm: CryptoEncryptionAlgorithm.XCHACHA20_POLY1305
             }),
-            cache: {
-                content: {},
-                createdAt: CoreDate.utc(),
-                createdBy: sender,
-                createdByDevice: { id: "senderDeviceId" },
-                receivedByEveryone: false,
-                recipients: [
-                    {
-                        address: CoreAddress.from("did:e:a-domain:dids:anidentity"),
-                        encryptedKey: CryptoCipher.from({
-                            cipher: CoreBuffer.fromUtf8("test"),
-                            algorithm: CryptoEncryptionAlgorithm.XCHACHA20_POLY1305,
-                            nonce: CoreBuffer.fromUtf8("some-arbitrary-nonce....")
-                        })
-                    }
-                ]
-            }
+            content: {},
+            createdAt: CoreDate.utc(),
+            createdBy: sender,
+            createdByDevice: { id: "senderDeviceId" },
+            receivedByEveryone: false,
+            recipients: [
+                {
+                    address: CoreAddress.from("did:e:a-domain:dids:anidentity"),
+                    encryptedKey: CryptoCipher.from({
+                        cipher: CoreBuffer.fromUtf8("test"),
+                        algorithm: CryptoEncryptionAlgorithm.XCHACHA20_POLY1305,
+                        nonce: CoreBuffer.fromUtf8("some-arbitrary-nonce....")
+                    })
+                }
+            ]
         };
     }
 

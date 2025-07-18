@@ -35,6 +35,9 @@ export class DatawalletModificationMapper {
             case "TechnicalData":
                 payloadCategory = DatawalletModificationCategory.TechnicalData;
                 break;
+            case "Content":
+                payloadCategory = DatawalletModificationCategory.Content;
+                break;
             case "Userdata":
                 payloadCategory = DatawalletModificationCategory.Userdata;
                 break;

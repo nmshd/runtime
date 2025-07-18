@@ -31,7 +31,7 @@ export class ReceivedNotificationUseCase extends UseCase<ReceivedNotificationReq
         const message = await this.messageController.getMessage(CoreId.from(request.messageId));
         if (!message) return Result.fail(RuntimeErrors.general.recordNotFound(Message));
 
-        if (!(message.cache!.content instanceof Notification)) return Result.fail(RuntimeErrors.notifications.messageDoesNotContainNotification(message.id));
+        if (!(message.content instanceof Notification)) return Result.fail(RuntimeErrors.notifications.messageDoesNotContainNotification(message.id));
         if (message.isOwn) return Result.fail(RuntimeErrors.notifications.cannotReceiveNotificationFromOwnMessage());
 
         const notification = await this.notificationsController.received(message);

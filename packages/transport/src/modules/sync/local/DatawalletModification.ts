@@ -20,6 +20,7 @@ export enum DatawalletModificationType {
 
 export enum DatawalletModificationCategory {
     TechnicalData = "TechnicalData",
+    Content = "Content",
     Userdata = "Userdata",
     Metadata = "Metadata"
 }
