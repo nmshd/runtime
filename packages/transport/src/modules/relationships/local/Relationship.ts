@@ -1,13 +1,13 @@
-import { ISerializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreDate, CoreId, ICoreId } from "@nmshd/core-types";
+import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
+import { CoreDate, CoreId, ICoreDate, ICoreId } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
 import { CoreSynchronizable, ICoreSynchronizable, TransportError } from "../../../core";
 import { Identity, IIdentity } from "../../accounts/data/Identity";
 import { BackboneGetRelationshipResponse } from "../backbone/BackboneGetRelationships";
 import { RelationshipStatus } from "../transmission/RelationshipStatus";
-import { CachedRelationship, ICachedRelationship } from "./CachedRelationship";
 import { IPeerDeletionInfo, PeerDeletionInfo } from "./PeerDeletionInfo";
 import { RelationshipAuditLog } from "./RelationshipAuditLog";
+import { IRelationshipAuditLogEntry, RelationshipAuditLogEntry } from "./RelationshipAuditLogEntry";
 
 export interface IRelationship extends ICoreSynchronizable {
     relationshipSecretId: ICoreId;
@@ -15,8 +15,12 @@ export interface IRelationship extends ICoreSynchronizable {
     peerDeletionInfo?: IPeerDeletionInfo;
     status: RelationshipStatus;
 
-    cache?: ICachedRelationship;
-    cachedAt?: CoreDate;
+    templateId: ICoreId;
+    creationContent: ISerializable;
+
+    lastMessageSentAt?: ICoreDate;
+    lastMessageReceivedAt?: ICoreDate;
+    auditLog: IRelationshipAuditLogEntry[];
 
     metadata?: any;
     metadataModifiedAt?: CoreDate;
@@ -30,7 +34,15 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
         nameof<Relationship>((r) => r.relationshipSecretId),
         nameof<Relationship>((r) => r.peer),
         nameof<Relationship>((r) => r.status),
-        nameof<Relationship>((r) => r.peerDeletionInfo)
+        nameof<Relationship>((r) => r.peerDeletionInfo),
+        nameof<Relationship>((r) => r.auditLog)
+    ];
+
+    public override readonly contentProperties = [
+        nameof<Relationship>((r) => r.templateId),
+        nameof<Relationship>((r) => r.creationContent),
+        nameof<Relationship>((r) => r.lastMessageSentAt),
+        nameof<Relationship>((r) => r.lastMessageReceivedAt)
     ];
 
     public override readonly metadataProperties = [nameof<Relationship>((r) => r.metadata), nameof<Relationship>((r) => r.metadataModifiedAt)];
@@ -51,13 +63,25 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
     @serialize()
     public status: RelationshipStatus;
 
-    @validate({ nullable: true })
+    @validate()
     @serialize()
-    public cache?: CachedRelationship;
+    public templateId: CoreId;
+
+    @validate()
+    @serialize()
+    public creationContent: Serializable;
 
     @validate({ nullable: true })
     @serialize()
-    public cachedAt?: CoreDate;
+    public lastMessageSentAt?: CoreDate;
+
+    @validate({ nullable: true })
+    @serialize()
+    public lastMessageReceivedAt?: CoreDate;
+
+    @validate()
+    @serialize({ type: RelationshipAuditLogEntry })
+    public auditLog: RelationshipAuditLogEntry[];
 
     @validate({ nullable: true })
     @serialize()
@@ -73,7 +97,6 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
         // Adds flattened peerAddress and templateId to the JSON stored in the database.
         // This helps us to boost the performance of database queries that include these fields.
         json.peerAddress = this.peer.address.toString();
-        json.templateId = this.cache?.templateId.toString();
 
         return json;
     }
@@ -84,30 +107,19 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
         creationContent: ISerializable,
         relationshipSecretId: CoreId
     ): Relationship {
-        const cache = CachedRelationship.from({
-            creationContent,
-            templateId: CoreId.from(response.relationshipTemplateId),
-            auditLog: RelationshipAuditLog.fromBackboneAuditLog(response.auditLog)
-        });
-
         return Relationship.from({
             id: CoreId.from(response.id),
             relationshipSecretId: relationshipSecretId,
             peer: peer,
             status: RelationshipStatus.Pending,
-            cache: cache,
-            cachedAt: CoreDate.utc()
+            creationContent,
+            templateId: CoreId.from(response.relationshipTemplateId),
+            auditLog: RelationshipAuditLog.fromBackboneAuditLog(response.auditLog)
         });
     }
 
     public static from(value: IRelationship): Relationship {
         return this.fromAny(value);
-    }
-
-    public setCache(cache: CachedRelationship): this {
-        this.cache = cache;
-        this.cachedAt = CoreDate.utc();
-        return this;
     }
 
     public setMetadata(metadata: any): this {

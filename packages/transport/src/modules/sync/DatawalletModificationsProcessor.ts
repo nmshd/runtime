@@ -14,8 +14,6 @@ import { FileController } from "../files/FileController";
 import { CachedFile } from "../files/local/CachedFile";
 import { File } from "../files/local/File";
 import { MessageController } from "../messages/MessageController";
-import { CachedRelationship } from "../relationships/local/CachedRelationship";
-import { Relationship } from "../relationships/local/Relationship";
 import { RelationshipsController } from "../relationships/RelationshipsController";
 import { CachedRelationshipTemplate } from "../relationshipTemplates/local/CachedRelationshipTemplate";
 import { RelationshipTemplate } from "../relationshipTemplates/local/RelationshipTemplate";
@@ -160,10 +158,6 @@ export class DatawalletModificationsProcessor {
         await this.saveNewCaches(caches.relationshipTemplates, DbCollectionName.RelationshipTemplates, RelationshipTemplate);
         await this.saveNewCaches(caches.tokens, DbCollectionName.Tokens, Token);
         await this.saveNewCaches(caches.identityDeletionProcesses, DbCollectionName.IdentityDeletionProcess, IdentityDeletionProcess);
-
-        // Need to fetch the cache for relationships after the cache for relationship templates was fetched, because when building the relationship cache, the cache of thecorresponding relationship template is needed
-        const relationshipCaches = await this.cacheFetcher.fetchCacheFor({ relationships: cacheChangesGroupedByCollection.relationshipIds });
-        await this.saveNewCaches(relationshipCaches.relationships, DbCollectionName.Relationships, Relationship);
     }
 
     @log()
@@ -221,13 +215,12 @@ export class CacheFetcher {
     public async fetchCacheFor(input: FetchCacheInput): Promise<FetchCacheOutput> {
         const caches = await Promise.all([
             this.fetchCaches(this.fileController, input.files),
-            this.fetchCaches(this.relationshipController, input.relationships),
             this.fetchCaches(this.relationshipTemplateController, input.relationshipTemplates),
             this.fetchCaches(this.tokenController, input.tokens),
             this.fetchCaches(this.identityDeletionProcessController, input.identityDeletionProcesses)
         ]);
 
-        const output: FetchCacheOutput = { files: caches[0], relationships: caches[1], relationshipTemplates: caches[2], tokens: caches[3], identityDeletionProcesses: caches[4] };
+        const output: FetchCacheOutput = { files: caches[0], relationshipTemplates: caches[1], tokens: caches[2], identityDeletionProcesses: caches[3] };
 
         return output;
     }
@@ -250,7 +243,6 @@ interface FetchCacheInput {
 
 interface FetchCacheOutput {
     files: FetchCacheOutputItem<CachedFile>[];
-    relationships: FetchCacheOutputItem<CachedRelationship>[];
     relationshipTemplates: FetchCacheOutputItem<CachedRelationshipTemplate>[];
     tokens: FetchCacheOutputItem<CachedToken>[];
     identityDeletionProcesses: FetchCacheOutputItem<CachedIdentityDeletionProcess>[];
