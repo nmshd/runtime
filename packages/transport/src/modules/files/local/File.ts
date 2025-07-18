@@ -1,15 +1,36 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreDate, FileReference, ICoreDate } from "@nmshd/core-types";
-import { CryptoSecretKey, ICryptoSecretKey } from "@nmshd/crypto";
+import { CoreAddress, CoreDate, CoreId, FileReference, ICoreAddress, ICoreDate, ICoreId } from "@nmshd/core-types";
+import { CryptoSecretKey, CryptoSignature, ICryptoSecretKey, ICryptoSignature } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
-import { CoreSynchronizable, ICoreSynchronizable } from "../../../core";
-import { CachedFile, ICachedFile } from "./CachedFile";
+import { CoreHash, CoreSynchronizable, ICoreHash, ICoreSynchronizable } from "../../../core";
+import { BackboneGetFilesResponse } from "../backbone/BackboneGetFiles";
+import { FileMetadata } from "../transmission/FileMetadata";
 
 export interface IFile extends ICoreSynchronizable {
     secretKey: ICryptoSecretKey;
     isOwn: boolean;
-    cache?: ICachedFile;
-    cachedAt?: ICoreDate;
+
+    title?: string;
+    filename: string;
+    tags?: string[];
+    filesize: number;
+    filemodified?: CoreDate;
+    mimetype: string;
+    cipherHash: ICoreHash;
+    createdAt: ICoreDate;
+    expiresAt: ICoreDate;
+    cipherKey: ICryptoSecretKey;
+    description?: string;
+    originalFilename?: string;
+    owner: CoreAddress;
+    ownerSignature: ICryptoSignature;
+    plaintextHash: ICoreHash;
+    createdBy: ICoreAddress;
+    createdByDevice: ICoreId;
+    deletedAt?: ICoreDate;
+    deletedBy?: ICoreAddress;
+    deletedByDevice?: ICoreId;
+
     metadata?: any;
     metadataModifiedAt?: ICoreDate;
     ownershipToken?: string;
@@ -26,6 +47,7 @@ export class File extends CoreSynchronizable implements IFile {
         nameof<File>((r) => r.ownershipToken),
         nameof<File>((r) => r.ownershipIsLocked)
     ];
+    // TODO: add all props
     public override readonly metadataProperties = [nameof<File>((r) => r.metadata), nameof<File>((r) => r.metadataModifiedAt)];
 
     @validate()
@@ -38,11 +60,79 @@ export class File extends CoreSynchronizable implements IFile {
 
     @validate({ nullable: true })
     @serialize()
-    public cache?: CachedFile;
+    public title?: string;
+
+    @validate()
+    @serialize()
+    public filename: string;
+
+    @validate({ nullable: true })
+    @serialize({ type: String })
+    public tags?: string[];
+
+    @validate()
+    @serialize()
+    public filesize: number;
 
     @validate({ nullable: true })
     @serialize()
-    public cachedAt?: CoreDate;
+    public filemodified?: CoreDate;
+
+    @validate()
+    @serialize()
+    public mimetype: string;
+
+    @validate()
+    @serialize()
+    public cipherHash: CoreHash;
+
+    @validate()
+    @serialize()
+    public createdAt: CoreDate;
+
+    @validate()
+    @serialize()
+    public expiresAt: CoreDate;
+
+    @validate({ nullable: true })
+    @serialize()
+    public description?: string;
+
+    @validate()
+    @serialize()
+    public owner: CoreAddress;
+
+    @validate()
+    @serialize()
+    public ownerSignature: CryptoSignature;
+
+    @validate()
+    @serialize()
+    public plaintextHash: CoreHash;
+
+    @validate()
+    @serialize()
+    public createdBy: CoreAddress;
+
+    @validate()
+    @serialize()
+    public createdByDevice: CoreId;
+
+    @validate()
+    @serialize()
+    public cipherKey: CryptoSecretKey;
+
+    @validate({ nullable: true })
+    @serialize()
+    public deletedAt?: CoreDate;
+
+    @validate({ nullable: true })
+    @serialize()
+    public deletedBy?: CoreAddress;
+
+    @validate({ nullable: true })
+    @serialize()
+    public deletedByDevice?: CoreId;
 
     @validate({ nullable: true })
     @serialize()
@@ -66,12 +156,6 @@ export class File extends CoreSynchronizable implements IFile {
 
     public toFileReference(backboneBaseUrl: string): FileReference {
         return FileReference.from({ id: this.id, backboneBaseUrl, key: this.secretKey });
-    }
-
-    public setCache(cache: CachedFile): this {
-        this.cache = cache;
-        this.cachedAt = CoreDate.utc();
-        return this;
     }
 
     public setMetadata(metadata: any): this {
@@ -99,5 +183,40 @@ export class File extends CoreSynchronizable implements IFile {
         this.ownershipToken = undefined;
         this.ownershipIsLocked = undefined;
         return this;
+    }
+
+    public static fromBackbone(
+        localData: {
+            id: CoreId;
+            secretKey: ICryptoSecretKey;
+            isOwn: boolean;
+        },
+        backboneResponse: BackboneGetFilesResponse,
+        metadata: FileMetadata
+    ): File {
+        return File.from({
+            id: localData.id,
+            secretKey: CryptoSecretKey.from(localData.secretKey),
+            isOwn: localData.isOwn,
+            title: metadata.title,
+            description: metadata.description,
+            cipherKey: metadata.secretKey,
+            filemodified: metadata.filemodified,
+            filename: metadata.filename,
+            tags: metadata.tags,
+            filesize: metadata.filesize,
+            plaintextHash: metadata.plaintextHash,
+            deletedAt: backboneResponse.deletedAt ? CoreDate.from(backboneResponse.deletedAt) : undefined,
+            deletedBy: backboneResponse.deletedBy ? CoreAddress.from(backboneResponse.deletedBy) : undefined,
+            deletedByDevice: backboneResponse.deletedByDevice ? CoreId.from(backboneResponse.deletedByDevice) : undefined,
+            cipherHash: CoreHash.from(backboneResponse.cipherHash),
+            createdAt: CoreDate.from(backboneResponse.createdAt),
+            createdBy: CoreAddress.from(backboneResponse.createdBy),
+            createdByDevice: CoreId.from(backboneResponse.createdByDevice),
+            expiresAt: CoreDate.from(backboneResponse.expiresAt),
+            mimetype: metadata.mimetype,
+            owner: CoreAddress.from(backboneResponse.owner),
+            ownerSignature: CryptoSignature.fromBase64(backboneResponse.ownerSignature)
+        });
     }
 }

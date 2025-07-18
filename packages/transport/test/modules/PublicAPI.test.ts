@@ -87,8 +87,7 @@ publicFunctions[FileController.name] = [
     nameof<FileController>((r) => r.getOrLoadFileByReference),
     nameof<FileController>((r) => r.getOrLoadFile),
     nameof<FileController>((r) => r.sendFile),
-    nameof<FileController>((r) => r.downloadFileContent),
-    nameof<FileController>((r) => r.updateCache)
+    nameof<FileController>((r) => r.downloadFileContent)
 ];
 publicFunctions[MessageController.name] = [
     nameof<MessageController>((r) => r.init),

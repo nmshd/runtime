@@ -67,7 +67,7 @@ describe("TokenController", function () {
         expect((receivedToken.content as any).content).toBe((sentToken.content as any).content);
     });
 
-    test("should get the cached token", async function () {
+    test("should get the stored token", async function () {
         const sentToken = await sender.tokens.getToken(tempId1);
         const receivedToken = await recipient.tokens.getToken(tempId1);
         expect(sentToken).toBeDefined();
@@ -249,7 +249,7 @@ describe("TokenController", function () {
         expect(receivedTokenContent.passwordProtection!.salt.toBase64URL()).toBe(sentTokenContent.passwordProtection!.salt.toBase64URL());
     });
 
-    test("should get the cached tokens", async function () {
+    test("should get the stored tokens", async function () {
         const sentTokens = await sender.tokens.getTokens();
         const receivedTokens = await recipient.tokens.getTokens();
         expect(sentTokens).toHaveLength(6);

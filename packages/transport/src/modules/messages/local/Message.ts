@@ -109,13 +109,13 @@ export class Message extends CoreSynchronizable implements IMessage {
         return this;
     }
 
-    public updateWithBackboneData(cachedMessage: IBackboneMessageContents): void {
-        this.createdBy = cachedMessage.createdBy;
-        this.createdByDevice = cachedMessage.createdByDevice;
-        this.recipients = cachedMessage.recipients;
-        this.attachments = cachedMessage.attachments;
-        this.content = cachedMessage.content;
-        this.createdAt = cachedMessage.createdAt;
-        this.receivedByEveryone = cachedMessage.receivedByEveryone;
+    public updateWithBackboneData(backboneMessageContents: IBackboneMessageContents): void {
+        this.createdBy = backboneMessageContents.createdBy;
+        this.createdByDevice = backboneMessageContents.createdByDevice;
+        this.recipients = backboneMessageContents.recipients;
+        this.attachments = backboneMessageContents.attachments;
+        this.content = backboneMessageContents.content;
+        this.createdAt = backboneMessageContents.createdAt;
+        this.receivedByEveryone = backboneMessageContents.receivedByEveryone;
     }
 }

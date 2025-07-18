@@ -164,7 +164,7 @@ describe("MessageSync", function () {
         expect(a1MessageFromA1!.recipients[0].receivedAt).toBeDefined();
         expect(a1MessageFromA2!.recipients[0].receivedAt).toBeDefined();
 
-        // A2 receives the CacheChanged modifications and updates its cache
+        // A2 receives the modifications
         await a2.syncDatawallet();
 
         const a2MessageFromA1 = await a2.messages.getMessage(a1SentMessage.id);
