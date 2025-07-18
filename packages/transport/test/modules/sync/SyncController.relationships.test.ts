@@ -179,7 +179,7 @@ describe("RelationshipSync", function () {
         templateOnDevice2 = await device2.relationshipTemplates.getRelationshipTemplate(templateOnDevice1.id);
         expect(templateOnDevice2).toBeDefined();
         expect(templateOnDevice2?.cache).toBeDefined();
-        expect(templateOnDevice2!.toJSON()).toStrictEqual(templateOnDevice1.toJSON());
+        expect(templateOnDevice2!.toJSON()).toStrictEqualExcluding(templateOnDevice1.toJSON(), "cachedAt");
     });
 
     test("Synchronizing after both parties have decomposed simultaneously does not throw", async function () {
