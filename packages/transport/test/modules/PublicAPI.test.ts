@@ -152,7 +152,6 @@ publicFunctions[TokenController.name] = [
     nameof<TokenController>((r) => r.getTokens),
     nameof<TokenController>((r) => r.sendToken),
     nameof<TokenController>((r) => r.getToken),
-    nameof<TokenController>((r) => r.updateCache),
     nameof<TokenController>((r) => r.loadPeerTokenByReference)
 ];
 
