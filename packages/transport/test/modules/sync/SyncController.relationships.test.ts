@@ -42,7 +42,6 @@ describe("RelationshipSync", function () {
 
         relationshipOnRequestorDevice2 = await requestorDevice2.relationships.getRelationship(createdRelationship.id);
         expect(relationshipOnRequestorDevice2).toBeDefined();
-        expect(relationshipOnRequestorDevice2?.cache).toBeDefined();
 
         expect(relationshipOnRequestorDevice2!.toJSON()).toStrictEqualExcluding(createdRelationship.toJSON(), "cachedAt");
 
@@ -194,7 +193,7 @@ describe("RelationshipSync", function () {
 
         const relationship = (await TestUtil.addRelationship(requestor, templator)).acceptedRelationshipFromSelf;
         const relationshipId = relationship.id;
-        const templateId = relationship.cache!.templateId;
+        const templateId = relationship.templateId;
 
         await templator.syncEverything();
         await requestor.syncEverything();
