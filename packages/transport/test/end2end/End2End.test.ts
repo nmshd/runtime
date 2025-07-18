@@ -73,11 +73,11 @@ describe("RelationshipTest: Accept", function () {
 
         const receivedToken = await to.tokens.loadPeerTokenByReference(tokenRef, false);
 
-        if (!(receivedToken.cache!.content instanceof TokenContentRelationshipTemplate)) {
+        if (!(receivedToken.content instanceof TokenContentRelationshipTemplate)) {
             throw new Error("token content not instanceof TokenContentRelationshipTemplate");
         }
 
-        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByTokenContent(receivedToken.cache!.content);
+        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByTokenContent(receivedToken.content);
 
         expect(templateTo.cache!.content).toBeInstanceOf(JSONWrapper);
         const templateContent = templateTo.cache!.content as JSONWrapper;
@@ -173,11 +173,11 @@ describe("RelationshipTest: Reject", function () {
         const tokenRef = token.toTokenReference(from.config.baseUrl);
         const receivedToken = await to.tokens.loadPeerTokenByReference(tokenRef, false);
 
-        if (!(receivedToken.cache!.content instanceof TokenContentRelationshipTemplate)) {
+        if (!(receivedToken.content instanceof TokenContentRelationshipTemplate)) {
             throw new Error("token content not instanceof TokenContentRelationshipTemplate");
         }
 
-        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByTokenContent(receivedToken.cache!.content);
+        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByTokenContent(receivedToken.content);
 
         expect(templateTo.cache!.content).toBeInstanceOf(JSONWrapper);
         const templateContent = templateTo.cache!.content as JSONWrapper;
@@ -270,11 +270,11 @@ describe("RelationshipTest: Revoke", function () {
 
         const receivedToken = await requestor.tokens.loadPeerTokenByReference(tokenRef, false);
 
-        if (!(receivedToken.cache!.content instanceof TokenContentRelationshipTemplate)) {
+        if (!(receivedToken.content instanceof TokenContentRelationshipTemplate)) {
             throw new Error("token content not instanceof TokenContentRelationshipTemplate");
         }
 
-        const templateRequestor = await requestor.relationshipTemplates.loadPeerRelationshipTemplateByTokenContent(receivedToken.cache!.content);
+        const templateRequestor = await requestor.relationshipTemplates.loadPeerRelationshipTemplateByTokenContent(receivedToken.content);
 
         expect(templateRequestor.cache!.content).toBeInstanceOf(JSONWrapper);
         const templateContent = templateRequestor.cache!.content as JSONWrapper;
@@ -342,7 +342,7 @@ describe("RelationshipTest: Revoke", function () {
 
         const receivedToken = await requestor.tokens.loadPeerTokenByReference(tokenRef, false);
 
-        const receivedTemplateToken = TokenContentRelationshipTemplate.from(receivedToken.cache!.content as TokenContentRelationshipTemplate);
+        const receivedTemplateToken = TokenContentRelationshipTemplate.from(receivedToken.content as TokenContentRelationshipTemplate);
 
         const templateRequestor = await requestor.relationshipTemplates.loadPeerRelationshipTemplateByTokenContent(receivedTemplateToken);
 
@@ -823,11 +823,11 @@ describe("RelationshipTest: operation executioner validation (on pending relatio
 
         const receivedToken = await to.tokens.loadPeerTokenByReference(tokenRef, false);
 
-        if (!(receivedToken.cache!.content instanceof TokenContentRelationshipTemplate)) {
+        if (!(receivedToken.content instanceof TokenContentRelationshipTemplate)) {
             throw new Error("token content not instanceof TokenContentRelationshipTemplate");
         }
 
-        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByTokenContent(receivedToken.cache!.content);
+        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByTokenContent(receivedToken.content);
         const request = await to.relationships.sendRelationship({
             template: templateTo,
             creationContent: {
