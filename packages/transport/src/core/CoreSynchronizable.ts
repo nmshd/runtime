@@ -7,6 +7,7 @@ export interface ICoreSynchronizable extends ISerializable {
 
 export abstract class CoreSynchronizable extends Serializable implements ICoreSynchronizable {
     public readonly technicalProperties: string[] = [];
+    public readonly contentProperties: string[] = [];
     public readonly userdataProperties: string[] = [];
     public readonly metadataProperties: string[] = [];
 

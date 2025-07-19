@@ -7,24 +7,9 @@ import _ from "lodash";
 import { TransportCoreErrors, TransportError, TransportIds } from "../../core";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { ICacheable } from "../../core/ICacheable";
-import { CachedIdentityDeletionProcess } from "../accounts/data/CachedIdentityDeletionProcess";
-import { IdentityDeletionProcess } from "../accounts/data/IdentityDeletionProcess";
-import { IdentityDeletionProcessController } from "../accounts/IdentityDeletionProcessController";
 import { FileController } from "../files/FileController";
 import { CachedFile } from "../files/local/CachedFile";
 import { File } from "../files/local/File";
-import { CachedMessage } from "../messages/local/CachedMessage";
-import { Message } from "../messages/local/Message";
-import { MessageController } from "../messages/MessageController";
-import { CachedRelationship } from "../relationships/local/CachedRelationship";
-import { Relationship } from "../relationships/local/Relationship";
-import { RelationshipsController } from "../relationships/RelationshipsController";
-import { CachedRelationshipTemplate } from "../relationshipTemplates/local/CachedRelationshipTemplate";
-import { RelationshipTemplate } from "../relationshipTemplates/local/RelationshipTemplate";
-import { RelationshipTemplateController } from "../relationshipTemplates/RelationshipTemplateController";
-import { CachedToken } from "../tokens/local/CachedToken";
-import { Token } from "../tokens/local/Token";
-import { TokenController } from "../tokens/TokenController";
 import { DatawalletModification, DatawalletModificationType } from "./local/DatawalletModification";
 
 export class DatawalletModificationsProcessor {
@@ -51,14 +36,7 @@ export class DatawalletModificationsProcessor {
         this.cacheChanges = modifications.filter((m) => m.type === DatawalletModificationType.CacheChanged);
     }
 
-    private readonly collectionsWithCacheableItems: string[] = [
-        DbCollectionName.Files,
-        DbCollectionName.Messages,
-        DbCollectionName.Relationships,
-        DbCollectionName.RelationshipTemplates,
-        DbCollectionName.Tokens,
-        DbCollectionName.IdentityDeletionProcess
-    ];
+    private readonly collectionsWithCacheableItems: string[] = [DbCollectionName.Files];
 
     public async execute(): Promise<void> {
         await this.applyModifications();
@@ -151,25 +129,9 @@ export class DatawalletModificationsProcessor {
 
         const cacheChangesGroupedByCollection = this.groupCacheChangesByCollection(cacheChangesWithoutDeletes);
 
-        const caches = await this.cacheFetcher.fetchCacheFor({
-            files: cacheChangesGroupedByCollection.fileIds,
-            relationshipTemplates: cacheChangesGroupedByCollection.relationshipTemplateIds,
-            tokens: cacheChangesGroupedByCollection.tokenIds,
-            identityDeletionProcesses: cacheChangesGroupedByCollection.identityDeletionProcessIds
-        });
+        const caches = await this.cacheFetcher.fetchCacheFor({ files: cacheChangesGroupedByCollection.fileIds });
 
         await this.saveNewCaches(caches.files, DbCollectionName.Files, File);
-        await this.saveNewCaches(caches.relationshipTemplates, DbCollectionName.RelationshipTemplates, RelationshipTemplate);
-        await this.saveNewCaches(caches.tokens, DbCollectionName.Tokens, Token);
-        await this.saveNewCaches(caches.identityDeletionProcesses, DbCollectionName.IdentityDeletionProcess, IdentityDeletionProcess);
-
-        // Need to fetch the cache for relationships after the cache for relationship templates was fetched, because when building the relationship cache, the cache of thecorresponding relationship template is needed
-        const relationshipCaches = await this.cacheFetcher.fetchCacheFor({ relationships: cacheChangesGroupedByCollection.relationshipIds });
-        await this.saveNewCaches(relationshipCaches.relationships, DbCollectionName.Relationships, Relationship);
-
-        // Need to fetch the cache for messages after the cache for relationships was fetched, because when building the message cache, the cache of thecorresponding relationship is needed
-        const messageCaches = await this.cacheFetcher.fetchCacheFor({ messages: cacheChangesGroupedByCollection.messageIds });
-        await this.saveNewCaches(messageCaches.messages, DbCollectionName.Messages, Message);
     }
 
     @log()
@@ -189,13 +151,9 @@ export class DatawalletModificationsProcessor {
         const groups = _.groupBy(cacheChanges, (c) => c.collection);
 
         const fileIds = (groups[DbCollectionName.Files] ?? []).map((m) => m.objectIdentifier);
-        const messageIds = (groups[DbCollectionName.Messages] ?? []).map((m) => m.objectIdentifier);
-        const relationshipIds = (groups[DbCollectionName.Relationships] ?? []).map((m) => m.objectIdentifier);
         const relationshipTemplateIds = (groups[DbCollectionName.RelationshipTemplates] ?? []).map((m) => m.objectIdentifier);
-        const tokenIds = (groups[DbCollectionName.Tokens] ?? []).map((m) => m.objectIdentifier);
-        const identityDeletionProcessIds = (groups[DbCollectionName.IdentityDeletionProcess] ?? []).map((m) => m.objectIdentifier);
 
-        return { fileIds, messageIds, relationshipTemplateIds, tokenIds, relationshipIds, identityDeletionProcessIds };
+        return { fileIds, relationshipTemplateIds };
     }
 
     private async saveNewCaches<T extends ICacheable>(caches: FetchCacheOutputItem<any>[], collectionName: DbCollectionName, constructorOfT: new () => T) {
@@ -215,33 +173,11 @@ export class DatawalletModificationsProcessor {
 }
 
 export class CacheFetcher {
-    public constructor(
-        private readonly fileController: FileController,
-        private readonly messageController: MessageController,
-        private readonly relationshipTemplateController: RelationshipTemplateController,
-        private readonly relationshipController: RelationshipsController,
-        private readonly tokenController: TokenController,
-        private readonly identityDeletionProcessController: IdentityDeletionProcessController
-    ) {}
+    public constructor(private readonly fileController: FileController) {}
 
     public async fetchCacheFor(input: FetchCacheInput): Promise<FetchCacheOutput> {
-        const caches = await Promise.all([
-            this.fetchCaches(this.fileController, input.files),
-            this.fetchCaches(this.messageController, input.messages),
-            this.fetchCaches(this.relationshipController, input.relationships),
-            this.fetchCaches(this.relationshipTemplateController, input.relationshipTemplates),
-            this.fetchCaches(this.tokenController, input.tokens),
-            this.fetchCaches(this.identityDeletionProcessController, input.identityDeletionProcesses)
-        ]);
-
-        const output: FetchCacheOutput = {
-            files: caches[0],
-            messages: caches[1],
-            relationships: caches[2],
-            relationshipTemplates: caches[3],
-            tokens: caches[4],
-            identityDeletionProcesses: caches[5]
-        };
+        const caches = await Promise.all([this.fetchCaches(this.fileController, input.files)]);
+        const output: FetchCacheOutput = { files: caches[0] };
 
         return output;
     }
@@ -255,20 +191,10 @@ export class CacheFetcher {
 
 interface FetchCacheInput {
     files?: CoreId[];
-    messages?: CoreId[];
-    relationships?: CoreId[];
-    relationshipTemplates?: CoreId[];
-    tokens?: CoreId[];
-    identityDeletionProcesses?: CoreId[];
 }
 
 interface FetchCacheOutput {
     files: FetchCacheOutputItem<CachedFile>[];
-    messages: FetchCacheOutputItem<CachedMessage>[];
-    relationships: FetchCacheOutputItem<CachedRelationship>[];
-    relationshipTemplates: FetchCacheOutputItem<CachedRelationshipTemplate>[];
-    tokens: FetchCacheOutputItem<CachedToken>[];
-    identityDeletionProcesses: FetchCacheOutputItem<CachedIdentityDeletionProcess>[];
 }
 
 interface FetchCacheOutputItem<TCache> {

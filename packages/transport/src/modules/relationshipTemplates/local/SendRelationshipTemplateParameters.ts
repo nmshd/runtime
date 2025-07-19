@@ -1,7 +1,7 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreAddress, CoreDate, ICoreAddress, ICoreDate } from "@nmshd/core-types";
 import { IPasswordProtectionCreationParameters, PasswordProtectionCreationParameters } from "../../../core/types/PasswordProtectionCreationParameters";
-import { validateMaxNumberOfAllocations } from "./CachedRelationshipTemplate";
+import { validateMaxNumberOfAllocations } from "./RelationshipTemplate";
 
 export interface ISendRelationshipTemplateParameters extends ISerializable {
     content: ISerializable;

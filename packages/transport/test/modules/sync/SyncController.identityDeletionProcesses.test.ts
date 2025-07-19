@@ -24,7 +24,7 @@ describe("IdentityDeletionProcessSync", function () {
         await account2.syncDatawallet();
         const result = await account2.identityDeletionProcess.getIdentityDeletionProcessByStatus(IdentityDeletionProcessStatus.Approved);
         expect(result).toBeDefined();
-        expect(result).toStrictEqualExcluding(identityDeletionProcess, "cachedAt");
+        expect(result).toStrictEqual(identityDeletionProcess);
     });
 
     test("cancel IdentityDeletionProcess on first device: sync should receive cancelled IdentityDeletionProcess on second device", async function () {
@@ -38,7 +38,7 @@ describe("IdentityDeletionProcessSync", function () {
         await account2.syncDatawallet();
         const result = await account2.identityDeletionProcess.getIdentityDeletionProcessByStatus(IdentityDeletionProcessStatus.Cancelled);
         expect(result).toBeDefined();
-        expect(result).toStrictEqualExcluding(identityDeletionProcess, "cachedAt");
+        expect(result).toStrictEqual(identityDeletionProcess);
     });
 
     test("initiate IdentityDeletionProcess from Backbone admin API: sync should receive IdentityDeletionProcess on second devices", async function () {
@@ -80,7 +80,7 @@ describe("IdentityDeletionProcessSync", function () {
         await account2.syncDatawallet();
         const result = await account2.identityDeletionProcess.getIdentityDeletionProcessByStatus(IdentityDeletionProcessStatus.Approved);
         expect(result).toBeDefined();
-        expect(result).toStrictEqualExcluding(identityDeletionProcess, "cachedAt");
+        expect(result).toStrictEqual(identityDeletionProcess);
     });
 
     test("cancel IdentityDeletionProcess from Backbone admin API: sync should receive cancelled IdentityDeletionProcess on second devices", async function () {
@@ -94,6 +94,6 @@ describe("IdentityDeletionProcessSync", function () {
         await account2.syncDatawallet();
         const result = await account2.identityDeletionProcess.getIdentityDeletionProcessByStatus(IdentityDeletionProcessStatus.Cancelled);
         expect(result).toBeDefined();
-        expect(result).toStrictEqualExcluding(identityDeletionProcess, "cachedAt");
+        expect(result).toStrictEqual(identityDeletionProcess);
     });
 });

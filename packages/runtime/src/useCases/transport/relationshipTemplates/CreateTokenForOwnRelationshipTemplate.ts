@@ -61,7 +61,7 @@ export class CreateTokenForOwnRelationshipTemplateUseCase extends UseCase<Create
             return Result.fail(RuntimeErrors.relationshipTemplates.cannotCreateTokenForPeerTemplate());
         }
 
-        if (template.cache?.forIdentity && request.forIdentity !== template.cache.forIdentity.toString()) {
+        if (template.forIdentity && request.forIdentity !== template.forIdentity.toString()) {
             return Result.fail(RuntimeErrors.relationshipTemplates.personalizationMustBeInherited());
         }
 
@@ -76,11 +76,11 @@ export class CreateTokenForOwnRelationshipTemplateUseCase extends UseCase<Create
         const tokenContent = TokenContentRelationshipTemplate.from({
             templateId: template.id,
             secretKey: template.secretKey,
-            forIdentity: template.cache?.forIdentity,
+            forIdentity: template.forIdentity,
             passwordProtection
         });
 
-        const defaultTokenExpiry = template.cache?.expiresAt ?? CoreDate.utc().add({ days: 12 });
+        const defaultTokenExpiry = template.expiresAt ?? CoreDate.utc().add({ days: 12 });
         const tokenExpiry = request.expiresAt ? CoreDate.from(request.expiresAt) : defaultTokenExpiry;
 
         const ephemeral = request.ephemeral ?? true;

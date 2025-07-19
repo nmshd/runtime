@@ -199,9 +199,9 @@ export class MultiAccountController {
 
         if (deviceSharedSecret.isBackupDevice) {
             const tokens = await accountController.tokens.getTokens({
-                "cache.content.@type": "TokenContentDeviceSharedSecret",
-                "cache.content.sharedSecret.id": deviceSharedSecret.id.toString(),
-                "cache.content.sharedSecret.isBackupDevice": true
+                "content.@type": "TokenContentDeviceSharedSecret",
+                "content.sharedSecret.id": deviceSharedSecret.id.toString(),
+                "content.sharedSecret.isBackupDevice": true
             });
 
             for (const token of tokens) {
