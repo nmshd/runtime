@@ -279,8 +279,8 @@ export class MultiAccountController {
         account.deletionDate = deletionDate ?? undefined;
         await this._localAccounts.update(oldAccount, account);
 
-        const cachedAccount = this.sessionStorage.findSession(address)?.account;
-        if (cachedAccount) cachedAccount.deletionDate = deletionDate?.toString();
+        const storedAccount = this.sessionStorage.findSession(address)?.account;
+        if (storedAccount) storedAccount.deletionDate = deletionDate?.toString();
 
         return account;
     }

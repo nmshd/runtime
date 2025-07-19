@@ -120,7 +120,7 @@ describe("MessageController", function () {
             expectValidMessages(sentMessage, receivedMessage, tempDate);
         });
 
-        test("should get the cached Message", async function () {
+        test("should get the stored Message", async function () {
             const sentMessage = await sender.messages.getMessage(tempId1);
             const receivedMessage = await recipient.messages.getMessage(tempId1);
             expect(sentMessage).toBeDefined();
@@ -153,7 +153,7 @@ describe("MessageController", function () {
             expect(receivedMessage.recipients[0].receivedByDevice?.toString()).toBe(recipient.activeDevice.id.toString());
         });
 
-        test("should get the cached messages", async function () {
+        test("should get the stored messages", async function () {
             const sentMessages = await sender.messages.getMessages();
             const receivedMessages = await recipient.messages.getMessages();
             expect(sentMessages).toHaveLength(3);

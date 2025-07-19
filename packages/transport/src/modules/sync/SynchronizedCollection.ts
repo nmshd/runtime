@@ -2,9 +2,7 @@ import { DatabaseType, IDatabaseCollection } from "@js-soft/docdb-access-abstrac
 import { Serializable } from "@js-soft/ts-serval";
 import jsonpatch from "fast-json-patch";
 import _ from "lodash";
-import { nameof } from "ts-simple-nameof";
 import { CoreSynchronizable, ICoreSynchronizable } from "../../core/CoreSynchronizable";
-import { ICacheable } from "../../core/ICacheable";
 import { TransportIds } from "../../core/TransportIds";
 import { DatawalletModification, DatawalletModificationCategory, DatawalletModificationType } from "../sync/local/DatawalletModification";
 
@@ -141,7 +139,6 @@ ${new Error().stack}`);
         const haveContentPropertiesChanged = _.intersection(newObject.contentProperties, changedRootProperties).length !== 0;
         const haveMetadataPropertiesChanged = _.intersection(newObject.metadataProperties, changedRootProperties).length !== 0;
         const haveUserdataPropertiesChanged = _.intersection(newObject.userdataProperties, changedRootProperties).length !== 0;
-        const hasCacheChanged = changedRootProperties.some((p) => p === nameof<ICacheable>((c) => c.cache));
 
         const objectIdentifier = (newObject as any)["id"];
 
@@ -200,18 +197,6 @@ ${new Error().stack}`);
                     objectIdentifier: objectIdentifier,
                     payloadCategory: DatawalletModificationCategory.Userdata,
                     payload: payload,
-                    datawalletVersion: this.datawalletVersion
-                })
-            );
-        }
-
-        if (hasCacheChanged) {
-            await this.datawalletModifications.create(
-                DatawalletModification.from({
-                    localId: await TransportIds.datawalletModification.generate(),
-                    type: DatawalletModificationType.CacheChanged,
-                    collection: this.name,
-                    objectIdentifier: objectIdentifier,
                     datawalletVersion: this.datawalletVersion
                 })
             );
