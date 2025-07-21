@@ -120,8 +120,8 @@ class Attributes {
         );
     }
 
-    public setDefaultRepositoryAttributesIsDisabled() {
-        return new CoreError("error.consumption.attributes.setDefaultRepositoryAttributesIsDisabled", "Setting default RepositoryAttributes is disabled for this Account.");
+    public setDefaultOwnIdentityAttributesIsDisabled() {
+        return new CoreError("error.consumption.attributes.setDefaultOwnIdentityAttributesIsDisabled", "Setting default own IdentityAttributes is disabled for this Account.");
     }
 
     public invalidTags(tags: string[]): ApplicationError {

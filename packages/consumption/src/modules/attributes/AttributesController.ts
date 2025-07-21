@@ -28,39 +28,36 @@ import { ConsumptionError } from "../../consumption/ConsumptionError";
 import { ConsumptionIds } from "../../consumption/ConsumptionIds";
 import { flattenObject, ValidationResult } from "../common";
 import { AttributeCreatedEvent, AttributeDeletedEvent, AttributeWasViewedAtChangedEvent } from "./events";
-import { AttributeSuccessorParams, AttributeSuccessorParamsJSON, IAttributeSuccessorParams } from "./local/AttributeSuccessorParams";
 import { AttributeTagCollection, IAttributeTag } from "./local/AttributeTagCollection";
 import { ForwardedRelationshipAttributeSharingInfo } from "./local/ForwardedRelationshipAttributeSharingInfo";
 import { LocalAttribute, LocalAttributeJSON } from "./local/LocalAttribute";
 import { OwnAttributeDeletionStatus } from "./local/OwnAttributeDeletionInfo";
 import { OwnIdentityAttribute } from "./local/OwnIdentityAttribute";
 import { OwnIdentityAttributeSharingInfo } from "./local/OwnIdentityAttributeSharingInfo";
-import { IOwnIdentityAttributeSuccessorParams, OwnIdentityAttributeSuccessorParams, OwnIdentityAttributeSuccessorParamsJSON } from "./local/OwnIdentityAttributeSuccessorParams";
 import { OwnRelationshipAttribute } from "./local/OwnRelationshipAttribute";
 import { OwnRelationshipAttributeSharingInfo } from "./local/OwnRelationshipAttributeSharingInfo";
 import { PeerAttributeDeletionStatus } from "./local/PeerAttributeDeletionInfo";
 import { PeerIdentityAttribute } from "./local/PeerIdentityAttribute";
 import { PeerIdentityAttributeSharingInfo } from "./local/PeerIdentityAttributeSharingInfo";
-import {
-    IPeerIdentityAttributeSuccessorParams,
-    PeerIdentityAttributeSuccessorParams,
-    PeerIdentityAttributeSuccessorParamsJSON
-} from "./local/PeerIdentityAttributeSuccessorParams";
 import { PeerRelationshipAttribute } from "./local/PeerRelationshipAttribute";
 import { PeerRelationshipAttributeSharingInfo } from "./local/PeerRelationshipAttributeSharingInfo";
 import { IdentityAttributeQueryTranslator, RelationshipAttributeQueryTranslator, ThirdPartyRelationshipAttributeQueryTranslator } from "./local/QueryTranslator";
-import {
-    IRelationshipAttributeSuccessorParams,
-    RelationshipAttributeSuccessorParams,
-    RelationshipAttributeSuccessorParamsJSON
-} from "./local/RelationshipAttributeSuccessorParams";
 import { ThirdPartyRelationshipAttribute } from "./local/ThirdPartyRelationshipAttribute";
 import { ThirdPartyRelationshipAttributeSharingInfo } from "./local/ThirdPartyRelationshipAttributeSharingInfo";
 import {
+    IOwnIdentityAttributeSuccessorParams,
+    IPeerIdentityAttributeSuccessorParams,
+    IRelationshipAttributeSuccessorParams,
     IThirdPartyRelationshipAttributeSuccessorParams,
+    OwnIdentityAttributeSuccessorParams,
+    OwnIdentityAttributeSuccessorParamsJSON,
+    PeerIdentityAttributeSuccessorParams,
+    PeerIdentityAttributeSuccessorParamsJSON,
+    RelationshipAttributeSuccessorParams,
+    RelationshipAttributeSuccessorParamsJSON,
     ThirdPartyRelationshipAttributeSuccessorParams,
     ThirdPartyRelationshipAttributeSuccessorParamsJSON
-} from "./local/ThirdPartyRelationshipAttributeSuccessorParams";
+} from "./local/successorParams";
 
 export class AttributesController extends ConsumptionBaseController {
     private attributes: SynchronizedCollection;
@@ -425,7 +422,7 @@ export class AttributesController extends ConsumptionBaseController {
         return thirdPartyRelationshipAttribute;
     }
 
-    // TODO: maybe combine this with the following function
+    // TODO: maybe combine this with the following function; maybe use params as input object like for create
     public async addSharingInfoToOwnIdentityAttribute(attribute: OwnIdentityAttribute, peer: CoreAddress, sourceReference: CoreId): Promise<OwnIdentityAttribute> {
         const sharingInfo = OwnIdentityAttributeSharingInfo.from({ peer, sourceReference, sharedAt: CoreDate.utc() });
         (attribute.sharingInfos ??= []).push(sharingInfo);
@@ -555,7 +552,7 @@ export class AttributesController extends ConsumptionBaseController {
         await this.updateAttributeUnsafe(predecessor);
 
         // TODO: publish events only for own Attributes and ThirdPartyRelationshipAttributes
-        this.eventBus.publish(new AttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
+        // this.eventBus.publish(new AttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
 
         return { predecessor, successor };
     }
@@ -587,7 +584,7 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         const successor = PeerIdentityAttribute.from({
-            id: parsedSuccessorParams.id ?? (await ConsumptionIds.attribute.generate()),
+            id: parsedSuccessorParams.id,
             content: parsedSuccessorParams.content,
             createdAt: CoreDate.utc(),
             sharingInfo: parsedSuccessorParams.sharingInfo,
@@ -599,7 +596,7 @@ export class AttributesController extends ConsumptionBaseController {
         await this.updateAttributeUnsafe(predecessor);
 
         // TODO: publish events only for own Attributes and ThirdPartyRelationshipAttributes
-        this.eventBus.publish(new AttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
+        // this.eventBus.publish(new AttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
 
         return { predecessor, successor };
     }
@@ -629,7 +626,7 @@ export class AttributesController extends ConsumptionBaseController {
         await this.updateAttributeUnsafe(predecessor);
 
         // TODO: publish events only for own Attributes and ThirdPartyRelationshipAttributes
-        this.eventBus.publish(new AttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
+        // this.eventBus.publish(new AttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
 
         return { predecessor, successor };
     }
@@ -659,7 +656,7 @@ export class AttributesController extends ConsumptionBaseController {
         await this.updateAttributeUnsafe(predecessor);
 
         // TODO: publish events only for own Attributes and ThirdPartyRelationshipAttributes
-        this.eventBus.publish(new AttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
+        // this.eventBus.publish(new AttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
 
         return { predecessor, successor };
     }
@@ -677,7 +674,7 @@ export class AttributesController extends ConsumptionBaseController {
         }
 
         const successor = ThirdPartyRelationshipAttribute.from({
-            id: parsedSuccessorParams.id ?? (await ConsumptionIds.attribute.generate()),
+            id: parsedSuccessorParams.id,
             content: parsedSuccessorParams.content,
             createdAt: CoreDate.utc(),
             sharingInfo: parsedSuccessorParams.sharingInfo,
@@ -689,7 +686,7 @@ export class AttributesController extends ConsumptionBaseController {
         await this.updateAttributeUnsafe(predecessor);
 
         // TODO: publish events only for own Attributes and ThirdPartyRelationshipAttributes; do we need different Events?
-        this.eventBus.publish(new AttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
+        // this.eventBus.publish(new AttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
 
         return { predecessor, successor };
     }
