@@ -1,7 +1,7 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { IdentityAttribute, IdentityAttributeJSON, IIdentityAttribute } from "@nmshd/content";
 import { nameof } from "ts-simple-nameof";
-import { IPeerIdentityAttributeSharingInfo, PeerIdentityAttributeSharingInfo, PeerIdentityAttributeSharingInfoJSON } from "../sharingInfos";
+import { IPeerIdentityAttributeSharingInfo, PeerAttributeDeletionInfo, PeerIdentityAttributeSharingInfo, PeerIdentityAttributeSharingInfoJSON } from "../sharingInfos";
 import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./LocalAttribute";
 
 export interface PeerIdentityAttributeJSON extends LocalAttributeJSON {
@@ -26,6 +26,11 @@ export class PeerIdentityAttribute extends LocalAttribute implements IPeerIdenti
     @serialize()
     @validate()
     public sharingInfo: PeerIdentityAttributeSharingInfo;
+
+    public setDeletionInfo(deletionInfo: PeerAttributeDeletionInfo): this {
+        this.sharingInfo.deletionInfo = deletionInfo;
+        return this;
+    }
 
     public static override from(value: IPeerIdentityAttribute | PeerIdentityAttributeJSON): PeerIdentityAttribute {
         return super.fromAny(value) as PeerIdentityAttribute;

@@ -2,16 +2,18 @@ import { serialize, type, validate } from "@js-soft/ts-serval";
 import { IRelationshipAttribute, RelationshipAttribute, RelationshipAttributeJSON } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
-import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./LocalAttribute";
 import {
+    ForwardedRelationshipAttributeDeletionInfo,
     ForwardedRelationshipAttributeDeletionStatus,
     ForwardedRelationshipAttributeSharingInfo,
     ForwardedRelationshipAttributeSharingInfoJSON,
     IForwardedRelationshipAttributeSharingInfo,
     IOwnRelationshipAttributeSharingInfo,
+    OwnAttributeDeletionInfo,
     OwnRelationshipAttributeSharingInfo,
     OwnRelationshipAttributeSharingInfoJSON
-} from "./sharingInfos";
+} from "../sharingInfos";
+import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./LocalAttribute";
 
 export interface OwnRelationshipAttributeJSON extends LocalAttributeJSON {
     "@type": "OwnRelationshipAttribute";
@@ -57,6 +59,19 @@ export class OwnRelationshipAttribute extends LocalAttribute implements IOwnRela
 
         const excludedDeletionStatuses = [ForwardedRelationshipAttributeDeletionStatus.DeletedByPeer, ForwardedRelationshipAttributeDeletionStatus.ToBeDeletedByPeer];
         return thirdPartySharingInfosWithPeer.some((sharingInfo) => !sharingInfo.deletionInfo || !excludedDeletionStatuses.includes(sharingInfo.deletionInfo.deletionStatus));
+    }
+
+    public setDeletionInfo(deletionInfo: OwnAttributeDeletionInfo): this {
+        this.initialSharingInfo.deletionInfo = deletionInfo;
+        return this;
+    }
+
+    public setDeletionInfoForThirdParty(deletionInfo: ForwardedRelationshipAttributeDeletionInfo, thirdParty: CoreAddress): this {
+        const sharingInfoForThirdParty = this.thirdPartySharingInfos?.find((sharingInfo) => sharingInfo.peer.equals(thirdParty));
+        if (!sharingInfoForThirdParty) throw Error; // TODO:
+
+        sharingInfoForThirdParty.deletionInfo = deletionInfo; // TODO: check if this works
+        return this;
     }
 
     public static override from(value: IOwnRelationshipAttribute | OwnRelationshipAttributeJSON): OwnRelationshipAttribute {

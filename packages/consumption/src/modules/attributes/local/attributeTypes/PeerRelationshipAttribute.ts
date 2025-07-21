@@ -3,11 +3,13 @@ import { IRelationshipAttribute, RelationshipAttribute, RelationshipAttributeJSO
 import { CoreAddress } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
 import {
+    ForwardedRelationshipAttributeDeletionInfo,
     ForwardedRelationshipAttributeDeletionStatus,
     ForwardedRelationshipAttributeSharingInfo,
     ForwardedRelationshipAttributeSharingInfoJSON,
     IForwardedRelationshipAttributeSharingInfo,
     IPeerRelationshipAttributeSharingInfo,
+    PeerAttributeDeletionInfo,
     PeerRelationshipAttributeSharingInfo,
     PeerRelationshipAttributeSharingInfoJSON
 } from "../sharingInfos";
@@ -57,6 +59,19 @@ export class PeerRelationshipAttribute extends LocalAttribute implements IPeerRe
 
         const excludedDeletionStatuses = [ForwardedRelationshipAttributeDeletionStatus.DeletedByPeer, ForwardedRelationshipAttributeDeletionStatus.ToBeDeletedByPeer];
         return thirdPartySharingInfosWithPeer.some((sharingInfo) => !sharingInfo.deletionInfo || !excludedDeletionStatuses.includes(sharingInfo.deletionInfo.deletionStatus));
+    }
+
+    public setDeletionInfo(deletionInfo: PeerAttributeDeletionInfo): this {
+        this.initialSharingInfo.deletionInfo = deletionInfo;
+        return this;
+    }
+
+    public setDeletionInfoForThirdParty(deletionInfo: ForwardedRelationshipAttributeDeletionInfo, thirdParty: CoreAddress): this {
+        const sharingInfoForThirdParty = this.thirdPartySharingInfos?.find((sharingInfo) => sharingInfo.peer.equals(thirdParty));
+        if (!sharingInfoForThirdParty) throw Error; // TODO:
+
+        sharingInfoForThirdParty.deletionInfo = deletionInfo; // TODO: check if this works
+        return this;
     }
 
     public static override from(value: IPeerRelationshipAttribute | PeerRelationshipAttributeJSON): PeerRelationshipAttribute {

@@ -1,7 +1,12 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { IRelationshipAttribute, RelationshipAttribute, RelationshipAttributeJSON } from "@nmshd/content";
 import { nameof } from "ts-simple-nameof";
-import { IThirdPartyRelationshipAttributeSharingInfo, ThirdPartyRelationshipAttributeSharingInfo, ThirdPartyRelationshipAttributeSharingInfoJSON } from "../sharingInfos";
+import {
+    IThirdPartyRelationshipAttributeSharingInfo,
+    PeerAttributeDeletionInfo,
+    ThirdPartyRelationshipAttributeSharingInfo,
+    ThirdPartyRelationshipAttributeSharingInfoJSON
+} from "../sharingInfos";
 import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./LocalAttribute";
 
 export interface ThirdPartyRelationshipAttributeJSON extends LocalAttributeJSON {
@@ -26,6 +31,11 @@ export class ThirdPartyRelationshipAttribute extends LocalAttribute implements I
     @serialize()
     @validate()
     public sharingInfo: ThirdPartyRelationshipAttributeSharingInfo;
+
+    public setDeletionInfo(deletionInfo: PeerAttributeDeletionInfo): this {
+        this.sharingInfo.deletionInfo = deletionInfo;
+        return this;
+    }
 
     public static override from(value: IThirdPartyRelationshipAttribute | ThirdPartyRelationshipAttributeJSON): ThirdPartyRelationshipAttribute {
         return super.fromAny(value) as ThirdPartyRelationshipAttribute;

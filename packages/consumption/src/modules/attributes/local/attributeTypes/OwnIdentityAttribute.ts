@@ -2,7 +2,13 @@ import { serialize, type, validate } from "@js-soft/ts-serval";
 import { IdentityAttribute, IdentityAttributeJSON, IIdentityAttribute } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
-import { IOwnIdentityAttributeSharingInfo, OwnAttributeDeletionStatus, OwnIdentityAttributeSharingInfo, OwnIdentityAttributeSharingInfoJSON } from "../sharingInfos";
+import {
+    IOwnIdentityAttributeSharingInfo,
+    OwnAttributeDeletionInfo,
+    OwnAttributeDeletionStatus,
+    OwnIdentityAttributeSharingInfo,
+    OwnIdentityAttributeSharingInfoJSON
+} from "../sharingInfos";
 import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./LocalAttribute";
 
 export interface OwnIdentityAttributeJSON extends LocalAttributeJSON {
@@ -44,6 +50,14 @@ export class OwnIdentityAttribute extends LocalAttribute implements IOwnIdentity
 
         const excludedDeletionStatuses = [OwnAttributeDeletionStatus.DeletedByPeer, OwnAttributeDeletionStatus.ToBeDeletedByPeer];
         return sharingInfosWithPeer.some((sharingInfo) => !sharingInfo.deletionInfo || !excludedDeletionStatuses.includes(sharingInfo.deletionInfo.deletionStatus));
+    }
+
+    public setDeletionInfoForPeer(deletionInfo: OwnAttributeDeletionInfo, peer: CoreAddress): this {
+        const sharingInfoForPeer = this.sharingInfos?.find((sharingInfo) => sharingInfo.peer.equals(peer));
+        if (!sharingInfoForPeer) throw Error; // TODO:
+
+        sharingInfoForPeer.deletionInfo = deletionInfo; // TODO: check if this works
+        return this;
     }
 
     public static override from(value: IOwnIdentityAttribute | OwnIdentityAttributeJSON): OwnIdentityAttribute {
