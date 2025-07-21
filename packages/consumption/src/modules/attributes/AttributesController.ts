@@ -29,21 +29,30 @@ import { ConsumptionIds } from "../../consumption/ConsumptionIds";
 import { flattenObject, ValidationResult } from "../common";
 import { AttributeCreatedEvent, AttributeDeletedEvent, AttributeWasViewedAtChangedEvent } from "./events";
 import { AttributeTagCollection, IAttributeTag } from "./local/AttributeTagCollection";
-import { ForwardedRelationshipAttributeSharingInfo } from "./local/ForwardedRelationshipAttributeSharingInfo";
-import { LocalAttribute, LocalAttributeJSON } from "./local/LocalAttribute";
-import { OwnAttributeDeletionStatus } from "./local/OwnAttributeDeletionInfo";
-import { OwnIdentityAttribute } from "./local/OwnIdentityAttribute";
-import { OwnIdentityAttributeSharingInfo } from "./local/OwnIdentityAttributeSharingInfo";
-import { OwnRelationshipAttribute } from "./local/OwnRelationshipAttribute";
-import { OwnRelationshipAttributeSharingInfo } from "./local/OwnRelationshipAttributeSharingInfo";
-import { PeerAttributeDeletionStatus } from "./local/PeerAttributeDeletionInfo";
-import { PeerIdentityAttribute } from "./local/PeerIdentityAttribute";
-import { PeerIdentityAttributeSharingInfo } from "./local/PeerIdentityAttributeSharingInfo";
-import { PeerRelationshipAttribute } from "./local/PeerRelationshipAttribute";
-import { PeerRelationshipAttributeSharingInfo } from "./local/PeerRelationshipAttributeSharingInfo";
+import {
+    LocalAttribute,
+    LocalAttributeJSON,
+    OwnIdentityAttribute,
+    OwnRelationshipAttribute,
+    PeerIdentityAttribute,
+    PeerRelationshipAttribute,
+    ThirdPartyRelationshipAttribute
+} from "./local/attributeTypes";
 import { IdentityAttributeQueryTranslator, RelationshipAttributeQueryTranslator, ThirdPartyRelationshipAttributeQueryTranslator } from "./local/QueryTranslator";
-import { ThirdPartyRelationshipAttribute } from "./local/ThirdPartyRelationshipAttribute";
-import { ThirdPartyRelationshipAttributeSharingInfo } from "./local/ThirdPartyRelationshipAttributeSharingInfo";
+import {
+    ForwardedRelationshipAttributeDeletionInfo,
+    ForwardedRelationshipAttributeDeletionStatus,
+    ForwardedRelationshipAttributeSharingInfo,
+    OwnAttributeDeletionInfo,
+    OwnAttributeDeletionStatus,
+    OwnIdentityAttributeSharingInfo,
+    OwnRelationshipAttributeSharingInfo,
+    PeerAttributeDeletionInfo,
+    PeerAttributeDeletionStatus,
+    PeerIdentityAttributeSharingInfo,
+    PeerRelationshipAttributeSharingInfo,
+    ThirdPartyRelationshipAttributeSharingInfo
+} from "./local/sharingInfos";
 import {
     IOwnIdentityAttributeSuccessorParams,
     IOwnRelationshipAttributeSuccessorParams,
@@ -1257,45 +1266,122 @@ export class AttributesController extends ConsumptionBaseController {
 
         const deletionDate = relationship.cache!.auditLog[relationship.cache!.auditLog.length - 1].createdAt;
 
-        await this.setDeletionInfoOfOwnSharedAttributes(relationship.peer.address.toString(), deletionDate);
-        await this.setDeletionInfoOfPeerSharedAttributes(relationship.peer.address.toString(), deletionDate);
+        await this.setDeletionInfoOfAttributesSharedWithPeer(relationship.peer.address, deletionDate);
     }
 
-    // TODO:
-    private async setDeletionInfoOfOwnSharedAttributes(peer: String, deletionDate: CoreDate): Promise<void> {
-        const ownSharedAttributeDeletionInfo = LocalAttributeDeletionInfo.from({
-            deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
+    private async setDeletionInfoOfAttributesSharedWithPeer(peer: CoreAddress, deletionDate: CoreDate): Promise<void> {
+        await this.setDeletionInfoOfOwnIdentityAttributes(peer, deletionDate);
+        await this.setDeletionInfoOfPeerIdentityAttributes(peer, deletionDate);
+        await this.setDeletionInfoOfOwnRelationshipAttributes(peer, deletionDate);
+        await this.setDeletionInfoOfPeerRelationshipAttributes(peer, deletionDate);
+        await this.setDeletionInfoOfForwardedRelationshipAttributes(peer, deletionDate);
+        await this.setDeletionInfoOfThirdPartyRelationshipAttributes(peer, deletionDate);
+    }
+
+    private async setDeletionInfoOfOwnIdentityAttributes(peer: CoreAddress, deletionDate: CoreDate): Promise<void> {
+        const ownAttributeDeletionInfo = OwnAttributeDeletionInfo.from({
+            deletionStatus: OwnAttributeDeletionStatus.DeletedByPeer,
             deletionDate
         });
 
-        const ownSharedAttributes = await this.getLocalAttributes({
-            "shareInfo.peer": peer,
-            "content.owner": this.identity.address.toString(),
-            "deletionInfo.deletionStatus": { $ne: LocalAttributeDeletionStatus.DeletedByPeer }
-        });
+        const attributesSharedWithPeer = (await this.getLocalAttributes({
+            "@type": "OwnIdentityAttribute",
+            "sharingInfos.peer": peer.toString(),
+            "sharingInfos.deletionInfo.deletionStatus": { $ne: OwnAttributeDeletionStatus.DeletedByPeer }
+        })) as OwnIdentityAttribute[];
 
-        await this.setDeletionInfoOfAttributes(ownSharedAttributes, ownSharedAttributeDeletionInfo);
+        for (const attribute of attributesSharedWithPeer) {
+            attribute.setDeletionInfoForPeer(ownAttributeDeletionInfo, peer);
+            await this.updateAttributeUnsafe(attribute);
+        }
     }
 
-    // TODO:
-    private async setDeletionInfoOfPeerSharedAttributes(peer: String, deletionDate: CoreDate): Promise<void> {
-        const peerSharedAttributeDeletionInfo = LocalAttributeDeletionInfo.from({
-            deletionStatus: LocalAttributeDeletionStatus.DeletedByOwner,
+    private async setDeletionInfoOfPeerIdentityAttributes(peer: CoreAddress, deletionDate: CoreDate): Promise<void> {
+        const peerAttributeDeletionInfo = PeerAttributeDeletionInfo.from({
+            deletionStatus: PeerAttributeDeletionStatus.DeletedByOwner,
             deletionDate
         });
 
-        const peerSharedAttributes = await this.getLocalAttributes({
-            "shareInfo.peer": peer,
-            "content.owner": peer,
-            "deletionInfo.deletionStatus": { $ne: LocalAttributeDeletionStatus.DeletedByOwner }
-        });
+        const attributesSharedWithPeer = (await this.getLocalAttributes({
+            "@type": "PeerIdentityAttribute",
+            "sharingInfo.peer": peer.toString(),
+            "sharingInfo.deletionInfo.deletionStatus": { $ne: PeerAttributeDeletionStatus.DeletedByOwner }
+        })) as PeerIdentityAttribute[];
 
-        await this.setDeletionInfoOfAttributes(peerSharedAttributes, peerSharedAttributeDeletionInfo);
+        for (const attribute of attributesSharedWithPeer) {
+            attribute.setDeletionInfo(peerAttributeDeletionInfo);
+            await this.updateAttributeUnsafe(attribute);
+        }
     }
 
-    private async setDeletionInfoOfAttributes(attributes: LocalAttribute[], deletionInfo: LocalAttributeDeletionInfo): Promise<void> {
-        for (const attribute of attributes) {
-            attribute.setDeletionInfo(deletionInfo, this.identity.address);
+    private async setDeletionInfoOfOwnRelationshipAttributes(peer: CoreAddress, deletionDate: CoreDate): Promise<void> {
+        const ownAttributeDeletionInfo = OwnAttributeDeletionInfo.from({
+            deletionStatus: OwnAttributeDeletionStatus.DeletedByPeer,
+            deletionDate
+        });
+
+        const attributesSharedWithPeer = (await this.getLocalAttributes({
+            "@type": "OwnRelationshipAttribute",
+            "initialSharingInfo.peer": peer.toString(),
+            "initialSharingInfo.deletionInfo.deletionStatus": { $ne: OwnAttributeDeletionStatus.DeletedByPeer }
+        })) as OwnRelationshipAttribute[];
+
+        for (const attribute of attributesSharedWithPeer) {
+            attribute.setDeletionInfo(ownAttributeDeletionInfo);
+            await this.updateAttributeUnsafe(attribute);
+        }
+    }
+
+    private async setDeletionInfoOfPeerRelationshipAttributes(peer: CoreAddress, deletionDate: CoreDate): Promise<void> {
+        const peerAttributeDeletionInfo = PeerAttributeDeletionInfo.from({
+            deletionStatus: PeerAttributeDeletionStatus.DeletedByOwner,
+            deletionDate
+        });
+
+        const attributesSharedWithPeer = (await this.getLocalAttributes({
+            "@type": "PeerRelationshipAttribute",
+            "initialSharingInfo.peer": peer.toString(),
+            "initialSharingInfo.deletionInfo.deletionStatus": { $ne: PeerAttributeDeletionStatus.DeletedByOwner }
+        })) as PeerRelationshipAttribute[];
+
+        for (const attribute of attributesSharedWithPeer) {
+            attribute.setDeletionInfo(peerAttributeDeletionInfo);
+            await this.updateAttributeUnsafe(attribute);
+        }
+    }
+
+    private async setDeletionInfoOfForwardedRelationshipAttributes(thirdParty: CoreAddress, deletionDate: CoreDate): Promise<void> {
+        const peerAttributeDeletionInfo = ForwardedRelationshipAttributeDeletionInfo.from({
+            deletionStatus: ForwardedRelationshipAttributeDeletionStatus.DeletedByPeer,
+            deletionDate
+        });
+
+        const attributesSharedWithPeer = (await this.getLocalAttributes({
+            "@type": { $in: ["OwnRelationshipAttribute", "PeerRelationshipAttribute"] },
+            "thirdPartySharingInfos.peer": thirdParty.toString(),
+            "thirdPartySharingInfos.deletionInfo.deletionStatus": { $ne: ForwardedRelationshipAttributeDeletionStatus.DeletedByPeer }
+        })) as OwnRelationshipAttribute[] | PeerRelationshipAttribute[];
+
+        for (const attribute of attributesSharedWithPeer) {
+            attribute.setDeletionInfoForThirdParty(peerAttributeDeletionInfo, thirdParty);
+            await this.updateAttributeUnsafe(attribute);
+        }
+    }
+
+    private async setDeletionInfoOfThirdPartyRelationshipAttributes(peer: CoreAddress, deletionDate: CoreDate): Promise<void> {
+        const peerAttributeDeletionInfo = PeerAttributeDeletionInfo.from({
+            deletionStatus: PeerAttributeDeletionStatus.DeletedByOwner,
+            deletionDate
+        });
+
+        const attributesSharedWithPeer = (await this.getLocalAttributes({
+            "@type": "ThirdPartyRelationshipAttribute",
+            "sharingInfo.peer": peer.toString(),
+            "sharingInfo.deletionInfo.deletionStatus": { $ne: PeerAttributeDeletionStatus.DeletedByOwner }
+        })) as ThirdPartyRelationshipAttribute[];
+
+        for (const attribute of attributesSharedWithPeer) {
+            attribute.setDeletionInfo(peerAttributeDeletionInfo);
             await this.updateAttributeUnsafe(attribute);
         }
     }
