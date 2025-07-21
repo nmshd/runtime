@@ -1,10 +1,6 @@
 export * from "./AttributesController";
 export * from "./events";
-export * from "./local/AttributeSuccessorParams";
 export * from "./local/AttributeTagCollection";
-export * from "./local/CreateOwnIdentityAttributeParams";
-export * from "./local/CreateSharedLocalAttributeCopyParams";
-export * from "./local/CreateSharedLocalAttributeParams";
 export * from "./local/ForwardedRelationshipAttributeDeletionInfo";
 export * from "./local/ForwardedRelationshipAttributeSharingInfo";
 export * from "./local/LocalAttribute";
@@ -18,5 +14,6 @@ export * from "./local/PeerIdentityAttribute";
 export * from "./local/PeerIdentityAttributeSharingInfo";
 export * from "./local/PeerRelationshipAttribute";
 export * from "./local/PeerRelationshipAttributeSharingInfo";
+export * from "./local/successorParams";
 export * from "./local/ThirdPartyRelationshipAttribute";
 export * from "./local/ThirdPartyRelationshipAttributeSharingInfo";
