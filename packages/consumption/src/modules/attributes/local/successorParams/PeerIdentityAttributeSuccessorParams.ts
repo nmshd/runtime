@@ -2,7 +2,7 @@ import { serialize, type, validate } from "@js-soft/ts-serval";
 import { IdentityAttribute, IdentityAttributeJSON } from "@nmshd/content";
 import { CoreId, ICoreId } from "@nmshd/core-types";
 import { IPeerIdentityAttributeSharingInfo, PeerIdentityAttributeSharingInfo, PeerIdentityAttributeSharingInfoJSON } from "../PeerIdentityAttributeSharingInfo";
-import { AbstractAttributeSuccessorParams, AbstractAttributeSuccessorParamsJSON, IAbstractAttributeSuccessorParams } from "./AbstractIdentityAttributeSuccessorParams";
+import { AbstractAttributeSuccessorParams, AbstractAttributeSuccessorParamsJSON, IAbstractAttributeSuccessorParams } from "./AbstractAttributeSuccessorParams";
 
 export interface PeerIdentityAttributeSuccessorParamsJSON extends AbstractAttributeSuccessorParamsJSON {
     content: IdentityAttributeJSON;

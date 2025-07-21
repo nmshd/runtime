@@ -6,7 +6,7 @@ import {
     ThirdPartyRelationshipAttributeSharingInfo,
     ThirdPartyRelationshipAttributeSharingInfoJSON
 } from "../ThirdPartyRelationshipAttributeSharingInfo";
-import { AbstractAttributeSuccessorParams, AbstractAttributeSuccessorParamsJSON, IAbstractAttributeSuccessorParams } from "./AbstractIdentityAttributeSuccessorParams";
+import { AbstractAttributeSuccessorParams, AbstractAttributeSuccessorParamsJSON, IAbstractAttributeSuccessorParams } from "./AbstractAttributeSuccessorParams";
 
 export interface ThirdPartyRelationshipAttributeSuccessorParamsJSON extends AbstractAttributeSuccessorParamsJSON {
     content: RelationshipAttributeJSON;

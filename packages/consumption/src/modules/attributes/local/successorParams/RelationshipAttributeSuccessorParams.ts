@@ -3,7 +3,7 @@ import { RelationshipAttribute, RelationshipAttributeJSON } from "@nmshd/content
 import { CoreId, ICoreId } from "@nmshd/core-types";
 import { IOwnRelationshipAttributeSharingInfo, OwnRelationshipAttributeSharingInfo, OwnRelationshipAttributeSharingInfoJSON } from "../OwnRelationshipAttributeSharingInfo";
 import { IPeerRelationshipAttributeSharingInfo, PeerRelationshipAttributeSharingInfo, PeerRelationshipAttributeSharingInfoJSON } from "../PeerRelationshipAttributeSharingInfo";
-import { AbstractAttributeSuccessorParams, AbstractAttributeSuccessorParamsJSON, IAbstractAttributeSuccessorParams } from "./AbstractIdentityAttributeSuccessorParams";
+import { AbstractAttributeSuccessorParams, AbstractAttributeSuccessorParamsJSON, IAbstractAttributeSuccessorParams } from "./AbstractAttributeSuccessorParams";
 
 // TODO: maybe split this into separate files for own and peer
 export interface RelationshipAttributeSuccessorParamsJSON extends AbstractAttributeSuccessorParamsJSON {
