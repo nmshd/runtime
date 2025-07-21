@@ -14,10 +14,15 @@ import { CoreAddress } from "@nmshd/core-types";
 import { TransportCoreErrors } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { OwnIdentityAttribute, PeerIdentityAttribute, PeerIdentityAttributeSharingInfo, PeerSharedAttributeSucceededEvent } from "../../../attributes";
+import {
+    OwnIdentityAttribute,
+    OwnIdentityAttributeSuccessorParams,
+    PeerIdentityAttribute,
+    PeerIdentityAttributeSharingInfo,
+    PeerIdentityAttributeSuccessorParams,
+    PeerSharedAttributeSucceededEvent
+} from "../../../attributes";
 import { LocalAttribute } from "../../../attributes/local/LocalAttribute";
-import { OwnIdentityAttributeSuccessorParams } from "../../../attributes/local/OwnIdentityAttributeSuccessorParams";
-import { PeerIdentityAttributeSuccessorParams } from "../../../attributes/local/PeerIdentityAttributeSuccessorParams";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 import { LocalRequestInfo } from "../IRequestItemProcessor";

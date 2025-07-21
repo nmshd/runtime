@@ -20,18 +20,18 @@ import { nameof } from "ts-simple-nameof";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import {
     OwnIdentityAttribute,
+    OwnIdentityAttributeSuccessorParams,
     OwnRelationshipAttribute,
     PeerIdentityAttribute,
     PeerIdentityAttributeSharingInfo,
+    PeerIdentityAttributeSuccessorParams,
     PeerRelationshipAttribute,
     PeerSharedAttributeSucceededEvent,
     ThirdPartyRelationshipAttribute,
-    ThirdPartyRelationshipAttributeSharingInfo
+    ThirdPartyRelationshipAttributeSharingInfo,
+    ThirdPartyRelationshipAttributeSuccessorParams
 } from "../../../attributes";
 import { LocalAttribute } from "../../../attributes/local/LocalAttribute";
-import { OwnIdentityAttributeSuccessorParams } from "../../../attributes/local/OwnIdentityAttributeSuccessorParams";
-import { PeerIdentityAttributeSuccessorParams } from "../../../attributes/local/PeerIdentityAttributeSuccessorParams";
-import { ThirdPartyRelationshipAttributeSuccessorParams } from "../../../attributes/local/ThirdPartyRelationshipAttributeSuccessorParams";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 import { LocalRequestInfo } from "../IRequestItemProcessor";
