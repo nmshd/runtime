@@ -1,9 +1,11 @@
 import { ILogger } from "@js-soft/logging-abstractions";
-import { IdentityAttribute, PeerSharedAttributeSucceededNotificationItem } from "@nmshd/content";
+import { ApplicationError } from "@js-soft/ts-utils";
+import { IdentityAttribute, PeerSharedAttributeSucceededNotificationItem, RelationshipAttribute } from "@nmshd/content";
 import { TransportLoggerFactory } from "@nmshd/transport";
 import { ConsumptionController } from "../../../../consumption/ConsumptionController";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { LocalAttribute, PeerSharedAttributeSucceededEvent } from "../../../attributes";
+import { LocalAttribute, PeerIdentityAttribute, PeerIdentityAttributeSuccessorParams, PeerRelationshipAttribute, PeerSharedAttributeSucceededEvent } from "../../../attributes";
+import { PeerRelationshipAttributeSuccessorParams } from "../../../attributes/local/successorParams/PeerRelationshipAttributeSuccessorParams";
 import { ValidationResult } from "../../../common";
 import { LocalNotification } from "../../local/LocalNotification";
 import { AbstractNotificationItemProcessor } from "../AbstractNotificationItemProcessor";
@@ -24,43 +26,76 @@ export class PeerSharedAttributeSucceededNotificationItemProcessor extends Abstr
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successionPeerIsNotOwner());
         }
 
-        const successorParams = {
-            id: notificationItem.successorId,
-            content: notificationItem.successorContent,
-            shareInfo: { notificationReference: notification.id, peer: notification.peer }
-        };
+        const predecessor = await this.consumptionController.attributes.getLocalAttribute(notificationItem.predecessorId);
+        if (!predecessor) return ValidationResult.error(ConsumptionCoreErrors.attributes.predecessorDoesNotExist());
 
-        if (notificationItem.successorContent instanceof IdentityAttribute) {
-            const validationResult = await this.consumptionController.attributes.validatePeerSharedIdentityAttributeSuccession(notificationItem.predecessorId, successorParams);
-            return validationResult;
+        // TODO: this wasn't implemented for ThirdPartyRelationshipAttributes so far
+        if (!(predecessor instanceof PeerIdentityAttribute || predecessor instanceof PeerRelationshipAttribute)) {
+            return ValidationResult.error(new ApplicationError("", "")); // TODO:
         }
 
-        const validationResult = await this.consumptionController.attributes.validatePeerSharedRelationshipAttributeSuccession(notificationItem.predecessorId, successorParams);
-        return validationResult;
+        if (predecessor instanceof PeerIdentityAttribute) {
+            if (!(notificationItem.successorContent instanceof IdentityAttribute)) {
+                return ValidationResult.error(new ApplicationError("", "")); // TODO:
+            }
+
+            const successorParams = PeerIdentityAttributeSuccessorParams.from({
+                id: notificationItem.successorId,
+                content: notificationItem.successorContent,
+                sharingInfo: { sourceReference: notification.id, peer: notification.peer }
+            });
+            return await this.consumptionController.attributes.validatePeerIdentityAttributeSuccession(predecessor, successorParams);
+        }
+
+        if (!(notificationItem.successorContent instanceof RelationshipAttribute)) {
+            return ValidationResult.error(new ApplicationError("", "")); // TODO:
+        }
+
+        // if (predecessor instanceof PeerRelationshipAttribute) {
+        const successorParams = PeerRelationshipAttributeSuccessorParams.from({
+            id: notificationItem.successorId,
+            content: notificationItem.successorContent,
+            initialSharingInfo: { sourceReference: notification.id, peer: notification.peer }
+        });
+        return await this.consumptionController.attributes.validatePeerRelationshipAttributeSuccession(predecessor, successorParams);
+        // }
+
+        // TODO: evaluate if this should be implemented for ThirdPartyRelationshipAttributes now
+        // const successorParams = {
+        //     id: notificationItem.successorId,
+        //     content: notificationItem.successorContent,
+        //     sharingInfo: { notificationReference: notification.id, peer: notification.peer }
+        // };
+        // return await this.consumptionController.attributes.validateThirdPartyRelationshipAttributeSuccession(predecessor, successorParams);
     }
 
     public override async process(notificationItem: PeerSharedAttributeSucceededNotificationItem, notification: LocalNotification): Promise<PeerSharedAttributeSucceededEvent> {
-        const successorParams = {
-            id: notificationItem.successorId,
-            content: notificationItem.successorContent,
-            shareInfo: { notificationReference: notification.id, peer: notification.peer }
-        };
-
-        let predecessor: LocalAttribute;
-        let successor: LocalAttribute;
+        let updatedPredecessor: LocalAttribute | undefined;
+        let successor: LocalAttribute | undefined;
         try {
-            if (notificationItem.successorContent instanceof IdentityAttribute) {
-                ({ predecessor, successor } = await this.consumptionController.attributes.succeedPeerSharedIdentityAttribute(
-                    notificationItem.predecessorId,
-                    successorParams,
-                    false
-                ));
-            } else {
-                ({ predecessor, successor } = await this.consumptionController.attributes.succeedPeerSharedRelationshipAttribute(
-                    notificationItem.predecessorId,
-                    successorParams,
-                    false
-                ));
+            const predecessor = await this.consumptionController.attributes.getLocalAttribute(notificationItem.predecessorId);
+            if (!predecessor) throw ConsumptionCoreErrors.attributes.predecessorDoesNotExist();
+
+            if (predecessor instanceof PeerIdentityAttribute && notificationItem.successorContent instanceof IdentityAttribute) {
+                const successorParams = PeerIdentityAttributeSuccessorParams.from({
+                    id: notificationItem.successorId,
+                    content: notificationItem.successorContent,
+                    sharingInfo: { sourceReference: notification.id, peer: notification.peer }
+                });
+                const attributesAfterSuccession = await this.consumptionController.attributes.succeedPeerIdentityAttribute(predecessor, successorParams, false);
+                ({ predecessor: updatedPredecessor, successor } = attributesAfterSuccession);
+            } else if (predecessor instanceof PeerRelationshipAttribute && notificationItem.successorContent instanceof RelationshipAttribute) {
+                const successorParams = PeerRelationshipAttributeSuccessorParams.from({
+                    id: notificationItem.successorId,
+                    content: notificationItem.successorContent,
+                    initialSharingInfo: { sourceReference: notification.id, peer: notification.peer }
+                });
+                const attributesAfterSuccession = await this.consumptionController.attributes.succeedPeerRelationshipAttribute(predecessor, successorParams, false);
+                ({ predecessor: updatedPredecessor, successor } = attributesAfterSuccession);
+            }
+
+            if (!updatedPredecessor || !successor) {
+                throw Error; // TODO:
             }
         } catch (e: unknown) {
             await this.rollbackPartialWork(notificationItem, notification).catch((e) =>
@@ -69,8 +104,8 @@ export class PeerSharedAttributeSucceededNotificationItemProcessor extends Abstr
             throw e;
         }
 
-        const myAddress = this.consumptionController.accountController.identity.address;
-        return new PeerSharedAttributeSucceededEvent(myAddress.toString(), predecessor, successor);
+        const ownAddress = this.accountController.identity.address.toString();
+        return new PeerSharedAttributeSucceededEvent(ownAddress, updatedPredecessor, successor);
     }
 
     public override async rollback(notificationItem: PeerSharedAttributeSucceededNotificationItem, notification: LocalNotification): Promise<void> {
