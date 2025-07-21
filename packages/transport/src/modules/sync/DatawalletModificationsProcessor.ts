@@ -67,7 +67,7 @@ export class DatawalletModificationsProcessor {
                 };
 
                 await targetCollection.update(oldDoc, newObject);
-                return;
+                continue;
             }
 
             await targetCollection.create({
