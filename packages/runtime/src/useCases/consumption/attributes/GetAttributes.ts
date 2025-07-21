@@ -14,7 +14,9 @@ export interface GetAttributesRequest {
     hideTechnical?: boolean;
 }
 
+// TODO: sharingInfos variations
 export interface GetAttributesRequestQuery {
+    "@type"?: string | string[];
     createdAt?: string;
     succeeds?: string | string[];
     succeededBy?: string | string[];
@@ -27,12 +29,11 @@ export interface GetAttributesRequestQuery {
     "content.isTechnical"?: string;
     "content.confidentiality"?: string | string[];
     "content.value.@type"?: string | string[];
-    shareInfo?: string | string[];
-    "shareInfo.requestReference"?: string | string[];
-    "shareInfo.notificationReference"?: string | string[];
-    "shareInfo.peer"?: string | string[];
-    "shareInfo.sourceAttribute"?: string | string[];
-    "shareInfo.thirdPartyAddress"?: string | string[];
+    sharingInfos?: string | string[];
+    "sharingInfos.peer"?: string | string[];
+    "sharingInfos.sourceReference"?: string | string[];
+    "sharingInfos.sharedAt"?: string | string[];
+    "sharingInfos.thirdPartyAddress"?: string | string[];
     deletionInfo?: string | string[];
     "deletionInfo.deletionStatus"?: string | string[];
     "deletionInfo.deletionDate"?: string | string[];
@@ -41,6 +42,7 @@ export interface GetAttributesRequestQuery {
 export class GetAttributesUseCase extends UseCase<GetAttributesRequest, LocalAttributeDTO[]> {
     public static readonly queryTranslator = new QueryTranslator({
         whitelist: {
+            [`${nameof<LocalAttributeDTO>}.@type`]: true,
             [nameof<LocalAttributeDTO>((x) => x.createdAt)]: true,
             [nameof<LocalAttributeDTO>((x) => x.succeeds)]: true,
             [nameof<LocalAttributeDTO>((x) => x.succeededBy)]: true,
@@ -61,11 +63,11 @@ export class GetAttributesUseCase extends UseCase<GetAttributesRequest, LocalAtt
             [`${nameof<LocalAttributeDTO>((x) => x.content)}.${nameof<RelationshipAttributeJSON>((x) => x.confidentiality)}`]: true,
 
             // shareInfo
-            [`${nameof<LocalAttributeDTO>((x) => x.shareInfo)}`]: true,
-            [`${nameof<LocalAttributeDTO>((x) => x.shareInfo)}.${nameof<LocalAttributeShareInfoJSON>((x) => x.peer)}`]: true,
-            [`${nameof<LocalAttributeDTO>((x) => x.shareInfo)}.${nameof<LocalAttributeShareInfoJSON>((x) => x.requestReference)}`]: true,
-            [`${nameof<LocalAttributeDTO>((x) => x.shareInfo)}.${nameof<LocalAttributeShareInfoJSON>((x) => x.notificationReference)}`]: true,
-            [`${nameof<LocalAttributeDTO>((x) => x.shareInfo)}.${nameof<LocalAttributeShareInfoJSON>((x) => x.sourceAttribute)}`]: true,
+            [`${nameof<LocalAttributeDTO>((x) => x.sharingInfos)}`]: true,
+            [`${nameof<LocalAttributeDTO>((x) => x.sharingInfos)}.${nameof<LocalAttributeShareInfoJSON>((x) => x.peer)}`]: true,
+            [`${nameof<LocalAttributeDTO>((x) => x.sharingInfos)}.${nameof<LocalAttributeShareInfoJSON>((x) => x.sourceReference)}`]: true,
+            [`${nameof<LocalAttributeDTO>((x) => x.sharingInfos)}.${nameof<LocalAttributeShareInfoJSON>((x) => x.sharedAt)}`]: true,
+            [`${nameof<LocalAttributeDTO>((x) => x.sharingInfos)}.${nameof<LocalAttributeShareInfoJSON>((x) => x.thirdPartyAddress)}`]: true,
 
             // deletionInfo
             [`${nameof<LocalAttributeDTO>((x) => x.deletionInfo)}`]: true,
@@ -73,6 +75,7 @@ export class GetAttributesUseCase extends UseCase<GetAttributesRequest, LocalAtt
             [`${nameof<LocalAttributeDTO>((x) => x.deletionInfo)}.${nameof<LocalAttributeDeletionInfoJSON>((x) => x.deletionDate)}`]: true
         },
         alias: {
+            [`${nameof<LocalAttributeDTO>}.@type`]: `${nameof<LocalAttributeDTO>}.@type`,
             [nameof<LocalAttributeDTO>((x) => x.createdAt)]: nameof<LocalAttribute>((x) => x.createdAt),
             [nameof<LocalAttributeDTO>((x) => x.succeeds)]: nameof<LocalAttribute>((x) => x.succeeds),
             [nameof<LocalAttributeDTO>((x) => x.succeededBy)]: nameof<LocalAttribute>((x) => x.succeededBy),
@@ -92,12 +95,8 @@ export class GetAttributesUseCase extends UseCase<GetAttributesRequest, LocalAtt
             [`${nameof<LocalAttributeDTO>((x) => x.content)}.${nameof<RelationshipAttributeJSON>((x) => x.isTechnical)}`]: `${nameof<LocalAttribute>((x) => x.content)}.${nameof<RelationshipAttributeJSON>((x) => x.isTechnical)}`,
             [`${nameof<LocalAttributeDTO>((x) => x.content)}.${nameof<RelationshipAttributeJSON>((x) => x.confidentiality)}`]: `${nameof<LocalAttribute>((x) => x.content)}.${nameof<RelationshipAttributeJSON>((x) => x.confidentiality)}`,
 
-            // shareInfo
-            [`${nameof<LocalAttributeDTO>((x) => x.shareInfo)}`]: `${nameof<LocalAttribute>((x) => x.shareInfo)}`,
-            [`${nameof<LocalAttributeDTO>((x) => x.shareInfo)}.${nameof<LocalAttributeShareInfoJSON>((x) => x.peer)}`]: `${nameof<LocalAttribute>((x) => x.shareInfo)}.${nameof<LocalAttributeShareInfoJSON>((x) => x.peer)}`,
-            [`${nameof<LocalAttributeDTO>((x) => x.shareInfo)}.${nameof<LocalAttributeShareInfoJSON>((x) => x.requestReference)}`]: `${nameof<LocalAttribute>((x) => x.shareInfo)}.${nameof<LocalAttributeShareInfoJSON>((x) => x.requestReference)}`,
-            [`${nameof<LocalAttributeDTO>((x) => x.shareInfo)}.${nameof<LocalAttributeShareInfoJSON>((x) => x.notificationReference)}`]: `${nameof<LocalAttribute>((x) => x.shareInfo)}.${nameof<LocalAttributeShareInfoJSON>((x) => x.notificationReference)}`,
-            [`${nameof<LocalAttributeDTO>((x) => x.shareInfo)}.${nameof<LocalAttributeShareInfoJSON>((x) => x.sourceAttribute)}`]: `${nameof<LocalAttribute>((x) => x.shareInfo)}.${nameof<LocalAttributeShareInfoJSON>((x) => x.sourceAttribute)}`,
+            // sharingInfos
+            [`${nameof<LocalAttributeDTO>((x) => x.sharingInfos)}`]: `${nameof<LocalAttribute>((x) => x.sharingInfos)}`,
 
             // deletionInfo
             [`${nameof<LocalAttributeDTO>((x) => x.deletionInfo)}`]: `${nameof<LocalAttribute>((x) => x.deletionInfo)}`,
@@ -117,6 +116,52 @@ export class GetAttributesUseCase extends UseCase<GetAttributesRequest, LocalAtt
                     allowedTags.push(tagQuery);
                 }
                 query["$or"] = allowedTags;
+            },
+
+            // sharingInfos
+            [`${nameof<LocalAttributeDTO>((x) => x.sharingInfos)}.${nameof<LocalAttributeShareInfoJSON>((x) => x.peer)}`]: (query: any, input: string | string[]) => {
+                if (typeof input === "string") {
+                    query["sharingInfos"] = { $elemMatch: { peer: input } };
+                    return;
+                }
+                const allowedPeers = [];
+                for (const peer of input) {
+                    allowedPeers.push({ shareInfo: { $elemMatch: { peer } } });
+                }
+                query["$or"] = allowedPeers;
+            },
+            [`${nameof<LocalAttributeDTO>((x) => x.sharingInfos)}.${nameof<LocalAttributeShareInfoJSON>((x) => x.sourceReference)}`]: (query: any, input: string | string[]) => {
+                if (typeof input === "string") {
+                    query["sharingInfos"] = { $elemMatch: { sourceReference: input } };
+                    return;
+                }
+                const allowedSourceReferences = [];
+                for (const sourceReference of input) {
+                    allowedSourceReferences.push({ shareInfo: { $elemMatch: { sourceReference } } });
+                }
+                query["$or"] = allowedSourceReferences;
+            },
+            [`${nameof<LocalAttributeDTO>((x) => x.sharingInfos)}.${nameof<LocalAttributeShareInfoJSON>((x) => x.sharedAt)}`]: (query: any, input: string | string[]) => {
+                if (typeof input === "string") {
+                    query["sharingInfos"] = { $elemMatch: { sharedAt: input } };
+                    return;
+                }
+                const allowedSharedAts = [];
+                for (const sharedAt of input) {
+                    allowedSharedAts.push({ shareInfo: { $elemMatch: { sharedAt } } });
+                }
+                query["$or"] = allowedSharedAts;
+            },
+            [`${nameof<LocalAttributeDTO>((x) => x.sharingInfos)}.${nameof<LocalAttributeShareInfoJSON>((x) => x.thirdPartyAddress)}`]: (query: any, input: string | string[]) => {
+                if (typeof input === "string") {
+                    query["sharingInfos"] = { $elemMatch: { thirdPartyAddress: input } };
+                    return;
+                }
+                const allowedThirdPartyAddresses = [];
+                for (const thirdPartyAddress of input) {
+                    allowedThirdPartyAddresses.push({ shareInfo: { $elemMatch: { thirdPartyAddress } } });
+                }
+                query["$or"] = allowedThirdPartyAddresses;
             }
         }
     });

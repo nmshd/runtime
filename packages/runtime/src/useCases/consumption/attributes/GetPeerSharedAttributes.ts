@@ -26,10 +26,11 @@ export interface GetPeerSharedAttributesRequestQuery {
     "content.isTechnical"?: string;
     "content.confidentiality"?: string | string[];
     "content.value.@type"?: string | string[];
-    shareInfo?: string | string[];
-    "shareInfo.requestReference"?: string | string[];
-    "shareInfo.notificationReference"?: string | string[];
-    "shareInfo.thirdPartyAddress"?: string | string[];
+    sharingInfos?: string | string[];
+    "sharingInfos.peer"?: string | string[];
+    "sharingInfos.sourceReference"?: string | string[];
+    "sharingInfos.sharedAt"?: string | string[];
+    "sharingInfos.thirdPartyAddress"?: string | string[];
     deletionInfo?: string | string[];
     "deletionInfo.deletionStatus"?: string | string[];
     "deletionInfo.deletionDate"?: string | string[];
@@ -51,10 +52,11 @@ export class GetPeerSharedAttributesUseCase extends UseCase<GetPeerSharedAttribu
 
     protected async executeInternal(request: GetPeerSharedAttributesRequest): Promise<Result<LocalAttributeDTO[]>> {
         const query: GetAttributesRequestQuery = request.query ?? {};
-        query["content.owner"] = request.peer;
 
         const flattenedQuery = flattenObject(query);
         const dbQuery = GetAttributesUseCase.queryTranslator.parse(flattenedQuery);
+
+        dbQuery["@type"] = { $in: ["PeerIdentityAttribute", "PeerRelationshipAttribute", "ThirdPartyRelationshipAttribute"] };
 
         if (request.onlyLatestVersions ?? true) {
             dbQuery["succeededBy"] = { $exists: false };

@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { AttributesController, LocalAttribute } from "@nmshd/consumption";
+import { AttributesController, LocalAttribute, OwnIdentityAttribute } from "@nmshd/consumption";
 import { CoreId } from "@nmshd/core-types";
 import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { AccountController } from "@nmshd/transport";
@@ -34,7 +34,7 @@ export class ChangeDefaultRepositoryAttributeUseCase extends UseCase<ChangeDefau
         const newDefaultAttribute = await this.attributesController.getLocalAttribute(CoreId.from(request.attributeId));
         if (!newDefaultAttribute) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
 
-        if (!newDefaultAttribute.isRepositoryAttribute(this.accountController.identity.address)) {
+        if (!(newDefaultAttribute instanceof OwnIdentityAttribute)) {
             return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(CoreId.from(request.attributeId)));
         }
 
@@ -42,10 +42,10 @@ export class ChangeDefaultRepositoryAttributeUseCase extends UseCase<ChangeDefau
             return Result.fail(RuntimeErrors.attributes.hasSuccessor(newDefaultAttribute));
         }
 
-        const defaultRepositoryAttribute = await this.attributesController.setAsDefaultRepositoryAttribute(newDefaultAttribute, false);
+        const defaultOwnIdentityAttribute = await this.attributesController.setAsDefaultOwnIdentityAttribute(newDefaultAttribute, false);
 
         await this.accountController.syncDatawallet();
 
-        return Result.ok(AttributeMapper.toAttributeDTO(defaultRepositoryAttribute));
+        return Result.ok(AttributeMapper.toAttributeDTO(defaultOwnIdentityAttribute));
     }
 }

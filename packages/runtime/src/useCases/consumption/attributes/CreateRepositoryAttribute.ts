@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
-import { AttributesController, CreateRepositoryAttributeParams } from "@nmshd/consumption";
-import { AttributeValues } from "@nmshd/content";
+import { AttributesController } from "@nmshd/consumption";
+import { AttributeValues, IdentityAttribute } from "@nmshd/content";
 import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { AccountController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
@@ -43,19 +43,17 @@ export class CreateRepositoryAttributeUseCase extends UseCase<CreateRepositoryAt
     }
 
     protected async executeInternal(request: CreateRepositoryAttributeRequest): Promise<Result<LocalAttributeDTO>> {
-        const repositoryAttributeDuplicate = await this.attributesController.getRepositoryAttributeWithSameValue(request.content.value);
-        if (repositoryAttributeDuplicate) {
-            return Result.fail(RuntimeErrors.attributes.cannotCreateDuplicateRepositoryAttribute(repositoryAttributeDuplicate.id));
+        const ownIdentityAttributeDuplicate = await this.attributesController.getOwnIdentityAttributeWithSameValue(request.content.value);
+        if (ownIdentityAttributeDuplicate) {
+            return Result.fail(RuntimeErrors.attributes.cannotCreateDuplicateRepositoryAttribute(ownIdentityAttributeDuplicate.id));
         }
 
-        const params = CreateRepositoryAttributeParams.from({
-            content: {
-                "@type": "IdentityAttribute",
-                owner: this.accountController.identity.address.toString(),
+        const createdLocalAttribute = await this.attributesController.createOwnIdentityAttribute({
+            content: IdentityAttribute.from({
+                owner: this.accountController.identity.address,
                 ...request.content
-            }
+            })
         });
-        const createdLocalAttribute = await this.attributesController.createRepositoryAttribute(params);
 
         await this.accountController.syncDatawallet();
 

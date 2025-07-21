@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { AttributesController, CreateOutgoingRequestParameters, ErrorValidationResult, LocalAttribute, OutgoingRequestsController } from "@nmshd/consumption";
+import { AttributesController, CreateOutgoingRequestParameters, ErrorValidationResult, LocalAttribute, OutgoingRequestsController, OwnIdentityAttribute } from "@nmshd/consumption";
 import { Request, ShareAttributeRequestItem } from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { LocalRequestDTO } from "@nmshd/runtime-types";
@@ -42,13 +42,11 @@ export class ShareRepositoryAttributeUseCase extends UseCase<ShareRepositoryAttr
     }
 
     protected async executeInternal(request: ShareRepositoryAttributeRequest): Promise<Result<LocalRequestDTO>> {
-        const repositoryAttributeId = CoreId.from(request.attributeId);
-        const repositoryAttribute = await this.attributeController.getLocalAttribute(repositoryAttributeId);
-        if (!repositoryAttribute) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute.name));
+        const attributeId = CoreId.from(request.attributeId);
+        const ownIdentityAttribute = await this.attributeController.getLocalAttribute(attributeId);
+        if (!ownIdentityAttribute) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute.name));
 
-        if (!repositoryAttribute.isRepositoryAttribute(this.accountController.identity.address)) {
-            return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(repositoryAttributeId));
-        }
+        if (!(ownIdentityAttribute instanceof OwnIdentityAttribute)) return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(attributeId));
 
         const requestParams = CreateOutgoingRequestParameters.from({
             peer: request.peer,
@@ -57,8 +55,8 @@ export class ShareRepositoryAttributeUseCase extends UseCase<ShareRepositoryAttr
                 items: [
                     ShareAttributeRequestItem.from({
                         ...(request.requestItemMetadata ?? {}),
-                        attribute: repositoryAttribute.content,
-                        sourceAttributeId: repositoryAttribute.id,
+                        attribute: ownIdentityAttribute.content,
+                        sourceAttributeId: ownIdentityAttribute.id,
                         mustBeAccepted: true
                     }).toJSON()
                 ]

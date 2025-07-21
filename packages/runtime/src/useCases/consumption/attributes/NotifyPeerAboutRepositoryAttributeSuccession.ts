@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { AttributesController, ConsumptionIds, IAttributeSuccessorParams, LocalAttribute, LocalAttributeDeletionStatus } from "@nmshd/consumption";
+import { AttributesController, ConsumptionIds, LocalAttribute, OwnIdentityAttribute } from "@nmshd/consumption";
 import { Notification, PeerSharedAttributeSucceededNotificationItem } from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { LocalAttributeDTO } from "@nmshd/runtime-types";
@@ -39,71 +39,49 @@ export class NotifyPeerAboutRepositoryAttributeSuccessionUseCase extends UseCase
     }
 
     protected async executeInternal(request: NotifyPeerAboutRepositoryAttributeSuccessionRequest): Promise<Result<NotifyPeerAboutRepositoryAttributeSuccessionResponse>> {
-        const repositoryAttributeSuccessorId = CoreId.from(request.attributeId);
-        const repositoryAttributeSuccessor = await this.attributeController.getLocalAttribute(repositoryAttributeSuccessorId);
+        const attributeId = CoreId.from(request.attributeId);
+        const attribute = await this.attributeController.getLocalAttribute(attributeId);
 
-        if (!repositoryAttributeSuccessor) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute.name));
+        if (!attribute) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute.name));
 
-        if (!repositoryAttributeSuccessor.isRepositoryAttribute(this.accountController.identity.address)) {
-            return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(repositoryAttributeSuccessorId));
-        }
+        if (!(attribute instanceof OwnIdentityAttribute)) return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(attributeId));
 
-        const candidatePredecessors = await this.attributeController.getSharedVersionsOfAttribute(repositoryAttributeSuccessorId, [CoreAddress.from(request.peer)]);
+        const peerAddress = CoreAddress.from(request.peer);
+        const candidatePredecessors = await this.attributeController.getSharedVersionsOfAttribute(attribute, peerAddress);
 
         if (candidatePredecessors.length === 0) {
-            return Result.fail(RuntimeErrors.attributes.noPreviousVersionOfRepositoryAttributeHasBeenSharedWithPeerBefore(repositoryAttributeSuccessorId, request.peer));
+            // TODO: or is deleted or to be deleted
+            return Result.fail(RuntimeErrors.attributes.noPreviousVersionOfRepositoryAttributeHasBeenSharedWithPeerBefore(attributeId, peerAddress));
         }
 
-        const ownSharedIdentityAttributePredecessor = candidatePredecessors.find(
-            (attribute) =>
-                attribute.deletionInfo?.deletionStatus !== LocalAttributeDeletionStatus.DeletedByPeer &&
-                attribute.deletionInfo?.deletionStatus !== LocalAttributeDeletionStatus.ToBeDeletedByPeer
-        );
-
-        if (!ownSharedIdentityAttributePredecessor) {
-            return Result.fail(RuntimeErrors.attributes.cannotSucceedAttributesWithDeletionInfo(candidatePredecessors.map((attribute) => attribute.id)));
-        }
-
-        if (ownSharedIdentityAttributePredecessor.shareInfo?.sourceAttribute?.toString() === request.attributeId) {
-            return Result.fail(
-                RuntimeErrors.attributes.repositoryAttributeHasAlreadyBeenSharedWithPeer(request.attributeId, request.peer, ownSharedIdentityAttributePredecessor.id)
-            );
+        const predecessorSharedWithPeer = candidatePredecessors[0];
+        if (predecessorSharedWithPeer.id.toString() === request.attributeId) {
+            return Result.fail(RuntimeErrors.attributes.repositoryAttributeHasAlreadyBeenSharedWithPeer(request.attributeId, peerAddress, predecessorSharedWithPeer.id));
         }
 
         const notificationId = await ConsumptionIds.notification.generate();
-        const successorParams: IAttributeSuccessorParams = {
-            content: repositoryAttributeSuccessor.content,
-            succeeds: ownSharedIdentityAttributePredecessor.id,
-            shareInfo: { peer: ownSharedIdentityAttributePredecessor.shareInfo!.peer, sourceAttribute: repositoryAttributeSuccessor.id, notificationReference: notificationId }
-        };
-
-        const validationResult = await this.attributeController.validateOwnSharedIdentityAttributeSuccession(ownSharedIdentityAttributePredecessor.id, successorParams);
-        if (validationResult.isError()) {
-            return Result.fail(validationResult.error);
-        }
-
-        const { predecessor: updatedOwnSharedIdentityAttributePredecessor, successor: ownSharedIdentityAttributeSuccessor } =
-            await this.attributeController.succeedOwnSharedIdentityAttribute(ownSharedIdentityAttributePredecessor.id, successorParams, false);
+        const updatedAttribute = await this.attributeController.addSharingInfoToOwnIdentityAttribute(attribute, peerAddress, notificationId);
 
         const notificationItem = PeerSharedAttributeSucceededNotificationItem.from({
-            predecessorId: ownSharedIdentityAttributePredecessor.id,
-            successorId: ownSharedIdentityAttributeSuccessor.id,
-            successorContent: ownSharedIdentityAttributeSuccessor.content
+            predecessorId: predecessorSharedWithPeer.id,
+            successorId: updatedAttribute.id,
+            successorContent: updatedAttribute.content
         });
         const notification = Notification.from({
             id: notificationId,
             items: [notificationItem]
         });
+
         await this.messageController.sendMessage({
-            recipients: [ownSharedIdentityAttributePredecessor.shareInfo!.peer],
+            recipients: [peerAddress],
             content: notification
         });
 
         await this.accountController.syncDatawallet();
 
         const result = {
-            predecessor: AttributeMapper.toAttributeDTO(updatedOwnSharedIdentityAttributePredecessor),
-            successor: AttributeMapper.toAttributeDTO(ownSharedIdentityAttributeSuccessor),
+            predecessor: AttributeMapper.toAttributeDTO(predecessorSharedWithPeer),
+            successor: AttributeMapper.toAttributeDTO(updatedAttribute),
             notificationId: notificationId.toString()
         };
         return Result.ok(result);

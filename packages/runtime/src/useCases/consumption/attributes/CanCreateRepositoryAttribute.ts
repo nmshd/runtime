@@ -53,9 +53,9 @@ export class CanCreateRepositoryAttributeUseCase extends UseCase<CanCreateReposi
             return Result.ok({ isSuccess: false, code: failures[0].error.code, message: failures[0].error.message });
         }
 
-        const repositoryAttributeDuplicate = await this.attributesController.getRepositoryAttributeWithSameValue(request.content.value);
-        if (repositoryAttributeDuplicate) {
-            const error = RuntimeErrors.attributes.cannotCreateDuplicateRepositoryAttribute(repositoryAttributeDuplicate.id);
+        const ownIdentityAttributeDuplicate = await this.attributesController.getOwnIdentityAttributeWithSameValue(request.content.value);
+        if (ownIdentityAttributeDuplicate) {
+            const error = RuntimeErrors.attributes.cannotCreateDuplicateRepositoryAttribute(ownIdentityAttributeDuplicate.id);
             return Result.ok({ isSuccess: false, code: error.code, message: error.message });
         }
 

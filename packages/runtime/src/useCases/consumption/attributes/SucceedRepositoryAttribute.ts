@@ -1,11 +1,12 @@
 import { Result } from "@js-soft/ts-utils";
-import { AttributesController, AttributeSuccessorParamsJSON, ConsumptionCoreErrors } from "@nmshd/consumption";
+import { AttributesController, ConsumptionCoreErrors, OwnIdentityAttribute } from "@nmshd/consumption";
+import { OwnIdentityAttributeSuccessorParamsJSON } from "@nmshd/consumption/src/modules/attributes/local/OwnIdentityAttributeSuccessorParams";
 import { AttributeValues } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
 import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { AccountController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { AttributeMapper } from "./AttributeMapper";
 
 export interface SucceedRepositoryAttributeResponse {
@@ -40,21 +41,20 @@ export class SucceedRepositoryAttributeUseCase extends UseCase<SucceedRepository
         const predecessor = await this.attributeController.getLocalAttribute(CoreId.from(request.predecessorId));
         if (!predecessor) return Result.fail(ConsumptionCoreErrors.attributes.predecessorDoesNotExist());
 
-        const successorParams: AttributeSuccessorParamsJSON = {
+        if (!(predecessor instanceof OwnIdentityAttribute)) return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(request.predecessorId));
+
+        const successorParams: OwnIdentityAttributeSuccessorParamsJSON = {
             content: {
                 "@type": "IdentityAttribute",
                 owner: this.accountController.identity.address.toString(),
                 ...request.successorContent
-            },
-            succeeds: predecessor.id.toString()
+            }
         };
-        const predecessorId = CoreId.from(request.predecessorId);
-        const validationResult = await this.attributeController.validateRepositoryAttributeSuccession(predecessorId, successorParams);
-        if (validationResult.isError()) {
-            return Result.fail(validationResult.error);
-        }
 
-        const { predecessor: updatedPredecessor, successor } = await this.attributeController.succeedRepositoryAttribute(predecessorId, successorParams, false);
+        const validationResult = await this.attributeController.validateAttributeSuccession(predecessor, successorParams);
+        if (validationResult.isError()) return Result.fail(validationResult.error);
+
+        const { predecessor: updatedPredecessor, successor } = await this.attributeController.succeedOwnIdentityAttribute(predecessor, successorParams, false);
         await this.accountController.syncDatawallet();
 
         const response: SucceedRepositoryAttributeResponse = {

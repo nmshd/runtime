@@ -46,7 +46,7 @@ export class DeleteThirdPartyRelationshipAttributeAndNotifyPeerUseCase extends U
         }
 
         const relationshipWithStatusPending = await this.relationshipsController.getRelationshipToIdentity(
-            thirdPartyRelationshipAttribute.shareInfo.peer,
+            thirdPartyRelationshipAttribute.sharingInfos.peer,
             RelationshipStatus.Pending
         );
         if (relationshipWithStatusPending) {
@@ -58,7 +58,7 @@ export class DeleteThirdPartyRelationshipAttributeAndNotifyPeerUseCase extends U
 
         await this.attributesController.executeFullAttributeDeletionProcess(thirdPartyRelationshipAttribute);
 
-        const messageRecipientsValidationResult = await this.messageController.validateMessageRecipients([thirdPartyRelationshipAttribute.shareInfo.peer]);
+        const messageRecipientsValidationResult = await this.messageController.validateMessageRecipients([thirdPartyRelationshipAttribute.sharingInfos.peer]);
         if (messageRecipientsValidationResult.isError) {
             return Result.ok({});
         }
@@ -70,7 +70,7 @@ export class DeleteThirdPartyRelationshipAttributeAndNotifyPeerUseCase extends U
             items: [notificationItem]
         });
         await this.messageController.sendMessage({
-            recipients: [thirdPartyRelationshipAttribute.shareInfo.peer],
+            recipients: [thirdPartyRelationshipAttribute.sharingInfos.peer],
             content: notification
         });
 

@@ -40,9 +40,11 @@ export class GetRepositoryAttributesUseCase extends UseCase<GetRepositoryAttribu
 
     protected async executeInternal(request: GetRepositoryAttributesRequest): Promise<Result<GetRepositoryAttributesResponse>> {
         const query: GetAttributesRequestQuery = request.query ?? {};
+
+        query["@type"] = "OwnIdentityAttribute";
+
         const flattenedQuery = flattenObject(query);
         const dbQuery = GetAttributesUseCase.queryTranslator.parse(flattenedQuery);
-        dbQuery.shareInfo = { $exists: false };
 
         if (request.onlyLatestVersions ?? true) dbQuery["succeededBy"] = { $exists: false };
 
