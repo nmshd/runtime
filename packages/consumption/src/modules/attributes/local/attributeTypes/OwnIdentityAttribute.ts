@@ -2,8 +2,8 @@ import { serialize, type, validate } from "@js-soft/ts-serval";
 import { IdentityAttribute, IdentityAttributeJSON, IIdentityAttribute } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
+import { IOwnIdentityAttributeSharingInfo, OwnAttributeDeletionStatus, OwnIdentityAttributeSharingInfo, OwnIdentityAttributeSharingInfoJSON } from "../sharingInfos";
 import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./LocalAttribute";
-import { IOwnIdentityAttributeSharingInfo, OwnAttributeDeletionStatus, OwnIdentityAttributeSharingInfo, OwnIdentityAttributeSharingInfoJSON } from "./sharingInfos";
 
 export interface OwnIdentityAttributeJSON extends LocalAttributeJSON {
     "@type": "OwnIdentityAttribute";

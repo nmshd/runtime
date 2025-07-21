@@ -1,5 +1,5 @@
 import { TransportDataEvent } from "@nmshd/transport";
-import { LocalAttribute } from "../local/LocalAttribute";
+import { LocalAttribute } from "../local/attributeTypes";
 
 export class AttributeCreatedEvent extends TransportDataEvent<LocalAttribute> {
     public static readonly namespace = "consumption.attributeCreated";

@@ -2,7 +2,6 @@ import { serialize, type, validate } from "@js-soft/ts-serval";
 import { IRelationshipAttribute, RelationshipAttribute, RelationshipAttributeJSON } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
-import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./LocalAttribute";
 import {
     ForwardedRelationshipAttributeDeletionStatus,
     ForwardedRelationshipAttributeSharingInfo,
@@ -11,7 +10,8 @@ import {
     IPeerRelationshipAttributeSharingInfo,
     PeerRelationshipAttributeSharingInfo,
     PeerRelationshipAttributeSharingInfoJSON
-} from "./sharingInfos";
+} from "../sharingInfos";
+import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./LocalAttribute";
 
 export interface PeerRelationshipAttributeJSON extends LocalAttributeJSON {
     "@type": "PeerRelationshipAttribute";

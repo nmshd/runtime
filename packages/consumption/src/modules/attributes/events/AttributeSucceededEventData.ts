@@ -1,4 +1,4 @@
-import { LocalAttribute } from "../local/LocalAttribute";
+import { LocalAttribute } from "../local/attributeTypes";
 
 export interface AttributeSucceededEventData {
     predecessor: LocalAttribute;
