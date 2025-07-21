@@ -72,10 +72,8 @@ class Attributes {
         );
     }
 
-    public successionMustNotChangePeer(comment?: string) {
-        let errorMessage = "The peer of the shared Attribute must not change.";
-        if (comment) errorMessage += ` ${comment}`;
-        return new CoreError("error.consumption.attributes.successionMustNotChangePeer", errorMessage);
+    public successionMustNotChangePeer() {
+        return new CoreError("error.consumption.attributes.successionMustNotChangePeer", "The peer of the shared Attribute must not change.");
     }
 
     public successionMustNotChangeThirdParty(comment?: string) {

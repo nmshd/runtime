@@ -46,18 +46,23 @@ import { ThirdPartyRelationshipAttribute } from "./local/ThirdPartyRelationshipA
 import { ThirdPartyRelationshipAttributeSharingInfo } from "./local/ThirdPartyRelationshipAttributeSharingInfo";
 import {
     IOwnIdentityAttributeSuccessorParams,
+    IOwnRelationshipAttributeSuccessorParams,
     IPeerIdentityAttributeSuccessorParams,
-    IRelationshipAttributeSuccessorParams,
     IThirdPartyRelationshipAttributeSuccessorParams,
     OwnIdentityAttributeSuccessorParams,
     OwnIdentityAttributeSuccessorParamsJSON,
+    OwnRelationshipAttributeSuccessorParams,
+    OwnRelationshipAttributeSuccessorParamsJSON,
     PeerIdentityAttributeSuccessorParams,
     PeerIdentityAttributeSuccessorParamsJSON,
-    RelationshipAttributeSuccessorParams,
-    RelationshipAttributeSuccessorParamsJSON,
     ThirdPartyRelationshipAttributeSuccessorParams,
     ThirdPartyRelationshipAttributeSuccessorParamsJSON
 } from "./local/successorParams";
+import {
+    IPeerRelationshipAttributeSuccessorParams,
+    PeerRelationshipAttributeSuccessorParams,
+    PeerRelationshipAttributeSuccessorParamsJSON
+} from "./local/successorParams/PeerRelationshipAttributeSuccessorParams";
 
 export class AttributesController extends ConsumptionBaseController {
     private attributes: SynchronizedCollection;
@@ -532,15 +537,14 @@ export class AttributesController extends ConsumptionBaseController {
         parsedSuccessorParams.content = IdentityAttribute.from(trimmedAttribute);
 
         if (validate) {
-            const validationResult = await this.validateAttributeSuccession(predecessor, parsedSuccessorParams);
+            const validationResult = await this.validateOwnIdentityAttributeSuccession(predecessor, parsedSuccessorParams);
             if (validationResult.isError()) throw validationResult.error;
         }
 
         const successor = OwnIdentityAttribute.from({
-            id: parsedSuccessorParams.id ?? (await ConsumptionIds.attribute.generate()),
+            id: await ConsumptionIds.attribute.generate(),
             content: parsedSuccessorParams.content,
             createdAt: CoreDate.utc(),
-            sharingInfos: parsedSuccessorParams.sharingInfo ? [parsedSuccessorParams.sharingInfo] : undefined,
             succeeds: predecessor.id,
             isDefault: predecessor.isDefault
         });
@@ -579,7 +583,7 @@ export class AttributesController extends ConsumptionBaseController {
         parsedSuccessorParams.content = IdentityAttribute.from(trimmedAttribute);
 
         if (validate) {
-            const validationResult = await this.validateAttributeSuccession(predecessor, parsedSuccessorParams);
+            const validationResult = await this.validatePeerIdentityAttributeSuccession(predecessor, parsedSuccessorParams);
             if (validationResult.isError()) throw validationResult.error;
         }
 
@@ -603,18 +607,18 @@ export class AttributesController extends ConsumptionBaseController {
 
     public async succeedOwnRelationshipAttribute(
         predecessor: OwnRelationshipAttribute,
-        successorParams: IRelationshipAttributeSuccessorParams | RelationshipAttributeSuccessorParamsJSON,
+        successorParams: IOwnRelationshipAttributeSuccessorParams | OwnRelationshipAttributeSuccessorParamsJSON,
         validate = true
     ): Promise<{ predecessor: OwnRelationshipAttribute; successor: OwnRelationshipAttribute }> {
-        const parsedSuccessorParams = RelationshipAttributeSuccessorParams.from(successorParams);
+        const parsedSuccessorParams = OwnRelationshipAttributeSuccessorParams.from(successorParams);
 
         if (validate) {
-            const validationResult = await this.validateAttributeSuccession(predecessor, parsedSuccessorParams);
+            const validationResult = await this.validateOwnRelationshipAttributeSuccession(predecessor, parsedSuccessorParams);
             if (validationResult.isError()) throw validationResult.error;
         }
 
         const successor = OwnRelationshipAttribute.from({
-            id: parsedSuccessorParams.id ?? (await ConsumptionIds.attribute.generate()),
+            id: await ConsumptionIds.attribute.generate(),
             content: parsedSuccessorParams.content,
             createdAt: CoreDate.utc(),
             initialSharingInfo: parsedSuccessorParams.initialSharingInfo,
@@ -633,18 +637,18 @@ export class AttributesController extends ConsumptionBaseController {
 
     public async succeedPeerRelationshipAttribute(
         predecessor: PeerRelationshipAttribute,
-        successorParams: IRelationshipAttributeSuccessorParams | RelationshipAttributeSuccessorParamsJSON,
+        successorParams: IPeerRelationshipAttributeSuccessorParams | PeerRelationshipAttributeSuccessorParamsJSON,
         validate = true
     ): Promise<{ predecessor: PeerRelationshipAttribute; successor: PeerRelationshipAttribute }> {
-        const parsedSuccessorParams = RelationshipAttributeSuccessorParams.from(successorParams);
+        const parsedSuccessorParams = PeerRelationshipAttributeSuccessorParams.from(successorParams);
 
         if (validate) {
-            const validationResult = await this.validateAttributeSuccession(predecessor, parsedSuccessorParams);
+            const validationResult = await this.validatePeerRelationshipAttributeSuccession(predecessor, parsedSuccessorParams);
             if (validationResult.isError()) throw validationResult.error;
         }
 
         const successor = PeerRelationshipAttribute.from({
-            id: parsedSuccessorParams.id ?? (await ConsumptionIds.attribute.generate()),
+            id: parsedSuccessorParams.id,
             content: parsedSuccessorParams.content,
             createdAt: CoreDate.utc(),
             initialSharingInfo: parsedSuccessorParams.initialSharingInfo,
@@ -669,7 +673,7 @@ export class AttributesController extends ConsumptionBaseController {
         const parsedSuccessorParams = ThirdPartyRelationshipAttributeSuccessorParams.from(successorParams);
 
         if (validate) {
-            const validationResult = await this.validateAttributeSuccession(predecessor, parsedSuccessorParams);
+            const validationResult = await this.validateThirdPartyRelationshipAttributeSuccession(predecessor, parsedSuccessorParams);
             if (validationResult.isError()) throw validationResult.error;
         }
 
@@ -707,10 +711,13 @@ export class AttributesController extends ConsumptionBaseController {
     //     return { predecessor, successor };
     // }
 
-    public async validateAttributeSuccession(predecessor: LocalAttribute, successorParams: IAttributeSuccessorParams | AttributeSuccessorParamsJSON): Promise<ValidationResult> {
+    public async validateOwnIdentityAttributeSuccession(
+        predecessor: OwnIdentityAttribute,
+        successorParams: OwnIdentityAttributeSuccessorParams | OwnIdentityAttributeSuccessorParamsJSON
+    ): Promise<ValidationResult> {
         let parsedSuccessorParams;
         try {
-            parsedSuccessorParams = AttributeSuccessorParams.from(successorParams);
+            parsedSuccessorParams = OwnIdentityAttributeSuccessorParams.from(successorParams);
         } catch (e: unknown) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successorIsNotAValidAttribute(e));
         }
@@ -718,39 +725,142 @@ export class AttributesController extends ConsumptionBaseController {
         const tagValidationResult = await this.validateTagsOfAttribute(parsedSuccessorParams.content);
         if (tagValidationResult.isError()) throw tagValidationResult.error;
 
-        // TODO: sharingInfo(s)
-        const successor = LocalAttribute.from({
-            id: CoreId.from(parsedSuccessorParams.id ?? "dummy"),
+        const successor = OwnIdentityAttribute.from({
+            id: await ConsumptionIds.attribute.generate(),
             content: parsedSuccessorParams.content,
-            succeeds: predecessor.id,
-            createdAt: CoreDate.utc()
+            createdAt: CoreDate.utc(),
+            succeeds: predecessor.id
         });
 
-        if (parsedSuccessorParams.id) {
-            const successor = await this.getLocalAttribute(CoreId.from(parsedSuccessorParams.id));
-            if (successor) return ValidationResult.error(ConsumptionCoreErrors.attributes.successorMustNotYetExist());
+        return await this.validateAttributeSuccession(predecessor, successor);
+    }
+
+    public async validatePeerIdentityAttributeSuccession(
+        predecessor: PeerIdentityAttribute,
+        successorParams: PeerIdentityAttributeSuccessorParams | PeerIdentityAttributeSuccessorParamsJSON
+    ): Promise<ValidationResult> {
+        let parsedSuccessorParams;
+        try {
+            parsedSuccessorParams = PeerIdentityAttributeSuccessorParams.from(successorParams);
+        } catch (e: unknown) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.successorIsNotAValidAttribute(e));
         }
 
-        // TODO: can be deleted
-        if (successor.succeededBy) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.successorMustNotHaveASuccessor());
+        const successor = PeerIdentityAttribute.from({
+            id: parsedSuccessorParams.id,
+            content: parsedSuccessorParams.content,
+            createdAt: CoreDate.utc(),
+            succeeds: predecessor.id,
+            sharingInfo: parsedSuccessorParams.sharingInfo
+        });
+
+        if (predecessor.sharingInfo.peer.toString() !== successor.sharingInfo.peer.toString()) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangePeer());
         }
+
+        if (predecessor.sharingInfo.deletionInfo) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedAttributesWithDeletionInfo());
+        }
+
+        return await this.validateAttributeSuccession(predecessor, successor);
+    }
+
+    public async validateOwnRelationshipAttributeSuccession(
+        predecessor: OwnRelationshipAttribute,
+        successorParams: OwnRelationshipAttributeSuccessorParams | OwnRelationshipAttributeSuccessorParamsJSON
+    ): Promise<ValidationResult> {
+        let parsedSuccessorParams;
+        try {
+            parsedSuccessorParams = OwnRelationshipAttributeSuccessorParams.from(successorParams);
+        } catch (e: unknown) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.successorIsNotAValidAttribute(e));
+        }
+
+        const successor = OwnRelationshipAttribute.from({
+            id: await ConsumptionIds.attribute.generate(),
+            content: parsedSuccessorParams.content,
+            createdAt: CoreDate.utc(),
+            succeeds: predecessor.id,
+            initialSharingInfo: parsedSuccessorParams.initialSharingInfo
+        });
+
+        if (predecessor.initialSharingInfo.peer.toString() !== successor.initialSharingInfo.peer.toString()) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangePeer());
+        }
+
+        if (predecessor.initialSharingInfo.deletionInfo) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedAttributesWithDeletionInfo());
+        }
+
+        return await this.validateAttributeSuccession(predecessor, successor);
+    }
+
+    public async validatePeerRelationshipAttributeSuccession(
+        predecessor: PeerRelationshipAttribute,
+        successorParams: IPeerRelationshipAttributeSuccessorParams | PeerRelationshipAttributeSuccessorParamsJSON
+    ): Promise<ValidationResult> {
+        let parsedSuccessorParams;
+        try {
+            parsedSuccessorParams = PeerRelationshipAttributeSuccessorParams.from(successorParams);
+        } catch (e: unknown) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.successorIsNotAValidAttribute(e));
+        }
+
+        const successor = PeerRelationshipAttribute.from({
+            id: parsedSuccessorParams.id,
+            content: parsedSuccessorParams.content,
+            createdAt: CoreDate.utc(),
+            succeeds: predecessor.id,
+            initialSharingInfo: parsedSuccessorParams.initialSharingInfo
+        });
+
+        if (predecessor.initialSharingInfo.peer.toString() !== successor.initialSharingInfo.peer.toString()) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangePeer());
+        }
+
+        if (predecessor.initialSharingInfo.deletionInfo) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedAttributesWithDeletionInfo());
+        }
+
+        return await this.validateAttributeSuccession(predecessor, successor);
+    }
+
+    public async validateThirdPartyRelationshipAttributeSuccession(
+        predecessor: ThirdPartyRelationshipAttribute,
+        successorParams: ThirdPartyRelationshipAttributeSuccessorParams | ThirdPartyRelationshipAttributeSuccessorParamsJSON
+    ): Promise<ValidationResult> {
+        let parsedSuccessorParams;
+        try {
+            parsedSuccessorParams = ThirdPartyRelationshipAttributeSuccessorParams.from(successorParams);
+        } catch (e: unknown) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.successorIsNotAValidAttribute(e));
+        }
+
+        const successor = ThirdPartyRelationshipAttribute.from({
+            id: parsedSuccessorParams.id,
+            content: parsedSuccessorParams.content,
+            createdAt: CoreDate.utc(),
+            succeeds: predecessor.id,
+            sharingInfo: parsedSuccessorParams.sharingInfo
+        });
+
+        if (predecessor.sharingInfo.peer.toString() !== successor.sharingInfo.peer.toString()) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangePeer());
+        }
+
+        if (predecessor.sharingInfo.deletionInfo) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedAttributesWithDeletionInfo());
+        }
+
+        return await this.validateAttributeSuccession(predecessor, successor);
+    }
+
+    private async validateAttributeSuccession(predecessor: LocalAttribute, successor: LocalAttribute): Promise<ValidationResult> {
+        const existingAttributeWithSameId = await this.getLocalAttribute(successor.id);
+        if (existingAttributeWithSameId) return ValidationResult.error(ConsumptionCoreErrors.attributes.successorMustNotYetExist());
 
         if (predecessor.succeededBy) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedAttributesWithASuccessor(predecessor.succeededBy.toString()));
-        }
-
-        // TODO: this will need to be specific for types; also check that predecessor was shared with peer
-        if (
-            parsedSuccessorParams.sharingInfo?.peer &&
-            predecessor.hasDeletionInfo(parsedSuccessorParams.sharingInfo.peer, [
-                LocalAttributeDeletionStatus.ToBeDeleted,
-                LocalAttributeDeletionStatus.ToBeDeletedByPeer,
-                LocalAttributeDeletionStatus.DeletedByOwner,
-                LocalAttributeDeletionStatus.DeletedByPeer
-            ])
-        ) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedAttributesWithDeletionInfo());
         }
 
         if (_.isEqual(successor.content.toJSON(), predecessor.content.toJSON())) {
@@ -1104,7 +1214,7 @@ export class AttributesController extends ConsumptionBaseController {
         });
     }
 
-    // TODO: only allow IdentityAttributes as arguments
+    // TODO: only allow IdentityAttributes as arguments?
     public async validateTagsOfAttribute(attribute: IdentityAttribute | RelationshipAttribute): Promise<ValidationResult> {
         if (attribute instanceof RelationshipAttribute) return ValidationResult.success();
         if (!attribute.tags || attribute.tags.length === 0) return ValidationResult.success();
