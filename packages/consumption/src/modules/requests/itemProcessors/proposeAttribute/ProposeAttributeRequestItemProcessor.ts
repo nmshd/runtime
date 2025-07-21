@@ -2,8 +2,6 @@ import {
     AttributeAlreadySharedAcceptResponseItem,
     AttributeSuccessionAcceptResponseItem,
     IdentityAttribute,
-    IdentityAttributeQuery,
-    IQLQuery,
     ProposeAttributeAcceptResponseItem,
     ProposeAttributeRequestItem,
     RejectResponseItem,
@@ -12,12 +10,14 @@ import {
     Request,
     ResponseItemResult
 } from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { CoreAddress } from "@nmshd/core-types";
 import { TransportCoreErrors } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { AttributeSuccessorParams, IAttributeSuccessorParams, LocalAttributeDeletionStatus, LocalAttributeShareInfo, PeerSharedAttributeSucceededEvent } from "../../../attributes";
+import { OwnIdentityAttribute, PeerIdentityAttribute, PeerIdentityAttributeSharingInfo, PeerSharedAttributeSucceededEvent } from "../../../attributes";
 import { LocalAttribute } from "../../../attributes/local/LocalAttribute";
+import { OwnIdentityAttributeSuccessorParams } from "../../../attributes/local/OwnIdentityAttributeSuccessorParams";
+import { PeerIdentityAttributeSuccessorParams } from "../../../attributes/local/PeerIdentityAttributeSuccessorParams";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 import { LocalRequestInfo } from "../IRequestItemProcessor";
@@ -131,36 +131,29 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
                 return ValidationResult.error(TransportCoreErrors.general.recordNotFound(LocalAttribute, parsedParams.attributeId.toString()));
             }
 
+            // TODO: error message and code, maybe split these cases to be more precise
+            if (!(foundLocalAttribute instanceof OwnIdentityAttribute)) {
+                return ValidationResult.error(
+                    ConsumptionCoreErrors.requests.attributeQueryMismatch(
+                        "The provided IdentityAttribute is a shared copy of a RepositoryAttribute. You can only share RepositoryAttributes."
+                    )
+                );
+            }
+
             attribute = foundLocalAttribute.content;
 
-            if (
-                (requestItem.query instanceof IdentityAttributeQuery || requestItem.query instanceof IQLQuery) &&
-                attribute instanceof IdentityAttribute &&
-                this.accountController.identity.isMe(attribute.owner)
-            ) {
-                // if (foundLocalAttribute.isShared()) {
-                //     return ValidationResult.error(
-                //         ConsumptionCoreErrors.requests.attributeQueryMismatch(
-                //             "The provided IdentityAttribute is a shared copy of a RepositoryAttribute. You can only share RepositoryAttributes."
-                //         )
-                //     );
-                // }
+            const successorsSharedWithPeer = await this.consumptionController.attributes.getSharedSuccessorsOfAttribute(foundLocalAttribute, requestInfo.peer);
 
-                const attributeSuccessorsSharedWithPeer = await this.consumptionController.attributes.getSharedSuccessorsOfAttribute(foundLocalAttribute, {
-                    "sharingInfos.peer": requestInfo.peer.toString()
-                });
+            if (successorsSharedWithPeer.length > 0) {
+                return ValidationResult.error(
+                    ConsumptionCoreErrors.requests.attributeQueryMismatch(
+                        `The provided IdentityAttribute is outdated. You have already shared the successor '${successorsSharedWithPeer[0].id}' of it.`
+                    )
+                );
+            }
 
-                if (attributeSuccessorsSharedWithPeer.length > 0) {
-                    return ValidationResult.error(
-                        ConsumptionCoreErrors.requests.attributeQueryMismatch(
-                            `The provided IdentityAttribute is outdated. You have already shared the successor '${attributeSuccessorsSharedWithPeer[0].id}' of it.`
-                        )
-                    );
-                }
-
-                if (parsedParams.tags && parsedParams.tags.length > 0) {
-                    attribute.tags = attribute.tags ? [...attribute.tags, ...parsedParams.tags] : parsedParams.tags;
-                }
+            if (parsedParams.tags && parsedParams.tags.length > 0) {
+                attribute.tags = attribute.tags ? [...attribute.tags, ...parsedParams.tags] : parsedParams.tags;
             }
         } else if (parsedParams.isWithNewAttribute()) {
             attribute = parsedParams.attribute;
@@ -219,58 +212,38 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
         return ValidationResult.success();
     }
 
+    // TODO: maybe have shared code with ReadAttributeRequestItemProcessor
     public override async accept(
         _requestItem: ProposeAttributeRequestItem,
         params: AcceptProposeAttributeRequestItemParametersJSON,
         requestInfo: LocalRequestInfo
     ): Promise<ProposeAttributeAcceptResponseItem | AttributeSuccessionAcceptResponseItem | AttributeAlreadySharedAcceptResponseItem> {
         const parsedParams = AcceptProposeAttributeRequestItemParameters.from(params);
-        let sharedLocalAttribute;
 
         if (parsedParams.isWithExistingAttribute()) {
-            let existingSourceAttribute = await this.consumptionController.attributes.getLocalAttribute(parsedParams.attributeId);
-            if (!existingSourceAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, parsedParams.attributeId.toString());
+            let existingAttribute = await this.consumptionController.attributes.getLocalAttribute(parsedParams.attributeId);
+            if (!existingAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, parsedParams.attributeId.toString());
 
-            if (parsedParams.tags && parsedParams.tags.length > 0 && existingSourceAttribute.content instanceof IdentityAttribute) {
-                const mergedTags = existingSourceAttribute.content.tags ? [...existingSourceAttribute.content.tags, ...parsedParams.tags] : parsedParams.tags;
-                existingSourceAttribute.content.tags = mergedTags;
+            if (!(existingAttribute instanceof OwnIdentityAttribute)) throw Error; // TODO:
 
-                const successorParams: IAttributeSuccessorParams = {
-                    content: existingSourceAttribute.content
-                };
-                const attributesAfterSuccession = await this.consumptionController.attributes.succeedAttribute(parsedParams.attributeId, successorParams);
-                existingSourceAttribute = attributesAfterSuccession.successor;
+            if (parsedParams.tags && parsedParams.tags.length > 0) {
+                const mergedTags = existingAttribute.content.tags ? [...existingAttribute.content.tags, ...parsedParams.tags] : parsedParams.tags;
+                existingAttribute.content.tags = mergedTags;
+
+                // TODO: I think we should only succeed if new tags are actually added; or not do a succession in general, but then peer will have different tags -> might be okay
+                const successorParams = OwnIdentityAttributeSuccessorParams.from({
+                    content: existingAttribute.content
+                });
+                const attributesAfterSuccession = await this.consumptionController.attributes.succeedOwnIdentityAttribute(existingAttribute, successorParams);
+                existingAttribute = attributesAfterSuccession.successor;
+
+                // TODO: improve this
+                if (!(existingAttribute instanceof OwnIdentityAttribute)) throw Error;
             }
 
-            const query = {
-                "deletionInfo.deletionStatus": {
-                    $nin: [
-                        LocalAttributeDeletionStatus.DeletedByPeer,
-                        LocalAttributeDeletionStatus.DeletedByOwner,
-                        LocalAttributeDeletionStatus.ToBeDeletedByPeer,
-                        LocalAttributeDeletionStatus.ToBeDeleted
-                    ]
-                }
-            };
-            const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfAttribute(parsedParams.attributeId, [requestInfo.peer], true, query);
+            const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfAttribute(existingAttribute, requestInfo.peer);
 
-            const wasSharedBefore = latestSharedVersion.length > 0;
-            const isLatestSharedVersion = latestSharedVersion[0]?.id.toString() === existingSourceAttribute.id.toString();
-            const predecessorWasSharedBefore = wasSharedBefore && !isLatestSharedVersion;
-
-            if (!wasSharedBefore) {
-                sharedLocalAttribute = await this.consumptionController.attributes.createSharingInfoForAttribute({
-                    attributeId: CoreId.from(existingSourceAttribute.id),
-                    peer: CoreAddress.from(requestInfo.peer),
-                    sourceReference: CoreId.from(requestInfo.id)
-                });
-                return ProposeAttributeAcceptResponseItem.from({
-                    result: ResponseItemResult.Accepted,
-                    attributeId: sharedLocalAttribute.id,
-                    attribute: sharedLocalAttribute.content
-                });
-            }
-
+            const isLatestSharedVersion = latestSharedVersion[0]?.id.toString() === existingAttribute.id.toString();
             if (isLatestSharedVersion) {
                 return AttributeAlreadySharedAcceptResponseItem.from({
                     result: ResponseItemResult.Accepted,
@@ -278,42 +251,35 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
                 });
             }
 
-            if (predecessorWasSharedBefore) {
-                const sharedPredecessor = latestSharedVersion[0];
+            const updatedAttribute = await this.consumptionController.attributes.addSharingInfoToOwnIdentityAttribute(existingAttribute, requestInfo.peer, requestInfo.id);
 
-                // TODO: check why this check is necessary
-                if (existingSourceAttribute.isOwnIdentityAttribute(this.currentIdentityAddress)) {
-                    const successorParams = AttributeSuccessorParams.from({
-                        content: existingSourceAttribute.content,
-                        sharingInfo: LocalAttributeShareInfo.from({
-                            peer: requestInfo.peer,
-                            sourceReference: requestInfo.id,
-                            sharedAt: CoreDate.utc()
-                        })
-                    });
-                    const successorSharedAttribute = (await this.consumptionController.attributes.succeedAttribute(sharedPredecessor.id, successorParams)).successor;
-                    return AttributeSuccessionAcceptResponseItem.from({
-                        result: ResponseItemResult.Accepted,
-                        successorId: successorSharedAttribute.id,
-                        successorContent: successorSharedAttribute.content,
-                        predecessorId: sharedPredecessor.id
-                    });
-                }
+            // TODO: maybe negate this
+            const wasSharedBefore = latestSharedVersion.length > 0;
+            if (!wasSharedBefore) {
+                return ProposeAttributeAcceptResponseItem.from({
+                    result: ResponseItemResult.Accepted,
+                    attributeId: updatedAttribute.id,
+                    attribute: updatedAttribute.content
+                });
             }
+
+            const sharedPredecessor = latestSharedVersion[0];
+            return AttributeSuccessionAcceptResponseItem.from({
+                result: ResponseItemResult.Accepted,
+                predecessorId: sharedPredecessor.id,
+                successorId: updatedAttribute.id,
+                successorContent: updatedAttribute.content
+            });
         } else if (parsedParams.isWithNewAttribute()) {
             if (parsedParams.attribute.owner.equals("")) {
                 parsedParams.attribute.owner = this.currentIdentityAddress;
             }
 
             if (parsedParams.attribute instanceof RelationshipAttribute) {
-                const sharingInfo = LocalAttributeShareInfo.from({
-                    peer: requestInfo.peer,
-                    sourceReference: CoreId.from(requestInfo.id),
-                    sharedAt: CoreDate.utc()
-                });
-                const ownRelationshipAttribute = await this.consumptionController.attributes.createAttributeWithSharingInfo({
+                const ownRelationshipAttribute = await this.consumptionController.attributes.createOwnRelationshipAttribute({
                     content: parsedParams.attribute,
-                    sharingInfo
+                    peer: requestInfo.peer,
+                    sourceReference: requestInfo.id
                 });
 
                 return ProposeAttributeAcceptResponseItem.from({
@@ -338,30 +304,46 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
         _requestItem: ProposeAttributeRequestItem,
         requestInfo: LocalRequestInfo
     ): Promise<PeerSharedAttributeSucceededEvent | void> {
-        const sharingInfo = LocalAttributeShareInfo.from({
-            peer: requestInfo.peer,
-            sourceReference: requestInfo.id,
-            sharedAt: CoreDate.utc()
-        });
-
         if (responseItem instanceof ProposeAttributeAcceptResponseItem) {
-            await this.consumptionController.attributes.createAttributeWithSharingInfo({
+            if (responseItem.attribute instanceof IdentityAttribute) {
+                await this.consumptionController.attributes.createPeerIdentityAttribute({
+                    id: responseItem.attributeId,
+                    content: responseItem.attribute,
+                    peer: requestInfo.peer,
+                    sourceReference: requestInfo.id
+                });
+                return;
+            }
+
+            await this.consumptionController.attributes.createPeerRelationshipAttribute({
                 id: responseItem.attributeId,
                 content: responseItem.attribute,
-                sharingInfo
+                peer: requestInfo.peer,
+                sourceReference: requestInfo.id
             });
+            return;
         }
 
         if (responseItem instanceof AttributeSuccessionAcceptResponseItem && responseItem.successorContent instanceof IdentityAttribute) {
-            const successorParams = AttributeSuccessorParams.from({
-                id: responseItem.successorId,
-                content: responseItem.successorContent,
-                sharingInfo
-            });
-            const { predecessor, successor } = await this.consumptionController.attributes.succeedAttribute(responseItem.predecessorId, successorParams);
-            // TODO: check publishing of events
-            return new PeerSharedAttributeSucceededEvent(this.currentIdentityAddress.toString(), predecessor, successor);
+            const predecessor = await this.consumptionController.attributes.getLocalAttribute(responseItem.predecessorId);
+            if (!predecessor) throw Error; // TODO: or return?
+
+            if (predecessor instanceof PeerIdentityAttribute && responseItem.successorContent instanceof IdentityAttribute) {
+                const sharingInfo = PeerIdentityAttributeSharingInfo.from({
+                    peer: requestInfo.peer,
+                    sourceReference: requestInfo.id
+                });
+
+                const successorParams = PeerIdentityAttributeSuccessorParams.from({
+                    id: responseItem.successorId,
+                    content: responseItem.successorContent,
+                    sharingInfo
+                });
+
+                const { predecessor: updatedPredecessor, successor } = await this.consumptionController.attributes.succeedPeerIdentityAttribute(predecessor, successorParams);
+                // TODO: check publishing of events
+                return new PeerSharedAttributeSucceededEvent(this.currentIdentityAddress.toString(), updatedPredecessor, successor);
+            }
         }
-        return;
     }
 }
