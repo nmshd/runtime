@@ -241,7 +241,7 @@ export class AttributesController extends ConsumptionBaseController {
         return this.parseArray(attributes, LocalAttribute);
     }
 
-    // TODO: check if we need to allow creating own IdentityAttributes that contain a sharingInfo immediately
+    // TODO: check if some shared validation can be extracted from the create functions
     public async createOwnIdentityAttribute(params: { content: IdentityAttribute }): Promise<OwnIdentityAttribute> {
         let attribute = params.content;
         if (attribute.owner.toString() !== this.identity.address.toString()) {
@@ -257,7 +257,6 @@ export class AttributesController extends ConsumptionBaseController {
         };
         attribute = IdentityAttribute.from(trimmedAttribute);
 
-        // TODO: this should also be done in other create methods
         if (!this.validateAttributeCharacters(attribute)) {
             throw ConsumptionCoreErrors.attributes.forbiddenCharactersInAttribute("The Attribute contains forbidden characters.");
         }
@@ -325,26 +324,30 @@ export class AttributesController extends ConsumptionBaseController {
         return attribute;
     }
 
-    // TODO: refactor parameters such that not sharingInfo is required as a whole, same for other create functions
     public async createPeerIdentityAttribute(params: { content: IdentityAttribute; peer: CoreAddress; sourceReference: CoreId; id: CoreId }): Promise<PeerIdentityAttribute> {
-        if (params.content.owner.toString() !== params.peer.toString()) {
+        let attribute = params.content;
+        if (attribute.owner.toString() !== params.peer.toString()) {
             throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute();
         }
 
-        const tagValidationResult = await this.validateTagsOfAttribute(params.content);
+        const tagValidationResult = await this.validateTagsOfAttribute(attribute);
         if (tagValidationResult.isError()) throw tagValidationResult.error;
 
         const trimmedAttribute = {
-            ...params.content.toJSON(),
-            value: this.trimAttributeValue(params.content.value.toJSON() as AttributeValues.Identity.Json)
+            ...attribute.toJSON(),
+            value: this.trimAttributeValue(attribute.value.toJSON() as AttributeValues.Identity.Json)
         };
-        params.content = IdentityAttribute.from(trimmedAttribute);
+        attribute = IdentityAttribute.from(trimmedAttribute);
+
+        if (!this.validateAttributeCharacters(attribute)) {
+            throw ConsumptionCoreErrors.attributes.forbiddenCharactersInAttribute("The Attribute contains forbidden characters.");
+        }
 
         const sharingInfo = PeerIdentityAttributeSharingInfo.from({
             peer: params.peer,
             sourceReference: params.sourceReference
         });
-        const peerIdentityAttribute = PeerIdentityAttribute.from({ id: params.id, content: params.content, sharingInfo, createdAt: CoreDate.utc() });
+        const peerIdentityAttribute = PeerIdentityAttribute.from({ id: params.id, content: attribute, sharingInfo, createdAt: CoreDate.utc() });
         await this.attributes.create(peerIdentityAttribute);
 
         this.eventBus.publish(new AttributeCreatedEvent(this.identity.address.toString(), peerIdentityAttribute));
@@ -357,8 +360,13 @@ export class AttributesController extends ConsumptionBaseController {
         sourceReference: CoreId;
         id?: CoreId;
     }): Promise<OwnRelationshipAttribute> {
-        if (params.content.owner.toString() !== this.identity.address.toString()) {
+        const attribute = params.content;
+        if (attribute.owner.toString() !== this.identity.address.toString()) {
             throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute();
+        }
+
+        if (!this.validateAttributeCharacters(attribute)) {
+            throw ConsumptionCoreErrors.attributes.forbiddenCharactersInAttribute("The Attribute contains forbidden characters.");
         }
 
         const initialSharingInfo = OwnRelationshipAttributeSharingInfo.from({
@@ -367,7 +375,7 @@ export class AttributesController extends ConsumptionBaseController {
         });
         const ownRelationshipAttribute = OwnRelationshipAttribute.from({
             id: params.id ?? (await ConsumptionIds.attribute.generate()),
-            content: params.content,
+            content: attribute,
             initialSharingInfo,
             createdAt: CoreDate.utc()
         });
@@ -383,8 +391,13 @@ export class AttributesController extends ConsumptionBaseController {
         sourceReference: CoreId;
         id?: CoreId;
     }): Promise<PeerRelationshipAttribute> {
-        if (params.content.owner.toString() !== params.peer.toString()) {
+        const attribute = params.content;
+        if (attribute.owner.toString() !== params.peer.toString()) {
             throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute();
+        }
+
+        if (!this.validateAttributeCharacters(attribute)) {
+            throw ConsumptionCoreErrors.attributes.forbiddenCharactersInAttribute("The Attribute contains forbidden characters.");
         }
 
         const initialSharingInfo = PeerRelationshipAttributeSharingInfo.from({
@@ -393,7 +406,7 @@ export class AttributesController extends ConsumptionBaseController {
         });
         const peerRelationshipAttribute = PeerRelationshipAttribute.from({
             id: params.id ?? (await ConsumptionIds.attribute.generate()),
-            content: params.content,
+            content: attribute,
             initialSharingInfo,
             createdAt: CoreDate.utc()
         });
@@ -403,7 +416,6 @@ export class AttributesController extends ConsumptionBaseController {
         return peerRelationshipAttribute;
     }
 
-    // TODO: evaluate if input parameters should be expected as an object
     public async createThirdPartyRelationshipAttribute(params: {
         content: RelationshipAttribute;
         peer: CoreAddress;
@@ -411,8 +423,13 @@ export class AttributesController extends ConsumptionBaseController {
         initialAttributePeer: CoreAddress;
         id: CoreId;
     }): Promise<ThirdPartyRelationshipAttribute> {
-        if (!(params.content.owner.toString() === params.peer.toString() || params.content.owner.toString() === params.initialAttributePeer.toString())) {
+        attribute;
+        if (!(attribute.owner.toString() === params.peer.toString() || attribute.owner.toString() === params.initialAttributePeer.toString())) {
             throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute();
+        }
+
+        if (!this.validateAttributeCharacters(attribute)) {
+            throw ConsumptionCoreErrors.attributes.forbiddenCharactersInAttribute("The Attribute contains forbidden characters.");
         }
 
         const sharingInfo = ThirdPartyRelationshipAttributeSharingInfo.from({
@@ -420,7 +437,7 @@ export class AttributesController extends ConsumptionBaseController {
             sourceReference: params.sourceReference,
             initialAttributePeer: params.initialAttributePeer
         });
-        const thirdPartyRelationshipAttribute = ThirdPartyRelationshipAttribute.from({ id: params.id, content: params.content, sharingInfo, createdAt: CoreDate.utc() });
+        const thirdPartyRelationshipAttribute = ThirdPartyRelationshipAttribute.from({ id: params.id, content: attribute, sharingInfo, createdAt: CoreDate.utc() });
         await this.attributes.create(thirdPartyRelationshipAttribute);
 
         this.eventBus.publish(new AttributeCreatedEvent(this.identity.address.toString(), thirdPartyRelationshipAttribute));
@@ -451,76 +468,6 @@ export class AttributesController extends ConsumptionBaseController {
 
         return attribute;
     }
-
-    // TODO: maybe we need individual methods for the Attribute types again
-    // public async succeedAttribute(
-    //     predecessorId: CoreId,
-    //     successorParams: IAttributeSuccessorParams | AttributeSuccessorParamsJSON,
-    //     validate = true
-    // ): Promise<{ predecessor: LocalAttribute; successor: LocalAttribute }> {
-    //     const parsedSuccessorParams = AttributeSuccessorParams.from(successorParams);
-    //     const trimmedAttribute = {
-    //         ...parsedSuccessorParams.content.toJSON(),
-    //         value: this.trimAttributeValue(parsedSuccessorParams.content.value.toJSON() as AttributeValues.Identity.Json)
-    //     };
-    //     parsedSuccessorParams.content = IdentityAttribute.from(trimmedAttribute);
-
-    //     if (validate) {
-    //         const validationResult = await this.validateAttributeSuccession(predecessorId, parsedSuccessorParams);
-    //         if (validationResult.isError()) throw validationResult.error;
-    //     }
-
-    //     const { predecessor, successor } = await this._succeedAttributeUnsafe(predecessorId, {
-    //         id: parsedSuccessorParams.id,
-    //         content: parsedSuccessorParams.content,
-    //         succeeds: predecessorId,
-    //         sharingInfos: parsedSuccessorParams.sharingInfo ? [parsedSuccessorParams.sharingInfo] : undefined
-    //     });
-
-    //     // TODO: publish events only for own Attributes and ThirdPartyRelationshipAttributes
-    //     this.eventBus.publish(new AttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
-
-    //     return { predecessor, successor };
-    // }
-
-    // private async _succeedAttributeUnsafe(
-    //     predecessorId: CoreId,
-    //     successorParams: Parameters<typeof this.createAttributeUnsafe>[0]
-    // ): Promise<{ predecessor: LocalAttribute; successor: LocalAttribute }> {
-    //     const predecessor = await this.getLocalAttribute(predecessorId);
-    //     if (!predecessor) throw ConsumptionCoreErrors.attributes.predecessorDoesNotExist();
-
-    //     const successor = await this.createAttributeUnsafe({
-    //         id: successorParams.id,
-    //         content: successorParams.content,
-    //         succeeds: predecessorId,
-    //         sharingInfos: successorParams.sharingInfos,
-    //         createdAt: successorParams.createdAt,
-    //         succeededBy: successorParams.succeededBy,
-    //         isDefault: predecessor.isDefault
-    //     });
-
-    //     await this.removeDefault(predecessor);
-
-    //     predecessor.succeededBy = successor.id;
-    //     await this.updateAttributeUnsafe(predecessor);
-
-    //     return { predecessor, successor };
-    // }
-
-    // public async createAttributeUnsafe(attributeData: Omit<ILocalAttribute, "id" | "createdAt"> & { id?: ICoreId; createdAt?: ICoreDate }): Promise<LocalAttribute> {
-    //     const localAttribute = LocalAttribute.from({
-    //         id: attributeData.id ?? (await ConsumptionIds.attribute.generate()),
-    //         content: attributeData.content,
-    //         createdAt: attributeData.createdAt ?? CoreDate.utc(),
-    //         sharingInfos: attributeData.sharingInfos,
-    //         succeededBy: attributeData.succeededBy,
-    //         succeeds: attributeData.succeeds,
-    //         isDefault: attributeData.isDefault
-    //     });
-    //     await this.attributes.create(localAttribute);
-    //     return localAttribute;
-    // }
 
     // TODO: check if parts of this can be put into separate functions
     public async succeedOwnIdentityAttribute(
