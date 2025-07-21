@@ -2,11 +2,7 @@ import { serialize, type, validate } from "@js-soft/ts-serval";
 import { IRelationshipAttribute, RelationshipAttribute, RelationshipAttributeJSON } from "@nmshd/content";
 import { nameof } from "ts-simple-nameof";
 import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./LocalAttribute";
-import {
-    IThirdPartyRelationshipAttributeSharingInfo,
-    ThirdPartyRelationshipAttributeSharingInfo,
-    ThirdPartyRelationshipAttributeSharingInfoJSON
-} from "./ThirdPartyRelationshipAttributeSharingInfo";
+import { IThirdPartyRelationshipAttributeSharingInfo, ThirdPartyRelationshipAttributeSharingInfo, ThirdPartyRelationshipAttributeSharingInfoJSON } from "./sharingInfos";
 
 export interface ThirdPartyRelationshipAttributeJSON extends LocalAttributeJSON {
     "@type": "ThirdPartyRelationshipAttribute";

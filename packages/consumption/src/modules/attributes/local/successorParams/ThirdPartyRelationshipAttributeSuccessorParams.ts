@@ -1,11 +1,7 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { IRelationshipAttribute, RelationshipAttribute, RelationshipAttributeJSON } from "@nmshd/content";
 import { CoreId, ICoreId } from "@nmshd/core-types";
-import {
-    IThirdPartyRelationshipAttributeSharingInfo,
-    ThirdPartyRelationshipAttributeSharingInfo,
-    ThirdPartyRelationshipAttributeSharingInfoJSON
-} from "../ThirdPartyRelationshipAttributeSharingInfo";
+import { IThirdPartyRelationshipAttributeSharingInfo, ThirdPartyRelationshipAttributeSharingInfo, ThirdPartyRelationshipAttributeSharingInfoJSON } from "../sharingInfos";
 import { AbstractAttributeSuccessorParams, AbstractAttributeSuccessorParamsJSON, IAbstractAttributeSuccessorParams } from "./AbstractAttributeSuccessorParams";
 
 export interface ThirdPartyRelationshipAttributeSuccessorParamsJSON extends AbstractAttributeSuccessorParamsJSON {

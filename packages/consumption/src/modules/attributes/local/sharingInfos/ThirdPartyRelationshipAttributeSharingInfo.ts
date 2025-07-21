@@ -1,7 +1,7 @@
 import { serialize, validate } from "@js-soft/ts-serval";
 import { CoreAddress, ICoreAddress } from "@nmshd/core-types";
 import { AbstractAttributeSharingInfo, AbstractAttributeSharingInfoJSON, IAbstractAttributeSharingInfo } from "./AbstractAttributeSharingInfo";
-import { IPeerAttributeDeletionInfo, PeerAttributeDeletionInfo, PeerAttributeDeletionInfoJSON } from "./PeerAttributeDeletionInfo";
+import { IPeerAttributeDeletionInfo, PeerAttributeDeletionInfo, PeerAttributeDeletionInfoJSON } from "./deletionInfos";
 
 export interface ThirdPartyRelationshipAttributeSharingInfoJSON extends AbstractAttributeSharingInfoJSON {
     initialAttributePeer: string;

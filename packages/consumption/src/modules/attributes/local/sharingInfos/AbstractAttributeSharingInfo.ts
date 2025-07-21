@@ -3,16 +3,17 @@ import { CoreAddress, CoreId, ICoreAddress, ICoreId } from "@nmshd/core-types";
 import {
     ForwardedRelationshipAttributeDeletionInfo,
     ForwardedRelationshipAttributeDeletionInfoJSON,
-    IForwardedRelationshipAttributeDeletionInfo
-} from "./ForwardedRelationshipAttributeDeletionInfo";
-import { IOwnAttributeDeletionInfo, OwnAttributeDeletionInfo, OwnAttributeDeletionInfoJSON } from "./OwnAttributeDeletionInfo";
-import { IPeerAttributeDeletionInfo, PeerAttributeDeletionInfo, PeerAttributeDeletionInfoJSON } from "./PeerAttributeDeletionInfo";
-import {
+    IForwardedRelationshipAttributeDeletionInfo,
+    IOwnAttributeDeletionInfo,
+    IPeerAttributeDeletionInfo,
     IThirdPartyRelationshipAttributeDeletionInfo,
+    OwnAttributeDeletionInfo,
+    OwnAttributeDeletionInfoJSON,
+    PeerAttributeDeletionInfo,
+    PeerAttributeDeletionInfoJSON,
     ThirdPartyRelationshipAttributeDeletionInfo,
     ThirdPartyRelationshipAttributeDeletionInfoJSON
-} from "./ThirdPartyRelationshipAttributeDeletionInfo";
-
+} from "./deletionInfos";
 export interface AbstractAttributeSharingInfoJSON {
     peer: string;
     sourceReference: string;

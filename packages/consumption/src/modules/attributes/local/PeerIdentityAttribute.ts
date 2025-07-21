@@ -2,7 +2,7 @@ import { serialize, type, validate } from "@js-soft/ts-serval";
 import { IdentityAttribute, IdentityAttributeJSON, IIdentityAttribute } from "@nmshd/content";
 import { nameof } from "ts-simple-nameof";
 import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./LocalAttribute";
-import { IPeerIdentityAttributeSharingInfo, PeerIdentityAttributeSharingInfo, PeerIdentityAttributeSharingInfoJSON } from "./PeerIdentityAttributeSharingInfo";
+import { IPeerIdentityAttributeSharingInfo, PeerIdentityAttributeSharingInfo, PeerIdentityAttributeSharingInfoJSON } from "./sharingInfos";
 
 export interface PeerIdentityAttributeJSON extends LocalAttributeJSON {
     "@type": "PeerIdentityAttribute";

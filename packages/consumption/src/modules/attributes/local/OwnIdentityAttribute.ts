@@ -3,8 +3,7 @@ import { IdentityAttribute, IdentityAttributeJSON, IIdentityAttribute } from "@n
 import { CoreAddress } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
 import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./LocalAttribute";
-import { OwnAttributeDeletionStatus } from "./OwnAttributeDeletionInfo";
-import { IOwnIdentityAttributeSharingInfo, OwnIdentityAttributeSharingInfo, OwnIdentityAttributeSharingInfoJSON } from "./OwnIdentityAttributeSharingInfo";
+import { IOwnIdentityAttributeSharingInfo, OwnAttributeDeletionStatus, OwnIdentityAttributeSharingInfo, OwnIdentityAttributeSharingInfoJSON } from "./sharingInfos";
 
 export interface OwnIdentityAttributeJSON extends LocalAttributeJSON {
     "@type": "OwnIdentityAttribute";

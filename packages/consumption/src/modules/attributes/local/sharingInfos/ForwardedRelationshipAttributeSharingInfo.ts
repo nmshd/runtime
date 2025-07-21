@@ -1,13 +1,8 @@
 import { serialize, validate } from "@js-soft/ts-serval";
 import { CoreDate, ICoreDate } from "@nmshd/core-types";
 import { AbstractAttributeSharingInfo, AbstractAttributeSharingInfoJSON, IAbstractAttributeSharingInfo } from "./AbstractAttributeSharingInfo";
-import {
-    ForwardedRelationshipAttributeDeletionInfo,
-    ForwardedRelationshipAttributeDeletionInfoJSON,
-    IForwardedRelationshipAttributeDeletionInfo
-} from "./ForwardedRelationshipAttributeDeletionInfo";
+import { ForwardedRelationshipAttributeDeletionInfo, ForwardedRelationshipAttributeDeletionInfoJSON, IForwardedRelationshipAttributeDeletionInfo } from "./deletionInfos";
 
-// TODO: we should improve the folder structure
 export interface ForwardedRelationshipAttributeSharingInfoJSON extends AbstractAttributeSharingInfoJSON {
     sharedAt: string;
     deletionInfo?: ForwardedRelationshipAttributeDeletionInfoJSON;

@@ -1,6 +1,6 @@
 import { serialize, validate } from "@js-soft/ts-serval";
 import { AbstractAttributeSharingInfo, AbstractAttributeSharingInfoJSON, IAbstractAttributeSharingInfo } from "./AbstractAttributeSharingInfo";
-import { IOwnAttributeDeletionInfo, OwnAttributeDeletionInfo, OwnAttributeDeletionInfoJSON } from "./OwnAttributeDeletionInfo";
+import { IOwnAttributeDeletionInfo, OwnAttributeDeletionInfo, OwnAttributeDeletionInfoJSON } from "./deletionInfos";
 
 export interface OwnRelationshipAttributeSharingInfoJSON extends AbstractAttributeSharingInfoJSON {
     deletionInfo?: OwnAttributeDeletionInfoJSON;

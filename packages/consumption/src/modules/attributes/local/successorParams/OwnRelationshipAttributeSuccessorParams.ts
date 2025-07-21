@@ -1,6 +1,6 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { RelationshipAttribute, RelationshipAttributeJSON } from "@nmshd/content";
-import { IOwnRelationshipAttributeSharingInfo, OwnRelationshipAttributeSharingInfo, OwnRelationshipAttributeSharingInfoJSON } from "../OwnRelationshipAttributeSharingInfo";
+import { IOwnRelationshipAttributeSharingInfo, OwnRelationshipAttributeSharingInfo, OwnRelationshipAttributeSharingInfoJSON } from "../sharingInfos";
 import { AbstractAttributeSuccessorParams, AbstractAttributeSuccessorParamsJSON, IAbstractAttributeSuccessorParams } from "./AbstractAttributeSuccessorParams";
 
 export interface OwnRelationshipAttributeSuccessorParamsJSON extends AbstractAttributeSuccessorParamsJSON {
