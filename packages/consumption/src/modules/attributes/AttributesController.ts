@@ -240,29 +240,30 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     // TODO: check if we need to allow creating own IdentityAttributes that contain a sharingInfo immediately
-    public async createOwnIdentityAttribute(content: IdentityAttribute): Promise<OwnIdentityAttribute> {
-        if (content.owner.toString() !== this.identity.address.toString()) {
+    public async createOwnIdentityAttribute(params: { content: IdentityAttribute }): Promise<OwnIdentityAttribute> {
+        let attribute = params.content;
+        if (attribute.owner.toString() !== this.identity.address.toString()) {
             throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute();
         }
 
-        const tagValidationResult = await this.validateTagsOfAttribute(content);
+        const tagValidationResult = await this.validateTagsOfAttribute(attribute);
         if (tagValidationResult.isError()) throw tagValidationResult.error;
 
         const trimmedAttribute = {
-            ...content.toJSON(),
-            value: this.trimAttributeValue(content.value.toJSON() as AttributeValues.Identity.Json)
+            ...attribute.toJSON(),
+            value: this.trimAttributeValue(attribute.value.toJSON() as AttributeValues.Identity.Json)
         };
-        content = IdentityAttribute.from(trimmedAttribute);
+        attribute = IdentityAttribute.from(trimmedAttribute);
 
         // TODO: this should also be done in other create methods
-        if (!this.validateAttributeCharacters(content)) {
+        if (!this.validateAttributeCharacters(attribute)) {
             throw ConsumptionCoreErrors.attributes.forbiddenCharactersInAttribute("The Attribute contains forbidden characters.");
         }
 
         let ownIdentityAttribute = OwnIdentityAttribute.from({
             id: await ConsumptionIds.attribute.generate(),
             createdAt: CoreDate.utc(),
-            content
+            content: attribute
         });
 
         await this.attributes.create(ownIdentityAttribute);
