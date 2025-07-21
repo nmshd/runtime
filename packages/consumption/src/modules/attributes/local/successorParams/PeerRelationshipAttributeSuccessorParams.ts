@@ -24,7 +24,7 @@ export class PeerRelationshipAttributeSuccessorParams extends AbstractAttributeS
 
     @validate()
     @serialize()
-    public override id: CoreId;
+    public id: CoreId;
 
     @validate()
     @serialize()

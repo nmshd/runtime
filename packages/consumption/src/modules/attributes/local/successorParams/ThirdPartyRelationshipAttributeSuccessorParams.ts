@@ -28,7 +28,7 @@ export class ThirdPartyRelationshipAttributeSuccessorParams extends AbstractAttr
 
     @validate()
     @serialize()
-    public override id: CoreId;
+    public id: CoreId;
 
     @validate({ nullable: true })
     @serialize()
