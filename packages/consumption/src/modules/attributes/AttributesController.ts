@@ -423,7 +423,7 @@ export class AttributesController extends ConsumptionBaseController {
         initialAttributePeer: CoreAddress;
         id: CoreId;
     }): Promise<ThirdPartyRelationshipAttribute> {
-        attribute;
+        const attribute = params.content;
         if (!(attribute.owner.toString() === params.peer.toString() || attribute.owner.toString() === params.initialAttributePeer.toString())) {
             throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute();
         }
@@ -863,9 +863,9 @@ export class AttributesController extends ConsumptionBaseController {
             await this.detachSuccessor(successor);
         }
 
-        await this.deletePredecessorsOfAttribute(attribute.id);
+        await this.deletePredecessorsOfAttribute(attribute);
 
-        if (this.setDefaultOwnIdentityAttributes) {
+        if (attribute instanceof OwnIdentityAttribute && this.setDefaultOwnIdentityAttributes) {
             await this.transferDefault(attribute);
         }
 
@@ -887,33 +887,29 @@ export class AttributesController extends ConsumptionBaseController {
         await this.updateAttributeUnsafe(successor);
     }
 
-    private async deletePredecessorsOfAttribute(attributeId: CoreId): Promise<void> {
-        const predecessors = await this.getPredecessorsOfAttribute(attributeId);
+    private async deletePredecessorsOfAttribute(attribute: LocalAttribute): Promise<void> {
+        const predecessors = await this.getPredecessorsOfAttribute(attribute);
         for (const predecessor of predecessors) {
             await this.deleteAttribute(predecessor);
         }
     }
 
-    private async transferDefault(attribute: LocalAttribute): Promise<void> {
+    private async transferDefault(attribute: OwnIdentityAttribute): Promise<void> {
         if (!this.setDefaultOwnIdentityAttributes) throw ConsumptionCoreErrors.attributes.setDefaultOwnIdentityAttributesIsDisabled();
+
         if (!attribute.isDefault) return;
 
         const valueType = attribute.content.value.constructor.name;
         const query = {
             $and: [
-                {
-                    [`${nameof<LocalAttribute>((c) => c.content)}.value.@type`]: valueType
-                },
-                {
-                    [nameof<LocalAttribute>((c) => c.succeededBy)]: undefined
-                },
-                {
-                    [nameof<LocalAttribute>((c) => c.id)]: { $ne: attribute.id.toString() }
-                }
+                { [`${nameof<LocalAttribute>}.@type`]: "OwnIdentityAttribute" },
+                { [`${nameof<LocalAttribute>((c) => c.content)}.value.@type`]: valueType },
+                { [nameof<LocalAttribute>((c) => c.succeededBy)]: undefined },
+                { [nameof<LocalAttribute>((c) => c.id)]: { $ne: attribute.id.toString() } }
             ]
         };
 
-        const defaultCandidates = await this.getLocalAttributes(query);
+        const defaultCandidates = (await this.getLocalAttributes(query)) as OwnIdentityAttribute[];
         if (defaultCandidates.length === 0) return;
 
         defaultCandidates[defaultCandidates.length - 1].isDefault = true;
