@@ -866,32 +866,19 @@ export class AttributesController extends ConsumptionBaseController {
         await this.updateAttributeUnsafe(defaultCandidates[defaultCandidates.length - 1]);
     }
 
-    public async getVersionsOfAttribute(id: CoreId): Promise<LocalAttribute[]> {
-        const attribute = await this.getLocalAttribute(id);
-        if (!attribute) {
-            throw TransportCoreErrors.general.recordNotFound(LocalAttribute, id.toString());
-        }
-
-        const predecessors = await this.getPredecessorsOfAttribute(id);
-        const successors = await this.getSuccessorsOfAttribute(id);
+    public async getVersionsOfAttribute(attribute: LocalAttribute): Promise<LocalAttribute[]> {
+        const predecessors = await this.getPredecessorsOfAttribute(attribute);
+        const successors = await this.getSuccessorsOfAttribute(attribute);
 
         const allAttributeVersions = [...successors.reverse(), attribute, ...predecessors];
-
         return allAttributeVersions;
     }
 
-    public async getPredecessorsOfAttribute(id: CoreId): Promise<LocalAttribute[]> {
-        let attribute = await this.getLocalAttribute(id);
-        if (!attribute) {
-            throw TransportCoreErrors.general.recordNotFound(LocalAttribute, id.toString());
-        }
-
+    public async getPredecessorsOfAttribute(attribute: LocalAttribute): Promise<LocalAttribute[]> {
         const predecessors: LocalAttribute[] = [];
         while (attribute.succeeds) {
             const predecessor = await this.getLocalAttribute(attribute.succeeds);
-            if (!predecessor) {
-                throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.succeeds.toString());
-            }
+            if (!predecessor) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.succeeds.toString());
 
             attribute = predecessor;
             predecessors.push(attribute);
@@ -900,18 +887,11 @@ export class AttributesController extends ConsumptionBaseController {
         return predecessors;
     }
 
-    public async getSuccessorsOfAttribute(id: CoreId): Promise<LocalAttribute[]> {
-        let attribute = await this.getLocalAttribute(id);
-        if (!attribute) {
-            throw TransportCoreErrors.general.recordNotFound(LocalAttribute, id.toString());
-        }
-
+    public async getSuccessorsOfAttribute(attribute: LocalAttribute): Promise<LocalAttribute[]> {
         const successors: LocalAttribute[] = [];
         while (attribute.succeededBy) {
             const successor = await this.getLocalAttribute(attribute.succeededBy);
-            if (!successor) {
-                throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.succeededBy.toString());
-            }
+            if (!successor) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.succeededBy.toString());
 
             attribute = successor;
             successors.push(successor);
