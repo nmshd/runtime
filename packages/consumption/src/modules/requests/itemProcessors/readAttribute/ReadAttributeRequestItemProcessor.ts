@@ -31,7 +31,7 @@ import {
     ThirdPartyRelationshipAttributeSharingInfo,
     ThirdPartyRelationshipAttributeSuccessorParams
 } from "../../../attributes";
-import { LocalAttribute } from "../../../attributes/local/LocalAttribute";
+import { LocalAttribute } from "../../../attributes/local/attributeTypes";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 import { LocalRequestInfo } from "../IRequestItemProcessor";

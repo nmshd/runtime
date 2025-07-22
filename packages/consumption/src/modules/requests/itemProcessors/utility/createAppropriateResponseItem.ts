@@ -100,7 +100,7 @@ async function getOwnIdentityAttribute(attribute: IdentityAttribute, attributesC
     const existingOwnIdentityAttribute = await attributesController.getOwnIdentityAttributeWithSameValue((attribute.value as any).toJSON());
 
     if (!existingOwnIdentityAttribute) {
-        return await attributesController.createOwnIdentityAttribute(attribute);
+        return await attributesController.createOwnIdentityAttribute({ content: attribute });
     }
 
     const newTags = attribute.tags?.filter((tag) => !existingOwnIdentityAttribute.content.tags?.includes(tag));
