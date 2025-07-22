@@ -10,9 +10,6 @@ import { TransportLoggerFactory } from "./TransportLoggerFactory";
 export enum ControllerName {
     Account = "Account",
     Attribute = "Attribute",
-    Certificate = "Certificate",
-    CertificateIssuer = "CertificateIssuer",
-    CertificateValidator = "CertificateValidator",
     Challenge = "Challenge",
     Device = "Device",
     Devices = "Devices",
