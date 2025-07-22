@@ -1,6 +1,12 @@
 import { Result } from "@js-soft/ts-utils";
-import { AttributesController, ConsumptionCoreErrors, ConsumptionIds, OwnRelationshipAttribute, OwnRelationshipAttributeSharingInfo } from "@nmshd/consumption";
-import { RelationshipAttributeSuccessorParams } from "@nmshd/consumption/src/modules/attributes/local/RelationshipAttributeSuccessorParams";
+import {
+    AttributesController,
+    ConsumptionCoreErrors,
+    ConsumptionIds,
+    OwnRelationshipAttribute,
+    OwnRelationshipAttributeSharingInfo,
+    OwnRelationshipAttributeSuccessorParams
+} from "@nmshd/consumption";
 import { AttributeValues, Notification, PeerSharedAttributeSucceededNotificationItem, RelationshipAttribute } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
 import { LocalAttributeDTO } from "@nmshd/runtime-types";
@@ -57,12 +63,12 @@ export class SucceedRelationshipAttributeAndNotifyPeerUseCase extends UseCase<Su
 
         const notificationId = await ConsumptionIds.notification.generate();
 
-        const successorParams = RelationshipAttributeSuccessorParams.from({
+        const successorParams = OwnRelationshipAttributeSuccessorParams.from({
             content: successorContent,
             initialSharingInfo: OwnRelationshipAttributeSharingInfo.from({ peer, sourceReference: notificationId })
         });
 
-        const validationResult = await this.attributeController.validateAttributeSuccession(predecessor, successorParams);
+        const validationResult = await this.attributeController.validateOwnRelationshipAttributeSuccession(predecessor, successorParams);
         if (validationResult.isError()) return Result.fail(validationResult.error);
 
         const { predecessor: updatedPredecessor, successor } = await this.attributeController.succeedOwnRelationshipAttribute(predecessor, successorParams, false);
