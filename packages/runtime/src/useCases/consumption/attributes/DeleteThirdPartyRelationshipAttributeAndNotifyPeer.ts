@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { AttributesController, ConsumptionIds, LocalAttribute } from "@nmshd/consumption";
+import { AttributesController, ConsumptionIds, LocalAttribute, ThirdPartyRelationshipAttribute } from "@nmshd/consumption";
 import { Notification, ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
 import { AccountController, MessageController, RelationshipsController, RelationshipStatus } from "@nmshd/transport";
@@ -41,12 +41,12 @@ export class DeleteThirdPartyRelationshipAttributeAndNotifyPeerUseCase extends U
         const thirdPartyRelationshipAttribute = await this.attributesController.getLocalAttribute(thirdPartyRelationshipAttributeId);
         if (!thirdPartyRelationshipAttribute) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
 
-        if (!thirdPartyRelationshipAttribute.isThirdPartyRelationshipAttribute()) {
+        if (!(thirdPartyRelationshipAttribute instanceof ThirdPartyRelationshipAttribute)) {
             return Result.fail(RuntimeErrors.attributes.isNotThirdPartyRelationshipAttribute(thirdPartyRelationshipAttributeId));
         }
 
         const relationshipWithStatusPending = await this.relationshipsController.getRelationshipToIdentity(
-            thirdPartyRelationshipAttribute.sharingInfos.peer,
+            thirdPartyRelationshipAttribute.sharingInfo.peer,
             RelationshipStatus.Pending
         );
         if (relationshipWithStatusPending) {
@@ -58,10 +58,8 @@ export class DeleteThirdPartyRelationshipAttributeAndNotifyPeerUseCase extends U
 
         await this.attributesController.executeFullAttributeDeletionProcess(thirdPartyRelationshipAttribute);
 
-        const messageRecipientsValidationResult = await this.messageController.validateMessageRecipients([thirdPartyRelationshipAttribute.sharingInfos.peer]);
-        if (messageRecipientsValidationResult.isError) {
-            return Result.ok({});
-        }
+        const messageRecipientsValidationResult = await this.messageController.validateMessageRecipients([thirdPartyRelationshipAttribute.sharingInfo.peer]);
+        if (messageRecipientsValidationResult.isError) return Result.ok({});
 
         const notificationId = await ConsumptionIds.notification.generate();
         const notificationItem = ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem.from({ attributeId: thirdPartyRelationshipAttributeId });
@@ -70,7 +68,7 @@ export class DeleteThirdPartyRelationshipAttributeAndNotifyPeerUseCase extends U
             items: [notificationItem]
         });
         await this.messageController.sendMessage({
-            recipients: [thirdPartyRelationshipAttribute.sharingInfos.peer],
+            recipients: [thirdPartyRelationshipAttribute.sharingInfo.peer],
             content: notification
         });
 
