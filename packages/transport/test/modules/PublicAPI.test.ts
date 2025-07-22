@@ -3,7 +3,6 @@ import { nameof } from "ts-simple-nameof";
 import {
     AccountController,
     AnonymousTokenController,
-    CertificateIssuer,
     ChallengeController,
     DeviceController,
     DevicesController,
@@ -68,8 +67,6 @@ publicFunctions[IdentityController.name] = [
     nameof<IdentityController>((r) => r.sign),
     nameof<IdentityController>((r) => r.verify)
 ];
-
-publicFunctions[CertificateIssuer.name] = [nameof<CertificateIssuer>((r) => r.init), nameof<CertificateIssuer>((r) => r.issueCertificate)];
 
 publicFunctions[ChallengeController.name] = [
     nameof<ChallengeController>((r) => r.init),
@@ -186,7 +183,6 @@ describe("PublicAPI", function () {
         controllers[DevicesController.name] = account.devices;
         controllers[DeviceSecretController.name] = account.activeDevice.secrets;
         controllers[IdentityController.name] = account.identity;
-        controllers[CertificateIssuer.name] = account.certificateIssuer;
         controllers[ChallengeController.name] = account.challenges;
         controllers[FileController.name] = account.files;
         controllers[MessageController.name] = account.messages;
