@@ -15,18 +15,23 @@ export interface OwnIdentityAttributeJSON extends LocalAttributeJSON {
     "@type": "OwnIdentityAttribute";
     content: IdentityAttributeJSON;
     isDefault?: true;
-    sharingInfos?: OwnIdentityAttributeSharingInfoJSON[];
+    forwardedSharingInfos?: OwnIdentityAttributeSharingInfoJSON[];
 }
 
 export interface IOwnIdentityAttribute extends ILocalAttribute {
     content: IIdentityAttribute;
     isDefault?: true;
-    sharingInfos?: IOwnIdentityAttributeSharingInfo[];
+    forwardedSharingInfos?: IOwnIdentityAttributeSharingInfo[];
 }
 
 @type("OwnIdentityAttribute")
 export class OwnIdentityAttribute extends LocalAttribute implements IOwnIdentityAttribute {
-    public override readonly technicalProperties = ["@type", "@context", nameof<OwnIdentityAttribute>((r) => r.isDefault), nameof<OwnIdentityAttribute>((r) => r.sharingInfos)];
+    public override readonly technicalProperties = [
+        "@type",
+        "@context",
+        nameof<OwnIdentityAttribute>((r) => r.isDefault),
+        nameof<OwnIdentityAttribute>((r) => r.forwardedSharingInfos)
+    ];
 
     @serialize()
     @validate()
@@ -38,12 +43,12 @@ export class OwnIdentityAttribute extends LocalAttribute implements IOwnIdentity
 
     @serialize()
     @validate({ nullable: true })
-    public sharingInfos?: OwnIdentityAttributeSharingInfo[];
+    public forwardedSharingInfos?: OwnIdentityAttributeSharingInfo[];
 
     public isSharedWith(peerAddress: CoreAddress, includeDeletedAndToBeDeleted = false): boolean {
-        if (!this.sharingInfos) return false;
+        if (!this.forwardedSharingInfos) return false;
 
-        const sharingInfosWithPeer = this.sharingInfos.filter((sharingInfo) => sharingInfo.peer.equals(peerAddress));
+        const sharingInfosWithPeer = this.forwardedSharingInfos.filter((sharingInfo) => sharingInfo.peer.equals(peerAddress));
         if (sharingInfosWithPeer.length === 0) return false;
 
         if (includeDeletedAndToBeDeleted) return true;
@@ -53,7 +58,7 @@ export class OwnIdentityAttribute extends LocalAttribute implements IOwnIdentity
     }
 
     public setDeletionInfoForPeer(deletionInfo: OwnAttributeDeletionInfo, peer: CoreAddress): this {
-        const sharingInfoForPeer = this.sharingInfos?.find((sharingInfo) => sharingInfo.peer.equals(peer));
+        const sharingInfoForPeer = this.forwardedSharingInfos?.find((sharingInfo) => sharingInfo.peer.equals(peer));
         if (!sharingInfoForPeer) throw Error; // TODO:
 
         sharingInfoForPeer.deletionInfo = deletionInfo; // TODO: check if this works
@@ -64,8 +69,8 @@ export class OwnIdentityAttribute extends LocalAttribute implements IOwnIdentity
         const excludedDeletionStatuses = [OwnAttributeDeletionStatus.DeletedByPeer, OwnAttributeDeletionStatus.ToBeDeletedByPeer];
 
         const sharingInfos = includeDeletedAndToBeDeleted
-            ? this.sharingInfos
-            : this.sharingInfos?.filter((sharingInfo) => {
+            ? this.forwardedSharingInfos
+            : this.forwardedSharingInfos?.filter((sharingInfo) => {
                   if (!sharingInfo.deletionInfo) return true;
                   return !excludedDeletionStatuses.includes(sharingInfo.deletionInfo.deletionStatus);
               });

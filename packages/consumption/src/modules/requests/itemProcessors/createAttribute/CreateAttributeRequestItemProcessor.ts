@@ -9,9 +9,9 @@ import {
     Request,
     ResponseItemResult
 } from "@nmshd/content";
-import { CoreAddress, CoreDate } from "@nmshd/core-types";
+import { CoreAddress } from "@nmshd/core-types";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { PeerIdentityAttribute, PeerIdentityAttributeSuccessorParams, PeerSharedAttributeSucceededEvent } from "../../../attributes";
+import { PeerIdentityAttribute, PeerIdentityAttributeSharingInfo, PeerIdentityAttributeSuccessorParams, PeerSharedAttributeSucceededEvent } from "../../../attributes";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
@@ -169,12 +169,6 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
         const isOwnAttribute = requestItem.attribute.owner.toString() === this.currentIdentityAddress.toString();
         const isPeerAttribute = requestItem.attribute.owner.toString() === requestInfo.peer.toString();
 
-        const sharingInfo = {
-            peer: requestInfo.peer,
-            sourceReference: requestInfo.id,
-            sharedAt: CoreDate.utc()
-        };
-
         if (responseItem instanceof CreateAttributeAcceptResponseItem) {
             if (requestItem.attribute instanceof IdentityAttribute && isPeerAttribute) {
                 await this.consumptionController.attributes.createPeerIdentityAttribute({
@@ -211,10 +205,14 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
             const predecessor = await this.consumptionController.attributes.getLocalAttribute(responseItem.predecessorId);
             if (!predecessor || !(predecessor instanceof PeerIdentityAttribute)) return;
 
+            const peerSharingInfo = PeerIdentityAttributeSharingInfo.from({
+                peer: requestInfo.peer,
+                sourceReference: requestInfo.id
+            });
             const successorParams = PeerIdentityAttributeSuccessorParams.from({
                 id: responseItem.successorId,
                 content: responseItem.successorContent,
-                sharingInfo
+                peerSharingInfo
             });
             const { predecessor: updatedPredecessor, successor } = await this.consumptionController.attributes.succeedPeerIdentityAttribute(predecessor, successorParams);
             // TODO: check publishing of events

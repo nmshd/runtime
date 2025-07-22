@@ -5,12 +5,12 @@ import { AbstractAttributeSuccessorParams, AbstractAttributeSuccessorParamsJSON,
 
 export interface OwnRelationshipAttributeSuccessorParamsJSON extends AbstractAttributeSuccessorParamsJSON {
     content: RelationshipAttributeJSON;
-    initialSharingInfo: Omit<OwnRelationshipAttributeSharingInfoJSON, "deletionInfo">;
+    peerSharingInfo: Omit<OwnRelationshipAttributeSharingInfoJSON, "deletionInfo">;
 }
 
 export interface IOwnRelationshipAttributeSuccessorParams extends IAbstractAttributeSuccessorParams {
     content: RelationshipAttribute;
-    initialSharingInfo: Omit<IOwnRelationshipAttributeSharingInfo, "deletionInfo">;
+    peerSharingInfo: Omit<IOwnRelationshipAttributeSharingInfo, "deletionInfo">;
 }
 
 @type("OwnRelationshipAttributeSuccessorParams")
@@ -21,7 +21,7 @@ export class OwnRelationshipAttributeSuccessorParams extends AbstractAttributeSu
 
     @validate()
     @serialize()
-    public initialSharingInfo: Omit<OwnRelationshipAttributeSharingInfo, "deletionInfo">;
+    public peerSharingInfo: Omit<OwnRelationshipAttributeSharingInfo, "deletionInfo">;
 
     public static from(value: IOwnRelationshipAttributeSuccessorParams | OwnRelationshipAttributeSuccessorParamsJSON): OwnRelationshipAttributeSuccessorParams {
         return this.fromAny(value);

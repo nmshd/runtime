@@ -7,17 +7,17 @@ import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./LocalAttr
 export interface PeerIdentityAttributeJSON extends LocalAttributeJSON {
     "@type": "PeerIdentityAttribute";
     content: IdentityAttributeJSON;
-    sharingInfo: PeerIdentityAttributeSharingInfoJSON;
+    peerSharingInfo: PeerIdentityAttributeSharingInfoJSON;
 }
 
 export interface IPeerIdentityAttribute extends ILocalAttribute {
     content: IIdentityAttribute;
-    sharingInfo: IPeerIdentityAttributeSharingInfo;
+    peerSharingInfo: IPeerIdentityAttributeSharingInfo;
 }
 
 @type("PeerIdentityAttribute")
 export class PeerIdentityAttribute extends LocalAttribute implements IPeerIdentityAttribute {
-    public override readonly technicalProperties = ["@type", "@context", nameof<PeerIdentityAttribute>((r) => r.sharingInfo)];
+    public override readonly technicalProperties = ["@type", "@context", nameof<PeerIdentityAttribute>((r) => r.peerSharingInfo)];
 
     @serialize()
     @validate()
@@ -25,10 +25,10 @@ export class PeerIdentityAttribute extends LocalAttribute implements IPeerIdenti
 
     @serialize()
     @validate()
-    public sharingInfo: PeerIdentityAttributeSharingInfo;
+    public peerSharingInfo: PeerIdentityAttributeSharingInfo;
 
     public setDeletionInfo(deletionInfo: PeerAttributeDeletionInfo): this {
-        this.sharingInfo.deletionInfo = deletionInfo;
+        this.peerSharingInfo.deletionInfo = deletionInfo;
         return this;
     }
 

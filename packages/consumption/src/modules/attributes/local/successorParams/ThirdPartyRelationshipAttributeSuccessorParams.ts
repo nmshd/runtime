@@ -7,13 +7,13 @@ import { AbstractAttributeSuccessorParams, AbstractAttributeSuccessorParamsJSON,
 export interface ThirdPartyRelationshipAttributeSuccessorParamsJSON extends AbstractAttributeSuccessorParamsJSON {
     content: RelationshipAttributeJSON;
     id: string;
-    sharingInfo: Omit<ThirdPartyRelationshipAttributeSharingInfoJSON, "deletionInfo">;
+    peerSharingInfo: Omit<ThirdPartyRelationshipAttributeSharingInfoJSON, "deletionInfo">;
 }
 
 export interface IThirdPartyRelationshipAttributeSuccessorParams extends IAbstractAttributeSuccessorParams {
     content: IRelationshipAttribute;
     id: ICoreId;
-    sharingInfo: Omit<IThirdPartyRelationshipAttributeSharingInfo, "deletionInfo">;
+    peerSharingInfo: Omit<IThirdPartyRelationshipAttributeSharingInfo, "deletionInfo">;
 }
 
 @type("ThirdPartyRelationshipAttributeSuccessorParams")
@@ -28,7 +28,7 @@ export class ThirdPartyRelationshipAttributeSuccessorParams extends AbstractAttr
 
     @validate({ nullable: true })
     @serialize()
-    public sharingInfo: Omit<ThirdPartyRelationshipAttributeSharingInfo, "deletionInfo">;
+    public peerSharingInfo: Omit<ThirdPartyRelationshipAttributeSharingInfo, "deletionInfo">;
 
     public static from(
         value: IThirdPartyRelationshipAttributeSuccessorParams | ThirdPartyRelationshipAttributeSuccessorParamsJSON

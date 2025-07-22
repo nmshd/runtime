@@ -334,15 +334,14 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             if (!predecessor) throw Error; // TODO: or return?
 
             if (predecessor instanceof PeerIdentityAttribute && responseItem.successorContent instanceof IdentityAttribute) {
-                const sharingInfo = PeerIdentityAttributeSharingInfo.from({
+                const peerSharingInfo = PeerIdentityAttributeSharingInfo.from({
                     peer: requestInfo.peer,
                     sourceReference: requestInfo.id
                 });
-
                 const successorParams = PeerIdentityAttributeSuccessorParams.from({
                     id: responseItem.successorId,
                     content: responseItem.successorContent,
-                    sharingInfo
+                    peerSharingInfo
                 });
 
                 const { predecessor: updatedPredecessor, successor } = await this.consumptionController.attributes.succeedPeerIdentityAttribute(predecessor, successorParams);

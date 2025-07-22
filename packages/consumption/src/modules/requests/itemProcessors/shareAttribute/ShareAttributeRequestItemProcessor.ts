@@ -99,7 +99,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                 );
             }
 
-            const initialPeer = foundAttribute.initialSharingInfo.peer;
+            const initialPeer = foundAttribute.peerSharingInfo.peer;
             const queryForNonPendingRelationships = {
                 "peer.address": initialPeer.toString(),
                 status: { $in: [RelationshipStatus.Active, RelationshipStatus.Terminated, RelationshipStatus.DeletionProposed] }

@@ -18,14 +18,14 @@ import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./LocalAttr
 export interface OwnRelationshipAttributeJSON extends LocalAttributeJSON {
     "@type": "OwnRelationshipAttribute";
     content: RelationshipAttributeJSON;
-    initialSharingInfo: OwnRelationshipAttributeSharingInfoJSON;
-    thirdPartySharingInfos?: ForwardedRelationshipAttributeSharingInfoJSON[];
+    peerSharingInfo: OwnRelationshipAttributeSharingInfoJSON;
+    forwardedSharingInfos?: ForwardedRelationshipAttributeSharingInfoJSON[];
 }
 
 export interface IOwnRelationshipAttribute extends ILocalAttribute {
     content: IRelationshipAttribute;
-    initialSharingInfo: IOwnRelationshipAttributeSharingInfo;
-    thirdPartySharingInfos?: IForwardedRelationshipAttributeSharingInfo[];
+    peerSharingInfo: IOwnRelationshipAttributeSharingInfo;
+    forwardedSharingInfos?: IForwardedRelationshipAttributeSharingInfo[];
 }
 
 @type("OwnRelationshipAttribute")
@@ -33,8 +33,8 @@ export class OwnRelationshipAttribute extends LocalAttribute implements IOwnRela
     public override readonly technicalProperties = [
         "@type",
         "@context",
-        nameof<OwnRelationshipAttribute>((r) => r.initialSharingInfo),
-        nameof<OwnRelationshipAttribute>((r) => r.thirdPartySharingInfos)
+        nameof<OwnRelationshipAttribute>((r) => r.peerSharingInfo),
+        nameof<OwnRelationshipAttribute>((r) => r.forwardedSharingInfos)
     ];
 
     @serialize()
@@ -43,16 +43,16 @@ export class OwnRelationshipAttribute extends LocalAttribute implements IOwnRela
 
     @serialize()
     @validate()
-    public initialSharingInfo: OwnRelationshipAttributeSharingInfo;
+    public peerSharingInfo: OwnRelationshipAttributeSharingInfo;
 
     @serialize()
     @validate({ nullable: true })
-    public thirdPartySharingInfos?: ForwardedRelationshipAttributeSharingInfo[];
+    public forwardedSharingInfos?: ForwardedRelationshipAttributeSharingInfo[];
 
     public isSharedWith(peerAddress: CoreAddress, includeDeletedAndToBeDeleted = false): boolean {
-        if (!this.thirdPartySharingInfos) return false;
+        if (!this.forwardedSharingInfos) return false;
 
-        const thirdPartySharingInfosWithPeer = this.thirdPartySharingInfos.filter((sharingInfo) => sharingInfo.peer.equals(peerAddress));
+        const thirdPartySharingInfosWithPeer = this.forwardedSharingInfos.filter((sharingInfo) => sharingInfo.peer.equals(peerAddress));
         if (thirdPartySharingInfosWithPeer.length === 0) return false;
 
         if (includeDeletedAndToBeDeleted) return true;
@@ -62,12 +62,12 @@ export class OwnRelationshipAttribute extends LocalAttribute implements IOwnRela
     }
 
     public setDeletionInfo(deletionInfo: OwnAttributeDeletionInfo): this {
-        this.initialSharingInfo.deletionInfo = deletionInfo;
+        this.peerSharingInfo.deletionInfo = deletionInfo;
         return this;
     }
 
     public setDeletionInfoForThirdParty(deletionInfo: ForwardedRelationshipAttributeDeletionInfo, thirdParty: CoreAddress): this {
-        const sharingInfoForThirdParty = this.thirdPartySharingInfos?.find((sharingInfo) => sharingInfo.peer.equals(thirdParty));
+        const sharingInfoForThirdParty = this.forwardedSharingInfos?.find((sharingInfo) => sharingInfo.peer.equals(thirdParty));
         if (!sharingInfoForThirdParty) throw Error; // TODO:
 
         sharingInfoForThirdParty.deletionInfo = deletionInfo; // TODO: check if this works
@@ -78,8 +78,8 @@ export class OwnRelationshipAttribute extends LocalAttribute implements IOwnRela
         const excludedDeletionStatuses = [ForwardedRelationshipAttributeDeletionStatus.DeletedByPeer, ForwardedRelationshipAttributeDeletionStatus.ToBeDeletedByPeer];
 
         const sharingInfos = includeDeletedAndToBeDeleted
-            ? this.thirdPartySharingInfos
-            : this.thirdPartySharingInfos?.filter((sharingInfo) => {
+            ? this.forwardedSharingInfos
+            : this.forwardedSharingInfos?.filter((sharingInfo) => {
                   if (!sharingInfo.deletionInfo) return true;
                   return !excludedDeletionStatuses.includes(sharingInfo.deletionInfo.deletionStatus);
               });

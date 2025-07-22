@@ -12,17 +12,17 @@ import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./LocalAttr
 export interface ThirdPartyRelationshipAttributeJSON extends LocalAttributeJSON {
     "@type": "ThirdPartyRelationshipAttribute";
     content: RelationshipAttributeJSON;
-    sharingInfo: ThirdPartyRelationshipAttributeSharingInfoJSON;
+    peerSharingInfo: ThirdPartyRelationshipAttributeSharingInfoJSON;
 }
 
 export interface IThirdPartyRelationshipAttribute extends ILocalAttribute {
     content: IRelationshipAttribute;
-    sharingInfo: IThirdPartyRelationshipAttributeSharingInfo;
+    peerSharingInfo: IThirdPartyRelationshipAttributeSharingInfo;
 }
 
 @type("ThirdPartyRelationshipAttribute")
 export class ThirdPartyRelationshipAttribute extends LocalAttribute implements IThirdPartyRelationshipAttribute {
-    public override readonly technicalProperties = ["@type", "@context", nameof<ThirdPartyRelationshipAttribute>((r) => r.sharingInfo)];
+    public override readonly technicalProperties = ["@type", "@context", nameof<ThirdPartyRelationshipAttribute>((r) => r.peerSharingInfo)];
 
     @serialize()
     @validate()
@@ -30,10 +30,10 @@ export class ThirdPartyRelationshipAttribute extends LocalAttribute implements I
 
     @serialize()
     @validate()
-    public sharingInfo: ThirdPartyRelationshipAttributeSharingInfo;
+    public peerSharingInfo: ThirdPartyRelationshipAttributeSharingInfo;
 
     public setDeletionInfo(deletionInfo: PeerAttributeDeletionInfo): this {
-        this.sharingInfo.deletionInfo = deletionInfo;
+        this.peerSharingInfo.deletionInfo = deletionInfo;
         return this;
     }
 

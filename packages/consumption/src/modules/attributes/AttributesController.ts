@@ -346,11 +346,16 @@ export class AttributesController extends ConsumptionBaseController {
             throw ConsumptionCoreErrors.attributes.forbiddenCharactersInAttribute("The Attribute contains forbidden characters.");
         }
 
-        const sharingInfo = PeerIdentityAttributeSharingInfo.from({
+        const peerSharingInfo = PeerIdentityAttributeSharingInfo.from({
             peer: params.peer,
             sourceReference: params.sourceReference
         });
-        const peerIdentityAttribute = PeerIdentityAttribute.from({ id: params.id, content: attribute, sharingInfo, createdAt: CoreDate.utc() });
+        const peerIdentityAttribute = PeerIdentityAttribute.from({
+            id: params.id,
+            content: attribute,
+            peerSharingInfo,
+            createdAt: CoreDate.utc()
+        });
         await this.attributes.create(peerIdentityAttribute);
 
         this.eventBus.publish(new AttributeCreatedEvent(this.identity.address.toString(), peerIdentityAttribute));
@@ -372,14 +377,14 @@ export class AttributesController extends ConsumptionBaseController {
             throw ConsumptionCoreErrors.attributes.forbiddenCharactersInAttribute("The Attribute contains forbidden characters.");
         }
 
-        const initialSharingInfo = OwnRelationshipAttributeSharingInfo.from({
+        const peerSharingInfo = OwnRelationshipAttributeSharingInfo.from({
             peer: params.peer,
             sourceReference: params.sourceReference
         });
         const ownRelationshipAttribute = OwnRelationshipAttribute.from({
             id: params.id ?? (await ConsumptionIds.attribute.generate()),
             content: attribute,
-            initialSharingInfo,
+            peerSharingInfo,
             createdAt: CoreDate.utc()
         });
         await this.attributes.create(ownRelationshipAttribute);
@@ -403,14 +408,14 @@ export class AttributesController extends ConsumptionBaseController {
             throw ConsumptionCoreErrors.attributes.forbiddenCharactersInAttribute("The Attribute contains forbidden characters.");
         }
 
-        const initialSharingInfo = PeerRelationshipAttributeSharingInfo.from({
+        const peerSharingInfo = PeerRelationshipAttributeSharingInfo.from({
             peer: params.peer,
             sourceReference: params.sourceReference
         });
         const peerRelationshipAttribute = PeerRelationshipAttribute.from({
             id: params.id ?? (await ConsumptionIds.attribute.generate()),
             content: attribute,
-            initialSharingInfo,
+            peerSharingInfo,
             createdAt: CoreDate.utc()
         });
         await this.attributes.create(peerRelationshipAttribute);
@@ -435,12 +440,17 @@ export class AttributesController extends ConsumptionBaseController {
             throw ConsumptionCoreErrors.attributes.forbiddenCharactersInAttribute("The Attribute contains forbidden characters.");
         }
 
-        const sharingInfo = ThirdPartyRelationshipAttributeSharingInfo.from({
+        const peerSharingInfo = ThirdPartyRelationshipAttributeSharingInfo.from({
             peer: params.peer,
             sourceReference: params.sourceReference,
             initialAttributePeer: params.initialAttributePeer
         });
-        const thirdPartyRelationshipAttribute = ThirdPartyRelationshipAttribute.from({ id: params.id, content: attribute, sharingInfo, createdAt: CoreDate.utc() });
+        const thirdPartyRelationshipAttribute = ThirdPartyRelationshipAttribute.from({
+            id: params.id,
+            content: attribute,
+            peerSharingInfo,
+            createdAt: CoreDate.utc()
+        });
         await this.attributes.create(thirdPartyRelationshipAttribute);
 
         this.eventBus.publish(new AttributeCreatedEvent(this.identity.address.toString(), thirdPartyRelationshipAttribute));
@@ -450,7 +460,7 @@ export class AttributesController extends ConsumptionBaseController {
     // TODO: maybe combine this with the following function; maybe use params as input object like for create
     public async addSharingInfoToOwnIdentityAttribute(attribute: OwnIdentityAttribute, peer: CoreAddress, sourceReference: CoreId): Promise<OwnIdentityAttribute> {
         const sharingInfo = OwnIdentityAttributeSharingInfo.from({ peer, sourceReference, sharedAt: CoreDate.utc() });
-        (attribute.sharingInfos ??= []).push(sharingInfo);
+        (attribute.forwardedSharingInfos ??= []).push(sharingInfo);
         await this.updateAttributeUnsafe(attribute);
 
         // TODO: publish event?
@@ -464,7 +474,7 @@ export class AttributesController extends ConsumptionBaseController {
         sourceReference: CoreId
     ): Promise<OwnRelationshipAttribute | PeerRelationshipAttribute> {
         const sharingInfo = ForwardedRelationshipAttributeSharingInfo.from({ peer, sourceReference, sharedAt: CoreDate.utc() });
-        (attribute.thirdPartySharingInfos ??= []).push(sharingInfo);
+        (attribute.forwardedSharingInfos ??= []).push(sharingInfo);
         await this.updateAttributeUnsafe(attribute);
 
         // TODO: publish event?
@@ -541,7 +551,7 @@ export class AttributesController extends ConsumptionBaseController {
             id: parsedSuccessorParams.id,
             content: parsedSuccessorParams.content,
             createdAt: CoreDate.utc(),
-            sharingInfo: parsedSuccessorParams.sharingInfo,
+            peerSharingInfo: parsedSuccessorParams.peerSharingInfo,
             succeeds: predecessor.id
         });
         await this.attributes.create(successor);
@@ -571,7 +581,7 @@ export class AttributesController extends ConsumptionBaseController {
             id: await ConsumptionIds.attribute.generate(),
             content: parsedSuccessorParams.content,
             createdAt: CoreDate.utc(),
-            initialSharingInfo: parsedSuccessorParams.initialSharingInfo,
+            peerSharingInfo: parsedSuccessorParams.peerSharingInfo,
             succeeds: predecessor.id
         });
         await this.attributes.create(successor);
@@ -601,7 +611,7 @@ export class AttributesController extends ConsumptionBaseController {
             id: parsedSuccessorParams.id,
             content: parsedSuccessorParams.content,
             createdAt: CoreDate.utc(),
-            initialSharingInfo: parsedSuccessorParams.initialSharingInfo,
+            peerSharingInfo: parsedSuccessorParams.peerSharingInfo,
             succeeds: predecessor.id
         });
         await this.attributes.create(successor);
@@ -631,7 +641,7 @@ export class AttributesController extends ConsumptionBaseController {
             id: parsedSuccessorParams.id,
             content: parsedSuccessorParams.content,
             createdAt: CoreDate.utc(),
-            sharingInfo: parsedSuccessorParams.sharingInfo,
+            peerSharingInfo: parsedSuccessorParams.peerSharingInfo,
             succeeds: predecessor.id
         });
         await this.attributes.create(successor);
@@ -701,14 +711,14 @@ export class AttributesController extends ConsumptionBaseController {
             content: parsedSuccessorParams.content,
             createdAt: CoreDate.utc(),
             succeeds: predecessor.id,
-            sharingInfo: parsedSuccessorParams.sharingInfo
+            peerSharingInfo: parsedSuccessorParams.peerSharingInfo
         });
 
-        if (predecessor.sharingInfo.peer.toString() !== successor.sharingInfo.peer.toString()) {
+        if (predecessor.peerSharingInfo.peer.toString() !== successor.peerSharingInfo.peer.toString()) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangePeer());
         }
 
-        if (predecessor.sharingInfo.deletionInfo) {
+        if (predecessor.peerSharingInfo.deletionInfo) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedAttributesWithDeletionInfo());
         }
 
@@ -731,14 +741,14 @@ export class AttributesController extends ConsumptionBaseController {
             content: parsedSuccessorParams.content,
             createdAt: CoreDate.utc(),
             succeeds: predecessor.id,
-            initialSharingInfo: parsedSuccessorParams.initialSharingInfo
+            peerSharingInfo: parsedSuccessorParams.peerSharingInfo
         });
 
-        if (predecessor.initialSharingInfo.peer.toString() !== successor.initialSharingInfo.peer.toString()) {
+        if (predecessor.peerSharingInfo.peer.toString() !== successor.peerSharingInfo.peer.toString()) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangePeer());
         }
 
-        if (predecessor.initialSharingInfo.deletionInfo) {
+        if (predecessor.peerSharingInfo.deletionInfo) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedAttributesWithDeletionInfo());
         }
 
@@ -761,14 +771,14 @@ export class AttributesController extends ConsumptionBaseController {
             content: parsedSuccessorParams.content,
             createdAt: CoreDate.utc(),
             succeeds: predecessor.id,
-            initialSharingInfo: parsedSuccessorParams.initialSharingInfo
+            peerSharingInfo: parsedSuccessorParams.peerSharingInfo
         });
 
-        if (predecessor.initialSharingInfo.peer.toString() !== successor.initialSharingInfo.peer.toString()) {
+        if (predecessor.peerSharingInfo.peer.toString() !== successor.peerSharingInfo.peer.toString()) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangePeer());
         }
 
-        if (predecessor.initialSharingInfo.deletionInfo) {
+        if (predecessor.peerSharingInfo.deletionInfo) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedAttributesWithDeletionInfo());
         }
 
@@ -791,14 +801,14 @@ export class AttributesController extends ConsumptionBaseController {
             content: parsedSuccessorParams.content,
             createdAt: CoreDate.utc(),
             succeeds: predecessor.id,
-            sharingInfo: parsedSuccessorParams.sharingInfo
+            peerSharingInfo: parsedSuccessorParams.peerSharingInfo
         });
 
-        if (predecessor.sharingInfo.peer.toString() !== successor.sharingInfo.peer.toString()) {
+        if (predecessor.peerSharingInfo.peer.toString() !== successor.peerSharingInfo.peer.toString()) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangePeer());
         }
 
-        if (predecessor.sharingInfo.deletionInfo) {
+        if (predecessor.peerSharingInfo.deletionInfo) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedAttributesWithDeletionInfo());
         }
 
