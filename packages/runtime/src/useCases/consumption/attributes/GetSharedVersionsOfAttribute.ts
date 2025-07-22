@@ -7,7 +7,6 @@ import { Inject } from "@nmshd/typescript-ioc";
 import { AddressString, AttributeIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { AttributeMapper } from "./AttributeMapper";
 
-// TODO: we should probably compensate for making peers mandatory by adding another use case that returns all peers of an attribute?
 export interface GetSharedVersionsOfAttributeRequest {
     attributeId: AttributeIdString;
     peer: AddressString;

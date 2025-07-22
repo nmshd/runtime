@@ -74,6 +74,22 @@ export class PeerRelationshipAttribute extends LocalAttribute implements IPeerRe
         return this;
     }
 
+    public getThirdParties(includeDeletedAndToBeDeleted = false): CoreAddress[] {
+        const excludedDeletionStatuses = [ForwardedRelationshipAttributeDeletionStatus.DeletedByPeer, ForwardedRelationshipAttributeDeletionStatus.ToBeDeletedByPeer];
+
+        const sharingInfos = includeDeletedAndToBeDeleted
+            ? this.thirdPartySharingInfos
+            : this.thirdPartySharingInfos?.filter((sharingInfo) => {
+                  if (!sharingInfo.deletionInfo) return true;
+                  return !excludedDeletionStatuses.includes(sharingInfo.deletionInfo.deletionStatus);
+              });
+
+        const thirdParty = sharingInfos?.map((sharingInfo) => sharingInfo.peer);
+        if (!thirdParty) return [];
+
+        return thirdParty;
+    }
+
     public static override from(value: IPeerRelationshipAttribute | PeerRelationshipAttributeJSON): PeerRelationshipAttribute {
         return super.fromAny(value) as PeerRelationshipAttribute;
     }

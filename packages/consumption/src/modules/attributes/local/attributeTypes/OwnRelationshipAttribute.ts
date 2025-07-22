@@ -74,6 +74,22 @@ export class OwnRelationshipAttribute extends LocalAttribute implements IOwnRela
         return this;
     }
 
+    public getThirdParties(includeDeletedAndToBeDeleted = false): CoreAddress[] {
+        const excludedDeletionStatuses = [ForwardedRelationshipAttributeDeletionStatus.DeletedByPeer, ForwardedRelationshipAttributeDeletionStatus.ToBeDeletedByPeer];
+
+        const sharingInfos = includeDeletedAndToBeDeleted
+            ? this.thirdPartySharingInfos
+            : this.thirdPartySharingInfos?.filter((sharingInfo) => {
+                  if (!sharingInfo.deletionInfo) return true;
+                  return !excludedDeletionStatuses.includes(sharingInfo.deletionInfo.deletionStatus);
+              });
+
+        const thirdParty = sharingInfos?.map((sharingInfo) => sharingInfo.peer);
+        if (!thirdParty) return [];
+
+        return thirdParty;
+    }
+
     public static override from(value: IOwnRelationshipAttribute | OwnRelationshipAttributeJSON): OwnRelationshipAttribute {
         return super.fromAny(value) as OwnRelationshipAttribute;
     }

@@ -60,6 +60,22 @@ export class OwnIdentityAttribute extends LocalAttribute implements IOwnIdentity
         return this;
     }
 
+    public getPeers(includeDeletedAndToBeDeleted = false): CoreAddress[] {
+        const excludedDeletionStatuses = [OwnAttributeDeletionStatus.DeletedByPeer, OwnAttributeDeletionStatus.ToBeDeletedByPeer];
+
+        const sharingInfos = includeDeletedAndToBeDeleted
+            ? this.sharingInfos
+            : this.sharingInfos?.filter((sharingInfo) => {
+                  if (!sharingInfo.deletionInfo) return true;
+                  return !excludedDeletionStatuses.includes(sharingInfo.deletionInfo.deletionStatus);
+              });
+
+        const peers = sharingInfos?.map((sharingInfo) => sharingInfo.peer);
+        if (!peers) return [];
+
+        return peers;
+    }
+
     public static override from(value: IOwnIdentityAttribute | OwnIdentityAttributeJSON): OwnIdentityAttribute {
         return super.fromAny(value) as OwnIdentityAttribute;
     }
