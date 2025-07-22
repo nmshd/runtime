@@ -926,7 +926,7 @@ export class AttributesController extends ConsumptionBaseController {
         await this.updateAttributeUnsafe(defaultCandidates[defaultCandidates.length - 1]);
     }
 
-    public async getVersionsOfAttribute(attribute: LocalAttribute): Promise<LocalAttribute[]> {
+    public async getVersionsOfAttribute<T extends LocalAttribute>(attribute: T): Promise<T[]> {
         const predecessors = await this.getPredecessorsOfAttribute(attribute);
         const successors = await this.getSuccessorsOfAttribute(attribute);
 
@@ -934,10 +934,10 @@ export class AttributesController extends ConsumptionBaseController {
         return allAttributeVersions;
     }
 
-    public async getPredecessorsOfAttribute(attribute: LocalAttribute): Promise<LocalAttribute[]> {
-        const predecessors: LocalAttribute[] = [];
+    public async getPredecessorsOfAttribute<T extends LocalAttribute>(attribute: T): Promise<T[]> {
+        const predecessors: T[] = [];
         while (attribute.succeeds) {
-            const predecessor = await this.getLocalAttribute(attribute.succeeds);
+            const predecessor = (await this.getLocalAttribute(attribute.succeeds)) as T | undefined;
             if (!predecessor) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.succeeds.toString());
 
             attribute = predecessor;
@@ -947,10 +947,10 @@ export class AttributesController extends ConsumptionBaseController {
         return predecessors;
     }
 
-    public async getSuccessorsOfAttribute(attribute: LocalAttribute): Promise<LocalAttribute[]> {
-        const successors: LocalAttribute[] = [];
+    public async getSuccessorsOfAttribute<T extends LocalAttribute>(attribute: T): Promise<T[]> {
+        const successors: T[] = [];
         while (attribute.succeededBy) {
-            const successor = await this.getLocalAttribute(attribute.succeededBy);
+            const successor = (await this.getLocalAttribute(attribute.succeededBy)) as T | undefined;
             if (!successor) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.succeededBy.toString());
 
             attribute = successor;
