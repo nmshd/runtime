@@ -34,6 +34,6 @@ describe("TokenSync", function () {
         expect(tokenOnDevice2).toBeDefined();
 
         tokenOnDevice2 = await device2.tokens.getToken(tokenOnDevice1.id);
-        expect(tokenOnDevice2?.toJSON()).toStrictEqualExcluding(tokenOnDevice1.toJSON(), "cachedAt");
+        expect(tokenOnDevice2?.toJSON()).toStrictEqual(tokenOnDevice1.toJSON());
     });
 });

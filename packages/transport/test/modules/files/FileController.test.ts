@@ -15,30 +15,26 @@ describe("FileController", function () {
 
     function expectValidFiles(sentFile: File, receivedFile: File, nowMinusSeconds: CoreDate) {
         expect(sentFile.id.toString()).toBe(receivedFile.id.toString());
-        expect(sentFile.cache).toBeDefined();
-        expect(sentFile.cachedAt?.isSameOrAfter(nowMinusSeconds)).toBe(true);
-        expect(sentFile.cache?.createdBy.toString()).toBe(sender.identity.address.toString());
-        expect(sentFile.cache?.owner.toString()).toBe(sender.identity.address.toString());
-        expect(sentFile.cache?.createdByDevice.toString()).toBe(sender.activeDevice.id.toString());
-        expect(sentFile.cache?.createdAt.isSameOrAfter(nowMinusSeconds)).toBe(true);
-        expect(receivedFile.cache).toBeDefined();
-        expect(receivedFile.cachedAt?.isSameOrAfter(nowMinusSeconds)).toBe(true);
-        expect(receivedFile.cache?.createdBy.toString()).toBe(sender.identity.address.toString());
-        expect(receivedFile.cache?.createdByDevice.toString()).toBe(sender.activeDevice.id.toString());
-        expect(receivedFile.cache?.createdAt.isSameOrAfter(nowMinusSeconds)).toBe(true);
-        expect(receivedFile.cache?.expiresAt).toStrictEqual(sentFile.cache!.expiresAt);
-        expect(sentFile.cache!.description).toBe(receivedFile.cache!.description);
-        expect(sentFile.cache!.title).toBe(receivedFile.cache!.title);
-        expect(sentFile.cache!.tags).toStrictEqual(receivedFile.cache!.tags);
-        expect(sentFile.cache!.filemodified?.toString()).toBe(receivedFile.cache!.filemodified?.toString());
-        expect(sentFile.cache!.filename).toBe(receivedFile.cache!.filename);
-        expect(sentFile.cache!.filesize).toBe(receivedFile.cache!.filesize);
-        expect(sentFile.cache!.mimetype).toBe(receivedFile.cache!.mimetype);
-        expect(sentFile.cache!.owner.toString()).toBe(receivedFile.cache!.owner.toString());
-        expect(sentFile.cache!.ownerSignature.toBase64()).toBe(receivedFile.cache!.ownerSignature.toBase64());
-        expect(sentFile.cache!.plaintextHash.toBase64()).toBe(receivedFile.cache!.plaintextHash.toBase64());
-        expect(sentFile.cache!.cipherHash.toBase64()).toBe(receivedFile.cache!.cipherHash.toBase64());
-        expect(sentFile.cache!.cipherKey.toBase64()).toBe(receivedFile.cache!.cipherKey.toBase64());
+        expect(sentFile.createdBy.toString()).toBe(sender.identity.address.toString());
+        expect(sentFile.owner.toString()).toBe(sender.identity.address.toString());
+        expect(sentFile.createdByDevice.toString()).toBe(sender.activeDevice.id.toString());
+        expect(sentFile.createdAt.isSameOrAfter(nowMinusSeconds)).toBe(true);
+        expect(receivedFile.createdBy.toString()).toBe(sender.identity.address.toString());
+        expect(receivedFile.createdByDevice.toString()).toBe(sender.activeDevice.id.toString());
+        expect(receivedFile.createdAt.isSameOrAfter(nowMinusSeconds)).toBe(true);
+        expect(receivedFile.expiresAt).toStrictEqual(sentFile.expiresAt);
+        expect(sentFile.description).toBe(receivedFile.description);
+        expect(sentFile.title).toBe(receivedFile.title);
+        expect(sentFile.tags).toStrictEqual(receivedFile.tags);
+        expect(sentFile.filemodified?.toString()).toBe(receivedFile.filemodified?.toString());
+        expect(sentFile.filename).toBe(receivedFile.filename);
+        expect(sentFile.filesize).toBe(receivedFile.filesize);
+        expect(sentFile.mimetype).toBe(receivedFile.mimetype);
+        expect(sentFile.owner.toString()).toBe(receivedFile.owner.toString());
+        expect(sentFile.ownerSignature.toBase64()).toBe(receivedFile.ownerSignature.toBase64());
+        expect(sentFile.plaintextHash.toBase64()).toBe(receivedFile.plaintextHash.toBase64());
+        expect(sentFile.cipherHash.toBase64()).toBe(receivedFile.cipherHash.toBase64());
+        expect(sentFile.cipherKey.toBase64()).toBe(receivedFile.cipherKey.toBase64());
     }
 
     beforeAll(async function () {
@@ -70,7 +66,7 @@ describe("FileController", function () {
         expectValidFiles(sentFile, receivedFile, tempDate);
     });
 
-    test("should get the cached File", async function () {
+    test("should get the stored File", async function () {
         const sentFile = await sender.files.getFile(tempId1);
         const receivedFile = await recipient.files.getFile(tempId1);
         expect(sentFile).toBeDefined();
@@ -101,7 +97,7 @@ describe("FileController", function () {
         expectValidFiles(sentFile, receivedFile, tempDate);
     });
 
-    test("should get the cached files", async function () {
+    test("should get the stored files", async function () {
         const sentFiles = await sender.files.getFiles();
         const receivedFiles = await recipient.files.getFiles();
         expect(sentFiles).toHaveLength(3);
@@ -125,30 +121,24 @@ describe("FileController", function () {
     });
 
     describe("File deletion", function () {
-        let sentFile: File;
-        let receivedFile: File;
-
-        beforeEach(async function () {
-            const content = CoreBuffer.fromUtf8("Test");
-            sentFile = await TestUtil.uploadFile(sender, content);
-
-            const reference = sentFile.toFileReference(sender.config.baseUrl);
-            receivedFile = await recipient.files.getOrLoadFileByReference(reference);
-        });
-
         test("should delete own file locally and from the Backbone", async function () {
+            const sentFile = await TestUtil.uploadFile(sender, CoreBuffer.fromUtf8("Test"));
+            const reference = sentFile.toFileReference(sender.config.baseUrl);
+
             await sender.files.deleteFile(sentFile);
-            const fileOnBackbone = await recipient.files.fetchCaches([sentFile.id]);
-            expect(fileOnBackbone).toHaveLength(0);
 
             const localFile = await sender.files.getFile(sentFile.id);
             expect(localFile).toBeUndefined();
+
+            await expect(recipient.files.getOrLoadFileByReference(reference)).rejects.toThrow("error.platform.recordNotFound");
         });
 
-        test("should delete a peer owned file only locally", async function () {
+        test("should delete a peer owned file locally", async function () {
+            const sentFile = await TestUtil.uploadFile(sender, CoreBuffer.fromUtf8("Test"));
+            const reference = sentFile.toFileReference(sender.config.baseUrl);
+            const receivedFile = await recipient.files.getOrLoadFileByReference(reference);
+
             await recipient.files.deleteFile(receivedFile);
-            const fileOnBackbone = await sender.files.fetchCaches([sentFile.id]);
-            expect(fileOnBackbone).toHaveLength(1);
 
             const localFile = await recipient.files.getFile(sentFile.id);
             expect(localFile).toBeUndefined();
@@ -239,7 +229,7 @@ describe("FileController", function () {
 
             const updatedFile = (await TestUtil.syncUntilHasFile(sender, file.id))[0];
             expect(updatedFile.isOwn).toBe(false);
-            expect(updatedFile.cache!.owner).toStrictEqual(recipient.identity.address);
+            expect(updatedFile.owner).toStrictEqual(recipient.identity.address);
             expect(updatedFile.ownershipToken).toBeUndefined();
         });
 
@@ -249,7 +239,7 @@ describe("FileController", function () {
             await recipient.files.getOrLoadFile(file.id, file.secretKey);
 
             const updatedFile = await recipient.files.claimFileOwnership(file.id, file.ownershipToken!);
-            expect(updatedFile.cache!.owner).toStrictEqual(recipient.identity.address);
+            expect(updatedFile.owner).toStrictEqual(recipient.identity.address);
             expect(updatedFile.isOwn).toBe(true);
 
             expect(updatedFile.ownershipToken).toBeDefined();

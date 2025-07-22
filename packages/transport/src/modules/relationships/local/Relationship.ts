@@ -1,7 +1,7 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreDate, CoreId, ICoreDate, ICoreId } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
-import { CoreSynchronizable, ICoreSynchronizable, TransportError } from "../../../core";
+import { CoreSynchronizable, ICoreSynchronizable } from "../../../core";
 import { Identity, IIdentity } from "../../accounts/data/Identity";
 import { BackboneGetRelationshipResponse } from "../backbone/BackboneGetRelationships";
 import { RelationshipStatus } from "../transmission/RelationshipStatus";
@@ -116,9 +116,5 @@ export class Relationship extends CoreSynchronizable implements IRelationship {
         this.metadata = metadata;
         this.metadataModifiedAt = CoreDate.utc();
         return this;
-    }
-
-    private newCacheEmptyError(): Error {
-        return new TransportError(`The cache of the Relationship with id "${this.id}" is empty.`);
     }
 }

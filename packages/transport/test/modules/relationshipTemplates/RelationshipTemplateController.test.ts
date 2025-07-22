@@ -52,7 +52,7 @@ describe("RelationshipTemplateController", function () {
         expectValidRelationshipTemplates(sentRelationshipTemplate, receivedRelationshipTemplate, tempDate);
     });
 
-    test("should get the cached RelationshipTemplate", async function () {
+    test("should get the stored RelationshipTemplate", async function () {
         const sentRelationshipTemplate = await sender.relationshipTemplates.getRelationshipTemplate(tempId1);
         const receivedRelationshipTemplate = await recipient.relationshipTemplates.getRelationshipTemplate(tempId1);
         expect(sentRelationshipTemplate).toBeDefined();
@@ -80,7 +80,7 @@ describe("RelationshipTemplateController", function () {
         expectValidRelationshipTemplates(sentRelationshipTemplate, receivedRelationshipTemplate, tempDate);
     });
 
-    test("should get the cached relationshipTemplates", async function () {
+    test("should get the stored relationshipTemplates", async function () {
         const sentRelationshipTemplates = await sender.relationshipTemplates.getRelationshipTemplates();
         const receivedRelationshipTemplates = await recipient.relationshipTemplates.getRelationshipTemplates();
         expect(sentRelationshipTemplates).toHaveLength(3);

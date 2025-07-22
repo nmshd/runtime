@@ -49,7 +49,6 @@ export * from "./files/backbone/BackboneGetFiles";
 export * from "./files/backbone/BackbonePostFiles";
 export * from "./files/backbone/FileClient";
 export * from "./files/FileController";
-export * from "./files/local/CachedFile";
 export * from "./files/local/File";
 export * from "./files/local/SendFileParameters";
 export * from "./files/transmission/FileMetadata";
