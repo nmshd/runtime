@@ -167,16 +167,10 @@ export class AttributesController extends ConsumptionBaseController {
         return ownIdentityAttributes;
     }
 
-    // TODO:
     public async executeIQLQuery(query: IIQLQuery): Promise<LocalAttribute[]> {
         /* Fetch subset of attributes relevant for IQL queries. We filter for
          * identity attributes which are not shared. */
-        const envelopedAttributes: any[] = await this.attributes.find({
-            "content.@type": "IdentityAttribute",
-            shareInfo: {
-                $exists: false
-            }
-        });
+        const envelopedAttributes: any[] = await this.attributes.find({ "@type": "OwnIdentityAttribute" });
 
         /* Remove envelope from attributes and execute query. IQL makes no use
          * of the envelope data. */
@@ -866,9 +860,8 @@ export class AttributesController extends ConsumptionBaseController {
 
         if (attribute.succeededBy) {
             const successor = await this.getLocalAttribute(attribute.succeededBy);
-            if (!successor) {
-                throw ConsumptionCoreErrors.attributes.successorDoesNotExist();
-            }
+            if (!successor) throw ConsumptionCoreErrors.attributes.successorDoesNotExist();
+
             await this.detachSuccessor(successor);
         }
 
@@ -884,9 +877,7 @@ export class AttributesController extends ConsumptionBaseController {
     public async validateFullAttributeDeletionProcess(attribute: LocalAttribute): Promise<ValidationResult> {
         if (attribute.succeededBy) {
             const successor = await this.getLocalAttribute(attribute.succeededBy);
-            if (!successor) {
-                return ValidationResult.error(ConsumptionCoreErrors.attributes.successorDoesNotExist());
-            }
+            if (!successor) return ValidationResult.error(ConsumptionCoreErrors.attributes.successorDoesNotExist());
         }
         return ValidationResult.success();
     }
