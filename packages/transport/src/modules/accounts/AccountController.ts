@@ -11,9 +11,6 @@ import { TransportLoggerFactory } from "../../core/TransportLoggerFactory";
 import { IdentityDeletionProcessStatusChangedEvent } from "../../events/IdentityDeletionProcessStatusChangedEvent";
 import { PasswordGenerator } from "../../util";
 import { AnnouncementController } from "../announcements/AnnouncementController";
-import { CertificateController } from "../certificates/CertificateController";
-import { CertificateIssuer } from "../certificates/CertificateIssuer";
-import { CertificateValidator } from "../certificates/CertificateValidator";
 import { ChallengeController } from "../challenges/ChallengeController";
 import { DeviceController } from "../devices/DeviceController";
 import { DeviceSecretType } from "../devices/DeviceSecretController";
@@ -55,9 +52,6 @@ export class AccountController {
 
     public announcements: AnnouncementController;
     public challenges: ChallengeController;
-    public certificates: CertificateController;
-    public certificateIssuer: CertificateIssuer;
-    public certificateValidator: CertificateValidator;
     public devices: DevicesController;
     public files: FileController;
     public messages: MessageController;
@@ -206,9 +200,6 @@ export class AccountController {
         this.announcements = await new AnnouncementController(this).init();
         this.relationshipSecrets = await new RelationshipSecretController(this).init();
         this.devices = await new DevicesController(this).init();
-        this.certificates = await new CertificateController(this).init();
-        this.certificateIssuer = await new CertificateIssuer(this).init();
-        this.certificateValidator = await new CertificateValidator(this).init();
         this.files = await new FileController(this).init();
 
         this.relationships = await new RelationshipsController(this, this.relationshipSecrets).init();
