@@ -1,7 +1,7 @@
 import { QueryTranslator } from "@js-soft/docdb-querytranslator";
 import { Result } from "@js-soft/ts-utils";
 import { RelationshipTemplateDTO } from "@nmshd/runtime-types";
-import { CachedRelationshipTemplate, PasswordProtection, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
+import { PasswordProtection, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { nameof } from "ts-simple-nameof";
 import { OwnerRestriction, PasswordProtectionMapper, SchemaRepository, SchemaValidator, UseCase } from "../../common";
@@ -49,16 +49,12 @@ export class GetRelationshipTemplatesUseCase extends UseCase<GetRelationshipTemp
         },
         alias: {
             [nameof<RelationshipTemplateDTO>((r) => r.isOwn)]: nameof<RelationshipTemplate>((r) => r.isOwn),
-            [nameof<RelationshipTemplateDTO>((r) => r.createdAt)]: `${nameof<RelationshipTemplate>((r) => r.cache)}.${nameof<CachedRelationshipTemplate>((t) => t.createdAt)}`,
-            [nameof<RelationshipTemplateDTO>((r) => r.expiresAt)]: `${nameof<RelationshipTemplate>((r) => r.cache)}.${nameof<CachedRelationshipTemplate>((t) => t.expiresAt)}`,
-            [nameof<RelationshipTemplateDTO>((r) => r.createdBy)]: `${nameof<RelationshipTemplate>((r) => r.cache)}.${nameof<CachedRelationshipTemplate>((t) => t.createdBy)}`,
-            [nameof<RelationshipTemplateDTO>((r) => r.createdByDevice)]: `${nameof<RelationshipTemplate>((r) => r.cache)}.${nameof<CachedRelationshipTemplate>(
-                (t) => t.createdByDevice
-            )}`,
-            [nameof<RelationshipTemplateDTO>((r) => r.maxNumberOfAllocations)]: `${nameof<RelationshipTemplate>((r) => r.cache)}.${nameof<CachedRelationshipTemplate>(
-                (t) => t.maxNumberOfAllocations
-            )}`,
-            [nameof<RelationshipTemplateDTO>((r) => r.forIdentity)]: `${nameof<RelationshipTemplate>((r) => r.cache)}.${nameof<CachedRelationshipTemplate>((t) => t.forIdentity)}`,
+            [nameof<RelationshipTemplateDTO>((r) => r.createdAt)]: nameof<RelationshipTemplate>((r) => r.createdAt),
+            [nameof<RelationshipTemplateDTO>((r) => r.expiresAt)]: nameof<RelationshipTemplate>((r) => r.expiresAt),
+            [nameof<RelationshipTemplateDTO>((r) => r.createdBy)]: nameof<RelationshipTemplate>((r) => r.createdBy),
+            [nameof<RelationshipTemplateDTO>((r) => r.createdByDevice)]: nameof<RelationshipTemplate>((r) => r.createdByDevice),
+            [nameof<RelationshipTemplateDTO>((r) => r.maxNumberOfAllocations)]: nameof<RelationshipTemplate>((r) => r.maxNumberOfAllocations),
+            [nameof<RelationshipTemplateDTO>((r) => r.forIdentity)]: nameof<RelationshipTemplate>((r) => r.forIdentity),
             [nameof<RelationshipTemplateDTO>((r) => r.passwordProtection)]: nameof<RelationshipTemplate>((r) => r.passwordProtection)
         },
         custom: {

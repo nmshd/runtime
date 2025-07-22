@@ -93,8 +93,4 @@ export class TransportController {
     protected parseArray<T extends Serializable>(values: Object[], type: new () => T): T[] {
         return values.map((v) => (type as any).fromAny(v));
     }
-
-    protected newCacheEmptyError(entityName: string | Function, id: string): Error {
-        return new TransportError(`The cache of ${entityName instanceof Function ? entityName.name : entityName} with id "${id}" is empty.`);
-    }
 }

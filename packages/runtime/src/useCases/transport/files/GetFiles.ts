@@ -1,7 +1,7 @@
 import { QueryTranslator } from "@js-soft/docdb-querytranslator";
 import { Result } from "@js-soft/ts-utils";
 import { FileDTO } from "@nmshd/runtime-types";
-import { CachedFile, File, FileController } from "@nmshd/transport";
+import { File, FileController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { nameof } from "ts-simple-nameof";
 import { OwnerRestriction, SchemaRepository, SchemaValidator, UseCase } from "../../common";
@@ -52,33 +52,35 @@ export class GetFilesUseCase extends UseCase<GetFilesRequest, FileDTO[]> {
             [nameof<FileDTO>((c) => c.ownershipIsLocked)]: true
         },
         alias: {
-            [nameof<FileDTO>((c) => c.createdAt)]: `${nameof<File>((f) => f.cache)}.${nameof<CachedFile>((c) => c.createdAt)}`,
-            [nameof<FileDTO>((c) => c.createdBy)]: `${nameof<File>((f) => f.cache)}.${nameof<CachedFile>((c) => c.createdBy)}`,
-            [nameof<FileDTO>((c) => c.createdByDevice)]: `${nameof<File>((f) => f.cache)}.${nameof<CachedFile>((c) => c.createdByDevice)}`,
-            [nameof<FileDTO>((c) => c.description)]: `${nameof<File>((f) => f.cache)}.${nameof<CachedFile>((c) => c.description)}`,
-            [nameof<FileDTO>((c) => c.expiresAt)]: `${nameof<File>((f) => f.cache)}.${nameof<CachedFile>((c) => c.expiresAt)}`,
-            [nameof<FileDTO>((c) => c.filename)]: `${nameof<File>((f) => f.cache)}.${nameof<CachedFile>((c) => c.filename)}`,
-            [nameof<FileDTO>((c) => c.filesize)]: `${nameof<File>((f) => f.cache)}.${nameof<CachedFile>((c) => c.filesize)}`,
-            [nameof<FileDTO>((c) => c.mimetype)]: `${nameof<File>((f) => f.cache)}.${nameof<CachedFile>((c) => c.mimetype)}`,
-            [nameof<FileDTO>((c) => c.title)]: `${nameof<File>((f) => f.cache)}.${nameof<CachedFile>((c) => c.title)}`,
-            [nameof<FileDTO>((c) => c.tags)]: `${nameof<File>((f) => f.cache)}.${nameof<CachedFile>((c) => c.tags)}`,
+            [nameof<FileDTO>((c) => c.createdAt)]: nameof<File>((f) => f.createdAt),
+            [nameof<FileDTO>((c) => c.createdBy)]: nameof<File>((f) => f.createdBy),
+            [nameof<FileDTO>((c) => c.createdByDevice)]: nameof<File>((f) => f.createdByDevice),
+            [nameof<FileDTO>((c) => c.description)]: nameof<File>((f) => f.description),
+            [nameof<FileDTO>((c) => c.expiresAt)]: nameof<File>((f) => f.expiresAt),
+            [nameof<FileDTO>((c) => c.filename)]: nameof<File>((f) => f.filename),
+            [nameof<FileDTO>((c) => c.filesize)]: nameof<File>((f) => f.filesize),
+            [nameof<FileDTO>((c) => c.mimetype)]: nameof<File>((f) => f.mimetype),
+            [nameof<FileDTO>((c) => c.title)]: nameof<File>((f) => f.title),
+            [nameof<FileDTO>((c) => c.tags)]: nameof<File>((f) => f.tags),
             [nameof<FileDTO>((c) => c.isOwn)]: nameof<File>((f) => f.isOwn),
-            [nameof<FileDTO>((c) => c.ownershipToken)]: nameof<File>((f) => f.ownershipToken),
             [nameof<FileDTO>((c) => c.ownershipIsLocked)]: nameof<File>((f) => f.ownershipIsLocked)
         },
         custom: {
             // content.tags
-            [`${nameof<FileDTO>((x) => x.tags)}`]: (query: any, input: string | string[]) => {
+            [nameof<FileDTO>((x) => x.tags)]: (query: any, input: string | string[]) => {
                 if (typeof input === "string") {
-                    query[`${nameof<FileDTO>((x) => x.tags)}`] = { $contains: input };
+                    query[nameof<FileDTO>((x) => x.tags)] = { $contains: input };
                     return;
                 }
                 const allowedTags = [];
                 for (const tag of input) {
-                    const tagQuery = { [`${nameof<FileDTO>((x) => x.tags)}`]: { $contains: tag } };
+                    const tagQuery = { [nameof<FileDTO>((x) => x.tags)]: { $contains: tag } };
                     allowedTags.push(tagQuery);
                 }
                 query["$or"] = allowedTags;
+            },
+            [nameof<FileDTO>((c) => c.ownershipToken)]: (query: any, input: string | string[]) => {
+                query[nameof<File>((f) => f.ownershipToken)] = input;
             }
         }
     });

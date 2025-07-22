@@ -4,7 +4,6 @@ import { CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
 import { CoreCrypto, IConfig, ICorrelator, TransportCoreErrors } from "../../core";
 import { PasswordProtection } from "../../core/types/PasswordProtection";
 import { AnonymousTokenClient } from "./backbone/AnonymousTokenClient";
-import { CachedToken } from "./local/CachedToken";
 import { Token } from "./local/Token";
 import { TokenReference } from "./transmission/TokenReference";
 
@@ -47,17 +46,13 @@ export class AnonymousTokenController {
             id: id,
             secretKey: secretKey,
             isOwn: false,
-            passwordProtection
-        });
-
-        const cachedToken = CachedToken.from({
+            passwordProtection,
             createdAt: CoreDate.from(response.createdAt),
             expiresAt: CoreDate.from(response.expiresAt),
             createdBy: CoreAddress.from(response.createdBy),
             createdByDevice: CoreId.from(response.createdByDevice),
             content: plaintextTokenContent
         });
-        token.setCache(cachedToken);
 
         return token;
     }

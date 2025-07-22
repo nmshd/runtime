@@ -1,7 +1,7 @@
 import { QueryTranslator } from "@js-soft/docdb-querytranslator";
 import { Result } from "@js-soft/ts-utils";
 import { TokenDTO } from "@nmshd/runtime-types";
-import { CachedToken, PasswordProtection, Token, TokenController } from "@nmshd/transport";
+import { PasswordProtection, Token, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { nameof } from "ts-simple-nameof";
 import { OwnerRestriction, PasswordProtectionMapper, SchemaRepository, SchemaValidator, UseCase } from "../../common";
@@ -47,11 +47,11 @@ export class GetTokensUseCase extends UseCase<GetTokensRequest, TokenDTO[]> {
         },
         alias: {
             [nameof<TokenDTO>((r) => r.isOwn)]: nameof<Token>((r) => r.isOwn),
-            [nameof<TokenDTO>((t) => t.createdAt)]: `${nameof<Token>((t) => t.cache)}.${[nameof<CachedToken>((t) => t.createdAt)]}`,
-            [nameof<TokenDTO>((t) => t.createdBy)]: `${nameof<Token>((t) => t.cache)}.${[nameof<CachedToken>((t) => t.createdBy)]}`,
-            [nameof<TokenDTO>((t) => t.createdByDevice)]: `${nameof<Token>((t) => t.cache)}.${[nameof<CachedToken>((t) => t.createdByDevice)]}`,
-            [nameof<TokenDTO>((t) => t.expiresAt)]: `${nameof<Token>((t) => t.cache)}.${[nameof<CachedToken>((t) => t.expiresAt)]}`,
-            [nameof<TokenDTO>((t) => t.forIdentity)]: `${nameof<Token>((t) => t.cache)}.${[nameof<CachedToken>((t) => t.forIdentity)]}`,
+            [nameof<TokenDTO>((t) => t.createdAt)]: nameof<Token>((t) => t.createdAt),
+            [nameof<TokenDTO>((t) => t.createdBy)]: nameof<Token>((t) => t.createdBy),
+            [nameof<TokenDTO>((t) => t.createdByDevice)]: nameof<Token>((t) => t.createdByDevice),
+            [nameof<TokenDTO>((t) => t.expiresAt)]: nameof<Token>((t) => t.expiresAt),
+            [nameof<TokenDTO>((t) => t.forIdentity)]: nameof<Token>((t) => t.forIdentity),
             [nameof<TokenDTO>((r) => r.passwordProtection)]: nameof<Token>((r) => r.passwordProtection)
         },
         custom: {

@@ -13,7 +13,7 @@ export class IdentityDeletionProcessStatusChangedExternalEventProcessor extends 
     public override async execute(externalEvent: BackboneExternalEvent): Promise<IdentityDeletionProcess> {
         const messageReceivedPayload = IdentityDeletionProcessStatusChangedEventData.fromAny(externalEvent.payload);
 
-        const newIdentityDeletionProcess = await this.accountController.identityDeletionProcess.updateCacheOfExistingIdentityDeletionProcess(
+        const newIdentityDeletionProcess = await this.accountController.identityDeletionProcess.updateExistingIdentityDeletionProcessFromBackbone(
             messageReceivedPayload.deletionProcessId
         );
 

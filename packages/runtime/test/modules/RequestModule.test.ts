@@ -303,6 +303,7 @@ describe("RequestModule", () => {
 
         test("triggers RelationshipTemplateProcessedEvent if an active Relationship exists", async () => {
             const template = await exchangeRelationshipTemplate();
+            await rRuntimeServices.eventBus.waitForRunningEventHandlers();
 
             await rRuntimeServices.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: template.reference.truncated });
 

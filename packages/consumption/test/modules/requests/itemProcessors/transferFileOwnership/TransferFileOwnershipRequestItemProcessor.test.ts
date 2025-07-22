@@ -302,7 +302,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
 
             const claimedFile = await recipientAccountController.files.getFile(senderFile.id);
             expect(claimedFile!.isOwn).toBe(true);
-            expect(claimedFile!.cache!.owner).toStrictEqual(recipient);
+            expect(claimedFile!.owner).toStrictEqual(recipient);
             expect(claimedFile!.toFileReference(recipientAccountController.config.baseUrl)).toStrictEqual(senderFileReference);
 
             const ownSharedIdentityAttribute = await recipientConsumptionController.attributes.getLocalAttribute(responseItem.attributeId);
@@ -387,7 +387,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
 
             const claimedFile = await senderAccountController.files.getFile(senderFile.id);
             expect(claimedFile!.isOwn).toBe(false);
-            expect(claimedFile!.cache!.owner).toStrictEqual(recipient);
+            expect(claimedFile!.owner).toStrictEqual(recipient);
 
             const peerSharedIdentityAttribute = await senderConsumptionController.attributes.getLocalAttribute(responseItem.attributeId);
             expect(peerSharedIdentityAttribute!.shareInfo!.peer).toStrictEqual(recipient);
