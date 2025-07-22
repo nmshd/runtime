@@ -321,7 +321,6 @@ export class AccountController {
             operatingSystem: deviceInfo.operatingSystem,
             publicKey: deviceKeypair.publicKey,
             type: deviceInfo.type,
-            certificate: "",
             username: createdIdentity.device.username,
             datawalletVersion: this._config.supportedDatawalletVersion,
             isBackupDevice: false
