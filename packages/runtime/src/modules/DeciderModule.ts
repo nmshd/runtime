@@ -434,7 +434,7 @@ async function checkRequestItemCompatibilityAndApplyResponseConfig(
             }
 
             if (isGeneralRequestConfig(requestConfigElement) && responseConfigElement.accept) {
-                const requestItemsWithSimpleAccept = ["AuthenticationRequestItem", "ConsentRequestItem", "CreateAttributeRequestItem", "ShareAttributeRequestItem"];
+                const requestItemsWithSimpleAccept = ["CreateAttributeRequestItem", "ShareAttributeRequestItem"];
                 if (!requestItemsWithSimpleAccept.includes(item["@type"])) continue;
             }
 
