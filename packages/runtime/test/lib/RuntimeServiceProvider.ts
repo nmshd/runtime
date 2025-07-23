@@ -1,6 +1,6 @@
 import { IConfigOverwrite } from "@nmshd/transport";
 import correlator from "correlation-id";
-import { AnonymousServices, ConsumptionServices, DataViewExpander, DeciderModuleConfigurationOverwrite, RuntimeConfig, TransportServices } from "../../src";
+import { AnonymousServices, AutomationConfig, ConsumptionServices, DataViewExpander, RuntimeConfig, TransportServices } from "../../src";
 import { MockEventBus } from "./MockEventBus";
 import { TestRuntime } from "./TestRuntime";
 
@@ -16,7 +16,7 @@ export interface TestRuntimeServices {
 export interface LaunchConfiguration {
     enableDatawallet?: boolean;
     enableDeciderModule?: boolean;
-    configureDeciderModule?: DeciderModuleConfigurationOverwrite;
+    deciderModuleAutomationConfigs?: AutomationConfig[];
     enableRequestModule?: boolean;
     enableNotificationModule?: boolean;
     enableDefaultRepositoryAttributes?: boolean;
@@ -70,7 +70,7 @@ export class RuntimeServiceProvider {
             if (launchConfiguration.enableDeciderModule) config.modules.decider.enabled = true;
             if (launchConfiguration.enableNotificationModule) config.modules.notification.enabled = true;
 
-            config.modules.decider.automationConfig = launchConfiguration.configureDeciderModule?.automationConfig;
+            config.modules.decider.automationConfig = launchConfiguration.deciderModuleAutomationConfigs;
 
             const runtime = new TestRuntime(
                 config,

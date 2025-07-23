@@ -31,8 +31,6 @@ export interface DeciderModuleConfiguration extends ModuleConfiguration {
     automationConfig?: AutomationConfig[];
 }
 
-export type DeciderModuleConfigurationOverwrite = Partial<DeciderModuleConfiguration>;
-
 export interface AutomationConfig {
     requestConfig: RequestConfig;
     responseConfig: ResponseConfig;

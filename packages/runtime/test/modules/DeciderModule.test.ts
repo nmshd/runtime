@@ -22,7 +22,7 @@ import {
 } from "@nmshd/content";
 import { CoreAddress, CoreDate } from "@nmshd/core-types";
 import {
-    DeciderModuleConfigurationOverwrite,
+    AutomationConfig,
     IncomingRequestStatusChangedEvent,
     LocalRequestStatus,
     MessageProcessedEvent,
@@ -62,19 +62,13 @@ describe("DeciderModule", () => {
 
     describe("no automationConfig", () => {
         test("moves an incoming Request into status 'ManualDecisionRequired' if a RequestItem is flagged as requireManualDecision", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            peer: sender.address
-                        },
-                        responseConfig: {
-                            accept: false
-                        }
-                    }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: { peer: sender.address },
+                    responseConfig: { accept: false }
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -159,21 +153,19 @@ describe("DeciderModule", () => {
 
     describe("GeneralRequestConfig", () => {
         test("rejects a Request given a GeneralRequestConfig", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            peer: sender.address
-                        },
-                        responseConfig: {
-                            accept: false,
-                            message: "An error message",
-                            code: "an.error.code"
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        peer: sender.address
+                    },
+                    responseConfig: {
+                        accept: false,
+                        message: "An error message",
+                        code: "an.error.code"
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -207,19 +199,13 @@ describe("DeciderModule", () => {
         });
 
         test("accepts a Request given a GeneralRequestConfig", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            peer: sender.address
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
-                    }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: { peer: sender.address },
+                    responseConfig: { accept: true }
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -285,24 +271,22 @@ describe("DeciderModule", () => {
         test("decides a Request given a GeneralRequestConfig with all fields set", async () => {
             const requestExpirationDate = CoreDate.utc().add({ days: 1 });
 
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            peer: sender.address,
-                            "source.type": "RelationshipTemplate",
-                            "content.expiresAt": `<${requestExpirationDate.add({ days: 1 })}`,
-                            "content.title": "Title of Request",
-                            "content.description": "Description of Request",
-                            "content.metadata": { key: "value" }
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        peer: sender.address,
+                        "source.type": "RelationshipTemplate",
+                        "content.expiresAt": `<${requestExpirationDate.add({ days: 1 })}`,
+                        "content.title": "Title of Request",
+                        "content.description": "Description of Request",
+                        "content.metadata": { key: "value" }
+                    },
+                    responseConfig: {
+                        accept: true
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
 
             const request = Request.from({
                 expiresAt: requestExpirationDate.toString(),
@@ -336,24 +320,22 @@ describe("DeciderModule", () => {
             const requestExpirationDate = CoreDate.utc().add({ days: 1 }).toString();
             const anotherExpirationDate = CoreDate.utc().add({ days: 2 }).toString();
 
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            peer: [sender.address, "another Identity"],
-                            "source.type": "Message",
-                            "content.expiresAt": [requestExpirationDate, `<${anotherExpirationDate}`],
-                            "content.title": ["Title of Request", "Another title of Request"],
-                            "content.description": ["Description of Request", "Another description of Request"],
-                            "content.metadata": [{ key: "value" }, { anotherKey: "anotherValue" }]
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        peer: [sender.address, "another Identity"],
+                        "source.type": "Message",
+                        "content.expiresAt": [requestExpirationDate, `<${anotherExpirationDate}`],
+                        "content.title": ["Title of Request", "Another title of Request"],
+                        "content.description": ["Description of Request", "Another description of Request"],
+                        "content.metadata": [{ key: "value" }, { anotherKey: "anotherValue" }]
+                    },
+                    responseConfig: {
+                        accept: true
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -377,19 +359,17 @@ describe("DeciderModule", () => {
         });
 
         test("decides a Request given a GeneralRequestConfig that doesn't require a property that is set in the Request", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            peer: sender.address
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        peer: sender.address
+                    },
+                    responseConfig: {
+                        accept: true
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -410,20 +390,18 @@ describe("DeciderModule", () => {
         });
 
         test("cannot decide a Request given a GeneralRequestConfig that doesn't fit the Request", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            peer: "another identity",
-                            "source.type": "Message"
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        peer: "another identity",
+                        "source.type": "Message"
+                    },
+                    responseConfig: {
+                        accept: true
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -446,19 +424,17 @@ describe("DeciderModule", () => {
 
         test("cannot decide a Request given a GeneralRequestConfig with an expiration date too high", async () => {
             const requestExpirationDate = CoreDate.utc().add({ days: 1 }).toString();
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            "content.expiresAt": [requestExpirationDate, `<${requestExpirationDate}`]
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        "content.expiresAt": [requestExpirationDate, `<${requestExpirationDate}`]
+                    },
+                    responseConfig: {
+                        accept: true
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -480,19 +456,17 @@ describe("DeciderModule", () => {
 
         test("cannot decide a Request given a GeneralRequestConfig  with an expiration date too low", async () => {
             const requestExpirationDate = CoreDate.utc().add({ days: 1 }).toString();
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            "content.expiresAt": [requestExpirationDate, `>${requestExpirationDate}`]
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        "content.expiresAt": [requestExpirationDate, `>${requestExpirationDate}`]
+                    },
+                    responseConfig: {
+                        accept: true
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -513,20 +487,18 @@ describe("DeciderModule", () => {
         });
 
         test("cannot decide a Request given a GeneralRequestConfig with arrays that don't fit the Request", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            peer: ["another Identity", "a further other Identity"],
-                            "source.type": "Message"
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        peer: ["another Identity", "a further other Identity"],
+                        "source.type": "Message"
+                    },
+                    responseConfig: {
+                        accept: true
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -543,20 +515,18 @@ describe("DeciderModule", () => {
         });
 
         test("cannot decide a Request given a GeneralRequestConfig that requires a property that is not set in the Request", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            peer: sender.address,
-                            "content.title": "Title of Request"
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        peer: sender.address,
+                        "content.title": "Title of Request"
+                    },
+                    responseConfig: {
+                        accept: true
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -573,19 +543,17 @@ describe("DeciderModule", () => {
         });
 
         test("cannot accept a Request with RequestItems that require AcceptResponseParameters given a GeneralRequestConfig", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            peer: sender.address
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        peer: sender.address
+                    },
+                    responseConfig: {
+                        accept: true
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -607,19 +575,17 @@ describe("DeciderModule", () => {
 
     describe("RelationshipRequestConfig", () => {
         test("decides a Request on new Relationship given an according RelationshipRequestConfig", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            relationshipAlreadyExists: false
-                        },
-                        responseConfig: {
-                            accept: false
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        relationshipAlreadyExists: false
+                    },
+                    responseConfig: {
+                        accept: false
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
 
             const request = Request.from({
                 items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }]
@@ -646,19 +612,17 @@ describe("DeciderModule", () => {
         });
 
         test("decides a Request on existing Relationship given an according RelationshipRequestConfig", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            relationshipAlreadyExists: true
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        relationshipAlreadyExists: true
+                    },
+                    responseConfig: {
+                        accept: true
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -678,19 +642,17 @@ describe("DeciderModule", () => {
         });
 
         test("doesn't decide a Request on new Relationship given a contrary RelationshipRequestConfig", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            relationshipAlreadyExists: true
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        relationshipAlreadyExists: true
+                    },
+                    responseConfig: {
+                        accept: true
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
 
             const request = Request.from({
                 items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }]
@@ -717,19 +679,17 @@ describe("DeciderModule", () => {
         });
 
         test("doesn't decide a Request on existing Relationship given a contrary RelationshipRequestConfig", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            relationshipAlreadyExists: false
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        relationshipAlreadyExists: false
+                    },
+                    responseConfig: {
+                        accept: true
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -751,25 +711,23 @@ describe("DeciderModule", () => {
 
     describe("RequestItemConfig", () => {
         test("rejects a RequestItem given a RequestItemConfig with all fields set", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            "content.item.@type": "AuthenticationRequestItem",
-                            "content.item.mustBeAccepted": false,
-                            "content.item.title": "Title of RequestItem",
-                            "content.item.description": "Description of RequestItem",
-                            "content.item.metadata": { key: "value" }
-                        },
-                        responseConfig: {
-                            accept: false,
-                            code: "an.error.code",
-                            message: "An error message"
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        "content.item.@type": "AuthenticationRequestItem",
+                        "content.item.mustBeAccepted": false,
+                        "content.item.title": "Title of RequestItem",
+                        "content.item.description": "Description of RequestItem",
+                        "content.item.metadata": { key: "value" }
+                    },
+                    responseConfig: {
+                        accept: false,
+                        code: "an.error.code",
+                        message: "An error message"
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -806,23 +764,21 @@ describe("DeciderModule", () => {
         });
 
         test("accepts a RequestItem given a RequestItemConfig with all fields set", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            "content.item.@type": "AuthenticationRequestItem",
-                            "content.item.mustBeAccepted": false,
-                            "content.item.title": "Title of RequestItem",
-                            "content.item.description": "Description of RequestItem",
-                            "content.item.metadata": { key: "value" }
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        "content.item.@type": "AuthenticationRequestItem",
+                        "content.item.mustBeAccepted": false,
+                        "content.item.title": "Title of RequestItem",
+                        "content.item.description": "Description of RequestItem",
+                        "content.item.metadata": { key: "value" }
+                    },
+                    responseConfig: {
+                        accept: true
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -857,22 +813,20 @@ describe("DeciderModule", () => {
         });
 
         test("accepts a RequestItem given a RequestItemConfig with all fields set with arrays", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            "content.item.@type": ["AuthenticationRequestItem", "ContentRequestItem"],
-                            "content.item.mustBeAccepted": false,
-                            "content.item.description": ["Description of RequestItem", "Another description of RequestItem"],
-                            "content.item.metadata": [{ key: "value" }, { anotherKey: "anotherValue" }]
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        "content.item.@type": ["AuthenticationRequestItem", "ContentRequestItem"],
+                        "content.item.mustBeAccepted": false,
+                        "content.item.description": ["Description of RequestItem", "Another description of RequestItem"],
+                        "content.item.metadata": [{ key: "value" }, { anotherKey: "anotherValue" }]
+                    },
+                    responseConfig: {
+                        accept: true
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -907,19 +861,17 @@ describe("DeciderModule", () => {
         });
 
         test("decides a Request with equal RequestItems given a single RequestItemConfig", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            "content.item.@type": "AuthenticationRequestItem"
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        "content.item.@type": "AuthenticationRequestItem"
+                    },
+                    responseConfig: {
+                        accept: true
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -962,19 +914,17 @@ describe("DeciderModule", () => {
         });
 
         test("decides a RequestItem given a RequestItemConfig that doesn't require a property that is set in the Request", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            "content.item.@type": "AuthenticationRequestItem"
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        "content.item.@type": "AuthenticationRequestItem"
+                    },
+                    responseConfig: {
+                        accept: true
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -1007,20 +957,18 @@ describe("DeciderModule", () => {
         });
 
         test("cannot decide a RequestItem given a RequestItemConfig that doesn't fit the RequestItem", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            "content.item.@type": "AuthenticationRequestItem",
-                            "content.item.title": "Another title of RequestItem"
-                        },
-                        responseConfig: {
-                            accept: false
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        "content.item.@type": "AuthenticationRequestItem",
+                        "content.item.title": "Another title of RequestItem"
+                    },
+                    responseConfig: {
+                        accept: false
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -1046,19 +994,17 @@ describe("DeciderModule", () => {
         });
 
         test("cannot decide a RequestItem given a RequestItemConfig that doesn't fit the RequestItem regarding a boolean property", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            "content.item.mustBeAccepted": false
-                        },
-                        responseConfig: {
-                            accept: false
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        "content.item.mustBeAccepted": false
+                    },
+                    responseConfig: {
+                        accept: false
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -1084,20 +1030,18 @@ describe("DeciderModule", () => {
         });
 
         test("cannot decide a RequestItem given a RequestItemConfig with arrays that doesn't fit the RequestItem", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            "content.item.@type": "AuthenticationRequestItem",
-                            "content.item.title": ["Another title of RequestItem", "A further title of RequestItem"]
-                        },
-                        responseConfig: {
-                            accept: false
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        "content.item.@type": "AuthenticationRequestItem",
+                        "content.item.title": ["Another title of RequestItem", "A further title of RequestItem"]
+                    },
+                    responseConfig: {
+                        accept: false
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -1123,20 +1067,18 @@ describe("DeciderModule", () => {
         });
 
         test("cannot decide a RequestItem given a RequestItemConfig that requires a property that is not set in the Request", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            "content.item.@type": "AuthenticationRequestItem",
-                            "content.item.description": "Description of RequestItem"
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        "content.item.@type": "AuthenticationRequestItem",
+                        "content.item.description": "Description of RequestItem"
+                    },
+                    responseConfig: {
+                        accept: true
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -1155,20 +1097,18 @@ describe("DeciderModule", () => {
 
     describe("RequestItemDerivationConfigs", () => {
         test("accepts an AuthenticationRequestItem given a AuthenticationRequestItemConfig with all fields set", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            "content.item.@type": "AuthenticationRequestItem",
-                            "content.item.title": "Title of RequestItem"
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        "content.item.@type": "AuthenticationRequestItem",
+                        "content.item.title": "Title of RequestItem"
+                    },
+                    responseConfig: {
+                        accept: true
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -1203,21 +1143,19 @@ describe("DeciderModule", () => {
         });
 
         test("accepts a ConsentRequestItem given a ConsentRequestItemConfig with all fields set", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            "content.item.@type": "ConsentRequestItem",
-                            "content.item.consent": "A consent text",
-                            "content.item.link": "www.a-link-to-a-consent-website.com"
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        "content.item.@type": "ConsentRequestItem",
+                        "content.item.consent": "A consent text",
+                        "content.item.link": "www.a-link-to-a-consent-website.com"
+                    },
+                    responseConfig: {
+                        accept: true
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -1253,23 +1191,21 @@ describe("DeciderModule", () => {
         });
 
         test("accepts a CreateAttributeRequestItem given a CreateAttributeRequestItemConfig with all fields set for an IdentityAttribute", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            "content.item.@type": "CreateAttributeRequestItem",
-                            "content.item.attribute.@type": "IdentityAttribute",
-                            "content.item.attribute.tags": ["x:tag1", "x:tag2"],
-                            "content.item.attribute.value.@type": "IdentityFileReference",
-                            "content.item.attribute.value.value": "A link to a file with more than 30 characters"
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        "content.item.@type": "CreateAttributeRequestItem",
+                        "content.item.attribute.@type": "IdentityAttribute",
+                        "content.item.attribute.tags": ["x:tag1", "x:tag2"],
+                        "content.item.attribute.value.@type": "IdentityFileReference",
+                        "content.item.attribute.value.value": "A link to a file with more than 30 characters"
+                    },
+                    responseConfig: {
+                        accept: true
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -1321,28 +1257,26 @@ describe("DeciderModule", () => {
         });
 
         test("accepts a CreateAttributeRequestItem given a CreateAttributeRequestItemConfig with all fields set for a RelationshipAttribute", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            "content.item.@type": "CreateAttributeRequestItem",
-                            "content.item.attribute.@type": "RelationshipAttribute",
-                            "content.item.attribute.owner": sender.address,
-                            "content.item.attribute.key": "A key",
-                            "content.item.attribute.isTechnical": false,
-                            "content.item.attribute.confidentiality": RelationshipAttributeConfidentiality.Public,
-                            "content.item.attribute.value.@type": "ProprietaryFileReference",
-                            "content.item.attribute.value.value": "A proprietary file reference with more than 30 characters",
-                            "content.item.attribute.value.title": "An Attribute's title",
-                            "content.item.attribute.value.description": "An Attribute's description"
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        "content.item.@type": "CreateAttributeRequestItem",
+                        "content.item.attribute.@type": "RelationshipAttribute",
+                        "content.item.attribute.owner": sender.address,
+                        "content.item.attribute.key": "A key",
+                        "content.item.attribute.isTechnical": false,
+                        "content.item.attribute.confidentiality": RelationshipAttributeConfidentiality.Public,
+                        "content.item.attribute.value.@type": "ProprietaryFileReference",
+                        "content.item.attribute.value.value": "A proprietary file reference with more than 30 characters",
+                        "content.item.attribute.value.title": "An Attribute's title",
+                        "content.item.attribute.value.description": "An Attribute's description"
+                    },
+                    responseConfig: {
+                        accept: true
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -1400,20 +1334,18 @@ describe("DeciderModule", () => {
         test("accepts a DeleteAttributeRequestItem given a DeleteAttributeRequestItemConfig with all fields set", async () => {
             const deletionDate = CoreDate.utc().add({ days: 7 }).toString();
 
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            "content.item.@type": "DeleteAttributeRequestItem"
-                        },
-                        responseConfig: {
-                            accept: true,
-                            deletionDate: deletionDate
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        "content.item.@type": "DeleteAttributeRequestItem"
+                    },
+                    responseConfig: {
+                        accept: true,
+                        deletionDate: deletionDate
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig, enableRequestModule: true }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs, enableRequestModule: true }))[0];
 
             await establishRelationship(sender.transport, recipient.transport);
             const sharedAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(sender, recipient, {
@@ -1462,31 +1394,29 @@ describe("DeciderModule", () => {
         });
 
         test("accepts a ProposeAttributeRequestItem given a ProposeAttributeRequestItemConfig with all fields set for an IdentityAttribute", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            "content.item.@type": "ProposeAttributeRequestItem",
-                            "content.item.attribute.@type": "IdentityAttribute",
-                            "content.item.attribute.tags": ["x:tag1", "x:tag2"],
-                            "content.item.attribute.value.@type": "GivenName",
-                            "content.item.attribute.value.value": "Given name of recipient proposed by sender",
-                            "content.item.query.@type": "IdentityAttributeQuery",
-                            "content.item.query.valueType": "GivenName",
-                            "content.item.query.tags": ["x:tag1", "x:tag2"]
-                        },
-                        responseConfig: {
-                            accept: true,
-                            attribute: IdentityAttribute.from({
-                                owner: "",
-                                value: GivenName.from("Given name of recipient").toJSON(),
-                                tags: ["x:tag1"]
-                            })
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        "content.item.@type": "ProposeAttributeRequestItem",
+                        "content.item.attribute.@type": "IdentityAttribute",
+                        "content.item.attribute.tags": ["x:tag1", "x:tag2"],
+                        "content.item.attribute.value.@type": "GivenName",
+                        "content.item.attribute.value.value": "Given name of recipient proposed by sender",
+                        "content.item.query.@type": "IdentityAttributeQuery",
+                        "content.item.query.valueType": "GivenName",
+                        "content.item.query.tags": ["x:tag1", "x:tag2"]
+                    },
+                    responseConfig: {
+                        accept: true,
+                        attribute: IdentityAttribute.from({
+                            owner: "",
+                            value: GivenName.from("Given name of recipient").toJSON(),
+                            tags: ["x:tag1"]
+                        })
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -1543,45 +1473,43 @@ describe("DeciderModule", () => {
         });
 
         test("accepts a ProposeAttributeRequestItem given a ProposeAttributeRequestItemConfig with all fields set for a RelationshipAttribute", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            "content.item.@type": "ProposeAttributeRequestItem",
-                            "content.item.attribute.@type": "RelationshipAttribute",
-                            "content.item.attribute.key": "A key",
-                            "content.item.attribute.isTechnical": false,
-                            "content.item.attribute.confidentiality": RelationshipAttributeConfidentiality.Public,
-                            "content.item.attribute.value.@type": "ProprietaryString",
-                            "content.item.attribute.value.value": "A proprietary string",
-                            "content.item.attribute.value.title": "Title of Attribute",
-                            "content.item.attribute.value.description": "Description of Attribute",
-                            "content.item.query.@type": "RelationshipAttributeQuery",
-                            "content.item.query.key": "A key",
-                            "content.item.query.attributeCreationHints.title": "Title of Attribute",
-                            "content.item.query.attributeCreationHints.description": "Description of Attribute",
-                            "content.item.query.attributeCreationHints.valueType": "ProprietaryString",
-                            "content.item.query.attributeCreationHints.confidentiality": RelationshipAttributeConfidentiality.Public
-                        },
-                        responseConfig: {
-                            accept: true,
-                            attribute: RelationshipAttribute.from({
-                                owner: CoreAddress.from(""),
-                                value: {
-                                    "@type": "ProprietaryString",
-                                    value: "A proprietary string",
-                                    title: "Title of Attribute",
-                                    description: "Description of Attribute"
-                                },
-                                key: "A key",
-                                confidentiality: RelationshipAttributeConfidentiality.Public
-                            })
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        "content.item.@type": "ProposeAttributeRequestItem",
+                        "content.item.attribute.@type": "RelationshipAttribute",
+                        "content.item.attribute.key": "A key",
+                        "content.item.attribute.isTechnical": false,
+                        "content.item.attribute.confidentiality": RelationshipAttributeConfidentiality.Public,
+                        "content.item.attribute.value.@type": "ProprietaryString",
+                        "content.item.attribute.value.value": "A proprietary string",
+                        "content.item.attribute.value.title": "Title of Attribute",
+                        "content.item.attribute.value.description": "Description of Attribute",
+                        "content.item.query.@type": "RelationshipAttributeQuery",
+                        "content.item.query.key": "A key",
+                        "content.item.query.attributeCreationHints.title": "Title of Attribute",
+                        "content.item.query.attributeCreationHints.description": "Description of Attribute",
+                        "content.item.query.attributeCreationHints.valueType": "ProprietaryString",
+                        "content.item.query.attributeCreationHints.confidentiality": RelationshipAttributeConfidentiality.Public
+                    },
+                    responseConfig: {
+                        accept: true,
+                        attribute: RelationshipAttribute.from({
+                            owner: CoreAddress.from(""),
+                            value: {
+                                "@type": "ProprietaryString",
+                                value: "A proprietary string",
+                                title: "Title of Attribute",
+                                description: "Description of Attribute"
+                            },
+                            key: "A key",
+                            confidentiality: RelationshipAttributeConfidentiality.Public
+                        })
                     }
-                ]
-            };
+                }
+            ];
 
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -1648,27 +1576,25 @@ describe("DeciderModule", () => {
         });
 
         test("accepts a ReadAttributeRequestItem given a ReadAttributeRequestItemConfig with all fields set for an IdentityAttributeQuery", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            "content.item.@type": "ReadAttributeRequestItem",
-                            "content.item.query.@type": "IdentityAttributeQuery",
-                            "content.item.query.valueType": "GivenName",
-                            "content.item.query.tags": ["x:tag1", "x:tag2"]
-                        },
-                        responseConfig: {
-                            accept: true,
-                            newAttribute: IdentityAttribute.from({
-                                owner: "",
-                                value: GivenName.from("Given name of recipient").toJSON(),
-                                tags: ["x:tag1"]
-                            })
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        "content.item.@type": "ReadAttributeRequestItem",
+                        "content.item.query.@type": "IdentityAttributeQuery",
+                        "content.item.query.valueType": "GivenName",
+                        "content.item.query.tags": ["x:tag1", "x:tag2"]
+                    },
+                    responseConfig: {
+                        accept: true,
+                        newAttribute: IdentityAttribute.from({
+                            owner: "",
+                            value: GivenName.from("Given name of recipient").toJSON(),
+                            tags: ["x:tag1"]
+                        })
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -1716,38 +1642,36 @@ describe("DeciderModule", () => {
         });
 
         test("accepts a ReadAttributeRequestItem given a ReadAttributeRequestItemConfig with all fields set for a RelationshipAttributeQuery", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            "content.item.@type": "ReadAttributeRequestItem",
-                            "content.item.query.@type": "RelationshipAttributeQuery",
-                            "content.item.query.key": "A key",
-                            "content.item.query.owner": "",
-                            "content.item.query.attributeCreationHints.title": "Title of Attribute",
-                            "content.item.query.attributeCreationHints.description": "Description of Attribute",
-                            "content.item.query.attributeCreationHints.valueType": "ProprietaryString",
-                            "content.item.query.attributeCreationHints.confidentiality": RelationshipAttributeConfidentiality.Public
-                        },
-                        responseConfig: {
-                            accept: true,
-                            newAttribute: RelationshipAttribute.from({
-                                owner: CoreAddress.from(""),
-                                value: {
-                                    "@type": "ProprietaryString",
-                                    value: "A proprietary string",
-                                    title: "Title of Attribute",
-                                    description: "Description of Attribute"
-                                },
-                                key: "A key",
-                                confidentiality: RelationshipAttributeConfidentiality.Public
-                            })
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        "content.item.@type": "ReadAttributeRequestItem",
+                        "content.item.query.@type": "RelationshipAttributeQuery",
+                        "content.item.query.key": "A key",
+                        "content.item.query.owner": "",
+                        "content.item.query.attributeCreationHints.title": "Title of Attribute",
+                        "content.item.query.attributeCreationHints.description": "Description of Attribute",
+                        "content.item.query.attributeCreationHints.valueType": "ProprietaryString",
+                        "content.item.query.attributeCreationHints.confidentiality": RelationshipAttributeConfidentiality.Public
+                    },
+                    responseConfig: {
+                        accept: true,
+                        newAttribute: RelationshipAttribute.from({
+                            owner: CoreAddress.from(""),
+                            value: {
+                                "@type": "ProprietaryString",
+                                value: "A proprietary string",
+                                title: "Title of Attribute",
+                                description: "Description of Attribute"
+                            },
+                            key: "A key",
+                            confidentiality: RelationshipAttributeConfidentiality.Public
+                        })
                     }
-                ]
-            };
+                }
+            ];
 
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -1801,28 +1725,26 @@ describe("DeciderModule", () => {
         });
 
         test("accepts a ReadAttributeRequestItem given a ReadAttributeRequestItemConfig with all fields set for an IQLQuery", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            "content.item.@type": "ReadAttributeRequestItem",
-                            "content.item.query.@type": "IQLQuery",
-                            "content.item.query.queryString": "GivenName || LastName",
-                            "content.item.query.attributeCreationHints.valueType": "GivenName",
-                            "content.item.query.attributeCreationHints.tags": ["x:tag1", "x:tag2"]
-                        },
-                        responseConfig: {
-                            accept: true,
-                            newAttribute: IdentityAttribute.from({
-                                owner: "",
-                                value: GivenName.from("Given name of recipient").toJSON(),
-                                tags: ["x:tag1"]
-                            })
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        "content.item.@type": "ReadAttributeRequestItem",
+                        "content.item.query.@type": "IQLQuery",
+                        "content.item.query.queryString": "GivenName || LastName",
+                        "content.item.query.attributeCreationHints.valueType": "GivenName",
+                        "content.item.query.attributeCreationHints.tags": ["x:tag1", "x:tag2"]
+                    },
+                    responseConfig: {
+                        accept: true,
+                        newAttribute: IdentityAttribute.from({
+                            owner: "",
+                            value: GivenName.from("Given name of recipient").toJSON(),
+                            tags: ["x:tag1"]
+                        })
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -1873,24 +1795,22 @@ describe("DeciderModule", () => {
         });
 
         test("accepts a ShareAttributeRequestItem given a ShareAttributeRequestItemConfig with all fields set for an IdentityAttribute and upper bounds for dates", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            "content.item.@type": "ShareAttributeRequestItem",
-                            "content.item.attribute.@type": "IdentityAttribute",
-                            "content.item.attribute.owner": sender.address,
-                            "content.item.attribute.tags": ["x:tag1", "x:tag2"],
-                            "content.item.attribute.value.@type": "IdentityFileReference",
-                            "content.item.attribute.value.value": "A link to a file with more than 30 characters"
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        "content.item.@type": "ShareAttributeRequestItem",
+                        "content.item.attribute.@type": "IdentityAttribute",
+                        "content.item.attribute.owner": sender.address,
+                        "content.item.attribute.tags": ["x:tag1", "x:tag2"],
+                        "content.item.attribute.value.@type": "IdentityFileReference",
+                        "content.item.attribute.value.value": "A link to a file with more than 30 characters"
+                    },
+                    responseConfig: {
+                        accept: true
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -1943,28 +1863,26 @@ describe("DeciderModule", () => {
         });
 
         test("accepts a ShareAttributeRequestItem given a ShareAttributeRequestItemConfig with all fields set for a RelationshipAttribute", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            "content.item.@type": "ShareAttributeRequestItem",
-                            "content.item.attribute.@type": "RelationshipAttribute",
-                            "content.item.attribute.owner": sender.address,
-                            "content.item.attribute.key": "A key",
-                            "content.item.attribute.isTechnical": false,
-                            "content.item.attribute.confidentiality": RelationshipAttributeConfidentiality.Public,
-                            "content.item.attribute.value.@type": "ProprietaryString",
-                            "content.item.attribute.value.value": "A proprietary string",
-                            "content.item.attribute.value.title": "An Attribute's title",
-                            "content.item.attribute.value.description": "An Attribute's description"
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        "content.item.@type": "ShareAttributeRequestItem",
+                        "content.item.attribute.@type": "RelationshipAttribute",
+                        "content.item.attribute.owner": sender.address,
+                        "content.item.attribute.key": "A key",
+                        "content.item.attribute.isTechnical": false,
+                        "content.item.attribute.confidentiality": RelationshipAttributeConfidentiality.Public,
+                        "content.item.attribute.value.@type": "ProprietaryString",
+                        "content.item.attribute.value.value": "A proprietary string",
+                        "content.item.attribute.value.title": "An Attribute's title",
+                        "content.item.attribute.value.description": "An Attribute's description"
+                    },
+                    responseConfig: {
+                        accept: true
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -2021,19 +1939,17 @@ describe("DeciderModule", () => {
         });
 
         test("accepts a TransferFileOwnershipRequestItem given a TransferFileOwnershipRequestItemConfig with all fields set", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            "content.item.@type": "TransferFileOwnershipRequestItem"
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        "content.item.@type": "TransferFileOwnershipRequestItem"
+                    },
+                    responseConfig: {
+                        accept: true
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig, enableRequestModule: true }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs, enableRequestModule: true }))[0];
 
             await establishRelationship(sender.transport, recipient.transport);
             const file = await uploadFile(sender.transport);
@@ -2080,21 +1996,19 @@ describe("DeciderModule", () => {
 
     describe("RequestConfig with general and RequestItem-specific elements", () => {
         test("decides a Request given a config with general and RequestItem-specific elements", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            peer: sender.address,
-                            "content.item.@type": "ConsentRequestItem",
-                            "content.item.consent": "A consent text"
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        peer: sender.address,
+                        "content.item.@type": "ConsentRequestItem",
+                        "content.item.consent": "A consent text"
+                    },
+                    responseConfig: {
+                        accept: true
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -2111,20 +2025,18 @@ describe("DeciderModule", () => {
         });
 
         test("decides a Request given a config with general elements and multiple RequestItem types", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            peer: sender.address,
-                            "content.item.@type": ["AuthenticationRequestItem", "ConsentRequestItem"]
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        peer: sender.address,
+                        "content.item.@type": ["AuthenticationRequestItem", "ConsentRequestItem"]
+                    },
+                    responseConfig: {
+                        accept: true
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -2141,21 +2053,19 @@ describe("DeciderModule", () => {
         });
 
         test("cannot decide a Request given a config with not fitting general and fitting RequestItem-specific elements", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            peer: "another Identity",
-                            "content.item.@type": "ConsentRequestItem",
-                            "content.item.consent": "A consent text"
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        peer: "another Identity",
+                        "content.item.@type": "ConsentRequestItem",
+                        "content.item.consent": "A consent text"
+                    },
+                    responseConfig: {
+                        accept: true
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -2172,21 +2082,19 @@ describe("DeciderModule", () => {
         });
 
         test("cannot decide a Request given a config with fitting general and not fitting RequestItem-specific elements", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            peer: sender.address,
-                            "content.item.@type": "ConsentRequestItem",
-                            "content.item.consent": "Another consent text"
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        peer: sender.address,
+                        "content.item.@type": "ConsentRequestItem",
+                        "content.item.consent": "Another consent text"
+                    },
+                    responseConfig: {
+                        accept: true
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -2203,19 +2111,13 @@ describe("DeciderModule", () => {
         });
 
         test("cannot decide a Request if there is no fitting RequestItemConfig for every RequestItem", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            "content.item.@type": "AuthenticationRequestItem"
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
-                    }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: { "content.item.@type": "AuthenticationRequestItem" },
+                    responseConfig: { accept: true }
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -2248,21 +2150,19 @@ describe("DeciderModule", () => {
 
     describe("RequestItemGroups", () => {
         test("decides a RequestItem in a RequestItemGroup given a GeneralRequestConfig", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            peer: sender.address
-                        },
-                        responseConfig: {
-                            accept: false,
-                            code: "an.error.code",
-                            message: "An error message"
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        peer: sender.address
+                    },
+                    responseConfig: {
+                        accept: false,
+                        code: "an.error.code",
+                        message: "An error message"
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -2308,21 +2208,19 @@ describe("DeciderModule", () => {
         });
 
         test("decides all RequestItems inside and outside of a RequestItemGroup given a GeneralRequestConfig", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            peer: sender.address
-                        },
-                        responseConfig: {
-                            accept: false,
-                            code: "an.error.code",
-                            message: "An error message"
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        peer: sender.address
+                    },
+                    responseConfig: {
+                        accept: false,
+                        code: "an.error.code",
+                        message: "An error message"
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -2381,21 +2279,19 @@ describe("DeciderModule", () => {
         });
 
         test("decides a RequestItem in a RequestItemGroup given a RequestItemConfig", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            "content.item.@type": "AuthenticationRequestItem"
-                        },
-                        responseConfig: {
-                            accept: false,
-                            code: "an.error.code",
-                            message: "An error message"
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        "content.item.@type": "AuthenticationRequestItem"
+                    },
+                    responseConfig: {
+                        accept: false,
+                        code: "an.error.code",
+                        message: "An error message"
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -2441,21 +2337,19 @@ describe("DeciderModule", () => {
         });
 
         test("decides all RequestItems inside and outside of a RequestItemGroup given a RequestItemConfig", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            "content.item.@type": "AuthenticationRequestItem"
-                        },
-                        responseConfig: {
-                            accept: false,
-                            code: "an.error.code",
-                            message: "An error message"
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        "content.item.@type": "AuthenticationRequestItem"
+                    },
+                    responseConfig: {
+                        accept: false,
+                        code: "an.error.code",
+                        message: "An error message"
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -2514,19 +2408,17 @@ describe("DeciderModule", () => {
         });
 
         test("cannot decide a Request with RequestItemGroup if there is no fitting RequestItemConfig for every RequestItem", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            "content.item.@type": "AuthenticationRequestItem"
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        "content.item.@type": "AuthenticationRequestItem"
+                    },
+                    responseConfig: {
+                        accept: true
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -2564,27 +2456,25 @@ describe("DeciderModule", () => {
 
     describe("automationConfig with multiple elements", () => {
         test("decides a Request given an individual RequestItemConfig for every RequestItem", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            "content.item.@type": "AuthenticationRequestItem"
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        "content.item.@type": "AuthenticationRequestItem"
                     },
-                    {
-                        requestConfig: {
-                            "content.item.@type": "ConsentRequestItem"
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+                    responseConfig: {
+                        accept: true
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                },
+                {
+                    requestConfig: {
+                        "content.item.@type": "ConsentRequestItem"
+                    },
+                    responseConfig: {
+                        accept: true
+                    }
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -2627,27 +2517,25 @@ describe("DeciderModule", () => {
         });
 
         test("decides a Request with RequestItemGroup given an individual RequestItemConfig for every RequestItem", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            "content.item.@type": "AuthenticationRequestItem"
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        "content.item.@type": "AuthenticationRequestItem"
                     },
-                    {
-                        requestConfig: {
-                            "content.item.@type": "ConsentRequestItem"
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+                    responseConfig: {
+                        accept: true
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                },
+                {
+                    requestConfig: {
+                        "content.item.@type": "ConsentRequestItem"
+                    },
+                    responseConfig: {
+                        accept: true
+                    }
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -2697,27 +2585,25 @@ describe("DeciderModule", () => {
         });
 
         test("decides a Request with the first fitting RequestItemConfig given multiple fitting RequestItemConfigs", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            "content.item.@type": "AuthenticationRequestItem"
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        "content.item.@type": "AuthenticationRequestItem"
                     },
-                    {
-                        requestConfig: {
-                            "content.item.@type": "AuthenticationRequestItem"
-                        },
-                        responseConfig: {
-                            accept: false
-                        }
+                    responseConfig: {
+                        accept: true
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                },
+                {
+                    requestConfig: {
+                        "content.item.@type": "AuthenticationRequestItem"
+                    },
+                    responseConfig: {
+                        accept: false
+                    }
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -2750,27 +2636,25 @@ describe("DeciderModule", () => {
         });
 
         test("accepts all mustBeAccepted RequestItems and rejects all other RequestItems", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            "content.item.mustBeAccepted": true
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        "content.item.mustBeAccepted": true
                     },
-                    {
-                        requestConfig: {
-                            "content.item.mustBeAccepted": false
-                        },
-                        responseConfig: {
-                            accept: false
-                        }
+                    responseConfig: {
+                        accept: true
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                },
+                {
+                    requestConfig: {
+                        "content.item.mustBeAccepted": false
+                    },
+                    responseConfig: {
+                        accept: false
+                    }
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -2813,28 +2697,26 @@ describe("DeciderModule", () => {
         });
 
         test("accepts a RequestItem with a fitting RequestItemConfig and rejects all other RequestItems with GeneralRequestConfig", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            peer: sender.address,
-                            "content.item.@type": "AuthenticationRequestItem"
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        peer: sender.address,
+                        "content.item.@type": "AuthenticationRequestItem"
                     },
-                    {
-                        requestConfig: {
-                            peer: sender.address
-                        },
-                        responseConfig: {
-                            accept: false
-                        }
+                    responseConfig: {
+                        accept: true
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                },
+                {
+                    requestConfig: {
+                        peer: sender.address
+                    },
+                    responseConfig: {
+                        accept: false
+                    }
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -2883,28 +2765,26 @@ describe("DeciderModule", () => {
         });
 
         test("rejects a RequestItem with a fitting RequestItemConfig and accepts all other RequestItems with GeneralRequestConfig", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            peer: sender.address,
-                            "content.item.@type": "AuthenticationRequestItem"
-                        },
-                        responseConfig: {
-                            accept: false
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        peer: sender.address,
+                        "content.item.@type": "AuthenticationRequestItem"
                     },
-                    {
-                        requestConfig: {
-                            peer: sender.address
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+                    responseConfig: {
+                        accept: false
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                },
+                {
+                    requestConfig: {
+                        peer: sender.address
+                    },
+                    responseConfig: {
+                        accept: true
+                    }
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -2947,38 +2827,36 @@ describe("DeciderModule", () => {
         });
 
         test("rejects a RequestItem with a fitting RequestItemConfig, accepts other simple RequestItems with GeneralRequestConfig and accepts other RequestItem with fitting RequestItemConfig", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            peer: sender.address,
-                            "content.item.@type": "AuthenticationRequestItem"
-                        },
-                        responseConfig: {
-                            accept: false
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        peer: sender.address,
+                        "content.item.@type": "AuthenticationRequestItem"
                     },
-                    {
-                        requestConfig: {
-                            peer: sender.address
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
-                    },
-                    {
-                        requestConfig: {
-                            peer: sender.address,
-                            "content.item.@type": "DeleteAttributeRequestItem"
-                        },
-                        responseConfig: {
-                            accept: true,
-                            deletionDate: CoreDate.utc().add({ days: 1 }).toString()
-                        }
+                    responseConfig: {
+                        accept: false
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig, enableRequestModule: true }))[0];
+                },
+                {
+                    requestConfig: {
+                        peer: sender.address
+                    },
+                    responseConfig: {
+                        accept: true
+                    }
+                },
+                {
+                    requestConfig: {
+                        peer: sender.address,
+                        "content.item.@type": "DeleteAttributeRequestItem"
+                    },
+                    responseConfig: {
+                        accept: true,
+                        deletionDate: CoreDate.utc().add({ days: 1 }).toString()
+                    }
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs, enableRequestModule: true }))[0];
 
             await establishRelationship(sender.transport, recipient.transport);
             const sharedAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(sender, recipient, {
@@ -3036,27 +2914,25 @@ describe("DeciderModule", () => {
         });
 
         test("cannot decide a Request if a mustBeAccepted RequestItem is not accepted", async () => {
-            const deciderConfig: DeciderModuleConfigurationOverwrite = {
-                automationConfig: [
-                    {
-                        requestConfig: {
-                            "content.item.@type": "AuthenticationRequestItem"
-                        },
-                        responseConfig: {
-                            accept: false
-                        }
+            const deciderModuleAutomationConfigs: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        "content.item.@type": "AuthenticationRequestItem"
                     },
-                    {
-                        requestConfig: {
-                            "content.item.@type": "ConsentRequestItem"
-                        },
-                        responseConfig: {
-                            accept: true
-                        }
+                    responseConfig: {
+                        accept: false
                     }
-                ]
-            };
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig }))[0];
+                },
+                {
+                    requestConfig: {
+                        "content.item.@type": "ConsentRequestItem"
+                    },
+                    responseConfig: {
+                        accept: true
+                    }
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs }))[0];
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
@@ -3088,20 +2964,19 @@ describe("DeciderModule", () => {
     });
 
     test("should throw an error if the automationConfig is invalid", async () => {
-        const deciderConfig: DeciderModuleConfigurationOverwrite = {
-            automationConfig: [
-                {
-                    requestConfig: {
-                        "content.item.@type": "AuthenticationRequestItem"
-                    },
-                    responseConfig: {
-                        accept: true,
-                        deletionDate: CoreDate.utc().add({ days: 1 }).toString()
-                    }
+        const deciderModuleAutomationConfigs: AutomationConfig[] = [
+            {
+                requestConfig: {
+                    "content.item.@type": "AuthenticationRequestItem"
+                },
+                responseConfig: {
+                    accept: true,
+                    deletionDate: CoreDate.utc().add({ days: 1 }).toString()
                 }
-            ]
-        };
-        await expect(runtimeServiceProvider.launch(1, { enableDeciderModule: true, configureDeciderModule: deciderConfig })).rejects.toThrow(
+            }
+        ];
+
+        await expect(runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomationConfigs })).rejects.toThrow(
             "The RequestConfig does not match the ResponseConfig."
         );
     });
