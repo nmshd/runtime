@@ -1,6 +1,6 @@
 import { CoreDate } from "@nmshd/core-types";
 import { TokenReference } from "@nmshd/transport";
-import { DeviceDTO } from "src";
+import { DeviceDTO } from "../../../src";
 import { RuntimeServiceProvider, TestRuntimeServices } from "../../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
