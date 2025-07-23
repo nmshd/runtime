@@ -1,6 +1,5 @@
 import { IdentityMetadata } from "@nmshd/consumption";
 import { Random, RandomCharacterRange } from "@nmshd/core-types";
-import { AddressString } from "src/useCases/common";
 import { ConsumptionServices, TransportServices } from "../../src";
 import { establishRelationship, RuntimeServiceProvider } from "../lib";
 
@@ -9,8 +8,8 @@ let consumptionServices: ConsumptionServices;
 let transportServices: TransportServices;
 let peerTransportServices: TransportServices;
 
-let ownAddress: AddressString;
-let peerAddress: AddressString;
+let ownAddress: string;
+let peerAddress: string;
 
 beforeAll(async () => {
     const runtimeServices = await runtimeServiceProvider.launch(2);
