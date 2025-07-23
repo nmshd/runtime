@@ -2970,7 +2970,7 @@ describe("DeciderModule", () => {
     test("should throw an error if the automationConfig is invalid", async () => {
         const deciderModuleAutomations: AutomationConfig[] = [
             {
-                requestConfig: { "content.item.@type": "FreeTextRequestItem" },
+                requestConfig: { "content.item.@type": "AuthenticationRequestItem" },
                 responseConfig: { accept: true, deletionDate: CoreDate.utc().add({ days: 1 }).toString() }
             }
         ];
