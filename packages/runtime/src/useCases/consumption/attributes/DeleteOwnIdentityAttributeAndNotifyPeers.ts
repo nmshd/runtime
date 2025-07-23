@@ -6,17 +6,17 @@ import { AccountController, MessageController, RelationshipsController, Relation
 import { Inject } from "@nmshd/typescript-ioc";
 import { AttributeIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
-export interface DeleteRepositoryAttributeRequest {
+export interface DeleteOwnIdentityAttributeAndNotifyPeersRequest {
     attributeId: AttributeIdString;
 }
 
-class Validator extends SchemaValidator<DeleteRepositoryAttributeRequest> {
+class Validator extends SchemaValidator<DeleteOwnIdentityAttributeAndNotifyPeersRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
-        super(schemaRepository.getSchema("DeleteRepositoryAttributeRequest"));
+        super(schemaRepository.getSchema("DeleteOwnIdentityAttributeAndNotifyPeersRequest"));
     }
 }
 
-export class DeleteRepositoryAttributeUseCase extends UseCase<DeleteRepositoryAttributeRequest, void> {
+export class DeleteOwnIdentityAttributeAndNotifyPeersUseCase extends UseCase<DeleteOwnIdentityAttributeAndNotifyPeersRequest, void> {
     public constructor(
         @Inject private readonly attributesController: AttributesController,
         @Inject private readonly accountController: AccountController,
@@ -29,7 +29,7 @@ export class DeleteRepositoryAttributeUseCase extends UseCase<DeleteRepositoryAt
 
     // TODO: and notify peers
     // TODO: "changed behavior": own IdentityAttribute can be deleted if it is shared with a peer with a pending relationship -> problem with sending Message
-    protected async executeInternal(request: DeleteRepositoryAttributeRequest): Promise<Result<void>> {
+    protected async executeInternal(request: DeleteOwnIdentityAttributeAndNotifyPeersRequest): Promise<Result<void>> {
         const ownIdentityAttribute = await this.attributesController.getLocalAttribute(CoreId.from(request.attributeId));
         if (!ownIdentityAttribute) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
 
@@ -49,7 +49,7 @@ export class DeleteRepositoryAttributeUseCase extends UseCase<DeleteRepositoryAt
         return Result.ok(undefined);
     }
 
-    // TODO: return notificationId
+    // TODO: return notificationIds?
     private async notifyPeers(ownIdentityAttribute: OwnIdentityAttribute): Promise<void> {
         const peers = ownIdentityAttribute.getPeers();
         if (peers.length === 0) return;
