@@ -16,7 +16,7 @@ export interface TestRuntimeServices {
 export interface LaunchConfiguration {
     enableDatawallet?: boolean;
     enableDeciderModule?: boolean;
-    deciderModuleAutomationConfigs?: AutomationConfig[];
+    deciderModuleAutomations?: AutomationConfig[];
     enableRequestModule?: boolean;
     enableNotificationModule?: boolean;
     enableDefaultRepositoryAttributes?: boolean;
@@ -70,7 +70,7 @@ export class RuntimeServiceProvider {
             if (launchConfiguration.enableDeciderModule) config.modules.decider.enabled = true;
             if (launchConfiguration.enableNotificationModule) config.modules.notification.enabled = true;
 
-            config.modules.decider.automationConfig = launchConfiguration.deciderModuleAutomationConfigs;
+            config.modules.decider.automationConfig = launchConfiguration.deciderModuleAutomations;
 
             const runtime = new TestRuntime(
                 config,
