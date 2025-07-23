@@ -1,3 +1,4 @@
+export * from "./AbstractAttributeDeletionInfo";
 export * from "./ForwardedRelationshipAttributeDeletionInfo";
 export * from "./OwnAttributeDeletionInfo";
 export * from "./PeerAttributeDeletionInfo";

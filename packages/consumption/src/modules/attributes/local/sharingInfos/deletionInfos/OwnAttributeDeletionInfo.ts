@@ -1,5 +1,5 @@
-import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-serval";
-import { CoreDate, ICoreDate } from "@nmshd/core-types";
+import { serialize, validate } from "@js-soft/ts-serval";
+import { AbstractAttributeDeletionInfo, AbstractAttributeDeletionInfoJSON, IAbstractAttributeDeletionInfo } from "./AbstractAttributeDeletionInfo";
 
 export enum OwnAttributeDeletionStatus {
     DeletionRequestSent = "DeletionRequestSent",
@@ -8,27 +8,21 @@ export enum OwnAttributeDeletionStatus {
     DeletedByPeer = "DeletedByPeer"
 }
 
-export interface OwnAttributeDeletionInfoJSON {
+export interface OwnAttributeDeletionInfoJSON extends AbstractAttributeDeletionInfoJSON {
     deletionStatus: OwnAttributeDeletionStatus;
-    deletionDate: string;
 }
 
-export interface IOwnAttributeDeletionInfo extends ISerializable {
+export interface IOwnAttributeDeletionInfo extends IAbstractAttributeDeletionInfo {
     deletionStatus: OwnAttributeDeletionStatus;
-    deletionDate: ICoreDate;
 }
 
-export class OwnAttributeDeletionInfo extends Serializable implements IOwnAttributeDeletionInfo {
+export class OwnAttributeDeletionInfo extends AbstractAttributeDeletionInfo implements IOwnAttributeDeletionInfo {
     @serialize()
     @validate({
         customValidator: (v) =>
             !Object.values(OwnAttributeDeletionStatus).includes(v) ? `must be one of: ${Object.values(OwnAttributeDeletionStatus).map((o) => `"${o}"`)}` : undefined
     })
-    public deletionStatus: OwnAttributeDeletionStatus;
-
-    @serialize()
-    @validate()
-    public deletionDate: CoreDate;
+    public override deletionStatus: OwnAttributeDeletionStatus;
 
     public static from(value: IOwnAttributeDeletionInfo | OwnAttributeDeletionInfoJSON): OwnAttributeDeletionInfo {
         return this.fromAny(value);

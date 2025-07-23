@@ -1,5 +1,5 @@
-import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-serval";
-import { CoreDate, ICoreDate } from "@nmshd/core-types";
+import { serialize, validate } from "@js-soft/ts-serval";
+import { AbstractAttributeDeletionInfo, AbstractAttributeDeletionInfoJSON, IAbstractAttributeDeletionInfo } from "./AbstractAttributeDeletionInfo";
 
 // TODO: get deletion statuses straight
 export enum ThirdPartyRelationshipAttributeDeletionStatus {
@@ -7,17 +7,15 @@ export enum ThirdPartyRelationshipAttributeDeletionStatus {
     DeletedByPeer = "DeletedByPeer"
 }
 
-export interface ThirdPartyRelationshipAttributeDeletionInfoJSON {
+export interface ThirdPartyRelationshipAttributeDeletionInfoJSON extends AbstractAttributeDeletionInfoJSON {
     deletionStatus: ThirdPartyRelationshipAttributeDeletionStatus;
-    deletionDate: string;
 }
 
-export interface IThirdPartyRelationshipAttributeDeletionInfo extends ISerializable {
+export interface IThirdPartyRelationshipAttributeDeletionInfo extends IAbstractAttributeDeletionInfo {
     deletionStatus: ThirdPartyRelationshipAttributeDeletionStatus;
-    deletionDate: ICoreDate;
 }
 
-export class ThirdPartyRelationshipAttributeDeletionInfo extends Serializable implements IThirdPartyRelationshipAttributeDeletionInfo {
+export class ThirdPartyRelationshipAttributeDeletionInfo extends AbstractAttributeDeletionInfo implements IThirdPartyRelationshipAttributeDeletionInfo {
     @serialize()
     @validate({
         customValidator: (v) =>
@@ -25,11 +23,7 @@ export class ThirdPartyRelationshipAttributeDeletionInfo extends Serializable im
                 ? `must be one of: ${Object.values(ThirdPartyRelationshipAttributeDeletionStatus).map((o) => `"${o}"`)}`
                 : undefined
     })
-    public deletionStatus: ThirdPartyRelationshipAttributeDeletionStatus;
-
-    @serialize()
-    @validate()
-    public deletionDate: CoreDate;
+    public override deletionStatus: ThirdPartyRelationshipAttributeDeletionStatus;
 
     public static from(value: IThirdPartyRelationshipAttributeDeletionInfo | ThirdPartyRelationshipAttributeDeletionInfoJSON): ThirdPartyRelationshipAttributeDeletionInfo {
         return this.fromAny(value);
