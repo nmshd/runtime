@@ -606,6 +606,80 @@ describe("DeciderModule", () => {
                 (e) => e.data.result === MessageProcessedResult.ManualRequestDecisionRequired && e.data.message.id === message.id
             );
         });
+
+        test("does not automatically decide a Request given a GeneralRequestConfig when an AuthenticationRequestItem is sent", async () => {
+            const deciderModuleAutomations: AutomationConfig[] = [
+                {
+                    requestConfig: { peer: sender.address },
+                    responseConfig: { accept: true }
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomations }))[0];
+            await establishRelationship(sender.transport, recipient.transport);
+
+            const message = await exchangeMessage(sender.transport, recipient.transport);
+            const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                receivedRequest: {
+                    "@type": "Request",
+                    items: [
+                        {
+                            "@type": "AuthenticationRequestItem",
+                            title: "anAuthentication",
+                            mustBeAccepted: true
+                        }
+                    ]
+                },
+                requestSourceId: message.id
+            });
+            await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+            await expect(recipient.eventBus).toHavePublished(
+                MessageProcessedEvent,
+                (e) => e.data.result === MessageProcessedResult.ManualRequestDecisionRequired && e.data.message.id === message.id
+            );
+
+            const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
+            expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.ManualDecisionRequired);
+            expect(requestAfterAction.wasAutomaticallyDecided).toBeUndefined();
+            expect(requestAfterAction.response).toBeUndefined();
+        });
+
+        test("does not automatically decide a Request given a GeneralRequestConfig when a ConsentRequestItem is sent", async () => {
+            const deciderModuleAutomations: AutomationConfig[] = [
+                {
+                    requestConfig: { peer: sender.address },
+                    responseConfig: { accept: true }
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomations }))[0];
+            await establishRelationship(sender.transport, recipient.transport);
+
+            const message = await exchangeMessage(sender.transport, recipient.transport);
+            const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                receivedRequest: {
+                    "@type": "Request",
+                    items: [
+                        {
+                            "@type": "ConsentRequestItem",
+                            consent: "aConsent",
+                            mustBeAccepted: true
+                        }
+                    ]
+                },
+                requestSourceId: message.id
+            });
+            await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+            await expect(recipient.eventBus).toHavePublished(
+                MessageProcessedEvent,
+                (e) => e.data.result === MessageProcessedResult.ManualRequestDecisionRequired && e.data.message.id === message.id
+            );
+
+            const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
+            expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.ManualDecisionRequired);
+            expect(requestAfterAction.wasAutomaticallyDecided).toBeUndefined();
+            expect(requestAfterAction.response).toBeUndefined();
+        });
     });
 
     describe("RelationshipRequestConfig", () => {

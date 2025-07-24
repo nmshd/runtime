@@ -72,6 +72,12 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
     private async handleIncomingRequestStatusChanged(event: IncomingRequestStatusChangedEvent) {
         if (event.data.newStatus !== LocalRequestStatus.DecisionRequired) return;
 
+        const containsAuthenticationOrConsentRequestItem = containsItem(
+            event.data.request.content,
+            (item) => item["@type"] === "AuthenticationRequestItem" || item["@type"] === "ConsentRequestItem"
+        );
+        if (containsAuthenticationOrConsentRequestItem) return await this.requireManualDecision(event);
+
         const automaticallyDecided = (await this.automaticallyDecideRequest(event)).wasDecided;
         if (automaticallyDecided) {
             const services = await this.runtime.getServices(event.eventTargetAddress);
