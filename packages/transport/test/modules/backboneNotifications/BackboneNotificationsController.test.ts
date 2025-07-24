@@ -30,7 +30,17 @@ describe("BackboneNotificationsController", function () {
         await recipient.close();
     });
 
-    describe("errors", function () {
+    test("sendNotification", async function () {
+        await TestUtil.addRelationship(sender, recipient);
+
+        const address = recipient.identity.address.toString();
+        const code = "TestCode";
+
+        const result = await sender.notifications.sendNotification({ recipients: [address], code });
+        expect(result).toBeUndefined();
+    });
+
+    describe("sendNotification errors", function () {
         test.each([
             [["recipient1"], "No active relationship found for recipients: recipient1"],
             [["recipient1", "recipient2"], "No active relationship found for recipients: recipient1, recipient2"],
@@ -42,12 +52,19 @@ describe("BackboneNotificationsController", function () {
 
         test.each([
             ["", "Code must not be empty"],
-            ["aRandomCode", "No active relationship found for recipients: recipient1, recipient2"]
+            ["aRandomCode", "The given message code does not exist."]
         ])("invalid codes: %s", async function (code, errorMessage) {
             await TestUtil.addRelationship(sender, recipient);
 
-            const address = recipient.identity.address.toString();
-            await expect(sender.notifications.sendNotification({ recipients: [address], code })).rejects.toThrow(errorMessage);
+            await expect(sender.notifications.sendNotification({ recipients: [recipient.identity.address.toString()], code })).rejects.toThrow(errorMessage);
+        });
+
+        test("pending relationship", async function () {
+            await TestUtil.addPendingRelationship(sender, recipient);
+
+            await expect(sender.notifications.sendNotification({ recipients: [recipient.identity.address.toString()], code: "aCode" })).rejects.toThrow(
+                "No active relationship found for recipients"
+            );
         });
     });
 });
