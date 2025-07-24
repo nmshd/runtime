@@ -1,5 +1,6 @@
 export * from "./account";
 export * from "./announcements";
+export * from "./backboneNotifications";
 export * from "./challenges";
 export * from "./devices";
 export * from "./files";

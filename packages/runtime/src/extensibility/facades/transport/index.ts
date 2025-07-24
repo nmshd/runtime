@@ -1,5 +1,6 @@
 export * from "./AccountFacade";
 export * from "./AnnouncementsFacade";
+export * from "./BackboneNotificationsFacade";
 export * from "./ChallengesFacade";
 export * from "./DevicesFacade";
 export * from "./FilesFacade";
