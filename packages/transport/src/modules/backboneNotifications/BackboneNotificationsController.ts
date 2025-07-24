@@ -1,19 +1,19 @@
 import { CoreAddress } from "@nmshd/core-types";
 import { ControllerName, TransportController } from "../../core/TransportController";
 import { AccountController } from "../accounts/AccountController";
-import { NotificationsClient } from "./backbone/NotificationsClient";
+import { BackboneNotificationsClient } from "./backbone/BackboneNotificationsClient";
 
 export class NotificationsController extends TransportController {
-    private client: NotificationsClient;
+    private client: BackboneNotificationsClient;
 
     public constructor(parent: AccountController) {
-        super(ControllerName.Notifications, parent);
+        super(ControllerName.BackboneNotifications, parent);
     }
 
     public override async init(): Promise<this> {
         await super.init();
 
-        this.client = new NotificationsClient(this.config, this.parent.authenticator, this.transport.correlator);
+        this.client = new BackboneNotificationsClient(this.config, this.parent.authenticator, this.transport.correlator);
         return this;
     }
 
