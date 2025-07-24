@@ -340,10 +340,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "mustBeAccepted": {
                     "type": "boolean",
                     "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 }
             },
             "required": [
@@ -376,10 +372,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "mustBeAccepted": {
                     "type": "boolean",
                     "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
                 "attribute": {
                     "anyOf": [
@@ -2326,10 +2318,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "type": "boolean",
                     "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
-                },
                 "attributeId": {
                     "type": "string"
                 }
@@ -2365,10 +2353,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "mustBeAccepted": {
                     "type": "boolean",
                     "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
                 "attribute": {
                     "anyOf": [
@@ -2419,10 +2403,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "mustBeAccepted": {
                     "type": "boolean",
                     "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
                 "query": {
                     "anyOf": [
@@ -2692,10 +2672,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "type": "boolean",
                     "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
-                },
                 "query": {
                     "anyOf": [
                         {
@@ -2784,10 +2760,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "type": "boolean",
                     "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
-                },
                 "consent": {
                     "type": "string"
                 },
@@ -2830,10 +2802,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "type": "boolean",
                     "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
-                },
                 "title": {
                     "type": "string"
                 }
@@ -2869,10 +2837,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "mustBeAccepted": {
                     "type": "boolean",
                     "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
                 "title": {
                     "type": "string"
@@ -3122,10 +3086,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "mustBeAccepted": {
                     "type": "boolean",
                     "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
                 "fileReference": {
                     "type": "string"
@@ -8327,10 +8287,6 @@ export const CreateOutgoingRequestRequest: any = {
                 "mustBeAccepted": {
                     "type": "boolean",
                     "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 }
             },
             "required": [
@@ -8363,10 +8319,6 @@ export const CreateOutgoingRequestRequest: any = {
                 "mustBeAccepted": {
                     "type": "boolean",
                     "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
                 "attribute": {
                     "anyOf": [
@@ -10313,10 +10265,6 @@ export const CreateOutgoingRequestRequest: any = {
                     "type": "boolean",
                     "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
-                },
                 "attributeId": {
                     "type": "string"
                 }
@@ -10352,10 +10300,6 @@ export const CreateOutgoingRequestRequest: any = {
                 "mustBeAccepted": {
                     "type": "boolean",
                     "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
                 "attribute": {
                     "anyOf": [
@@ -10406,10 +10350,6 @@ export const CreateOutgoingRequestRequest: any = {
                 "mustBeAccepted": {
                     "type": "boolean",
                     "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
                 "query": {
                     "anyOf": [
@@ -10679,10 +10619,6 @@ export const CreateOutgoingRequestRequest: any = {
                     "type": "boolean",
                     "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
-                },
                 "query": {
                     "anyOf": [
                         {
@@ -10771,10 +10707,6 @@ export const CreateOutgoingRequestRequest: any = {
                     "type": "boolean",
                     "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
-                },
                 "consent": {
                     "type": "string"
                 },
@@ -10817,10 +10749,6 @@ export const CreateOutgoingRequestRequest: any = {
                     "type": "boolean",
                     "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
-                },
                 "title": {
                     "type": "string"
                 }
@@ -10856,10 +10784,6 @@ export const CreateOutgoingRequestRequest: any = {
                 "mustBeAccepted": {
                     "type": "boolean",
                     "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
                 "title": {
                     "type": "string"
@@ -11109,10 +11033,6 @@ export const CreateOutgoingRequestRequest: any = {
                 "mustBeAccepted": {
                     "type": "boolean",
                     "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
                 "fileReference": {
                     "type": "string"
@@ -11813,10 +11733,6 @@ export const ReceivedIncomingRequestRequest: any = {
                 "mustBeAccepted": {
                     "type": "boolean",
                     "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 }
             },
             "required": [
@@ -11849,10 +11765,6 @@ export const ReceivedIncomingRequestRequest: any = {
                 "mustBeAccepted": {
                     "type": "boolean",
                     "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
                 "attribute": {
                     "anyOf": [
@@ -13799,10 +13711,6 @@ export const ReceivedIncomingRequestRequest: any = {
                     "type": "boolean",
                     "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
-                },
                 "attributeId": {
                     "type": "string"
                 }
@@ -13838,10 +13746,6 @@ export const ReceivedIncomingRequestRequest: any = {
                 "mustBeAccepted": {
                     "type": "boolean",
                     "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
                 "attribute": {
                     "anyOf": [
@@ -13892,10 +13796,6 @@ export const ReceivedIncomingRequestRequest: any = {
                 "mustBeAccepted": {
                     "type": "boolean",
                     "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
                 "query": {
                     "anyOf": [
@@ -14165,10 +14065,6 @@ export const ReceivedIncomingRequestRequest: any = {
                     "type": "boolean",
                     "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
-                },
                 "query": {
                     "anyOf": [
                         {
@@ -14257,10 +14153,6 @@ export const ReceivedIncomingRequestRequest: any = {
                     "type": "boolean",
                     "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
-                },
                 "consent": {
                     "type": "string"
                 },
@@ -14303,10 +14195,6 @@ export const ReceivedIncomingRequestRequest: any = {
                     "type": "boolean",
                     "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
-                },
                 "title": {
                     "type": "string"
                 }
@@ -14342,10 +14230,6 @@ export const ReceivedIncomingRequestRequest: any = {
                 "mustBeAccepted": {
                     "type": "boolean",
                     "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
-                },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
                 },
                 "title": {
                     "type": "string"
@@ -14596,10 +14480,6 @@ export const ReceivedIncomingRequestRequest: any = {
                     "type": "boolean",
                     "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
                 },
-                "requireManualDecision": {
-                    "type": "boolean",
-                    "description": "If set to `true`, it advices the recipient of this RequestItem to carefully consider their decision and especially do not decide based on some automation rules."
-                },
                 "fileReference": {
                     "type": "string"
                 },
@@ -14739,9 +14619,6 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
                         },
                         "metadata": {
                             "type": "object"
-                        },
-                        "requireManualDecision": {
-                            "type": "boolean"
                         }
                     },
                     "additionalProperties": false
@@ -16993,9 +16870,6 @@ export const ShareRepositoryAttributeRequest: any = {
                         },
                         "metadata": {
                             "type": "object"
-                        },
-                        "requireManualDecision": {
-                            "type": "boolean"
                         }
                     },
                     "additionalProperties": false

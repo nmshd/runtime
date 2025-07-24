@@ -20,7 +20,6 @@ export interface ShareRepositoryAttributeRequest {
     requestItemMetadata?: {
         description?: string;
         metadata?: Record<string, any>;
-        requireManualDecision?: boolean;
     };
 }
 
