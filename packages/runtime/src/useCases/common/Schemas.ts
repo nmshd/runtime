@@ -2303,6 +2303,9 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "linkDisplayText": {
                     "type": "string"
+                },
+                "requiresInteraction": {
+                    "type": "boolean"
                 }
             },
             "required": [
@@ -8889,6 +8892,9 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 "linkDisplayText": {
                     "type": "string"
+                },
+                "requiresInteraction": {
+                    "type": "boolean"
                 }
             },
             "required": [
@@ -11870,6 +11876,9 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "linkDisplayText": {
                     "type": "string"
+                },
+                "requiresInteraction": {
+                    "type": "boolean"
                 }
             },
             "required": [
