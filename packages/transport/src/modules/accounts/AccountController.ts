@@ -24,6 +24,7 @@ import { DeviceSecretCredentials } from "../devices/local/DeviceSecretCredential
 import { DeviceSharedSecret } from "../devices/transmission/DeviceSharedSecret";
 import { FileController } from "../files/FileController";
 import { MessageController } from "../messages/MessageController";
+import { NotificationsController } from "../notifications/NotificationsController";
 import { PublicRelationshipTemplateReferencesController } from "../publicRelationshipTemplateReferences/PublicRelationshipTemplateReferencesController";
 import { RelationshipTemplateController } from "../relationshipTemplates/RelationshipTemplateController";
 import { RelationshipSecretController } from "../relationships/RelationshipSecretController";
@@ -61,6 +62,7 @@ export class AccountController {
     public devices: DevicesController;
     public files: FileController;
     public messages: MessageController;
+    public notifications: NotificationsController;
     public publicRelationshipTemplateReferences: PublicRelationshipTemplateReferencesController;
     public relationships: RelationshipsController;
     public relationshipTemplates: RelationshipTemplateController;
@@ -215,6 +217,7 @@ export class AccountController {
 
         this.relationshipTemplates = await new RelationshipTemplateController(this, this.relationshipSecrets).init();
         this.messages = await new MessageController(this).init();
+        this.notifications = await new NotificationsController(this).init();
         this.tokens = await new TokenController(this).init();
         this.publicRelationshipTemplateReferences = await new PublicRelationshipTemplateReferencesController(this).init();
 
