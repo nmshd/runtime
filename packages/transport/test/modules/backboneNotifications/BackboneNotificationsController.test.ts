@@ -2,7 +2,7 @@ import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { AccountController, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
-describe("BackboneNotificationsController", function () {
+describe("BackbonebackboneNotificationsController", function () {
     let connection: IDatabaseConnection;
 
     let transport: Transport;
@@ -36,40 +36,44 @@ describe("BackboneNotificationsController", function () {
         const address = recipient.identity.address.toString();
         const code = "TestCode";
 
-        const result = await sender.notifications.sendNotification({ recipients: [address], code });
+        const result = await sender.backboneNotifications.sendNotification({ recipients: [address], code });
         expect(result).toBeUndefined();
     });
 
     describe("sendNotification errors", function () {
         test.each([
-            [["recipient1"], "error.transport.backboneNotifications.noActiveRelationshipFoundForRecipients"],
-            [["recipient1", "recipient2"], "error.transport.backboneNotifications.noActiveRelationshipFoundForRecipients"],
-            [[], "error.transport.backboneNotifications.atLeastOneRecipientRequired"]
+            [["recipient1"], "error.transport.backbonebackboneNotifications.noActiveRelationshipFoundForRecipients"],
+            [["recipient1", "recipient2"], "error.transport.backbonebackboneNotifications.noActiveRelationshipFoundForRecipients"],
+            [[], "error.transport.backbonebackboneNotifications.atLeastOneRecipientRequired"]
         ])("invalid recipients: %s", async function (recipients, errorMessage) {
-            await expect(sender.notifications.sendNotification({ recipients, code: "aCode" })).rejects.toThrow(errorMessage);
+            await expect(sender.backboneNotifications.sendNotification({ recipients, code: "aCode" })).rejects.toThrow(errorMessage);
         });
 
         test("one valid and one invalid recipient", async function () {
             await TestUtil.addRelationship(sender, recipient);
 
             const input = { recipients: [recipient.identity.address.toString(), "invalidRecipientAddress"], code: "aCode" };
-            await expect(sender.notifications.sendNotification(input)).rejects.toThrow("error.transport.backboneNotifications.noActiveRelationshipFoundForRecipients");
+            await expect(sender.backboneNotifications.sendNotification(input)).rejects.toThrow(
+                "error.transport.backbonebackboneNotifications.noActiveRelationshipFoundForRecipients"
+            );
         });
 
         test.each([
-            ["", "error.transport.backboneNotifications.codeMustNotBeEmpty"],
+            ["", "error.transport.backbonebackboneNotifications.codeMustNotBeEmpty"],
             ["aRandomCode", "error.platform.validation.notification.codeDoesNotExist"]
         ])("invalid codes: %s", async function (code, errorMessage) {
             await TestUtil.addRelationship(sender, recipient);
 
-            await expect(sender.notifications.sendNotification({ recipients: [recipient.identity.address.toString()], code })).rejects.toThrow(errorMessage);
+            await expect(sender.backboneNotifications.sendNotification({ recipients: [recipient.identity.address.toString()], code })).rejects.toThrow(errorMessage);
         });
 
         test("pending relationship", async function () {
             await TestUtil.addPendingRelationship(sender, recipient);
 
             const input = { recipients: [recipient.identity.address.toString()], code: "aCode" };
-            await expect(sender.notifications.sendNotification(input)).rejects.toThrow("error.transport.backboneNotifications.noActiveRelationshipFoundForRecipients");
+            await expect(sender.backboneNotifications.sendNotification(input)).rejects.toThrow(
+                "error.transport.backbonebackboneNotifications.noActiveRelationshipFoundForRecipients"
+            );
         });
     });
 });

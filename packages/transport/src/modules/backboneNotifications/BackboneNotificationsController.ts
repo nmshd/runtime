@@ -4,7 +4,7 @@ import { ControllerName, TransportController } from "../../core/TransportControl
 import { AccountController } from "../accounts/AccountController";
 import { BackboneNotificationsClient } from "./backbone/BackboneNotificationsClient";
 
-export class NotificationsController extends TransportController {
+export class BackboneNotificationsController extends TransportController {
     private client: BackboneNotificationsClient;
 
     public constructor(parent: AccountController) {

@@ -11,7 +11,7 @@ import { TransportLoggerFactory } from "../../core/TransportLoggerFactory";
 import { IdentityDeletionProcessStatusChangedEvent } from "../../events/IdentityDeletionProcessStatusChangedEvent";
 import { PasswordGenerator } from "../../util";
 import { AnnouncementController } from "../announcements/AnnouncementController";
-import { NotificationsController } from "../backboneNotifications/BackboneNotificationsController";
+import { BackboneNotificationsController } from "../backboneNotifications/BackboneNotificationsController";
 import { CertificateController } from "../certificates/CertificateController";
 import { CertificateIssuer } from "../certificates/CertificateIssuer";
 import { CertificateValidator } from "../certificates/CertificateValidator";
@@ -55,6 +55,7 @@ export class AccountController {
     public info: IDatabaseMap;
 
     public announcements: AnnouncementController;
+    public backboneNotifications: BackboneNotificationsController;
     public challenges: ChallengeController;
     public certificates: CertificateController;
     public certificateIssuer: CertificateIssuer;
@@ -62,7 +63,6 @@ export class AccountController {
     public devices: DevicesController;
     public files: FileController;
     public messages: MessageController;
-    public notifications: NotificationsController;
     public publicRelationshipTemplateReferences: PublicRelationshipTemplateReferencesController;
     public relationships: RelationshipsController;
     public relationshipTemplates: RelationshipTemplateController;
@@ -206,6 +206,7 @@ export class AccountController {
         this._log.trace("Initializing controllers...");
 
         this.announcements = await new AnnouncementController(this).init();
+        this.backboneNotifications = await new BackboneNotificationsController(this).init();
         this.relationshipSecrets = await new RelationshipSecretController(this).init();
         this.devices = await new DevicesController(this).init();
         this.certificates = await new CertificateController(this).init();
@@ -217,7 +218,6 @@ export class AccountController {
 
         this.relationshipTemplates = await new RelationshipTemplateController(this, this.relationshipSecrets).init();
         this.messages = await new MessageController(this).init();
-        this.notifications = await new NotificationsController(this).init();
         this.tokens = await new TokenController(this).init();
         this.publicRelationshipTemplateReferences = await new PublicRelationshipTemplateReferencesController(this).init();
 
