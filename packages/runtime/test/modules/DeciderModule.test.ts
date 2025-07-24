@@ -147,8 +147,16 @@ describe("DeciderModule", () => {
                 receivedRequest: {
                     "@type": "Request",
                     items: [
-                        { "@type": "AuthenticationRequestItem", mustBeAccepted: false, title: "Title of RequestItem" },
-                        { "@type": "ConsentRequestItem", mustBeAccepted: false, consent: "A consent text" }
+                        {
+                            "@type": "CreateAttributeRequestItem",
+                            mustBeAccepted: false,
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
+                        },
+                        {
+                            "@type": "CreateAttributeRequestItem",
+                            mustBeAccepted: false,
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "DisplayName", value: "aDisplayName" } }
+                        }
                     ]
                 },
                 requestSourceId: message.id
@@ -187,8 +195,6 @@ describe("DeciderModule", () => {
                 receivedRequest: {
                     "@type": "Request",
                     items: [
-                        { "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false },
-                        { "@type": "ConsentRequestItem", consent: "A consent text", mustBeAccepted: false },
                         {
                             "@type": "CreateAttributeRequestItem",
                             attribute: {
@@ -235,11 +241,9 @@ describe("DeciderModule", () => {
 
             const responseContent = requestAfterAction.response!.content;
             expect(responseContent.result).toBe(ResponseResult.Accepted);
-            expect(responseContent.items).toHaveLength(4);
-            expect(responseContent.items[0]["@type"]).toBe("AcceptResponseItem");
-            expect(responseContent.items[1]["@type"]).toBe("AcceptResponseItem");
-            expect(responseContent.items[2]["@type"]).toBe("CreateAttributeAcceptResponseItem");
-            expect(responseContent.items[3]["@type"]).toBe("ShareAttributeAcceptResponseItem");
+            expect(responseContent.items).toHaveLength(2);
+            expect(responseContent.items[0]["@type"]).toBe("CreateAttributeAcceptResponseItem");
+            expect(responseContent.items[1]["@type"]).toBe("ShareAttributeAcceptResponseItem");
         });
 
         test("decides a Request given a GeneralRequestConfig with all fields set", async () => {
@@ -267,7 +271,13 @@ describe("DeciderModule", () => {
                 title: "Title of Request",
                 description: "Description of Request",
                 metadata: { key: "value" },
-                items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }]
+                items: [
+                    {
+                        "@type": "CreateAttributeRequestItem",
+                        mustBeAccepted: false,
+                        attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
+                    }
+                ]
             });
             const template = (
                 await sender.transport.relationshipTemplates.createOwnRelationshipTemplate({
@@ -320,7 +330,13 @@ describe("DeciderModule", () => {
                     title: "Title of Request",
                     description: "Description of Request",
                     metadata: { key: "value" },
-                    items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }]
+                    items: [
+                        {
+                            "@type": "CreateAttributeRequestItem",
+                            mustBeAccepted: false,
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
+                        }
+                    ]
                 },
                 requestSourceId: message.id
             });
@@ -351,7 +367,13 @@ describe("DeciderModule", () => {
                 receivedRequest: {
                     "@type": "Request",
                     title: "Title of Request",
-                    items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }]
+                    items: [
+                        {
+                            "@type": "CreateAttributeRequestItem",
+                            mustBeAccepted: false,
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
+                        }
+                    ]
                 },
                 requestSourceId: message.id
             });
@@ -380,7 +402,16 @@ describe("DeciderModule", () => {
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
             const receivedRequestResult = await recipient.consumption.incomingRequests.received({
-                receivedRequest: { "@type": "Request", items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }] },
+                receivedRequest: {
+                    "@type": "Request",
+                    items: [
+                        {
+                            "@type": "CreateAttributeRequestItem",
+                            mustBeAccepted: false,
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
+                        }
+                    ]
+                },
                 requestSourceId: message.id
             });
             await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
@@ -415,7 +446,13 @@ describe("DeciderModule", () => {
             const receivedRequestResult = await recipient.consumption.incomingRequests.received({
                 receivedRequest: {
                     "@type": "Request",
-                    items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }],
+                    items: [
+                        {
+                            "@type": "CreateAttributeRequestItem",
+                            mustBeAccepted: false,
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
+                        }
+                    ],
                     expiresAt: requestExpirationDate
                 },
                 requestSourceId: message.id
@@ -447,7 +484,13 @@ describe("DeciderModule", () => {
             const receivedRequestResult = await recipient.consumption.incomingRequests.received({
                 receivedRequest: {
                     "@type": "Request",
-                    items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }],
+                    items: [
+                        {
+                            "@type": "CreateAttributeRequestItem",
+                            mustBeAccepted: false,
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
+                        }
+                    ],
                     expiresAt: requestExpirationDate
                 },
                 requestSourceId: message.id
@@ -477,7 +520,16 @@ describe("DeciderModule", () => {
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
             const receivedRequestResult = await recipient.consumption.incomingRequests.received({
-                receivedRequest: { "@type": "Request", items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }] },
+                receivedRequest: {
+                    "@type": "Request",
+                    items: [
+                        {
+                            "@type": "CreateAttributeRequestItem",
+                            mustBeAccepted: false,
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
+                        }
+                    ]
+                },
                 requestSourceId: message.id
             });
             await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
@@ -505,7 +557,16 @@ describe("DeciderModule", () => {
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
             const receivedRequestResult = await recipient.consumption.incomingRequests.received({
-                receivedRequest: { "@type": "Request", items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }] },
+                receivedRequest: {
+                    "@type": "Request",
+                    items: [
+                        {
+                            "@type": "CreateAttributeRequestItem",
+                            mustBeAccepted: false,
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
+                        }
+                    ]
+                },
                 requestSourceId: message.id
             });
             await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
@@ -545,6 +606,80 @@ describe("DeciderModule", () => {
                 (e) => e.data.result === MessageProcessedResult.ManualRequestDecisionRequired && e.data.message.id === message.id
             );
         });
+
+        test("does not automatically decide a Request given a GeneralRequestConfig when an AuthenticationRequestItem is sent", async () => {
+            const deciderModuleAutomations: AutomationConfig[] = [
+                {
+                    requestConfig: { peer: sender.address },
+                    responseConfig: { accept: true }
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomations }))[0];
+            await establishRelationship(sender.transport, recipient.transport);
+
+            const message = await exchangeMessage(sender.transport, recipient.transport);
+            const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                receivedRequest: {
+                    "@type": "Request",
+                    items: [
+                        {
+                            "@type": "AuthenticationRequestItem",
+                            title: "anAuthentication",
+                            mustBeAccepted: true
+                        }
+                    ]
+                },
+                requestSourceId: message.id
+            });
+            await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+            await expect(recipient.eventBus).toHavePublished(
+                MessageProcessedEvent,
+                (e) => e.data.result === MessageProcessedResult.ManualRequestDecisionRequired && e.data.message.id === message.id
+            );
+
+            const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
+            expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.ManualDecisionRequired);
+            expect(requestAfterAction.wasAutomaticallyDecided).toBeUndefined();
+            expect(requestAfterAction.response).toBeUndefined();
+        });
+
+        test("does not automatically decide a Request given a GeneralRequestConfig when a ConsentRequestItem is sent", async () => {
+            const deciderModuleAutomations: AutomationConfig[] = [
+                {
+                    requestConfig: { peer: sender.address },
+                    responseConfig: { accept: true }
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomations }))[0];
+            await establishRelationship(sender.transport, recipient.transport);
+
+            const message = await exchangeMessage(sender.transport, recipient.transport);
+            const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                receivedRequest: {
+                    "@type": "Request",
+                    items: [
+                        {
+                            "@type": "ConsentRequestItem",
+                            consent: "aConsent",
+                            mustBeAccepted: true
+                        }
+                    ]
+                },
+                requestSourceId: message.id
+            });
+            await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+            await expect(recipient.eventBus).toHavePublished(
+                MessageProcessedEvent,
+                (e) => e.data.result === MessageProcessedResult.ManualRequestDecisionRequired && e.data.message.id === message.id
+            );
+
+            const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
+            expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.ManualDecisionRequired);
+            expect(requestAfterAction.wasAutomaticallyDecided).toBeUndefined();
+            expect(requestAfterAction.response).toBeUndefined();
+        });
     });
 
     describe("RelationshipRequestConfig", () => {
@@ -562,7 +697,13 @@ describe("DeciderModule", () => {
             const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomations }))[0];
 
             const request = Request.from({
-                items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }]
+                items: [
+                    {
+                        "@type": "CreateAttributeRequestItem",
+                        mustBeAccepted: false,
+                        attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
+                    }
+                ]
             });
             const template = (
                 await sender.transport.relationshipTemplates.createOwnRelationshipTemplate({
@@ -603,7 +744,13 @@ describe("DeciderModule", () => {
             const receivedRequestResult = await recipient.consumption.incomingRequests.received({
                 receivedRequest: {
                     "@type": "Request",
-                    items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }]
+                    items: [
+                        {
+                            "@type": "CreateAttributeRequestItem",
+                            mustBeAccepted: false,
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
+                        }
+                    ]
                 },
                 requestSourceId: message.id
             });
@@ -629,7 +776,13 @@ describe("DeciderModule", () => {
             const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomations }))[0];
 
             const request = Request.from({
-                items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }]
+                items: [
+                    {
+                        "@type": "CreateAttributeRequestItem",
+                        mustBeAccepted: false,
+                        attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
+                    }
+                ]
             });
             const template = (
                 await sender.transport.relationshipTemplates.createOwnRelationshipTemplate({
@@ -670,7 +823,13 @@ describe("DeciderModule", () => {
             const receivedRequestResult = await recipient.consumption.incomingRequests.received({
                 receivedRequest: {
                     "@type": "Request",
-                    items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }]
+                    items: [
+                        {
+                            "@type": "CreateAttributeRequestItem",
+                            mustBeAccepted: false,
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
+                        }
+                    ]
                 },
                 requestSourceId: message.id
             });
@@ -688,9 +847,8 @@ describe("DeciderModule", () => {
             const deciderModuleAutomations: AutomationConfig[] = [
                 {
                     requestConfig: {
-                        "content.item.@type": "AuthenticationRequestItem",
+                        "content.item.@type": "CreateAttributeRequestItem",
                         "content.item.mustBeAccepted": false,
-                        "content.item.title": "Title of RequestItem",
                         "content.item.description": "Description of RequestItem",
                         "content.item.metadata": { key: "value" }
                     },
@@ -710,9 +868,9 @@ describe("DeciderModule", () => {
                     "@type": "Request",
                     items: [
                         {
-                            "@type": "AuthenticationRequestItem",
+                            "@type": "CreateAttributeRequestItem",
                             mustBeAccepted: false,
-                            title: "Title of RequestItem",
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } },
                             description: "Description of RequestItem",
                             metadata: { key: "value" }
                         }
@@ -741,9 +899,8 @@ describe("DeciderModule", () => {
             const deciderModuleAutomations: AutomationConfig[] = [
                 {
                     requestConfig: {
-                        "content.item.@type": "AuthenticationRequestItem",
+                        "content.item.@type": "CreateAttributeRequestItem",
                         "content.item.mustBeAccepted": false,
-                        "content.item.title": "Title of RequestItem",
                         "content.item.description": "Description of RequestItem",
                         "content.item.metadata": { key: "value" }
                     },
@@ -761,9 +918,9 @@ describe("DeciderModule", () => {
                     "@type": "Request",
                     items: [
                         {
-                            "@type": "AuthenticationRequestItem",
+                            "@type": "CreateAttributeRequestItem",
                             mustBeAccepted: false,
-                            title: "Title of RequestItem",
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } },
                             description: "Description of RequestItem",
                             metadata: { key: "value" }
                         }
@@ -790,7 +947,7 @@ describe("DeciderModule", () => {
             const deciderModuleAutomations: AutomationConfig[] = [
                 {
                     requestConfig: {
-                        "content.item.@type": ["AuthenticationRequestItem", "ContentRequestItem"],
+                        "content.item.@type": ["CreateAttributeRequestItem", "ShareAttributeRequestItem"],
                         "content.item.mustBeAccepted": false,
                         "content.item.description": ["Description of RequestItem", "Another description of RequestItem"],
                         "content.item.metadata": [{ key: "value" }, { anotherKey: "anotherValue" }]
@@ -809,9 +966,9 @@ describe("DeciderModule", () => {
                     "@type": "Request",
                     items: [
                         {
-                            "@type": "AuthenticationRequestItem",
+                            "@type": "CreateAttributeRequestItem",
                             mustBeAccepted: false,
-                            title: "Title of RequestItem",
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } },
                             description: "Description of RequestItem",
                             metadata: { key: "value" }
                         }
@@ -838,7 +995,7 @@ describe("DeciderModule", () => {
             const deciderModuleAutomations: AutomationConfig[] = [
                 {
                     requestConfig: {
-                        "content.item.@type": "AuthenticationRequestItem"
+                        "content.item.@type": "CreateAttributeRequestItem"
                     },
                     responseConfig: {
                         accept: true
@@ -854,14 +1011,14 @@ describe("DeciderModule", () => {
                     "@type": "Request",
                     items: [
                         {
-                            "@type": "AuthenticationRequestItem",
-                            title: "Title of RequestItem",
-                            mustBeAccepted: false
+                            "@type": "CreateAttributeRequestItem",
+                            mustBeAccepted: false,
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
                         },
                         {
-                            "@type": "AuthenticationRequestItem",
-                            title: "Title of RequestItem",
-                            mustBeAccepted: false
+                            "@type": "CreateAttributeRequestItem",
+                            mustBeAccepted: false,
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
                         }
                     ]
                 },
@@ -883,15 +1040,15 @@ describe("DeciderModule", () => {
 
             const responseItems = responseContent.items;
             expect(responseItems).toHaveLength(2);
-            expect(responseItems[0]["@type"]).toBe("AcceptResponseItem");
-            expect(responseItems[1]["@type"]).toBe("AcceptResponseItem");
+            expect(responseItems[0]["@type"]).toBe("CreateAttributeAcceptResponseItem");
+            expect(responseItems[1]["@type"]).toBe("AttributeAlreadySharedAcceptResponseItem");
         });
 
         test("decides a RequestItem given a RequestItemConfig that doesn't require a property that is set in the Request", async () => {
             const deciderModuleAutomations: AutomationConfig[] = [
                 {
                     requestConfig: {
-                        "content.item.@type": "AuthenticationRequestItem"
+                        "content.item.@type": "CreateAttributeRequestItem"
                     },
                     responseConfig: {
                         accept: true
@@ -907,9 +1064,10 @@ describe("DeciderModule", () => {
                     "@type": "Request",
                     items: [
                         {
-                            "@type": "AuthenticationRequestItem",
+                            "@type": "CreateAttributeRequestItem",
                             mustBeAccepted: false,
-                            title: "Title of RequestItem"
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } },
+                            description: "Description of RequestItem"
                         }
                     ]
                 },
@@ -934,8 +1092,8 @@ describe("DeciderModule", () => {
             const deciderModuleAutomations: AutomationConfig[] = [
                 {
                     requestConfig: {
-                        "content.item.@type": "AuthenticationRequestItem",
-                        "content.item.title": "Another title of RequestItem"
+                        "content.item.@type": "CreateAttributeRequestItem",
+                        "content.item.description": "Another description of RequestItem"
                     },
                     responseConfig: {
                         accept: false
@@ -951,9 +1109,10 @@ describe("DeciderModule", () => {
                     "@type": "Request",
                     items: [
                         {
-                            "@type": "AuthenticationRequestItem",
+                            "@type": "CreateAttributeRequestItem",
                             mustBeAccepted: false,
-                            title: "Title of RequestItem"
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } },
+                            description: "Description of RequestItem"
                         }
                     ]
                 },
@@ -987,9 +1146,9 @@ describe("DeciderModule", () => {
                     "@type": "Request",
                     items: [
                         {
-                            "@type": "AuthenticationRequestItem",
+                            "@type": "CreateAttributeRequestItem",
                             mustBeAccepted: true,
-                            title: "Title of RequestItem"
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
                         }
                     ]
                 },
@@ -1003,12 +1162,12 @@ describe("DeciderModule", () => {
             );
         });
 
-        test("cannot decide a RequestItem given a RequestItemConfig with arrays that doesn't fit the RequestItem", async () => {
+        test("cannot decide a RequestItem given a RequestItemConfig with arrays that don't fit the RequestItem", async () => {
             const deciderModuleAutomations: AutomationConfig[] = [
                 {
                     requestConfig: {
-                        "content.item.@type": "AuthenticationRequestItem",
-                        "content.item.title": ["Another title of RequestItem", "A further title of RequestItem"]
+                        "content.item.@type": "CreateAttributeRequestItem",
+                        "content.item.description": ["Another description of RequestItem", "A further description of RequestItem"]
                     },
                     responseConfig: {
                         accept: false
@@ -1024,9 +1183,10 @@ describe("DeciderModule", () => {
                     "@type": "Request",
                     items: [
                         {
-                            "@type": "AuthenticationRequestItem",
+                            "@type": "CreateAttributeRequestItem",
                             mustBeAccepted: false,
-                            title: "Title of RequestItem"
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } },
+                            description: "Description of RequestItem"
                         }
                     ]
                 },
@@ -1044,7 +1204,7 @@ describe("DeciderModule", () => {
             const deciderModuleAutomations: AutomationConfig[] = [
                 {
                     requestConfig: {
-                        "content.item.@type": "AuthenticationRequestItem",
+                        "content.item.@type": "CreateAttributeRequestItem",
                         "content.item.description": "Description of RequestItem"
                     },
                     responseConfig: {
@@ -1057,7 +1217,16 @@ describe("DeciderModule", () => {
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
             const receivedRequestResult = await recipient.consumption.incomingRequests.received({
-                receivedRequest: { "@type": "Request", items: [{ "@type": "AuthenticationRequestItem", title: "Title of RequestItem", mustBeAccepted: false }] },
+                receivedRequest: {
+                    "@type": "Request",
+                    items: [
+                        {
+                            "@type": "CreateAttributeRequestItem",
+                            mustBeAccepted: false,
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
+                        }
+                    ]
+                },
                 requestSourceId: message.id
             });
             await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
@@ -1070,100 +1239,6 @@ describe("DeciderModule", () => {
     });
 
     describe("RequestItemDerivationConfigs", () => {
-        test("accepts an AuthenticationRequestItem given a AuthenticationRequestItemConfig with all fields set", async () => {
-            const deciderModuleAutomations: AutomationConfig[] = [
-                {
-                    requestConfig: {
-                        "content.item.@type": "AuthenticationRequestItem",
-                        "content.item.title": "Title of RequestItem"
-                    },
-                    responseConfig: {
-                        accept: true
-                    }
-                }
-            ];
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomations }))[0];
-            await establishRelationship(sender.transport, recipient.transport);
-
-            const message = await exchangeMessage(sender.transport, recipient.transport);
-            const receivedRequestResult = await recipient.consumption.incomingRequests.received({
-                receivedRequest: {
-                    "@type": "Request",
-                    items: [
-                        {
-                            "@type": "AuthenticationRequestItem",
-                            title: "Title of RequestItem",
-                            mustBeAccepted: true
-                        }
-                    ]
-                },
-                requestSourceId: message.id
-            });
-            await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
-
-            await expect(recipient.eventBus).toHavePublished(
-                MessageProcessedEvent,
-                (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
-            );
-
-            const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
-            expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Decided);
-            expect(requestAfterAction.response).toBeDefined();
-
-            const responseContent = requestAfterAction.response!.content;
-            expect(responseContent.result).toBe(ResponseResult.Accepted);
-            expect(responseContent.items).toHaveLength(1);
-            expect(responseContent.items[0]["@type"]).toBe("AcceptResponseItem");
-        });
-
-        test("accepts a ConsentRequestItem given a ConsentRequestItemConfig with all fields set", async () => {
-            const deciderModuleAutomations: AutomationConfig[] = [
-                {
-                    requestConfig: {
-                        "content.item.@type": "ConsentRequestItem",
-                        "content.item.consent": "A consent text",
-                        "content.item.link": "www.a-link-to-a-consent-website.com"
-                    },
-                    responseConfig: {
-                        accept: true
-                    }
-                }
-            ];
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomations }))[0];
-            await establishRelationship(sender.transport, recipient.transport);
-
-            const message = await exchangeMessage(sender.transport, recipient.transport);
-            const receivedRequestResult = await recipient.consumption.incomingRequests.received({
-                receivedRequest: {
-                    "@type": "Request",
-                    items: [
-                        {
-                            "@type": "ConsentRequestItem",
-                            mustBeAccepted: true,
-                            consent: "A consent text",
-                            link: "www.a-link-to-a-consent-website.com"
-                        }
-                    ]
-                },
-                requestSourceId: message.id
-            });
-            await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
-
-            await expect(recipient.eventBus).toHavePublished(
-                MessageProcessedEvent,
-                (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
-            );
-
-            const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
-            expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Decided);
-            expect(requestAfterAction.response).toBeDefined();
-
-            const responseContent = requestAfterAction.response!.content;
-            expect(responseContent.result).toBe(ResponseResult.Accepted);
-            expect(responseContent.items).toHaveLength(1);
-            expect(responseContent.items[0]["@type"]).toBe("AcceptResponseItem");
-        });
-
         test("accepts a CreateAttributeRequestItem given a CreateAttributeRequestItemConfig with all fields set for an IdentityAttribute", async () => {
             const deciderModuleAutomations: AutomationConfig[] = [
                 {
@@ -1974,121 +2049,8 @@ describe("DeciderModule", () => {
                 {
                     requestConfig: {
                         peer: sender.address,
-                        "content.item.@type": "ConsentRequestItem",
-                        "content.item.consent": "A consent text"
-                    },
-                    responseConfig: {
-                        accept: true
-                    }
-                }
-            ];
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomations }))[0];
-            await establishRelationship(sender.transport, recipient.transport);
-
-            const message = await exchangeMessage(sender.transport, recipient.transport);
-            const receivedRequestResult = await recipient.consumption.incomingRequests.received({
-                receivedRequest: { "@type": "Request", items: [{ "@type": "ConsentRequestItem", consent: "A consent text", mustBeAccepted: false }] },
-                requestSourceId: message.id
-            });
-            await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
-
-            await expect(recipient.eventBus).toHavePublished(
-                MessageProcessedEvent,
-                (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
-            );
-        });
-
-        test("decides a Request given a config with general elements and multiple RequestItem types", async () => {
-            const deciderModuleAutomations: AutomationConfig[] = [
-                {
-                    requestConfig: {
-                        peer: sender.address,
-                        "content.item.@type": ["AuthenticationRequestItem", "ConsentRequestItem"]
-                    },
-                    responseConfig: {
-                        accept: true
-                    }
-                }
-            ];
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomations }))[0];
-            await establishRelationship(sender.transport, recipient.transport);
-
-            const message = await exchangeMessage(sender.transport, recipient.transport);
-            const receivedRequestResult = await recipient.consumption.incomingRequests.received({
-                receivedRequest: { "@type": "Request", items: [{ "@type": "ConsentRequestItem", consent: "A consent text", mustBeAccepted: false }] },
-                requestSourceId: message.id
-            });
-            await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
-
-            await expect(recipient.eventBus).toHavePublished(
-                MessageProcessedEvent,
-                (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
-            );
-        });
-
-        test("cannot decide a Request given a config with not fitting general and fitting RequestItem-specific elements", async () => {
-            const deciderModuleAutomations: AutomationConfig[] = [
-                {
-                    requestConfig: {
-                        peer: "another Identity",
-                        "content.item.@type": "ConsentRequestItem",
-                        "content.item.consent": "A consent text"
-                    },
-                    responseConfig: {
-                        accept: true
-                    }
-                }
-            ];
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomations }))[0];
-            await establishRelationship(sender.transport, recipient.transport);
-
-            const message = await exchangeMessage(sender.transport, recipient.transport);
-            const receivedRequestResult = await recipient.consumption.incomingRequests.received({
-                receivedRequest: { "@type": "Request", items: [{ "@type": "ConsentRequestItem", consent: "A consent text", mustBeAccepted: false }] },
-                requestSourceId: message.id
-            });
-            await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
-
-            await expect(recipient.eventBus).toHavePublished(
-                MessageProcessedEvent,
-                (e) => e.data.result === MessageProcessedResult.ManualRequestDecisionRequired && e.data.message.id === message.id
-            );
-        });
-
-        test("cannot decide a Request given a config with fitting general and not fitting RequestItem-specific elements", async () => {
-            const deciderModuleAutomations: AutomationConfig[] = [
-                {
-                    requestConfig: {
-                        peer: sender.address,
-                        "content.item.@type": "ConsentRequestItem",
-                        "content.item.consent": "Another consent text"
-                    },
-                    responseConfig: {
-                        accept: true
-                    }
-                }
-            ];
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomations }))[0];
-            await establishRelationship(sender.transport, recipient.transport);
-
-            const message = await exchangeMessage(sender.transport, recipient.transport);
-            const receivedRequestResult = await recipient.consumption.incomingRequests.received({
-                receivedRequest: { "@type": "Request", items: [{ "@type": "ConsentRequestItem", consent: "A consent text", mustBeAccepted: false }] },
-                requestSourceId: message.id
-            });
-            await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
-
-            await expect(recipient.eventBus).toHavePublished(
-                MessageProcessedEvent,
-                (e) => e.data.result === MessageProcessedResult.ManualRequestDecisionRequired && e.data.message.id === message.id
-            );
-        });
-
-        test("cannot decide a Request if there is no fitting RequestItemConfig for every RequestItem", async () => {
-            const deciderModuleAutomations: AutomationConfig[] = [
-                {
-                    requestConfig: {
-                        "content.item.@type": "AuthenticationRequestItem"
+                        "content.item.@type": "CreateAttributeRequestItem",
+                        "content.item.mustBeAccepted": true
                     },
                     responseConfig: {
                         accept: true
@@ -2104,14 +2066,161 @@ describe("DeciderModule", () => {
                     "@type": "Request",
                     items: [
                         {
-                            "@type": "AuthenticationRequestItem",
+                            "@type": "CreateAttributeRequestItem",
+                            mustBeAccepted: true,
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
+                        }
+                    ]
+                },
+                requestSourceId: message.id
+            });
+            await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+            await expect(recipient.eventBus).toHavePublished(
+                MessageProcessedEvent,
+                (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
+            );
+        });
+
+        test("decides a Request given a config with general elements and multiple RequestItem types", async () => {
+            const deciderModuleAutomations: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        peer: sender.address,
+                        "content.item.@type": ["CreateAttributeRequestItem", "ShareAttributeRequestItem"]
+                    },
+                    responseConfig: {
+                        accept: true
+                    }
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomations }))[0];
+            await establishRelationship(sender.transport, recipient.transport);
+
+            const message = await exchangeMessage(sender.transport, recipient.transport);
+            const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                receivedRequest: {
+                    "@type": "Request",
+                    items: [
+                        {
+                            "@type": "CreateAttributeRequestItem",
                             mustBeAccepted: false,
-                            title: "Title of RequestItem"
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
+                        }
+                    ]
+                },
+                requestSourceId: message.id
+            });
+            await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+            await expect(recipient.eventBus).toHavePublished(
+                MessageProcessedEvent,
+                (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
+            );
+        });
+
+        test("cannot decide a Request given a config with not fitting general and fitting RequestItem-specific elements", async () => {
+            const deciderModuleAutomations: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        peer: "another Identity",
+                        "content.item.@type": "CreateAttributeRequestItem"
+                    },
+                    responseConfig: {
+                        accept: true
+                    }
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomations }))[0];
+            await establishRelationship(sender.transport, recipient.transport);
+
+            const message = await exchangeMessage(sender.transport, recipient.transport);
+            const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                receivedRequest: {
+                    "@type": "Request",
+                    items: [
+                        {
+                            "@type": "CreateAttributeRequestItem",
+                            mustBeAccepted: true,
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
+                        }
+                    ]
+                },
+                requestSourceId: message.id
+            });
+            await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+            await expect(recipient.eventBus).toHavePublished(
+                MessageProcessedEvent,
+                (e) => e.data.result === MessageProcessedResult.ManualRequestDecisionRequired && e.data.message.id === message.id
+            );
+        });
+
+        test("cannot decide a Request given a config with fitting general and not fitting RequestItem-specific elements", async () => {
+            const deciderModuleAutomations: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        peer: sender.address,
+                        "content.item.@type": "ShareAttributeRequestItem"
+                    },
+                    responseConfig: {
+                        accept: true
+                    }
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomations }))[0];
+            await establishRelationship(sender.transport, recipient.transport);
+
+            const message = await exchangeMessage(sender.transport, recipient.transport);
+            const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                receivedRequest: {
+                    "@type": "Request",
+                    items: [
+                        {
+                            "@type": "CreateAttributeRequestItem",
+                            mustBeAccepted: true,
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
+                        }
+                    ]
+                },
+                requestSourceId: message.id
+            });
+            await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
+
+            await expect(recipient.eventBus).toHavePublished(
+                MessageProcessedEvent,
+                (e) => e.data.result === MessageProcessedResult.ManualRequestDecisionRequired && e.data.message.id === message.id
+            );
+        });
+
+        test("cannot decide a Request if there is no fitting RequestItemConfig for every RequestItem", async () => {
+            const deciderModuleAutomations: AutomationConfig[] = [
+                {
+                    requestConfig: {
+                        "content.item.@type": "CreateAttributeRequestItem"
+                    },
+                    responseConfig: {
+                        accept: true
+                    }
+                }
+            ];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomations }))[0];
+            await establishRelationship(sender.transport, recipient.transport);
+
+            const message = await exchangeMessage(sender.transport, recipient.transport);
+            const receivedRequestResult = await recipient.consumption.incomingRequests.received({
+                receivedRequest: {
+                    "@type": "Request",
+                    items: [
+                        {
+                            "@type": "CreateAttributeRequestItem",
+                            mustBeAccepted: false,
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
                         },
                         {
-                            "@type": "ConsentRequestItem",
+                            "@type": "DeleteAttributeRequestItem",
                             mustBeAccepted: false,
-                            consent: "A consent text"
+                            attributeId: "anAttributeId"
                         }
                     ]
                 },
@@ -2152,9 +2261,9 @@ describe("DeciderModule", () => {
                             "@type": "RequestItemGroup",
                             items: [
                                 {
-                                    "@type": "AuthenticationRequestItem",
-                                    title: "Title of RequestItem",
-                                    mustBeAccepted: false
+                                    "@type": "CreateAttributeRequestItem",
+                                    mustBeAccepted: false,
+                                    attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
                                 }
                             ]
                         }
@@ -2207,22 +2316,22 @@ describe("DeciderModule", () => {
                     "@type": "Request",
                     items: [
                         {
-                            "@type": "AuthenticationRequestItem",
-                            title: "Title of RequestItem",
-                            mustBeAccepted: false
+                            "@type": "CreateAttributeRequestItem",
+                            mustBeAccepted: false,
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
                         },
                         {
                             "@type": "RequestItemGroup",
                             items: [
                                 {
-                                    "@type": "AuthenticationRequestItem",
-                                    title: "Title of RequestItem",
-                                    mustBeAccepted: false
+                                    "@type": "CreateAttributeRequestItem",
+                                    mustBeAccepted: false,
+                                    attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
                                 },
                                 {
-                                    "@type": "AuthenticationRequestItem",
-                                    title: "Title of RequestItem",
-                                    mustBeAccepted: false
+                                    "@type": "CreateAttributeRequestItem",
+                                    mustBeAccepted: false,
+                                    attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
                                 }
                             ]
                         }
@@ -2260,7 +2369,7 @@ describe("DeciderModule", () => {
             const deciderModuleAutomations: AutomationConfig[] = [
                 {
                     requestConfig: {
-                        "content.item.@type": "AuthenticationRequestItem"
+                        "content.item.@type": "CreateAttributeRequestItem"
                     },
                     responseConfig: {
                         accept: false,
@@ -2281,9 +2390,9 @@ describe("DeciderModule", () => {
                             "@type": "RequestItemGroup",
                             items: [
                                 {
-                                    "@type": "AuthenticationRequestItem",
-                                    title: "Title of RequestItem",
-                                    mustBeAccepted: false
+                                    "@type": "CreateAttributeRequestItem",
+                                    mustBeAccepted: false,
+                                    attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
                                 }
                             ]
                         }
@@ -2318,7 +2427,7 @@ describe("DeciderModule", () => {
             const deciderModuleAutomations: AutomationConfig[] = [
                 {
                     requestConfig: {
-                        "content.item.@type": "AuthenticationRequestItem"
+                        "content.item.@type": "CreateAttributeRequestItem"
                     },
                     responseConfig: {
                         accept: false,
@@ -2336,22 +2445,22 @@ describe("DeciderModule", () => {
                     "@type": "Request",
                     items: [
                         {
-                            "@type": "AuthenticationRequestItem",
-                            title: "Title of RequestItem",
-                            mustBeAccepted: false
+                            "@type": "CreateAttributeRequestItem",
+                            mustBeAccepted: false,
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
                         },
                         {
                             "@type": "RequestItemGroup",
                             items: [
                                 {
-                                    "@type": "AuthenticationRequestItem",
-                                    title: "Title of RequestItem",
-                                    mustBeAccepted: false
+                                    "@type": "CreateAttributeRequestItem",
+                                    mustBeAccepted: false,
+                                    attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
                                 },
                                 {
-                                    "@type": "AuthenticationRequestItem",
-                                    title: "Title of RequestItem",
-                                    mustBeAccepted: false
+                                    "@type": "CreateAttributeRequestItem",
+                                    mustBeAccepted: false,
+                                    attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
                                 }
                             ]
                         }
@@ -2389,7 +2498,7 @@ describe("DeciderModule", () => {
             const deciderModuleAutomations: AutomationConfig[] = [
                 {
                     requestConfig: {
-                        "content.item.@type": "AuthenticationRequestItem"
+                        "content.item.@type": "CreateAttributeRequestItem"
                     },
                     responseConfig: {
                         accept: true
@@ -2405,17 +2514,17 @@ describe("DeciderModule", () => {
                     "@type": "Request",
                     items: [
                         {
-                            "@type": "AuthenticationRequestItem",
+                            "@type": "CreateAttributeRequestItem",
                             mustBeAccepted: false,
-                            title: "Title of RequestItem"
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
                         },
                         {
                             "@type": "RequestItemGroup",
                             items: [
                                 {
-                                    "@type": "ConsentRequestItem",
+                                    "@type": "DeleteAttributeRequestItem",
                                     mustBeAccepted: false,
-                                    consent: "A consent text"
+                                    attributeId: "anAttributeId"
                                 }
                             ]
                         }
@@ -2437,7 +2546,7 @@ describe("DeciderModule", () => {
             const deciderModuleAutomations: AutomationConfig[] = [
                 {
                     requestConfig: {
-                        "content.item.@type": "AuthenticationRequestItem"
+                        "content.item.@type": "CreateAttributeRequestItem"
                     },
                     responseConfig: {
                         accept: true
@@ -2445,10 +2554,10 @@ describe("DeciderModule", () => {
                 },
                 {
                     requestConfig: {
-                        "content.item.@type": "ConsentRequestItem"
+                        "content.item.@type": "DeleteAttributeRequestItem"
                     },
                     responseConfig: {
-                        accept: true
+                        accept: false
                     }
                 }
             ];
@@ -2461,14 +2570,14 @@ describe("DeciderModule", () => {
                     "@type": "Request",
                     items: [
                         {
-                            "@type": "AuthenticationRequestItem",
+                            "@type": "CreateAttributeRequestItem",
                             mustBeAccepted: false,
-                            title: "Title of RequestItem"
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
                         },
                         {
-                            "@type": "ConsentRequestItem",
+                            "@type": "DeleteAttributeRequestItem",
                             mustBeAccepted: false,
-                            consent: "A consent text"
+                            attributeId: "anAttributeId"
                         }
                     ]
                 },
@@ -2490,15 +2599,15 @@ describe("DeciderModule", () => {
 
             const responseItems = responseContent.items;
             expect(responseItems).toHaveLength(2);
-            expect(responseItems[0]["@type"]).toBe("AcceptResponseItem");
-            expect(responseItems[1]["@type"]).toBe("AcceptResponseItem");
+            expect(responseItems[0]["@type"]).toBe("CreateAttributeAcceptResponseItem");
+            expect(responseItems[1]["@type"]).toBe("RejectResponseItem");
         });
 
         test("decides a Request with RequestItemGroup given an individual RequestItemConfig for every RequestItem", async () => {
             const deciderModuleAutomations: AutomationConfig[] = [
                 {
                     requestConfig: {
-                        "content.item.@type": "AuthenticationRequestItem"
+                        "content.item.@type": "CreateAttributeRequestItem"
                     },
                     responseConfig: {
                         accept: true
@@ -2506,10 +2615,10 @@ describe("DeciderModule", () => {
                 },
                 {
                     requestConfig: {
-                        "content.item.@type": "ConsentRequestItem"
+                        "content.item.@type": "DeleteAttributeRequestItem"
                     },
                     responseConfig: {
-                        accept: true
+                        accept: false
                     }
                 }
             ];
@@ -2522,17 +2631,17 @@ describe("DeciderModule", () => {
                     "@type": "Request",
                     items: [
                         {
-                            "@type": "AuthenticationRequestItem",
+                            "@type": "CreateAttributeRequestItem",
                             mustBeAccepted: false,
-                            title: "Title of RequestItem"
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
                         },
                         {
                             "@type": "RequestItemGroup",
                             items: [
                                 {
-                                    "@type": "ConsentRequestItem",
+                                    "@type": "DeleteAttributeRequestItem",
                                     mustBeAccepted: false,
-                                    consent: "A consent text"
+                                    attributeId: "anAttributeId"
                                 }
                             ]
                         }
@@ -2556,17 +2665,17 @@ describe("DeciderModule", () => {
 
             const responseItems = responseContent.items;
             expect(responseItems).toHaveLength(2);
-            expect(responseItems[0]["@type"]).toBe("AcceptResponseItem");
+            expect(responseItems[0]["@type"]).toBe("CreateAttributeAcceptResponseItem");
             expect(responseItems[1]["@type"]).toBe("ResponseItemGroup");
             expect((responseItems[1] as ResponseItemGroupJSON).items).toHaveLength(1);
-            expect((responseItems[1] as ResponseItemGroupJSON).items[0]["@type"]).toBe("AcceptResponseItem");
+            expect((responseItems[1] as ResponseItemGroupJSON).items[0]["@type"]).toBe("RejectResponseItem");
         });
 
         test("decides a Request with the first fitting RequestItemConfig given multiple fitting RequestItemConfigs", async () => {
             const deciderModuleAutomations: AutomationConfig[] = [
                 {
                     requestConfig: {
-                        "content.item.@type": "AuthenticationRequestItem"
+                        "content.item.@type": "CreateAttributeRequestItem"
                     },
                     responseConfig: {
                         accept: true
@@ -2574,7 +2683,7 @@ describe("DeciderModule", () => {
                 },
                 {
                     requestConfig: {
-                        "content.item.@type": "AuthenticationRequestItem"
+                        "content.item.@type": "CreateAttributeRequestItem"
                     },
                     responseConfig: {
                         accept: false
@@ -2590,9 +2699,9 @@ describe("DeciderModule", () => {
                     "@type": "Request",
                     items: [
                         {
-                            "@type": "AuthenticationRequestItem",
-                            title: "Title of RequestItem",
-                            mustBeAccepted: false
+                            "@type": "CreateAttributeRequestItem",
+                            mustBeAccepted: false,
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
                         }
                     ]
                 },
@@ -2641,14 +2750,14 @@ describe("DeciderModule", () => {
                     "@type": "Request",
                     items: [
                         {
-                            "@type": "AuthenticationRequestItem",
+                            "@type": "CreateAttributeRequestItem",
                             mustBeAccepted: true,
-                            title: "Title of RequestItem"
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
                         },
                         {
-                            "@type": "ConsentRequestItem",
+                            "@type": "CreateAttributeRequestItem",
                             mustBeAccepted: false,
-                            consent: "A consent text"
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "DisplayName", value: "aDisplayName" } }
                         }
                     ]
                 },
@@ -2670,7 +2779,7 @@ describe("DeciderModule", () => {
 
             const responseItems = responseContent.items;
             expect(responseItems).toHaveLength(2);
-            expect(responseItems[0]["@type"]).toBe("AcceptResponseItem");
+            expect(responseItems[0]["@type"]).toBe("CreateAttributeAcceptResponseItem");
             expect(responseItems[1]["@type"]).toBe("RejectResponseItem");
         });
 
@@ -2679,7 +2788,7 @@ describe("DeciderModule", () => {
                 {
                     requestConfig: {
                         peer: sender.address,
-                        "content.item.@type": "AuthenticationRequestItem"
+                        "content.item.@type": "CreateAttributeRequestItem"
                     },
                     responseConfig: {
                         accept: true
@@ -2703,19 +2812,19 @@ describe("DeciderModule", () => {
                     "@type": "Request",
                     items: [
                         {
-                            "@type": "AuthenticationRequestItem",
+                            "@type": "CreateAttributeRequestItem",
                             mustBeAccepted: false,
-                            title: "Title of RequestItem"
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
                         },
                         {
-                            "@type": "ConsentRequestItem",
+                            "@type": "DeleteAttributeRequestItem",
                             mustBeAccepted: false,
-                            consent: "A consent text"
+                            attributeId: "anAttributeId"
                         },
                         {
-                            "@type": "ConsentRequestItem",
+                            "@type": "DeleteAttributeRequestItem",
                             mustBeAccepted: false,
-                            consent: "Another consent text"
+                            attributeId: "anotherAttributeId"
                         }
                     ]
                 },
@@ -2737,7 +2846,7 @@ describe("DeciderModule", () => {
 
             const responseItems = responseContent.items;
             expect(responseItems).toHaveLength(3);
-            expect(responseItems[0]["@type"]).toBe("AcceptResponseItem");
+            expect(responseItems[0]["@type"]).toBe("CreateAttributeAcceptResponseItem");
             expect(responseItems[1]["@type"]).toBe("RejectResponseItem");
             expect(responseItems[2]["@type"]).toBe("RejectResponseItem");
         });
@@ -2747,7 +2856,7 @@ describe("DeciderModule", () => {
                 {
                     requestConfig: {
                         peer: sender.address,
-                        "content.item.@type": "AuthenticationRequestItem"
+                        "content.item.@type": "DeleteAttributeRequestItem"
                     },
                     responseConfig: {
                         accept: false
@@ -2771,14 +2880,14 @@ describe("DeciderModule", () => {
                     "@type": "Request",
                     items: [
                         {
-                            "@type": "AuthenticationRequestItem",
+                            "@type": "DeleteAttributeRequestItem",
                             mustBeAccepted: false,
-                            title: "Title of RequestItem"
+                            attributeId: "anAttributeId"
                         },
                         {
-                            "@type": "ConsentRequestItem",
+                            "@type": "CreateAttributeRequestItem",
                             mustBeAccepted: false,
-                            consent: "A consent text"
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
                         }
                     ]
                 },
@@ -2801,7 +2910,7 @@ describe("DeciderModule", () => {
             const responseItems = responseContent.items;
             expect(responseItems).toHaveLength(2);
             expect(responseItems[0]["@type"]).toBe("RejectResponseItem");
-            expect(responseItems[1]["@type"]).toBe("AcceptResponseItem");
+            expect(responseItems[1]["@type"]).toBe("CreateAttributeAcceptResponseItem");
         });
 
         test("rejects a RequestItem with a fitting RequestItemConfig, accepts other simple RequestItems with GeneralRequestConfig and accepts other RequestItem with fitting RequestItemConfig", async () => {
@@ -2809,7 +2918,8 @@ describe("DeciderModule", () => {
                 {
                     requestConfig: {
                         peer: sender.address,
-                        "content.item.@type": "AuthenticationRequestItem"
+                        "content.item.@type": "CreateAttributeRequestItem",
+                        "content.item.description": "A description of the RequestItem"
                     },
                     responseConfig: {
                         accept: false
@@ -2851,14 +2961,15 @@ describe("DeciderModule", () => {
                     "@type": "Request",
                     items: [
                         {
-                            "@type": "AuthenticationRequestItem",
+                            "@type": "CreateAttributeRequestItem",
                             mustBeAccepted: false,
-                            title: "Title of RequestItem"
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } },
+                            description: "A description of the RequestItem"
                         },
                         {
-                            "@type": "ConsentRequestItem",
+                            "@type": "CreateAttributeRequestItem",
                             mustBeAccepted: false,
-                            consent: "A consent text"
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
                         },
                         {
                             "@type": "DeleteAttributeRequestItem",
@@ -2886,7 +2997,7 @@ describe("DeciderModule", () => {
             const responseItems = responseContent.items;
             expect(responseItems).toHaveLength(3);
             expect(responseItems[0]["@type"]).toBe("RejectResponseItem");
-            expect(responseItems[1]["@type"]).toBe("AcceptResponseItem");
+            expect(responseItems[1]["@type"]).toBe("CreateAttributeAcceptResponseItem");
             expect(responseItems[2]["@type"]).toBe("DeleteAttributeAcceptResponseItem");
         });
 
@@ -2894,7 +3005,7 @@ describe("DeciderModule", () => {
             const deciderModuleAutomations: AutomationConfig[] = [
                 {
                     requestConfig: {
-                        "content.item.@type": "AuthenticationRequestItem"
+                        "content.item.@type": "DeleteAttributeRequestItem"
                     },
                     responseConfig: {
                         accept: false
@@ -2902,7 +3013,7 @@ describe("DeciderModule", () => {
                 },
                 {
                     requestConfig: {
-                        "content.item.@type": "ConsentRequestItem"
+                        "content.item.@type": "CreateAttributeRequestItem"
                     },
                     responseConfig: {
                         accept: true
@@ -2918,14 +3029,14 @@ describe("DeciderModule", () => {
                     "@type": "Request",
                     items: [
                         {
-                            "@type": "AuthenticationRequestItem",
+                            "@type": "DeleteAttributeRequestItem",
                             mustBeAccepted: true,
-                            title: "Title of RequestItem"
+                            attributeId: "anAttributeId"
                         },
                         {
-                            "@type": "ConsentRequestItem",
-                            mustBeAccepted: true,
-                            consent: "A consent text"
+                            "@type": "CreateAttributeRequestItem",
+                            mustBeAccepted: false,
+                            attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "PhoneNumber", value: "0123" } }
                         }
                     ]
                 },
@@ -2943,7 +3054,7 @@ describe("DeciderModule", () => {
     test("should throw an error if the automationConfig is invalid", async () => {
         const deciderModuleAutomations: AutomationConfig[] = [
             {
-                requestConfig: { "content.item.@type": "AuthenticationRequestItem" },
+                requestConfig: { "content.item.@type": "CreateAttributeRequestItem" },
                 responseConfig: { accept: true, deletionDate: CoreDate.utc().add({ days: 1 }).toString() }
             }
         ];
