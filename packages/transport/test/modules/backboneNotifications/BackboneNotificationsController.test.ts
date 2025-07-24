@@ -2,7 +2,7 @@ import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { AccountController, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
-describe("MessageController", function () {
+describe("BackboneNotificationsController", function () {
     let connection: IDatabaseConnection;
 
     let transport: Transport;
