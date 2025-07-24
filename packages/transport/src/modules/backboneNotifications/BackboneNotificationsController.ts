@@ -1,4 +1,5 @@
 import { CoreAddress } from "@nmshd/core-types";
+import { TransportCoreErrors } from "../../core";
 import { ControllerName, TransportController } from "../../core/TransportController";
 import { AccountController } from "../accounts/AccountController";
 import { BackboneNotificationsClient } from "./backbone/BackboneNotificationsClient";
@@ -18,13 +19,8 @@ export class NotificationsController extends TransportController {
     }
 
     public async sendNotification(input: { recipients: string[]; code: string }): Promise<void> {
-        if (input.recipients.length === 0) {
-            throw new Error("At least one recipient is required");
-        }
-
-        if (input.code.length === 0) {
-            throw new Error("Code must not be empty");
-        }
+        if (input.recipients.length === 0) throw TransportCoreErrors.backboneNotifications.atLeastOneRecipientRequired();
+        if (input.code.length === 0) throw TransportCoreErrors.backboneNotifications.codeMustNotBeEmpty();
 
         await this._validateRecipients(input.recipients);
 
@@ -32,7 +28,7 @@ export class NotificationsController extends TransportController {
 
         if (result.isSuccess) return;
 
-        throw new Error(`Failed to send notification: ${result.error.message}`);
+        throw result.error;
     }
 
     private async _validateRecipients(recipients: string[]): Promise<void> {
@@ -47,6 +43,6 @@ export class NotificationsController extends TransportController {
 
         if (recipientsWithoutActiveRelationship.length === 0) return;
 
-        throw new Error(`No active relationship found for recipients: ${recipientsWithoutActiveRelationship.join(", ")}`);
+        throw TransportCoreErrors.backboneNotifications.noActiveRelationshipFoundForRecipients(recipientsWithoutActiveRelationship);
     }
 }
