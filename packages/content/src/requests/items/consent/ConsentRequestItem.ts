@@ -7,11 +7,6 @@ export interface ConsentRequestItemJSON extends RequestItemJSON {
     consent: string;
     link?: string;
     linkDisplayText?: string;
-    /**
-     * If set to `true`, it advices the recipient of this RequestItem to carefully consider to grant the consent.
-     * This will for example tell the UI to not preselect the consent checkbox to have a user interaction on exactly this consent.
-     * This can be required for legal reasons, e.g. when the consent is required by law or if the consent is for a sensitive data processing.
-     */
     requiresInteraction?: boolean;
 }
 
@@ -19,11 +14,6 @@ export interface IConsentRequestItem extends IRequestItem {
     consent: string;
     link?: string;
     linkDisplayText?: string;
-    /**
-     * If set to `true`, it advices the recipient of this RequestItem to carefully consider to grant the consent.
-     * This will for example tell the UI to not preselect the consent checkbox to have a user interaction on exactly this consent.
-     * This can be required for legal reasons, e.g. when the consent is required by law or if the consent is for a sensitive data processing.
-     */
     requiresInteraction?: boolean;
 }
 
