@@ -2,7 +2,7 @@ import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { AccountController, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
-describe("BackbonebackboneNotificationsController", function () {
+describe("backboneNotificationsController", function () {
     let connection: IDatabaseConnection;
 
     let transport: Transport;
@@ -42,9 +42,9 @@ describe("BackbonebackboneNotificationsController", function () {
 
     describe("sendNotification errors", function () {
         test.each([
-            [["recipient1"], "error.transport.backbonebackboneNotifications.noActiveRelationshipFoundForRecipients"],
-            [["recipient1", "recipient2"], "error.transport.backbonebackboneNotifications.noActiveRelationshipFoundForRecipients"],
-            [[], "error.transport.backbonebackboneNotifications.atLeastOneRecipientRequired"]
+            [["recipient1"], "error.transport.backboneNotifications.noActiveRelationshipFoundForRecipients"],
+            [["recipient1", "recipient2"], "error.transport.backboneNotifications.noActiveRelationshipFoundForRecipients"],
+            [[], "error.transport.backboneNotifications.atLeastOneRecipientRequired"]
         ])("invalid recipients: %s", async function (recipients, errorMessage) {
             await expect(sender.backboneNotifications.sendNotification({ recipients, code: "aCode" })).rejects.toThrow(errorMessage);
         });
@@ -53,13 +53,11 @@ describe("BackbonebackboneNotificationsController", function () {
             await TestUtil.addRelationship(sender, recipient);
 
             const input = { recipients: [recipient.identity.address.toString(), "invalidRecipientAddress"], code: "aCode" };
-            await expect(sender.backboneNotifications.sendNotification(input)).rejects.toThrow(
-                "error.transport.backbonebackboneNotifications.noActiveRelationshipFoundForRecipients"
-            );
+            await expect(sender.backboneNotifications.sendNotification(input)).rejects.toThrow("error.transport.backboneNotifications.noActiveRelationshipFoundForRecipients");
         });
 
         test.each([
-            ["", "error.transport.backbonebackboneNotifications.codeMustNotBeEmpty"],
+            ["", "error.transport.backboneNotifications.codeMustNotBeEmpty"],
             ["aRandomCode", "error.platform.validation.notification.codeDoesNotExist"]
         ])("invalid codes: %s", async function (code, errorMessage) {
             await TestUtil.addRelationship(sender, recipient);
@@ -71,9 +69,7 @@ describe("BackbonebackboneNotificationsController", function () {
             await TestUtil.addPendingRelationship(sender, recipient);
 
             const input = { recipients: [recipient.identity.address.toString()], code: "aCode" };
-            await expect(sender.backboneNotifications.sendNotification(input)).rejects.toThrow(
-                "error.transport.backbonebackboneNotifications.noActiveRelationshipFoundForRecipients"
-            );
+            await expect(sender.backboneNotifications.sendNotification(input)).rejects.toThrow("error.transport.backboneNotifications.noActiveRelationshipFoundForRecipients");
         });
     });
 });
