@@ -1290,7 +1290,7 @@ export class AttributesController extends ConsumptionBaseController {
         })) as OwnIdentityAttribute[];
 
         for (const attribute of attributesSharedWithPeer) {
-            attribute.setDeletionInfoForPeer(deletionInfo, peer);
+            attribute.setForwardedDeletionInfo(deletionInfo, peer);
             await this.updateAttributeUnsafe(attribute);
         }
     }
@@ -1308,7 +1308,7 @@ export class AttributesController extends ConsumptionBaseController {
         })) as PeerIdentityAttribute[];
 
         for (const attribute of attributesSharedWithPeer) {
-            attribute.setDeletionInfo(deletionInfo);
+            attribute.setPeerDeletionInfo(deletionInfo);
             await this.updateAttributeUnsafe(attribute);
         }
     }
@@ -1326,7 +1326,7 @@ export class AttributesController extends ConsumptionBaseController {
         })) as OwnRelationshipAttribute[];
 
         for (const attribute of attributesSharedWithPeer) {
-            attribute.setDeletionInfo(deletionInfo);
+            attribute.setPeerDeletionInfo(deletionInfo);
             await this.updateAttributeUnsafe(attribute);
         }
     }
@@ -1344,7 +1344,7 @@ export class AttributesController extends ConsumptionBaseController {
         })) as PeerRelationshipAttribute[];
 
         for (const attribute of attributesSharedWithPeer) {
-            attribute.setDeletionInfo(deletionInfo);
+            attribute.setPeerDeletionInfo(deletionInfo);
             await this.updateAttributeUnsafe(attribute);
         }
     }
@@ -1362,7 +1362,7 @@ export class AttributesController extends ConsumptionBaseController {
         })) as OwnRelationshipAttribute[] | PeerRelationshipAttribute[];
 
         for (const attribute of attributesSharedWithPeer) {
-            attribute.setDeletionInfoForThirdParty(deletionInfo, thirdParty);
+            attribute.setForwardedDeletionInfo(deletionInfo, thirdParty);
             await this.updateAttributeUnsafe(attribute);
         }
     }
@@ -1380,7 +1380,7 @@ export class AttributesController extends ConsumptionBaseController {
         })) as ThirdPartyRelationshipAttribute[];
 
         for (const attribute of attributesSharedWithPeer) {
-            attribute.setDeletionInfo(deletionInfo);
+            attribute.setPeerDeletionInfo(deletionInfo);
             await this.updateAttributeUnsafe(attribute);
         }
     }

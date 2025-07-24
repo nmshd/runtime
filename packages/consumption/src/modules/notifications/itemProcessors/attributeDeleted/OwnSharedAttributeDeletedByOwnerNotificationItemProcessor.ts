@@ -65,7 +65,7 @@ export class OwnSharedAttributeDeletedByOwnerNotificationItemProcessor extends A
 
         for (const attr of [attribute, ...predecessors]) {
             if (!attr.peerSharingInfo.deletionInfo) {
-                attr.setDeletionInfo(deletionInfo);
+                attr.setPeerDeletionInfo(deletionInfo);
                 await this.consumptionController.attributes.updateAttributeUnsafe(attr);
             }
         }

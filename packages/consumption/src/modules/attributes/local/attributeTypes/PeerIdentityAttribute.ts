@@ -27,7 +27,7 @@ export class PeerIdentityAttribute extends LocalAttribute implements IPeerIdenti
     @validate()
     public peerSharingInfo: PeerIdentityAttributeSharingInfo;
 
-    public setDeletionInfo(deletionInfo: PeerAttributeDeletionInfo): this {
+    public setPeerDeletionInfo(deletionInfo: PeerAttributeDeletionInfo): this {
         this.peerSharingInfo.deletionInfo = deletionInfo;
         return this;
     }
