@@ -241,7 +241,7 @@ class BackboneNotifications {
     public noActiveRelationshipFoundForRecipients(recipients: string[]) {
         return new CoreError(
             "error.transport.backboneNotifications.noActiveRelationshipFoundForRecipients",
-            `No active relationship found for recipients: ${recipients.join(", ")}`
+            `No active Relationship found for recipients: ${recipients.join(", ")}`
         );
     }
 }
