@@ -49,6 +49,8 @@ import {
     PeerAttributeDeletionStatus,
     PeerIdentityAttributeSharingInfo,
     PeerRelationshipAttributeSharingInfo,
+    ThirdPartyRelationshipAttributeDeletionInfo,
+    ThirdPartyRelationshipAttributeDeletionStatus,
     ThirdPartyRelationshipAttributeSharingInfo
 } from "./local/sharingInfos";
 import {
@@ -1368,8 +1370,8 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     private async setDeletionInfoOfThirdPartyRelationshipAttributes(peer: CoreAddress, deletionDate: CoreDate): Promise<void> {
-        const deletionInfo = PeerAttributeDeletionInfo.from({
-            deletionStatus: PeerAttributeDeletionStatus.DeletedByOwner,
+        const deletionInfo = ThirdPartyRelationshipAttributeDeletionInfo.from({
+            deletionStatus: ThirdPartyRelationshipAttributeDeletionStatus.DeletedByPeer,
             deletionDate
         });
 

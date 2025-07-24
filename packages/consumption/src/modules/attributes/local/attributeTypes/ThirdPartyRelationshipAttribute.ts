@@ -3,7 +3,7 @@ import { IRelationshipAttribute, RelationshipAttribute, RelationshipAttributeJSO
 import { nameof } from "ts-simple-nameof";
 import {
     IThirdPartyRelationshipAttributeSharingInfo,
-    PeerAttributeDeletionInfo,
+    ThirdPartyRelationshipAttributeDeletionInfo,
     ThirdPartyRelationshipAttributeSharingInfo,
     ThirdPartyRelationshipAttributeSharingInfoJSON
 } from "../sharingInfos";
@@ -32,7 +32,7 @@ export class ThirdPartyRelationshipAttribute extends LocalAttribute implements I
     @validate()
     public peerSharingInfo: ThirdPartyRelationshipAttributeSharingInfo;
 
-    public setPeerDeletionInfo(deletionInfo: PeerAttributeDeletionInfo): this {
+    public setPeerDeletionInfo(deletionInfo: ThirdPartyRelationshipAttributeDeletionInfo): this {
         this.peerSharingInfo.deletionInfo = deletionInfo;
         return this;
     }

@@ -1,16 +1,16 @@
 import { serialize, validate } from "@js-soft/ts-serval";
 import { CoreAddress, ICoreAddress } from "@nmshd/core-types";
 import { AbstractAttributeSharingInfo, AbstractAttributeSharingInfoJSON, IAbstractAttributeSharingInfo } from "./AbstractAttributeSharingInfo";
-import { IPeerAttributeDeletionInfo, PeerAttributeDeletionInfo, PeerAttributeDeletionInfoJSON } from "./deletionInfos";
+import { IThirdPartyRelationshipAttributeDeletionInfo, ThirdPartyRelationshipAttributeDeletionInfo, ThirdPartyRelationshipAttributeDeletionInfoJSON } from "./deletionInfos";
 
 export interface ThirdPartyRelationshipAttributeSharingInfoJSON extends AbstractAttributeSharingInfoJSON {
     initialAttributePeer: string;
-    deletionInfo?: PeerAttributeDeletionInfoJSON;
+    deletionInfo?: ThirdPartyRelationshipAttributeDeletionInfoJSON;
 }
 
 export interface IThirdPartyRelationshipAttributeSharingInfo extends IAbstractAttributeSharingInfo {
     initialAttributePeer: ICoreAddress;
-    deletionInfo?: IPeerAttributeDeletionInfo;
+    deletionInfo?: IThirdPartyRelationshipAttributeDeletionInfo;
 }
 
 export class ThirdPartyRelationshipAttributeSharingInfo extends AbstractAttributeSharingInfo implements IThirdPartyRelationshipAttributeSharingInfo {
@@ -20,7 +20,7 @@ export class ThirdPartyRelationshipAttributeSharingInfo extends AbstractAttribut
 
     @serialize()
     @validate({ nullable: true })
-    public override deletionInfo?: PeerAttributeDeletionInfo;
+    public override deletionInfo?: ThirdPartyRelationshipAttributeDeletionInfo;
 
     public static from(value: IThirdPartyRelationshipAttributeSharingInfo | ThirdPartyRelationshipAttributeSharingInfoJSON): ThirdPartyRelationshipAttributeSharingInfo {
         return super.fromAny(value) as ThirdPartyRelationshipAttributeSharingInfo;
