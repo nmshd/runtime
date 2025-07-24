@@ -5,7 +5,7 @@ import { SendBackboneNotificationRequest, SendBackboneNotificationUseCase } from
 export class BackboneNotificationsFacade {
     public constructor(@Inject private readonly sendBackboneNotificationUseCase: SendBackboneNotificationUseCase) {}
 
-    public async getAnnouncements(request: SendBackboneNotificationRequest): Promise<Result<void>> {
+    public async sendBackboneNotification(request: SendBackboneNotificationRequest): Promise<Result<void>> {
         return await this.sendBackboneNotificationUseCase.execute(request);
     }
 }
