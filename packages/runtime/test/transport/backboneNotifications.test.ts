@@ -14,8 +14,8 @@ beforeAll(async () => {
 }, 30000);
 afterAll(async () => await serviceProvider.stop());
 
-describe("send Backbone Notification", function () {
-    test("sendBackboneNotification", async function () {
+describe("sendBackboneNotification", function () {
+    test("should be possible to send a backbone notification to a active relationship", async function () {
         const address = (await transportServices2.account.getIdentityInfo()).value.address.toString();
 
         const result = await transportServices1.backboneNotifications.sendBackboneNotification({ recipients: [address], code: "TestCode" });
