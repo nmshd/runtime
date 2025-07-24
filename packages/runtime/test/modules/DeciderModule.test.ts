@@ -2861,7 +2861,7 @@ describe("DeciderModule", () => {
                     }
                 }
             ];
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomations }))[0];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableRequestModule: true, enableDeciderModule: true, deciderModuleAutomations }))[0];
             await establishRelationship(sender.transport, recipient.transport);
             const sharedAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(sender, recipient, {
                 content: {
@@ -2970,7 +2970,7 @@ describe("DeciderModule", () => {
     test("should throw an error if the automationConfig is invalid", async () => {
         const deciderModuleAutomations: AutomationConfig[] = [
             {
-                requestConfig: { "content.item.@type": "FreeTextRequestItem" },
+                requestConfig: { "content.item.@type": "AuthenticationRequestItem" },
                 responseConfig: { accept: true, deletionDate: CoreDate.utc().add({ days: 1 }).toString() }
             }
         ];
