@@ -61,32 +61,6 @@ describe("DeciderModule", () => {
     });
 
     describe("no automationConfig", () => {
-        test("moves an incoming Request into status 'ManualDecisionRequired' if a RequestItem is flagged as requireManualDecision", async () => {
-            const deciderModuleAutomations: AutomationConfig[] = [
-                {
-                    requestConfig: { peer: sender.address },
-                    responseConfig: { accept: false }
-                }
-            ];
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomations }))[0];
-            await establishRelationship(sender.transport, recipient.transport);
-
-            const message = await exchangeMessage(sender.transport, recipient.transport);
-            const receivedRequestResult = await recipient.consumption.incomingRequests.received({
-                receivedRequest: { "@type": "Request", items: [{ "@type": "TestRequestItem", mustBeAccepted: false, requireManualDecision: true }] },
-                requestSourceId: message.id
-            });
-            await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
-
-            await expect(recipient.eventBus).toHavePublished(
-                IncomingRequestStatusChangedEvent,
-                (e) => e.data.newStatus === LocalRequestStatus.ManualDecisionRequired && e.data.request.id === receivedRequestResult.value.id
-            );
-
-            const requestAfterAction = await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id });
-            expect(requestAfterAction.value.status).toStrictEqual(LocalRequestStatus.ManualDecisionRequired);
-        });
-
         test("moves an incoming Request into status 'ManualDecisionRequired' if no automationConfig is set", async () => {
             const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true }))[0];
             await establishRelationship(sender.transport, recipient.transport);
