@@ -13,6 +13,7 @@ export * from "./announcements/data/AnnouncementAction";
 export * from "./backboneCompatibility/backbone/GetBackboneVersionResponse";
 export * from "./backboneCompatibility/backbone/VersionClient";
 export * from "./backboneCompatibility/BackboneCompatibilityController";
+export * from "./backboneNotifications/BackboneNotificationsController";
 export * from "./challenges/backbone/ChallengeAuthClient";
 export * from "./challenges/backbone/ChallengeClient";
 export * from "./challenges/ChallengeController";

@@ -11,6 +11,7 @@ import { TransportLoggerFactory } from "../../core/TransportLoggerFactory";
 import { IdentityDeletionProcessStatusChangedEvent } from "../../events/IdentityDeletionProcessStatusChangedEvent";
 import { PasswordGenerator } from "../../util";
 import { AnnouncementController } from "../announcements/AnnouncementController";
+import { BackboneNotificationsController } from "../backboneNotifications/BackboneNotificationsController";
 import { ChallengeController } from "../challenges/ChallengeController";
 import { DeviceController } from "../devices/DeviceController";
 import { DeviceSecretType } from "../devices/DeviceSecretController";
@@ -51,6 +52,7 @@ export class AccountController {
     public info: IDatabaseMap;
 
     public announcements: AnnouncementController;
+    public backboneNotifications: BackboneNotificationsController;
     public challenges: ChallengeController;
     public devices: DevicesController;
     public files: FileController;
@@ -198,6 +200,7 @@ export class AccountController {
         this._log.trace("Initializing controllers...");
 
         this.announcements = await new AnnouncementController(this).init();
+        this.backboneNotifications = await new BackboneNotificationsController(this).init();
         this.relationshipSecrets = await new RelationshipSecretController(this).init();
         this.devices = await new DevicesController(this).init();
         this.files = await new FileController(this).init();
