@@ -44,10 +44,17 @@ describe("BackboneNotificationsController", function () {
         test.each([
             [["recipient1"], "No active relationship found for recipients: recipient1"],
             [["recipient1", "recipient2"], "No active relationship found for recipients: recipient1, recipient2"],
-            [["recipient1", "recipient2", "recipient3"], "No active relationship found for recipients: recipient1, recipient2, recipient3"],
             [[], "At least one recipient is required"]
         ])("invalid recipients: %s", async function (recipients, errorMessage) {
             await expect(sender.notifications.sendNotification({ recipients, code: "aCode" })).rejects.toThrow(errorMessage);
+        });
+
+        test("one valid and one invalid recipient", async function () {
+            await TestUtil.addRelationship(sender, recipient);
+
+            await expect(sender.notifications.sendNotification({ recipients: [recipient.identity.address.toString(), "invalidRecipientAddress"], code: "aCode" })).rejects.toThrow(
+                "No active relationship found for recipients: invalidRecipientAddress"
+            );
         });
 
         test.each([
