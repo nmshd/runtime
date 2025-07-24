@@ -2861,7 +2861,7 @@ describe("DeciderModule", () => {
                     }
                 }
             ];
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomations }))[0];
+            const recipient = (await runtimeServiceProvider.launch(1, { enableRequestModule: true, enableDeciderModule: true, deciderModuleAutomations }))[0];
             await establishRelationship(sender.transport, recipient.transport);
             const sharedAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(sender, recipient, {
                 content: {
