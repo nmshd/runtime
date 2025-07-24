@@ -21438,6 +21438,36 @@ export const GetAnnouncementsRequest: any = {
     }
 }
 
+export const SendBackboneNotificationRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/SendBackboneNotificationRequest",
+    "definitions": {
+        "SendBackboneNotificationRequest": {
+            "type": "object",
+            "properties": {
+                "recipients": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/AddressString"
+                    }
+                },
+                "code": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "recipients",
+                "code"
+            ],
+            "additionalProperties": false
+        },
+        "AddressString": {
+            "type": "string",
+            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
+        }
+    }
+}
+
 export const CreateRelationshipChallengeRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/CreateRelationshipChallengeRequest",
@@ -23447,36 +23477,6 @@ export const LoadPeerTokenRequest: any = {
         "URLTokenReferenceString": {
             "type": "string",
             "pattern": "^https?:\\/\\/.*\\/r\\/TOK[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
-        }
-    }
-}
-
-export const SendBackboneNotificationRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/SendBackboneNotificationRequest",
-    "definitions": {
-        "SendBackboneNotificationRequest": {
-            "type": "object",
-            "properties": {
-                "recipients": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/AddressString"
-                    }
-                },
-                "code": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "recipients",
-                "code"
-            ],
-            "additionalProperties": false
-        },
-        "AddressString": {
-            "type": "string",
-            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
         }
     }
 }
