@@ -1080,8 +1080,8 @@ export class AttributesController extends ConsumptionBaseController {
             "content.owner": owner.toString(),
             "content.key": key,
             "content.value.@type": valueType,
-            "initialSharingInfo.peer": peer.toString(),
-            "initialSharingInfo.deletionInfo.deletionStatus": {
+            "peerSharingInfo.peer": peer.toString(),
+            "peerSharingInfo.deletionInfo.deletionStatus": {
                 $nin: [
                     ForwardedAttributeDeletionStatus.ToBeDeletedByPeer,
                     ForwardedAttributeDeletionStatus.DeletedByPeer,
@@ -1321,8 +1321,8 @@ export class AttributesController extends ConsumptionBaseController {
 
         const attributesSharedWithPeer = (await this.getLocalAttributes({
             "@type": "OwnRelationshipAttribute",
-            "initialSharingInfo.peer": peer.toString(),
-            "initialSharingInfo.deletionInfo.deletionStatus": { $ne: ForwardedAttributeDeletionStatus.DeletedByPeer }
+            "peerSharingInfo.peer": peer.toString(),
+            "peerSharingInfo.deletionInfo.deletionStatus": { $ne: ForwardedAttributeDeletionStatus.DeletedByPeer }
         })) as OwnRelationshipAttribute[];
 
         for (const attribute of attributesSharedWithPeer) {
@@ -1339,8 +1339,8 @@ export class AttributesController extends ConsumptionBaseController {
 
         const attributesSharedWithPeer = (await this.getLocalAttributes({
             "@type": "PeerRelationshipAttribute",
-            "initialSharingInfo.peer": peer.toString(),
-            "initialSharingInfo.deletionInfo.deletionStatus": { $ne: PeerAttributeDeletionStatus.DeletedByOwner }
+            "peerSharingInfo.peer": peer.toString(),
+            "peerSharingInfo.deletionInfo.deletionStatus": { $ne: PeerAttributeDeletionStatus.DeletedByOwner }
         })) as PeerRelationshipAttribute[];
 
         for (const attribute of attributesSharedWithPeer) {
