@@ -8,7 +8,7 @@ import { ConsumptionControllerName } from "../../../consumption/ConsumptionContr
 import { ConsumptionCoreErrors } from "../../../consumption/ConsumptionCoreErrors";
 import { ConsumptionError } from "../../../consumption/ConsumptionError";
 import { ConsumptionIds } from "../../../consumption/ConsumptionIds";
-import { LocalAttributeDeletionInfo, LocalAttributeDeletionStatus } from "../../attributes";
+import { ForwardedAttributeDeletionInfo, ForwardedAttributeDeletionStatus, OwnIdentityAttribute, OwnRelationshipAttribute, PeerRelationshipAttribute } from "../../attributes";
 import { ValidationResult } from "../../common/ValidationResult";
 import { OutgoingRequestCreatedAndCompletedEvent, OutgoingRequestCreatedEvent, OutgoingRequestStatusChangedEvent } from "../events";
 import { RequestItemProcessorRegistry } from "../itemProcessors/RequestItemProcessorRegistry";
@@ -198,7 +198,9 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         const parsedParams = SentOutgoingRequestParameters.from(params);
         const request = await this._sent(parsedParams.requestId, parsedParams.requestSourceObject);
 
-        await this._setDeletionInfo(request.content);
+        const peer = parsedParams.requestSourceObject.cache?.recipients[0].address;
+        if (!peer) throw Error; // TODO:
+        await this._setDeletionRequestSent(request.content, peer);
 
         this.eventBus.publish(
             new OutgoingRequestStatusChangedEvent(this.identity.address.toString(), {
@@ -234,7 +236,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         return request;
     }
 
-    private async _setDeletionInfo(request: Request) {
+    private async _setDeletionRequestSent(request: Request, peer: CoreAddress) {
         const requestItemsFromRequest = request.items.filter((item) => item instanceof RequestItem) as RequestItem[];
         const requestItemGroupsFromRequest = request.items.filter((item) => item instanceof RequestItemGroup);
         const requestItemsFromGroups = requestItemGroupsFromRequest.map((group) => group.items).flat();
@@ -242,27 +244,57 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         const deleteAttributeRequestItems = requestItems.filter((item) => item instanceof DeleteAttributeRequestItem);
         if (deleteAttributeRequestItems.length === 0) return;
 
-        const ownSharedAttributeIds = deleteAttributeRequestItems.map((item) => item.attributeId);
-        for (const ownSharedAttributeId of ownSharedAttributeIds) {
-            const ownSharedAttribute = await this.parent.attributes.getLocalAttribute(ownSharedAttributeId);
-            if (!ownSharedAttribute) {
-                throw new ConsumptionError(`The own shared Attribute ${ownSharedAttributeId} of a created DeleteAttributeRequestItem was not found.`);
+        const forwardedAttributeIds = deleteAttributeRequestItems.map((item) => item.attributeId);
+        for (const forwardedAttributeId of forwardedAttributeIds) {
+            const attribute = await this.parent.attributes.getLocalAttribute(forwardedAttributeId);
+            if (!attribute) {
+                throw new ConsumptionError(`The forwarded Attribute ${forwardedAttributeId} of a created DeleteAttributeRequestItem was not found.`);
             }
 
-            const deletionInfo = LocalAttributeDeletionInfo.from({
-                deletionStatus: LocalAttributeDeletionStatus.DeletionRequestSent,
+            if (!(attribute instanceof OwnIdentityAttribute || attribute instanceof OwnRelationshipAttribute || attribute instanceof PeerRelationshipAttribute)) {
+                throw new ConsumptionError(
+                    `The attribute ${forwardedAttributeId} of a created DeleteAttributeRequestItem is no own IdentityAttribute, own RelationshipAttribute or peer RelationshipAttribute.`
+                );
+            }
+            const deletionInfo = ForwardedAttributeDeletionInfo.from({
+                deletionStatus: ForwardedAttributeDeletionStatus.DeletionRequestSent,
                 deletionDate: CoreDate.utc()
             });
 
-            const predecessors = await this.parent.attributes.getPredecessorsOfAttribute(ownSharedAttributeId);
-            for (const attr of [ownSharedAttribute, ...predecessors]) {
-                if (
-                    attr.deletionInfo?.deletionStatus !== LocalAttributeDeletionStatus.ToBeDeletedByPeer &&
-                    attr.deletionInfo?.deletionStatus !== LocalAttributeDeletionStatus.DeletedByPeer
-                ) {
-                    attr.setDeletionInfo(deletionInfo, this.identity.address);
-                    await this.parent.attributes.updateAttributeUnsafe(attr);
-                }
+            const predecessors = await this.parent.attributes.getPredecessorsOfAttribute(attribute);
+            const attributes = [attribute, ...predecessors];
+
+            const deletionWasRequestedFromInitialPeer = attribute instanceof OwnRelationshipAttribute && attribute.peerSharingInfo.peer.equals(peer);
+            if (deletionWasRequestedFromInitialPeer) await this._setPeerDeletionInfo(attributes as OwnRelationshipAttribute[], deletionInfo);
+            await this._setForwardedDeletionInfo(attributes, deletionInfo, peer);
+        }
+    }
+
+    private async _setPeerDeletionInfo(attributes: OwnRelationshipAttribute[], deletionInfo: ForwardedAttributeDeletionInfo): Promise<void> {
+        for (const attribute of attributes) {
+            if (
+                attribute.peerSharingInfo.deletionInfo?.deletionStatus !== ForwardedAttributeDeletionStatus.DeletedByPeer &&
+                attribute.peerSharingInfo.deletionInfo?.deletionStatus !== ForwardedAttributeDeletionStatus.ToBeDeletedByPeer
+            ) {
+                attribute.setPeerDeletionInfo(deletionInfo);
+                await this.parent.attributes.updateAttributeUnsafe(attribute);
+            }
+        }
+    }
+
+    private async _setForwardedDeletionInfo(
+        attributes: (OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute)[],
+        deletionInfo: ForwardedAttributeDeletionInfo,
+        peer: CoreAddress
+    ): Promise<void> {
+        for (const attribute of attributes) {
+            const sharingInfoOfPeer = attribute.forwardedSharingInfos?.find((sharingInfo) => sharingInfo.peer.equals(peer));
+            if (
+                sharingInfoOfPeer?.deletionInfo?.deletionStatus !== ForwardedAttributeDeletionStatus.DeletedByPeer &&
+                sharingInfoOfPeer?.deletionInfo?.deletionStatus !== ForwardedAttributeDeletionStatus.ToBeDeletedByPeer
+            ) {
+                attribute.setForwardedDeletionInfo(deletionInfo, peer);
+                await this.parent.attributes.updateAttributeUnsafe(attribute);
             }
         }
     }

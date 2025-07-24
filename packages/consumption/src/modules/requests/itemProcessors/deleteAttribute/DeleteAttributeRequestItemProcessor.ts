@@ -157,8 +157,8 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
     private async setPeerDeletionInfo(attributes: OwnRelationshipAttribute[], deletionInfo: ForwardedAttributeDeletionInfo): Promise<void> {
         for (const attribute of attributes) {
             if (
-                attribute.peerSharingInfo?.deletionInfo?.deletionStatus !== ForwardedAttributeDeletionStatus.DeletedByPeer &&
-                attribute.peerSharingInfo?.deletionInfo?.deletionStatus !== ForwardedAttributeDeletionStatus.ToBeDeletedByPeer
+                attribute.peerSharingInfo.deletionInfo?.deletionStatus !== ForwardedAttributeDeletionStatus.DeletedByPeer &&
+                attribute.peerSharingInfo.deletionInfo?.deletionStatus !== ForwardedAttributeDeletionStatus.ToBeDeletedByPeer
             ) {
                 attribute.setPeerDeletionInfo(deletionInfo);
                 await this.consumptionController.attributes.updateAttributeUnsafe(attribute);
