@@ -8,6 +8,7 @@ export enum ForwardedAttributeDeletionStatus {
     DeletedByPeer = "DeletedByPeer"
 }
 
+// TODO: the naming isn't optimal, since this is also used for OwnRelationshipAttribute.peerSharingInfo
 export interface ForwardedAttributeDeletionInfoJSON extends AbstractAttributeDeletionInfoJSON {
     deletionStatus: ForwardedAttributeDeletionStatus;
 }
