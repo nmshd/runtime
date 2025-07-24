@@ -1,14 +1,11 @@
 import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-serval";
 import { CoreAddress, CoreId, ICoreAddress, ICoreId } from "@nmshd/core-types";
 import {
-    ForwardedRelationshipAttributeDeletionInfo,
-    ForwardedRelationshipAttributeDeletionInfoJSON,
-    IForwardedRelationshipAttributeDeletionInfo,
-    IOwnAttributeDeletionInfo,
+    ForwardedAttributeDeletionInfo,
+    ForwardedAttributeDeletionInfoJSON,
+    IForwardedAttributeDeletionInfo,
     IPeerAttributeDeletionInfo,
     IThirdPartyRelationshipAttributeDeletionInfo,
-    OwnAttributeDeletionInfo,
-    OwnAttributeDeletionInfoJSON,
     PeerAttributeDeletionInfo,
     PeerAttributeDeletionInfoJSON,
     ThirdPartyRelationshipAttributeDeletionInfo,
@@ -17,13 +14,13 @@ import {
 export interface AbstractAttributeSharingInfoJSON {
     peer: string;
     sourceReference: string;
-    deletionInfo?: OwnAttributeDeletionInfoJSON | PeerAttributeDeletionInfoJSON | ThirdPartyRelationshipAttributeDeletionInfoJSON | ForwardedRelationshipAttributeDeletionInfoJSON;
+    deletionInfo?: ForwardedAttributeDeletionInfoJSON | PeerAttributeDeletionInfoJSON | ThirdPartyRelationshipAttributeDeletionInfoJSON;
 }
 
 export interface IAbstractAttributeSharingInfo extends ISerializable {
     peer: ICoreAddress;
     sourceReference: ICoreId;
-    deletionInfo?: IOwnAttributeDeletionInfo | IPeerAttributeDeletionInfo | IThirdPartyRelationshipAttributeDeletionInfo | IForwardedRelationshipAttributeDeletionInfo;
+    deletionInfo?: IForwardedAttributeDeletionInfo | IPeerAttributeDeletionInfo | IThirdPartyRelationshipAttributeDeletionInfo;
 }
 
 export abstract class AbstractAttributeSharingInfo extends Serializable implements IAbstractAttributeSharingInfo {
@@ -37,5 +34,5 @@ export abstract class AbstractAttributeSharingInfo extends Serializable implemen
 
     @serialize()
     @validate({ nullable: true })
-    public deletionInfo?: OwnAttributeDeletionInfo | PeerAttributeDeletionInfo | ThirdPartyRelationshipAttributeDeletionInfo | ForwardedRelationshipAttributeDeletionInfo;
+    public deletionInfo?: ForwardedAttributeDeletionInfo | PeerAttributeDeletionInfo | ThirdPartyRelationshipAttributeDeletionInfo;
 }

@@ -3,13 +3,12 @@ import { IRelationshipAttribute, RelationshipAttribute, RelationshipAttributeJSO
 import { CoreAddress } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
 import {
-    ForwardedRelationshipAttributeDeletionInfo,
-    ForwardedRelationshipAttributeDeletionStatus,
+    ForwardedAttributeDeletionInfo,
+    ForwardedAttributeDeletionStatus,
     ForwardedRelationshipAttributeSharingInfo,
     ForwardedRelationshipAttributeSharingInfoJSON,
     IForwardedRelationshipAttributeSharingInfo,
     IOwnRelationshipAttributeSharingInfo,
-    OwnAttributeDeletionInfo,
     OwnRelationshipAttributeSharingInfo,
     OwnRelationshipAttributeSharingInfoJSON
 } from "../sharingInfos";
@@ -57,16 +56,16 @@ export class OwnRelationshipAttribute extends LocalAttribute implements IOwnRela
 
         if (includeDeletedAndToBeDeleted) return true;
 
-        const excludedDeletionStatuses = [ForwardedRelationshipAttributeDeletionStatus.DeletedByPeer, ForwardedRelationshipAttributeDeletionStatus.ToBeDeletedByPeer];
+        const excludedDeletionStatuses = [ForwardedAttributeDeletionStatus.DeletedByPeer, ForwardedAttributeDeletionStatus.ToBeDeletedByPeer];
         return thirdPartySharingInfosWithPeer.some((sharingInfo) => !sharingInfo.deletionInfo || !excludedDeletionStatuses.includes(sharingInfo.deletionInfo.deletionStatus));
     }
 
-    public setDeletionInfo(deletionInfo: OwnAttributeDeletionInfo): this {
+    public setDeletionInfo(deletionInfo: ForwardedAttributeDeletionInfo): this {
         this.peerSharingInfo.deletionInfo = deletionInfo;
         return this;
     }
 
-    public setDeletionInfoForThirdParty(deletionInfo: ForwardedRelationshipAttributeDeletionInfo, thirdParty: CoreAddress): this {
+    public setDeletionInfoForThirdParty(deletionInfo: ForwardedAttributeDeletionInfo, thirdParty: CoreAddress): this {
         const sharingInfoForThirdParty = this.forwardedSharingInfos?.find((sharingInfo) => sharingInfo.peer.equals(thirdParty));
         if (!sharingInfoForThirdParty) throw Error; // TODO:
 
@@ -75,7 +74,7 @@ export class OwnRelationshipAttribute extends LocalAttribute implements IOwnRela
     }
 
     public getThirdParties(includeDeletedAndToBeDeleted = false): CoreAddress[] {
-        const excludedDeletionStatuses = [ForwardedRelationshipAttributeDeletionStatus.DeletedByPeer, ForwardedRelationshipAttributeDeletionStatus.ToBeDeletedByPeer];
+        const excludedDeletionStatuses = [ForwardedAttributeDeletionStatus.DeletedByPeer, ForwardedAttributeDeletionStatus.ToBeDeletedByPeer];
 
         const sharingInfos = includeDeletedAndToBeDeleted
             ? this.forwardedSharingInfos

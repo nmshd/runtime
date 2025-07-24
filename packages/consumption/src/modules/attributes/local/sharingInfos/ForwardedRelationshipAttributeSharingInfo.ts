@@ -1,16 +1,16 @@
 import { serialize, validate } from "@js-soft/ts-serval";
 import { CoreDate, ICoreDate } from "@nmshd/core-types";
 import { AbstractAttributeSharingInfo, AbstractAttributeSharingInfoJSON, IAbstractAttributeSharingInfo } from "./AbstractAttributeSharingInfo";
-import { ForwardedRelationshipAttributeDeletionInfo, ForwardedRelationshipAttributeDeletionInfoJSON, IForwardedRelationshipAttributeDeletionInfo } from "./deletionInfos";
+import { ForwardedAttributeDeletionInfo, ForwardedAttributeDeletionInfoJSON, IForwardedAttributeDeletionInfo } from "./deletionInfos";
 
 export interface ForwardedRelationshipAttributeSharingInfoJSON extends AbstractAttributeSharingInfoJSON {
     sharedAt: string;
-    deletionInfo?: ForwardedRelationshipAttributeDeletionInfoJSON;
+    deletionInfo?: ForwardedAttributeDeletionInfoJSON;
 }
 
 export interface IForwardedRelationshipAttributeSharingInfo extends IAbstractAttributeSharingInfo {
     sharedAt: ICoreDate;
-    deletionInfo?: IForwardedRelationshipAttributeDeletionInfo;
+    deletionInfo?: IForwardedAttributeDeletionInfo;
 }
 
 export class ForwardedRelationshipAttributeSharingInfo extends AbstractAttributeSharingInfo implements IForwardedRelationshipAttributeSharingInfo {
@@ -20,7 +20,7 @@ export class ForwardedRelationshipAttributeSharingInfo extends AbstractAttribute
 
     @serialize()
     @validate({ nullable: true })
-    public override deletionInfo?: ForwardedRelationshipAttributeDeletionInfo;
+    public override deletionInfo?: ForwardedAttributeDeletionInfo;
 
     public static from(value: IForwardedRelationshipAttributeSharingInfo | ForwardedRelationshipAttributeSharingInfoJSON): ForwardedRelationshipAttributeSharingInfo {
         return super.fromAny(value) as ForwardedRelationshipAttributeSharingInfo;
