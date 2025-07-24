@@ -1096,100 +1096,6 @@ describe("DeciderModule", () => {
     });
 
     describe("RequestItemDerivationConfigs", () => {
-        test("accepts an AuthenticationRequestItem given a AuthenticationRequestItemConfig with all fields set", async () => {
-            const deciderModuleAutomations: AutomationConfig[] = [
-                {
-                    requestConfig: {
-                        "content.item.@type": "AuthenticationRequestItem",
-                        "content.item.title": "Title of RequestItem"
-                    },
-                    responseConfig: {
-                        accept: true
-                    }
-                }
-            ];
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomations }))[0];
-            await establishRelationship(sender.transport, recipient.transport);
-
-            const message = await exchangeMessage(sender.transport, recipient.transport);
-            const receivedRequestResult = await recipient.consumption.incomingRequests.received({
-                receivedRequest: {
-                    "@type": "Request",
-                    items: [
-                        {
-                            "@type": "AuthenticationRequestItem",
-                            title: "Title of RequestItem",
-                            mustBeAccepted: true
-                        }
-                    ]
-                },
-                requestSourceId: message.id
-            });
-            await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
-
-            await expect(recipient.eventBus).toHavePublished(
-                MessageProcessedEvent,
-                (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
-            );
-
-            const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
-            expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Decided);
-            expect(requestAfterAction.response).toBeDefined();
-
-            const responseContent = requestAfterAction.response!.content;
-            expect(responseContent.result).toBe(ResponseResult.Accepted);
-            expect(responseContent.items).toHaveLength(1);
-            expect(responseContent.items[0]["@type"]).toBe("AcceptResponseItem");
-        });
-
-        test("accepts a ConsentRequestItem given a ConsentRequestItemConfig with all fields set", async () => {
-            const deciderModuleAutomations: AutomationConfig[] = [
-                {
-                    requestConfig: {
-                        "content.item.@type": "ConsentRequestItem",
-                        "content.item.consent": "A consent text",
-                        "content.item.link": "www.a-link-to-a-consent-website.com"
-                    },
-                    responseConfig: {
-                        accept: true
-                    }
-                }
-            ];
-            const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomations }))[0];
-            await establishRelationship(sender.transport, recipient.transport);
-
-            const message = await exchangeMessage(sender.transport, recipient.transport);
-            const receivedRequestResult = await recipient.consumption.incomingRequests.received({
-                receivedRequest: {
-                    "@type": "Request",
-                    items: [
-                        {
-                            "@type": "ConsentRequestItem",
-                            mustBeAccepted: true,
-                            consent: "A consent text",
-                            link: "www.a-link-to-a-consent-website.com"
-                        }
-                    ]
-                },
-                requestSourceId: message.id
-            });
-            await recipient.consumption.incomingRequests.checkPrerequisites({ requestId: receivedRequestResult.value.id });
-
-            await expect(recipient.eventBus).toHavePublished(
-                MessageProcessedEvent,
-                (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
-            );
-
-            const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
-            expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Decided);
-            expect(requestAfterAction.response).toBeDefined();
-
-            const responseContent = requestAfterAction.response!.content;
-            expect(responseContent.result).toBe(ResponseResult.Accepted);
-            expect(responseContent.items).toHaveLength(1);
-            expect(responseContent.items[0]["@type"]).toBe("AcceptResponseItem");
-        });
-
         test("accepts a CreateAttributeRequestItem given a CreateAttributeRequestItemConfig with all fields set for an IdentityAttribute", async () => {
             const deciderModuleAutomations: AutomationConfig[] = [
                 {
@@ -2966,7 +2872,7 @@ describe("DeciderModule", () => {
         const deciderModuleAutomations: AutomationConfig[] = [
             {
                 requestConfig: {
-                    "content.item.@type": "AuthenticationRequestItem"
+                    "content.item.@type": "CreateAttributeRequestItem"
                 },
                 responseConfig: {
                     accept: true,
