@@ -19,6 +19,7 @@ import {
     AnnouncementController,
     AnonymousTokenController,
     BackboneCompatibilityController,
+    BackboneNotificationsController,
     ChallengeController,
     DeviceController,
     DevicesController,
@@ -232,6 +233,10 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
 
         Container.bind(AnnouncementController)
             .factory(() => this.getAccountController().announcements)
+            .scope(Scope.Request);
+
+        Container.bind(BackboneNotificationsController)
+            .factory(() => this.getAccountController().backboneNotifications)
             .scope(Scope.Request);
 
         Container.bind(DevicesController)

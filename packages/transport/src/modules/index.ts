@@ -13,6 +13,7 @@ export * from "./announcements/data/AnnouncementAction";
 export * from "./backboneCompatibility/backbone/GetBackboneVersionResponse";
 export * from "./backboneCompatibility/backbone/VersionClient";
 export * from "./backboneCompatibility/BackboneCompatibilityController";
+export * from "./backboneNotifications/BackboneNotificationsController";
 export * from "./certificates/CertificateController";
 export * from "./certificates/CertificateIssuer";
 export * from "./certificates/CertificateValidator";

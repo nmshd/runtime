@@ -229,6 +229,23 @@ class General {
     }
 }
 
+class BackboneNotifications {
+    public atLeastOneRecipientRequired() {
+        return new CoreError("error.transport.backboneNotifications.atLeastOneRecipientRequired", "At least one recipient is required.");
+    }
+
+    public codeMustNotBeEmpty() {
+        return new CoreError("error.transport.backboneNotifications.codeMustNotBeEmpty", "The code must not be empty.");
+    }
+
+    public noActiveRelationshipFoundForRecipients(recipients: string[]) {
+        return new CoreError(
+            "error.transport.backboneNotifications.noActiveRelationshipFoundForRecipients",
+            `No active Relationship found for recipients: ${recipients.join(", ")}`
+        );
+    }
+}
+
 export class TransportCoreErrors {
     public static readonly relationships = new Relationships();
     public static readonly general = new General();
@@ -239,4 +256,5 @@ export class TransportCoreErrors {
     public static readonly challenges = new Challenges();
     public static readonly datawallet = new Datawallet();
     public static readonly tokens = new Tokens();
+    public static readonly backboneNotifications = new BackboneNotifications();
 }
