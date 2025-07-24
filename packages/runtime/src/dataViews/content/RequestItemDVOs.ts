@@ -16,7 +16,6 @@ export interface RequestItemGroupDVO {
 
 export interface RequestItemDVO extends DataViewObject {
     mustBeAccepted: boolean;
-    requireManualDecision?: boolean;
     isDecidable: boolean;
     response?: ResponseItemDVO;
 }
