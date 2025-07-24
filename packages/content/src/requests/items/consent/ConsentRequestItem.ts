@@ -49,6 +49,10 @@ export class ConsentRequestItem extends RequestItem implements IConsentRequestIt
     @validate({ nullable: true, min: 3, max: 30 })
     public linkDisplayText?: string;
 
+    @serialize()
+    @validate({ nullable: true })
+    public requiresInteraction?: boolean;
+
     protected static override postFrom<T extends Serializable>(value: T): T {
         if (!(value instanceof ConsentRequestItem)) throw new Error("this should never happen");
 
