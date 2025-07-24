@@ -3,12 +3,11 @@ import { Result } from "@js-soft/ts-utils";
 import {
     AbstractAttributeDeletionInfoJSON,
     AttributesController,
+    AttributeWithForwardedSharingInfos,
+    AttributeWithPeerSharingInfo,
     ForwardedSharingInfoJSON,
     LocalAttribute,
     OwnIdentityAttribute,
-    OwnRelationshipAttribute,
-    PeerIdentityAttribute,
-    PeerRelationshipAttribute,
     PeerSharingInfoJSON,
     ThirdPartyRelationshipAttribute,
     ThirdPartyRelationshipAttributeSharingInfoJSON
@@ -55,10 +54,6 @@ export interface GetAttributesRequestQuery {
     "forwardedSharingInfos.deletionInfo.deletionStatus"?: string | string[];
     "forwardedSharingInfos.deletionInfo.deletionDate"?: string | string[];
 }
-
-// TODO: maybe move this in consumption
-type AttributeWithPeerSharingInfo = PeerIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute | ThirdPartyRelationshipAttribute;
-type AttributeWithForwardedSharingInfos = OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute;
 
 export class GetAttributesUseCase extends UseCase<GetAttributesRequest, LocalAttributeDTO[]> {
     public static readonly queryTranslator = new QueryTranslator({

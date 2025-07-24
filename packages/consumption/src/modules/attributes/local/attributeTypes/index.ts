@@ -1,3 +1,5 @@
+export * from "./AttributeWithForwardedSharingInfos";
+export * from "./AttributeWithPeerSharingInfo";
 export * from "./LocalAttribute";
 export * from "./OwnIdentityAttribute";
 export * from "./OwnRelationshipAttribute";
