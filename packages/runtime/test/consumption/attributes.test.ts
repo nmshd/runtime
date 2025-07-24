@@ -6,7 +6,6 @@ import {
     ReadAttributeRequestItemJSON,
     RelationshipAttributeConfidentiality,
     RelationshipTemplateContentJSON,
-    RequestItemJSONDerivations,
     ShareAttributeRequestItem,
     ShareAttributeRequestItemJSON,
     ThirdPartyRelationshipAttributeQuery,
@@ -1375,8 +1374,7 @@ describe(ShareRepositoryAttributeUseCase.name, () => {
             },
             requestItemMetadata: {
                 description: "An item description",
-                metadata: { aKey: "aValue" },
-                requireManualDecision: true
+                metadata: { aKey: "aValue" }
             }
         };
         const shareRequestResult = await services1.consumption.attributes.shareRepositoryAttribute(shareRequest);
@@ -1390,7 +1388,6 @@ describe(ShareRepositoryAttributeUseCase.name, () => {
 
         expect(request.content.items[0].description).toBe("An item description");
         expect(request.content.items[0].metadata).toStrictEqual({ aKey: "aValue" });
-        expect((request.content.items[0] as RequestItemJSONDerivations).requireManualDecision).toBe(true);
     });
 
     test("should send a sharing request containing a repository attribute that was already shared but deleted by the peer", async () => {
@@ -1938,8 +1935,7 @@ describe(CreateAndShareRelationshipAttributeUseCase.name, () => {
             },
             requestItemMetadata: {
                 description: "An item Description",
-                metadata: { aKey: "aValue" },
-                requireManualDecision: true
+                metadata: { aKey: "aValue" }
             }
         };
         const requestResult = await services1.consumption.attributes.createAndShareRelationshipAttribute(createAndShareRelationshipAttributeRequest);
@@ -1954,7 +1950,6 @@ describe(CreateAndShareRelationshipAttributeUseCase.name, () => {
 
         expect(request.content.items[0].description).toBe("An item Description");
         expect(request.content.items[0].metadata).toStrictEqual({ aKey: "aValue" });
-        expect((request.content.items[0] as RequestItemJSONDerivations).requireManualDecision).toBe(true);
     });
 });
 
