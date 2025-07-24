@@ -2019,8 +2019,12 @@ describe("DeciderModule", () => {
         test("cannot decide a Request if there is no fitting RequestItemConfig for every RequestItem", async () => {
             const deciderModuleAutomations: AutomationConfig[] = [
                 {
-                    requestConfig: { "content.item.@type": "AuthenticationRequestItem" },
-                    responseConfig: { accept: true }
+                    requestConfig: {
+                        "content.item.@type": "AuthenticationRequestItem"
+                    },
+                    responseConfig: {
+                        accept: true
+                    }
                 }
             ];
             const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomations }))[0];
@@ -2871,13 +2875,8 @@ describe("DeciderModule", () => {
     test("should throw an error if the automationConfig is invalid", async () => {
         const deciderModuleAutomations: AutomationConfig[] = [
             {
-                requestConfig: {
-                    "content.item.@type": "CreateAttributeRequestItem"
-                },
-                responseConfig: {
-                    accept: true,
-                    deletionDate: CoreDate.utc().add({ days: 1 }).toString()
-                }
+                requestConfig: { "content.item.@type": "CreateAttributeRequestItem" },
+                responseConfig: { accept: true, deletionDate: CoreDate.utc().add({ days: 1 }).toString() }
             }
         ];
 
