@@ -25,7 +25,6 @@ export interface CreateAndShareRelationshipAttributeRequest {
     requestItemMetadata?: {
         description?: string;
         metadata?: Record<string, any>;
-        requireManualDecision?: boolean;
     };
 }
 
