@@ -3,8 +3,6 @@ import { IdentityAttribute } from "@nmshd/content";
 import { DeciderModule } from "../../src";
 import {
     AcceptResponseConfig,
-    AuthenticationRequestItemConfig,
-    ConsentRequestItemConfig,
     CreateAttributeRequestItemConfig,
     DeleteAttributeAcceptResponseConfig,
     DeleteAttributeRequestItemConfig,
@@ -92,14 +90,6 @@ describe("DeciderModule unit tests", () => {
             peer: ["peerA", "peerB"]
         };
 
-        const authenticationRequestItemConfig: AuthenticationRequestItemConfig = {
-            "content.item.@type": "AuthenticationRequestItem"
-        };
-
-        const consentRequestItemConfig: ConsentRequestItemConfig = {
-            "content.item.@type": "ConsentRequestItem"
-        };
-
         const createAttributeRequestItemConfig: CreateAttributeRequestItemConfig = {
             "content.item.@type": "CreateAttributeRequestItem"
         };
@@ -126,18 +116,6 @@ describe("DeciderModule unit tests", () => {
             [generalRequestConfig, deleteAttributeAcceptResponseConfig, false],
             [generalRequestConfig, proposeAttributeWithNewAttributeAcceptResponseConfig, false],
             [generalRequestConfig, readAttributeWithNewAttributeAcceptResponseConfig, false],
-
-            [authenticationRequestItemConfig, rejectResponseConfig, true],
-            [authenticationRequestItemConfig, simpleAcceptResponseConfig, true],
-            [authenticationRequestItemConfig, deleteAttributeAcceptResponseConfig, false],
-            [authenticationRequestItemConfig, proposeAttributeWithNewAttributeAcceptResponseConfig, false],
-            [authenticationRequestItemConfig, readAttributeWithNewAttributeAcceptResponseConfig, false],
-
-            [consentRequestItemConfig, rejectResponseConfig, true],
-            [consentRequestItemConfig, simpleAcceptResponseConfig, true],
-            [consentRequestItemConfig, deleteAttributeAcceptResponseConfig, false],
-            [consentRequestItemConfig, proposeAttributeWithNewAttributeAcceptResponseConfig, false],
-            [consentRequestItemConfig, readAttributeWithNewAttributeAcceptResponseConfig, false],
 
             [createAttributeRequestItemConfig, rejectResponseConfig, true],
             [createAttributeRequestItemConfig, simpleAcceptResponseConfig, true],
