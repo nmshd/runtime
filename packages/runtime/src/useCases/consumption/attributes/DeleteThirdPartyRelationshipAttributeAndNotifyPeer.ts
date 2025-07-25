@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController, ConsumptionIds, LocalAttribute, ThirdPartyRelationshipAttribute } from "@nmshd/consumption";
-import { Notification, ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem } from "@nmshd/content";
+import { Notification, PeerSharedAttributeDeletedByPeerNotificationItem } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
 import { AccountController, MessageController, RelationshipsController, RelationshipStatus } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
@@ -60,7 +60,7 @@ export class DeleteThirdPartyRelationshipAttributeAndNotifyPeerUseCase extends U
         if (messageRecipientsValidationResult.isError) return Result.ok({});
 
         const notificationId = await ConsumptionIds.notification.generate();
-        const notificationItem = ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem.from({ attributeId: thirdPartyRelationshipAttributeId });
+        const notificationItem = PeerSharedAttributeDeletedByPeerNotificationItem.from({ attributeId: thirdPartyRelationshipAttributeId });
         const notification = Notification.from({
             id: notificationId,
             items: [notificationItem]

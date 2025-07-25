@@ -4,11 +4,11 @@ import { CoreDate } from "@nmshd/core-types";
 import { TransportLoggerFactory } from "@nmshd/transport";
 import { ConsumptionController } from "../../../../consumption/ConsumptionController";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { PeerSharedAttributeDeletedByPeerEvent } from "../../../attributes";
-import { LocalAttributeDeletionInfo, LocalAttributeDeletionStatus } from "../../../attributes/local/LocalAttributeDeletionInfo";
+import { OwnIdentityAttribute, OwnRelationshipAttribute, PeerSharedAttributeDeletedByPeerEvent } from "../../../attributes";
 import { ValidationResult } from "../../../common";
 import { LocalNotification } from "../../local/LocalNotification";
 import { AbstractNotificationItemProcessor } from "../AbstractNotificationItemProcessor";
+import { ApplicationError } from "@js-soft/ts-utils";
 
 export class PeerSharedAttributeDeletedByPeerNotificationItemProcessor extends AbstractNotificationItemProcessor<PeerSharedAttributeDeletedByPeerNotificationItem> {
     private readonly _logger: ILogger;
@@ -26,8 +26,10 @@ export class PeerSharedAttributeDeletedByPeerNotificationItemProcessor extends A
 
         if (!attribute) return ValidationResult.success();
 
-        if (!attribute.isOwnSharedAttribute(this.currentIdentityAddress)) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.isNotOwnSharedAttribute(notificationItem.attributeId));
+        // TODO: think about ThirdPartyRelationshipAttributes
+        if (!(attribute instanceof OwnIdentityAttribute || attribute instanceof OwnRelationshipAttribute)) {
+            return ValidationResult.error(new ApplicationError("", "")); // TODO:
+            // return ValidationResult.error(ConsumptionCoreErrors.attributes.isNotOwnSharedAttribute(notificationItem.attributeId));
         }
 
         if (!notification.peer.equals(attribute.shareInfo.peer)) {
