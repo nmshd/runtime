@@ -27,78 +27,72 @@ export interface LocalAttributeDVO extends DataViewObject {
     succeededBy?: string;
 }
 
-/**
- * Original own LocalAttribute DataViewObject
- */
-export interface RepositoryAttributeDVO extends LocalAttributeDVO {
-    type: "RepositoryAttributeDVO";
-    sharedWith: SharedToPeerAttributeDVO[];
+export interface OwnIdentityAttributeDVO extends LocalAttributeDVO {
+    type: "OwnIdentityAttributeDVO";
     isOwn: true;
     tags?: string[];
     isDefault?: true;
+    forwardingPeers?: string[]; // TODO: check if this can be IdentityDVO[]
+    forwardedSharingInfos?: ForwardedSharingInfoDVO[];
 }
 
-/**
- * LocalAttribute DataViewObject which is shared to a peer
- */
-export interface SharedToPeerAttributeDVO extends LocalAttributeDVO {
-    type: "SharedToPeerAttributeDVO";
-    peer: string; // Careful: We cannot expand the peer to an IdentityDVO, as the IdentityDVO possibly contains the LocalAttributesDVO of the Relationship (endless recursion)
-    requestReference?: string;
-    notificationReference?: string;
-    sourceAttribute?: string;
-    isOwn: true;
-    tags?: string[];
-    deletionDate?: string;
-    deletionStatus?: string;
-}
-
-/**
- * LocalAttribute DataViewObject which was received from a peer
- */
-export interface PeerAttributeDVO extends LocalAttributeDVO {
-    type: "PeerAttributeDVO";
-    peer: string; // Careful: We cannot expand the peer to an IdentityDVO, as the IdentityDVO possibly contains the LocalAttributesDVO of the Relationship (endless recursion)
-    requestReference?: string;
-    notificationReference?: string;
+export interface PeerIdentityAttributeDVO extends LocalAttributeDVO {
+    type: "PeerIdentityAttributeDVO";
     isOwn: false;
     tags?: string[];
+    peer: string; // Careful: We cannot expand the peer to an IdentityDVO, as the IdentityDVO possibly contains the LocalAttributesDVO of the Relationship (endless recursion)
+    sourceReference: string;
     deletionDate?: string;
     deletionStatus?: string;
 }
 
-/**
- * LocalAttribute DataViewObject which was received from a peer
- */
+// TODO: is it okay to have the peerSharingInfo of the initial peer flatted here?
 export interface OwnRelationshipAttributeDVO extends LocalAttributeDVO {
     type: "OwnRelationshipAttributeDVO";
-    key: string;
-    peer: string; // Careful: We cannot expand the peer to an IdentityDVO, as the IdentityDVO possibly contains the LocalAttributesDVO of the Relationship (endless recursion)
-    requestReference?: string;
-    notificationReference?: string;
-    sourceAttribute?: string;
-    thirdPartyAddress?: string;
     isOwn: true;
+    key: string;
     confidentiality: string;
     isTechnical: boolean;
+    peer: string; // Careful: We cannot expand the peer to an IdentityDVO, as the IdentityDVO possibly contains the LocalAttributesDVO of the Relationship (endless recursion)
+    sourceReference?: string;
+    deletionDate?: string;
+    deletionStatus?: string;
+    forwardingPeers?: string[]; // TODO: check if this can be IdentityDVO[]
+    forwardedSharingInfos?: ForwardedSharingInfoDVO[];
+}
+
+export interface PeerRelationshipAttributeDVO extends LocalAttributeDVO {
+    type: "PeerRelationshipAttributeDVO";
+    isOwn: false;
+    key: string;
+    confidentiality: string;
+    isTechnical: boolean;
+    peer: string; // Careful: We cannot expand the peer to an IdentityDVO, as the IdentityDVO possibly contains the LocalAttributesDVO of the Relationship (endless recursion)
+    sourceReference?: string;
+    deletionDate?: string;
+    deletionStatus?: string;
+    forwardingPeers?: string[]; // TODO: check if this can be IdentityDVO[]
+    forwardedSharingInfos?: ForwardedSharingInfoDVO[];
+}
+
+export interface ThirdPartyRelationshipAttributeDVO extends LocalAttributeDVO {
+    type: "ThirdPartyRelationshipAttributeDVO";
+    isOwn: false;
+    key: string;
+    confidentiality: string;
+    isTechnical: boolean;
+    peer: string; // Careful: We cannot expand the peer to an IdentityDVO, as the IdentityDVO possibly contains the LocalAttributesDVO of the Relationship (endless recursion)
+    initialAttributePeer: string;
+    sourceReference: string;
     deletionDate?: string;
     deletionStatus?: string;
 }
 
-/**
- * LocalAttribute DataViewObject which was received from a peer
- */
-export interface PeerRelationshipAttributeDVO extends LocalAttributeDVO {
-    type: "PeerRelationshipAttributeDVO";
-    key: string;
-    peer: string; // Careful: We cannot expand the peer to an IdentityDVO, as the IdentityDVO possibly contains the LocalAttributesDVO of the Relationship (endless recursion)
-    requestReference?: string;
-    notificationReference?: string;
-    sourceAttribute?: string;
-    thirdPartyAddress?: string;
-    isOwn: false;
-    confidentiality: string;
-    isTechnical: boolean;
+export interface ForwardedSharingInfoDVO {
+    type: "ForwardedSharingInfoDVO"; // TODO: check if a type is required
+    peer: string;
+    sourceReference: string;
+    sharedAt: string;
     deletionDate?: string;
     deletionStatus?: string;
 }
@@ -120,7 +114,7 @@ export interface ProcessedAttributeQueryDVO extends AttributeQueryDVO {
  * which fit to this query within the `results` property.
  */
 export interface ProcessedIdentityAttributeQueryDVO extends ProcessedAttributeQueryDVO {
-    results: (RepositoryAttributeDVO | SharedToPeerAttributeDVO)[];
+    results: OwnIdentityAttributeDVO[];
     type: "ProcessedIdentityAttributeQueryDVO";
     tags?: string[];
     valueType: string;
@@ -162,7 +156,7 @@ export interface ProcessedThirdPartyRelationshipAttributeQueryDVO extends Proces
 
 export interface ProcessedIQLQueryDVO extends ProcessedAttributeQueryDVO {
     type: "ProcessedIQLQueryDVO";
-    results: RepositoryAttributeDVO[];
+    results: OwnIdentityAttributeDVO[];
     valueType?: string;
     renderHints?: RenderHintsJSON;
     valueHints?: ValueHintsJSON;

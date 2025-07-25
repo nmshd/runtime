@@ -1,5 +1,14 @@
 import { Serializable, SerializableBase } from "@js-soft/ts-serval";
-import { ConsumptionController, LocalRequestStatus } from "@nmshd/consumption";
+import {
+    AttributeWithForwardedSharingInfos,
+    ConsumptionController,
+    LocalRequestStatus,
+    OwnIdentityAttribute,
+    OwnRelationshipAttribute,
+    PeerIdentityAttribute,
+    PeerRelationshipAttribute,
+    ThirdPartyRelationshipAttribute
+} from "@nmshd/consumption";
 import {
     AttributeAlreadySharedAcceptResponseItemJSON,
     AttributeSuccessionAcceptResponseItemJSON,
@@ -74,11 +83,13 @@ import { DataViewObject } from "./DataViewObject";
 import { DataViewTranslateable } from "./DataViewTranslateable";
 import { DVOError } from "./common";
 import {
+    ForwardedSharingInfoDVO,
     LocalAttributeDVO,
     LocalRequestDVO,
     LocalResponseDVO,
+    OwnIdentityAttributeDVO,
     OwnRelationshipAttributeDVO,
-    PeerAttributeDVO,
+    PeerIdentityAttributeDVO,
     PeerRelationshipAttributeDVO,
     PeerRelationshipTemplateDVO,
     ProcessedAttributeQueryDVO,
@@ -87,8 +98,7 @@ import {
     ProcessedRelationshipAttributeQueryDVO,
     ProcessedThirdPartyRelationshipAttributeQueryDVO,
     RelationshipSettingDVO,
-    RepositoryAttributeDVO,
-    SharedToPeerAttributeDVO
+    ThirdPartyRelationshipAttributeDVO
 } from "./consumption";
 import {
     AttributeAlreadyDeletedAcceptResponseItemDVO,
@@ -1004,181 +1014,193 @@ export class DataViewExpander {
 
     public async expandLocalAttributeDTO(
         attribute: LocalAttributeDTO
-    ): Promise<RepositoryAttributeDVO | SharedToPeerAttributeDVO | PeerAttributeDVO | PeerRelationshipAttributeDVO | OwnRelationshipAttributeDVO> {
+    ): Promise<OwnIdentityAttributeDVO | PeerIdentityAttributeDVO | OwnRelationshipAttributeDVO | PeerRelationshipAttributeDVO | ThirdPartyRelationshipAttributeDVO> {
         const valueType = attribute.content.value["@type"];
         const localAttribute = await this.consumptionController.attributes.getLocalAttribute(CoreId.from(attribute.id));
         if (!localAttribute) throw new Error("Attribute not found");
+        if (
+            !(
+                localAttribute instanceof OwnIdentityAttribute ||
+                localAttribute instanceof PeerIdentityAttribute ||
+                localAttribute instanceof OwnRelationshipAttribute ||
+                localAttribute instanceof PeerRelationshipAttribute ||
+                localAttribute instanceof ThirdPartyRelationshipAttribute
+            )
+        ) {
+            throw new Error("Attribute has unknown type");
+        }
 
         const owner = attribute.content.owner;
-
-        let name = `i18n://dvo.attribute.name.${valueType}`;
-        let description = `i18n://dvo.attribute.description.${valueType}`;
+        const name = `i18n://dvo.attribute.name.${valueType}`;
+        const description = `i18n://dvo.attribute.description.${valueType}`;
         const renderHints = localAttribute.content.value.renderHints.toJSON();
         const valueHints = localAttribute.content.value.valueHints.toJSON();
 
-        if (localAttribute.shareInfo) {
-            const peer = localAttribute.shareInfo.peer.toString();
-            if (localAttribute.content instanceof RelationshipAttribute) {
-                const relationshipAttribute = localAttribute.content;
-                const value = relationshipAttribute.value;
-                if ("title" in value) {
-                    name = value.title;
-                }
-                if ("description" in value && !!value.description) {
-                    description = value.description;
-                }
-
-                // Peer shared RelationshipAttribute
-                if (relationshipAttribute.owner.toString() === peer) {
-                    return {
-                        type: "PeerRelationshipAttributeDVO",
-                        id: attribute.id,
-                        name,
-                        key: relationshipAttribute.key,
-                        confidentiality: relationshipAttribute.confidentiality,
-                        description,
-                        content: attribute.content,
-                        value: attribute.content.value,
-                        date: attribute.createdAt,
-                        owner,
-                        renderHints,
-                        valueHints,
-                        isValid: true,
-                        createdAt: attribute.createdAt,
-                        isOwn: false,
-                        peer: peer,
-                        isDraft: false,
-                        requestReference: localAttribute.shareInfo.requestReference?.toString(),
-                        notificationReference: localAttribute.shareInfo.notificationReference?.toString(),
-                        sourceAttribute: localAttribute.shareInfo.sourceAttribute?.toString(),
-                        thirdPartyAddress: localAttribute.shareInfo.thirdPartyAddress?.toString(),
-                        valueType,
-                        isTechnical: relationshipAttribute.isTechnical,
-                        deletionStatus: localAttribute.deletionInfo?.deletionStatus,
-                        deletionDate: localAttribute.deletionInfo?.deletionDate.toString(),
-                        wasViewedAt: attribute.wasViewedAt
-                    };
-                }
-                // Own shared RelationshipAttribute
-                return {
-                    type: "OwnRelationshipAttributeDVO",
-                    id: attribute.id,
-                    name,
-                    key: relationshipAttribute.key,
-                    confidentiality: relationshipAttribute.confidentiality,
-                    description,
-                    content: attribute.content,
-                    value: attribute.content.value,
-                    date: attribute.createdAt,
-                    owner,
-                    renderHints,
-                    valueHints,
-                    isValid: true,
-                    createdAt: attribute.createdAt,
-                    isOwn: true,
-                    peer: peer,
-                    isDraft: false,
-                    requestReference: localAttribute.shareInfo.requestReference?.toString(),
-                    notificationReference: localAttribute.shareInfo.notificationReference?.toString(),
-                    sourceAttribute: localAttribute.shareInfo.sourceAttribute?.toString(),
-                    thirdPartyAddress: localAttribute.shareInfo.thirdPartyAddress?.toString(),
-                    valueType,
-                    isTechnical: relationshipAttribute.isTechnical,
-                    deletionStatus: localAttribute.deletionInfo?.deletionStatus,
-                    deletionDate: localAttribute.deletionInfo?.deletionDate.toString(),
-                    wasViewedAt: attribute.wasViewedAt
-                };
-            }
-            const identityAttribute = localAttribute.content;
-
-            if (identityAttribute.owner.toString() === peer) {
-                // Peer shared IdentityAttribute
-                return {
-                    type: "PeerAttributeDVO",
-                    id: attribute.id,
-                    name,
-                    description,
-                    content: attribute.content,
-                    value: attribute.content.value,
-                    date: attribute.createdAt,
-                    owner: owner,
-                    renderHints,
-                    valueHints,
-                    isValid: true,
-                    createdAt: attribute.createdAt,
-                    isOwn: false,
-                    peer: peer,
-                    isDraft: false,
-                    requestReference: localAttribute.shareInfo.requestReference?.toString(),
-                    notificationReference: localAttribute.shareInfo.notificationReference?.toString(),
-                    tags: identityAttribute.tags,
-                    valueType,
-                    deletionStatus: localAttribute.deletionInfo?.deletionStatus,
-                    deletionDate: localAttribute.deletionInfo?.deletionDate.toString(),
-                    wasViewedAt: attribute.wasViewedAt
-                };
-            }
-            // Own Shared IdentityAttribute
+        if (localAttribute instanceof OwnIdentityAttribute) {
             return {
-                type: "SharedToPeerAttributeDVO",
+                type: "OwnIdentityAttributeDVO",
                 id: attribute.id,
                 name,
                 description,
-                content: attribute.content,
-                value: attribute.content.value,
                 date: attribute.createdAt,
+                content: attribute.content,
                 owner: owner,
+                value: attribute.content.value,
+                valueType,
                 renderHints,
                 valueHints,
+                isDraft: false,
+                isOwn: true,
                 isValid: true,
                 createdAt: attribute.createdAt,
-                isOwn: true,
-                peer: peer,
-                isDraft: false,
-                requestReference: localAttribute.shareInfo.requestReference?.toString(),
-                notificationReference: localAttribute.shareInfo.notificationReference?.toString(),
-                sourceAttribute: localAttribute.shareInfo.sourceAttribute?.toString(),
-                tags: identityAttribute.tags,
-                valueType,
-                deletionStatus: localAttribute.deletionInfo?.deletionStatus,
-                deletionDate: localAttribute.deletionInfo?.deletionDate.toString(),
-                wasViewedAt: attribute.wasViewedAt
+                wasViewedAt: attribute.wasViewedAt,
+                succeeds: attribute.succeeds,
+                succeededBy: attribute.succeededBy,
+                tags: localAttribute.content.tags,
+                isDefault: attribute.isDefault,
+                forwardingPeers: localAttribute.getPeers().map((peerAddress) => peerAddress.toString()),
+                forwardedSharingInfos: this.expandForwardedSharingInfos(localAttribute)
             };
         }
-        const identityAttribute = localAttribute.content as IdentityAttribute;
 
-        const sharedToPeerAttributes = await this.consumption.attributes.getAttributes({ query: { "shareInfo.sourceAttribute": attribute.id } });
-        const sharedToPeerDVOs = await this.expandLocalAttributeDTOs(sharedToPeerAttributes.value);
+        if (localAttribute instanceof PeerIdentityAttribute) {
+            return {
+                type: "PeerIdentityAttributeDVO",
+                id: attribute.id,
+                name,
+                description,
+                date: attribute.createdAt,
+                content: attribute.content,
+                owner: owner,
+                value: attribute.content.value,
+                valueType,
+                renderHints,
+                valueHints,
+                isDraft: false,
+                isOwn: false,
+                isValid: true,
+                createdAt: attribute.createdAt,
+                wasViewedAt: attribute.wasViewedAt,
+                succeeds: attribute.succeeds,
+                succeededBy: attribute.succeededBy,
+                tags: localAttribute.content.tags,
+                peer: localAttribute.peerSharingInfo.peer.toString(),
+                sourceReference: localAttribute.peerSharingInfo.sourceReference.toString(),
+                deletionDate: localAttribute.peerSharingInfo.deletionInfo?.deletionDate.toString(),
+                deletionStatus: localAttribute.peerSharingInfo.deletionInfo?.deletionStatus
+            };
+        }
 
-        // RepositoryAttribute
+        if (localAttribute instanceof OwnRelationshipAttribute) {
+            return {
+                type: "OwnRelationshipAttributeDVO",
+                id: attribute.id,
+                name,
+                description,
+                date: attribute.createdAt,
+                content: attribute.content,
+                owner,
+                value: attribute.content.value,
+                valueType,
+                renderHints,
+                valueHints,
+                isDraft: false,
+                isOwn: true,
+                isValid: true,
+                createdAt: attribute.createdAt,
+                wasViewedAt: attribute.wasViewedAt,
+                succeeds: attribute.succeeds,
+                succeededBy: attribute.succeededBy,
+                key: localAttribute.content.key,
+                confidentiality: localAttribute.content.confidentiality,
+                isTechnical: localAttribute.content.isTechnical,
+                peer: localAttribute.peerSharingInfo.peer.toString(),
+                sourceReference: localAttribute.peerSharingInfo.sourceReference.toString(),
+                deletionStatus: localAttribute.peerSharingInfo.deletionInfo?.deletionStatus,
+                deletionDate: localAttribute.peerSharingInfo.deletionInfo?.deletionDate.toString(),
+                forwardingPeers: localAttribute.getThirdParties().map((thirdPartyAddress) => thirdPartyAddress.toString()),
+                forwardedSharingInfos: this.expandForwardedSharingInfos(localAttribute)
+            };
+        }
+
+        if (localAttribute instanceof PeerRelationshipAttribute) {
+            return {
+                type: "PeerRelationshipAttributeDVO",
+                id: attribute.id,
+                name,
+                description,
+                date: attribute.createdAt,
+                content: attribute.content,
+                owner,
+                value: attribute.content.value,
+                valueType,
+                renderHints,
+                valueHints,
+                isDraft: false,
+                isOwn: false,
+                isValid: true,
+                createdAt: attribute.createdAt,
+                wasViewedAt: attribute.wasViewedAt,
+                succeeds: attribute.succeeds,
+                succeededBy: attribute.succeededBy,
+                key: localAttribute.content.key,
+                confidentiality: localAttribute.content.confidentiality,
+                isTechnical: localAttribute.content.isTechnical,
+                peer: localAttribute.peerSharingInfo.peer.toString(),
+                sourceReference: localAttribute.peerSharingInfo.sourceReference.toString(),
+                deletionStatus: localAttribute.peerSharingInfo.deletionInfo?.deletionStatus,
+                deletionDate: localAttribute.peerSharingInfo.deletionInfo?.deletionDate.toString(),
+                forwardingPeers: localAttribute.getThirdParties().map((thirdPartyAddress) => thirdPartyAddress.toString()),
+                forwardedSharingInfos: this.expandForwardedSharingInfos(localAttribute)
+            };
+        }
+
         return {
-            type: "RepositoryAttributeDVO",
+            type: "ThirdPartyRelationshipAttributeDVO",
             id: attribute.id,
             name,
             description,
-            content: attribute.content,
-            value: attribute.content.value,
             date: attribute.createdAt,
-            owner: owner,
+            content: attribute.content,
+            owner,
+            value: attribute.content.value,
+            valueType,
             renderHints,
             valueHints,
+            isDraft: false,
+            isOwn: false,
             isValid: true,
             createdAt: attribute.createdAt,
-            isOwn: true,
-            isDraft: false,
-            sharedWith: sharedToPeerDVOs as SharedToPeerAttributeDVO[],
-            tags: identityAttribute.tags,
-            valueType,
-            isDefault: attribute.isDefault,
-            wasViewedAt: attribute.wasViewedAt
+            wasViewedAt: attribute.wasViewedAt,
+            succeeds: attribute.succeeds,
+            succeededBy: attribute.succeededBy,
+            key: localAttribute.content.key,
+            confidentiality: localAttribute.content.confidentiality,
+            isTechnical: localAttribute.content.isTechnical,
+            peer: localAttribute.peerSharingInfo.peer.toString(),
+            initialAttributePeer: localAttribute.peerSharingInfo.initialAttributePeer.toString(),
+            sourceReference: localAttribute.peerSharingInfo.sourceReference.toString(),
+            deletionStatus: localAttribute.peerSharingInfo.deletionInfo?.deletionStatus,
+            deletionDate: localAttribute.peerSharingInfo.deletionInfo?.deletionDate.toString()
         };
     }
 
     public async expandLocalAttributeDTOs(
         attributes: LocalAttributeDTO[]
-    ): Promise<(RepositoryAttributeDVO | SharedToPeerAttributeDVO | PeerAttributeDVO | PeerRelationshipAttributeDVO | OwnRelationshipAttributeDVO)[]> {
+    ): Promise<(OwnIdentityAttributeDVO | PeerIdentityAttributeDVO | OwnRelationshipAttributeDVO | PeerRelationshipAttributeDVO | ThirdPartyRelationshipAttributeDVO)[]> {
         const attributesPromise = attributes.map((attribute) => this.expandLocalAttributeDTO(attribute));
         return await Promise.all(attributesPromise);
+    }
+
+    private expandForwardedSharingInfos(localAttribute: AttributeWithForwardedSharingInfos): ForwardedSharingInfoDVO[] | undefined {
+        return localAttribute.forwardedSharingInfos?.map((sharingInfo) => ({
+            type: "ForwardedSharingInfoDVO",
+            peer: sharingInfo.peer.toString(),
+            sourceReference: sharingInfo.sourceReference.toString(),
+            sharedAt: sharingInfo.sharedAt.toString(),
+            deletionDate: sharingInfo.deletionInfo?.deletionDate.toString(),
+            deletionStatus: sharingInfo.deletionInfo?.deletionStatus
+        }));
     }
 
     public async expandAttributeQuery(
@@ -1357,7 +1379,7 @@ export class DataViewExpander {
         return {
             ...this.expandIdentityAttributeQuery(query),
             type: "ProcessedIdentityAttributeQueryDVO",
-            results: matchedAttributeDVOs as RepositoryAttributeDVO[],
+            results: matchedAttributeDVOs as OwnIdentityAttributeDVO[],
             isProcessed: true
         };
     }
@@ -1425,7 +1447,7 @@ export class DataViewExpander {
         return {
             ...this.expandIQLQuery(query),
             type: "ProcessedIQLQueryDVO",
-            results: matchedAttributeDVOs as RepositoryAttributeDVO[],
+            results: matchedAttributeDVOs as OwnIdentityAttributeDVO[],
             isProcessed: true,
             valueType,
             renderHints,
