@@ -55,7 +55,7 @@ describe("AttachmentTest", function () {
 
     test("should send the correct message to recipient1", function () {
         expect(message1).toBeDefined();
-        expect(message1.cache!.attachments).toHaveLength(1);
+        expect(message1.attachments).toHaveLength(1);
     });
 
     test("should sync in recipients until all messages received", async function () {
@@ -70,9 +70,9 @@ describe("AttachmentTest", function () {
         const recipientMessage = await recipient1.messages.getMessage(message1.id);
         expect(recipientMessage).toBeDefined();
         if (!recipientMessage) return;
-        expect(recipientMessage.cache!.attachments).toHaveLength(1);
+        expect(recipientMessage.attachments).toHaveLength(1);
 
-        const downloadedContent = await recipient1.files.downloadFileContent(recipientMessage.cache!.attachments[0]);
+        const downloadedContent = await recipient1.files.downloadFileContent(recipientMessage.attachments[0]);
 
         expect(content.toArray()).toStrictEqual(downloadedContent.toArray());
     });
@@ -81,9 +81,9 @@ describe("AttachmentTest", function () {
         const recipientMessage = await recipient1.messages.getMessage(message3.id);
         expect(recipientMessage).toBeDefined();
         if (!recipientMessage) return;
-        expect(recipientMessage.cache!.attachments).toHaveLength(1);
+        expect(recipientMessage.attachments).toHaveLength(1);
 
-        const downloadedContent = await recipient1.files.downloadFileContent(recipientMessage.cache!.attachments[0]);
+        const downloadedContent = await recipient1.files.downloadFileContent(recipientMessage.attachments[0]);
 
         expect(content.toArray()).toStrictEqual(downloadedContent.toArray());
     });
@@ -92,13 +92,13 @@ describe("AttachmentTest", function () {
         const recipientMessage = await recipient1.messages.getMessage(message4.id);
         expect(recipientMessage).toBeDefined();
         if (!recipientMessage) return;
-        expect(recipientMessage.cache!.attachments).toHaveLength(2);
+        expect(recipientMessage.attachments).toHaveLength(2);
 
-        const downloadedContent = await recipient1.files.downloadFileContent(recipientMessage.cache!.attachments[0]);
+        const downloadedContent = await recipient1.files.downloadFileContent(recipientMessage.attachments[0]);
 
         expect(content.toArray()).toStrictEqual(downloadedContent.toArray());
 
-        const downloadedContent2: CoreBuffer = await recipient1.files.downloadFileContent(recipientMessage.cache!.attachments[1]);
+        const downloadedContent2: CoreBuffer = await recipient1.files.downloadFileContent(recipientMessage.attachments[1]);
 
         expect(content2.toArray()).toStrictEqual(downloadedContent2.toArray());
     });
@@ -107,9 +107,9 @@ describe("AttachmentTest", function () {
         const recipientMessage = await recipient2.messages.getMessage(message2.id);
         expect(recipientMessage).toBeDefined();
         if (!recipientMessage) return;
-        expect(recipientMessage.cache!.attachments).toHaveLength(1);
+        expect(recipientMessage.attachments).toHaveLength(1);
 
-        const downloadedContent = await recipient2.files.downloadFileContent(recipientMessage.cache!.attachments[0]);
+        const downloadedContent = await recipient2.files.downloadFileContent(recipientMessage.attachments[0]);
 
         expect(content.toArray()).toStrictEqual(downloadedContent.toArray());
     });
@@ -118,9 +118,9 @@ describe("AttachmentTest", function () {
         const recipientMessage = await recipient2.messages.getMessage(message3.id);
         expect(recipientMessage).toBeDefined();
         if (!recipientMessage) return;
-        expect(recipientMessage.cache!.attachments).toHaveLength(1);
+        expect(recipientMessage.attachments).toHaveLength(1);
 
-        const downloadedContent = await recipient2.files.downloadFileContent(recipientMessage.cache!.attachments[0]);
+        const downloadedContent = await recipient2.files.downloadFileContent(recipientMessage.attachments[0]);
 
         expect(content.toArray()).toStrictEqual(downloadedContent.toArray());
     });
@@ -129,13 +129,13 @@ describe("AttachmentTest", function () {
         const recipientMessage = await recipient2.messages.getMessage(message4.id);
         expect(recipientMessage).toBeDefined();
         if (!recipientMessage) return;
-        expect(recipientMessage.cache!.attachments).toHaveLength(2);
+        expect(recipientMessage.attachments).toHaveLength(2);
 
-        const downloadedContent = await recipient2.files.downloadFileContent(recipientMessage.cache!.attachments[0]);
+        const downloadedContent = await recipient2.files.downloadFileContent(recipientMessage.attachments[0]);
 
         expect(content.toArray()).toStrictEqual(downloadedContent.toArray());
 
-        const downloadedContent2: CoreBuffer = await recipient2.files.downloadFileContent(recipientMessage.cache!.attachments[1]);
+        const downloadedContent2: CoreBuffer = await recipient2.files.downloadFileContent(recipientMessage.attachments[1]);
 
         expect(content2.toArray()).toStrictEqual(downloadedContent2.toArray());
     });

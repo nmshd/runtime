@@ -1,7 +1,7 @@
 import { QueryTranslator } from "@js-soft/docdb-querytranslator";
 import { Result } from "@js-soft/ts-utils";
 import { MessageDTO, RecipientDTO } from "@nmshd/runtime-types";
-import { CachedMessage, CachedMessageRecipient, Message, MessageController, MessageEnvelopeRecipient } from "@nmshd/transport";
+import { Message, MessageController, MessageEnvelopeRecipient, MessageRecipient } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { nameof } from "ts-simple-nameof";
 import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
@@ -51,27 +51,27 @@ export class GetMessagesUseCase extends UseCase<GetMessagesRequest, MessageDTO[]
 
         alias: {
             [nameof<MessageDTO>((m) => m.isOwn)]: nameof<Message>((m) => m.isOwn),
-            [nameof<MessageDTO>((m) => m.createdBy)]: `${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.createdBy)}`,
-            [nameof<MessageDTO>((m) => m.createdByDevice)]: `${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.createdByDevice)}`,
-            [nameof<MessageDTO>((m) => m.createdAt)]: `${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.createdAt)}`,
-            [`${nameof<MessageDTO>((m) => m.recipients)}.${nameof<RecipientDTO>((r) => r.address)}`]: `${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>(
+            [nameof<MessageDTO>((m) => m.createdBy)]: `${nameof<Message>((m) => m.createdBy)}`,
+            [nameof<MessageDTO>((m) => m.createdByDevice)]: `${nameof<Message>((m) => m.createdByDevice)}`,
+            [nameof<MessageDTO>((m) => m.createdAt)]: `${nameof<Message>((m) => m.createdAt)}`,
+            [`${nameof<MessageDTO>((m) => m.recipients)}.${nameof<RecipientDTO>((r) => r.address)}`]: `${nameof<Message>(
                 (m) => m.recipients
             )}.${nameof<MessageEnvelopeRecipient>((r) => r.address)}`,
-            [`${nameof<MessageDTO>((m) => m.recipients)}.${nameof<RecipientDTO>((r) => r.relationshipId)}`]: `${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.recipients)}.${nameof<CachedMessageRecipient>((m) => m.relationshipId)}`,
-            [`${nameof<MessageDTO>((m) => m.content)}.@type`]: `${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.content)}.@type`,
-            [`${nameof<MessageDTO>((m) => m.content)}.body`]: `${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.content)}.body`,
-            [`${nameof<MessageDTO>((m) => m.content)}.subject`]: `${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.content)}.subject`,
+            [`${nameof<MessageDTO>((m) => m.recipients)}.${nameof<RecipientDTO>((r) => r.relationshipId)}`]: `${nameof<Message>((m) => m.recipients)}.${nameof<MessageRecipient>((m) => m.relationshipId)}`,
+            [`${nameof<MessageDTO>((m) => m.content)}.@type`]: `${nameof<Message>((m) => m.content)}.@type`,
+            [`${nameof<MessageDTO>((m) => m.content)}.body`]: `${nameof<Message>((m) => m.content)}.body`,
+            [`${nameof<MessageDTO>((m) => m.content)}.subject`]: `${nameof<Message>((m) => m.content)}.subject`,
             [nameof<MessageDTO>((m) => m.wasReadAt)]: nameof<Message>((m) => m.wasReadAt)
         },
 
         custom: {
             [nameof<MessageDTO>((m) => m.attachments)]: (query: any, input: any) => {
                 if (input === "+") {
-                    query[`${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.attachments)}`] = { $not: { $size: 0 } };
+                    query[`${nameof<Message>((m) => m.attachments)}`] = { $not: { $size: 0 } };
                     return;
                 }
 
-                query[`${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.attachments)}`] = {
+                query[`${nameof<Message>((m) => m.attachments)}`] = {
                     $containsAny: Array.isArray(input) ? input : [input]
                 };
             },
@@ -104,10 +104,10 @@ export class GetMessagesUseCase extends UseCase<GetMessagesRequest, MessageDTO[]
 
                 query["$or"] = [
                     {
-                        [`${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.createdBy)}`]: participantQuery
+                        [`${nameof<Message>((m) => m.createdBy)}`]: participantQuery
                     },
                     {
-                        [`${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.recipients)}.${nameof<MessageEnvelopeRecipient>((r) => r.address)}`]: participantQuery
+                        [`${nameof<Message>((m) => m.recipients)}.${nameof<MessageEnvelopeRecipient>((r) => r.address)}`]: participantQuery
                     }
                 ];
             }

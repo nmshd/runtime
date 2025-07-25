@@ -13,6 +13,7 @@ import {
     IIQLQuery,
     IRelationshipAttributeQuery,
     Nationality,
+    ProprietaryString,
     RelationshipAttribute,
     RelationshipAttributeConfidentiality,
     Street,
@@ -110,6 +111,22 @@ describe("AttributesController", function () {
             mockEventBus.expectPublishedEvents(AttributeCreatedEvent);
         });
 
+        test("should not create a new attribute with a forbidden character", async function () {
+            const params: ICreateRepositoryAttributeParams = {
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "DisplayName",
+                        value: "aDisplayName😀"
+                    },
+                    owner: consumptionController.accountController.identity.address
+                })
+            };
+
+            await expect(consumptionController.attributes.createRepositoryAttribute(params)).rejects.toThrow(
+                "error.consumption.attributes.forbiddenCharactersInAttribute: 'The Attribute contains forbidden characters.'"
+            );
+        });
+
         test("should trim whitespace for a RepositoryAttribute", async function () {
             const params: ICreateRepositoryAttributeParams = {
                 content: IdentityAttribute.from({
@@ -158,7 +175,6 @@ describe("AttributesController", function () {
                     city: "aCity",
                     country: "DE"
                 },
-                validTo: CoreDate.utc(),
                 owner: consumptionController.accountController.identity.address
             });
 
@@ -194,7 +210,6 @@ describe("AttributesController", function () {
                     city: " aCity  ",
                     country: "DE"
                 },
-                validTo: CoreDate.utc(),
                 owner: consumptionController.accountController.identity.address
             });
 
@@ -230,7 +245,6 @@ describe("AttributesController", function () {
                     city: "aCity",
                     country: "DE"
                 },
-                validTo: CoreDate.utc(),
                 owner: consumptionController.accountController.identity.address
             });
 
@@ -442,6 +456,22 @@ describe("AttributesController", function () {
             });
 
             expect(thirdPartyLocalAttributeCopy.shareInfo?.thirdPartyAddress?.toString()).toBe(thirdPartyAddress.toString());
+        });
+
+        test("should not create a new attribute with a duplicate id", async function () {
+            const params: ICreateRepositoryAttributeParams = {
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "DisplayName",
+                        value: "aDisplayName"
+                    },
+                    owner: consumptionController.accountController.identity.address
+                }),
+                id: CoreId.from("duplicateId")
+            };
+
+            await consumptionController.attributes.createRepositoryAttribute(params);
+            await expect(consumptionController.attributes.createRepositoryAttribute(params)).rejects.toThrow(/[Dd]uplicate key/);
         });
     });
 
@@ -1281,6 +1311,35 @@ describe("AttributesController", function () {
 
     describe("succeed Attributes", function () {
         describe("Common validator", function () {
+            test("should catch a forbidden character in the successor", async function () {
+                const predecessor = await consumptionController.attributes.createRepositoryAttribute({
+                    content: IdentityAttribute.from({
+                        value: {
+                            "@type": "GivenName",
+                            value: "aGivenName"
+                        },
+                        owner: consumptionController.accountController.identity.address,
+                        tags: ["x:aTag"]
+                    })
+                });
+
+                const successorData: IAttributeSuccessorParams = {
+                    content: IdentityAttribute.from({
+                        value: {
+                            "@type": "GivenName",
+                            value: "aGivenName😀"
+                        },
+                        owner: consumptionController.accountController.identity.address,
+                        tags: ["x:aTag"]
+                    })
+                };
+
+                const validationResult = await consumptionController.attributes.validateAttributeSuccessionCommon(predecessor.id, successorData);
+                expect(validationResult).errorValidationResult({
+                    code: "error.consumption.attributes.forbiddenCharactersInAttribute"
+                });
+            });
+
             test("should catch if content doesn't change", async function () {
                 const predecessor = await consumptionController.attributes.createRepositoryAttribute({
                     content: IdentityAttribute.from({
@@ -1289,7 +1348,7 @@ describe("AttributesController", function () {
                             value: "DE"
                         },
                         owner: consumptionController.accountController.identity.address,
-                        tags: ["aTag"]
+                        tags: ["x:aTag"]
                     })
                 });
 
@@ -1300,7 +1359,7 @@ describe("AttributesController", function () {
                             value: "DE"
                         },
                         owner: consumptionController.accountController.identity.address,
-                        tags: ["aTag"]
+                        tags: ["x:aTag"]
                     })
                 };
 
@@ -1550,7 +1609,7 @@ describe("AttributesController", function () {
                     content: IdentityAttribute.from({
                         value: {
                             "@type": "BirthName",
-                            value: "Müller"
+                            value: "aBirthName"
                         },
                         owner: consumptionController.accountController.identity.address
                     })
@@ -1903,7 +1962,7 @@ describe("AttributesController", function () {
                             value: "DE"
                         },
                         owner: consumptionController.accountController.identity.address,
-                        tags: ["aTag"]
+                        tags: ["x:aTag"]
                     })
                 });
 
@@ -1914,7 +1973,7 @@ describe("AttributesController", function () {
                             value: "DE"
                         },
                         owner: consumptionController.accountController.identity.address,
-                        tags: ["aTag", "anotherTag"]
+                        tags: ["x:aTag", "x:anotherTag"]
                     })
                 };
 
@@ -1926,8 +1985,8 @@ describe("AttributesController", function () {
                 expect(successor.succeeds!.equals(updatedPredecessor.id)).toBe(true);
                 expect((updatedPredecessor.content.value.toJSON() as any).value).toBe("DE");
                 expect((successor.content.value.toJSON() as any).value).toBe("DE");
-                expect((updatedPredecessor.content as IdentityAttribute).tags).toStrictEqual(["aTag"]);
-                expect((successor.content as IdentityAttribute).tags).toStrictEqual(["aTag", "anotherTag"]);
+                expect((updatedPredecessor.content as IdentityAttribute).tags).toStrictEqual(["x:aTag"]);
+                expect((successor.content as IdentityAttribute).tags).toStrictEqual(["x:aTag", "x:anotherTag"]);
             });
 
             test("should make successor default succeeding a default repository attribute", async function () {
@@ -2243,7 +2302,6 @@ describe("AttributesController", function () {
                             country: version0ChildValues[4],
                             state: "Berlin"
                         },
-                        validTo: CoreDate.utc(),
                         owner: consumptionController.accountController.identity.address
                     });
 
@@ -2442,7 +2500,6 @@ describe("AttributesController", function () {
                             city: version0ChildValues[3],
                             country: version0ChildValues[4]
                         },
-                        validTo: CoreDate.utc(),
                         owner: CoreAddress.from("peer")
                     });
 
@@ -3502,6 +3559,67 @@ describe("AttributesController", function () {
         });
     });
 
+    describe("validate tags", function () {
+        /* eslint-disable @typescript-eslint/naming-convention */
+        const mockedTagCollection: AttributeTagCollection = AttributeTagCollection.from({
+            supportedLanguages: ["de", "en"],
+            tagsForAttributeValueTypes: {
+                PhoneNumber: {
+                    emergency: {
+                        displayNames: {
+                            de: "Notfallkontakt",
+                            en: "Emergency Contact"
+                        },
+                        children: {
+                            first: {
+                                displayNames: {
+                                    de: "Erster Notfallkontakt",
+                                    en: "First Emergency Contact"
+                                }
+                            },
+                            second: {
+                                displayNames: {
+                                    de: "Zweiter Notfallkontakt",
+                                    en: "Second Emergency Contact"
+                                }
+                            }
+                        }
+                    },
+                    private: {
+                        displayNames: {
+                            de: "Privat",
+                            en: "Private"
+                        }
+                    }
+                }
+            }
+        });
+        /* eslint-enable @typescript-eslint/naming-convention */
+
+        test("should validate valid tags", function () {
+            expect(consumptionController.attributes["isValidTag"]("bkb:private", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(true);
+            expect(consumptionController.attributes["isValidTag"]("bkb:emergency:first", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(true);
+            expect(consumptionController.attributes["isValidTag"]("bkb:emergency:second", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(true);
+            expect(consumptionController.attributes["isValidTag"]("x:my:custom:tag", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(true);
+            expect(consumptionController.attributes["isValidTag"]("X:my:custom:tag", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(true);
+            expect(consumptionController.attributes["isValidTag"]("mimetype:x/x", {})).toBe(true);
+            expect(consumptionController.attributes["isValidTag"]("urn:aUrnTag", {})).toBe(true);
+            expect(consumptionController.attributes["isValidTag"]("language:de", {})).toBe(true);
+        });
+
+        test("should validate invalid tags", function () {
+            expect(consumptionController.attributes["isValidTag"]("bkb:nonexistent", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(false);
+            expect(consumptionController.attributes["isValidTag"]("bkb:emergency", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(false);
+            expect(consumptionController.attributes["isValidTag"]("bkb:private", mockedTagCollection.tagsForAttributeValueTypes["nonexistent"])).toBe(false);
+            expect(consumptionController.attributes["isValidTag"]("bkb:emergency:nonexistent", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(false);
+            expect(consumptionController.attributes["isValidTag"]("bkb:emergency:first:nonexistent", mockedTagCollection.tagsForAttributeValueTypes["PhoneNumber"])).toBe(false);
+            expect(consumptionController.attributes["isValidTag"]("mimetype:/x", {})).toBe(false);
+            expect(consumptionController.attributes["isValidTag"]("Urn:invalidUrn", {})).toBe(false);
+            expect(consumptionController.attributes["isValidTag"]("language:invalid", {})).toBe(false);
+            expect(consumptionController.attributes["isValidTag"]("unsupportedPrefix:invalid", {})).toBe(false);
+        });
+    });
+
     describe("tag definition caching by time", function () {
         let connection: IDatabaseConnection;
         let transport: Transport;
@@ -3624,6 +3742,45 @@ describe("AttributesController", function () {
 
             verify(attributeTagClientSpy.getTagCollection(anything())).twice();
             verify(attributesControllerSpy["setTagCollection"](anything())).twice();
+        });
+    });
+
+    describe("validate attribute values", function () {
+        test("should catch forbidden characters in an IdentityAttribute", function () {
+            expect(
+                consumptionController.attributes.validateAttributeCharacters(
+                    IdentityAttribute.from({
+                        owner: CoreAddress.from("anAddress"),
+                        value: City.from({ value: "aCity😀" })
+                    })
+                )
+            ).toBe(false);
+        });
+
+        test("should catch forbidden characters in a RelationshipAttribute", function () {
+            expect(
+                consumptionController.attributes.validateAttributeCharacters(
+                    RelationshipAttribute.from({
+                        key: "aKey",
+                        owner: CoreAddress.from("anAddress"),
+                        confidentiality: RelationshipAttributeConfidentiality.Public,
+                        value: ProprietaryString.from({ title: "aTitle", value: "aProprietaryStringValue😀" })
+                    })
+                )
+            ).toBe(false);
+        });
+
+        test("should allow all characters in a RelationshipAttribute's title and description", function () {
+            expect(
+                consumptionController.attributes.validateAttributeCharacters(
+                    RelationshipAttribute.from({
+                        key: "aKey",
+                        owner: CoreAddress.from("anAddress"),
+                        confidentiality: RelationshipAttributeConfidentiality.Public,
+                        value: ProprietaryString.from({ title: "aTitle😀", value: "aProprietaryStringValue", description: "aDescription😀" })
+                    })
+                )
+            ).toBe(true);
         });
     });
 });

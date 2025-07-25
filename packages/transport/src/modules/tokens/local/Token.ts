@@ -1,25 +1,41 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreDate, ICoreDate } from "@nmshd/core-types";
+import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
+import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreDate, ICoreId } from "@nmshd/core-types";
 import { CryptoSecretKey, ICryptoSecretKey } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
 import { CoreSynchronizable, ICoreSynchronizable } from "../../../core";
 import { IPasswordProtection, PasswordProtection } from "../../../core/types/PasswordProtection";
 import { TokenReference } from "../transmission/TokenReference";
-import { CachedToken, ICachedToken } from "./CachedToken";
 
 export interface IToken extends ICoreSynchronizable {
     secretKey: ICryptoSecretKey;
     isOwn: boolean;
     passwordProtection?: IPasswordProtection;
-    cache?: ICachedToken;
-    cachedAt?: ICoreDate;
+
+    createdBy: ICoreAddress;
+    createdAt: ICoreDate;
+    expiresAt: ICoreDate;
+    content: ISerializable;
+    createdByDevice: ICoreId;
+    forIdentity?: ICoreAddress;
+
     metadata?: any;
     metadataModifiedAt?: ICoreDate;
 }
 
 @type("Token")
 export class Token extends CoreSynchronizable implements IToken {
-    public override readonly technicalProperties = ["@type", "@context", nameof<Token>((r) => r.secretKey), nameof<Token>((r) => r.isOwn)];
+    public override readonly technicalProperties = [
+        "@type",
+        "@context",
+        nameof<Token>((r) => r.secretKey),
+        nameof<Token>((r) => r.isOwn),
+        nameof<Token>((r) => r.createdBy),
+        nameof<Token>((r) => r.createdAt),
+        nameof<Token>((r) => r.expiresAt),
+        nameof<Token>((r) => r.createdByDevice),
+        nameof<Token>((r) => r.forIdentity)
+    ];
+    public override readonly contentProperties = [nameof<Token>((r) => r.content)];
     public override readonly userdataProperties = [nameof<Token>((r) => r.passwordProtection)];
     public override readonly metadataProperties = [nameof<Token>((r) => r.metadata), nameof<Token>((r) => r.metadataModifiedAt)];
 
@@ -35,13 +51,29 @@ export class Token extends CoreSynchronizable implements IToken {
     @serialize()
     public passwordProtection?: PasswordProtection;
 
-    @validate({ nullable: true })
+    @validate()
     @serialize()
-    public cache?: CachedToken;
+    public createdBy: CoreAddress;
+
+    @validate()
+    @serialize()
+    public createdAt: CoreDate;
+
+    @validate()
+    @serialize()
+    public expiresAt: CoreDate;
+
+    @validate()
+    @serialize()
+    public content: Serializable;
+
+    @validate()
+    @serialize()
+    public createdByDevice: CoreId;
 
     @validate({ nullable: true })
     @serialize()
-    public cachedAt?: CoreDate;
+    public forIdentity?: CoreAddress;
 
     @validate({ nullable: true })
     @serialize()
@@ -60,15 +92,9 @@ export class Token extends CoreSynchronizable implements IToken {
             id: this.id,
             backboneBaseUrl,
             key: this.secretKey,
-            forIdentityTruncated: this.cache!.forIdentity?.toString().slice(-4),
+            forIdentityTruncated: this.forIdentity?.toString().slice(-4),
             passwordProtection: this.passwordProtection?.toSharedPasswordProtection()
         });
-    }
-
-    public setCache(cache: CachedToken): this {
-        this.cache = cache;
-        this.cachedAt = CoreDate.utc();
-        return this;
     }
 
     public setMetadata(metadata: any): void {

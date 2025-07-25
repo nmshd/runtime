@@ -7,12 +7,14 @@ export interface ConsentRequestItemJSON extends RequestItemJSON {
     consent: string;
     link?: string;
     linkDisplayText?: string;
+    requiresInteraction?: boolean;
 }
 
 export interface IConsentRequestItem extends IRequestItem {
     consent: string;
     link?: string;
     linkDisplayText?: string;
+    requiresInteraction?: boolean;
 }
 
 @type("ConsentRequestItem")
@@ -36,6 +38,10 @@ export class ConsentRequestItem extends RequestItem implements IConsentRequestIt
     @serialize()
     @validate({ nullable: true, min: 3, max: 30 })
     public linkDisplayText?: string;
+
+    @serialize()
+    @validate({ nullable: true })
+    public requiresInteraction?: boolean;
 
     protected static override postFrom<T extends Serializable>(value: T): T {
         if (!(value instanceof ConsentRequestItem)) throw new Error("this should never happen");
