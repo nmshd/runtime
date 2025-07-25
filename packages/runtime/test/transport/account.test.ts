@@ -222,7 +222,7 @@ describe("Un-/RegisterPushNotificationToken", () => {
         expect(result).toBeAnError("environment must be equal to one of the allowed values", "error.runtime.validation.invalidPropertyValue");
     });
 
-    test.each(["Development", "Production"])("register with valid enviroment", async (environment: any) => {
+    test.each(["Development", "Production", undefined])("register with valid enviroment: %s", async (environment: any) => {
         const result = await sTransportServices.account.registerPushNotificationToken({
             handle: "handleLongerThan10Characters",
             platform: "dummy",
