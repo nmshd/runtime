@@ -4,6 +4,7 @@ import { AbstractAttributeDeletionInfo, AbstractAttributeDeletionInfoJSON, IAbst
 // TODO: get deletion statuses straight
 export enum ThirdPartyRelationshipAttributeDeletionStatus {
     ToBeDeleted = "ToBeDeleted",
+    DeletedByOwner = "DeletedByOwner",
     DeletedByPeer = "DeletedByPeer"
 }
 

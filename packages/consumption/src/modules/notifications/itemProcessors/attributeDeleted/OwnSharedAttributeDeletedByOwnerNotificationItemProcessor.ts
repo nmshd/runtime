@@ -10,7 +10,10 @@ import {
     PeerAttributeDeletionInfo,
     PeerAttributeDeletionStatus,
     PeerIdentityAttribute,
-    PeerRelationshipAttribute
+    PeerRelationshipAttribute,
+    ThirdPartyRelationshipAttribute,
+    ThirdPartyRelationshipAttributeDeletionInfo,
+    ThirdPartyRelationshipAttributeDeletionStatus
 } from "../../../attributes";
 import { ValidationResult } from "../../../common";
 import { LocalNotification } from "../../local/LocalNotification";
@@ -32,8 +35,7 @@ export class OwnSharedAttributeDeletedByOwnerNotificationItemProcessor extends A
 
         if (!attribute) return ValidationResult.success(); // TODO: why is this success? Shouldn't it be an error?
 
-        // TODO: think about ThirdPartyRelationshipAttributes
-        if (!(attribute instanceof PeerIdentityAttribute || attribute instanceof PeerRelationshipAttribute)) {
+        if (!(attribute instanceof PeerIdentityAttribute || attribute instanceof PeerRelationshipAttribute || attribute instanceof ThirdPartyRelationshipAttribute)) {
             return ValidationResult.error(new ApplicationError("", "")); // TODO:
             // return ValidationResult.error(ConsumptionCoreErrors.attributes.isNotPeerSharedAttribute(notificationItem.attributeId));
         }
@@ -52,23 +54,34 @@ export class OwnSharedAttributeDeletedByOwnerNotificationItemProcessor extends A
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
         if (!attribute) return;
 
-        if (!(attribute instanceof PeerIdentityAttribute || attribute instanceof PeerRelationshipAttribute)) {
+        if (!(attribute instanceof PeerIdentityAttribute || attribute instanceof PeerRelationshipAttribute || attribute instanceof ThirdPartyRelationshipAttribute)) {
             throw Error; // TODO:
         }
 
-        const deletionInfo = PeerAttributeDeletionInfo.from({
-            deletionStatus: PeerAttributeDeletionStatus.DeletedByOwner,
+        if (attribute instanceof PeerIdentityAttribute || attribute instanceof PeerRelationshipAttribute) {
+            const deletionInfo = PeerAttributeDeletionInfo.from({
+                deletionStatus: PeerAttributeDeletionStatus.DeletedByOwner,
+                deletionDate: CoreDate.utc()
+            });
+
+            const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute);
+            const attributes = [attribute, ...predecessors];
+
+            await this.consumptionController.attributes.setPeerDeletionInfoOfPeerAttribute(attributes, deletionInfo);
+
+            return new OwnSharedAttributeDeletedByOwnerEvent(this.currentIdentityAddress.toString(), attribute);
+        }
+
+        const deletionStatus = attribute.peerIsOwner() ? ThirdPartyRelationshipAttributeDeletionStatus.DeletedByOwner : ThirdPartyRelationshipAttributeDeletionStatus.DeletedByPeer;
+        const deletionInfo = ThirdPartyRelationshipAttributeDeletionInfo.from({
+            deletionStatus,
             deletionDate: CoreDate.utc()
         });
 
         const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute);
+        const attributes = [attribute, ...predecessors];
 
-        for (const attr of [attribute, ...predecessors]) {
-            if (!attr.peerSharingInfo.deletionInfo) {
-                attr.setPeerDeletionInfo(deletionInfo);
-                await this.consumptionController.attributes.updateAttributeUnsafe(attr);
-            }
-        }
+        await this.consumptionController.attributes.setPeerDeletionInfoOfThirdPartyRelationshipAttribute(attributes, deletionInfo);
 
         return new OwnSharedAttributeDeletedByOwnerEvent(this.currentIdentityAddress.toString(), attribute);
     }

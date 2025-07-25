@@ -1,7 +1,13 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { IdentityAttribute, IdentityAttributeJSON, IIdentityAttribute } from "@nmshd/content";
 import { nameof } from "ts-simple-nameof";
-import { IPeerIdentityAttributeSharingInfo, PeerAttributeDeletionInfo, PeerIdentityAttributeSharingInfo, PeerIdentityAttributeSharingInfoJSON } from "../sharingInfos";
+import {
+    IPeerIdentityAttributeSharingInfo,
+    PeerAttributeDeletionInfo,
+    PeerAttributeDeletionStatus,
+    PeerIdentityAttributeSharingInfo,
+    PeerIdentityAttributeSharingInfoJSON
+} from "../sharingInfos";
 import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./LocalAttribute";
 
 export interface PeerIdentityAttributeJSON extends LocalAttributeJSON {
@@ -26,6 +32,13 @@ export class PeerIdentityAttribute extends LocalAttribute implements IPeerIdenti
     @serialize()
     @validate()
     public peerSharingInfo: PeerIdentityAttributeSharingInfo;
+
+    public isDeletedByOwnerOrToBeDeleted(): boolean {
+        if (!this.peerSharingInfo.deletionInfo) return false;
+
+        const deletionStatuses = [PeerAttributeDeletionStatus.DeletedByOwner, PeerAttributeDeletionStatus.ToBeDeleted];
+        return deletionStatuses.includes(this.peerSharingInfo.deletionInfo.deletionStatus);
+    }
 
     public setPeerDeletionInfo(deletionInfo: PeerAttributeDeletionInfo): this {
         this.peerSharingInfo.deletionInfo = deletionInfo;

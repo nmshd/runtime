@@ -265,37 +265,10 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
             const attributes = [attribute, ...predecessors];
 
             const deletionWasRequestedFromInitialPeer = attribute instanceof OwnRelationshipAttribute && attribute.peerSharingInfo.peer.equals(peer);
-            if (deletionWasRequestedFromInitialPeer) await this._setPeerDeletionInfo(attributes as OwnRelationshipAttribute[], deletionInfo);
-            await this._setForwardedDeletionInfo(attributes, deletionInfo, peer);
-        }
-    }
-
-    private async _setPeerDeletionInfo(attributes: OwnRelationshipAttribute[], deletionInfo: ForwardedAttributeDeletionInfo): Promise<void> {
-        for (const attribute of attributes) {
-            if (
-                attribute.peerSharingInfo.deletionInfo?.deletionStatus !== ForwardedAttributeDeletionStatus.DeletedByPeer &&
-                attribute.peerSharingInfo.deletionInfo?.deletionStatus !== ForwardedAttributeDeletionStatus.ToBeDeletedByPeer
-            ) {
-                attribute.setPeerDeletionInfo(deletionInfo);
-                await this.parent.attributes.updateAttributeUnsafe(attribute);
+            if (deletionWasRequestedFromInitialPeer) {
+                await this.parent.attributes.setPeerDeletionInfoOfOwnRelationshipAttribute(attributes as OwnRelationshipAttribute[], deletionInfo);
             }
-        }
-    }
-
-    private async _setForwardedDeletionInfo(
-        attributes: (OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute)[],
-        deletionInfo: ForwardedAttributeDeletionInfo,
-        peer: CoreAddress
-    ): Promise<void> {
-        for (const attribute of attributes) {
-            const sharingInfoOfPeer = attribute.forwardedSharingInfos?.find((sharingInfo) => sharingInfo.peer.equals(peer));
-            if (
-                sharingInfoOfPeer?.deletionInfo?.deletionStatus !== ForwardedAttributeDeletionStatus.DeletedByPeer &&
-                sharingInfoOfPeer?.deletionInfo?.deletionStatus !== ForwardedAttributeDeletionStatus.ToBeDeletedByPeer
-            ) {
-                attribute.setForwardedDeletionInfo(deletionInfo, peer);
-                await this.parent.attributes.updateAttributeUnsafe(attribute);
-            }
+            await this.parent.attributes.setForwardedDeletionInfo(attributes, deletionInfo, peer);
         }
     }
 

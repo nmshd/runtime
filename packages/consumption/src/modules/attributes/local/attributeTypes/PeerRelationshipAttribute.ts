@@ -10,6 +10,7 @@ import {
     IForwardedRelationshipAttributeSharingInfo,
     IPeerRelationshipAttributeSharingInfo,
     PeerAttributeDeletionInfo,
+    PeerAttributeDeletionStatus,
     PeerRelationshipAttributeSharingInfo,
     PeerRelationshipAttributeSharingInfoJSON
 } from "../sharingInfos";
@@ -59,6 +60,30 @@ export class PeerRelationshipAttribute extends LocalAttribute implements IPeerRe
 
         const excludedDeletionStatuses = [ForwardedAttributeDeletionStatus.DeletedByPeer, ForwardedAttributeDeletionStatus.ToBeDeletedByPeer];
         return thirdPartySharingInfosWithPeer.some((sharingInfo) => !sharingInfo.deletionInfo || !excludedDeletionStatuses.includes(sharingInfo.deletionInfo.deletionStatus));
+    }
+
+    // TODO: maybe simply rename deletionStatus DeletedByOwner to DeletedByPeer
+    public isDeletedByOwnerOrToBeDeleted(): boolean {
+        if (!this.peerSharingInfo.deletionInfo) return false;
+
+        const deletionStatuses = [PeerAttributeDeletionStatus.DeletedByOwner, PeerAttributeDeletionStatus.ToBeDeleted];
+        return deletionStatuses.includes(this.peerSharingInfo.deletionInfo.deletionStatus);
+    }
+
+    public isDeletedOrToBeDeletedByForwardingPeer(peerAddress: CoreAddress): boolean {
+        if (!this.forwardedSharingInfos) return false;
+
+        const sharingInfosWithPeer = this.forwardedSharingInfos.filter((sharingInfo) => sharingInfo.peer.equals(peerAddress));
+        if (sharingInfosWithPeer.length === 0) return false;
+
+        const deletionStatuses = [ForwardedAttributeDeletionStatus.DeletedByPeer, ForwardedAttributeDeletionStatus.ToBeDeletedByPeer];
+        const hasSharingInfoWithDeletionStatus = sharingInfosWithPeer.some(
+            (sharingInfo) => sharingInfo.deletionInfo && deletionStatuses.includes(sharingInfo.deletionInfo.deletionStatus)
+        );
+        const hasSharingInfoWithoutDeletionStatus = sharingInfosWithPeer.some(
+            (sharingInfo) => !sharingInfo.deletionInfo || !deletionStatuses.includes(sharingInfo.deletionInfo.deletionStatus)
+        );
+        return hasSharingInfoWithDeletionStatus && !hasSharingInfoWithoutDeletionStatus;
     }
 
     public setPeerDeletionInfo(deletionInfo: PeerAttributeDeletionInfo): this {
