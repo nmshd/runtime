@@ -812,9 +812,9 @@ export class DataViewExpander {
                 case "TransferFileOwnershipAcceptResponseItem":
                     const transferFileOwnershipResponseItem = responseItem as TransferFileOwnershipAcceptResponseItemJSON;
 
-                    const sharedAttributeResultForTransfer = await this.consumption.attributes.getAttribute({ id: transferFileOwnershipResponseItem.attributeId });
-                    if (sharedAttributeResultForTransfer.isError) {
-                        if (!sharedAttributeResultForTransfer.error.equals(RuntimeErrors.general.recordNotFound())) throw sharedAttributeResultForTransfer.error;
+                    const attributeResultForTransfer = await this.consumption.attributes.getAttribute({ id: transferFileOwnershipResponseItem.attributeId });
+                    if (attributeResultForTransfer.isError) {
+                        if (!attributeResultForTransfer.error.equals(RuntimeErrors.general.recordNotFound())) throw attributeResultForTransfer.error;
 
                         return {
                             type: "AttributeAlreadyDeletedAcceptResponseItemDVO",
@@ -823,32 +823,15 @@ export class DataViewExpander {
                         } as AttributeAlreadyDeletedAcceptResponseItemDVO;
                     }
 
-                    const sharedAttributeDVOForTransfer = (await this.expandLocalAttributeDTO(sharedAttributeResultForTransfer.value)) as SharedToPeerAttributeDVO;
-
-                    let repositoryAttributeDVOForTransfer;
-                    const repositoryAttributeIdForTransferExists = !!sharedAttributeDVOForTransfer.sourceAttribute;
-                    if (repositoryAttributeIdForTransferExists) {
-                        const repositoryAttributeResultForTransfer = await this.consumption.attributes.getAttribute({
-                            id: sharedAttributeDVOForTransfer.sourceAttribute!
-                        });
-
-                        if (repositoryAttributeResultForTransfer.isError && !repositoryAttributeResultForTransfer.error.equals(RuntimeErrors.general.recordNotFound())) {
-                            throw repositoryAttributeResultForTransfer.error;
-                        }
-
-                        if (repositoryAttributeResultForTransfer.isSuccess) {
-                            repositoryAttributeDVOForTransfer = await this.expandLocalAttributeDTO(repositoryAttributeResultForTransfer.value);
-                        }
-                    }
+                    const attributeDVOForTransfer = (await this.expandLocalAttributeDTO(attributeResultForTransfer.value)) as OwnIdentityAttributeDVO;
 
                     return {
                         ...transferFileOwnershipResponseItem,
                         type: "TransferFileOwnershipAcceptResponseItemDVO",
-                        id: repositoryAttributeDVOForTransfer?.id ?? transferFileOwnershipResponseItem.attributeId,
+                        id: transferFileOwnershipResponseItem.attributeId,
                         name: name,
-                        repositoryAttribute: repositoryAttributeDVOForTransfer,
-                        sharedAttributeId: transferFileOwnershipResponseItem.attributeId,
-                        sharedAttribute: sharedAttributeDVOForTransfer
+                        attributeId: transferFileOwnershipResponseItem.attributeId,
+                        attribute: attributeDVOForTransfer
                     } as TransferFileOwnershipAcceptResponseItemDVO;
 
                 case "AttributeSuccessionAcceptResponseItem":
