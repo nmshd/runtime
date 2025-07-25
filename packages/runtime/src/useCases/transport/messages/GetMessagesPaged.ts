@@ -1,3 +1,4 @@
+import { DatabasePaginationOptions } from "@js-soft/docdb-access-abstractions";
 import { QueryTranslator } from "@js-soft/docdb-querytranslator";
 import { Result } from "@js-soft/ts-utils";
 import { MessageDTO, RecipientDTO } from "@nmshd/runtime-types";
@@ -5,34 +6,26 @@ import { CachedMessage, CachedMessageRecipient, Message, MessageController, Mess
 import { Inject } from "@nmshd/typescript-ioc";
 import { nameof } from "ts-simple-nameof";
 import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { GetMessagesQuery } from "./GetMessages";
 import { MessageMapper } from "./MessageMapper";
 
-export interface GetMessagesQuery {
-    isOwn?: string;
-    createdBy?: string | string[];
-    createdByDevice?: string | string[];
-    createdAt?: string | string[];
-    "content.@type"?: string | string[];
-    "content.body"?: string | string[];
-    "content.subject"?: string | string[];
-    attachments?: string | string[];
-    "recipients.address"?: string | string[];
-    "recipients.relationshipId"?: string | string[];
-    wasReadAt?: string | string[];
-    participant?: string | string[];
-}
-
-export interface GetMessagesRequest {
+export interface GetMessagesPagedRequest {
     query?: GetMessagesQuery;
+    paginationOptions?: DatabasePaginationOptions; // an upper bound for limit could be appropriate
 }
 
-class Validator extends SchemaValidator<GetMessagesRequest> {
+export interface GetMessagesPagedResponse {
+    messages: MessageDTO[];
+    messageCount: number;
+}
+
+class Validator extends SchemaValidator<GetMessagesPagedRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
-        super(schemaRepository.getSchema("GetMessagesRequest"));
+        super(schemaRepository.getSchema("GetMessagesPagedRequest"));
     }
 }
 
-export class GetMessagesUseCase extends UseCase<GetMessagesRequest, MessageDTO[]> {
+export class GetMessagesPagedUseCase extends UseCase<GetMessagesPagedRequest, GetMessagesPagedResponse> {
     private static readonly queryTranslator = new QueryTranslator({
         whitelist: {
             [nameof<MessageDTO>((m) => m.isOwn)]: true,
@@ -86,7 +79,7 @@ export class GetMessagesUseCase extends UseCase<GetMessagesRequest, MessageDTO[]
                     participantQuery = {};
 
                     for (const value of input) {
-                        const parsed: { field: string; value: any } = GetMessagesUseCase.queryTranslator.parseString(value, true);
+                        const parsed: { field: string; value: any } = GetMessagesPagedUseCase.queryTranslator.parseString(value, true);
 
                         switch (parsed.field) {
                             case "$containsAny":
@@ -99,7 +92,7 @@ export class GetMessagesUseCase extends UseCase<GetMessagesRequest, MessageDTO[]
                         }
                     }
                 } else {
-                    participantQuery = GetMessagesUseCase.queryTranslator.parseStringVal(input);
+                    participantQuery = GetMessagesPagedUseCase.queryTranslator.parseStringVal(input);
                 }
 
                 query["$or"] = [
@@ -121,11 +114,14 @@ export class GetMessagesUseCase extends UseCase<GetMessagesRequest, MessageDTO[]
         super(validator);
     }
 
-    protected async executeInternal(request: GetMessagesRequest): Promise<Result<MessageDTO[]>> {
-        const query = GetMessagesUseCase.queryTranslator.parse(request.query);
+    protected async executeInternal(request: GetMessagesPagedRequest): Promise<Result<GetMessagesPagedResponse>> {
+        const query = GetMessagesPagedUseCase.queryTranslator.parse(request.query);
 
-        const result = await this.messageController.getMessages(query);
+        const getMessagesResult = await this.messageController.getMessages(query, request.paginationOptions);
 
-        return Result.ok(MessageMapper.toMessageDTOList(result.messages));
+        return Result.ok({
+            messages: MessageMapper.toMessageDTOList(getMessagesResult.messages),
+            messageCount: getMessagesResult.messageCount
+        });
     }
 }
