@@ -16,7 +16,7 @@ export class AbstractString extends AbstractAttributeValue implements IAbstractS
     public value: string;
 
     public static override preFrom(value: any): any {
-        if (typeof value === "string") value = { value };
+        if (typeof value !== "object") value = { value };
         return value;
     }
 

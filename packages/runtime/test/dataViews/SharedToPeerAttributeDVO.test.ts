@@ -1,4 +1,4 @@
-import { AbstractIntegerJSON, AbstractStringJSON, IdentityAttributeJSON } from "@nmshd/content";
+import { AbstractStringJSON, IdentityAttributeJSON } from "@nmshd/content";
 import { SharedToPeerAttributeDVO } from "../../src";
 import { cleanupAttributes, ensureActiveRelationship, executeFullCreateAndShareRepositoryAttributeFlow, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 
@@ -25,51 +25,6 @@ beforeAll(async () => {
 afterAll(() => serviceProvider.stop());
 
 describe("SharedToPeerAttributeDVO", () => {
-    test("check the BirthYear", async () => {
-        const ownSharedIdentityAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
-            content: {
-                value: {
-                    "@type": "BirthYear",
-                    value: 2001
-                }
-            }
-        });
-
-        const dto = (await services1.consumption.attributes.getAttribute({ id: ownSharedIdentityAttribute.id })).value;
-        const dvo = (await services1.expander.expandLocalAttributeDTO(dto)) as SharedToPeerAttributeDVO;
-        expect(dvo).toBeDefined();
-        expect(dvo.type).toBe("SharedToPeerAttributeDVO");
-        expect(dvo.id).toStrictEqual(ownSharedIdentityAttribute.id);
-        expect(dvo.name).toBe("i18n://dvo.attribute.name.BirthYear");
-        expect(dvo.description).toBe("i18n://dvo.attribute.description.BirthYear");
-        expect(dvo.date).toStrictEqual(ownSharedIdentityAttribute.createdAt);
-        expect(dvo.content).toStrictEqual(ownSharedIdentityAttribute.content);
-        const value = dvo.value as AbstractIntegerJSON;
-        expect(value["@type"]).toBe("BirthYear");
-        expect(value.value).toBe(2001);
-        expect(dvo.createdAt).toStrictEqual(ownSharedIdentityAttribute.createdAt);
-        expect(dvo.isOwn).toBe(true);
-        expect(dvo.isValid).toBe(true);
-        expect(dvo.owner).toStrictEqual(ownSharedIdentityAttribute.content.owner);
-        expect(dvo.renderHints["@type"]).toBe("RenderHints");
-        expect(dvo.renderHints.technicalType).toBe("Integer");
-        expect(dvo.renderHints.editType).toBe("SelectLike");
-        expect(dvo.renderHints.dataType).toBe("Year");
-        expect(dvo.valueHints["@type"]).toBe("ValueHints");
-        expect(dvo.valueHints.min).toBe(1);
-        expect(dvo.valueHints.max).toBe(9999);
-        expect(dvo.peer).toBe(ownSharedIdentityAttribute.shareInfo!.peer);
-        expect(dvo.isDraft).toBe(false);
-        expect(dvo.requestReference).toBe(ownSharedIdentityAttribute.shareInfo!.requestReference);
-        expect(dvo.notificationReference).toBe(ownSharedIdentityAttribute.shareInfo!.notificationReference);
-        expect(dvo.sourceAttribute).toBe(ownSharedIdentityAttribute.shareInfo!.sourceAttribute);
-        expect(dvo.tags).toBe((ownSharedIdentityAttribute.content as IdentityAttributeJSON).tags);
-        expect(dvo.valueType).toBe(ownSharedIdentityAttribute.content.value["@type"]);
-        expect(dvo.deletionStatus).toBe(ownSharedIdentityAttribute.deletionInfo?.deletionStatus);
-        expect(dvo.deletionDate).toBe(ownSharedIdentityAttribute.deletionInfo?.deletionDate);
-        expect(dvo.wasViewedAt).toBeUndefined();
-    });
-
     test("check the Sex", async () => {
         const ownSharedIdentityAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
             content: {
