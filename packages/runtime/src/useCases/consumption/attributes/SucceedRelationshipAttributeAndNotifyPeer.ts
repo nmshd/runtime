@@ -48,7 +48,8 @@ export class SucceedRelationshipAttributeAndNotifyPeerUseCase extends UseCase<Su
         const predecessor = await this.attributeController.getLocalAttribute(CoreId.from(request.predecessorId));
         if (!predecessor) return Result.fail(ConsumptionCoreErrors.attributes.predecessorDoesNotExist());
 
-        if (!(predecessor instanceof OwnRelationshipAttribute)) return Result.fail(ConsumptionCoreErrors.attributes.predecessorIsNotOwnSharedRelationshipAttribute());
+        // TODO: return correct error message
+        if (!(predecessor instanceof OwnRelationshipAttribute)) return Result.fail(ConsumptionCoreErrors.attributes.predecessorDoesNotExist());
 
         const successorContent = RelationshipAttribute.from({
             "@type": "RelationshipAttribute",
