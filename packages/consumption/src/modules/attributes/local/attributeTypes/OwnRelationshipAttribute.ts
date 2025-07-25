@@ -83,12 +83,12 @@ export class OwnRelationshipAttribute extends LocalAttribute implements IOwnRela
         return hasSharingInfoWithDeletionStatus && !hasSharingInfoWithoutDeletionStatus;
     }
 
-    public setPeerDeletionInfo(deletionInfo: ForwardedAttributeDeletionInfo): this {
+    public setPeerDeletionInfo(deletionInfo: ForwardedAttributeDeletionInfo | undefined): this {
         this.peerSharingInfo.deletionInfo = deletionInfo;
         return this;
     }
 
-    public setForwardedDeletionInfo(deletionInfo: ForwardedAttributeDeletionInfo, thirdParty: CoreAddress): this {
+    public setForwardedDeletionInfo(deletionInfo: ForwardedAttributeDeletionInfo | undefined, thirdParty: CoreAddress): this {
         const sharingInfoForThirdParty = this.forwardedSharingInfos?.find((sharingInfo) => sharingInfo.peer.equals(thirdParty));
         if (!sharingInfoForThirdParty) throw Error; // TODO:
 

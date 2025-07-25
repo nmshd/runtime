@@ -86,12 +86,12 @@ export class PeerRelationshipAttribute extends LocalAttribute implements IPeerRe
         return hasSharingInfoWithDeletionStatus && !hasSharingInfoWithoutDeletionStatus;
     }
 
-    public setPeerDeletionInfo(deletionInfo: PeerAttributeDeletionInfo): this {
+    public setPeerDeletionInfo(deletionInfo: PeerAttributeDeletionInfo | undefined): this {
         this.peerSharingInfo.deletionInfo = deletionInfo;
         return this;
     }
 
-    public setForwardedDeletionInfo(deletionInfo: ForwardedAttributeDeletionInfo, thirdParty: CoreAddress): this {
+    public setForwardedDeletionInfo(deletionInfo: ForwardedAttributeDeletionInfo | undefined, thirdParty: CoreAddress): this {
         const sharingInfoForThirdParty = this.forwardedSharingInfos?.find((sharingInfo) => sharingInfo.peer.equals(thirdParty));
         if (!sharingInfoForThirdParty) throw Error; // TODO:
 

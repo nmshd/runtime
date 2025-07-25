@@ -44,7 +44,7 @@ export class ThirdPartyRelationshipAttribute extends LocalAttribute implements I
         return deletionStatuses.includes(this.peerSharingInfo.deletionInfo.deletionStatus);
     }
 
-    public setPeerDeletionInfo(deletionInfo: ThirdPartyRelationshipAttributeDeletionInfo): this {
+    public setPeerDeletionInfo(deletionInfo: ThirdPartyRelationshipAttributeDeletionInfo | undefined): this {
         this.peerSharingInfo.deletionInfo = deletionInfo;
         return this;
     }
