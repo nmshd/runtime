@@ -1755,34 +1755,32 @@ describe(NotifyPeerAboutOwnIdentityAttributeSuccessionUseCase.name, () => {
         expect(notificationResult).toBeSuccessful();
     });
 
-    test("should create sender own shared identity attribute and recipient peer shared identity attribute", async () => {
-        const { successor: ownSharedIdentityAttributeVersion1 } = await executeFullNotifyPeerAboutAttributeSuccessionFlow(services1, services2, ownIdentityAttributeVersion1.id);
-        expect(ownSharedIdentityAttributeVersion1.succeeds).toStrictEqual(ownIdentityAttributeVersion0.id);
-        expect(ownSharedIdentityAttributeVersion1.content.value).toStrictEqual(succeedOwnIdentityAttributeRequest1.successorContent.value);
-        expect((ownSharedIdentityAttributeVersion1 as any).content.tags).toStrictEqual(succeedOwnIdentityAttributeRequest1.successorContent.tags);
-
-        const recipientPeerSharedIdentityAttributeVersion1 = (await services2.consumption.attributes.getAttribute({ id: ownSharedIdentityAttributeVersion1.id })).value;
-        expect(recipientPeerSharedIdentityAttributeVersion1.content).toStrictEqual(ownSharedIdentityAttributeVersion1.content);
+    test("should add forwardedSharingInfo to successor of own IdentityAttribute of sender", async () => {
+        const { successor: updatedOwnIdentityAttributeVersion1 } = await executeFullNotifyPeerAboutAttributeSuccessionFlow(services1, services2, ownIdentityAttributeVersion1.id);
+        expect(updatedOwnIdentityAttributeVersion1.forwardedSharingInfos![0].peer).toBe(services2.address);
     });
 
-    test("should allow to notify about successor having notified about predecessor", async () => {
-        let { successor: ownSharedIdentityAttributeVersion1 } = await executeFullNotifyPeerAboutAttributeSuccessionFlow(services1, services2, ownIdentityAttributeVersion1.id);
+    test("should create successor peer IdentityAttribute for recipient", async () => {
+        await executeFullNotifyPeerAboutAttributeSuccessionFlow(services1, services2, ownIdentityAttributeVersion1.id);
 
-        const successionResult = await executeFullNotifyPeerAboutAttributeSuccessionFlow(services1, services2, ownIdentityAttributeVersion2.id);
-        ownSharedIdentityAttributeVersion1 = successionResult["predecessor"];
-        const ownSharedIdentityAttributeVersion2 = successionResult["successor"];
+        const recipientPeerIdentityAttributeVersion1 = (await services2.consumption.attributes.getAttribute({ id: ownIdentityAttributeVersion1.id })).value;
+        expect(recipientPeerIdentityAttributeVersion1.content).toStrictEqual(ownIdentityAttributeVersion1.content);
+        expect(recipientPeerIdentityAttributeVersion1.succeeds).toBe(ownIdentityAttributeVersion0.id);
 
-        expect(ownSharedIdentityAttributeVersion1.succeededBy).toStrictEqual(ownSharedIdentityAttributeVersion2.id);
-        expect(ownSharedIdentityAttributeVersion2.succeeds).toStrictEqual(ownSharedIdentityAttributeVersion1.id);
-        expect(ownSharedIdentityAttributeVersion2.succeededBy).toBeUndefined();
+        const recipientPeerIdentityAttributeVersion0 = (await services2.consumption.attributes.getAttribute({ id: ownIdentityAttributeVersion0.id })).value;
+        expect(recipientPeerIdentityAttributeVersion0.succeededBy).toBe(recipientPeerIdentityAttributeVersion1.id);
     });
 
     test("should allow to notify about successor not having notified about predecessor", async () => {
-        const { successor: ownSharedIdentityAttributeVersion2 } = await executeFullNotifyPeerAboutAttributeSuccessionFlow(services1, services2, ownIdentityAttributeVersion2.id);
-        expect(ownSharedIdentityAttributeVersion2.succeeds).toStrictEqual(ownIdentityAttributeVersion0.id);
+        await executeFullNotifyPeerAboutAttributeSuccessionFlow(services1, services2, ownIdentityAttributeVersion2.id);
+
+        const recipientPeerIdentityAttributeVersion2 = (await services2.consumption.attributes.getAttribute({ id: ownIdentityAttributeVersion2.id })).value;
+        const recipientPeerIdentityAttributeVersion0 = (await services2.consumption.attributes.getAttribute({ id: ownIdentityAttributeVersion0.id })).value;
+        expect(recipientPeerIdentityAttributeVersion2.succeeds).toBe(recipientPeerIdentityAttributeVersion0.id);
+        expect(recipientPeerIdentityAttributeVersion0.succeededBy).toBe(recipientPeerIdentityAttributeVersion2.id);
     });
 
-    test("should allow to notify about successor if the predecessor was deleted by peer but additional predecessor exists", async () => {
+    test("should allow to notify about successor if the predecessor was deleted by the peer but was shared again", async () => {
         const deleteResult = await services2.consumption.attributes.deletePeerIdentityAttributeAndNotifyOwner({ attributeId: ownIdentityAttributeVersion0.id });
         const notificationId = deleteResult.value.notificationId!;
 
@@ -1790,35 +1788,37 @@ describe(NotifyPeerAboutOwnIdentityAttributeSuccessionUseCase.name, () => {
         await services1.eventBus.waitForEvent(PeerSharedAttributeDeletedByPeerEvent, (e) => {
             return e.data.id === ownIdentityAttributeVersion0.id;
         });
-        const updatedOwnSharedIdentityAttribute = (await services1.consumption.attributes.getAttribute({ id: ownIdentityAttributeVersion0.id })).value;
-        expect(updatedOwnSharedIdentityAttribute.deletionInfo?.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByPeer);
+        const updatedOwnIdentityAttribute = (await services1.consumption.attributes.getAttribute({ id: ownIdentityAttributeVersion0.id })).value;
+        expect(updatedOwnIdentityAttribute.forwardedSharingInfos![0].deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByPeer);
 
-        const ownSharedIdentityAttributeVersion0WithoutDeletionInfo = await executeFullShareOwnIdentityAttributeFlow(
-            services1,
-            services2,
-            ownIdentityAttributeVersion0.shareInfo!.sourceAttribute!
-        );
+        await executeFullShareOwnIdentityAttributeFlow(services1, services2, ownIdentityAttributeVersion0.id);
 
         const result = await services1.consumption.attributes.notifyPeerAboutOwnIdentityAttributeSuccession({
             attributeId: ownIdentityAttributeVersion2.id,
             peer: services2.address
         });
         expect(result).toBeSuccessful();
-        expect(result.value.predecessor.id).toBe(ownSharedIdentityAttributeVersion0WithoutDeletionInfo.id);
     });
 
-    test("should throw if the predecessor repository attribute was deleted", async () => {
-        const repositoryAttributeVersion0 = (await services1.consumption.attributes.getAttribute({ id: ownIdentityAttributeVersion0.shareInfo!.sourceAttribute! })).value;
-        await services1.consumption.attributes.deleteOwnIdentityAttribute({ attributeId: repositoryAttributeVersion0.id });
+    test("should throw if the predecessor was deleted by the peer", async () => {
+        const deleteResult = await services2.consumption.attributes.deletePeerIdentityAttributeAndNotifyOwner({ attributeId: ownIdentityAttributeVersion0.id });
+        const notificationId = deleteResult.value.notificationId!;
+
+        await syncUntilHasMessageWithNotification(services1.transport, notificationId);
+        await services1.eventBus.waitForEvent(PeerSharedAttributeDeletedByPeerEvent, (e) => {
+            return e.data.id === ownIdentityAttributeVersion0.id;
+        });
+        const updatedOwnIdentityAttribute = (await services1.consumption.attributes.getAttribute({ id: ownIdentityAttributeVersion0.id })).value;
+        expect(updatedOwnIdentityAttribute.forwardedSharingInfos![0].deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByPeer);
 
         const notificationResult = await services1.consumption.attributes.notifyPeerAboutOwnIdentityAttributeSuccession({
             attributeId: ownIdentityAttributeVersion1.id,
             peer: services2.address
         });
-        expect(notificationResult).toBeAnError(/.*/, "error.runtime.attributes.noPreviousVersionOfRepositoryAttributeHasBeenSharedWithPeerBefore");
+        expect(notificationResult).toBeAnError(/.*/, "error.runtime.attributes.peerHasNoPreviousVersionOfAttribute");
     });
 
-    test("should throw if the successor repository attribute was deleted", async () => {
+    test("should throw if the successor own IdentityAttribute was deleted", async () => {
         await services1.consumption.attributes.deleteOwnIdentityAttribute({ attributeId: ownIdentityAttributeVersion1.id });
 
         const notificationResult = await services1.consumption.attributes.notifyPeerAboutOwnIdentityAttributeSuccession({
@@ -1828,27 +1828,6 @@ describe(NotifyPeerAboutOwnIdentityAttributeSuccessionUseCase.name, () => {
         expect(notificationResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
     });
 
-    test("should throw if the predecessor was deleted by peer", async () => {
-        const { successor: ownSharedIdentityAttributeVersion1 } = await executeFullNotifyPeerAboutAttributeSuccessionFlow(services1, services2, ownIdentityAttributeVersion1.id);
-        const rPeerSharedIdentityAttributeVersion1 = (await services2.consumption.attributes.getAttribute({ id: ownSharedIdentityAttributeVersion1.id })).value;
-
-        const deleteResult = await services2.consumption.attributes.deletePeerIdentityAttributeAndNotifyOwner({ attributeId: rPeerSharedIdentityAttributeVersion1.id });
-        const notificationId = deleteResult.value.notificationId!;
-
-        await syncUntilHasMessageWithNotification(services1.transport, notificationId);
-        await services1.eventBus.waitForEvent(PeerSharedAttributeDeletedByPeerEvent, (e) => {
-            return e.data.id === ownSharedIdentityAttributeVersion1.id;
-        });
-        const updatedOwnSharedIdentityAttribute = (await services1.consumption.attributes.getAttribute({ id: ownSharedIdentityAttributeVersion1.id })).value;
-        expect(updatedOwnSharedIdentityAttribute.deletionInfo?.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByPeer);
-
-        const notificationResult = await services1.consumption.attributes.notifyPeerAboutOwnIdentityAttributeSuccession({
-            attributeId: ownIdentityAttributeVersion2.id,
-            peer: services2.address
-        });
-        expect(notificationResult).toBeAnError(/.*/, "error.runtime.attributes.cannotSucceedAttributesWithDeletionInfo");
-    });
-
     test("should throw if the same version of the attribute has been notified about already", async () => {
         await executeFullNotifyPeerAboutAttributeSuccessionFlow(services1, services2, ownIdentityAttributeVersion1.id);
 
@@ -1856,7 +1835,7 @@ describe(NotifyPeerAboutOwnIdentityAttributeSuccessionUseCase.name, () => {
             attributeId: ownIdentityAttributeVersion1.id,
             peer: services2.address
         });
-        expect(result2).toBeAnError(/.*/, "error.runtime.attributes.repositoryAttributeHasAlreadyBeenSharedWithPeer");
+        expect(result2).toBeAnError(/.*/, "error.runtime.attributes.ownIdentityAttributeHasAlreadyBeenSharedWithPeer");
     });
 
     test("should throw if a later version of the attribute has been notified about already", async () => {
@@ -1870,7 +1849,7 @@ describe(NotifyPeerAboutOwnIdentityAttributeSuccessionUseCase.name, () => {
     });
 
     test("should throw if no other version of the attribute has been shared before", async () => {
-        const newRepositoryAttribute = (
+        const newOwnIdentityAttribute = (
             await services1.consumption.attributes.createOwnIdentityAttribute({
                 content: {
                     value: {
@@ -1881,8 +1860,8 @@ describe(NotifyPeerAboutOwnIdentityAttributeSuccessionUseCase.name, () => {
             })
         ).value;
 
-        const result = await services1.consumption.attributes.notifyPeerAboutOwnIdentityAttributeSuccession({ attributeId: newRepositoryAttribute.id, peer: services2.address });
-        expect(result).toBeAnError(/.*/, "error.runtime.attributes.noPreviousVersionOfRepositoryAttributeHasBeenSharedWithPeerBefore");
+        const result = await services1.consumption.attributes.notifyPeerAboutOwnIdentityAttributeSuccession({ attributeId: newOwnIdentityAttribute.id, peer: services2.address });
+        expect(result).toBeAnError(/.*/, "error.runtime.attributes.peerHasNoPreviousVersionOfAttribute");
     });
 });
 

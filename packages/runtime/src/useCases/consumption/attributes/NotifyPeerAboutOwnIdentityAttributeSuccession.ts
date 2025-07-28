@@ -50,13 +50,12 @@ export class NotifyPeerAboutOwnIdentityAttributeSuccessionUseCase extends UseCas
         const candidatePredecessors = await this.attributeController.getSharedVersionsOfAttribute(attribute, peerAddress);
 
         if (candidatePredecessors.length === 0) {
-            // TODO: or is deleted or to be deleted
-            return Result.fail(RuntimeErrors.attributes.noPreviousVersionOfRepositoryAttributeHasBeenSharedWithPeerBefore(attributeId, peerAddress));
+            return Result.fail(RuntimeErrors.attributes.peerHasNoPreviousVersionOfAttribute(attributeId, peerAddress));
         }
 
         const predecessorSharedWithPeer = candidatePredecessors[0];
         if (predecessorSharedWithPeer.id.toString() === request.attributeId) {
-            return Result.fail(RuntimeErrors.attributes.repositoryAttributeHasAlreadyBeenSharedWithPeer(request.attributeId, peerAddress, predecessorSharedWithPeer.id));
+            return Result.fail(RuntimeErrors.attributes.ownIdentityAttributeHasAlreadyBeenSharedWithPeer(request.attributeId, peerAddress));
         }
 
         const notificationId = await ConsumptionIds.notification.generate();
