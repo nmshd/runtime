@@ -16,7 +16,6 @@ export interface RequestItemGroupDVO {
 
 export interface RequestItemDVO extends DataViewObject {
     mustBeAccepted: boolean;
-    requireManualDecision?: boolean;
     isDecidable: boolean;
     response?: ResponseItemDVO;
 }
@@ -62,6 +61,7 @@ export interface ConsentRequestItemDVO extends RequestItemDVO {
     consent: string;
     link?: string;
     linkDisplayText?: string;
+    requiresInteraction?: boolean;
 }
 
 export interface FormFieldRequestItemDVO extends RequestItemDVO {

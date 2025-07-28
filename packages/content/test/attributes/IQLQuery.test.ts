@@ -20,9 +20,7 @@ describe("IQLQuery", function () {
     });
 
     test("can be created with creation hints", function () {
-        const hint: IQLQueryCreationHintsJSON = {
-            valueType: "ZipCode"
-        };
+        const hint: IQLQueryCreationHintsJSON = { valueType: "BirthDate" };
 
         const serializable = IQLQuery.from({
             queryString: validIqlQueries[0],

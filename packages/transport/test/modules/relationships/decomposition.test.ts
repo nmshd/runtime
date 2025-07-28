@@ -62,7 +62,7 @@ describe("Data cleanup after relationship decomposition", function () {
     });
 
     test("templates should be deleted", async function () {
-        const templateForRelationship = await sender.relationshipTemplates.getRelationshipTemplate(relationship.cache!.templateId);
+        const templateForRelationship = await sender.relationshipTemplates.getRelationshipTemplate(relationship.templateId);
         const otherTemplate = await sender.relationshipTemplates.getRelationshipTemplate(templateId);
         expect(templateForRelationship).toBeUndefined();
         expect(otherTemplate).toBeUndefined();
@@ -77,7 +77,7 @@ describe("Data cleanup after relationship decomposition", function () {
         const messages = await sender.messages.getMessages();
         expect(messages).toHaveLength(1);
 
-        expect(messages[0].cache!.recipients.map((r) => [r.address, r.relationshipId])).toStrictEqual(
+        expect(messages[0].recipients.map((r) => [r.address, r.relationshipId])).toStrictEqual(
             expect.arrayContaining([
                 [await TestUtil.generateAddressPseudonym(process.env.NMSHD_TEST_BASEURL!), undefined],
                 [recipient2.identity.address, relationship2Id]
@@ -110,7 +110,7 @@ describe("Data cleanup after relationship decomposition", function () {
         await sender2.syncDatawallet();
 
         const sender2Messages = await sender2.messages.getMessages();
-        expect(sender2Messages[0].cache?.recipients.map((r) => [r.address, r.relationshipId])).toStrictEqual(
+        expect(sender2Messages[0].recipients.map((r) => [r.address, r.relationshipId])).toStrictEqual(
             expect.arrayContaining([
                 [await TestUtil.generateAddressPseudonym(process.env.NMSHD_TEST_BASEURL!), undefined],
                 [recipient2.identity.address, relationship2Id]

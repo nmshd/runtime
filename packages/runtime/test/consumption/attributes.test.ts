@@ -6,7 +6,6 @@ import {
     ReadAttributeRequestItemJSON,
     RelationshipAttributeConfidentiality,
     RelationshipTemplateContentJSON,
-    RequestItemJSONDerivations,
     ShareAttributeRequestItem,
     ShareAttributeRequestItemJSON,
     ThirdPartyRelationshipAttributeQuery,
@@ -715,18 +714,20 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
             const request: CanCreateRepositoryAttributeRequest = {
                 content: {
                     value: {
-                        "@type": "BirthMonth",
-                        value: 14
+                        "@type": "BirthDate",
+                        day: 14,
+                        month: 14,
+                        year: 1990
                     },
                     tags: ["x:tag1", "x:tag2"]
-                } as any
+                }
             };
             const result = await services1.consumption.attributes.canCreateRepositoryAttribute(request);
 
             assert(!result.value.isSuccess);
 
             expect(result.value.isSuccess).toBe(false);
-            expect(result.value.message).toBe("BirthMonth :: value must be equal to one of the allowed values");
+            expect(result.value.message).toBe("BirthMonth.value:Number :: must be an integer value between 1 and 12");
             expect(result.value.code).toBe("error.runtime.validation.invalidPropertyValue");
         });
 
@@ -889,10 +890,14 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
         const createAttributeWithOptionalPropertyRequest: CreateRepositoryAttributeRequest = {
             content: {
                 value: {
-                    "@type": "PersonName",
-                    givenName: "aGivenName",
-                    surname: "aSurname",
-                    middleName: "aMiddleName"
+                    "@type": "StreetAddress",
+                    street: "aStreet",
+                    houseNo: "aHouseNo",
+                    zipCode: "aZipCode",
+                    city: "aCity",
+                    country: "DE",
+                    state: "aState",
+                    recipient: "aRecipient"
                 },
                 tags: ["x:tag1", "x:tag2"]
             }
@@ -901,9 +906,13 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
         const canCreateAttributeWithoutOptionalPropertyRequest: CanCreateRepositoryAttributeRequest = {
             content: {
                 value: {
-                    "@type": "PersonName",
-                    givenName: "aGivenName",
-                    surname: "aSurname"
+                    "@type": "StreetAddress",
+                    street: "aStreet",
+                    houseNo: "aHouseNo",
+                    zipCode: "aZipCode",
+                    city: "aCity",
+                    country: "DE",
+                    recipient: "aRecipient"
                 },
                 tags: ["x:tag1", "x:tag2"]
             }
@@ -1063,15 +1072,17 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
             const request: CreateRepositoryAttributeRequest = {
                 content: {
                     value: {
-                        "@type": "BirthMonth",
-                        value: 14
+                        "@type": "BirthDate",
+                        day: 14,
+                        month: 14,
+                        year: 1990
                     },
                     tags: ["x:tag1", "x:tag2"]
-                } as any
+                }
             };
             const result = await services1.consumption.attributes.createRepositoryAttribute(request);
-            expect(result.error.message).toBe("BirthMonth :: value must be equal to one of the allowed values");
-            expect(result.error.code).toBe("error.runtime.validation.invalidPropertyValue");
+            expect(result.error.message).toBe("BirthMonth.value:Number :: must be an integer value between 1 and 12");
+            expect(result.error.code).toBe("error.runtime.requestDeserialization");
         });
 
         test("should not accept an additional property", async () => {
@@ -1189,10 +1200,14 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
         const request: CreateRepositoryAttributeRequest = {
             content: {
                 value: {
-                    "@type": "PersonName",
-                    givenName: "aGivenName",
-                    surname: "aSurname",
-                    middleName: "aMiddleName"
+                    "@type": "StreetAddress",
+                    street: "aStreet",
+                    houseNo: "aHouseNo",
+                    zipCode: "aZipCode",
+                    city: "aCity",
+                    country: "DE",
+                    state: "aState",
+                    recipient: "aRecipient"
                 },
                 tags: ["x:tag1", "x:tag2"]
             }
@@ -1201,9 +1216,13 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
         const request2: CreateRepositoryAttributeRequest = {
             content: {
                 value: {
-                    "@type": "PersonName",
-                    givenName: "aGivenName",
-                    surname: "aSurname"
+                    "@type": "StreetAddress",
+                    street: "aStreet",
+                    houseNo: "aHouseNo",
+                    zipCode: "aZipCode",
+                    city: "aCity",
+                    country: "DE",
+                    recipient: "aRecipient"
                 },
                 tags: ["x:tag1", "x:tag2"]
             }
@@ -1355,8 +1374,7 @@ describe(ShareRepositoryAttributeUseCase.name, () => {
             },
             requestItemMetadata: {
                 description: "An item description",
-                metadata: { aKey: "aValue" },
-                requireManualDecision: true
+                metadata: { aKey: "aValue" }
             }
         };
         const shareRequestResult = await services1.consumption.attributes.shareRepositoryAttribute(shareRequest);
@@ -1370,7 +1388,6 @@ describe(ShareRepositoryAttributeUseCase.name, () => {
 
         expect(request.content.items[0].description).toBe("An item description");
         expect(request.content.items[0].metadata).toStrictEqual({ aKey: "aValue" });
-        expect((request.content.items[0] as RequestItemJSONDerivations).requireManualDecision).toBe(true);
     });
 
     test("should send a sharing request containing a repository attribute that was already shared but deleted by the peer", async () => {
@@ -1918,8 +1935,7 @@ describe(CreateAndShareRelationshipAttributeUseCase.name, () => {
             },
             requestItemMetadata: {
                 description: "An item Description",
-                metadata: { aKey: "aValue" },
-                requireManualDecision: true
+                metadata: { aKey: "aValue" }
             }
         };
         const requestResult = await services1.consumption.attributes.createAndShareRelationshipAttribute(createAndShareRelationshipAttributeRequest);
@@ -1934,7 +1950,6 @@ describe(CreateAndShareRelationshipAttributeUseCase.name, () => {
 
         expect(request.content.items[0].description).toBe("An item Description");
         expect(request.content.items[0].metadata).toStrictEqual({ aKey: "aValue" });
-        expect((request.content.items[0] as RequestItemJSONDerivations).requireManualDecision).toBe(true);
     });
 });
 

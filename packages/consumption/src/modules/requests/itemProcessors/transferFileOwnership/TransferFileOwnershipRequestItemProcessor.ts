@@ -33,7 +33,7 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
             );
         }
 
-        if (foundFile.cache!.expiresAt.isExpired()) {
+        if (foundFile.expiresAt.isExpired()) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidRequestItem(
                     `You cannot request the transfer of ownership of the File with ID '${requestItem.fileReference.id.toString()}' since it is already expired.`
@@ -41,8 +41,8 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
             );
         }
 
-        if (foundFile.cache!.tags && foundFile.cache!.tags.length > 0) {
-            const tagValidationResult = await this.consumptionController.attributes.validateTagsForType(foundFile.cache!.tags, "IdentityFileReference");
+        if (foundFile.tags && foundFile.tags.length > 0) {
+            const tagValidationResult = await this.consumptionController.attributes.validateTagsForType(foundFile.tags, "IdentityFileReference");
             if (tagValidationResult.isError()) {
                 return ValidationResult.error(
                     ConsumptionCoreErrors.requests.invalidRequestItem(
@@ -78,7 +78,7 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
             );
         }
 
-        if (file.cache!.expiresAt.isExpired()) {
+        if (file.expiresAt.isExpired()) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidRequestItem(
                     `You cannot accept this RequestItem since the File with the given ID '${requestItem.fileReference.id.toString()}' is already expired.`
@@ -94,7 +94,7 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
             );
         }
 
-        if (file.cache!.owner.toString() !== requestInfo.peer.toString()) {
+        if (file.owner.toString() !== requestInfo.peer.toString()) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidRequestItem(
                     `You cannot accept this RequestItem since the File with the given fileReference '${requestItem.fileReference.id.toString()}' is not owned by the peer.`
@@ -102,8 +102,8 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
             );
         }
 
-        if (file.cache!.tags && file.cache!.tags.length > 0) {
-            const tagValidationResult = await this.consumptionController.attributes.validateTagsForType(file.cache!.tags, "IdentityFileReference");
+        if (file.tags && file.tags.length > 0) {
+            const tagValidationResult = await this.consumptionController.attributes.validateTagsForType(file.tags, "IdentityFileReference");
             if (tagValidationResult.isError()) {
                 return ValidationResult.error(
                     ConsumptionCoreErrors.requests.invalidRequestItem(
@@ -140,7 +140,7 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
                     value: ownFile.toFileReference(this.accountController.config.baseUrl).truncate()
                 }),
                 owner: this.accountController.identity.address,
-                tags: ownFile.cache!.tags
+                tags: ownFile.tags
             })
         });
 

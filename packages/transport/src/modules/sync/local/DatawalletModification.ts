@@ -14,12 +14,12 @@ export interface IDatawalletModification extends ISerializable {
 export enum DatawalletModificationType {
     Create = "Create",
     Update = "Update",
-    Delete = "Delete",
-    CacheChanged = "CacheChanged"
+    Delete = "Delete"
 }
 
 export enum DatawalletModificationCategory {
     TechnicalData = "TechnicalData",
+    Content = "Content",
     Userdata = "Userdata",
     Metadata = "Metadata"
 }

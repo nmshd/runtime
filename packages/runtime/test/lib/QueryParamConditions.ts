@@ -116,7 +116,7 @@ export class QueryParamConditions<TQuery extends PartialRecord<keyof TQuery, str
 
         this._conditions.push({
             key: key,
-            value: positiveValue.replace(/....$/, "XXXX"),
+            value: positiveValue.replace(/..$/, "XX").replace(/^../, "XX"),
             expectedResult: false
         });
 

@@ -1,8 +1,7 @@
 import { IDatabaseCollection } from "@js-soft/docdb-access-abstractions";
-import { CoreDate, CoreIdHelper } from "@nmshd/core-types";
+import { CoreIdHelper } from "@nmshd/core-types";
 import { instance, mock, verify } from "ts-mockito";
 import { DatawalletModification, DatawalletModificationCategory, DatawalletModificationType, SynchronizedCollection } from "../../../src";
-import { ACacheableSynchronizedCollectionItem, CachedACacheableSynchronizedCollectionItem } from "../../testHelpers/ACacheableSynchronizedCollectionItem";
 import { ASynchronizedCollectionItem } from "../../testHelpers/ASynchronizedCollectionItem";
 import { FakeDatabaseCollection } from "../../testHelpers/FakeDatabaseCollection";
 import { objectWith } from "../../testHelpers/PartialObjectMatcher";
@@ -62,100 +61,6 @@ describe("SynchronizedCollection", function () {
                 })
             )
         ).once();
-    });
-
-    test("when inserting a new non-cacheable item, no CacheChanged modification is created", async function () {
-        const newItem = ASynchronizedCollectionItem.from({
-            id: await CoreIdHelper.notPrefixed.generate(),
-            someTechnicalStringProperty: "SomeValue"
-        });
-
-        await synchronizedCollection.create(newItem);
-
-        verify(
-            datawalletModificationsCollectionMock.create(
-                objectWith<DatawalletModification>({
-                    collection: synchronizedCollection.name,
-                    objectIdentifier: newItem.id,
-                    type: DatawalletModificationType.CacheChanged
-                })
-            )
-        ).never();
-    });
-
-    test("when updating a cacheable item with a changed cache, a CacheChanged modification is created", async function () {
-        const item = ACacheableSynchronizedCollectionItem.from({
-            id: await CoreIdHelper.notPrefixed.generate(),
-            someTechnicalProperty: "SomeValue",
-            cache: { someCacheProperty: "cachedValue" },
-            cachedAt: CoreDate.utc()
-        });
-
-        await parentCollection.create(item);
-
-        item.cache = CachedACacheableSynchronizedCollectionItem.fromAny({ someCacheProperty: "updatedCachedValue" });
-
-        const itemDoc = await parentCollection.read(item.id.toString());
-
-        await synchronizedCollection.update(itemDoc, item);
-
-        verify(
-            datawalletModificationsCollectionMock.create(
-                objectWith<DatawalletModification>({
-                    collection: synchronizedCollection.name,
-                    objectIdentifier: item.id,
-                    type: DatawalletModificationType.CacheChanged
-                })
-            )
-        ).once();
-    });
-
-    test("when updating a cacheable item without a changed cache, no CacheChanged modification is created", async function () {
-        const item = ACacheableSynchronizedCollectionItem.from({
-            id: await CoreIdHelper.notPrefixed.generate(),
-            someTechnicalProperty: "SomeValue",
-            cache: { someCacheProperty: "cachedValue" },
-            cachedAt: CoreDate.utc()
-        });
-
-        await parentCollection.create(item);
-
-        const itemDoc = await parentCollection.read(item.id.toString());
-
-        await synchronizedCollection.update(itemDoc, item);
-
-        verify(
-            datawalletModificationsCollectionMock.create(
-                objectWith<DatawalletModification>({
-                    collection: synchronizedCollection.name,
-                    objectIdentifier: item.id,
-                    type: DatawalletModificationType.CacheChanged
-                })
-            )
-        ).never();
-    });
-
-    test("when updating a non-cacheable item, no CacheChanged modification is created", async function () {
-        const item = ASynchronizedCollectionItem.from({
-            id: await CoreIdHelper.notPrefixed.generate(),
-            someTechnicalStringProperty: "SomeValue"
-        });
-
-        await parentCollection.create(item);
-
-        const itemDoc = await parentCollection.read(item.id.toString());
-
-        await synchronizedCollection.update(itemDoc, item);
-
-        verify(
-            datawalletModificationsCollectionMock.create(
-                objectWith<DatawalletModification>({
-                    collection: synchronizedCollection.name,
-                    objectIdentifier: item.id,
-                    type: DatawalletModificationType.CacheChanged
-                })
-            )
-        ).never();
     });
 
     test("when a inserting a new item, a datawallet modification for technical data is created", async function () {

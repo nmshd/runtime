@@ -165,17 +165,17 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
     public async createAndCompleteFromRelationshipTemplateResponse(params: ICreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters): Promise<LocalRequest> {
         const parsedParams = CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters.from(params);
 
-        const peer = parsedParams.responseSource instanceof Relationship ? parsedParams.responseSource.peer.address : parsedParams.responseSource.cache!.createdBy;
+        const peer = parsedParams.responseSource instanceof Relationship ? parsedParams.responseSource.peer.address : parsedParams.responseSource.createdBy;
         const response = parsedParams.response;
         const requestId = response.requestId;
 
-        const templateContent = parsedParams.template.cache!.content;
+        const templateContent = parsedParams.template.content;
         if (!(templateContent instanceof RelationshipTemplateContent)) {
             throw new ConsumptionError("The content of the template is not of type RelationshipTemplateContent hence it's not possible to create a request from it.");
         }
 
         // checking for an active relationship is not secure as in the meantime the relationship could have been accepted
-        const isFromNewRelationship = parsedParams.responseSource instanceof Relationship && parsedParams.responseSource.cache!.auditLog.length === 1;
+        const isFromNewRelationship = parsedParams.responseSource instanceof Relationship && parsedParams.responseSource.auditLog.length === 1;
 
         const requestContent = isFromNewRelationship ? templateContent.onNewRelationship : templateContent.onExistingRelationship;
 
@@ -310,8 +310,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
 
         this.assertRequestStatus(request, LocalRequestStatus.Open, LocalRequestStatus.Expired);
 
-        const responseSourceObjectCreationDate =
-            responseSourceObject instanceof Message ? responseSourceObject.cache!.createdAt : responseSourceObject.cache!.auditLog[0].createdAt;
+        const responseSourceObjectCreationDate = responseSourceObject instanceof Message ? responseSourceObject.createdAt : responseSourceObject.auditLog[0].createdAt;
         if (request.status === LocalRequestStatus.Expired && request.isExpired(responseSourceObjectCreationDate)) {
             throw new ConsumptionError("Cannot complete an expired request with a response that was created before the expiration date");
         }

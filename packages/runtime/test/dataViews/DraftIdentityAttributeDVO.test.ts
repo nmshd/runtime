@@ -1,16 +1,4 @@
-import {
-    AbstractIntegerJSON,
-    AbstractStringJSON,
-    BirthDay,
-    BirthMonth,
-    BirthYear,
-    CommunicationLanguage,
-    GivenName,
-    IdentityAttribute,
-    Nationality,
-    PersonName,
-    Sex
-} from "@nmshd/content";
+import { AbstractStringJSON, CommunicationLanguage, GivenName, IdentityAttribute, Nationality, Sex, StreetAddress } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { DataViewExpander, TransportServices } from "../../src";
 import { RuntimeServiceProvider } from "../lib";
@@ -56,90 +44,6 @@ describe("DraftIdentityAttributeDVO", () => {
         expect(dvo.renderHints.editType).toBe("InputLike");
         expect(dvo.valueHints["@type"]).toBe("ValueHints");
         expect(dvo.valueHints.max).toBe(100);
-    });
-
-    test("check the BirthDay", async () => {
-        const attribute = IdentityAttribute.from<BirthDay>({
-            owner: transportService1Address,
-            value: BirthDay.from(17)
-        }).toJSON();
-        const dvo = await expander1.expandAttribute(attribute);
-        expect(dvo).toBeDefined();
-        expect(dvo.type).toBe("DraftIdentityAttributeDVO");
-        expect(dvo.id).toBe("");
-        expect(dvo.name).toBe("i18n://dvo.attribute.name.BirthDay");
-        expect(dvo.description).toBe("i18n://dvo.attribute.description.BirthDay");
-        expect(dvo.content).toStrictEqual(attribute);
-        const value = dvo.value as AbstractIntegerJSON;
-        expect(value["@type"]).toBe("BirthDay");
-        expect(value.value).toBe(17);
-        expect(dvo.owner.type).toBe("IdentityDVO");
-        expect(dvo.owner.id).toStrictEqual(attribute.owner);
-        expect(dvo.owner.name).toBe("i18n://dvo.identity.self.name");
-        expect(dvo.owner.isSelf).toBe(true);
-        expect(dvo.renderHints["@type"]).toBe("RenderHints");
-        expect(dvo.renderHints.technicalType).toBe("Integer");
-        expect(dvo.renderHints.editType).toBe("SelectLike");
-        expect(dvo.renderHints.dataType).toBe("Day");
-        expect(dvo.valueHints["@type"]).toBe("ValueHints");
-        expect(dvo.valueHints.min).toBe(1);
-        expect(dvo.valueHints.max).toBe(31);
-    });
-
-    test("check the BirthMonth", async () => {
-        const attribute = IdentityAttribute.from<BirthMonth>({
-            owner: transportService1Address,
-            value: BirthMonth.from(11)
-        }).toJSON();
-        const dvo = await expander1.expandAttribute(attribute);
-        expect(dvo).toBeDefined();
-        expect(dvo.type).toBe("DraftIdentityAttributeDVO");
-        expect(dvo.id).toBe("");
-        expect(dvo.name).toBe("i18n://dvo.attribute.name.BirthMonth");
-        expect(dvo.description).toBe("i18n://dvo.attribute.description.BirthMonth");
-        expect(dvo.content).toStrictEqual(attribute);
-        const value = dvo.value as AbstractIntegerJSON;
-        expect(value["@type"]).toBe("BirthMonth");
-        expect(value.value).toBe(11);
-        expect(dvo.owner.type).toBe("IdentityDVO");
-        expect(dvo.owner.id).toStrictEqual(attribute.owner);
-        expect(dvo.owner.name).toBe("i18n://dvo.identity.self.name");
-        expect(dvo.owner.isSelf).toBe(true);
-        expect(dvo.renderHints["@type"]).toBe("RenderHints");
-        expect(dvo.renderHints.technicalType).toBe("Integer");
-        expect(dvo.renderHints.editType).toBe("SelectLike");
-        expect(dvo.renderHints.dataType).toBe("Month");
-        expect(dvo.valueHints["@type"]).toBe("ValueHints");
-        expect(dvo.valueHints.min).toBe(1);
-        expect(dvo.valueHints.max).toBe(12);
-    });
-
-    test("check the BirthYear", async () => {
-        const attribute = IdentityAttribute.from<BirthYear>({
-            owner: transportService1Address,
-            value: BirthYear.from(2001)
-        }).toJSON();
-        const dvo = await expander1.expandAttribute(attribute);
-        expect(dvo).toBeDefined();
-        expect(dvo.type).toBe("DraftIdentityAttributeDVO");
-        expect(dvo.id).toBe("");
-        expect(dvo.name).toBe("i18n://dvo.attribute.name.BirthYear");
-        expect(dvo.description).toBe("i18n://dvo.attribute.description.BirthYear");
-        expect(dvo.content).toStrictEqual(attribute);
-        const value = dvo.value as AbstractIntegerJSON;
-        expect(value["@type"]).toBe("BirthYear");
-        expect(value.value).toBe(2001);
-        expect(dvo.owner.type).toBe("IdentityDVO");
-        expect(dvo.owner.id).toStrictEqual(attribute.owner);
-        expect(dvo.owner.name).toBe("i18n://dvo.identity.self.name");
-        expect(dvo.owner.isSelf).toBe(true);
-        expect(dvo.renderHints["@type"]).toBe("RenderHints");
-        expect(dvo.renderHints.technicalType).toBe("Integer");
-        expect(dvo.renderHints.editType).toBe("SelectLike");
-        expect(dvo.renderHints.dataType).toBe("Year");
-        expect(dvo.valueHints["@type"]).toBe("ValueHints");
-        expect(dvo.valueHints.min).toBe(1);
-        expect(dvo.valueHints.max).toBe(9999);
     });
 
     test("check the Sex", async () => {
@@ -232,26 +136,27 @@ describe("DraftIdentityAttributeDVO", () => {
         expect(dvo.valueHints.values![31]).toStrictEqual({ key: "de", displayName: "i18n://attributes.values.languages.de" });
     });
 
-    test("check a complex PersonName", async () => {
-        const attribute = IdentityAttribute.from<PersonName>({
+    test("check a complex StreetAddress", async () => {
+        const attribute = IdentityAttribute.from<StreetAddress>({
             owner: transportService1Address,
-            value: PersonName.from({
-                honorificPrefix: "anHonorificPrefix",
-                givenName: "aGivenName",
-                middleName: "aMiddleName",
-                surname: "aSurname",
-                honorificSuffix: "anHonorificSuffix"
+            value: StreetAddress.from({
+                street: "aStreet",
+                houseNo: "aHouseNo",
+                zipCode: "aZipCode",
+                city: "aCity",
+                country: "DE",
+                recipient: "aRecipient"
             })
         }).toJSON();
         const dvo = await expander1.expandAttribute(attribute);
         expect(dvo).toBeDefined();
         expect(dvo.type).toBe("DraftIdentityAttributeDVO");
         expect(dvo.id).toBe("");
-        expect(dvo.name).toBe("i18n://dvo.attribute.name.PersonName");
-        expect(dvo.description).toBe("i18n://dvo.attribute.description.PersonName");
+        expect(dvo.name).toBe("i18n://dvo.attribute.name.StreetAddress");
+        expect(dvo.description).toBe("i18n://dvo.attribute.description.StreetAddress");
         expect(dvo.content).toStrictEqual(attribute);
         const value = dvo.value as AbstractStringJSON;
-        expect(value["@type"]).toBe("PersonName");
+        expect(value["@type"]).toBe("StreetAddress");
         expect(dvo.owner.type).toBe("IdentityDVO");
         expect(dvo.owner.id).toStrictEqual(attribute.owner);
         expect(dvo.owner.name).toBe("i18n://dvo.identity.self.name");
@@ -262,12 +167,12 @@ describe("DraftIdentityAttributeDVO", () => {
         expect(dvo.renderHints.editType).toBe("Complex");
         expect(dvo.renderHints.dataType).toBeUndefined();
         expect(dvo.renderHints.propertyHints).toBeDefined();
-        expect(dvo.renderHints.propertyHints!["givenName"]).toBeDefined();
-        expect(dvo.renderHints.propertyHints!["givenName"].editType).toBe("InputLike");
-        expect(dvo.renderHints.propertyHints!["givenName"].technicalType).toBe("String");
+        expect(dvo.renderHints.propertyHints!["street"]).toBeDefined();
+        expect(dvo.renderHints.propertyHints!["street"].editType).toBe("InputLike");
+        expect(dvo.renderHints.propertyHints!["street"].technicalType).toBe("String");
 
         expect(dvo.valueHints["@type"]).toBe("ValueHints");
-        expect(dvo.valueHints.propertyHints!["givenName"]).toBeDefined();
-        expect(dvo.valueHints.propertyHints!["givenName"].max).toBe(100);
+        expect(dvo.valueHints.propertyHints!["street"]).toBeDefined();
+        expect(dvo.valueHints.propertyHints!["street"].max).toBe(100);
     });
 });

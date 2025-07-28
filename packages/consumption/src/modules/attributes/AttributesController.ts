@@ -1265,7 +1265,7 @@ export class AttributesController extends ConsumptionBaseController {
             throw ConsumptionCoreErrors.attributes.wrongRelationshipStatusToSetDeletionInfo();
         }
 
-        const deletionDate = relationship.cache!.auditLog[relationship.cache!.auditLog.length - 1].createdAt;
+        const deletionDate = relationship.auditLog[relationship.auditLog.length - 1].createdAt;
 
         await this.setDeletionInfoOfAttributesSharedWithPeer(relationship.peer.address, deletionDate);
     }

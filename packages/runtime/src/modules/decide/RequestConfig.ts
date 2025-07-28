@@ -21,17 +21,6 @@ export interface RequestItemConfig extends GeneralRequestConfig {
     "content.item.metadata"?: object | object[];
 }
 
-export interface AuthenticationRequestItemConfig extends RequestItemConfig {
-    "content.item.@type": "AuthenticationRequestItem";
-    "content.item.title"?: string | string[];
-}
-
-export interface ConsentRequestItemConfig extends RequestItemConfig {
-    "content.item.@type": "ConsentRequestItem";
-    "content.item.consent"?: string | string[];
-    "content.item.link"?: string | string[];
-}
-
 export interface CreateAttributeRequestItemConfig extends RequestItemConfig {
     "content.item.@type": "CreateAttributeRequestItem";
     "content.item.attribute.@type"?: "IdentityAttribute" | "RelationshipAttribute";
@@ -108,8 +97,6 @@ export interface TransferFileOwnershipRequestItemConfig extends RequestItemConfi
 
 export type RequestItemDerivationConfig =
     | RequestItemConfig
-    | AuthenticationRequestItemConfig
-    | ConsentRequestItemConfig
     | CreateAttributeRequestItemConfig
     | DeleteAttributeRequestItemConfig
     | ProposeAttributeRequestItemConfig

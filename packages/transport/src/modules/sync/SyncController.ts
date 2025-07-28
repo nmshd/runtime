@@ -7,7 +7,7 @@ import { DatawalletSynchronizedEvent } from "../../events/DatawalletSynchronized
 import { AccountController } from "../accounts/AccountController";
 import { ChangedItems } from "./ChangedItems";
 import { DatawalletModificationMapper } from "./DatawalletModificationMapper";
-import { CacheFetcher, DatawalletModificationsProcessor } from "./DatawalletModificationsProcessor";
+import { DatawalletModificationsProcessor } from "./DatawalletModificationsProcessor";
 import { WhatToSync } from "./WhatToSync";
 import { BackboneDatawalletModification } from "./backbone/BackboneDatawalletModification";
 import { BackboneSyncRun } from "./backbone/BackboneSyncRun";
@@ -27,20 +27,6 @@ export class SyncController extends TransportController {
     private readonly deviceMigrations: DeviceMigrations;
     private readonly identityMigrations: IdentityMigrations;
     private readonly externalEventRegistry = new ExternalEventProcessorRegistry();
-
-    private _cacheFetcher?: CacheFetcher;
-    private get cacheFetcher() {
-        this._cacheFetcher ??= new CacheFetcher(
-            this.parent.files,
-            this.parent.messages,
-            this.parent.relationshipTemplates,
-            this.parent.relationships,
-            this.parent.tokens,
-            this.parent.identityDeletionProcess
-        );
-
-        return this._cacheFetcher;
-    }
 
     public constructor(
         parent: AccountController,
@@ -253,7 +239,6 @@ export class SyncController extends TransportController {
 
         const datawalletModificationsProcessor = new DatawalletModificationsProcessor(
             incomingModifications,
-            this.cacheFetcher,
             this.db,
             TransportLoggerFactory.getLogger(DatawalletModificationsProcessor)
         );

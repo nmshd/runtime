@@ -31,10 +31,6 @@ export class DecomposeRelationshipUseCase extends UseCase<DecomposeRelationshipR
             return Result.fail(RuntimeErrors.general.recordNotFound(Relationship));
         }
 
-        if (!relationship.cache) {
-            return Result.fail(RuntimeErrors.general.cacheEmpty(Relationship, relationship.id.toString()));
-        }
-
         // Backbone call first so nothing is deleted in case it goes wrong
         await this.relationshipsController.decompose(relationship.id);
 

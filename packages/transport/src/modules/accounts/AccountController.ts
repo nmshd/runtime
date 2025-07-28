@@ -11,9 +11,7 @@ import { TransportLoggerFactory } from "../../core/TransportLoggerFactory";
 import { IdentityDeletionProcessStatusChangedEvent } from "../../events/IdentityDeletionProcessStatusChangedEvent";
 import { PasswordGenerator } from "../../util";
 import { AnnouncementController } from "../announcements/AnnouncementController";
-import { CertificateController } from "../certificates/CertificateController";
-import { CertificateIssuer } from "../certificates/CertificateIssuer";
-import { CertificateValidator } from "../certificates/CertificateValidator";
+import { BackboneNotificationsController } from "../backboneNotifications/BackboneNotificationsController";
 import { ChallengeController } from "../challenges/ChallengeController";
 import { DeviceController } from "../devices/DeviceController";
 import { DeviceSecretType } from "../devices/DeviceSecretController";
@@ -54,10 +52,8 @@ export class AccountController {
     public info: IDatabaseMap;
 
     public announcements: AnnouncementController;
+    public backboneNotifications: BackboneNotificationsController;
     public challenges: ChallengeController;
-    public certificates: CertificateController;
-    public certificateIssuer: CertificateIssuer;
-    public certificateValidator: CertificateValidator;
     public devices: DevicesController;
     public files: FileController;
     public messages: MessageController;
@@ -204,11 +200,9 @@ export class AccountController {
         this._log.trace("Initializing controllers...");
 
         this.announcements = await new AnnouncementController(this).init();
+        this.backboneNotifications = await new BackboneNotificationsController(this).init();
         this.relationshipSecrets = await new RelationshipSecretController(this).init();
         this.devices = await new DevicesController(this).init();
-        this.certificates = await new CertificateController(this).init();
-        this.certificateIssuer = await new CertificateIssuer(this).init();
-        this.certificateValidator = await new CertificateValidator(this).init();
         this.files = await new FileController(this).init();
 
         this.relationships = await new RelationshipsController(this, this.relationshipSecrets).init();
@@ -330,7 +324,6 @@ export class AccountController {
             operatingSystem: deviceInfo.operatingSystem,
             publicKey: deviceKeypair.publicKey,
             type: deviceInfo.type,
-            certificate: "",
             username: createdIdentity.device.username,
             datawalletVersion: this._config.supportedDatawalletVersion,
             isBackupDevice: false
@@ -350,7 +343,7 @@ export class AccountController {
         const storeSecretWithRetry = async (fn: () => Promise<any>) => {
             let retryCount = 0;
 
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-constant-condition
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             while (true) {
                 try {
                     return await fn();

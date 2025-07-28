@@ -49,12 +49,6 @@ export interface RequestItemJSON extends ContentJSON {
      * If set to `false`, the recipient can decide whether they want to accept it or not.
      */
     mustBeAccepted: boolean;
-
-    /**
-     * If set to `true`, it advices the recipient of this RequestItem to carefully consider
-     * their decision and especially do not decide based on some automation rules.
-     */
-    requireManualDecision?: boolean;
 }
 
 export type RequestItemJSONDerivations =
@@ -88,12 +82,6 @@ export interface IRequestItem extends ISerializable {
      * If set to `false`, the recipient can decide whether they want to accept it or not.
      */
     mustBeAccepted: boolean;
-
-    /**
-     * If set to `true`, it advices the recipient of this RequestItem to carefully consider
-     * their decision and especially do not decide based on some automation rules.
-     */
-    requireManualDecision?: boolean;
 }
 
 export type IRequestItemDerivations =
@@ -120,10 +108,6 @@ export abstract class RequestItem extends Serializable {
     @serialize()
     @validate({ nullable: true })
     public metadata?: object;
-
-    @serialize()
-    @validate({ nullable: true })
-    public requireManualDecision?: boolean;
 
     public override toJSON(verbose?: boolean | undefined, serializeAsString?: boolean | undefined): RequestItemJSON {
         return super.toJSON(verbose, serializeAsString) as RequestItemJSON;
