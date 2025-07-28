@@ -339,15 +339,13 @@ describe("attribute queries", () => {
     });
 });
 
-describe("get repository, own shared and peer shared attributes", () => {
+describe("get own IdentityAttributes, own Attributes shared with peer and peer Attributes", () => {
     // own = services1, peer = services 2
     let services1OwnSurnameV0: LocalAttributeDTO;
     let services1OwnSurnameV1: LocalAttributeDTO;
 
     let services1OwnGivenNameV0: LocalAttributeDTO;
     let services1OwnGivenNameV1: LocalAttributeDTO;
-    let services1SharedGivenNameV0: LocalAttributeDTO;
-    let services1SharedGivenNameV1: LocalAttributeDTO;
 
     let services1OwnRelationshipAttributeV0: LocalAttributeDTO;
     let services1OwnRelationshipAttributeV1: LocalAttributeDTO;
@@ -539,34 +537,34 @@ describe("get repository, own shared and peer shared attributes", () => {
     });
 
     describe(GetOwnAttributesSharedWithPeerUseCase.name, () => {
-        test("should return only latest versions of own Attributes", async function () {
+        test("should return only latest versions of own Attributes shared with peer", async function () {
             const requests = [{ peer: services2.address }, { peer: services2.address, onlyLatestVersions: true }, { peer: services2.address, hideTechnical: false }];
             for (const request of requests) {
                 const result = await services1.consumption.attributes.getOwnAttributesSharedWithPeer(request);
                 expect(result).toBeSuccessful();
-                const ownAttributes = result.value;
-                expect(ownAttributes).toStrictEqual([services1SharedGivenNameV1, services1OwnRelationshipAttributeV1, services1TechnicalOwnRelationshipAttribute]);
+                const ownAttributesSharedWithPeer = result.value;
+                expect(ownAttributesSharedWithPeer).toStrictEqual([services1OwnGivenNameV1, services1OwnRelationshipAttributeV1, services1TechnicalOwnRelationshipAttribute]);
             }
         });
 
-        test("should return all shared version of own shared attributes", async function () {
+        test("should return all version of own Attributes shared with peer", async function () {
             const result = await services1.consumption.attributes.getOwnAttributesSharedWithPeer({ peer: services2.address, onlyLatestVersions: false });
             expect(result).toBeSuccessful();
-            const ownSharedAttributes = result.value;
-            expect(ownSharedAttributes).toStrictEqual([
-                services1SharedGivenNameV0,
-                services1SharedGivenNameV1,
+            const ownAttributesSharedWithPeer = result.value;
+            expect(ownAttributesSharedWithPeer).toStrictEqual([
+                services1OwnGivenNameV0,
+                services1OwnGivenNameV1,
                 services1OwnRelationshipAttributeV0,
                 services1OwnRelationshipAttributeV1,
                 services1TechnicalOwnRelationshipAttribute
             ]);
         });
 
-        test("should hide technical own shared attributes when hideTechnical=true", async () => {
+        test("should hide technical own Attributes shared with peer when hideTechnical=true", async () => {
             const result = await services1.consumption.attributes.getOwnAttributesSharedWithPeer({ peer: services2.address, hideTechnical: true });
             expect(result).toBeSuccessful();
-            const ownSharedAttributes = result.value;
-            expect(ownSharedAttributes).toStrictEqual([services1SharedGivenNameV1, services1OwnRelationshipAttributeV1]);
+            const ownAttributesSharedWithPeer = result.value;
+            expect(ownAttributesSharedWithPeer).toStrictEqual([services1OwnGivenNameV1, services1OwnRelationshipAttributeV1]);
         });
     });
 
@@ -577,8 +575,8 @@ describe("get repository, own shared and peer shared attributes", () => {
         let notTechnicalReceivedAttributes: LocalAttributeDTO[];
         beforeEach(async function () {
             const services1SharedAttributeIds = [
-                services1SharedGivenNameV0,
-                services1SharedGivenNameV1,
+                services1OwnGivenNameV0,
+                services1OwnGivenNameV1,
                 services1OwnRelationshipAttributeV0,
                 services1OwnRelationshipAttributeV1,
                 services1TechnicalOwnRelationshipAttribute
@@ -599,28 +597,28 @@ describe("get repository, own shared and peer shared attributes", () => {
             }
         });
 
-        test("should return only latest shared versions of peer shared attributes", async () => {
+        test("should return only latest shared versions of peer Attributes", async () => {
             const requests = [{ peer: services1.address }, { peer: services1.address, onlyLatestVersions: true }, { peer: services1.address, hideTechnical: false }];
             for (const request of requests) {
                 const result = await services2.consumption.attributes.getPeerAttributes(request);
                 expect(result).toBeSuccessful();
-                const peerSharedAttributes = result.value;
-                expect(peerSharedAttributes).toStrictEqual(onlyLatestReceivedAttributes);
+                const peerAttributes = result.value;
+                expect(peerAttributes).toStrictEqual(onlyLatestReceivedAttributes);
             }
         });
 
-        test("should return all versions of peer shared attributes", async () => {
+        test("should return all versions of peer Attributes", async () => {
             const result = await services2.consumption.attributes.getPeerAttributes({ peer: services1.address, onlyLatestVersions: false });
             expect(result).toBeSuccessful();
-            const peerSharedAttributes = result.value;
-            expect(peerSharedAttributes).toStrictEqual(allReceivedAttributes);
+            const peerAttributes = result.value;
+            expect(peerAttributes).toStrictEqual(allReceivedAttributes);
         });
 
-        test("should hide technical peer shared attributes when hideTechnical=true", async () => {
+        test("should hide technical peer Attributes when hideTechnical=true", async () => {
             const result = await services2.consumption.attributes.getPeerAttributes({ peer: services1.address, hideTechnical: true, onlyLatestVersions: false });
             expect(result).toBeSuccessful();
-            const peerSharedAttributes = result.value;
-            expect(peerSharedAttributes).toStrictEqual(notTechnicalReceivedAttributes);
+            const peerAttributes = result.value;
+            expect(peerAttributes).toStrictEqual(notTechnicalReceivedAttributes);
         });
     });
 });
