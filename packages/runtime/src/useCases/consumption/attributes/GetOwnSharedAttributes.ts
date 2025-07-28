@@ -21,20 +21,26 @@ export interface GetOwnSharedAttributesRequest {
 export interface GetOwnSharedAttributeRequestQuery {
     createdAt?: string;
     wasViewedAt?: string | string[];
+    isDefault?: string;
     "content.@type"?: string | string[];
     "content.tags"?: string | string[];
     "content.key"?: string | string[];
     "content.isTechnical"?: string;
     "content.confidentiality"?: string | string[];
     "content.value.@type"?: string | string[];
-    sharingInfos?: string | string[];
-    "sharingInfos.peer"?: string | string[];
-    "sharingInfos.sourceReference"?: string | string[];
-    "sharingInfos.sharedAt"?: string | string[];
-    "sharingInfos.thirdPartyAddress"?: string | string[];
-    deletionInfo?: string | string[];
-    "deletionInfo.deletionStatus"?: string | string[];
-    "deletionInfo.deletionDate"?: string | string[];
+    peerSharingInfo?: string | string[];
+    "peerSharingInfo.peer"?: string | string[];
+    "peerSharingInfo.sourceReference"?: string | string[];
+    "peerSharingInfo.deletionInfo"?: string | string[];
+    "peerSharingInfo.deletionInfo.deletionStatus"?: string | string[];
+    "peerSharingInfo.deletionInfo.deletionDate"?: string | string[];
+    forwardedSharingInfos?: string | string[];
+    "forwardedSharingInfos.peer"?: string | string[];
+    "forwardedSharingInfos.sourceReference"?: string | string[];
+    "forwardedSharingInfos.sharedAt"?: string | string[];
+    "forwardedSharingInfos.deletionInfo"?: string | string[];
+    "forwardedSharingInfos.deletionInfo.deletionStatus"?: string | string[];
+    "forwardedSharingInfos.deletionInfo.deletionDate"?: string | string[];
 }
 
 class Validator extends SchemaValidator<GetOwnSharedAttributesRequest> {

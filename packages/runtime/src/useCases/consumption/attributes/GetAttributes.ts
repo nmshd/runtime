@@ -42,6 +42,7 @@ export interface GetAttributesRequestQuery {
     peerSharingInfo?: string | string[];
     "peerSharingInfo.peer"?: string | string[];
     "peerSharingInfo.sourceReference"?: string | string[];
+    "peerSharingInfo.initialAttributePeer"?: string | string[];
     "peerSharingInfo.deletionInfo"?: string | string[];
     "peerSharingInfo.deletionInfo.deletionStatus"?: string | string[];
     "peerSharingInfo.deletionInfo.deletionDate"?: string | string[];
@@ -49,7 +50,6 @@ export interface GetAttributesRequestQuery {
     "forwardedSharingInfos.peer"?: string | string[];
     "forwardedSharingInfos.sourceReference"?: string | string[];
     "forwardedSharingInfos.sharedAt"?: string | string[];
-    "forwardedSharingInfos.initialPeer"?: string | string[];
     "forwardedSharingInfos.deletionInfo"?: string | string[];
     "forwardedSharingInfos.deletionInfo.deletionStatus"?: string | string[];
     "forwardedSharingInfos.deletionInfo.deletionDate"?: string | string[];
