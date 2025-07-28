@@ -13042,11 +13042,11 @@ export const DeleteOwnIdentityAttributeAndNotifyPeersRequest: any = {
     }
 }
 
-export const DeleteOwnRelationshipAttributeAndNotifyPeerRequest: any = {
+export const DeleteOwnRelationshipAttributeAndNotifyPeersRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/DeleteOwnRelationshipAttributeAndNotifyPeerRequest",
+    "$ref": "#/definitions/DeleteOwnRelationshipAttributeAndNotifyPeersRequest",
     "definitions": {
-        "DeleteOwnRelationshipAttributeAndNotifyPeerRequest": {
+        "DeleteOwnRelationshipAttributeAndNotifyPeersRequest": {
             "type": "object",
             "properties": {
                 "attributeId": {

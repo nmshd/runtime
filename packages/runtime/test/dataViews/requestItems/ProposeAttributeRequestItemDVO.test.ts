@@ -488,7 +488,7 @@ describe("ProposeAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         const localRequest = (await runtimeServices1.consumption.outgoingRequests.getRequest({ id: requestId })).value;
         const sharedAttributeId = (localRequest.response!.content.items[0] as ProposeAttributeAcceptResponseItemJSON).attributeId;
 
-        await runtimeServices2.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: sharedAttributeId });
+        await runtimeServices2.consumption.attributes.deleteOwnRelationshipAttributeAndNotifyPeers({ attributeId: sharedAttributeId });
 
         const recipientMessage = (await runtimeServices2.transport.messages.getMessage({ id: senderMessage.id })).value;
         const dvo = (await expander2.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
@@ -502,7 +502,7 @@ describe("ProposeAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         const localRequest = (await runtimeServices1.consumption.outgoingRequests.getRequest({ id: requestId })).value;
         const sharedAttributeId = (localRequest.response!.content.items[0] as ProposeAttributeAcceptResponseItemJSON).attributeId;
 
-        await runtimeServices1.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: sharedAttributeId });
+        await runtimeServices1.consumption.attributes.deletePeerIdentityAttributeAndNotifyOwner({ attributeId: sharedAttributeId });
 
         const senderMessageAfterDeletion = (await runtimeServices1.transport.messages.getMessage({ id: senderMessage.id })).value;
         const dvo = (await expander1.expandMessageDTO(senderMessageAfterDeletion)) as RequestMessageDVO;
@@ -728,7 +728,7 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
         const localRequest = (await runtimeServices1.consumption.outgoingRequests.getRequest({ id: requestId })).value;
         const sharedPredecessorId = (localRequest.response!.content.items[0] as AttributeSuccessionAcceptResponseItemJSON).predecessorId;
 
-        await runtimeServices2.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: sharedPredecessorId });
+        await runtimeServices2.consumption.attributes.deleteOwnRelationshipAttributeAndNotifyPeers({ attributeId: sharedPredecessorId });
 
         const recipientMessage = (await runtimeServices2.transport.messages.getMessage({ id: senderMessage.id })).value;
         const dvo = (await expander2.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
@@ -744,7 +744,7 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
         const localRequest = (await runtimeServices1.consumption.outgoingRequests.getRequest({ id: requestId })).value;
         const sharedPredecessorId = (localRequest.response!.content.items[0] as AttributeSuccessionAcceptResponseItemJSON).predecessorId;
 
-        await runtimeServices1.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: sharedPredecessorId });
+        await runtimeServices1.consumption.attributes.deletePeerIdentityAttributeAndNotifyOwner({ attributeId: sharedPredecessorId });
 
         const senderMessageAfterDeletion = (await runtimeServices1.transport.messages.getMessage({ id: senderMessage.id })).value;
         const dvo = (await expander1.expandMessageDTO(senderMessageAfterDeletion)) as RequestMessageDVO;
@@ -760,7 +760,7 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
         const localRequest = (await runtimeServices1.consumption.outgoingRequests.getRequest({ id: requestId })).value;
         const sharedSuccessorId = (localRequest.response!.content.items[0] as AttributeSuccessionAcceptResponseItemJSON).successorId;
 
-        await runtimeServices2.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: sharedSuccessorId });
+        await runtimeServices2.consumption.attributes.deleteOwnRelationshipAttributeAndNotifyPeers({ attributeId: sharedSuccessorId });
 
         const recipientMessage = (await runtimeServices2.transport.messages.getMessage({ id: senderMessage.id })).value;
         const dvo = (await expander2.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
@@ -774,7 +774,7 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
         const localRequest = (await runtimeServices1.consumption.outgoingRequests.getRequest({ id: requestId })).value;
         const sharedSuccessorId = (localRequest.response!.content.items[0] as AttributeSuccessionAcceptResponseItemJSON).successorId;
 
-        await runtimeServices1.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: sharedSuccessorId });
+        await runtimeServices1.consumption.attributes.deletePeerIdentityAttributeAndNotifyOwner({ attributeId: sharedSuccessorId });
 
         const senderMessageAfterDeletion = (await runtimeServices1.transport.messages.getMessage({ id: senderMessage.id })).value;
         const dvo = (await expander1.expandMessageDTO(senderMessageAfterDeletion)) as RequestMessageDVO;
@@ -942,7 +942,7 @@ describe("AttributeAlreadySharedAcceptResponseItemDVO with IdentityAttributeQuer
         const localRequest = (await runtimeServices1.consumption.outgoingRequests.getRequest({ id: requestId })).value;
         const sharedAttributeId = (localRequest.response!.content.items[0] as AttributeAlreadySharedAcceptResponseItemJSON).attributeId;
 
-        await runtimeServices2.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: sharedAttributeId });
+        await runtimeServices2.consumption.attributes.deleteOwnRelationshipAttributeAndNotifyPeers({ attributeId: sharedAttributeId });
 
         const recipientMessage = (await runtimeServices2.transport.messages.getMessage({ id: senderMessage.id })).value;
         const dvo = (await expander2.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
@@ -956,7 +956,7 @@ describe("AttributeAlreadySharedAcceptResponseItemDVO with IdentityAttributeQuer
         const localRequest = (await runtimeServices1.consumption.outgoingRequests.getRequest({ id: requestId })).value;
         const sharedAttributeId = (localRequest.response!.content.items[0] as AttributeAlreadySharedAcceptResponseItemJSON).attributeId;
 
-        await runtimeServices1.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: sharedAttributeId });
+        await runtimeServices1.consumption.attributes.deletePeerIdentityAttributeAndNotifyOwner({ attributeId: sharedAttributeId });
 
         const senderMessageAfterDeletion = (await runtimeServices1.transport.messages.getMessage({ id: senderMessage.id })).value;
         const dvo = (await expander1.expandMessageDTO(senderMessageAfterDeletion)) as RequestMessageDVO;

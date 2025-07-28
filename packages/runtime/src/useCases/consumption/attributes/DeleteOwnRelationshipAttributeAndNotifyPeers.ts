@@ -6,24 +6,24 @@ import { AccountController, MessageController, RelationshipsController, Relation
 import { Inject } from "@nmshd/typescript-ioc";
 import { AttributeIdString, NotificationIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
-export interface DeleteOwnRelationshipAttributeAndNotifyPeerRequest {
+export interface DeleteOwnRelationshipAttributeAndNotifyPeersRequest {
     attributeId: AttributeIdString;
 }
 
 // TODO: maybe an array for ids of third party notifications?
-export interface DeleteOwnRelationshipAttributeAndNotifyPeerResponse {
+export interface DeleteOwnRelationshipAttributeAndNotifyPeersResponse {
     notificationId?: NotificationIdString;
 }
 
-class Validator extends SchemaValidator<DeleteOwnRelationshipAttributeAndNotifyPeerRequest> {
+class Validator extends SchemaValidator<DeleteOwnRelationshipAttributeAndNotifyPeersRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
-        super(schemaRepository.getSchema("DeleteOwnRelationshipAttributeAndNotifyPeerRequest"));
+        super(schemaRepository.getSchema("DeleteOwnRelationshipAttributeAndNotifyPeersRequest"));
     }
 }
 
-export class DeleteOwnRelationshipAttributeAndNotifyPeerUseCase extends UseCase<
-    DeleteOwnRelationshipAttributeAndNotifyPeerRequest,
-    DeleteOwnRelationshipAttributeAndNotifyPeerResponse
+export class DeleteOwnRelationshipAttributeAndNotifyPeersUseCase extends UseCase<
+    DeleteOwnRelationshipAttributeAndNotifyPeersRequest,
+    DeleteOwnRelationshipAttributeAndNotifyPeersResponse
 > {
     public constructor(
         @Inject private readonly attributesController: AttributesController,
@@ -35,7 +35,7 @@ export class DeleteOwnRelationshipAttributeAndNotifyPeerUseCase extends UseCase<
         super(validator);
     }
 
-    protected async executeInternal(request: DeleteOwnRelationshipAttributeAndNotifyPeerRequest): Promise<Result<DeleteOwnRelationshipAttributeAndNotifyPeerResponse>> {
+    protected async executeInternal(request: DeleteOwnRelationshipAttributeAndNotifyPeersRequest): Promise<Result<DeleteOwnRelationshipAttributeAndNotifyPeersResponse>> {
         const ownRelationshipAttributeId = CoreId.from(request.attributeId);
         const ownRelationshipAttribute = await this.attributesController.getLocalAttribute(ownRelationshipAttributeId);
         if (!ownRelationshipAttribute) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));

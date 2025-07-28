@@ -175,7 +175,7 @@ describe("SharedToPeerAttributeDVO", () => {
             }
         });
         const repositoryAttribute = (await services1.consumption.attributes.getAttribute({ id: ownSharedIdentityAttribute.shareInfo!.sourceAttribute! })).value;
-        await services1.consumption.attributes.deleteRepositoryAttribute({ attributeId: repositoryAttribute.id });
+        await services1.consumption.attributes.deleteOwnIdentityAttribute({ attributeId: repositoryAttribute.id });
         const updatedOwnSharedIdentityAttribute = (await services1.consumption.attributes.getAttribute({ id: ownSharedIdentityAttribute.id })).value;
 
         const dto = (await services1.consumption.attributes.getAttribute({ id: updatedOwnSharedIdentityAttribute.id })).value;
