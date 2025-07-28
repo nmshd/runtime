@@ -37,7 +37,7 @@ import {
     cleanupAttributes,
     establishRelationship,
     exchangeMessage,
-    executeFullCreateAndShareRepositoryAttributeFlow,
+    executeFullCreateAndShareOwnIdentityAttributeFlow,
     uploadFile
 } from "../lib";
 
@@ -1397,7 +1397,7 @@ describe("DeciderModule", () => {
             const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomations, enableRequestModule: true }))[0];
 
             await establishRelationship(sender.transport, recipient.transport);
-            const sharedAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(sender, recipient, {
+            const sharedAttribute = await executeFullCreateAndShareOwnIdentityAttributeFlow(sender, recipient, {
                 content: {
                     value: {
                         "@type": "GivenName",
@@ -2946,7 +2946,7 @@ describe("DeciderModule", () => {
             ];
             const recipient = (await runtimeServiceProvider.launch(1, { enableRequestModule: true, enableDeciderModule: true, deciderModuleAutomations }))[0];
             await establishRelationship(sender.transport, recipient.transport);
-            const sharedAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(sender, recipient, {
+            const sharedAttribute = await executeFullCreateAndShareOwnIdentityAttributeFlow(sender, recipient, {
                 content: {
                     value: {
                         "@type": "GivenName",

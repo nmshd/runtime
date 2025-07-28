@@ -1,6 +1,6 @@
 import { AbstractStringJSON, IdentityAttributeJSON } from "@nmshd/content";
 import { SharedToPeerAttributeDVO } from "../../src";
-import { cleanupAttributes, ensureActiveRelationship, executeFullCreateAndShareRepositoryAttributeFlow, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
+import { cleanupAttributes, ensureActiveRelationship, executeFullCreateAndShareOwnIdentityAttributeFlow, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let services1: TestRuntimeServices;
@@ -26,7 +26,7 @@ afterAll(() => serviceProvider.stop());
 
 describe("SharedToPeerAttributeDVO", () => {
     test("check the Sex", async () => {
-        const ownSharedIdentityAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
+        const ownSharedIdentityAttribute = await executeFullCreateAndShareOwnIdentityAttributeFlow(services1, services2, {
             content: {
                 value: {
                     "@type": "Sex",
@@ -73,7 +73,7 @@ describe("SharedToPeerAttributeDVO", () => {
     });
 
     test("check the Nationality", async () => {
-        const ownSharedIdentityAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
+        const ownSharedIdentityAttribute = await executeFullCreateAndShareOwnIdentityAttributeFlow(services1, services2, {
             content: {
                 value: {
                     "@type": "Nationality",
@@ -119,7 +119,7 @@ describe("SharedToPeerAttributeDVO", () => {
     });
 
     test("check the CommunicationLanguage", async () => {
-        const ownSharedIdentityAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
+        const ownSharedIdentityAttribute = await executeFullCreateAndShareOwnIdentityAttributeFlow(services1, services2, {
             content: {
                 value: {
                     "@type": "CommunicationLanguage",
@@ -166,7 +166,7 @@ describe("SharedToPeerAttributeDVO", () => {
     });
 
     test("check the CommunicationLanguage after the RepositoryAttribute was deleted", async () => {
-        const ownSharedIdentityAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
+        const ownSharedIdentityAttribute = await executeFullCreateAndShareOwnIdentityAttributeFlow(services1, services2, {
             content: {
                 value: {
                     "@type": "CommunicationLanguage",

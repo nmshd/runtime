@@ -1,6 +1,6 @@
 import { AbstractStringJSON, IdentityAttributeJSON } from "@nmshd/content";
 import { PeerAttributeDVO } from "../../src";
-import { ensureActiveRelationship, executeFullCreateAndShareRepositoryAttributeFlow, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
+import { ensureActiveRelationship, executeFullCreateAndShareOwnIdentityAttributeFlow, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let services1: TestRuntimeServices;
@@ -22,7 +22,7 @@ afterAll(() => serviceProvider.stop());
 
 describe("PeerAttributeDVO", () => {
     test("check the Sex", async () => {
-        const sOwnSharedIdentityAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(services2, services1, {
+        const sOwnSharedIdentityAttribute = await executeFullCreateAndShareOwnIdentityAttributeFlow(services2, services1, {
             content: {
                 value: {
                     "@type": "Sex",
@@ -71,7 +71,7 @@ describe("PeerAttributeDVO", () => {
     });
 
     test("check the Nationality", async () => {
-        const sOwnSharedIdentityAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(services2, services1, {
+        const sOwnSharedIdentityAttribute = await executeFullCreateAndShareOwnIdentityAttributeFlow(services2, services1, {
             content: {
                 value: {
                     "@type": "Nationality",
@@ -120,7 +120,7 @@ describe("PeerAttributeDVO", () => {
     });
 
     test("check the CommunicationLanguage", async () => {
-        const sOwnSharedIdentityAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(services2, services1, {
+        const sOwnSharedIdentityAttribute = await executeFullCreateAndShareOwnIdentityAttributeFlow(services2, services1, {
             content: {
                 value: {
                     "@type": "CommunicationLanguage",

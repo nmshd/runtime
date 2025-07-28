@@ -44,8 +44,8 @@ import {
     establishRelationship,
     exchangeMessageWithRequest,
     exchangeTemplate,
+    executeFullCreateAndShareOwnIdentityAttributeFlow,
     executeFullCreateAndShareRelationshipAttributeFlow,
-    executeFullCreateAndShareRepositoryAttributeFlow,
     executeFullSucceedRepositoryAttributeAndNotifyPeerFlow,
     generateAddressPseudonym,
     getRelationship,
@@ -641,7 +641,7 @@ describe("Attributes for the relationship", () => {
         relationshipId = relationship.id;
 
         // create own shared attributes
-        ownSharedIdentityAttributeV0 = await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
+        ownSharedIdentityAttributeV0 = await executeFullCreateAndShareOwnIdentityAttributeFlow(services1, services2, {
             content: {
                 value: {
                     "@type": "GivenName",
@@ -702,7 +702,7 @@ describe("Attributes for the relationship", () => {
         });
 
         // create peer shared attributes
-        peerSharedIdentityAttributeV0 = await executeFullCreateAndShareRepositoryAttributeFlow(services2, services1, {
+        peerSharedIdentityAttributeV0 = await executeFullCreateAndShareOwnIdentityAttributeFlow(services2, services1, {
             content: {
                 value: {
                     "@type": "GivenName",
@@ -1290,7 +1290,7 @@ describe("RelationshipDecomposition", () => {
         await sendAndReceiveNotification(services1.transport, services2.transport, services2.consumption);
 
         const randomName1 = await Random.string(7);
-        await executeFullCreateAndShareRepositoryAttributeFlow(services1, services2, {
+        await executeFullCreateAndShareOwnIdentityAttributeFlow(services1, services2, {
             content: {
                 value: {
                     "@type": "GivenName",
@@ -1300,7 +1300,7 @@ describe("RelationshipDecomposition", () => {
         });
 
         const randomName2 = await Random.string(7);
-        await executeFullCreateAndShareRepositoryAttributeFlow(services2, services1, {
+        await executeFullCreateAndShareOwnIdentityAttributeFlow(services2, services1, {
             content: {
                 value: {
                     "@type": "GivenName",

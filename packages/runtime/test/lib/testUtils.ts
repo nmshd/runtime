@@ -614,19 +614,19 @@ export async function sendAndReceiveNotification(
  *
  * Returns the sender's own shared identity attribute.
  */
-export async function executeFullCreateAndShareRepositoryAttributeFlow(
+export async function executeFullCreateAndShareOwnIdentityAttributeFlow(
     sender: TestRuntimeServices,
     recipient: TestRuntimeServices,
     request: CreateOwnIdentityAttributeRequest
 ): Promise<LocalAttributeDTO> {
     const createAttributeRequestResult = await sender.consumption.attributes.createOwnIdentityAttribute(request);
-    const repositoryAttribute = createAttributeRequestResult.value;
+    const ownIdentityAttribute = createAttributeRequestResult.value;
 
-    const senderOwnSharedIdentityAttribute = await executeFullShareRepositoryAttributeFlow(sender, recipient, repositoryAttribute.id);
-    return senderOwnSharedIdentityAttribute;
+    const senderOwnIdentityAttribute = await executeFullShareOwnIdentityAttributeFlow(sender, recipient, ownIdentityAttribute.id);
+    return senderOwnIdentityAttribute;
 }
 
-export async function executeFullShareRepositoryAttributeFlow(sender: TestRuntimeServices, recipient: TestRuntimeServices, attributeId: string): Promise<LocalAttributeDTO> {
+export async function executeFullShareOwnIdentityAttributeFlow(sender: TestRuntimeServices, recipient: TestRuntimeServices, attributeId: string): Promise<LocalAttributeDTO> {
     const shareRequest: ShareOwnIdentityAttributeRequest = {
         attributeId: attributeId.toString(),
         peer: recipient.address
@@ -634,8 +634,8 @@ export async function executeFullShareRepositoryAttributeFlow(sender: TestRuntim
     const shareRequestResult = await sender.consumption.attributes.shareOwnIdentityAttribute(shareRequest);
     const shareRequestId = shareRequestResult.value.id;
 
-    const senderOwnSharedIdentityAttribute = await acceptIncomingShareAttributeRequest(sender, recipient, shareRequestId);
-    return senderOwnSharedIdentityAttribute;
+    const senderOwnIdentityAttribute = await acceptIncomingShareAttributeRequest(sender, recipient, shareRequestId);
+    return senderOwnIdentityAttribute;
 }
 
 export async function acceptIncomingShareAttributeRequest(sender: TestRuntimeServices, recipient: TestRuntimeServices, requestId: string): Promise<LocalAttributeDTO> {
@@ -646,13 +646,14 @@ export async function acceptIncomingShareAttributeRequest(sender: TestRuntimeSer
     await recipient.consumption.incomingRequests.accept({ requestId: requestId, items: [{ accept: true }] });
 
     const responseMessage = await syncUntilHasMessageWithResponse(sender.transport, requestId);
+    // TODO: this will need to be refactored when we remove attributeId from ShareAttributeAcceptResponseItem
     const sharedAttributeId = (responseMessage.content.response.items[0] as ShareAttributeAcceptResponseItemJSON).attributeId;
     await sender.eventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => {
         return e.data.request.id === requestId && e.data.newStatus === LocalRequestStatus.Completed;
     });
 
-    const senderOwnSharedAttribute = (await sender.consumption.attributes.getAttribute({ id: sharedAttributeId })).value;
-    return senderOwnSharedAttribute;
+    const senderOwnIdentityAttribute = (await sender.consumption.attributes.getAttribute({ id: sharedAttributeId })).value;
+    return senderOwnIdentityAttribute;
 }
 
 /**

@@ -28,7 +28,7 @@ import {
     exchangeMessage,
     exchangeMessageWithAttachment,
     exchangeTemplate,
-    executeFullCreateAndShareRepositoryAttributeFlow,
+    executeFullCreateAndShareOwnIdentityAttributeFlow,
     QueryParamConditions,
     reactivateTerminatedRelationship,
     RuntimeServiceProvider,
@@ -656,7 +656,7 @@ describe("Postponed Notifications via Messages", () => {
         });
 
         test("should be able to receive Notifications sent on a terminated Relationship in the right order after the Relationship was reactivated", async () => {
-            const ownSharedIdentityAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(client1, client5, {
+            const ownSharedIdentityAttribute = await executeFullCreateAndShareOwnIdentityAttributeFlow(client1, client5, {
                 content: {
                     value: {
                         "@type": "GivenName",

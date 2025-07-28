@@ -39,7 +39,7 @@ import {
     establishRelationship,
     exchangeAndAcceptRequestByMessage,
     exchangeMessageWithRequest,
-    executeFullCreateAndShareRepositoryAttributeFlow,
+    executeFullCreateAndShareOwnIdentityAttributeFlow,
     MockEventBus,
     RuntimeServiceProvider,
     sendMessageWithRequest,
@@ -515,7 +515,7 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
     let requestContent: CreateOutgoingRequestRequest;
     let responseItems: DecideRequestItemParametersJSON[];
     beforeEach(async () => {
-        const predecessorOwnSharedIdentityAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(runtimeServices2, runtimeServices1, {
+        const predecessorOwnSharedIdentityAttribute = await executeFullCreateAndShareOwnIdentityAttributeFlow(runtimeServices2, runtimeServices1, {
             content: {
                 value: {
                     "@type": "GivenName",
@@ -787,7 +787,7 @@ describe("AttributeAlreadySharedAcceptResponseItemDVO with IdentityAttributeQuer
     let requestContent: CreateOutgoingRequestRequest;
     let responseItems: DecideRequestItemParametersJSON[];
     beforeEach(async () => {
-        const alreadySharedIdentityAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(runtimeServices2, runtimeServices1, {
+        const alreadySharedIdentityAttribute = await executeFullCreateAndShareOwnIdentityAttributeFlow(runtimeServices2, runtimeServices1, {
             content: {
                 value: {
                     "@type": "GivenName",
