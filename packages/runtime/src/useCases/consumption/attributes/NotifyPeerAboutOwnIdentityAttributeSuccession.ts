@@ -8,26 +8,26 @@ import { Inject } from "@nmshd/typescript-ioc";
 import { AddressString, AttributeIdString, NotificationIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { AttributeMapper } from "./AttributeMapper";
 
-export interface NotifyPeerAboutRepositoryAttributeSuccessionResponse {
+export interface NotifyPeerAboutOwnIdentityAttributeSuccessionResponse {
     predecessor: LocalAttributeDTO;
     successor: LocalAttributeDTO;
     notificationId: NotificationIdString;
 }
 
-export interface NotifyPeerAboutRepositoryAttributeSuccessionRequest {
+export interface NotifyPeerAboutOwnIdentityAttributeSuccessionRequest {
     attributeId: AttributeIdString;
     peer: AddressString;
 }
 
-class Validator extends SchemaValidator<NotifyPeerAboutRepositoryAttributeSuccessionRequest> {
+class Validator extends SchemaValidator<NotifyPeerAboutOwnIdentityAttributeSuccessionRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
-        super(schemaRepository.getSchema("NotifyPeerAboutRepositoryAttributeSuccessionRequest"));
+        super(schemaRepository.getSchema("NotifyPeerAboutOwnIdentityAttributeSuccessionRequest"));
     }
 }
 
-export class NotifyPeerAboutRepositoryAttributeSuccessionUseCase extends UseCase<
-    NotifyPeerAboutRepositoryAttributeSuccessionRequest,
-    NotifyPeerAboutRepositoryAttributeSuccessionResponse
+export class NotifyPeerAboutOwnIdentityAttributeSuccessionUseCase extends UseCase<
+    NotifyPeerAboutOwnIdentityAttributeSuccessionRequest,
+    NotifyPeerAboutOwnIdentityAttributeSuccessionResponse
 > {
     public constructor(
         @Inject private readonly accountController: AccountController,
@@ -38,7 +38,7 @@ export class NotifyPeerAboutRepositoryAttributeSuccessionUseCase extends UseCase
         super(validator);
     }
 
-    protected async executeInternal(request: NotifyPeerAboutRepositoryAttributeSuccessionRequest): Promise<Result<NotifyPeerAboutRepositoryAttributeSuccessionResponse>> {
+    protected async executeInternal(request: NotifyPeerAboutOwnIdentityAttributeSuccessionRequest): Promise<Result<NotifyPeerAboutOwnIdentityAttributeSuccessionResponse>> {
         const attributeId = CoreId.from(request.attributeId);
         const attribute = await this.attributeController.getLocalAttribute(attributeId);
 

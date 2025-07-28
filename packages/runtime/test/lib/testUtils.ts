@@ -43,8 +43,8 @@ import {
     MessageContentDerivation,
     MessageDTO,
     MessageSentEvent,
-    NotifyPeerAboutRepositoryAttributeSuccessionRequest,
-    NotifyPeerAboutRepositoryAttributeSuccessionResponse,
+    NotifyPeerAboutOwnIdentityAttributeSuccessionRequest,
+    NotifyPeerAboutOwnIdentityAttributeSuccessionResponse,
     OutgoingRequestStatusChangedEvent,
     OwnSharedAttributeSucceededEvent,
     PeerSharedAttributeSucceededEvent,
@@ -696,11 +696,11 @@ export async function executeFullNotifyPeerAboutAttributeSuccessionFlow(
     recipient: TestRuntimeServices,
     attributeId: string
 ): Promise<SucceedOwnIdentityAttributeResponse> {
-    const notifyRequest: NotifyPeerAboutRepositoryAttributeSuccessionRequest = {
+    const notifyRequest: NotifyPeerAboutOwnIdentityAttributeSuccessionRequest = {
         attributeId: attributeId,
         peer: recipient.address
     };
-    const notifyRequestResult = await sender.consumption.attributes.notifyPeerAboutRepositoryAttributeSuccession(notifyRequest);
+    const notifyRequestResult = await sender.consumption.attributes.notifyPeerAboutOwnIdentityAttributeSuccession(notifyRequest);
 
     await waitForRecipientToReceiveNotification(sender, recipient, notifyRequestResult.value);
 
@@ -715,7 +715,7 @@ export async function executeFullNotifyPeerAboutAttributeSuccessionFlow(
 export async function waitForRecipientToReceiveNotification(
     sender: TestRuntimeServices,
     recipient: TestRuntimeServices,
-    notifyRequestResult: NotifyPeerAboutRepositoryAttributeSuccessionResponse
+    notifyRequestResult: NotifyPeerAboutOwnIdentityAttributeSuccessionResponse
 ): Promise<void> {
     await syncUntilHasMessageWithNotification(recipient.transport, notifyRequestResult.notificationId);
 

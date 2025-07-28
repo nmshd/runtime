@@ -682,7 +682,7 @@ describe("Postponed Notifications via Messages", () => {
             ).value;
 
             const notifyAboutSuccessionResult = (
-                await client1.consumption.attributes.notifyPeerAboutRepositoryAttributeSuccession({ attributeId: successorOfRepositoryAttribute.id, peer: client5.address })
+                await client1.consumption.attributes.notifyPeerAboutOwnIdentityAttributeSuccession({ attributeId: successorOfRepositoryAttribute.id, peer: client5.address })
             ).value;
             await client1.eventBus.waitForEvent(OwnSharedAttributeSucceededEvent);
             await client5.transport.account.syncEverything();

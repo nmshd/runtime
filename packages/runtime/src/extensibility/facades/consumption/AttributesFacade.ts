@@ -49,9 +49,9 @@ import {
     GetVersionsOfAttributeUseCase,
     MarkAttributeAsViewedRequest,
     MarkAttributeAsViewedUseCase,
-    NotifyPeerAboutRepositoryAttributeSuccessionRequest,
-    NotifyPeerAboutRepositoryAttributeSuccessionResponse,
-    NotifyPeerAboutRepositoryAttributeSuccessionUseCase,
+    NotifyPeerAboutOwnIdentityAttributeSuccessionRequest,
+    NotifyPeerAboutOwnIdentityAttributeSuccessionResponse,
+    NotifyPeerAboutOwnIdentityAttributeSuccessionUseCase,
     SetAttributeDeletionInfoOfDeletionProposedRelationshipRequest,
     SetAttributeDeletionInfoOfDeletionProposedRelationshipUseCase,
     ShareOwnIdentityAttributeRequest,
@@ -85,7 +85,7 @@ export class AttributesFacade {
         @Inject private readonly validateIQLQueryUseCase: ValidateIQLQueryUseCase,
         @Inject private readonly succeedOwnIdentityAttributeUseCase: SucceedOwnIdentityAttributeUseCase,
         @Inject private readonly shareOwnIdentityAttributeUseCase: ShareOwnIdentityAttributeUseCase,
-        @Inject private readonly notifyPeerAboutRepositoryAttributeSuccessionUseCase: NotifyPeerAboutRepositoryAttributeSuccessionUseCase,
+        @Inject private readonly notifyPeerAboutOwnIdentityAttributeSuccessionUseCase: NotifyPeerAboutOwnIdentityAttributeSuccessionUseCase,
         @Inject private readonly createAndShareRelationshipAttributeUseCase: CreateAndShareRelationshipAttributeUseCase,
         @Inject private readonly succeedRelationshipAttributeAndNotifyPeerUseCase: SucceedRelationshipAttributeAndNotifyPeerUseCase,
         @Inject private readonly changeDefaultOwnIdentityAttributeUseCase: ChangeDefaultOwnIdentityAttributeUseCase,
@@ -163,10 +163,10 @@ export class AttributesFacade {
         return await this.shareOwnIdentityAttributeUseCase.execute(request);
     }
 
-    public async notifyPeerAboutRepositoryAttributeSuccession(
-        request: NotifyPeerAboutRepositoryAttributeSuccessionRequest
-    ): Promise<Result<NotifyPeerAboutRepositoryAttributeSuccessionResponse>> {
-        return await this.notifyPeerAboutRepositoryAttributeSuccessionUseCase.execute(request);
+    public async notifyPeerAboutOwnIdentityAttributeSuccession(
+        request: NotifyPeerAboutOwnIdentityAttributeSuccessionRequest
+    ): Promise<Result<NotifyPeerAboutOwnIdentityAttributeSuccessionResponse>> {
+        return await this.notifyPeerAboutOwnIdentityAttributeSuccessionUseCase.execute(request);
     }
 
     public async createAndShareRelationshipAttribute(request: CreateAndShareRelationshipAttributeRequest): Promise<Result<LocalRequestDTO>> {

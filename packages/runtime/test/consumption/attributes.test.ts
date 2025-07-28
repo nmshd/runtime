@@ -38,7 +38,7 @@ import {
     LocalAttributeDTO,
     LocalAttributeDeletionStatus,
     MarkAttributeAsViewedUseCase,
-    NotifyPeerAboutRepositoryAttributeSuccessionUseCase,
+    NotifyPeerAboutOwnIdentityAttributeSuccessionUseCase,
     OwnSharedAttributeDeletedByOwnerEvent,
     PeerSharedAttributeDeletedByPeerEvent,
     RelationshipChangedEvent,
@@ -1706,7 +1706,7 @@ describe(SucceedOwnIdentityAttributeUseCase.name, () => {
     });
 });
 
-describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
+describe(NotifyPeerAboutOwnIdentityAttributeSuccessionUseCase.name, () => {
     let succeedRepositoryAttributeRequest1: SucceedOwnIdentityAttributeRequest;
     let succeedRepositoryAttributeRequest2: SucceedOwnIdentityAttributeRequest;
     let ownSharedIdentityAttributeVersion0: LocalAttributeDTO;
@@ -1748,7 +1748,7 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
     });
 
     test("should successfully notify peer about attribute succession", async () => {
-        const notificationResult = await services1.consumption.attributes.notifyPeerAboutRepositoryAttributeSuccession({
+        const notificationResult = await services1.consumption.attributes.notifyPeerAboutOwnIdentityAttributeSuccession({
             attributeId: repositoryAttributeVersion1.id,
             peer: services2.address
         });
@@ -1799,7 +1799,7 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
             ownSharedIdentityAttributeVersion0.shareInfo!.sourceAttribute!
         );
 
-        const result = await services1.consumption.attributes.notifyPeerAboutRepositoryAttributeSuccession({
+        const result = await services1.consumption.attributes.notifyPeerAboutOwnIdentityAttributeSuccession({
             attributeId: repositoryAttributeVersion2.id,
             peer: services2.address
         });
@@ -1811,7 +1811,7 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
         const repositoryAttributeVersion0 = (await services1.consumption.attributes.getAttribute({ id: ownSharedIdentityAttributeVersion0.shareInfo!.sourceAttribute! })).value;
         await services1.consumption.attributes.deleteRepositoryAttribute({ attributeId: repositoryAttributeVersion0.id });
 
-        const notificationResult = await services1.consumption.attributes.notifyPeerAboutRepositoryAttributeSuccession({
+        const notificationResult = await services1.consumption.attributes.notifyPeerAboutOwnIdentityAttributeSuccession({
             attributeId: repositoryAttributeVersion1.id,
             peer: services2.address
         });
@@ -1821,7 +1821,7 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
     test("should throw if the successor repository attribute was deleted", async () => {
         await services1.consumption.attributes.deleteRepositoryAttribute({ attributeId: repositoryAttributeVersion1.id });
 
-        const notificationResult = await services1.consumption.attributes.notifyPeerAboutRepositoryAttributeSuccession({
+        const notificationResult = await services1.consumption.attributes.notifyPeerAboutOwnIdentityAttributeSuccession({
             attributeId: repositoryAttributeVersion1.id,
             peer: services2.address
         });
@@ -1842,7 +1842,7 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
         const updatedOwnSharedIdentityAttribute = (await services1.consumption.attributes.getAttribute({ id: ownSharedIdentityAttributeVersion1.id })).value;
         expect(updatedOwnSharedIdentityAttribute.deletionInfo?.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByPeer);
 
-        const notificationResult = await services1.consumption.attributes.notifyPeerAboutRepositoryAttributeSuccession({
+        const notificationResult = await services1.consumption.attributes.notifyPeerAboutOwnIdentityAttributeSuccession({
             attributeId: repositoryAttributeVersion2.id,
             peer: services2.address
         });
@@ -1852,7 +1852,7 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
     test("should throw if the same version of the attribute has been notified about already", async () => {
         await executeFullNotifyPeerAboutAttributeSuccessionFlow(services1, services2, repositoryAttributeVersion1.id);
 
-        const result2 = await services1.consumption.attributes.notifyPeerAboutRepositoryAttributeSuccession({
+        const result2 = await services1.consumption.attributes.notifyPeerAboutOwnIdentityAttributeSuccession({
             attributeId: repositoryAttributeVersion1.id,
             peer: services2.address
         });
@@ -1862,7 +1862,7 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
     test("should throw if a later version of the attribute has been notified about already", async () => {
         await executeFullNotifyPeerAboutAttributeSuccessionFlow(services1, services2, repositoryAttributeVersion2.id);
 
-        const notificationResult = await services1.consumption.attributes.notifyPeerAboutRepositoryAttributeSuccession({
+        const notificationResult = await services1.consumption.attributes.notifyPeerAboutOwnIdentityAttributeSuccession({
             attributeId: repositoryAttributeVersion1.id,
             peer: services2.address
         });
@@ -1881,7 +1881,7 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
             })
         ).value;
 
-        const result = await services1.consumption.attributes.notifyPeerAboutRepositoryAttributeSuccession({ attributeId: newRepositoryAttribute.id, peer: services2.address });
+        const result = await services1.consumption.attributes.notifyPeerAboutOwnIdentityAttributeSuccession({ attributeId: newRepositoryAttribute.id, peer: services2.address });
         expect(result).toBeAnError(/.*/, "error.runtime.attributes.noPreviousVersionOfRepositoryAttributeHasBeenSharedWithPeerBefore");
     });
 });
@@ -2246,7 +2246,7 @@ describe("Get (shared) versions of attribute", () => {
 
         async function notifyPeerAboutVersion2(): Promise<void> {
             const notifyRequestResult = (
-                await services1.consumption.attributes.notifyPeerAboutRepositoryAttributeSuccession({
+                await services1.consumption.attributes.notifyPeerAboutOwnIdentityAttributeSuccession({
                     attributeId: sRepositoryAttributeVersion2.id,
                     peer: services2.address
                 })
