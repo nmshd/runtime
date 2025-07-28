@@ -8,27 +8,27 @@ import { RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationRe
 import { IValidator } from "../../common/validation/IValidator";
 import { IdentityAttributeValueValidator } from "./IdentityAttributeValueValidator";
 
-interface AbstractCanCreateRepositoryAttributeRequest<T> {
+interface AbstractCanCreateOwnIdentityAttributeRequest<T> {
     content: {
         value: T;
         tags?: string[];
     };
 }
 
-export interface CanCreateRepositoryAttributeRequest extends AbstractCanCreateRepositoryAttributeRequest<AttributeValues.Identity.Json> {}
+export interface CanCreateOwnIdentityAttributeRequest extends AbstractCanCreateOwnIdentityAttributeRequest<AttributeValues.Identity.Json> {}
 
-export interface SchemaValidatableCanCreateRepositoryAttributeRequest extends AbstractCanCreateRepositoryAttributeRequest<unknown> {}
+export interface SchemaValidatableCanCreateOwnIdentityAttributeRequest extends AbstractCanCreateOwnIdentityAttributeRequest<unknown> {}
 
-class Validator implements IValidator<CanCreateRepositoryAttributeRequest> {
+class Validator implements IValidator<CanCreateOwnIdentityAttributeRequest> {
     public constructor(@Inject private readonly schemaRepository: SchemaRepository) {}
 
-    public validate(request: CanCreateRepositoryAttributeRequest): ValidationResult {
-        const requestSchemaValidator = new SchemaValidator(this.schemaRepository.getSchema("CanCreateRepositoryAttributeRequest"));
+    public validate(request: CanCreateOwnIdentityAttributeRequest): ValidationResult {
+        const requestSchemaValidator = new SchemaValidator(this.schemaRepository.getSchema("CanCreateOwnIdentityAttributeRequest"));
         return requestSchemaValidator.validate(request);
     }
 }
 
-export type CanCreateRepositoryAttributeResponse =
+export type CanCreateOwnIdentityAttributeResponse =
     | { isSuccess: true }
     | {
           isSuccess: false;
@@ -36,7 +36,7 @@ export type CanCreateRepositoryAttributeResponse =
           message: string;
       };
 
-export class CanCreateRepositoryAttributeUseCase extends UseCase<CanCreateRepositoryAttributeRequest, CanCreateRepositoryAttributeResponse> {
+export class CanCreateOwnIdentityAttributeUseCase extends UseCase<CanCreateOwnIdentityAttributeRequest, CanCreateOwnIdentityAttributeResponse> {
     public constructor(
         @Inject private readonly attributesController: AttributesController,
         @Inject private readonly accountController: AccountController,
@@ -46,7 +46,7 @@ export class CanCreateRepositoryAttributeUseCase extends UseCase<CanCreateReposi
         super(validator);
     }
 
-    protected async executeInternal(request: CanCreateRepositoryAttributeRequest): Promise<Result<CanCreateRepositoryAttributeResponse>> {
+    protected async executeInternal(request: CanCreateOwnIdentityAttributeRequest): Promise<Result<CanCreateOwnIdentityAttributeResponse>> {
         const identityAttributeValueValidator = new IdentityAttributeValueValidator(this.schemaRepository);
         const attributeValueValidationResult = await identityAttributeValueValidator.validate(request.content.value);
         if (attributeValueValidationResult.isInvalid()) {

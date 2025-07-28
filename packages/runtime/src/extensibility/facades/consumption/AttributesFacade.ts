@@ -2,9 +2,9 @@ import { Result } from "@js-soft/ts-utils";
 import { AttributeTagCollectionDTO, LocalAttributeDTO, LocalRequestDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
 import {
-    CanCreateRepositoryAttributeRequest,
-    CanCreateRepositoryAttributeResponse,
-    CanCreateRepositoryAttributeUseCase,
+    CanCreateOwnIdentityAttributeRequest,
+    CanCreateOwnIdentityAttributeResponse,
+    CanCreateOwnIdentityAttributeUseCase,
     ChangeDefaultRepositoryAttributeRequest,
     ChangeDefaultRepositoryAttributeUseCase,
     CreateAndShareRelationshipAttributeRequest,
@@ -69,7 +69,7 @@ import {
 
 export class AttributesFacade {
     public constructor(
-        @Inject private readonly canCreateRepositoryAttributeUseCase: CanCreateRepositoryAttributeUseCase,
+        @Inject private readonly canCreateOwnIdentityAttributeUseCase: CanCreateOwnIdentityAttributeUseCase,
         @Inject private readonly createOwnIdentityAttributeUseCase: CreateOwnIdentityAttributeUseCase,
         @Inject private readonly getPeerSharedAttributesUseCase: GetPeerSharedAttributesUseCase,
         @Inject private readonly getOwnSharedAttributesUseCase: GetOwnSharedAttributesUseCase,
@@ -99,8 +99,8 @@ export class AttributesFacade {
         @Inject private readonly markAttributeAsViewedUseCase: MarkAttributeAsViewedUseCase
     ) {}
 
-    public async canCreateRepositoryAttribute(request: CanCreateRepositoryAttributeRequest): Promise<Result<CanCreateRepositoryAttributeResponse>> {
-        return await this.canCreateRepositoryAttributeUseCase.execute(request);
+    public async canCreateOwnIdentityAttribute(request: CanCreateOwnIdentityAttributeRequest): Promise<Result<CanCreateOwnIdentityAttributeResponse>> {
+        return await this.canCreateOwnIdentityAttributeUseCase.execute(request);
     }
 
     public async createOwnIdentityAttribute(request: CreateOwnIdentityAttributeRequest): Promise<Result<LocalAttributeDTO>> {
