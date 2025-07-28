@@ -268,11 +268,11 @@ describe("get attribute(s)", () => {
 });
 
 describe("attribute queries", () => {
-    let repositoryAttribute: LocalAttributeDTO;
-    let ownSharedRelationshipAttribute: LocalAttributeDTO;
+    let ownIdentityAttribute: LocalAttributeDTO;
+    let ownRelationshipAttribute: LocalAttributeDTO;
 
     beforeEach(async function () {
-        const createRepositoryAttributeRequest: CreateOwnIdentityAttributeRequest = {
+        const createOwnIdentityAttributeRequest: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
                     "@type": "PhoneNumber",
@@ -280,9 +280,9 @@ describe("attribute queries", () => {
                 }
             }
         };
-        repositoryAttribute = (await services1.consumption.attributes.createOwnIdentityAttribute(createRepositoryAttributeRequest)).value;
+        ownIdentityAttribute = (await services1.consumption.attributes.createOwnIdentityAttribute(createOwnIdentityAttributeRequest)).value;
 
-        ownSharedRelationshipAttribute = await executeFullCreateAndShareRelationshipAttributeFlow(services1, services2, {
+        ownRelationshipAttribute = await executeFullCreateAndShareRelationshipAttributeFlow(services1, services2, {
             content: {
                 value: {
                     "@type": "ProprietaryString",
@@ -296,17 +296,17 @@ describe("attribute queries", () => {
     });
 
     describe(ExecuteIdentityAttributeQueryUseCase.name, () => {
-        test("should allow to execute an identityAttributeQuery", async function () {
+        test("should allow to execute an IdentityAttributeQuery", async function () {
             const result = await services1.consumption.attributes.executeIdentityAttributeQuery({ query: { "@type": "IdentityAttributeQuery", valueType: "PhoneNumber" } });
             expect(result).toBeSuccessful();
             const receivedAttributes = result.value;
             const receivedAttributeIds = receivedAttributes.map((attribute) => attribute.id);
-            expect(receivedAttributeIds.sort()).toStrictEqual([repositoryAttribute.id]);
+            expect(receivedAttributeIds.sort()).toStrictEqual([ownIdentityAttribute.id]);
         });
     });
 
     describe(ExecuteRelationshipAttributeQueryUseCase.name, () => {
-        test("should allow to execute a relationshipAttributeQuery", async function () {
+        test("should allow to execute a RelationshipAttributeQuery", async function () {
             const result = await services1.consumption.attributes.executeRelationshipAttributeQuery({
                 query: {
                     "@type": "RelationshipAttributeQuery",
@@ -317,7 +317,7 @@ describe("attribute queries", () => {
             });
             expect(result).toBeSuccessful();
             const receivedAttribute = result.value;
-            expect(receivedAttribute.id).toStrictEqual(ownSharedRelationshipAttribute.id);
+            expect(receivedAttribute.id).toStrictEqual(ownRelationshipAttribute.id);
         });
     });
 
@@ -334,7 +334,7 @@ describe("attribute queries", () => {
             expect(result).toBeSuccessful();
             const receivedAttribute = result.value;
             expect(receivedAttribute).toHaveLength(1);
-            expect(receivedAttribute[0].id).toStrictEqual(ownSharedRelationshipAttribute.id);
+            expect(receivedAttribute[0].id).toStrictEqual(ownRelationshipAttribute.id);
         });
     });
 });
