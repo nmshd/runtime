@@ -46,7 +46,7 @@ import {
     exchangeTemplate,
     executeFullCreateAndShareOwnIdentityAttributeFlow,
     executeFullCreateAndShareRelationshipAttributeFlow,
-    executeFullSucceedRepositoryAttributeAndNotifyPeerFlow,
+    executeFullSucceedOwnIdentityAttributeAndNotifyPeerFlow,
     generateAddressPseudonym,
     getRelationship,
     sendAndReceiveNotification,
@@ -651,7 +651,7 @@ describe("Attributes for the relationship", () => {
         });
 
         const repositoryAttributeIdV0 = ownSharedIdentityAttributeV0.shareInfo!.sourceAttribute!;
-        ({ predecessor: ownSharedIdentityAttributeV0, successor: ownSharedIdentityAttributeV1 } = await executeFullSucceedRepositoryAttributeAndNotifyPeerFlow(
+        ({ predecessor: ownSharedIdentityAttributeV0, successor: ownSharedIdentityAttributeV1 } = await executeFullSucceedOwnIdentityAttributeAndNotifyPeerFlow(
             services1,
             services2,
             {
@@ -712,7 +712,7 @@ describe("Attributes for the relationship", () => {
         });
 
         const peerRepositoryAttributeIdV0 = peerSharedIdentityAttributeV0.shareInfo!.sourceAttribute!;
-        ({ predecessor: peerSharedIdentityAttributeV0, successor: peerSharedIdentityAttributeV1 } = await executeFullSucceedRepositoryAttributeAndNotifyPeerFlow(
+        ({ predecessor: peerSharedIdentityAttributeV0, successor: peerSharedIdentityAttributeV1 } = await executeFullSucceedOwnIdentityAttributeAndNotifyPeerFlow(
             services2,
             services1,
             {
@@ -1174,25 +1174,25 @@ describe("RelationshipDecomposition", () => {
     });
 
     test("attributes should be deleted", async () => {
-        const ownSharedAttributes = (await services1.consumption.attributes.getOwnSharedAttributes({ peer: services2.address })).value;
+        const ownSharedAttributes = (await services1.consumption.attributes.getOwnAttributesSharedWithPeer({ peer: services2.address })).value;
         expect(ownSharedAttributes).toHaveLength(0);
 
-        const peerSharedAttributes = (await services1.consumption.attributes.getPeerSharedAttributes({ peer: services2.address })).value;
+        const peerSharedAttributes = (await services1.consumption.attributes.getPeerAttributes({ peer: services2.address })).value;
         expect(peerSharedAttributes).toHaveLength(0);
 
-        const ownSharedAttributesControl = (await services1.consumption.attributes.getOwnSharedAttributes({ peer: services3.address })).value;
+        const ownSharedAttributesControl = (await services1.consumption.attributes.getOwnAttributesSharedWithPeer({ peer: services3.address })).value;
         expect(ownSharedAttributesControl).not.toHaveLength(0);
 
-        const peerSharedAttributesControl = (await services1.consumption.attributes.getPeerSharedAttributes({ peer: services3.address })).value;
+        const peerSharedAttributesControl = (await services1.consumption.attributes.getPeerAttributes({ peer: services3.address })).value;
         expect(peerSharedAttributesControl).not.toHaveLength(0);
     });
 
     test("attributes should be marked as deleted for peer", async () => {
-        const ownSharedAttributes = (await services2.consumption.attributes.getOwnSharedAttributes({ peer: services1.address })).value;
+        const ownSharedAttributes = (await services2.consumption.attributes.getOwnAttributesSharedWithPeer({ peer: services1.address })).value;
         expect(ownSharedAttributes).toHaveLength(1);
         expect(ownSharedAttributes[0].deletionInfo!.deletionStatus).toBe(LocalAttributeDeletionStatus.DeletedByPeer);
 
-        const peerSharedAttributes = (await services2.consumption.attributes.getPeerSharedAttributes({ peer: services1.address })).value;
+        const peerSharedAttributes = (await services2.consumption.attributes.getPeerAttributes({ peer: services1.address })).value;
         expect(peerSharedAttributes).toHaveLength(1);
         expect(peerSharedAttributes[0].deletionInfo!.deletionStatus).toBe(LocalAttributeDeletionStatus.DeletedByOwner);
     });

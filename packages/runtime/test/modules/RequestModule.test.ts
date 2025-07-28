@@ -538,7 +538,7 @@ describe("Handling the rejection and the revocation of a Relationship by the Req
         sRuntimeServices.eventBus.reset();
         rRuntimeServices.eventBus.reset();
 
-        const rRepositoryAttributes = (await rRuntimeServices.consumption.attributes.getRepositoryAttributes({})).value;
+        const rRepositoryAttributes = (await rRuntimeServices.consumption.attributes.getOwnIdentityAttributes({})).value;
         for (const rRepositoryAttribute of rRepositoryAttributes) {
             await rRuntimeServices.consumption.attributes.deleteOwnIdentityAttribute({ attributeId: rRepositoryAttribute.id });
         }

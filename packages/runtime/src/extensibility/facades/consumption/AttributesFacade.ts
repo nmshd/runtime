@@ -40,12 +40,12 @@ import {
     GetAttributeUseCase,
     GetAttributesRequest,
     GetAttributesUseCase,
-    GetOwnSharedAttributesRequest,
-    GetOwnSharedAttributesUseCase,
-    GetPeerSharedAttributesRequest,
-    GetPeerSharedAttributesUseCase,
-    GetRepositoryAttributesRequest,
-    GetRepositoryAttributesUseCase,
+    GetOwnAttributesSharedWithPeerRequest,
+    GetOwnAttributesSharedWithPeerUseCase,
+    GetOwnIdentityAttributesRequest,
+    GetOwnIdentityAttributesUseCase,
+    GetPeerAttributesRequest,
+    GetPeerAttributesUseCase,
     GetSharedVersionsOfAttributeRequest,
     GetSharedVersionsOfAttributeUseCase,
     GetVersionsOfAttributeRequest,
@@ -74,9 +74,9 @@ export class AttributesFacade {
     public constructor(
         @Inject private readonly canCreateOwnIdentityAttributeUseCase: CanCreateOwnIdentityAttributeUseCase,
         @Inject private readonly createOwnIdentityAttributeUseCase: CreateOwnIdentityAttributeUseCase,
-        @Inject private readonly getPeerSharedAttributesUseCase: GetPeerSharedAttributesUseCase,
-        @Inject private readonly getOwnSharedAttributesUseCase: GetOwnSharedAttributesUseCase,
-        @Inject private readonly getRepositoryAttributesUseCase: GetRepositoryAttributesUseCase,
+        @Inject private readonly getPeerAttributesUseCase: GetPeerAttributesUseCase,
+        @Inject private readonly getOwnAttributesSharedWithPeerUseCase: GetOwnAttributesSharedWithPeerUseCase,
+        @Inject private readonly getOwnIdentityAttributesUseCase: GetOwnIdentityAttributesUseCase,
         @Inject private readonly getAttributeUseCase: GetAttributeUseCase,
         @Inject private readonly getAttributesUseCase: GetAttributesUseCase,
         @Inject private readonly getVersionsOfAttributeUseCase: GetVersionsOfAttributeUseCase,
@@ -111,16 +111,16 @@ export class AttributesFacade {
         return await this.createOwnIdentityAttributeUseCase.execute(request);
     }
 
-    public async getPeerSharedAttributes(request: GetPeerSharedAttributesRequest): Promise<Result<LocalAttributeDTO[]>> {
-        return await this.getPeerSharedAttributesUseCase.execute(request);
+    public async getPeerAttributes(request: GetPeerAttributesRequest): Promise<Result<LocalAttributeDTO[]>> {
+        return await this.getPeerAttributesUseCase.execute(request);
     }
 
-    public async getOwnSharedAttributes(request: GetOwnSharedAttributesRequest): Promise<Result<LocalAttributeDTO[]>> {
-        return await this.getOwnSharedAttributesUseCase.execute(request);
+    public async getOwnAttributesSharedWithPeer(request: GetOwnAttributesSharedWithPeerRequest): Promise<Result<LocalAttributeDTO[]>> {
+        return await this.getOwnAttributesSharedWithPeerUseCase.execute(request);
     }
 
-    public async getRepositoryAttributes(request: GetRepositoryAttributesRequest): Promise<Result<LocalAttributeDTO[]>> {
-        return await this.getRepositoryAttributesUseCase.execute(request);
+    public async getOwnIdentityAttributes(request: GetOwnIdentityAttributesRequest): Promise<Result<LocalAttributeDTO[]>> {
+        return await this.getOwnIdentityAttributesUseCase.execute(request);
     }
 
     public async getAttribute(request: GetAttributeRequest): Promise<Result<LocalAttributeDTO>> {

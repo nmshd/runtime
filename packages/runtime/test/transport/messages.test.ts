@@ -671,7 +671,7 @@ describe("Postponed Notifications via Messages", () => {
 
             const { successor: successorOfRepositoryAttribute } = (
                 await client1.consumption.attributes.succeedOwnIdentityAttribute({
-                    predecessorId: (await client1.consumption.attributes.getRepositoryAttributes({})).value[0].id,
+                    predecessorId: (await client1.consumption.attributes.getOwnIdentityAttributes({})).value[0].id,
                     successorContent: {
                         value: {
                             "@type": "GivenName",

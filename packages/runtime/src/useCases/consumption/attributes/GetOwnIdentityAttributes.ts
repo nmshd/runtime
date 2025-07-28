@@ -6,15 +6,15 @@ import { SchemaRepository, SchemaValidator, UseCase, flattenObject } from "../..
 import { AttributeMapper } from "./AttributeMapper";
 import { GetAttributesRequestQuery, GetAttributesUseCase } from "./GetAttributes";
 
-export interface GetRepositoryAttributesRequest {
+export interface GetOwnIdentityAttributesRequest {
     /**
      * default: true
      */
     onlyLatestVersions?: boolean;
-    query?: GetRepositoryAttributesRequestQuery;
+    query?: GetOwnIdentityAttributesRequestQuery;
 }
 
-export interface GetRepositoryAttributesRequestQuery {
+export interface GetOwnIdentityAttributesRequestQuery {
     createdAt?: string;
     isDefault?: string;
     wasViewedAt?: string | string[];
@@ -29,15 +29,15 @@ export interface GetRepositoryAttributesRequestQuery {
     "forwardedSharingInfos.deletionInfo.deletionDate"?: string | string[];
 }
 
-export interface GetRepositoryAttributesResponse extends Array<LocalAttributeDTO> {}
+export interface GetOwnIdentityAttributesResponse extends Array<LocalAttributeDTO> {}
 
-class Validator extends SchemaValidator<GetRepositoryAttributesRequest> {
+class Validator extends SchemaValidator<GetOwnIdentityAttributesRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
-        super(schemaRepository.getSchema("GetRepositoryAttributesRequest"));
+        super(schemaRepository.getSchema("GetOwnIdentityAttributesRequest"));
     }
 }
 
-export class GetRepositoryAttributesUseCase extends UseCase<GetRepositoryAttributesRequest, GetRepositoryAttributesResponse> {
+export class GetOwnIdentityAttributesUseCase extends UseCase<GetOwnIdentityAttributesRequest, GetOwnIdentityAttributesResponse> {
     public constructor(
         @Inject private readonly attributesController: AttributesController,
         @Inject validator: Validator
@@ -45,7 +45,7 @@ export class GetRepositoryAttributesUseCase extends UseCase<GetRepositoryAttribu
         super(validator);
     }
 
-    protected async executeInternal(request: GetRepositoryAttributesRequest): Promise<Result<GetRepositoryAttributesResponse>> {
+    protected async executeInternal(request: GetOwnIdentityAttributesRequest): Promise<Result<GetOwnIdentityAttributesResponse>> {
         const query: GetAttributesRequestQuery = request.query ?? {};
 
         query["@type"] = "OwnIdentityAttribute";

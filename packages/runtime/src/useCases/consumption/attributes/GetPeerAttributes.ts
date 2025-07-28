@@ -7,9 +7,9 @@ import { flattenObject } from "../../common/flattenObject";
 import { AttributeMapper } from "./AttributeMapper";
 import { GetAttributesRequestQuery, GetAttributesUseCase } from "./GetAttributes";
 
-export interface GetPeerSharedAttributesRequest {
+export interface GetPeerAttributesRequest {
     peer: AddressString;
-    query?: GetPeerSharedAttributesRequestQuery;
+    query?: GetPeerAttributesRequestQuery;
     hideTechnical?: boolean;
     /**
      * default: true
@@ -17,7 +17,7 @@ export interface GetPeerSharedAttributesRequest {
     onlyLatestVersions?: boolean;
 }
 
-export interface GetPeerSharedAttributesRequestQuery {
+export interface GetPeerAttributesRequestQuery {
     createdAt?: string;
     wasViewedAt?: string | string[];
     "content.@type"?: string | string[];
@@ -27,7 +27,6 @@ export interface GetPeerSharedAttributesRequestQuery {
     "content.confidentiality"?: string | string[];
     "content.value.@type"?: string | string[];
     peerSharingInfo?: string | string[];
-    "peerSharingInfo.peer"?: string | string[];
     "peerSharingInfo.sourceReference"?: string | string[];
     "peerSharingInfo.initialAttributePeer"?: string | string[];
     "peerSharingInfo.deletionInfo"?: string | string[];
@@ -42,13 +41,13 @@ export interface GetPeerSharedAttributesRequestQuery {
     "forwardedSharingInfos.deletionInfo.deletionDate"?: string | string[];
 }
 
-class Validator extends SchemaValidator<GetPeerSharedAttributesRequest> {
+class Validator extends SchemaValidator<GetPeerAttributesRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
-        super(schemaRepository.getSchema("GetPeerSharedAttributesRequest"));
+        super(schemaRepository.getSchema("GetPeerAttributesRequest"));
     }
 }
 
-export class GetPeerSharedAttributesUseCase extends UseCase<GetPeerSharedAttributesRequest, LocalAttributeDTO[]> {
+export class GetPeerAttributesUseCase extends UseCase<GetPeerAttributesRequest, LocalAttributeDTO[]> {
     public constructor(
         @Inject private readonly attributeController: AttributesController,
         @Inject validator: Validator
@@ -56,13 +55,14 @@ export class GetPeerSharedAttributesUseCase extends UseCase<GetPeerSharedAttribu
         super(validator);
     }
 
-    protected async executeInternal(request: GetPeerSharedAttributesRequest): Promise<Result<LocalAttributeDTO[]>> {
+    protected async executeInternal(request: GetPeerAttributesRequest): Promise<Result<LocalAttributeDTO[]>> {
         const query: GetAttributesRequestQuery = request.query ?? {};
 
         const flattenedQuery = flattenObject(query);
         const dbQuery = GetAttributesUseCase.queryTranslator.parse(flattenedQuery);
 
         dbQuery["@type"] = { $in: ["PeerIdentityAttribute", "PeerRelationshipAttribute", "ThirdPartyRelationshipAttribute"] };
+        dbQuery["peerSharingInfo.peer"] = request.peer;
 
         if (request.onlyLatestVersions ?? true) {
             dbQuery["succeededBy"] = { $exists: false };

@@ -1650,7 +1650,7 @@ export class DataViewExpander {
         const relationshipSetting = await this.getRelationshipSettingDVO(relationship);
 
         const stringByType: Record<string, undefined | string> = {};
-        const relationshipAttributesResult = await this.consumption.attributes.getPeerSharedAttributes({ peer: relationship.peer });
+        const relationshipAttributesResult = await this.consumption.attributes.getPeerAttributes({ peer: relationship.peer });
         const expandedAttributes = await this.expandLocalAttributeDTOs(relationshipAttributesResult.value);
         const attributesByType: Record<string, undefined | LocalAttributeDVO[]> = {};
         for (const attribute of expandedAttributes) {
@@ -1674,7 +1674,7 @@ export class DataViewExpander {
             }
         }
 
-        const sendMailDisabledResult = await this.consumption.attributes.getPeerSharedAttributes({
+        const sendMailDisabledResult = await this.consumption.attributes.getPeerAttributes({
             peer: relationship.peer,
             query: { "content.value.@type": "Consent", "content.key": "__App_Contact_sendMailDisabled" }
         });

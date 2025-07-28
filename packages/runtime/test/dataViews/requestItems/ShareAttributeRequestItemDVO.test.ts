@@ -287,10 +287,10 @@ describe("ShareAttributeRequestItemDVO", () => {
     });
 
     test("check the attributes for the sender", async () => {
-        const baselineNumberOfAttributes = (await sConsumptionServices.attributes.getOwnSharedAttributes({ peer: rAddress })).value.length;
+        const baselineNumberOfAttributes = (await sConsumptionServices.attributes.getOwnAttributesSharedWithPeer({ peer: rAddress })).value.length;
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
         const dvo = (await sExpander.expandMessageDTO(senderMessage)) as RequestMessageDVO;
-        const attributeResult = await sConsumptionServices.attributes.getOwnSharedAttributes({
+        const attributeResult = await sConsumptionServices.attributes.getOwnAttributesSharedWithPeer({
             peer: dvo.request.peer.id
         });
 

@@ -680,16 +680,16 @@ export async function executeFullCreateAndShareRelationshipAttributeFlow(
  *
  * Returns the sender's own shared predecessor and successor identity attribute.
  */
-export async function executeFullSucceedRepositoryAttributeAndNotifyPeerFlow(
+export async function executeFullSucceedOwnIdentityAttributeAndNotifyPeerFlow(
     sender: TestRuntimeServices,
     recipient: TestRuntimeServices,
     request: SucceedOwnIdentityAttributeRequest
 ): Promise<SucceedOwnIdentityAttributeResponse> {
-    const succeedAttributeRequestResult = await sender.consumption.attributes.succeedOwnIdentityAttribute(request);
-    const repositorySuccessorId = succeedAttributeRequestResult.value.successor.id;
+    const succeedAttributeResult = await sender.consumption.attributes.succeedOwnIdentityAttribute(request);
+    const ownIdentityAttributeSuccessorId = succeedAttributeResult.value.successor.id;
 
-    const senderOwnSharedIdentityAttributes = await executeFullNotifyPeerAboutAttributeSuccessionFlow(sender, recipient, repositorySuccessorId);
-    return senderOwnSharedIdentityAttributes;
+    const senderUpdatedOwnIdentityAttributes = await executeFullNotifyPeerAboutAttributeSuccessionFlow(sender, recipient, ownIdentityAttributeSuccessorId);
+    return senderUpdatedOwnIdentityAttributes;
 }
 
 export async function executeFullNotifyPeerAboutAttributeSuccessionFlow(
@@ -705,12 +705,12 @@ export async function executeFullNotifyPeerAboutAttributeSuccessionFlow(
 
     await waitForRecipientToReceiveNotification(sender, recipient, notifyRequestResult.value);
 
-    const senderOwnSharedIdentityAttributes: SucceedOwnIdentityAttributeResponse = {
+    const senderOwnIdentityAttributes: SucceedOwnIdentityAttributeResponse = {
         predecessor: notifyRequestResult.value.predecessor,
         successor: notifyRequestResult.value.successor
     };
 
-    return senderOwnSharedIdentityAttributes;
+    return senderOwnIdentityAttributes;
 }
 
 export async function waitForRecipientToReceiveNotification(

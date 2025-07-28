@@ -1,16 +1,15 @@
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController } from "@nmshd/consumption";
 import { LocalAttributeDTO } from "@nmshd/runtime-types";
-import { IdentityController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { AddressString, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { flattenObject } from "../../common/flattenObject";
 import { AttributeMapper } from "./AttributeMapper";
 import { GetAttributesRequestQuery, GetAttributesUseCase } from "./GetAttributes";
 
-export interface GetOwnSharedAttributesRequest {
+export interface GetOwnAttributesSharedWithPeerRequest {
     peer: AddressString;
-    query?: GetOwnSharedAttributeRequestQuery;
+    query?: GetOwnAttributesSharedWithPeerRequestQuery;
     hideTechnical?: boolean;
     /**
      * default: true
@@ -18,7 +17,7 @@ export interface GetOwnSharedAttributesRequest {
     onlyLatestVersions?: boolean;
 }
 
-export interface GetOwnSharedAttributeRequestQuery {
+export interface GetOwnAttributesSharedWithPeerRequestQuery {
     createdAt?: string;
     wasViewedAt?: string | string[];
     isDefault?: string;
@@ -29,13 +28,11 @@ export interface GetOwnSharedAttributeRequestQuery {
     "content.confidentiality"?: string | string[];
     "content.value.@type"?: string | string[];
     peerSharingInfo?: string | string[];
-    "peerSharingInfo.peer"?: string | string[];
     "peerSharingInfo.sourceReference"?: string | string[];
     "peerSharingInfo.deletionInfo"?: string | string[];
     "peerSharingInfo.deletionInfo.deletionStatus"?: string | string[];
     "peerSharingInfo.deletionInfo.deletionDate"?: string | string[];
     forwardedSharingInfos?: string | string[];
-    "forwardedSharingInfos.peer"?: string | string[];
     "forwardedSharingInfos.sourceReference"?: string | string[];
     "forwardedSharingInfos.sharedAt"?: string | string[];
     "forwardedSharingInfos.deletionInfo"?: string | string[];
@@ -43,28 +40,28 @@ export interface GetOwnSharedAttributeRequestQuery {
     "forwardedSharingInfos.deletionInfo.deletionDate"?: string | string[];
 }
 
-class Validator extends SchemaValidator<GetOwnSharedAttributesRequest> {
+class Validator extends SchemaValidator<GetOwnAttributesSharedWithPeerRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
-        super(schemaRepository.getSchema("GetOwnSharedAttributesRequest"));
+        super(schemaRepository.getSchema("GetOwnAttributesSharedWithPeerRequest"));
     }
 }
 
-export class GetOwnSharedAttributesUseCase extends UseCase<GetOwnSharedAttributesRequest, LocalAttributeDTO[]> {
+export class GetOwnAttributesSharedWithPeerUseCase extends UseCase<GetOwnAttributesSharedWithPeerRequest, LocalAttributeDTO[]> {
     public constructor(
         @Inject private readonly attributeController: AttributesController,
-        @Inject private readonly identityController: IdentityController,
         @Inject validator: Validator
     ) {
         super(validator);
     }
 
-    protected async executeInternal(request: GetOwnSharedAttributesRequest): Promise<Result<LocalAttributeDTO[]>> {
+    protected async executeInternal(request: GetOwnAttributesSharedWithPeerRequest): Promise<Result<LocalAttributeDTO[]>> {
         const query: GetAttributesRequestQuery = request.query ?? {};
 
         const flattenedQuery = flattenObject(query);
         const dbQuery = GetAttributesUseCase.queryTranslator.parse(flattenedQuery);
 
         dbQuery["@type"] = { $in: ["OwnIdentityAttribute", "OwnRelationshipAttribute"] };
+        // TODO: filter for peer
 
         if (request.onlyLatestVersions ?? true) {
             dbQuery["succeededBy"] = { $exists: false };

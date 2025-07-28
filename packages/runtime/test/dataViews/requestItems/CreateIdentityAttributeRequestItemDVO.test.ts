@@ -291,7 +291,7 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
     test("check the attributes for the sender", async () => {
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
         const dvo = (await sExpander.expandMessageDTO(senderMessage)) as RequestMessageDVO;
-        const attributeResult = await sConsumptionServices.attributes.getOwnSharedAttributes({
+        const attributeResult = await sConsumptionServices.attributes.getOwnAttributesSharedWithPeer({
             peer: dvo.request.peer.id
         });
 
