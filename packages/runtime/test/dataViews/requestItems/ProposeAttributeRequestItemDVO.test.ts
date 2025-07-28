@@ -102,7 +102,7 @@ describe("ProposeAttributeRequestItemDVO with IdentityAttributeQuery", () => {
     let requestContent: CreateOutgoingRequestRequest;
     let responseItems: DecideRequestItemParametersJSON[];
     beforeEach(async () => {
-        const attribute1 = await consumptionServices2.attributes.createRepositoryAttribute({
+        const attribute1 = await consumptionServices2.attributes.createOwnIdentityAttribute({
             content: {
                 value: {
                     "@type": "GivenName",
@@ -111,7 +111,7 @@ describe("ProposeAttributeRequestItemDVO with IdentityAttributeQuery", () => {
             }
         });
 
-        await consumptionServices2.attributes.createRepositoryAttribute({
+        await consumptionServices2.attributes.createOwnIdentityAttribute({
             content: {
                 value: {
                     "@type": "Surname",

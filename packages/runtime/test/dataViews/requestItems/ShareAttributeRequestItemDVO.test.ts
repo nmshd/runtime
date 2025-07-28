@@ -63,7 +63,7 @@ beforeAll(async () => {
 afterAll(() => serviceProvider.stop());
 
 beforeEach(async () => {
-    const senderAttribute = await sConsumptionServices.attributes.createRepositoryAttribute({
+    const senderAttribute = await sConsumptionServices.attributes.createOwnIdentityAttribute({
         content: {
             value: {
                 "@type": "DisplayName",

@@ -79,7 +79,7 @@ describe("ReadAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         address2 = (await transportServices2.account.getIdentityInfo()).value.address;
 
         const repositoryAttribute = (
-            await consumptionServices2.attributes.createRepositoryAttribute({
+            await consumptionServices2.attributes.createOwnIdentityAttribute({
                 content: {
                     value: {
                         "@type": "GivenName",
@@ -344,7 +344,7 @@ describe("ReadAttributeRequestItemDVO with IQL and results", () => {
         await establishRelationship(transportServices1, transportServices2);
         address2 = (await transportServices2.account.getIdentityInfo()).value.address;
 
-        const attribute = await consumptionServices2.attributes.createRepositoryAttribute({
+        const attribute = await consumptionServices2.attributes.createOwnIdentityAttribute({
             content: {
                 value: {
                     "@type": "GivenName",
@@ -567,7 +567,7 @@ describe("ReadAttributeRequestItemDVO with IQL and fallback", () => {
         await establishRelationship(transportServices1, transportServices2);
         address2 = (await transportServices2.account.getIdentityInfo()).value.address;
 
-        const attribute = await consumptionServices2.attributes.createRepositoryAttribute({
+        const attribute = await consumptionServices2.attributes.createOwnIdentityAttribute({
             content: {
                 value: {
                     "@type": "Surname",
@@ -576,7 +576,7 @@ describe("ReadAttributeRequestItemDVO with IQL and fallback", () => {
             }
         });
 
-        await consumptionServices2.attributes.createRepositoryAttribute({
+        await consumptionServices2.attributes.createOwnIdentityAttribute({
             content: {
                 value: {
                     "@type": "GivenName",

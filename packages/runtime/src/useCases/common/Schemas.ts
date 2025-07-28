@@ -12987,11 +12987,11 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
     }
 }
 
-export const CreateRepositoryAttributeRequest: any = {
+export const CreateOwnIdentityAttributeRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CreateRepositoryAttributeRequest",
+    "$ref": "#/definitions/CreateOwnIdentityAttributeRequest",
     "definitions": {
-        "CreateRepositoryAttributeRequest": {
+        "CreateOwnIdentityAttributeRequest": {
             "type": "object",
             "additionalProperties": false,
             "properties": {
@@ -13805,6 +13805,19 @@ export const GetAttributesRequest: any = {
                         }
                     ]
                 },
+                "peerSharingInfo.initialAttributePeer": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
                 "peerSharingInfo.deletionInfo": {
                     "anyOf": [
                         {
@@ -13884,19 +13897,6 @@ export const GetAttributesRequest: any = {
                     ]
                 },
                 "forwardedSharingInfos.sharedAt": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "forwardedSharingInfos.initialPeer": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -14003,6 +14003,9 @@ export const GetOwnSharedAttributesRequest: any = {
                         }
                     ]
                 },
+                "isDefault": {
+                    "type": "string"
+                },
                 "content.@type": {
                     "anyOf": [
                         {
@@ -14071,7 +14074,7 @@ export const GetOwnSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "sharingInfos": {
+                "peerSharingInfo": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -14084,7 +14087,7 @@ export const GetOwnSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "sharingInfos.peer": {
+                "peerSharingInfo.peer": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -14097,7 +14100,7 @@ export const GetOwnSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "sharingInfos.sourceReference": {
+                "peerSharingInfo.sourceReference": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -14110,7 +14113,7 @@ export const GetOwnSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "sharingInfos.sharedAt": {
+                "peerSharingInfo.deletionInfo": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -14123,7 +14126,7 @@ export const GetOwnSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "sharingInfos.thirdPartyAddress": {
+                "peerSharingInfo.deletionInfo.deletionStatus": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -14136,7 +14139,7 @@ export const GetOwnSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "deletionInfo": {
+                "peerSharingInfo.deletionInfo.deletionDate": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -14149,7 +14152,7 @@ export const GetOwnSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "deletionInfo.deletionStatus": {
+                "forwardedSharingInfos": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -14162,7 +14165,72 @@ export const GetOwnSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "deletionInfo.deletionDate": {
+                "forwardedSharingInfos.peer": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingInfos.sourceReference": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingInfos.sharedAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingInfos.deletionInfo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingInfos.deletionInfo.deletionStatus": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingInfos.deletionInfo.deletionDate": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -14298,7 +14366,7 @@ export const GetPeerSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "sharingInfos": {
+                "peerSharingInfo": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -14311,7 +14379,7 @@ export const GetPeerSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "sharingInfos.peer": {
+                "peerSharingInfo.peer": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -14324,7 +14392,7 @@ export const GetPeerSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "sharingInfos.sourceReference": {
+                "peerSharingInfo.sourceReference": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -14337,7 +14405,7 @@ export const GetPeerSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "sharingInfos.sharedAt": {
+                "peerSharingInfo.initialAttributePeer": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -14350,7 +14418,7 @@ export const GetPeerSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "sharingInfos.thirdPartyAddress": {
+                "peerSharingInfo.deletionInfo": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -14363,7 +14431,7 @@ export const GetPeerSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "deletionInfo": {
+                "peerSharingInfo.deletionInfo.deletionStatus": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -14376,7 +14444,7 @@ export const GetPeerSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "deletionInfo.deletionStatus": {
+                "peerSharingInfo.deletionInfo.deletionDate": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -14389,7 +14457,85 @@ export const GetPeerSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "deletionInfo.deletionDate": {
+                "forwardedSharingInfos": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingInfos.peer": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingInfos.sourceReference": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingInfos.sharedAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingInfos.deletionInfo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingInfos.deletionInfo.deletionStatus": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingInfos.deletionInfo.deletionDate": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -14461,6 +14607,97 @@ export const GetRepositoryAttributesRequest: any = {
                     ]
                 },
                 "content.value.@type": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingInfos": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingInfos.peer": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingInfos.sourceReference": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingInfos.sharedAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingInfos.deletionInfo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingInfos.deletionInfo.deletionStatus": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingInfos.deletionInfo.deletionDate": {
                     "anyOf": [
                         {
                             "type": "string"

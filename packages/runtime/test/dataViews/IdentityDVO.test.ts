@@ -27,7 +27,7 @@ afterAll(() => serviceProvider.stop());
 
 describe("IdentityDVO after loading a relationship template sharing a DisplayName", () => {
     beforeAll(async () => {
-        const senderAttribute = await templator.consumption.attributes.createRepositoryAttribute({
+        const senderAttribute = await templator.consumption.attributes.createOwnIdentityAttribute({
             content: {
                 value: {
                     "@type": "DisplayName",

@@ -21,7 +21,7 @@ describe("IdentityAttributeQueryExpanded", () => {
 
     beforeAll(async () => {
         const firstlyCreatedGivenName = (
-            await consumptionServices1.attributes.createRepositoryAttribute({
+            await consumptionServices1.attributes.createOwnIdentityAttribute({
                 content: {
                     value: {
                         "@type": "GivenName",
@@ -33,7 +33,7 @@ describe("IdentityAttributeQueryExpanded", () => {
         ).value;
 
         const secondlyCreatedGivenName = (
-            await consumptionServices1.attributes.createRepositoryAttribute({
+            await consumptionServices1.attributes.createOwnIdentityAttribute({
                 content: {
                     value: {
                         "@type": "GivenName",

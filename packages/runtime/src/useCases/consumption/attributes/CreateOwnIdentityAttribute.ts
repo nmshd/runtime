@@ -9,22 +9,22 @@ import { IValidator } from "../../common/validation/IValidator";
 import { AttributeMapper } from "./AttributeMapper";
 import { IdentityAttributeValueValidator } from "./IdentityAttributeValueValidator";
 
-interface AbstractCreateRepositoryAttributeRequest<T> {
+interface AbstractCreateOwnIdentityAttributeRequest<T> {
     content: {
         value: T;
         tags?: string[];
     };
 }
 
-export interface CreateRepositoryAttributeRequest extends AbstractCreateRepositoryAttributeRequest<AttributeValues.Identity.Json> {}
+export interface CreateOwnIdentityAttributeRequest extends AbstractCreateOwnIdentityAttributeRequest<AttributeValues.Identity.Json> {}
 
-export interface SchemaValidatableCreateRepositoryAttributeRequest extends AbstractCreateRepositoryAttributeRequest<unknown> {}
+export interface SchemaValidatableCreateOwnIdentityAttributeRequest extends AbstractCreateOwnIdentityAttributeRequest<unknown> {}
 
-class Validator implements IValidator<CreateRepositoryAttributeRequest> {
+class Validator implements IValidator<CreateOwnIdentityAttributeRequest> {
     public constructor(@Inject private readonly schemaRepository: SchemaRepository) {}
 
-    public validate(request: CreateRepositoryAttributeRequest): Promise<ValidationResult> | ValidationResult {
-        const requestSchemaValidator = new SchemaValidator(this.schemaRepository.getSchema("CreateRepositoryAttributeRequest"));
+    public validate(request: CreateOwnIdentityAttributeRequest): Promise<ValidationResult> | ValidationResult {
+        const requestSchemaValidator = new SchemaValidator(this.schemaRepository.getSchema("CreateOwnIdentityAttributeRequest"));
         const requestValidationResult = requestSchemaValidator.validate(request);
         if (requestValidationResult.isInvalid()) return requestValidationResult;
 
@@ -33,7 +33,7 @@ class Validator implements IValidator<CreateRepositoryAttributeRequest> {
     }
 }
 
-export class CreateRepositoryAttributeUseCase extends UseCase<CreateRepositoryAttributeRequest, LocalAttributeDTO> {
+export class CreateOwnIdentityAttributeUseCase extends UseCase<CreateOwnIdentityAttributeRequest, LocalAttributeDTO> {
     public constructor(
         @Inject private readonly attributesController: AttributesController,
         @Inject private readonly accountController: AccountController,
@@ -42,7 +42,7 @@ export class CreateRepositoryAttributeUseCase extends UseCase<CreateRepositoryAt
         super(validator);
     }
 
-    protected async executeInternal(request: CreateRepositoryAttributeRequest): Promise<Result<LocalAttributeDTO>> {
+    protected async executeInternal(request: CreateOwnIdentityAttributeRequest): Promise<Result<LocalAttributeDTO>> {
         const ownIdentityAttributeDuplicate = await this.attributesController.getOwnIdentityAttributeWithSameValue(request.content.value);
         if (ownIdentityAttributeDuplicate) {
             return Result.fail(RuntimeErrors.attributes.cannotCreateDuplicateRepositoryAttribute(ownIdentityAttributeDuplicate.id));

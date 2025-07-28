@@ -33,7 +33,7 @@ import {
     ConsumptionServices,
     CreateAndShareRelationshipAttributeRequest,
     CreateOutgoingRequestRequest,
-    CreateRepositoryAttributeRequest,
+    CreateOwnIdentityAttributeRequest,
     FileDTO,
     IdentityDeletionProcessDTO,
     IncomingRequestStatusChangedEvent,
@@ -617,9 +617,9 @@ export async function sendAndReceiveNotification(
 export async function executeFullCreateAndShareRepositoryAttributeFlow(
     sender: TestRuntimeServices,
     recipient: TestRuntimeServices,
-    request: CreateRepositoryAttributeRequest
+    request: CreateOwnIdentityAttributeRequest
 ): Promise<LocalAttributeDTO> {
-    const createAttributeRequestResult = await sender.consumption.attributes.createRepositoryAttribute(request);
+    const createAttributeRequestResult = await sender.consumption.attributes.createOwnIdentityAttribute(request);
     const repositoryAttribute = createAttributeRequestResult.value;
 
     const senderOwnSharedIdentityAttribute = await executeFullShareRepositoryAttributeFlow(sender, recipient, repositoryAttribute.id);

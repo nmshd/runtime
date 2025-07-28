@@ -829,7 +829,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 statusLog: []
             });
 
-            const localAttribute = await consumptionController.attributes.createRepositoryAttribute({
+            const localAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: recipient
                 })

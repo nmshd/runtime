@@ -75,7 +75,7 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         address1 = (await transportServices1.account.getIdentityInfo()).value.address;
         address2 = (await transportServices2.account.getIdentityInfo()).value.address;
         const repositoryAttribute = (
-            await consumptionServices2.attributes.createRepositoryAttribute({
+            await consumptionServices2.attributes.createOwnIdentityAttribute({
                 content: {
                     value: StreetAddress.from({
                         street: "aStreet",
@@ -358,7 +358,7 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
         address1 = (await transportServices1.account.getIdentityInfo()).value.address;
         address2 = (await transportServices2.account.getIdentityInfo()).value.address;
         const recipientAddress = (await transportServices2.account.getIdentityInfo()).value.address;
-        const attribute = await consumptionServices2.attributes.createRepositoryAttribute({
+        const attribute = await consumptionServices2.attributes.createOwnIdentityAttribute({
             content: {
                 value: StreetAddress.from({
                     street: "aStreet",

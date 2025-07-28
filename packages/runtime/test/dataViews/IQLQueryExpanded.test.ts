@@ -20,7 +20,7 @@ describe("IQLQueryExpanded", () => {
     beforeAll(async () => {
         attributes.push(
             (
-                await consumptionServices1.attributes.createRepositoryAttribute({
+                await consumptionServices1.attributes.createOwnIdentityAttribute({
                     content: {
                         value: {
                             "@type": "GivenName",
@@ -33,7 +33,7 @@ describe("IQLQueryExpanded", () => {
         );
         attributes.push(
             (
-                await consumptionServices1.attributes.createRepositoryAttribute({
+                await consumptionServices1.attributes.createOwnIdentityAttribute({
                     content: {
                         value: {
                             "@type": "GivenName",
@@ -45,7 +45,7 @@ describe("IQLQueryExpanded", () => {
         );
         attributes.push(
             (
-                await consumptionServices1.attributes.createRepositoryAttribute({
+                await consumptionServices1.attributes.createOwnIdentityAttribute({
                     content: {
                         value: {
                             "@type": "GivenName",
@@ -58,7 +58,7 @@ describe("IQLQueryExpanded", () => {
         );
         attributes.push(
             (
-                await consumptionServices1.attributes.createRepositoryAttribute({
+                await consumptionServices1.attributes.createOwnIdentityAttribute({
                     content: {
                         value: {
                             "@type": "Surname",

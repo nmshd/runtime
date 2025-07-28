@@ -9,8 +9,8 @@ import {
     ChangeDefaultRepositoryAttributeUseCase,
     CreateAndShareRelationshipAttributeRequest,
     CreateAndShareRelationshipAttributeUseCase,
-    CreateRepositoryAttributeRequest,
-    CreateRepositoryAttributeUseCase,
+    CreateOwnIdentityAttributeRequest,
+    CreateOwnIdentityAttributeUseCase,
     DeleteOwnIdentityAttributeAndNotifyPeersRequest,
     DeleteOwnIdentityAttributeAndNotifyPeersUseCase,
     DeleteOwnRelationshipAttributeAndNotifyPeerRequest,
@@ -70,7 +70,7 @@ import {
 export class AttributesFacade {
     public constructor(
         @Inject private readonly canCreateRepositoryAttributeUseCase: CanCreateRepositoryAttributeUseCase,
-        @Inject private readonly createRepositoryAttributeUseCase: CreateRepositoryAttributeUseCase,
+        @Inject private readonly createOwnIdentityAttributeUseCase: CreateOwnIdentityAttributeUseCase,
         @Inject private readonly getPeerSharedAttributesUseCase: GetPeerSharedAttributesUseCase,
         @Inject private readonly getOwnSharedAttributesUseCase: GetOwnSharedAttributesUseCase,
         @Inject private readonly getRepositoryAttributesUseCase: GetRepositoryAttributesUseCase,
@@ -103,8 +103,8 @@ export class AttributesFacade {
         return await this.canCreateRepositoryAttributeUseCase.execute(request);
     }
 
-    public async createRepositoryAttribute(request: CreateRepositoryAttributeRequest): Promise<Result<LocalAttributeDTO>> {
-        return await this.createRepositoryAttributeUseCase.execute(request);
+    public async createOwnIdentityAttribute(request: CreateOwnIdentityAttributeRequest): Promise<Result<LocalAttributeDTO>> {
+        return await this.createOwnIdentityAttributeUseCase.execute(request);
     }
 
     public async getPeerSharedAttributes(request: GetPeerSharedAttributesRequest): Promise<Result<LocalAttributeDTO[]>> {

@@ -21,12 +21,9 @@ import {
     ChangeDefaultRepositoryAttributeUseCase,
     CreateAndShareRelationshipAttributeRequest,
     CreateAndShareRelationshipAttributeUseCase,
+    CreateOwnIdentityAttributeRequest,
+    CreateOwnIdentityAttributeUseCase,
     CreateOwnRelationshipTemplateRequest,
-    CreateRepositoryAttributeRequest,
-    CreateRepositoryAttributeUseCase,
-    DeleteOwnSharedAttributeAndNotifyPeerUseCase,
-    DeletePeerSharedAttributeAndNotifyOwnerUseCase,
-    DeleteRepositoryAttributeUseCase,
     DeleteThirdPartyRelationshipAttributeAndNotifyPeerUseCase,
     ExecuteIdentityAttributeQueryUseCase,
     ExecuteRelationshipAttributeQueryUseCase,
@@ -120,7 +117,7 @@ describe("get attribute(s)", () => {
     let identityAttributeIds: string[];
     let appAttributeIds: string[];
     beforeEach(async function () {
-        const senderRequests: CreateRepositoryAttributeRequest[] = [
+        const senderRequests: CreateOwnIdentityAttributeRequest[] = [
             {
                 content: {
                     value: {
@@ -149,7 +146,7 @@ describe("get attribute(s)", () => {
 
         identityAttributeIds = [];
         for (const request of senderRequests) {
-            const identityAttribute = (await services1.consumption.attributes.createRepositoryAttribute(request)).value;
+            const identityAttribute = (await services1.consumption.attributes.createOwnIdentityAttribute(request)).value;
             identityAttributeIds.push(identityAttribute.id);
         }
 
@@ -169,7 +166,7 @@ describe("get attribute(s)", () => {
 
         appAttributeIds = [];
         for (const request of senderRequests) {
-            const appAttribute = (await appService.consumption.attributes.createRepositoryAttribute(request)).value;
+            const appAttribute = (await appService.consumption.attributes.createOwnIdentityAttribute(request)).value;
             appAttributeIds.push(appAttribute.id);
         }
     });
@@ -275,7 +272,7 @@ describe("attribute queries", () => {
     let ownSharedRelationshipAttribute: LocalAttributeDTO;
 
     beforeEach(async function () {
-        const createRepositoryAttributeRequest: CreateRepositoryAttributeRequest = {
+        const createRepositoryAttributeRequest: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
                     "@type": "PhoneNumber",
@@ -283,7 +280,7 @@ describe("attribute queries", () => {
                 }
             }
         };
-        repositoryAttribute = (await services1.consumption.attributes.createRepositoryAttribute(createRepositoryAttributeRequest)).value;
+        repositoryAttribute = (await services1.consumption.attributes.createOwnIdentityAttribute(createRepositoryAttributeRequest)).value;
 
         ownSharedRelationshipAttribute = await executeFullCreateAndShareRelationshipAttributeFlow(services1, services2, {
             content: {
@@ -360,7 +357,7 @@ describe("get repository, own shared and peer shared attributes", () => {
     beforeEach(async function () {
         // unshared succeeded repository attribute
         services1RepoSurnameV0 = (
-            await services1.consumption.attributes.createRepositoryAttribute({
+            await services1.consumption.attributes.createOwnIdentityAttribute({
                 content: {
                     value: {
                         "@type": "Surname",
@@ -502,7 +499,7 @@ describe("get repository, own shared and peer shared attributes", () => {
 
         test("should allow to get only default attributes", async function () {
             const defaultGivenName = (
-                await appService.consumption.attributes.createRepositoryAttribute({
+                await appService.consumption.attributes.createOwnIdentityAttribute({
                     content: {
                         value: {
                             "@type": "GivenName",
@@ -513,7 +510,7 @@ describe("get repository, own shared and peer shared attributes", () => {
             ).value;
 
             const defaultSurname = (
-                await appService.consumption.attributes.createRepositoryAttribute({
+                await appService.consumption.attributes.createOwnIdentityAttribute({
                     content: {
                         value: {
                             "@type": "Surname",
@@ -524,7 +521,7 @@ describe("get repository, own shared and peer shared attributes", () => {
             ).value;
 
             const otherSurname = (
-                await appService.consumption.attributes.createRepositoryAttribute({
+                await appService.consumption.attributes.createOwnIdentityAttribute({
                     content: {
                         value: {
                             "@type": "Surname",
@@ -775,7 +772,7 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
     });
 
     test("should not allow to create a RepositoryAttribute duplicate", async () => {
-        const repositoryAttribute = (await services1.consumption.attributes.createRepositoryAttribute(canCreateRepositoryAttributeRequest)).value;
+        const repositoryAttribute = (await services1.consumption.attributes.createOwnIdentityAttribute(canCreateRepositoryAttributeRequest)).value;
 
         const result = await services1.consumption.attributes.canCreateRepositoryAttribute(canCreateRepositoryAttributeRequest);
 
@@ -798,7 +795,7 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
                 tags: ["x:tag1", "x:tag2"]
             }
         };
-        const repositoryAttribute = (await services1.consumption.attributes.createRepositoryAttribute(canCreateRepositoryAttributeRequest)).value;
+        const repositoryAttribute = (await services1.consumption.attributes.createOwnIdentityAttribute(canCreateRepositoryAttributeRequest)).value;
 
         const result = await services1.consumption.attributes.canCreateRepositoryAttribute(canCreateUntrimmedRepositoryAttributeRequest);
 
@@ -812,7 +809,7 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
     });
 
     test("should not allow to create a duplicate RepositoryAttribute even if the tags are different", async () => {
-        const createAttributeRequest: CreateRepositoryAttributeRequest = {
+        const createAttributeRequest: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
                     "@type": "GivenName",
@@ -821,7 +818,7 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
                 tags: ["x:tag1", "x:tag2"]
             }
         };
-        const repositoryAttribute = (await services1.consumption.attributes.createRepositoryAttribute(createAttributeRequest)).value;
+        const repositoryAttribute = (await services1.consumption.attributes.createOwnIdentityAttribute(createAttributeRequest)).value;
 
         const canCreateAttributeRequest: CanCreateRepositoryAttributeRequest = {
             content: {
@@ -845,7 +842,7 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
     });
 
     test("should allow to create another RepositoryAttribute even if the tags are duplicates", async () => {
-        const request: CreateRepositoryAttributeRequest = {
+        const request: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
                     "@type": "GivenName",
@@ -854,7 +851,7 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
                 tags: ["x:tag1", "x:tag2"]
             }
         };
-        await services1.consumption.attributes.createRepositoryAttribute(request);
+        await services1.consumption.attributes.createOwnIdentityAttribute(request);
 
         const request2: CanCreateRepositoryAttributeRequest = {
             content: {
@@ -871,7 +868,7 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
     });
 
     test("should allow to create a RepositoryAttribute duplicate of a predecessor", async () => {
-        const predecessor = await services1.consumption.attributes.createRepositoryAttribute(canCreateRepositoryAttributeRequest);
+        const predecessor = await services1.consumption.attributes.createOwnIdentityAttribute(canCreateRepositoryAttributeRequest);
         await services1.consumption.attributes.succeedRepositoryAttribute({
             predecessorId: predecessor.value.id,
             successorContent: {
@@ -887,7 +884,7 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
     });
 
     test("should allow to create a RepositoryAttribute that is the same as an existing RepositoryAttribute without an optional property", async () => {
-        const createAttributeWithOptionalPropertyRequest: CreateRepositoryAttributeRequest = {
+        const createAttributeWithOptionalPropertyRequest: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
                     "@type": "StreetAddress",
@@ -918,7 +915,7 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
             }
         };
 
-        await services1.consumption.attributes.createRepositoryAttribute(createAttributeWithOptionalPropertyRequest);
+        await services1.consumption.attributes.createOwnIdentityAttribute(createAttributeWithOptionalPropertyRequest);
 
         const result = await services1.consumption.attributes.canCreateRepositoryAttribute(canCreateAttributeWithoutOptionalPropertyRequest);
         expect(result.value.isSuccess).toBe(true);
@@ -945,9 +942,9 @@ describe(CanCreateRepositoryAttributeUseCase.name, () => {
     });
 });
 
-describe(CreateRepositoryAttributeUseCase.name, () => {
+describe(CreateOwnIdentityAttributeUseCase.name, () => {
     test("should create a repository attribute", async () => {
-        const request: CreateRepositoryAttributeRequest = {
+        const request: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
                     "@type": "GivenName",
@@ -957,7 +954,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
             }
         };
 
-        const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+        const result = await services1.consumption.attributes.createOwnIdentityAttribute(request);
         expect(result).toBeSuccessful();
         const attribute = result.value;
         expect(attribute.content).toMatchObject(request.content);
@@ -965,7 +962,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
     });
 
     test("should trim a repository attribute before creation", async () => {
-        const request: CreateRepositoryAttributeRequest = {
+        const request: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
                     "@type": "GivenName",
@@ -975,7 +972,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
             }
         };
 
-        const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+        const result = await services1.consumption.attributes.createOwnIdentityAttribute(request);
         expect(result).toBeSuccessful();
         const attribute = result.value;
         expect((attribute.content.value as GivenNameJSON).value).toBe("aGivenName");
@@ -983,7 +980,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
     });
 
     test("should create a RepositoryAttribute that is the default if it is the first of its value type", async () => {
-        const request: CreateRepositoryAttributeRequest = {
+        const request: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
                     "@type": "Pseudonym",
@@ -991,13 +988,13 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                 }
             }
         };
-        const result = await appService.consumption.attributes.createRepositoryAttribute(request);
+        const result = await appService.consumption.attributes.createOwnIdentityAttribute(request);
         const attribute = result.value;
         expect(attribute.isDefault).toBe(true);
     });
 
     test("should create a RepositoryAttribute that is not the default if it is not the first of its value type", async () => {
-        const request: CreateRepositoryAttributeRequest = {
+        const request: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
                     "@type": "JobTitle",
@@ -1005,7 +1002,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                 }
             }
         };
-        const request2: CreateRepositoryAttributeRequest = {
+        const request2: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
                     "@type": "JobTitle",
@@ -1013,15 +1010,15 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                 }
             }
         };
-        await appService.consumption.attributes.createRepositoryAttribute(request);
-        const result = await appService.consumption.attributes.createRepositoryAttribute(request2);
+        await appService.consumption.attributes.createOwnIdentityAttribute(request);
+        const result = await appService.consumption.attributes.createOwnIdentityAttribute(request2);
         const attribute = result.value;
         expect(attribute.isDefault).toBeUndefined();
     });
 
     describe("validation errors for the attribute content", () => {
         test("should not create a number as GivenName", async () => {
-            const request: CreateRepositoryAttributeRequest = {
+            const request: CreateOwnIdentityAttributeRequest = {
                 content: {
                     value: {
                         "@type": "GivenName",
@@ -1030,13 +1027,13 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                     tags: ["x:tag1", "x:tag2"]
                 } as any
             };
-            const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+            const result = await services1.consumption.attributes.createOwnIdentityAttribute(request);
             expect(result.error.message).toBe("GivenName :: value must be string");
             expect(result.error.code).toBe("error.runtime.validation.invalidPropertyValue");
         });
 
         test("should not create a string as year of BirthDate", async () => {
-            const request: CreateRepositoryAttributeRequest = {
+            const request: CreateOwnIdentityAttributeRequest = {
                 content: {
                     value: {
                         "@type": "BirthDate",
@@ -1047,13 +1044,13 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                     tags: ["x:tag1", "x:tag2"]
                 } as any
             };
-            const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+            const result = await services1.consumption.attributes.createOwnIdentityAttribute(request);
             expect(result.error.message).toBe("BirthDate :: year must be number");
             expect(result.error.code).toBe("error.runtime.validation.invalidPropertyValue");
         });
 
         test("should not create a BirthDate with a missing year", async () => {
-            const request: CreateRepositoryAttributeRequest = {
+            const request: CreateOwnIdentityAttributeRequest = {
                 content: {
                     value: {
                         "@type": "BirthDate",
@@ -1063,13 +1060,13 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                     tags: ["x:tag1", "x:tag2"]
                 } as any
             };
-            const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+            const result = await services1.consumption.attributes.createOwnIdentityAttribute(request);
             expect(result.error.message).toBe("BirthDate :: must have required property 'year'");
             expect(result.error.code).toBe("error.runtime.validation.invalidPropertyValue");
         });
 
         test("should not create 14 as BirthMonth", async () => {
-            const request: CreateRepositoryAttributeRequest = {
+            const request: CreateOwnIdentityAttributeRequest = {
                 content: {
                     value: {
                         "@type": "BirthDate",
@@ -1080,13 +1077,13 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                     tags: ["x:tag1", "x:tag2"]
                 }
             };
-            const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+            const result = await services1.consumption.attributes.createOwnIdentityAttribute(request);
             expect(result.error.message).toBe("BirthMonth.value:Number :: must be an integer value between 1 and 12");
             expect(result.error.code).toBe("error.runtime.requestDeserialization");
         });
 
         test("should not accept an additional property", async () => {
-            const request: CreateRepositoryAttributeRequest = {
+            const request: CreateOwnIdentityAttributeRequest = {
                 content: {
                     value: {
                         "@type": "GivenName",
@@ -1096,27 +1093,27 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
                     tags: ["x:tag1", "x:tag2"]
                 } as any
             };
-            const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+            const result = await services1.consumption.attributes.createOwnIdentityAttribute(request);
             expect(result.error.message).toBe("GivenName :: must NOT have additional properties");
             expect(result.error.code).toBe("error.runtime.validation.invalidPropertyValue");
         });
 
         test("should not accept an invalid @type", async () => {
-            const request: CreateRepositoryAttributeRequest = {
+            const request: CreateOwnIdentityAttributeRequest = {
                 content: {
                     value: {
                         "@type": "invalid-type"
                     }
                 }
             } as any;
-            const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+            const result = await services1.consumption.attributes.createOwnIdentityAttribute(request);
             expect(result.error.message).toBe("content.value.@type must match one of the allowed Attribute value types for IdentityAttributes");
             expect(result.error.code).toBe("error.runtime.validation.invalidPropertyValue");
         });
     });
 
     test("should not create a duplicate RepositoryAttribute", async () => {
-        const request: CreateRepositoryAttributeRequest = {
+        const request: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
                     "@type": "GivenName",
@@ -1126,10 +1123,10 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
             }
         };
 
-        const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+        const result = await services1.consumption.attributes.createOwnIdentityAttribute(request);
         expect(result).toBeSuccessful();
 
-        const result2 = await services1.consumption.attributes.createRepositoryAttribute(request);
+        const result2 = await services1.consumption.attributes.createOwnIdentityAttribute(request);
         expect(result2).toBeAnError(
             `The RepositoryAttribute cannot be created because it has the same content.value as the already existing RepositoryAttribute with id '${result.value.id.toString()}'.`,
             "error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute"
@@ -1137,7 +1134,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
     });
 
     test("should not create a RepositoryAttribute if there would be a duplicate after trimming", async () => {
-        const request: CreateRepositoryAttributeRequest = {
+        const request: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
                     "@type": "GivenName",
@@ -1147,7 +1144,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
             }
         };
 
-        const untrimmedRequest: CreateRepositoryAttributeRequest = {
+        const untrimmedRequest: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
                     "@type": "GivenName",
@@ -1157,10 +1154,10 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
             }
         };
 
-        const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+        const result = await services1.consumption.attributes.createOwnIdentityAttribute(request);
         expect(result).toBeSuccessful();
 
-        const result2 = await services1.consumption.attributes.createRepositoryAttribute(untrimmedRequest);
+        const result2 = await services1.consumption.attributes.createOwnIdentityAttribute(untrimmedRequest);
         expect(result2).toBeAnError(
             `The RepositoryAttribute cannot be created because it has the same content.value as the already existing RepositoryAttribute with id '${result.value.id.toString()}'.`,
             "error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute"
@@ -1168,7 +1165,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
     });
 
     test("should not prevent the creation when the RepositoryAttribute duplicate got succeeded", async () => {
-        const request: CreateRepositoryAttributeRequest = {
+        const request: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
                     "@type": "GivenName",
@@ -1178,7 +1175,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
             }
         };
 
-        const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+        const result = await services1.consumption.attributes.createOwnIdentityAttribute(request);
         expect(result).toBeSuccessful();
 
         const successionResult = await services1.consumption.attributes.succeedRepositoryAttribute({
@@ -1192,12 +1189,12 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
         });
         expect(successionResult).toBeSuccessful();
 
-        const result2 = await services1.consumption.attributes.createRepositoryAttribute(request);
+        const result2 = await services1.consumption.attributes.createOwnIdentityAttribute(request);
         expect(result2).toBeSuccessful();
     });
 
     test("should create a RepositoryAttribute that is the same as an existing RepositoryAttribute without an optional property", async () => {
-        const request: CreateRepositoryAttributeRequest = {
+        const request: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
                     "@type": "StreetAddress",
@@ -1213,7 +1210,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
             }
         };
 
-        const request2: CreateRepositoryAttributeRequest = {
+        const request2: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
                     "@type": "StreetAddress",
@@ -1228,15 +1225,15 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
             }
         };
 
-        const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+        const result = await services1.consumption.attributes.createOwnIdentityAttribute(request);
         expect(result).toBeSuccessful();
 
-        const result2 = await services1.consumption.attributes.createRepositoryAttribute(request2);
+        const result2 = await services1.consumption.attributes.createOwnIdentityAttribute(request2);
         expect(result2).toBeSuccessful();
     });
 
     test("should not create a duplicate RepositoryAttribute even if the tags are different", async () => {
-        const request: CreateRepositoryAttributeRequest = {
+        const request: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
                     "@type": "GivenName",
@@ -1246,10 +1243,10 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
             }
         };
 
-        const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+        const result = await services1.consumption.attributes.createOwnIdentityAttribute(request);
         expect(result).toBeSuccessful();
 
-        const request2: CreateRepositoryAttributeRequest = {
+        const request2: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
                     "@type": "GivenName",
@@ -1259,13 +1256,13 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
             }
         };
 
-        const result2 = await services1.consumption.attributes.createRepositoryAttribute(request2);
+        const result2 = await services1.consumption.attributes.createOwnIdentityAttribute(request2);
         expect(result2).toBeAnError(
             `The RepositoryAttribute cannot be created because it has the same content.value as the already existing RepositoryAttribute with id '${result.value.id.toString()}'.`,
             "error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute"
         );
 
-        const request3: CreateRepositoryAttributeRequest = {
+        const request3: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
                     "@type": "GivenName",
@@ -1275,13 +1272,13 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
             }
         };
 
-        const result3 = await services1.consumption.attributes.createRepositoryAttribute(request3);
+        const result3 = await services1.consumption.attributes.createOwnIdentityAttribute(request3);
         expect(result3).toBeAnError(
             `The RepositoryAttribute cannot be created because it has the same content.value as the already existing RepositoryAttribute with id '${result.value.id.toString()}'.`,
             "error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute"
         );
 
-        const request4: CreateRepositoryAttributeRequest = {
+        const request4: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
                     "@type": "GivenName",
@@ -1290,7 +1287,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
             }
         };
 
-        const result4 = await services1.consumption.attributes.createRepositoryAttribute(request4);
+        const result4 = await services1.consumption.attributes.createOwnIdentityAttribute(request4);
         expect(result4).toBeAnError(
             `The RepositoryAttribute cannot be created because it has the same content.value as the already existing RepositoryAttribute with id '${result.value.id.toString()}'.`,
             "error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute"
@@ -1298,7 +1295,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
     });
 
     test("should create a RepositoryAttribute even if the tags are duplicates", async () => {
-        const request: CreateRepositoryAttributeRequest = {
+        const request: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
                     "@type": "GivenName",
@@ -1308,10 +1305,10 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
             }
         };
 
-        const result = await services1.consumption.attributes.createRepositoryAttribute(request);
+        const result = await services1.consumption.attributes.createOwnIdentityAttribute(request);
         expect(result).toBeSuccessful();
 
-        const request2: CreateRepositoryAttributeRequest = {
+        const request2: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
                     "@type": "GivenName",
@@ -1321,7 +1318,7 @@ describe(CreateRepositoryAttributeUseCase.name, () => {
             }
         };
 
-        const result2 = await services1.consumption.attributes.createRepositoryAttribute(request2);
+        const result2 = await services1.consumption.attributes.createOwnIdentityAttribute(request2);
         expect(result2).toBeSuccessful();
     });
 });
@@ -1330,7 +1327,7 @@ describe(ShareRepositoryAttributeUseCase.name, () => {
     let sRepositoryAttribute: LocalAttributeDTO;
     beforeEach(async () => {
         sRepositoryAttribute = (
-            await services1.consumption.attributes.createRepositoryAttribute({
+            await services1.consumption.attributes.createOwnIdentityAttribute({
                 content: {
                     value: {
                         "@type": "GivenName",
@@ -1566,7 +1563,7 @@ describe(ShareRepositoryAttributeUseCase.name, () => {
 
 describe(SucceedRepositoryAttributeUseCase.name, () => {
     test("should succeed a repository attribute", async () => {
-        const createAttributeRequest: CreateRepositoryAttributeRequest = {
+        const createAttributeRequest: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
                     "@type": "GivenName",
@@ -1575,7 +1572,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
                 tags: ["x:tag1", "x:tag2"]
             }
         };
-        const predecessor = (await services1.consumption.attributes.createRepositoryAttribute(createAttributeRequest)).value;
+        const predecessor = (await services1.consumption.attributes.createOwnIdentityAttribute(createAttributeRequest)).value;
 
         const succeedAttributeRequest: SucceedRepositoryAttributeRequest = {
             predecessorId: predecessor.id.toString(),
@@ -1598,7 +1595,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
     });
 
     test("should trim the successor of a repository attribute", async () => {
-        const createAttributeRequest: CreateRepositoryAttributeRequest = {
+        const createAttributeRequest: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
                     "@type": "GivenName",
@@ -1607,7 +1604,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
                 tags: ["x:tag1", "x:tag2"]
             }
         };
-        const predecessor = (await services1.consumption.attributes.createRepositoryAttribute(createAttributeRequest)).value;
+        const predecessor = (await services1.consumption.attributes.createOwnIdentityAttribute(createAttributeRequest)).value;
 
         const succeedAttributeRequest: SucceedRepositoryAttributeRequest = {
             predecessorId: predecessor.id.toString(),
@@ -1659,7 +1656,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
     });
 
     test("should throw if successor doesn't meet validation criteria", async () => {
-        const createAttributeRequest: CreateRepositoryAttributeRequest = {
+        const createAttributeRequest: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
                     "@type": "PhoneNumber",
@@ -1667,7 +1664,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
                 }
             }
         };
-        const predecessor = (await services1.consumption.attributes.createRepositoryAttribute(createAttributeRequest)).value;
+        const predecessor = (await services1.consumption.attributes.createOwnIdentityAttribute(createAttributeRequest)).value;
 
         const succeedAttributeRequest: SucceedRepositoryAttributeRequest = {
             predecessorId: predecessor.id.toString(),
@@ -1683,7 +1680,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
     });
 
     test("validation should catch attempts of changing the value type", async () => {
-        const createAttributeRequest: CreateRepositoryAttributeRequest = {
+        const createAttributeRequest: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
                     "@type": "GivenName",
@@ -1692,7 +1689,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
                 tags: ["x:tag1", "x:tag2"]
             }
         };
-        const predecessor = (await services1.consumption.attributes.createRepositoryAttribute(createAttributeRequest)).value;
+        const predecessor = (await services1.consumption.attributes.createOwnIdentityAttribute(createAttributeRequest)).value;
 
         const succeedAttributeRequest: SucceedRepositoryAttributeRequest = {
             predecessorId: predecessor.id.toString(),
@@ -1874,7 +1871,7 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
 
     test("should throw if no other version of the attribute has been shared before", async () => {
         const newRepositoryAttribute = (
-            await services1.consumption.attributes.createRepositoryAttribute({
+            await services1.consumption.attributes.createOwnIdentityAttribute({
                 content: {
                     value: {
                         "@type": "GivenName",
@@ -2046,7 +2043,7 @@ describe(SucceedRelationshipAttributeAndNotifyPeerUseCase.name, () => {
 describe(ChangeDefaultRepositoryAttributeUseCase.name, () => {
     test("should change default RepositoryAttribute", async () => {
         const defaultAttribute = (
-            await appService.consumption.attributes.createRepositoryAttribute({
+            await appService.consumption.attributes.createOwnIdentityAttribute({
                 content: {
                     value: {
                         "@type": "GivenName",
@@ -2058,7 +2055,7 @@ describe(ChangeDefaultRepositoryAttributeUseCase.name, () => {
         expect(defaultAttribute.isDefault).toBe(true);
 
         const desiredDefaultAttribute = (
-            await appService.consumption.attributes.createRepositoryAttribute({
+            await appService.consumption.attributes.createOwnIdentityAttribute({
                 content: {
                     value: {
                         "@type": "GivenName",
@@ -2082,7 +2079,7 @@ describe(ChangeDefaultRepositoryAttributeUseCase.name, () => {
     });
 
     test("should return an error if the new default attribute is not a RepositoryAttribute", async () => {
-        await appService.consumption.attributes.createRepositoryAttribute({
+        await appService.consumption.attributes.createOwnIdentityAttribute({
             content: {
                 value: {
                     "@type": "GivenName",
@@ -2104,7 +2101,7 @@ describe(ChangeDefaultRepositoryAttributeUseCase.name, () => {
     });
 
     test("should return an error if the new default attribute has a successor", async () => {
-        await appService.consumption.attributes.createRepositoryAttribute({
+        await appService.consumption.attributes.createOwnIdentityAttribute({
             content: {
                 value: {
                     "@type": "GivenName",
@@ -2114,7 +2111,7 @@ describe(ChangeDefaultRepositoryAttributeUseCase.name, () => {
         });
 
         const desiredDefaultAttribute = (
-            await appService.consumption.attributes.createRepositoryAttribute({
+            await appService.consumption.attributes.createOwnIdentityAttribute({
                 content: {
                     value: {
                         "@type": "GivenName",
@@ -2148,7 +2145,7 @@ describe(ChangeDefaultRepositoryAttributeUseCase.name, () => {
 
     test("should return an error trying to set a default attribute if setDefaultRepositoryAttributes is false", async () => {
         const attribute = (
-            await services1.consumption.attributes.createRepositoryAttribute({
+            await services1.consumption.attributes.createOwnIdentityAttribute({
                 content: {
                     value: {
                         "@type": "GivenName",
@@ -2209,7 +2206,7 @@ describe("Get (shared) versions of attribute", () => {
 
     async function setUpRepositoryAttributeVersions() {
         sRepositoryAttributeVersion0 = (
-            await services1.consumption.attributes.createRepositoryAttribute({
+            await services1.consumption.attributes.createOwnIdentityAttribute({
                 content: {
                     value: {
                         "@type": "GivenName",
@@ -2741,7 +2738,7 @@ describe("DeleteAttributeUseCases", () => {
             });
 
             const repositoryAttribute = (
-                await services2.consumption.attributes.createRepositoryAttribute({
+                await services2.consumption.attributes.createOwnIdentityAttribute({
                     content: {
                         value: {
                             "@type": "GivenName",
@@ -2911,7 +2908,7 @@ describe("DeleteAttributeUseCases", () => {
             });
 
             const repositoryAttribute = (
-                await services1.consumption.attributes.createRepositoryAttribute({
+                await services1.consumption.attributes.createOwnIdentityAttribute({
                     content: {
                         value: {
                             "@type": "GivenName",
@@ -3380,7 +3377,7 @@ describe(SetAttributeDeletionInfoOfDeletionProposedRelationshipUseCase.name, () 
 
 describe(MarkAttributeAsViewedUseCase.name, () => {
     test("should mark an Attribute as viewed", async () => {
-        const request: CreateRepositoryAttributeRequest = {
+        const request: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
                     "@type": "GivenName",
@@ -3388,7 +3385,7 @@ describe(MarkAttributeAsViewedUseCase.name, () => {
                 }
             }
         };
-        const localAttribute = (await services1.consumption.attributes.createRepositoryAttribute(request)).value;
+        const localAttribute = (await services1.consumption.attributes.createOwnIdentityAttribute(request)).value;
         expect(localAttribute.wasViewedAt).toBeUndefined();
 
         const expectedViewingTime = CoreDate.utc();
