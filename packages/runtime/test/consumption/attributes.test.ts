@@ -47,9 +47,9 @@ import {
     SetAttributeDeletionInfoOfDeletionProposedRelationshipUseCase,
     ShareOwnIdentityAttributeRequest,
     ShareOwnIdentityAttributeUseCase,
+    SucceedOwnIdentityAttributeRequest,
+    SucceedOwnIdentityAttributeUseCase,
     SucceedRelationshipAttributeAndNotifyPeerUseCase,
-    SucceedRepositoryAttributeRequest,
-    SucceedRepositoryAttributeUseCase,
     ThirdPartyRelationshipAttributeDeletedByPeerEvent
 } from "../../src";
 import {
@@ -368,7 +368,7 @@ describe("get repository, own shared and peer shared attributes", () => {
         ).value;
 
         ({ predecessor: services1RepoSurnameV0, successor: services1RepoSurnameV1 } = (
-            await services1.consumption.attributes.succeedRepositoryAttribute({
+            await services1.consumption.attributes.succeedOwnIdentityAttribute({
                 predecessorId: services1RepoSurnameV0.id,
                 successorContent: {
                     value: {
@@ -869,7 +869,7 @@ describe(CanCreateOwnIdentityAttributeUseCase.name, () => {
 
     test("should allow to create a RepositoryAttribute duplicate of a predecessor", async () => {
         const predecessor = await services1.consumption.attributes.createOwnIdentityAttribute(canCreateRepositoryAttributeRequest);
-        await services1.consumption.attributes.succeedRepositoryAttribute({
+        await services1.consumption.attributes.succeedOwnIdentityAttribute({
             predecessorId: predecessor.value.id,
             successorContent: {
                 value: {
@@ -1178,7 +1178,7 @@ describe(CreateOwnIdentityAttributeUseCase.name, () => {
         const result = await services1.consumption.attributes.createOwnIdentityAttribute(request);
         expect(result).toBeSuccessful();
 
-        const successionResult = await services1.consumption.attributes.succeedRepositoryAttribute({
+        const successionResult = await services1.consumption.attributes.succeedOwnIdentityAttribute({
             predecessorId: result.value.id,
             successorContent: {
                 value: {
@@ -1475,7 +1475,7 @@ describe(ShareOwnIdentityAttributeUseCase.name, () => {
         });
 
         const { successor: successorRepositoryAttribute } = (
-            await services1.consumption.attributes.succeedRepositoryAttribute({
+            await services1.consumption.attributes.succeedOwnIdentityAttribute({
                 predecessorId: predecesssorOwnSharedIdentityAttribute.shareInfo!.sourceAttribute!,
                 successorContent: {
                     value: {
@@ -1561,7 +1561,7 @@ describe(ShareOwnIdentityAttributeUseCase.name, () => {
     });
 });
 
-describe(SucceedRepositoryAttributeUseCase.name, () => {
+describe(SucceedOwnIdentityAttributeUseCase.name, () => {
     test("should succeed a repository attribute", async () => {
         const createAttributeRequest: CreateOwnIdentityAttributeRequest = {
             content: {
@@ -1574,7 +1574,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
         };
         const predecessor = (await services1.consumption.attributes.createOwnIdentityAttribute(createAttributeRequest)).value;
 
-        const succeedAttributeRequest: SucceedRepositoryAttributeRequest = {
+        const succeedAttributeRequest: SucceedOwnIdentityAttributeRequest = {
             predecessorId: predecessor.id.toString(),
             successorContent: {
                 value: {
@@ -1584,7 +1584,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
                 tags: ["x:tag3", "x:tag4"]
             }
         };
-        const result = await services1.consumption.attributes.succeedRepositoryAttribute(succeedAttributeRequest);
+        const result = await services1.consumption.attributes.succeedOwnIdentityAttribute(succeedAttributeRequest);
         expect(result.isError).toBe(false);
         const { predecessor: updatedPredecessor, successor } = result.value;
         expect(updatedPredecessor.succeededBy).toStrictEqual(successor.id);
@@ -1606,7 +1606,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
         };
         const predecessor = (await services1.consumption.attributes.createOwnIdentityAttribute(createAttributeRequest)).value;
 
-        const succeedAttributeRequest: SucceedRepositoryAttributeRequest = {
+        const succeedAttributeRequest: SucceedOwnIdentityAttributeRequest = {
             predecessorId: predecessor.id.toString(),
             successorContent: {
                 value: {
@@ -1616,7 +1616,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
                 tags: ["x:tag1", "x:tag2"]
             }
         };
-        const result = await services1.consumption.attributes.succeedRepositoryAttribute(succeedAttributeRequest);
+        const result = await services1.consumption.attributes.succeedOwnIdentityAttribute(succeedAttributeRequest);
         expect(result.isError).toBe(false);
         const { predecessor: updatedPredecessor, successor } = result.value;
         expect((successor as any).content.value.value).toBe("anotherGivenName");
@@ -1626,7 +1626,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
     });
 
     test("should throw if predecessor id is invalid", async () => {
-        const succeedAttributeRequest: SucceedRepositoryAttributeRequest = {
+        const succeedAttributeRequest: SucceedOwnIdentityAttributeRequest = {
             predecessorId: CoreId.from("faulty").toString(),
             successorContent: {
                 value: {
@@ -1636,12 +1636,12 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
                 tags: ["x:tag1", "x:tag2"]
             }
         };
-        const result = await services1.consumption.attributes.succeedRepositoryAttribute(succeedAttributeRequest);
+        const result = await services1.consumption.attributes.succeedOwnIdentityAttribute(succeedAttributeRequest);
         expect(result).toBeAnError(/.*/, "error.consumption.attributes.predecessorDoesNotExist");
     });
 
     test("should throw if predecessor doesn't exist", async () => {
-        const succeedAttributeRequest: SucceedRepositoryAttributeRequest = {
+        const succeedAttributeRequest: SucceedOwnIdentityAttributeRequest = {
             predecessorId: (await new CoreIdHelper("ATT").generate()).toString(),
             successorContent: {
                 value: {
@@ -1651,7 +1651,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
                 tags: ["x:tag1", "x:tag2"]
             }
         };
-        const result = await services1.consumption.attributes.succeedRepositoryAttribute(succeedAttributeRequest);
+        const result = await services1.consumption.attributes.succeedOwnIdentityAttribute(succeedAttributeRequest);
         expect(result).toBeAnError(/.*/, "error.consumption.attributes.predecessorDoesNotExist");
     });
 
@@ -1666,7 +1666,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
         };
         const predecessor = (await services1.consumption.attributes.createOwnIdentityAttribute(createAttributeRequest)).value;
 
-        const succeedAttributeRequest: SucceedRepositoryAttributeRequest = {
+        const succeedAttributeRequest: SucceedOwnIdentityAttributeRequest = {
             predecessorId: predecessor.id.toString(),
             successorContent: {
                 value: {
@@ -1675,7 +1675,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
                 }
             }
         };
-        const result = await services1.consumption.attributes.succeedRepositoryAttribute(succeedAttributeRequest);
+        const result = await services1.consumption.attributes.succeedOwnIdentityAttribute(succeedAttributeRequest);
         expect(result).toBeAnError("Value is shorter than 3 characters", "error.consumption.attributes.successorIsNotAValidAttribute");
     });
 
@@ -1691,7 +1691,7 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
         };
         const predecessor = (await services1.consumption.attributes.createOwnIdentityAttribute(createAttributeRequest)).value;
 
-        const succeedAttributeRequest: SucceedRepositoryAttributeRequest = {
+        const succeedAttributeRequest: SucceedOwnIdentityAttributeRequest = {
             predecessorId: predecessor.id.toString(),
             successorContent: {
                 value: {
@@ -1701,14 +1701,14 @@ describe(SucceedRepositoryAttributeUseCase.name, () => {
                 tags: ["x:tag3", "x:tag4"]
             }
         };
-        const result = await services1.consumption.attributes.succeedRepositoryAttribute(succeedAttributeRequest);
+        const result = await services1.consumption.attributes.succeedOwnIdentityAttribute(succeedAttributeRequest);
         expect(result).toBeAnError(/.*/, "error.consumption.attributes.successionMustNotChangeValueType");
     });
 });
 
 describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
-    let succeedRepositoryAttributeRequest1: SucceedRepositoryAttributeRequest;
-    let succeedRepositoryAttributeRequest2: SucceedRepositoryAttributeRequest;
+    let succeedRepositoryAttributeRequest1: SucceedOwnIdentityAttributeRequest;
+    let succeedRepositoryAttributeRequest2: SucceedOwnIdentityAttributeRequest;
     let ownSharedIdentityAttributeVersion0: LocalAttributeDTO;
     let repositoryAttributeVersion1: LocalAttributeDTO;
     let repositoryAttributeVersion2: LocalAttributeDTO;
@@ -1733,7 +1733,7 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
                 tags: ["x:tag3", "x:tag4"]
             }
         };
-        ({ successor: repositoryAttributeVersion1 } = (await services1.consumption.attributes.succeedRepositoryAttribute(succeedRepositoryAttributeRequest1)).value);
+        ({ successor: repositoryAttributeVersion1 } = (await services1.consumption.attributes.succeedOwnIdentityAttribute(succeedRepositoryAttributeRequest1)).value);
 
         succeedRepositoryAttributeRequest2 = {
             predecessorId: repositoryAttributeVersion1.id,
@@ -1744,7 +1744,7 @@ describe(NotifyPeerAboutRepositoryAttributeSuccessionUseCase.name, () => {
                 }
             }
         };
-        ({ successor: repositoryAttributeVersion2 } = (await services1.consumption.attributes.succeedRepositoryAttribute(succeedRepositoryAttributeRequest2)).value);
+        ({ successor: repositoryAttributeVersion2 } = (await services1.consumption.attributes.succeedOwnIdentityAttribute(succeedRepositoryAttributeRequest2)).value);
     });
 
     test("should successfully notify peer about attribute succession", async () => {
@@ -2122,7 +2122,7 @@ describe(ChangeDefaultOwnIdentityAttributeUseCase.name, () => {
         ).value;
 
         const successionResult = (
-            await appService.consumption.attributes.succeedRepositoryAttribute({
+            await appService.consumption.attributes.succeedOwnIdentityAttribute({
                 predecessorId: desiredDefaultAttribute.id,
                 successorContent: {
                     value: {
@@ -2175,7 +2175,7 @@ describe("Get (shared) versions of attribute", () => {
     let sOwnSharedRelationshipAttributeVersion1: LocalAttributeDTO;
     let sOwnSharedRelationshipAttributeVersion2: LocalAttributeDTO;
     async function succeedVersion0(): Promise<void> {
-        const succeedRepositoryAttributeRequest1: SucceedRepositoryAttributeRequest = {
+        const succeedRepositoryAttributeRequest1: SucceedOwnIdentityAttributeRequest = {
             predecessorId: sRepositoryAttributeVersion0.id.toString(),
             successorContent: {
                 value: {
@@ -2185,12 +2185,12 @@ describe("Get (shared) versions of attribute", () => {
                 tags: ["x:tag2"]
             }
         };
-        const sRepositoryAttributeSuccessionResult1 = await services1.consumption.attributes.succeedRepositoryAttribute(succeedRepositoryAttributeRequest1);
+        const sRepositoryAttributeSuccessionResult1 = await services1.consumption.attributes.succeedOwnIdentityAttribute(succeedRepositoryAttributeRequest1);
         ({ predecessor: sRepositoryAttributeVersion0, successor: sRepositoryAttributeVersion1 } = sRepositoryAttributeSuccessionResult1.value);
     }
 
     async function succeedVersion1(): Promise<void> {
-        const succeedRepositoryAttributeRequest2: SucceedRepositoryAttributeRequest = {
+        const succeedRepositoryAttributeRequest2: SucceedOwnIdentityAttributeRequest = {
             predecessorId: sRepositoryAttributeVersion1.id.toString(),
             successorContent: {
                 value: {
@@ -2200,7 +2200,7 @@ describe("Get (shared) versions of attribute", () => {
                 tags: ["x:tag3"]
             }
         };
-        const sRepositoryAttributeSuccessionResult2 = await services1.consumption.attributes.succeedRepositoryAttribute(succeedRepositoryAttributeRequest2);
+        const sRepositoryAttributeSuccessionResult2 = await services1.consumption.attributes.succeedOwnIdentityAttribute(succeedRepositoryAttributeRequest2);
         ({ predecessor: sRepositoryAttributeVersion1, successor: sRepositoryAttributeVersion2 } = sRepositoryAttributeSuccessionResult2.value);
     }
 

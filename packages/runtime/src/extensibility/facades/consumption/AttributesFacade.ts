@@ -56,12 +56,12 @@ import {
     SetAttributeDeletionInfoOfDeletionProposedRelationshipUseCase,
     ShareOwnIdentityAttributeRequest,
     ShareOwnIdentityAttributeUseCase,
+    SucceedOwnIdentityAttributeRequest,
+    SucceedOwnIdentityAttributeResponse,
+    SucceedOwnIdentityAttributeUseCase,
     SucceedRelationshipAttributeAndNotifyPeerRequest,
     SucceedRelationshipAttributeAndNotifyPeerResponse,
     SucceedRelationshipAttributeAndNotifyPeerUseCase,
-    SucceedRepositoryAttributeRequest,
-    SucceedRepositoryAttributeResponse,
-    SucceedRepositoryAttributeUseCase,
     ValidateIQLQueryRequest,
     ValidateIQLQueryResponse,
     ValidateIQLQueryUseCase
@@ -83,7 +83,7 @@ export class AttributesFacade {
         @Inject private readonly executeThirdPartyRelationshipAttributeQueryUseCase: ExecuteThirdPartyRelationshipAttributeQueryUseCase,
         @Inject private readonly executeIQLQueryUseCase: ExecuteIQLQueryUseCase,
         @Inject private readonly validateIQLQueryUseCase: ValidateIQLQueryUseCase,
-        @Inject private readonly succeedRepositoryAttributeUseCase: SucceedRepositoryAttributeUseCase,
+        @Inject private readonly succeedOwnIdentityAttributeUseCase: SucceedOwnIdentityAttributeUseCase,
         @Inject private readonly shareOwnIdentityAttributeUseCase: ShareOwnIdentityAttributeUseCase,
         @Inject private readonly notifyPeerAboutRepositoryAttributeSuccessionUseCase: NotifyPeerAboutRepositoryAttributeSuccessionUseCase,
         @Inject private readonly createAndShareRelationshipAttributeUseCase: CreateAndShareRelationshipAttributeUseCase,
@@ -155,8 +155,8 @@ export class AttributesFacade {
         return await this.validateIQLQueryUseCase.execute(request);
     }
 
-    public async succeedRepositoryAttribute(request: SucceedRepositoryAttributeRequest): Promise<Result<SucceedRepositoryAttributeResponse>> {
-        return await this.succeedRepositoryAttributeUseCase.execute(request);
+    public async succeedOwnIdentityAttribute(request: SucceedOwnIdentityAttributeRequest): Promise<Result<SucceedOwnIdentityAttributeResponse>> {
+        return await this.succeedOwnIdentityAttributeUseCase.execute(request);
     }
 
     public async shareOwnIdentityAttribute(request: ShareOwnIdentityAttributeRequest): Promise<Result<LocalRequestDTO>> {

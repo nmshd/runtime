@@ -528,7 +528,7 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
             .value;
 
         const { successor: successorRepositoryAttribute } = (
-            await consumptionServices2.attributes.succeedRepositoryAttribute({
+            await consumptionServices2.attributes.succeedOwnIdentityAttribute({
                 predecessorId: predecessorRepositoryAttribute.id,
                 successorContent: {
                     value: {

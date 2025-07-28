@@ -54,8 +54,8 @@ import {
     RelationshipTemplateDTO,
     RelationshipTemplateProcessedEvent,
     ShareOwnIdentityAttributeRequest,
-    SucceedRepositoryAttributeRequest,
-    SucceedRepositoryAttributeResponse,
+    SucceedOwnIdentityAttributeRequest,
+    SucceedOwnIdentityAttributeResponse,
     SyncEverythingResponse,
     TokenDTO,
     TransportServices,
@@ -682,9 +682,9 @@ export async function executeFullCreateAndShareRelationshipAttributeFlow(
 export async function executeFullSucceedRepositoryAttributeAndNotifyPeerFlow(
     sender: TestRuntimeServices,
     recipient: TestRuntimeServices,
-    request: SucceedRepositoryAttributeRequest
-): Promise<SucceedRepositoryAttributeResponse> {
-    const succeedAttributeRequestResult = await sender.consumption.attributes.succeedRepositoryAttribute(request);
+    request: SucceedOwnIdentityAttributeRequest
+): Promise<SucceedOwnIdentityAttributeResponse> {
+    const succeedAttributeRequestResult = await sender.consumption.attributes.succeedOwnIdentityAttribute(request);
     const repositorySuccessorId = succeedAttributeRequestResult.value.successor.id;
 
     const senderOwnSharedIdentityAttributes = await executeFullNotifyPeerAboutAttributeSuccessionFlow(sender, recipient, repositorySuccessorId);
@@ -695,7 +695,7 @@ export async function executeFullNotifyPeerAboutAttributeSuccessionFlow(
     sender: TestRuntimeServices,
     recipient: TestRuntimeServices,
     attributeId: string
-): Promise<SucceedRepositoryAttributeResponse> {
+): Promise<SucceedOwnIdentityAttributeResponse> {
     const notifyRequest: NotifyPeerAboutRepositoryAttributeSuccessionRequest = {
         attributeId: attributeId,
         peer: recipient.address
@@ -704,7 +704,7 @@ export async function executeFullNotifyPeerAboutAttributeSuccessionFlow(
 
     await waitForRecipientToReceiveNotification(sender, recipient, notifyRequestResult.value);
 
-    const senderOwnSharedIdentityAttributes: SucceedRepositoryAttributeResponse = {
+    const senderOwnSharedIdentityAttributes: SucceedOwnIdentityAttributeResponse = {
         predecessor: notifyRequestResult.value.predecessor,
         successor: notifyRequestResult.value.successor
     };

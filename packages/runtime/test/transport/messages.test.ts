@@ -670,7 +670,7 @@ describe("Postponed Notifications via Messages", () => {
             expect(terminatedRelationship.status).toBe(RelationshipStatus.Terminated);
 
             const { successor: successorOfRepositoryAttribute } = (
-                await client1.consumption.attributes.succeedRepositoryAttribute({
+                await client1.consumption.attributes.succeedOwnIdentityAttribute({
                     predecessorId: (await client1.consumption.attributes.getRepositoryAttributes({})).value[0].id,
                     successorContent: {
                         value: {
