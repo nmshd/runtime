@@ -670,8 +670,8 @@ export async function executeFullCreateAndShareRelationshipAttributeFlow(
     const requestResult = await sender.consumption.attributes.createAndShareRelationshipAttribute({ ...request, peer: recipient.address });
     const requestId = requestResult.value.id;
 
-    const senderOwnSharedRelationshipAttribute = await acceptIncomingShareAttributeRequest(sender, recipient, requestId);
-    return senderOwnSharedRelationshipAttribute;
+    const senderOwnRelationshipAttribute = await acceptIncomingShareAttributeRequest(sender, recipient, requestId);
+    return senderOwnRelationshipAttribute;
 }
 
 /**

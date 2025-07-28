@@ -46,7 +46,7 @@ export class ShareOwnIdentityAttributeUseCase extends UseCase<ShareOwnIdentityAt
         const ownIdentityAttribute = await this.attributeController.getLocalAttribute(attributeId);
         if (!ownIdentityAttribute) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute.name));
 
-        if (!(ownIdentityAttribute instanceof OwnIdentityAttribute)) return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(attributeId));
+        if (!(ownIdentityAttribute instanceof OwnIdentityAttribute)) return Result.fail(RuntimeErrors.attributes.isNotOwnIdentityAttribute(attributeId));
 
         const requestParams = CreateOutgoingRequestParameters.from({
             peer: request.peer,

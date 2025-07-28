@@ -34,7 +34,7 @@ export class DeleteOwnIdentityAttributeAndNotifyPeersUseCase extends UseCase<Del
         if (!ownIdentityAttribute) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
 
         if (!(ownIdentityAttribute instanceof OwnIdentityAttribute)) {
-            return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(request.attributeId)); // TODO:
+            return Result.fail(RuntimeErrors.attributes.isNotOwnIdentityAttribute(request.attributeId)); // TODO:
         }
 
         const validationResult = await this.attributesController.validateFullAttributeDeletionProcess(ownIdentityAttribute);

@@ -1504,7 +1504,7 @@ describe(ShareOwnIdentityAttributeUseCase.name, () => {
             peer: services2.address
         };
         const shareRequestResult = await services1.consumption.attributes.shareOwnIdentityAttribute(shareRequest);
-        expect(shareRequestResult).toBeAnError(/.*/, "error.runtime.attributes.isNotRepositoryAttribute");
+        expect(shareRequestResult).toBeAnError(/.*/, "error.runtime.attributes.isNotOwnIdentityAttribute");
     });
 
     test("should reject sharing a peer shared identity attribute", async () => {
@@ -1516,7 +1516,7 @@ describe(ShareOwnIdentityAttributeUseCase.name, () => {
             peer: services1.address
         };
         const shareRequestResult = await services2.consumption.attributes.shareOwnIdentityAttribute(shareRequest);
-        expect(shareRequestResult).toBeAnError(/.*/, "error.runtime.attributes.isNotRepositoryAttribute");
+        expect(shareRequestResult).toBeAnError(/.*/, "error.runtime.attributes.isNotOwnIdentityAttribute");
     });
 
     test("should reject sharing a relationship attribute", async () => {
@@ -1539,7 +1539,7 @@ describe(ShareOwnIdentityAttributeUseCase.name, () => {
             peer: services2.address
         };
         const shareRequestResult = await services1.consumption.attributes.shareOwnIdentityAttribute(shareRequest);
-        expect(shareRequestResult).toBeAnError(/.*/, "error.runtime.attributes.isNotRepositoryAttribute");
+        expect(shareRequestResult).toBeAnError(/.*/, "error.runtime.attributes.isNotOwnIdentityAttribute");
     });
 
     test("should throw if repository attribute doesn't exist", async () => {
@@ -1883,11 +1883,11 @@ describe(CreateAndShareRelationshipAttributeUseCase.name, () => {
         expect(requestResult).toBeSuccessful();
 
         const requestId = requestResult.value.id;
-        const sOwnSharedRelationshipAttribute = await acceptIncomingShareAttributeRequest(services1, services2, requestId);
-        const rPeerSharedRelationshipAttribute = (await services2.consumption.attributes.getAttribute({ id: sOwnSharedRelationshipAttribute.id })).value;
+        const sOwnRelationshipAttribute = await acceptIncomingShareAttributeRequest(services1, services2, requestId);
+        const rPeerRelationshipAttribute = (await services2.consumption.attributes.getAttribute({ id: sOwnRelationshipAttribute.id })).value;
 
-        expect(sOwnSharedRelationshipAttribute.content.value).toStrictEqual(createAndShareRelationshipAttributeRequest.content.value);
-        expect(sOwnSharedRelationshipAttribute.content).toStrictEqual(rPeerSharedRelationshipAttribute.content);
+        expect(sOwnRelationshipAttribute.content.value).toStrictEqual(createAndShareRelationshipAttributeRequest.content.value);
+        expect(sOwnRelationshipAttribute.content).toStrictEqual(rPeerRelationshipAttribute.content);
     });
 
     test("should create and share a relationship attribute with metadata", async () => {
@@ -1930,9 +1930,9 @@ describe(CreateAndShareRelationshipAttributeUseCase.name, () => {
 });
 
 describe(SucceedRelationshipAttributeAndNotifyPeerUseCase.name, () => {
-    let sOwnSharedRelationshipAttribute: LocalAttributeDTO;
+    let sOwnRelationshipAttribute: LocalAttributeDTO;
     beforeEach(async () => {
-        sOwnSharedRelationshipAttribute = await executeFullCreateAndShareRelationshipAttributeFlow(services1, services2, {
+        sOwnRelationshipAttribute = await executeFullCreateAndShareRelationshipAttributeFlow(services1, services2, {
             content: {
                 key: "test key for succession",
                 value: {
@@ -1945,9 +1945,9 @@ describe(SucceedRelationshipAttributeAndNotifyPeerUseCase.name, () => {
         });
     });
 
-    test("should succeed a relationship attribute and notify peer", async () => {
+    test("should succeed an own RelationshipAttribute and notify peer", async () => {
         const result = await services1.consumption.attributes.succeedRelationshipAttributeAndNotifyPeer({
-            predecessorId: sOwnSharedRelationshipAttribute.id,
+            predecessorId: sOwnRelationshipAttribute.id,
             successorContent: {
                 value: {
                     "@type": "ProprietaryString",
@@ -1966,20 +1966,18 @@ describe(SucceedRelationshipAttributeAndNotifyPeerUseCase.name, () => {
         const recipientSuccessor = (await services2.consumption.attributes.getAttribute({ id: senderSuccessor.id })).value;
 
         expect(senderSuccessor.content).toStrictEqual(recipientSuccessor.content);
-        expect(senderSuccessor.shareInfo!.notificationReference).toStrictEqual(recipientSuccessor.shareInfo!.notificationReference);
-        expect(senderSuccessor.shareInfo!.requestReference).toBeUndefined();
-        expect(recipientSuccessor.shareInfo!.requestReference).toBeUndefined();
-        expect(senderSuccessor.shareInfo!.peer).toBe(services2.address);
-        expect(recipientSuccessor.shareInfo!.peer).toBe(services1.address);
+        expect(senderSuccessor.peerSharingInfo!.sourceReference).toBe(recipientSuccessor.peerSharingInfo!.sourceReference);
+        expect(senderSuccessor.peerSharingInfo!.peer).toBe(services2.address);
+        expect(recipientSuccessor.peerSharingInfo!.peer).toBe(services1.address);
         expect(senderSuccessor.succeeds).toBe(senderPredecessor.id);
         expect(recipientSuccessor.succeeds).toBe(recipientPredecessor.id);
         expect(senderPredecessor.succeededBy).toBe(senderSuccessor.id);
         expect(recipientPredecessor.succeededBy).toBe(recipientSuccessor.id);
     });
 
-    test("should throw changing the value type succeeding a relationship attribute", async () => {
+    test("should throw trying to change the value type succeeding an own RelationshipAttribute", async () => {
         const result = await services1.consumption.attributes.succeedRelationshipAttributeAndNotifyPeer({
-            predecessorId: sOwnSharedRelationshipAttribute.id,
+            predecessorId: sOwnRelationshipAttribute.id,
             successorContent: {
                 value: {
                     "@type": "ProprietaryBoolean",
@@ -1993,20 +1991,20 @@ describe(SucceedRelationshipAttributeAndNotifyPeerUseCase.name, () => {
     });
 
     test("should throw if the predecessor was deleted by peer", async () => {
-        const rPeerSharedRelationshipAttribute = (await services2.consumption.attributes.getAttribute({ id: sOwnSharedRelationshipAttribute.id })).value;
+        const rPeerRelationshipAttribute = (await services2.consumption.attributes.getAttribute({ id: sOwnRelationshipAttribute.id })).value;
 
-        const deleteResult = await services2.consumption.attributes.deletePeerIdentityAttributeAndNotifyOwner({ attributeId: rPeerSharedRelationshipAttribute.id });
+        const deleteResult = await services2.consumption.attributes.deletePeerRelationshipAttributeAndNotifyPeers({ attributeId: rPeerRelationshipAttribute.id });
         const notificationId = deleteResult.value.notificationId!;
 
         await syncUntilHasMessageWithNotification(services1.transport, notificationId);
         await services1.eventBus.waitForEvent(PeerSharedAttributeDeletedByPeerEvent, (e) => {
-            return e.data.id === sOwnSharedRelationshipAttribute.id;
+            return e.data.id === sOwnRelationshipAttribute.id;
         });
-        const updatedOwnSharedRelationshipAttribute = (await services1.consumption.attributes.getAttribute({ id: sOwnSharedRelationshipAttribute.id })).value;
-        expect(updatedOwnSharedRelationshipAttribute.deletionInfo?.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByPeer);
+        const updatedOwnRelationshipAttribute = (await services1.consumption.attributes.getAttribute({ id: sOwnRelationshipAttribute.id })).value;
+        expect(updatedOwnRelationshipAttribute.peerSharingInfo!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByPeer);
 
         const result = await services1.consumption.attributes.succeedRelationshipAttributeAndNotifyPeer({
-            predecessorId: sOwnSharedRelationshipAttribute.id,
+            predecessorId: sOwnRelationshipAttribute.id,
             successorContent: {
                 value: {
                     "@type": "ProprietaryString",
@@ -2020,7 +2018,7 @@ describe(SucceedRelationshipAttributeAndNotifyPeerUseCase.name, () => {
 });
 
 describe(ChangeDefaultOwnIdentityAttributeUseCase.name, () => {
-    test("should change default RepositoryAttribute", async () => {
+    test("should change default own IdentityAttribute", async () => {
         const defaultAttribute = (
             await appService.consumption.attributes.createOwnIdentityAttribute({
                 content: {
@@ -2057,7 +2055,7 @@ describe(ChangeDefaultOwnIdentityAttributeUseCase.name, () => {
         expect(updatedFormerDefaultAttribute.isDefault).toBeUndefined();
     });
 
-    test("should return an error if the new default attribute is not a RepositoryAttribute", async () => {
+    test("should return an error if the new default Attribute is not an own IdentityAttribute", async () => {
         await appService.consumption.attributes.createOwnIdentityAttribute({
             content: {
                 value: {
@@ -2067,16 +2065,19 @@ describe(ChangeDefaultOwnIdentityAttributeUseCase.name, () => {
             }
         });
 
-        const desiredSharedDefaultAttribute = await executeFullCreateAndShareOwnIdentityAttributeFlow(appService, services2, {
+        const desiredSharedDefaultAttribute = await executeFullCreateAndShareOwnIdentityAttributeFlow(services2, appService, {
             content: {
                 value: {
                     "@type": "GivenName",
-                    value: "My new shared name"
+                    value: "My peer's name"
                 }
             }
         });
         const result = await appService.consumption.attributes.changeDefaultOwnIdentityAttribute({ attributeId: desiredSharedDefaultAttribute.id });
-        expect(result).toBeAnError(`Attribute '${desiredSharedDefaultAttribute.id.toString()}' is not a RepositoryAttribute.`, "error.runtime.attributes.isNotRepositoryAttribute");
+        expect(result).toBeAnError(
+            `Attribute '${desiredSharedDefaultAttribute.id.toString()}' is not an own IdentityAttribute.`,
+            "error.runtime.attributes.isNotOwnIdentityAttribute"
+        );
     });
 
     test("should return an error if the new default attribute has a successor", async () => {
@@ -2122,7 +2123,7 @@ describe(ChangeDefaultOwnIdentityAttributeUseCase.name, () => {
         );
     });
 
-    test("should return an error trying to set a default attribute if setDefaultRepositoryAttributes is false", async () => {
+    test("should return an error trying to set a default attribute if setDefaultIOwnIdentityAttributes is false", async () => {
         const attribute = (
             await services1.consumption.attributes.createOwnIdentityAttribute({
                 content: {
@@ -2136,7 +2137,7 @@ describe(ChangeDefaultOwnIdentityAttributeUseCase.name, () => {
         expect(attribute.isDefault).toBeUndefined();
 
         const result = await services1.consumption.attributes.changeDefaultOwnIdentityAttribute({ attributeId: attribute.id });
-        expect(result).toBeAnError("Setting default RepositoryAttributes is disabled for this Account.", "error.runtime.attributes.setDefaultRepositoryAttributesIsDisabled");
+        expect(result).toBeAnError("Setting default own IdentityAttributes is disabled for this Account.", "error.runtime.attributes.setDefaultOwnIdentityAttributesIsDisabled");
     });
 });
 
@@ -2594,7 +2595,7 @@ describe("DeleteAttributeUseCases", () => {
 
         test("should throw trying to call with an attribute that is not a repository attribute", async () => {
             const result = await services1.consumption.attributes.deleteOwnIdentityAttribute({ attributeId: ownSharedIdentityAttributeVersion1.id });
-            expect(result).toBeAnError(/.*/, "error.runtime.attributes.isNotRepositoryAttribute");
+            expect(result).toBeAnError(/.*/, "error.runtime.attributes.isNotOwnIdentityAttribute");
         });
 
         test("should throw trying to call with an unknown attribute ID", async () => {

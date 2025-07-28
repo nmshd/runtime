@@ -40,7 +40,7 @@ export class SucceedOwnIdentityAttributeUseCase extends UseCase<SucceedOwnIdenti
         const predecessor = await this.attributeController.getLocalAttribute(CoreId.from(request.predecessorId));
         if (!predecessor) return Result.fail(ConsumptionCoreErrors.attributes.predecessorDoesNotExist());
 
-        if (!(predecessor instanceof OwnIdentityAttribute)) return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(request.predecessorId));
+        if (!(predecessor instanceof OwnIdentityAttribute)) return Result.fail(RuntimeErrors.attributes.isNotOwnIdentityAttribute(request.predecessorId));
 
         const successorParams: OwnIdentityAttributeSuccessorParamsJSON = {
             content: {

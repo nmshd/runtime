@@ -28,14 +28,14 @@ export class ChangeDefaultOwnIdentityAttributeUseCase extends UseCase<ChangeDefa
 
     protected async executeInternal(request: ChangeDefaultOwnIdentityAttributeRequest): Promise<Result<LocalAttributeDTO>> {
         if (!this.attributesController.parent.consumptionConfig.setDefaultRepositoryAttributes) {
-            return Result.fail(RuntimeErrors.attributes.setDefaultRepositoryAttributesIsDisabled());
+            return Result.fail(RuntimeErrors.attributes.setDefaultOwnIdentityAttributesIsDisabled());
         }
 
         const newDefaultAttribute = await this.attributesController.getLocalAttribute(CoreId.from(request.attributeId));
         if (!newDefaultAttribute) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
 
         if (!(newDefaultAttribute instanceof OwnIdentityAttribute)) {
-            return Result.fail(RuntimeErrors.attributes.isNotRepositoryAttribute(CoreId.from(request.attributeId)));
+            return Result.fail(RuntimeErrors.attributes.isNotOwnIdentityAttribute(CoreId.from(request.attributeId)));
         }
 
         if (newDefaultAttribute.succeededBy) {

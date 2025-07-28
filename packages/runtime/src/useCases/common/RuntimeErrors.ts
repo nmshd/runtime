@@ -198,8 +198,8 @@ class Notifications {
 }
 
 class Attributes {
-    public isNotRepositoryAttribute(attributeId: CoreId | string): ApplicationError {
-        return new ApplicationError("error.runtime.attributes.isNotRepositoryAttribute", `Attribute '${attributeId.toString()}' is not a RepositoryAttribute.`);
+    public isNotOwnIdentityAttribute(attributeId: CoreId | string): ApplicationError {
+        return new ApplicationError("error.runtime.attributes.isNotOwnIdentityAttribute", `Attribute '${attributeId.toString()}' is not an own IdentityAttribute.`);
     }
 
     public ownIdentityAttributeHasAlreadyBeenSharedWithPeer(attributeId: CoreId | string, peer: CoreAddress | string): ApplicationError {
@@ -252,8 +252,8 @@ class Attributes {
         );
     }
 
-    public setDefaultRepositoryAttributesIsDisabled(): ApplicationError {
-        return new ApplicationError("error.runtime.attributes.setDefaultRepositoryAttributesIsDisabled", "Setting default RepositoryAttributes is disabled for this Account.");
+    public setDefaultOwnIdentityAttributesIsDisabled(): ApplicationError {
+        return new ApplicationError("error.runtime.attributes.setDefaultOwnIdentityAttributesIsDisabled", "Setting default own IdentityAttributes is disabled for this Account.");
     }
 
     public cannotDeleteSharedAttributeWhileRelationshipIsPending(): ApplicationError {
