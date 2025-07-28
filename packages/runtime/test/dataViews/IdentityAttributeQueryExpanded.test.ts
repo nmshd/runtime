@@ -44,7 +44,7 @@ describe("IdentityAttributeQueryExpanded", () => {
             })
         ).value;
 
-        const updatedSecondlyCreatedGivenName = (await consumptionServices1.attributes.changeDefaultRepositoryAttribute({ attributeId: secondlyCreatedGivenName.id })).value;
+        const updatedSecondlyCreatedGivenName = (await consumptionServices1.attributes.changeDefaultOwnIdentityAttribute({ attributeId: secondlyCreatedGivenName.id })).value;
         const updatedFirstlyCreatedGivenName = (await consumptionServices1.attributes.getAttribute({ id: firstlyCreatedGivenName.id })).value;
 
         attributes.push(updatedSecondlyCreatedGivenName, updatedFirstlyCreatedGivenName);

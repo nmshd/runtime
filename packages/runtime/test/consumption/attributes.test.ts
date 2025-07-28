@@ -18,7 +18,7 @@ import {
     AttributeWasViewedAtChangedEvent,
     CanCreateOwnIdentityAttributeRequest,
     CanCreateOwnIdentityAttributeUseCase,
-    ChangeDefaultRepositoryAttributeUseCase,
+    ChangeDefaultOwnIdentityAttributeUseCase,
     CreateAndShareRelationshipAttributeRequest,
     CreateAndShareRelationshipAttributeUseCase,
     CreateOwnIdentityAttributeRequest,
@@ -2040,7 +2040,7 @@ describe(SucceedRelationshipAttributeAndNotifyPeerUseCase.name, () => {
     });
 });
 
-describe(ChangeDefaultRepositoryAttributeUseCase.name, () => {
+describe(ChangeDefaultOwnIdentityAttributeUseCase.name, () => {
     test("should change default RepositoryAttribute", async () => {
         const defaultAttribute = (
             await appService.consumption.attributes.createOwnIdentityAttribute({
@@ -2066,7 +2066,7 @@ describe(ChangeDefaultRepositoryAttributeUseCase.name, () => {
         ).value;
         expect(desiredDefaultAttribute.isDefault).toBeUndefined();
 
-        const result = await appService.consumption.attributes.changeDefaultRepositoryAttribute({ attributeId: desiredDefaultAttribute.id });
+        const result = await appService.consumption.attributes.changeDefaultOwnIdentityAttribute({ attributeId: desiredDefaultAttribute.id });
         expect(result).toBeSuccessful();
         const newDefaultAttribute = result.value;
         expect(newDefaultAttribute.isDefault).toBe(true);
@@ -2096,7 +2096,7 @@ describe(ChangeDefaultRepositoryAttributeUseCase.name, () => {
                 }
             }
         });
-        const result = await appService.consumption.attributes.changeDefaultRepositoryAttribute({ attributeId: desiredSharedDefaultAttribute.id });
+        const result = await appService.consumption.attributes.changeDefaultOwnIdentityAttribute({ attributeId: desiredSharedDefaultAttribute.id });
         expect(result).toBeAnError(`Attribute '${desiredSharedDefaultAttribute.id.toString()}' is not a RepositoryAttribute.`, "error.runtime.attributes.isNotRepositoryAttribute");
     });
 
@@ -2136,7 +2136,7 @@ describe(ChangeDefaultRepositoryAttributeUseCase.name, () => {
         const updatedDesiredDefaultAttribute = successionResult.predecessor;
         const desiredDefaultAttributeSuccessor = successionResult.successor;
 
-        const result = await appService.consumption.attributes.changeDefaultRepositoryAttribute({ attributeId: updatedDesiredDefaultAttribute.id });
+        const result = await appService.consumption.attributes.changeDefaultOwnIdentityAttribute({ attributeId: updatedDesiredDefaultAttribute.id });
         expect(result).toBeAnError(
             `Attribute '${updatedDesiredDefaultAttribute.id.toString()}' already has a successor ${desiredDefaultAttributeSuccessor.id.toString()}.`,
             "error.runtime.attributes.hasSuccessor"
@@ -2156,7 +2156,7 @@ describe(ChangeDefaultRepositoryAttributeUseCase.name, () => {
         ).value;
         expect(attribute.isDefault).toBeUndefined();
 
-        const result = await services1.consumption.attributes.changeDefaultRepositoryAttribute({ attributeId: attribute.id });
+        const result = await services1.consumption.attributes.changeDefaultOwnIdentityAttribute({ attributeId: attribute.id });
         expect(result).toBeAnError("Setting default RepositoryAttributes is disabled for this Account.", "error.runtime.attributes.setDefaultRepositoryAttributesIsDisabled");
     });
 });

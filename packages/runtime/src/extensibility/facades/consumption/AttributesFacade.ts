@@ -5,8 +5,8 @@ import {
     CanCreateOwnIdentityAttributeRequest,
     CanCreateOwnIdentityAttributeResponse,
     CanCreateOwnIdentityAttributeUseCase,
-    ChangeDefaultRepositoryAttributeRequest,
-    ChangeDefaultRepositoryAttributeUseCase,
+    ChangeDefaultOwnIdentityAttributeRequest,
+    ChangeDefaultOwnIdentityAttributeUseCase,
     CreateAndShareRelationshipAttributeRequest,
     CreateAndShareRelationshipAttributeUseCase,
     CreateOwnIdentityAttributeRequest,
@@ -88,7 +88,7 @@ export class AttributesFacade {
         @Inject private readonly notifyPeerAboutRepositoryAttributeSuccessionUseCase: NotifyPeerAboutRepositoryAttributeSuccessionUseCase,
         @Inject private readonly createAndShareRelationshipAttributeUseCase: CreateAndShareRelationshipAttributeUseCase,
         @Inject private readonly succeedRelationshipAttributeAndNotifyPeerUseCase: SucceedRelationshipAttributeAndNotifyPeerUseCase,
-        @Inject private readonly changeDefaultRepositoryAttributeUseCase: ChangeDefaultRepositoryAttributeUseCase,
+        @Inject private readonly changeDefaultOwnIdentityAttributeUseCase: ChangeDefaultOwnIdentityAttributeUseCase,
         @Inject private readonly deleteOwnSharedAttributeAndNotifyPeerUseCase: DeleteOwnRelationshipAttributeAndNotifyPeerUseCase,
         @Inject private readonly deletePeerSharedAttributeAndNotifyOwnerUseCase: DeletePeerIdentityAttributeAndNotifyOwnerUseCase,
         @Inject private readonly deleteThirdPartyRelationshipAttributeAndNotifyPeerUseCase: DeleteThirdPartyRelationshipAttributeAndNotifyPeerUseCase,
@@ -179,8 +179,8 @@ export class AttributesFacade {
         return await this.succeedRelationshipAttributeAndNotifyPeerUseCase.execute(request);
     }
 
-    public async changeDefaultRepositoryAttribute(request: ChangeDefaultRepositoryAttributeRequest): Promise<Result<LocalAttributeDTO>> {
-        return await this.changeDefaultRepositoryAttributeUseCase.execute(request);
+    public async changeDefaultOwnIdentityAttribute(request: ChangeDefaultOwnIdentityAttributeRequest): Promise<Result<LocalAttributeDTO>> {
+        return await this.changeDefaultOwnIdentityAttributeUseCase.execute(request);
     }
 
     public async deleteOwnSharedAttributeAndNotifyPeer(
