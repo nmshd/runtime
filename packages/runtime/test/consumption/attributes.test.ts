@@ -172,7 +172,7 @@ describe("get attribute(s)", () => {
     });
 
     describe(GetAttributeUseCase.name, () => {
-        test("should allow to get an attribute by id", async function () {
+        test("should allow to get an Attribute by id", async function () {
             const result = await services1.consumption.attributes.getAttribute({ id: relationshipAttributeId });
             expect(result).toBeSuccessful();
             const receivedAttributeId = result.value.id;
@@ -181,7 +181,7 @@ describe("get attribute(s)", () => {
     });
 
     describe(GetAttributesUseCase.name, () => {
-        test("should list all attributes with empty query", async () => {
+        test("should list all Attributes with empty query", async () => {
             const result = await services1.consumption.attributes.getAttributes({ query: {} });
             expect(result).toBeSuccessful();
             const attributes = result.value;
@@ -191,7 +191,7 @@ describe("get attribute(s)", () => {
             expect(attributeIds).toStrictEqual(expect.arrayContaining(identityAttributeIds));
         });
 
-        test("should allow to get an attribute by type", async function () {
+        test("should allow to get an Attribute by value type", async function () {
             const result = await services1.consumption.attributes.getAttributes({
                 query: { "content.value.@type": "GivenName" }
             });
@@ -203,7 +203,7 @@ describe("get attribute(s)", () => {
             expect(attributes[0].id).toStrictEqual(identityAttributeIds[0]);
         });
 
-        test("should allow to get an attribute by multiple types", async function () {
+        test("should allow to get an Attribute by multiple value types", async function () {
             const result = await services1.consumption.attributes.getAttributes({
                 query: { "content.value.@type": ["Surname", "GivenName"] }
             });
@@ -217,7 +217,7 @@ describe("get attribute(s)", () => {
             expect(attributeIds).toStrictEqual(expect.arrayContaining(identityAttributeIds));
         });
 
-        test("should hide technical attributes when hideTechnical=true", async () => {
+        test("should hide technical Attributes when hideTechnical=true", async () => {
             const result = await services1.consumption.attributes.getAttributes({ query: {}, hideTechnical: true });
             expect(result).toBeSuccessful();
             const attributes = result.value;
@@ -227,7 +227,7 @@ describe("get attribute(s)", () => {
             expect(attributeIds).toStrictEqual(identityAttributeIds);
         });
 
-        test("should return technical attributes when hideTechnical=false", async () => {
+        test("should return technical Attributes when hideTechnical=false", async () => {
             const getAttributesResponse = await services1.consumption.attributes.getAttributes({ query: {}, hideTechnical: false });
             expect(getAttributesResponse.isSuccess).toBe(true);
             const attributes = getAttributesResponse.value;
@@ -238,7 +238,7 @@ describe("get attribute(s)", () => {
             expect(attributeIds).toStrictEqual(expect.arrayContaining(identityAttributeIds));
         });
 
-        test("should allow to get only default attributes", async function () {
+        test("should allow to get only default own IdentityAttributes", async function () {
             const result = await appService.consumption.attributes.getAttributes({
                 query: { isDefault: "true" }
             });
@@ -253,7 +253,7 @@ describe("get attribute(s)", () => {
             expect(attributeIds).not.toContain(appAttributeIds[2]);
         });
 
-        test("should allow not to get default attributes", async function () {
+        test("should allow get Attributes that are not default own IdentityAttributes", async function () {
             const result = await appService.consumption.attributes.getAttributes({
                 query: { isDefault: "!true" }
             });
