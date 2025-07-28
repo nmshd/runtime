@@ -716,16 +716,16 @@ export async function executeFullNotifyPeerAboutAttributeSuccessionFlow(
 export async function waitForRecipientToReceiveNotification(
     sender: TestRuntimeServices,
     recipient: TestRuntimeServices,
-    notifyRequestResult: NotifyPeerAboutOwnIdentityAttributeSuccessionResponse
+    notifyResult: NotifyPeerAboutOwnIdentityAttributeSuccessionResponse
 ): Promise<void> {
-    await syncUntilHasMessageWithNotification(recipient.transport, notifyRequestResult.notificationId);
+    await syncUntilHasMessageWithNotification(recipient.transport, notifyResult.notificationId);
 
     await sender.eventBus.waitForEvent(OwnSharedAttributeSucceededEvent, (e) => {
-        return e.data.successor.id === notifyRequestResult.successor.id;
+        return e.data.successor.id === notifyResult.successor.id;
     });
 
     await recipient.eventBus.waitForEvent(PeerSharedAttributeSucceededEvent, (e) => {
-        return e.data.successor.id === notifyRequestResult.successor.id;
+        return e.data.successor.id === notifyResult.successor.id;
     });
 }
 
@@ -755,13 +755,14 @@ export async function executeFullRequestAndAcceptExistingAttributeFlow(
     });
 
     const responseMessage = await syncUntilHasMessageWithResponse(requestor.transport, localRequest.id);
+    // TODO: this will need refactoring
     const sharedAttributeId = (responseMessage.content.response.items[0] as ShareAttributeAcceptResponseItemJSON).attributeId;
     await requestor.eventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => {
         return e.data.request.id === localRequest.id && e.data.newStatus === LocalRequestStatus.Completed;
     });
 
-    const ownSharedAttribute = (await responder.consumption.attributes.getAttribute({ id: sharedAttributeId })).value;
-    return ownSharedAttribute;
+    const ownForwardedAttribute = (await responder.consumption.attributes.getAttribute({ id: sharedAttributeId })).value;
+    return ownForwardedAttribute;
 }
 
 export async function executeFullShareAndAcceptAttributeRequestFlow(
