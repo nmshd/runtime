@@ -198,7 +198,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         const parsedParams = SentOutgoingRequestParameters.from(params);
         const request = await this._sent(parsedParams.requestId, parsedParams.requestSourceObject);
 
-        const peer = parsedParams.requestSourceObject.cache?.recipients[0].address;
+        const peer = parsedParams.requestSourceObject.recipients[0].address;
         if (!peer) throw Error; // TODO:
         await this._setDeletionRequestSent(request.content, peer);
 
