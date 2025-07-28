@@ -54,8 +54,8 @@ import {
     NotifyPeerAboutRepositoryAttributeSuccessionUseCase,
     SetAttributeDeletionInfoOfDeletionProposedRelationshipRequest,
     SetAttributeDeletionInfoOfDeletionProposedRelationshipUseCase,
-    ShareRepositoryAttributeRequest,
-    ShareRepositoryAttributeUseCase,
+    ShareOwnIdentityAttributeRequest,
+    ShareOwnIdentityAttributeUseCase,
     SucceedRelationshipAttributeAndNotifyPeerRequest,
     SucceedRelationshipAttributeAndNotifyPeerResponse,
     SucceedRelationshipAttributeAndNotifyPeerUseCase,
@@ -84,7 +84,7 @@ export class AttributesFacade {
         @Inject private readonly executeIQLQueryUseCase: ExecuteIQLQueryUseCase,
         @Inject private readonly validateIQLQueryUseCase: ValidateIQLQueryUseCase,
         @Inject private readonly succeedRepositoryAttributeUseCase: SucceedRepositoryAttributeUseCase,
-        @Inject private readonly shareRepositoryAttributeUseCase: ShareRepositoryAttributeUseCase,
+        @Inject private readonly shareOwnIdentityAttributeUseCase: ShareOwnIdentityAttributeUseCase,
         @Inject private readonly notifyPeerAboutRepositoryAttributeSuccessionUseCase: NotifyPeerAboutRepositoryAttributeSuccessionUseCase,
         @Inject private readonly createAndShareRelationshipAttributeUseCase: CreateAndShareRelationshipAttributeUseCase,
         @Inject private readonly succeedRelationshipAttributeAndNotifyPeerUseCase: SucceedRelationshipAttributeAndNotifyPeerUseCase,
@@ -159,8 +159,8 @@ export class AttributesFacade {
         return await this.succeedRepositoryAttributeUseCase.execute(request);
     }
 
-    public async shareRepositoryAttribute(request: ShareRepositoryAttributeRequest): Promise<Result<LocalRequestDTO>> {
-        return await this.shareRepositoryAttributeUseCase.execute(request);
+    public async shareOwnIdentityAttribute(request: ShareOwnIdentityAttributeRequest): Promise<Result<LocalRequestDTO>> {
+        return await this.shareOwnIdentityAttributeUseCase.execute(request);
     }
 
     public async notifyPeerAboutRepositoryAttributeSuccession(

@@ -8,7 +8,7 @@ import { Inject } from "@nmshd/typescript-ioc";
 import { AddressString, AttributeIdString, ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { RequestMapper } from "../requests";
 
-export interface ShareRepositoryAttributeRequest {
+export interface ShareOwnIdentityAttributeRequest {
     attributeId: AttributeIdString;
     peer: AddressString;
     requestMetadata?: {
@@ -23,13 +23,14 @@ export interface ShareRepositoryAttributeRequest {
     };
 }
 
-class Validator extends SchemaValidator<ShareRepositoryAttributeRequest> {
+class Validator extends SchemaValidator<ShareOwnIdentityAttributeRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
-        super(schemaRepository.getSchema("ShareRepositoryAttributeRequest"));
+        super(schemaRepository.getSchema("ShareOwnIdentityAttributeRequest"));
     }
 }
 
-export class ShareRepositoryAttributeUseCase extends UseCase<ShareRepositoryAttributeRequest, LocalRequestDTO> {
+// TODO: maybe call this ForwardOwnIdentityAttribute
+export class ShareOwnIdentityAttributeUseCase extends UseCase<ShareOwnIdentityAttributeRequest, LocalRequestDTO> {
     public constructor(
         @Inject private readonly attributeController: AttributesController,
         @Inject private readonly accountController: AccountController,
@@ -40,7 +41,7 @@ export class ShareRepositoryAttributeUseCase extends UseCase<ShareRepositoryAttr
         super(validator);
     }
 
-    protected async executeInternal(request: ShareRepositoryAttributeRequest): Promise<Result<LocalRequestDTO>> {
+    protected async executeInternal(request: ShareOwnIdentityAttributeRequest): Promise<Result<LocalRequestDTO>> {
         const attributeId = CoreId.from(request.attributeId);
         const ownIdentityAttribute = await this.attributeController.getLocalAttribute(attributeId);
         if (!ownIdentityAttribute) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute.name));

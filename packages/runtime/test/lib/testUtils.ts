@@ -53,7 +53,7 @@ import {
     RelationshipStatus,
     RelationshipTemplateDTO,
     RelationshipTemplateProcessedEvent,
-    ShareRepositoryAttributeRequest,
+    ShareOwnIdentityAttributeRequest,
     SucceedRepositoryAttributeRequest,
     SucceedRepositoryAttributeResponse,
     SyncEverythingResponse,
@@ -627,11 +627,11 @@ export async function executeFullCreateAndShareRepositoryAttributeFlow(
 }
 
 export async function executeFullShareRepositoryAttributeFlow(sender: TestRuntimeServices, recipient: TestRuntimeServices, attributeId: string): Promise<LocalAttributeDTO> {
-    const shareRequest: ShareRepositoryAttributeRequest = {
+    const shareRequest: ShareOwnIdentityAttributeRequest = {
         attributeId: attributeId.toString(),
         peer: recipient.address
     };
-    const shareRequestResult = await sender.consumption.attributes.shareRepositoryAttribute(shareRequest);
+    const shareRequestResult = await sender.consumption.attributes.shareOwnIdentityAttribute(shareRequest);
     const shareRequestId = shareRequestResult.value.id;
 
     const senderOwnSharedIdentityAttribute = await acceptIncomingShareAttributeRequest(sender, recipient, shareRequestId);
