@@ -55,7 +55,7 @@
         "@nmshd/core-types": "*",
         "@nmshd/iql": "^1.0.3",
         "luxon": "^3.7.1",
-        "ts-simple-nameof": "^1.3.2"
+        "ts-simple-nameof": "^1.3.3"
     },
     "devDependencies": {
         "@types/luxon": "^3.6.2",
