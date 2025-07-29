@@ -13954,18 +13954,18 @@ export const GetAttributesRequest: any = {
     }
 }
 
-export const GetOwnSharedAttributesRequest: any = {
+export const GetOwnAttributesSharedWithPeerRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetOwnSharedAttributesRequest",
+    "$ref": "#/definitions/GetOwnAttributesSharedWithPeerRequest",
     "definitions": {
-        "GetOwnSharedAttributesRequest": {
+        "GetOwnAttributesSharedWithPeerRequest": {
             "type": "object",
             "properties": {
                 "peer": {
                     "$ref": "#/definitions/AddressString"
                 },
                 "query": {
-                    "$ref": "#/definitions/GetOwnSharedAttributeRequestQuery"
+                    "$ref": "#/definitions/GetOwnAttributesSharedWithPeerRequestQuery"
                 },
                 "hideTechnical": {
                     "type": "boolean"
@@ -13984,7 +13984,7 @@ export const GetOwnSharedAttributesRequest: any = {
             "type": "string",
             "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
         },
-        "GetOwnSharedAttributeRequestQuery": {
+        "GetOwnAttributesSharedWithPeerRequestQuery": {
             "type": "object",
             "properties": {
                 "createdAt": {
@@ -14087,19 +14087,6 @@ export const GetOwnSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "peerSharingInfo.peer": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
                 "peerSharingInfo.sourceReference": {
                     "anyOf": [
                         {
@@ -14140,6 +14127,155 @@ export const GetOwnSharedAttributesRequest: any = {
                     ]
                 },
                 "peerSharingInfo.deletionInfo.deletionDate": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingInfos": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingInfos.sourceReference": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingInfos.sharedAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingInfos.deletionInfo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingInfos.deletionInfo.deletionStatus": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingInfos.deletionInfo.deletionDate": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+}
+
+export const GetOwnIdentityAttributesRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetOwnIdentityAttributesRequest",
+    "definitions": {
+        "GetOwnIdentityAttributesRequest": {
+            "type": "object",
+            "properties": {
+                "onlyLatestVersions": {
+                    "type": "boolean",
+                    "description": "default: true"
+                },
+                "query": {
+                    "$ref": "#/definitions/GetOwnIdentityAttributesRequestQuery"
+                }
+            },
+            "additionalProperties": false
+        },
+        "GetOwnIdentityAttributesRequestQuery": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "isDefault": {
+                    "type": "string"
+                },
+                "wasViewedAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.tags": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.value.@type": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -14249,18 +14385,18 @@ export const GetOwnSharedAttributesRequest: any = {
     }
 }
 
-export const GetPeerSharedAttributesRequest: any = {
+export const GetPeerAttributesRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetPeerSharedAttributesRequest",
+    "$ref": "#/definitions/GetPeerAttributesRequest",
     "definitions": {
-        "GetPeerSharedAttributesRequest": {
+        "GetPeerAttributesRequest": {
             "type": "object",
             "properties": {
                 "peer": {
                     "$ref": "#/definitions/AddressString"
                 },
                 "query": {
-                    "$ref": "#/definitions/GetPeerSharedAttributesRequestQuery"
+                    "$ref": "#/definitions/GetPeerAttributesRequestQuery"
                 },
                 "hideTechnical": {
                     "type": "boolean"
@@ -14279,7 +14415,7 @@ export const GetPeerSharedAttributesRequest: any = {
             "type": "string",
             "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
         },
-        "GetPeerSharedAttributesRequestQuery": {
+        "GetPeerAttributesRequestQuery": {
             "type": "object",
             "properties": {
                 "createdAt": {
@@ -14367,19 +14503,6 @@ export const GetPeerSharedAttributesRequest: any = {
                     ]
                 },
                 "peerSharingInfo": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "peerSharingInfo.peer": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -14445,168 +14568,6 @@ export const GetPeerSharedAttributesRequest: any = {
                     ]
                 },
                 "peerSharingInfo.deletionInfo.deletionDate": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "forwardedSharingInfos": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "forwardedSharingInfos.peer": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "forwardedSharingInfos.sourceReference": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "forwardedSharingInfos.sharedAt": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "forwardedSharingInfos.deletionInfo": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "forwardedSharingInfos.deletionInfo.deletionStatus": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "forwardedSharingInfos.deletionInfo.deletionDate": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                }
-            },
-            "additionalProperties": false
-        }
-    }
-}
-
-export const GetRepositoryAttributesRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetRepositoryAttributesRequest",
-    "definitions": {
-        "GetRepositoryAttributesRequest": {
-            "type": "object",
-            "properties": {
-                "onlyLatestVersions": {
-                    "type": "boolean",
-                    "description": "default: true"
-                },
-                "query": {
-                    "$ref": "#/definitions/GetRepositoryAttributesRequestQuery"
-                }
-            },
-            "additionalProperties": false
-        },
-        "GetRepositoryAttributesRequestQuery": {
-            "type": "object",
-            "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "isDefault": {
-                    "type": "string"
-                },
-                "wasViewedAt": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.tags": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.value.@type": {
                     "anyOf": [
                         {
                             "type": "string"
