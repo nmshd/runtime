@@ -2,6 +2,7 @@ import { Event, EventBus, Result, sleep, SubscriptionTarget } from "@js-soft/ts-
 import {
     AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON,
     AcceptRequestItemParametersJSON,
+    AttributeWithForwardedSharingInfos,
     ConsumptionIds,
     DecideRequestItemGroupParametersJSON,
     DecideRequestItemParametersJSON,
@@ -871,15 +872,29 @@ export async function generateAddressPseudonym(backboneBaseUrl: string): Promise
     return pseudonym;
 }
 
-export async function cleanupAttributes(services: TestRuntimeServices[], onlyShared = false): Promise<void> {
-    const query = onlyShared ? { "shareInfo.sourceAttribute": "" } : {};
+export async function cleanupAttributes(services: TestRuntimeServices[]): Promise<void> {
     await Promise.all(
         services.map(async (services) => {
             const servicesAttributeController = services.consumption.attributes["getAttributeUseCase"]["attributeController"];
 
-            const servicesAttributesResult = await services.consumption.attributes.getAttributes({ query });
+            const servicesAttributesResult = await services.consumption.attributes.getAttributes({});
             for (const attribute of servicesAttributesResult.value) {
                 await servicesAttributeController.deleteAttributeUnsafe(CoreId.from(attribute.id));
+            }
+        })
+    );
+}
+
+export async function cleanupForwardedSharingInfos(services: TestRuntimeServices[]): Promise<void> {
+    const query = { forwardedSharingInfos: "" };
+    await Promise.all(
+        services.map(async (services) => {
+            const servicesAttributeController = services.consumption.attributes["getAttributeUseCase"]["attributeController"];
+
+            const servicesAttributes = (await servicesAttributeController.getLocalAttributes({ query })) as AttributeWithForwardedSharingInfos[];
+            for (const attribute of servicesAttributes) {
+                attribute.forwardedSharingInfos = undefined;
+                await servicesAttributeController.updateAttributeUnsafe(attribute);
             }
         })
     );

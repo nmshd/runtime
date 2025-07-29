@@ -21,7 +21,7 @@ import {
     TransportServices
 } from "../../../src";
 import {
-    cleanupAttributes,
+    cleanupForwardedSharingInfos,
     establishRelationship,
     exchangeAndAcceptRequestByMessage,
     exchangeMessageWithRequest,
@@ -54,7 +54,7 @@ afterAll(() => serviceProvider.stop());
 beforeEach(async function () {
     eventBus1.reset();
     eventBus2.reset();
-    await cleanupAttributes([runtimeServices1, runtimeServices2], true);
+    await cleanupForwardedSharingInfos([runtimeServices1, runtimeServices2]);
 });
 
 describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () => {
