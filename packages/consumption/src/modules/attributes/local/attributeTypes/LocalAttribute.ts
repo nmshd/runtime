@@ -56,6 +56,11 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
     public wasViewedAt?: CoreDate;
 
     public static from(value: ILocalAttribute | LocalAttributeJSON): LocalAttribute {
-        return this.fromAny(value);
+        const parsed = this.fromUnknown(value);
+        if (!(parsed instanceof LocalAttribute)) {
+            throw new Error(`Parsed value is not an instance of ${LocalAttribute.name}`);
+        }
+
+        return parsed;
     }
 }
