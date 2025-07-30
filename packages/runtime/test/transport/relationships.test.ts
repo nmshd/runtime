@@ -1,5 +1,5 @@
 import { ApplicationError, Result, sleep } from "@js-soft/ts-utils";
-import { AcceptReadAttributeRequestItemParametersJSON, LocalAttributeDeletionStatus } from "@nmshd/consumption";
+import { AcceptReadAttributeRequestItemParametersJSON, ForwardedAttributeDeletionStatus, PeerAttributeDeletionStatus } from "@nmshd/consumption";
 import {
     GivenName,
     IdentityAttribute,
@@ -620,14 +620,14 @@ describe("Attributes for the relationship", () => {
     let services1: TestRuntimeServices;
     let services2: TestRuntimeServices;
     let relationshipId: string;
-    let ownSharedIdentityAttributeV0: LocalAttributeDTO;
-    let ownSharedIdentityAttributeV1: LocalAttributeDTO;
-    let peerSharedIdentityAttributeV0: LocalAttributeDTO;
-    let peerSharedIdentityAttributeV1: LocalAttributeDTO;
-    let ownSharedRelationshipAttributeV0: LocalAttributeDTO;
-    let ownSharedRelationshipAttributeV1: LocalAttributeDTO;
-    let peerSharedRelationshipAttributeV0: LocalAttributeDTO;
-    let peerSharedRelationshipAttributeV1: LocalAttributeDTO;
+    let ownIdentityAttributeV0: LocalAttributeDTO;
+    let ownIdentityAttributeV1: LocalAttributeDTO;
+    let peerIdentityAttributeV0: LocalAttributeDTO;
+    let peerIdentityAttributeV1: LocalAttributeDTO;
+    let ownRelationshipAttributeV0: LocalAttributeDTO;
+    let ownRelationshipAttributeV1: LocalAttributeDTO;
+    let peerRelationshipAttributeV0: LocalAttributeDTO;
+    let peerRelationshipAttributeV1: LocalAttributeDTO;
     beforeAll(async () => {
         [services1, services2] = await serviceProvider.launch(2, {
             enableRequestModule: true,
@@ -640,8 +640,7 @@ describe("Attributes for the relationship", () => {
         const relationship = await getRelationship(services1.transport);
         relationshipId = relationship.id;
 
-        // create own shared attributes
-        ownSharedIdentityAttributeV0 = await executeFullCreateAndShareOwnIdentityAttributeFlow(services1, services2, {
+        ownIdentityAttributeV0 = await executeFullCreateAndShareOwnIdentityAttributeFlow(services1, services2, {
             content: {
                 value: {
                     "@type": "GivenName",
@@ -650,22 +649,17 @@ describe("Attributes for the relationship", () => {
             }
         });
 
-        const repositoryAttributeIdV0 = ownSharedIdentityAttributeV0.shareInfo!.sourceAttribute!;
-        ({ predecessor: ownSharedIdentityAttributeV0, successor: ownSharedIdentityAttributeV1 } = await executeFullSucceedOwnIdentityAttributeAndNotifyPeerFlow(
-            services1,
-            services2,
-            {
-                predecessorId: repositoryAttributeIdV0,
-                successorContent: {
-                    value: {
-                        "@type": "GivenName",
-                        value: "New own name"
-                    }
+        ({ predecessor: ownIdentityAttributeV0, successor: ownIdentityAttributeV1 } = await executeFullSucceedOwnIdentityAttributeAndNotifyPeerFlow(services1, services2, {
+            predecessorId: ownIdentityAttributeV0.id,
+            successorContent: {
+                value: {
+                    "@type": "GivenName",
+                    value: "New own name"
                 }
             }
-        ));
+        }));
 
-        ownSharedRelationshipAttributeV0 = await executeFullCreateAndShareRelationshipAttributeFlow(services1, services2, {
+        ownRelationshipAttributeV0 = await executeFullCreateAndShareRelationshipAttributeFlow(services1, services2, {
             content: {
                 key: "a key",
                 confidentiality: RelationshipAttributeConfidentiality.Public,
@@ -680,7 +674,7 @@ describe("Attributes for the relationship", () => {
 
         const ownSucceedRelationshipAttributeAndNotifyPeerResult = (
             await services1.consumption.attributes.succeedRelationshipAttributeAndNotifyPeer({
-                predecessorId: ownSharedRelationshipAttributeV0.id,
+                predecessorId: ownRelationshipAttributeV0.id,
                 successorContent: {
                     value: {
                         "@type": "ProprietaryString",
@@ -691,18 +685,17 @@ describe("Attributes for the relationship", () => {
             })
         ).value;
 
-        ownSharedRelationshipAttributeV0 = ownSucceedRelationshipAttributeAndNotifyPeerResult["predecessor"];
-        ownSharedRelationshipAttributeV1 = ownSucceedRelationshipAttributeAndNotifyPeerResult["successor"];
+        ownRelationshipAttributeV0 = ownSucceedRelationshipAttributeAndNotifyPeerResult["predecessor"];
+        ownRelationshipAttributeV1 = ownSucceedRelationshipAttributeAndNotifyPeerResult["successor"];
         const ownNotificationId = ownSucceedRelationshipAttributeAndNotifyPeerResult["notificationId"];
 
         await syncUntilHasMessageWithNotification(services2.transport, ownNotificationId);
 
         await services1.eventBus.waitForEvent(OwnSharedAttributeSucceededEvent, (e) => {
-            return e.data.successor.id === ownSharedRelationshipAttributeV1.id;
+            return e.data.successor.id === ownRelationshipAttributeV1.id;
         });
 
-        // create peer shared attributes
-        peerSharedIdentityAttributeV0 = await executeFullCreateAndShareOwnIdentityAttributeFlow(services2, services1, {
+        peerIdentityAttributeV0 = await executeFullCreateAndShareOwnIdentityAttributeFlow(services2, services1, {
             content: {
                 value: {
                     "@type": "GivenName",
@@ -711,22 +704,17 @@ describe("Attributes for the relationship", () => {
             }
         });
 
-        const peerRepositoryAttributeIdV0 = peerSharedIdentityAttributeV0.shareInfo!.sourceAttribute!;
-        ({ predecessor: peerSharedIdentityAttributeV0, successor: peerSharedIdentityAttributeV1 } = await executeFullSucceedOwnIdentityAttributeAndNotifyPeerFlow(
-            services2,
-            services1,
-            {
-                predecessorId: peerRepositoryAttributeIdV0,
-                successorContent: {
-                    value: {
-                        "@type": "GivenName",
-                        value: "New peer name"
-                    }
+        ({ predecessor: peerIdentityAttributeV0, successor: peerIdentityAttributeV1 } = await executeFullSucceedOwnIdentityAttributeAndNotifyPeerFlow(services2, services1, {
+            predecessorId: peerIdentityAttributeV0.id,
+            successorContent: {
+                value: {
+                    "@type": "GivenName",
+                    value: "New peer name"
                 }
             }
-        ));
+        }));
 
-        peerSharedRelationshipAttributeV0 = await executeFullCreateAndShareRelationshipAttributeFlow(services2, services1, {
+        peerRelationshipAttributeV0 = await executeFullCreateAndShareRelationshipAttributeFlow(services2, services1, {
             content: {
                 key: "a key",
                 confidentiality: RelationshipAttributeConfidentiality.Public,
@@ -741,7 +729,7 @@ describe("Attributes for the relationship", () => {
 
         const peerSucceedRelationshipAttributeAndNotifyPeerResult = (
             await services2.consumption.attributes.succeedRelationshipAttributeAndNotifyPeer({
-                predecessorId: peerSharedRelationshipAttributeV0.id,
+                predecessorId: peerRelationshipAttributeV0.id,
                 successorContent: {
                     value: {
                         "@type": "ProprietaryString",
@@ -752,14 +740,14 @@ describe("Attributes for the relationship", () => {
             })
         ).value;
 
-        peerSharedRelationshipAttributeV0 = peerSucceedRelationshipAttributeAndNotifyPeerResult["predecessor"];
-        peerSharedRelationshipAttributeV1 = peerSucceedRelationshipAttributeAndNotifyPeerResult["successor"];
+        peerRelationshipAttributeV0 = peerSucceedRelationshipAttributeAndNotifyPeerResult["predecessor"];
+        peerRelationshipAttributeV1 = peerSucceedRelationshipAttributeAndNotifyPeerResult["successor"];
         const peerNotificationId = peerSucceedRelationshipAttributeAndNotifyPeerResult["notificationId"];
 
         await syncUntilHasMessageWithNotification(services1.transport, peerNotificationId);
 
         await services1.eventBus.waitForEvent(PeerSharedAttributeSucceededEvent, (e) => {
-            return e.data.successor.id === peerSharedRelationshipAttributeV1.id;
+            return e.data.successor.id === peerRelationshipAttributeV1.id;
         });
     });
 
@@ -769,7 +757,7 @@ describe("Attributes for the relationship", () => {
         const attributesOfRelationship1 = result1.value;
         const attributesOfRelationshipIds1 = attributesOfRelationship1.map((a) => a.id);
         expect(attributesOfRelationshipIds1.sort()).toStrictEqual(
-            [ownSharedIdentityAttributeV1.id, peerSharedIdentityAttributeV1.id, ownSharedRelationshipAttributeV1.id, peerSharedRelationshipAttributeV1.id].sort()
+            [ownIdentityAttributeV1.id, peerIdentityAttributeV1.id, ownRelationshipAttributeV1.id, peerRelationshipAttributeV1.id].sort()
         );
 
         const result2 = await services2.transport.relationships.getAttributesForRelationship({ id: relationshipId });
@@ -777,7 +765,7 @@ describe("Attributes for the relationship", () => {
         const attributesOfRelationship2 = result2.value;
         const attributesOfRelationshipIds2 = attributesOfRelationship2.map((a) => a.id);
         expect(attributesOfRelationshipIds2.sort()).toStrictEqual(
-            [ownSharedIdentityAttributeV1.id, peerSharedIdentityAttributeV1.id, ownSharedRelationshipAttributeV1.id, peerSharedRelationshipAttributeV1.id].sort()
+            [ownIdentityAttributeV1.id, peerIdentityAttributeV1.id, ownRelationshipAttributeV1.id, peerRelationshipAttributeV1.id].sort()
         );
     });
 
@@ -791,14 +779,14 @@ describe("Attributes for the relationship", () => {
         const attributesOfRelationshipIds1 = attributesOfRelationship1.map((a) => a.id);
         expect(attributesOfRelationshipIds1.sort()).toStrictEqual(
             [
-                ownSharedIdentityAttributeV0.id,
-                ownSharedIdentityAttributeV1.id,
-                peerSharedIdentityAttributeV0.id,
-                peerSharedIdentityAttributeV1.id,
-                ownSharedRelationshipAttributeV0.id,
-                ownSharedRelationshipAttributeV1.id,
-                peerSharedRelationshipAttributeV0.id,
-                peerSharedRelationshipAttributeV1.id
+                ownIdentityAttributeV0.id,
+                ownIdentityAttributeV1.id,
+                peerIdentityAttributeV0.id,
+                peerIdentityAttributeV1.id,
+                ownRelationshipAttributeV0.id,
+                ownRelationshipAttributeV1.id,
+                peerRelationshipAttributeV0.id,
+                peerRelationshipAttributeV1.id
             ].sort()
         );
 
@@ -808,14 +796,14 @@ describe("Attributes for the relationship", () => {
         const attributesOfRelationshipIds2 = attributesOfRelationship2.map((a) => a.id);
         expect(attributesOfRelationshipIds2.sort()).toStrictEqual(
             [
-                ownSharedIdentityAttributeV0.id,
-                ownSharedIdentityAttributeV1.id,
-                peerSharedIdentityAttributeV0.id,
-                peerSharedIdentityAttributeV1.id,
-                ownSharedRelationshipAttributeV0.id,
-                ownSharedRelationshipAttributeV1.id,
-                peerSharedRelationshipAttributeV0.id,
-                peerSharedRelationshipAttributeV1.id
+                ownIdentityAttributeV0.id,
+                ownIdentityAttributeV1.id,
+                peerIdentityAttributeV0.id,
+                peerIdentityAttributeV1.id,
+                ownRelationshipAttributeV0.id,
+                ownRelationshipAttributeV1.id,
+                peerRelationshipAttributeV0.id,
+                peerRelationshipAttributeV1.id
             ].sort()
         );
     });
@@ -1190,11 +1178,11 @@ describe("RelationshipDecomposition", () => {
     test("attributes should be marked as deleted for peer", async () => {
         const ownSharedAttributes = (await services2.consumption.attributes.getOwnAttributesSharedWithPeer({ peer: services1.address })).value;
         expect(ownSharedAttributes).toHaveLength(1);
-        expect(ownSharedAttributes[0].deletionInfo!.deletionStatus).toBe(LocalAttributeDeletionStatus.DeletedByPeer);
+        expect(ownSharedAttributes[0].forwardedSharingInfos![0].deletionInfo!.deletionStatus).toBe(ForwardedAttributeDeletionStatus.DeletedByPeer);
 
         const peerSharedAttributes = (await services2.consumption.attributes.getPeerAttributes({ peer: services1.address })).value;
         expect(peerSharedAttributes).toHaveLength(1);
-        expect(peerSharedAttributes[0].deletionInfo!.deletionStatus).toBe(LocalAttributeDeletionStatus.DeletedByOwner);
+        expect(peerSharedAttributes[0].peerSharingInfo!.deletionInfo!.deletionStatus).toBe(PeerAttributeDeletionStatus.DeletedByOwner);
     });
 
     test("notifications should be deleted", async () => {

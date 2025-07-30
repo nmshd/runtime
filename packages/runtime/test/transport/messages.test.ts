@@ -717,11 +717,11 @@ describe("Postponed Notifications via Messages", () => {
 
             const peerSharedIdentityAttribute = (await client5.consumption.attributes.getAttribute({ id: ownSharedIdentityAttribute.id })).value;
             assert(peerSharedIdentityAttribute.succeededBy);
-            assert(peerSharedIdentityAttribute.deletionInfo?.deletionDate);
-            assert(peerSharedIdentityAttribute.deletionInfo.deletionStatus, LocalAttributeDeletionStatus.DeletedByOwner);
+            assert(peerSharedIdentityAttribute.peerSharingInfo!.deletionInfo?.deletionDate);
+            assert(peerSharedIdentityAttribute.peerSharingInfo!.deletionInfo.deletionStatus, LocalAttributeDeletionStatus.DeletedByOwner);
 
             const timeOfSuccession = (await client5.consumption.attributes.getAttribute({ id: peerSharedIdentityAttribute.succeededBy })).value.createdAt;
-            const timeOfDeletionByOwner = peerSharedIdentityAttribute.deletionInfo.deletionDate;
+            const timeOfDeletionByOwner = peerSharedIdentityAttribute.peerSharingInfo!.deletionInfo.deletionDate;
             expect(CoreDate.from(timeOfAcceptanceOfReactivation).isBefore(CoreDate.from(timeOfSuccession))).toBe(true);
             expect(CoreDate.from(timeOfSuccession).isBefore(CoreDate.from(timeOfDeletionByOwner))).toBe(true);
         });
