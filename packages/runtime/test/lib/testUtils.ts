@@ -609,12 +609,6 @@ export async function sendAndReceiveNotification(
     return notification.value;
 }
 
-/**
- * Creates a repository attribute on sender's side and shares it with
- * recipient, waiting for all communication and event processing to finish.
- *
- * Returns the sender's own shared identity attribute.
- */
 export async function executeFullCreateAndShareOwnIdentityAttributeFlow(
     sender: TestRuntimeServices,
     recipient: TestRuntimeServices,
@@ -653,16 +647,10 @@ export async function acceptIncomingShareAttributeRequest(sender: TestRuntimeSer
         return e.data.request.id === requestId && e.data.newStatus === LocalRequestStatus.Completed;
     });
 
-    const senderOwnIdentityAttribute = (await sender.consumption.attributes.getAttribute({ id: sharedAttributeId })).value;
-    return senderOwnIdentityAttribute;
+    const senderOwnAttribute = (await sender.consumption.attributes.getAttribute({ id: sharedAttributeId })).value;
+    return senderOwnAttribute;
 }
 
-/**
- * Creates and shares a relationship attribute, waiting for all communication
- * and event processing to finish.
- *
- * Returns the sender's own shared relationship attribute.
- */
 export async function executeFullCreateAndShareRelationshipAttributeFlow(
     sender: TestRuntimeServices,
     recipient: TestRuntimeServices,
@@ -675,12 +663,6 @@ export async function executeFullCreateAndShareRelationshipAttributeFlow(
     return senderOwnRelationshipAttribute;
 }
 
-/**
- * Succeeds a repository attribute on sender's side and notifies
- * recipient, waiting for all communication and event processing to finish.
- *
- * Returns the sender's own shared predecessor and successor identity attribute.
- */
 export async function executeFullSucceedOwnIdentityAttributeAndNotifyPeerFlow(
     sender: TestRuntimeServices,
     recipient: TestRuntimeServices,
@@ -730,13 +712,6 @@ export async function waitForRecipientToReceiveNotification(
     });
 }
 
-/**
- * The requestor asks the responder for a RepositoryAttribute or a RelationshipAttribute from another Relationship.
- * The responder sends them an own shared IdentityAttribute or ThirdPartyRelationshipAttribute,
- * waiting for all communication and event processing to finish.
- *
- * Returns the responder's own shared Attribute.
- */
 export async function executeFullRequestAndAcceptExistingAttributeFlow(
     responder: TestRuntimeServices,
     requestor: TestRuntimeServices,
@@ -792,10 +767,11 @@ export async function executeFullShareAndAcceptAttributeRequestFlow(
         content: createRequestResult.value.content
     });
 
-    const ownSharedAttribute = await acceptIncomingShareAttributeRequest(owner, peer, createRequestResult.value.id);
-    return ownSharedAttribute;
+    const ownAttribute = await acceptIncomingShareAttributeRequest(owner, peer, createRequestResult.value.id);
+    return ownAttribute;
 }
 
+// TODO: delete this
 /**
  * Generate all possible combinations of the given arrays.
  *
