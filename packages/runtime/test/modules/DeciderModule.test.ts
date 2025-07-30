@@ -1,4 +1,4 @@
-import { LocalAttributeDeletionStatus } from "@nmshd/consumption";
+import { PeerAttributeDeletionStatus } from "@nmshd/consumption";
 import {
     CreateAttributeAcceptResponseItemJSON,
     DeleteAttributeAcceptResponseItemJSON,
@@ -1438,8 +1438,8 @@ describe("DeciderModule", () => {
             expect((responseContent.items[0] as DeleteAttributeAcceptResponseItemJSON).deletionDate).toBe(deletionDate);
 
             const updatedSharedAttribute = (await recipient.consumption.attributes.getAttribute({ id: sharedAttribute.id })).value;
-            expect(updatedSharedAttribute.deletionInfo!.deletionStatus).toBe(LocalAttributeDeletionStatus.ToBeDeleted);
-            expect(updatedSharedAttribute.deletionInfo!.deletionDate).toBe(deletionDate);
+            expect(updatedSharedAttribute.peerSharingInfo!.deletionInfo!.deletionStatus).toBe(PeerAttributeDeletionStatus.ToBeDeleted);
+            expect(updatedSharedAttribute.peerSharingInfo!.deletionInfo!.deletionDate).toBe(deletionDate);
         });
 
         test("accepts a ProposeAttributeRequestItem given a ProposeAttributeRequestItemConfig with all fields set for an IdentityAttribute", async () => {
@@ -2036,10 +2036,8 @@ describe("DeciderModule", () => {
 
             const sharedAttributeId = (responseContent.items[0] as TransferFileOwnershipAcceptResponseItemJSON).attributeId;
             const sharedAttribute = (await recipient.consumption.attributes.getAttribute({ id: sharedAttributeId })).value;
-            expect(sharedAttribute.shareInfo).toBeDefined();
-
-            const repositoryAttribute = (await recipient.consumption.attributes.getAttribute({ id: sharedAttribute.shareInfo!.sourceAttribute! })).value;
-            expect(repositoryAttribute.content.value["@type"]).toBe("IdentityFileReference");
+            expect(sharedAttribute.content.value["@type"]).toBe("IdentityFileReference");
+            expect(sharedAttribute.forwardedSharingInfos).toHaveLength(1);
         });
     });
 
