@@ -36,7 +36,7 @@ export class OwnRelationshipAttribute extends LocalAttribute implements IOwnRela
         nameof<OwnRelationshipAttribute>((r) => r.forwardedSharingInfos)
     ];
 
-    @serialize()
+    @serialize({ customGenerator: (value: RelationshipAttribute) => value.toJSON(true) })
     @validate()
     public override content: RelationshipAttribute;
 

@@ -29,11 +29,13 @@ export class OwnIdentityAttribute extends LocalAttribute implements IOwnIdentity
     public override readonly technicalProperties = [
         "@type",
         "@context",
+        // TODO: super, same for other attribute types
         nameof<OwnIdentityAttribute>((r) => r.isDefault),
         nameof<OwnIdentityAttribute>((r) => r.forwardedSharingInfos)
     ];
 
-    @serialize()
+    // TODO: maybe we can get rid of this customGenerator
+    @serialize({ customGenerator: (value: IdentityAttribute) => value.toJSON(true) })
     @validate()
     public override content: IdentityAttribute;
 

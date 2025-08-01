@@ -38,7 +38,7 @@ export class PeerRelationshipAttribute extends LocalAttribute implements IPeerRe
         nameof<PeerRelationshipAttribute>((r) => r.forwardedSharingInfos)
     ];
 
-    @serialize()
+    @serialize({ customGenerator: (value: RelationshipAttribute) => value.toJSON(true) })
     @validate()
     public override content: RelationshipAttribute;
 

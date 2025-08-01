@@ -25,7 +25,7 @@ export interface IPeerIdentityAttribute extends ILocalAttribute {
 export class PeerIdentityAttribute extends LocalAttribute implements IPeerIdentityAttribute {
     public override readonly technicalProperties = ["@type", "@context", nameof<PeerIdentityAttribute>((r) => r.peerSharingInfo)];
 
-    @serialize()
+    @serialize({ customGenerator: (value: IdentityAttribute) => value.toJSON(true) })
     @validate()
     public override content: IdentityAttribute;
 
