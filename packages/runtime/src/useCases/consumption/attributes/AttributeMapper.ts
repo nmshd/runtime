@@ -1,5 +1,5 @@
-import { LocalAttribute, LocalAttributeDeletionInfoJSON, LocalAttributeShareInfoJSON } from "@nmshd/consumption";
-import { LocalAttributeDTO } from "@nmshd/runtime-types";
+import { AttributeWithForwardedSharingInfos, AttributeWithPeerSharingInfo, LocalAttribute, OwnIdentityAttribute } from "@nmshd/consumption";
+import { ForwardedSharingInfosDTO, LocalAttributeDTO, PeerSharingInfoDTO } from "@nmshd/runtime-types";
 
 export class AttributeMapper {
     public static toAttributeDTO(attribute: LocalAttribute): LocalAttributeDTO {
@@ -9,10 +9,13 @@ export class AttributeMapper {
             createdAt: attribute.createdAt.toString(),
             succeeds: attribute.succeeds?.toString(),
             succeededBy: attribute.succeededBy?.toString(),
-            shareInfo: attribute.shareInfo?.toJSON() as LocalAttributeShareInfoJSON,
-            deletionInfo: attribute.deletionInfo?.toJSON() as LocalAttributeDeletionInfoJSON,
-            isDefault: attribute.isDefault,
-            wasViewedAt: attribute.wasViewedAt?.toString()
+            wasViewedAt: attribute.wasViewedAt?.toString(),
+            isDefault: attribute instanceof OwnIdentityAttribute ? attribute.isDefault : undefined,
+            peerSharingInfo: "peerSharingInfo" in attribute ? ((attribute as AttributeWithPeerSharingInfo).peerSharingInfo?.toJSON() as PeerSharingInfoDTO) : undefined,
+            forwardedSharingInfos:
+                "forwardedSharingInfos" in attribute
+                    ? ((attribute as AttributeWithForwardedSharingInfos).forwardedSharingInfos?.map((sharingInfo) => sharingInfo.toJSON()) as ForwardedSharingInfosDTO[])
+                    : undefined
         };
     }
 

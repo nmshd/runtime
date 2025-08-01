@@ -10,7 +10,6 @@ import {
     ProposeAttributeRequestItem,
     ReadAttributeRequestItem,
     ShareAttributeRequestItem,
-    ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem,
     TransferFileOwnershipRequestItem
 } from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
@@ -39,7 +38,6 @@ import {
     RequestItemProcessorRegistry,
     SettingsController,
     ShareAttributeRequestItemProcessor,
-    ThirdPartyRelationshipAttributeDeletedByPeerNotificationItemProcessor,
     TransferFileOwnershipRequestItemProcessor
 } from "../modules";
 import { ConsumptionConfig } from "./ConsumptionConfig";
@@ -159,8 +157,7 @@ export class ConsumptionController {
         return new Map<NotificationItemConstructor, NotificationItemProcessorConstructor>([
             [PeerSharedAttributeSucceededNotificationItem, PeerSharedAttributeSucceededNotificationItemProcessor],
             [OwnSharedAttributeDeletedByOwnerNotificationItem, OwnSharedAttributeDeletedByOwnerNotificationItemProcessor],
-            [PeerSharedAttributeDeletedByPeerNotificationItem, PeerSharedAttributeDeletedByPeerNotificationItemProcessor],
-            [ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem, ThirdPartyRelationshipAttributeDeletedByPeerNotificationItemProcessor]
+            [PeerSharedAttributeDeletedByPeerNotificationItem, PeerSharedAttributeDeletedByPeerNotificationItemProcessor]
         ]);
     }
 

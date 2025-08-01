@@ -18,7 +18,7 @@ import {
     establishRelationship,
     exchangeAndAcceptRequestByMessage,
     exchangeMessageWithRequest,
-    executeFullCreateAndShareRepositoryAttributeFlow,
+    executeFullCreateAndShareOwnIdentityAttributeFlow,
     MockEventBus,
     RuntimeServiceProvider,
     sendMessageWithRequest,
@@ -61,7 +61,7 @@ beforeAll(async () => {
 
 beforeEach(async () => {
     await cleanupAttributes([sRuntimeServices, rRuntimeServices]);
-    const sOwnSharedIdentityAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(sRuntimeServices, rRuntimeServices, {
+    const sOwnSharedIdentityAttribute = await executeFullCreateAndShareOwnIdentityAttributeFlow(sRuntimeServices, rRuntimeServices, {
         content: {
             value: {
                 "@type": "GivenName",

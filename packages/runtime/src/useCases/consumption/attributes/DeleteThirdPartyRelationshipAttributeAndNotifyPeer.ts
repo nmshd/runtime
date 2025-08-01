@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
-import { AttributesController, ConsumptionIds, LocalAttribute } from "@nmshd/consumption";
-import { Notification, ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem } from "@nmshd/content";
+import { AttributesController, ConsumptionIds, LocalAttribute, ThirdPartyRelationshipAttribute } from "@nmshd/consumption";
+import { Notification, PeerSharedAttributeDeletedByPeerNotificationItem } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
 import { AccountController, MessageController, RelationshipsController, RelationshipStatus } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
@@ -41,14 +41,12 @@ export class DeleteThirdPartyRelationshipAttributeAndNotifyPeerUseCase extends U
         const thirdPartyRelationshipAttribute = await this.attributesController.getLocalAttribute(thirdPartyRelationshipAttributeId);
         if (!thirdPartyRelationshipAttribute) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
 
-        if (!thirdPartyRelationshipAttribute.isThirdPartyRelationshipAttribute()) {
+        if (!(thirdPartyRelationshipAttribute instanceof ThirdPartyRelationshipAttribute)) {
             return Result.fail(RuntimeErrors.attributes.isNotThirdPartyRelationshipAttribute(thirdPartyRelationshipAttributeId));
         }
 
-        const relationshipWithStatusPending = await this.relationshipsController.getRelationshipToIdentity(
-            thirdPartyRelationshipAttribute.shareInfo.peer,
-            RelationshipStatus.Pending
-        );
+        const peer = thirdPartyRelationshipAttribute.peerSharingInfo.peer;
+        const relationshipWithStatusPending = await this.relationshipsController.getRelationshipToIdentity(peer, RelationshipStatus.Pending);
         if (relationshipWithStatusPending) {
             return Result.fail(RuntimeErrors.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending());
         }
@@ -58,19 +56,17 @@ export class DeleteThirdPartyRelationshipAttributeAndNotifyPeerUseCase extends U
 
         await this.attributesController.executeFullAttributeDeletionProcess(thirdPartyRelationshipAttribute);
 
-        const messageRecipientsValidationResult = await this.messageController.validateMessageRecipients([thirdPartyRelationshipAttribute.shareInfo.peer]);
-        if (messageRecipientsValidationResult.isError) {
-            return Result.ok({});
-        }
+        const messageRecipientsValidationResult = await this.messageController.validateMessageRecipients([peer]);
+        if (messageRecipientsValidationResult.isError) return Result.ok({});
 
         const notificationId = await ConsumptionIds.notification.generate();
-        const notificationItem = ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem.from({ attributeId: thirdPartyRelationshipAttributeId });
+        const notificationItem = PeerSharedAttributeDeletedByPeerNotificationItem.from({ attributeId: thirdPartyRelationshipAttributeId });
         const notification = Notification.from({
             id: notificationId,
             items: [notificationItem]
         });
         await this.messageController.sendMessage({
-            recipients: [thirdPartyRelationshipAttribute.shareInfo.peer],
+            recipients: [peer],
             content: notification
         });
 

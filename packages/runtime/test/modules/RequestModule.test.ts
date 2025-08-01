@@ -538,9 +538,9 @@ describe("Handling the rejection and the revocation of a Relationship by the Req
         sRuntimeServices.eventBus.reset();
         rRuntimeServices.eventBus.reset();
 
-        const rRepositoryAttributes = (await rRuntimeServices.consumption.attributes.getRepositoryAttributes({})).value;
+        const rRepositoryAttributes = (await rRuntimeServices.consumption.attributes.getOwnIdentityAttributes({})).value;
         for (const rRepositoryAttribute of rRepositoryAttributes) {
-            await rRuntimeServices.consumption.attributes.deleteRepositoryAttribute({ attributeId: rRepositoryAttribute.id });
+            await rRuntimeServices.consumption.attributes.deleteOwnIdentityAttributeAndNotifyPeers({ attributeId: rRepositoryAttribute.id });
         }
     });
 
@@ -613,7 +613,7 @@ describe("Handling the rejection and the revocation of a Relationship by the Req
                     mustBeAccepted: true,
                     sourceAttributeId: existingRelationshipAttributeForFurtherSharing.id,
                     attribute: existingRelationshipAttributeForFurtherSharing.content,
-                    thirdPartyAddress: existingRelationshipAttributeForFurtherSharing.shareInfo?.peer
+                    thirdPartyAddress: existingRelationshipAttributeForFurtherSharing.peerSharingInfo?.peer
                 }
             ],
             [{ accept: true }, { accept: true }, { accept: true }]
