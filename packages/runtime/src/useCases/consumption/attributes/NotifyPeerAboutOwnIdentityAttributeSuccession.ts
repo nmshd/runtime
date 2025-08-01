@@ -53,16 +53,23 @@ export class NotifyPeerAboutOwnIdentityAttributeSuccessionUseCase extends UseCas
             return Result.fail(RuntimeErrors.attributes.peerHasNoPreviousVersionOfAttribute(attributeId, peerAddress));
         }
 
-        const predecessorSharedWithPeer = candidatePredecessors[0];
-        if (predecessorSharedWithPeer.id.toString() === request.attributeId) {
+        const latestVersionSharedWithPeer = candidatePredecessors[0];
+        if (latestVersionSharedWithPeer.id.toString() === request.attributeId) {
             return Result.fail(RuntimeErrors.attributes.ownIdentityAttributeHasAlreadyBeenSharedWithPeer(request.attributeId, peerAddress));
+        }
+
+        const latestSharedVersionIsSuccessor = await this.attributeController.isSubsequentInSuccession(attribute, latestVersionSharedWithPeer);
+        if (latestSharedVersionIsSuccessor) {
+            return Result.fail(
+                RuntimeErrors.attributes.successorOfOwnIdentityAttributeHasAlreadyBeenSharedWithPeer(request.attributeId, latestVersionSharedWithPeer.id, peerAddress)
+            );
         }
 
         const notificationId = await ConsumptionIds.notification.generate();
         const updatedAttribute = await this.attributeController.addSharingInfoToOwnIdentityAttribute(attribute, peerAddress, notificationId);
 
         const notificationItem = PeerSharedAttributeSucceededNotificationItem.from({
-            predecessorId: predecessorSharedWithPeer.id,
+            predecessorId: latestVersionSharedWithPeer.id,
             successorId: updatedAttribute.id,
             successorContent: updatedAttribute.content
         });
@@ -79,7 +86,7 @@ export class NotifyPeerAboutOwnIdentityAttributeSuccessionUseCase extends UseCas
         await this.accountController.syncDatawallet();
 
         const result = {
-            predecessor: AttributeMapper.toAttributeDTO(predecessorSharedWithPeer),
+            predecessor: AttributeMapper.toAttributeDTO(latestVersionSharedWithPeer),
             successor: AttributeMapper.toAttributeDTO(updatedAttribute),
             notificationId: notificationId.toString()
         };

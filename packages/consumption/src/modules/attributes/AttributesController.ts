@@ -27,7 +27,14 @@ import { ConsumptionCoreErrors } from "../../consumption/ConsumptionCoreErrors";
 import { ConsumptionError } from "../../consumption/ConsumptionError";
 import { ConsumptionIds } from "../../consumption/ConsumptionIds";
 import { flattenObject, ValidationResult } from "../common";
-import { AttributeCreatedEvent, AttributeDeletedEvent, AttributeWasViewedAtChangedEvent } from "./events";
+import {
+    AttributeCreatedEvent,
+    AttributeDeletedEvent,
+    AttributeWasViewedAtChangedEvent,
+    OwnSharedAttributeSucceededEvent,
+    RepositoryAttributeSucceededEvent,
+    ThirdPartyRelationshipAttributeSucceededEvent
+} from "./events";
 import { AttributeTagCollection, IAttributeTag } from "./local/AttributeTagCollection";
 import {
     LocalAttribute,
@@ -515,8 +522,8 @@ export class AttributesController extends ConsumptionBaseController {
         predecessor.succeededBy = successor.id;
         await this.updateAttributeUnsafe(predecessor);
 
-        // TODO: publish events only for own Attributes and ThirdPartyRelationshipAttributes
-        // this.eventBus.publish(new AttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
+        // TODO: maybe publish same succeeded event for all attributes, publish events only for own Attributes and ThirdPartyRelationshipAttributes
+        this.eventBus.publish(new RepositoryAttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
 
         return { predecessor, successor };
     }
@@ -559,9 +566,6 @@ export class AttributesController extends ConsumptionBaseController {
         predecessor.succeededBy = successor.id;
         await this.updateAttributeUnsafe(predecessor);
 
-        // TODO: publish events only for own Attributes and ThirdPartyRelationshipAttributes
-        // this.eventBus.publish(new AttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
-
         return { predecessor, successor };
     }
 
@@ -590,7 +594,7 @@ export class AttributesController extends ConsumptionBaseController {
         await this.updateAttributeUnsafe(predecessor);
 
         // TODO: publish events only for own Attributes and ThirdPartyRelationshipAttributes
-        // this.eventBus.publish(new AttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
+        this.eventBus.publish(new OwnSharedAttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
 
         return { predecessor, successor };
     }
@@ -618,9 +622,6 @@ export class AttributesController extends ConsumptionBaseController {
 
         predecessor.succeededBy = successor.id;
         await this.updateAttributeUnsafe(predecessor);
-
-        // TODO: publish events only for own Attributes and ThirdPartyRelationshipAttributes
-        // this.eventBus.publish(new AttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
 
         return { predecessor, successor };
     }
@@ -650,7 +651,7 @@ export class AttributesController extends ConsumptionBaseController {
         await this.updateAttributeUnsafe(predecessor);
 
         // TODO: publish events only for own Attributes and ThirdPartyRelationshipAttributes; do we need different Events?
-        // this.eventBus.publish(new AttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
+        this.eventBus.publish(new ThirdPartyRelationshipAttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
 
         return { predecessor, successor };
     }
@@ -977,7 +978,7 @@ export class AttributesController extends ConsumptionBaseController {
         attribute: SharableAttributeTypes,
         peerAddress: CoreAddress,
         includeDeletedAndToBeDeleted = false,
-        onlyLatestVersions = true // TODO: name should be singular, also can we set default to false?
+        onlyLatestVersions = true // TODO: name should be singular, also can we set default to false if we do a renaming?
     ): Promise<SharableAttributeTypes[]> {
         const sharedAttribute = attribute.isSharedWith(peerAddress, includeDeletedAndToBeDeleted) ? [attribute] : [];
         const sharedPredecessors = await this.getSharedPredecessorsOfAttribute(attribute, peerAddress, includeDeletedAndToBeDeleted);
@@ -985,7 +986,9 @@ export class AttributesController extends ConsumptionBaseController {
 
         const sharedAttributeVersions = [...sharedSuccessors.reverse(), ...sharedAttribute, ...sharedPredecessors];
 
-        if (onlyLatestVersions) return sharedAttributeVersions.filter((attribute) => attribute.succeededBy === undefined);
+        if (onlyLatestVersions) {
+            return sharedAttributeVersions.length > 0 ? [sharedAttributeVersions[0]] : [];
+        }
 
         return sharedAttributeVersions;
     }

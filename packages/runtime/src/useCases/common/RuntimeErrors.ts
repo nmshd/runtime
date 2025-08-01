@@ -209,6 +209,13 @@ class Attributes {
         );
     }
 
+    public successorOfOwnIdentityAttributeHasAlreadyBeenSharedWithPeer(attributeId: CoreId | string, successorId: CoreId | string, peer: CoreAddress | string): ApplicationError {
+        return new ApplicationError(
+            "error.runtime.attributes.successorOfOwnIdentityAttributeHasAlreadyBeenSharedWithPeer",
+            `A successor '${successorId.toString()}' of the own IdentityAttribute '${attributeId.toString()}' has already been shared with peer '${peer.toString()}'.'.`
+        );
+    }
+
     public peerHasNoPreviousVersionOfAttribute(attributeId: CoreId | string, peer: CoreAddress | string): ApplicationError {
         return new ApplicationError(
             "error.runtime.attributes.peerHasNoPreviousVersionOfAttribute",
