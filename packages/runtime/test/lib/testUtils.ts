@@ -47,7 +47,6 @@ import {
     NotifyPeerAboutOwnIdentityAttributeSuccessionRequest,
     NotifyPeerAboutOwnIdentityAttributeSuccessionResponse,
     OutgoingRequestStatusChangedEvent,
-    OwnSharedAttributeSucceededEvent,
     PeerSharedAttributeSucceededEvent,
     RelationshipChangedEvent,
     RelationshipDTO,
@@ -684,13 +683,13 @@ export async function executeFullNotifyPeerAboutAttributeSuccessionFlow(
         attributeId: attributeId,
         peer: recipient.address
     };
-    const notifyRequestResult = await sender.consumption.attributes.notifyPeerAboutOwnIdentityAttributeSuccession(notifyRequest);
+    const notifyResult = await sender.consumption.attributes.notifyPeerAboutOwnIdentityAttributeSuccession(notifyRequest);
 
-    await waitForRecipientToReceiveNotification(sender, recipient, notifyRequestResult.value);
+    await waitForRecipientToReceiveNotification(sender, recipient, notifyResult.value);
 
     const senderOwnIdentityAttributes: SucceedOwnIdentityAttributeResponse = {
-        predecessor: notifyRequestResult.value.predecessor,
-        successor: notifyRequestResult.value.successor
+        predecessor: notifyResult.value.predecessor,
+        successor: notifyResult.value.successor
     };
 
     return senderOwnIdentityAttributes;
@@ -702,10 +701,6 @@ export async function waitForRecipientToReceiveNotification(
     notifyResult: NotifyPeerAboutOwnIdentityAttributeSuccessionResponse
 ): Promise<void> {
     await syncUntilHasMessageWithNotification(recipient.transport, notifyResult.notificationId);
-
-    await sender.eventBus.waitForEvent(OwnSharedAttributeSucceededEvent, (e) => {
-        return e.data.successor.id === notifyResult.successor.id;
-    });
 
     await recipient.eventBus.waitForEvent(PeerSharedAttributeSucceededEvent, (e) => {
         return e.data.successor.id === notifyResult.successor.id;

@@ -61,7 +61,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                 if (sharedSuccessors.length > 0) {
                     return ValidationResult.error(
                         ConsumptionCoreErrors.requests.invalidRequestItem(
-                            `The provided IdentityAttribute is outdated. Its successor '${sharedSuccessors[0]}' is already shared with the peer.`
+                            `The provided IdentityAttribute is outdated. Its successor '${sharedSuccessors[0].id}' is already shared with the peer.`
                         )
                     );
                 }
@@ -70,7 +70,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                 if (sharedPredecessors.length > 0) {
                     return ValidationResult.error(
                         ConsumptionCoreErrors.requests.invalidRequestItem(
-                            `The predecessor '${sharedPredecessors[0]}' of the IdentityAttribute is already shared with the peer. Instead of sharing it, you should notify the peer about the Attribute succession.`
+                            `The predecessor '${sharedPredecessors[0].id}' of the IdentityAttribute is already shared with the peer. Instead of sharing it, you should notify the peer about the Attribute succession.`
                         )
                     );
                 }
