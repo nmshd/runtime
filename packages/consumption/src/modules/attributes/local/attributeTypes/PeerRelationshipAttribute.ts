@@ -46,7 +46,7 @@ export class PeerRelationshipAttribute extends LocalAttribute implements IPeerRe
     @validate()
     public peerSharingInfo: PeerRelationshipAttributeSharingInfo;
 
-    @serialize()
+    @serialize({ type: ForwardedRelationshipAttributeSharingInfo })
     @validate({ nullable: true })
     public forwardedSharingInfos?: ForwardedRelationshipAttributeSharingInfo[];
 

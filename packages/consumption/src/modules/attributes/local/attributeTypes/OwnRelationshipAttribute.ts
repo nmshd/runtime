@@ -44,7 +44,7 @@ export class OwnRelationshipAttribute extends LocalAttribute implements IOwnRela
     @validate()
     public peerSharingInfo: OwnRelationshipAttributeSharingInfo;
 
-    @serialize()
+    @serialize({ type: ForwardedRelationshipAttributeSharingInfo })
     @validate({ nullable: true })
     public forwardedSharingInfos?: ForwardedRelationshipAttributeSharingInfo[];
 

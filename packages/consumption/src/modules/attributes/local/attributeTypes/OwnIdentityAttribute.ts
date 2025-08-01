@@ -43,7 +43,7 @@ export class OwnIdentityAttribute extends LocalAttribute implements IOwnIdentity
     @validate({ nullable: true })
     public isDefault?: true;
 
-    @serialize()
+    @serialize({ type: OwnIdentityAttributeSharingInfo })
     @validate({ nullable: true })
     public forwardedSharingInfos?: OwnIdentityAttributeSharingInfo[];
 
@@ -100,6 +100,7 @@ export class OwnIdentityAttribute extends LocalAttribute implements IOwnIdentity
     }
 
     public static override from(value: IOwnIdentityAttribute | OwnIdentityAttributeJSON): OwnIdentityAttribute {
-        return super.fromAny(value) as OwnIdentityAttribute;
+        const foo = super.fromAny(value) as OwnIdentityAttribute;
+        return foo;
     }
 }
