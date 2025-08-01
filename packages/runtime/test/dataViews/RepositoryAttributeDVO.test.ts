@@ -1,4 +1,4 @@
-import { AbstractIntegerJSON, AbstractStringJSON, BiologicalSex, BirthMonth } from "@nmshd/content";
+import { AbstractStringJSON, BiologicalSex } from "@nmshd/content";
 import { ConsumptionServices, CreateRepositoryAttributeRequest, DataViewExpander, RepositoryAttributeDVO } from "../../src";
 import { RuntimeServiceProvider } from "../lib";
 
@@ -32,29 +32,6 @@ describe("RepositoryAttributeDVO", () => {
                     value: {
                         "@type": "Surname",
                         value: "aSurname"
-                    }
-                }
-            },
-            {
-                content: {
-                    value: {
-                        "@type": "BirthDay",
-                        value: 17
-                    }
-                }
-            },
-            {
-                content: {
-                    value: BirthMonth.from({
-                        value: 11
-                    }).toJSON()
-                }
-            },
-            {
-                content: {
-                    value: {
-                        "@type": "BirthYear",
-                        value: 2001
                     }
                 }
             },
@@ -137,92 +114,8 @@ describe("RepositoryAttributeDVO", () => {
         expect(dvo.valueHints.max).toBe(100);
     });
 
-    test("check the BirthDay", async () => {
-        const attribute = (await consumptionServices1.attributes.createRepositoryAttribute(requests[2])).value;
-        const dvo = (await expander1.expandLocalAttributeDTO(attribute)) as RepositoryAttributeDVO;
-        expect(dvo).toBeDefined();
-        expect(dvo.type).toBe("RepositoryAttributeDVO");
-        expect(dvo.id).toStrictEqual(attribute.id);
-        expect(dvo.name).toBe("i18n://dvo.attribute.name.BirthDay");
-        expect(dvo.description).toBe("i18n://dvo.attribute.description.BirthDay");
-        expect(dvo.date).toStrictEqual(attribute.createdAt);
-        expect(dvo.wasViewedAt).toBeUndefined();
-        expect(dvo.content).toStrictEqual(attribute.content);
-        const value = dvo.value as AbstractIntegerJSON;
-        expect(value["@type"]).toBe("BirthDay");
-        expect(value.value).toBe(17);
-        expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
-        expect(dvo.isOwn).toBe(true);
-        expect(dvo.isValid).toBe(true);
-        expect(dvo.sharedWith).toStrictEqual([]);
-        expect(dvo.owner).toStrictEqual(attribute.content.owner);
-        expect(dvo.renderHints["@type"]).toBe("RenderHints");
-        expect(dvo.renderHints.technicalType).toBe("Integer");
-        expect(dvo.renderHints.editType).toBe("SelectLike");
-        expect(dvo.renderHints.dataType).toBe("Day");
-        expect(dvo.valueHints["@type"]).toBe("ValueHints");
-        expect(dvo.valueHints.min).toBe(1);
-        expect(dvo.valueHints.max).toBe(31);
-    });
-
-    test("check the BirthMonth", async () => {
-        const attribute = (await consumptionServices1.attributes.createRepositoryAttribute(requests[3])).value;
-        const dvo = (await expander1.expandLocalAttributeDTO(attribute)) as RepositoryAttributeDVO;
-        expect(dvo).toBeDefined();
-        expect(dvo.type).toBe("RepositoryAttributeDVO");
-        expect(dvo.id).toStrictEqual(attribute.id);
-        expect(dvo.name).toBe("i18n://dvo.attribute.name.BirthMonth");
-        expect(dvo.description).toBe("i18n://dvo.attribute.description.BirthMonth");
-        expect(dvo.date).toStrictEqual(attribute.createdAt);
-        expect(dvo.wasViewedAt).toBeUndefined();
-        expect(dvo.content).toStrictEqual(attribute.content);
-        const value = dvo.value as AbstractIntegerJSON;
-        expect(value["@type"]).toBe("BirthMonth");
-        expect(value.value).toBe(11);
-        expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
-        expect(dvo.isOwn).toBe(true);
-        expect(dvo.isValid).toBe(true);
-        expect(dvo.sharedWith).toStrictEqual([]);
-        expect(dvo.owner).toStrictEqual(attribute.content.owner);
-        expect(dvo.renderHints["@type"]).toBe("RenderHints");
-        expect(dvo.renderHints.technicalType).toBe("Integer");
-        expect(dvo.renderHints.editType).toBe("SelectLike");
-        expect(dvo.renderHints.dataType).toBe("Month");
-        expect(dvo.valueHints["@type"]).toBe("ValueHints");
-        expect(dvo.valueHints.min).toBe(1);
-        expect(dvo.valueHints.max).toBe(12);
-    });
-
-    test("check the BirthYear", async () => {
-        const attribute = (await consumptionServices1.attributes.createRepositoryAttribute(requests[4])).value;
-        const dvo = (await expander1.expandLocalAttributeDTO(attribute)) as RepositoryAttributeDVO;
-        expect(dvo).toBeDefined();
-        expect(dvo.type).toBe("RepositoryAttributeDVO");
-        expect(dvo.id).toStrictEqual(attribute.id);
-        expect(dvo.name).toBe("i18n://dvo.attribute.name.BirthYear");
-        expect(dvo.description).toBe("i18n://dvo.attribute.description.BirthYear");
-        expect(dvo.date).toStrictEqual(attribute.createdAt);
-        expect(dvo.wasViewedAt).toBeUndefined();
-        expect(dvo.content).toStrictEqual(attribute.content);
-        const value = dvo.value as AbstractIntegerJSON;
-        expect(value["@type"]).toBe("BirthYear");
-        expect(value.value).toBe(2001);
-        expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
-        expect(dvo.isOwn).toBe(true);
-        expect(dvo.isValid).toBe(true);
-        expect(dvo.sharedWith).toStrictEqual([]);
-        expect(dvo.owner).toStrictEqual(attribute.content.owner);
-        expect(dvo.renderHints["@type"]).toBe("RenderHints");
-        expect(dvo.renderHints.technicalType).toBe("Integer");
-        expect(dvo.renderHints.editType).toBe("SelectLike");
-        expect(dvo.renderHints.dataType).toBe("Year");
-        expect(dvo.valueHints["@type"]).toBe("ValueHints");
-        expect(dvo.valueHints.min).toBe(1);
-        expect(dvo.valueHints.max).toBe(9999);
-    });
-
     test("check the Sex", async () => {
-        const attribute = (await consumptionServices1.attributes.createRepositoryAttribute(requests[5])).value;
+        const attribute = (await consumptionServices1.attributes.createRepositoryAttribute(requests[2])).value;
         const dvo = (await expander1.expandLocalAttributeDTO(attribute)) as RepositoryAttributeDVO;
         expect(dvo).toBeDefined();
         expect(dvo.type).toBe("RepositoryAttributeDVO");
@@ -253,7 +146,7 @@ describe("RepositoryAttributeDVO", () => {
     });
 
     test("check the Nationality", async () => {
-        const attribute = (await consumptionServices1.attributes.createRepositoryAttribute(requests[6])).value;
+        const attribute = (await consumptionServices1.attributes.createRepositoryAttribute(requests[3])).value;
         const dvo = (await expander1.expandLocalAttributeDTO(attribute)) as RepositoryAttributeDVO;
         expect(dvo).toBeDefined();
         expect(dvo.type).toBe("RepositoryAttributeDVO");
@@ -283,7 +176,7 @@ describe("RepositoryAttributeDVO", () => {
     });
 
     test("check the CommunicationLanguage", async () => {
-        const attribute = (await consumptionServices1.attributes.createRepositoryAttribute(requests[7])).value;
+        const attribute = (await consumptionServices1.attributes.createRepositoryAttribute(requests[4])).value;
         const dvo = (await expander1.expandLocalAttributeDTO(attribute)) as RepositoryAttributeDVO;
         expect(dvo).toBeDefined();
         expect(dvo.type).toBe("RepositoryAttributeDVO");

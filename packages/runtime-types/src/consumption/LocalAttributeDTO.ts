@@ -24,7 +24,6 @@ export interface LocalAttributeDeletionInfoDTO {
 
 export interface LocalAttributeDTO {
     id: string;
-    parentId?: string;
     createdAt: string;
     content: IdentityAttributeJSON | RelationshipAttributeJSON;
     succeeds?: string;
