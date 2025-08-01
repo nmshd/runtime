@@ -16,7 +16,6 @@ import { RuntimeErrors } from "../useCases/common/RuntimeErrors";
 import {
     isAcceptResponseConfig,
     isDeleteAttributeAcceptResponseConfig,
-    isFreeTextAcceptResponseConfig,
     isGeneralRequestConfig,
     isProposeAttributeWithNewAttributeAcceptResponseConfig,
     isReadAttributeWithNewAttributeAcceptResponseConfig,
@@ -57,8 +56,6 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
         switch (requestConfig["content.item.@type"]) {
             case "DeleteAttributeRequestItem":
                 return isDeleteAttributeAcceptResponseConfig(responseConfig);
-            case "FreeTextRequestItem":
-                return isFreeTextAcceptResponseConfig(responseConfig);
             case "ProposeAttributeRequestItem":
                 return isProposeAttributeWithNewAttributeAcceptResponseConfig(responseConfig);
             case "ReadAttributeRequestItem":
@@ -75,10 +72,11 @@ export class DeciderModule extends RuntimeModule<DeciderModuleConfiguration> {
     private async handleIncomingRequestStatusChanged(event: IncomingRequestStatusChangedEvent) {
         if (event.data.newStatus !== LocalRequestStatus.DecisionRequired) return;
 
-        const requestContent = event.data.request.content;
-        if (containsItem(requestContent, (item) => item.requireManualDecision === true)) {
-            return await this.requireManualDecision(event);
-        }
+        const containsAuthenticationOrConsentRequestItem = containsItem(
+            event.data.request.content,
+            (item) => item["@type"] === "AuthenticationRequestItem" || item["@type"] === "ConsentRequestItem"
+        );
+        if (containsAuthenticationOrConsentRequestItem) return await this.requireManualDecision(event);
 
         const automaticallyDecided = (await this.automaticallyDecideRequest(event)).wasDecided;
         if (automaticallyDecided) {
@@ -348,7 +346,7 @@ async function checkCompatibility(
             continue;
         }
 
-        if (property.endsWith("At") || property.endsWith("From") || property.endsWith("To")) {
+        if (property.endsWith("At")) {
             if (!(typeof unformattedRequestProperty === "string")) throw Error(`The RequestConfig property '${property}' must be a string.`);
 
             const datesAreCompatible = checkDatesCompatibility(requestConfigProperty, unformattedRequestProperty);
@@ -462,13 +460,7 @@ async function checkRequestItemCompatibilityAndApplyResponseConfig(
         }
 
         if (isGeneralRequestConfig(requestConfigElement) && responseConfigElement.accept) {
-            const requestItemsWithSimpleAccept = [
-                "AuthenticationRequestItem",
-                "ConsentRequestItem",
-                "CreateAttributeRequestItem",
-                "RegisterAttributeListenerRequestItem",
-                "ShareAttributeRequestItem"
-            ];
+            const requestItemsWithSimpleAccept = ["CreateAttributeRequestItem", "ShareAttributeRequestItem"];
             if (!requestItemsWithSimpleAccept.includes(item["@type"])) continue;
         }
 

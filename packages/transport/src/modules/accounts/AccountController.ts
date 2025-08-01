@@ -12,9 +12,6 @@ import { IdentityDeletionProcessStatusChangedEvent } from "../../events/Identity
 import { PasswordGenerator } from "../../util";
 import { AnnouncementController } from "../announcements/AnnouncementController";
 import { BackboneNotificationsController } from "../backboneNotifications/BackboneNotificationsController";
-import { CertificateController } from "../certificates/CertificateController";
-import { CertificateIssuer } from "../certificates/CertificateIssuer";
-import { CertificateValidator } from "../certificates/CertificateValidator";
 import { ChallengeController } from "../challenges/ChallengeController";
 import { DeviceController } from "../devices/DeviceController";
 import { DeviceSecretType } from "../devices/DeviceSecretController";
@@ -57,9 +54,6 @@ export class AccountController {
     public announcements: AnnouncementController;
     public backboneNotifications: BackboneNotificationsController;
     public challenges: ChallengeController;
-    public certificates: CertificateController;
-    public certificateIssuer: CertificateIssuer;
-    public certificateValidator: CertificateValidator;
     public devices: DevicesController;
     public files: FileController;
     public messages: MessageController;
@@ -209,9 +203,6 @@ export class AccountController {
         this.backboneNotifications = await new BackboneNotificationsController(this).init();
         this.relationshipSecrets = await new RelationshipSecretController(this).init();
         this.devices = await new DevicesController(this).init();
-        this.certificates = await new CertificateController(this).init();
-        this.certificateIssuer = await new CertificateIssuer(this).init();
-        this.certificateValidator = await new CertificateValidator(this).init();
         this.files = await new FileController(this).init();
 
         this.relationships = await new RelationshipsController(this, this.relationshipSecrets).init();
@@ -333,7 +324,6 @@ export class AccountController {
             operatingSystem: deviceInfo.operatingSystem,
             publicKey: deviceKeypair.publicKey,
             type: deviceInfo.type,
-            certificate: "",
             username: createdIdentity.device.username,
             datawalletVersion: this._config.supportedDatawalletVersion,
             isBackupDevice: false
@@ -462,7 +452,7 @@ export class AccountController {
     }
 
     public async getSynchronizedCollection(collectionName: string): Promise<SynchronizedCollection> {
-        const collection = await this.db.getCollection(collectionName);
+        const collection = await this.db.getCollection(collectionName, ["id"]);
         if (!this.config.datawalletEnabled) {
             return new SynchronizedCollection(collection, this.config.supportedDatawalletVersion);
         }

@@ -2,7 +2,7 @@ import { Result } from "@js-soft/ts-utils";
 import { CoreId, FileReference, Reference } from "@nmshd/core-types";
 import { CryptoSecretKey } from "@nmshd/crypto";
 import { FileDTO } from "@nmshd/runtime-types";
-import { AccountController, BackboneIds, FileController, Token, TokenContentFile, TokenController, TokenReference } from "@nmshd/transport";
+import { AccountController, BackboneIds, FileController, TokenContentFile, TokenController, TokenReference } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import {
     FileReferenceString,
@@ -70,15 +70,11 @@ export class GetOrLoadFileUseCase extends UseCase<GetOrLoadFileRequest, FileDTO>
     private async loadFileFromTokenReference(reference: TokenReference, password?: string): Promise<Result<FileDTO>> {
         const token = await this.tokenController.loadPeerTokenByReference(TokenReference.from(reference), true, password);
 
-        if (!token.cache) {
-            throw RuntimeErrors.general.cacheEmpty(Token, token.id.toString());
-        }
-
-        if (!(token.cache.content instanceof TokenContentFile)) {
+        if (!(token.content instanceof TokenContentFile)) {
             return Result.fail(RuntimeErrors.general.invalidTokenContent());
         }
 
-        const content = token.cache.content;
+        const content = token.content;
         return await this.loadFile(content.fileId, content.secretKey);
     }
 

@@ -62,7 +62,7 @@ describe("End2End Request/Response via Relationship Template", function () {
 
     test("recipient: create Local Request", async function () {
         rLocalRequest = await rConsumptionController.incomingRequests.received({
-            receivedRequest: (rTemplate.cache!.content as RelationshipTemplateContent).onNewRelationship,
+            receivedRequest: (rTemplate.content as RelationshipTemplateContent).onNewRelationship,
             requestSourceObject: rTemplate
         });
     });
@@ -95,7 +95,7 @@ describe("End2End Request/Response via Relationship Template", function () {
             template: rTemplate,
             creationContent: RelationshipCreationContent.from({ response: rLocalRequest.response!.content })
         });
-        rCreationContent = rRelationship.cache?.creationContent as RelationshipCreationContent;
+        rCreationContent = rRelationship.creationContent as RelationshipCreationContent;
     });
 
     test("recipient: complete Local Request", async function () {
@@ -111,7 +111,7 @@ describe("End2End Request/Response via Relationship Template", function () {
     });
 
     test("sender: create Local Request and Response from Relationship Change", async function () {
-        sCreationContent = sRelationship.cache!.creationContent as RelationshipCreationContent;
+        sCreationContent = sRelationship.creationContent as RelationshipCreationContent;
         const response = sCreationContent.response;
 
         sLocalRequest = await sConsumptionController.outgoingRequests.createAndCompleteFromRelationshipTemplateResponse({
@@ -130,11 +130,11 @@ describe("End2End Request/Response via Relationship Template", function () {
         expect(rLocalRequest.id.toString()).toStrictEqual(sLocalRequest.id.toString());
 
         // make sure (de-)serialization worked as expected
-        expect(sTemplate.cache!.content).toBeInstanceOf(RelationshipTemplateContent);
-        expect((sTemplate.cache!.content as RelationshipTemplateContent).onNewRelationship).toBeInstanceOf(Request);
+        expect(sTemplate.content).toBeInstanceOf(RelationshipTemplateContent);
+        expect((sTemplate.content as RelationshipTemplateContent).onNewRelationship).toBeInstanceOf(Request);
 
-        expect(rTemplate.cache!.content).toBeInstanceOf(RelationshipTemplateContent);
-        expect((rTemplate.cache!.content as RelationshipTemplateContent).onNewRelationship).toBeInstanceOf(Request);
+        expect(rTemplate.content).toBeInstanceOf(RelationshipTemplateContent);
+        expect((rTemplate.content as RelationshipTemplateContent).onNewRelationship).toBeInstanceOf(Request);
 
         expect(sLocalRequest.content.items[0]).toBeInstanceOf(TestRequestItem);
         expect(rLocalRequest.content.items[0]).toBeInstanceOf(TestRequestItem);
@@ -209,7 +209,7 @@ describe("End2End Request/Response via Messages", function () {
 
     test("recipient: create Local Request", async function () {
         rLocalRequest = await rConsumptionController.incomingRequests.received({
-            receivedRequest: rMessageWithRequest.cache!.content as Request,
+            receivedRequest: rMessageWithRequest.content as Request,
             requestSourceObject: rMessageWithRequest
         });
     });
@@ -250,7 +250,7 @@ describe("End2End Request/Response via Messages", function () {
     });
 
     test("recipient: complete Local Request", async function () {
-        const responseWrapper = rMessageWithResponse.cache!.content as ResponseWrapper;
+        const responseWrapper = rMessageWithResponse.content as ResponseWrapper;
         expect(responseWrapper).toBeInstanceOf(ResponseWrapper);
 
         const message = await rAccountController.messages.getMessage(responseWrapper.requestSourceReference);
@@ -268,7 +268,7 @@ describe("End2End Request/Response via Messages", function () {
     });
 
     test("sender: complete Local Request", async function () {
-        const responseWrapper = sMessageWithResponse.cache!.content as ResponseWrapper;
+        const responseWrapper = sMessageWithResponse.content as ResponseWrapper;
 
         sLocalRequest = await sConsumptionController.outgoingRequests.complete({
             requestId: responseWrapper.requestId,
@@ -286,12 +286,12 @@ describe("End2End Request/Response via Messages", function () {
         expect(rLocalRequest.id.toString()).toStrictEqual(sLocalRequest.id.toString());
 
         // make sure (de-)serialization worked as expected
-        expect(sMessageWithRequest.cache!.content).toBeInstanceOf(Request);
-        expect(rMessageWithRequest.cache!.content).toBeInstanceOf(Request);
+        expect(sMessageWithRequest.content).toBeInstanceOf(Request);
+        expect(rMessageWithRequest.content).toBeInstanceOf(Request);
         expect(sLocalRequest.content.items[0]).toBeInstanceOf(TestRequestItem);
         expect(rLocalRequest.content.items[0]).toBeInstanceOf(TestRequestItem);
-        expect(sMessageWithResponse.cache!.content).toBeInstanceOf(ResponseWrapper);
-        expect(rMessageWithResponse.cache!.content).toBeInstanceOf(ResponseWrapper);
+        expect(sMessageWithResponse.content).toBeInstanceOf(ResponseWrapper);
+        expect(rMessageWithResponse.content).toBeInstanceOf(ResponseWrapper);
         expect(sLocalRequest.response!.content.items[0]).toBeInstanceOf(AcceptResponseItem);
         expect(rLocalRequest.response!.content.items[0]).toBeInstanceOf(AcceptResponseItem);
     });
@@ -350,7 +350,7 @@ describe("End2End Request via Template and Response via Message", function () {
 
     test("recipient: create Local Request", async function () {
         rLocalRequest = await rConsumptionController.incomingRequests.received({
-            receivedRequest: (rTemplate.cache!.content as RelationshipTemplateContent).onExistingRelationship!,
+            receivedRequest: (rTemplate.content as RelationshipTemplateContent).onExistingRelationship!,
             requestSourceObject: rTemplate
         });
     });
@@ -403,7 +403,7 @@ describe("End2End Request via Template and Response via Message", function () {
     });
 
     test("sender: create Local Request and Response from Relationship Change", async function () {
-        const responseWrapper = sMessageWithResponse.cache!.content as ResponseWrapper;
+        const responseWrapper = sMessageWithResponse.content as ResponseWrapper;
         expect(responseWrapper).toBeInstanceOf(ResponseWrapper);
 
         const template = await sAccountController.relationshipTemplates.getRelationshipTemplate(responseWrapper.requestSourceReference);
@@ -425,11 +425,11 @@ describe("End2End Request via Template and Response via Message", function () {
         expect(rLocalRequest.id.toString()).toStrictEqual(sLocalRequest.id.toString());
 
         // make sure (de-)serialization worked as expected
-        expect(sTemplate.cache!.content).toBeInstanceOf(RelationshipTemplateContent);
-        expect((sTemplate.cache!.content as RelationshipTemplateContent).onExistingRelationship).toBeInstanceOf(Request);
+        expect(sTemplate.content).toBeInstanceOf(RelationshipTemplateContent);
+        expect((sTemplate.content as RelationshipTemplateContent).onExistingRelationship).toBeInstanceOf(Request);
 
-        expect(rTemplate.cache!.content).toBeInstanceOf(RelationshipTemplateContent);
-        expect((rTemplate.cache!.content as RelationshipTemplateContent).onExistingRelationship).toBeInstanceOf(Request);
+        expect(rTemplate.content).toBeInstanceOf(RelationshipTemplateContent);
+        expect((rTemplate.content as RelationshipTemplateContent).onExistingRelationship).toBeInstanceOf(Request);
 
         expect(sLocalRequest.content.items[0]).toBeInstanceOf(TestRequestItem);
         expect(rLocalRequest.content.items[0]).toBeInstanceOf(TestRequestItem);
@@ -439,7 +439,7 @@ describe("End2End Request via Template and Response via Message", function () {
 
         expect(sLocalRequest.content.items[0]).toBeInstanceOf(TestRequestItem);
         expect(rLocalRequest.content.items[0]).toBeInstanceOf(TestRequestItem);
-        expect(sMessageWithResponse.cache!.content).toBeInstanceOf(ResponseWrapper);
-        expect(rMessageWithResponse.cache!.content).toBeInstanceOf(ResponseWrapper);
+        expect(sMessageWithResponse.content).toBeInstanceOf(ResponseWrapper);
+        expect(rMessageWithResponse.content).toBeInstanceOf(ResponseWrapper);
     });
 });

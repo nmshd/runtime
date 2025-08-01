@@ -2,7 +2,7 @@ import { ISerializable, Serializable, serialize, type, validate } from "@js-soft
 import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreDate, ICoreId } from "@nmshd/core-types";
 import { CryptoCipher, ICryptoCipher } from "@nmshd/crypto";
 
-export interface ICachedMessageRecipient extends ISerializable {
+export interface IMessageRecipient extends ISerializable {
     address: ICoreAddress;
     encryptedKey: ICryptoCipher;
     receivedAt?: ICoreDate;
@@ -10,8 +10,8 @@ export interface ICachedMessageRecipient extends ISerializable {
     relationshipId?: ICoreId;
 }
 
-@type("CachedMessageRecipient")
-export class CachedMessageRecipient extends Serializable implements ICachedMessageRecipient {
+@type("MessageRecipient")
+export class MessageRecipient extends Serializable implements IMessageRecipient {
     @validate()
     @serialize()
     public address: CoreAddress;
@@ -32,7 +32,7 @@ export class CachedMessageRecipient extends Serializable implements ICachedMessa
     @serialize()
     public relationshipId?: CoreId;
 
-    public static from(value: ICachedMessageRecipient): CachedMessageRecipient {
+    public static from(value: IMessageRecipient): MessageRecipient {
         return this.fromAny(value);
     }
 }

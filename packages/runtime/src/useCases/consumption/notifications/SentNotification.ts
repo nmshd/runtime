@@ -32,7 +32,7 @@ export class SentNotificationUseCase extends UseCase<SentNotificationRequest, Lo
         const message = await this.messageController.getMessage(CoreId.from(request.messageId));
         if (!message) return Result.fail(RuntimeErrors.general.recordNotFound(Message));
 
-        if (!(message.cache!.content instanceof Notification)) return Result.fail(RuntimeErrors.notifications.messageDoesNotContainNotification(message.id));
+        if (!(message.content instanceof Notification)) return Result.fail(RuntimeErrors.notifications.messageDoesNotContainNotification(message.id));
         if (!message.isOwn) return Result.fail(RuntimeErrors.notifications.cannotSaveSentNotificationFromPeerMessage(message.id));
 
         const notification = await this.notificationsController.sent(message);
