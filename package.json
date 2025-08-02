@@ -28,7 +28,7 @@
         "test:teardown": "docker compose -f .dev/compose.yml down -fsv"
     },
     "devDependencies": {
-        "@js-soft/eslint-config-ts": "^2.0.0",
+        "@js-soft/eslint-config-ts": "^2.0.2",
         "@js-soft/license-check": "^1.0.9",
         "@types/jest": "^30.0.0",
         "@types/node": "^22.17.0",
