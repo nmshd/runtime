@@ -977,8 +977,8 @@ export class AttributesController extends ConsumptionBaseController {
     public async getSharedVersionsOfAttribute<SharableAttributeTypes extends OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute>(
         attribute: SharableAttributeTypes,
         peerAddress: CoreAddress,
-        includeDeletedAndToBeDeleted = false,
-        onlyLatestVersions = true // TODO: name should be singular, also can we set default to false if we do a renaming?
+        onlyLatestVersions = true, // TODO: name should be singular, also can we set default to false if we do a renaming?
+        includeDeletedAndToBeDeleted = false
     ): Promise<SharableAttributeTypes[]> {
         const sharedAttribute = attribute.isSharedWith(peerAddress, includeDeletedAndToBeDeleted) ? [attribute] : [];
         const sharedPredecessors = await this.getSharedPredecessorsOfAttribute(attribute, peerAddress, includeDeletedAndToBeDeleted);

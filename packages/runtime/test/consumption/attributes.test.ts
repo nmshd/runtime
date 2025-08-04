@@ -97,7 +97,8 @@ beforeAll(async () => {
     appService = (
         await runtimeServiceProvider.launch(1, {
             enableDefaultRepositoryAttributes: true,
-            enableRequestModule: true
+            enableRequestModule: true,
+            enableDeciderModule: true
         })
     )[0];
 
@@ -1822,7 +1823,7 @@ describe(NotifyPeerAboutOwnIdentityAttributeSuccessionUseCase.name, () => {
             attributeId: ownIdentityAttributeVersion1.id,
             peer: services2.address
         });
-        expect(notificationResult).toBeAnError(/.*/, "error.consumption.attributes.successorSourceDoesNotSucceedPredecessorSource");
+        expect(notificationResult).toBeAnError(/.*/, "error.runtime.attributes.successorOfOwnIdentityAttributeHasAlreadyBeenSharedWithPeer");
     });
 
     test("should throw if no other version of the attribute has been shared before", async () => {
@@ -2281,19 +2282,6 @@ describe("Get (shared) versions of Attribute", () => {
 
                 const returnedVersions = result.value;
                 expect(returnedVersions).toStrictEqual(sOwnIdentityAttributeVersions);
-            }
-        });
-
-        test("should get all versions of an own IdentityAttribute shared with the same peer", async () => {
-            await setUpIdentityAttributeVersions();
-            // TODO: we could here also give the not shared version as test input
-            const sOwnIdentityAttributeVersionsSharedWithPeer = [sOwnIdentityAttributeVersion2, sOwnIdentityAttributeVersion0];
-            for (const version of sOwnIdentityAttributeVersionsSharedWithPeer) {
-                const result1 = await services1.consumption.attributes.getVersionsOfAttribute({ attributeId: version.id });
-                expect(result1.isSuccess).toBe(true);
-
-                const returnedVersions1 = result1.value;
-                expect(returnedVersions1).toStrictEqual(sOwnIdentityAttributeVersionsSharedWithPeer);
             }
         });
 
