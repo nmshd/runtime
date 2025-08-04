@@ -48,7 +48,7 @@ export class PeerSharedAttributeDeletedByPeerNotificationItemProcessor extends A
         }
 
         const senderIsPeerOfRelationshipAttribute =
-            (attribute instanceof OwnRelationshipAttribute || attribute instanceof ThirdPartyRelationshipAttribute) && !notification.peer.equals(attribute.peerSharingInfo.peer);
+            (attribute instanceof OwnRelationshipAttribute || attribute instanceof ThirdPartyRelationshipAttribute) && notification.peer.equals(attribute.peerSharingInfo.peer);
         const attributeIsSharedWithSender =
             (attribute instanceof OwnIdentityAttribute || attribute instanceof OwnRelationshipAttribute || attribute instanceof PeerRelationshipAttribute) &&
             attribute.isSharedWith(notification.peer);
