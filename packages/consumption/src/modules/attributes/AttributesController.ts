@@ -1290,8 +1290,8 @@ export class AttributesController extends ConsumptionBaseController {
 
         const attributesSharedWithPeer = (await this.getLocalAttributes({
             "@type": "OwnIdentityAttribute",
-            "sharingInfos.peer": peer.toString(),
-            "sharingInfos.deletionInfo.deletionStatus": { $ne: ForwardedAttributeDeletionStatus.DeletedByPeer }
+            "forwardedSharingInfos.peer": peer.toString(),
+            "forwardedSharingInfos.deletionInfo.deletionStatus": { $ne: ForwardedAttributeDeletionStatus.DeletedByPeer }
         })) as OwnIdentityAttribute[];
 
         await this.setForwardedDeletionInfo(attributesSharedWithPeer, deletionInfo, peer);
@@ -1305,8 +1305,8 @@ export class AttributesController extends ConsumptionBaseController {
 
         const attributesSharedWithPeer = (await this.getLocalAttributes({
             "@type": "PeerIdentityAttribute",
-            "sharingInfo.peer": peer.toString(),
-            "sharingInfo.deletionInfo.deletionStatus": { $ne: PeerAttributeDeletionStatus.DeletedByOwner }
+            "peerSharingInfo.peer": peer.toString(),
+            "peerSharingInfo.deletionInfo.deletionStatus": { $ne: PeerAttributeDeletionStatus.DeletedByOwner }
         })) as PeerIdentityAttribute[];
 
         await this.setPeerDeletionInfoOfPeerAttribute(attributesSharedWithPeer, deletionInfo);
@@ -1350,8 +1350,8 @@ export class AttributesController extends ConsumptionBaseController {
 
         const attributesSharedWithPeer = (await this.getLocalAttributes({
             "@type": { $in: ["OwnRelationshipAttribute", "PeerRelationshipAttribute"] },
-            "thirdPartySharingInfos.peer": thirdParty.toString(),
-            "thirdPartySharingInfos.deletionInfo.deletionStatus": { $ne: ForwardedAttributeDeletionStatus.DeletedByPeer }
+            "forwardedSharingInfos.peer": thirdParty.toString(),
+            "forwardedSharingInfos.deletionInfo.deletionStatus": { $ne: ForwardedAttributeDeletionStatus.DeletedByPeer }
         })) as OwnRelationshipAttribute[] | PeerRelationshipAttribute[];
 
         await this.setForwardedDeletionInfo(attributesSharedWithPeer, deletionInfo, thirdParty);
@@ -1365,8 +1365,8 @@ export class AttributesController extends ConsumptionBaseController {
 
         const attributesSharedWithPeer = (await this.getLocalAttributes({
             "@type": "ThirdPartyRelationshipAttribute",
-            "sharingInfo.peer": peer.toString(),
-            "sharingInfo.deletionInfo.deletionStatus": {
+            "peerSharingInfo.peer": peer.toString(),
+            "peerSharingInfo.deletionInfo.deletionStatus": {
                 $nin: [ThirdPartyRelationshipAttributeDeletionStatus.DeletedByPeer, ThirdPartyRelationshipAttributeDeletionStatus.DeletedByOwner]
             }
         })) as ThirdPartyRelationshipAttribute[];
