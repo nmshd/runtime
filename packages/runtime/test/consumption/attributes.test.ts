@@ -70,6 +70,7 @@ import {
     executeFullShareOwnIdentityAttributeFlow,
     executeFullSucceedOwnIdentityAttributeAndNotifyPeerFlow,
     syncUntilHasMessageWithNotification,
+    syncUntilHasMessages,
     syncUntilHasRelationships,
     waitForRecipientToReceiveNotification
 } from "../lib";
@@ -3084,7 +3085,8 @@ describe(SetAttributeDeletionInfoOfDeletionProposedRelationshipUseCase.name, () 
         });
 
         await services1.consumption.attributes.deleteOwnIdentityAttributeAndNotifyPeers({ attributeId: ownIdentityAttribute.id });
-        // await syncUntilHasMessageWithNotification(services2.transport, notificationId);
+        // TODO: specify notification id if possible
+        await syncUntilHasMessages(services2.transport);
         await services2.eventBus.waitForEvent(OwnSharedAttributeDeletedByOwnerEvent, (e) => {
             return e.data.id.toString() === ownIdentityAttribute.id;
         });
