@@ -89,6 +89,11 @@ export class TransportController {
     }
 
     protected parseArray<T extends Serializable>(values: Object[], type: new () => T): T[] {
-        return values.map((v) => (type as any).fromAny(v));
+        return values.map((v) => {
+            const parsed = (type as any).fromUnknown(v);
+            if (!(parsed instanceof type)) throw new Error(`Parsed value is not an instance of ${type.name}`);
+
+            return parsed;
+        });
     }
 }
