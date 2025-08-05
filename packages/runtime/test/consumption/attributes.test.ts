@@ -199,7 +199,7 @@ describe("get attribute(s)", () => {
 
             const attributes = result.value;
             expect(attributes).toHaveLength(3);
-            expect(attributes.map((attribute) => attribute.id)).toEqual(expect.arrayContaining(identityAttributeIds));
+            expect(attributes.map((attribute) => attribute.id)).toStrictEqual(expect.arrayContaining(identityAttributeIds));
         });
 
         test("should allow to get an Attribute by value type", async function () {
