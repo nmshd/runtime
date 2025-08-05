@@ -431,7 +431,6 @@ export class AttributesController extends ConsumptionBaseController {
         return attribute;
     }
 
-    // TODO: check if parts of this can be put into separate functions
     public async succeedOwnIdentityAttribute(
         predecessor: OwnIdentityAttribute,
         successorParams: IOwnIdentityAttributeSuccessorParams | OwnIdentityAttributeSuccessorParamsJSON,
@@ -583,7 +582,7 @@ export class AttributesController extends ConsumptionBaseController {
         return { predecessor, successor };
     }
 
-    // TODO: check if we want to keep this
+    // TODO: check if we want to use this shared code in the succeed functions above
     // private async succeedAttributeUnsafe(
     //     predecessor: LocalAttribute,
     //     successor: LocalAttribute
@@ -815,9 +814,7 @@ export class AttributesController extends ConsumptionBaseController {
 
         await this.deletePredecessorsOfAttribute(attribute);
 
-        if (attribute instanceof OwnIdentityAttribute && this.setDefaultOwnIdentityAttributes) {
-            await this.transferDefault(attribute);
-        }
+        if (attribute instanceof OwnIdentityAttribute && this.setDefaultOwnIdentityAttributes) await this.transferDefault(attribute);
 
         await this.deleteAttribute(attribute);
     }
@@ -910,11 +907,10 @@ export class AttributesController extends ConsumptionBaseController {
         return false;
     }
 
-    // TODO: maybe this could simply be an enhanced version of getVersionsOfAttribute
     public async getSharedVersionsOfAttribute<SharableAttributeTypes extends OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute>(
         attribute: SharableAttributeTypes,
         peerAddress: CoreAddress,
-        onlyLatestVersions = true, // TODO: name should be singular, also can we set default to false if we do a renaming?
+        onlyLatestVersion = true,
         includeDeletedAndToBeDeleted = false
     ): Promise<SharableAttributeTypes[]> {
         const sharedAttribute = attribute.isSharedWith(peerAddress, includeDeletedAndToBeDeleted) ? [attribute] : [];
@@ -923,9 +919,7 @@ export class AttributesController extends ConsumptionBaseController {
 
         const sharedAttributeVersions = [...sharedSuccessors.reverse(), ...sharedAttribute, ...sharedPredecessors];
 
-        if (onlyLatestVersions) {
-            return sharedAttributeVersions.length > 0 ? [sharedAttributeVersions[0]] : [];
-        }
+        if (onlyLatestVersion) return sharedAttributeVersions.length > 0 ? [sharedAttributeVersions[0]] : [];
 
         return sharedAttributeVersions;
     }
@@ -986,10 +980,9 @@ export class AttributesController extends ConsumptionBaseController {
         const query = flattenObject({
             "@type": "PeerIdentityAttribute",
             content: {
-                owner: peer, // TODO: it is not required to query multiple times by peer
+                owner: peer,
                 value: trimmedValue
-            },
-            sharingInfo: { peer }
+            }
         });
         query["succeededBy"] = { $exists: false };
 
