@@ -95,7 +95,7 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async getLocalAttributes(query?: any, hideTechnical = false): Promise<LocalAttribute[]> {
-        const enrichedQuery = this.enrichQuery(query, hideTechnical);
+        const enrichedQuery = this.addHideTechnicalToQuery(query, hideTechnical);
         const attributes = await this.attributes.find(enrichedQuery);
         const parsed = this.parseArray(attributes, LocalAttribute);
 
@@ -106,7 +106,7 @@ export class AttributesController extends ConsumptionBaseController {
         return sorted;
     }
 
-    private enrichQuery(query: any, hideTechnical: boolean) {
+    private addHideTechnicalToQuery(query: any, hideTechnical: boolean) {
         if (!hideTechnical) return query;
 
         const hideTechnicalQuery = {
@@ -293,6 +293,29 @@ export class AttributesController extends ConsumptionBaseController {
         return newDefaultAttribute;
     }
 
+    public async updateAttributeUnsafe(attributeParams: ILocalAttribute): Promise<LocalAttribute> {
+        const doc = await this.attributes.findOne({
+            [nameof<LocalAttribute>((c) => c.id)]: attributeParams.id.toString()
+        });
+        if (!doc) {
+            throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attributeParams.id.toString());
+        }
+
+        const params: ILocalAttribute = {
+            id: attributeParams.id,
+            content: attributeParams.content,
+            createdAt: attributeParams.createdAt,
+            shareInfo: attributeParams.shareInfo,
+            succeededBy: attributeParams.succeededBy,
+            succeeds: attributeParams.succeeds,
+            deletionInfo: attributeParams.deletionInfo,
+            isDefault: attributeParams.isDefault
+        };
+        const newAttribute = LocalAttribute.from(params);
+        await this.attributes.update(doc, newAttribute);
+        return newAttribute;
+    }
+
     public async createSharedLocalAttributeCopy(params: ICreateSharedLocalAttributeCopyParams): Promise<LocalAttribute> {
         const parsedParams = CreateSharedLocalAttributeCopyParams.from(params);
         const sourceAttribute = await this.getLocalAttribute(parsedParams.sourceAttributeId);
@@ -333,19 +356,6 @@ export class AttributesController extends ConsumptionBaseController {
         await this.attributes.create(peerLocalAttribute);
         this.eventBus.publish(new AttributeCreatedEvent(this.identity.address.toString(), peerLocalAttribute));
         return peerLocalAttribute;
-    }
-
-    public async deleteAttribute(attribute: LocalAttribute): Promise<void> {
-        await this.deleteAttributeUnsafe(attribute.id);
-
-        this.eventBus.publish(new AttributeDeletedEvent(this.identity.address.toString(), attribute));
-    }
-
-    public async deleteAttributesExchangedWithPeer(peer: CoreAddress): Promise<void> {
-        const attributes = await this.getLocalAttributes({ "shareInfo.peer": peer.toString() });
-        for (const attribute of attributes) {
-            await this.deleteAttributeUnsafe(attribute.id);
-        }
     }
 
     public async succeedRepositoryAttribute(
@@ -914,27 +924,17 @@ export class AttributesController extends ConsumptionBaseController {
         return localAttribute;
     }
 
-    public async updateAttributeUnsafe(attributeParams: ILocalAttribute): Promise<LocalAttribute> {
-        const doc = await this.attributes.findOne({
-            [nameof<LocalAttribute>((c) => c.id)]: attributeParams.id.toString()
-        });
-        if (!doc) {
-            throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attributeParams.id.toString());
-        }
+    public async deleteAttribute(attribute: LocalAttribute): Promise<void> {
+        await this.deleteAttributeUnsafe(attribute.id);
 
-        const params: ILocalAttribute = {
-            id: attributeParams.id,
-            content: attributeParams.content,
-            createdAt: attributeParams.createdAt,
-            shareInfo: attributeParams.shareInfo,
-            succeededBy: attributeParams.succeededBy,
-            succeeds: attributeParams.succeeds,
-            deletionInfo: attributeParams.deletionInfo,
-            isDefault: attributeParams.isDefault
-        };
-        const newAttribute = LocalAttribute.from(params);
-        await this.attributes.update(doc, newAttribute);
-        return newAttribute;
+        this.eventBus.publish(new AttributeDeletedEvent(this.identity.address.toString(), attribute));
+    }
+
+    public async deleteAttributesExchangedWithPeer(peer: CoreAddress): Promise<void> {
+        const attributes = await this.getLocalAttributes({ "shareInfo.peer": peer.toString() });
+        for (const attribute of attributes) {
+            await this.deleteAttributeUnsafe(attribute.id);
+        }
     }
 
     public async deleteAttributeUnsafe(id: CoreId): Promise<void> {
