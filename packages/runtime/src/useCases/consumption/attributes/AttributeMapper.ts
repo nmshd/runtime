@@ -12,9 +12,8 @@ import { ForwardedSharingInfosDTO, LocalAttributeDTO, PeerSharingInfoDTO } from 
 
 export class AttributeMapper {
     public static toAttributeDTO(attribute: LocalAttribute): LocalAttributeDTO {
-        // TODO: make this prettier
         return {
-            "@type": AttributeMapper.getType(attribute),
+            "@type": this.toType(attribute),
             id: attribute.id.toString(),
             content: attribute.content.toJSON(),
             createdAt: attribute.createdAt.toString(),
@@ -22,11 +21,8 @@ export class AttributeMapper {
             succeededBy: attribute.succeededBy?.toString(),
             wasViewedAt: attribute.wasViewedAt?.toString(),
             isDefault: attribute instanceof OwnIdentityAttribute ? attribute.isDefault : undefined,
-            peerSharingInfo: "peerSharingInfo" in attribute ? ((attribute as AttributeWithPeerSharingInfo).peerSharingInfo?.toJSON() as PeerSharingInfoDTO) : undefined,
-            forwardedSharingInfos:
-                "forwardedSharingInfos" in attribute
-                    ? ((attribute as AttributeWithForwardedSharingInfos).forwardedSharingInfos?.map((sharingInfo) => sharingInfo.toJSON()) as ForwardedSharingInfosDTO[])
-                    : undefined
+            peerSharingInfo: this.toPeerSharingInfo(attribute),
+            forwardedSharingInfos: this.toForwardedSharingInfos(attribute)
         };
     }
 
@@ -34,12 +30,24 @@ export class AttributeMapper {
         return attributes.map((attribute) => this.toAttributeDTO(attribute));
     }
 
-    private static getType(attribute: LocalAttribute) {
+    private static toType(attribute: LocalAttribute) {
         if (attribute instanceof OwnIdentityAttribute) return "OwnIdentityAttribute";
         if (attribute instanceof PeerIdentityAttribute) return "PeerIdentityAttribute";
         if (attribute instanceof OwnRelationshipAttribute) return "OwnRelationshipAttribute";
         if (attribute instanceof PeerRelationshipAttribute) return "PeerRelationshipAttribute";
         if (attribute instanceof ThirdPartyRelationshipAttribute) return "ThirdPartyRelationshipAttribute";
         throw Error; // TODO:
+    }
+
+    private static toPeerSharingInfo(attribute: LocalAttribute) {
+        if (!("peerSharingInfo" in attribute)) return undefined;
+
+        return (attribute as AttributeWithPeerSharingInfo).peerSharingInfo.toJSON() as PeerSharingInfoDTO;
+    }
+
+    private static toForwardedSharingInfos(attribute: LocalAttribute) {
+        if (!("forwardedSharingInfos" in attribute)) return undefined;
+
+        return (attribute as AttributeWithForwardedSharingInfos).forwardedSharingInfos?.map((sharingInfo) => sharingInfo.toJSON()) as ForwardedSharingInfosDTO[];
     }
 }
