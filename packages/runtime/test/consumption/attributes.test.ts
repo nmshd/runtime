@@ -2701,26 +2701,23 @@ describe("DeleteAttributeUseCases", () => {
             peerRelationshipAttributeVersion0 = (await services2.consumption.attributes.getAttribute({ id: ownRelationshipAttributeVersion0.id })).value;
             peerRelationshipAttributeVersion1 = (await services2.consumption.attributes.getAttribute({ id: ownRelationshipAttributeVersion1.id })).value;
 
-            ownRelationshipAttributeVersion0 = await executeFullShareAndAcceptAttributeRequestFlow(
-                services1,
-                services3,
-                ShareAttributeRequestItem.from({
-                    attribute: ownRelationshipAttributeVersion0.content,
-                    sourceAttributeId: ownRelationshipAttributeVersion0.id,
-                    thirdPartyAddress: services2.address,
-                    mustBeAccepted: true
-                })
-            );
-            ownRelationshipAttributeVersion1 = await executeFullShareAndAcceptAttributeRequestFlow(
-                services1,
-                services3,
-                ShareAttributeRequestItem.from({
-                    attribute: ownRelationshipAttributeVersion1.content,
-                    sourceAttributeId: ownRelationshipAttributeVersion1.id,
-                    thirdPartyAddress: services2.address,
-                    mustBeAccepted: true
-                })
-            );
+            const requestParams = {
+                peer: services1.address,
+                content: {
+                    items: [
+                        ReadAttributeRequestItem.from({
+                            query: ThirdPartyRelationshipAttributeQuery.from({
+                                key: "aKey",
+                                owner: ThirdPartyRelationshipAttributeQueryOwner.Recipient,
+                                thirdParty: [services2.address]
+                            }),
+                            mustBeAccepted: true
+                        }).toJSON()
+                    ]
+                }
+            };
+            ownRelationshipAttributeVersion0 = await executeFullRequestAndAcceptExistingAttributeFlow(services1, services3, requestParams, ownRelationshipAttributeVersion0.id);
+            ownRelationshipAttributeVersion1 = await executeFullRequestAndAcceptExistingAttributeFlow(services1, services3, requestParams, ownRelationshipAttributeVersion1.id);
 
             thirdPartyRelationshipAttributeVersion0 = (await services3.consumption.attributes.getAttribute({ id: ownRelationshipAttributeVersion0.id })).value;
             thirdPartyRelationshipAttributeVersion1 = (await services3.consumption.attributes.getAttribute({ id: ownRelationshipAttributeVersion1.id })).value;

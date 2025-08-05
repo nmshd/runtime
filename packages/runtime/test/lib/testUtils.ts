@@ -13,6 +13,7 @@ import {
     ArbitraryRelationshipCreationContentJSON,
     ArbitraryRelationshipTemplateContent,
     ArbitraryRelationshipTemplateContentJSON,
+    AttributeSuccessionAcceptResponseItemJSON,
     INotificationItem,
     Notification,
     ReadAttributeAcceptResponseItemJSON,
@@ -727,11 +728,15 @@ export async function executeFullRequestAndAcceptExistingAttributeFlow(
     });
 
     const responseMessage = await syncUntilHasMessageWithResponse(requestor.transport, localRequest.id);
-    // TODO: this will need refactoring
-    const sharedAttributeId = (responseMessage.content.response.items[0] as ReadAttributeAcceptResponseItemJSON).attributeId;
     await requestor.eventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => {
         return e.data.request.id === localRequest.id && e.data.newStatus === LocalRequestStatus.Completed;
     });
+
+    const responseItem = responseMessage.content.response.items[0];
+    const sharedAttributeId =
+        responseItem["@type"] === "ReadAttributeAcceptResponseItem" || responseItem["@type"] === "AttributeAlreadySharedAcceptResponseItem"
+            ? (responseItem as ReadAttributeAcceptResponseItemJSON).attributeId.toString()
+            : (responseItem as AttributeSuccessionAcceptResponseItemJSON).successorId;
 
     const ownForwardedAttribute = (await responder.consumption.attributes.getAttribute({ id: sharedAttributeId })).value;
     return ownForwardedAttribute;
