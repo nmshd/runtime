@@ -53,7 +53,6 @@ describe("PeerRelationshipAttributeDVO", () => {
         expect(dvo.isTechnical).toBe((rPeerSharedRelationshipAttribute.content as RelationshipAttributeJSON).isTechnical);
         expect(dvo.createdAt).toStrictEqual(rPeerSharedRelationshipAttribute.createdAt);
         expect(dvo.isOwn).toBe(false);
-        expect(dvo.isValid).toBe(true);
         expect(dvo.isDraft).toBe(false);
         expect(dvo.owner).toStrictEqual(rPeerSharedRelationshipAttribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");

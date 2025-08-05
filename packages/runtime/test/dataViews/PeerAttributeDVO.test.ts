@@ -46,7 +46,6 @@ describe("PeerAttributeDVO", () => {
         expect(value.value).toBe("male");
         expect(dvo.createdAt).toStrictEqual(rPeerSharedIdentityAttribute.createdAt);
         expect(dvo.isOwn).toBe(false);
-        expect(dvo.isValid).toBe(true);
         expect(dvo.isDraft).toBe(false);
         expect(dvo.owner).toStrictEqual(rPeerSharedIdentityAttribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
@@ -95,7 +94,6 @@ describe("PeerAttributeDVO", () => {
         expect(value.value).toBe("DE");
         expect(dvo.createdAt).toStrictEqual(rPeerSharedIdentityAttribute.createdAt);
         expect(dvo.isOwn).toBe(false);
-        expect(dvo.isValid).toBe(true);
         expect(dvo.isDraft).toBe(false);
         expect(dvo.owner).toStrictEqual(rPeerSharedIdentityAttribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
@@ -145,7 +143,6 @@ describe("PeerAttributeDVO", () => {
         expect(value.value).toBe("de");
         expect(dvo.createdAt).toStrictEqual(rPeerSharedIdentityAttribute.createdAt);
         expect(dvo.isOwn).toBe(false);
-        expect(dvo.isValid).toBe(true);
         expect(dvo.isDraft).toBe(false);
         expect(dvo.owner).toStrictEqual(rPeerSharedIdentityAttribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");

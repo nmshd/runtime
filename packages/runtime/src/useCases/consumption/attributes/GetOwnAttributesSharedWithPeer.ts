@@ -63,9 +63,7 @@ export class GetOwnAttributesSharedWithPeerUseCase extends UseCase<GetOwnAttribu
         dbQuery["@type"] = { $in: ["OwnIdentityAttribute", "OwnRelationshipAttribute"] };
         dbQuery["$or"] = [{ "peerSharingInfo.peer": request.peer }, { "forwardedSharingInfos.peer": request.peer }];
 
-        if (request.onlyLatestVersions ?? true) {
-            dbQuery["succeededBy"] = { $exists: false };
-        }
+        if (request.onlyLatestVersions ?? true) dbQuery["succeededBy"] = { $exists: false };
 
         const attributes = await this.attributeController.getLocalAttributes(dbQuery, request.hideTechnical);
 

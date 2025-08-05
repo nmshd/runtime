@@ -16,8 +16,8 @@ export interface GetOwnIdentityAttributesRequest {
 
 export interface GetOwnIdentityAttributesRequestQuery {
     createdAt?: string;
-    isDefault?: string;
     wasViewedAt?: string | string[];
+    isDefault?: string;
     "content.tags"?: string | string[];
     "content.value.@type"?: string | string[];
     forwardedSharingInfos?: string | string[];

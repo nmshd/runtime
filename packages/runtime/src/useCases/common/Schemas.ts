@@ -14246,9 +14246,6 @@ export const GetOwnIdentityAttributesRequest: any = {
                 "createdAt": {
                     "type": "string"
                 },
-                "isDefault": {
-                    "type": "string"
-                },
                 "wasViewedAt": {
                     "anyOf": [
                         {
@@ -14261,6 +14258,9 @@ export const GetOwnIdentityAttributesRequest: any = {
                             }
                         }
                     ]
+                },
+                "isDefault": {
+                    "type": "string"
                 },
                 "content.tags": {
                     "anyOf": [

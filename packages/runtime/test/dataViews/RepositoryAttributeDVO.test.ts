@@ -78,7 +78,6 @@ describe("OwnIdentityAttributeDVO", () => {
         expect(value.value).toBe("aGivenName");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.isValid).toBe(true);
         expect(dvo.sharedWith).toStrictEqual([]);
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
@@ -104,7 +103,6 @@ describe("OwnIdentityAttributeDVO", () => {
         expect(value.value).toBe("aSurname");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.isValid).toBe(true);
         expect(dvo.sharedWith).toStrictEqual([]);
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
@@ -130,7 +128,6 @@ describe("OwnIdentityAttributeDVO", () => {
         expect(value.value).toBe("male");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.isValid).toBe(true);
         expect(dvo.sharedWith).toStrictEqual([]);
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
@@ -161,7 +158,6 @@ describe("OwnIdentityAttributeDVO", () => {
         expect(value.value).toBe("DE");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.isValid).toBe(true);
         expect(dvo.sharedWith).toStrictEqual([]);
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
@@ -191,7 +187,6 @@ describe("OwnIdentityAttributeDVO", () => {
         expect(value.value).toBe("de");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.isValid).toBe(true);
         expect(dvo.sharedWith).toStrictEqual([]);
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");

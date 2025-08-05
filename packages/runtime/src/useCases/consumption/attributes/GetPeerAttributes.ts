@@ -64,9 +64,7 @@ export class GetPeerAttributesUseCase extends UseCase<GetPeerAttributesRequest, 
         dbQuery["@type"] = { $in: ["PeerIdentityAttribute", "PeerRelationshipAttribute", "ThirdPartyRelationshipAttribute"] };
         dbQuery["peerSharingInfo.peer"] = request.peer;
 
-        if (request.onlyLatestVersions ?? true) {
-            dbQuery["succeededBy"] = { $exists: false };
-        }
+        if (request.onlyLatestVersions ?? true) dbQuery["succeededBy"] = { $exists: false };
 
         const attributes = await this.attributeController.getLocalAttributes(dbQuery, request.hideTechnical);
 
