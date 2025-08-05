@@ -48,6 +48,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                 );
             }
 
+            // TODO: this also applies to RelationshipAttributes that can be shared with third parties
             if (recipient) {
                 if (foundAttribute.isSharedWith(recipient)) {
                     return ValidationResult.error(

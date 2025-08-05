@@ -2,7 +2,7 @@ import { Result } from "@js-soft/ts-utils";
 import { AttributesController, ConsumptionIds, LocalAttribute, OwnRelationshipAttribute } from "@nmshd/consumption";
 import { Notification, OwnSharedAttributeDeletedByOwnerNotificationItem } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
-import { AccountController, MessageController, RelationshipsController, RelationshipStatus } from "@nmshd/transport";
+import { AccountController, MessageController, PeerDeletionStatus, RelationshipsController, RelationshipStatus } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { AttributeIdString, NotificationIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
@@ -91,12 +91,12 @@ export class DeleteOwnRelationshipAttributeAndNotifyPeersUseCase extends UseCase
         if (thirdParties.length === 0) return;
 
         const queryForRelationshipsToNotify = {
-            "peer.address": thirdParties.map((thirdParty) => thirdParty.toString()),
+            "peer.address": { $in: thirdParties.map((thirdParty) => thirdParty.toString()) },
             status: { $in: [RelationshipStatus.Pending, RelationshipStatus.Active, RelationshipStatus.Terminated] },
-            "peerDeletionInfo.deletionStatus": { $ne: "Deleted" }
+            "peerDeletionInfo.deletionStatus": { $ne: PeerDeletionStatus.Deleted }
         };
         const relationshipsToNotify = await this.relationshipsController.getRelationships(queryForRelationshipsToNotify);
-        if (relationshipsToNotify.length > 0) return;
+        if (relationshipsToNotify.length === 0) return;
 
         const thirdPartiesToNotify = relationshipsToNotify.map((relationship) => relationship.peer.address);
 

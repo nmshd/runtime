@@ -15,6 +15,7 @@ import {
     ArbitraryRelationshipTemplateContentJSON,
     INotificationItem,
     Notification,
+    ReadAttributeAcceptResponseItemJSON,
     RelationshipTemplateContentJSON,
     Request,
     RequestItemGroupJSON,
@@ -727,7 +728,7 @@ export async function executeFullRequestAndAcceptExistingAttributeFlow(
 
     const responseMessage = await syncUntilHasMessageWithResponse(requestor.transport, localRequest.id);
     // TODO: this will need refactoring
-    const sharedAttributeId = (responseMessage.content.response.items[0] as ShareAttributeAcceptResponseItemJSON).attributeId;
+    const sharedAttributeId = (responseMessage.content.response.items[0] as ReadAttributeAcceptResponseItemJSON).attributeId;
     await requestor.eventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => {
         return e.data.request.id === localRequest.id && e.data.newStatus === LocalRequestStatus.Completed;
     });
