@@ -438,9 +438,7 @@ export class AttributesController extends ConsumptionBaseController {
         validate = true
     ): Promise<{ predecessor: OwnIdentityAttribute; successor: OwnIdentityAttribute }> {
         const parsedSuccessorParams = OwnIdentityAttributeSuccessorParams.from(successorParams);
-        let attribute = parsedSuccessorParams.content;
-
-        attribute = this.trimAttribute(attribute);
+        const attribute = this.trimAttribute(parsedSuccessorParams.content);
 
         if (validate) {
             const validationResult = await this.validateOwnIdentityAttributeSuccession(predecessor, parsedSuccessorParams);
@@ -463,7 +461,6 @@ export class AttributesController extends ConsumptionBaseController {
 
         // TODO: maybe publish same succeeded event for all attributes, publish events only for own Attributes and ThirdPartyRelationshipAttributes
         this.eventBus.publish(new RepositoryAttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
-
         return { predecessor, successor };
     }
 
@@ -481,9 +478,7 @@ export class AttributesController extends ConsumptionBaseController {
         validate = true
     ): Promise<{ predecessor: PeerIdentityAttribute; successor: PeerIdentityAttribute }> {
         const parsedSuccessorParams = PeerIdentityAttributeSuccessorParams.from(successorParams);
-        let attribute = parsedSuccessorParams.content;
-
-        attribute = this.trimAttribute(attribute);
+        const attribute = this.trimAttribute(parsedSuccessorParams.content);
 
         if (validate) {
             const validationResult = await this.validatePeerIdentityAttributeSuccession(predecessor, parsedSuccessorParams);
@@ -529,9 +524,7 @@ export class AttributesController extends ConsumptionBaseController {
         predecessor.succeededBy = successor.id;
         await this.updateAttributeUnsafe(predecessor);
 
-        // TODO: publish events only for own Attributes and ThirdPartyRelationshipAttributes
         this.eventBus.publish(new OwnSharedAttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
-
         return { predecessor, successor };
     }
 
@@ -586,9 +579,7 @@ export class AttributesController extends ConsumptionBaseController {
         predecessor.succeededBy = successor.id;
         await this.updateAttributeUnsafe(predecessor);
 
-        // TODO: publish events only for own Attributes and ThirdPartyRelationshipAttributes; do we need different Events?
         this.eventBus.publish(new ThirdPartyRelationshipAttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
-
         return { predecessor, successor };
     }
 
@@ -604,7 +595,6 @@ export class AttributesController extends ConsumptionBaseController {
 
     //     // TODO: publish events only for own Attributes and ThirdPartyRelationshipAttributes
     //     this.eventBus.publish(new AttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
-
     //     return { predecessor, successor };
     // }
 
@@ -785,20 +775,31 @@ export class AttributesController extends ConsumptionBaseController {
 
     public async deleteAttribute(attribute: LocalAttribute): Promise<void> {
         await this.deleteAttributeUnsafe(attribute.id);
-
         this.eventBus.publish(new AttributeDeletedEvent(this.identity.address.toString(), attribute));
-    }
-
-    public async deleteAttributesExchangedWithPeer(peer: CoreAddress): Promise<void> {
-        // TODO: can we query only specific types of LocalAttributes?
-        const attributes = await this.getLocalAttributes({ "sharingInfos.peer": peer.toString() }); // TODO: this should still work with an array shareInfo
-        for (const attribute of attributes) {
-            await this.deleteAttributeUnsafe(attribute.id);
-        }
     }
 
     public async deleteAttributeUnsafe(id: CoreId): Promise<void> {
         await this.attributes.delete({ id: id });
+    }
+
+    public async deleteAttributesExchangedWithPeer(peer: CoreAddress): Promise<void> {
+        const receivedAttributes = await this.getLocalAttributes({ "peerSharingInfo.peer": peer.toString() });
+        for (const attribute of receivedAttributes) {
+            await this.deleteAttributeUnsafe(attribute.id);
+        }
+
+        const forwardedAttributes = (await this.getLocalAttributes({ "forwardedSharingInfos.peer": peer.toString() })) as AttributeWithForwardedSharingInfos[];
+        for (const attribute of forwardedAttributes) {
+            await this.removeForwardedSharingInfoFromAttribute(attribute, peer);
+        }
+    }
+
+    public async removeForwardedSharingInfoFromAttribute<T extends AttributeWithForwardedSharingInfos>(attribute: T, peer: CoreAddress): Promise<T> {
+        attribute.forwardedSharingInfos = attribute.forwardedSharingInfos?.filter((sharingInfo) => !sharingInfo.peer.equals(peer));
+        await this.updateAttributeUnsafe(attribute);
+
+        // TODO: publish event?
+        return attribute;
     }
 
     public async executeFullAttributeDeletionProcess(attribute: LocalAttribute): Promise<void> {
