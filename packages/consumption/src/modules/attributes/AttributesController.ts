@@ -166,14 +166,6 @@ export class AttributesController extends ConsumptionBaseController {
         return { $and: [query, hideTechnicalQuery] };
     }
 
-    // TODO: evaluate if we need these more specific queries
-    public async getOwnIdentityAttributes(query?: any): Promise<OwnIdentityAttribute[]> {
-        const queryForOwnIdentityAttributes: any = query ? { $and: [query, { "@type": "OwnIdentityAttribute" }] } : { "@type": "OwnIdentityAttribute" };
-
-        const ownIdentityAttributes = (await this.getLocalAttributes(queryForOwnIdentityAttributes)) as OwnIdentityAttribute[];
-        return ownIdentityAttributes;
-    }
-
     public async executeIQLQuery(query: IIQLQuery): Promise<LocalAttribute[]> {
         /* Fetch subset of attributes relevant for IQL queries. We filter for
          * identity attributes which are not shared. */
@@ -251,40 +243,22 @@ export class AttributesController extends ConsumptionBaseController {
         return this.parseArray(attributes, LocalAttribute);
     }
 
-    // TODO: check if some shared validation can be extracted from the create functions
     public async createOwnIdentityAttribute(params: { content: IdentityAttribute }): Promise<OwnIdentityAttribute> {
-        let attribute = params.content;
-        if (attribute.owner.toString() !== this.identity.address.toString()) {
-            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute();
-        }
+        const attribute = this.trimAttribute(params.content);
 
-        const tagValidationResult = await this.validateTagsOfAttribute(attribute);
-        if (tagValidationResult.isError()) throw tagValidationResult.error;
-
-        const trimmedAttribute = {
-            ...attribute.toJSON(),
-            value: this.trimAttributeValue(attribute.value.toJSON() as AttributeValues.Identity.Json)
-        };
-        attribute = IdentityAttribute.from(trimmedAttribute);
-
-        if (!this.validateAttributeCharacters(attribute)) {
-            throw ConsumptionCoreErrors.attributes.forbiddenCharactersInAttribute("The Attribute contains forbidden characters.");
-        }
+        if (!attribute.owner.equals(this.identity.address)) throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute();
+        await this.validateAttributeCreation(attribute);
 
         let ownIdentityAttribute = OwnIdentityAttribute.from({
             id: await ConsumptionIds.attribute.generate(),
             createdAt: CoreDate.utc(),
             content: attribute
         });
-
         await this.attributes.create(ownIdentityAttribute);
 
-        if (this.setDefaultOwnIdentityAttributes) {
-            ownIdentityAttribute = await this.setAsDefaultOwnIdentityAttribute(ownIdentityAttribute, true);
-        }
+        if (this.setDefaultOwnIdentityAttributes) ownIdentityAttribute = await this.setAsDefaultOwnIdentityAttribute(ownIdentityAttribute, true);
 
         this.eventBus.publish(new AttributeCreatedEvent(this.identity.address.toString(), ownIdentityAttribute));
-
         return ownIdentityAttribute;
     }
 
@@ -335,23 +309,10 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async createPeerIdentityAttribute(params: { content: IdentityAttribute; peer: CoreAddress; sourceReference: CoreId; id: CoreId }): Promise<PeerIdentityAttribute> {
-        let attribute = params.content;
-        if (attribute.owner.toString() !== params.peer.toString()) {
-            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute();
-        }
+        const attribute = this.trimAttribute(params.content);
 
-        const tagValidationResult = await this.validateTagsOfAttribute(attribute);
-        if (tagValidationResult.isError()) throw tagValidationResult.error;
-
-        const trimmedAttribute = {
-            ...attribute.toJSON(),
-            value: this.trimAttributeValue(attribute.value.toJSON() as AttributeValues.Identity.Json)
-        };
-        attribute = IdentityAttribute.from(trimmedAttribute);
-
-        if (!this.validateAttributeCharacters(attribute)) {
-            throw ConsumptionCoreErrors.attributes.forbiddenCharactersInAttribute("The Attribute contains forbidden characters.");
-        }
+        if (!attribute.owner.equals(params.peer)) throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute();
+        await this.validateAttributeCreation(attribute);
 
         const peerSharingInfo = PeerIdentityAttributeSharingInfo.from({
             peer: params.peer,
@@ -376,13 +337,9 @@ export class AttributesController extends ConsumptionBaseController {
         id?: CoreId;
     }): Promise<OwnRelationshipAttribute> {
         const attribute = params.content;
-        if (attribute.owner.toString() !== this.identity.address.toString()) {
-            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute();
-        }
 
-        if (!this.validateAttributeCharacters(attribute)) {
-            throw ConsumptionCoreErrors.attributes.forbiddenCharactersInAttribute("The Attribute contains forbidden characters.");
-        }
+        if (!attribute.owner.equals(this.identity.address)) throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute();
+        await this.validateAttributeCreation(attribute);
 
         const peerSharingInfo = OwnRelationshipAttributeSharingInfo.from({
             peer: params.peer,
@@ -407,13 +364,9 @@ export class AttributesController extends ConsumptionBaseController {
         id?: CoreId;
     }): Promise<PeerRelationshipAttribute> {
         const attribute = params.content;
-        if (attribute.owner.toString() !== params.peer.toString()) {
-            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute();
-        }
 
-        if (!this.validateAttributeCharacters(attribute)) {
-            throw ConsumptionCoreErrors.attributes.forbiddenCharactersInAttribute("The Attribute contains forbidden characters.");
-        }
+        if (!attribute.owner.equals(params.peer)) throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute();
+        await this.validateAttributeCreation(attribute);
 
         const peerSharingInfo = PeerRelationshipAttributeSharingInfo.from({
             peer: params.peer,
@@ -439,13 +392,9 @@ export class AttributesController extends ConsumptionBaseController {
         id: CoreId;
     }): Promise<ThirdPartyRelationshipAttribute> {
         const attribute = params.content;
-        if (!(attribute.owner.toString() === params.peer.toString() || attribute.owner.toString() === params.initialAttributePeer.toString())) {
-            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute();
-        }
 
-        if (!this.validateAttributeCharacters(attribute)) {
-            throw ConsumptionCoreErrors.attributes.forbiddenCharactersInAttribute("The Attribute contains forbidden characters.");
-        }
+        if (!(attribute.owner.equals(params.peer) || attribute.owner.equals(params.initialAttributePeer))) throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute();
+        await this.validateAttributeCreation(attribute);
 
         const peerSharingInfo = ThirdPartyRelationshipAttributeSharingInfo.from({
             peer: params.peer,
@@ -462,6 +411,17 @@ export class AttributesController extends ConsumptionBaseController {
 
         this.eventBus.publish(new AttributeCreatedEvent(this.identity.address.toString(), thirdPartyRelationshipAttribute));
         return thirdPartyRelationshipAttribute;
+    }
+
+    private async validateAttributeCreation(attribute: IdentityAttribute | RelationshipAttribute): Promise<void> {
+        if (!this.validateAttributeCharacters(attribute)) {
+            throw ConsumptionCoreErrors.attributes.forbiddenCharactersInAttribute("The Attribute contains forbidden characters.");
+        }
+
+        if (attribute instanceof Relationship) return;
+
+        const tagValidationResult = await this.validateTagsOfAttribute(attribute);
+        if (tagValidationResult.isError()) throw tagValidationResult.error;
     }
 
     // TODO: maybe combine this with the following function; maybe use params as input object like for create
@@ -496,12 +456,9 @@ export class AttributesController extends ConsumptionBaseController {
         validate = true
     ): Promise<{ predecessor: OwnIdentityAttribute; successor: OwnIdentityAttribute }> {
         const parsedSuccessorParams = OwnIdentityAttributeSuccessorParams.from(successorParams);
+        let attribute = parsedSuccessorParams.content;
 
-        const trimmedAttribute = {
-            ...parsedSuccessorParams.content.toJSON(),
-            value: this.trimAttributeValue(parsedSuccessorParams.content.value.toJSON() as AttributeValues.Identity.Json)
-        };
-        parsedSuccessorParams.content = IdentityAttribute.from(trimmedAttribute);
+        attribute = this.trimAttribute(attribute);
 
         if (validate) {
             const validationResult = await this.validateOwnIdentityAttributeSuccession(predecessor, parsedSuccessorParams);
@@ -510,7 +467,7 @@ export class AttributesController extends ConsumptionBaseController {
 
         const successor = OwnIdentityAttribute.from({
             id: await ConsumptionIds.attribute.generate(),
-            content: parsedSuccessorParams.content,
+            content: attribute,
             createdAt: CoreDate.utc(),
             succeeds: predecessor.id,
             isDefault: predecessor.isDefault
@@ -542,12 +499,9 @@ export class AttributesController extends ConsumptionBaseController {
         validate = true
     ): Promise<{ predecessor: PeerIdentityAttribute; successor: PeerIdentityAttribute }> {
         const parsedSuccessorParams = PeerIdentityAttributeSuccessorParams.from(successorParams);
+        let attribute = parsedSuccessorParams.content;
 
-        const trimmedAttribute = {
-            ...parsedSuccessorParams.content.toJSON(),
-            value: this.trimAttributeValue(parsedSuccessorParams.content.value.toJSON() as AttributeValues.Identity.Json)
-        };
-        parsedSuccessorParams.content = IdentityAttribute.from(trimmedAttribute);
+        attribute = this.trimAttribute(attribute);
 
         if (validate) {
             const validationResult = await this.validatePeerIdentityAttributeSuccession(predecessor, parsedSuccessorParams);
@@ -556,7 +510,7 @@ export class AttributesController extends ConsumptionBaseController {
 
         const successor = PeerIdentityAttribute.from({
             id: parsedSuccessorParams.id,
-            content: parsedSuccessorParams.content,
+            content: attribute,
             createdAt: CoreDate.utc(),
             peerSharingInfo: parsedSuccessorParams.peerSharingInfo,
             succeeds: predecessor.id
@@ -1066,6 +1020,14 @@ export class AttributesController extends ConsumptionBaseController {
 
         const attributeDuplicate = matchingAttributes.find((duplicate) => _.isEqual(duplicate.content.value.toJSON(), value));
         return attributeDuplicate;
+    }
+
+    private trimAttribute(attribute: IdentityAttribute): IdentityAttribute {
+        const trimmedAttribute = {
+            ...attribute.toJSON(),
+            value: this.trimAttributeValue(attribute.value.toJSON() as AttributeValues.Identity.Json)
+        };
+        return IdentityAttribute.from(trimmedAttribute);
     }
 
     private trimAttributeValue(value: AttributeValues.Identity.Json): AttributeValues.Identity.Json {
