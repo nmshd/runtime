@@ -10,16 +10,13 @@ import { IdentityDVO } from "../transport";
 export interface LocalAttributeDVO extends DataViewObject {
     content: IdentityAttributeJSON | RelationshipAttributeJSON;
     owner: string; // Careful: We cannot expand the owner to an IdentityDVO, as the IdentityDVO possibly contains the LocalAttributesDVO of the Relationship (endless recursion)
+    isOwn: boolean;
 
     value: unknown;
     valueType: string;
 
     renderHints: RenderHintsJSON;
     valueHints: ValueHintsJSON;
-
-    isDraft: false;
-    isOwn: boolean;
-    isValid: boolean;
 
     createdAt: string;
     wasViewedAt?: string;

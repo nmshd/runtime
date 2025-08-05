@@ -49,7 +49,6 @@ describe("SharedToPeerAttributeDVO", () => {
         expect(value.value).toBe("male");
         expect(dvo.createdAt).toStrictEqual(ownSharedIdentityAttribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.isValid).toBe(true);
         expect(dvo.owner).toStrictEqual(ownSharedIdentityAttribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");
@@ -61,7 +60,6 @@ describe("SharedToPeerAttributeDVO", () => {
             { key: "male", displayName: "i18n://attributes.values.sex.male" }
         ]);
         expect(dvo.peer).toBe(ownSharedIdentityAttribute.shareInfo!.peer);
-        expect(dvo.isDraft).toBe(false);
         expect(dvo.requestReference).toBe(ownSharedIdentityAttribute.shareInfo!.requestReference);
         expect(dvo.notificationReference).toBe(ownSharedIdentityAttribute.shareInfo!.notificationReference);
         expect(dvo.sourceAttribute).toBe(ownSharedIdentityAttribute.shareInfo!.sourceAttribute);
@@ -95,7 +93,6 @@ describe("SharedToPeerAttributeDVO", () => {
         expect(value.value).toBe("DE");
         expect(dvo.createdAt).toStrictEqual(ownSharedIdentityAttribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.isValid).toBe(true);
         expect(dvo.owner).toStrictEqual(ownSharedIdentityAttribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");
@@ -107,7 +104,6 @@ describe("SharedToPeerAttributeDVO", () => {
         expect(dvo.valueHints.values).toHaveLength(249);
         expect(dvo.valueHints.values![61]).toStrictEqual({ key: "DE", displayName: "i18n://attributes.values.countries.DE" });
         expect(dvo.peer).toBe(ownSharedIdentityAttribute.shareInfo!.peer);
-        expect(dvo.isDraft).toBe(false);
         expect(dvo.requestReference).toBe(ownSharedIdentityAttribute.shareInfo!.requestReference);
         expect(dvo.notificationReference).toBe(ownSharedIdentityAttribute.shareInfo!.notificationReference);
         expect(dvo.sourceAttribute).toBe(ownSharedIdentityAttribute.shareInfo!.sourceAttribute);
@@ -142,7 +138,6 @@ describe("SharedToPeerAttributeDVO", () => {
         expect(value.value).toBe("de");
         expect(dvo.createdAt).toStrictEqual(ownSharedIdentityAttribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.isValid).toBe(true);
         expect(dvo.owner).toStrictEqual(ownSharedIdentityAttribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");
@@ -154,7 +149,6 @@ describe("SharedToPeerAttributeDVO", () => {
         expect(dvo.valueHints.values).toHaveLength(183);
         expect(dvo.valueHints.values![31]).toStrictEqual({ key: "de", displayName: "i18n://attributes.values.languages.de" });
         expect(dvo.peer).toBe(ownSharedIdentityAttribute.shareInfo!.peer);
-        expect(dvo.isDraft).toBe(false);
         expect(dvo.requestReference).toBe(ownSharedIdentityAttribute.shareInfo!.requestReference);
         expect(dvo.notificationReference).toBe(ownSharedIdentityAttribute.shareInfo!.notificationReference);
         expect(dvo.sourceAttribute).toBe(ownSharedIdentityAttribute.shareInfo!.sourceAttribute);
@@ -192,7 +186,6 @@ describe("SharedToPeerAttributeDVO", () => {
         expect(value.value).toBe("de");
         expect(dvo.createdAt).toStrictEqual(updatedOwnSharedIdentityAttribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.isValid).toBe(true);
         expect(dvo.owner).toStrictEqual(updatedOwnSharedIdentityAttribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");
@@ -204,7 +197,6 @@ describe("SharedToPeerAttributeDVO", () => {
         expect(dvo.valueHints.values).toHaveLength(183);
         expect(dvo.valueHints.values![31]).toStrictEqual({ key: "de", displayName: "i18n://attributes.values.languages.de" });
         expect(dvo.peer).toBe(updatedOwnSharedIdentityAttribute.shareInfo!.peer);
-        expect(dvo.isDraft).toBe(false);
         expect(dvo.requestReference).toBe(updatedOwnSharedIdentityAttribute.shareInfo!.requestReference);
         expect(dvo.notificationReference).toBe(updatedOwnSharedIdentityAttribute.shareInfo!.notificationReference);
         expect(dvo.sourceAttribute).toBe(updatedOwnSharedIdentityAttribute.shareInfo!.sourceAttribute);
