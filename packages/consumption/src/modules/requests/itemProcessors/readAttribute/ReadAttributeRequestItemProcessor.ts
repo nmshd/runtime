@@ -315,7 +315,10 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             // TODO: maybe negate this
             const wasSharedBefore = latestSharedVersion.length > 0;
             if (!wasSharedBefore) {
-                const thirdPartyAddress = existingAttribute instanceof OwnRelationshipAttribute ? existingAttribute.peerSharingInfo.peer : undefined;
+                const thirdPartyAddress =
+                    existingAttribute instanceof OwnRelationshipAttribute || existingAttribute instanceof PeerRelationshipAttribute
+                        ? existingAttribute.peerSharingInfo.peer
+                        : undefined;
 
                 return ReadAttributeAcceptResponseItem.from({
                     result: ResponseItemResult.Accepted,
