@@ -58,7 +58,7 @@ export interface GetAttributesRequestQuery {
 export class GetAttributesUseCase extends UseCase<GetAttributesRequest, LocalAttributeDTO[]> {
     public static readonly queryTranslator = new QueryTranslator({
         whitelist: {
-            [`${nameof<LocalAttributeDTO>}.@type`]: true,
+            ["@type"]: true,
             [nameof<LocalAttributeDTO>((x) => x.createdAt)]: true,
             [nameof<LocalAttributeDTO>((x) => x.succeeds)]: true,
             [nameof<LocalAttributeDTO>((x) => x.succeededBy)]: true,
@@ -97,7 +97,6 @@ export class GetAttributesUseCase extends UseCase<GetAttributesRequest, LocalAtt
             [`${nameof<LocalAttributeDTO>((x) => x.forwardedSharingInfos)}.${nameof<ForwardedSharingInfosDTO>((x) => x.deletionInfo)}.${nameof<LocalAttributeDeletionInfoDTO>((x) => x.deletionDate)}`]: true
         },
         alias: {
-            [`${nameof<LocalAttributeDTO>}.@type`]: `${nameof<LocalAttributeDTO>}.@type`,
             [nameof<LocalAttributeDTO>((x) => x.createdAt)]: nameof<LocalAttribute>((x) => x.createdAt),
             [nameof<LocalAttributeDTO>((x) => x.succeeds)]: nameof<LocalAttribute>((x) => x.succeeds),
             [nameof<LocalAttributeDTO>((x) => x.succeededBy)]: nameof<LocalAttribute>((x) => x.succeededBy),

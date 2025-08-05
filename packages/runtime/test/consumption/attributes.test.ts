@@ -194,6 +194,15 @@ describe("get attribute(s)", () => {
             expect(attributeIds).toStrictEqual(expect.arrayContaining(identityAttributeIds));
         });
 
+        test("should allow to get an Attribute by type", async function () {
+            const result = await services1.consumption.attributes.getAttributes({ query: { "@type": "OwnIdentityAttribute" } });
+            expect(result).toBeSuccessful();
+
+            const attributes = result.value;
+            expect(attributes).toHaveLength(3);
+            expect(attributes.map((attribute) => attribute.id)).toEqual(expect.arrayContaining(identityAttributeIds));
+        });
+
         test("should allow to get an Attribute by value type", async function () {
             const result = await services1.consumption.attributes.getAttributes({
                 query: { "content.value.@type": "GivenName" }

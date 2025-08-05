@@ -1,6 +1,7 @@
 import { IdentityAttributeJSON, RelationshipAttributeJSON } from "@nmshd/content";
 
 export interface LocalAttributeDTO {
+    "@type": "OwnIdentityAttribute" | "PeerIdentityAttribute" | "OwnRelationshipAttribute" | "PeerRelationshipAttribute" | "ThirdPartyRelationshipAttribute";
     id: string;
     createdAt: string;
     content: IdentityAttributeJSON | RelationshipAttributeJSON;
