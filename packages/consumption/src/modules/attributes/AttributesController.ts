@@ -37,6 +37,7 @@ import {
 } from "./events";
 import { AttributeTagCollection, IAttributeTag } from "./local/AttributeTagCollection";
 import {
+    AttributeWithForwardedSharingInfos,
     LocalAttribute,
     LocalAttributeJSON,
     OwnIdentityAttribute,
@@ -49,8 +50,7 @@ import { IdentityAttributeQueryTranslator, RelationshipAttributeQueryTranslator,
 import {
     ForwardedAttributeDeletionInfo,
     ForwardedAttributeDeletionStatus,
-    ForwardedRelationshipAttributeSharingInfo,
-    OwnIdentityAttributeSharingInfo,
+    ForwardedSharingInfo,
     OwnRelationshipAttributeSharingInfo,
     PeerAttributeDeletionInfo,
     PeerAttributeDeletionStatus,
@@ -262,7 +262,6 @@ export class AttributesController extends ConsumptionBaseController {
         return ownIdentityAttribute;
     }
 
-    // TODO: check if we still need this skipOverwrite, I think it had something to do with child Attributes
     public async setAsDefaultOwnIdentityAttribute(newDefaultAttribute: OwnIdentityAttribute, skipOverwrite?: boolean): Promise<OwnIdentityAttribute> {
         if (!this.setDefaultOwnIdentityAttributes) throw ConsumptionCoreErrors.attributes.setDefaultOwnIdentityAttributesIsDisabled();
 
@@ -414,9 +413,7 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     private async validateAttributeCreation(attribute: IdentityAttribute | RelationshipAttribute): Promise<void> {
-        if (!this.validateAttributeCharacters(attribute)) {
-            throw ConsumptionCoreErrors.attributes.forbiddenCharactersInAttribute("The Attribute contains forbidden characters.");
-        }
+        if (!this.validateAttributeCharacters(attribute)) throw ConsumptionCoreErrors.attributes.forbiddenCharactersInAttribute("The Attribute contains forbidden characters.");
 
         if (attribute instanceof Relationship) return;
 
@@ -424,28 +421,13 @@ export class AttributesController extends ConsumptionBaseController {
         if (tagValidationResult.isError()) throw tagValidationResult.error;
     }
 
-    // TODO: maybe combine this with the following function; maybe use params as input object like for create
-    public async addSharingInfoToOwnIdentityAttribute(attribute: OwnIdentityAttribute, peer: CoreAddress, sourceReference: CoreId): Promise<OwnIdentityAttribute> {
-        const sharingInfo = OwnIdentityAttributeSharingInfo.from({ peer, sourceReference, sharedAt: CoreDate.utc() });
+    public async addForwardedSharingInfoToAttribute<T extends AttributeWithForwardedSharingInfos>(attribute: T, peer: CoreAddress, sourceReference: CoreId): Promise<T> {
+        const sharingInfo = ForwardedSharingInfo.from({ peer, sourceReference, sharedAt: CoreDate.utc() });
+
         (attribute.forwardedSharingInfos ??= []).push(sharingInfo);
         await this.updateAttributeUnsafe(attribute);
 
         // TODO: publish event?
-
-        return attribute;
-    }
-
-    public async addThirdPartySharingInfoToRelationshipAttribute(
-        attribute: OwnRelationshipAttribute | PeerRelationshipAttribute,
-        peer: CoreAddress,
-        sourceReference: CoreId
-    ): Promise<OwnRelationshipAttribute | PeerRelationshipAttribute> {
-        const sharingInfo = ForwardedRelationshipAttributeSharingInfo.from({ peer, sourceReference, sharedAt: CoreDate.utc() });
-        (attribute.forwardedSharingInfos ??= []).push(sharingInfo);
-        await this.updateAttributeUnsafe(attribute);
-
-        // TODO: publish event?
-
         return attribute;
     }
 

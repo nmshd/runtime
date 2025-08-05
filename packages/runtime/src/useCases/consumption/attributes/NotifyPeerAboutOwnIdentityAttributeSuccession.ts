@@ -66,7 +66,7 @@ export class NotifyPeerAboutOwnIdentityAttributeSuccessionUseCase extends UseCas
         }
 
         const notificationId = await ConsumptionIds.notification.generate();
-        const updatedAttribute = await this.attributeController.addSharingInfoToOwnIdentityAttribute(attribute, peerAddress, notificationId);
+        const updatedAttribute = await this.attributeController.addForwardedSharingInfoToAttribute(attribute, peerAddress, notificationId);
 
         const notificationItem = PeerSharedAttributeSucceededNotificationItem.from({
             predecessorId: latestVersionSharedWithPeer.id,

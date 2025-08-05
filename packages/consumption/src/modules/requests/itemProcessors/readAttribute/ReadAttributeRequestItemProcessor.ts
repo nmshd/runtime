@@ -307,10 +307,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 });
             }
 
-            const updatedAttribute =
-                existingAttribute instanceof OwnIdentityAttribute
-                    ? await this.consumptionController.attributes.addSharingInfoToOwnIdentityAttribute(existingAttribute, requestInfo.peer, requestInfo.id)
-                    : await this.consumptionController.attributes.addThirdPartySharingInfoToRelationshipAttribute(existingAttribute, requestInfo.peer, requestInfo.id);
+            const updatedAttribute = await this.consumptionController.attributes.addForwardedSharingInfoToAttribute(existingAttribute, requestInfo.peer, requestInfo.id);
 
             // TODO: maybe negate this
             const wasSharedBefore = latestSharedVersion.length > 0;

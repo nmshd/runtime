@@ -8,7 +8,7 @@ import {
     ResponseItemResult
 } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
-import { AttributesController, OwnIdentityAttribute, OwnIdentityAttributeSharingInfo } from "../../../attributes";
+import { AttributesController, ForwardedSharingInfo, OwnIdentityAttribute } from "../../../attributes";
 import { LocalRequestInfo } from "../IRequestItemProcessor";
 
 export default async function createAppropriateResponseItem(
@@ -47,7 +47,7 @@ export default async function createAppropriateResponseItem(
     const latestSharedVersion = latestSharedVersions.length > 0 ? latestSharedVersions[0] : undefined;
 
     if (!latestSharedVersion) {
-        await attributesController.addSharingInfoToOwnIdentityAttribute(ownIdentityAttribute, requestInfo.peer, requestInfo.id);
+        await attributesController.addForwardedSharingInfoToAttribute(ownIdentityAttribute, requestInfo.peer, requestInfo.id);
 
         switch (itemType) {
             case "Create":
@@ -79,7 +79,7 @@ export default async function createAppropriateResponseItem(
 
     const ownIdentityAttributeSuccessorParams = {
         content: ownIdentityAttribute.content,
-        sharingInfo: OwnIdentityAttributeSharingInfo.from({
+        sharingInfo: ForwardedSharingInfo.from({
             peer: requestInfo.peer,
             sourceReference: requestInfo.id,
             sharedAt: CoreDate.utc()

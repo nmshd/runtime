@@ -5,9 +5,9 @@ import { nameof } from "ts-simple-nameof";
 import {
     ForwardedAttributeDeletionInfo,
     ForwardedAttributeDeletionStatus,
-    ForwardedRelationshipAttributeSharingInfo,
-    ForwardedRelationshipAttributeSharingInfoJSON,
-    IForwardedRelationshipAttributeSharingInfo,
+    ForwardedSharingInfo,
+    ForwardedSharingInfoJSON,
+    IForwardedSharingInfo,
     IOwnRelationshipAttributeSharingInfo,
     OwnRelationshipAttributeSharingInfo,
     OwnRelationshipAttributeSharingInfoJSON
@@ -18,13 +18,13 @@ export interface OwnRelationshipAttributeJSON extends LocalAttributeJSON {
     "@type": "OwnRelationshipAttribute";
     content: RelationshipAttributeJSON;
     peerSharingInfo: OwnRelationshipAttributeSharingInfoJSON;
-    forwardedSharingInfos?: ForwardedRelationshipAttributeSharingInfoJSON[];
+    forwardedSharingInfos?: ForwardedSharingInfoJSON[];
 }
 
 export interface IOwnRelationshipAttribute extends ILocalAttribute {
     content: IRelationshipAttribute;
     peerSharingInfo: IOwnRelationshipAttributeSharingInfo;
-    forwardedSharingInfos?: IForwardedRelationshipAttributeSharingInfo[];
+    forwardedSharingInfos?: IForwardedSharingInfo[];
 }
 
 @type("OwnRelationshipAttribute")
@@ -44,9 +44,9 @@ export class OwnRelationshipAttribute extends LocalAttribute implements IOwnRela
     @validate()
     public peerSharingInfo: OwnRelationshipAttributeSharingInfo;
 
-    @serialize({ type: ForwardedRelationshipAttributeSharingInfo })
+    @serialize({ type: ForwardedSharingInfo })
     @validate({ nullable: true })
-    public forwardedSharingInfos?: ForwardedRelationshipAttributeSharingInfo[];
+    public forwardedSharingInfos?: ForwardedSharingInfo[];
 
     public isSharedWith(peerAddress: CoreAddress, includeDeletedAndToBeDeleted = false): boolean {
         if (!this.forwardedSharingInfos) return false;

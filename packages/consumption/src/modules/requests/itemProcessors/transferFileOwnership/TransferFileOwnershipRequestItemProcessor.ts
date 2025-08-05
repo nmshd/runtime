@@ -144,7 +144,7 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
             })
         });
 
-        await this.consumptionController.attributes.addSharingInfoToOwnIdentityAttribute(ownIdentityAttribute, requestInfo.peer, requestInfo.id);
+        await this.consumptionController.attributes.addForwardedSharingInfoToAttribute(ownIdentityAttribute, requestInfo.peer, requestInfo.id);
 
         return TransferFileOwnershipAcceptResponseItem.from({
             result: ResponseItemResult.Accepted,

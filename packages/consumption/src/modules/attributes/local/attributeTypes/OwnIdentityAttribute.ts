@@ -2,26 +2,20 @@ import { serialize, type, validate } from "@js-soft/ts-serval";
 import { IdentityAttribute, IdentityAttributeJSON, IIdentityAttribute } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
-import {
-    ForwardedAttributeDeletionInfo,
-    ForwardedAttributeDeletionStatus,
-    IOwnIdentityAttributeSharingInfo,
-    OwnIdentityAttributeSharingInfo,
-    OwnIdentityAttributeSharingInfoJSON
-} from "../sharingInfos";
+import { ForwardedAttributeDeletionInfo, ForwardedAttributeDeletionStatus, ForwardedSharingInfo, ForwardedSharingInfoJSON, IForwardedSharingInfo } from "../sharingInfos";
 import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./LocalAttribute";
 
 export interface OwnIdentityAttributeJSON extends LocalAttributeJSON {
     "@type": "OwnIdentityAttribute";
     content: IdentityAttributeJSON;
     isDefault?: true;
-    forwardedSharingInfos?: OwnIdentityAttributeSharingInfoJSON[];
+    forwardedSharingInfos?: ForwardedSharingInfoJSON[];
 }
 
 export interface IOwnIdentityAttribute extends ILocalAttribute {
     content: IIdentityAttribute;
     isDefault?: true;
-    forwardedSharingInfos?: IOwnIdentityAttributeSharingInfo[];
+    forwardedSharingInfos?: IForwardedSharingInfo[];
 }
 
 @type("OwnIdentityAttribute")
@@ -43,9 +37,9 @@ export class OwnIdentityAttribute extends LocalAttribute implements IOwnIdentity
     @validate({ nullable: true })
     public isDefault?: true;
 
-    @serialize({ type: OwnIdentityAttributeSharingInfo })
+    @serialize({ type: ForwardedSharingInfo })
     @validate({ nullable: true })
-    public forwardedSharingInfos?: OwnIdentityAttributeSharingInfo[];
+    public forwardedSharingInfos?: ForwardedSharingInfo[];
 
     public isSharedWith(peerAddress: CoreAddress, includeDeletedAndToBeDeleted = false): boolean {
         if (!this.forwardedSharingInfos) return false;

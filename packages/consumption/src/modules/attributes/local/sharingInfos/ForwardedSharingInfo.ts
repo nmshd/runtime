@@ -3,17 +3,17 @@ import { CoreDate, ICoreDate } from "@nmshd/core-types";
 import { AbstractAttributeSharingInfo, AbstractAttributeSharingInfoJSON, IAbstractAttributeSharingInfo } from "./AbstractAttributeSharingInfo";
 import { ForwardedAttributeDeletionInfo, ForwardedAttributeDeletionInfoJSON, IForwardedAttributeDeletionInfo } from "./deletionInfos";
 
-export interface ForwardedRelationshipAttributeSharingInfoJSON extends AbstractAttributeSharingInfoJSON {
+export interface ForwardedSharingInfoJSON extends AbstractAttributeSharingInfoJSON {
     sharedAt: string;
     deletionInfo?: ForwardedAttributeDeletionInfoJSON;
 }
 
-export interface IForwardedRelationshipAttributeSharingInfo extends IAbstractAttributeSharingInfo {
+export interface IForwardedSharingInfo extends IAbstractAttributeSharingInfo {
     sharedAt: ICoreDate;
     deletionInfo?: IForwardedAttributeDeletionInfo;
 }
 
-export class ForwardedRelationshipAttributeSharingInfo extends AbstractAttributeSharingInfo implements IForwardedRelationshipAttributeSharingInfo {
+export class ForwardedSharingInfo extends AbstractAttributeSharingInfo implements IForwardedSharingInfo {
     @serialize()
     @validate()
     public sharedAt: CoreDate;
@@ -22,7 +22,7 @@ export class ForwardedRelationshipAttributeSharingInfo extends AbstractAttribute
     @validate({ nullable: true })
     public override deletionInfo?: ForwardedAttributeDeletionInfo;
 
-    public static from(value: IForwardedRelationshipAttributeSharingInfo | ForwardedRelationshipAttributeSharingInfoJSON): ForwardedRelationshipAttributeSharingInfo {
-        return super.fromAny(value) as ForwardedRelationshipAttributeSharingInfo;
+    public static from(value: IForwardedSharingInfo | ForwardedSharingInfoJSON): ForwardedSharingInfo {
+        return super.fromAny(value) as ForwardedSharingInfo;
     }
 }

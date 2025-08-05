@@ -256,7 +256,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
                 });
             }
 
-            const updatedAttribute = await this.consumptionController.attributes.addSharingInfoToOwnIdentityAttribute(existingAttribute, requestInfo.peer, requestInfo.id);
+            const updatedAttribute = await this.consumptionController.attributes.addForwardedSharingInfoToAttribute(existingAttribute, requestInfo.peer, requestInfo.id);
 
             // TODO: maybe negate this
             const wasSharedBefore = latestSharedVersion.length > 0;

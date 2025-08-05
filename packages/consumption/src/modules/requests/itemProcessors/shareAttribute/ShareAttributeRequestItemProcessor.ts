@@ -217,11 +217,11 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
         const sharedAttribute = await this.consumptionController.attributes.getLocalAttribute(requestItem.sourceAttributeId);
 
         if (sharedAttribute instanceof OwnIdentityAttribute) {
-            await this.consumptionController.attributes.addSharingInfoToOwnIdentityAttribute(sharedAttribute, requestInfo.peer, requestInfo.id);
+            await this.consumptionController.attributes.addForwardedSharingInfoToAttribute(sharedAttribute, requestInfo.peer, requestInfo.id);
         }
 
         if (sharedAttribute instanceof OwnRelationshipAttribute || sharedAttribute instanceof PeerRelationshipAttribute) {
-            await this.consumptionController.attributes.addThirdPartySharingInfoToRelationshipAttribute(sharedAttribute, requestInfo.peer, requestInfo.id);
+            await this.consumptionController.attributes.addForwardedSharingInfoToAttribute(sharedAttribute, requestInfo.peer, requestInfo.id);
         }
     }
 }
