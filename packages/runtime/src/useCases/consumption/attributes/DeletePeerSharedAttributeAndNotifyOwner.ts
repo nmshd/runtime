@@ -47,16 +47,12 @@ export class DeletePeerSharedAttributeAndNotifyOwnerUseCase extends UseCase<Dele
         }
 
         const validationResult = await this.attributesController.validateFullAttributeDeletionProcess(peerSharedAttribute);
-        if (validationResult.isError()) {
-            return Result.fail(validationResult.error);
-        }
+        if (validationResult.isError()) return Result.fail(validationResult.error);
 
         await this.attributesController.executeFullAttributeDeletionProcess(peerSharedAttribute);
 
         const messageRecipientsValidationResult = await this.messageController.validateMessageRecipients([peerSharedAttribute.shareInfo.peer]);
-        if (messageRecipientsValidationResult.isError) {
-            return Result.ok({});
-        }
+        if (messageRecipientsValidationResult.isError) return Result.ok({});
 
         const notificationId = await ConsumptionIds.notification.generate();
         const notificationItem = PeerSharedAttributeDeletedByPeerNotificationItem.from({ attributeId: peerSharedAttributeId });

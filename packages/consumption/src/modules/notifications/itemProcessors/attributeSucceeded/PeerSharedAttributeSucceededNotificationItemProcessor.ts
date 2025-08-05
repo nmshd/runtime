@@ -69,8 +69,8 @@ export class PeerSharedAttributeSucceededNotificationItemProcessor extends Abstr
             throw e;
         }
 
-        const myAddress = this.consumptionController.accountController.identity.address;
-        return new PeerSharedAttributeSucceededEvent(myAddress.toString(), predecessor, successor);
+        const ownAddress = this.consumptionController.accountController.identity.address.toString();
+        return new PeerSharedAttributeSucceededEvent(ownAddress, predecessor, successor);
     }
 
     public override async rollback(notificationItem: PeerSharedAttributeSucceededNotificationItem, notification: LocalNotification): Promise<void> {
