@@ -19,7 +19,6 @@ export interface LocalAttributeDVO extends DataViewObject {
 
     isDraft: false;
     isOwn: boolean;
-    isValid: boolean;
 
     createdAt: string;
     wasViewedAt?: string;
