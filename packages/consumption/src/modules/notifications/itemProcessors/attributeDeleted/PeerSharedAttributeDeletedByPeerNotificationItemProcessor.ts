@@ -67,7 +67,7 @@ export class PeerSharedAttributeDeletedByPeerNotificationItemProcessor extends A
         const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute.id);
 
         for (const attr of [attribute, ...predecessors]) {
-            // the previous deletionState cannot be unambiguously known, either it was undefined or 'toBeDeletedByPeer'
+            // the previous deletionState cannot be unambiguously known, either it was undefined or 'ToBeDeletedByPeer'
             attr.deletionInfo = undefined;
             await this.consumptionController.attributes.updateAttributeUnsafe(attr);
         }
