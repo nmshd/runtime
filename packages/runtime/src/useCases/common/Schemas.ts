@@ -13633,9 +13633,6 @@ export const GetAttributesRequest: any = {
                         }
                     ]
                 },
-                "isDefault": {
-                    "type": "string"
-                },
                 "wasViewedAt": {
                     "anyOf": [
                         {
@@ -13648,6 +13645,9 @@ export const GetAttributesRequest: any = {
                             }
                         }
                     ]
+                },
+                "isDefault": {
+                    "type": "string"
                 },
                 "content.@type": {
                     "anyOf": [
@@ -14317,9 +14317,6 @@ export const GetRepositoryAttributesRequest: any = {
                 "createdAt": {
                     "type": "string"
                 },
-                "isDefault": {
-                    "type": "string"
-                },
                 "wasViewedAt": {
                     "anyOf": [
                         {
@@ -14332,6 +14329,9 @@ export const GetRepositoryAttributesRequest: any = {
                             }
                         }
                     ]
+                },
+                "isDefault": {
+                    "type": "string"
                 },
                 "content.tags": {
                     "anyOf": [
