@@ -122,7 +122,6 @@ describe("DeleteAttributeRequestItemDVO", () => {
         expect(value.value).toBe("A given name");
         expect(requestItemDVO.attribute.renderHints.editType).toBe("InputLike");
         expect(requestItemDVO.attribute.valueHints.max).toBe(100);
-        expect(requestItemDVO.attribute.isDraft).toBe(false);
         expect(requestItemDVO.attribute.isOwn).toBe(true);
         expect(requestItemDVO.mustBeAccepted).toBe(true);
         expect(requestItemDVO.attributeId).toBe(attributeId);
@@ -155,7 +154,6 @@ describe("DeleteAttributeRequestItemDVO", () => {
         expect(value.value).toBe("A given name");
         expect(requestItemDVO.attribute.renderHints.editType).toBe("InputLike");
         expect(requestItemDVO.attribute.valueHints.max).toBe(100);
-        expect(requestItemDVO.attribute.isDraft).toBe(false);
         expect(requestItemDVO.attribute.isOwn).toBe(false);
         expect(requestItemDVO.mustBeAccepted).toBe(true);
         expect(requestItemDVO.attributeId).toBe(attributeId);
@@ -231,7 +229,6 @@ describe("DeleteAttributeRequestItemDVO", () => {
         expect(requestItemDVO.attribute.renderHints.technicalType).toBe("String");
         expect(requestItemDVO.attribute.renderHints.editType).toBe("InputLike");
         expect(requestItemDVO.attribute.valueHints.max).toBe(100);
-        expect(requestItemDVO.attribute.isDraft).toBe(false);
         expect(requestItemDVO.attribute.isOwn).toBe(true);
         expect(requestItemDVO.mustBeAccepted).toBe(true);
         const response = dvo.request.response;

@@ -104,7 +104,6 @@ describe("IQLQueryExpanded", () => {
         expect(dvo.tags![0]).toBe("x:default");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.isValid).toBe(true);
         expect(dvo.sharedWith).toStrictEqual([]);
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
@@ -127,7 +126,6 @@ describe("IQLQueryExpanded", () => {
         expect(value.value).toBe("Egon");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.isValid).toBe(true);
         expect(dvo.sharedWith).toStrictEqual([]);
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
@@ -151,7 +149,6 @@ describe("IQLQueryExpanded", () => {
         expect(dvo.tags![0]).toBe("x:fake");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.isValid).toBe(true);
         expect(dvo.sharedWith).toStrictEqual([]);
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
@@ -194,7 +191,6 @@ describe("IQLQueryExpanded", () => {
         expect(dvo.tags![0]).toBe("x:default");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.isValid).toBe(true);
         expect(dvo.sharedWith).toStrictEqual([]);
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
@@ -237,7 +233,6 @@ describe("IQLQueryExpanded", () => {
         expect(dvo.tags![0]).toBe("x:fake");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.isValid).toBe(true);
         expect(dvo.sharedWith).toStrictEqual([]);
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
@@ -277,7 +272,6 @@ describe("IQLQueryExpanded", () => {
         expect(dvo.tags![0]).toBe("x:fake");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.isValid).toBe(true);
         expect(dvo.sharedWith).toStrictEqual([]);
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
@@ -301,7 +295,6 @@ describe("IQLQueryExpanded", () => {
         expect(dvo.tags![0]).toBe("x:fake");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.isValid).toBe(true);
         expect(dvo.sharedWith).toStrictEqual([]);
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
