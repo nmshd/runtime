@@ -315,10 +315,13 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             // TODO: maybe negate this
             const wasSharedBefore = latestSharedVersion.length > 0;
             if (!wasSharedBefore) {
+                const thirdPartyAddress = existingAttribute instanceof OwnRelationshipAttribute ? existingAttribute.peerSharingInfo.peer : undefined;
+
                 return ReadAttributeAcceptResponseItem.from({
                     result: ResponseItemResult.Accepted,
                     attributeId: updatedAttribute.id,
-                    attribute: updatedAttribute.content
+                    attribute: updatedAttribute.content,
+                    thirdPartyAddress
                 });
             }
 
@@ -396,6 +399,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                     sourceReference: requestInfo.id,
                     initialAttributePeer: responseItem.thirdPartyAddress
                 });
+                return;
             }
 
             if (responseItem.attribute.owner.toString() === this.currentIdentityAddress.toString()) {
