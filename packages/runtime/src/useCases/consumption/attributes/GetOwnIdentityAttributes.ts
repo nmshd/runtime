@@ -48,10 +48,10 @@ export class GetOwnIdentityAttributesUseCase extends UseCase<GetOwnIdentityAttri
     protected async executeInternal(request: GetOwnIdentityAttributesRequest): Promise<Result<GetOwnIdentityAttributesResponse>> {
         const query: GetAttributesRequestQuery = request.query ?? {};
 
-        query["@type"] = "OwnIdentityAttribute";
-
         const flattenedQuery = flattenObject(query);
         const dbQuery = GetAttributesUseCase.queryTranslator.parse(flattenedQuery);
+
+        dbQuery["@type"] = "OwnIdentityAttribute";
 
         if (request.onlyLatestVersions ?? true) dbQuery["succeededBy"] = { $exists: false };
 
