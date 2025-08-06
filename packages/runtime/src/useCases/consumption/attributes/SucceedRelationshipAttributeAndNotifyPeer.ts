@@ -12,7 +12,7 @@ import { CoreId } from "@nmshd/core-types";
 import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { AccountController, MessageController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { AttributeIdString, NotificationIdString, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { AttributeIdString, NotificationIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { AttributeMapper } from "./AttributeMapper";
 
 export interface SucceedRelationshipAttributeAndNotifyPeerResponse {
@@ -48,8 +48,7 @@ export class SucceedRelationshipAttributeAndNotifyPeerUseCase extends UseCase<Su
         const predecessor = await this.attributeController.getLocalAttribute(CoreId.from(request.predecessorId));
         if (!predecessor) return Result.fail(ConsumptionCoreErrors.attributes.predecessorDoesNotExist());
 
-        // TODO: return correct error message
-        if (!(predecessor instanceof OwnRelationshipAttribute)) return Result.fail(ConsumptionCoreErrors.attributes.predecessorDoesNotExist());
+        if (!(predecessor instanceof OwnRelationshipAttribute)) return Result.fail(RuntimeErrors.attributes.isNotOwnRelationshipAttribute(predecessor.id));
 
         const successorContent = RelationshipAttribute.from({
             "@type": "RelationshipAttribute",

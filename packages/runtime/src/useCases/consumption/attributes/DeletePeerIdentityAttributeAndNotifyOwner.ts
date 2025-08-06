@@ -38,7 +38,7 @@ export class DeletePeerIdentityAttributeAndNotifyOwnerUseCase extends UseCase<De
         if (!peerIdentityAttribute) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
 
         if (!(peerIdentityAttribute instanceof PeerIdentityAttribute)) {
-            return Result.fail(RuntimeErrors.attributes.isNotPeerSharedAttribute(peerIdentityAttributeId)); // TODO:
+            return Result.fail(RuntimeErrors.attributes.isNotPeerIdentityAttribute(peerIdentityAttributeId));
         }
 
         const peer = peerIdentityAttribute.peerSharingInfo.peer;

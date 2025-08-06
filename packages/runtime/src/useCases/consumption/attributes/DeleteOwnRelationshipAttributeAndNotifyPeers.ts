@@ -41,7 +41,7 @@ export class DeleteOwnRelationshipAttributeAndNotifyPeersUseCase extends UseCase
         if (!ownRelationshipAttribute) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
 
         if (!(ownRelationshipAttribute instanceof OwnRelationshipAttribute)) {
-            return Result.fail(RuntimeErrors.attributes.isNotOwnSharedAttribute(ownRelationshipAttributeId)); // TODO:
+            return Result.fail(RuntimeErrors.attributes.isNotOwnRelationshipAttribute(ownRelationshipAttributeId));
         }
 
         const relationshipWithStatusPending = await this.relationshipsController.getRelationshipToIdentity(

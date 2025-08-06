@@ -199,7 +199,7 @@ class Notifications {
 
 class Attributes {
     public isNotOwnIdentityAttribute(attributeId: CoreId | string): ApplicationError {
-        return new ApplicationError("error.runtime.attributes.isNotOwnIdentityAttribute", `Attribute '${attributeId.toString()}' is not an own IdentityAttribute.`);
+        return new ApplicationError("error.runtime.attributes.isNotOwnIdentityAttribute", `The Attribute '${attributeId.toString()}' is not an own IdentityAttribute.`);
     }
 
     public ownIdentityAttributeHasAlreadyBeenSharedWithPeer(attributeId: CoreId | string, peer: CoreAddress | string): ApplicationError {
@@ -223,12 +223,16 @@ class Attributes {
         );
     }
 
-    public isNotOwnSharedAttribute(attributeId: CoreId | string): ApplicationError {
-        return new ApplicationError("error.runtime.attributes.isNotOwnSharedAttribute", `Attribute '${attributeId.toString()}' is not an own shared Attribute.`);
+    public isNotOwnRelationshipAttribute(attributeId: CoreId | string): ApplicationError {
+        return new ApplicationError("error.runtime.attributes.isNotOwnRelationshipAttribute", `The Attribute '${attributeId.toString()}' is not an own RelationshipAttribute.`);
     }
 
-    public isNotPeerSharedAttribute(attributeId: CoreId | string): ApplicationError {
-        return new ApplicationError("error.runtime.attributes.isNotPeerSharedAttribute", `Attribute '${attributeId.toString()}' is not a peer shared Attribute.`);
+    public isNotPeerRelationshipAttribute(attributeId: CoreId | string): ApplicationError {
+        return new ApplicationError("error.runtime.attributes.isNotPeerRelationshipAttribute", `The Attribute '${attributeId.toString()}' is not a peer RelationshipAttribute.`);
+    }
+
+    public isNotPeerIdentityAttribute(attributeId: CoreId | string): ApplicationError {
+        return new ApplicationError("error.runtime.attributes.isNotPeerIdentityAttribute", `The Attribute '${attributeId.toString()}' is not a peer shared Attribute.`);
     }
 
     public isNotThirdPartyRelationshipAttribute(attributeId: CoreId | string): ApplicationError {
