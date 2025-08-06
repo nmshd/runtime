@@ -158,7 +158,7 @@ export class AppRuntime extends Runtime<AppConfig> {
             throw error;
         }
 
-        const consumptionController = await new ConsumptionController(this.transport, accountController, { setDefaultRepositoryAttributes: true }).init();
+        const consumptionController = await new ConsumptionController(this.transport, accountController, { setDefaultOwnIdentityAttributes: true }).init();
 
         const services = await this.login(accountController, consumptionController);
 
