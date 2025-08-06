@@ -103,12 +103,8 @@ class Attributes {
         );
     }
 
-    // TODO: error message
-    public wrongOwnerOfAttribute() {
-        return new CoreError(
-            "error.consumption.attributes.wrongOwnerOfAttribute",
-            "A wrong owner was provided wanting to create a RepositoryAttribute. You can only create RepositoryAttributes for yourself."
-        );
+    public wrongOwnerOfAttribute(message: string) {
+        return new CoreError("error.consumption.attributes.wrongOwnerOfAttribute", message);
     }
 
     public senderIsNotPeerOfSharedAttribute(senderId: string | CoreAddress, attributeId: string | CoreId) {

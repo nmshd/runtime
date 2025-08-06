@@ -246,7 +246,10 @@ export class AttributesController extends ConsumptionBaseController {
     public async createOwnIdentityAttribute(params: { content: IdentityAttribute }): Promise<OwnIdentityAttribute> {
         const attribute = this.trimAttribute(params.content);
 
-        if (!attribute.owner.equals(this.identity.address)) throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute();
+        if (!attribute.owner.equals(this.identity.address)) {
+            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute("When creating an own IdentityAttribute, the owner must match the own address");
+        }
+
         await this.validateAttributeCreation(attribute);
 
         let ownIdentityAttribute = OwnIdentityAttribute.from({
@@ -310,7 +313,10 @@ export class AttributesController extends ConsumptionBaseController {
     public async createPeerIdentityAttribute(params: { content: IdentityAttribute; peer: CoreAddress; sourceReference: CoreId; id: CoreId }): Promise<PeerIdentityAttribute> {
         const attribute = this.trimAttribute(params.content);
 
-        if (!attribute.owner.equals(params.peer)) throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute();
+        if (!attribute.owner.equals(params.peer)) {
+            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute("When creating a peer IdentityAttribute, the owner must match the address of the peer");
+        }
+
         await this.validateAttributeCreation(attribute);
 
         const peerSharingInfo = PeerIdentityAttributeSharingInfo.from({
@@ -337,7 +343,10 @@ export class AttributesController extends ConsumptionBaseController {
     }): Promise<OwnRelationshipAttribute> {
         const attribute = params.content;
 
-        if (!attribute.owner.equals(this.identity.address)) throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute();
+        if (!attribute.owner.equals(this.identity.address)) {
+            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute("When creating an own RelationshipAttribute, the owner must match the own address");
+        }
+
         await this.validateAttributeCreation(attribute);
 
         const peerSharingInfo = OwnRelationshipAttributeSharingInfo.from({
@@ -364,7 +373,10 @@ export class AttributesController extends ConsumptionBaseController {
     }): Promise<PeerRelationshipAttribute> {
         const attribute = params.content;
 
-        if (!attribute.owner.equals(params.peer)) throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute();
+        if (!attribute.owner.equals(params.peer)) {
+            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute("When creating a peer RelationshipAttribute, the owner must match the address of the peer");
+        }
+
         await this.validateAttributeCreation(attribute);
 
         const peerSharingInfo = PeerRelationshipAttributeSharingInfo.from({
@@ -392,7 +404,11 @@ export class AttributesController extends ConsumptionBaseController {
     }): Promise<ThirdPartyRelationshipAttribute> {
         const attribute = params.content;
 
-        if (!(attribute.owner.equals(params.peer) || attribute.owner.equals(params.initialAttributePeer))) throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute();
+        if (!(attribute.owner.equals(params.peer) || attribute.owner.equals(params.initialAttributePeer))) {
+            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute(
+                "When creating a ThirdPartyRelationshipAttribute, the owner must match the address of the peer or initial Attribute peer"
+            );
+        }
         await this.validateAttributeCreation(attribute);
 
         const peerSharingInfo = ThirdPartyRelationshipAttributeSharingInfo.from({
