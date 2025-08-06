@@ -125,7 +125,6 @@ export class GetAttributesUseCase extends UseCase<GetAttributesRequest, LocalAtt
             [`${nameof<LocalAttributeDTO>((x) => x.peerSharingInfo)}.${nameof<PeerSharingInfoDTO>((x) => x.deletionInfo)}.${nameof<LocalAttributeDeletionInfoDTO>((x) => x.deletionStatus)}`]: `${nameof<AttributeWithPeerSharingInfo>((x) => x.peerSharingInfo)}.${nameof<PeerSharingInfoJSON>((x) => x.deletionInfo)}.${nameof<AbstractAttributeDeletionInfoJSON>((x) => x.deletionStatus)}`,
             [`${nameof<LocalAttributeDTO>((x) => x.peerSharingInfo)}.${nameof<PeerSharingInfoDTO>((x) => x.deletionInfo)}.${nameof<LocalAttributeDeletionInfoDTO>((x) => x.deletionDate)}`]: `${nameof<AttributeWithPeerSharingInfo>((x) => x.peerSharingInfo)}.${nameof<PeerSharingInfoJSON>((x) => x.deletionInfo)}.${nameof<AbstractAttributeDeletionInfoJSON>((x) => x.deletionDate)}`,
 
-            // TODO: do we need custom logic for forwardedSharingInfos
             // forwardedSharingInfos
             [`${nameof<LocalAttributeDTO>((x) => x.forwardedSharingInfos)}`]: `${nameof<AttributeWithForwardedSharingInfos>((x) => x.forwardedSharingInfos)}`,
             [`${nameof<LocalAttributeDTO>((x) => x.forwardedSharingInfos)}.${nameof<ForwardedSharingInfosDTO>((x) => x.peer)}`]: `${nameof<AttributeWithForwardedSharingInfos>((x) => x.forwardedSharingInfos)}.${nameof<ForwardedSharingInfoJSON>((x) => x.peer)}`,

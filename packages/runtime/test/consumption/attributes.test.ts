@@ -276,6 +276,35 @@ describe("get attribute(s)", () => {
 
             expect(attributes[0].id).toBe(appAttributeIds[2]);
         });
+
+        test("should allow to get an Attribute by peer of peerSharingInfo", async function () {
+            const result = await services1.consumption.attributes.getAttributes({ query: { "peerSharingInfo.peer": services2.address } });
+            expect(result).toBeSuccessful();
+
+            const attributes = result.value;
+            expect(attributes).toHaveLength(1);
+            expect(attributes[0].id).toBe(relationshipAttributeId);
+        });
+
+        test("should allow to get an Attribute by peer of forwardedSharingInfo", async function () {
+            const identityAttribute = (await services1.consumption.attributes.getAttribute({ id: identityAttributeIds[0] })).value;
+            await executeFullShareAndAcceptAttributeRequestFlow(
+                services1,
+                services2,
+                ShareAttributeRequestItem.from({
+                    attribute: identityAttribute.content,
+                    sourceAttributeId: identityAttribute.id,
+                    mustBeAccepted: true
+                })
+            );
+
+            const result = await services1.consumption.attributes.getAttributes({ query: { "forwardedSharingInfos.peer": services2.address } });
+            expect(result).toBeSuccessful();
+
+            const attributes = result.value;
+            expect(attributes).toHaveLength(1);
+            expect(attributes[0].id).toBe(identityAttribute.id);
+        });
     });
 });
 

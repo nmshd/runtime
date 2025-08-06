@@ -36,7 +36,7 @@ export class AttributeMapper {
         if (attribute instanceof OwnRelationshipAttribute) return "OwnRelationshipAttribute";
         if (attribute instanceof PeerRelationshipAttribute) return "PeerRelationshipAttribute";
         if (attribute instanceof ThirdPartyRelationshipAttribute) return "ThirdPartyRelationshipAttribute";
-        throw Error; // TODO:
+        throw new Error("Type of LocalAttribute not found.");
     }
 
     private static toPeerSharingInfo(attribute: LocalAttribute) {

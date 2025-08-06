@@ -27,14 +27,13 @@ export class DeleteOwnIdentityAttributeAndNotifyPeersUseCase extends UseCase<Del
         super(validator);
     }
 
-    // TODO: and notify peers
     // TODO: "changed behavior": own IdentityAttribute can be deleted if it is shared with a peer with a pending relationship -> problem with sending Message
     protected async executeInternal(request: DeleteOwnIdentityAttributeAndNotifyPeersRequest): Promise<Result<void>> {
         const ownIdentityAttribute = await this.attributesController.getLocalAttribute(CoreId.from(request.attributeId));
         if (!ownIdentityAttribute) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
 
         if (!(ownIdentityAttribute instanceof OwnIdentityAttribute)) {
-            return Result.fail(RuntimeErrors.attributes.isNotOwnIdentityAttribute(request.attributeId)); // TODO:
+            return Result.fail(RuntimeErrors.attributes.isNotOwnIdentityAttribute(request.attributeId));
         }
 
         const validationResult = await this.attributesController.validateFullAttributeDeletionProcess(ownIdentityAttribute);
