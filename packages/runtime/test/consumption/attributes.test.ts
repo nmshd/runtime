@@ -97,7 +97,7 @@ beforeAll(async () => {
 
     appService = (
         await runtimeServiceProvider.launch(1, {
-            enableDefaultRepositoryAttributes: true,
+            enableDefaultOwnIdentityAttributes: true,
             enableRequestModule: true,
             enableDeciderModule: true
         })

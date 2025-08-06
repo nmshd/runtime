@@ -8,7 +8,7 @@ let expander1: DataViewExpander;
 
 beforeAll(async () => {
     const runtimeServices = await serviceProvider.launch(1, {
-        enableDefaultRepositoryAttributes: true
+        enableDefaultOwnIdentityAttributes: true
     });
     consumptionServices1 = runtimeServices[0].consumption;
     expander1 = runtimeServices[0].expander;
