@@ -215,7 +215,7 @@ describe("AttributesController", function () {
             const createSharedAttributesParams: ICreateSharedLocalAttributeCopyParams = {
                 sourceAttributeId: nationalityAttribute.id,
                 peer: peer,
-                requestReference: CoreId.from("requestId")
+                sourceReference: CoreId.from("requestId")
             };
 
             const sharedNationalityAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy(createSharedAttributesParams);
@@ -235,14 +235,14 @@ describe("AttributesController", function () {
             });
             const createPeerAttributeParams: ICreateSharedLocalAttributeParams = {
                 content: content,
-                requestReference: CoreId.from("requestId"),
+                sourceReference: CoreId.from("requestId"),
                 peer: CoreAddress.from("address")
             };
             const peerLocalAttribute = await consumptionController.attributes.createSharedLocalAttribute(createPeerAttributeParams);
             expect(peerLocalAttribute.content.toJSON()).toStrictEqual(content.toJSON());
             expect(peerLocalAttribute.content.value).toBeInstanceOf(Nationality);
             expect(createPeerAttributeParams.peer.address).toStrictEqual(CoreAddress.from("address").toString());
-            expect(createPeerAttributeParams.requestReference.toString()).toStrictEqual(CoreId.from("requestId").toString());
+            expect(createPeerAttributeParams.sourceReference.toString()).toStrictEqual(CoreId.from("requestId").toString());
 
             mockEventBus.expectLastPublishedEvent(AttributeCreatedEvent);
         });
@@ -257,14 +257,14 @@ describe("AttributesController", function () {
             });
             const createSharedAttributeParams: ICreateSharedLocalAttributeParams = {
                 content: content,
-                requestReference: CoreId.from("requestId"),
+                sourceReference: CoreId.from("requestId"),
                 peer: CoreAddress.from("address")
             };
             const peerLocalAttribute = await consumptionController.attributes.createSharedLocalAttribute(createSharedAttributeParams);
             expect(peerLocalAttribute.content.toJSON()).toStrictEqual(content.toJSON());
             expect(peerLocalAttribute.content.value).toBeInstanceOf(Nationality);
             expect(createSharedAttributeParams.peer.address).toStrictEqual(CoreAddress.from("address").toString());
-            expect(createSharedAttributeParams.requestReference.toString()).toStrictEqual(CoreId.from("requestId").toString());
+            expect(createSharedAttributeParams.sourceReference.toString()).toStrictEqual(CoreId.from("requestId").toString());
 
             mockEventBus.expectLastPublishedEvent(AttributeCreatedEvent);
         });
@@ -286,13 +286,13 @@ describe("AttributesController", function () {
                 }),
                 shareInfo: {
                     peer: thirdPartyAddress,
-                    requestReference: CoreId.from("reqRefA")
+                    sourceReference: CoreId.from("reqRefA")
                 }
             });
 
             const thirdPartyLocalAttributeCopy = await consumptionController.attributes.createSharedLocalAttributeCopy({
                 peer: peerAddress,
-                requestReference: CoreId.from("reqRefB"),
+                sourceReference: CoreId.from("reqRefB"),
                 sourceAttributeId: relationshipAttribute.id,
                 attributeId: CoreId.from("ATTthirdParty")
             });
@@ -330,7 +330,7 @@ describe("AttributesController", function () {
                     owner: testAccount.identity.address,
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }),
-                requestReference: CoreId.from("reqRef"),
+                sourceReference: CoreId.from("reqRef"),
                 peer: CoreAddress.from("peer")
             };
             await consumptionController.attributes.createSharedLocalAttribute(relationshipAttributeParams);
@@ -361,7 +361,7 @@ describe("AttributesController", function () {
                     owner: testAccount.identity.address,
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }),
-                requestReference: CoreId.from("reqRef"),
+                sourceReference: CoreId.from("reqRef"),
                 peer: CoreAddress.from("peer")
             };
             await consumptionController.attributes.createSharedLocalAttribute(relationshipAttributeParams);
@@ -394,7 +394,7 @@ describe("AttributesController", function () {
                     owner: testAccount.identity.address,
                     confidentiality: RelationshipAttributeConfidentiality.Protected
                 }),
-                requestReference: CoreId.from("reqRef"),
+                sourceReference: CoreId.from("reqRef"),
                 peer: CoreAddress.from("peer")
             };
             await consumptionController.attributes.createSharedLocalAttribute(relationshipAttributeParams);
@@ -427,7 +427,7 @@ describe("AttributesController", function () {
                     owner: testAccount.identity.address,
                     confidentiality: RelationshipAttributeConfidentiality.Private
                 }),
-                requestReference: CoreId.from("reqRef"),
+                sourceReference: CoreId.from("reqRef"),
                 peer: CoreAddress.from("peer")
             };
             await consumptionController.attributes.createSharedLocalAttribute(relationshipAttributeParams);
@@ -459,7 +459,7 @@ describe("AttributesController", function () {
                     confidentiality: RelationshipAttributeConfidentiality.Protected
                 }),
                 peer: CoreAddress.from("peerAddress"),
-                requestReference: CoreId.from("requestId")
+                sourceReference: CoreId.from("requestId")
             });
 
             const attributes = await consumptionController.attributes.executeThirdPartyRelationshipAttributeQuery({
@@ -484,7 +484,7 @@ describe("AttributesController", function () {
                     confidentiality: RelationshipAttributeConfidentiality.Private
                 }),
                 peer: CoreAddress.from("peerAddress"),
-                requestReference: CoreId.from("requestId")
+                sourceReference: CoreId.from("requestId")
             });
 
             const attributes = await consumptionController.attributes.executeThirdPartyRelationshipAttributeQuery({
@@ -508,7 +508,7 @@ describe("AttributesController", function () {
                     confidentiality: RelationshipAttributeConfidentiality.Private
                 }),
                 peer: CoreAddress.from("peerAddress"),
-                requestReference: CoreId.from("requestId")
+                sourceReference: CoreId.from("requestId")
             });
 
             const attributes = await consumptionController.attributes.executeThirdPartyRelationshipAttributeQuery({
@@ -533,7 +533,7 @@ describe("AttributesController", function () {
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }),
                 peer: CoreAddress.from("thirdPartyAddress"),
-                requestReference: CoreId.from("requestId")
+                sourceReference: CoreId.from("requestId")
             });
 
             const attributes = await consumptionController.attributes.executeThirdPartyRelationshipAttributeQuery({
@@ -557,7 +557,7 @@ describe("AttributesController", function () {
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }),
                 peer: CoreAddress.from("thirdPartyAddress"),
-                requestReference: CoreId.from("requestId")
+                sourceReference: CoreId.from("requestId")
             });
 
             const attributes = await consumptionController.attributes.executeThirdPartyRelationshipAttributeQuery({
@@ -582,7 +582,7 @@ describe("AttributesController", function () {
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }),
                 peer: CoreAddress.from("thirdPartyAddress"),
-                requestReference: CoreId.from("requestId")
+                sourceReference: CoreId.from("requestId")
             });
 
             await consumptionController.attributes.createSharedLocalAttribute({
@@ -597,7 +597,7 @@ describe("AttributesController", function () {
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }),
                 peer: CoreAddress.from("anotherThirdPartyAddress"),
-                requestReference: CoreId.from("requestId")
+                sourceReference: CoreId.from("requestId")
             });
 
             await consumptionController.attributes.createSharedLocalAttribute({
@@ -612,7 +612,7 @@ describe("AttributesController", function () {
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }),
                 peer: CoreAddress.from("thirdPartyAddress"),
-                requestReference: CoreId.from("requestId")
+                sourceReference: CoreId.from("requestId")
             });
 
             const attributes = await consumptionController.attributes.executeThirdPartyRelationshipAttributeQuery({
@@ -646,7 +646,7 @@ describe("AttributesController", function () {
                     owner: testAccount.identity.address,
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }),
-                requestReference: CoreId.from("reqRef"),
+                sourceReference: CoreId.from("reqRef"),
                 peer: CoreAddress.from("peer")
             };
             const relationshipAttribute = await consumptionController.attributes.createSharedLocalAttribute(relationshipAttributeParams);
@@ -674,7 +674,7 @@ describe("AttributesController", function () {
             const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute(repositoryAttributeParams);
             await consumptionController.attributes.createSharedLocalAttributeCopy({
                 peer: CoreAddress.from("a-fake-peer"),
-                requestReference: CoreId.from("a-fake-reference"),
+                sourceReference: CoreId.from("a-fake-reference"),
                 sourceAttributeId: repositoryAttribute.id,
                 attributeId: CoreId.from("fake-attribute-id")
             });
@@ -709,7 +709,7 @@ describe("AttributesController", function () {
                     owner: testAccount.identity.address,
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }),
-                requestReference: CoreId.from("reqRef"),
+                sourceReference: CoreId.from("reqRef"),
                 peer: CoreAddress.from("peer")
             };
             const relationshipAttribute = await consumptionController.attributes.createSharedLocalAttribute(relationshipAttributeParams);
@@ -722,7 +722,7 @@ describe("AttributesController", function () {
                     },
                     owner: CoreAddress.from("peer")
                 }),
-                requestReference: CoreId.from("reqRef"),
+                sourceReference: CoreId.from("reqRef"),
                 peer: CoreAddress.from("peer")
             };
             const peerAttribute = await consumptionController.attributes.createSharedLocalAttribute(peerSharedIdentityAttributeParams);
@@ -777,7 +777,7 @@ describe("AttributesController", function () {
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }),
                 peer: CoreAddress.from("peerAddress"),
-                requestReference: CoreId.from("reqRef123")
+                sourceReference: CoreId.from("reqRef123")
             });
 
             const peerRelationshipAttribute = await consumptionController.attributes.createSharedLocalAttribute({
@@ -792,7 +792,7 @@ describe("AttributesController", function () {
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }),
                 peer: CoreAddress.from("peerAddress"),
-                requestReference: CoreId.from("reqRef123")
+                sourceReference: CoreId.from("reqRef123")
             });
 
             await consumptionController.attributes.deleteAttributesExchangedWithPeer(CoreAddress.from("peerAddress"));
@@ -834,7 +834,7 @@ describe("AttributesController", function () {
                 predecessorOwnSharedIdentityAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
                     sourceAttributeId: predecessorRepositoryAttribute.id,
                     peer: CoreAddress.from("peer"),
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 });
 
                 const sharedSuccessorParams: IAttributeSuccessorParams = {
@@ -847,7 +847,7 @@ describe("AttributesController", function () {
                     }),
                     shareInfo: {
                         peer: CoreAddress.from("peer"),
-                        requestReference: CoreId.from("reqRef2"),
+                        sourceReference: CoreId.from("reqRef2"),
                         sourceAttribute: successorRepositoryAttribute.id
                     }
                 };
@@ -1346,7 +1346,7 @@ describe("AttributesController", function () {
                 predecessorOwnSharedIdentityAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
                     sourceAttributeId: predecessorRepositoryAttribute.id,
                     peer: CoreAddress.from("peer"),
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 });
 
                 successorOwnSharedIdentityAttributeParams = {
@@ -1434,7 +1434,7 @@ describe("AttributesController", function () {
             test("should catch if the successor source attribute is not a repository attribute", async function () {
                 successorRepositoryAttribute.shareInfo = LocalAttributeShareInfo.from({
                     peer: CoreAddress.from("peer"),
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 });
                 await consumptionController.attributes.updateAttributeUnsafe(successorRepositoryAttribute);
 
@@ -1668,7 +1668,7 @@ describe("AttributesController", function () {
                 const predecessor = await consumptionController.attributes.createSharedLocalAttributeCopy({
                     sourceAttributeId: predecessorRepo.id,
                     peer: CoreAddress.from("peer"),
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 });
 
                 const successorParams: IAttributeSuccessorParams = {
@@ -1681,7 +1681,7 @@ describe("AttributesController", function () {
                     }),
                     shareInfo: {
                         peer: CoreAddress.from("peer"),
-                        requestReference: CoreId.from("reqRef2"),
+                        sourceReference: CoreId.from("reqRef2"),
                         sourceAttribute: successorRepo.id
                     }
                 };
@@ -1729,7 +1729,7 @@ describe("AttributesController", function () {
                 const predecessor = await consumptionController.attributes.createSharedLocalAttributeCopy({
                     sourceAttributeId: predecessorRepo.id,
                     peer: CoreAddress.from("peer"),
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 });
 
                 const successorParams: IAttributeSuccessorParams = {
@@ -1742,7 +1742,7 @@ describe("AttributesController", function () {
                     }),
                     shareInfo: {
                         peer: CoreAddress.from("peer"),
-                        requestReference: CoreId.from("reqRef2"),
+                        sourceReference: CoreId.from("reqRef2"),
                         sourceAttribute: successorRepo.id
                     }
                 };
@@ -1766,7 +1766,7 @@ describe("AttributesController", function () {
                         owner: CoreAddress.from("peer")
                     }),
                     shareInfo: {
-                        requestReference: CoreId.from("reqRefA"),
+                        sourceReference: CoreId.from("reqRefA"),
                         peer: CoreAddress.from("peer")
                     }
                 });
@@ -1779,7 +1779,7 @@ describe("AttributesController", function () {
                         owner: CoreAddress.from("peer")
                     }),
                     shareInfo: {
-                        requestReference: CoreId.from("reqRefB"),
+                        sourceReference: CoreId.from("reqRefB"),
                         peer: CoreAddress.from("peer")
                     }
                 };
@@ -1807,7 +1807,7 @@ describe("AttributesController", function () {
                         confidentiality: RelationshipAttributeConfidentiality.Public
                     }),
                     peer: CoreAddress.from("peerAddress"),
-                    requestReference: CoreId.from("reqRefA")
+                    sourceReference: CoreId.from("reqRefA")
                 });
                 const successorParams: IAttributeSuccessorParams = {
                     content: RelationshipAttribute.from({
@@ -1822,7 +1822,7 @@ describe("AttributesController", function () {
                     }),
                     shareInfo: {
                         peer: CoreAddress.from("peerAddress"),
-                        requestReference: CoreId.from("reqRefB")
+                        sourceReference: CoreId.from("reqRefB")
                     }
                 };
 
@@ -1852,7 +1852,7 @@ describe("AttributesController", function () {
                         confidentiality: RelationshipAttributeConfidentiality.Public
                     }),
                     peer: CoreAddress.from("peerAddress"),
-                    requestReference: CoreId.from("reqRefA")
+                    sourceReference: CoreId.from("reqRefA")
                 });
                 const successorParams: IAttributeSuccessorParams = {
                     content: RelationshipAttribute.from({
@@ -1867,7 +1867,7 @@ describe("AttributesController", function () {
                     }),
                     shareInfo: {
                         peer: CoreAddress.from("peerAddress"),
-                        requestReference: CoreId.from("reqRefB")
+                        sourceReference: CoreId.from("reqRefB")
                     }
                 };
 
@@ -1898,7 +1898,7 @@ describe("AttributesController", function () {
                     }),
                     shareInfo: {
                         peer: CoreAddress.from("peerAddress"),
-                        requestReference: CoreId.from("reqRefA"),
+                        sourceReference: CoreId.from("reqRefA"),
                         sourceAttribute: CoreId.from("ATT0"),
                         thirdPartyAddress: CoreAddress.from("thirdPartyAddress")
                     }
@@ -1916,7 +1916,7 @@ describe("AttributesController", function () {
                     }),
                     shareInfo: {
                         peer: CoreAddress.from("peerAddress"),
-                        requestReference: CoreId.from("reqRefB"),
+                        sourceReference: CoreId.from("reqRefB"),
                         sourceAttribute: CoreId.from("ATT1"),
                         thirdPartyAddress: CoreAddress.from("thirdPartyAddress")
                     }
@@ -1993,7 +1993,7 @@ describe("AttributesController", function () {
                 }),
                 shareInfo: LocalAttributeShareInfo.from({
                     peer: CoreAddress.from("peer"),
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 })
             });
 
@@ -2072,7 +2072,7 @@ describe("AttributesController", function () {
                     owner: testAccount.identity.address,
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }),
-                requestReference: CoreId.from("reqRef"),
+                sourceReference: CoreId.from("reqRef"),
                 peer: CoreAddress.from("peer")
             });
 
@@ -2087,7 +2087,7 @@ describe("AttributesController", function () {
                     owner: testAccount.identity.address,
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }),
-                requestReference: CoreId.from("reqRef"),
+                sourceReference: CoreId.from("reqRef"),
                 peer: CoreAddress.from("peer")
             });
 
@@ -2103,7 +2103,7 @@ describe("AttributesController", function () {
                     owner: testAccount.identity.address,
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }),
-                requestReference: CoreId.from("reqRef"),
+                sourceReference: CoreId.from("reqRef"),
                 peer: CoreAddress.from("peer")
             });
         });
@@ -2216,7 +2216,7 @@ describe("AttributesController", function () {
             const ownSharedIdentityAttributeVersion0 = await consumptionController.attributes.createSharedLocalAttributeCopy({
                 sourceAttributeId: repositoryAttributeVersion0.id,
                 peer: CoreAddress.from("peerA"),
-                requestReference: CoreId.from("reqRef")
+                sourceReference: CoreId.from("reqRef")
             });
 
             const ownSharedIdentityAttributeVersionsBeforeSuccession = await consumptionController.attributes.getVersionsOfAttribute(ownSharedIdentityAttributeVersion0.id);
@@ -2225,7 +2225,7 @@ describe("AttributesController", function () {
             const ownSharedIdentityAttributeVersion1 = await consumptionController.attributes.createSharedLocalAttributeCopy({
                 sourceAttributeId: repositoryAttributeVersion1.id,
                 peer: CoreAddress.from("peerB"),
-                requestReference: CoreId.from("reqRef1")
+                sourceReference: CoreId.from("reqRef1")
             });
 
             const successorParams: IAttributeSuccessorParams = {
@@ -2238,7 +2238,7 @@ describe("AttributesController", function () {
                 }),
                 shareInfo: {
                     peer: CoreAddress.from("peerB"),
-                    requestReference: CoreId.from("reqRef2"),
+                    sourceReference: CoreId.from("reqRef2"),
                     sourceAttribute: repositoryAttributeVersion2.id
                 }
             };
@@ -2263,7 +2263,7 @@ describe("AttributesController", function () {
                     owner: CoreAddress.from("peer")
                 }),
                 peer: CoreAddress.from("peer"),
-                requestReference: CoreId.from("reqRefA")
+                sourceReference: CoreId.from("reqRefA")
             });
             const successorParams1: IAttributeSuccessorParams = {
                 content: IdentityAttribute.from({
@@ -2319,7 +2319,7 @@ describe("AttributesController", function () {
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }),
                 peer: CoreAddress.from("peerAddress"),
-                requestReference: CoreId.from("reqRefA")
+                sourceReference: CoreId.from("reqRefA")
             });
             const successorParams1: IAttributeSuccessorParams = {
                 content: RelationshipAttribute.from({
@@ -2334,7 +2334,7 @@ describe("AttributesController", function () {
                 }),
                 shareInfo: {
                     peer: CoreAddress.from("peerAddress"),
-                    requestReference: CoreId.from("reqRefB")
+                    sourceReference: CoreId.from("reqRefB")
                 }
             };
             const successorParams2: IAttributeSuccessorParams = {
@@ -2350,7 +2350,7 @@ describe("AttributesController", function () {
                 }),
                 shareInfo: {
                     peer: CoreAddress.from("peerAddress"),
-                    requestReference: CoreId.from("reqRefC")
+                    sourceReference: CoreId.from("reqRefC")
                 }
             };
 
@@ -2386,7 +2386,7 @@ describe("AttributesController", function () {
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }),
                 peer: CoreAddress.from("peerAddress"),
-                requestReference: CoreId.from("reqRefA")
+                sourceReference: CoreId.from("reqRefA")
             });
             const successorParams1: IAttributeSuccessorParams = {
                 content: RelationshipAttribute.from({
@@ -2401,7 +2401,7 @@ describe("AttributesController", function () {
                 }),
                 shareInfo: {
                     peer: CoreAddress.from("peerAddress"),
-                    requestReference: CoreId.from("reqRefB")
+                    sourceReference: CoreId.from("reqRefB")
                 }
             };
             const successorParams2: IAttributeSuccessorParams = {
@@ -2417,7 +2417,7 @@ describe("AttributesController", function () {
                 }),
                 shareInfo: {
                     peer: CoreAddress.from("peerAddress"),
-                    requestReference: CoreId.from("reqRefC")
+                    sourceReference: CoreId.from("reqRefC")
                 }
             };
 
@@ -2533,13 +2533,13 @@ describe("AttributesController", function () {
             ownSharedIdentityAttributeV1PeerA = await consumptionController.attributes.createSharedLocalAttributeCopy({
                 sourceAttributeId: repositoryAttributeV1.id,
                 peer: CoreAddress.from("peerA"),
-                requestReference: CoreId.from("reqRef")
+                sourceReference: CoreId.from("reqRef")
             });
 
             ownSharedIdentityAttributeV1PeerB = await consumptionController.attributes.createSharedLocalAttributeCopy({
                 sourceAttributeId: repositoryAttributeV1.id,
                 peer: CoreAddress.from("peerB"),
-                requestReference: CoreId.from("reqRef1")
+                sourceReference: CoreId.from("reqRef1")
             });
 
             const ownSharedIdentityAttributeParamsV2PeerB: IAttributeSuccessorParams = {
@@ -2552,7 +2552,7 @@ describe("AttributesController", function () {
                 }),
                 shareInfo: {
                     peer: CoreAddress.from("peerB"),
-                    requestReference: CoreId.from("reqRef2"),
+                    sourceReference: CoreId.from("reqRef2"),
                     sourceAttribute: repositoryAttributeV2.id
                 }
             };
@@ -2651,7 +2651,7 @@ describe("AttributesController", function () {
                     owner: consumptionController.accountController.identity.address
                 }),
                 peer: CoreAddress.from("peer"),
-                requestReference: CoreId.from("reqRefX")
+                sourceReference: CoreId.from("reqRefX")
             });
 
             const result = await consumptionController.attributes.getSharedVersionsOfAttribute(sharedIdentityAttribute.id);
@@ -2671,7 +2671,7 @@ describe("AttributesController", function () {
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }),
                 peer: CoreAddress.from("peerAddress"),
-                requestReference: CoreId.from("reqRef123")
+                sourceReference: CoreId.from("reqRef123")
             });
 
             const result = await consumptionController.attributes.getSharedVersionsOfAttribute(relationshipAttribute.id);
@@ -2727,7 +2727,7 @@ describe("AttributesController", function () {
                     },
                     owner: CoreAddress.from("peer")
                 }),
-                requestReference: CoreId.from("reqRef"),
+                sourceReference: CoreId.from("reqRef"),
                 peer: CoreAddress.from("peer")
             });
 
@@ -2751,7 +2751,7 @@ describe("AttributesController", function () {
                     },
                     owner: CoreAddress.from("peer")
                 }),
-                requestReference: CoreId.from("reqRef"),
+                sourceReference: CoreId.from("reqRef"),
                 peer: CoreAddress.from("peer")
             });
 

@@ -60,7 +60,7 @@ describe("PeerAttributeDVO", () => {
         expect(dvo.succeeds).toBe(rPeerSharedIdentityAttribute.succeeds);
         expect(dvo.succeededBy).toBe(rPeerSharedIdentityAttribute.succeededBy);
         expect(dvo.peer).toBe(rPeerSharedIdentityAttribute.shareInfo!.peer);
-        expect(dvo.requestReference).toBe(rPeerSharedIdentityAttribute.shareInfo!.requestReference);
+        expect(dvo.sourceReference).toBe(rPeerSharedIdentityAttribute.shareInfo!.sourceReference);
         expect(dvo.notificationReference).toBe(rPeerSharedIdentityAttribute.shareInfo!.notificationReference);
         expect(dvo.tags).toBe((rPeerSharedIdentityAttribute.content as IdentityAttributeJSON).tags);
         expect(dvo.valueType).toBe(rPeerSharedIdentityAttribute.content.value["@type"]);
@@ -108,7 +108,7 @@ describe("PeerAttributeDVO", () => {
         expect(dvo.succeeds).toBe(rPeerSharedIdentityAttribute.succeeds);
         expect(dvo.succeededBy).toBe(rPeerSharedIdentityAttribute.succeededBy);
         expect(dvo.peer).toBe(rPeerSharedIdentityAttribute.shareInfo!.peer);
-        expect(dvo.requestReference).toBe(rPeerSharedIdentityAttribute.shareInfo!.requestReference);
+        expect(dvo.sourceReference).toBe(rPeerSharedIdentityAttribute.shareInfo!.sourceReference);
         expect(dvo.notificationReference).toBe(rPeerSharedIdentityAttribute.shareInfo!.notificationReference);
         expect(dvo.tags).toBe((rPeerSharedIdentityAttribute.content as IdentityAttributeJSON).tags);
         expect(dvo.valueType).toBe(rPeerSharedIdentityAttribute.content.value["@type"]);
@@ -157,7 +157,7 @@ describe("PeerAttributeDVO", () => {
         expect(dvo.succeeds).toBe(rPeerSharedIdentityAttribute.succeeds);
         expect(dvo.succeededBy).toBe(rPeerSharedIdentityAttribute.succeededBy);
         expect(dvo.peer).toBe(rPeerSharedIdentityAttribute.shareInfo!.peer);
-        expect(dvo.requestReference).toBe(rPeerSharedIdentityAttribute.shareInfo!.requestReference);
+        expect(dvo.sourceReference).toBe(rPeerSharedIdentityAttribute.shareInfo!.sourceReference);
         expect(dvo.notificationReference).toBe(rPeerSharedIdentityAttribute.shareInfo!.notificationReference);
         expect(dvo.tags).toBe((rPeerSharedIdentityAttribute.content as IdentityAttributeJSON).tags);
         expect(dvo.valueType).toBe(rPeerSharedIdentityAttribute.content.value["@type"]);

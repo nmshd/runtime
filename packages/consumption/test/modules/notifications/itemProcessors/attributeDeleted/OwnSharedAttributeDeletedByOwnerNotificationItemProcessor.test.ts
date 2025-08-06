@@ -64,7 +64,7 @@ describe("OwnSharedAttributeDeletedByPeerNotificationItemProcessor", function ()
             }),
             shareInfo: {
                 peer: CoreAddress.from("peer"),
-                requestReference: CoreId.from("reqRef")
+                sourceReference: CoreId.from("reqRef")
             }
         });
 
@@ -123,7 +123,7 @@ describe("OwnSharedAttributeDeletedByPeerNotificationItemProcessor", function ()
             }),
             shareInfo: {
                 peer: CoreAddress.from("peer"),
-                requestReference: CoreId.from("reqRef")
+                sourceReference: CoreId.from("reqRef")
             }
         });
 
@@ -179,7 +179,7 @@ describe("OwnSharedAttributeDeletedByPeerNotificationItemProcessor", function ()
             }),
             shareInfo: {
                 peer: CoreAddress.from("peer"),
-                requestReference: CoreId.from("reqRef")
+                sourceReference: CoreId.from("reqRef")
             },
             deletionInfo: {
                 deletionStatus: LocalAttributeDeletionStatus.ToBeDeleted,
@@ -239,7 +239,7 @@ describe("OwnSharedAttributeDeletedByPeerNotificationItemProcessor", function ()
             }),
             shareInfo: {
                 peer: CoreAddress.from("peer"),
-                requestReference: CoreId.from("requestId")
+                sourceReference: CoreId.from("requestId")
             }
         });
 
@@ -349,7 +349,7 @@ describe("OwnSharedAttributeDeletedByPeerNotificationItemProcessor", function ()
             }),
             shareInfo: {
                 peer: CoreAddress.from("otherPeer"),
-                requestReference: CoreId.from("reqRef")
+                sourceReference: CoreId.from("reqRef")
             }
         });
 

@@ -4,7 +4,7 @@ import { LocalAttributeShareInfo, LocalAttributeShareInfoJSON } from "../../../s
 describe("LocalAttributeShareInfo", function () {
     const validShareInfoJsonParams: LocalAttributeShareInfoJSON[] = [
         {
-            requestReference: "requestReferenceId",
+            sourceReference: "sourceReferenceId",
             peer: "peerAddress",
             sourceAttribute: "sourceAttributeId"
         },
@@ -14,7 +14,7 @@ describe("LocalAttributeShareInfo", function () {
             sourceAttribute: "sourceAttributeId"
         },
         {
-            requestReference: "requestReferenceId",
+            sourceReference: "sourceReferenceId",
             peer: "peerAddress"
         },
         {
@@ -28,7 +28,7 @@ describe("LocalAttributeShareInfo", function () {
             thirdPartyAddress: "thirdPartyAddress"
         },
         {
-            requestReference: "requestReferenceId",
+            sourceReference: "sourceReferenceId",
             peer: "peerAddress",
             sourceAttribute: "sourceAttributeId",
             thirdPartyAddress: "thirdPartyAddress"
@@ -36,7 +36,7 @@ describe("LocalAttributeShareInfo", function () {
     ];
     test.each(validShareInfoJsonParams)("should create objects from valid parameters using from()", function (shareInfoParams: LocalAttributeShareInfoJSON) {
         const shareInfo = LocalAttributeShareInfo.from(shareInfoParams);
-        expect(shareInfo.requestReference?.toJSON()).toStrictEqual(shareInfoParams.requestReference);
+        expect(shareInfo.sourceReference?.toJSON()).toStrictEqual(shareInfoParams.sourceReference);
         expect(shareInfo.notificationReference?.toJSON()).toStrictEqual(shareInfoParams.notificationReference);
         expect(shareInfo.peer.toJSON()).toStrictEqual(shareInfoParams.peer);
         expect(shareInfo.sourceAttribute?.toJSON()).toStrictEqual(shareInfoParams.sourceAttribute);
@@ -46,7 +46,7 @@ describe("LocalAttributeShareInfo", function () {
     const invalidShareInfoJsonParams: LocalAttributeShareInfoJSON[] = [
         {
             notificationReference: "notificationReferenceId",
-            requestReference: "requestReferenceId",
+            sourceReference: "sourceReferenceId",
             peer: "peerAddress"
         },
         {

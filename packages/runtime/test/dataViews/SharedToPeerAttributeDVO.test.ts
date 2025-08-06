@@ -61,7 +61,7 @@ describe("SharedToPeerAttributeDVO", () => {
         ]);
         expect(dvo.peer).toBe(ownSharedIdentityAttribute.shareInfo!.peer);
         expect(dvo.isDraft).toBe(false);
-        expect(dvo.requestReference).toBe(ownSharedIdentityAttribute.shareInfo!.requestReference);
+        expect(dvo.sourceReference).toBe(ownSharedIdentityAttribute.shareInfo!.sourceReference);
         expect(dvo.notificationReference).toBe(ownSharedIdentityAttribute.shareInfo!.notificationReference);
         expect(dvo.sourceAttribute).toBe(ownSharedIdentityAttribute.shareInfo!.sourceAttribute);
         expect(dvo.tags).toBe((ownSharedIdentityAttribute.content as IdentityAttributeJSON).tags);
@@ -106,7 +106,7 @@ describe("SharedToPeerAttributeDVO", () => {
         expect(dvo.valueHints.values![61]).toStrictEqual({ key: "DE", displayName: "i18n://attributes.values.countries.DE" });
         expect(dvo.peer).toBe(ownSharedIdentityAttribute.shareInfo!.peer);
         expect(dvo.isDraft).toBe(false);
-        expect(dvo.requestReference).toBe(ownSharedIdentityAttribute.shareInfo!.requestReference);
+        expect(dvo.sourceReference).toBe(ownSharedIdentityAttribute.shareInfo!.sourceReference);
         expect(dvo.notificationReference).toBe(ownSharedIdentityAttribute.shareInfo!.notificationReference);
         expect(dvo.sourceAttribute).toBe(ownSharedIdentityAttribute.shareInfo!.sourceAttribute);
         expect(dvo.tags).toBe((ownSharedIdentityAttribute.content as IdentityAttributeJSON).tags);
@@ -152,7 +152,7 @@ describe("SharedToPeerAttributeDVO", () => {
         expect(dvo.valueHints.values![31]).toStrictEqual({ key: "de", displayName: "i18n://attributes.values.languages.de" });
         expect(dvo.peer).toBe(ownSharedIdentityAttribute.shareInfo!.peer);
         expect(dvo.isDraft).toBe(false);
-        expect(dvo.requestReference).toBe(ownSharedIdentityAttribute.shareInfo!.requestReference);
+        expect(dvo.sourceReference).toBe(ownSharedIdentityAttribute.shareInfo!.sourceReference);
         expect(dvo.notificationReference).toBe(ownSharedIdentityAttribute.shareInfo!.notificationReference);
         expect(dvo.sourceAttribute).toBe(ownSharedIdentityAttribute.shareInfo!.sourceAttribute);
         expect(dvo.tags).toBe((ownSharedIdentityAttribute.content as IdentityAttributeJSON).tags);
@@ -201,7 +201,7 @@ describe("SharedToPeerAttributeDVO", () => {
         expect(dvo.valueHints.values![31]).toStrictEqual({ key: "de", displayName: "i18n://attributes.values.languages.de" });
         expect(dvo.peer).toBe(updatedOwnSharedIdentityAttribute.shareInfo!.peer);
         expect(dvo.isDraft).toBe(false);
-        expect(dvo.requestReference).toBe(updatedOwnSharedIdentityAttribute.shareInfo!.requestReference);
+        expect(dvo.sourceReference).toBe(updatedOwnSharedIdentityAttribute.shareInfo!.sourceReference);
         expect(dvo.notificationReference).toBe(updatedOwnSharedIdentityAttribute.shareInfo!.notificationReference);
         expect(dvo.sourceAttribute).toBe(updatedOwnSharedIdentityAttribute.shareInfo!.sourceAttribute);
         expect(dvo.tags).toBe((updatedOwnSharedIdentityAttribute.content as IdentityAttributeJSON).tags);

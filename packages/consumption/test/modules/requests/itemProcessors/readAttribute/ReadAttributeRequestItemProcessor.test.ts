@@ -319,7 +319,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         })
                     }),
                     peer: recipient,
-                    requestReference: await ConsumptionIds.request.generate()
+                    sourceReference: await ConsumptionIds.request.generate()
                 });
 
                 const requestItem = ReadAttributeRequestItem.from({
@@ -356,7 +356,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         })
                     }),
                     peer: recipient,
-                    requestReference: await ConsumptionIds.request.generate()
+                    sourceReference: await ConsumptionIds.request.generate()
                 });
 
                 const requestItem = ReadAttributeRequestItem.from({
@@ -473,7 +473,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     })
                 }),
                 peer: aThirdParty,
-                requestReference: await ConsumptionIds.request.generate()
+                sourceReference: await ConsumptionIds.request.generate()
             });
 
             const requestItem = ReadAttributeRequestItem.from({
@@ -599,7 +599,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             await consumptionController.attributes.createSharedLocalAttributeCopy({
                 sourceAttributeId: successorRepositoryAttribute.id,
                 peer: sender,
-                requestReference: await CoreIdHelper.notPrefixed.generate()
+                sourceReference: await CoreIdHelper.notPrefixed.generate()
             });
 
             const requestItem = ReadAttributeRequestItem.from({
@@ -737,7 +737,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         owner: recipient
                     }),
                     peer: sender,
-                    requestReference: await ConsumptionIds.request.generate()
+                    sourceReference: await ConsumptionIds.request.generate()
                 });
 
                 const requestItem = ReadAttributeRequestItem.from({
@@ -792,7 +792,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const ownSharedCopyOfSuccessor = await consumptionController.attributes.createSharedLocalAttributeCopy({
                     sourceAttributeId: successorOfRepositoryAttribute.id,
                     peer: sender,
-                    requestReference: await ConsumptionIds.request.generate()
+                    sourceReference: await ConsumptionIds.request.generate()
                 });
 
                 const requestItem = ReadAttributeRequestItem.from({
@@ -980,7 +980,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         })
                     }),
                     peer: sender,
-                    requestReference: await ConsumptionIds.request.generate()
+                    sourceReference: await ConsumptionIds.request.generate()
                 });
 
                 const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
@@ -1004,7 +1004,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         value: ProprietaryString.from({ title: "aTitle", value: "aProprietaryStringValue" })
                     }),
                     peer: sender,
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 });
 
                 const requestItem = ReadAttributeRequestItem.from({
@@ -1061,7 +1061,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         value: ProprietaryString.from({ title: "aTitle", value: "aProprietaryStringValue" })
                     }),
                     peer: sender,
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 });
 
                 const requestItem = ReadAttributeRequestItem.from({
@@ -1199,7 +1199,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     }),
                     shareInfo: {
                         peer: aThirdParty,
-                        requestReference: await ConsumptionIds.request.generate(),
+                        sourceReference: await ConsumptionIds.request.generate(),
                         sourceAttribute: CoreId.from("sourceAttributeId"),
                         thirdPartyAddress: CoreAddress.from("aThirdParty")
                     }
@@ -1254,7 +1254,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         })
                     }),
                     peer: anUninvolvedThirdParty,
-                    requestReference: await ConsumptionIds.request.generate()
+                    sourceReference: await ConsumptionIds.request.generate()
                 });
 
                 const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
@@ -1307,7 +1307,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         })
                     }),
                     peer: aThirdParty,
-                    requestReference: await ConsumptionIds.request.generate()
+                    sourceReference: await ConsumptionIds.request.generate()
                 });
 
                 const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
@@ -1357,7 +1357,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         })
                     }),
                     peer: aThirdParty,
-                    requestReference: await ConsumptionIds.request.generate()
+                    sourceReference: await ConsumptionIds.request.generate()
                 });
 
                 const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
@@ -1457,7 +1457,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         })
                     }),
                     peer: aThirdParty,
-                    requestReference: await ConsumptionIds.request.generate()
+                    sourceReference: await ConsumptionIds.request.generate()
                 });
 
                 const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
@@ -1504,7 +1504,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         })
                     }),
                     peer: aThirdParty,
-                    requestReference: await ConsumptionIds.request.generate()
+                    sourceReference: await ConsumptionIds.request.generate()
                 });
 
                 const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
@@ -1621,7 +1621,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const predecessorOwnSharedIdentityAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
                     sourceAttributeId: predecessorRepositoryAttribute.id,
                     peer: sender,
-                    requestReference: CoreId.from("initialRequest")
+                    sourceReference: CoreId.from("initialRequest")
                 });
 
                 const { successor: successorRepositoryAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(predecessorRepositoryAttribute.id, {
@@ -1684,7 +1684,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 await consumptionController.attributes.createSharedLocalAttributeCopy({
                     sourceAttributeId: predecessorRepositoryAttribute.id,
                     peer: sender,
-                    requestReference: CoreId.from("initialRequest")
+                    sourceReference: CoreId.from("initialRequest")
                 });
 
                 const { successor: successorRepositoryAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(predecessorRepositoryAttribute.id, {
@@ -1752,7 +1752,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     shareInfo: LocalAttributeShareInfo.from({
                         sourceAttribute: predecessorRepositoryAttribute.id,
                         peer: sender,
-                        requestReference: await CoreIdHelper.notPrefixed.generate()
+                        sourceReference: await CoreIdHelper.notPrefixed.generate()
                     }),
                     deletionInfo: LocalAttributeDeletionInfo.from({
                         deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
@@ -1817,7 +1817,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     shareInfo: LocalAttributeShareInfo.from({
                         sourceAttribute: predecessorRepositoryAttribute.id,
                         peer: sender,
-                        requestReference: await CoreIdHelper.notPrefixed.generate()
+                        sourceReference: await CoreIdHelper.notPrefixed.generate()
                     }),
                     deletionInfo: LocalAttributeDeletionInfo.from({ deletionStatus: LocalAttributeDeletionStatus.ToBeDeletedByPeer, deletionDate: CoreDate.utc().add({ days: 1 }) })
                 });
@@ -1865,7 +1865,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const alreadySharedAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
                     sourceAttributeId: repositoryAttribute.id,
                     peer: sender,
-                    requestReference: await CoreIdHelper.notPrefixed.generate()
+                    sourceReference: await CoreIdHelper.notPrefixed.generate()
                 });
 
                 const requestItem = ReadAttributeRequestItem.from({
@@ -1908,7 +1908,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 await consumptionController.attributes.createSharedLocalAttributeCopy({
                     sourceAttributeId: repositoryAttribute.id,
                     peer: sender,
-                    requestReference: await CoreIdHelper.notPrefixed.generate()
+                    sourceReference: await CoreIdHelper.notPrefixed.generate()
                 });
 
                 const requestItem = ReadAttributeRequestItem.from({
@@ -1955,7 +1955,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: accountController.identity.address
                     }),
-                    shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: repositoryAttribute.id, peer: sender, requestReference: await CoreIdHelper.notPrefixed.generate() }),
+                    shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: repositoryAttribute.id, peer: sender, sourceReference: await CoreIdHelper.notPrefixed.generate() }),
                     deletionInfo: LocalAttributeDeletionInfo.from({
                         deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
                         deletionDate: CoreDate.utc().subtract({ days: 1 })
@@ -2005,7 +2005,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: CoreAddress.from(accountController.identity.address)
                     }),
-                    shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: repositoryAttribute.id, peer: sender, requestReference: await CoreIdHelper.notPrefixed.generate() }),
+                    shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: repositoryAttribute.id, peer: sender, sourceReference: await CoreIdHelper.notPrefixed.generate() }),
                     deletionInfo: LocalAttributeDeletionInfo.from({ deletionStatus: LocalAttributeDeletionStatus.ToBeDeletedByPeer, deletionDate: CoreDate.utc().add({ days: 1 }) })
                 });
 
@@ -2049,7 +2049,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         owner: accountController.identity.address
                     }),
                     peer: peerAddress,
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 });
 
                 const requestItem = ReadAttributeRequestItem.from({
@@ -2092,13 +2092,13 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         owner: accountController.identity.address
                     }),
                     peer: thirdPartyAddress,
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 });
 
                 const predecessorOwnSharedRelationshipAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
                     sourceAttributeId: predecessorSourceAttribute.id,
                     peer: sender,
-                    requestReference: CoreId.from("initialRequest")
+                    sourceReference: CoreId.from("initialRequest")
                 });
 
                 const { successor: successorSourceAttribute } = await consumptionController.attributes.succeedOwnSharedRelationshipAttribute(predecessorSourceAttribute.id, {
@@ -2171,13 +2171,13 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         owner: thirdPartyAddress
                     }),
                     peer: thirdPartyAddress,
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 });
 
                 const predecessorOwnSharedRelationshipAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
                     sourceAttributeId: predecessorSourceAttribute.id,
                     peer: sender,
-                    requestReference: CoreId.from("initialRequest")
+                    sourceReference: CoreId.from("initialRequest")
                 });
 
                 const { successor: successorSourceAttribute } = await consumptionController.attributes.succeedPeerSharedRelationshipAttribute(predecessorSourceAttribute.id, {
@@ -2582,7 +2582,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const existingOwnSharedIdentityAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
                     sourceAttributeId: existingRepositoryAttribute.id,
                     peer: sender,
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 });
 
                 const requestItem = ReadAttributeRequestItem.from({
@@ -2631,7 +2631,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const existingOwnSharedIdentityAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
                     sourceAttributeId: existingRepositoryAttribute.id,
                     peer: sender,
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 });
 
                 const requestItem = ReadAttributeRequestItem.from({
@@ -2681,7 +2681,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const existingOwnSharedIdentityAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
                     sourceAttributeId: existingRepositoryAttribute.id,
                     peer: sender,
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 });
 
                 const requestItem = ReadAttributeRequestItem.from({
@@ -2737,7 +2737,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const existingOwnSharedIdentityAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
                     sourceAttributeId: existingRepositoryAttribute.id,
                     peer: sender,
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 });
 
                 const requestItem = ReadAttributeRequestItem.from({
@@ -2792,7 +2792,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const existingOwnSharedIdentityAttributePredecessor = await consumptionController.attributes.createSharedLocalAttributeCopy({
                     sourceAttributeId: existingRepositoryAttributePredecessor.id,
                     peer: sender,
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 });
 
                 const existingRepositoryAttributeSuccessor = (
@@ -2853,7 +2853,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const existingOwnSharedIdentityAttributePredecessor = await consumptionController.attributes.createSharedLocalAttributeCopy({
                     sourceAttributeId: existingRepositoryAttributePredecessor.id,
                     peer: sender,
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 });
 
                 const existingRepositoryAttributeSuccessor = (
@@ -2956,7 +2956,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     owner: recipient
                 }),
                 peer: recipient,
-                requestReference: CoreId.from("oldReqRef")
+                sourceReference: CoreId.from("oldReqRef")
             });
 
             const requestItem = ReadAttributeRequestItem.from({
@@ -3011,7 +3011,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     owner: thirdPartyAddress
                 }),
                 peer: recipient,
-                requestReference: CoreId.from("oldReqRef"),
+                sourceReference: CoreId.from("oldReqRef"),
                 thirdPartyAddress: thirdPartyAddress
             });
 

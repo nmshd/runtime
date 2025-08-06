@@ -45,7 +45,7 @@ describe("LocalAttributeDeletionInfo", function () {
         ownSharedIdentityAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
             sourceAttributeId: repositoryAttribute.id,
             peer: CoreAddress.from("peer"),
-            requestReference: CoreId.from("request")
+            sourceReference: CoreId.from("request")
         });
 
         peerSharedIdentityAttribute = await consumptionController.attributes.createSharedLocalAttribute({
@@ -56,7 +56,7 @@ describe("LocalAttributeDeletionInfo", function () {
                 owner: CoreAddress.from("peer")
             }),
             peer: CoreAddress.from("peer"),
-            requestReference: CoreId.from("request")
+            sourceReference: CoreId.from("request")
         });
 
         thirdPartyRelationshipAttribute = await consumptionController.attributes.createSharedLocalAttribute({
@@ -70,7 +70,7 @@ describe("LocalAttributeDeletionInfo", function () {
                 owner: CoreAddress.from("thirdParty")
             }),
             peer: CoreAddress.from("peer"),
-            requestReference: CoreId.from("request"),
+            sourceReference: CoreId.from("request"),
             thirdPartyAddress: CoreAddress.from("thirdPartyAddress")
         });
     });
