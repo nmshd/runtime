@@ -63,7 +63,7 @@ describe("PeerSharedAttributeSucceededNotificationItemProcessor", function () {
             }),
             shareInfo: {
                 peer: CoreAddress.from("peer"),
-                requestReference: CoreId.from("reqRef")
+                sourceReference: CoreId.from("reqRef")
             }
         });
 
@@ -133,7 +133,7 @@ describe("PeerSharedAttributeSucceededNotificationItemProcessor", function () {
             }),
             shareInfo: {
                 peer: CoreAddress.from("peer"),
-                requestReference: CoreId.from("reqRef")
+                sourceReference: CoreId.from("reqRef")
             }
         });
 
@@ -206,7 +206,7 @@ describe("PeerSharedAttributeSucceededNotificationItemProcessor", function () {
             }),
             shareInfo: {
                 peer: CoreAddress.from("otherPeer"),
-                requestReference: CoreId.from("reqRef")
+                sourceReference: CoreId.from("reqRef")
             }
         });
 

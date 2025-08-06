@@ -64,7 +64,7 @@ export class PeerSharedAttributeSucceededNotificationItemProcessor extends Abstr
         // const successorParams = {
         //     id: notificationItem.successorId,
         //     content: notificationItem.successorContent,
-        //     sharingInfo: { notificationReference: notification.id, peer: notification.peer }
+        //     sharingInfo: { sourceReference: notification.id, peer: notification.peer }
         // };
         // return await this.consumptionController.attributes.validateThirdPartyRelationshipAttributeSuccession(predecessor, successorParams);
     }

@@ -179,7 +179,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                         owner: testParams.attribute.owner.equals("") ? sender : testParams.attribute.owner
                     } as IRelationshipAttribute,
                     peer: aThirdParty,
-                    requestReference: await ConsumptionIds.request.generate()
+                    sourceReference: await ConsumptionIds.request.generate()
                 });
             }
 
@@ -278,7 +278,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: aThirdParty,
-                    requestReference: await ConsumptionIds.request.generate(),
+                    sourceReference: await ConsumptionIds.request.generate(),
                     sourceAttribute: CoreId.from("sourceAttributeId")
                 }
             });
@@ -307,7 +307,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             const localAttributeCopy = await consumptionController.attributes.createSharedLocalAttributeCopy({
                 peer: recipient,
-                requestReference: await ConsumptionIds.request.generate(),
+                sourceReference: await ConsumptionIds.request.generate(),
                 sourceAttributeId: localAttribute.id
             });
             expect(localAttributeCopy.isShared()).toBe(true);
@@ -342,7 +342,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: recipient,
-                    requestReference: await ConsumptionIds.request.generate(),
+                    sourceReference: await ConsumptionIds.request.generate(),
                     sourceAttribute: localAttribute.id
                 },
                 deletionInfo: {
@@ -379,7 +379,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: recipient,
-                    requestReference: await ConsumptionIds.request.generate(),
+                    sourceReference: await ConsumptionIds.request.generate(),
                     sourceAttribute: localAttribute.id
                 },
                 deletionInfo: {
@@ -420,7 +420,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const ownSharedCopyOfSuccessor = await consumptionController.attributes.createSharedLocalAttributeCopy({
                 sourceAttributeId: successorOfRepositoryAttribute.id,
                 peer: recipient,
-                requestReference: await ConsumptionIds.request.generate()
+                sourceReference: await ConsumptionIds.request.generate()
             });
 
             const requestItem = ShareAttributeRequestItem.from({
@@ -461,7 +461,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: recipient,
-                    requestReference: await ConsumptionIds.request.generate(),
+                    sourceReference: await ConsumptionIds.request.generate(),
                     sourceAttribute: successorOfRepositoryAttribute.id
                 },
                 deletionInfo: {
@@ -505,7 +505,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: recipient,
-                    requestReference: await ConsumptionIds.request.generate(),
+                    sourceReference: await ConsumptionIds.request.generate(),
                     sourceAttribute: successorOfRepositoryAttribute.id
                 },
                 deletionInfo: {
@@ -534,7 +534,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const ownSharedCopyOfPredecessor = await consumptionController.attributes.createSharedLocalAttributeCopy({
                 sourceAttributeId: repositoryAttribute.id,
                 peer: recipient,
-                requestReference: await ConsumptionIds.request.generate()
+                sourceReference: await ConsumptionIds.request.generate()
             });
 
             expect(ownSharedCopyOfPredecessor.isShared()).toBe(true);
@@ -590,7 +590,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: recipient,
-                    requestReference: await ConsumptionIds.request.generate(),
+                    sourceReference: await ConsumptionIds.request.generate(),
                     sourceAttribute: repositoryAttribute.id
                 },
                 deletionInfo: {
@@ -634,7 +634,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: recipient,
-                    requestReference: await ConsumptionIds.request.generate(),
+                    sourceReference: await ConsumptionIds.request.generate(),
                     sourceAttribute: repositoryAttribute.id
                 },
                 deletionInfo: {
@@ -665,7 +665,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: aThirdParty,
-                    requestReference: await ConsumptionIds.request.generate(),
+                    sourceReference: await ConsumptionIds.request.generate(),
                     sourceAttribute: CoreId.from("sourceAttributeId")
                 }
             });
@@ -694,7 +694,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                     key: "aKey"
                 }),
                 peer: recipient,
-                requestReference: await ConsumptionIds.request.generate()
+                sourceReference: await ConsumptionIds.request.generate()
             });
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: false,
@@ -721,7 +721,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: aThirdParty,
-                    requestReference: await ConsumptionIds.request.generate()
+                    sourceReference: await ConsumptionIds.request.generate()
                 }
             });
 
@@ -734,7 +734,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: recipient,
-                    requestReference: await ConsumptionIds.request.generate(),
+                    sourceReference: await ConsumptionIds.request.generate(),
                     thirdPartyAddress: aThirdParty,
                     sourceAttribute: initialRelationshipAttribute.id
                 }
@@ -766,7 +766,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: aThirdParty,
-                    requestReference: await ConsumptionIds.request.generate()
+                    sourceReference: await ConsumptionIds.request.generate()
                 }
             });
 
@@ -779,7 +779,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: recipient,
-                    requestReference: await ConsumptionIds.request.generate(),
+                    sourceReference: await ConsumptionIds.request.generate(),
                     thirdPartyAddress: aThirdParty,
                     sourceAttribute: initialRelationshipAttribute.id
                 },
@@ -812,7 +812,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: aThirdParty,
-                    requestReference: await ConsumptionIds.request.generate()
+                    sourceReference: await ConsumptionIds.request.generate()
                 }
             });
 
@@ -825,7 +825,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: recipient,
-                    requestReference: await ConsumptionIds.request.generate(),
+                    sourceReference: await ConsumptionIds.request.generate(),
                     sourceAttribute: initialRelationshipAttribute.id,
                     thirdPartyAddress: aThirdParty
                 },
@@ -861,7 +861,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: aThirdParty,
-                    requestReference: await ConsumptionIds.request.generate()
+                    sourceReference: await ConsumptionIds.request.generate()
                 }
             });
 
@@ -942,7 +942,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const existingPeerSharedIdentityAttribute = await consumptionController.attributes.createSharedLocalAttribute({
                 content: TestObjectFactory.createIdentityAttribute({ owner: sender }),
                 peer: sender,
-                requestReference: await ConsumptionIds.request.generate()
+                sourceReference: await ConsumptionIds.request.generate()
             });
 
             const requestItem = ShareAttributeRequestItem.from({
@@ -970,7 +970,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const existingPeerSharedIdentityAttribute = await consumptionController.attributes.createAttributeUnsafe({
                 content: TestObjectFactory.createIdentityAttribute({ owner: sender }),
                 shareInfo: {
-                    requestReference: await ConsumptionIds.request.generate(),
+                    sourceReference: await ConsumptionIds.request.generate(),
                     peer: sender
                 },
                 deletionInfo: {
@@ -1004,7 +1004,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const existingPeerSharedIdentityAttribute = await consumptionController.attributes.createAttributeUnsafe({
                 content: TestObjectFactory.createIdentityAttribute({ owner: sender }),
                 shareInfo: {
-                    requestReference: await ConsumptionIds.request.generate(),
+                    sourceReference: await ConsumptionIds.request.generate(),
                     peer: sender
                 },
                 succeededBy: CoreId.from("aSuccessorId")
@@ -1148,7 +1148,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const sourceAttribute = await consumptionController.attributes.createAttributeUnsafe({
                 content: sourceAttributeContent,
                 shareInfo: LocalAttributeShareInfo.from({
-                    requestReference: CoreId.from("REQ1"),
+                    sourceReference: CoreId.from("REQ1"),
                     peer: aThirdParty
                 })
             });
