@@ -1359,7 +1359,7 @@ describe("AttributesController", function () {
                     }),
                     shareInfo: {
                         peer: CoreAddress.from("peer"),
-                        notificationReference: CoreId.from("notRef"),
+                        sourceReference: CoreId.from("notRef"),
                         sourceAttribute: successorRepositoryAttribute.id
                     }
                 };
@@ -2275,7 +2275,7 @@ describe("AttributesController", function () {
                 }),
                 shareInfo: {
                     peer: CoreAddress.from("peer"),
-                    notificationReference: CoreId.from("notRefB")
+                    sourceReference: CoreId.from("notRefB")
                 }
             };
             const successorParams2: IAttributeSuccessorParams = {
@@ -2288,7 +2288,7 @@ describe("AttributesController", function () {
                 }),
                 shareInfo: {
                     peer: CoreAddress.from("peer"),
-                    notificationReference: CoreId.from("notRefC")
+                    sourceReference: CoreId.from("notRefC")
                 }
             };
 

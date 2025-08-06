@@ -62,7 +62,7 @@ describe("OwnRelationshipAttributeDVO", () => {
         expect(dvo.succeededBy).toBe(ownSharedRelationshipAttribute.succeededBy);
         expect(dvo.peer).toBe(ownSharedRelationshipAttribute.shareInfo!.peer);
         expect(dvo.sourceReference).toBe(ownSharedRelationshipAttribute.shareInfo!.sourceReference);
-        expect(dvo.notificationReference).toBe(ownSharedRelationshipAttribute.shareInfo!.notificationReference);
+        expect(dvo.sourceReference).toBe(ownSharedRelationshipAttribute.shareInfo!.sourceReference);
         expect(dvo.sourceAttribute).toBe(ownSharedRelationshipAttribute.shareInfo!.sourceAttribute);
         expect(dvo.valueType).toBe(ownSharedRelationshipAttribute.content.value["@type"]);
         expect(dvo.deletionStatus).toBe(ownSharedRelationshipAttribute.deletionInfo?.deletionStatus);

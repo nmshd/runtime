@@ -62,7 +62,7 @@ describe("SharedToPeerAttributeDVO", () => {
         expect(dvo.peer).toBe(ownSharedIdentityAttribute.shareInfo!.peer);
         expect(dvo.isDraft).toBe(false);
         expect(dvo.sourceReference).toBe(ownSharedIdentityAttribute.shareInfo!.sourceReference);
-        expect(dvo.notificationReference).toBe(ownSharedIdentityAttribute.shareInfo!.notificationReference);
+        expect(dvo.sourceReference).toBe(ownSharedIdentityAttribute.shareInfo!.sourceReference);
         expect(dvo.sourceAttribute).toBe(ownSharedIdentityAttribute.shareInfo!.sourceAttribute);
         expect(dvo.tags).toBe((ownSharedIdentityAttribute.content as IdentityAttributeJSON).tags);
         expect(dvo.valueType).toBe(ownSharedIdentityAttribute.content.value["@type"]);
@@ -107,7 +107,7 @@ describe("SharedToPeerAttributeDVO", () => {
         expect(dvo.peer).toBe(ownSharedIdentityAttribute.shareInfo!.peer);
         expect(dvo.isDraft).toBe(false);
         expect(dvo.sourceReference).toBe(ownSharedIdentityAttribute.shareInfo!.sourceReference);
-        expect(dvo.notificationReference).toBe(ownSharedIdentityAttribute.shareInfo!.notificationReference);
+        expect(dvo.sourceReference).toBe(ownSharedIdentityAttribute.shareInfo!.sourceReference);
         expect(dvo.sourceAttribute).toBe(ownSharedIdentityAttribute.shareInfo!.sourceAttribute);
         expect(dvo.tags).toBe((ownSharedIdentityAttribute.content as IdentityAttributeJSON).tags);
         expect(dvo.valueType).toBe(ownSharedIdentityAttribute.content.value["@type"]);
@@ -153,7 +153,7 @@ describe("SharedToPeerAttributeDVO", () => {
         expect(dvo.peer).toBe(ownSharedIdentityAttribute.shareInfo!.peer);
         expect(dvo.isDraft).toBe(false);
         expect(dvo.sourceReference).toBe(ownSharedIdentityAttribute.shareInfo!.sourceReference);
-        expect(dvo.notificationReference).toBe(ownSharedIdentityAttribute.shareInfo!.notificationReference);
+        expect(dvo.sourceReference).toBe(ownSharedIdentityAttribute.shareInfo!.sourceReference);
         expect(dvo.sourceAttribute).toBe(ownSharedIdentityAttribute.shareInfo!.sourceAttribute);
         expect(dvo.tags).toBe((ownSharedIdentityAttribute.content as IdentityAttributeJSON).tags);
         expect(dvo.valueType).toBe(ownSharedIdentityAttribute.content.value["@type"]);
@@ -202,7 +202,7 @@ describe("SharedToPeerAttributeDVO", () => {
         expect(dvo.peer).toBe(updatedOwnSharedIdentityAttribute.shareInfo!.peer);
         expect(dvo.isDraft).toBe(false);
         expect(dvo.sourceReference).toBe(updatedOwnSharedIdentityAttribute.shareInfo!.sourceReference);
-        expect(dvo.notificationReference).toBe(updatedOwnSharedIdentityAttribute.shareInfo!.notificationReference);
+        expect(dvo.sourceReference).toBe(updatedOwnSharedIdentityAttribute.shareInfo!.sourceReference);
         expect(dvo.sourceAttribute).toBe(updatedOwnSharedIdentityAttribute.shareInfo!.sourceAttribute);
         expect(dvo.tags).toBe((updatedOwnSharedIdentityAttribute.content as IdentityAttributeJSON).tags);
         expect(dvo.valueType).toBe(updatedOwnSharedIdentityAttribute.content.value["@type"]);

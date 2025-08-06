@@ -2114,7 +2114,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     }),
                     shareInfo: LocalAttributeShareInfo.from({
                         peer: thirdPartyAddress,
-                        notificationReference: CoreId.from("successionNotification")
+                        sourceReference: CoreId.from("successionNotification")
                     })
                 });
 
@@ -2193,7 +2193,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     }),
                     shareInfo: LocalAttributeShareInfo.from({
                         peer: thirdPartyAddress,
-                        notificationReference: CoreId.from("successionNotification")
+                        sourceReference: CoreId.from("successionNotification")
                     })
                 });
 

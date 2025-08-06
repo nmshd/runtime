@@ -61,7 +61,7 @@ describe("PeerAttributeDVO", () => {
         expect(dvo.succeededBy).toBe(rPeerSharedIdentityAttribute.succeededBy);
         expect(dvo.peer).toBe(rPeerSharedIdentityAttribute.shareInfo!.peer);
         expect(dvo.sourceReference).toBe(rPeerSharedIdentityAttribute.shareInfo!.sourceReference);
-        expect(dvo.notificationReference).toBe(rPeerSharedIdentityAttribute.shareInfo!.notificationReference);
+        expect(dvo.sourceReference).toBe(rPeerSharedIdentityAttribute.shareInfo!.sourceReference);
         expect(dvo.tags).toBe((rPeerSharedIdentityAttribute.content as IdentityAttributeJSON).tags);
         expect(dvo.valueType).toBe(rPeerSharedIdentityAttribute.content.value["@type"]);
         expect(dvo.deletionStatus).toBe(rPeerSharedIdentityAttribute.deletionInfo?.deletionStatus);
@@ -109,7 +109,7 @@ describe("PeerAttributeDVO", () => {
         expect(dvo.succeededBy).toBe(rPeerSharedIdentityAttribute.succeededBy);
         expect(dvo.peer).toBe(rPeerSharedIdentityAttribute.shareInfo!.peer);
         expect(dvo.sourceReference).toBe(rPeerSharedIdentityAttribute.shareInfo!.sourceReference);
-        expect(dvo.notificationReference).toBe(rPeerSharedIdentityAttribute.shareInfo!.notificationReference);
+        expect(dvo.sourceReference).toBe(rPeerSharedIdentityAttribute.shareInfo!.sourceReference);
         expect(dvo.tags).toBe((rPeerSharedIdentityAttribute.content as IdentityAttributeJSON).tags);
         expect(dvo.valueType).toBe(rPeerSharedIdentityAttribute.content.value["@type"]);
         expect(dvo.deletionStatus).toBe(rPeerSharedIdentityAttribute.deletionInfo?.deletionStatus);
@@ -158,7 +158,7 @@ describe("PeerAttributeDVO", () => {
         expect(dvo.succeededBy).toBe(rPeerSharedIdentityAttribute.succeededBy);
         expect(dvo.peer).toBe(rPeerSharedIdentityAttribute.shareInfo!.peer);
         expect(dvo.sourceReference).toBe(rPeerSharedIdentityAttribute.shareInfo!.sourceReference);
-        expect(dvo.notificationReference).toBe(rPeerSharedIdentityAttribute.shareInfo!.notificationReference);
+        expect(dvo.sourceReference).toBe(rPeerSharedIdentityAttribute.shareInfo!.sourceReference);
         expect(dvo.tags).toBe((rPeerSharedIdentityAttribute.content as IdentityAttributeJSON).tags);
         expect(dvo.valueType).toBe(rPeerSharedIdentityAttribute.content.value["@type"]);
         expect(dvo.deletionStatus).toBe(rPeerSharedIdentityAttribute.deletionInfo?.deletionStatus);

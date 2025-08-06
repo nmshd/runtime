@@ -255,7 +255,7 @@ describe("OwnSharedAttributeDeletedByPeerNotificationItemProcessor", function ()
                 }),
                 shareInfo: {
                     peer: CoreAddress.from("peer"),
-                    notificationReference: CoreId.from("notRef")
+                    sourceReference: CoreId.from("notRef")
                 }
             }
         );
