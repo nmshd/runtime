@@ -1,0 +1,90 @@
+import { ProprietaryStringJSON, RelationshipAttributeConfidentiality, RelationshipAttributeJSON, ShareAttributeRequestItem } from "@nmshd/content";
+import { ThirdPartyRelationshipAttributeDVO } from "../../src";
+import {
+    cleanupAttributes,
+    ensureActiveRelationship,
+    executeFullCreateAndShareRelationshipAttributeFlow,
+    executeFullShareAndAcceptAttributeRequestFlow,
+    RuntimeServiceProvider,
+    TestRuntimeServices
+} from "../lib";
+
+const serviceProvider = new RuntimeServiceProvider();
+let services1: TestRuntimeServices;
+let services2: TestRuntimeServices;
+let services3: TestRuntimeServices;
+
+beforeAll(async () => {
+    const runtimeServices = await serviceProvider.launch(3, { enableRequestModule: true, enableDeciderModule: true });
+    services1 = runtimeServices[0];
+    services2 = runtimeServices[1];
+    services3 = runtimeServices[2];
+
+    await ensureActiveRelationship(services1.transport, services2.transport);
+    await ensureActiveRelationship(services1.transport, services3.transport);
+}, 30000);
+
+beforeEach(async () => await cleanupAttributes([services1, services2, services3]));
+
+afterAll(() => serviceProvider.stop());
+
+describe("ThirdPartyRelationshipAttributeDVO", () => {
+    test("check a ProprietaryString that was forwarded to a third party", async () => {
+        const ownRelationshipAttribute = await executeFullCreateAndShareRelationshipAttributeFlow(services1, services2, {
+            content: {
+                key: "Some key",
+                value: {
+                    "@type": "ProprietaryString",
+                    title: "aTitle",
+                    value: "aString"
+                },
+                confidentiality: RelationshipAttributeConfidentiality.Public
+            }
+        });
+
+        await executeFullShareAndAcceptAttributeRequestFlow(
+            services1,
+            services3,
+            ShareAttributeRequestItem.from({
+                attribute: ownRelationshipAttribute.content,
+                sourceAttributeId: ownRelationshipAttribute.id,
+                thirdPartyAddress: services2.address,
+                mustBeAccepted: true
+            })
+        );
+
+        const thirdPartyRelationshipAttribute = (await services3.consumption.attributes.getAttribute({ id: ownRelationshipAttribute.id })).value;
+        const dvo = (await services3.expander.expandLocalAttributeDTO(thirdPartyRelationshipAttribute)) as ThirdPartyRelationshipAttributeDVO;
+        expect(dvo).toBeDefined();
+        expect(dvo.type).toBe("ThirdPartyRelationshipAttributeDVO");
+        expect(dvo.id).toStrictEqual(thirdPartyRelationshipAttribute.id);
+        expect(dvo.name).toBe("aTitle");
+        expect(dvo.description).toBe("i18n://dvo.attribute.description.ProprietaryString");
+        expect(dvo.date).toStrictEqual(thirdPartyRelationshipAttribute.createdAt);
+        expect(dvo.content).toStrictEqual(thirdPartyRelationshipAttribute.content);
+        const value = dvo.value as ProprietaryStringJSON;
+        expect(value["@type"]).toBe("ProprietaryString");
+        expect(value.value).toBe("aString");
+        expect(value.title).toBe("aTitle");
+        expect(dvo.key).toBe((thirdPartyRelationshipAttribute.content as RelationshipAttributeJSON).key);
+        expect(dvo.confidentiality).toBe((thirdPartyRelationshipAttribute.content as RelationshipAttributeJSON).confidentiality);
+        expect(dvo.isTechnical).toBe((thirdPartyRelationshipAttribute.content as RelationshipAttributeJSON).isTechnical);
+        expect(dvo.createdAt).toStrictEqual(thirdPartyRelationshipAttribute.createdAt);
+        expect(dvo.isOwn).toBe(false);
+        expect(dvo.isDraft).toBe(false);
+        expect(dvo.owner).toStrictEqual(thirdPartyRelationshipAttribute.content.owner);
+        expect(dvo.renderHints["@type"]).toBe("RenderHints");
+        expect(dvo.renderHints.technicalType).toBe("String");
+        expect(dvo.renderHints.editType).toBe("InputLike");
+        expect(dvo.valueHints["@type"]).toBe("ValueHints");
+        expect(dvo.succeeds).toBe(thirdPartyRelationshipAttribute.succeeds);
+        expect(dvo.succeededBy).toBe(thirdPartyRelationshipAttribute.succeededBy);
+        expect(dvo.peer).toBe(thirdPartyRelationshipAttribute.peerSharingInfo!.peer);
+        expect(dvo.sourceReference).toBe(thirdPartyRelationshipAttribute.peerSharingInfo!.sourceReference);
+        expect(dvo.initialAttributePeer).toBe(services2.address);
+        expect(dvo.deletionStatus).toBe(thirdPartyRelationshipAttribute.peerSharingInfo!.deletionInfo?.deletionStatus);
+        expect(dvo.deletionDate).toBe(thirdPartyRelationshipAttribute.peerSharingInfo!.deletionInfo?.deletionDate);
+        expect(dvo.valueType).toBe(thirdPartyRelationshipAttribute.content.value["@type"]);
+        expect(dvo.wasViewedAt).toBeUndefined();
+    });
+});
