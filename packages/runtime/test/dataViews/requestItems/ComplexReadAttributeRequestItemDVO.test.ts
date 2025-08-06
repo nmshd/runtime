@@ -168,7 +168,7 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         expect(identityAttributeQueryDVO.valueHints.propertyHints!["houseNo"].max).toBe(100);
         expect(requestItemDVO.mustBeAccepted).toBe(true);
         const resultItem = identityAttributeQueryDVO.results[0];
-        expect(resultItem.type).toBe("RepositoryAttributeDVO");
+        expect(resultItem.type).toBe("OwnIdentityAttributeDVO");
         expect(resultItem.content["@type"]).toBe("IdentityAttribute");
         expect(resultItem.content.value["@type"]).toBe("StreetAddress");
         expect((resultItem.content.value as StreetAddressJSON).street).toBe("aStreet");
@@ -235,7 +235,7 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         expect(responseItem.attribute).toBeDefined();
         const recipientAddress = (await transportServices2.account.getIdentityInfo()).value.address;
         expect(responseItem.attribute.owner).toBe(recipientAddress);
-        expect(responseItem.attribute.type).toBe("SharedToPeerAttributeDVO");
+        expect(responseItem.attribute.type).toBe("OwnIdentityAttributeDVO");
 
         const attributeValue = responseItem.attribute.value as StreetAddressJSON;
         expect(attributeValue["@type"]).toBe("StreetAddress");
@@ -444,7 +444,7 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
         expect(iqlQueryDVO.results).toHaveLength(1);
         expect(requestItemDVO.mustBeAccepted).toBe(true);
         const resultItem = iqlQueryDVO.results[0];
-        expect(resultItem.type).toBe("RepositoryAttributeDVO");
+        expect(resultItem.type).toBe("OwnIdentityAttributeDVO");
         expect(resultItem.content["@type"]).toBe("IdentityAttribute");
         expect(resultItem.content.value["@type"]).toBe("StreetAddress");
         expect((resultItem.content.value as StreetAddressJSON).street).toBe("aStreet");
@@ -500,7 +500,7 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
         expect(responseItem.attribute).toBeDefined();
         const recipientAddress = (await transportServices2.account.getIdentityInfo()).value.address;
         expect(responseItem.attribute.owner).toBe(recipientAddress);
-        expect(responseItem.attribute.type).toBe("SharedToPeerAttributeDVO");
+        expect(responseItem.attribute.type).toBe("OwnIdentityAttributeDVO");
 
         const attributeValue = responseItem.attribute.value as StreetAddressJSON;
         expect(attributeValue["@type"]).toBe("StreetAddress");
