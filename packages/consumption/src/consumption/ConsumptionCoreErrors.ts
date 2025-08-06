@@ -30,12 +30,6 @@ class Attributes {
         );
     }
 
-    public successorMustNotHaveASuccessor(comment?: string) {
-        let errorMessage = "The successor must not have a successor itself.";
-        if (comment) errorMessage += ` ${comment}`;
-        return new CoreError("error.consumption.attributes.successorMustNotHaveASuccessor", errorMessage);
-    }
-
     public predecessorDoesNotExist() {
         return new CoreError("error.consumption.attributes.predecessorDoesNotExist", "The predecessor does not exist.");
     }
