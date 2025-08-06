@@ -25,11 +25,9 @@ import {
     AcceptReadAttributeRequestItemParametersWithNewAttributeJSON,
     ConsumptionController,
     ConsumptionIds,
-    LocalAttributeDeletionInfo,
-    LocalAttributeDeletionStatus,
-    LocalAttributeShareInfo,
     LocalRequest,
     LocalRequestStatus,
+    OwnIdentityAttribute,
     PeerSharedAttributeSucceededEvent,
     ReadAttributeRequestItemProcessor,
     ValidationResult
@@ -308,7 +306,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             });
 
             test("cannot query another RelationshipAttribute with same key", async function () {
-                await consumptionController.attributes.createSharedLocalAttribute({
+                await consumptionController.attributes.createOwnRelationshipAttribute({
                     content: RelationshipAttribute.from({
                         key: "uniqueKey",
                         confidentiality: RelationshipAttributeConfidentiality.Public,
@@ -345,7 +343,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             });
 
             test("can query a RelationshipAttribute with same key but different value type", async function () {
-                await consumptionController.attributes.createSharedLocalAttribute({
+                await consumptionController.attributes.createOwnRelationshipAttribute({
                     content: RelationshipAttribute.from({
                         key: "valueTypeSpecificUniqueKey",
                         confidentiality: RelationshipAttributeConfidentiality.Public,
@@ -390,7 +388,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
         beforeEach(async () => await TestUtil.ensureActiveRelationship(accountController, thirdPartyAccountController));
 
         test("can be called with the id of an existing own LocalAttribute", async function () {
-            const attribute = await consumptionController.attributes.createRepositoryAttribute({
+            const attribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: recipient
                 })
@@ -462,7 +460,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
         });
 
         test("can be called with an existing RelationshipAttribute by a third party", async function () {
-            const attribute = await consumptionController.attributes.createSharedLocalAttribute({
+            const attribute = await consumptionController.attributes.createPeerRelationshipAttribute({
                 content: RelationshipAttribute.from({
                     key: "aKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public,
@@ -580,13 +578,13 @@ describe("ReadAttributeRequestItemProcessor", function () {
         });
 
         test("returns an error trying to share the predecessor of an already shared Attribute", async function () {
-            const predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+            const predecessorRepositoryAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: accountController.identity.address
                 })
             });
 
-            const { successor: successorRepositoryAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(predecessorRepositoryAttribute.id, {
+            const { successor: successorRepositoryAttribute } = await consumptionController.attributes.succeedOwnIdentityAttribute(predecessorRepositoryAttribute, {
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "GivenName",
@@ -596,11 +594,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 })
             });
 
-            await consumptionController.attributes.createSharedLocalAttributeCopy({
-                sourceAttributeId: successorRepositoryAttribute.id,
-                peer: sender,
-                sourceReference: await CoreIdHelper.notPrefixed.generate()
-            });
+            await consumptionController.attributes.addForwardedSharingInfoToAttribute(successorRepositoryAttribute, sender, await CoreIdHelper.notPrefixed.generate());
 
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
@@ -637,7 +631,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             const attributesControllerSpy = spy(consumptionController.attributes);
             when(attributesControllerSpy.validateTagsOfAttribute(anything())).thenResolve(ValidationResult.success());
 
-            const existingAttribute = await consumptionController.attributes.createRepositoryAttribute({
+            const existingAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
                     tags: ["invalidTag"],
                     owner: accountController.identity.address
@@ -732,13 +726,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
         describe("canAccept ReadAttributeRequestitem with IdentityAttributeQuery", function () {
             test("returns an error when the existing IdentityAttribute is already shared", async function () {
-                const attribute = await consumptionController.attributes.createSharedLocalAttribute({
+                const attribute = await consumptionController.attributes.createOwnIdentityAttribute({
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: recipient
-                    }),
-                    peer: sender,
-                    sourceReference: await ConsumptionIds.request.generate()
+                    })
                 });
+                await consumptionController.attributes.addForwardedSharingInfoToAttribute(attribute, sender, await ConsumptionIds.request.generate());
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -772,13 +765,13 @@ describe("ReadAttributeRequestItemProcessor", function () {
             });
 
             test("returns an error when a successor of the existing IdentityAttribute is already shared", async function () {
-                const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                const repositoryAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: recipient
                     })
                 });
 
-                const { successor: successorOfRepositoryAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(repositoryAttribute.id, {
+                const { successor: successorOfRepositoryAttribute } = await consumptionController.attributes.succeedOwnIdentityAttribute(repositoryAttribute, {
                     content: {
                         "@type": "IdentityAttribute",
                         owner: recipient.toString(),
@@ -789,11 +782,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     }
                 });
 
-                const ownSharedCopyOfSuccessor = await consumptionController.attributes.createSharedLocalAttributeCopy({
-                    sourceAttributeId: successorOfRepositoryAttribute.id,
-                    peer: sender,
-                    sourceReference: await ConsumptionIds.request.generate()
-                });
+                await consumptionController.attributes.addForwardedSharingInfoToAttribute(successorOfRepositoryAttribute, sender, await ConsumptionIds.request.generate());
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -822,7 +811,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.attributeQueryMismatch",
-                    message: `The provided IdentityAttribute is outdated. You have already shared the successor '${ownSharedCopyOfSuccessor.shareInfo?.sourceAttribute?.toString()}' of it.`
+                    message: `The provided IdentityAttribute is outdated. You have already shared the successor '${repositoryAttribute.id.toString()}' of it.`
                 });
             });
 
@@ -864,7 +853,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             });
 
             test("returns success responding with an existing Attribute and specifying additional tags that are requested by the IdentityAttributeQuery", async function () {
-                const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                const repositoryAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: recipient,
                         value: GivenName.fromAny({ value: "aGivenName" }),
@@ -969,7 +958,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     statusLog: []
                 });
 
-                const localAttribute = await consumptionController.attributes.createSharedLocalAttribute({
+                const localAttribute = await consumptionController.attributes.createOwnRelationshipAttribute({
                     content: RelationshipAttribute.from({
                         key: "aKey",
                         confidentiality: RelationshipAttributeConfidentiality.Public,
@@ -997,7 +986,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             });
 
             test("throws an error when another RelationshipAttribute with same key was queried", async function () {
-                await consumptionController.attributes.createSharedLocalAttribute({
+                await consumptionController.attributes.createOwnRelationshipAttribute({
                     content: TestObjectFactory.createRelationshipAttribute({
                         key: "uniqueKey",
                         owner: recipient,
@@ -1054,7 +1043,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             });
 
             test("returns an error if accepting would lead to the creation of another RelationshipAttribute with same key but rejecting of the ReadAttributeRequestItem would be permitted", async function () {
-                await consumptionController.attributes.createSharedLocalAttribute({
+                await consumptionController.attributes.createOwnRelationshipAttribute({
                     content: TestObjectFactory.createRelationshipAttribute({
                         key: "anotherUniqueKey",
                         owner: recipient,
@@ -1163,6 +1152,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
         });
 
         describe("canAccept ReadAttributeRequestitem with ThirdPartyRelationshipAttributeQuery", function () {
+            // TODO: maybe add test that answering with a ThirdPartyRelationshipAttribute is prevented
             test("returns an error when a RelationshipAttribute is a copy of a sourceAttribute that was queried using a ThirdPartyRelationshipAttributeQuery", async function () {
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -1243,7 +1233,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     statusLog: []
                 });
 
-                const localAttribute = await consumptionController.attributes.createSharedLocalAttribute({
+                const localAttribute = await consumptionController.attributes.createOwnRelationshipAttribute({
                     content: RelationshipAttribute.from({
                         key: "aKey",
                         confidentiality: RelationshipAttributeConfidentiality.Public,
@@ -1296,7 +1286,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     statusLog: []
                 });
 
-                const localAttribute = await consumptionController.attributes.createSharedLocalAttribute({
+                const localAttribute = await consumptionController.attributes.createOwnRelationshipAttribute({
                     content: RelationshipAttribute.from({
                         key: "aKey",
                         confidentiality: RelationshipAttributeConfidentiality.Public,
@@ -1346,7 +1336,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     statusLog: []
                 });
 
-                const localAttribute = await consumptionController.attributes.createSharedLocalAttribute({
+                const localAttribute = await consumptionController.attributes.createOwnRelationshipAttribute({
                     content: RelationshipAttribute.from({
                         key: "aKey",
                         confidentiality: RelationshipAttributeConfidentiality.Public,
@@ -1446,7 +1436,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     statusLog: []
                 });
 
-                const localAttribute = await consumptionController.attributes.createSharedLocalAttribute({
+                const localAttribute = await consumptionController.attributes.createPeerRelationshipAttribute({
                     content: RelationshipAttribute.from({
                         key: "aKey",
                         confidentiality: RelationshipAttributeConfidentiality.Public,
@@ -1493,7 +1483,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     statusLog: []
                 });
 
-                const localAttribute = await consumptionController.attributes.createSharedLocalAttribute({
+                const localAttribute = await consumptionController.attributes.createOwnRelationshipAttribute({
                     content: RelationshipAttribute.from({
                         key: "aKey",
                         confidentiality: RelationshipAttributeConfidentiality.Private,
@@ -1532,7 +1522,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
         describe("accept with existing Attribute", function () {
             test("accept with existing RepositoryAttribute", async function () {
-                const attribute = await consumptionController.attributes.createRepositoryAttribute({
+                const attribute = await consumptionController.attributes.createOwnIdentityAttribute({
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: recipient
                     })
@@ -1564,14 +1554,13 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const result = await processor.accept(requestItem, acceptParams, incomingRequest);
                 expect(result).toBeInstanceOf(ReadAttributeAcceptResponseItem);
 
-                const createdAttribute = await consumptionController.attributes.getLocalAttribute((result as ReadAttributeAcceptResponseItem).attributeId);
-                expect(createdAttribute).toBeDefined();
-                expect(createdAttribute!.shareInfo).toBeDefined();
-                expect(createdAttribute!.shareInfo!.peer.toString()).toStrictEqual(incomingRequest.peer.toString());
+                const updatedAttribute = (await consumptionController.attributes.getLocalAttribute(attribute.id)) as OwnIdentityAttribute;
+                expect(updatedAttribute.forwardedSharingInfos).toHaveLength(1);
+                expect(updatedAttribute.forwardedSharingInfos![0].peer).toStrictEqual(incomingRequest.peer);
             });
 
             test("accept with existing RepositoryAttribute and new tags", async function () {
-                const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                const ownIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: accountController.identity.address,
                         tags: ["x:anExistingTag"]
@@ -1598,33 +1587,28 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
                     accept: true,
-                    existingAttributeId: repositoryAttribute.id.toString(),
+                    existingAttributeId: ownIdentityAttribute.id.toString(),
                     tags: ["x:aNewTag"]
                 };
 
                 const result = await processor.accept(requestItem, acceptParams, incomingRequest);
                 expect(result).toBeInstanceOf(ReadAttributeAcceptResponseItem);
 
-                const ownSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute((result as ReadAttributeAcceptResponseItem).attributeId);
-                const sourceAttribute = await consumptionController.attributes.getLocalAttribute(ownSharedIdentityAttribute!.shareInfo!.sourceAttribute!);
-                expect(sourceAttribute!.succeeds).toBeDefined();
-                expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x:anExistingTag", "x:aNewTag"]);
+                const updatedOwnIdentityAttribute = (await consumptionController.attributes.getLocalAttribute(ownIdentityAttribute.id)) as OwnIdentityAttribute;
+                expect(updatedOwnIdentityAttribute.succeeds).toBeDefined();
+                expect(updatedOwnIdentityAttribute.content.tags).toStrictEqual(["x:anExistingTag", "x:aNewTag"]);
             });
 
             test("accept with existing IdentityAttribute whose predecessor was already shared", async function () {
-                const predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                const predecessorRepositoryAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: CoreAddress.from(accountController.identity.address)
                     })
                 });
 
-                const predecessorOwnSharedIdentityAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
-                    sourceAttributeId: predecessorRepositoryAttribute.id,
-                    peer: sender,
-                    sourceReference: CoreId.from("initialRequest")
-                });
+                await consumptionController.attributes.addForwardedSharingInfoToAttribute(predecessorRepositoryAttribute, sender, CoreId.from("initialRequest"));
 
-                const { successor: successorRepositoryAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(predecessorRepositoryAttribute.id, {
+                const { successor: successorRepositoryAttribute } = await consumptionController.attributes.succeedOwnIdentityAttribute(predecessorRepositoryAttribute, {
                     content: IdentityAttribute.from({
                         value: {
                             "@type": "GivenName",
@@ -1660,20 +1644,10 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 const result = await processor.accept(requestItem, acceptParams, incomingRequest);
                 expect(result).toBeInstanceOf(AttributeSuccessionAcceptResponseItem);
-
-                const successorOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute((result as AttributeSuccessionAcceptResponseItem).successorId);
-                expect(successorOwnSharedIdentityAttribute).toBeDefined();
-                expect(successorOwnSharedIdentityAttribute!.shareInfo).toBeDefined();
-                expect(successorOwnSharedIdentityAttribute!.shareInfo!.peer.toString()).toStrictEqual(incomingRequest.peer.toString());
-                expect(successorOwnSharedIdentityAttribute!.shareInfo!.sourceAttribute).toStrictEqual(successorRepositoryAttribute.id);
-                expect(successorOwnSharedIdentityAttribute!.succeeds).toStrictEqual(predecessorOwnSharedIdentityAttribute.id);
-
-                const updatedPredecessorOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute(predecessorOwnSharedIdentityAttribute.id);
-                expect(updatedPredecessorOwnSharedIdentityAttribute!.succeededBy).toStrictEqual(successorOwnSharedIdentityAttribute!.id);
             });
 
             test("accept with existing IdentityAttribute whose predecessor was already shared and new tags", async function () {
-                const predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                const predecessor = await consumptionController.attributes.createOwnIdentityAttribute({
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: accountController.identity.address,
                         value: GivenName.fromAny({ value: "aGivenName" }),
@@ -1681,13 +1655,9 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     })
                 });
 
-                await consumptionController.attributes.createSharedLocalAttributeCopy({
-                    sourceAttributeId: predecessorRepositoryAttribute.id,
-                    peer: sender,
-                    sourceReference: CoreId.from("initialRequest")
-                });
+                await consumptionController.attributes.addForwardedSharingInfoToAttribute(predecessor, sender, CoreId.from("initialRequest"));
 
-                const { successor: successorRepositoryAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(predecessorRepositoryAttribute.id, {
+                const { successor: successor } = await consumptionController.attributes.succeedOwnIdentityAttribute(predecessor, {
                     content: IdentityAttribute.from({
                         owner: accountController.identity.address,
                         value: GivenName.fromAny({ value: "aNewGivenName" }),
@@ -1715,27 +1685,26 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
                     accept: true,
-                    existingAttributeId: successorRepositoryAttribute.id.toString(),
+                    existingAttributeId: successor.id.toString(),
                     tags: ["x:aNewTag"]
                 };
 
                 const result = await processor.accept(requestItem, acceptParams, incomingRequest);
                 expect(result).toBeInstanceOf(AttributeSuccessionAcceptResponseItem);
 
-                const successorOwnSharedIdentityAttribute = await consumptionController.attributes.getLocalAttribute((result as AttributeSuccessionAcceptResponseItem).successorId);
-                const sourceAttribute = await consumptionController.attributes.getLocalAttribute(successorOwnSharedIdentityAttribute!.shareInfo!.sourceAttribute!);
-                expect(sourceAttribute!.succeeds).toStrictEqual(successorRepositoryAttribute.id);
-                expect((sourceAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x:anExistingTag", "x:aNewTag"]);
+                const updatedSuccessor = (await consumptionController.attributes.getLocalAttribute(successor.id)) as OwnIdentityAttribute;
+                expect(updatedSuccessor.succeeds).toStrictEqual(successor.id);
+                expect(updatedSuccessor.content.tags).toStrictEqual(["x:anExistingTag", "x:aNewTag"]);
             });
 
             test("accept with existing IdentityAttribute whose predecessor was already shared but is DeletedByPeer", async function () {
-                const predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                const predecessorRepositoryAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: accountController.identity.address
                     })
                 });
 
-                const { successor: successorRepositoryAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(predecessorRepositoryAttribute.id, {
+                const { successor: successorRepositoryAttribute } = await consumptionController.attributes.succeedOwnIdentityAttribute(predecessorRepositoryAttribute, {
                     content: IdentityAttribute.from({
                         value: {
                             "@type": "GivenName",
