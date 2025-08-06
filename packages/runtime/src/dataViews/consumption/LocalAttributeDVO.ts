@@ -45,7 +45,6 @@ export interface PeerIdentityAttributeDVO extends LocalAttributeDVO {
     deletionStatus?: string;
 }
 
-// TODO: is it okay to have the peerSharingInfo of the initial peer flatted here?
 export interface OwnRelationshipAttributeDVO extends LocalAttributeDVO {
     type: "OwnRelationshipAttributeDVO";
     isOwn: true;
@@ -88,7 +87,6 @@ export interface ThirdPartyRelationshipAttributeDVO extends LocalAttributeDVO {
 }
 
 export interface ForwardedSharingInfoDVO {
-    type: "ForwardedSharingInfoDVO"; // TODO: check if a type is required
     peer: string;
     sourceReference: string;
     sharedAt: string;

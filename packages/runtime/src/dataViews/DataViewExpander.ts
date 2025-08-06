@@ -1040,7 +1040,7 @@ export class DataViewExpander {
                 succeededBy: attribute.succeededBy,
                 tags: localAttribute.content.tags,
                 isDefault: attribute.isDefault,
-                forwardingPeers: localAttribute.getPeers().map((peerAddress) => peerAddress.toString()),
+                forwardingPeers: this.expandForwardingPeers(localAttribute),
                 forwardedSharingInfos: this.expandForwardedSharingInfos(localAttribute)
             };
         }
@@ -1098,7 +1098,7 @@ export class DataViewExpander {
                 sourceReference: localAttribute.peerSharingInfo.sourceReference.toString(),
                 deletionStatus: localAttribute.peerSharingInfo.deletionInfo?.deletionStatus,
                 deletionDate: localAttribute.peerSharingInfo.deletionInfo?.deletionDate.toString(),
-                forwardingPeers: localAttribute.getThirdParties().map((thirdPartyAddress) => thirdPartyAddress.toString()),
+                forwardingPeers: this.expandForwardingPeers(localAttribute),
                 forwardedSharingInfos: this.expandForwardedSharingInfos(localAttribute)
             };
         }
@@ -1129,7 +1129,7 @@ export class DataViewExpander {
                 sourceReference: localAttribute.peerSharingInfo.sourceReference.toString(),
                 deletionStatus: localAttribute.peerSharingInfo.deletionInfo?.deletionStatus,
                 deletionDate: localAttribute.peerSharingInfo.deletionInfo?.deletionDate.toString(),
-                forwardingPeers: localAttribute.getThirdParties().map((thirdPartyAddress) => thirdPartyAddress.toString()),
+                forwardingPeers: this.expandForwardingPeers(localAttribute),
                 forwardedSharingInfos: this.expandForwardedSharingInfos(localAttribute)
             };
         }
@@ -1170,15 +1170,31 @@ export class DataViewExpander {
         return await Promise.all(attributesPromise);
     }
 
+    private expandForwardingPeers(localAttribute: AttributeWithForwardedSharingInfos): string[] | undefined {
+        if (!localAttribute.forwardedSharingInfos || localAttribute.forwardedSharingInfos.length === 0) return;
+
+        if (localAttribute instanceof OwnIdentityAttribute) {
+            return localAttribute.getPeers().map((peerAddress) => peerAddress.toString());
+        }
+
+        return localAttribute.getThirdParties().map((thirdPartyAddress) => thirdPartyAddress.toString());
+    }
+
     private expandForwardedSharingInfos(localAttribute: AttributeWithForwardedSharingInfos): ForwardedSharingInfoDVO[] | undefined {
-        return localAttribute.forwardedSharingInfos?.map((sharingInfo) => ({
-            type: "ForwardedSharingInfoDVO",
-            peer: sharingInfo.peer.toString(),
-            sourceReference: sharingInfo.sourceReference.toString(),
-            sharedAt: sharingInfo.sharedAt.toString(),
-            deletionDate: sharingInfo.deletionInfo?.deletionDate.toString(),
-            deletionStatus: sharingInfo.deletionInfo?.deletionStatus
-        }));
+        if (!localAttribute.forwardedSharingInfos || localAttribute.forwardedSharingInfos.length === 0) return;
+
+        return localAttribute.forwardedSharingInfos?.map((sharingInfo) => {
+            const result: ForwardedSharingInfoDVO = {
+                peer: sharingInfo.peer.toString(),
+                sourceReference: sharingInfo.sourceReference.toString(),
+                sharedAt: sharingInfo.sharedAt.toString()
+            };
+            if (sharingInfo.deletionInfo) {
+                result.deletionDate = sharingInfo.deletionInfo.deletionDate.toString();
+                result.deletionStatus = sharingInfo.deletionInfo.deletionStatus;
+            }
+            return result;
+        });
     }
 
     public async expandAttributeQuery(

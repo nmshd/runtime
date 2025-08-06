@@ -1,15 +1,14 @@
 import { AbstractStringJSON, BiologicalSex } from "@nmshd/content";
-import { ConsumptionServices, CreateOwnIdentityAttributeRequest, DataViewExpander, OwnIdentityAttributeDVO } from "../../src";
-import { RuntimeServiceProvider } from "../lib";
+import { CreateOwnIdentityAttributeRequest, OwnIdentityAttributeDVO } from "../../src";
+import { ensureActiveRelationship, executeFullCreateAndShareOwnIdentityAttributeFlow, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
-let consumptionServices1: ConsumptionServices;
-let expander1: DataViewExpander;
+let services1: TestRuntimeServices;
+let services2: TestRuntimeServices;
 
 beforeAll(async () => {
-    const runtimeServices = await serviceProvider.launch(1);
-    consumptionServices1 = runtimeServices[0].consumption;
-    expander1 = runtimeServices[0].expander;
+    [services1, services2] = await serviceProvider.launch(2, { enableRequestModule: true, enableDeciderModule: true });
+    await ensureActiveRelationship(services1.transport, services2.transport);
 }, 30000);
 
 afterAll(() => serviceProvider.stop());
@@ -63,8 +62,8 @@ describe("OwnIdentityAttributeDVO", () => {
     });
 
     test("check the GivenName", async () => {
-        const attribute = (await consumptionServices1.attributes.createOwnIdentityAttribute(requests[0])).value;
-        const dvo = (await expander1.expandLocalAttributeDTO(attribute)) as OwnIdentityAttributeDVO;
+        const attribute = (await services1.consumption.attributes.createOwnIdentityAttribute(requests[0])).value;
+        const dvo = (await services1.expander.expandLocalAttributeDTO(attribute)) as OwnIdentityAttributeDVO;
         expect(dvo).toBeDefined();
         expect(dvo.type).toBe("OwnIdentityAttributeDVO");
         expect(dvo.id).toStrictEqual(attribute.id);
@@ -78,7 +77,8 @@ describe("OwnIdentityAttributeDVO", () => {
         expect(value.value).toBe("aGivenName");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.sharedWith).toStrictEqual([]);
+        expect(dvo.forwardingPeers).toBeUndefined();
+        expect(dvo.forwardedSharingInfos).toBeUndefined();
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");
@@ -88,8 +88,8 @@ describe("OwnIdentityAttributeDVO", () => {
     });
 
     test("check the Surname", async () => {
-        const attribute = (await consumptionServices1.attributes.createOwnIdentityAttribute(requests[1])).value;
-        const dvo = (await expander1.expandLocalAttributeDTO(attribute)) as OwnIdentityAttributeDVO;
+        const attribute = (await services1.consumption.attributes.createOwnIdentityAttribute(requests[1])).value;
+        const dvo = (await services1.expander.expandLocalAttributeDTO(attribute)) as OwnIdentityAttributeDVO;
         expect(dvo).toBeDefined();
         expect(dvo.type).toBe("OwnIdentityAttributeDVO");
         expect(dvo.id).toStrictEqual(attribute.id);
@@ -103,7 +103,9 @@ describe("OwnIdentityAttributeDVO", () => {
         expect(value.value).toBe("aSurname");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.sharedWith).toStrictEqual([]);
+        expect(dvo.isDefault).toBe(attribute.isDefault);
+        expect(dvo.forwardingPeers).toBeUndefined();
+        expect(dvo.forwardedSharingInfos).toBeUndefined();
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");
@@ -113,8 +115,8 @@ describe("OwnIdentityAttributeDVO", () => {
     });
 
     test("check the Sex", async () => {
-        const attribute = (await consumptionServices1.attributes.createOwnIdentityAttribute(requests[2])).value;
-        const dvo = (await expander1.expandLocalAttributeDTO(attribute)) as OwnIdentityAttributeDVO;
+        const attribute = (await services1.consumption.attributes.createOwnIdentityAttribute(requests[2])).value;
+        const dvo = (await services1.expander.expandLocalAttributeDTO(attribute)) as OwnIdentityAttributeDVO;
         expect(dvo).toBeDefined();
         expect(dvo.type).toBe("OwnIdentityAttributeDVO");
         expect(dvo.id).toStrictEqual(attribute.id);
@@ -128,7 +130,9 @@ describe("OwnIdentityAttributeDVO", () => {
         expect(value.value).toBe("male");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.sharedWith).toStrictEqual([]);
+        expect(dvo.isDefault).toBe(attribute.isDefault);
+        expect(dvo.forwardingPeers).toBeUndefined();
+        expect(dvo.forwardedSharingInfos).toBeUndefined();
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");
@@ -143,8 +147,8 @@ describe("OwnIdentityAttributeDVO", () => {
     });
 
     test("check the Nationality", async () => {
-        const attribute = (await consumptionServices1.attributes.createOwnIdentityAttribute(requests[3])).value;
-        const dvo = (await expander1.expandLocalAttributeDTO(attribute)) as OwnIdentityAttributeDVO;
+        const attribute = (await services1.consumption.attributes.createOwnIdentityAttribute(requests[3])).value;
+        const dvo = (await services1.expander.expandLocalAttributeDTO(attribute)) as OwnIdentityAttributeDVO;
         expect(dvo).toBeDefined();
         expect(dvo.type).toBe("OwnIdentityAttributeDVO");
         expect(dvo.id).toStrictEqual(attribute.id);
@@ -158,7 +162,9 @@ describe("OwnIdentityAttributeDVO", () => {
         expect(value.value).toBe("DE");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.sharedWith).toStrictEqual([]);
+        expect(dvo.isDefault).toBe(attribute.isDefault);
+        expect(dvo.forwardingPeers).toBeUndefined();
+        expect(dvo.forwardedSharingInfos).toBeUndefined();
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");
@@ -172,8 +178,9 @@ describe("OwnIdentityAttributeDVO", () => {
     });
 
     test("check the CommunicationLanguage", async () => {
-        const attribute = (await consumptionServices1.attributes.createOwnIdentityAttribute(requests[4])).value;
-        const dvo = (await expander1.expandLocalAttributeDTO(attribute)) as OwnIdentityAttributeDVO;
+        const attribute = await executeFullCreateAndShareOwnIdentityAttributeFlow(services1, services2, requests[4]);
+
+        const dvo = (await services1.expander.expandLocalAttributeDTO(attribute)) as OwnIdentityAttributeDVO;
         expect(dvo).toBeDefined();
         expect(dvo.type).toBe("OwnIdentityAttributeDVO");
         expect(dvo.id).toStrictEqual(attribute.id);
@@ -187,7 +194,15 @@ describe("OwnIdentityAttributeDVO", () => {
         expect(value.value).toBe("de");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.sharedWith).toStrictEqual([]);
+        expect(dvo.isDefault).toBe(attribute.isDefault);
+        expect(dvo.forwardingPeers).toStrictEqual([services2.address]);
+        expect(dvo.forwardedSharingInfos).toStrictEqual([
+            {
+                peer: services2.address,
+                sourceReference: attribute.forwardedSharingInfos![0].sourceReference,
+                sharedAt: attribute.forwardedSharingInfos![0].sharedAt
+            }
+        ]);
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");
