@@ -1076,8 +1076,8 @@ export class DataViewExpander {
             return {
                 type: "OwnRelationshipAttributeDVO",
                 id: attribute.id,
-                name,
-                description,
+                name: "title" in attribute.content.value ? attribute.content.value.title : name,
+                description: "description" in attribute.content.value ? attribute.content.value.description : description,
                 date: attribute.createdAt,
                 content: attribute.content,
                 owner,
@@ -1107,8 +1107,8 @@ export class DataViewExpander {
             return {
                 type: "PeerRelationshipAttributeDVO",
                 id: attribute.id,
-                name,
-                description,
+                name: "title" in attribute.content.value ? attribute.content.value.title : name,
+                description: "description" in attribute.content.value ? attribute.content.value.description : description,
                 date: attribute.createdAt,
                 content: attribute.content,
                 owner,
@@ -1137,8 +1137,8 @@ export class DataViewExpander {
         return {
             type: "ThirdPartyRelationshipAttributeDVO",
             id: attribute.id,
-            name,
-            description,
+            name: "title" in attribute.content.value ? attribute.content.value.title : name,
+            description: "description" in attribute.content.value ? attribute.content.value.description : description,
             date: attribute.createdAt,
             content: attribute.content,
             owner,
