@@ -27,7 +27,7 @@ export class ChangeDefaultOwnIdentityAttributeUseCase extends UseCase<ChangeDefa
     }
 
     protected async executeInternal(request: ChangeDefaultOwnIdentityAttributeRequest): Promise<Result<LocalAttributeDTO>> {
-        if (!this.attributesController.parent.consumptionConfig.setDefaultRepositoryAttributes) {
+        if (!this.attributesController.parent.consumptionConfig.setDefaultOwnIdentityAttributes) {
             return Result.fail(RuntimeErrors.attributes.setDefaultOwnIdentityAttributesIsDisabled());
         }
 

@@ -92,7 +92,7 @@ export class ConsumptionController {
             this,
             this.transport.eventBus,
             this.accountController.identity,
-            this.consumptionConfig.setDefaultRepositoryAttributes
+            this.consumptionConfig.setDefaultOwnIdentityAttributes
         ).init();
         this._drafts = await new DraftsController(this).init();
 
