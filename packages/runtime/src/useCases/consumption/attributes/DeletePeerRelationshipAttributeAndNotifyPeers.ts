@@ -42,7 +42,7 @@ export class DeletePeerRelationshipAttributeAndNotifyPeersUseCase extends UseCas
         if (!peerRelationshipAttribute) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
 
         if (!(peerRelationshipAttribute instanceof PeerRelationshipAttribute)) {
-            return Result.fail(RuntimeErrors.attributes.isNotPeerSharedAttribute(peerRelationshipAttributeId)); // TODO:
+            return Result.fail(RuntimeErrors.attributes.isNotPeerRelationshipAttribute(peerRelationshipAttributeId));
         }
 
         const relationshipWithStatusPending = await this.relationshipsController.getRelationshipToIdentity(
