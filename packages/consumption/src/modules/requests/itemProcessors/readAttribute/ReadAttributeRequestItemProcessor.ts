@@ -116,11 +116,16 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 return ValidationResult.error(TransportCoreErrors.general.recordNotFound(LocalAttribute, parsedParams.existingAttributeId.toString()));
             }
 
-            // TODO: error message and code, maybe split these cases to be more precise
-            if (foundLocalAttribute instanceof PeerIdentityAttribute || foundLocalAttribute instanceof ThirdPartyRelationshipAttribute) {
+            if (
+                !(
+                    foundLocalAttribute instanceof OwnIdentityAttribute ||
+                    foundLocalAttribute instanceof OwnRelationshipAttribute ||
+                    foundLocalAttribute instanceof PeerRelationshipAttribute
+                )
+            ) {
                 return ValidationResult.error(
-                    ConsumptionCoreErrors.requests.attributeQueryMismatch(
-                        "The provided IdentityAttribute is a shared copy of a RepositoryAttribute. You can only share RepositoryAttributes."
+                    ConsumptionCoreErrors.requests.invalidAcceptParameters(
+                        "The selected Attribute is not an own IdentityAttribute, own RelationshipAttribute or peer RelationshipAttribute. When accepting a ReadAttributeRequestItem with an existing Attribute it may only be such an Attribute."
                     )
                 );
             }
@@ -279,22 +284,22 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                     existingAttribute instanceof PeerRelationshipAttribute
                 )
             ) {
-                throw Error; // TODO:
+                throw ConsumptionCoreErrors.requests.invalidAcceptParameters(
+                    "The selected Attribute is not an own IdentityAttribute, own RelationshipAttribute or peer RelationshipAttribute. When accepting a ReadAttributeRequestItem with an existing Attribute it may only be such an Attribute."
+                );
             }
 
             if (parsedParams.tags && parsedParams.tags.length > 0 && existingAttribute instanceof OwnIdentityAttribute) {
                 const mergedTags = existingAttribute.content.tags ? [...existingAttribute.content.tags, ...parsedParams.tags] : parsedParams.tags;
                 existingAttribute.content.tags = mergedTags;
 
-                // TODO: I think we should only succeed if new tags are actually added; or not do a succession in general, but then peer will have different tags -> might be okay
                 const successorParams = OwnIdentityAttributeSuccessorParams.from({
                     content: existingAttribute.content
                 });
                 const attributesAfterSuccession = await this.consumptionController.attributes.succeedOwnIdentityAttribute(existingAttribute, successorParams);
                 existingAttribute = attributesAfterSuccession.successor;
 
-                // TODO: improve this
-                if (!(existingAttribute instanceof OwnIdentityAttribute)) throw Error;
+                if (!(existingAttribute instanceof OwnIdentityAttribute)) throw new Error("This should never occur, but is required for the compiler.");
             }
 
             const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfAttribute(existingAttribute, requestInfo.peer);
@@ -309,9 +314,8 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
             const updatedAttribute = await this.consumptionController.attributes.addForwardedSharingInfoToAttribute(existingAttribute, requestInfo.peer, requestInfo.id);
 
-            // TODO: maybe negate this
-            const wasSharedBefore = latestSharedVersion.length > 0;
-            if (!wasSharedBefore) {
+            const wasNotSharedBefore = latestSharedVersion.length === 0;
+            if (wasNotSharedBefore) {
                 const thirdPartyAddress =
                     existingAttribute instanceof OwnRelationshipAttribute || existingAttribute instanceof PeerRelationshipAttribute
                         ? existingAttribute.peerSharingInfo.peer
@@ -423,7 +427,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
         if (responseItem instanceof AttributeSuccessionAcceptResponseItem) {
             const predecessor = await this.consumptionController.attributes.getLocalAttribute(responseItem.predecessorId);
-            if (!predecessor) throw Error; // TODO: or return?
+            if (!predecessor) return;
 
             if (!(predecessor instanceof PeerIdentityAttribute || predecessor instanceof ThirdPartyRelationshipAttribute)) return;
 

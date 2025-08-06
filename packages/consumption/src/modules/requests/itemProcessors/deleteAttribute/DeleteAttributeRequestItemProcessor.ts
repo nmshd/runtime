@@ -26,13 +26,14 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
             return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem(`The Attribute '${requestItem.attributeId.toString()}' could not be found.`));
         }
 
-        if (!recipient) return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("The recipient is not specified.")); // TODO:
+        if (!recipient) {
+            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("The recipient must be specified when sending a DeleteAttributeRequestItem."));
+        }
 
         if (!(attribute instanceof OwnIdentityAttribute || attribute instanceof OwnRelationshipAttribute || attribute instanceof PeerRelationshipAttribute)) {
-            // TODO: message
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidRequestItem(
-                    `The Attribute '${requestItem.attributeId.toString()}' is not an own shared Attribute. You can only request the deletion of own shared Attributes.`
+                    `The Attribute '${requestItem.attributeId.toString()}' is not an own IdentityAttribute, own RelationshipAttribute or peer RelationshipAttribute. You can only request the deletion of such Attributes.`
                 )
             );
         }
@@ -62,13 +63,15 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
         const attribute = await this.consumptionController.attributes.getLocalAttribute(requestItem.attributeId);
         if (!attribute) return ValidationResult.success();
 
-        // TODO: we should probably also check that the request peer and attribute peer match
         if (
             !(attribute instanceof PeerIdentityAttribute || attribute instanceof PeerRelationshipAttribute || attribute instanceof ThirdPartyRelationshipAttribute) ||
             !attribute.peerSharingInfo.peer.equals(requestInfo.peer)
         ) {
-            // TODO:
-            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("TODO"));
+            return ValidationResult.error(
+                ConsumptionCoreErrors.requests.invalidRequestItem(
+                    "The recipient isn't the peer of the Attribute and therefore isn't allowed to request the deletion of the Attribute."
+                )
+            );
         }
 
         const deletionDate = parsedParams.deletionDate;
@@ -142,9 +145,8 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
 
         const attribute = await this.consumptionController.attributes.getLocalAttribute(requestItem.attributeId);
         if (!attribute) return;
-        if (!(attribute instanceof OwnIdentityAttribute || attribute instanceof OwnRelationshipAttribute || attribute instanceof PeerRelationshipAttribute)) {
-            return; // TODO: this seems fishy, maybe throw an error instead? Or is it safe enough to use a type cast?
-        }
+
+        if (!(attribute instanceof OwnIdentityAttribute || attribute instanceof OwnRelationshipAttribute || attribute instanceof PeerRelationshipAttribute)) return;
 
         if (responseItem instanceof DeleteAttributeAcceptResponseItem) {
             await this.setDeletionInfoForAcceptedRequestItem(attribute, responseItem.deletionDate, requestInfo.peer);

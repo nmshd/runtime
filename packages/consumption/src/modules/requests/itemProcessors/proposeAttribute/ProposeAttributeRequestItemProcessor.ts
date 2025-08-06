@@ -136,11 +136,10 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
                 return ValidationResult.error(TransportCoreErrors.general.recordNotFound(LocalAttribute, parsedParams.attributeId.toString()));
             }
 
-            // TODO: error message and code, maybe split these cases to be more precise
             if (!(foundLocalAttribute instanceof OwnIdentityAttribute)) {
                 return ValidationResult.error(
-                    ConsumptionCoreErrors.requests.attributeQueryMismatch(
-                        "The provided IdentityAttribute is a shared copy of a RepositoryAttribute. You can only share RepositoryAttributes."
+                    ConsumptionCoreErrors.requests.invalidAcceptParameters(
+                        "The selected Attribute is not an own IdentityAttribute. When accepting a ProposeAttributeRequestItem with an existing Attribute it may only be an own IdentityAttribute."
                     )
                 );
             }
@@ -229,21 +228,23 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             let existingAttribute = await this.consumptionController.attributes.getLocalAttribute(parsedParams.attributeId);
             if (!existingAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, parsedParams.attributeId.toString());
 
-            if (!(existingAttribute instanceof OwnIdentityAttribute)) throw Error; // TODO:
+            if (!(existingAttribute instanceof OwnIdentityAttribute)) {
+                throw ConsumptionCoreErrors.requests.invalidAcceptParameters(
+                    "The selected Attribute is not an own IdentityAttribute. When accepting a ProposeAttributeRequestItem with an existing Attribute it may only be an own IdentityAttribute."
+                );
+            }
 
             if (parsedParams.tags && parsedParams.tags.length > 0) {
                 const mergedTags = existingAttribute.content.tags ? [...existingAttribute.content.tags, ...parsedParams.tags] : parsedParams.tags;
                 existingAttribute.content.tags = mergedTags;
 
-                // TODO: I think we should only succeed if new tags are actually added; or not do a succession in general, but then peer will have different tags -> might be okay
                 const successorParams = OwnIdentityAttributeSuccessorParams.from({
                     content: existingAttribute.content
                 });
                 const attributesAfterSuccession = await this.consumptionController.attributes.succeedOwnIdentityAttribute(existingAttribute, successorParams);
                 existingAttribute = attributesAfterSuccession.successor;
 
-                // TODO: improve this
-                if (!(existingAttribute instanceof OwnIdentityAttribute)) throw Error;
+                if (!(existingAttribute instanceof OwnIdentityAttribute)) throw new Error("This should never occur, but is required for the compiler.");
             }
 
             const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfAttribute(existingAttribute, requestInfo.peer);
@@ -258,9 +259,8 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
 
             const updatedAttribute = await this.consumptionController.attributes.addForwardedSharingInfoToAttribute(existingAttribute, requestInfo.peer, requestInfo.id);
 
-            // TODO: maybe negate this
-            const wasSharedBefore = latestSharedVersion.length > 0;
-            if (!wasSharedBefore) {
+            const wasNotSharedBefore = latestSharedVersion.length === 0;
+            if (wasNotSharedBefore) {
                 return ProposeAttributeAcceptResponseItem.from({
                     result: ResponseItemResult.Accepted,
                     attributeId: updatedAttribute.id,
@@ -331,23 +331,23 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
 
         if (responseItem instanceof AttributeSuccessionAcceptResponseItem && responseItem.successorContent instanceof IdentityAttribute) {
             const predecessor = await this.consumptionController.attributes.getLocalAttribute(responseItem.predecessorId);
-            if (!predecessor) throw Error; // TODO: or return?
+            if (!predecessor) return;
 
-            if (predecessor instanceof PeerIdentityAttribute && responseItem.successorContent instanceof IdentityAttribute) {
-                const peerSharingInfo = PeerIdentityAttributeSharingInfo.from({
-                    peer: requestInfo.peer,
-                    sourceReference: requestInfo.id
-                });
-                const successorParams = PeerIdentityAttributeSuccessorParams.from({
-                    id: responseItem.successorId,
-                    content: responseItem.successorContent,
-                    peerSharingInfo
-                });
+            if (!(predecessor instanceof PeerIdentityAttribute && responseItem.successorContent instanceof IdentityAttribute)) return;
 
-                const { predecessor: updatedPredecessor, successor } = await this.consumptionController.attributes.succeedPeerIdentityAttribute(predecessor, successorParams);
-                // TODO: check publishing of events
-                return new PeerSharedAttributeSucceededEvent(this.currentIdentityAddress.toString(), updatedPredecessor, successor);
-            }
+            const peerSharingInfo = PeerIdentityAttributeSharingInfo.from({
+                peer: requestInfo.peer,
+                sourceReference: requestInfo.id
+            });
+            const successorParams = PeerIdentityAttributeSuccessorParams.from({
+                id: responseItem.successorId,
+                content: responseItem.successorContent,
+                peerSharingInfo
+            });
+
+            const { predecessor: updatedPredecessor, successor } = await this.consumptionController.attributes.succeedPeerIdentityAttribute(predecessor, successorParams);
+            // TODO: check publishing of events
+            return new PeerSharedAttributeSucceededEvent(this.currentIdentityAddress.toString(), updatedPredecessor, successor);
         }
     }
 }
