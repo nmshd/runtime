@@ -2467,7 +2467,7 @@ describe("Get (shared) versions of Attribute", () => {
     });
 });
 
-describe.only(DeleteAttributeAndNotifyUseCase.name, () => {
+describe(DeleteAttributeAndNotifyUseCase.name, () => {
     describe("Delete IdentityAttributes", () => {
         let ownIdentityAttributeVersion0: LocalAttributeDTO;
         let ownIdentityAttributeVersion1: LocalAttributeDTO;
