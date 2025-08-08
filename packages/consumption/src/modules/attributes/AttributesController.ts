@@ -431,7 +431,7 @@ export class AttributesController extends ConsumptionBaseController {
     private async validateAttributeCreation(attribute: IdentityAttribute | RelationshipAttribute): Promise<void> {
         if (!this.validateAttributeCharacters(attribute)) throw ConsumptionCoreErrors.attributes.forbiddenCharactersInAttribute("The Attribute contains forbidden characters.");
 
-        if (attribute instanceof Relationship) return;
+        if (attribute instanceof RelationshipAttribute) return;
 
         const tagValidationResult = await this.validateTagsOfAttribute(attribute);
         if (tagValidationResult.isError()) throw tagValidationResult.error;
@@ -863,7 +863,7 @@ export class AttributesController extends ConsumptionBaseController {
         const valueType = attribute.content.value.constructor.name;
         const query = {
             $and: [
-                { [`${nameof<LocalAttribute>}.@type`]: "OwnIdentityAttribute" },
+                { [`@type`]: "OwnIdentityAttribute" },
                 { [`${nameof<LocalAttribute>((c) => c.content)}.value.@type`]: valueType },
                 { [nameof<LocalAttribute>((c) => c.succeededBy)]: undefined },
                 { [nameof<LocalAttribute>((c) => c.id)]: { $ne: attribute.id.toString() } }
