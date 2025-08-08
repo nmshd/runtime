@@ -5,7 +5,7 @@ export * from "./AttributeWasViewedAtChangedEvent";
 export * from "./ForwardedAttributeDeletedEvent";
 export * from "./OwnSharedAttributeDeletedByOwnerEvent";
 export * from "./OwnSharedAttributeSucceededEvent";
-export * from "./PeerSharedAttributeDeletedByPeerEvent";
+export * from "./PeerRelationshipAttributeDeletedEvent";
 export * from "./PeerSharedAttributeSucceededEvent";
 export * from "./RepositoryAttributeSucceededEvent";
 export * from "./ThirdPartyRelationshipAttributeDeletedByPeerEvent";

@@ -12,7 +12,7 @@ export * from "./OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent
 export * from "./OutgoingRequestStatusChangedEvent";
 export * from "./OwnSharedAttributeDeletedByOwnerEvent";
 export * from "./OwnSharedAttributeSucceededEvent";
-export * from "./PeerSharedAttributeDeletedByPeerEvent";
+export * from "./PeerRelationshipAttributeDeletedEvent";
 export * from "./PeerSharedAttributeSucceededEvent";
 export * from "./RelationshipEvent";
 export * from "./RelationshipTemplateProcessedEvent";
