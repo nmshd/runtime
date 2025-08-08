@@ -4,7 +4,7 @@ import {
     CreateAttributeRequestItem,
     DeleteAttributeRequestItem,
     FormFieldRequestItem,
-    ForwardedAttributeDeletedNotificationItem,
+    ForwardedAttributeDeletedByPeerNotificationItem,
     OwnAttributeDeletedByOwnerNotificationItem,
     PeerRelationshipAttributeDeletedByPeerNotificationItem,
     PeerSharedAttributeSucceededNotificationItem,
@@ -41,7 +41,7 @@ import {
     ShareAttributeRequestItemProcessor,
     TransferFileOwnershipRequestItemProcessor
 } from "../modules";
-import { ForwardedAttributeDeletedNotificationItemProcessor } from "../modules/notifications/itemProcessors/attributeDeleted/ForwardedAttributeDeletedNotificationItemProcessor";
+import { ForwardedAttributeDeletedByPeerNotificationItemProcessor } from "../modules/notifications/itemProcessors/attributeDeleted/ForwardedAttributeDeletedByPeerNotificationItemProcessor";
 import { ConsumptionConfig } from "./ConsumptionConfig";
 
 export class ConsumptionController {
@@ -160,7 +160,7 @@ export class ConsumptionController {
             [PeerSharedAttributeSucceededNotificationItem, PeerSharedAttributeSucceededNotificationItemProcessor],
             [OwnAttributeDeletedByOwnerNotificationItem, OwnAttributeDeletedByOwnerNotificationItemProcessor],
             [PeerRelationshipAttributeDeletedByPeerNotificationItem, PeerRelationshipAttributeDeletedByPeerNotificationItemProcessor],
-            [ForwardedAttributeDeletedNotificationItem, ForwardedAttributeDeletedNotificationItemProcessor]
+            [ForwardedAttributeDeletedByPeerNotificationItem, ForwardedAttributeDeletedByPeerNotificationItemProcessor]
         ]);
     }
 

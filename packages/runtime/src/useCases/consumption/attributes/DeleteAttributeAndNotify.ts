@@ -10,7 +10,7 @@ import {
     ThirdPartyRelationshipAttribute
 } from "@nmshd/consumption";
 import {
-    ForwardedAttributeDeletedNotificationItem,
+    ForwardedAttributeDeletedByPeerNotificationItem,
     Notification,
     OwnAttributeDeletedByOwnerNotificationItem,
     PeerRelationshipAttributeDeletedByPeerNotificationItem
@@ -101,7 +101,7 @@ export class DeleteAttributeAndNotifyUseCase extends UseCase<DeleteAttributeAndN
     }
 
     private async notifyAboutDeletionOfForwardedAttribute(attribute: PeerIdentityAttribute | ThirdPartyRelationshipAttribute) {
-        const notificationItem = ForwardedAttributeDeletedNotificationItem.from({ attributeId: attribute.id });
+        const notificationItem = ForwardedAttributeDeletedByPeerNotificationItem.from({ attributeId: attribute.id });
 
         const notificationId = await this.notifyPeer(attribute.peerSharingInfo.peer, notificationItem);
         return notificationId;
@@ -132,7 +132,7 @@ export class DeleteAttributeAndNotifyUseCase extends UseCase<DeleteAttributeAndN
 
     private async notifyPeer(
         peer: CoreAddress,
-        notificationItem: OwnAttributeDeletedByOwnerNotificationItem | PeerRelationshipAttributeDeletedByPeerNotificationItem | ForwardedAttributeDeletedNotificationItem
+        notificationItem: OwnAttributeDeletedByOwnerNotificationItem | PeerRelationshipAttributeDeletedByPeerNotificationItem | ForwardedAttributeDeletedByPeerNotificationItem
     ) {
         const messageRecipientsValidationResult = await this.messageController.validateMessageRecipients([peer]);
         if (messageRecipientsValidationResult.isError) return [];

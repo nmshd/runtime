@@ -1,12 +1,12 @@
 import { ILogger } from "@js-soft/logging-abstractions";
 import { ApplicationError } from "@js-soft/ts-utils";
-import { ForwardedAttributeDeletedNotificationItem } from "@nmshd/content";
+import { ForwardedAttributeDeletedByPeerNotificationItem } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
 import { TransportLoggerFactory } from "@nmshd/transport";
 import { ConsumptionController } from "../../../../consumption/ConsumptionController";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import {
-    ForwardedAttributeDeletedEvent,
+    ForwardedAttributeDeletedByPeerEvent,
     ForwardedAttributeDeletionInfo,
     ForwardedAttributeDeletionStatus,
     OwnIdentityAttribute,
@@ -17,16 +17,16 @@ import { ValidationResult } from "../../../common";
 import { LocalNotification } from "../../local/LocalNotification";
 import { AbstractNotificationItemProcessor } from "../AbstractNotificationItemProcessor";
 
-export class ForwardedAttributeDeletedNotificationItemProcessor extends AbstractNotificationItemProcessor<ForwardedAttributeDeletedNotificationItem> {
+export class ForwardedAttributeDeletedByPeerNotificationItemProcessor extends AbstractNotificationItemProcessor<ForwardedAttributeDeletedByPeerNotificationItem> {
     private readonly _logger: ILogger;
 
     public constructor(consumptionController: ConsumptionController) {
         super(consumptionController);
-        this._logger = TransportLoggerFactory.getLogger(ForwardedAttributeDeletedNotificationItemProcessor);
+        this._logger = TransportLoggerFactory.getLogger(ForwardedAttributeDeletedByPeerNotificationItemProcessor);
     }
 
     public override async checkPrerequisitesOfIncomingNotificationItem(
-        notificationItem: ForwardedAttributeDeletedNotificationItem,
+        notificationItem: ForwardedAttributeDeletedByPeerNotificationItem,
         notification: LocalNotification
     ): Promise<ValidationResult> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
@@ -44,7 +44,10 @@ export class ForwardedAttributeDeletedNotificationItemProcessor extends Abstract
         return ValidationResult.success();
     }
 
-    public override async process(notificationItem: ForwardedAttributeDeletedNotificationItem, notification: LocalNotification): Promise<ForwardedAttributeDeletedEvent | void> {
+    public override async process(
+        notificationItem: ForwardedAttributeDeletedByPeerNotificationItem,
+        notification: LocalNotification
+    ): Promise<ForwardedAttributeDeletedByPeerEvent | void> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
         if (!attribute) return;
 
@@ -62,10 +65,10 @@ export class ForwardedAttributeDeletedNotificationItemProcessor extends Abstract
 
         await this.consumptionController.attributes.setForwardedDeletionInfo(attributes, deletionInfo, notification.peer, true);
 
-        return new ForwardedAttributeDeletedEvent(this.currentIdentityAddress.toString(), attribute);
+        return new ForwardedAttributeDeletedByPeerEvent(this.currentIdentityAddress.toString(), attribute);
     }
 
-    public override async rollback(notificationItem: ForwardedAttributeDeletedNotificationItem, notification: LocalNotification): Promise<void> {
+    public override async rollback(notificationItem: ForwardedAttributeDeletedByPeerNotificationItem, notification: LocalNotification): Promise<void> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
         if (!attribute) return;
 

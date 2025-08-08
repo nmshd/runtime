@@ -26,7 +26,7 @@ import {
     ExecuteIdentityAttributeQueryUseCase,
     ExecuteRelationshipAttributeQueryUseCase,
     ExecuteThirdPartyRelationshipAttributeQueryUseCase,
-    ForwardedAttributeDeletedEvent,
+    ForwardedAttributeDeletedByPeerEvent,
     GetAttributeUseCase,
     GetAttributesUseCase,
     GetOwnAttributesSharedWithPeerUseCase,
@@ -2600,7 +2600,7 @@ describe.only(DeleteAttributeAndNotifyUseCase.name, () => {
 
                 const timeBeforeUpdate = CoreDate.utc();
                 await syncUntilHasMessages(services1.transport);
-                await services1.eventBus.waitForEvent(ForwardedAttributeDeletedEvent, (e) => {
+                await services1.eventBus.waitForEvent(ForwardedAttributeDeletedByPeerEvent, (e) => {
                     return e.data.id.toString() === peerIdentityAttributeVersion0.id;
                 });
 
@@ -2618,7 +2618,7 @@ describe.only(DeleteAttributeAndNotifyUseCase.name, () => {
 
                 const timeBeforeUpdate = CoreDate.utc();
                 await syncUntilHasMessages(services1.transport);
-                await services1.eventBus.waitForEvent(ForwardedAttributeDeletedEvent, (e) => {
+                await services1.eventBus.waitForEvent(ForwardedAttributeDeletedByPeerEvent, (e) => {
                     return e.data.id.toString() === peerIdentityAttributeVersion1.id;
                 });
 
@@ -3039,7 +3039,7 @@ describe.only(DeleteAttributeAndNotifyUseCase.name, () => {
 
                 const timeBeforeUpdate = CoreDate.utc();
                 await syncUntilHasMessageWithNotification(services1.transport, notificationId);
-                await services1.eventBus.waitForEvent(ForwardedAttributeDeletedEvent, (e) => {
+                await services1.eventBus.waitForEvent(ForwardedAttributeDeletedByPeerEvent, (e) => {
                     return e.data.id.toString() === thirdPartyRelationshipAttributeForwardedByOwnerVersion0.id;
                 });
 
@@ -3062,7 +3062,7 @@ describe.only(DeleteAttributeAndNotifyUseCase.name, () => {
 
                 const timeBeforeUpdate = CoreDate.utc();
                 await syncUntilHasMessageWithNotification(services1.transport, notificationId);
-                await services1.eventBus.waitForEvent(ForwardedAttributeDeletedEvent, (e) => {
+                await services1.eventBus.waitForEvent(ForwardedAttributeDeletedByPeerEvent, (e) => {
                     return e.data.id.toString() === thirdPartyRelationshipAttributeForwardedByOwnerVersion1.id;
                 });
 
@@ -3089,7 +3089,7 @@ describe.only(DeleteAttributeAndNotifyUseCase.name, () => {
 
                 const timeBeforeUpdate = CoreDate.utc();
                 await syncUntilHasMessageWithNotification(services2.transport, notificationId);
-                await services2.eventBus.waitForEvent(ForwardedAttributeDeletedEvent, (e) => {
+                await services2.eventBus.waitForEvent(ForwardedAttributeDeletedByPeerEvent, (e) => {
                     return e.data.id.toString() === thirdPartyRelationshipAttributeForwardedByPeerVersion0.id;
                 });
 
@@ -3112,7 +3112,7 @@ describe.only(DeleteAttributeAndNotifyUseCase.name, () => {
 
                 const timeBeforeUpdate = CoreDate.utc();
                 await syncUntilHasMessageWithNotification(services2.transport, notificationId);
-                await services2.eventBus.waitForEvent(ForwardedAttributeDeletedEvent, (e) => {
+                await services2.eventBus.waitForEvent(ForwardedAttributeDeletedByPeerEvent, (e) => {
                     return e.data.id.toString() === thirdPartyRelationshipAttributeForwardedByPeerVersion1.id;
                 });
 
