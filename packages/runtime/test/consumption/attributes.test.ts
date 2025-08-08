@@ -39,7 +39,7 @@ import {
     MarkAttributeAsViewedUseCase,
     NotifyPeerAboutOwnIdentityAttributeSuccessionUseCase,
     OwnAttributeDeletedByOwnerEvent,
-    PeerRelationshipAttributeDeletedEvent,
+    PeerRelationshipAttributeDeletedByPeerEvent,
     RelationshipChangedEvent,
     RelationshipStatus,
     RepositoryAttributeSucceededEvent,
@@ -1427,7 +1427,7 @@ describe(ShareOwnIdentityAttributeUseCase.name, () => {
         const notificationId = deleteResult.value.notificationIds[0];
 
         await syncUntilHasMessageWithNotification(services1.transport, notificationId);
-        await services1.eventBus.waitForEvent(PeerRelationshipAttributeDeletedEvent, (e) => {
+        await services1.eventBus.waitForEvent(PeerRelationshipAttributeDeletedByPeerEvent, (e) => {
             return e.data.id === sOwnIdentityAttribute.id;
         });
         const sUpdatedOwnIdentityAttribute = (await services1.consumption.attributes.getAttribute({ id: sOwnIdentityAttribute.id })).value;
@@ -1799,7 +1799,7 @@ describe(NotifyPeerAboutOwnIdentityAttributeSuccessionUseCase.name, () => {
         const notificationId = deleteResult.value.notificationIds[0];
 
         await syncUntilHasMessageWithNotification(services1.transport, notificationId);
-        await services1.eventBus.waitForEvent(PeerRelationshipAttributeDeletedEvent, (e) => {
+        await services1.eventBus.waitForEvent(PeerRelationshipAttributeDeletedByPeerEvent, (e) => {
             return e.data.id === ownIdentityAttributeVersion0.id;
         });
         const updatedOwnIdentityAttribute = (await services1.consumption.attributes.getAttribute({ id: ownIdentityAttributeVersion0.id })).value;
@@ -1819,7 +1819,7 @@ describe(NotifyPeerAboutOwnIdentityAttributeSuccessionUseCase.name, () => {
         const notificationId = deleteResult.value.notificationIds[0];
 
         await syncUntilHasMessageWithNotification(services1.transport, notificationId);
-        await services1.eventBus.waitForEvent(PeerRelationshipAttributeDeletedEvent, (e) => {
+        await services1.eventBus.waitForEvent(PeerRelationshipAttributeDeletedByPeerEvent, (e) => {
             return e.data.id === ownIdentityAttributeVersion0.id;
         });
         const updatedOwnIdentityAttribute = (await services1.consumption.attributes.getAttribute({ id: ownIdentityAttributeVersion0.id })).value;
@@ -2011,7 +2011,7 @@ describe(SucceedRelationshipAttributeAndNotifyPeerUseCase.name, () => {
         const notificationId = deleteResult.value.notificationIds[0];
 
         await syncUntilHasMessageWithNotification(services1.transport, notificationId);
-        await services1.eventBus.waitForEvent(PeerRelationshipAttributeDeletedEvent, (e) => {
+        await services1.eventBus.waitForEvent(PeerRelationshipAttributeDeletedByPeerEvent, (e) => {
             return e.data.id === sOwnRelationshipAttribute.id;
         });
         const updatedOwnRelationshipAttribute = (await services1.consumption.attributes.getAttribute({ id: sOwnRelationshipAttribute.id })).value;
@@ -2934,7 +2934,7 @@ describe.only(DeleteAttributeAndNotifyUseCase.name, () => {
 
                 const timeBeforeUpdate = CoreDate.utc();
                 await syncUntilHasMessages(services1.transport);
-                await services1.eventBus.waitForEvent(PeerRelationshipAttributeDeletedEvent, (e) => {
+                await services1.eventBus.waitForEvent(PeerRelationshipAttributeDeletedByPeerEvent, (e) => {
                     return e.data.id.toString() === peerRelationshipAttributeVersion0.id;
                 });
                 const timeAfterUpdate = CoreDate.utc();
@@ -2949,7 +2949,7 @@ describe.only(DeleteAttributeAndNotifyUseCase.name, () => {
 
                 const timeBeforeUpdate = CoreDate.utc();
                 await syncUntilHasMessages(services1.transport);
-                await services1.eventBus.waitForEvent(PeerRelationshipAttributeDeletedEvent, (e) => {
+                await services1.eventBus.waitForEvent(PeerRelationshipAttributeDeletedByPeerEvent, (e) => {
                     return e.data.id.toString() === peerRelationshipAttributeVersion1.id;
                 });
                 const timeAfterUpdate = CoreDate.utc();
@@ -2966,7 +2966,7 @@ describe.only(DeleteAttributeAndNotifyUseCase.name, () => {
 
                 const timeBeforeUpdate = CoreDate.utc();
                 await syncUntilHasMessages(services3.transport);
-                await services3.eventBus.waitForEvent(PeerRelationshipAttributeDeletedEvent, (e) => {
+                await services3.eventBus.waitForEvent(PeerRelationshipAttributeDeletedByPeerEvent, (e) => {
                     return e.data.id.toString() === forwardedPeerRelationshipAttributeVersion0.id;
                 });
                 const timeAfterUpdate = CoreDate.utc();
@@ -2983,7 +2983,7 @@ describe.only(DeleteAttributeAndNotifyUseCase.name, () => {
 
                 const timeBeforeUpdate = CoreDate.utc();
                 await syncUntilHasMessages(services3.transport);
-                await services3.eventBus.waitForEvent(PeerRelationshipAttributeDeletedEvent, (e) => {
+                await services3.eventBus.waitForEvent(PeerRelationshipAttributeDeletedByPeerEvent, (e) => {
                     return e.data.id.toString() === forwardedPeerRelationshipAttributeVersion1.id;
                 });
                 const timeAfterUpdate = CoreDate.utc();
@@ -3407,7 +3407,7 @@ describe(SetAttributeDeletionInfoOfDeletionProposedRelationshipUseCase.name, () 
 
         const notificationId = (await services1.consumption.attributes.deleteAttributeAndNotify({ attributeId: ownIdentityAttribute.id })).value.notificationIds[0];
         await syncUntilHasMessageWithNotification(services2.transport, notificationId);
-        await services2.eventBus.waitForEvent(PeerRelationshipAttributeDeletedEvent, (e) => {
+        await services2.eventBus.waitForEvent(PeerRelationshipAttributeDeletedByPeerEvent, (e) => {
             return e.data.id.toString() === ownIdentityAttribute.id;
         });
 
