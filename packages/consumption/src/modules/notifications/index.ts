@@ -1,5 +1,5 @@
 export * from "./itemProcessors/AbstractNotificationItemProcessor";
-export * from "./itemProcessors/attributeDeleted/OwnSharedAttributeDeletedByOwnerNotificationItemProcessor";
+export * from "./itemProcessors/attributeDeleted/OwnAttributeDeletedByOwnerNotificationItemProcessor";
 export * from "./itemProcessors/attributeDeleted/PeerRelationshipAttributeDeletedNotificationItemProcessor";
 export * from "./itemProcessors/attributeSucceeded/PeerSharedAttributeSucceededNotificationItemProcessor";
 export * from "./itemProcessors/NotificationItemConstructor";

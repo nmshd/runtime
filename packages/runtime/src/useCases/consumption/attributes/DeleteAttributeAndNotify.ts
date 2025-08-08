@@ -12,7 +12,7 @@ import {
 import {
     ForwardedAttributeDeletedNotificationItem,
     Notification,
-    OwnSharedAttributeDeletedByOwnerNotificationItem,
+    OwnAttributeDeletedByOwnerNotificationItem,
     PeerRelationshipAttributeDeletedNotificationItem
 } from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
@@ -75,7 +75,7 @@ export class DeleteAttributeAndNotifyUseCase extends UseCase<DeleteAttributeAndN
     }
 
     private async notifyAboutDeletionOfOwnIdentityAttribute(attribute: OwnIdentityAttribute): Promise<NotificationIdString[]> {
-        const notificationItem = OwnSharedAttributeDeletedByOwnerNotificationItem.from({ attributeId: attribute.id });
+        const notificationItem = OwnAttributeDeletedByOwnerNotificationItem.from({ attributeId: attribute.id });
 
         const forwardingPeers = attribute.getPeers();
         if (forwardingPeers.length === 0) return [];
@@ -87,7 +87,7 @@ export class DeleteAttributeAndNotifyUseCase extends UseCase<DeleteAttributeAndN
     private async notifyAboutDeletionOfRelationshipAttribute(attribute: OwnRelationshipAttribute | PeerRelationshipAttribute) {
         const notificationItem =
             attribute instanceof OwnRelationshipAttribute
-                ? OwnSharedAttributeDeletedByOwnerNotificationItem.from({ attributeId: attribute.id })
+                ? OwnAttributeDeletedByOwnerNotificationItem.from({ attributeId: attribute.id })
                 : PeerRelationshipAttributeDeletedNotificationItem.from({ attributeId: attribute.id });
 
         const peerNotificationId = await this.notifyPeer(attribute.peerSharingInfo.peer, notificationItem);
@@ -107,10 +107,7 @@ export class DeleteAttributeAndNotifyUseCase extends UseCase<DeleteAttributeAndN
         return notificationId;
     }
 
-    private async notifyForwardingPeers(
-        peers: CoreAddress[],
-        notificationItem: OwnSharedAttributeDeletedByOwnerNotificationItem | PeerRelationshipAttributeDeletedNotificationItem
-    ) {
+    private async notifyForwardingPeers(peers: CoreAddress[], notificationItem: OwnAttributeDeletedByOwnerNotificationItem | PeerRelationshipAttributeDeletedNotificationItem) {
         const queryForRelationshipsToNotify = {
             "peer.address": { $in: peers.map((peer) => peer.toString()) },
             status: { $in: [RelationshipStatus.Pending, RelationshipStatus.Active, RelationshipStatus.Terminated] },
@@ -132,7 +129,7 @@ export class DeleteAttributeAndNotifyUseCase extends UseCase<DeleteAttributeAndN
 
     private async notifyPeer(
         peer: CoreAddress,
-        notificationItem: OwnSharedAttributeDeletedByOwnerNotificationItem | PeerRelationshipAttributeDeletedNotificationItem | ForwardedAttributeDeletedNotificationItem
+        notificationItem: OwnAttributeDeletedByOwnerNotificationItem | PeerRelationshipAttributeDeletedNotificationItem | ForwardedAttributeDeletedNotificationItem
     ) {
         const messageRecipientsValidationResult = await this.messageController.validateMessageRecipients([peer]);
         if (messageRecipientsValidationResult.isError) return [];
@@ -143,7 +140,7 @@ export class DeleteAttributeAndNotifyUseCase extends UseCase<DeleteAttributeAndN
 
     private async sendNotification(
         peer: CoreAddress,
-        notificationItem: OwnSharedAttributeDeletedByOwnerNotificationItem | PeerRelationshipAttributeDeletedNotificationItem
+        notificationItem: OwnAttributeDeletedByOwnerNotificationItem | PeerRelationshipAttributeDeletedNotificationItem
     ): Promise<string> {
         const notificationId = await ConsumptionIds.notification.generate();
         const notification = Notification.from({ id: notificationId, items: [notificationItem] });

@@ -13,7 +13,7 @@ import {
     OutgoingRequestCreatedEvent,
     OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent,
     OutgoingRequestStatusChangedEvent,
-    OwnSharedAttributeDeletedByOwnerEvent,
+    OwnAttributeDeletedByOwnerEvent,
     OwnSharedAttributeSucceededEvent,
     PeerRelationshipAttributeDeletedEvent,
     PeerSharedAttributeSucceededEvent,
@@ -144,8 +144,8 @@ export class EventProxy {
             this.targetEventBus.publish(new AttributeDeletedEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
         });
 
-        this.subscribeToSourceEvent(consumption.OwnSharedAttributeDeletedByOwnerEvent, (event) => {
-            this.targetEventBus.publish(new OwnSharedAttributeDeletedByOwnerEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
+        this.subscribeToSourceEvent(consumption.OwnAttributeDeletedByOwnerEvent, (event) => {
+            this.targetEventBus.publish(new OwnAttributeDeletedByOwnerEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
         });
 
         this.subscribeToSourceEvent(consumption.PeerRelationshipAttributeDeletedEvent, (event) => {

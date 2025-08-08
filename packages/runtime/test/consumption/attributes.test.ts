@@ -38,7 +38,7 @@ import {
     LocalAttributeDeletionStatus,
     MarkAttributeAsViewedUseCase,
     NotifyPeerAboutOwnIdentityAttributeSuccessionUseCase,
-    OwnSharedAttributeDeletedByOwnerEvent,
+    OwnAttributeDeletedByOwnerEvent,
     PeerRelationshipAttributeDeletedEvent,
     RelationshipChangedEvent,
     RelationshipStatus,
@@ -2467,7 +2467,7 @@ describe("Get (shared) versions of Attribute", () => {
     });
 });
 
-describe(DeleteAttributeAndNotifyUseCase.name, () => {
+describe.only(DeleteAttributeAndNotifyUseCase.name, () => {
     describe("Delete IdentityAttributes", () => {
         let ownIdentityAttributeVersion0: LocalAttributeDTO;
         let ownIdentityAttributeVersion1: LocalAttributeDTO;
@@ -2532,7 +2532,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
 
                 const timeBeforeUpdate = CoreDate.utc();
                 await syncUntilHasMessages(services2.transport);
-                await services2.eventBus.waitForEvent(OwnSharedAttributeDeletedByOwnerEvent, (e) => {
+                await services2.eventBus.waitForEvent(OwnAttributeDeletedByOwnerEvent, (e) => {
                     return e.data.id.toString() === ownIdentityAttributeVersion0.id;
                 });
                 const timeAfterUpdate = CoreDate.utc();
@@ -2547,7 +2547,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
 
                 const timeBeforeUpdate = CoreDate.utc();
                 await syncUntilHasMessages(services2.transport);
-                await services2.eventBus.waitForEvent(OwnSharedAttributeDeletedByOwnerEvent, (e) => {
+                await services2.eventBus.waitForEvent(OwnAttributeDeletedByOwnerEvent, (e) => {
                     return e.data.id.toString() === ownIdentityAttributeVersion1.id;
                 });
                 const timeAfterUpdate = CoreDate.utc();
@@ -2839,7 +2839,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
 
                 const timeBeforeUpdate = CoreDate.utc();
                 await syncUntilHasMessages(services2.transport);
-                await services2.eventBus.waitForEvent(OwnSharedAttributeDeletedByOwnerEvent, (e) => {
+                await services2.eventBus.waitForEvent(OwnAttributeDeletedByOwnerEvent, (e) => {
                     return e.data.id.toString() === ownRelationshipAttributeVersion0.id;
                 });
                 const timeAfterUpdate = CoreDate.utc();
@@ -2854,7 +2854,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
 
                 const timeBeforeUpdate = CoreDate.utc();
                 await syncUntilHasMessages(services2.transport);
-                await services2.eventBus.waitForEvent(OwnSharedAttributeDeletedByOwnerEvent, (e) => {
+                await services2.eventBus.waitForEvent(OwnAttributeDeletedByOwnerEvent, (e) => {
                     return e.data.id.toString() === ownRelationshipAttributeVersion1.id;
                 });
                 const timeAfterUpdate = CoreDate.utc();
@@ -2871,7 +2871,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
 
                 const timeBeforeUpdate = CoreDate.utc();
                 await syncUntilHasMessages(services3.transport);
-                await services3.eventBus.waitForEvent(OwnSharedAttributeDeletedByOwnerEvent, (e) => {
+                await services3.eventBus.waitForEvent(OwnAttributeDeletedByOwnerEvent, (e) => {
                     return e.data.id.toString() === ownRelationshipAttributeVersion0.id;
                 });
                 const timeAfterUpdate = CoreDate.utc();
@@ -2888,7 +2888,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
 
                 const timeBeforeUpdate = CoreDate.utc();
                 await syncUntilHasMessages(services3.transport);
-                await services3.eventBus.waitForEvent(OwnSharedAttributeDeletedByOwnerEvent, (e) => {
+                await services3.eventBus.waitForEvent(OwnAttributeDeletedByOwnerEvent, (e) => {
                     return e.data.id.toString() === ownRelationshipAttributeVersion1.id;
                 });
                 const timeAfterUpdate = CoreDate.utc();
@@ -3374,7 +3374,7 @@ describe(SetAttributeDeletionInfoOfDeletionProposedRelationshipUseCase.name, () 
         await services1.consumption.attributes.deleteAttributeAndNotify({ attributeId: ownIdentityAttribute.id });
         // TODO: specify notification id if possible
         await syncUntilHasMessages(services2.transport);
-        await services2.eventBus.waitForEvent(OwnSharedAttributeDeletedByOwnerEvent, (e) => {
+        await services2.eventBus.waitForEvent(OwnAttributeDeletedByOwnerEvent, (e) => {
             return e.data.id.toString() === ownIdentityAttribute.id;
         });
 

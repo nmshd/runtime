@@ -1,12 +1,12 @@
 import { ILogger } from "@js-soft/logging-abstractions";
 import { ApplicationError } from "@js-soft/ts-utils";
-import { OwnSharedAttributeDeletedByOwnerNotificationItem } from "@nmshd/content";
+import { OwnAttributeDeletedByOwnerNotificationItem } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
 import { TransportLoggerFactory } from "@nmshd/transport";
 import { ConsumptionController } from "../../../../consumption/ConsumptionController";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import {
-    OwnSharedAttributeDeletedByOwnerEvent,
+    OwnAttributeDeletedByOwnerEvent,
     PeerAttributeDeletionInfo,
     PeerAttributeDeletionStatus,
     PeerIdentityAttribute,
@@ -19,16 +19,16 @@ import { ValidationResult } from "../../../common";
 import { LocalNotification } from "../../local/LocalNotification";
 import { AbstractNotificationItemProcessor } from "../AbstractNotificationItemProcessor";
 
-export class OwnSharedAttributeDeletedByOwnerNotificationItemProcessor extends AbstractNotificationItemProcessor<OwnSharedAttributeDeletedByOwnerNotificationItem> {
+export class OwnAttributeDeletedByOwnerNotificationItemProcessor extends AbstractNotificationItemProcessor<OwnAttributeDeletedByOwnerNotificationItem> {
     private readonly _logger: ILogger;
 
     public constructor(consumptionController: ConsumptionController) {
         super(consumptionController);
-        this._logger = TransportLoggerFactory.getLogger(OwnSharedAttributeDeletedByOwnerNotificationItemProcessor);
+        this._logger = TransportLoggerFactory.getLogger(OwnAttributeDeletedByOwnerNotificationItemProcessor);
     }
 
     public override async checkPrerequisitesOfIncomingNotificationItem(
-        notificationItem: OwnSharedAttributeDeletedByOwnerNotificationItem,
+        notificationItem: OwnAttributeDeletedByOwnerNotificationItem,
         notification: LocalNotification
     ): Promise<ValidationResult> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
@@ -47,10 +47,7 @@ export class OwnSharedAttributeDeletedByOwnerNotificationItemProcessor extends A
         return ValidationResult.success();
     }
 
-    public override async process(
-        notificationItem: OwnSharedAttributeDeletedByOwnerNotificationItem,
-        _notification: LocalNotification
-    ): Promise<OwnSharedAttributeDeletedByOwnerEvent | void> {
+    public override async process(notificationItem: OwnAttributeDeletedByOwnerNotificationItem, _notification: LocalNotification): Promise<OwnAttributeDeletedByOwnerEvent | void> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
         if (!attribute) return;
 
@@ -69,7 +66,7 @@ export class OwnSharedAttributeDeletedByOwnerNotificationItemProcessor extends A
 
             await this.consumptionController.attributes.setPeerDeletionInfoOfPeerAttribute(attributes, deletionInfo);
 
-            return new OwnSharedAttributeDeletedByOwnerEvent(this.currentIdentityAddress.toString(), attribute);
+            return new OwnAttributeDeletedByOwnerEvent(this.currentIdentityAddress.toString(), attribute);
         }
 
         const deletionStatus = attribute.peerIsOwner() ? ThirdPartyRelationshipAttributeDeletionStatus.DeletedByOwner : ThirdPartyRelationshipAttributeDeletionStatus.DeletedByPeer;
@@ -83,10 +80,10 @@ export class OwnSharedAttributeDeletedByOwnerNotificationItemProcessor extends A
 
         await this.consumptionController.attributes.setPeerDeletionInfoOfThirdPartyRelationshipAttribute(attributes, deletionInfo);
 
-        return new OwnSharedAttributeDeletedByOwnerEvent(this.currentIdentityAddress.toString(), attribute);
+        return new OwnAttributeDeletedByOwnerEvent(this.currentIdentityAddress.toString(), attribute);
     }
 
-    public override async rollback(notificationItem: OwnSharedAttributeDeletedByOwnerNotificationItem, _notification: LocalNotification): Promise<void> {
+    public override async rollback(notificationItem: OwnAttributeDeletedByOwnerNotificationItem, _notification: LocalNotification): Promise<void> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
         if (!attribute) return;
 
