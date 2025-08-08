@@ -11,6 +11,7 @@ export interface DeletePeerIdentityAttributeAndNotifyOwnerRequest {
     attributeId: AttributeIdString;
 }
 
+// TODO: return array with notificationIds
 export interface DeletePeerIdentityAttributeAndNotifyOwnerResponse {
     notificationId?: NotificationIdString;
 }
@@ -32,6 +33,7 @@ export class DeletePeerIdentityAttributeAndNotifyOwnerUseCase extends UseCase<De
         super(validator);
     }
 
+    // TODO: what if only predecessor was shared
     protected async executeInternal(request: DeletePeerIdentityAttributeAndNotifyOwnerRequest): Promise<Result<DeletePeerIdentityAttributeAndNotifyOwnerResponse>> {
         const peerIdentityAttributeId = CoreId.from(request.attributeId);
         const peerIdentityAttribute = await this.attributesController.getLocalAttribute(peerIdentityAttributeId);

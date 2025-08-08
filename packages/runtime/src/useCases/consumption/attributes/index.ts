@@ -4,6 +4,7 @@ export * from "./CanCreateOwnIdentityAttribute";
 export * from "./ChangeDefaultOwnIdentityAttribute";
 export * from "./CreateAndShareRelationshipAttribute";
 export * from "./CreateOwnIdentityAttribute";
+export * from "./DeleteAttributeAndNotify";
 export * from "./DeleteOwnIdentityAttributeAndNotifyPeers";
 export * from "./DeleteOwnRelationshipAttributeAndNotifyPeers";
 export * from "./DeletePeerIdentityAttributeAndNotifyOwner";

@@ -393,7 +393,8 @@ export class MessageController extends TransportController {
         for (const recipient of recipients) {
             const relationship = await this.relationships.getRelationshipToIdentity(recipient);
 
-            if (!relationship || !(relationship.status === RelationshipStatus.Terminated || relationship.status === RelationshipStatus.Active)) {
+            const allowedRelationshipStatuses = [RelationshipStatus.Pending, RelationshipStatus.Active, RelationshipStatus.Terminated];
+            if (!relationship || !allowedRelationshipStatuses.includes(relationship.status)) {
                 peersWithNeitherActiveNorTerminatedRelationship.push(recipient.address);
                 continue;
             }

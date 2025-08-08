@@ -20024,6 +20024,29 @@ export const LoadPeerTokenRequest: any = {
     }
 }
 
+export const DeleteAttributeAndNotifyRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/DeleteAttributeAndNotifyRequest",
+    "definitions": {
+        "DeleteAttributeAndNotifyRequest": {
+            "type": "object",
+            "properties": {
+                "attributeId": {
+                    "$ref": "#/definitions/AttributeIdString"
+                }
+            },
+            "required": [
+                "attributeId"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeIdString": {
+            "type": "string",
+            "pattern": "ATT[A-Za-z0-9]{17}"
+        }
+    }
+}
+
 export const CommunicationLanguage: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/CommunicationLanguage",

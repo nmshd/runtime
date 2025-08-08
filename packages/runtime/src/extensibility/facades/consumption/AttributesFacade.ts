@@ -11,6 +11,9 @@ import {
     CreateAndShareRelationshipAttributeUseCase,
     CreateOwnIdentityAttributeRequest,
     CreateOwnIdentityAttributeUseCase,
+    DeleteAttributeAndNotifyRequest,
+    DeleteAttributeAndNotifyResponse,
+    DeleteAttributeAndNotifyUseCase,
     DeleteOwnIdentityAttributeAndNotifyPeersRequest,
     DeleteOwnIdentityAttributeAndNotifyPeersUseCase,
     DeleteOwnRelationshipAttributeAndNotifyPeersRequest,
@@ -92,6 +95,7 @@ export class AttributesFacade {
         @Inject private readonly createAndShareRelationshipAttributeUseCase: CreateAndShareRelationshipAttributeUseCase,
         @Inject private readonly succeedRelationshipAttributeAndNotifyPeerUseCase: SucceedRelationshipAttributeAndNotifyPeerUseCase,
         @Inject private readonly changeDefaultOwnIdentityAttributeUseCase: ChangeDefaultOwnIdentityAttributeUseCase,
+        @Inject private readonly deleteAttributeAndNotifyUseCase: DeleteAttributeAndNotifyUseCase,
         @Inject private readonly deleteOwnRelationshipAttributeAndNotifyPeersUseCase: DeleteOwnRelationshipAttributeAndNotifyPeersUseCase,
         @Inject private readonly deletePeerRelationshipAttributeAndNotifyPeersUseCase: DeletePeerRelationshipAttributeAndNotifyPeersUseCase,
         @Inject private readonly deletePeerIdentityAttributeAndNotifyOwnerUseCase: DeletePeerIdentityAttributeAndNotifyOwnerUseCase,
@@ -185,6 +189,10 @@ export class AttributesFacade {
 
     public async changeDefaultOwnIdentityAttribute(request: ChangeDefaultOwnIdentityAttributeRequest): Promise<Result<LocalAttributeDTO>> {
         return await this.changeDefaultOwnIdentityAttributeUseCase.execute(request);
+    }
+
+    public async deleteAttributeAndNotify(request: DeleteAttributeAndNotifyRequest): Promise<Result<DeleteAttributeAndNotifyResponse>> {
+        return await this.deleteAttributeAndNotifyUseCase.execute(request);
     }
 
     public async deleteOwnRelationshipAttributeAndNotifyPeers(
