@@ -881,6 +881,9 @@ export class AttributesController extends ConsumptionBaseController {
         const predecessors = await this.getPredecessorsOfAttribute(attribute);
         const successors = await this.getSuccessorsOfAttribute(attribute);
 
+        const localAttribute = await this.getLocalAttribute(attribute.id);
+        if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
+
         const allAttributeVersions = [...successors.reverse(), attribute, ...predecessors];
         return allAttributeVersions;
     }
