@@ -431,7 +431,7 @@ export class AttributesController extends ConsumptionBaseController {
     private async validateAttributeCreation(attribute: IdentityAttribute | RelationshipAttribute): Promise<void> {
         if (!this.validateAttributeCharacters(attribute)) throw ConsumptionCoreErrors.attributes.forbiddenCharactersInAttribute("The Attribute contains forbidden characters.");
 
-        if (attribute instanceof Relationship) return;
+        if (attribute instanceof RelationshipAttribute) return;
 
         const tagValidationResult = await this.validateTagsOfAttribute(attribute);
         if (tagValidationResult.isError()) throw tagValidationResult.error;
@@ -863,7 +863,7 @@ export class AttributesController extends ConsumptionBaseController {
         const valueType = attribute.content.value.constructor.name;
         const query = {
             $and: [
-                { [`${nameof<LocalAttribute>}.@type`]: "OwnIdentityAttribute" },
+                { [`@type`]: "OwnIdentityAttribute" },
                 { [`${nameof<LocalAttribute>((c) => c.content)}.value.@type`]: valueType },
                 { [nameof<LocalAttribute>((c) => c.succeededBy)]: undefined },
                 { [nameof<LocalAttribute>((c) => c.id)]: { $ne: attribute.id.toString() } }
@@ -880,6 +880,9 @@ export class AttributesController extends ConsumptionBaseController {
     public async getVersionsOfAttribute<T extends LocalAttribute>(attribute: T): Promise<T[]> {
         const predecessors = await this.getPredecessorsOfAttribute(attribute);
         const successors = await this.getSuccessorsOfAttribute(attribute);
+
+        const localAttribute = await this.getLocalAttribute(attribute.id);
+        if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
 
         const allAttributeVersions = [...successors.reverse(), attribute, ...predecessors];
         return allAttributeVersions;
@@ -929,6 +932,9 @@ export class AttributesController extends ConsumptionBaseController {
         onlyLatestVersion = true,
         includeDeletedAndToBeDeleted = false
     ): Promise<SharableAttributeTypes[]> {
+        const localAttribute = await this.getLocalAttribute(attribute.id);
+        if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
+
         const sharedAttribute = attribute.isSharedWith(peerAddress, includeDeletedAndToBeDeleted) ? [attribute] : [];
         const sharedPredecessors = await this.getSharedPredecessorsOfAttribute(attribute, peerAddress, includeDeletedAndToBeDeleted);
         const sharedSuccessors = await this.getSharedSuccessorsOfAttribute(attribute, peerAddress, includeDeletedAndToBeDeleted);
