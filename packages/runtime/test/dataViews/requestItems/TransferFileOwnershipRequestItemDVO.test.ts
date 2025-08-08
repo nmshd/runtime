@@ -236,7 +236,7 @@ describe("TransferFileOwnershipRequestItemDVO", () => {
         const localRequest = (await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: requestId })).value;
         const sharedAttributeId = (localRequest.response!.content.items[0] as TransferFileOwnershipAcceptResponseItemJSON).attributeId;
 
-        await rRuntimeServices.consumption.attributes.deleteOwnRelationshipAttributeAndNotifyPeers({ attributeId: sharedAttributeId });
+        await rRuntimeServices.consumption.attributes.deleteAttributeAndNotify({ attributeId: sharedAttributeId });
 
         const recipientMessage = (await rRuntimeServices.transport.messages.getMessage({ id: senderMessage.id })).value;
         const dvo = (await rExpander.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
@@ -251,7 +251,7 @@ describe("TransferFileOwnershipRequestItemDVO", () => {
         const sharedAttributeId = (localRequest.response!.content.items[0] as TransferFileOwnershipAcceptResponseItemJSON).attributeId;
         const sharedAttribute = (await rRuntimeServices.consumption.attributes.getAttribute({ id: sharedAttributeId })).value;
 
-        await rRuntimeServices.consumption.attributes.deleteOwnIdentityAttributeAndNotifyPeers({ attributeId: sharedAttribute.id });
+        await rRuntimeServices.consumption.attributes.deleteAttributeAndNotify({ attributeId: sharedAttribute.id });
 
         const recipientMessage = (await rRuntimeServices.transport.messages.getMessage({ id: senderMessage.id })).value;
         const dvo = (await rExpander.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
@@ -266,8 +266,8 @@ describe("TransferFileOwnershipRequestItemDVO", () => {
         const localRequest = (await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: requestId })).value;
         const sharedAttributeId = (localRequest.response!.content.items[0] as TransferFileOwnershipAcceptResponseItemJSON).attributeId;
 
-        await rRuntimeServices.consumption.attributes.deleteOwnRelationshipAttributeAndNotifyPeers({ attributeId: sharedAttributeId });
-        await rRuntimeServices.consumption.attributes.deleteOwnIdentityAttributeAndNotifyPeers({ attributeId: sharedAttributeId });
+        await rRuntimeServices.consumption.attributes.deleteAttributeAndNotify({ attributeId: sharedAttributeId });
+        await rRuntimeServices.consumption.attributes.deleteAttributeAndNotify({ attributeId: sharedAttributeId });
 
         const recipientMessage = (await rRuntimeServices.transport.messages.getMessage({ id: senderMessage.id })).value;
         const dvo = (await rExpander.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
@@ -281,7 +281,7 @@ describe("TransferFileOwnershipRequestItemDVO", () => {
         const localRequest = (await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: requestId })).value;
         const sharedAttributeId = (localRequest.response!.content.items[0] as TransferFileOwnershipAcceptResponseItemJSON).attributeId;
 
-        await sRuntimeServices.consumption.attributes.deletePeerIdentityAttributeAndNotifyOwner({ attributeId: sharedAttributeId });
+        await sRuntimeServices.consumption.attributes.deleteAttributeAndNotify({ attributeId: sharedAttributeId });
 
         const senderMessageAfterDeletion = (await sRuntimeServices.transport.messages.getMessage({ id: senderMessage.id })).value;
         const dvo = (await sExpander.expandMessageDTO(senderMessageAfterDeletion)) as RequestMessageDVO;

@@ -315,7 +315,7 @@ describe("ShareAttributeRequestItemDVO", () => {
         const localRequest = (await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: requestId })).value;
         const sharedAttributeId = (localRequest.response!.content.items[0] as ShareAttributeAcceptResponseItemJSON).attributeId;
 
-        await rRuntimeServices.consumption.attributes.deletePeerIdentityAttributeAndNotifyOwner({ attributeId: sharedAttributeId });
+        await rRuntimeServices.consumption.attributes.deleteAttributeAndNotify({ attributeId: sharedAttributeId });
 
         const recipientMessage = (await rRuntimeServices.transport.messages.getMessage({ id: senderMessage.id })).value;
         const dvo = (await rExpander.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
@@ -329,7 +329,7 @@ describe("ShareAttributeRequestItemDVO", () => {
         const localRequest = (await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: requestId })).value;
         const sharedAttributeId = (localRequest.response!.content.items[0] as ShareAttributeAcceptResponseItemJSON).attributeId;
 
-        await sRuntimeServices.consumption.attributes.deleteOwnRelationshipAttributeAndNotifyPeers({ attributeId: sharedAttributeId });
+        await sRuntimeServices.consumption.attributes.deleteAttributeAndNotify({ attributeId: sharedAttributeId });
 
         const senderMessageAfterDeletion = (await sRuntimeServices.transport.messages.getMessage({ id: senderMessage.id })).value;
         const dvo = (await sExpander.expandMessageDTO(senderMessageAfterDeletion)) as RequestMessageDVO;

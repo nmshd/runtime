@@ -689,8 +689,7 @@ describe("Postponed Notifications via Messages", () => {
             const successionNotificationNotYetReceived = await client5.consumption.notifications.getNotification({ id: notifyAboutSuccessionResult.notificationId });
             expect(successionNotificationNotYetReceived).toBeAnError(/.*/, "error.transport.recordNotFound");
 
-            const notifyAboutDeletionResult = (await client1.consumption.attributes.deleteOwnRelationshipAttributeAndNotifyPeers({ attributeId: ownSharedIdentityAttribute.id }))
-                .value;
+            const notifyAboutDeletionResult = (await client1.consumption.attributes.deleteAttributeAndNotify({ attributeId: ownSharedIdentityAttribute.id })).value;
             await client1.eventBus.waitForEvent(AttributeDeletedEvent);
             await client5.transport.account.syncEverything();
             const deletionNotificationNotYetReceived = await client5.consumption.notifications.getNotification({ id: notifyAboutDeletionResult.notificationId! });

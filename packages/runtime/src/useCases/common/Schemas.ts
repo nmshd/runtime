@@ -13019,80 +13019,11 @@ export const CreateOwnIdentityAttributeRequest: any = {
     }
 }
 
-export const DeleteOwnIdentityAttributeAndNotifyPeersRequest: any = {
+export const DeleteAttributeAndNotifyRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/DeleteOwnIdentityAttributeAndNotifyPeersRequest",
+    "$ref": "#/definitions/DeleteAttributeAndNotifyRequest",
     "definitions": {
-        "DeleteOwnIdentityAttributeAndNotifyPeersRequest": {
-            "type": "object",
-            "properties": {
-                "attributeId": {
-                    "$ref": "#/definitions/AttributeIdString"
-                }
-            },
-            "required": [
-                "attributeId"
-            ],
-            "additionalProperties": false
-        },
-        "AttributeIdString": {
-            "type": "string",
-            "pattern": "ATT[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const DeleteOwnRelationshipAttributeAndNotifyPeersRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/DeleteOwnRelationshipAttributeAndNotifyPeersRequest",
-    "definitions": {
-        "DeleteOwnRelationshipAttributeAndNotifyPeersRequest": {
-            "type": "object",
-            "properties": {
-                "attributeId": {
-                    "$ref": "#/definitions/AttributeIdString"
-                }
-            },
-            "required": [
-                "attributeId"
-            ],
-            "additionalProperties": false
-        },
-        "AttributeIdString": {
-            "type": "string",
-            "pattern": "ATT[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const DeletePeerIdentityAttributeAndNotifyOwnerRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/DeletePeerIdentityAttributeAndNotifyOwnerRequest",
-    "definitions": {
-        "DeletePeerIdentityAttributeAndNotifyOwnerRequest": {
-            "type": "object",
-            "properties": {
-                "attributeId": {
-                    "$ref": "#/definitions/AttributeIdString"
-                }
-            },
-            "required": [
-                "attributeId"
-            ],
-            "additionalProperties": false
-        },
-        "AttributeIdString": {
-            "type": "string",
-            "pattern": "ATT[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const DeletePeerRelationshipAttributeAndNotifyPeersRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/DeletePeerRelationshipAttributeAndNotifyPeersRequest",
-    "definitions": {
-        "DeletePeerRelationshipAttributeAndNotifyPeersRequest": {
+        "DeleteAttributeAndNotifyRequest": {
             "type": "object",
             "properties": {
                 "attributeId": {
@@ -13130,29 +13061,6 @@ export const DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest: any 
         "RelationshipIdString": {
             "type": "string",
             "pattern": "REL[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const DeleteThirdPartyRelationshipAttributeAndNotifyPeerRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/DeleteThirdPartyRelationshipAttributeAndNotifyPeerRequest",
-    "definitions": {
-        "DeleteThirdPartyRelationshipAttributeAndNotifyPeerRequest": {
-            "type": "object",
-            "properties": {
-                "attributeId": {
-                    "$ref": "#/definitions/AttributeIdString"
-                }
-            },
-            "required": [
-                "attributeId"
-            ],
-            "additionalProperties": false
-        },
-        "AttributeIdString": {
-            "type": "string",
-            "pattern": "ATT[A-Za-z0-9]{17}"
         }
     }
 }
@@ -20020,29 +19928,6 @@ export const LoadPeerTokenRequest: any = {
         "URLTokenReferenceString": {
             "type": "string",
             "pattern": "^https?:\\/\\/.*\\/r\\/TOK[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
-        }
-    }
-}
-
-export const DeleteAttributeAndNotifyRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/DeleteAttributeAndNotifyRequest",
-    "definitions": {
-        "DeleteAttributeAndNotifyRequest": {
-            "type": "object",
-            "properties": {
-                "attributeId": {
-                    "$ref": "#/definitions/AttributeIdString"
-                }
-            },
-            "required": [
-                "attributeId"
-            ],
-            "additionalProperties": false
-        },
-        "AttributeIdString": {
-            "type": "string",
-            "pattern": "ATT[A-Za-z0-9]{17}"
         }
     }
 }

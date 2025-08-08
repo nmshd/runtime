@@ -14,22 +14,8 @@ import {
     DeleteAttributeAndNotifyRequest,
     DeleteAttributeAndNotifyResponse,
     DeleteAttributeAndNotifyUseCase,
-    DeleteOwnIdentityAttributeAndNotifyPeersRequest,
-    DeleteOwnIdentityAttributeAndNotifyPeersUseCase,
-    DeleteOwnRelationshipAttributeAndNotifyPeersRequest,
-    DeleteOwnRelationshipAttributeAndNotifyPeersResponse,
-    DeleteOwnRelationshipAttributeAndNotifyPeersUseCase,
-    DeletePeerIdentityAttributeAndNotifyOwnerRequest,
-    DeletePeerIdentityAttributeAndNotifyOwnerResponse,
-    DeletePeerIdentityAttributeAndNotifyOwnerUseCase,
-    DeletePeerRelationshipAttributeAndNotifyPeersRequest,
-    DeletePeerRelationshipAttributeAndNotifyPeersResponse,
-    DeletePeerRelationshipAttributeAndNotifyPeersUseCase,
     DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest,
     DeleteSharedAttributesForRejectedOrRevokedRelationshipUseCase,
-    DeleteThirdPartyRelationshipAttributeAndNotifyPeerRequest,
-    DeleteThirdPartyRelationshipAttributeAndNotifyPeerResponse,
-    DeleteThirdPartyRelationshipAttributeAndNotifyPeerUseCase,
     ExecuteIQLQueryRequest,
     ExecuteIQLQueryUseCase,
     ExecuteIdentityAttributeQueryRequest,
@@ -96,11 +82,6 @@ export class AttributesFacade {
         @Inject private readonly succeedRelationshipAttributeAndNotifyPeerUseCase: SucceedRelationshipAttributeAndNotifyPeerUseCase,
         @Inject private readonly changeDefaultOwnIdentityAttributeUseCase: ChangeDefaultOwnIdentityAttributeUseCase,
         @Inject private readonly deleteAttributeAndNotifyUseCase: DeleteAttributeAndNotifyUseCase,
-        @Inject private readonly deleteOwnRelationshipAttributeAndNotifyPeersUseCase: DeleteOwnRelationshipAttributeAndNotifyPeersUseCase,
-        @Inject private readonly deletePeerRelationshipAttributeAndNotifyPeersUseCase: DeletePeerRelationshipAttributeAndNotifyPeersUseCase,
-        @Inject private readonly deletePeerIdentityAttributeAndNotifyOwnerUseCase: DeletePeerIdentityAttributeAndNotifyOwnerUseCase,
-        @Inject private readonly deleteThirdPartyRelationshipAttributeAndNotifyPeerUseCase: DeleteThirdPartyRelationshipAttributeAndNotifyPeerUseCase,
-        @Inject private readonly deleteOwnIdentityAttributeAndNotifyPeersUseCase: DeleteOwnIdentityAttributeAndNotifyPeersUseCase,
         @Inject private readonly deleteSharedAttributesForRejectedOrRevokedRelationshipUseCase: DeleteSharedAttributesForRejectedOrRevokedRelationshipUseCase,
         @Inject private readonly getAttributeTagCollectionUseCase: GetAttributeTagCollectionUseCase,
         @Inject private readonly setAttributeDeletionInfoOfDeletionProposedRelationshipUseCase: SetAttributeDeletionInfoOfDeletionProposedRelationshipUseCase,
@@ -193,34 +174,6 @@ export class AttributesFacade {
 
     public async deleteAttributeAndNotify(request: DeleteAttributeAndNotifyRequest): Promise<Result<DeleteAttributeAndNotifyResponse>> {
         return await this.deleteAttributeAndNotifyUseCase.execute(request);
-    }
-
-    public async deleteOwnRelationshipAttributeAndNotifyPeers(
-        request: DeleteOwnRelationshipAttributeAndNotifyPeersRequest
-    ): Promise<Result<DeleteOwnRelationshipAttributeAndNotifyPeersResponse>> {
-        return await this.deleteOwnRelationshipAttributeAndNotifyPeersUseCase.execute(request);
-    }
-
-    public async deletePeerRelationshipAttributeAndNotifyPeers(
-        request: DeletePeerRelationshipAttributeAndNotifyPeersRequest
-    ): Promise<Result<DeletePeerRelationshipAttributeAndNotifyPeersResponse>> {
-        return await this.deletePeerRelationshipAttributeAndNotifyPeersUseCase.execute(request);
-    }
-
-    public async deletePeerIdentityAttributeAndNotifyOwner(
-        request: DeletePeerIdentityAttributeAndNotifyOwnerRequest
-    ): Promise<Result<DeletePeerIdentityAttributeAndNotifyOwnerResponse>> {
-        return await this.deletePeerIdentityAttributeAndNotifyOwnerUseCase.execute(request);
-    }
-
-    public async deleteThirdPartyRelationshipAttributeAndNotifyPeer(
-        request: DeleteThirdPartyRelationshipAttributeAndNotifyPeerRequest
-    ): Promise<Result<DeleteThirdPartyRelationshipAttributeAndNotifyPeerResponse>> {
-        return await this.deleteThirdPartyRelationshipAttributeAndNotifyPeerUseCase.execute(request);
-    }
-
-    public async deleteOwnIdentityAttributeAndNotifyPeers(request: DeleteOwnIdentityAttributeAndNotifyPeersRequest): Promise<Result<void>> {
-        return await this.deleteOwnIdentityAttributeAndNotifyPeersUseCase.execute(request);
     }
 
     public async deleteSharedAttributesForRejectedOrRevokedRelationship(request: DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest): Promise<Result<void>> {
