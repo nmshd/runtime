@@ -1343,6 +1343,7 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     // TODO: maybe it can make sense to have a functions setPeerDeletionInfo that selects the fitting of the following functions for simpler code elsewhere
+    // TODO: naming should be plural
     public async setPeerDeletionInfoOfOwnRelationshipAttribute(
         attributes: OwnRelationshipAttribute[],
         deletionInfo: ForwardedAttributeDeletionInfo,

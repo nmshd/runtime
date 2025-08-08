@@ -8,9 +8,7 @@ import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreEr
 import {
     ForwardedAttributeDeletionInfo,
     ForwardedAttributeDeletionStatus,
-    OwnIdentityAttribute,
     OwnRelationshipAttribute,
-    PeerRelationshipAttribute,
     PeerRelationshipAttributeDeletedEvent,
     ThirdPartyRelationshipAttribute,
     ThirdPartyRelationshipAttributeDeletionInfo,
@@ -35,24 +33,12 @@ export class PeerRelationshipAttributeDeletedNotificationItemProcessor extends A
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
         if (!attribute) return ValidationResult.success();
 
-        if (
-            !(
-                attribute instanceof OwnIdentityAttribute ||
-                attribute instanceof OwnRelationshipAttribute ||
-                attribute instanceof PeerRelationshipAttribute ||
-                attribute instanceof ThirdPartyRelationshipAttribute
-            )
-        ) {
+        if (!(attribute instanceof OwnRelationshipAttribute || attribute instanceof ThirdPartyRelationshipAttribute)) {
             return ValidationResult.error(new ApplicationError("", "")); // TODO:
             // return ValidationResult.error(ConsumptionCoreErrors.attributes.isNotOwnSharedAttribute(notificationItem.attributeId));
         }
 
-        const senderIsPeerOfRelationshipAttribute =
-            (attribute instanceof OwnRelationshipAttribute || attribute instanceof ThirdPartyRelationshipAttribute) && notification.peer.equals(attribute.peerSharingInfo.peer);
-        const attributeIsSharedWithSender =
-            (attribute instanceof OwnIdentityAttribute || attribute instanceof OwnRelationshipAttribute || attribute instanceof PeerRelationshipAttribute) &&
-            attribute.isSharedWith(notification.peer);
-        if (!(senderIsPeerOfRelationshipAttribute || attributeIsSharedWithSender)) {
+        if (!notification.peer.equals(attribute.peerSharingInfo.peer)) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.senderIsNotPeerOfSharedAttribute(notification.peer, notificationItem.attributeId));
         }
 
@@ -66,32 +52,20 @@ export class PeerRelationshipAttributeDeletedNotificationItemProcessor extends A
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
         if (!attribute) return;
 
-        if (
-            !(
-                attribute instanceof OwnIdentityAttribute ||
-                attribute instanceof OwnRelationshipAttribute ||
-                attribute instanceof PeerRelationshipAttribute ||
-                attribute instanceof ThirdPartyRelationshipAttribute
-            )
-        ) {
+        if (!(attribute instanceof OwnRelationshipAttribute || attribute instanceof ThirdPartyRelationshipAttribute)) {
             throw Error; // TODO:
         }
 
-        if (attribute instanceof OwnIdentityAttribute || attribute instanceof OwnRelationshipAttribute || attribute instanceof PeerRelationshipAttribute) {
+        const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute);
+        const attributes = [attribute, ...predecessors];
+
+        if (attribute instanceof OwnRelationshipAttribute) {
             const deletionInfo = ForwardedAttributeDeletionInfo.from({
                 deletionStatus: ForwardedAttributeDeletionStatus.DeletedByPeer,
                 deletionDate: CoreDate.utc()
             });
 
-            const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute);
-            const attributes = [attribute, ...predecessors];
-
-            const senderIsPeerOfOwnRelationshipAttribute = attribute instanceof OwnRelationshipAttribute && notification.peer.equals(attribute.peerSharingInfo.peer);
-            if (senderIsPeerOfOwnRelationshipAttribute) {
-                await this.consumptionController.attributes.setPeerDeletionInfoOfOwnRelationshipAttribute(attributes as OwnRelationshipAttribute[], deletionInfo, true);
-            } else {
-                await this.consumptionController.attributes.setForwardedDeletionInfo(attributes, deletionInfo, notification.peer, true);
-            }
+            await this.consumptionController.attributes.setPeerDeletionInfoOfOwnRelationshipAttribute(attributes as OwnRelationshipAttribute[], deletionInfo, true);
 
             return new PeerRelationshipAttributeDeletedEvent(this.currentIdentityAddress.toString(), attribute);
         }
@@ -101,10 +75,7 @@ export class PeerRelationshipAttributeDeletedNotificationItemProcessor extends A
             deletionDate: CoreDate.utc()
         });
 
-        const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute);
-        const attributes = [attribute, ...predecessors];
-
-        await this.consumptionController.attributes.setPeerDeletionInfoOfThirdPartyRelationshipAttribute(attributes, deletionInfo, true);
+        await this.consumptionController.attributes.setPeerDeletionInfoOfThirdPartyRelationshipAttribute(attributes as ThirdPartyRelationshipAttribute[], deletionInfo, true);
 
         return new PeerRelationshipAttributeDeletedEvent(this.currentIdentityAddress.toString(), attribute);
     }
@@ -113,25 +84,7 @@ export class PeerRelationshipAttributeDeletedNotificationItemProcessor extends A
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
         if (!attribute) return;
 
-        if (
-            !(
-                attribute instanceof OwnIdentityAttribute ||
-                attribute instanceof OwnRelationshipAttribute ||
-                attribute instanceof PeerRelationshipAttribute ||
-                attribute instanceof ThirdPartyRelationshipAttribute
-            )
-        ) {
-            return;
-        }
-
-        const senderIsPeerOfOwnRelationshipAttribute = attribute instanceof OwnRelationshipAttribute && notification.peer.equals(attribute.peerSharingInfo.peer);
-        if (attribute instanceof OwnIdentityAttribute || attribute instanceof PeerRelationshipAttribute || senderIsPeerOfOwnRelationshipAttribute) {
-            const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute);
-            for (const attr of [attribute, ...predecessors]) {
-                // the previous deletionState cannot be unambiguously known, either it was undefined or 'ToBeDeletedByPeer'
-                attr.setForwardedDeletionInfo(undefined, notification.peer);
-                await this.consumptionController.attributes.updateAttributeUnsafe(attr);
-            }
+        if (!(attribute instanceof OwnRelationshipAttribute || attribute instanceof ThirdPartyRelationshipAttribute)) {
             return;
         }
 
