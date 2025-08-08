@@ -1,5 +1,4 @@
 import { ILogger } from "@js-soft/logging-abstractions";
-import { ApplicationError } from "@js-soft/ts-utils";
 import { PeerRelationshipAttributeDeletedByPeerNotificationItem } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
 import { TransportLoggerFactory } from "@nmshd/transport";
@@ -34,8 +33,11 @@ export class PeerRelationshipAttributeDeletedByPeerNotificationItemProcessor ext
         if (!attribute) return ValidationResult.success();
 
         if (!(attribute instanceof OwnRelationshipAttribute || attribute instanceof ThirdPartyRelationshipAttribute)) {
-            return ValidationResult.error(new ApplicationError("", "")); // TODO:
-            // return ValidationResult.error(ConsumptionCoreErrors.attributes.isNotOwnSharedAttribute(notificationItem.attributeId));
+            return ValidationResult.error(
+                ConsumptionCoreErrors.attributes.wrongTypeOfAttribute(
+                    `The Attribute ${notificationItem.attributeId} is not an own RelationshipAttribute or ThirdPartyRelationshipAttribute.`
+                )
+            );
         }
 
         if (!notification.peer.equals(attribute.peerSharingInfo.peer)) {
@@ -47,13 +49,15 @@ export class PeerRelationshipAttributeDeletedByPeerNotificationItemProcessor ext
 
     public override async process(
         notificationItem: PeerRelationshipAttributeDeletedByPeerNotificationItem,
-        notification: LocalNotification
+        _notification: LocalNotification
     ): Promise<PeerRelationshipAttributeDeletedByPeerEvent | void> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
         if (!attribute) return;
 
         if (!(attribute instanceof OwnRelationshipAttribute || attribute instanceof ThirdPartyRelationshipAttribute)) {
-            throw Error; // TODO:
+            throw ConsumptionCoreErrors.attributes.wrongTypeOfAttribute(
+                `The Attribute ${notificationItem.attributeId} is not an own RelationshipAttribute or ThirdPartyRelationshipAttribute.`
+            );
         }
 
         const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute);
@@ -80,7 +84,7 @@ export class PeerRelationshipAttributeDeletedByPeerNotificationItemProcessor ext
         return new PeerRelationshipAttributeDeletedByPeerEvent(this.currentIdentityAddress.toString(), attribute);
     }
 
-    public override async rollback(notificationItem: PeerRelationshipAttributeDeletedByPeerNotificationItem, notification: LocalNotification): Promise<void> {
+    public override async rollback(notificationItem: PeerRelationshipAttributeDeletedByPeerNotificationItem, _notification: LocalNotification): Promise<void> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
         if (!attribute) return;
 

@@ -1,5 +1,4 @@
 import { ILogger } from "@js-soft/logging-abstractions";
-import { ApplicationError } from "@js-soft/ts-utils";
 import { ForwardedAttributeDeletedByPeerNotificationItem } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
 import { TransportLoggerFactory } from "@nmshd/transport";
@@ -33,8 +32,11 @@ export class ForwardedAttributeDeletedByPeerNotificationItemProcessor extends Ab
         if (!attribute) return ValidationResult.success();
 
         if (!(attribute instanceof OwnIdentityAttribute || attribute instanceof OwnRelationshipAttribute || attribute instanceof PeerRelationshipAttribute)) {
-            return ValidationResult.error(new ApplicationError("", "")); // TODO:
-            // return ValidationResult.error(ConsumptionCoreErrors.attributes.isNotOwnSharedAttribute(notificationItem.attributeId));
+            return ValidationResult.error(
+                ConsumptionCoreErrors.attributes.wrongTypeOfAttribute(
+                    `The Attribute ${notificationItem.attributeId} is not an own IdentityAttribute, own RelationshipAttribute or peer RelationshipAttribute.`
+                )
+            );
         }
 
         if (!attribute.isSharedWith(notification.peer)) {
@@ -52,7 +54,9 @@ export class ForwardedAttributeDeletedByPeerNotificationItemProcessor extends Ab
         if (!attribute) return;
 
         if (!(attribute instanceof OwnIdentityAttribute || attribute instanceof OwnRelationshipAttribute || attribute instanceof PeerRelationshipAttribute)) {
-            throw Error; // TODO:
+            throw ConsumptionCoreErrors.attributes.wrongTypeOfAttribute(
+                `The Attribute ${notificationItem.attributeId} is not an own IdentityAttribute, own RelationshipAttribute or peer RelationshipAttribute.`
+            );
         }
 
         const deletionInfo = ForwardedAttributeDeletionInfo.from({

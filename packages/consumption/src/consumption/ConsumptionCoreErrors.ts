@@ -101,6 +101,10 @@ class Attributes {
         return new CoreError("error.consumption.attributes.wrongOwnerOfAttribute", message);
     }
 
+    public wrongTypeOfAttribute(message: string) {
+        return new CoreError("error.consumption.attributes.wrongTypeOfAttribute", message);
+    }
+
     public senderIsNotPeerOfSharedAttribute(senderId: string | CoreAddress, attributeId: string | CoreId) {
         return new CoreError(
             "error.consumption.attributes.senderIsNotPeerOfSharedAttribute",

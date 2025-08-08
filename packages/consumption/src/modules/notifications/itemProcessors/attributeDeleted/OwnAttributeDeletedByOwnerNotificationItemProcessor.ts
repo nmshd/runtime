@@ -1,5 +1,4 @@
 import { ILogger } from "@js-soft/logging-abstractions";
-import { ApplicationError } from "@js-soft/ts-utils";
 import { OwnAttributeDeletedByOwnerNotificationItem } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
 import { TransportLoggerFactory } from "@nmshd/transport";
@@ -36,8 +35,11 @@ export class OwnAttributeDeletedByOwnerNotificationItemProcessor extends Abstrac
         if (!attribute) return ValidationResult.success(); // TODO: why is this success? Shouldn't it be an error?
 
         if (!(attribute instanceof PeerIdentityAttribute || attribute instanceof PeerRelationshipAttribute || attribute instanceof ThirdPartyRelationshipAttribute)) {
-            return ValidationResult.error(new ApplicationError("", "")); // TODO:
-            // return ValidationResult.error(ConsumptionCoreErrors.attributes.isNotPeerSharedAttribute(notificationItem.attributeId));
+            return ValidationResult.error(
+                ConsumptionCoreErrors.attributes.wrongTypeOfAttribute(
+                    `The Attribute ${notificationItem.attributeId} is not a peer IdentityAttribute, peer RelationshipAttribute or ThirdPartyRelationshipAttribute.`
+                )
+            );
         }
 
         if (!notification.peer.equals(attribute.peerSharingInfo.peer)) {
@@ -52,7 +54,9 @@ export class OwnAttributeDeletedByOwnerNotificationItemProcessor extends Abstrac
         if (!attribute) return;
 
         if (!(attribute instanceof PeerIdentityAttribute || attribute instanceof PeerRelationshipAttribute || attribute instanceof ThirdPartyRelationshipAttribute)) {
-            throw Error; // TODO:
+            throw ConsumptionCoreErrors.attributes.wrongTypeOfAttribute(
+                `The Attribute ${notificationItem.attributeId} is not a peer IdentityAttribute, peer RelationshipAttribute or ThirdPartyRelationshipAttribute.`
+            );
         }
 
         if (attribute instanceof PeerIdentityAttribute || attribute instanceof PeerRelationshipAttribute) {
