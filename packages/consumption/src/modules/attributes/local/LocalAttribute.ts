@@ -24,7 +24,6 @@ export interface LocalAttributeJSON {
     succeededBy?: string;
     shareInfo?: LocalAttributeShareInfoJSON;
     deletionInfo?: LocalAttributeDeletionInfoJSON;
-    parentId?: string;
     isDefault?: true;
     wasViewedAt?: string;
 }
@@ -36,7 +35,6 @@ export interface ILocalAttribute extends ICoreSynchronizable {
     succeededBy?: ICoreId;
     shareInfo?: ILocalAttributeShareInfo;
     deletionInfo?: ILocalAttributeDeletionInfo;
-    parentId?: ICoreId;
     isDefault?: true;
     wasViewedAt?: ICoreDate;
 }
@@ -44,28 +42,24 @@ export interface ILocalAttribute extends ICoreSynchronizable {
 export type OwnSharedIdentityAttribute = LocalAttribute & {
     content: IdentityAttribute;
     shareInfo: LocalAttributeShareInfo;
-    parentId: undefined;
     isDefault: undefined;
 };
 
 export type OwnSharedRelationshipAttribute = LocalAttribute & {
     content: RelationshipAttribute;
     shareInfo: LocalAttributeShareInfo;
-    parentId: undefined;
     isDefault: undefined;
 };
 
 export type PeerSharedIdentityAttribute = LocalAttribute & {
     content: IdentityAttribute;
     shareInfo: LocalAttributeShareInfo & { sourceAttribute: undefined };
-    parentId: undefined;
     isDefault: undefined;
 };
 
 export type PeerSharedRelationshipAttribute = LocalAttribute & {
     content: RelationshipAttribute;
     shareInfo: LocalAttributeShareInfo & { sourceAttribute: undefined };
-    parentId: undefined;
     isDefault: undefined;
 };
 
@@ -74,7 +68,6 @@ export type ThirdPartyRelationshipAttribute = LocalAttribute & {
     shareInfo: LocalAttributeShareInfo & {
         thirdPartyAddress: CoreAddress;
     };
-    parentId: undefined;
     isDefault: undefined;
 };
 
@@ -94,7 +87,6 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
         nameof<LocalAttribute>((r) => r.succeededBy),
         nameof<LocalAttribute>((r) => r.shareInfo),
         nameof<LocalAttribute>((r) => r.deletionInfo),
-        nameof<LocalAttribute>((r) => r.parentId),
         nameof<LocalAttribute>((r) => r.isDefault),
         nameof<LocalAttribute>((r) => r.wasViewedAt)
     ];
@@ -124,10 +116,6 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
     @validate({ nullable: true })
     @serialize()
     public deletionInfo?: LocalAttributeDeletionInfo;
-
-    @validate({ nullable: true })
-    @serialize()
-    public parentId?: CoreId;
 
     @validate({ nullable: true })
     @serialize()
@@ -164,7 +152,6 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
     public isOwnSharedAttribute(ownAddress: CoreAddress, peerAddress?: CoreAddress): this is OwnSharedIdentityAttribute | OwnSharedRelationshipAttribute {
         let isOwnSharedAttribute = this.isShared() && this.isOwnedBy(ownAddress);
 
-        isOwnSharedAttribute &&= !this.parentId;
         isOwnSharedAttribute &&= !this.isDefault;
 
         if (peerAddress) isOwnSharedAttribute &&= this.shareInfo!.peer.equals(peerAddress);
@@ -176,7 +163,6 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
 
         isPeerSharedAttribute &&= !this.shareInfo!.sourceAttribute;
 
-        isPeerSharedAttribute &&= !this.parentId;
         isPeerSharedAttribute &&= !this.isDefault;
 
         if (peerAddress) isPeerSharedAttribute &&= this.isOwnedBy(peerAddress);
@@ -190,7 +176,6 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
     public isRelationshipAttribute(): this is LocalAttribute & { content: RelationshipAttribute; shareInfo: LocalAttributeShareInfo } {
         let isRelationshipAttribute = this.content instanceof RelationshipAttribute && this.isShared();
 
-        isRelationshipAttribute &&= !this.parentId;
         isRelationshipAttribute &&= !this.isDefault;
 
         return isRelationshipAttribute;
@@ -258,16 +243,14 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
         content: IIdentityAttribute | IRelationshipAttribute,
         succeeds?: ICoreId,
         shareInfo?: ILocalAttributeShareInfo,
-        id?: CoreId,
-        parentId?: CoreId
+        id?: CoreId
     ): Promise<LocalAttribute> {
         return this.from({
             id: id ?? (await ConsumptionIds.attribute.generate()),
             createdAt: CoreDate.utc(),
             content,
             succeeds,
-            shareInfo,
-            parentId
+            shareInfo
         });
     }
 }
