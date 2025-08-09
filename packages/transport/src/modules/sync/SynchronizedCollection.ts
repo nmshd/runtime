@@ -2,9 +2,7 @@ import { DatabaseType, IDatabaseCollection } from "@js-soft/docdb-access-abstrac
 import { Serializable } from "@js-soft/ts-serval";
 import jsonpatch from "fast-json-patch";
 import _ from "lodash";
-import { nameof } from "ts-simple-nameof";
 import { CoreSynchronizable, ICoreSynchronizable } from "../../core/CoreSynchronizable";
-import { ICacheable } from "../../core/ICacheable";
 import { TransportIds } from "../../core/TransportIds";
 import { DatawalletModification, DatawalletModificationCategory, DatawalletModificationType } from "../sync/local/DatawalletModification";
 
@@ -29,6 +27,7 @@ export class SynchronizedCollection implements IDatabaseCollection {
         }
 
         const technicalModificationPayload = _.pickBy<any>(newObjectJson, (value, key) => value !== undefined && newObject.technicalProperties.includes(key));
+        const contentModificationPayload = _.pickBy<any>(newObjectJson, (value, key) => value !== undefined && newObject.contentProperties.includes(key));
         const metadataModificationPayload = _.pickBy<any>(newObjectJson, (value, key) => value !== undefined && newObject.metadataProperties.includes(key));
         const userdataModificationPayload = _.pickBy<any>(newObjectJson, (value, key) => value !== undefined && newObject.userdataProperties.includes(key));
         const objectIdentifier = (newObject as any)["id"];
@@ -42,6 +41,20 @@ export class SynchronizedCollection implements IDatabaseCollection {
                     objectIdentifier: objectIdentifier,
                     payloadCategory: DatawalletModificationCategory.TechnicalData,
                     payload: technicalModificationPayload,
+                    datawalletVersion: this.datawalletVersion
+                })
+            );
+        }
+
+        if (Object.getOwnPropertyNames(contentModificationPayload).length !== 0) {
+            await this.datawalletModifications.create(
+                DatawalletModification.from({
+                    localId: await TransportIds.datawalletModification.generate(),
+                    type: DatawalletModificationType.Create,
+                    collection: this.name,
+                    objectIdentifier: objectIdentifier,
+                    payloadCategory: DatawalletModificationCategory.Content,
+                    payload: contentModificationPayload,
                     datawalletVersion: this.datawalletVersion
                 })
             );
@@ -123,9 +136,9 @@ ${new Error().stack}`);
         }
 
         const haveTechnicalPropertiesChanged = _.intersection(newObject.technicalProperties, changedRootProperties).length !== 0;
+        const haveContentPropertiesChanged = _.intersection(newObject.contentProperties, changedRootProperties).length !== 0;
         const haveMetadataPropertiesChanged = _.intersection(newObject.metadataProperties, changedRootProperties).length !== 0;
         const haveUserdataPropertiesChanged = _.intersection(newObject.userdataProperties, changedRootProperties).length !== 0;
-        const hasCacheChanged = changedRootProperties.some((p) => p === nameof<ICacheable>((c) => c.cache));
 
         const objectIdentifier = (newObject as any)["id"];
 
@@ -138,6 +151,21 @@ ${new Error().stack}`);
                     collection: this.name,
                     objectIdentifier: objectIdentifier,
                     payloadCategory: DatawalletModificationCategory.TechnicalData,
+                    payload: payload,
+                    datawalletVersion: this.datawalletVersion
+                })
+            );
+        }
+
+        if (haveContentPropertiesChanged) {
+            const payload = _.pick(newObjectJson, newObject.contentProperties);
+            await this.datawalletModifications.create(
+                DatawalletModification.from({
+                    localId: await TransportIds.datawalletModification.generate(),
+                    type: DatawalletModificationType.Update,
+                    collection: this.name,
+                    objectIdentifier: objectIdentifier,
+                    payloadCategory: DatawalletModificationCategory.Content,
                     payload: payload,
                     datawalletVersion: this.datawalletVersion
                 })
@@ -169,18 +197,6 @@ ${new Error().stack}`);
                     objectIdentifier: objectIdentifier,
                     payloadCategory: DatawalletModificationCategory.Userdata,
                     payload: payload,
-                    datawalletVersion: this.datawalletVersion
-                })
-            );
-        }
-
-        if (hasCacheChanged) {
-            await this.datawalletModifications.create(
-                DatawalletModification.from({
-                    localId: await TransportIds.datawalletModification.generate(),
-                    type: DatawalletModificationType.CacheChanged,
-                    collection: this.name,
-                    objectIdentifier: objectIdentifier,
                     datawalletVersion: this.datawalletVersion
                 })
             );

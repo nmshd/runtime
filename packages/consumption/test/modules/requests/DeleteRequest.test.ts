@@ -48,7 +48,7 @@ describe("Delete requests", function () {
         const messages = await TestUtil.syncUntilHasMessages(rAccountController);
         const rMessageWithRequest = messages[0];
         const rLocalRequest = await rConsumptionController.incomingRequests.received({
-            receivedRequest: rMessageWithRequest.cache!.content as Request,
+            receivedRequest: rMessageWithRequest.content as Request,
             requestSourceObject: rMessageWithRequest
         });
 
@@ -71,7 +71,7 @@ describe("Delete requests", function () {
         const messages = await TestUtil.syncUntilHasMessages(rAccountController);
         const rMessageWithRequest = messages[0];
         const rLocalRequest = await rConsumptionController.incomingRequests.received({
-            receivedRequest: rMessageWithRequest.cache!.content as Request,
+            receivedRequest: rMessageWithRequest.content as Request,
             requestSourceObject: rMessageWithRequest
         });
 
@@ -94,7 +94,7 @@ describe("Delete requests", function () {
         const messages = await TestUtil.syncUntilHasMessages(rAccountController);
         const rMessageWithRequest = messages[0];
         const rLocalRequest = await rConsumptionController.incomingRequests.received({
-            receivedRequest: rMessageWithRequest.cache!.content as Request,
+            receivedRequest: rMessageWithRequest.content as Request,
             requestSourceObject: rMessageWithRequest
         });
 
