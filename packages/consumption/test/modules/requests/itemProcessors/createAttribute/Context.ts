@@ -176,7 +176,7 @@ export class GivenSteps {
         const createdOwnSharedIdentityAttribute = await this.context.consumptionController.attributes.createSharedLocalAttributeCopy({
             sourceAttributeId: params.sourceAttributeId,
             peer: this.context.translateTestIdentity(params.peer)!,
-            requestReference: CoreId.from("reqRef")
+            sourceReference: CoreId.from("reqRef")
         });
         return createdOwnSharedIdentityAttribute;
     }
@@ -184,7 +184,7 @@ export class GivenSteps {
     public async aPeerSharedIdentityAttribute(params: { peer: CoreAddress }): Promise<LocalAttribute> {
         const createdPeerSharedIdentityAttribute = await this.context.consumptionController.attributes.createSharedLocalAttribute({
             peer: this.context.translateTestIdentity(params.peer)!,
-            requestReference: CoreId.from("reqRef"),
+            sourceReference: CoreId.from("reqRef"),
             content: TestObjectFactory.createIdentityAttribute({ owner: this.context.translateTestIdentity(params.peer) })
         });
         return createdPeerSharedIdentityAttribute;
@@ -345,7 +345,7 @@ export class WhenSteps {
 
         return await this.context.consumptionController.attributes.createSharedLocalAttribute({
             content: relationshipAttribute,
-            requestReference: CoreId.from("reqRef"),
+            sourceReference: CoreId.from("reqRef"),
             peer: CoreAddress.from("peer")
         });
     }
@@ -358,7 +358,7 @@ export class WhenSteps {
 
         await this.context.consumptionController.attributes.createSharedLocalAttribute({
             content: relationshipAttribute,
-            requestReference: CoreId.from("reqRef"),
+            sourceReference: CoreId.from("reqRef"),
             peer: CoreAddress.from("peer"),
             thirdPartyAddress: CoreAddress.from("AThirdParty")
         });

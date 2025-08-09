@@ -114,7 +114,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                     owner: aThirdParty
                 }),
                 peer: aThirdParty,
-                requestReference: await ConsumptionIds.request.generate()
+                sourceReference: await ConsumptionIds.request.generate()
             });
 
             const requestItem = ReadAttributeRequestItem.from({
@@ -829,7 +829,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 statusLog: []
             });
 
-            const localAttribute = await consumptionController.attributes.createRepositoryAttribute({
+            const localAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: recipient
                 })
@@ -883,7 +883,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                     })
                 }),
                 peer: aThirdParty,
-                requestReference: await ConsumptionIds.request.generate()
+                sourceReference: await ConsumptionIds.request.generate()
             });
 
             const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
@@ -936,7 +936,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                     })
                 }),
                 peer: aThirdParty,
-                requestReference: await ConsumptionIds.request.generate()
+                sourceReference: await ConsumptionIds.request.generate()
             });
 
             const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
@@ -987,7 +987,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                     })
                 }),
                 peer: aThirdParty,
-                requestReference: await ConsumptionIds.request.generate()
+                sourceReference: await ConsumptionIds.request.generate()
             });
 
             const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {

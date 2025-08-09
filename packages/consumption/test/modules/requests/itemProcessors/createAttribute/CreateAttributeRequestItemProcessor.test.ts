@@ -471,7 +471,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             const repositoryAttribute = await Given.aRepositoryAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, value: GivenName.from("aGivenName") });
             await Given.anAttribute({
                 content: repositoryAttribute.content,
-                shareInfo: { sourceAttribute: repositoryAttribute.id, peer: TestIdentity.PEER, requestReference: CoreId.from("reqRef") },
+                shareInfo: { sourceAttribute: repositoryAttribute.id, peer: TestIdentity.PEER, sourceReference: CoreId.from("reqRef") },
                 deletionInfo: { deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer, deletionDate: CoreDate.utc().subtract({ days: 1 }) }
             });
             await Given.aRequestItemWithAnIdentityAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, value: GivenName.from("aGivenName") });
@@ -484,7 +484,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             const repositoryAttribute = await Given.aRepositoryAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, value: GivenName.from("aGivenName") });
             await Given.anAttribute({
                 content: repositoryAttribute.content,
-                shareInfo: { sourceAttribute: repositoryAttribute.id, peer: TestIdentity.PEER, requestReference: CoreId.from("reqRef") },
+                shareInfo: { sourceAttribute: repositoryAttribute.id, peer: TestIdentity.PEER, sourceReference: CoreId.from("reqRef") },
                 deletionInfo: { deletionStatus: LocalAttributeDeletionStatus.ToBeDeletedByPeer, deletionDate: CoreDate.utc().add({ days: 1 }) }
             });
             await Given.aRequestItemWithAnIdentityAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, value: GivenName.from("aGivenName") });

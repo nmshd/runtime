@@ -65,7 +65,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: peerAddress,
-                    requestReference: CoreId.from("reqRef"),
+                    sourceReference: CoreId.from("reqRef"),
                     sourceAttribute: CoreId.from("repositoryAttribute")
                 }
             });
@@ -94,7 +94,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: peerAddress,
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 }
             });
 
@@ -143,7 +143,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: peerAddress,
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 }
             });
 
@@ -174,7 +174,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: peerAddress,
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 }
             });
 
@@ -202,7 +202,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: CoreAddress.from("ThirdParty"),
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 }
             });
 
@@ -230,7 +230,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: peerAddress,
-                    requestReference: CoreId.from("reqRef"),
+                    sourceReference: CoreId.from("reqRef"),
                     sourceAttribute: CoreId.from("repositoryAttribute")
                 }
             });
@@ -259,7 +259,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: peerAddress,
-                    requestReference: CoreId.from("reqRef"),
+                    sourceReference: CoreId.from("reqRef"),
                     sourceAttribute: CoreId.from("repositoryAttribute")
                 },
                 deletionInfo: {
@@ -292,7 +292,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: peerAddress,
-                    requestReference: CoreId.from("reqRef"),
+                    sourceReference: CoreId.from("reqRef"),
                     sourceAttribute: CoreId.from("repositoryAttribute")
                 },
                 deletionInfo: {
@@ -372,7 +372,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: peerAddress,
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 }
             });
 
@@ -417,7 +417,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: peerAddress,
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 }
             });
 
@@ -465,7 +465,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: peerAddress,
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 }
             });
 
@@ -515,7 +515,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: peerAddress,
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 }
             });
 
@@ -563,7 +563,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: peerAddress,
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 }
             });
 
@@ -614,7 +614,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: peerAddress,
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 }
             });
 
@@ -697,7 +697,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: peerAddress,
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 },
                 deletionInfo: {
                     deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
@@ -746,7 +746,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: peerAddress,
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 },
                 deletionInfo: {
                     deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
@@ -798,7 +798,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: peerAddress,
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 }
             });
 
@@ -849,7 +849,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: peerAddress,
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 }
             });
 
@@ -898,7 +898,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: peerAddress,
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 },
                 succeededBy: sOwnSharedIdentityAttributeId
             });
@@ -914,7 +914,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: peerAddress,
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 },
                 succeeds: sPredecessorOwnSharedIdentityAttribute.id
             });
@@ -966,7 +966,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: peerAddress,
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 },
                 succeededBy: sOwnSharedIdentityAttributeId,
                 deletionInfo: {
@@ -986,7 +986,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: peerAddress,
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 },
                 succeeds: sPredecessorOwnSharedIdentityAttribute.id
             });
@@ -1035,7 +1035,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: peerAddress,
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 }
             });
 
@@ -1084,7 +1084,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: peerAddress,
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 },
                 succeededBy: sOwnSharedIdentityAttributeId
             });
@@ -1100,7 +1100,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: peerAddress,
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 },
                 succeeds: sPredecessorOwnSharedIdentityAttribute.id
             });
@@ -1154,7 +1154,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: peerAddress,
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 },
                 succeededBy: sOwnSharedIdentityAttributeId,
                 deletionInfo: {
@@ -1174,7 +1174,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: peerAddress,
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 },
                 succeeds: sPredecessorOwnSharedIdentityAttribute.id
             });
@@ -1224,7 +1224,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: peerAddress,
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 },
                 succeededBy: sOwnSharedIdentityAttributeId,
                 deletionInfo: {
@@ -1244,7 +1244,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 }),
                 shareInfo: {
                     peer: peerAddress,
-                    requestReference: CoreId.from("reqRef")
+                    sourceReference: CoreId.from("reqRef")
                 },
                 succeeds: sPredecessorOwnSharedIdentityAttribute.id
             });

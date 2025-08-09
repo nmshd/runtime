@@ -701,7 +701,7 @@ export class RequestsWhen {
             }),
             shareInfo: {
                 peer: CoreAddress.from("peer"),
-                requestReference: CoreId.from("shareRequestReference1")
+                sourceReference: CoreId.from("shareSourceReference1")
             }
         });
 
@@ -716,7 +716,7 @@ export class RequestsWhen {
             }),
             shareInfo: {
                 peer: CoreAddress.from("peer"),
-                requestReference: CoreId.from("shareRequestReference2a")
+                sourceReference: CoreId.from("shareSourceReference2a")
             },
             succeeds: predecessorId
         });
@@ -732,7 +732,7 @@ export class RequestsWhen {
             }),
             shareInfo: {
                 peer: CoreAddress.from("peer"),
-                requestReference: CoreId.from("shareRequestReference2b")
+                sourceReference: CoreId.from("shareSourceReference2b")
             },
             succeededBy: sOwnSharedIdentityAttribute2.id
         });

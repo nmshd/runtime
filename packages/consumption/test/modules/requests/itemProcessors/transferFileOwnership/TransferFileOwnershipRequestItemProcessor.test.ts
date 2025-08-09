@@ -307,7 +307,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
 
             const ownSharedIdentityAttribute = await recipientConsumptionController.attributes.getLocalAttribute(responseItem.attributeId);
             expect(ownSharedIdentityAttribute!.shareInfo!.peer).toStrictEqual(sender);
-            expect(ownSharedIdentityAttribute!.shareInfo!.requestReference).toStrictEqual(incomingRequest.id);
+            expect(ownSharedIdentityAttribute!.shareInfo!.sourceReference).toStrictEqual(incomingRequest.id);
             expect(ownSharedIdentityAttribute!.content.value).toBeInstanceOf(IdentityFileReference);
             expect((ownSharedIdentityAttribute!.content.value as IdentityFileReference).value).toStrictEqual(senderFileReference.truncate());
             expect((ownSharedIdentityAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x:tag"]);
@@ -391,7 +391,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
 
             const peerSharedIdentityAttribute = await senderConsumptionController.attributes.getLocalAttribute(responseItem.attributeId);
             expect(peerSharedIdentityAttribute!.shareInfo!.peer).toStrictEqual(recipient);
-            expect(peerSharedIdentityAttribute!.shareInfo!.requestReference).toStrictEqual(requestInfo.id);
+            expect(peerSharedIdentityAttribute!.shareInfo!.sourceReference).toStrictEqual(requestInfo.id);
             expect(peerSharedIdentityAttribute!.shareInfo!.sourceAttribute).toBeUndefined();
             expect((peerSharedIdentityAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x:tag"]);
 

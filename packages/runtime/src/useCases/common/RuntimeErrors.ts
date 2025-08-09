@@ -198,34 +198,41 @@ class Notifications {
 }
 
 class Attributes {
-    public isNotRepositoryAttribute(attributeId: CoreId | string): ApplicationError {
-        return new ApplicationError("error.runtime.attributes.isNotRepositoryAttribute", `Attribute '${attributeId.toString()}' is not a RepositoryAttribute.`);
+    public isNotOwnIdentityAttribute(attributeId: CoreId | string): ApplicationError {
+        return new ApplicationError("error.runtime.attributes.isNotOwnIdentityAttribute", `The Attribute '${attributeId.toString()}' is not an own IdentityAttribute.`);
     }
 
-    public repositoryAttributeHasAlreadyBeenSharedWithPeer(
-        repositoryAttributeId: CoreId | string,
-        peer: CoreAddress | string,
-        ownSharedIdentityAttributeId: CoreId | string
-    ): ApplicationError {
+    public ownIdentityAttributeHasAlreadyBeenSharedWithPeer(attributeId: CoreId | string, peer: CoreAddress | string): ApplicationError {
         return new ApplicationError(
-            "error.runtime.attributes.repositoryAttributeHasAlreadyBeenSharedWithPeer",
-            `RepositoryAttribute '${repositoryAttributeId.toString()}' has already been shared with peer '${peer.toString()}'. ID of own shared IdentityAttribute: '${ownSharedIdentityAttributeId.toString()}'.`
+            "error.runtime.attributes.ownIdentityAttributeHasAlreadyBeenSharedWithPeer",
+            `The own IdentityAttribute '${attributeId.toString()}' has already been shared with peer '${peer.toString()}'.'.`
         );
     }
 
-    public noPreviousVersionOfRepositoryAttributeHasBeenSharedWithPeerBefore(repositoryAttributeId: CoreId | string, peer: CoreAddress | string): ApplicationError {
+    public successorOfOwnIdentityAttributeHasAlreadyBeenSharedWithPeer(attributeId: CoreId | string, successorId: CoreId | string, peer: CoreAddress | string): ApplicationError {
         return new ApplicationError(
-            "error.runtime.attributes.noPreviousVersionOfRepositoryAttributeHasBeenSharedWithPeerBefore",
-            `No previous version of the RepositoryAttribute '${repositoryAttributeId.toString()}' has been shared with peer '${peer.toString()}' before. If you wish to execute an initial sharing of this Attribute, use the ShareRepositoryAttributeUseCase instead.`
+            "error.runtime.attributes.successorOfOwnIdentityAttributeHasAlreadyBeenSharedWithPeer",
+            `A successor '${successorId.toString()}' of the own IdentityAttribute '${attributeId.toString()}' has already been shared with peer '${peer.toString()}'.'.`
         );
     }
 
-    public isNotOwnSharedAttribute(attributeId: CoreId | string): ApplicationError {
-        return new ApplicationError("error.runtime.attributes.isNotOwnSharedAttribute", `Attribute '${attributeId.toString()}' is not an own shared Attribute.`);
+    public peerHasNoPreviousVersionOfAttribute(attributeId: CoreId | string, peer: CoreAddress | string): ApplicationError {
+        return new ApplicationError(
+            "error.runtime.attributes.peerHasNoPreviousVersionOfAttribute",
+            `The peer '${peer.toString()}' doesn't have any previous version of the Attribute '${attributeId.toString()}'. Either you haven't shared it before or the peer has deleted it or is about to do so.`
+        );
     }
 
-    public isNotPeerSharedAttribute(attributeId: CoreId | string): ApplicationError {
-        return new ApplicationError("error.runtime.attributes.isNotPeerSharedAttribute", `Attribute '${attributeId.toString()}' is not a peer shared Attribute.`);
+    public isNotOwnRelationshipAttribute(attributeId: CoreId | string): ApplicationError {
+        return new ApplicationError("error.runtime.attributes.isNotOwnRelationshipAttribute", `The Attribute '${attributeId.toString()}' is not an own RelationshipAttribute.`);
+    }
+
+    public isNotPeerRelationshipAttribute(attributeId: CoreId | string): ApplicationError {
+        return new ApplicationError("error.runtime.attributes.isNotPeerRelationshipAttribute", `The Attribute '${attributeId.toString()}' is not a peer RelationshipAttribute.`);
+    }
+
+    public isNotPeerIdentityAttribute(attributeId: CoreId | string): ApplicationError {
+        return new ApplicationError("error.runtime.attributes.isNotPeerIdentityAttribute", `The Attribute '${attributeId.toString()}' is not a peer shared Attribute.`);
     }
 
     public isNotThirdPartyRelationshipAttribute(attributeId: CoreId | string): ApplicationError {
@@ -256,8 +263,8 @@ class Attributes {
         );
     }
 
-    public setDefaultRepositoryAttributesIsDisabled(): ApplicationError {
-        return new ApplicationError("error.runtime.attributes.setDefaultRepositoryAttributesIsDisabled", "Setting default RepositoryAttributes is disabled for this Account.");
+    public setDefaultOwnIdentityAttributesIsDisabled(): ApplicationError {
+        return new ApplicationError("error.runtime.attributes.setDefaultOwnIdentityAttributesIsDisabled", "Setting default own IdentityAttributes is disabled for this Account.");
     }
 
     public cannotDeleteSharedAttributeWhileRelationshipIsPending(): ApplicationError {
