@@ -162,7 +162,7 @@ describe("PeerRelationshipAttributeDeletedByPeerNotificationItemProcessor", func
         expect(attributeAfterRollback.peerSharingInfo.deletionInfo).toBeUndefined();
     });
 
-    test.only("runs all processor methods for an attribute that is to be deleted", async function () {
+    test("runs all processor methods for an attribute that is to be deleted", async function () {
         const ownRelationshipAttribute = await consumptionController.attributes.createOwnRelationshipAttribute({
             content: RelationshipAttribute.from({
                 key: "aKey",
@@ -178,10 +178,9 @@ describe("PeerRelationshipAttributeDeletedByPeerNotificationItemProcessor", func
             sourceReference: CoreId.from("reqRef")
         });
 
-        await consumptionController.attributes.setForwardedDeletionInfo(
+        await consumptionController.attributes.setPeerDeletionInfoOfOwnRelationshipAttribute(
             [ownRelationshipAttribute],
-            ForwardedAttributeDeletionInfo.from({ deletionStatus: ForwardedAttributeDeletionStatus.ToBeDeletedByPeer, deletionDate: CoreDate.utc().subtract({ days: 1 }) }),
-            CoreAddress.from("peer")
+            ForwardedAttributeDeletionInfo.from({ deletionStatus: ForwardedAttributeDeletionStatus.ToBeDeletedByPeer, deletionDate: CoreDate.utc().subtract({ days: 1 }) })
         );
 
         const notificationItem = PeerRelationshipAttributeDeletedByPeerNotificationItem.from({
