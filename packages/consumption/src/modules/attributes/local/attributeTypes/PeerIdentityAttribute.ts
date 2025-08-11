@@ -3,10 +3,10 @@ import { IdentityAttribute, IdentityAttributeJSON, IIdentityAttribute } from "@n
 import { nameof } from "ts-simple-nameof";
 import {
     IPeerIdentityAttributeSharingInfo,
-    PeerAttributeDeletionInfo,
-    PeerAttributeDeletionStatus,
     PeerIdentityAttributeSharingInfo,
-    PeerIdentityAttributeSharingInfoJSON
+    PeerIdentityAttributeSharingInfoJSON,
+    ReceivedAttributeDeletionInfo,
+    ReceivedAttributeDeletionStatus
 } from "../sharingInfos";
 import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./LocalAttribute";
 
@@ -36,11 +36,11 @@ export class PeerIdentityAttribute extends LocalAttribute implements IPeerIdenti
     public isDeletedByOwnerOrToBeDeleted(): boolean {
         if (!this.peerSharingInfo.deletionInfo) return false;
 
-        const deletionStatuses = [PeerAttributeDeletionStatus.DeletedByOwner, PeerAttributeDeletionStatus.ToBeDeleted];
+        const deletionStatuses = [ReceivedAttributeDeletionStatus.DeletedByOwner, ReceivedAttributeDeletionStatus.ToBeDeleted];
         return deletionStatuses.includes(this.peerSharingInfo.deletionInfo.deletionStatus);
     }
 
-    public setPeerDeletionInfo(deletionInfo: PeerAttributeDeletionInfo): this {
+    public setPeerDeletionInfo(deletionInfo: ReceivedAttributeDeletionInfo): this {
         this.peerSharingInfo.deletionInfo = deletionInfo;
         return this;
     }

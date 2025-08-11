@@ -9,10 +9,10 @@ import {
     ForwardedSharingInfoJSON,
     IForwardedSharingInfo,
     IPeerRelationshipAttributeSharingInfo,
-    PeerAttributeDeletionInfo,
-    PeerAttributeDeletionStatus,
     PeerRelationshipAttributeSharingInfo,
-    PeerRelationshipAttributeSharingInfoJSON
+    PeerRelationshipAttributeSharingInfoJSON,
+    ReceivedAttributeDeletionInfo,
+    ReceivedAttributeDeletionStatus
 } from "../sharingInfos";
 import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./LocalAttribute";
 
@@ -66,7 +66,7 @@ export class PeerRelationshipAttribute extends LocalAttribute implements IPeerRe
     public isDeletedByOwnerOrToBeDeleted(): boolean {
         if (!this.peerSharingInfo.deletionInfo) return false;
 
-        const deletionStatuses = [PeerAttributeDeletionStatus.DeletedByOwner, PeerAttributeDeletionStatus.ToBeDeleted];
+        const deletionStatuses = [ReceivedAttributeDeletionStatus.DeletedByOwner, ReceivedAttributeDeletionStatus.ToBeDeleted];
         return deletionStatuses.includes(this.peerSharingInfo.deletionInfo.deletionStatus);
     }
 
@@ -86,7 +86,7 @@ export class PeerRelationshipAttribute extends LocalAttribute implements IPeerRe
         return hasSharingInfoWithDeletionStatus && !hasSharingInfoWithoutDeletionStatus;
     }
 
-    public setPeerDeletionInfo(deletionInfo: PeerAttributeDeletionInfo | undefined): this {
+    public setPeerDeletionInfo(deletionInfo: ReceivedAttributeDeletionInfo | undefined): this {
         this.peerSharingInfo.deletionInfo = deletionInfo;
         return this;
     }

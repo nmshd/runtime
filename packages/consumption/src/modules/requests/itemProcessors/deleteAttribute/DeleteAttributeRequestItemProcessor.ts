@@ -6,10 +6,10 @@ import {
     EmittedAttributeDeletionStatus,
     OwnIdentityAttribute,
     OwnRelationshipAttribute,
-    PeerAttributeDeletionInfo,
-    PeerAttributeDeletionStatus,
     PeerIdentityAttribute,
     PeerRelationshipAttribute,
+    ReceivedAttributeDeletionInfo,
+    ReceivedAttributeDeletionStatus,
     ThirdPartyRelationshipAttribute,
     ThirdPartyRelationshipAttributeDeletionInfo,
     ThirdPartyRelationshipAttributeDeletionStatus
@@ -102,8 +102,8 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
         const deletionDate = CoreDate.from(params.deletionDate);
 
         if (attribute instanceof PeerIdentityAttribute || attribute instanceof PeerRelationshipAttribute) {
-            const deletionInfo = PeerAttributeDeletionInfo.from({
-                deletionStatus: PeerAttributeDeletionStatus.ToBeDeleted,
+            const deletionInfo = ReceivedAttributeDeletionInfo.from({
+                deletionStatus: ReceivedAttributeDeletionStatus.ToBeDeleted,
                 deletionDate: deletionDate
             });
 

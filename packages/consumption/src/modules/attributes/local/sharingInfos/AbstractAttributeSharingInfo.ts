@@ -4,23 +4,23 @@ import {
     EmittedAttributeDeletionInfo,
     EmittedAttributeDeletionInfoJSON,
     IEmittedAttributeDeletionInfo,
-    IPeerAttributeDeletionInfo,
+    IReceivedAttributeDeletionInfo,
     IThirdPartyRelationshipAttributeDeletionInfo,
-    PeerAttributeDeletionInfo,
-    PeerAttributeDeletionInfoJSON,
+    ReceivedAttributeDeletionInfo,
+    ReceivedAttributeDeletionInfoJSON,
     ThirdPartyRelationshipAttributeDeletionInfo,
     ThirdPartyRelationshipAttributeDeletionInfoJSON
 } from "./deletionInfos";
 export interface AbstractAttributeSharingInfoJSON {
     peer: string;
     sourceReference: string;
-    deletionInfo?: EmittedAttributeDeletionInfoJSON | PeerAttributeDeletionInfoJSON | ThirdPartyRelationshipAttributeDeletionInfoJSON;
+    deletionInfo?: EmittedAttributeDeletionInfoJSON | ReceivedAttributeDeletionInfoJSON | ThirdPartyRelationshipAttributeDeletionInfoJSON;
 }
 
 export interface IAbstractAttributeSharingInfo extends ISerializable {
     peer: ICoreAddress;
     sourceReference: ICoreId;
-    deletionInfo?: IEmittedAttributeDeletionInfo | IPeerAttributeDeletionInfo | IThirdPartyRelationshipAttributeDeletionInfo;
+    deletionInfo?: IEmittedAttributeDeletionInfo | IReceivedAttributeDeletionInfo | IThirdPartyRelationshipAttributeDeletionInfo;
 }
 
 export abstract class AbstractAttributeSharingInfo extends Serializable implements IAbstractAttributeSharingInfo {
@@ -34,5 +34,5 @@ export abstract class AbstractAttributeSharingInfo extends Serializable implemen
 
     @serialize()
     @validate({ nullable: true })
-    public deletionInfo?: EmittedAttributeDeletionInfo | PeerAttributeDeletionInfo | ThirdPartyRelationshipAttributeDeletionInfo;
+    public deletionInfo?: EmittedAttributeDeletionInfo | ReceivedAttributeDeletionInfo | ThirdPartyRelationshipAttributeDeletionInfo;
 }

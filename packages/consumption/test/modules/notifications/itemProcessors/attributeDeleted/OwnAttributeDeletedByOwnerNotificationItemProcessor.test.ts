@@ -9,10 +9,10 @@ import {
     LocalNotificationStatus,
     OwnAttributeDeletedByOwnerEvent,
     OwnAttributeDeletedByOwnerNotificationItemProcessor,
-    PeerAttributeDeletionInfo,
-    PeerAttributeDeletionStatus,
     PeerIdentityAttribute,
     PeerRelationshipAttribute,
+    ReceivedAttributeDeletionInfo,
+    ReceivedAttributeDeletionStatus,
     ThirdPartyRelationshipAttribute,
     ThirdPartyRelationshipAttributeDeletionStatus
 } from "../../../../../src";
@@ -99,10 +99,10 @@ describe("OwnAttributeDeletedByPeerNotificationItemProcessor", function () {
         expect(event).toBeInstanceOf(OwnAttributeDeletedByOwnerEvent);
         const updatedAttribute = (event as OwnAttributeDeletedByOwnerEvent).data as PeerIdentityAttribute;
         expect(notificationItem.attributeId.equals(updatedAttribute.id)).toBe(true);
-        expect(updatedAttribute.peerSharingInfo.deletionInfo!.deletionStatus).toStrictEqual(PeerAttributeDeletionStatus.DeletedByOwner);
+        expect(updatedAttribute.peerSharingInfo.deletionInfo!.deletionStatus).toStrictEqual(ReceivedAttributeDeletionStatus.DeletedByOwner);
 
         const databaseAttribute = (await consumptionController.attributes.getLocalAttribute(updatedAttribute.id)) as PeerIdentityAttribute;
-        expect(databaseAttribute.peerSharingInfo.deletionInfo!.deletionStatus).toStrictEqual(PeerAttributeDeletionStatus.DeletedByOwner);
+        expect(databaseAttribute.peerSharingInfo.deletionInfo!.deletionStatus).toStrictEqual(ReceivedAttributeDeletionStatus.DeletedByOwner);
 
         /* Manually trigger and verify rollback. */
         await processor.rollback(notificationItem, notification);
@@ -156,10 +156,10 @@ describe("OwnAttributeDeletedByPeerNotificationItemProcessor", function () {
         expect(event).toBeInstanceOf(OwnAttributeDeletedByOwnerEvent);
         const updatedAttribute = (event as OwnAttributeDeletedByOwnerEvent).data as PeerRelationshipAttribute;
         expect(notificationItem.attributeId.equals(updatedAttribute.id)).toBe(true);
-        expect(updatedAttribute.peerSharingInfo.deletionInfo!.deletionStatus).toStrictEqual(PeerAttributeDeletionStatus.DeletedByOwner);
+        expect(updatedAttribute.peerSharingInfo.deletionInfo!.deletionStatus).toStrictEqual(ReceivedAttributeDeletionStatus.DeletedByOwner);
 
         const databaseAttribute = (await consumptionController.attributes.getLocalAttribute(updatedAttribute.id)) as PeerRelationshipAttribute;
-        expect(databaseAttribute.peerSharingInfo.deletionInfo!.deletionStatus).toStrictEqual(PeerAttributeDeletionStatus.DeletedByOwner);
+        expect(databaseAttribute.peerSharingInfo.deletionInfo!.deletionStatus).toStrictEqual(ReceivedAttributeDeletionStatus.DeletedByOwner);
 
         /* Manually trigger and verify rollback. */
         await processor.rollback(notificationItem, notification);
@@ -242,8 +242,8 @@ describe("OwnAttributeDeletedByPeerNotificationItemProcessor", function () {
 
         await consumptionController.attributes.setPeerDeletionInfoOfPeerAttribute(
             [peerIdentityAttribute],
-            PeerAttributeDeletionInfo.from({
-                deletionStatus: PeerAttributeDeletionStatus.ToBeDeleted,
+            ReceivedAttributeDeletionInfo.from({
+                deletionStatus: ReceivedAttributeDeletionStatus.ToBeDeleted,
                 deletionDate: CoreDate.utc().subtract({ days: 1 })
             })
         );
@@ -278,10 +278,10 @@ describe("OwnAttributeDeletedByPeerNotificationItemProcessor", function () {
         expect(event).toBeInstanceOf(OwnAttributeDeletedByOwnerEvent);
         const updatedAttribute = (event as OwnAttributeDeletedByOwnerEvent).data as PeerIdentityAttribute;
         expect(notificationItem.attributeId.equals(updatedAttribute.id)).toBe(true);
-        expect(updatedAttribute.peerSharingInfo.deletionInfo!.deletionStatus).toStrictEqual(PeerAttributeDeletionStatus.ToBeDeleted);
+        expect(updatedAttribute.peerSharingInfo.deletionInfo!.deletionStatus).toStrictEqual(ReceivedAttributeDeletionStatus.ToBeDeleted);
 
         const databaseAttribute = (await consumptionController.attributes.getLocalAttribute(updatedAttribute.id)) as PeerIdentityAttribute;
-        expect(databaseAttribute.peerSharingInfo.deletionInfo!.deletionStatus).toStrictEqual(PeerAttributeDeletionStatus.ToBeDeleted);
+        expect(databaseAttribute.peerSharingInfo.deletionInfo!.deletionStatus).toStrictEqual(ReceivedAttributeDeletionStatus.ToBeDeleted);
 
         /* Manually trigger and verify rollback. */
         await processor.rollback(notificationItem, notification);
@@ -348,7 +348,7 @@ describe("OwnAttributeDeletedByPeerNotificationItemProcessor", function () {
         expect(event).toBeInstanceOf(OwnAttributeDeletedByOwnerEvent);
 
         const updatedPredecessor = (await consumptionController.attributes.getLocalAttribute(predecessorPeerIdentityAttribute.id)) as PeerIdentityAttribute;
-        expect(updatedPredecessor.peerSharingInfo.deletionInfo!.deletionStatus).toStrictEqual(PeerAttributeDeletionStatus.DeletedByOwner);
+        expect(updatedPredecessor.peerSharingInfo.deletionInfo!.deletionStatus).toStrictEqual(ReceivedAttributeDeletionStatus.DeletedByOwner);
 
         /* Manually trigger and verify rollback. */
         await processor.rollback(notificationItem, notification);

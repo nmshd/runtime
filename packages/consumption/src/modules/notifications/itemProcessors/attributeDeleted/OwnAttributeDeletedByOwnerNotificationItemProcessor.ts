@@ -6,10 +6,10 @@ import { ConsumptionController } from "../../../../consumption/ConsumptionContro
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import {
     OwnAttributeDeletedByOwnerEvent,
-    PeerAttributeDeletionInfo,
-    PeerAttributeDeletionStatus,
     PeerIdentityAttribute,
     PeerRelationshipAttribute,
+    ReceivedAttributeDeletionInfo,
+    ReceivedAttributeDeletionStatus,
     ThirdPartyRelationshipAttribute,
     ThirdPartyRelationshipAttributeDeletionInfo,
     ThirdPartyRelationshipAttributeDeletionStatus
@@ -60,8 +60,8 @@ export class OwnAttributeDeletedByOwnerNotificationItemProcessor extends Abstrac
         }
 
         if (attribute instanceof PeerIdentityAttribute || attribute instanceof PeerRelationshipAttribute) {
-            const deletionInfo = PeerAttributeDeletionInfo.from({
-                deletionStatus: PeerAttributeDeletionStatus.DeletedByOwner,
+            const deletionInfo = ReceivedAttributeDeletionInfo.from({
+                deletionStatus: ReceivedAttributeDeletionStatus.DeletedByOwner,
                 deletionDate: CoreDate.utc()
             });
 
