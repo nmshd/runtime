@@ -32,7 +32,7 @@ export class OwnAttributeDeletedByOwnerNotificationItemProcessor extends Abstrac
     ): Promise<ValidationResult> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
 
-        if (!attribute) return ValidationResult.success(); // TODO: why is this success? Shouldn't it be an error?
+        if (!attribute) return ValidationResult.success();
 
         if (!(attribute instanceof PeerIdentityAttribute || attribute instanceof PeerRelationshipAttribute || attribute instanceof ThirdPartyRelationshipAttribute)) {
             return ValidationResult.error(
