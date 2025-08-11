@@ -50,10 +50,10 @@ export class SucceedOwnIdentityAttributeUseCase extends UseCase<SucceedOwnIdenti
             }
         };
 
-        const validationResult = await this.attributeController.validateOwnIdentityAttributeSuccession(predecessor.id, successorParams);
+        const validationResult = await this.attributeController.validateOwnIdentityAttributeSuccession(predecessor, successorParams);
         if (validationResult.isError()) return Result.fail(validationResult.error);
 
-        const { predecessor: updatedPredecessor, successor } = await this.attributeController.succeedOwnIdentityAttribute(predecessor.id, successorParams, false);
+        const { predecessor: updatedPredecessor, successor } = await this.attributeController.succeedOwnIdentityAttribute(predecessor, successorParams, false);
         await this.accountController.syncDatawallet();
 
         const response: SucceedOwnIdentityAttributeResponse = {

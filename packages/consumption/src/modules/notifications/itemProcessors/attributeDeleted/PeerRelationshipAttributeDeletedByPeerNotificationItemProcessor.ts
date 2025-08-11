@@ -56,7 +56,7 @@ export class PeerRelationshipAttributeDeletedByPeerNotificationItemProcessor ext
             throw Error; // TODO:
         }
 
-        const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute.id);
+        const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute);
         const attributes = [attribute, ...predecessors];
 
         if (attribute instanceof OwnRelationshipAttribute) {
@@ -88,7 +88,7 @@ export class PeerRelationshipAttributeDeletedByPeerNotificationItemProcessor ext
             return;
         }
 
-        const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute.id);
+        const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute);
         for (const attr of [attribute, ...predecessors]) {
             // the previous deletionState cannot be unambiguously known, either it was undefined or 'ToBeDeletedByPeer'
             attr.setPeerDeletionInfo(undefined);

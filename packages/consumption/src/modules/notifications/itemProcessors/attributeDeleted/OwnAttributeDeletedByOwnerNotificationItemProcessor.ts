@@ -61,7 +61,7 @@ export class OwnAttributeDeletedByOwnerNotificationItemProcessor extends Abstrac
                 deletionDate: CoreDate.utc()
             });
 
-            const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute.id);
+            const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute);
             const attributes = [attribute, ...predecessors];
 
             await this.consumptionController.attributes.setPeerDeletionInfoOfPeerAttribute(attributes, deletionInfo);
@@ -75,7 +75,7 @@ export class OwnAttributeDeletedByOwnerNotificationItemProcessor extends Abstrac
             deletionDate: CoreDate.utc()
         });
 
-        const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute.id);
+        const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute);
         const attributes = [attribute, ...predecessors];
 
         await this.consumptionController.attributes.setPeerDeletionInfoOfThirdPartyRelationshipAttribute(attributes, deletionInfo);
@@ -89,7 +89,7 @@ export class OwnAttributeDeletedByOwnerNotificationItemProcessor extends Abstrac
 
         if (!(attribute instanceof PeerIdentityAttribute || attribute instanceof PeerRelationshipAttribute)) return;
 
-        const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute.id);
+        const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute);
         for (const attr of [attribute, ...predecessors]) {
             attr.peerSharingInfo.deletionInfo = undefined;
             await this.consumptionController.attributes.updateAttributeUnsafe(attr);

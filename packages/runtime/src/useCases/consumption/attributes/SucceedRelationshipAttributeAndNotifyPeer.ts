@@ -68,10 +68,10 @@ export class SucceedRelationshipAttributeAndNotifyPeerUseCase extends UseCase<Su
             peerSharingInfo: OwnRelationshipAttributeSharingInfo.from({ peer, sourceReference: notificationId })
         });
 
-        const validationResult = await this.attributeController.validateOwnRelationshipAttributeSuccession(predecessor.id, successorParams);
+        const validationResult = await this.attributeController.validateOwnRelationshipAttributeSuccession(predecessor, successorParams);
         if (validationResult.isError()) return Result.fail(validationResult.error);
 
-        const { predecessor: updatedPredecessor, successor } = await this.attributeController.succeedOwnRelationshipAttribute(predecessor.id, successorParams, false);
+        const { predecessor: updatedPredecessor, successor } = await this.attributeController.succeedOwnRelationshipAttribute(predecessor, successorParams, false);
 
         const notificationItem = PeerSharedAttributeSucceededNotificationItem.from({
             predecessorId: predecessor.id,

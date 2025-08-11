@@ -241,13 +241,13 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
                 const successorParams = OwnIdentityAttributeSuccessorParams.from({
                     content: existingAttribute.content
                 });
-                const attributesAfterSuccession = await this.consumptionController.attributes.succeedOwnIdentityAttribute(existingAttribute.id, successorParams);
+                const attributesAfterSuccession = await this.consumptionController.attributes.succeedOwnIdentityAttribute(existingAttribute, successorParams);
                 existingAttribute = attributesAfterSuccession.successor;
 
                 if (!(existingAttribute instanceof OwnIdentityAttribute)) throw new Error("This should never occur, but is required for the compiler.");
             }
 
-            const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfAttribute(existingAttribute.id, requestInfo.peer);
+            const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfAttribute(existingAttribute, requestInfo.peer);
 
             const isLatestSharedVersion = latestSharedVersion[0]?.id.toString() === existingAttribute.id.toString();
             if (isLatestSharedVersion) {
@@ -345,7 +345,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
                 peerSharingInfo
             });
 
-            const { predecessor: updatedPredecessor, successor } = await this.consumptionController.attributes.succeedPeerIdentityAttribute(predecessor.id, successorParams);
+            const { predecessor: updatedPredecessor, successor } = await this.consumptionController.attributes.succeedPeerIdentityAttribute(predecessor, successorParams);
             // TODO: check publishing of events
             return new PeerSharedAttributeSucceededEvent(this.currentIdentityAddress.toString(), updatedPredecessor, successor);
         }

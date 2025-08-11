@@ -214,7 +214,7 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
                 content: responseItem.successorContent,
                 peerSharingInfo
             });
-            const { predecessor: updatedPredecessor, successor } = await this.consumptionController.attributes.succeedPeerIdentityAttribute(predecessor.id, successorParams);
+            const { predecessor: updatedPredecessor, successor } = await this.consumptionController.attributes.succeedPeerIdentityAttribute(predecessor, successorParams);
             // TODO: check publishing of events
             return new PeerSharedAttributeSucceededEvent(this.currentIdentityAddress.toString(), updatedPredecessor, successor);
         }
