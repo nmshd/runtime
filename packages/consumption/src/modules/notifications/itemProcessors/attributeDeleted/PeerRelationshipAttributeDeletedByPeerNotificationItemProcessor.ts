@@ -69,7 +69,7 @@ export class PeerRelationshipAttributeDeletedByPeerNotificationItemProcessor ext
                 deletionDate: CoreDate.utc()
             });
 
-            await this.consumptionController.attributes.setPeerDeletionInfoOfOwnRelationshipAttribute(attributes as OwnRelationshipAttribute[], deletionInfo, true);
+            await this.consumptionController.attributes.setPeerDeletionInfoOfOwnRelationshipAttributes(attributes as OwnRelationshipAttribute[], deletionInfo, true);
 
             return new PeerRelationshipAttributeDeletedByPeerEvent(this.currentIdentityAddress.toString(), attribute);
         }
@@ -79,7 +79,7 @@ export class PeerRelationshipAttributeDeletedByPeerNotificationItemProcessor ext
             deletionDate: CoreDate.utc()
         });
 
-        await this.consumptionController.attributes.setPeerDeletionInfoOfThirdPartyRelationshipAttribute(attributes as ThirdPartyRelationshipAttribute[], deletionInfo, true);
+        await this.consumptionController.attributes.setPeerDeletionInfoOfThirdPartyRelationshipAttributes(attributes as ThirdPartyRelationshipAttribute[], deletionInfo, true);
 
         return new PeerRelationshipAttributeDeletedByPeerEvent(this.currentIdentityAddress.toString(), attribute);
     }

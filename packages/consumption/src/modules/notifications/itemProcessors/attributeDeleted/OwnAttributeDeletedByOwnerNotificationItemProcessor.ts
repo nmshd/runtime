@@ -68,7 +68,7 @@ export class OwnAttributeDeletedByOwnerNotificationItemProcessor extends Abstrac
             const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute);
             const attributes = [attribute, ...predecessors];
 
-            await this.consumptionController.attributes.setPeerDeletionInfoOfPeerAttribute(attributes, deletionInfo);
+            await this.consumptionController.attributes.setPeerDeletionInfoOfPeerAttributes(attributes, deletionInfo);
 
             return new OwnAttributeDeletedByOwnerEvent(this.currentIdentityAddress.toString(), attribute);
         }
@@ -82,7 +82,7 @@ export class OwnAttributeDeletedByOwnerNotificationItemProcessor extends Abstrac
         const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute);
         const attributes = [attribute, ...predecessors];
 
-        await this.consumptionController.attributes.setPeerDeletionInfoOfThirdPartyRelationshipAttribute(attributes, deletionInfo);
+        await this.consumptionController.attributes.setPeerDeletionInfoOfThirdPartyRelationshipAttributes(attributes, deletionInfo);
 
         return new OwnAttributeDeletedByOwnerEvent(this.currentIdentityAddress.toString(), attribute);
     }

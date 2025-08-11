@@ -110,7 +110,7 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
             const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute);
             const attributesToDelete = [attribute, ...predecessors];
 
-            await this.consumptionController.attributes.setPeerDeletionInfoOfPeerAttribute(attributesToDelete, deletionInfo);
+            await this.consumptionController.attributes.setPeerDeletionInfoOfPeerAttributes(attributesToDelete, deletionInfo);
 
             return DeleteAttributeAcceptResponseItem.from({
                 deletionDate: deletionDate,
@@ -126,7 +126,7 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
         const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute);
         const attributesToDelete = [attribute, ...predecessors];
 
-        await this.consumptionController.attributes.setPeerDeletionInfoOfThirdPartyRelationshipAttribute(attributesToDelete, deletionInfo);
+        await this.consumptionController.attributes.setPeerDeletionInfoOfThirdPartyRelationshipAttributes(attributesToDelete, deletionInfo);
 
         return DeleteAttributeAcceptResponseItem.from({
             deletionDate: deletionDate,
@@ -171,8 +171,8 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
 
         const deletionWasRequestedFromInitialPeer = attribute instanceof OwnRelationshipAttribute && attribute.peerSharingInfo.peer.equals(peer);
         return deletionWasRequestedFromInitialPeer
-            ? await this.consumptionController.attributes.setPeerDeletionInfoOfOwnRelationshipAttribute(attributes as OwnRelationshipAttribute[], deletionInfo)
-            : await this.consumptionController.attributes.setForwardedDeletionInfo(attributes, deletionInfo, peer);
+            ? await this.consumptionController.attributes.setPeerDeletionInfoOfOwnRelationshipAttributes(attributes as OwnRelationshipAttribute[], deletionInfo)
+            : await this.consumptionController.attributes.setForwardedDeletionInfoOfAttributes(attributes, deletionInfo, peer);
     }
 
     private async setDeletionInfoForRejectedRequestItem(
@@ -190,7 +190,7 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
 
         const deletionWasRequestedFromInitialPeer = attribute instanceof OwnRelationshipAttribute && attribute.peerSharingInfo.peer.equals(peer);
         return deletionWasRequestedFromInitialPeer
-            ? await this.consumptionController.attributes.setPeerDeletionInfoOfOwnRelationshipAttribute(attributes as OwnRelationshipAttribute[], deletionInfo)
-            : await this.consumptionController.attributes.setForwardedDeletionInfo(attributes, deletionInfo, peer);
+            ? await this.consumptionController.attributes.setPeerDeletionInfoOfOwnRelationshipAttributes(attributes as OwnRelationshipAttribute[], deletionInfo)
+            : await this.consumptionController.attributes.setForwardedDeletionInfoOfAttributes(attributes, deletionInfo, peer);
     }
 }

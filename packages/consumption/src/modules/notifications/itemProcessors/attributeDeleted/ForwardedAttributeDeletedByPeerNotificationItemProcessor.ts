@@ -67,7 +67,7 @@ export class ForwardedAttributeDeletedByPeerNotificationItemProcessor extends Ab
         const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute);
         const attributes = [attribute, ...predecessors];
 
-        await this.consumptionController.attributes.setForwardedDeletionInfo(attributes, deletionInfo, notification.peer, true);
+        await this.consumptionController.attributes.setForwardedDeletionInfoOfAttributes(attributes, deletionInfo, notification.peer, true);
 
         return new ForwardedAttributeDeletedByPeerEvent(this.currentIdentityAddress.toString(), attribute);
     }
