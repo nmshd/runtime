@@ -91,7 +91,7 @@ export class OwnAttributeDeletedByOwnerNotificationItemProcessor extends Abstrac
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
         if (!attribute) return;
 
-        if (!(attribute instanceof PeerIdentityAttribute || attribute instanceof PeerRelationshipAttribute)) return;
+        if (!(attribute instanceof PeerIdentityAttribute || attribute instanceof PeerRelationshipAttribute || attribute instanceof ThirdPartyRelationshipAttribute)) return;
 
         const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute);
         for (const attr of [attribute, ...predecessors]) {
