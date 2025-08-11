@@ -95,6 +95,12 @@ export class OwnAttributeDeletedByOwnerNotificationItemProcessor extends Abstrac
 
         const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute);
         for (const attr of [attribute, ...predecessors]) {
+            if (
+                attr.peerSharingInfo.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.ToBeDeleted ||
+                attr.peerSharingInfo.deletionInfo?.deletionStatus === ThirdPartyRelationshipAttributeDeletionStatus.ToBeDeleted
+            )
+                continue;
+
             attr.peerSharingInfo.deletionInfo = undefined;
             await this.consumptionController.attributes.updateAttributeUnsafe(attr);
         }

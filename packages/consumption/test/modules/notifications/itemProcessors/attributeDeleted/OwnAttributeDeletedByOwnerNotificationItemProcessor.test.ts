@@ -47,14 +47,6 @@ describe("OwnAttributeDeletedByPeerNotificationItemProcessor", function () {
         mockEventBus.clearPublishedEvents();
     });
 
-    afterEach(async function () {
-        const attributes = await consumptionController.attributes.getLocalAttributes();
-
-        for (const attribute of attributes) {
-            await consumptionController.attributes.deleteAttribute(attribute);
-        }
-    });
-
     test("runs all processor methods for a peer IdentityAttribute", async function () {
         const peerIdentityAttribute = await consumptionController.attributes.createPeerIdentityAttribute({
             content: IdentityAttribute.from({
@@ -286,7 +278,7 @@ describe("OwnAttributeDeletedByPeerNotificationItemProcessor", function () {
         /* Manually trigger and verify rollback. */
         await processor.rollback(notificationItem, notification);
         const attributeAfterRollback = (await consumptionController.attributes.getLocalAttribute(notificationItem.attributeId)) as PeerIdentityAttribute;
-        expect(attributeAfterRollback.peerSharingInfo.deletionInfo).toBeUndefined();
+        expect(attributeAfterRollback.peerSharingInfo.deletionInfo?.deletionStatus).toStrictEqual(ReceivedAttributeDeletionStatus.ToBeDeleted);
     });
 
     test("runs all processor methods for a succeeded attribute", async function () {
