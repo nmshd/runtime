@@ -2,6 +2,10 @@ import { ApplicationError } from "@js-soft/ts-utils";
 import { CoreAddress, CoreError, CoreId } from "@nmshd/core-types";
 
 class Attributes {
+    public attributeDoesNotExist() {
+        return new CoreError("error.consumption.attributes.attributeDoesNotExist", "The attribute does not exist.");
+    }
+
     public successorIsNotAValidAttribute(error: any) {
         return new CoreError(
             "error.consumption.attributes.successorIsNotAValidAttribute",
