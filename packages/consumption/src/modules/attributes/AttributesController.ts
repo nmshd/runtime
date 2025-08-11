@@ -439,6 +439,7 @@ export class AttributesController extends ConsumptionBaseController {
 
     public async addForwardedSharingInfoToAttribute<T extends AttributeWithForwardedSharingInfos>(attribute: T, peer: CoreAddress, sourceReference: CoreId): Promise<T> {
         const localAttribute = await this.getLocalAttribute(attribute.id);
+        if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
         if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
         const sharingInfo = ForwardedSharingInfo.from({ peer, sourceReference, sharedAt: CoreDate.utc() });
@@ -762,6 +763,7 @@ export class AttributesController extends ConsumptionBaseController {
 
     private async validateAttributeSuccession(predecessor: LocalAttribute, successor: LocalAttribute): Promise<ValidationResult> {
         const localAttribute = await this.getLocalAttribute(predecessor.id);
+        if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, predecessor.id.toString());
         if (!_.isEqual(predecessor, localAttribute)) return ValidationResult.error(ConsumptionCoreErrors.attributes.predecessorDoesNotExist());
 
         const existingAttributeWithSameId = await this.getLocalAttribute(successor.id);
@@ -892,6 +894,7 @@ export class AttributesController extends ConsumptionBaseController {
         const successors = await this.getSuccessorsOfAttribute(attribute);
 
         const localAttribute = await this.getLocalAttribute(attribute.id);
+        if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
         if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
         const allAttributeVersions = [...successors.reverse(), attribute, ...predecessors];
@@ -900,6 +903,7 @@ export class AttributesController extends ConsumptionBaseController {
 
     public async getPredecessorsOfAttribute<T extends LocalAttribute>(attribute: T): Promise<T[]> {
         const localAttribute = await this.getLocalAttribute(attribute.id);
+        if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
         if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
         const predecessors: T[] = [];
@@ -916,6 +920,7 @@ export class AttributesController extends ConsumptionBaseController {
 
     public async getSuccessorsOfAttribute<T extends LocalAttribute>(attribute: T): Promise<T[]> {
         const localAttribute = await this.getLocalAttribute(attribute.id);
+        if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
         if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
         const successors: T[] = [];
@@ -949,6 +954,7 @@ export class AttributesController extends ConsumptionBaseController {
         includeDeletedAndToBeDeleted = false
     ): Promise<SharableAttributeTypes[]> {
         const localAttribute = await this.getLocalAttribute(attribute.id);
+        if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
         if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
         const sharedAttribute = attribute.isSharedWith(peerAddress, includeDeletedAndToBeDeleted) ? [attribute] : [];
