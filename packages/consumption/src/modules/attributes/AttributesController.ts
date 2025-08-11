@@ -1335,7 +1335,7 @@ export class AttributesController extends ConsumptionBaseController {
 
     private async setDeletionInfoOfThirdPartyRelationshipAttributes(peer: CoreAddress, deletionDate: CoreDate): Promise<void> {
         const deletionInfo = ThirdPartyRelationshipAttributeDeletionInfo.from({
-            deletionStatus: ThirdPartyRelationshipAttributeDeletionStatus.DeletedByPeer, // TODO: might also need to be DeletedByOwner
+            deletionStatus: ThirdPartyRelationshipAttributeDeletionStatus.DeletedByPeer, // TODO: might also need to be DeletedByOwner -> resolve in further PR
             deletionDate
         });
 
@@ -1357,24 +1357,23 @@ export class AttributesController extends ConsumptionBaseController {
         overrideDeletedOrToBeDeleted = false
     ): Promise<void> {
         for (const attribute of attributes) {
-            if (overrideDeletedOrToBeDeleted || !attribute.isDeletedOrToBeDeletedByForwardingPeer(peer)) {
-                attribute.setForwardedDeletionInfo(deletionInfo, peer);
-                await this.updateAttributeUnsafe(attribute);
-            }
+            if (attribute.isDeletedOrToBeDeletedByForwardingPeer(peer) && !overrideDeletedOrToBeDeleted) continue;
+
+            attribute.setForwardedDeletionInfo(deletionInfo, peer);
+            await this.updateAttributeUnsafe(attribute);
         }
     }
 
-    // TODO: maybe it can make sense to have a functions setPeerDeletionInfo that selects the fitting of the following functions for simpler code elsewhere
     public async setPeerDeletionInfoOfOwnRelationshipAttributes(
         attributes: OwnRelationshipAttribute[],
         deletionInfo: EmittedAttributeDeletionInfo,
         overrideDeletedOrToBeDeleted = false
     ): Promise<void> {
         for (const attribute of attributes) {
-            if (overrideDeletedOrToBeDeleted || !attribute.isDeletedOrToBeDeletedByPeer()) {
-                attribute.setPeerDeletionInfo(deletionInfo);
-                await this.parent.attributes.updateAttributeUnsafe(attribute);
-            }
+            if (attribute.isDeletedOrToBeDeletedByPeer() && !overrideDeletedOrToBeDeleted) continue;
+
+            attribute.setPeerDeletionInfo(deletionInfo);
+            await this.parent.attributes.updateAttributeUnsafe(attribute);
         }
     }
 
@@ -1384,10 +1383,10 @@ export class AttributesController extends ConsumptionBaseController {
         overrideDeletedOrToBeDeleted = false
     ): Promise<void> {
         for (const attribute of attributes) {
-            if (overrideDeletedOrToBeDeleted || !attribute.isDeletedByOwnerOrToBeDeleted()) {
-                attribute.setPeerDeletionInfo(deletionInfo);
-                await this.parent.attributes.updateAttributeUnsafe(attribute);
-            }
+            if (attribute.isDeletedByOwnerOrToBeDeleted() && !overrideDeletedOrToBeDeleted) continue;
+
+            attribute.setPeerDeletionInfo(deletionInfo);
+            await this.parent.attributes.updateAttributeUnsafe(attribute);
         }
     }
 
@@ -1397,10 +1396,10 @@ export class AttributesController extends ConsumptionBaseController {
         overrideDeletedOrToBeDeleted = false
     ): Promise<void> {
         for (const attribute of attributes) {
-            if (overrideDeletedOrToBeDeleted || !attribute.isDeletedByOwnerOrPeerOrToBeDeleted()) {
-                attribute.setPeerDeletionInfo(deletionInfo);
-                await this.parent.attributes.updateAttributeUnsafe(attribute);
-            }
+            if (attribute.isDeletedByOwnerOrPeerOrToBeDeleted() && !overrideDeletedOrToBeDeleted) continue;
+
+            attribute.setPeerDeletionInfo(deletionInfo);
+            await this.parent.attributes.updateAttributeUnsafe(attribute);
         }
     }
 
