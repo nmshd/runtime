@@ -37,43 +37,31 @@ describe("PeerSharedAttributeSucceededNotificationItemProcessor", function () {
     });
 
     beforeEach(async function () {
-        const attributes = await consumptionController.attributes.getLocalAttributes();
-        for (const attribute of attributes) {
-            await consumptionController.attributes.deleteAttributeUnsafe(attribute.id);
-        }
+        TestUtil.cleanupAttributes(consumptionController);
         mockEventBus.clearPublishedEvents();
     });
 
-    afterEach(async function () {
-        const attributes = await consumptionController.attributes.getLocalAttributes();
-
-        for (const attribute of attributes) {
-            await consumptionController.attributes.deleteAttribute(attribute);
-        }
-    });
-
-    test("runs all processor methods for a peer shared identity attribute", async function () {
-        const peerSharedIdentityAttribute = await consumptionController.attributes.createAttributeUnsafe({
+    test("runs all processor methods for a peer IdentityAttribute", async function () {
+        const peerIdentityAttribute = await consumptionController.attributes.createPeerIdentityAttribute({
             content: IdentityAttribute.from({
                 value: {
                     "@type": "BirthName",
-                    value: "Schenkel"
+                    value: "aBirthName"
                 },
                 owner: CoreAddress.from("peer")
             }),
-            shareInfo: {
-                peer: CoreAddress.from("peer"),
-                sourceReference: CoreId.from("reqRef")
-            }
+            peer: CoreAddress.from("peer"),
+            sourceReference: CoreId.from("reqRef"),
+            id: CoreId.from("attributeId")
         });
 
         const notificationItem = PeerSharedAttributeSucceededNotificationItem.from({
-            predecessorId: peerSharedIdentityAttribute.id,
+            predecessorId: peerIdentityAttribute.id,
             successorId: CoreId.from("newAttributeId"),
             successorContent: IdentityAttribute.from({
                 value: {
                     "@type": "BirthName",
-                    value: "Wade"
+                    value: "anotherBirthName"
                 },
                 owner: CoreAddress.from("peer")
             })
@@ -108,7 +96,7 @@ describe("PeerSharedAttributeSucceededNotificationItemProcessor", function () {
         expect(notificationItem.predecessorId.equals(predecessor.id)).toBe(true);
         expect(predecessor.succeededBy?.equals(successor.id)).toBe(true);
         expect(successor.succeeds?.equals(predecessor.id)).toBe(true);
-        expect(peerSharedIdentityAttribute.id.equals(predecessor.id)).toBe(true);
+        expect(peerIdentityAttribute.id.equals(predecessor.id)).toBe(true);
 
         /* Manually trigger and verify rollback. */
         await processor.rollback(notificationItem, notification);
@@ -119,33 +107,31 @@ describe("PeerSharedAttributeSucceededNotificationItemProcessor", function () {
         expect(predecessorAfterRollback!.succeededBy).toBeUndefined();
     });
 
-    test("runs all processor methods for a peer shared relationship attribute", async function () {
-        const peerSharedRelationshipAttribute = await consumptionController.attributes.createAttributeUnsafe({
+    test("runs all processor methods for a peer RelationshipAttribute", async function () {
+        const peerRelationshipAttribute = await consumptionController.attributes.createPeerRelationshipAttribute({
             content: RelationshipAttribute.from({
-                key: "customerId",
+                key: "aKey",
                 value: {
                     "@type": "ProprietaryString",
-                    value: "0815",
-                    title: "Customer ID"
+                    value: "aValue",
+                    title: "aTitle"
                 },
                 owner: CoreAddress.from("peer"),
                 confidentiality: RelationshipAttributeConfidentiality.Public
             }),
-            shareInfo: {
-                peer: CoreAddress.from("peer"),
-                sourceReference: CoreId.from("reqRef")
-            }
+            peer: CoreAddress.from("peer"),
+            sourceReference: CoreId.from("reqRef")
         });
 
         const notificationItem = PeerSharedAttributeSucceededNotificationItem.from({
-            predecessorId: peerSharedRelationshipAttribute.id,
+            predecessorId: peerRelationshipAttribute.id,
             successorId: CoreId.from("newAttributeId"),
             successorContent: RelationshipAttribute.from({
-                key: "customerId",
+                key: "aKey",
                 value: {
                     "@type": "ProprietaryString",
-                    value: "1337",
-                    title: "Customer ID"
+                    value: "anotherValue",
+                    title: "aTitle"
                 },
                 owner: CoreAddress.from("peer"),
                 confidentiality: RelationshipAttributeConfidentiality.Public
@@ -181,7 +167,7 @@ describe("PeerSharedAttributeSucceededNotificationItemProcessor", function () {
         expect(notificationItem.predecessorId.equals(predecessor.id)).toBe(true);
         expect(predecessor.succeededBy?.equals(successor.id)).toBe(true);
         expect(successor.succeeds?.equals(predecessor.id)).toBe(true);
-        expect(peerSharedRelationshipAttribute.id.equals(predecessor.id)).toBe(true);
+        expect(peerRelationshipAttribute.id.equals(predecessor.id)).toBe(true);
 
         /* Manually trigger and verify rollback. */
         await processor.rollback(notificationItem, notification);
@@ -192,31 +178,27 @@ describe("PeerSharedAttributeSucceededNotificationItemProcessor", function () {
         expect(predecessorAfterRollback!.succeededBy).toBeUndefined();
     });
 
-    test("detects spoofing attempts", async function () {
-        /* A naughty peer is trying to succeed attributes owned
-         * not by himself, but by another peer. This must be
-         * caught by the validation. */
-        const peerSharedIdentityAttribute = await consumptionController.attributes.createAttributeUnsafe({
+    test("should throw if sender is not peer of Attribute", async function () {
+        const peerIdentityAttribute = await consumptionController.attributes.createPeerIdentityAttribute({
             content: IdentityAttribute.from({
                 value: {
                     "@type": "BirthName",
-                    value: "Schenkel"
+                    value: "aBirthName"
                 },
                 owner: CoreAddress.from("otherPeer")
             }),
-            shareInfo: {
-                peer: CoreAddress.from("otherPeer"),
-                sourceReference: CoreId.from("reqRef")
-            }
+            peer: CoreAddress.from("otherPeer"),
+            sourceReference: CoreId.from("reqRef"),
+            id: CoreId.from("attributeId")
         });
 
         const notificationItem = PeerSharedAttributeSucceededNotificationItem.from({
-            predecessorId: peerSharedIdentityAttribute.id,
+            predecessorId: peerIdentityAttribute.id,
             successorId: CoreId.from("newAttributeId"),
             successorContent: IdentityAttribute.from({
                 value: {
                     "@type": "BirthName",
-                    value: "Wade"
+                    value: "anotherBirthName"
                 },
                 owner: CoreAddress.from("otherPeer")
             })

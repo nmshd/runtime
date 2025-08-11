@@ -1,5 +1,4 @@
 import { ILogger } from "@js-soft/logging-abstractions";
-import { ApplicationError } from "@js-soft/ts-utils";
 import { IdentityAttribute, PeerSharedAttributeSucceededNotificationItem, RelationshipAttribute } from "@nmshd/content";
 import { TransportLoggerFactory } from "@nmshd/transport";
 import { ConsumptionController } from "../../../../consumption/ConsumptionController";
@@ -32,12 +31,16 @@ export class PeerSharedAttributeSucceededNotificationItemProcessor extends Abstr
 
         // TODO: this wasn't implemented for ThirdPartyRelationshipAttributes so far
         if (!(predecessor instanceof PeerIdentityAttribute || predecessor instanceof PeerRelationshipAttribute)) {
-            return ValidationResult.error(new ApplicationError("", "")); // TODO:
+            return ValidationResult.error(
+                ConsumptionCoreErrors.attributes.wrongTypeOfAttribute(
+                    `The Attribute ${notificationItem.predecessorId} is not a peer IdentityAttribute or peer RelationshipAttribute.`
+                )
+            );
         }
 
         if (predecessor instanceof PeerIdentityAttribute) {
             if (!(notificationItem.successorContent instanceof IdentityAttribute)) {
-                return ValidationResult.error(new ApplicationError("", "")); // TODO:
+                return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangeContentType());
             }
 
             const successorParams = PeerIdentityAttributeSuccessorParams.from({
@@ -49,7 +52,7 @@ export class PeerSharedAttributeSucceededNotificationItemProcessor extends Abstr
         }
 
         if (!(notificationItem.successorContent instanceof RelationshipAttribute)) {
-            return ValidationResult.error(new ApplicationError("", "")); // TODO:
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangeContentType());
         }
 
         // if (predecessor instanceof PeerRelationshipAttribute) {
@@ -71,32 +74,37 @@ export class PeerSharedAttributeSucceededNotificationItemProcessor extends Abstr
     }
 
     public override async process(notificationItem: PeerSharedAttributeSucceededNotificationItem, notification: LocalNotification): Promise<PeerSharedAttributeSucceededEvent> {
-        let updatedPredecessor: LocalAttribute | undefined;
-        let successor: LocalAttribute | undefined;
+        let updatedPredecessor: LocalAttribute;
+        let successor: LocalAttribute;
+
         try {
             const predecessor = await this.consumptionController.attributes.getLocalAttribute(notificationItem.predecessorId);
             if (!predecessor) throw ConsumptionCoreErrors.attributes.predecessorDoesNotExist();
 
-            if (predecessor instanceof PeerIdentityAttribute && notificationItem.successorContent instanceof IdentityAttribute) {
-                const successorParams = PeerIdentityAttributeSuccessorParams.from({
-                    id: notificationItem.successorId,
-                    content: notificationItem.successorContent,
-                    peerSharingInfo: { sourceReference: notification.id, peer: notification.peer }
-                });
-                const attributesAfterSuccession = await this.consumptionController.attributes.succeedPeerIdentityAttribute(predecessor, successorParams, false);
-                ({ predecessor: updatedPredecessor, successor } = attributesAfterSuccession);
-            } else if (predecessor instanceof PeerRelationshipAttribute && notificationItem.successorContent instanceof RelationshipAttribute) {
-                const successorParams = PeerRelationshipAttributeSuccessorParams.from({
-                    id: notificationItem.successorId,
-                    content: notificationItem.successorContent,
-                    peerSharingInfo: { sourceReference: notification.id, peer: notification.peer }
-                });
-                const attributesAfterSuccession = await this.consumptionController.attributes.succeedPeerRelationshipAttribute(predecessor, successorParams, false);
-                ({ predecessor: updatedPredecessor, successor } = attributesAfterSuccession);
+            if (!(predecessor instanceof PeerIdentityAttribute || predecessor instanceof PeerRelationshipAttribute)) {
+                throw ConsumptionCoreErrors.attributes.wrongTypeOfAttribute(
+                    `The Attribute ${notificationItem.predecessorId} is not a peer IdentityAttribute or peer RelationshipAttribute.`
+                );
             }
 
-            if (!updatedPredecessor || !successor) {
-                throw Error; // TODO:
+            if (predecessor instanceof PeerIdentityAttribute) {
+                const successorParams = PeerIdentityAttributeSuccessorParams.from({
+                    id: notificationItem.successorId,
+                    content: notificationItem.successorContent as IdentityAttribute,
+                    peerSharingInfo: { sourceReference: notification.id, peer: notification.peer }
+                });
+
+                const attributesAfterSuccession = await this.consumptionController.attributes.succeedPeerIdentityAttribute(predecessor, successorParams, false);
+                ({ predecessor: updatedPredecessor, successor } = attributesAfterSuccession);
+            } else {
+                const successorParams = PeerRelationshipAttributeSuccessorParams.from({
+                    id: notificationItem.successorId,
+                    content: notificationItem.successorContent as RelationshipAttribute,
+                    peerSharingInfo: { sourceReference: notification.id, peer: notification.peer }
+                });
+
+                const attributesAfterSuccession = await this.consumptionController.attributes.succeedPeerRelationshipAttribute(predecessor, successorParams, false);
+                ({ predecessor: updatedPredecessor, successor } = attributesAfterSuccession);
             }
         } catch (e: unknown) {
             await this.rollbackPartialWork(notificationItem, notification).catch((e) =>
