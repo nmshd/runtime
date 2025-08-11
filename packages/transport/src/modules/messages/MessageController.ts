@@ -387,7 +387,7 @@ export class MessageController extends TransportController {
     }
 
     public async validateMessageRecipients(recipients: CoreAddress[]): Promise<Result<void>> {
-        const peersWithNeitherActiveNorTerminatedRelationship: string[] = [];
+        const peersWithWrongRelationshipStatus: string[] = [];
         const deletedPeers: string[] = [];
 
         for (const recipient of recipients) {
@@ -395,7 +395,7 @@ export class MessageController extends TransportController {
 
             const allowedRelationshipStatuses = [RelationshipStatus.Pending, RelationshipStatus.Active, RelationshipStatus.Terminated];
             if (!relationship || !allowedRelationshipStatuses.includes(relationship.status)) {
-                peersWithNeitherActiveNorTerminatedRelationship.push(recipient.address);
+                peersWithWrongRelationshipStatus.push(recipient.address);
                 continue;
             }
 
@@ -404,8 +404,9 @@ export class MessageController extends TransportController {
             }
         }
 
-        if (peersWithNeitherActiveNorTerminatedRelationship.length > 0) {
-            return Result.fail(TransportCoreErrors.messages.hasNeitherActiveNorTerminatedRelationship(peersWithNeitherActiveNorTerminatedRelationship));
+        if (peersWithWrongRelationshipStatus.length > 0) {
+            // TODO: rename error
+            return Result.fail(TransportCoreErrors.messages.hasNeitherActiveNorTerminatedRelationship(peersWithWrongRelationshipStatus));
         }
 
         if (deletedPeers.length > 0) return Result.fail(TransportCoreErrors.messages.peerIsDeleted(deletedPeers));
