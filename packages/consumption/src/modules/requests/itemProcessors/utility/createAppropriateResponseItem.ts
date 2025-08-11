@@ -43,7 +43,7 @@ export default async function createAppropriateResponseItem(
 > {
     const ownIdentityAttribute = await getOwnIdentityAttribute(identityAttribute, attributesController);
 
-    const latestSharedVersions = await attributesController.getSharedVersionsOfAttribute(ownIdentityAttribute, requestInfo.peer);
+    const latestSharedVersions = await attributesController.getSharedVersionsOfAttribute(ownIdentityAttribute.id, requestInfo.peer);
     const latestSharedVersion = latestSharedVersions.length > 0 ? latestSharedVersions[0] : undefined;
 
     if (!latestSharedVersion) {
@@ -85,7 +85,7 @@ export default async function createAppropriateResponseItem(
             sharedAt: CoreDate.utc()
         })
     };
-    const ownIdentityAttributesAfterSuccession = await attributesController.succeedOwnIdentityAttribute(latestSharedVersion, ownIdentityAttributeSuccessorParams);
+    const ownIdentityAttributesAfterSuccession = await attributesController.succeedOwnIdentityAttribute(latestSharedVersion.id, ownIdentityAttributeSuccessorParams);
     const succeededOwnIdentityAttribute = ownIdentityAttributesAfterSuccession.successor;
 
     return AttributeSuccessionAcceptResponseItem.from({
@@ -123,6 +123,6 @@ async function mergeTagsOfOwnIdentityAttribute(
         succeeds: ownIdentityAttribute.id.toString()
     };
 
-    const ownIdentityAttributesAfterSuccession = await attributesController.succeedOwnIdentityAttribute(ownIdentityAttribute, repositoryAttributeSuccessorParams);
+    const ownIdentityAttributesAfterSuccession = await attributesController.succeedOwnIdentityAttribute(ownIdentityAttribute.id, repositoryAttributeSuccessorParams);
     return ownIdentityAttributesAfterSuccession.successor;
 }

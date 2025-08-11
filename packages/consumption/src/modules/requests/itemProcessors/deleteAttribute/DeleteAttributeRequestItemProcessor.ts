@@ -107,7 +107,7 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
                 deletionDate: deletionDate
             });
 
-            const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute);
+            const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute.id);
             const attributesToDelete = [attribute, ...predecessors];
 
             await this.consumptionController.attributes.setPeerDeletionInfoOfPeerAttribute(attributesToDelete, deletionInfo);
@@ -123,7 +123,7 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
             deletionDate: deletionDate
         });
 
-        const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute);
+        const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute.id);
         const attributesToDelete = [attribute, ...predecessors];
 
         await this.consumptionController.attributes.setPeerDeletionInfoOfThirdPartyRelationshipAttribute(attributesToDelete, deletionInfo);
@@ -166,7 +166,7 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
             deletionDate
         });
 
-        const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute);
+        const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute.id);
         const attributes = [attribute, ...predecessors];
 
         const deletionWasRequestedFromInitialPeer = attribute instanceof OwnRelationshipAttribute && attribute.peerSharingInfo.peer.equals(peer);
@@ -185,7 +185,7 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
             deletionDate
         });
 
-        const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute);
+        const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute.id);
         const attributes = [attribute, ...predecessors];
 
         const deletionWasRequestedFromInitialPeer = attribute instanceof OwnRelationshipAttribute && attribute.peerSharingInfo.peer.equals(peer);

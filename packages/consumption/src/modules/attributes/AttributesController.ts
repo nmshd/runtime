@@ -448,7 +448,7 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async succeedOwnIdentityAttribute(
-        predecessor: OwnIdentityAttribute,
+        predecessorId: CoreId,
         successorParams: IOwnIdentityAttributeSuccessorParams | OwnIdentityAttributeSuccessorParamsJSON,
         validate = true
     ): Promise<{ predecessor: OwnIdentityAttribute; successor: OwnIdentityAttribute }> {
@@ -456,15 +456,20 @@ export class AttributesController extends ConsumptionBaseController {
         const attribute = this.trimAttribute(parsedSuccessorParams.content);
 
         if (validate) {
-            const validationResult = await this.validateOwnIdentityAttributeSuccession(predecessor, parsedSuccessorParams);
+            const validationResult = await this.validateOwnIdentityAttributeSuccession(predecessorId, parsedSuccessorParams);
             if (validationResult.isError()) throw validationResult.error;
+        }
+
+        const predecessor = await this.getLocalAttribute(predecessorId);
+        if (!(predecessor instanceof OwnIdentityAttribute)) {
+            throw ConsumptionCoreErrors.attributes.predecessorIsNotOwnIdentityAttribute();
         }
 
         const successor = OwnIdentityAttribute.from({
             id: await ConsumptionIds.attribute.generate(),
             content: attribute,
             createdAt: CoreDate.utc(),
-            succeeds: predecessor.id,
+            succeeds: predecessorId,
             isDefault: predecessor.isDefault
         });
         await this.attributes.create(successor);
@@ -488,7 +493,7 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async succeedPeerIdentityAttribute(
-        predecessor: PeerIdentityAttribute,
+        predecessorId: CoreId,
         successorParams: IPeerIdentityAttributeSuccessorParams | PeerIdentityAttributeSuccessorParamsJSON,
         validate = true
     ): Promise<{ predecessor: PeerIdentityAttribute; successor: PeerIdentityAttribute }> {
@@ -496,8 +501,13 @@ export class AttributesController extends ConsumptionBaseController {
         const attribute = this.trimAttribute(parsedSuccessorParams.content);
 
         if (validate) {
-            const validationResult = await this.validatePeerIdentityAttributeSuccession(predecessor, parsedSuccessorParams);
+            const validationResult = await this.validatePeerIdentityAttributeSuccession(predecessorId, parsedSuccessorParams);
             if (validationResult.isError()) throw validationResult.error;
+        }
+
+        const predecessor = await this.getLocalAttribute(predecessorId);
+        if (!(predecessor instanceof PeerIdentityAttribute)) {
+            throw ConsumptionCoreErrors.attributes.predecessorIsNotPeerIdentityAttribute();
         }
 
         const successor = PeerIdentityAttribute.from({
@@ -505,7 +515,7 @@ export class AttributesController extends ConsumptionBaseController {
             content: attribute,
             createdAt: CoreDate.utc(),
             peerSharingInfo: parsedSuccessorParams.peerSharingInfo,
-            succeeds: predecessor.id
+            succeeds: predecessorId
         });
         await this.attributes.create(successor);
 
@@ -516,15 +526,20 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async succeedOwnRelationshipAttribute(
-        predecessor: OwnRelationshipAttribute,
+        predecessorId: CoreId,
         successorParams: IOwnRelationshipAttributeSuccessorParams | OwnRelationshipAttributeSuccessorParamsJSON,
         validate = true
     ): Promise<{ predecessor: OwnRelationshipAttribute; successor: OwnRelationshipAttribute }> {
         const parsedSuccessorParams = OwnRelationshipAttributeSuccessorParams.from(successorParams);
 
         if (validate) {
-            const validationResult = await this.validateOwnRelationshipAttributeSuccession(predecessor, parsedSuccessorParams);
+            const validationResult = await this.validateOwnRelationshipAttributeSuccession(predecessorId, parsedSuccessorParams);
             if (validationResult.isError()) throw validationResult.error;
+        }
+
+        const predecessor = await this.getLocalAttribute(predecessorId);
+        if (!(predecessor instanceof OwnRelationshipAttribute)) {
+            throw ConsumptionCoreErrors.attributes.predecessorIsNotOwnRelationshipAttribute();
         }
 
         const successor = OwnRelationshipAttribute.from({
@@ -532,7 +547,7 @@ export class AttributesController extends ConsumptionBaseController {
             content: parsedSuccessorParams.content,
             createdAt: CoreDate.utc(),
             peerSharingInfo: parsedSuccessorParams.peerSharingInfo,
-            succeeds: predecessor.id
+            succeeds: predecessorId
         });
         await this.attributes.create(successor);
 
@@ -544,15 +559,20 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async succeedPeerRelationshipAttribute(
-        predecessor: PeerRelationshipAttribute,
+        predecessorId: CoreId,
         successorParams: IPeerRelationshipAttributeSuccessorParams | PeerRelationshipAttributeSuccessorParamsJSON,
         validate = true
     ): Promise<{ predecessor: PeerRelationshipAttribute; successor: PeerRelationshipAttribute }> {
         const parsedSuccessorParams = PeerRelationshipAttributeSuccessorParams.from(successorParams);
 
         if (validate) {
-            const validationResult = await this.validatePeerRelationshipAttributeSuccession(predecessor, parsedSuccessorParams);
+            const validationResult = await this.validatePeerRelationshipAttributeSuccession(predecessorId, parsedSuccessorParams);
             if (validationResult.isError()) throw validationResult.error;
+        }
+
+        const predecessor = await this.getLocalAttribute(predecessorId);
+        if (!(predecessor instanceof PeerRelationshipAttribute)) {
+            throw ConsumptionCoreErrors.attributes.predecessorIsNotPeerRelationshipAttribute();
         }
 
         const successor = PeerRelationshipAttribute.from({
@@ -560,7 +580,7 @@ export class AttributesController extends ConsumptionBaseController {
             content: parsedSuccessorParams.content,
             createdAt: CoreDate.utc(),
             peerSharingInfo: parsedSuccessorParams.peerSharingInfo,
-            succeeds: predecessor.id
+            succeeds: predecessorId
         });
         await this.attributes.create(successor);
 
@@ -571,15 +591,20 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async succeedThirdPartyRelationshipAttribute(
-        predecessor: ThirdPartyRelationshipAttribute,
+        predecessorId: CoreId,
         successorParams: IThirdPartyRelationshipAttributeSuccessorParams | ThirdPartyRelationshipAttributeSuccessorParamsJSON,
         validate = true
     ): Promise<{ predecessor: ThirdPartyRelationshipAttribute; successor: ThirdPartyRelationshipAttribute }> {
         const parsedSuccessorParams = ThirdPartyRelationshipAttributeSuccessorParams.from(successorParams);
 
         if (validate) {
-            const validationResult = await this.validateThirdPartyRelationshipAttributeSuccession(predecessor, parsedSuccessorParams);
+            const validationResult = await this.validateThirdPartyRelationshipAttributeSuccession(predecessorId, parsedSuccessorParams);
             if (validationResult.isError()) throw validationResult.error;
+        }
+
+        const predecessor = await this.getLocalAttribute(predecessorId);
+        if (!(predecessor instanceof ThirdPartyRelationshipAttribute)) {
+            throw ConsumptionCoreErrors.attributes.predecessorIsNotThirdPartyRelationshipAttribute();
         }
 
         const successor = ThirdPartyRelationshipAttribute.from({
@@ -587,7 +612,7 @@ export class AttributesController extends ConsumptionBaseController {
             content: parsedSuccessorParams.content,
             createdAt: CoreDate.utc(),
             peerSharingInfo: parsedSuccessorParams.peerSharingInfo,
-            succeeds: predecessor.id
+            succeeds: predecessorId
         });
         await this.attributes.create(successor);
 
@@ -600,9 +625,12 @@ export class AttributesController extends ConsumptionBaseController {
 
     // TODO: check if we want to use this shared code in the succeed functions above
     // private async succeedAttributeUnsafe(
-    //     predecessor: LocalAttribute,
+    //     predecessorId: CoreId,
     //     successor: LocalAttribute
     // ): Promise<{ predecessor: LocalAttribute; successor: LocalAttribute }> {
+    //     const predecessor = await this.getLocalAttribute(predecessorId);
+    //     if (!predecessor) throw ConsumptionCoreErrors.attributes.predecessorDoesNotExist();
+
     //     await this.attributes.create(successor);
 
     //     predecessor.succeededBy = successor.id;
@@ -614,9 +642,18 @@ export class AttributesController extends ConsumptionBaseController {
     // }
 
     public async validateOwnIdentityAttributeSuccession(
-        predecessor: OwnIdentityAttribute,
+        predecessorId: CoreId,
         successorParams: OwnIdentityAttributeSuccessorParams | OwnIdentityAttributeSuccessorParamsJSON
     ): Promise<ValidationResult> {
+        const predecessor = await this.getLocalAttribute(predecessorId);
+        if (!predecessor) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.predecessorDoesNotExist());
+        }
+
+        if (!(predecessor instanceof OwnIdentityAttribute)) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.predecessorIsNotOwnIdentityAttribute());
+        }
+
         let parsedSuccessorParams;
         try {
             parsedSuccessorParams = OwnIdentityAttributeSuccessorParams.from(successorParams);
@@ -631,16 +668,25 @@ export class AttributesController extends ConsumptionBaseController {
             id: await ConsumptionIds.attribute.generate(),
             content: parsedSuccessorParams.content,
             createdAt: CoreDate.utc(),
-            succeeds: predecessor.id
+            succeeds: predecessorId
         });
 
-        return await this.validateAttributeSuccession(predecessor, successor);
+        return await this.validateAttributeSuccession(predecessorId, successor);
     }
 
     public async validatePeerIdentityAttributeSuccession(
-        predecessor: PeerIdentityAttribute,
+        predecessorId: CoreId,
         successorParams: PeerIdentityAttributeSuccessorParams | PeerIdentityAttributeSuccessorParamsJSON
     ): Promise<ValidationResult> {
+        const predecessor = await this.getLocalAttribute(predecessorId);
+        if (!predecessor) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.predecessorDoesNotExist());
+        }
+
+        if (!(predecessor instanceof PeerIdentityAttribute)) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.predecessorIsNotPeerIdentityAttribute());
+        }
+
         let parsedSuccessorParams;
         try {
             parsedSuccessorParams = PeerIdentityAttributeSuccessorParams.from(successorParams);
@@ -664,13 +710,22 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedAttributesWithDeletionInfo());
         }
 
-        return await this.validateAttributeSuccession(predecessor, successor);
+        return await this.validateAttributeSuccession(predecessorId, successor);
     }
 
     public async validateOwnRelationshipAttributeSuccession(
-        predecessor: OwnRelationshipAttribute,
+        predecessorId: CoreId,
         successorParams: OwnRelationshipAttributeSuccessorParams | OwnRelationshipAttributeSuccessorParamsJSON
     ): Promise<ValidationResult> {
+        const predecessor = await this.getLocalAttribute(predecessorId);
+        if (!predecessor) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.predecessorDoesNotExist());
+        }
+
+        if (!(predecessor instanceof OwnRelationshipAttribute)) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.predecessorIsNotOwnRelationshipAttribute());
+        }
+
         let parsedSuccessorParams;
         try {
             parsedSuccessorParams = OwnRelationshipAttributeSuccessorParams.from(successorParams);
@@ -694,13 +749,22 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedAttributesWithDeletionInfo());
         }
 
-        return await this.validateAttributeSuccession(predecessor, successor);
+        return await this.validateAttributeSuccession(predecessorId, successor);
     }
 
     public async validatePeerRelationshipAttributeSuccession(
-        predecessor: PeerRelationshipAttribute,
+        predecessorId: CoreId,
         successorParams: IPeerRelationshipAttributeSuccessorParams | PeerRelationshipAttributeSuccessorParamsJSON
     ): Promise<ValidationResult> {
+        const predecessor = await this.getLocalAttribute(predecessorId);
+        if (!predecessor) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.predecessorDoesNotExist());
+        }
+
+        if (!(predecessor instanceof PeerRelationshipAttribute)) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.predecessorIsNotPeerRelationshipAttribute());
+        }
+
         let parsedSuccessorParams;
         try {
             parsedSuccessorParams = PeerRelationshipAttributeSuccessorParams.from(successorParams);
@@ -724,13 +788,22 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedAttributesWithDeletionInfo());
         }
 
-        return await this.validateAttributeSuccession(predecessor, successor);
+        return await this.validateAttributeSuccession(predecessorId, successor);
     }
 
     public async validateThirdPartyRelationshipAttributeSuccession(
-        predecessor: ThirdPartyRelationshipAttribute,
+        predecessorId: CoreId,
         successorParams: ThirdPartyRelationshipAttributeSuccessorParams | ThirdPartyRelationshipAttributeSuccessorParamsJSON
     ): Promise<ValidationResult> {
+        const predecessor = await this.getLocalAttribute(predecessorId);
+        if (!predecessor) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.predecessorDoesNotExist());
+        }
+
+        if (!(predecessor instanceof ThirdPartyRelationshipAttribute)) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.predecessorIsNotThirdPartyRelationshipAttribute());
+        }
+
         let parsedSuccessorParams;
         try {
             parsedSuccessorParams = ThirdPartyRelationshipAttributeSuccessorParams.from(successorParams);
@@ -754,10 +827,15 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedAttributesWithDeletionInfo());
         }
 
-        return await this.validateAttributeSuccession(predecessor, successor);
+        return await this.validateAttributeSuccession(predecessorId, successor);
     }
 
-    private async validateAttributeSuccession(predecessor: LocalAttribute, successor: LocalAttribute): Promise<ValidationResult> {
+    private async validateAttributeSuccession(predecessorId: CoreId, successor: LocalAttribute): Promise<ValidationResult> {
+        const predecessor = await this.getLocalAttribute(predecessorId);
+        if (!predecessor) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.predecessorDoesNotExist());
+        }
+
         const existingAttributeWithSameId = await this.getLocalAttribute(successor.id);
         if (existingAttributeWithSameId) return ValidationResult.error(ConsumptionCoreErrors.attributes.successorMustNotYetExist());
 
@@ -828,7 +906,7 @@ export class AttributesController extends ConsumptionBaseController {
             await this.detachSuccessor(successor);
         }
 
-        await this.deletePredecessorsOfAttribute(attribute);
+        await this.deletePredecessorsOfAttribute(attribute.id);
 
         if (attribute instanceof OwnIdentityAttribute && this.setDefaultOwnIdentityAttributes) await this.transferDefault(attribute);
 
@@ -848,8 +926,8 @@ export class AttributesController extends ConsumptionBaseController {
         await this.updateAttributeUnsafe(successor);
     }
 
-    private async deletePredecessorsOfAttribute(attribute: LocalAttribute): Promise<void> {
-        const predecessors = await this.getPredecessorsOfAttribute(attribute);
+    private async deletePredecessorsOfAttribute(attributeId: CoreId): Promise<void> {
+        const predecessors = await this.getPredecessorsOfAttribute(attributeId);
         for (const predecessor of predecessors) {
             await this.deleteAttribute(predecessor);
         }
@@ -877,21 +955,24 @@ export class AttributesController extends ConsumptionBaseController {
         await this.updateAttributeUnsafe(defaultCandidates[defaultCandidates.length - 1]);
     }
 
-    public async getVersionsOfAttribute<T extends LocalAttribute>(attribute: T): Promise<T[]> {
-        const predecessors = await this.getPredecessorsOfAttribute(attribute);
-        const successors = await this.getSuccessorsOfAttribute(attribute);
+    public async getVersionsOfAttribute(id: CoreId): Promise<LocalAttribute[]> {
+        const attribute = await this.getLocalAttribute(id);
+        if (!attribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, id.toString());
 
-        const localAttribute = await this.getLocalAttribute(attribute.id);
-        if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
+        const predecessors = await this.getPredecessorsOfAttribute(id);
+        const successors = await this.getSuccessorsOfAttribute(id);
 
         const allAttributeVersions = [...successors.reverse(), attribute, ...predecessors];
         return allAttributeVersions;
     }
 
-    public async getPredecessorsOfAttribute<T extends LocalAttribute>(attribute: T): Promise<T[]> {
-        const predecessors: T[] = [];
+    public async getPredecessorsOfAttribute(id: CoreId): Promise<LocalAttribute[]> {
+        let attribute = await this.getLocalAttribute(id);
+        if (!attribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, id.toString());
+
+        const predecessors: LocalAttribute[] = [];
         while (attribute.succeeds) {
-            const predecessor = (await this.getLocalAttribute(attribute.succeeds)) as T | undefined;
+            const predecessor = await this.getLocalAttribute(attribute.succeeds);
             if (!predecessor) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.succeeds.toString());
 
             attribute = predecessor;
@@ -901,10 +982,13 @@ export class AttributesController extends ConsumptionBaseController {
         return predecessors;
     }
 
-    public async getSuccessorsOfAttribute<T extends LocalAttribute>(attribute: T): Promise<T[]> {
-        const successors: T[] = [];
+    public async getSuccessorsOfAttribute(id: CoreId): Promise<LocalAttribute[]> {
+        let attribute = await this.getLocalAttribute(id);
+        if (!attribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, id.toString());
+
+        const successors: LocalAttribute[] = [];
         while (attribute.succeededBy) {
-            const successor = (await this.getLocalAttribute(attribute.succeededBy)) as T | undefined;
+            const successor = await this.getLocalAttribute(attribute.succeededBy);
             if (!successor) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.succeededBy.toString());
 
             attribute = successor;
@@ -926,14 +1010,13 @@ export class AttributesController extends ConsumptionBaseController {
         return false;
     }
 
-    public async getSharedVersionsOfAttribute<SharableAttributeTypes extends OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute>(
-        attribute: SharableAttributeTypes,
-        peerAddress: CoreAddress,
-        onlyLatestVersion = true,
-        includeDeletedAndToBeDeleted = false
-    ): Promise<SharableAttributeTypes[]> {
-        const localAttribute = await this.getLocalAttribute(attribute.id);
-        if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
+    public async getSharedVersionsOfAttribute(id: CoreId, peerAddress: CoreAddress, onlyLatestVersion = true, includeDeletedAndToBeDeleted = false): Promise<LocalAttribute[]> {
+        const attribute = await this.getLocalAttribute(id);
+        if (!attribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, id.toString());
+
+        if (!(attribute instanceof OwnIdentityAttribute) && !(attribute instanceof OwnRelationshipAttribute) && !(attribute instanceof PeerRelationshipAttribute)) {
+            throw ConsumptionCoreErrors.attributes.isNotSharableAttribute(attribute.id);
+        }
 
         const sharedAttribute = attribute.isSharedWith(peerAddress, includeDeletedAndToBeDeleted) ? [attribute] : [];
         const sharedPredecessors = await this.getSharedPredecessorsOfAttribute(attribute, peerAddress, includeDeletedAndToBeDeleted);

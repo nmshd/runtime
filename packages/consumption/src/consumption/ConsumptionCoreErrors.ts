@@ -30,6 +30,26 @@ class Attributes {
         );
     }
 
+    public predecessorIsNotOwnIdentityAttribute() {
+        return new CoreError("error.consumption.attributes.predecessorIsNotOwnIdentityAttribute", "Predecessor is not an OwnIdentityAttribute.");
+    }
+
+    public predecessorIsNotPeerIdentityAttribute() {
+        return new CoreError("error.consumption.attributes.predecessorIsNotPeerIdentityAttribute", "Predecessor is not a PeerIdentityAttribute.");
+    }
+
+    public predecessorIsNotOwnRelationshipAttribute() {
+        return new CoreError("error.consumption.attributes.predecessorIsNotOwnRelationshipAttribute", "Predecessor is not an OwnRelationshipAttribute.");
+    }
+
+    public predecessorIsNotPeerRelationshipAttribute() {
+        return new CoreError("error.consumption.attributes.predecessorIsNotPeerRelationshipAttribute", "Predecessor is not a PeerRelationshipAttribute.");
+    }
+
+    public predecessorIsNotThirdPartyRelationshipAttribute() {
+        return new CoreError("error.consumption.attributes.predecessorIsNotThirdPartyRelationshipAttribute", "Predecessor is not a ThirdPartyRelationshipAttribute.");
+    }
+
     public predecessorDoesNotExist() {
         return new CoreError("error.consumption.attributes.predecessorDoesNotExist", "The predecessor does not exist.");
     }
@@ -99,6 +119,10 @@ class Attributes {
 
     public wrongOwnerOfAttribute(message: string) {
         return new CoreError("error.consumption.attributes.wrongOwnerOfAttribute", message);
+    }
+
+    public isNotSharableAttribute(attributeId: string | CoreId) {
+        return new CoreError("error.consumption.attributes.isNotSharableAttribute", `The Attribute (id: '${attributeId}') is not a sharable Attribute.`);
     }
 
     public senderIsNotPeerOfSharedAttribute(senderId: string | CoreAddress, attributeId: string | CoreId) {

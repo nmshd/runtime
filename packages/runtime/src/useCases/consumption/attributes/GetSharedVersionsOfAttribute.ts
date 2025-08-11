@@ -40,7 +40,7 @@ export class GetSharedVersionsOfAttributeUseCase extends UseCase<GetSharedVersio
             return Result.fail(RuntimeErrors.general.invalidPropertyValue("The `attributeId` property must belong to an own IdentityAttribute or a RelationshipAttribute."));
         }
 
-        const sharedVersions = await this.attributeController.getSharedVersionsOfAttribute(localAttribute, CoreAddress.from(request.peer), request.onlyLatestVersions);
+        const sharedVersions = await this.attributeController.getSharedVersionsOfAttribute(localAttribute.id, CoreAddress.from(request.peer), request.onlyLatestVersions);
 
         return Result.ok(AttributeMapper.toAttributeDTOList(sharedVersions));
     }

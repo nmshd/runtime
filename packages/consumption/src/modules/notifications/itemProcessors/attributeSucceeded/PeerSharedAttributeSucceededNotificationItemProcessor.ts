@@ -45,7 +45,7 @@ export class PeerSharedAttributeSucceededNotificationItemProcessor extends Abstr
                 content: notificationItem.successorContent,
                 peerSharingInfo: { sourceReference: notification.id, peer: notification.peer }
             });
-            return await this.consumptionController.attributes.validatePeerIdentityAttributeSuccession(predecessor, successorParams);
+            return await this.consumptionController.attributes.validatePeerIdentityAttributeSuccession(predecessor.id, successorParams);
         }
 
         if (!(notificationItem.successorContent instanceof RelationshipAttribute)) {
@@ -58,7 +58,7 @@ export class PeerSharedAttributeSucceededNotificationItemProcessor extends Abstr
             content: notificationItem.successorContent,
             peerSharingInfo: { sourceReference: notification.id, peer: notification.peer }
         });
-        return await this.consumptionController.attributes.validatePeerRelationshipAttributeSuccession(predecessor, successorParams);
+        return await this.consumptionController.attributes.validatePeerRelationshipAttributeSuccession(predecessor.id, successorParams);
         // }
 
         // TODO: evaluate if this should be implemented for ThirdPartyRelationshipAttributes now
@@ -67,7 +67,7 @@ export class PeerSharedAttributeSucceededNotificationItemProcessor extends Abstr
         //     content: notificationItem.successorContent,
         //     sharingInfo: { sourceReference: notification.id, peer: notification.peer }
         // };
-        // return await this.consumptionController.attributes.validateThirdPartyRelationshipAttributeSuccession(predecessor, successorParams);
+        // return await this.consumptionController.attributes.validateThirdPartyRelationshipAttributeSuccession(predecessor.id, successorParams);
     }
 
     public override async process(notificationItem: PeerSharedAttributeSucceededNotificationItem, notification: LocalNotification): Promise<PeerSharedAttributeSucceededEvent> {
@@ -83,7 +83,7 @@ export class PeerSharedAttributeSucceededNotificationItemProcessor extends Abstr
                     content: notificationItem.successorContent,
                     peerSharingInfo: { sourceReference: notification.id, peer: notification.peer }
                 });
-                const attributesAfterSuccession = await this.consumptionController.attributes.succeedPeerIdentityAttribute(predecessor, successorParams, false);
+                const attributesAfterSuccession = await this.consumptionController.attributes.succeedPeerIdentityAttribute(predecessor.id, successorParams, false);
                 ({ predecessor: updatedPredecessor, successor } = attributesAfterSuccession);
             } else if (predecessor instanceof PeerRelationshipAttribute && notificationItem.successorContent instanceof RelationshipAttribute) {
                 const successorParams = PeerRelationshipAttributeSuccessorParams.from({
@@ -91,7 +91,7 @@ export class PeerSharedAttributeSucceededNotificationItemProcessor extends Abstr
                     content: notificationItem.successorContent,
                     peerSharingInfo: { sourceReference: notification.id, peer: notification.peer }
                 });
-                const attributesAfterSuccession = await this.consumptionController.attributes.succeedPeerRelationshipAttribute(predecessor, successorParams, false);
+                const attributesAfterSuccession = await this.consumptionController.attributes.succeedPeerRelationshipAttribute(predecessor.id, successorParams, false);
                 ({ predecessor: updatedPredecessor, successor } = attributesAfterSuccession);
             }
 

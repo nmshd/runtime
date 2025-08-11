@@ -296,13 +296,13 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 const successorParams = OwnIdentityAttributeSuccessorParams.from({
                     content: existingAttribute.content
                 });
-                const attributesAfterSuccession = await this.consumptionController.attributes.succeedOwnIdentityAttribute(existingAttribute, successorParams);
+                const attributesAfterSuccession = await this.consumptionController.attributes.succeedOwnIdentityAttribute(existingAttribute.id, successorParams);
                 existingAttribute = attributesAfterSuccession.successor;
 
                 if (!(existingAttribute instanceof OwnIdentityAttribute)) throw new Error("This should never occur, but is required for the compiler.");
             }
 
-            const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfAttribute(existingAttribute, requestInfo.peer);
+            const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfAttribute(existingAttribute.id, requestInfo.peer);
 
             const isLatestSharedVersion = latestSharedVersion[0]?.id.toString() === existingAttribute.id.toString();
             if (isLatestSharedVersion) {
@@ -442,7 +442,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                     peerSharingInfo
                 });
 
-                const { predecessor: updatedPredecessor, successor } = await this.consumptionController.attributes.succeedPeerIdentityAttribute(predecessor, successorParams);
+                const { predecessor: updatedPredecessor, successor } = await this.consumptionController.attributes.succeedPeerIdentityAttribute(predecessor.id, successorParams);
                 // TODO: check publishing of events
                 return new PeerSharedAttributeSucceededEvent(this.currentIdentityAddress.toString(), updatedPredecessor, successor);
             }
@@ -460,7 +460,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 });
 
                 const { predecessor: updatedPredecessor, successor } = await this.consumptionController.attributes.succeedThirdPartyRelationshipAttribute(
-                    predecessor,
+                    predecessor.id,
                     successorParams
                 );
                 // TODO: check publishing of events

@@ -584,7 +584,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 })
             });
 
-            const { successor: successorRepositoryAttribute } = await consumptionController.attributes.succeedOwnIdentityAttribute(predecessorRepositoryAttribute, {
+            const { successor: successorRepositoryAttribute } = await consumptionController.attributes.succeedOwnIdentityAttribute(predecessorRepositoryAttribute.id, {
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "GivenName",
@@ -771,7 +771,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     })
                 });
 
-                const { successor: successorOfRepositoryAttribute } = await consumptionController.attributes.succeedOwnIdentityAttribute(repositoryAttribute, {
+                const { successor: successorOfRepositoryAttribute } = await consumptionController.attributes.succeedOwnIdentityAttribute(repositoryAttribute.id, {
                     content: {
                         "@type": "IdentityAttribute",
                         owner: recipient.toString(),
@@ -1608,7 +1608,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 await consumptionController.attributes.addForwardedSharingInfoToAttribute(predecessorRepositoryAttribute, sender, CoreId.from("initialRequest"));
 
-                const { successor: successorRepositoryAttribute } = await consumptionController.attributes.succeedOwnIdentityAttribute(predecessorRepositoryAttribute, {
+                const { successor: successorRepositoryAttribute } = await consumptionController.attributes.succeedOwnIdentityAttribute(predecessorRepositoryAttribute.id, {
                     content: IdentityAttribute.from({
                         value: {
                             "@type": "GivenName",
@@ -1657,7 +1657,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 await consumptionController.attributes.addForwardedSharingInfoToAttribute(predecessor, sender, CoreId.from("initialRequest"));
 
-                const { successor: successor } = await consumptionController.attributes.succeedOwnIdentityAttribute(predecessor, {
+                const { successor } = await consumptionController.attributes.succeedOwnIdentityAttribute(predecessor.id, {
                     content: IdentityAttribute.from({
                         owner: accountController.identity.address,
                         value: GivenName.fromAny({ value: "aNewGivenName" }),
@@ -1704,7 +1704,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     })
                 });
 
-                const { successor: successorRepositoryAttribute } = await consumptionController.attributes.succeedOwnIdentityAttribute(predecessorRepositoryAttribute, {
+                const { successor: successorRepositoryAttribute } = await consumptionController.attributes.succeedOwnIdentityAttribute(predecessorRepositoryAttribute.id, {
                     content: IdentityAttribute.from({
                         value: {
                             "@type": "GivenName",
