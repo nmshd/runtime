@@ -2,7 +2,7 @@ import { serialize, type, validate } from "@js-soft/ts-serval";
 import { IdentityAttribute, IdentityAttributeJSON, IIdentityAttribute } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
-import { ForwardedAttributeDeletionInfo, ForwardedAttributeDeletionStatus, ForwardedSharingInfo, ForwardedSharingInfoJSON, IForwardedSharingInfo } from "../sharingInfos";
+import { EmittedAttributeDeletionInfo, EmittedAttributeDeletionStatus, ForwardedSharingInfo, ForwardedSharingInfoJSON, IForwardedSharingInfo } from "../sharingInfos";
 import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./LocalAttribute";
 
 export interface OwnIdentityAttributeJSON extends LocalAttributeJSON {
@@ -49,7 +49,7 @@ export class OwnIdentityAttribute extends LocalAttribute implements IOwnIdentity
 
         if (includeDeletedAndToBeDeleted) return true;
 
-        const excludedDeletionStatuses = [ForwardedAttributeDeletionStatus.DeletedByPeer, ForwardedAttributeDeletionStatus.ToBeDeletedByPeer];
+        const excludedDeletionStatuses = [EmittedAttributeDeletionStatus.DeletedByPeer, EmittedAttributeDeletionStatus.ToBeDeletedByPeer];
         return sharingInfosWithPeer.some((sharingInfo) => !sharingInfo.deletionInfo || !excludedDeletionStatuses.includes(sharingInfo.deletionInfo.deletionStatus));
     }
 
@@ -59,7 +59,7 @@ export class OwnIdentityAttribute extends LocalAttribute implements IOwnIdentity
         const sharingInfosWithPeer = this.forwardedSharingInfos.filter((sharingInfo) => sharingInfo.peer.equals(peerAddress));
         if (sharingInfosWithPeer.length === 0) return false;
 
-        const deletionStatuses = [ForwardedAttributeDeletionStatus.DeletedByPeer, ForwardedAttributeDeletionStatus.ToBeDeletedByPeer];
+        const deletionStatuses = [EmittedAttributeDeletionStatus.DeletedByPeer, EmittedAttributeDeletionStatus.ToBeDeletedByPeer];
         const hasSharingInfoWithDeletionStatus = sharingInfosWithPeer.some(
             (sharingInfo) => sharingInfo.deletionInfo && deletionStatuses.includes(sharingInfo.deletionInfo.deletionStatus)
         );
@@ -69,7 +69,7 @@ export class OwnIdentityAttribute extends LocalAttribute implements IOwnIdentity
         return hasSharingInfoWithDeletionStatus && !hasSharingInfoWithoutDeletionStatus;
     }
 
-    public setForwardedDeletionInfo(deletionInfo: ForwardedAttributeDeletionInfo | undefined, peer: CoreAddress): this {
+    public setForwardedDeletionInfo(deletionInfo: EmittedAttributeDeletionInfo | undefined, peer: CoreAddress): this {
         const sharingInfoForPeer = this.forwardedSharingInfos?.find((sharingInfo) => sharingInfo.peer.equals(peer));
         if (!sharingInfoForPeer) throw Error; // TODO:
 
@@ -78,7 +78,7 @@ export class OwnIdentityAttribute extends LocalAttribute implements IOwnIdentity
     }
 
     public getPeers(includeDeletedAndToBeDeleted = false): CoreAddress[] {
-        const excludedDeletionStatuses = [ForwardedAttributeDeletionStatus.DeletedByPeer, ForwardedAttributeDeletionStatus.ToBeDeletedByPeer];
+        const excludedDeletionStatuses = [EmittedAttributeDeletionStatus.DeletedByPeer, EmittedAttributeDeletionStatus.ToBeDeletedByPeer];
 
         const sharingInfos = includeDeletedAndToBeDeleted
             ? this.forwardedSharingInfos

@@ -8,7 +8,7 @@ import { ConsumptionControllerName } from "../../../consumption/ConsumptionContr
 import { ConsumptionCoreErrors } from "../../../consumption/ConsumptionCoreErrors";
 import { ConsumptionError } from "../../../consumption/ConsumptionError";
 import { ConsumptionIds } from "../../../consumption/ConsumptionIds";
-import { ForwardedAttributeDeletionInfo, ForwardedAttributeDeletionStatus, OwnIdentityAttribute, OwnRelationshipAttribute, PeerRelationshipAttribute } from "../../attributes";
+import { EmittedAttributeDeletionInfo, EmittedAttributeDeletionStatus, OwnIdentityAttribute, OwnRelationshipAttribute, PeerRelationshipAttribute } from "../../attributes";
 import { ValidationResult } from "../../common/ValidationResult";
 import { OutgoingRequestCreatedAndCompletedEvent, OutgoingRequestCreatedEvent, OutgoingRequestStatusChangedEvent } from "../events";
 import { RequestItemProcessorRegistry } from "../itemProcessors/RequestItemProcessorRegistry";
@@ -256,8 +256,8 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
                     `The attribute ${forwardedAttributeId} of a created DeleteAttributeRequestItem is no own IdentityAttribute, own RelationshipAttribute or peer RelationshipAttribute.`
                 );
             }
-            const deletionInfo = ForwardedAttributeDeletionInfo.from({
-                deletionStatus: ForwardedAttributeDeletionStatus.DeletionRequestSent,
+            const deletionInfo = EmittedAttributeDeletionInfo.from({
+                deletionStatus: EmittedAttributeDeletionStatus.DeletionRequestSent,
                 deletionDate: CoreDate.utc()
             });
 

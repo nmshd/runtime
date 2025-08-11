@@ -48,8 +48,8 @@ import {
 } from "./local/attributeTypes";
 import { IdentityAttributeQueryTranslator, RelationshipAttributeQueryTranslator, ThirdPartyRelationshipAttributeQueryTranslator } from "./local/QueryTranslator";
 import {
-    ForwardedAttributeDeletionInfo,
-    ForwardedAttributeDeletionStatus,
+    EmittedAttributeDeletionInfo,
+    EmittedAttributeDeletionStatus,
     ForwardedSharingInfo,
     OwnRelationshipAttributeSharingInfo,
     PeerAttributeDeletionInfo,
@@ -1064,8 +1064,8 @@ export class AttributesController extends ConsumptionBaseController {
             "peerSharingInfo.peer": peer.toString(),
             "peerSharingInfo.deletionInfo.deletionStatus": {
                 $nin: [
-                    ForwardedAttributeDeletionStatus.ToBeDeletedByPeer,
-                    ForwardedAttributeDeletionStatus.DeletedByPeer,
+                    EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
+                    EmittedAttributeDeletionStatus.DeletedByPeer,
                     PeerAttributeDeletionStatus.ToBeDeleted,
                     PeerAttributeDeletionStatus.DeletedByOwner
                 ]
@@ -1259,15 +1259,15 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     private async setDeletionInfoOfOwnIdentityAttributes(peer: CoreAddress, deletionDate: CoreDate): Promise<void> {
-        const deletionInfo = ForwardedAttributeDeletionInfo.from({
-            deletionStatus: ForwardedAttributeDeletionStatus.DeletedByPeer,
+        const deletionInfo = EmittedAttributeDeletionInfo.from({
+            deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
             deletionDate
         });
 
         const attributesSharedWithPeer = (await this.getLocalAttributes({
             "@type": "OwnIdentityAttribute",
             "forwardedSharingInfos.peer": peer.toString(),
-            "forwardedSharingInfos.deletionInfo.deletionStatus": { $ne: ForwardedAttributeDeletionStatus.DeletedByPeer }
+            "forwardedSharingInfos.deletionInfo.deletionStatus": { $ne: EmittedAttributeDeletionStatus.DeletedByPeer }
         })) as OwnIdentityAttribute[];
 
         await this.setForwardedDeletionInfo(attributesSharedWithPeer, deletionInfo, peer);
@@ -1289,15 +1289,15 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     private async setDeletionInfoOfOwnRelationshipAttributes(peer: CoreAddress, deletionDate: CoreDate): Promise<void> {
-        const deletionInfo = ForwardedAttributeDeletionInfo.from({
-            deletionStatus: ForwardedAttributeDeletionStatus.DeletedByPeer,
+        const deletionInfo = EmittedAttributeDeletionInfo.from({
+            deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
             deletionDate
         });
 
         const attributesSharedWithPeer = (await this.getLocalAttributes({
             "@type": "OwnRelationshipAttribute",
             "peerSharingInfo.peer": peer.toString(),
-            "peerSharingInfo.deletionInfo.deletionStatus": { $ne: ForwardedAttributeDeletionStatus.DeletedByPeer }
+            "peerSharingInfo.deletionInfo.deletionStatus": { $ne: EmittedAttributeDeletionStatus.DeletedByPeer }
         })) as OwnRelationshipAttribute[];
 
         await this.setPeerDeletionInfoOfOwnRelationshipAttribute(attributesSharedWithPeer, deletionInfo);
@@ -1319,15 +1319,15 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     private async setDeletionInfoOfForwardedRelationshipAttributes(thirdParty: CoreAddress, deletionDate: CoreDate): Promise<void> {
-        const deletionInfo = ForwardedAttributeDeletionInfo.from({
-            deletionStatus: ForwardedAttributeDeletionStatus.DeletedByPeer,
+        const deletionInfo = EmittedAttributeDeletionInfo.from({
+            deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
             deletionDate
         });
 
         const attributesSharedWithPeer = (await this.getLocalAttributes({
             "@type": { $in: ["OwnRelationshipAttribute", "PeerRelationshipAttribute"] },
             "forwardedSharingInfos.peer": thirdParty.toString(),
-            "forwardedSharingInfos.deletionInfo.deletionStatus": { $ne: ForwardedAttributeDeletionStatus.DeletedByPeer }
+            "forwardedSharingInfos.deletionInfo.deletionStatus": { $ne: EmittedAttributeDeletionStatus.DeletedByPeer }
         })) as OwnRelationshipAttribute[] | PeerRelationshipAttribute[];
 
         await this.setForwardedDeletionInfo(attributesSharedWithPeer, deletionInfo, thirdParty);
@@ -1352,7 +1352,7 @@ export class AttributesController extends ConsumptionBaseController {
 
     public async setForwardedDeletionInfo(
         attributes: (OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute)[],
-        deletionInfo: ForwardedAttributeDeletionInfo,
+        deletionInfo: EmittedAttributeDeletionInfo,
         peer: CoreAddress,
         overrideDeletedOrToBeDeleted = false
     ): Promise<void> {
@@ -1368,7 +1368,7 @@ export class AttributesController extends ConsumptionBaseController {
     // TODO: naming should be plural
     public async setPeerDeletionInfoOfOwnRelationshipAttribute(
         attributes: OwnRelationshipAttribute[],
-        deletionInfo: ForwardedAttributeDeletionInfo,
+        deletionInfo: EmittedAttributeDeletionInfo,
         overrideDeletedOrToBeDeleted = false
     ): Promise<void> {
         for (const attribute of attributes) {

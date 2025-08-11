@@ -24,8 +24,8 @@ import {
     AttributesController,
     AttributeTagCollection,
     ConsumptionController,
-    ForwardedAttributeDeletionInfo,
-    ForwardedAttributeDeletionStatus,
+    EmittedAttributeDeletionInfo,
+    EmittedAttributeDeletionStatus,
     IOwnRelationshipAttributeSuccessorParams,
     IPeerIdentityAttributeSuccessorParams,
     IThirdPartyRelationshipAttributeSuccessorParams,
@@ -1326,8 +1326,8 @@ describe("AttributesController", function () {
                     })
                 });
                 predecessor.setForwardedDeletionInfo(
-                    ForwardedAttributeDeletionInfo.from({
-                        deletionStatus: ForwardedAttributeDeletionStatus.ToBeDeletedByPeer,
+                    EmittedAttributeDeletionInfo.from({
+                        deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
                         deletionDate: CoreDate.utc().add({ days: 1 })
                     }),
                     CoreAddress.from("peer")
@@ -1360,8 +1360,8 @@ describe("AttributesController", function () {
                     })
                 });
                 predecessor.setForwardedDeletionInfo(
-                    ForwardedAttributeDeletionInfo.from({
-                        deletionStatus: ForwardedAttributeDeletionStatus.DeletionRequestRejected,
+                    EmittedAttributeDeletionInfo.from({
+                        deletionStatus: EmittedAttributeDeletionStatus.DeletionRequestRejected,
                         deletionDate: CoreDate.utc().subtract({ days: 1 })
                     }),
                     CoreAddress.from("peer")

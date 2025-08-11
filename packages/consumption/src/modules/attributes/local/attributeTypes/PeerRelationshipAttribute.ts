@@ -3,8 +3,8 @@ import { IRelationshipAttribute, RelationshipAttribute, RelationshipAttributeJSO
 import { CoreAddress } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
 import {
-    ForwardedAttributeDeletionInfo,
-    ForwardedAttributeDeletionStatus,
+    EmittedAttributeDeletionInfo,
+    EmittedAttributeDeletionStatus,
     ForwardedSharingInfo,
     ForwardedSharingInfoJSON,
     IForwardedSharingInfo,
@@ -58,7 +58,7 @@ export class PeerRelationshipAttribute extends LocalAttribute implements IPeerRe
 
         if (includeDeletedAndToBeDeleted) return true;
 
-        const excludedDeletionStatuses = [ForwardedAttributeDeletionStatus.DeletedByPeer, ForwardedAttributeDeletionStatus.ToBeDeletedByPeer];
+        const excludedDeletionStatuses = [EmittedAttributeDeletionStatus.DeletedByPeer, EmittedAttributeDeletionStatus.ToBeDeletedByPeer];
         return thirdPartySharingInfosWithPeer.some((sharingInfo) => !sharingInfo.deletionInfo || !excludedDeletionStatuses.includes(sharingInfo.deletionInfo.deletionStatus));
     }
 
@@ -76,7 +76,7 @@ export class PeerRelationshipAttribute extends LocalAttribute implements IPeerRe
         const sharingInfosWithPeer = this.forwardedSharingInfos.filter((sharingInfo) => sharingInfo.peer.equals(peerAddress));
         if (sharingInfosWithPeer.length === 0) return false;
 
-        const deletionStatuses = [ForwardedAttributeDeletionStatus.DeletedByPeer, ForwardedAttributeDeletionStatus.ToBeDeletedByPeer];
+        const deletionStatuses = [EmittedAttributeDeletionStatus.DeletedByPeer, EmittedAttributeDeletionStatus.ToBeDeletedByPeer];
         const hasSharingInfoWithDeletionStatus = sharingInfosWithPeer.some(
             (sharingInfo) => sharingInfo.deletionInfo && deletionStatuses.includes(sharingInfo.deletionInfo.deletionStatus)
         );
@@ -91,7 +91,7 @@ export class PeerRelationshipAttribute extends LocalAttribute implements IPeerRe
         return this;
     }
 
-    public setForwardedDeletionInfo(deletionInfo: ForwardedAttributeDeletionInfo | undefined, thirdParty: CoreAddress): this {
+    public setForwardedDeletionInfo(deletionInfo: EmittedAttributeDeletionInfo | undefined, thirdParty: CoreAddress): this {
         const sharingInfoForThirdParty = this.forwardedSharingInfos?.find((sharingInfo) => sharingInfo.peer.equals(thirdParty));
         if (!sharingInfoForThirdParty) throw Error; // TODO:
 
@@ -100,7 +100,7 @@ export class PeerRelationshipAttribute extends LocalAttribute implements IPeerRe
     }
 
     public getThirdParties(includeDeletedAndToBeDeleted = false): CoreAddress[] {
-        const excludedDeletionStatuses = [ForwardedAttributeDeletionStatus.DeletedByPeer, ForwardedAttributeDeletionStatus.ToBeDeletedByPeer];
+        const excludedDeletionStatuses = [EmittedAttributeDeletionStatus.DeletedByPeer, EmittedAttributeDeletionStatus.ToBeDeletedByPeer];
 
         const sharingInfos = includeDeletedAndToBeDeleted
             ? this.forwardedSharingInfos

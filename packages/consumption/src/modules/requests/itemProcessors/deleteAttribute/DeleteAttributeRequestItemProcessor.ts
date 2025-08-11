@@ -2,8 +2,8 @@ import { AcceptResponseItem, DeleteAttributeAcceptResponseItem, DeleteAttributeR
 import { CoreAddress, CoreDate } from "@nmshd/core-types";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import {
-    ForwardedAttributeDeletionInfo,
-    ForwardedAttributeDeletionStatus,
+    EmittedAttributeDeletionInfo,
+    EmittedAttributeDeletionStatus,
     OwnIdentityAttribute,
     OwnRelationshipAttribute,
     PeerAttributeDeletionInfo,
@@ -161,8 +161,8 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
         deletionDate: CoreDate,
         peer: CoreAddress
     ): Promise<void> {
-        const deletionInfo = ForwardedAttributeDeletionInfo.from({
-            deletionStatus: ForwardedAttributeDeletionStatus.ToBeDeletedByPeer,
+        const deletionInfo = EmittedAttributeDeletionInfo.from({
+            deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
             deletionDate
         });
 
@@ -180,8 +180,8 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
         deletionDate: CoreDate,
         peer: CoreAddress
     ): Promise<void> {
-        const deletionInfo = ForwardedAttributeDeletionInfo.from({
-            deletionStatus: ForwardedAttributeDeletionStatus.DeletionRequestRejected,
+        const deletionInfo = EmittedAttributeDeletionInfo.from({
+            deletionStatus: EmittedAttributeDeletionStatus.DeletionRequestRejected,
             deletionDate
         });
 

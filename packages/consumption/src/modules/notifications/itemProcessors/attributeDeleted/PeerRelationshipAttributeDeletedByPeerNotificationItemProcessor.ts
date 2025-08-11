@@ -5,8 +5,8 @@ import { TransportLoggerFactory } from "@nmshd/transport";
 import { ConsumptionController } from "../../../../consumption/ConsumptionController";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import {
-    ForwardedAttributeDeletionInfo,
-    ForwardedAttributeDeletionStatus,
+    EmittedAttributeDeletionInfo,
+    EmittedAttributeDeletionStatus,
     OwnRelationshipAttribute,
     PeerRelationshipAttributeDeletedByPeerEvent,
     ThirdPartyRelationshipAttribute,
@@ -64,8 +64,8 @@ export class PeerRelationshipAttributeDeletedByPeerNotificationItemProcessor ext
         const attributes = [attribute, ...predecessors];
 
         if (attribute instanceof OwnRelationshipAttribute) {
-            const deletionInfo = ForwardedAttributeDeletionInfo.from({
-                deletionStatus: ForwardedAttributeDeletionStatus.DeletedByPeer,
+            const deletionInfo = EmittedAttributeDeletionInfo.from({
+                deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
                 deletionDate: CoreDate.utc()
             });
 

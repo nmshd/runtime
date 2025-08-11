@@ -1,19 +1,19 @@
 import { serialize, validate } from "@js-soft/ts-serval";
 import { AbstractAttributeSharingInfo, AbstractAttributeSharingInfoJSON, IAbstractAttributeSharingInfo } from "./AbstractAttributeSharingInfo";
-import { ForwardedAttributeDeletionInfo, ForwardedAttributeDeletionInfoJSON, IForwardedAttributeDeletionInfo } from "./deletionInfos";
+import { EmittedAttributeDeletionInfo, EmittedAttributeDeletionInfoJSON, IEmittedAttributeDeletionInfo } from "./deletionInfos";
 
 export interface OwnRelationshipAttributeSharingInfoJSON extends AbstractAttributeSharingInfoJSON {
-    deletionInfo?: ForwardedAttributeDeletionInfoJSON;
+    deletionInfo?: EmittedAttributeDeletionInfoJSON;
 }
 
 export interface IOwnRelationshipAttributeSharingInfo extends IAbstractAttributeSharingInfo {
-    deletionInfo?: IForwardedAttributeDeletionInfo;
+    deletionInfo?: IEmittedAttributeDeletionInfo;
 }
 
 export class OwnRelationshipAttributeSharingInfo extends AbstractAttributeSharingInfo implements IOwnRelationshipAttributeSharingInfo {
     @serialize()
     @validate({ nullable: true })
-    public override deletionInfo?: ForwardedAttributeDeletionInfo;
+    public override deletionInfo?: EmittedAttributeDeletionInfo;
 
     public static from(value: IOwnRelationshipAttributeSharingInfo | OwnRelationshipAttributeSharingInfoJSON): OwnRelationshipAttributeSharingInfo {
         return super.fromAny(value) as OwnRelationshipAttributeSharingInfo;

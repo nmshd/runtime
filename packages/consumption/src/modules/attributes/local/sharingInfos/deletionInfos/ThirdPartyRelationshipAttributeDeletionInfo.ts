@@ -1,7 +1,6 @@
 import { serialize, validate } from "@js-soft/ts-serval";
 import { AbstractAttributeDeletionInfo, AbstractAttributeDeletionInfoJSON, IAbstractAttributeDeletionInfo } from "./AbstractAttributeDeletionInfo";
 
-// TODO: get deletion statuses straight
 export enum ThirdPartyRelationshipAttributeDeletionStatus {
     ToBeDeleted = "ToBeDeleted",
     DeletedByOwner = "DeletedByOwner",

@@ -5,9 +5,9 @@ import { TransportLoggerFactory } from "@nmshd/transport";
 import { ConsumptionController } from "../../../../consumption/ConsumptionController";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import {
+    EmittedAttributeDeletionInfo,
+    EmittedAttributeDeletionStatus,
     ForwardedAttributeDeletedByPeerEvent,
-    ForwardedAttributeDeletionInfo,
-    ForwardedAttributeDeletionStatus,
     OwnIdentityAttribute,
     OwnRelationshipAttribute,
     PeerRelationshipAttribute
@@ -59,8 +59,8 @@ export class ForwardedAttributeDeletedByPeerNotificationItemProcessor extends Ab
             );
         }
 
-        const deletionInfo = ForwardedAttributeDeletionInfo.from({
-            deletionStatus: ForwardedAttributeDeletionStatus.DeletedByPeer,
+        const deletionInfo = EmittedAttributeDeletionInfo.from({
+            deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
             deletionDate: CoreDate.utc()
         });
 
