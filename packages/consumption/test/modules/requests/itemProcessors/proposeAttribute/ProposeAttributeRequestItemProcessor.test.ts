@@ -63,26 +63,21 @@ describe("ProposeAttributeRequestItemProcessor", function () {
     describe("canCreateOutgoingRequestItem", function () {
         const recipient = CoreAddress.from("recipient");
 
-        test("returns success when proposing an Identity Attribute", async () => {
+        test("returns success when proposing an IdentityAttribute", async () => {
             const requestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: TestObjectFactory.createIdentityAttribute({
                     value: GivenName.fromAny({ value: "aGivenName" }),
                     owner: CoreAddress.from("")
                 }),
-                query: IdentityAttributeQuery.from({
-                    valueType: "GivenName"
-                })
+                query: IdentityAttributeQuery.from({ valueType: "GivenName" })
             });
 
             const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), recipient);
-
             expect(result).successfulValidationResult();
         });
 
-        test("returns an error when proposing an Identity Attribute with invalid tag", async () => {
-            const recipient = CoreAddress.from("Recipient");
-
+        test("returns an error when proposing an IdentityAttribute with invalid tag", async () => {
             const requestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: TestObjectFactory.createIdentityAttribute({
@@ -90,20 +85,17 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     owner: CoreAddress.from(""),
                     tags: ["invalidTag"]
                 }),
-                query: IdentityAttributeQuery.from({
-                    valueType: "GivenName"
-                })
+                query: IdentityAttributeQuery.from({ valueType: "GivenName" })
             });
 
             const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), recipient);
-
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
                 message: "Detected invalidity of the following tags: 'invalidTag'."
             });
         });
 
-        test("returns success when proposing a Relationship Attribute", async () => {
+        test("returns success when proposing a RelationshipAttribute", async () => {
             const requestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: TestObjectFactory.createRelationshipAttribute({
@@ -122,22 +114,17 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             });
 
             const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), recipient);
-
             expect(result).successfulValidationResult();
         });
 
         test("returns an error when passing a forbidden character", async () => {
-            const recipient = CoreAddress.from("Recipient");
-
             const requestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: TestObjectFactory.createIdentityAttribute({
                     value: GivenName.fromAny({ value: "aGivenName😀" }),
                     owner: CoreAddress.from("")
                 }),
-                query: IdentityAttributeQuery.from({
-                    valueType: "GivenName"
-                })
+                query: IdentityAttributeQuery.from({ valueType: "GivenName" })
             });
 
             const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), recipient);
@@ -167,10 +154,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             });
 
             const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), recipient);
-
-            expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidRequestItem"
-            });
+            expect(result).errorValidationResult({ code: "error.consumption.requests.invalidRequestItem" });
         });
 
         test("returns an error when passing anything other than an empty string as an owner into 'query'", async () => {
@@ -192,10 +176,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             });
 
             const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), recipient);
-
-            expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidRequestItem"
-            });
+            expect(result).errorValidationResult({ code: "error.consumption.requests.invalidRequestItem" });
         });
 
         describe("query", function () {
@@ -205,25 +186,18 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 test("simple query", async () => {
                     const requestItem = ProposeAttributeRequestItem.from({
                         mustBeAccepted: false,
-                        attribute: TestObjectFactory.createIdentityAttribute({
-                            owner: CoreAddress.from("")
-                        }),
-                        query: IdentityAttributeQuery.from({
-                            valueType: "GivenName"
-                        })
+                        attribute: TestObjectFactory.createIdentityAttribute({ owner: CoreAddress.from("") }),
+                        query: IdentityAttributeQuery.from({ valueType: "GivenName" })
                     });
 
                     const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), recipient);
-
                     expect(result).successfulValidationResult();
                 });
 
                 test("cannot query invalid tag", async () => {
                     const requestItem = ProposeAttributeRequestItem.from({
                         mustBeAccepted: false,
-                        attribute: TestObjectFactory.createIdentityAttribute({
-                            owner: CoreAddress.from("")
-                        }),
+                        attribute: TestObjectFactory.createIdentityAttribute({ owner: CoreAddress.from("") }),
                         query: IdentityAttributeQuery.from({
                             valueType: "GivenName",
                             tags: ["invalidTag"]
@@ -231,7 +205,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     });
 
                     const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), recipient);
-
                     expect(result).errorValidationResult({
                         code: "error.consumption.requests.invalidRequestItem",
                         message: "Detected invalidity of the following tags: 'invalidTag'."
@@ -245,28 +218,22 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 test("simple query", async () => {
                     const requestItem = ProposeAttributeRequestItem.from({
                         mustBeAccepted: false,
-                        attribute: TestObjectFactory.createIdentityAttribute({
-                            owner: CoreAddress.from("")
-                        }),
+                        attribute: TestObjectFactory.createIdentityAttribute({ owner: CoreAddress.from("") }),
                         query: IQLQuery.from({ queryString: "GivenName", attributeCreationHints: { valueType: "GivenName" } })
                     });
 
                     const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), recipient);
-
                     expect(result).successfulValidationResult();
                 });
 
                 test("cannot query invalid tag", async () => {
                     const requestItem = ProposeAttributeRequestItem.from({
                         mustBeAccepted: false,
-                        attribute: TestObjectFactory.createIdentityAttribute({
-                            owner: CoreAddress.from("")
-                        }),
+                        attribute: TestObjectFactory.createIdentityAttribute({ owner: CoreAddress.from("") }),
                         query: IQLQuery.from({ queryString: "GivenName", attributeCreationHints: { valueType: "GivenName", tags: ["invalidTag"] } })
                     });
 
                     const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), recipient);
-
                     expect(result).errorValidationResult({
                         code: "error.consumption.requests.invalidRequestItem",
                         message: "Detected invalidity of the following tags: 'invalidTag'."
@@ -290,13 +257,12 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                         mustBeAccepted: false,
                         query: query,
                         attribute: TestObjectFactory.createRelationshipAttribute({
-                            value: ProprietaryString.fromAny({ title: "aTitle", value: "aGivenName" }),
+                            value: ProprietaryString.fromAny({ title: "aTitle", value: "aStringValue" }),
                             owner: CoreAddress.from("")
                         })
                     });
 
                     const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), recipient);
-
                     expect(result).successfulValidationResult();
                 });
 
@@ -336,7 +302,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     });
 
                     const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), recipient);
-
                     expect(result).errorValidationResult({
                         code: "error.consumption.requests.invalidRequestItem",
                         message:
@@ -380,7 +345,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     });
 
                     const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), recipient);
-
                     expect(result).successfulValidationResult();
                 });
             });
@@ -391,15 +355,11 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         const sender = CoreAddress.from("Sender");
         let recipient: CoreAddress;
 
-        beforeAll(function () {
-            recipient = accountController.identity.address;
-        });
+        beforeAll(() => (recipient = accountController.identity.address));
 
         test("returns success when called with the id of an existing own LocalAttribute", async function () {
             const existingLocalAttribute = await consumptionController.attributes.createRepositoryAttribute({
-                content: TestObjectFactory.createIdentityAttribute({
-                    owner: recipient
-                })
+                content: TestObjectFactory.createIdentityAttribute({ owner: recipient })
             });
 
             const requestItem = ProposeAttributeRequestItem.from({
@@ -408,9 +368,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     value: GivenName.fromAny({ value: "aGivenName" }),
                     owner: CoreAddress.from("")
                 }),
-                query: IdentityAttributeQuery.from({
-                    valueType: "GivenName"
-                })
+                query: IdentityAttributeQuery.from({ valueType: "GivenName" })
             });
             const requestId = await ConsumptionIds.request.generate();
             const request = LocalRequest.from({
@@ -419,10 +377,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 isOwn: false,
                 peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
+                content: Request.from({ id: requestId, items: [requestItem] }),
                 statusLog: []
             });
 
@@ -432,7 +387,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             };
 
             const result = await processor.canAccept(requestItem, acceptParams, request);
-
             expect(result).successfulValidationResult();
         });
 
@@ -449,10 +403,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 isOwn: false,
                 peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
+                content: Request.from({ id: requestId, items: [requestItem] }),
                 statusLog: []
             });
 
@@ -469,7 +420,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             };
 
             const result = await processor.canAccept(requestItem, acceptParams, request);
-
             expect(result).successfulValidationResult();
         });
 
@@ -490,10 +440,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 isOwn: false,
                 peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
+                content: Request.from({ id: requestId, items: [requestItem] }),
                 statusLog: []
             });
 
@@ -503,12 +450,10 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             };
 
             const result = await processor.canAccept(requestItem, acceptParams, request);
-
             expect(result).successfulValidationResult();
         });
 
-        test("returns an error when the attribute contains a forbidden character", async function () {
-            const sender = CoreAddress.from("Sender");
+        test("returns an error when the Attribute contains a forbidden character", async function () {
             const recipient = accountController.identity.address;
 
             const requestItem = ProposeAttributeRequestItem.from({
@@ -523,10 +468,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 isOwn: false,
                 peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
+                content: Request.from({ id: requestId, items: [requestItem] }),
                 statusLog: []
             });
 
@@ -543,7 +485,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             };
 
             const result = await processor.canAccept(requestItem, acceptParams, request);
-
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidAcceptParameters",
                 message: "The Attribute contains forbidden characters."
@@ -563,10 +504,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 isOwn: false,
                 peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
+                content: Request.from({ id: requestId, items: [requestItem] }),
                 statusLog: []
             });
 
@@ -576,17 +514,12 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             };
 
             const result = await processor.canAccept(requestItem, acceptParams, request);
-
-            expect(result).errorValidationResult({
-                code: "error.transport.recordNotFound"
-            });
+            expect(result).errorValidationResult({ code: "error.transport.recordNotFound" });
         });
 
         test("returns an error when the existing IdentityAttribute is already shared", async function () {
             const attribute = await consumptionController.attributes.createSharedLocalAttribute({
-                content: TestObjectFactory.createIdentityAttribute({
-                    owner: recipient
-                }),
+                content: TestObjectFactory.createIdentityAttribute({ owner: recipient }),
                 peer: sender,
                 sourceReference: await ConsumptionIds.request.generate()
             });
@@ -594,9 +527,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const requestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
-                attribute: TestObjectFactory.createIdentityAttribute({
-                    owner: CoreAddress.from("")
-                })
+                attribute: TestObjectFactory.createIdentityAttribute({ owner: CoreAddress.from("") })
             });
             const requestId = await ConsumptionIds.request.generate();
             const request = LocalRequest.from({
@@ -605,10 +536,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 isOwn: false,
                 peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
+                content: Request.from({ id: requestId, items: [requestItem] }),
                 statusLog: []
             });
 
@@ -618,7 +546,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             };
 
             const result = await processor.canAccept(requestItem, acceptParams, request);
-
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.attributeQueryMismatch",
                 message: "The provided IdentityAttribute is a shared copy of a RepositoryAttribute. You can only share RepositoryAttributes."
@@ -627,9 +554,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
 
         test("returns an error when a successor of the existing IdentityAttribute is already shared", async function () {
             const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
-                content: TestObjectFactory.createIdentityAttribute({
-                    owner: recipient
-                })
+                content: TestObjectFactory.createIdentityAttribute({ owner: recipient })
             });
 
             const { successor: successorOfRepositoryAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(repositoryAttribute.id, {
@@ -652,9 +577,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const requestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
-                attribute: TestObjectFactory.createIdentityAttribute({
-                    owner: CoreAddress.from("")
-                })
+                attribute: TestObjectFactory.createIdentityAttribute({ owner: CoreAddress.from("") })
             });
             const requestId = await ConsumptionIds.request.generate();
             const request = LocalRequest.from({
@@ -663,10 +586,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 isOwn: false,
                 peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
+                content: Request.from({ id: requestId, items: [requestItem] }),
                 statusLog: []
             });
 
@@ -676,7 +596,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             };
 
             const result = await processor.canAccept(requestItem, acceptParams, request);
-
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.attributeQueryMismatch",
                 message: `The provided IdentityAttribute is outdated. You have already shared the successor '${ownSharedCopyOfSuccessor.shareInfo?.sourceAttribute?.toString()}' of it.`
@@ -712,10 +631,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 isOwn: false,
                 peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
+                content: Request.from({ id: requestId, items: [requestItem] }),
                 statusLog: []
             });
 
@@ -739,7 +655,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             };
 
             const result = await processor.canAccept(requestItem, acceptParams, request);
-
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidAcceptParameters",
                 message: "When responding to a RelationshipAttributeQuery, only new RelationshipAttributes may be provided."
@@ -785,10 +700,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 isOwn: false,
                 peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
+                content: Request.from({ id: requestId, items: [requestItem] }),
                 statusLog: []
             });
 
@@ -851,10 +763,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 isOwn: false,
                 peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
+                content: Request.from({ id: requestId, items: [requestItem] }),
                 statusLog: []
             });
 
@@ -874,7 +783,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             };
 
             const result = await processor.canAccept(requestItem, acceptParams, incomingRequest);
-
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidAcceptParameters",
                 message:
@@ -884,9 +792,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
 
         test("returns an error trying to share the predecessor of an already shared Attribute", async function () {
             const predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
-                content: TestObjectFactory.createIdentityAttribute({
-                    owner: accountController.identity.address
-                })
+                content: TestObjectFactory.createIdentityAttribute({ owner: accountController.identity.address })
             });
 
             const { successor: successorRepositoryAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(predecessorRepositoryAttribute.id, {
@@ -917,10 +823,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 isOwn: false,
                 peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
+                content: Request.from({ id: requestId, items: [requestItem] }),
                 statusLog: []
             });
 
@@ -930,7 +833,6 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             };
 
             const result = await processor.canAccept(requestItem, acceptParams, request);
-
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.attributeQueryMismatch",
                 message: `The provided IdentityAttribute is outdated. You have already shared the successor '${successorRepositoryAttribute.id}' of it.`
@@ -969,21 +871,11 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 isOwn: false,
                 peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [proposeAttributeRequestItem]
-                }),
+                content: Request.from({ id: requestId, items: [proposeAttributeRequestItem] }),
                 statusLog: []
             });
 
-            const canAcceptWithNewAttributeResult = await processor.canAccept(
-                proposeAttributeRequestItem,
-                {
-                    accept: true,
-                    attribute: newAttribute.toJSON()
-                },
-                request
-            );
+            const canAcceptWithNewAttributeResult = await processor.canAccept(proposeAttributeRequestItem, { accept: true, attribute: newAttribute.toJSON() }, request);
 
             expect(canAcceptWithNewAttributeResult).errorValidationResult({
                 code: "error.consumption.requests.invalidAcceptParameters",
@@ -992,10 +884,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
 
             const canAcceptWithExistingAttributeResult = await processor.canAccept(
                 proposeAttributeRequestItem,
-                {
-                    accept: true,
-                    attributeId: existingAttribute.id.toString()
-                },
+                { accept: true, attributeId: existingAttribute.id.toString() },
                 request
             );
 
@@ -1010,16 +899,12 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         const sender = CoreAddress.from("Sender");
         let recipient: CoreAddress;
 
-        beforeAll(function () {
-            recipient = accountController.identity.address;
-        });
+        beforeAll(() => (recipient = accountController.identity.address));
 
         describe("accept with existing Attribute", function () {
             test("accept with existing RepositoryAttribute", async function () {
                 const attribute = await consumptionController.attributes.createRepositoryAttribute({
-                    content: TestObjectFactory.createIdentityAttribute({
-                        owner: recipient
-                    })
+                    content: TestObjectFactory.createIdentityAttribute({ owner: recipient })
                 });
 
                 const requestItem = ProposeAttributeRequestItem.from({
@@ -1034,10 +919,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     isOwn: false,
                     peer: sender,
                     status: LocalRequestStatus.DecisionRequired,
-                    content: Request.from({
-                        id: requestId,
-                        items: [requestItem]
-                    }),
+                    content: Request.from({ id: requestId, items: [requestItem] }),
                     statusLog: []
                 });
 
@@ -1056,9 +938,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
 
             test("accept with existing IdentityAttribute whose predecessor was already shared", async function () {
                 const predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
-                    content: TestObjectFactory.createIdentityAttribute({
-                        owner: accountController.identity.address
-                    })
+                    content: TestObjectFactory.createIdentityAttribute({ owner: accountController.identity.address })
                 });
 
                 const predecessorOwnSharedIdentityAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
@@ -1093,10 +973,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     isOwn: false,
                     peer: sender,
                     status: LocalRequestStatus.DecisionRequired,
-                    content: Request.from({
-                        id: requestId,
-                        items: [requestItem]
-                    }),
+                    content: Request.from({ id: requestId, items: [requestItem] }),
                     statusLog: []
                 });
 
@@ -1179,9 +1056,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
 
             test("accept with existing IdentityAttribute whose predecessor was already shared but is DeletedByPeer", async function () {
                 const predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
-                    content: TestObjectFactory.createIdentityAttribute({
-                        owner: accountController.identity.address
-                    })
+                    content: TestObjectFactory.createIdentityAttribute({ owner: accountController.identity.address })
                 });
 
                 const { successor: successorRepositoryAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(predecessorRepositoryAttribute.id, {
@@ -1225,10 +1100,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     isOwn: false,
                     peer: sender,
                     status: LocalRequestStatus.DecisionRequired,
-                    content: Request.from({
-                        id: requestId,
-                        items: [requestItem]
-                    }),
+                    content: Request.from({ id: requestId, items: [requestItem] }),
                     statusLog: []
                 });
 
@@ -1248,9 +1120,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
 
             test("accept with existing IdentityAttribute whose predecessor was already shared but is ToBeDeletedByPeer", async function () {
                 const predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
-                    content: TestObjectFactory.createIdentityAttribute({
-                        owner: CoreAddress.from(accountController.identity.address)
-                    })
+                    content: TestObjectFactory.createIdentityAttribute({ owner: CoreAddress.from(accountController.identity.address) })
                 });
 
                 const { successor: successorRepositoryAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(predecessorRepositoryAttribute.id, {
@@ -1291,10 +1161,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     isOwn: false,
                     peer: sender,
                     status: LocalRequestStatus.DecisionRequired,
-                    content: Request.from({
-                        id: requestId,
-                        items: [requestItem]
-                    }),
+                    content: Request.from({ id: requestId, items: [requestItem] }),
                     statusLog: []
                 });
 
@@ -1314,9 +1181,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
 
             test("accept with existing IdentityAttribute that is already shared and the latest shared version", async function () {
                 const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
-                    content: TestObjectFactory.createIdentityAttribute({
-                        owner: accountController.identity.address
-                    })
+                    content: TestObjectFactory.createIdentityAttribute({ owner: accountController.identity.address })
                 });
 
                 const alreadySharedAttribute = await consumptionController.attributes.createSharedLocalAttributeCopy({
@@ -1341,10 +1206,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     isOwn: false,
                     peer: sender,
                     status: LocalRequestStatus.DecisionRequired,
-                    content: Request.from({
-                        id: requestId,
-                        items: [requestItem]
-                    }),
+                    content: Request.from({ id: requestId, items: [requestItem] }),
                     statusLog: []
                 });
 
@@ -1409,15 +1271,11 @@ describe("ProposeAttributeRequestItemProcessor", function () {
 
             test("accept with existing IdentityAttribute that is already shared and the latest shared version but is DeletedByPeer", async function () {
                 const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
-                    content: TestObjectFactory.createIdentityAttribute({
-                        owner: accountController.identity.address
-                    })
+                    content: TestObjectFactory.createIdentityAttribute({ owner: accountController.identity.address })
                 });
 
                 const alreadySharedAttribute = await consumptionController.attributes.createAttributeUnsafe({
-                    content: TestObjectFactory.createIdentityAttribute({
-                        owner: accountController.identity.address
-                    }),
+                    content: TestObjectFactory.createIdentityAttribute({ owner: accountController.identity.address }),
                     shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: repositoryAttribute.id, peer: sender, sourceReference: await CoreIdHelper.notPrefixed.generate() }),
                     deletionInfo: LocalAttributeDeletionInfo.from({
                         deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
@@ -1441,10 +1299,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     isOwn: false,
                     peer: sender,
                     status: LocalRequestStatus.DecisionRequired,
-                    content: Request.from({
-                        id: requestId,
-                        items: [requestItem]
-                    }),
+                    content: Request.from({ id: requestId, items: [requestItem] }),
                     statusLog: []
                 });
 
@@ -1463,17 +1318,12 @@ describe("ProposeAttributeRequestItemProcessor", function () {
 
             test("accept with existing IdentityAttribute that is already shared and the latest shared version but is ToBeDeletedByPeer", async function () {
                 const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
-                    content: TestObjectFactory.createIdentityAttribute({
-                        owner: CoreAddress.from(accountController.identity.address)
-                    })
+                    content: TestObjectFactory.createIdentityAttribute({ owner: CoreAddress.from(accountController.identity.address) })
                 });
 
                 const alreadySharedAttribute = await consumptionController.attributes.createAttributeUnsafe({
-                    content: TestObjectFactory.createIdentityAttribute({
-                        owner: CoreAddress.from(accountController.identity.address)
-                    }),
-                    shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: repositoryAttribute.id, peer: sender, sourceReference: await CoreIdHelper.notPrefixed.generate() }),
-                    deletionInfo: LocalAttributeDeletionInfo.from({ deletionStatus: LocalAttributeDeletionStatus.ToBeDeletedByPeer, deletionDate: CoreDate.utc().add({ days: 1 }) })
+                    content: TestObjectFactory.createIdentityAttribute({ owner: CoreAddress.from(accountController.identity.address) }),
+                    shareInfo: LocalAttributeShareInfo.from({ sourceAttribute: repositoryAttribute.id, peer: sender, sourceReference: await CoreIdHelper.notPrefixed.generate() })
                 });
 
                 const requestItem = ProposeAttributeRequestItem.from({
@@ -1492,10 +1342,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     isOwn: false,
                     peer: sender,
                     status: LocalRequestStatus.DecisionRequired,
-                    content: Request.from({
-                        id: requestId,
-                        items: [requestItem]
-                    }),
+                    content: Request.from({ id: requestId, items: [requestItem] }),
                     statusLog: []
                 });
 
@@ -1531,10 +1378,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     isOwn: false,
                     peer: sender,
                     status: LocalRequestStatus.DecisionRequired,
-                    content: Request.from({
-                        id: requestId,
-                        items: [requestItem]
-                    }),
+                    content: Request.from({ id: requestId, items: [requestItem] }),
                     statusLog: []
                 });
 
@@ -1565,10 +1409,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     isOwn: false,
                     peer: sender,
                     status: LocalRequestStatus.DecisionRequired,
-                    content: Request.from({
-                        id: requestId,
-                        items: [requestItem]
-                    }),
+                    content: Request.from({ id: requestId, items: [requestItem] }),
                     statusLog: []
                 });
 
@@ -1609,10 +1450,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     isOwn: false,
                     peer: sender,
                     status: LocalRequestStatus.DecisionRequired,
-                    content: Request.from({
-                        id: requestId,
-                        items: [requestItem]
-                    }),
+                    content: Request.from({ id: requestId, items: [requestItem] }),
                     statusLog: []
                 });
 
@@ -1660,10 +1498,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     isOwn: false,
                     peer: sender,
                     status: LocalRequestStatus.DecisionRequired,
-                    content: Request.from({
-                        id: requestId,
-                        items: [requestItem]
-                    }),
+                    content: Request.from({ id: requestId, items: [requestItem] }),
                     statusLog: []
                 });
 
@@ -2244,10 +2079,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 isOwn: false,
                 peer: peer,
                 status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
+                content: Request.from({ id: requestId, items: [requestItem] }),
                 statusLog: []
             });
             const attributeId = await ConsumptionIds.attribute.generate();
@@ -2273,9 +2105,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             const sender = CoreAddress.from("Sender");
 
             const predecessorPeerSharedIdentityAttribute = await consumptionController.attributes.createSharedLocalAttribute({
-                content: TestObjectFactory.createIdentityAttribute({
-                    owner: sender
-                }),
+                content: TestObjectFactory.createIdentityAttribute({ owner: sender }),
                 peer: sender,
                 sourceReference: CoreId.from("oldReqRef")
             });
@@ -2286,17 +2116,13 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 attribute: TestObjectFactory.createIdentityAttribute()
             });
             const requestId = await ConsumptionIds.request.generate();
-
             const incomingRequest = LocalRequest.from({
                 id: requestId,
                 createdAt: CoreDate.utc(),
                 isOwn: false,
                 peer: sender,
                 status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
+                content: Request.from({ id: requestId, items: [requestItem] }),
                 statusLog: []
             });
 
@@ -2305,10 +2131,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 result: ResponseItemResult.Accepted,
                 predecessorId: predecessorPeerSharedIdentityAttribute.id,
                 successorId: successorId,
-                successorContent: TestObjectFactory.createIdentityAttribute({
-                    owner: sender,
-                    tags: ["x:aNewTag"]
-                })
+                successorContent: TestObjectFactory.createIdentityAttribute({ owner: sender, tags: ["x:aNewTag"] })
             });
 
             const event = await processor.applyIncomingResponseItem(responseItem, requestItem, incomingRequest);
