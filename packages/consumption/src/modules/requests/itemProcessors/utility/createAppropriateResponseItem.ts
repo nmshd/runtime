@@ -7,8 +7,7 @@ import {
     ReadAttributeAcceptResponseItem,
     ResponseItemResult
 } from "@nmshd/content";
-import { CoreDate } from "@nmshd/core-types";
-import { AttributesController, ForwardedSharingInfo, OwnIdentityAttribute } from "../../../attributes";
+import { AttributesController, OwnIdentityAttribute } from "../../../attributes";
 import { LocalRequestInfo } from "../IRequestItemProcessor";
 
 export default async function createAppropriateResponseItem(
@@ -77,21 +76,12 @@ export default async function createAppropriateResponseItem(
         });
     }
 
-    const ownIdentityAttributeSuccessorParams = {
-        content: ownIdentityAttribute.content,
-        sharingInfo: ForwardedSharingInfo.from({
-            peer: requestInfo.peer,
-            sourceReference: requestInfo.id,
-            sharedAt: CoreDate.utc()
-        })
-    };
-    const ownIdentityAttributesAfterSuccession = await attributesController.succeedOwnIdentityAttribute(latestSharedVersion, ownIdentityAttributeSuccessorParams);
-    const succeededOwnIdentityAttribute = ownIdentityAttributesAfterSuccession.successor;
+    await attributesController.addForwardedSharingInfoToAttribute(ownIdentityAttribute, requestInfo.peer, requestInfo.id);
 
     return AttributeSuccessionAcceptResponseItem.from({
         result: ResponseItemResult.Accepted,
-        successorId: succeededOwnIdentityAttribute.id,
-        successorContent: succeededOwnIdentityAttribute.content,
+        successorId: ownIdentityAttribute.id,
+        successorContent: ownIdentityAttribute.content,
         predecessorId: latestSharedVersion.id
     });
 }
@@ -115,7 +105,7 @@ async function mergeTagsOfOwnIdentityAttribute(
     newTags: string[],
     attributesController: AttributesController
 ): Promise<OwnIdentityAttribute> {
-    const repositoryAttributeSuccessorParams = {
+    const ownIdentityAttributeSuccessorParams = {
         content: {
             ...ownIdentityAttribute.content.toJSON(),
             tags: [...(ownIdentityAttribute.content.tags ?? []), ...newTags]
@@ -123,6 +113,6 @@ async function mergeTagsOfOwnIdentityAttribute(
         succeeds: ownIdentityAttribute.id.toString()
     };
 
-    const ownIdentityAttributesAfterSuccession = await attributesController.succeedOwnIdentityAttribute(ownIdentityAttribute, repositoryAttributeSuccessorParams);
+    const ownIdentityAttributesAfterSuccession = await attributesController.succeedOwnIdentityAttribute(ownIdentityAttribute, ownIdentityAttributeSuccessorParams);
     return ownIdentityAttributesAfterSuccession.successor;
 }

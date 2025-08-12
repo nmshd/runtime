@@ -10,6 +10,7 @@ export interface IOwnIdentityAttributeSuccessorParams extends IAbstractAttribute
     content: IdentityAttribute;
 }
 
+// TODO: do we need this type?
 @type("OwnIdentityAttributeSuccessorParams")
 export class OwnIdentityAttributeSuccessorParams extends AbstractAttributeSuccessorParams implements IOwnIdentityAttributeSuccessorParams {
     @validate()

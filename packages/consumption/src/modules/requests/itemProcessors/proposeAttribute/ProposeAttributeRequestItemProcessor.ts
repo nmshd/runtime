@@ -236,10 +236,12 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
 
             if (parsedParams.tags && parsedParams.tags.length > 0) {
                 const mergedTags = existingAttribute.content.tags ? [...existingAttribute.content.tags, ...parsedParams.tags] : parsedParams.tags;
-                existingAttribute.content.tags = mergedTags;
 
                 const successorParams = OwnIdentityAttributeSuccessorParams.from({
-                    content: existingAttribute.content
+                    content: {
+                        ...existingAttribute.content.toJSON(),
+                        tags: mergedTags
+                    }
                 });
                 const attributesAfterSuccession = await this.consumptionController.attributes.succeedOwnIdentityAttribute(existingAttribute, successorParams);
                 existingAttribute = attributesAfterSuccession.successor;
