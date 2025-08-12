@@ -276,13 +276,6 @@ describe("MessageController", function () {
             await expect(TestUtil.sendMessage(sender, recipientWithPendingRelationship)).resolves.not.toThrow();
         });
 
-        // TODO: do we need such a test?
-        // test("should decrypt a Message on a terminated Relationship", async function () {
-        //     const messageId = messageExchangedBeforeTermination.id.toString();
-        //     await expect(sender.messages.updateBackboneData([messageId])).resolves.not.toThrow();
-        //     await expect(recipientWithPendingRelationship.messages.updateBackboneData([messageId])).resolves.not.toThrow();
-        // });
-
         test("should be able to receive a Message sent on a pending Relationship after the Relationship was activated", async function () {
             const idOfSentMessageDuringPendingRelationship = (await TestUtil.sendMessage(sender, recipientWithPendingRelationship)).id;
 
