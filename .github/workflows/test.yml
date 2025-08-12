@@ -13,13 +13,13 @@ jobs:
   run-checks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: bash .ci/runChecks.sh
 
   test-app-runtime:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Start Backbone
         run: npm run start:backbone
       - uses: actions/setup-node@v4
@@ -42,7 +42,7 @@ jobs:
   test-consumption-mongodb:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Start Backbone
         run: npm run start:backbone
       - uses: actions/setup-node@v4
@@ -62,7 +62,7 @@ jobs:
   test-consumption-loki:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Start Backbone
         run: npm run start:backbone
       - uses: actions/setup-node@v4
@@ -84,7 +84,7 @@ jobs:
   test-content:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
         with:
           node-version: current
@@ -100,7 +100,7 @@ jobs:
   test-core-types:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
         with:
           node-version: current
@@ -116,7 +116,7 @@ jobs:
   test-runtime-mongodb:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Start Backbone
         run: npm run start:backbone
       - uses: actions/setup-node@v4
@@ -138,7 +138,7 @@ jobs:
   test-runtime-loki:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Start Backbone
         run: npm run start:backbone
       - uses: actions/setup-node@v4
@@ -163,7 +163,7 @@ jobs:
   test-transport-mongodb:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Start Backbone
         run: npm run start:backbone
       - uses: actions/setup-node@v4
@@ -185,7 +185,7 @@ jobs:
   test-transport-loki:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Start Backbone
         run: npm run start:backbone
       - uses: actions/setup-node@v4
