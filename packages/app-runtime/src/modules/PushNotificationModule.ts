@@ -51,9 +51,7 @@ export class PushNotificationModule extends AppRuntimeModule<PushNotificationMod
                 case BackboneEventName.ExternalEventCreated:
                     const result = await this.syncEverythingUntilHasChanges(services);
 
-                    if (result) {
-                        this.runtime.eventBus.publish(new ExternalEventReceivedEvent(accRef, result));
-                    }
+                    if (result) this.runtime.eventBus.publish(new ExternalEventReceivedEvent(accRef, result));
 
                     break;
                 default:
@@ -78,12 +76,14 @@ export class PushNotificationModule extends AppRuntimeModule<PushNotificationMod
             return syncResult.value;
         }
 
-        let retries = 0;
-        const maxRetries = 5;
+        let currentAttempt = 1;
+        const maxAttempts = 6;
 
-        while (retries <= maxRetries) {
-            retries++;
-            await sleep(250 * Math.ceil(retries / 2));
+        while (currentAttempt <= maxAttempts) {
+            this.logger.info(`No changes found in sync attempt ${currentAttempt}. Retrying...`);
+            currentAttempt++;
+
+            await sleep(250 * Math.ceil(currentAttempt / 2));
 
             const syncResult = await services.transportServices.account.syncEverything();
             if (syncResult.isError) {
@@ -92,8 +92,6 @@ export class PushNotificationModule extends AppRuntimeModule<PushNotificationMod
             }
 
             if (hasChanges(syncResult.value)) return syncResult.value;
-
-            this.logger.info(`No changes found in sync attempt ${retries + 1}. Retrying...`);
         }
 
         return;
