@@ -199,7 +199,6 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         const request = await this._sent(parsedParams.requestId, parsedParams.requestSourceObject);
 
         const peer = parsedParams.requestSourceObject.recipients[0].address;
-        if (!peer) throw new Error("No recipient was specified for the Message of the Request");
         await this._setDeletionRequestSent(request.content, peer);
 
         this.eventBus.publish(

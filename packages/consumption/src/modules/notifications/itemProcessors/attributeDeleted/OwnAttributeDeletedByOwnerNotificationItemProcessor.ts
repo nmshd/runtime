@@ -98,8 +98,9 @@ export class OwnAttributeDeletedByOwnerNotificationItemProcessor extends Abstrac
             if (
                 attr.peerSharingInfo.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.ToBeDeleted ||
                 attr.peerSharingInfo.deletionInfo?.deletionStatus === ThirdPartyRelationshipAttributeDeletionStatus.ToBeDeleted
-            )
+            ) {
                 continue;
+            }
 
             attr.peerSharingInfo.deletionInfo = undefined;
             await this.consumptionController.attributes.updateAttributeUnsafe(attr);
