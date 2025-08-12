@@ -65,26 +65,35 @@ export class PushNotificationModule extends AppRuntimeModule<PushNotificationMod
     }
 
     private async syncEverythingUntilHasChanges(services: RuntimeServices): Promise<SyncEverythingResponse | undefined> {
+        const hasChanges = (value: SyncEverythingResponse): boolean =>
+            Object.values(value)
+                .filter((v) => Array.isArray(v))
+                .some((array) => array.length > 0);
+
+        const syncResult = await services.transportServices.account.syncEverything();
+
+        if (syncResult.isError) {
+            this.logger.error(syncResult.error);
+        } else if (hasChanges(syncResult.value)) {
+            return syncResult.value;
+        }
+
         let retries = 0;
         const maxRetries = 5;
 
         while (retries <= maxRetries) {
+            retries++;
+            await sleep(250 * Math.ceil(retries / 2));
+
             const syncResult = await services.transportServices.account.syncEverything();
             if (syncResult.isError) {
-                this.logger.error(syncResult);
+                this.logger.error(syncResult.error);
                 continue;
             }
 
-            const value = syncResult.value;
-            const arrayProperties = Object.values(value).filter((v) => Array.isArray(v));
-            const hasChanges = arrayProperties.some((array) => array.length > 0);
-
-            if (hasChanges) return value;
+            if (hasChanges(syncResult.value)) return syncResult.value;
 
             this.logger.info(`No changes found in sync attempt ${retries + 1}. Retrying...`);
-
-            retries++;
-            await sleep(250 * Math.ceil(retries / 2));
         }
 
         return;
