@@ -25,6 +25,8 @@ import {
     AcceptReadAttributeRequestItemParametersWithNewAttributeJSON,
     ConsumptionController,
     ConsumptionIds,
+    EmittedAttributeDeletionInfo,
+    EmittedAttributeDeletionStatus,
     LocalRequest,
     LocalRequestStatus,
     OwnIdentityAttribute,
@@ -1521,7 +1523,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
         });
 
         describe("accept with existing Attribute", function () {
-            test("accept with existing RepositoryAttribute", async function () {
+            test("accept with existing own IdentityAttribute", async function () {
                 const attribute = await consumptionController.attributes.createOwnIdentityAttribute({
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: recipient
@@ -1559,7 +1561,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 expect(updatedAttribute.forwardedSharingInfos![0].peer).toStrictEqual(incomingRequest.peer);
             });
 
-            test("accept with existing RepositoryAttribute and new tags", async function () {
+            test("accept with existing own IdentityAttribute and new tags", async function () {
                 const ownIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: accountController.identity.address,
@@ -1599,16 +1601,16 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 expect(updatedOwnIdentityAttribute.content.tags).toStrictEqual(["x:anExistingTag", "x:aNewTag"]);
             });
 
-            test("accept with existing IdentityAttribute whose predecessor was already shared", async function () {
-                const predecessorRepositoryAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
+            test("accept with existing own IdentityAttribute whose predecessor was already shared", async function () {
+                const predecessorOwnIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: CoreAddress.from(accountController.identity.address)
                     })
                 });
 
-                await consumptionController.attributes.addForwardedSharingInfoToAttribute(predecessorRepositoryAttribute, sender, CoreId.from("initialRequest"));
+                await consumptionController.attributes.addForwardedSharingInfoToAttribute(predecessorOwnIdentityAttribute, sender, CoreId.from("initialRequest"));
 
-                const { successor: successorRepositoryAttribute } = await consumptionController.attributes.succeedOwnIdentityAttribute(predecessorRepositoryAttribute, {
+                const { successor: successorOwnIdentityAttribute } = await consumptionController.attributes.succeedOwnIdentityAttribute(predecessorOwnIdentityAttribute, {
                     content: IdentityAttribute.from({
                         value: {
                             "@type": "GivenName",
@@ -1639,7 +1641,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
                     accept: true,
-                    existingAttributeId: successorRepositoryAttribute.id.toString()
+                    existingAttributeId: successorOwnIdentityAttribute.id.toString()
                 };
 
                 const result = await processor.accept(requestItem, acceptParams, incomingRequest);
@@ -1657,7 +1659,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 await consumptionController.attributes.addForwardedSharingInfoToAttribute(predecessor, sender, CoreId.from("initialRequest"));
 
-                const { successor: successor } = await consumptionController.attributes.succeedOwnIdentityAttribute(predecessor, {
+                const { successor } = await consumptionController.attributes.succeedOwnIdentityAttribute(predecessor, {
                     content: IdentityAttribute.from({
                         owner: accountController.identity.address,
                         value: GivenName.fromAny({ value: "aNewGivenName" }),
@@ -1697,35 +1699,27 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 expect(updatedSuccessor.content.tags).toStrictEqual(["x:anExistingTag", "x:aNewTag"]);
             });
 
-            test("accept with existing IdentityAttribute whose predecessor was already shared but is DeletedByPeer", async function () {
-                const predecessorRepositoryAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
+            test("accept with existing own IdentityAttribute whose predecessor was already shared but is DeletedByPeer", async function () {
+                const predecessor = await consumptionController.attributes.createOwnIdentityAttribute({
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: accountController.identity.address
                     })
                 });
+                await consumptionController.attributes.addForwardedSharingInfoToAttribute(predecessor, sender, CoreId.from("reqRef"));
 
-                const { successor: successorRepositoryAttribute } = await consumptionController.attributes.succeedOwnIdentityAttribute(predecessorRepositoryAttribute, {
+                const deletionInfo = EmittedAttributeDeletionInfo.from({
+                    deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
+                    deletionDate: CoreDate.utc().subtract({ days: 1 })
+                });
+                await consumptionController.attributes.setForwardedDeletionInfoOfAttributes([predecessor], deletionInfo, sender);
+
+                const { successor } = await consumptionController.attributes.succeedOwnIdentityAttribute(predecessor, {
                     content: IdentityAttribute.from({
                         value: {
                             "@type": "GivenName",
                             value: "A succeeded given name"
                         },
                         owner: accountController.identity.address
-                    })
-                });
-
-                await consumptionController.attributes.createAttributeUnsafe({
-                    content: TestObjectFactory.createIdentityAttribute({
-                        owner: accountController.identity.address
-                    }),
-                    shareInfo: LocalAttributeShareInfo.from({
-                        sourceAttribute: predecessorRepositoryAttribute.id,
-                        peer: sender,
-                        sourceReference: await CoreIdHelper.notPrefixed.generate()
-                    }),
-                    deletionInfo: LocalAttributeDeletionInfo.from({
-                        deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
-                        deletionDate: CoreDate.utc().subtract({ days: 1 })
                     })
                 });
 
@@ -1750,26 +1744,29 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
                     accept: true,
-                    existingAttributeId: successorRepositoryAttribute.id.toString()
+                    existingAttributeId: successor.id.toString()
                 };
 
                 const result = await processor.accept(requestItem, acceptParams, incomingRequest);
                 expect(result).toBeInstanceOf(ReadAttributeAcceptResponseItem);
 
-                const createdAttribute = await consumptionController.attributes.getLocalAttribute((result as ReadAttributeAcceptResponseItem).attributeId);
-                expect(createdAttribute!.content).toStrictEqual(successorRepositoryAttribute.content);
-                expect(createdAttribute!.deletionInfo).toBeUndefined();
-                expect(createdAttribute!.succeeds).toBeUndefined();
+                const updatedSuccessor = (await consumptionController.attributes.getLocalAttribute(
+                    (result as ReadAttributeAcceptResponseItem).attributeId
+                )) as OwnIdentityAttribute;
+                expect(updatedSuccessor.id).toStrictEqual(successor.id);
+                expect(updatedSuccessor.forwardedSharingInfos).toHaveLength(1);
+                expect(updatedSuccessor.forwardedSharingInfos![0].peer).toStrictEqual(sender);
+                expect(updatedSuccessor.forwardedSharingInfos![0].deletionInfo).toBeUndefined();
             });
 
             test("accept with existing IdentityAttribute whose predecessor was already shared but is ToBeDeletedByPeer", async function () {
-                const predecessorRepositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+                const predecessorRepositoryAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: CoreAddress.from(accountController.identity.address)
                     })
                 });
 
-                const { successor: successorRepositoryAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(predecessorRepositoryAttribute.id, {
+                const { successor: successorRepositoryAttribute } = await consumptionController.attributes.succeedOwnIdentityAttribute(predecessorRepositoryAttribute.id, {
                     content: IdentityAttribute.from({
                         value: {
                             "@type": "GivenName",
