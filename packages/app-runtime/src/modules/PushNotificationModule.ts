@@ -44,6 +44,7 @@ export class PushNotificationModule extends AppRuntimeModule<PushNotificationMod
                         this.logger.error(walletResult);
                         return;
                     }
+
                     break;
                 case BackboneEventName.ExternalEventCreated:
                     const syncResult = await services.transportServices.account.syncEverything();
