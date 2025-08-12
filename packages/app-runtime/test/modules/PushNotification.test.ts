@@ -54,7 +54,7 @@ describe("PushNotificationModuleTest", function () {
     });
 
     test("should do a sync everything when ExternalEventCreated is received", async function () {
-        await TestUtil.sendMessage(session2, session);
+        const message = await TestUtil.sendMessage(session2, session);
 
         runtime.eventBus.publish(
             new RemoteNotificationEvent({
@@ -67,6 +67,6 @@ describe("PushNotificationModuleTest", function () {
             })
         );
 
-        await expect(eventBus).toHavePublished(ExternalEventReceivedEvent);
+        await expect(eventBus).toHavePublished(ExternalEventReceivedEvent, (e) => e.data.messages.some((m) => m.id === message.id));
     });
 });
