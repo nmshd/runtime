@@ -7,14 +7,18 @@ describe("PushNotificationModuleTest", function () {
 
     let runtime: AppRuntime;
     let session: LocalAccountSession;
+    let session2: LocalAccountSession;
     let devicePushIdentifier = "dummy value";
 
     beforeAll(async function () {
         runtime = await TestUtil.createRuntime({ pushService: "dummy", modules: { pushNotification: { enabled: true } } }, undefined, eventBus);
         await runtime.start();
 
-        const accounts = await TestUtil.provideAccounts(runtime, 1);
+        const accounts = await TestUtil.provideAccounts(runtime, 2);
         session = await runtime.selectAccount(accounts[0].id);
+        session2 = await runtime.selectAccount(accounts[1].id);
+
+        await TestUtil.addRelationship(session, session2);
     });
 
     afterAll(async function () {
@@ -50,6 +54,8 @@ describe("PushNotificationModuleTest", function () {
     });
 
     test("should do a sync everything when ExternalEventCreated is received", async function () {
+        const message = await TestUtil.sendMessage(session2, session);
+
         runtime.eventBus.publish(
             new RemoteNotificationEvent({
                 content: {
@@ -61,6 +67,6 @@ describe("PushNotificationModuleTest", function () {
             })
         );
 
-        await expect(eventBus).toHavePublished(ExternalEventReceivedEvent);
+        await expect(eventBus).toHavePublished(ExternalEventReceivedEvent, (e) => e.data.messages.some((m) => m.id === message.id));
     });
 });
