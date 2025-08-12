@@ -1,3 +1,5 @@
+import { sleep } from "@js-soft/ts-utils";
+import { RuntimeServices, SyncEverythingResponse } from "@nmshd/runtime";
 import { AppRuntimeErrors } from "../AppRuntimeErrors";
 import { AccountSelectedEvent, ExternalEventReceivedEvent, RemoteNotificationEvent, RemoteNotificationRegistrationEvent } from "../events";
 import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "./AppRuntimeModule";
@@ -47,13 +49,11 @@ export class PushNotificationModule extends AppRuntimeModule<PushNotificationMod
 
                     break;
                 case BackboneEventName.ExternalEventCreated:
-                    const syncResult = await services.transportServices.account.syncEverything();
-                    if (syncResult.isError) {
-                        this.logger.error(syncResult);
-                        return;
-                    }
+                    const result = await this.syncEverythingUntilHasChanges(services);
 
-                    this.runtime.eventBus.publish(new ExternalEventReceivedEvent(accRef, syncResult.value));
+                    if (result) {
+                        this.runtime.eventBus.publish(new ExternalEventReceivedEvent(accRef, result));
+                    }
 
                     break;
                 default:
@@ -62,6 +62,32 @@ export class PushNotificationModule extends AppRuntimeModule<PushNotificationMod
         } catch (e) {
             this.logger.error(e);
         }
+    }
+
+    private async syncEverythingUntilHasChanges(services: RuntimeServices): Promise<SyncEverythingResponse | undefined> {
+        let retries = 0;
+        const maxRetries = 5;
+
+        while (retries <= maxRetries) {
+            const syncResult = await services.transportServices.account.syncEverything();
+            if (syncResult.isError) {
+                this.logger.error(syncResult);
+                continue;
+            }
+
+            const value = syncResult.value;
+            const arrayProperties = Object.values(value).filter((v) => Array.isArray(v));
+            const hasChanges = arrayProperties.some((array) => array.length > 0);
+
+            if (hasChanges) return value;
+
+            this.logger.info(`No changes found in sync attempt ${retries + 1}. Retrying...`);
+
+            retries++;
+            await sleep(250 * Math.ceil(retries / 2));
+        }
+
+        return;
     }
 
     private async handleTokenRegistration(event: RemoteNotificationRegistrationEvent) {
