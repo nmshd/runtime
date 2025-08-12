@@ -1,4 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
+import { Serializable } from "@js-soft/ts-serval";
 import { CoreDate, CoreId } from "@nmshd/core-types";
 import { AccountController, IdentityDeletionProcess, IdentityDeletionProcessStatus, Message, Relationship, RelationshipStatus, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
@@ -260,23 +261,30 @@ describe("MessageController", function () {
         });
     });
 
-    // TODO: even though the tests pass, they log errors: error.transport.secrets.wrongSecretType: 'The given secret type is not supported!'
     describe("Sending and decrypting Messages for pending Relationships", function () {
         let recipientWithPendingRelationship: AccountController;
         let pendingRelationship: Relationship;
 
-        beforeAll(async function () {
+        beforeEach(async function () {
             recipientWithPendingRelationship = (await TestUtil.provideAccounts(transport, connection, 1))[0];
             pendingRelationship = await TestUtil.addPendingRelationship(sender, recipientWithPendingRelationship);
         });
 
-        afterAll(async () => await recipientWithPendingRelationship.close());
+        afterEach(async () => await recipientWithPendingRelationship.close());
 
-        test("should be able to send a Message on a pending Relationship", async function () {
-            await expect(TestUtil.sendMessage(sender, recipientWithPendingRelationship)).resolves.not.toThrow();
+        test("should be able to send a Message on a pending Relationship as the templator", async function () {
+            await expect(
+                sender.messages.sendMessage({ recipients: [recipientWithPendingRelationship.identity.address], content: Serializable.fromAny({ content: "TestContent" }) })
+            ).resolves.not.toThrow();
         });
 
-        test("should be able to receive a Message sent on a pending Relationship after the Relationship was activated", async function () {
+        test("should be able to send a Message on a pending Relationship as the requestor", async function () {
+            await expect(
+                recipientWithPendingRelationship.messages.sendMessage({ recipients: [sender.identity.address], content: Serializable.fromAny({ content: "TestContent" }) })
+            ).resolves.not.toThrow();
+        });
+
+        test("should be able to receive a Message sent on a pending Relationship as a tempator after the Relationship was activated", async function () {
             const idOfSentMessageDuringPendingRelationship = (await TestUtil.sendMessage(sender, recipientWithPendingRelationship)).id;
 
             await TestUtil.acceptPendingRelationship(sender, recipientWithPendingRelationship, pendingRelationship);
@@ -284,6 +292,16 @@ describe("MessageController", function () {
             const receivedMessages = await TestUtil.syncUntilHasMessages(recipientWithPendingRelationship);
             const idOfReceivedMessageAfterActivation = receivedMessages[receivedMessages.length - 1].id;
             expect(idOfReceivedMessageAfterActivation).toStrictEqual(idOfSentMessageDuringPendingRelationship);
+        });
+
+        test("should be able to receive a Message sent on a pending Relationship as a requestor after the Relationship was activated", async function () {
+            const idOfSentMessageDuringPendingRelationship2 = (await TestUtil.sendMessage(recipientWithPendingRelationship, sender)).id;
+
+            await TestUtil.acceptPendingRelationship(sender, recipientWithPendingRelationship, pendingRelationship);
+
+            const receivedMessages2 = await TestUtil.syncUntilHasMessages(sender);
+            const idOfReceivedMessageAfterActivation2 = receivedMessages2[receivedMessages2.length - 1].id;
+            expect(idOfReceivedMessageAfterActivation2).toStrictEqual(idOfSentMessageDuringPendingRelationship2);
         });
     });
 
