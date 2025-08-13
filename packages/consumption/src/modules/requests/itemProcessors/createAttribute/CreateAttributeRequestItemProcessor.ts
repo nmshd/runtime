@@ -129,7 +129,7 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
         }
 
         if (requestItem.attribute instanceof RelationshipAttribute) {
-            if (requestItem.attribute.owner === this.currentIdentityAddress) {
+            if (requestItem.attribute.owner.equals(this.currentIdentityAddress)) {
                 const ownRelationshipAttribute = await this.consumptionController.attributes.createOwnRelationshipAttribute({
                     content: requestItem.attribute,
                     peer: requestInfo.peer,
