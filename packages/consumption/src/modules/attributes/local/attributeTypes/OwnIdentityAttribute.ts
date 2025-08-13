@@ -94,7 +94,6 @@ export class OwnIdentityAttribute extends LocalAttribute implements IOwnIdentity
     }
 
     public static override from(value: IOwnIdentityAttribute | OwnIdentityAttributeJSON): OwnIdentityAttribute {
-        const foo = super.fromAny(value) as OwnIdentityAttribute;
-        return foo;
+        return super.fromAny(value) as OwnIdentityAttribute;
     }
 }
