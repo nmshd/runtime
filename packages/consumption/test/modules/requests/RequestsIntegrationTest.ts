@@ -25,6 +25,7 @@ import {
     CreateAttributeRequestItemProcessor,
     DecideRequestParametersJSON,
     DeleteAttributeRequestItemProcessor,
+    EmittedAttributeDeletionStatus,
     ICheckPrerequisitesOfIncomingRequestParameters,
     ICompleteIncomingRequestParameters,
     ICompleteOutgoingRequestParameters,
@@ -35,12 +36,12 @@ import {
     IRequireManualDecisionOfIncomingRequestParameters,
     ISentOutgoingRequestParameters,
     IncomingRequestsController,
-    LocalAttributeDeletionStatus,
     LocalRequest,
     LocalRequestSource,
     LocalRequestStatus,
     LocalResponse,
     OutgoingRequestsController,
+    OwnIdentityAttribute,
     ProposeAttributeRequestItemProcessor,
     ReadAttributeRequestItemProcessor,
     ReceivedIncomingRequestParameters,
@@ -691,51 +692,50 @@ export class RequestsWhen {
     }
 
     public async iSentAnOutgoingRequestWithDeleteAttributeRequestItems(): Promise<void> {
-        const sOwnSharedIdentityAttribute1 = await this.context.consumptionController.attributes.createAttributeUnsafe({
+        const sOwnIdentityAttribute1 = await this.context.consumptionController.attributes.createOwnIdentityAttribute({
             content: IdentityAttribute.from({
                 value: {
                     "@type": "BirthName",
                     value: "A first name"
                 },
                 owner: this.context.currentIdentity
-            }),
-            shareInfo: {
-                peer: CoreAddress.from("peer"),
-                sourceReference: CoreId.from("shareSourceReference1")
-            }
+            })
         });
+        await this.context.consumptionController.attributes.addForwardedSharingInfoToAttribute(
+            sOwnIdentityAttribute1,
+            CoreAddress.from("peer"),
+            CoreId.from("shareSourceReference1")
+        );
 
-        const predecessorId = await ConsumptionIds.attribute.generate();
-        const sOwnSharedIdentityAttribute2 = await this.context.consumptionController.attributes.createAttributeUnsafe({
-            content: IdentityAttribute.from({
-                value: {
-                    "@type": "BirthName",
-                    value: "A second name"
-                },
-                owner: this.context.currentIdentity
-            }),
-            shareInfo: {
-                peer: CoreAddress.from("peer"),
-                sourceReference: CoreId.from("shareSourceReference2a")
-            },
-            succeeds: predecessorId
-        });
-
-        await this.context.consumptionController.attributes.createAttributeUnsafe({
-            id: predecessorId,
+        const sOwnIdentityAttribute2 = await this.context.consumptionController.attributes.createOwnIdentityAttribute({
             content: IdentityAttribute.from({
                 value: {
                     "@type": "BirthName",
                     value: "A former second name"
                 },
                 owner: this.context.currentIdentity
-            }),
-            shareInfo: {
-                peer: CoreAddress.from("peer"),
-                sourceReference: CoreId.from("shareSourceReference2b")
-            },
-            succeededBy: sOwnSharedIdentityAttribute2.id
+            })
         });
+        await this.context.consumptionController.attributes.addForwardedSharingInfoToAttribute(
+            sOwnIdentityAttribute1,
+            CoreAddress.from("peer"),
+            CoreId.from("shareSourceReference2")
+        );
+
+        const { successor: sSucceededOwnIdentityAttribute2 } = await this.context.consumptionController.attributes.succeedOwnIdentityAttribute(sOwnIdentityAttribute2, {
+            content: IdentityAttribute.from({
+                value: {
+                    "@type": "BirthName",
+                    value: "A second name"
+                },
+                owner: this.context.currentIdentity
+            })
+        });
+        await this.context.consumptionController.attributes.addForwardedSharingInfoToAttribute(
+            sOwnIdentityAttribute2,
+            CoreAddress.from("peer"),
+            CoreId.from("shareSourceReference3")
+        );
 
         const createParams: ICreateOutgoingRequestParameters = {
             content: {
@@ -743,7 +743,7 @@ export class RequestsWhen {
                     RequestItemGroup.from({
                         items: [
                             DeleteAttributeRequestItem.from({
-                                attributeId: sOwnSharedIdentityAttribute1.id.toString(),
+                                attributeId: sOwnIdentityAttribute1.id.toString(),
                                 mustBeAccepted: false
                             }),
                             TestRequestItem.from({
@@ -752,7 +752,7 @@ export class RequestsWhen {
                         ]
                     }),
                     DeleteAttributeRequestItem.from({
-                        attributeId: sOwnSharedIdentityAttribute2.id.toString(),
+                        attributeId: sSucceededOwnIdentityAttribute2.id.toString(),
                         mustBeAccepted: false
                     }),
                     TestRequestItem.from({
@@ -1079,12 +1079,14 @@ export class RequestsThen {
     }
 
     public async theDeletionInfoOfTheAssociatedAttributesAndPredecessorsIsSet(): Promise<void> {
-        const sUpdatedOwnSharedIdentityAttributes = await this.context.consumptionController.attributes.getLocalAttributes();
-        expect(sUpdatedOwnSharedIdentityAttributes).toBeDefined();
-        expect(sUpdatedOwnSharedIdentityAttributes).toHaveLength(3);
-        for (const sUpdatedOwnSharedIdentityAttribute of sUpdatedOwnSharedIdentityAttributes) {
-            expect(sUpdatedOwnSharedIdentityAttribute.deletionInfo).toBeDefined();
-            expect(sUpdatedOwnSharedIdentityAttribute.deletionInfo!.deletionStatus).toBe(LocalAttributeDeletionStatus.DeletionRequestSent);
+        const sUpdatedOwnIdentityAttributes = await this.context.consumptionController.attributes.getLocalAttributes();
+        expect(sUpdatedOwnIdentityAttributes).toBeDefined();
+        expect(sUpdatedOwnIdentityAttributes).toHaveLength(3);
+        for (const sUpdatedOwnIdentityAttribute of sUpdatedOwnIdentityAttributes) {
+            expect((sUpdatedOwnIdentityAttribute as OwnIdentityAttribute).forwardedSharingInfos![0].deletionInfo).toBeDefined();
+            expect((sUpdatedOwnIdentityAttribute as OwnIdentityAttribute).forwardedSharingInfos![0].deletionInfo!.deletionStatus).toBe(
+                EmittedAttributeDeletionStatus.DeletionRequestSent
+            );
         }
     }
 
