@@ -57,7 +57,7 @@ describe("MessageController", function () {
         await connection.close();
     });
 
-    describe("Sending Messages requires existence of pending, active or terminated Relationship", function () {
+    describe("Sending Messages requires existence of active or terminated Relationship", function () {
         beforeEach(async () => {
             const relationshipBetweenSenderAndRecipient3 = await sender.relationships.getRelationshipToIdentity(recipient3.identity.address);
 
@@ -81,6 +81,13 @@ describe("MessageController", function () {
             await TestUtil.addPendingRelationship(sender, recipient3);
             const revokedRelationship = (await TestUtil.revokeRelationship(sender, recipient3)).revokedRelationshipFromSelf;
             expect(revokedRelationship.status).toBe("Revoked");
+
+            await expect(TestUtil.sendMessage(sender, recipient3)).rejects.toThrow("error.transport.messages.hasNeitherActiveNorTerminatedRelationship");
+        });
+
+        test("cannot send Message for pending Relationship", async function () {
+            const pendingRelationship = await TestUtil.addPendingRelationship(sender, recipient3);
+            expect(pendingRelationship.status).toBe("Pending");
 
             await expect(TestUtil.sendMessage(sender, recipient3)).rejects.toThrow("error.transport.messages.hasNeitherActiveNorTerminatedRelationship");
         });
@@ -289,40 +296,6 @@ describe("MessageController", function () {
             const receivedMessages = await TestUtil.syncUntilHasMessages(recipient);
             const idOfReceivedMessageAfterReactivation = receivedMessages[receivedMessages.length - 1].id;
             expect(idOfReceivedMessageAfterReactivation).toStrictEqual(idOfSentMessageDuringTerminatedRelationship);
-        });
-    });
-
-    // TODO: even though the tests pass, they log errors: error.transport.secrets.wrongSecretType: 'The given secret type is not supported!'
-    describe("Sending and decrypting Messages for pending Relationships", function () {
-        let recipientWithPendingRelationship: AccountController;
-        let pendingRelationship: Relationship;
-
-        beforeAll(async function () {
-            recipientWithPendingRelationship = (await TestUtil.provideAccounts(transport, connection, 1))[0];
-            pendingRelationship = await TestUtil.addPendingRelationship(sender, recipientWithPendingRelationship);
-        });
-
-        afterAll(async () => await recipientWithPendingRelationship.close());
-
-        test("should be able to send a Message on a pending Relationship", async function () {
-            await expect(TestUtil.sendMessage(sender, recipientWithPendingRelationship)).resolves.not.toThrow();
-        });
-
-        // TODO: do we need such a test?
-        // test("should decrypt a Message on a terminated Relationship", async function () {
-        //     const messageId = messageExchangedBeforeTermination.id.toString();
-        //     await expect(sender.messages.updateBackboneData([messageId])).resolves.not.toThrow();
-        //     await expect(recipientWithPendingRelationship.messages.updateBackboneData([messageId])).resolves.not.toThrow();
-        // });
-
-        test("should be able to receive a Message sent on a pending Relationship after the Relationship was activated", async function () {
-            const idOfSentMessageDuringPendingRelationship = (await TestUtil.sendMessage(sender, recipientWithPendingRelationship)).id;
-
-            await TestUtil.acceptPendingRelationship(sender, recipientWithPendingRelationship, pendingRelationship);
-
-            const receivedMessages = await TestUtil.syncUntilHasMessages(recipientWithPendingRelationship);
-            const idOfReceivedMessageAfterActivation = receivedMessages[receivedMessages.length - 1].id;
-            expect(idOfReceivedMessageAfterActivation).toStrictEqual(idOfSentMessageDuringPendingRelationship);
         });
     });
 

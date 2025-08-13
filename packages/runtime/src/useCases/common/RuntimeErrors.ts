@@ -270,7 +270,7 @@ class Attributes {
     public cannotDeleteSharedAttributeWhileRelationshipIsPending(): ApplicationError {
         return new ApplicationError(
             "error.runtime.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending",
-            "The shared Attribute cannot be deleted while the Relationship to the peer is in status 'Pending'."
+            "The shared Attribute cannot be deleted while the Relationship to the peer is in status 'Pending'. If you want to delete it now, you'll have to revoke the pending Relationship."
         );
     }
 }

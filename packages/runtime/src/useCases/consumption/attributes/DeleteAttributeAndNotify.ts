@@ -54,34 +54,33 @@ export class DeleteAttributeAndNotifyUseCase extends UseCase<DeleteAttributeAndN
         const validationResult = await this.attributesController.validateFullAttributeDeletionProcess(attribute);
         if (validationResult.isError()) return Result.fail(validationResult.error);
 
-        await this.attributesController.executeFullAttributeDeletionProcess(attribute);
-
-        let notificationIds: NotificationIdString[] = [];
+        let result: Result<DeleteAttributeAndNotifyResponse>;
         if (attribute instanceof OwnIdentityAttribute) {
-            notificationIds = await this.notifyAboutDeletionOfOwnIdentityAttribute(attribute);
+            result = await this.notifyAboutDeletionOfOwnIdentityAttribute(attribute);
+        } else if (attribute instanceof OwnRelationshipAttribute || attribute instanceof PeerRelationshipAttribute) {
+            result = await this.notifyAboutDeletionOfRelationshipAttribute(attribute);
+        } else if (attribute instanceof PeerIdentityAttribute || attribute instanceof ThirdPartyRelationshipAttribute) {
+            result = await this.notifyAboutDeletionOfForwardedAttribute(attribute);
+        } else {
+            throw new Error("Type of LocalAttribute not found.");
         }
 
-        if (attribute instanceof OwnRelationshipAttribute || attribute instanceof PeerRelationshipAttribute) {
-            notificationIds = await this.notifyAboutDeletionOfRelationshipAttribute(attribute);
-        }
+        if (result.isError) return result;
 
-        if (attribute instanceof PeerIdentityAttribute || attribute instanceof ThirdPartyRelationshipAttribute) {
-            notificationIds = await this.notifyAboutDeletionOfForwardedAttribute(attribute);
-        }
+        await this.attributesController.executeFullAttributeDeletionProcess(attribute);
 
         await this.accountController.syncDatawallet();
 
-        return Result.ok({ notificationIds });
+        return result;
     }
 
-    private async notifyAboutDeletionOfOwnIdentityAttribute(attribute: OwnIdentityAttribute): Promise<NotificationIdString[]> {
+    private async notifyAboutDeletionOfOwnIdentityAttribute(attribute: OwnIdentityAttribute): Promise<Result<DeleteAttributeAndNotifyResponse>> {
         const notificationItem = OwnAttributeDeletedByOwnerNotificationItem.from({ attributeId: attribute.id });
 
         const forwardingPeers = attribute.getPeers();
-        if (forwardingPeers.length === 0) return [];
+        if (forwardingPeers.length === 0) return Result.ok({ notificationIds: [] });
 
-        const notificationIds = await this.notifyForwardingPeers(forwardingPeers, notificationItem);
-        return notificationIds;
+        return await this.notifyForwardingPeers(forwardingPeers, notificationItem);
     }
 
     private async notifyAboutDeletionOfRelationshipAttribute(attribute: OwnRelationshipAttribute | PeerRelationshipAttribute) {
@@ -90,34 +89,40 @@ export class DeleteAttributeAndNotifyUseCase extends UseCase<DeleteAttributeAndN
                 ? OwnAttributeDeletedByOwnerNotificationItem.from({ attributeId: attribute.id })
                 : PeerRelationshipAttributeDeletedByPeerNotificationItem.from({ attributeId: attribute.id });
 
-        const peerNotificationId = await this.notifyPeer(attribute.peerSharingInfo.peer, notificationItem);
+        const peerNotificationResult = await this.notifyPeer(attribute.peerSharingInfo.peer, notificationItem);
+        if (peerNotificationResult.isError) return peerNotificationResult;
 
         const forwardingPeers = attribute.getThirdParties();
-        if (forwardingPeers.length === 0) return peerNotificationId;
+        if (forwardingPeers.length === 0) return peerNotificationResult;
 
-        const forwardingNotificationIds = await this.notifyForwardingPeers(forwardingPeers, notificationItem);
+        const forwardingNotificationResult = await this.notifyForwardingPeers(forwardingPeers, notificationItem);
+        if (forwardingNotificationResult.isError) return forwardingNotificationResult;
 
-        return [...peerNotificationId, ...forwardingNotificationIds];
+        const notificationIds = [...peerNotificationResult.value.notificationIds, ...forwardingNotificationResult.value.notificationIds];
+        return Result.ok({ notificationIds });
     }
 
     private async notifyAboutDeletionOfForwardedAttribute(attribute: PeerIdentityAttribute | ThirdPartyRelationshipAttribute) {
         const notificationItem = ForwardedAttributeDeletedByPeerNotificationItem.from({ attributeId: attribute.id });
 
-        const notificationId = await this.notifyPeer(attribute.peerSharingInfo.peer, notificationItem);
-        return notificationId;
+        return await this.notifyPeer(attribute.peerSharingInfo.peer, notificationItem);
     }
 
     private async notifyForwardingPeers(
         peers: CoreAddress[],
         notificationItem: OwnAttributeDeletedByOwnerNotificationItem | PeerRelationshipAttributeDeletedByPeerNotificationItem
-    ) {
+    ): Promise<Result<DeleteAttributeAndNotifyResponse>> {
         const queryForRelationshipsToNotify = {
             "peer.address": { $in: peers.map((peer) => peer.toString()) },
             status: { $in: [RelationshipStatus.Pending, RelationshipStatus.Active, RelationshipStatus.Terminated] },
             "peerDeletionInfo.deletionStatus": { $ne: PeerDeletionStatus.Deleted }
         };
         const relationshipsToNotify = await this.relationshipsController.getRelationships(queryForRelationshipsToNotify);
-        if (relationshipsToNotify.length === 0) return [];
+        if (relationshipsToNotify.length === 0) return Result.ok({ notificationIds: [] });
+
+        if (relationshipsToNotify.some((relationship) => relationship.status === RelationshipStatus.Pending)) {
+            return Result.fail(RuntimeErrors.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending());
+        }
 
         const notificationIds = [];
 
@@ -127,18 +132,20 @@ export class DeleteAttributeAndNotifyUseCase extends UseCase<DeleteAttributeAndN
             notificationIds.push(notificationId);
         }
 
-        return notificationIds;
+        return Result.ok({ notificationIds });
     }
 
     private async notifyPeer(
         peer: CoreAddress,
         notificationItem: OwnAttributeDeletedByOwnerNotificationItem | PeerRelationshipAttributeDeletedByPeerNotificationItem | ForwardedAttributeDeletedByPeerNotificationItem
-    ) {
+    ): Promise<Result<DeleteAttributeAndNotifyResponse>> {
         const messageRecipientsValidationResult = await this.messageController.validateMessageRecipients([peer]);
-        if (messageRecipientsValidationResult.isError) return [];
+        if (messageRecipientsValidationResult.isError) {
+            return Result.fail(RuntimeErrors.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending());
+        }
 
         const notificationId = await this.sendNotification(peer, notificationItem);
-        return [notificationId];
+        return Result.ok({ notificationIds: [notificationId] });
     }
 
     private async sendNotification(
