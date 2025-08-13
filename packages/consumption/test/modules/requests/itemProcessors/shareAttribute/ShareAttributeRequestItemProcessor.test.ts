@@ -3,8 +3,6 @@ import {
     AttributeAlreadySharedAcceptResponseItem,
     GivenName,
     IdentityAttribute,
-    IIdentityAttribute,
-    IRelationshipAttribute,
     ProprietaryString,
     RelationshipAttribute,
     RelationshipAttributeConfidentiality,
@@ -20,11 +18,15 @@ import { anything, reset, spy, when } from "ts-mockito";
 import {
     ConsumptionController,
     ConsumptionIds,
+    EmittedAttributeDeletionInfo,
+    EmittedAttributeDeletionStatus,
+    IPeerIdentityAttributeSuccessorParams,
     LocalAttribute,
-    LocalAttributeDeletionStatus,
-    LocalAttributeShareInfo,
     LocalRequest,
     LocalRequestStatus,
+    OwnIdentityAttribute,
+    OwnRelationshipAttribute,
+    PeerIdentityAttribute,
     ShareAttributeRequestItemProcessor,
     ValidationResult
 } from "../../../../../src";
@@ -86,7 +88,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 result: "error",
                 expectedError: {
                     code: "error.consumption.requests.invalidRequestItem",
-                    message: "The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes."
+                    message: "The provided IdentityAttribute belongs to someone else. You can only share OwnIdentityAttributes."
                 },
                 attribute: IdentityAttribute.from({
                     value: GivenName.fromAny({ value: "aGivenName" }),
@@ -121,7 +123,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 result: "success",
                 attribute: RelationshipAttribute.from({
                     value: ProprietaryString.fromAny({ value: "aGivenName", title: "aTitle" }),
-                    owner: CoreAddress.from("Sender"),
+                    owner: CoreAddress.from("someOtherOwner"),
                     confidentiality: RelationshipAttributeConfidentiality.Public,
                     key: "aKey"
                 })
@@ -166,19 +168,38 @@ describe("ShareAttributeRequestItemProcessor", function () {
             let sourceAttribute;
 
             if (testParams.attribute instanceof IdentityAttribute) {
-                sourceAttribute = await consumptionController.attributes.createAttributeUnsafe({
-                    content: {
-                        ...testParams.attribute.toJSON(),
+                if (testParams.attribute.owner.equals("") || testParams.attribute.owner.equals(sender)) {
+                    sourceAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
+                        content: IdentityAttribute.from({
+                            ...testParams.attribute,
+                            owner: testParams.attribute.owner.equals("") ? sender : testParams.attribute.owner
+                        })
+                    });
+                } else {
+                    sourceAttribute = await consumptionController.attributes.createPeerIdentityAttribute({
+                        content: IdentityAttribute.from({
+                            ...testParams.attribute
+                        }),
+                        peer: testParams.attribute.owner,
+                        sourceReference: CoreId.from("aSourceReferenceId"),
+                        id: CoreId.from("aPeerIdentityAttributeId")
+                    });
+                }
+            } else if (testParams.attribute.owner.equals("") || testParams.attribute.owner.equals(sender)) {
+                sourceAttribute = await consumptionController.attributes.createOwnRelationshipAttribute({
+                    content: RelationshipAttribute.from({
+                        ...testParams.attribute,
                         owner: testParams.attribute.owner.equals("") ? sender : testParams.attribute.owner
-                    } as IIdentityAttribute
+                    }),
+                    peer: aThirdParty,
+                    sourceReference: CoreId.from("aSourceReferenceId")
                 });
             } else {
-                sourceAttribute = await consumptionController.attributes.createSharedLocalAttribute({
-                    content: {
-                        ...testParams.attribute.toJSON(),
-                        owner: testParams.attribute.owner.equals("") ? sender : testParams.attribute.owner
-                    } as IRelationshipAttribute,
-                    peer: aThirdParty,
+                sourceAttribute = await consumptionController.attributes.createPeerRelationshipAttribute({
+                    content: RelationshipAttribute.from({
+                        ...testParams.attribute
+                    }),
+                    peer: testParams.attribute.owner,
                     sourceReference: await ConsumptionIds.request.generate()
                 });
             }
@@ -225,7 +246,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 owner: sender
             });
 
-            const sourceAttribute = await consumptionController.attributes.createRepositoryAttribute({ content: attribute });
+            const sourceAttribute = await consumptionController.attributes.createOwnIdentityAttribute({ content: attribute });
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: IdentityAttribute.from({
@@ -245,7 +266,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
         });
 
         test("returns error when an empty string is specified for the owner of the IdentityAttribute instead of the explicit address", async function () {
-            const sourceAttribute = await consumptionController.attributes.createRepositoryAttribute({
+            const sourceAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: IdentityAttribute.from({
                     owner: sender,
                     value: GivenName.from({ value: "aGivenName" })
@@ -270,52 +291,26 @@ describe("ShareAttributeRequestItemProcessor", function () {
             });
         });
 
-        test("returns error when the IdentityAttribute is a shared copy of a RepositoryAttribute", async function () {
-            const localAttribute = await consumptionController.attributes.createAttributeUnsafe({
-                content: IdentityAttribute.from({
-                    owner: sender,
-                    value: GivenName.from({ value: "aGivenName" })
-                }),
-                shareInfo: {
-                    peer: aThirdParty,
-                    sourceReference: await ConsumptionIds.request.generate(),
-                    sourceAttribute: CoreId.from("sourceAttributeId")
-                }
-            });
-            const requestItem = ShareAttributeRequestItem.from({
-                mustBeAccepted: false,
-                attribute: localAttribute.content,
-                sourceAttributeId: localAttribute.id
-            });
-            const request = Request.from({ items: [requestItem] });
-
-            const result = await processor.canCreateOutgoingRequestItem(requestItem, request, recipient);
-
-            expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidRequestItem",
-                message: "The provided IdentityAttribute is a shared copy of a RepositoryAttribute. You can only share RepositoryAttributes."
-            });
-        });
-
         test("returns error when the IdentityAttribute is already shared with the peer", async function () {
-            const localAttribute = await consumptionController.attributes.createRepositoryAttribute({
+            const ownIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: IdentityAttribute.from({
                     owner: sender,
                     value: GivenName.from({ value: "aGivenName" })
                 })
             });
 
-            const localAttributeCopy = await consumptionController.attributes.createSharedLocalAttributeCopy({
-                peer: recipient,
-                sourceReference: await ConsumptionIds.request.generate(),
-                sourceAttributeId: localAttribute.id
-            });
-            expect(localAttributeCopy.isShared()).toBe(true);
+            const forwardedOwnIdentityAttribute = await consumptionController.attributes.addForwardedSharingInfoToAttribute(
+                ownIdentityAttribute,
+                recipient,
+                CoreId.from("aSourceReferenceId")
+            );
+
+            expect(forwardedOwnIdentityAttribute.isSharedWith(recipient)).toBe(true);
 
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: false,
-                attribute: localAttribute.content,
-                sourceAttributeId: localAttribute.id
+                attribute: forwardedOwnIdentityAttribute.content,
+                sourceAttributeId: forwardedOwnIdentityAttribute.id
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -328,34 +323,38 @@ describe("ShareAttributeRequestItemProcessor", function () {
         });
 
         test("returns success when the IdentityAttribute is already shared with the peer but DeletedByPeer", async function () {
-            const localAttribute = await consumptionController.attributes.createRepositoryAttribute({
+            const ownIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: IdentityAttribute.from({
                     owner: sender,
                     value: GivenName.from({ value: "aGivenName" })
                 })
             });
 
-            const localAttributeCopy = await consumptionController.attributes.createAttributeUnsafe({
-                content: IdentityAttribute.from({
-                    owner: sender,
-                    value: GivenName.from({ value: "aGivenName" })
-                }),
-                shareInfo: {
-                    peer: recipient,
-                    sourceReference: await ConsumptionIds.request.generate(),
-                    sourceAttribute: localAttribute.id
-                },
-                deletionInfo: {
-                    deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
+            const forwardedOwnIdentityAttribute = await consumptionController.attributes.addForwardedSharingInfoToAttribute(
+                ownIdentityAttribute,
+                recipient,
+                CoreId.from("aSourceReferenceId")
+            );
+
+            await consumptionController.attributes.setForwardedDeletionInfoOfAttributes(
+                [forwardedOwnIdentityAttribute],
+                EmittedAttributeDeletionInfo.from({
+                    deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
                     deletionDate: CoreDate.utc().subtract({ days: 1 })
-                }
-            });
-            expect(localAttributeCopy.isShared()).toBe(true);
+                }),
+                recipient
+            );
+
+            const forwardedOwnIdentityAttributeWithDeletionInfo = (await consumptionController.attributes.getLocalAttribute(
+                forwardedOwnIdentityAttribute.id
+            )) as OwnIdentityAttribute;
+
+            expect(forwardedOwnIdentityAttributeWithDeletionInfo.isSharedWith(recipient, true)).toBe(true);
 
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: false,
-                attribute: localAttribute.content,
-                sourceAttributeId: localAttribute.id
+                attribute: forwardedOwnIdentityAttributeWithDeletionInfo.content,
+                sourceAttributeId: forwardedOwnIdentityAttributeWithDeletionInfo.id
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -365,34 +364,38 @@ describe("ShareAttributeRequestItemProcessor", function () {
         });
 
         test("returns success when the IdentityAttribute is already shared with the peer but ToBeDeletedByPeer", async function () {
-            const localAttribute = await consumptionController.attributes.createRepositoryAttribute({
+            const ownIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: IdentityAttribute.from({
                     owner: sender,
                     value: GivenName.from({ value: "aGivenName" })
                 })
             });
 
-            const localAttributeCopy = await consumptionController.attributes.createAttributeUnsafe({
-                content: IdentityAttribute.from({
-                    owner: sender,
-                    value: GivenName.from({ value: "aGivenName" })
-                }),
-                shareInfo: {
-                    peer: recipient,
-                    sourceReference: await ConsumptionIds.request.generate(),
-                    sourceAttribute: localAttribute.id
-                },
-                deletionInfo: {
-                    deletionStatus: LocalAttributeDeletionStatus.ToBeDeletedByPeer,
+            const forwardedOwnIdentityAttribute = await consumptionController.attributes.addForwardedSharingInfoToAttribute(
+                ownIdentityAttribute,
+                recipient,
+                CoreId.from("aSourceReferenceId")
+            );
+
+            await consumptionController.attributes.setForwardedDeletionInfoOfAttributes(
+                [forwardedOwnIdentityAttribute],
+                EmittedAttributeDeletionInfo.from({
+                    deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
                     deletionDate: CoreDate.utc().add({ days: 1 })
-                }
-            });
-            expect(localAttributeCopy.isShared()).toBe(true);
+                }),
+                recipient
+            );
+
+            const forwardedOwnIdentityAttributeWithDeletionInfo = (await consumptionController.attributes.getLocalAttribute(
+                forwardedOwnIdentityAttribute.id
+            )) as OwnIdentityAttribute;
+
+            expect(forwardedOwnIdentityAttributeWithDeletionInfo.isSharedWith(recipient, true)).toBe(true);
 
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: false,
-                attribute: localAttribute.content,
-                sourceAttributeId: localAttribute.id
+                attribute: forwardedOwnIdentityAttributeWithDeletionInfo.content,
+                sourceAttributeId: forwardedOwnIdentityAttributeWithDeletionInfo.id
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -402,11 +405,11 @@ describe("ShareAttributeRequestItemProcessor", function () {
         });
 
         test("returns an error when a successor of the existing IdentityAttribute is already shared with the peer", async function () {
-            const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+            const ownIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: TestObjectFactory.createIdentityAttribute({ owner: sender })
             });
 
-            const { successor: successorOfRepositoryAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(repositoryAttribute.id, {
+            const { successor: successorOfOwnIdentityAttribute } = await consumptionController.attributes.succeedOwnIdentityAttribute(ownIdentityAttribute, {
                 content: {
                     "@type": "IdentityAttribute",
                     owner: sender.toString(),
@@ -417,16 +420,16 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 }
             });
 
-            const ownSharedCopyOfSuccessor = await consumptionController.attributes.createSharedLocalAttributeCopy({
-                sourceAttributeId: successorOfRepositoryAttribute.id,
-                peer: recipient,
-                sourceReference: await ConsumptionIds.request.generate()
-            });
+            const forwardedSuccessor = await consumptionController.attributes.addForwardedSharingInfoToAttribute(
+                successorOfOwnIdentityAttribute,
+                recipient,
+                CoreId.from("aSourceReferenceId")
+            );
 
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: true,
-                attribute: repositoryAttribute.content,
-                sourceAttributeId: repositoryAttribute.id
+                attribute: ownIdentityAttribute.content,
+                sourceAttributeId: ownIdentityAttribute.id
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -434,16 +437,16 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: `The provided IdentityAttribute is outdated. Its successor '${ownSharedCopyOfSuccessor.shareInfo?.sourceAttribute?.toString()}' is already shared with the peer.`
+                message: `The provided IdentityAttribute is outdated. Its successor '${forwardedSuccessor.id.toString()}' is already shared with the peer.`
             });
         });
 
         test("returns success when a successor of the existing IdentityAttribute is already shared with the peer but DeletedByPeer", async function () {
-            const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+            const ownIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: TestObjectFactory.createIdentityAttribute({ owner: sender })
             });
 
-            const { successor: successorOfRepositoryAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(repositoryAttribute.id, {
+            const { successor: successorOfOwnIdentityAttribute } = await consumptionController.attributes.succeedOwnIdentityAttribute(ownIdentityAttribute, {
                 content: {
                     "@type": "IdentityAttribute",
                     owner: sender.toString(),
@@ -454,70 +457,25 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 }
             });
 
-            await consumptionController.attributes.createAttributeUnsafe({
-                content: IdentityAttribute.from({
-                    owner: sender,
-                    value: GivenName.from({ value: "aGivenName" })
-                }),
-                shareInfo: {
-                    peer: recipient,
-                    sourceReference: await ConsumptionIds.request.generate(),
-                    sourceAttribute: successorOfRepositoryAttribute.id
-                },
-                deletionInfo: {
-                    deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
+            const forwardedSuccessor = await consumptionController.attributes.addForwardedSharingInfoToAttribute(
+                successorOfOwnIdentityAttribute,
+                recipient,
+                CoreId.from("aSourceReferenceId")
+            );
+
+            await consumptionController.attributes.setForwardedDeletionInfoOfAttributes(
+                [forwardedSuccessor],
+                EmittedAttributeDeletionInfo.from({
+                    deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
                     deletionDate: CoreDate.utc().subtract({ days: 1 })
-                }
-            });
-
-            const requestItem = ShareAttributeRequestItem.from({
-                mustBeAccepted: true,
-                attribute: repositoryAttribute.content,
-                sourceAttributeId: repositoryAttribute.id
-            });
-            const request = Request.from({ items: [requestItem] });
-
-            const result = await processor.canCreateOutgoingRequestItem(requestItem, request, recipient);
-
-            expect(result).successfulValidationResult();
-        });
-
-        test("returns success when a successor of the existing IdentityAttribute is already shared with the peer but ToBeDeletedByPeer", async function () {
-            const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
-                content: TestObjectFactory.createIdentityAttribute({ owner: sender })
-            });
-
-            const { successor: successorOfRepositoryAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(repositoryAttribute.id, {
-                content: {
-                    "@type": "IdentityAttribute",
-                    owner: sender.toString(),
-                    value: {
-                        "@type": "GivenName",
-                        value: "anotherGivenName"
-                    }
-                }
-            });
-
-            await consumptionController.attributes.createAttributeUnsafe({
-                content: IdentityAttribute.from({
-                    owner: sender,
-                    value: GivenName.from({ value: "aGivenName" })
                 }),
-                shareInfo: {
-                    peer: recipient,
-                    sourceReference: await ConsumptionIds.request.generate(),
-                    sourceAttribute: successorOfRepositoryAttribute.id
-                },
-                deletionInfo: {
-                    deletionStatus: LocalAttributeDeletionStatus.ToBeDeletedByPeer,
-                    deletionDate: CoreDate.utc().add({ days: 1 })
-                }
-            });
+                recipient
+            );
 
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: true,
-                attribute: repositoryAttribute.content,
-                sourceAttributeId: repositoryAttribute.id
+                attribute: ownIdentityAttribute.content,
+                sourceAttributeId: ownIdentityAttribute.id
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -526,20 +484,12 @@ describe("ShareAttributeRequestItemProcessor", function () {
             expect(result).successfulValidationResult();
         });
 
-        test("returns an error when a predecessor of the existing IdentityAttribute is already shared and therefore the user should notify about the Attribute succession instead of share it.", async function () {
-            const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+        test("returns an error when a successor of the existing IdentityAttribute is already shared with the peer but ToBeDeletedByPeer", async function () {
+            const ownIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: TestObjectFactory.createIdentityAttribute({ owner: sender })
             });
 
-            const ownSharedCopyOfPredecessor = await consumptionController.attributes.createSharedLocalAttributeCopy({
-                sourceAttributeId: repositoryAttribute.id,
-                peer: recipient,
-                sourceReference: await ConsumptionIds.request.generate()
-            });
-
-            expect(ownSharedCopyOfPredecessor.isShared()).toBe(true);
-
-            const { successor: successorOfRepositoryAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(repositoryAttribute.id, {
+            const { successor: successorOfOwnIdentityAttribute } = await consumptionController.attributes.succeedOwnIdentityAttribute(ownIdentityAttribute, {
                 content: {
                     "@type": "IdentityAttribute",
                     owner: sender.toString(),
@@ -550,12 +500,25 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 }
             });
 
-            expect(successorOfRepositoryAttribute.isShared()).toBe(false);
+            const forwardedSuccessor = await consumptionController.attributes.addForwardedSharingInfoToAttribute(
+                successorOfOwnIdentityAttribute,
+                recipient,
+                CoreId.from("aSourceReferenceId")
+            );
+
+            await consumptionController.attributes.setForwardedDeletionInfoOfAttributes(
+                [forwardedSuccessor],
+                EmittedAttributeDeletionInfo.from({
+                    deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
+                    deletionDate: CoreDate.utc().add({ days: 1 })
+                }),
+                recipient
+            );
 
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: true,
-                attribute: successorOfRepositoryAttribute.content,
-                sourceAttributeId: successorOfRepositoryAttribute.id
+                attribute: ownIdentityAttribute.content,
+                sourceAttributeId: ownIdentityAttribute.id
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -563,16 +526,57 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: `The predecessor '${ownSharedCopyOfPredecessor.shareInfo?.sourceAttribute?.toString()}' of the IdentityAttribute is already shared with the peer. Instead of sharing it, you should notify the peer about the Attribute succession.`
+                message: `The successor '${forwardedSuccessor.id.toString()}' of the provided IdentityAttribute is to be deleted by the peer.`
+            });
+        });
+
+        test("returns an error when a predecessor of the existing IdentityAttribute is already shared and therefore the user should notify about the Attribute succession instead of share it.", async function () {
+            const ownIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
+                content: TestObjectFactory.createIdentityAttribute({ owner: sender })
+            });
+
+            const forwardedPredecessor = await consumptionController.attributes.addForwardedSharingInfoToAttribute(
+                ownIdentityAttribute,
+                recipient,
+                CoreId.from("aSourceReferenceId")
+            );
+
+            expect(forwardedPredecessor.isSharedWith(recipient)).toBe(true);
+
+            const { successor: successorOfOwnIdentityAttribute } = await consumptionController.attributes.succeedOwnIdentityAttribute(ownIdentityAttribute, {
+                content: {
+                    "@type": "IdentityAttribute",
+                    owner: sender.toString(),
+                    value: {
+                        "@type": "GivenName",
+                        value: "anotherGivenName"
+                    }
+                }
+            });
+
+            expect(successorOfOwnIdentityAttribute.isSharedWith(recipient)).toBe(false);
+
+            const requestItem = ShareAttributeRequestItem.from({
+                mustBeAccepted: true,
+                attribute: successorOfOwnIdentityAttribute.content,
+                sourceAttributeId: successorOfOwnIdentityAttribute.id
+            });
+            const request = Request.from({ items: [requestItem] });
+
+            const result = await processor.canCreateOutgoingRequestItem(requestItem, request, recipient);
+
+            expect(result).errorValidationResult({
+                code: "error.consumption.requests.invalidRequestItem",
+                message: `The predecessor '${forwardedPredecessor.id.toString()}' of the IdentityAttribute is already shared with the peer. Instead of sharing it, you should notify the peer about the Attribute succession.`
             });
         });
 
         test("returns success when a predecessor of the existing IdentityAttribute is already shared with the peer but DeletedByPeer", async function () {
-            const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+            const ownIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: TestObjectFactory.createIdentityAttribute({ owner: sender })
             });
 
-            const { successor: successorOfRepositoryAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(repositoryAttribute.id, {
+            const { successor: successorOfOwnIdentityAttribute } = await consumptionController.attributes.succeedOwnIdentityAttribute(ownIdentityAttribute, {
                 content: {
                     "@type": "IdentityAttribute",
                     owner: sender.toString(),
@@ -583,26 +587,25 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 }
             });
 
-            await consumptionController.attributes.createAttributeUnsafe({
-                content: IdentityAttribute.from({
-                    owner: sender,
-                    value: GivenName.from({ value: "aGivenName" })
-                }),
-                shareInfo: {
-                    peer: recipient,
-                    sourceReference: await ConsumptionIds.request.generate(),
-                    sourceAttribute: repositoryAttribute.id
-                },
-                deletionInfo: {
-                    deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
+            const forwardedPredecessor = await consumptionController.attributes.addForwardedSharingInfoToAttribute(
+                ownIdentityAttribute,
+                recipient,
+                CoreId.from("aSourceReferenceId")
+            );
+
+            await consumptionController.attributes.setForwardedDeletionInfoOfAttributes(
+                [forwardedPredecessor],
+                EmittedAttributeDeletionInfo.from({
+                    deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
                     deletionDate: CoreDate.utc().subtract({ days: 1 })
-                }
-            });
+                }),
+                recipient
+            );
 
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: true,
-                attribute: successorOfRepositoryAttribute.content,
-                sourceAttributeId: successorOfRepositoryAttribute.id
+                attribute: successorOfOwnIdentityAttribute.content,
+                sourceAttributeId: successorOfOwnIdentityAttribute.id
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -612,11 +615,11 @@ describe("ShareAttributeRequestItemProcessor", function () {
         });
 
         test("returns success when a predecessor of the existing IdentityAttribute is already shared with the peer but ToBeDeletedByPeer", async function () {
-            const repositoryAttribute = await consumptionController.attributes.createRepositoryAttribute({
+            const ownIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: TestObjectFactory.createIdentityAttribute({ owner: sender })
             });
 
-            const { successor: successorOfRepositoryAttribute } = await consumptionController.attributes.succeedRepositoryAttribute(repositoryAttribute.id, {
+            const { successor: successorOfOwnIdentityAttribute } = await consumptionController.attributes.succeedOwnIdentityAttribute(ownIdentityAttribute, {
                 content: {
                     "@type": "IdentityAttribute",
                     owner: sender.toString(),
@@ -627,26 +630,25 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 }
             });
 
-            await consumptionController.attributes.createAttributeUnsafe({
-                content: IdentityAttribute.from({
-                    owner: sender,
-                    value: GivenName.from({ value: "aGivenName" })
-                }),
-                shareInfo: {
-                    peer: recipient,
-                    sourceReference: await ConsumptionIds.request.generate(),
-                    sourceAttribute: repositoryAttribute.id
-                },
-                deletionInfo: {
-                    deletionStatus: LocalAttributeDeletionStatus.ToBeDeletedByPeer,
+            const forwardedPredecessor = await consumptionController.attributes.addForwardedSharingInfoToAttribute(
+                ownIdentityAttribute,
+                recipient,
+                CoreId.from("aSourceReferenceId")
+            );
+
+            await consumptionController.attributes.setForwardedDeletionInfoOfAttributes(
+                [forwardedPredecessor],
+                EmittedAttributeDeletionInfo.from({
+                    deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
                     deletionDate: CoreDate.utc().add({ days: 1 })
-                }
-            });
+                }),
+                recipient
+            );
 
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: true,
-                attribute: successorOfRepositoryAttribute.content,
-                sourceAttributeId: successorOfRepositoryAttribute.id
+                attribute: successorOfOwnIdentityAttribute.content,
+                sourceAttributeId: successorOfOwnIdentityAttribute.id
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -655,25 +657,25 @@ describe("ShareAttributeRequestItemProcessor", function () {
             expect(result).successfulValidationResult();
         });
 
-        test("returns error when the RelationshipAttribute is a copy of another RelationshipAttribute", async function () {
-            const relationshipAttribute = await consumptionController.attributes.createAttributeUnsafe({
+        test("returns error when the RelationshipAttribute is a ThirdPartyRelationshipAttribute", async function () {
+            const relationshipAttribute = await consumptionController.attributes.createThirdPartyRelationshipAttribute({
                 content: RelationshipAttribute.from({
-                    owner: sender,
+                    owner: aThirdParty,
                     value: ProprietaryString.fromAny({ value: "aGivenName", title: "aTitle" }),
                     confidentiality: RelationshipAttributeConfidentiality.Public,
                     key: "aKey"
                 }),
-                shareInfo: {
-                    peer: aThirdParty,
-                    sourceReference: await ConsumptionIds.request.generate(),
-                    sourceAttribute: CoreId.from("sourceAttributeId")
-                }
+
+                peer: aThirdParty,
+                sourceReference: await ConsumptionIds.request.generate(),
+                initialAttributePeer: CoreAddress.from("initialAttributePeer"),
+                id: CoreId.from("aThirdPartyRelationshipAttributeId")
             });
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: relationshipAttribute.content,
                 sourceAttributeId: relationshipAttribute.id,
-                thirdPartyAddress: relationshipAttribute.shareInfo?.peer
+                thirdPartyAddress: aThirdParty
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -681,12 +683,12 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: "You can only share RelationshipAttributes that are not a copy of a sourceAttribute."
+                message: "You cannot share ThirdPartyRelationshipAttributes."
             });
         });
 
         test("returns error when the initial RelationshipAttribute already exists in the context of the Relationship with the peer", async function () {
-            const relationshipAttribute = await consumptionController.attributes.createSharedLocalAttribute({
+            const relationshipAttribute = await consumptionController.attributes.createOwnRelationshipAttribute({
                 content: RelationshipAttribute.from({
                     owner: sender,
                     value: ProprietaryString.fromAny({ value: "aGivenName", title: "aTitle" }),
@@ -712,33 +714,18 @@ describe("ShareAttributeRequestItemProcessor", function () {
         });
 
         test("returns error when a ThirdPartyRelationshipAttribute already exists in the context of the Relationship with the peer", async function () {
-            const initialRelationshipAttribute = await consumptionController.attributes.createAttributeUnsafe({
+            const initialRelationshipAttribute = await consumptionController.attributes.createOwnRelationshipAttribute({
                 content: RelationshipAttribute.from({
                     owner: sender,
                     value: ProprietaryString.fromAny({ value: "aGivenName", title: "aTitle" }),
                     confidentiality: RelationshipAttributeConfidentiality.Public,
                     key: "aKey"
                 }),
-                shareInfo: {
-                    peer: aThirdParty,
-                    sourceReference: await ConsumptionIds.request.generate()
-                }
+                peer: aThirdParty,
+                sourceReference: await ConsumptionIds.request.generate()
             });
 
-            await consumptionController.attributes.createAttributeUnsafe({
-                content: RelationshipAttribute.from({
-                    owner: sender,
-                    value: ProprietaryString.fromAny({ value: "aGivenName", title: "aTitle" }),
-                    confidentiality: RelationshipAttributeConfidentiality.Public,
-                    key: "aKey"
-                }),
-                shareInfo: {
-                    peer: recipient,
-                    sourceReference: await ConsumptionIds.request.generate(),
-                    thirdPartyAddress: aThirdParty,
-                    sourceAttribute: initialRelationshipAttribute.id
-                }
-            });
+            await consumptionController.attributes.addForwardedSharingInfoToAttribute(initialRelationshipAttribute, recipient, CoreId.from("aSourceReferenceId"));
 
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: false,
@@ -906,8 +893,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             expect(responseItem).toBeInstanceOf(ShareAttributeAcceptResponseItem);
 
             const createdAttribute = await consumptionController.attributes.getLocalAttribute(responseItem.attributeId);
-            expect(createdAttribute!.shareInfo!.peer).toStrictEqual(sender);
-            expect(createdAttribute!.shareInfo!.sourceAttribute).toBeUndefined();
+            expect((createdAttribute as PeerIdentityAttribute).peerSharingInfo.peer).toStrictEqual(sender);
             expect(createdAttribute!.content.owner).toStrictEqual(sender);
         });
 
@@ -933,16 +919,16 @@ describe("ShareAttributeRequestItemProcessor", function () {
             expect(responseItem).toBeInstanceOf(ShareAttributeAcceptResponseItem);
 
             const createdAttribute = await consumptionController.attributes.getLocalAttribute(responseItem.attributeId);
-            expect(createdAttribute!.shareInfo!.peer).toStrictEqual(sender);
-            expect(createdAttribute!.shareInfo!.sourceAttribute).toBeUndefined();
+            expect((createdAttribute! as PeerIdentityAttribute).peerSharingInfo.peer).toStrictEqual(sender);
             expect(createdAttribute!.content.owner).toStrictEqual(sender);
         });
 
-        test("returns AttributeAlreadySharedAcceptResponseItem when accepting an already existing peer shared IdentityAttribute", async function () {
-            const existingPeerSharedIdentityAttribute = await consumptionController.attributes.createSharedLocalAttribute({
+        test("returns AttributeAlreadySharedAcceptResponseItem when accepting an already existing PeerIdentityAttribute", async function () {
+            const existingPeerIdentityAttribute = await consumptionController.attributes.createPeerIdentityAttribute({
                 content: TestObjectFactory.createIdentityAttribute({ owner: sender }),
                 peer: sender,
-                sourceReference: await ConsumptionIds.request.generate()
+                sourceReference: CoreId.from("aSourceReferenceId"),
+                id: CoreId.from("aPeerIdentityAttributeId")
             });
 
             const requestItem = ShareAttributeRequestItem.from({
@@ -963,11 +949,11 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             const responseItem = await processor.accept(requestItem, { accept: true }, incomingRequest);
             expect(responseItem).toBeInstanceOf(AttributeAlreadySharedAcceptResponseItem);
-            expect(responseItem.attributeId).toStrictEqual(existingPeerSharedIdentityAttribute.id);
+            expect(responseItem.attributeId).toStrictEqual(existingPeerIdentityAttribute.id);
         });
 
-        test("returns ShareAttributeAcceptResponseItem when accepting an already existing peer shared IdentityAttribute that has a deletionInfo", async function () {
-            const existingPeerSharedIdentityAttribute = await consumptionController.attributes.createAttributeUnsafe({
+        test("returns ShareAttributeAcceptResponseItem when accepting an already existing PeerIdentityAttribute that has a deletionInfo", async function () {
+            const existingPeerIdentityAttribute = await consumptionController.attributes.createAttributeUnsafe({
                 content: TestObjectFactory.createIdentityAttribute({ owner: sender }),
                 shareInfo: {
                     sourceReference: await ConsumptionIds.request.generate(),
@@ -997,18 +983,26 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             const responseItem = await processor.accept(requestItem, { accept: true }, incomingRequest);
             expect(responseItem).toBeInstanceOf(ShareAttributeAcceptResponseItem);
-            expect(responseItem.attributeId).not.toStrictEqual(existingPeerSharedIdentityAttribute.id);
+            expect(responseItem.attributeId).not.toStrictEqual(existingPeerIdentityAttribute.id);
         });
 
-        test("returns ShareAttributeAcceptResponseItem when accepting an already existing peer shared IdentityAttribute that has a successor", async function () {
-            const existingPeerSharedIdentityAttribute = await consumptionController.attributes.createAttributeUnsafe({
-                content: TestObjectFactory.createIdentityAttribute({ owner: sender }),
-                shareInfo: {
-                    sourceReference: await ConsumptionIds.request.generate(),
-                    peer: sender
-                },
-                succeededBy: CoreId.from("aSuccessorId")
+        test("returns ShareAttributeAcceptResponseItem when accepting an already existing PeerIdentityAttribute that has a successor", async function () {
+            const existingPeerIdentityAttribute = await consumptionController.attributes.createPeerIdentityAttribute({
+                content: TestObjectFactory.createIdentityAttribute({ owner: sender, value: GivenName.from({ value: "aGivenName" }) }),
+                sourceReference: CoreId.from("aSourceReferenceId"),
+                peer: sender,
+                id: CoreId.from("aPeerIdentityAttributeId")
             });
+
+            const successorParams: IPeerIdentityAttributeSuccessorParams = {
+                content: TestObjectFactory.createIdentityAttribute({ owner: sender, value: GivenName.from({ value: "anotherGivenName" }) }),
+                id: CoreId.from("aPeerIdentityAttributeSuccessorId"),
+                peerSharingInfo: {
+                    peer: sender,
+                    sourceReference: CoreId.from("anotherSourceReferenceId")
+                }
+            };
+            await consumptionController.attributes.succeedPeerIdentityAttribute(existingPeerIdentityAttribute, successorParams);
 
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: true,
@@ -1028,13 +1022,13 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             const responseItem = await processor.accept(requestItem, { accept: true }, incomingRequest);
             expect(responseItem).toBeInstanceOf(ShareAttributeAcceptResponseItem);
-            expect(responseItem.attributeId).not.toStrictEqual(existingPeerSharedIdentityAttribute.id);
+            expect(responseItem.attributeId).not.toStrictEqual(existingPeerIdentityAttribute.id);
         });
     });
 
     describe("canAccept", function () {
         test("returns success when sharing a valid IdentityAttribute", async function () {
-            const existingAttribute = await consumptionController.attributes.createRepositoryAttribute({
+            const existingAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: testAccount.identity.address,
                     tags: ["x:tag1"]
@@ -1077,7 +1071,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const attributesControllerSpy = spy(consumptionController.attributes);
             when(attributesControllerSpy.validateTagsOfAttribute(anything())).thenResolve(ValidationResult.success());
 
-            const existingAttribute = await consumptionController.attributes.createRepositoryAttribute({
+            const existingAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
                     tags: ["invalidTag"],
                     owner: testAccount.identity.address
@@ -1138,8 +1132,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             const createdAttribute = await consumptionController.attributes.getLocalAttribute(responseItem.attributeId);
             expect(createdAttribute!.id).toStrictEqual(responseItem.attributeId);
-            expect(createdAttribute!.shareInfo!.peer).toStrictEqual(localRequest.peer);
-            expect(createdAttribute!.shareInfo!.sourceAttribute).toStrictEqual(sourceAttribute.id);
+            expect((createdAttribute! as OwnIdentityAttribute).isSharedWith(localRequest.peer)).toBe(true);
             expect(createdAttribute!.content.owner).toStrictEqual(testAccount.identity.address);
         });
 
@@ -1164,10 +1157,9 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             const createdAttribute = await consumptionController.attributes.getLocalAttribute(responseItem.attributeId);
             expect(createdAttribute!.id).toStrictEqual(responseItem.attributeId);
-            expect(createdAttribute!.shareInfo!.peer).toStrictEqual(localRequest.peer);
-            expect(createdAttribute!.shareInfo!.sourceAttribute).toStrictEqual(sourceAttribute.id);
+            expect((createdAttribute! as OwnRelationshipAttribute).isSharedWith(localRequest.peer)).toBe(true);
             expect(createdAttribute!.content.owner).toStrictEqual(testAccount.identity.address);
-            expect(createdAttribute!.shareInfo!.thirdPartyAddress).toStrictEqual(aThirdParty);
+            expect((createdAttribute! as OwnRelationshipAttribute).peerSharingInfo.peer).toStrictEqual(aThirdParty);
         });
     });
 
@@ -1176,7 +1168,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             mustBeAccepted: true,
             attribute: sourceAttribute.content,
             sourceAttributeId: sourceAttribute.id,
-            thirdPartyAddress: sourceAttribute.isRelationshipAttribute() ? sourceAttribute.shareInfo.peer : undefined
+            thirdPartyAddress: sourceAttribute.content instanceof RelationshipAttribute ? (sourceAttribute as OwnRelationshipAttribute).peerSharingInfo.peer : undefined
         });
 
         const requestId = await ConsumptionIds.request.generate();
