@@ -2,7 +2,7 @@ import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { GivenName, ProprietaryInteger, ProprietaryString } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { Transport } from "@nmshd/transport";
-import { EmittedAttributeDeletionStatus } from "src";
+import { EmittedAttributeDeletionStatus } from "../../../../../src/modules/attributes/local/sharingInfos";
 import { TestUtil } from "../../../../core/TestUtil";
 import { TestObjectFactory } from "../../testHelpers/TestObjectFactory";
 import { Context, GivenSteps, ThenSteps, WhenSteps } from "./Context";
@@ -171,7 +171,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
                 key: "uniqueKey"
             });
 
-            await When.iCreateARelationshipAttribute(relationshipAttributeOfSender);
+            await When.iCreateAnOwnRelationshipAttribute(relationshipAttributeOfSender);
 
             const relationshipAttributeWithSameKey = TestObjectFactory.createRelationshipAttribute({
                 owner: TestIdentity.CURRENT_IDENTITY,
@@ -192,7 +192,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
                 key: "uniqueKey"
             });
 
-            await When.iCreateARelationshipAttribute(relationshipAttributeOfRecipient);
+            await When.iCreateAPeerRelationshipAttribute(relationshipAttributeOfRecipient);
 
             const relationshipAttributeWithSameKeyAndEmptyOwner = TestObjectFactory.createRelationshipAttribute({
                 owner: TestIdentity.EMPTY,
@@ -213,7 +213,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
                 key: "ownerSpecificUniqueKey"
             });
 
-            await When.iCreateARelationshipAttribute(relationshipAttributeOfSender);
+            await When.iCreateAnOwnRelationshipAttribute(relationshipAttributeOfSender);
 
             const relationshipAttributeOfRecipient = TestObjectFactory.createRelationshipAttribute({
                 owner: TestIdentity.PEER,
@@ -231,7 +231,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
                 value: ProprietaryString.from({ title: "aTitle", value: "aProprietaryStringValue" })
             });
 
-            await When.iCreateARelationshipAttribute(relationshipAttributeOfSender);
+            await When.iCreateAnOwnRelationshipAttribute(relationshipAttributeOfSender);
 
             const relationshipAttributeOfRecipient = TestObjectFactory.createRelationshipAttribute({
                 owner: TestIdentity.CURRENT_IDENTITY,
@@ -249,7 +249,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
                 key: "persistenceSpecificUniqueKey"
             });
 
-            const createdAttribute = await When.iCreateARelationshipAttribute(relationshipAttributeOfSender);
+            const createdAttribute = await When.iCreateAnOwnRelationshipAttribute(relationshipAttributeOfSender);
             await When.iMarkMyOwnRelationshipAttributeAsDeletedByPeer(createdAttribute);
 
             const relationshipAttributeWithSameKey = TestObjectFactory.createRelationshipAttribute({
@@ -263,7 +263,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
 
         test("returns Success when passing a RelationshipAttribute with same key as an already existing ThirdPartyRelationshipAttribute", async function () {
             const thirdPartyRelationshipAttribute = TestObjectFactory.createRelationshipAttribute({
-                owner: TestIdentity.CURRENT_IDENTITY,
+                owner: TestIdentity.PEER,
                 key: "relationshipSpecificUniqueKey"
             });
 
@@ -303,7 +303,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
                 owner: TestIdentity.PEER
             });
 
-            await When.iCreateARelationshipAttribute(relationshipAttributeOfRecipient);
+            await When.iCreateAPeerRelationshipAttribute(relationshipAttributeOfRecipient);
 
             await Given.aRequestItemWithARelationshipAttribute({
                 attributeOwner: TestIdentity.PEER
@@ -319,7 +319,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
                 owner: TestIdentity.CURRENT_IDENTITY
             });
 
-            await When.iCreateARelationshipAttribute(relationshipAttributeOfSender);
+            await When.iCreateAnOwnRelationshipAttribute(relationshipAttributeOfSender);
 
             await Given.aRequestItemWithARelationshipAttribute({
                 attributeOwner: TestIdentity.EMPTY
@@ -335,7 +335,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
                 owner: TestIdentity.CURRENT_IDENTITY
             });
 
-            await When.iCreateARelationshipAttribute(relationshipAttributeOfSender);
+            await When.iCreateAnOwnRelationshipAttribute(relationshipAttributeOfSender);
 
             await Given.aRequestItemWithARelationshipAttribute({
                 attributeOwner: TestIdentity.EMPTY,
@@ -419,8 +419,8 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await Then.theOwnIdentityAttributeIsForwarded(ownIdentityAttribute);
         });
 
-        test("in case of an IdentityAttribute that already exists as OwnIdentityAttribute with different tags: merges tags", async function () {
-            const ownIdentityAttribute = await Given.anOwnIdentityAttribute({
+        test("in case of an IdentityAttribute that already exists as OwnIdentityAttribute with different tags: merges tags by succession", async function () {
+            await Given.anOwnIdentityAttribute({
                 attributeOwner: TestIdentity.CURRENT_IDENTITY,
                 tags: ["x:tag1", "x:tag2"],
                 value: GivenName.from("aGivenName")
@@ -432,12 +432,12 @@ describe("CreateAttributeRequestItemProcessor", function () {
             });
             await When.iCallAccept();
             await Then.theResponseItemShouldBeOfType("CreateAttributeAcceptResponseItem");
-            await Then.theOwnIdentityAttributeIsForwarded(ownIdentityAttribute);
+            await Then.aForwardedOwnIdentityAttributeIsCreated();
             await Then.theTagsOfTheOwnIdentityAttributeMatch(["x:tag1", "x:tag2", "x:tag3"]);
         });
 
-        test("in case of an IdentityAttribute that after trimming already exists as OwnIdentityAttribute with different tags: merges tags", async function () {
-            const ownIdentityAttribute = await Given.anOwnIdentityAttribute({
+        test("in case of an IdentityAttribute that after trimming already exists as OwnIdentityAttribute with different tags: merges tags by succession", async function () {
+            await Given.anOwnIdentityAttribute({
                 attributeOwner: TestIdentity.CURRENT_IDENTITY,
                 tags: ["x:tag1", "x:tag2"],
                 value: GivenName.from("aGivenName")
@@ -449,7 +449,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             });
             await When.iCallAccept();
             await Then.theResponseItemShouldBeOfType("CreateAttributeAcceptResponseItem");
-            await Then.theOwnIdentityAttributeIsForwarded(ownIdentityAttribute);
+            await Then.aForwardedOwnIdentityAttributeIsCreated();
             await Then.theTagsOfTheOwnIdentityAttributeMatch(["x:tag1", "x:tag2", "x:tag3"]);
         });
 

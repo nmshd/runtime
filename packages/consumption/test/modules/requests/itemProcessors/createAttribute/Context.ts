@@ -24,6 +24,7 @@ import {
     OwnIdentityAttribute,
     OwnRelationshipAttribute,
     PeerIdentityAttribute,
+    PeerRelationshipAttribute,
     ValidationResult
 } from "../../../../../src";
 import { TestUtil } from "../../../../core/TestUtil";
@@ -410,7 +411,7 @@ export class ThenSteps {
 export class WhenSteps {
     public constructor(private readonly context: Context) {}
 
-    public async iCreateARelationshipAttribute(relationshipAttribute?: RelationshipAttribute): Promise<OwnRelationshipAttribute> {
+    public async iCreateAnOwnRelationshipAttribute(relationshipAttribute?: RelationshipAttribute): Promise<OwnRelationshipAttribute> {
         relationshipAttribute ??= TestObjectFactory.createRelationshipAttribute({
             owner: this.context.accountController.identity.address
         });
@@ -423,9 +424,22 @@ export class WhenSteps {
         });
     }
 
-    public async iCreateAThirdPartyRelationshipAttribute(relationshipAttribute?: RelationshipAttribute): Promise<void> {
+    public async iCreateAPeerRelationshipAttribute(relationshipAttribute?: RelationshipAttribute): Promise<PeerRelationshipAttribute> {
         relationshipAttribute ??= TestObjectFactory.createRelationshipAttribute({
             owner: this.context.accountController.identity.address
+        });
+        this.context.fillTestIdentitiesOfObject(relationshipAttribute);
+
+        return await this.context.consumptionController.attributes.createPeerRelationshipAttribute({
+            content: relationshipAttribute,
+            peer: CoreAddress.from("peer"),
+            sourceReference: CoreId.from("aSourceReferenceId")
+        });
+    }
+
+    public async iCreateAThirdPartyRelationshipAttribute(relationshipAttribute?: RelationshipAttribute): Promise<void> {
+        relationshipAttribute ??= TestObjectFactory.createRelationshipAttribute({
+            owner: CoreAddress.from("peer")
         });
         this.context.fillTestIdentitiesOfObject(relationshipAttribute);
 
@@ -433,7 +447,7 @@ export class WhenSteps {
             content: relationshipAttribute,
             peer: CoreAddress.from("peer"),
             sourceReference: CoreId.from("aSourceReferenceId"),
-            initialAttributePeer: CoreAddress.from("AThirdParty"),
+            initialAttributePeer: CoreAddress.from("aThirdParty"),
             id: CoreId.from("aThirdPartyRelationshipAttributeId")
         });
     }
