@@ -108,7 +108,7 @@ describe("validateAttributeMatchesWithQuery", function () {
 
         test("returns an error when the given Attribute id belongs to a peer Attribute", async function () {
             const thirdPartyAttributeId = await ConsumptionIds.attribute.generate();
-            await consumptionController.attributes.createSharedLocalAttribute({
+            await consumptionController.attributes.createPeerIdentityAttribute({
                 id: thirdPartyAttributeId,
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: aThirdParty
@@ -143,8 +143,9 @@ describe("validateAttributeMatchesWithQuery", function () {
             const result = await readProcessor.canAccept(requestItem, acceptParams, request);
 
             expect(result).errorValidationResult({
-                code: "error.consumption.requests.attributeQueryMismatch",
-                message: "The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes."
+                code: "error.consumption.requests.invalidAcceptParameters",
+                message:
+                    "The selected Attribute is not an own IdentityAttribute, own RelationshipAttribute or peer RelationshipAttribute. When accepting a ReadAttributeRequestItem with an existing Attribute it may only be such an Attribute."
             });
         });
 
@@ -872,7 +873,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 statusLog: []
             });
 
-            const localAttribute = await consumptionController.attributes.createSharedLocalAttribute({
+            const localAttribute = await consumptionController.attributes.createPeerRelationshipAttribute({
                 content: RelationshipAttribute.from({
                     key: "aKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public,
@@ -925,7 +926,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 statusLog: []
             });
 
-            const localAttribute = await consumptionController.attributes.createSharedLocalAttribute({
+            const localAttribute = await consumptionController.attributes.createPeerRelationshipAttribute({
                 content: RelationshipAttribute.from({
                     key: "aKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public,
@@ -976,7 +977,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 statusLog: []
             });
 
-            const localAttribute = await consumptionController.attributes.createSharedLocalAttribute({
+            const localAttribute = await consumptionController.attributes.createOwnRelationshipAttribute({
                 content: RelationshipAttribute.from({
                     key: "AnotherKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public,
