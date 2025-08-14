@@ -40,7 +40,7 @@ export class PeerIdentityAttribute extends LocalAttribute implements IPeerIdenti
         return deletionStatuses.includes(this.peerSharingInfo.deletionInfo.deletionStatus);
     }
 
-    public setPeerDeletionInfo(deletionInfo: ReceivedAttributeDeletionInfo): this {
+    public setPeerDeletionInfo(deletionInfo: ReceivedAttributeDeletionInfo | undefined): this {
         this.peerSharingInfo.deletionInfo = deletionInfo;
         return this;
     }

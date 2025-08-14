@@ -1389,7 +1389,7 @@ export class AttributesController extends ConsumptionBaseController {
 
     public async setPeerDeletionInfoOfOwnRelationshipAttribute(
         attribute: OwnRelationshipAttribute,
-        deletionInfo: EmittedAttributeDeletionInfo,
+        deletionInfo: EmittedAttributeDeletionInfo | undefined,
         overrideDeletedOrToBeDeleted = false
     ): Promise<void> {
         if (attribute.isDeletedOrToBeDeletedByPeer() && !overrideDeletedOrToBeDeleted) return;
@@ -1400,7 +1400,7 @@ export class AttributesController extends ConsumptionBaseController {
 
     public async setPeerDeletionInfoOfPeerAttribute(
         attribute: PeerIdentityAttribute | PeerRelationshipAttribute,
-        deletionInfo: ReceivedAttributeDeletionInfo,
+        deletionInfo: ReceivedAttributeDeletionInfo | undefined,
         overrideDeletedOrToBeDeleted = false
     ): Promise<void> {
         if (attribute.isDeletedByOwnerOrToBeDeleted() && !overrideDeletedOrToBeDeleted) return;
@@ -1411,7 +1411,7 @@ export class AttributesController extends ConsumptionBaseController {
 
     public async setPeerDeletionInfoOfThirdPartyRelationshipAttribute(
         attribute: ThirdPartyRelationshipAttribute,
-        deletionInfo: ThirdPartyRelationshipAttributeDeletionInfo,
+        deletionInfo: ThirdPartyRelationshipAttributeDeletionInfo | undefined,
         overrideDeletedOrToBeDeleted = false
     ): Promise<void> {
         if (attribute.isDeletedByOwnerOrPeerOrToBeDeleted() && !overrideDeletedOrToBeDeleted) return;
@@ -1422,7 +1422,7 @@ export class AttributesController extends ConsumptionBaseController {
 
     public async setForwardedDeletionInfoOfAttributeAndPredecessors(
         attribute: OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute,
-        deletionInfo: EmittedAttributeDeletionInfo | undefined,
+        deletionInfo: EmittedAttributeDeletionInfo,
         peer: CoreAddress,
         overrideDeletedOrToBeDeleted = false
     ): Promise<void> {

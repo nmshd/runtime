@@ -394,14 +394,13 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
     ): Promise<PeerSharedAttributeSucceededEvent | void> {
         if (responseItem instanceof RejectResponseItem) return;
 
-        // TODO: test this
         if (responseItem instanceof AttributeAlreadySharedAcceptResponseItem) {
             const attribute = await this.consumptionController.attributes.getLocalAttribute(responseItem.attributeId);
             if (!attribute || !(attribute instanceof PeerIdentityAttribute || attribute instanceof ThirdPartyRelationshipAttribute)) return;
 
             if (attribute.peerSharingInfo.deletionInfo?.deletionStatus !== ReceivedAttributeDeletionStatus.ToBeDeleted) return;
 
-            // TODO: refactor this nicely
+            // TODO: refactor this nicely -> other PR
             attribute.peerSharingInfo.deletionInfo = undefined;
             await this.consumptionController.attributes.updateAttributeUnsafe(attribute);
             return;

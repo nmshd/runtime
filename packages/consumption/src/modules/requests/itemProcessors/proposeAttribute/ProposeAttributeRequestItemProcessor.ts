@@ -20,7 +20,8 @@ import {
     PeerIdentityAttribute,
     PeerIdentityAttributeSharingInfo,
     PeerIdentityAttributeSuccessorParams,
-    PeerSharedAttributeSucceededEvent
+    PeerSharedAttributeSucceededEvent,
+    ReceivedAttributeDeletionStatus
 } from "../../../attributes";
 import { LocalAttribute } from "../../../attributes/local/attributeTypes";
 import { ValidationResult } from "../../../common/ValidationResult";
@@ -249,10 +250,15 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
                 if (!(existingAttribute instanceof OwnIdentityAttribute)) throw new Error("This should never occur, but is required for the compiler.");
             }
 
-            const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfAttribute(existingAttribute, requestInfo.peer);
+            const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfAttribute(existingAttribute, requestInfo.peer, undefined, true);
 
             const isLatestSharedVersion = latestSharedVersion[0]?.id.toString() === existingAttribute.id.toString();
             if (isLatestSharedVersion) {
+                // TODO: query for onlyToBeDeleted isn't necessary here, since getSharedVersionsOfAttribute won't return deleted attributes
+                if (latestSharedVersion[0].isDeletedOrToBeDeletedByForwardingPeer(requestInfo.peer, "onlyToBeDeleted")) {
+                    await this.consumptionController.attributes.setForwardedDeletionInfoOfAttribute(latestSharedVersion[0], undefined, requestInfo.peer, true);
+                }
+
                 return AttributeAlreadySharedAcceptResponseItem.from({
                     result: ResponseItemResult.Accepted,
                     attributeId: latestSharedVersion[0].id
@@ -311,6 +317,18 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
         _requestItem: ProposeAttributeRequestItem,
         requestInfo: LocalRequestInfo
     ): Promise<PeerSharedAttributeSucceededEvent | void> {
+        if (responseItem instanceof RejectResponseItem) return;
+
+        if (responseItem instanceof AttributeAlreadySharedAcceptResponseItem) {
+            const attribute = await this.consumptionController.attributes.getLocalAttribute(responseItem.attributeId);
+            if (!attribute || !(attribute instanceof PeerIdentityAttribute)) return;
+
+            if (attribute.peerSharingInfo.deletionInfo?.deletionStatus !== ReceivedAttributeDeletionStatus.ToBeDeleted) return;
+
+            await this.consumptionController.attributes.setPeerDeletionInfoOfPeerAttribute(attribute, undefined, true);
+            return;
+        }
+
         if (responseItem instanceof ProposeAttributeAcceptResponseItem) {
             if (responseItem.attribute instanceof IdentityAttribute) {
                 await this.consumptionController.attributes.createPeerIdentityAttribute({
