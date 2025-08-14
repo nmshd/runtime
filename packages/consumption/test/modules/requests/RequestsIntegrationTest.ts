@@ -703,7 +703,7 @@ export class RequestsWhen {
         });
         await this.context.consumptionController.attributes.addForwardedSharingInfoToAttribute(
             sOwnIdentityAttribute1,
-            CoreAddress.from("peer"),
+            CoreAddress.from("did:e:a-domain:dids:anidentity"),
             CoreId.from("shareSourceReference1")
         );
 
@@ -717,8 +717,8 @@ export class RequestsWhen {
             })
         });
         await this.context.consumptionController.attributes.addForwardedSharingInfoToAttribute(
-            sOwnIdentityAttribute1,
-            CoreAddress.from("peer"),
+            sOwnIdentityAttribute2,
+            CoreAddress.from("did:e:a-domain:dids:anidentity"),
             CoreId.from("shareSourceReference2")
         );
 
@@ -732,8 +732,8 @@ export class RequestsWhen {
             })
         });
         await this.context.consumptionController.attributes.addForwardedSharingInfoToAttribute(
-            sOwnIdentityAttribute2,
-            CoreAddress.from("peer"),
+            sSucceededOwnIdentityAttribute2,
+            CoreAddress.from("did:e:a-domain:dids:anidentity"),
             CoreId.from("shareSourceReference3")
         );
 
@@ -760,7 +760,7 @@ export class RequestsWhen {
                     })
                 ]
             },
-            peer: CoreAddress.from("peer")
+            peer: CoreAddress.from("did:e:a-domain:dids:anidentity")
         };
         const localRequest = await this.context.outgoingRequestsController.create(createParams);
 
