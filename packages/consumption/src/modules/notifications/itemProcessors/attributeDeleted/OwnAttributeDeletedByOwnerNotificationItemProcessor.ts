@@ -65,10 +65,7 @@ export class OwnAttributeDeletedByOwnerNotificationItemProcessor extends Abstrac
                 deletionDate: CoreDate.utc()
             });
 
-            const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute);
-            const attributes = [attribute, ...predecessors];
-
-            await this.consumptionController.attributes.setPeerDeletionInfoOfPeerAttributes(attributes, deletionInfo);
+            await this.consumptionController.attributes.setPeerDeletionInfoOfPeerAttributeAndPredecessors(attribute, deletionInfo);
 
             return new OwnAttributeDeletedByOwnerEvent(this.currentIdentityAddress.toString(), attribute);
         }
@@ -79,10 +76,7 @@ export class OwnAttributeDeletedByOwnerNotificationItemProcessor extends Abstrac
             deletionDate: CoreDate.utc()
         });
 
-        const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute);
-        const attributes = [attribute, ...predecessors];
-
-        await this.consumptionController.attributes.setPeerDeletionInfoOfThirdPartyRelationshipAttributes(attributes, deletionInfo);
+        await this.consumptionController.attributes.setPeerDeletionInfoOfThirdPartyRelationshipAttributeAndPredecessors(attribute, deletionInfo);
 
         return new OwnAttributeDeletedByOwnerEvent(this.currentIdentityAddress.toString(), attribute);
     }

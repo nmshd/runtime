@@ -229,7 +229,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
 
         // TODO: write test for this
         if (responseItem instanceof AttributeAlreadySharedAcceptResponseItem && sharedAttribute.isDeletedOrToBeDeletedByForwardingPeer(requestInfo.peer, "onlyToBeDeleted")) {
-            await this.consumptionController.attributes.setForwardedDeletionInfoOfAttributes([sharedAttribute], undefined, requestInfo.peer, true);
+            await this.consumptionController.attributes.setForwardedDeletionInfoOfAttribute(sharedAttribute, undefined, requestInfo.peer, true);
             return;
         }
 

@@ -1267,8 +1267,8 @@ describe("AttributesController", function () {
                     sourceReference: CoreId.from("aSourceReferenceId"),
                     id: CoreId.from("aPredecessorId")
                 });
-                await consumptionController.attributes.setPeerDeletionInfoOfPeerAttributes(
-                    [predecessor],
+                await consumptionController.attributes.setPeerDeletionInfoOfPeerAttribute(
+                    predecessor,
                     ReceivedAttributeDeletionInfo.from({
                         deletionStatus: ReceivedAttributeDeletionStatus.DeletedByOwner,
                         deletionDate: CoreDate.utc().subtract({ days: 1 })
@@ -1309,8 +1309,8 @@ describe("AttributesController", function () {
                     sourceReference: CoreId.from("aSourceReferenceId"),
                     id: CoreId.from("aPredecessorId")
                 });
-                await consumptionController.attributes.setPeerDeletionInfoOfPeerAttributes(
-                    [predecessor],
+                await consumptionController.attributes.setPeerDeletionInfoOfPeerAttribute(
+                    predecessor,
                     ReceivedAttributeDeletionInfo.from({
                         deletionStatus: ReceivedAttributeDeletionStatus.ToBeDeleted,
                         deletionDate: CoreDate.utc().add({ days: 1 })
@@ -1347,8 +1347,8 @@ describe("AttributesController", function () {
                     })
                 });
                 await consumptionController.attributes.addForwardedSharingInfoToAttribute(predecessor, CoreAddress.from("peer"), CoreId.from("aSourceReferenceId"));
-                await consumptionController.attributes.setForwardedDeletionInfoOfAttributes(
-                    [predecessor],
+                await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(
+                    predecessor,
                     EmittedAttributeDeletionInfo.from({
                         deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
                         deletionDate: CoreDate.utc().subtract({ days: 1 })

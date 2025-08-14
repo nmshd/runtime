@@ -311,7 +311,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             if (isLatestSharedVersion) {
                 // TODO: query for onlyToBeDeleted isn't necessary here, since getSharedVersionsOfAttribute won't return deleted attributes
                 if (latestSharedVersion[0].isDeletedOrToBeDeletedByForwardingPeer(requestInfo.peer, "onlyToBeDeleted")) {
-                    await this.consumptionController.attributes.setForwardedDeletionInfoOfAttributes([latestSharedVersion[0]], undefined, requestInfo.peer, true);
+                    await this.consumptionController.attributes.setForwardedDeletionInfoOfAttribute(latestSharedVersion[0], undefined, requestInfo.peer, true);
                 }
 
                 return AttributeAlreadySharedAcceptResponseItem.from({
