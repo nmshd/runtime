@@ -1013,7 +1013,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
                     deletionDate: CoreDate.utc().subtract({ days: 1 })
                 });
-                await consumptionController.attributes.setForwardedDeletionInfoOfAttributes([predecessorOwnIdentityAttribute], deletionInfo, sender);
+                await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(predecessorOwnIdentityAttribute, deletionInfo, sender);
 
                 const { successor: successorOwnIdentityAttribute } = await consumptionController.attributes.succeedOwnIdentityAttribute(predecessorOwnIdentityAttribute, {
                     content: IdentityAttribute.from({
@@ -1070,7 +1070,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
                     deletionDate: CoreDate.utc().add({ days: 1 })
                 });
-                await consumptionController.attributes.setForwardedDeletionInfoOfAttributes([predecessorOwnIdentityAttribute], deletionInfo, sender);
+                await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(predecessorOwnIdentityAttribute, deletionInfo, sender);
 
                 const { successor: successorOwnIdentityAttribute } = await consumptionController.attributes.succeedOwnIdentityAttribute(predecessorOwnIdentityAttribute, {
                     content: IdentityAttribute.from({
@@ -1210,7 +1210,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
                     deletionDate: CoreDate.utc().subtract({ days: 1 })
                 });
-                await consumptionController.attributes.setForwardedDeletionInfoOfAttributes([ownIdentityAttribute], deletionInfo, sender);
+                await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(ownIdentityAttribute, deletionInfo, sender);
 
                 const requestItem = ProposeAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -1258,7 +1258,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                     deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
                     deletionDate: CoreDate.utc().add({ days: 1 })
                 });
-                await consumptionController.attributes.setForwardedDeletionInfoOfAttributes([ownIdentityAttribute], deletionInfo, sender);
+                await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(ownIdentityAttribute, deletionInfo, sender);
                 const requestItem = ProposeAttributeRequestItem.from({
                     mustBeAccepted: true,
                     query: IdentityAttributeQuery.from({ valueType: "GivenName" }),

@@ -203,8 +203,8 @@ describe("ForwardedAttributeDeletedByPeerNotificationItemProcessor", function ()
         });
         await consumptionController.attributes.addForwardedSharingInfoToAttribute(ownIdentityAttribute, CoreAddress.from("peer"), CoreId.from("reqRef"));
 
-        await consumptionController.attributes.setForwardedDeletionInfoOfAttributes(
-            [ownIdentityAttribute],
+        await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(
+            ownIdentityAttribute,
             EmittedAttributeDeletionInfo.from({ deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer, deletionDate: CoreDate.utc().add({ days: 1 }) }),
             CoreAddress.from("peer")
         );

@@ -232,8 +232,8 @@ describe("OwnAttributeDeletedByPeerNotificationItemProcessor", function () {
             id: CoreId.from("attributeId")
         });
 
-        await consumptionController.attributes.setPeerDeletionInfoOfPeerAttributes(
-            [peerIdentityAttribute],
+        await consumptionController.attributes.setPeerDeletionInfoOfPeerAttribute(
+            peerIdentityAttribute,
             ReceivedAttributeDeletionInfo.from({
                 deletionStatus: ReceivedAttributeDeletionStatus.ToBeDeleted,
                 deletionDate: CoreDate.utc().subtract({ days: 1 })

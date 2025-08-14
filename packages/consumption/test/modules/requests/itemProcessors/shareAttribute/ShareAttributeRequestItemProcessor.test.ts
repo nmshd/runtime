@@ -359,8 +359,8 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 CoreId.from("aSourceReferenceId")
             );
 
-            await consumptionController.attributes.setForwardedDeletionInfoOfAttributes(
-                [forwardedOwnIdentityAttribute],
+            await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(
+                forwardedOwnIdentityAttribute,
                 EmittedAttributeDeletionInfo.from({
                     deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
                     deletionDate: CoreDate.utc().subtract({ days: 1 })
@@ -400,8 +400,8 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 CoreId.from("aSourceReferenceId")
             );
 
-            await consumptionController.attributes.setForwardedDeletionInfoOfAttributes(
-                [forwardedOwnIdentityAttribute],
+            await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(
+                forwardedOwnIdentityAttribute,
                 EmittedAttributeDeletionInfo.from({
                     deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
                     deletionDate: CoreDate.utc().add({ days: 1 })
@@ -486,8 +486,8 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 CoreId.from("aSourceReferenceId")
             );
 
-            await consumptionController.attributes.setForwardedDeletionInfoOfAttributes(
-                [forwardedSuccessor],
+            await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(
+                forwardedSuccessor,
                 EmittedAttributeDeletionInfo.from({
                     deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
                     deletionDate: CoreDate.utc().subtract({ days: 1 })
@@ -529,8 +529,8 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 CoreId.from("aSourceReferenceId")
             );
 
-            await consumptionController.attributes.setForwardedDeletionInfoOfAttributes(
-                [forwardedSuccessor],
+            await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(
+                forwardedSuccessor,
                 EmittedAttributeDeletionInfo.from({
                     deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
                     deletionDate: CoreDate.utc().add({ days: 1 })
@@ -616,8 +616,8 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 CoreId.from("aSourceReferenceId")
             );
 
-            await consumptionController.attributes.setForwardedDeletionInfoOfAttributes(
-                [forwardedPredecessor],
+            await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(
+                forwardedPredecessor,
                 EmittedAttributeDeletionInfo.from({
                     deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
                     deletionDate: CoreDate.utc().subtract({ days: 1 })
@@ -659,8 +659,8 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 CoreId.from("aSourceReferenceId")
             );
 
-            await consumptionController.attributes.setForwardedDeletionInfoOfAttributes(
-                [forwardedPredecessor],
+            await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(
+                forwardedPredecessor,
                 EmittedAttributeDeletionInfo.from({
                     deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
                     deletionDate: CoreDate.utc().add({ days: 1 })
@@ -784,8 +784,8 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 CoreId.from("anotherSourceReferenceId")
             );
 
-            await consumptionController.attributes.setForwardedDeletionInfoOfAttributes(
-                [forwardedRelationshipAttribute],
+            await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(
+                forwardedRelationshipAttribute,
                 EmittedAttributeDeletionInfo.from({
                     deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
                     deletionDate: CoreDate.utc().add({ days: 1 })
@@ -824,8 +824,8 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 CoreId.from("anotherSourceReferenceId")
             );
 
-            await consumptionController.attributes.setForwardedDeletionInfoOfAttributes(
-                [forwardedRelationshipAttribute],
+            await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(
+                forwardedRelationshipAttribute,
                 EmittedAttributeDeletionInfo.from({
                     deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
                     deletionDate: CoreDate.utc().subtract({ days: 1 })
@@ -969,8 +969,8 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 id: CoreId.from("aPeerIdentityAttributeId")
             });
 
-            await consumptionController.attributes.setPeerDeletionInfoOfPeerAttributes(
-                [existingPeerIdentityAttribute],
+            await consumptionController.attributes.setPeerDeletionInfoOfPeerAttribute(
+                existingPeerIdentityAttribute,
                 ReceivedAttributeDeletionInfo.from({
                     deletionStatus: ReceivedAttributeDeletionStatus.ToBeDeleted,
                     deletionDate: CoreDate.utc().add({ days: 1 })

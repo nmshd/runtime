@@ -178,8 +178,8 @@ describe("PeerRelationshipAttributeDeletedByPeerNotificationItemProcessor", func
             sourceReference: CoreId.from("reqRef")
         });
 
-        await consumptionController.attributes.setPeerDeletionInfoOfOwnRelationshipAttributes(
-            [ownRelationshipAttribute],
+        await consumptionController.attributes.setPeerDeletionInfoOfOwnRelationshipAttribute(
+            ownRelationshipAttribute,
             EmittedAttributeDeletionInfo.from({ deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer, deletionDate: CoreDate.utc().add({ days: 1 }) })
         );
 

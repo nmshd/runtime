@@ -243,8 +243,8 @@ export class GivenSteps {
             CoreId.from("aSourceReferenceId")
         );
 
-        await this.context.consumptionController.attributes.setForwardedDeletionInfoOfAttributes(
-            [forwardedOwnIdentityAttribute],
+        await this.context.consumptionController.attributes.setForwardedDeletionInfoOfAttribute(
+            forwardedOwnIdentityAttribute,
             EmittedAttributeDeletionInfo.from({
                 deletionStatus: params.deletionStatus,
                 deletionDate: params.deletionStatus === EmittedAttributeDeletionStatus.ToBeDeletedByPeer ? CoreDate.utc().add({ days: 1 }) : CoreDate.utc().subtract({ days: 1 })

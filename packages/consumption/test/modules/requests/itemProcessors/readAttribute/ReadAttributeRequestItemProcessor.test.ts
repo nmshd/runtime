@@ -1688,7 +1688,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
                     deletionDate: CoreDate.utc().subtract({ days: 1 })
                 });
-                await consumptionController.attributes.setForwardedDeletionInfoOfAttributes([predecessor], deletionInfo, sender);
+                await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(predecessor, deletionInfo, sender);
 
                 const { successor } = await consumptionController.attributes.succeedOwnIdentityAttribute(predecessor, {
                     content: IdentityAttribute.from({
@@ -1748,7 +1748,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
                     deletionDate: CoreDate.utc().subtract({ days: 1 })
                 });
-                await consumptionController.attributes.setForwardedDeletionInfoOfAttributes([predecessor], deletionInfo, sender);
+                await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(predecessor, deletionInfo, sender);
 
                 const { successor } = await consumptionController.attributes.succeedOwnIdentityAttribute(predecessor, {
                     content: IdentityAttribute.from({
@@ -1890,7 +1890,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
                     deletionDate: CoreDate.utc().subtract({ days: 1 })
                 });
-                await consumptionController.attributes.setForwardedDeletionInfoOfAttributes([ownIdentityAttribute], deletionInfo, sender);
+                await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(ownIdentityAttribute, deletionInfo, sender);
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -1942,7 +1942,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
                     deletionDate: CoreDate.utc().add({ days: 1 })
                 });
-                await consumptionController.attributes.setForwardedDeletionInfoOfAttributes([ownIdentityAttribute], deletionInfo, sender);
+                await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(ownIdentityAttribute, deletionInfo, sender);
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
