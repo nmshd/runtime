@@ -2,7 +2,6 @@ import { Result } from "@js-soft/ts-utils";
 import { AttributesController, LocalAttribute, OwnIdentityAttribute, OwnRelationshipAttribute, PeerRelationshipAttribute } from "@nmshd/consumption";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { LocalAttributeDTO } from "@nmshd/runtime-types";
-import { AccountController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { AddressString, AttributeIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { AttributeMapper } from "./AttributeMapper";
@@ -24,7 +23,6 @@ class Validator extends SchemaValidator<GetSharedVersionsOfAttributeRequest> {
 
 export class GetSharedVersionsOfAttributeUseCase extends UseCase<GetSharedVersionsOfAttributeRequest, LocalAttributeDTO[]> {
     public constructor(
-        @Inject private readonly accountController: AccountController,
         @Inject private readonly attributeController: AttributesController,
         @Inject validator: Validator
     ) {
