@@ -955,15 +955,16 @@ export class AttributesController extends ConsumptionBaseController {
         attribute: SharableAttributeTypes,
         peerAddress: CoreAddress,
         onlyLatestVersion = true,
-        includeDeletedAndToBeDeleted = false
+        includeToBeDeleted = false,
+        includeDeleted = false
     ): Promise<SharableAttributeTypes[]> {
         const localAttribute = await this.getLocalAttribute(attribute.id);
         if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
         if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
-        const sharedAttribute = attribute.isSharedWith(peerAddress, includeDeletedAndToBeDeleted) ? [attribute] : [];
-        const sharedPredecessors = await this.getSharedPredecessorsOfAttribute(attribute, peerAddress, includeDeletedAndToBeDeleted);
-        const sharedSuccessors = await this.getSharedSuccessorsOfAttribute(attribute, peerAddress, includeDeletedAndToBeDeleted);
+        const sharedAttribute = attribute.isSharedWith(peerAddress, includeToBeDeleted, includeDeleted) ? [attribute] : [];
+        const sharedPredecessors = await this.getSharedPredecessorsOfAttribute(attribute, peerAddress, includeToBeDeleted, includeDeleted);
+        const sharedSuccessors = await this.getSharedSuccessorsOfAttribute(attribute, peerAddress, includeToBeDeleted, includeDeleted);
 
         const sharedAttributeVersions = [...sharedSuccessors.reverse(), ...sharedAttribute, ...sharedPredecessors];
 
@@ -975,7 +976,8 @@ export class AttributesController extends ConsumptionBaseController {
     public async getSharedPredecessorsOfAttribute<SharableAttributeTypes extends OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute>(
         referenceAttribute: SharableAttributeTypes,
         peerAddress: CoreAddress,
-        includeDeletedAndToBeDeleted = false
+        includeToBeDeleted = false,
+        includeDeleted = false
     ): Promise<SharableAttributeTypes[]> {
         const matchingPredecessors: SharableAttributeTypes[] = [];
         while (referenceAttribute.succeeds) {
@@ -984,7 +986,7 @@ export class AttributesController extends ConsumptionBaseController {
 
             referenceAttribute = predecessor;
 
-            if (referenceAttribute.isSharedWith(peerAddress, includeDeletedAndToBeDeleted)) matchingPredecessors.push(referenceAttribute);
+            if (referenceAttribute.isSharedWith(peerAddress, includeToBeDeleted, includeDeleted)) matchingPredecessors.push(referenceAttribute);
         }
 
         return matchingPredecessors;
@@ -993,7 +995,8 @@ export class AttributesController extends ConsumptionBaseController {
     public async getSharedSuccessorsOfAttribute<SharableAttributeTypes extends OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute>(
         referenceAttribute: SharableAttributeTypes,
         peerAddress: CoreAddress,
-        includeDeletedAndToBeDeleted = false
+        includeToBeDeleted = false,
+        includeDeleted = false
     ): Promise<SharableAttributeTypes[]> {
         const matchingSuccessors: SharableAttributeTypes[] = [];
         while (referenceAttribute.succeededBy) {
@@ -1002,7 +1005,7 @@ export class AttributesController extends ConsumptionBaseController {
 
             referenceAttribute = successor;
 
-            if (referenceAttribute.isSharedWith(peerAddress, includeDeletedAndToBeDeleted)) matchingSuccessors.push(referenceAttribute);
+            if (referenceAttribute.isSharedWith(peerAddress, includeToBeDeleted, includeDeleted)) matchingSuccessors.push(referenceAttribute);
         }
 
         return matchingSuccessors;
@@ -1362,7 +1365,7 @@ export class AttributesController extends ConsumptionBaseController {
 
     public async setForwardedDeletionInfoOfAttributes(
         attributes: (OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute)[],
-        deletionInfo: EmittedAttributeDeletionInfo,
+        deletionInfo: EmittedAttributeDeletionInfo | undefined,
         peer: CoreAddress,
         overrideDeletedOrToBeDeleted = false
     ): Promise<void> {

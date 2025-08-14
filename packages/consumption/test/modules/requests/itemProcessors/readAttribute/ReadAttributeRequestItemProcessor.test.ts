@@ -1785,12 +1785,16 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 };
 
                 const result = await processor.accept(requestItem, acceptParams, incomingRequest);
-                expect(result).toBeInstanceOf(ReadAttributeAcceptResponseItem);
+                expect(result).toBeInstanceOf(AttributeSuccessionAcceptResponseItem);
+                expect((result as AttributeSuccessionAcceptResponseItem).predecessorId).toStrictEqual(predecessor.id);
+                expect((result as AttributeSuccessionAcceptResponseItem).successorId).toStrictEqual(successor.id);
 
-                const updatedSuccessor = (await consumptionController.attributes.getLocalAttribute(
-                    (result as ReadAttributeAcceptResponseItem).attributeId
-                )) as OwnIdentityAttribute;
-                expect(updatedSuccessor.id).toStrictEqual(successor.id);
+                const updatedPredecessor = (await consumptionController.attributes.getLocalAttribute(predecessor.id)) as OwnIdentityAttribute;
+                expect(updatedPredecessor.forwardedSharingInfos).toHaveLength(1);
+                expect(updatedPredecessor.forwardedSharingInfos![0].peer).toStrictEqual(sender);
+                expect(updatedPredecessor.forwardedSharingInfos![0].deletionInfo!.deletionStatus).toStrictEqual(EmittedAttributeDeletionStatus.ToBeDeletedByPeer);
+
+                const updatedSuccessor = (await consumptionController.attributes.getLocalAttribute(successor.id)) as OwnIdentityAttribute;
                 expect(updatedSuccessor.forwardedSharingInfos).toHaveLength(1);
                 expect(updatedSuccessor.forwardedSharingInfos![0].peer).toStrictEqual(sender);
                 expect(updatedSuccessor.forwardedSharingInfos![0].deletionInfo).toBeUndefined();
@@ -1874,7 +1878,6 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 expect((successorOwnIdentityAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x:anExistingTag", "x:aNewTag"]);
             });
 
-            // TODO: check how we want this
             test("accept with existing IdentityAttribute that is already shared and the latest shared version but is DeletedByPeer", async function () {
                 const ownIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                     content: TestObjectFactory.createIdentityAttribute({
@@ -1920,12 +1923,13 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     (result as ReadAttributeAcceptResponseItem).attributeId
                 )) as OwnIdentityAttribute;
                 expect(updatedOwnIdentityAttribute.id).toStrictEqual(ownIdentityAttribute.id);
-                expect(updatedOwnIdentityAttribute.forwardedSharingInfos).toHaveLength(1);
+                expect(updatedOwnIdentityAttribute.forwardedSharingInfos).toHaveLength(2);
                 expect(updatedOwnIdentityAttribute.forwardedSharingInfos![0].peer).toStrictEqual(sender);
-                expect(updatedOwnIdentityAttribute.forwardedSharingInfos![0].deletionInfo).toBeUndefined();
+                expect(updatedOwnIdentityAttribute.forwardedSharingInfos![0].deletionInfo!.deletionStatus).toBe(EmittedAttributeDeletionStatus.DeletedByPeer);
+                expect(updatedOwnIdentityAttribute.forwardedSharingInfos![1].peer).toStrictEqual(sender);
+                expect(updatedOwnIdentityAttribute.forwardedSharingInfos![1].deletionInfo).toBeUndefined();
             });
 
-            // TODO: check how we want this
             test("accept with existing IdentityAttribute that is already shared and the latest shared version but is ToBeDeletedByPeer", async function () {
                 const ownIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                     content: TestObjectFactory.createIdentityAttribute({
@@ -1965,9 +1969,9 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 };
 
                 const result = await processor.accept(requestItem, acceptParams, incomingRequest);
-                expect(result).toBeInstanceOf(ReadAttributeAcceptResponseItem);
+                expect(result).toBeInstanceOf(AttributeAlreadySharedAcceptResponseItem);
 
-                const createdAttribute = await consumptionController.attributes.getLocalAttribute((result as ReadAttributeAcceptResponseItem).attributeId);
+                const createdAttribute = await consumptionController.attributes.getLocalAttribute((result as AttributeAlreadySharedAcceptResponseItem).attributeId);
                 expect(createdAttribute!.id).toStrictEqual(ownIdentityAttribute.id);
                 expect(createdAttribute!.content).toStrictEqual(ownIdentityAttribute.content);
                 expect((createdAttribute as OwnIdentityAttribute).forwardedSharingInfos).toHaveLength(1);

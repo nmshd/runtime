@@ -48,16 +48,19 @@ export class OwnRelationshipAttribute extends LocalAttribute implements IOwnRela
     @validate({ nullable: true })
     public forwardedSharingInfos?: ForwardedSharingInfo[];
 
-    public isSharedWith(peerAddress: CoreAddress, includeDeletedAndToBeDeleted = false): boolean {
+    public isSharedWith(peerAddress: CoreAddress, includeToBeDeleted = false, includeDeleted = false): boolean {
         if (!this.forwardedSharingInfos) return false;
 
-        const thirdPartySharingInfosWithPeer = this.forwardedSharingInfos.filter((sharingInfo) => sharingInfo.peer.equals(peerAddress));
-        if (thirdPartySharingInfosWithPeer.length === 0) return false;
+        const sharingInfosWithPeer = this.forwardedSharingInfos.filter((sharingInfo) => sharingInfo.peer.equals(peerAddress));
+        if (sharingInfosWithPeer.length === 0) return false;
 
-        if (includeDeletedAndToBeDeleted) return true;
+        let excludedDeletionStatuses = [];
+        if (!includeToBeDeleted) excludedDeletionStatuses.push(EmittedAttributeDeletionStatus.ToBeDeletedByPeer);
+        if (!includeDeleted) excludedDeletionStatuses.push(EmittedAttributeDeletionStatus.DeletedByPeer);
 
-        const excludedDeletionStatuses = [EmittedAttributeDeletionStatus.DeletedByPeer, EmittedAttributeDeletionStatus.ToBeDeletedByPeer];
-        return thirdPartySharingInfosWithPeer.some((sharingInfo) => !sharingInfo.deletionInfo || !excludedDeletionStatuses.includes(sharingInfo.deletionInfo.deletionStatus));
+        if (excludedDeletionStatuses.length === 0) return true;
+
+        return sharingInfosWithPeer.some((sharingInfo) => !sharingInfo.deletionInfo || !excludedDeletionStatuses.includes(sharingInfo.deletionInfo.deletionStatus));
     }
 
     public isDeletedOrToBeDeletedByPeer(): boolean {
@@ -67,13 +70,22 @@ export class OwnRelationshipAttribute extends LocalAttribute implements IOwnRela
         return deletionStatuses.includes(this.peerSharingInfo.deletionInfo.deletionStatus);
     }
 
-    public isDeletedOrToBeDeletedByForwardingPeer(peerAddress: CoreAddress): boolean {
+    public isDeletedOrToBeDeletedByForwardingPeer(peerAddress: CoreAddress, queriedDeletionStatus?: "onlyDeleted" | "onlyToBeDeleted"): boolean {
         if (!this.forwardedSharingInfos) return false;
 
         const sharingInfosWithPeer = this.forwardedSharingInfos.filter((sharingInfo) => sharingInfo.peer.equals(peerAddress));
         if (sharingInfosWithPeer.length === 0) return false;
 
-        const deletionStatuses = [EmittedAttributeDeletionStatus.DeletedByPeer, EmittedAttributeDeletionStatus.ToBeDeletedByPeer];
+        let deletionStatuses;
+        switch (queriedDeletionStatus) {
+            case "onlyDeleted":
+                deletionStatuses = [EmittedAttributeDeletionStatus.DeletedByPeer];
+            case "onlyToBeDeleted":
+                deletionStatuses = [EmittedAttributeDeletionStatus.ToBeDeletedByPeer];
+            default:
+                deletionStatuses = [EmittedAttributeDeletionStatus.DeletedByPeer, EmittedAttributeDeletionStatus.ToBeDeletedByPeer];
+        }
+
         const hasSharingInfoWithDeletionStatus = sharingInfosWithPeer.some(
             (sharingInfo) => sharingInfo.deletionInfo && deletionStatuses.includes(sharingInfo.deletionInfo.deletionStatus)
         );

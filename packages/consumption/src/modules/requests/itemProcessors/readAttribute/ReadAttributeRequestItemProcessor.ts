@@ -27,6 +27,7 @@ import {
     PeerIdentityAttributeSuccessorParams,
     PeerRelationshipAttribute,
     PeerSharedAttributeSucceededEvent,
+    ReceivedAttributeDeletionStatus,
     ThirdPartyRelationshipAttribute,
     ThirdPartyRelationshipAttributeSharingInfo,
     ThirdPartyRelationshipAttributeSuccessorParams
@@ -304,10 +305,15 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 if (!(existingAttribute instanceof OwnIdentityAttribute)) throw new Error("This should never occur, but is required for the compiler.");
             }
 
-            const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfAttribute(existingAttribute, requestInfo.peer);
+            const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfAttribute(existingAttribute, requestInfo.peer, undefined, true);
 
-            const isLatestSharedVersion = latestSharedVersion[0]?.id.toString() === existingAttribute.id.toString();
+            const isLatestSharedVersion = latestSharedVersion[0]?.id.equals(existingAttribute.id);
             if (isLatestSharedVersion) {
+                // TODO: query for onlyToBeDeleted isn't necessary here, since getSharedVersionsOfAttribute won't return deleted attributes
+                if (latestSharedVersion[0].isDeletedOrToBeDeletedByForwardingPeer(requestInfo.peer, "onlyToBeDeleted")) {
+                    await this.consumptionController.attributes.setForwardedDeletionInfoOfAttributes([latestSharedVersion[0]], undefined, requestInfo.peer, true);
+                }
+
                 return AttributeAlreadySharedAcceptResponseItem.from({
                     result: ResponseItemResult.Accepted,
                     attributeId: latestSharedVersion[0].id
@@ -386,6 +392,21 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         _requestItem: ReadAttributeRequestItem,
         requestInfo: LocalRequestInfo
     ): Promise<PeerSharedAttributeSucceededEvent | void> {
+        if (responseItem instanceof RejectResponseItem) return;
+
+        // TODO: test this
+        if (responseItem instanceof AttributeAlreadySharedAcceptResponseItem) {
+            const attribute = await this.consumptionController.attributes.getLocalAttribute(responseItem.attributeId);
+            if (!attribute || !(attribute instanceof PeerIdentityAttribute || attribute instanceof ThirdPartyRelationshipAttribute)) return;
+
+            if (attribute.peerSharingInfo.deletionInfo?.deletionStatus !== ReceivedAttributeDeletionStatus.ToBeDeleted) return;
+
+            // TODO: refactor this nicely
+            attribute.peerSharingInfo.deletionInfo = undefined;
+            await this.consumptionController.attributes.updateAttributeUnsafe(attribute);
+            return;
+        }
+
         if (responseItem instanceof ReadAttributeAcceptResponseItem) {
             if (responseItem.attribute instanceof IdentityAttribute) {
                 await this.consumptionController.attributes.createPeerIdentityAttribute({
@@ -427,6 +448,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             return;
         }
 
+        // TODO: move up and early return
         if (responseItem instanceof AttributeSuccessionAcceptResponseItem) {
             const predecessor = await this.consumptionController.attributes.getLocalAttribute(responseItem.predecessorId);
             if (!predecessor) return;

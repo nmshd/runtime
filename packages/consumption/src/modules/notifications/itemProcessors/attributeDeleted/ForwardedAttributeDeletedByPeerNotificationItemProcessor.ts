@@ -39,7 +39,7 @@ export class ForwardedAttributeDeletedByPeerNotificationItemProcessor extends Ab
             );
         }
 
-        if (!attribute.isSharedWith(notification.peer, true)) {
+        if (!attribute.isSharedWith(notification.peer, true, true)) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.senderIsNotPeerOfSharedAttribute(notification.peer, notificationItem.attributeId));
         }
 

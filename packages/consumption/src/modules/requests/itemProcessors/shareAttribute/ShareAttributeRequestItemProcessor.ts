@@ -13,7 +13,7 @@ import { CoreAddress } from "@nmshd/core-types";
 import { RelationshipStatus } from "@nmshd/transport";
 import _ from "lodash";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { OwnIdentityAttribute, OwnRelationshipAttribute, PeerRelationshipAttribute } from "../../../attributes";
+import { OwnIdentityAttribute, OwnRelationshipAttribute, PeerRelationshipAttribute, ReceivedAttributeDeletionStatus } from "../../../attributes";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
@@ -186,6 +186,13 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
         );
 
         if (existingPeerIdentityAttribute) {
+            if (existingPeerIdentityAttribute.peerSharingInfo.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.ToBeDeleted) {
+                // TODO: refactor using AttributesController function
+                // TODO: test
+                existingPeerIdentityAttribute.peerSharingInfo.deletionInfo = undefined;
+                await this.consumptionController.attributes.updateAttributeUnsafe(existingPeerIdentityAttribute);
+            }
+
             return AttributeAlreadySharedAcceptResponseItem.from({
                 result: ResponseItemResult.Accepted,
                 attributeId: existingPeerIdentityAttribute.id
@@ -210,18 +217,22 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
         requestItem: ShareAttributeRequestItem,
         requestInfo: LocalRequestInfo
     ): Promise<void> {
-        if (!(responseItem instanceof ShareAttributeAcceptResponseItem)) {
+        if (responseItem instanceof RejectResponseItem) return;
+
+        const sharedAttribute = await this.consumptionController.attributes.getLocalAttribute(requestItem.sourceAttributeId);
+        if (
+            !sharedAttribute ||
+            !(sharedAttribute instanceof OwnIdentityAttribute || sharedAttribute instanceof OwnRelationshipAttribute || sharedAttribute instanceof PeerRelationshipAttribute)
+        ) {
             return;
         }
 
-        const sharedAttribute = await this.consumptionController.attributes.getLocalAttribute(requestItem.sourceAttributeId);
-
-        if (sharedAttribute instanceof OwnIdentityAttribute) {
-            await this.consumptionController.attributes.addForwardedSharingInfoToAttribute(sharedAttribute, requestInfo.peer, requestInfo.id);
+        // TODO: write test for this
+        if (responseItem instanceof AttributeAlreadySharedAcceptResponseItem && sharedAttribute.isDeletedOrToBeDeletedByForwardingPeer(requestInfo.peer, "onlyToBeDeleted")) {
+            await this.consumptionController.attributes.setForwardedDeletionInfoOfAttributes([sharedAttribute], undefined, requestInfo.peer, true);
+            return;
         }
 
-        if (sharedAttribute instanceof OwnRelationshipAttribute || sharedAttribute instanceof PeerRelationshipAttribute) {
-            await this.consumptionController.attributes.addForwardedSharingInfoToAttribute(sharedAttribute, requestInfo.peer, requestInfo.id);
-        }
+        await this.consumptionController.attributes.addForwardedSharingInfoToAttribute(sharedAttribute, requestInfo.peer, requestInfo.id);
     }
 }
