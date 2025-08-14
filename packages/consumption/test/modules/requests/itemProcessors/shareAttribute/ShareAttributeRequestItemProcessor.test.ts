@@ -372,7 +372,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 forwardedOwnIdentityAttribute.id
             )) as OwnIdentityAttribute;
 
-            expect(forwardedOwnIdentityAttributeWithDeletionInfo.isSharedWith(recipient, true)).toBe(true);
+            expect(forwardedOwnIdentityAttributeWithDeletionInfo.isSharedWith(recipient, false, true)).toBe(true);
 
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: false,
@@ -549,7 +549,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: `The successor '${forwardedSuccessor.id.toString()}' of the provided IdentityAttribute is to be deleted by the peer.`
+                message: `The provided IdentityAttribute is outdated. Its successor '${forwardedSuccessor.id.toString()}' is already shared with the peer.`
             });
         });
 

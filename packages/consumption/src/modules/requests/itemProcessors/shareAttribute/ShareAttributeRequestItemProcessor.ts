@@ -58,7 +58,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                     );
                 }
 
-                const sharedSuccessors = await this.consumptionController.attributes.getSharedSuccessorsOfAttribute(foundAttribute, recipient);
+                const sharedSuccessors = await this.consumptionController.attributes.getSharedSuccessorsOfAttribute(foundAttribute, recipient, true);
                 if (sharedSuccessors.length > 0) {
                     return ValidationResult.error(
                         ConsumptionCoreErrors.requests.invalidRequestItem(
