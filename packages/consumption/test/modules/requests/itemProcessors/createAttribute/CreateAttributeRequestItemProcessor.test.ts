@@ -477,7 +477,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await Then.theIdOfTheAlreadySharedAttributeMatches(ownIdentityAttribute.id);
         });
 
-        test("in case of an IdentityAttribute that already has as a ForwardedSharingInfo but is deleted by peer: removes the EmittedAttributeDeletionInfo", async function () {
+        test("in case of an IdentityAttribute that already has as a ForwardedSharingInfo but is deleted by peer: adds another forwardedSharingInfo without deletionInfo", async function () {
             const ownIdentityAttribute = await Given.aForwardedOwnIdentityAttributeWithDeletionInfo({
                 attributeOwner: TestIdentity.CURRENT_IDENTITY,
                 value: GivenName.from("aGivenName"),
@@ -488,6 +488,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await When.iCallAccept();
             await Then.theResponseItemShouldBeOfType("CreateAttributeAcceptResponseItem");
             await Then.theOwnIdentityAttributeIsForwarded(ownIdentityAttribute);
+            // TODO: we must check that the own IdentityAttribute has two forwardedSharingInfos for that peer
         });
 
         test("in case of an IdentityAttribute that already has as a ForwardedSharingInfo but is to be deleted by peer: removes the EmittedAttributeDeletionInfo", async function () {
@@ -499,7 +500,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             });
             await Given.aRequestItemWithAnIdentityAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, value: GivenName.from("aGivenName") });
             await When.iCallAccept();
-            await Then.theResponseItemShouldBeOfType("CreateAttributeAcceptResponseItem");
+            await Then.theResponseItemShouldBeOfType("AttributeAlreadySharedAcceptResponseItem");
             await Then.theOwnIdentityAttributeIsForwarded(ownIdentityAttribute);
         });
 
@@ -572,6 +573,8 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await Then.theResponseItemShouldBeOfType("AttributeSuccessionAcceptResponseItem");
             await Then.thePredecessorIdOfTheSucceededAttributeMatches(forwardedOwnIdentityAttributePredecessor.id);
         });
+
+        // TODO: add tests if predecessor was shared but DeletedByPeer(->CreateAttributeAcceptResponseItem) or ToBeDeletedByPeer(-> AttributeSuccessionAcceptResponseItem)
     });
 
     describe("applyIncomingResponseItem", function () {
