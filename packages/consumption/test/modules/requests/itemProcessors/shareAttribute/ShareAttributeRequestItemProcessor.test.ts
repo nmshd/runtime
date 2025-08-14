@@ -44,6 +44,8 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
     let processor: ShareAttributeRequestItemProcessor;
 
+    let recipientTestAccount: AccountController;
+
     let thirdPartyConsumptionController: ConsumptionController;
     let thirdPartyTestAccount: AccountController;
     let aThirdParty: CoreAddress;
@@ -53,12 +55,15 @@ describe("ShareAttributeRequestItemProcessor", function () {
         transport = TestUtil.createTransport();
         await transport.init();
 
-        const accounts = await TestUtil.provideAccounts(transport, connection, 2);
+        const accounts = await TestUtil.provideAccounts(transport, connection, 3);
         ({ accountController: testAccount, consumptionController } = accounts[0]);
 
-        ({ accountController: thirdPartyTestAccount, consumptionController: thirdPartyConsumptionController } = accounts[1]);
+        ({ accountController: recipientTestAccount } = accounts[1]);
+
+        ({ accountController: thirdPartyTestAccount, consumptionController: thirdPartyConsumptionController } = accounts[2]);
         aThirdParty = thirdPartyTestAccount.identity.address;
 
+        await TestUtil.ensureActiveRelationship(testAccount, recipientTestAccount);
         await TestUtil.ensureActiveRelationship(testAccount, thirdPartyTestAccount);
 
         processor = new ShareAttributeRequestItemProcessor(consumptionController);
@@ -69,11 +74,12 @@ describe("ShareAttributeRequestItemProcessor", function () {
     afterAll(async () => await connection.close());
 
     describe("canCreateOutgoingRequestItem", function () {
-        const recipient = CoreAddress.from("Recipient");
+        let recipient: CoreAddress;
         let sender: CoreAddress;
 
         beforeAll(function () {
             sender = testAccount.identity.address;
+            recipient = recipientTestAccount.identity.address;
         });
 
         test.each([
@@ -90,24 +96,11 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 result: "error",
                 expectedError: {
                     code: "error.consumption.requests.invalidRequestItem",
-                    message: "The provided IdentityAttribute belongs to someone else. You can only share OwnIdentityAttributes."
+                    message: "The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes."
                 },
                 attribute: IdentityAttribute.from({
                     value: GivenName.fromAny({ value: "aGivenName" }),
                     owner: CoreAddress.from("someOtherOwner")
-                })
-            },
-            {
-                scenario: "an Identity Attribute with invalid tag",
-                result: "error",
-                expectedError: {
-                    code: "error.consumption.requests.invalidRequestItem",
-                    message: "Detected invalidity of the following tags: 'invalidTag'."
-                },
-                attribute: IdentityAttribute.from({
-                    value: GivenName.fromAny({ value: "aGivenName" }),
-                    owner: CoreAddress.from("Sender"),
-                    tags: ["invalidTag"]
                 })
             },
             {
@@ -121,11 +114,11 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 })
             },
             {
-                scenario: "a Relationship Attribute with owner=someOtherOwner",
+                scenario: "a Relationship Attribute with owner=aThirdParty",
                 result: "success",
                 attribute: RelationshipAttribute.from({
                     value: ProprietaryString.fromAny({ value: "aGivenName", title: "aTitle" }),
-                    owner: CoreAddress.from("someOtherOwner"),
+                    owner: CoreAddress.from("aThirdParty"),
                     confidentiality: RelationshipAttributeConfidentiality.Public,
                     key: "aKey"
                 })
@@ -167,40 +160,34 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 testParams.attribute.owner = recipient;
             }
 
+            if (testParams.attribute.owner.address === "aThirdParty") {
+                testParams.attribute.owner = aThirdParty;
+            }
+
             let sourceAttribute;
 
             if (testParams.attribute instanceof IdentityAttribute) {
-                if (testParams.attribute.owner.equals("") || testParams.attribute.owner.equals(sender)) {
+                if (testParams.attribute.owner.equals(sender)) {
                     sourceAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
-                        content: IdentityAttribute.from({
-                            ...testParams.attribute,
-                            owner: testParams.attribute.owner.equals("") ? sender : testParams.attribute.owner
-                        })
+                        content: testParams.attribute
                     });
                 } else {
                     sourceAttribute = await consumptionController.attributes.createPeerIdentityAttribute({
-                        content: IdentityAttribute.from({
-                            ...testParams.attribute
-                        }),
+                        content: testParams.attribute,
                         peer: testParams.attribute.owner,
                         sourceReference: CoreId.from("aSourceReferenceId"),
                         id: CoreId.from("aPeerIdentityAttributeId")
                     });
                 }
-            } else if (testParams.attribute.owner.equals("") || testParams.attribute.owner.equals(sender)) {
+            } else if (testParams.attribute.owner.equals(sender)) {
                 sourceAttribute = await consumptionController.attributes.createOwnRelationshipAttribute({
-                    content: RelationshipAttribute.from({
-                        ...testParams.attribute,
-                        owner: testParams.attribute.owner.equals("") ? sender : testParams.attribute.owner
-                    }),
+                    content: testParams.attribute,
                     peer: aThirdParty,
                     sourceReference: CoreId.from("aSourceReferenceId")
                 });
             } else {
                 sourceAttribute = await consumptionController.attributes.createPeerRelationshipAttribute({
-                    content: RelationshipAttribute.from({
-                        ...testParams.attribute
-                    }),
+                    content: testParams.attribute,
                     peer: testParams.attribute.owner,
                     sourceReference: CoreId.from("aSourceReferenceId")
                 });
@@ -210,7 +197,11 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 mustBeAccepted: false,
                 attribute: sourceAttribute.content,
                 sourceAttributeId: sourceAttribute.id,
-                thirdPartyAddress: !(testParams.attribute instanceof IdentityAttribute) ? aThirdParty : undefined
+                thirdPartyAddress: !(testParams.attribute instanceof IdentityAttribute)
+                    ? testParams.attribute.owner.equals(sender)
+                        ? aThirdParty
+                        : testParams.attribute.owner
+                    : undefined
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -290,6 +281,36 @@ describe("ShareAttributeRequestItemProcessor", function () {
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
                 message: `The Attribute with the given sourceAttributeId '${sourceAttribute.id.toString()}' does not match the given Attribute.`
+            });
+        });
+
+        test("returns error when an invalid tag is specified as a tag of the provided IdentityAttribute", async function () {
+            const sourceAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
+                content: IdentityAttribute.from({
+                    owner: sender,
+                    value: GivenName.from({ value: "aGivenName" })
+                })
+            });
+
+            sourceAttribute.content.tags = ["invalidTag"];
+            await consumptionController.attributes.updateAttributeUnsafe(sourceAttribute);
+
+            const requestItem = ShareAttributeRequestItem.from({
+                mustBeAccepted: false,
+                attribute: IdentityAttribute.from({
+                    owner: sender,
+                    value: GivenName.from({ value: "aGivenName" }),
+                    tags: ["invalidTag"]
+                }),
+                sourceAttributeId: sourceAttribute.id
+            });
+            const request = Request.from({ items: [requestItem] });
+
+            const result = await processor.canCreateOutgoingRequestItem(requestItem, request, recipient);
+
+            expect(result).errorValidationResult({
+                code: "error.consumption.requests.invalidRequestItem",
+                message: `Detected invalidity of the following tags: 'invalidTag'.`
             });
         });
 

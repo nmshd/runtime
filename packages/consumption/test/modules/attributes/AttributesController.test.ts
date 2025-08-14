@@ -126,6 +126,21 @@ describe("AttributesController", function () {
             );
         });
 
+        test("should not create a new OwnIdentityAttribute with an invalid tag", async function () {
+            const params = {
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "DisplayName",
+                        value: "aDisplayName"
+                    },
+                    owner: consumptionController.accountController.identity.address,
+                    tags: ["invalidTag"]
+                })
+            };
+
+            await expect(consumptionController.attributes.createOwnIdentityAttribute(params)).rejects.toThrow("Detected invalidity of the following tags: 'invalidTag'.");
+        });
+
         test("should trim whitespace for an OwnIdentityAttribute", async function () {
             const params = {
                 content: IdentityAttribute.from({
