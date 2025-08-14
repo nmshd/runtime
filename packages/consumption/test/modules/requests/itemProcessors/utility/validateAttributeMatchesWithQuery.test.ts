@@ -106,49 +106,6 @@ describe("validateAttributeMatchesWithQuery", function () {
             });
         });
 
-        test("returns an error when the given Attribute id belongs to a peer Attribute", async function () {
-            const thirdPartyAttributeId = await ConsumptionIds.attribute.generate();
-            await consumptionController.attributes.createPeerIdentityAttribute({
-                id: thirdPartyAttributeId,
-                content: TestObjectFactory.createIdentityAttribute({
-                    owner: aThirdParty
-                }),
-                peer: aThirdParty,
-                sourceReference: await ConsumptionIds.request.generate()
-            });
-
-            const requestItem = ReadAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: IdentityAttributeQuery.from({ valueType: "GivenName" })
-            });
-            const requestId = await ConsumptionIds.request.generate();
-            const request = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
-            });
-
-            const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
-                accept: true,
-                existingAttributeId: thirdPartyAttributeId.toString()
-            };
-
-            const result = await readProcessor.canAccept(requestItem, acceptParams, request);
-
-            expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidAcceptParameters",
-                message:
-                    "The selected Attribute is not an own IdentityAttribute, own RelationshipAttribute or peer RelationshipAttribute. When accepting a ReadAttributeRequestItem with an existing Attribute it may only be such an Attribute."
-            });
-        });
-
         test("returns an error when the new IdentityAttribute to be created and shared belongs to a third party", async function () {
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,

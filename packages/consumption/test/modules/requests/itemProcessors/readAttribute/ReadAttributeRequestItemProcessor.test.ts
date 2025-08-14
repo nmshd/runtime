@@ -735,6 +735,49 @@ describe("ReadAttributeRequestItemProcessor", function () {
         });
 
         describe("canAccept ReadAttributeRequestitem with IdentityAttributeQuery", function () {
+            test("returns an error when the given IdentityAttribute id belongs to a PeerIdentityAttribute", async function () {
+                const peerAttributeId = await ConsumptionIds.attribute.generate();
+                await consumptionController.attributes.createPeerIdentityAttribute({
+                    id: peerAttributeId,
+                    content: TestObjectFactory.createIdentityAttribute({
+                        owner: aThirdParty
+                    }),
+                    peer: aThirdParty,
+                    sourceReference: await ConsumptionIds.request.generate()
+                });
+
+                const requestItem = ReadAttributeRequestItem.from({
+                    mustBeAccepted: true,
+                    query: IdentityAttributeQuery.from({ valueType: "GivenName" })
+                });
+                const requestId = await ConsumptionIds.request.generate();
+                const request = LocalRequest.from({
+                    id: requestId,
+                    createdAt: CoreDate.utc(),
+                    isOwn: false,
+                    peer: sender,
+                    status: LocalRequestStatus.DecisionRequired,
+                    content: Request.from({
+                        id: requestId,
+                        items: [requestItem]
+                    }),
+                    statusLog: []
+                });
+
+                const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
+                    accept: true,
+                    existingAttributeId: peerAttributeId.toString()
+                };
+
+                const result = await processor.canAccept(requestItem, acceptParams, request);
+
+                expect(result).errorValidationResult({
+                    code: "error.consumption.requests.invalidAcceptParameters",
+                    message:
+                        "The selected Attribute is not an own IdentityAttribute, own RelationshipAttribute or peer RelationshipAttribute. When accepting a ReadAttributeRequestItem with an existing Attribute it may only be such an Attribute."
+                });
+            });
+
             test("returns an error when a successor of the existing IdentityAttribute is already shared", async function () {
                 const predecessorOwnIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                     content: TestObjectFactory.createIdentityAttribute({
@@ -1675,7 +1718,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 expect(createdSuccessor.forwardedSharingInfos![0].peer).toStrictEqual(sender);
 
                 const updatedSuccessor = (await consumptionController.attributes.getLocalAttribute(successor.id)) as OwnIdentityAttribute;
-                expect(updatedSuccessor.succeededBy).toStrictEqual(createdSuccessor!.id);
+                expect(updatedSuccessor.succeededBy).toStrictEqual(createdSuccessor.id);
             });
 
             test("accept with existing IdentityAttribute whose predecessor was already shared but is DeletedByPeer", async function () {
@@ -1973,8 +2016,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 expect((result as AttributeAlreadySharedAcceptResponseItem).attributeId).toStrictEqual(ownIdentityAttribute.id);
 
                 const updatedOwnIdentityAttribute = (await consumptionController.attributes.getLocalAttribute(ownIdentityAttribute.id)) as OwnIdentityAttribute;
-                expect(updatedOwnIdentityAttribute!.id).toStrictEqual(ownIdentityAttribute.id);
-                expect(updatedOwnIdentityAttribute!.content).toStrictEqual(ownIdentityAttribute.content);
+                expect(updatedOwnIdentityAttribute.id).toStrictEqual(ownIdentityAttribute.id);
+                expect(updatedOwnIdentityAttribute.content).toStrictEqual(ownIdentityAttribute.content);
                 expect(updatedOwnIdentityAttribute.forwardedSharingInfos).toHaveLength(1);
                 expect(updatedOwnIdentityAttribute.forwardedSharingInfos![0].deletionInfo).toBeUndefined();
             });
