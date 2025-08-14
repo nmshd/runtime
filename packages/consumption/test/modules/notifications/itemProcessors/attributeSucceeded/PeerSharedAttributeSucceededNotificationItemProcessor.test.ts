@@ -37,7 +37,7 @@ describe("PeerSharedAttributeSucceededNotificationItemProcessor", function () {
     });
 
     beforeEach(async function () {
-        TestUtil.cleanupAttributes(consumptionController);
+        await TestUtil.cleanupAttributes(consumptionController);
         mockEventBus.clearPublishedEvents();
     });
 

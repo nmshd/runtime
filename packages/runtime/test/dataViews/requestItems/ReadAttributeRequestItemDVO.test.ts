@@ -1063,7 +1063,7 @@ describe("AttributeAlreadySharedAcceptResponseItemDVO with IdentityAttributeQuer
         responseItems = [{ accept: true, existingAttributeId: alreadySharedOwnIdentityAttribute.id } as AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON];
     }, 30000);
 
-    afterEach(async () => cleanupAttributes([runtimeServices1, runtimeServices2]));
+    afterEach(async () => await cleanupAttributes([runtimeServices1, runtimeServices2]));
 
     test("check the MessageDVO for the recipient after acceptance", async () => {
         const recipientMessage = await exchangeMessageWithRequest(runtimeServices1, runtimeServices2, requestContent);

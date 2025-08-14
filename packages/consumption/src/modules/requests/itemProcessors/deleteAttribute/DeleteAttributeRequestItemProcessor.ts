@@ -162,7 +162,7 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
 
         const deletionWasRequestedFromInitialPeer = attribute instanceof OwnRelationshipAttribute && attribute.peerSharingInfo.peer.equals(peer);
         return deletionWasRequestedFromInitialPeer
-            ? await this.consumptionController.attributes.setPeerDeletionInfoOfOwnRelationshipAttributeAndPredecessors(attribute as OwnRelationshipAttribute, deletionInfo)
+            ? await this.consumptionController.attributes.setPeerDeletionInfoOfOwnRelationshipAttributeAndPredecessors(attribute, deletionInfo)
             : await this.consumptionController.attributes.setForwardedDeletionInfoOfAttributeAndPredecessors(attribute, deletionInfo, peer);
     }
 
@@ -178,7 +178,7 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
 
         const deletionWasRequestedFromInitialPeer = attribute instanceof OwnRelationshipAttribute && attribute.peerSharingInfo.peer.equals(peer);
         return deletionWasRequestedFromInitialPeer
-            ? await this.consumptionController.attributes.setPeerDeletionInfoOfOwnRelationshipAttributeAndPredecessors(attribute as OwnRelationshipAttribute, deletionInfo)
+            ? await this.consumptionController.attributes.setPeerDeletionInfoOfOwnRelationshipAttributeAndPredecessors(attribute, deletionInfo)
             : await this.consumptionController.attributes.setForwardedDeletionInfoOfAttributeAndPredecessors(attribute, deletionInfo, peer);
     }
 }

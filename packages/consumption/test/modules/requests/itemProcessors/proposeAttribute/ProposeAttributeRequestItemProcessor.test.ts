@@ -1297,8 +1297,8 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 expect((result as AttributeAlreadySharedAcceptResponseItem).attributeId).toStrictEqual(ownIdentityAttribute.id);
 
                 const updatedOwnIdentityAttribute = (await consumptionController.attributes.getLocalAttribute(ownIdentityAttribute.id)) as OwnIdentityAttribute;
-                expect(updatedOwnIdentityAttribute!.id).toStrictEqual(ownIdentityAttribute.id);
-                expect(updatedOwnIdentityAttribute!.content).toStrictEqual(ownIdentityAttribute.content);
+                expect(updatedOwnIdentityAttribute.id).toStrictEqual(ownIdentityAttribute.id);
+                expect(updatedOwnIdentityAttribute.content).toStrictEqual(ownIdentityAttribute.content);
                 expect(updatedOwnIdentityAttribute.forwardedSharingInfos).toHaveLength(1);
                 expect(updatedOwnIdentityAttribute.forwardedSharingInfos![0].deletionInfo).toBeUndefined();
             });

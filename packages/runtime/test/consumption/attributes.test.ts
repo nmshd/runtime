@@ -1972,7 +1972,7 @@ describe(SucceedRelationshipAttributeAndNotifyPeerUseCase.name, () => {
         });
         expect(result).toBeSuccessful();
 
-        await waitForRecipientToReceiveNotification(services1, services2, result.value);
+        await waitForRecipientToReceiveNotification(services2, result.value);
 
         const senderPredecessor = result.value.predecessor;
         const senderSuccessor = result.value.successor;
@@ -2242,7 +2242,7 @@ describe("Get (shared) versions of Attribute", () => {
                     peer: services2.address
                 })
             ).value;
-            await waitForRecipientToReceiveNotification(services1, services2, notifyResult);
+            await waitForRecipientToReceiveNotification(services2, notifyResult);
 
             ({ predecessor: sOwnIdentityAttributeVersion0, successor: sOwnIdentityAttributeVersion2 } = notifyResult);
         }
@@ -2287,7 +2287,7 @@ describe("Get (shared) versions of Attribute", () => {
                     }
                 }
             });
-            await waitForRecipientToReceiveNotification(services1, services2, sOwnRelationshipAttributeSuccessionResult1.value);
+            await waitForRecipientToReceiveNotification(services2, sOwnRelationshipAttributeSuccessionResult1.value);
 
             ({ predecessor: sOwnRelationshipAttributeVersion0, successor: sOwnRelationshipAttributeVersion1 } = sOwnRelationshipAttributeSuccessionResult1.value);
         }
@@ -2303,7 +2303,7 @@ describe("Get (shared) versions of Attribute", () => {
                     }
                 }
             });
-            await waitForRecipientToReceiveNotification(services1, services2, sOwnRelationshipAttributeSuccessionResult2.value);
+            await waitForRecipientToReceiveNotification(services2, sOwnRelationshipAttributeSuccessionResult2.value);
 
             ({ predecessor: sOwnRelationshipAttributeVersion1, successor: sOwnRelationshipAttributeVersion2 } = sOwnRelationshipAttributeSuccessionResult2.value);
         }
