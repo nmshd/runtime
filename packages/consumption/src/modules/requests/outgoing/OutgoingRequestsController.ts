@@ -262,7 +262,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
 
             const deletionWasRequestedFromInitialPeer = attribute instanceof OwnRelationshipAttribute && attribute.peerSharingInfo.peer.equals(peer);
             if (deletionWasRequestedFromInitialPeer) {
-                await this.parent.attributes.setPeerDeletionInfoOfOwnRelationshipAttributeAndPredecessors(attribute as OwnRelationshipAttribute, deletionInfo);
+                await this.parent.attributes.setPeerDeletionInfoOfOwnRelationshipAttributeAndPredecessors(attribute, deletionInfo);
             }
             await this.parent.attributes.setForwardedDeletionInfoOfAttributeAndPredecessors(attribute, deletionInfo, peer);
         }

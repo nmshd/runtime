@@ -687,7 +687,7 @@ export async function executeFullNotifyPeerAboutAttributeSuccessionFlow(
     };
     const notifyResult = await sender.consumption.attributes.notifyPeerAboutOwnIdentityAttributeSuccession(notifyRequest);
 
-    await waitForRecipientToReceiveNotification(sender, recipient, notifyResult.value);
+    await waitForRecipientToReceiveNotification(recipient, notifyResult.value);
 
     const senderOwnIdentityAttributes: SucceedOwnIdentityAttributeResponse = {
         predecessor: notifyResult.value.predecessor,
@@ -697,11 +697,7 @@ export async function executeFullNotifyPeerAboutAttributeSuccessionFlow(
     return senderOwnIdentityAttributes;
 }
 
-export async function waitForRecipientToReceiveNotification(
-    sender: TestRuntimeServices,
-    recipient: TestRuntimeServices,
-    notifyResult: NotifyPeerAboutOwnIdentityAttributeSuccessionResponse
-): Promise<void> {
+export async function waitForRecipientToReceiveNotification(recipient: TestRuntimeServices, notifyResult: NotifyPeerAboutOwnIdentityAttributeSuccessionResponse): Promise<void> {
     await syncUntilHasMessageWithNotification(recipient.transport, notifyResult.notificationId);
 
     await recipient.eventBus.waitForEvent(PeerSharedAttributeSucceededEvent, (e) => {

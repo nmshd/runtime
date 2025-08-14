@@ -319,7 +319,7 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
             expect(ownIdentityAttribute.forwardedSharingInfos![0].sourceReference).toStrictEqual(incomingRequest.id);
             expect(ownIdentityAttribute.content.value).toBeInstanceOf(IdentityFileReference);
             expect((ownIdentityAttribute.content.value as IdentityFileReference).value).toStrictEqual(senderFileReference.truncate());
-            expect((ownIdentityAttribute.content as IdentityAttribute).tags).toStrictEqual(["x:tag"]);
+            expect(ownIdentityAttribute.content.tags).toStrictEqual(["x:tag"]);
         });
 
         test("sender should receive an external event when ownership of their File is claimed", async function () {
@@ -395,9 +395,9 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
             const peerIdentityAttribute = (await senderConsumptionController.attributes.getLocalAttribute(responseItem.attributeId)) as PeerIdentityAttribute;
             expect(peerIdentityAttribute.peerSharingInfo.peer).toStrictEqual(recipient);
             expect(peerIdentityAttribute.peerSharingInfo.sourceReference).toStrictEqual(requestInfo.id);
-            expect((peerIdentityAttribute.content as IdentityAttribute).tags).toStrictEqual(["x:tag"]);
+            expect(peerIdentityAttribute.content.tags).toStrictEqual(["x:tag"]);
 
-            const peerTruncatedFileReference = (peerIdentityAttribute!.content.value as IdentityFileReference).value;
+            const peerTruncatedFileReference = (peerIdentityAttribute.content.value as IdentityFileReference).value;
             expect(peerTruncatedFileReference).toStrictEqual(senderTruncatedFileReference);
         });
     });

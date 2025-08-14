@@ -47,7 +47,7 @@ export class OwnIdentityAttribute extends LocalAttribute implements IOwnIdentity
         const sharingInfosWithPeer = this.forwardedSharingInfos.filter((sharingInfo) => sharingInfo.peer.equals(peerAddress));
         if (sharingInfosWithPeer.length === 0) return false;
 
-        let excludedDeletionStatuses = [];
+        const excludedDeletionStatuses: any = [];
         if (!includeToBeDeleted) excludedDeletionStatuses.push(EmittedAttributeDeletionStatus.ToBeDeletedByPeer);
         if (!includeDeleted) excludedDeletionStatuses.push(EmittedAttributeDeletionStatus.DeletedByPeer);
 

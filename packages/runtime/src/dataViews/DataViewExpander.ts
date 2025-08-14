@@ -1183,7 +1183,7 @@ export class DataViewExpander {
     private expandForwardedSharingInfos(localAttribute: AttributeWithForwardedSharingInfos): ForwardedSharingInfoDVO[] | undefined {
         if (!localAttribute.forwardedSharingInfos || localAttribute.forwardedSharingInfos.length === 0) return;
 
-        return localAttribute.forwardedSharingInfos?.map((sharingInfo) => {
+        return localAttribute.forwardedSharingInfos.map((sharingInfo) => {
             const result: ForwardedSharingInfoDVO = {
                 peer: sharingInfo.peer.toString(),
                 sourceReference: sharingInfo.sourceReference.toString(),

@@ -68,7 +68,7 @@ describe("IdentityAttributeQueryExpanded", () => {
         expect(expandedQuery.valueHints.max).toBe(100);
         expect(expandedQuery.results).toHaveLength(2);
 
-        let dvo: OwnIdentityAttributeDVO = expandedQuery.results[0] as OwnIdentityAttributeDVO;
+        let dvo: OwnIdentityAttributeDVO = expandedQuery.results[0];
         let attribute = attributes[0];
         expect(dvo).toBeDefined();
         expect(dvo.type).toBe("OwnIdentityAttributeDVO");
@@ -93,7 +93,7 @@ describe("IdentityAttributeQueryExpanded", () => {
         expect(dvo.valueHints["@type"]).toBe("ValueHints");
         expect(dvo.valueHints.max).toBe(100);
 
-        dvo = expandedQuery.results[1] as OwnIdentityAttributeDVO;
+        dvo = expandedQuery.results[1];
         attribute = attributes[1];
         expect(dvo).toBeDefined();
         expect(dvo.type).toBe("OwnIdentityAttributeDVO");
