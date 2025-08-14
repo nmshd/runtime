@@ -87,10 +87,10 @@ class Attributes {
         );
     }
 
-    public cannotSucceedAttributesWithDeletionInfo() {
+    public cannotSucceedSharedAttributesDeletedByPeer() {
         return new CoreError(
-            "error.consumption.attributes.cannotSucceedAttributesWithDeletionInfo",
-            "You cannot succeed Attributes with a deletionInfo, since the peer may have already deleted it or marked it for deletion."
+            "error.consumption.attributes.cannotSucceedSharedAttributesDeletedByPeer",
+            "You cannot succeed shared Attributes that are already deleted by the peer."
         );
     }
 

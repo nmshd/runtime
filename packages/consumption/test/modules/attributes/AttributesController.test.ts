@@ -1239,7 +1239,49 @@ describe("AttributesController", function () {
                 });
             });
 
-            test("should catch if the predecessor is a PeerIdentityAttribute and has a deletionInfo", async function () {
+            test("should catch if the predecessor is a PeerIdentityAttribute with deletion status DeletedByOwner", async function () {
+                const predecessor = await consumptionController.attributes.createPeerIdentityAttribute({
+                    content: IdentityAttribute.from({
+                        value: {
+                            "@type": "Nationality",
+                            value: "DE"
+                        },
+                        owner: CoreAddress.from("peer")
+                    }),
+                    peer: CoreAddress.from("peer"),
+                    sourceReference: CoreId.from("aSourceReferenceId"),
+                    id: CoreId.from("aPredecessorId")
+                });
+                await consumptionController.attributes.setPeerDeletionInfoOfPeerAttributes(
+                    [predecessor],
+                    ReceivedAttributeDeletionInfo.from({
+                        deletionStatus: ReceivedAttributeDeletionStatus.DeletedByOwner,
+                        deletionDate: CoreDate.utc().subtract({ days: 1 })
+                    })
+                );
+
+                const successorData = PeerIdentityAttributeSuccessorParams.from({
+                    content: IdentityAttribute.from({
+                        value: {
+                            "@type": "Nationality",
+                            value: "US"
+                        },
+                        owner: CoreAddress.from("peer")
+                    }),
+                    peerSharingInfo: {
+                        sourceReference: CoreId.from("anotherSourceReferenceId"),
+                        peer: CoreAddress.from("peer")
+                    },
+                    id: CoreId.from("aSuccessorId")
+                });
+
+                const validationResult = await consumptionController.attributes.validatePeerIdentityAttributeSuccession(predecessor, successorData);
+                expect(validationResult).errorValidationResult({
+                    code: "error.consumption.attributes.cannotSucceedSharedAttributesDeletedByPeer"
+                });
+            });
+
+            test("should allow succession if the predecessor is a PeerIdentityAttribute with deletion status ToBeDeleted", async function () {
                 const predecessor = await consumptionController.attributes.createPeerIdentityAttribute({
                     content: IdentityAttribute.from({
                         value: {
@@ -1266,7 +1308,7 @@ describe("AttributesController", function () {
                             "@type": "Nationality",
                             value: "US"
                         },
-                        owner: consumptionController.accountController.identity.address
+                        owner: CoreAddress.from("peer")
                     }),
                     peerSharingInfo: {
                         sourceReference: CoreId.from("anotherSourceReferenceId"),
@@ -1276,9 +1318,7 @@ describe("AttributesController", function () {
                 });
 
                 const validationResult = await consumptionController.attributes.validatePeerIdentityAttributeSuccession(predecessor, successorData);
-                expect(validationResult).errorValidationResult({
-                    code: "error.consumption.attributes.cannotSucceedAttributesWithDeletionInfo"
-                });
+                expect(validationResult.isSuccess()).toBe(true);
             });
 
             test("should allow succession if the predecessor is an OwnIdentityAttribute and has a deletionInfo", async function () {

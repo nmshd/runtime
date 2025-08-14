@@ -442,6 +442,8 @@ export class AttributesController extends ConsumptionBaseController {
         if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
         if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
+        // TODO: check if forwardedSharingInfo with that peer already exists: no deletionInfo - throw, deleted - pass, tobedeleted - override
+
         const sharingInfo = ForwardedSharingInfo.from({ peer, sourceReference, sharedAt: CoreDate.utc() });
 
         (attribute.forwardedSharingInfos ??= []).push(sharingInfo);
@@ -660,12 +662,12 @@ export class AttributesController extends ConsumptionBaseController {
             peerSharingInfo: parsedSuccessorParams.peerSharingInfo
         });
 
-        if (predecessor.peerSharingInfo.peer.toString() !== successor.peerSharingInfo.peer.toString()) {
+        if (!predecessor.peerSharingInfo.peer.equals(successor.peerSharingInfo.peer)) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangePeer());
         }
 
-        if (predecessor.peerSharingInfo.deletionInfo) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedAttributesWithDeletionInfo());
+        if (predecessor.peerSharingInfo.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.DeletedByOwner) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedSharedAttributesDeletedByPeer());
         }
 
         return await this.validateAttributeSuccession(predecessor, successor);
@@ -690,12 +692,12 @@ export class AttributesController extends ConsumptionBaseController {
             peerSharingInfo: parsedSuccessorParams.peerSharingInfo
         });
 
-        if (predecessor.peerSharingInfo.peer.toString() !== successor.peerSharingInfo.peer.toString()) {
+        if (!predecessor.peerSharingInfo.peer.equals(successor.peerSharingInfo.peer)) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangePeer());
         }
 
-        if (predecessor.peerSharingInfo.deletionInfo) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedAttributesWithDeletionInfo());
+        if (predecessor.peerSharingInfo.deletionInfo?.deletionStatus === EmittedAttributeDeletionStatus.DeletedByPeer) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedSharedAttributesDeletedByPeer());
         }
 
         return await this.validateAttributeSuccession(predecessor, successor);
@@ -720,12 +722,12 @@ export class AttributesController extends ConsumptionBaseController {
             peerSharingInfo: parsedSuccessorParams.peerSharingInfo
         });
 
-        if (predecessor.peerSharingInfo.peer.toString() !== successor.peerSharingInfo.peer.toString()) {
+        if (!predecessor.peerSharingInfo.peer.equals(successor.peerSharingInfo.peer)) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangePeer());
         }
 
-        if (predecessor.peerSharingInfo.deletionInfo) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedAttributesWithDeletionInfo());
+        if (predecessor.peerSharingInfo.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.DeletedByOwner) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedSharedAttributesDeletedByPeer());
         }
 
         return await this.validateAttributeSuccession(predecessor, successor);
@@ -750,12 +752,15 @@ export class AttributesController extends ConsumptionBaseController {
             peerSharingInfo: parsedSuccessorParams.peerSharingInfo
         });
 
-        if (predecessor.peerSharingInfo.peer.toString() !== successor.peerSharingInfo.peer.toString()) {
+        if (!predecessor.peerSharingInfo.peer.equals(successor.peerSharingInfo.peer)) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangePeer());
         }
 
-        if (predecessor.peerSharingInfo.deletionInfo) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedAttributesWithDeletionInfo());
+        if (
+            predecessor.peerSharingInfo.deletionInfo?.deletionStatus === ThirdPartyRelationshipAttributeDeletionStatus.DeletedByOwner ||
+            predecessor.peerSharingInfo.deletionInfo?.deletionStatus === ThirdPartyRelationshipAttributeDeletionStatus.DeletedByPeer
+        ) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedSharedAttributesDeletedByPeer());
         }
 
         return await this.validateAttributeSuccession(predecessor, successor);

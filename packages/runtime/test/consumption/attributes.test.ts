@@ -2027,7 +2027,7 @@ describe(SucceedRelationshipAttributeAndNotifyPeerUseCase.name, () => {
                 }
             }
         });
-        expect(result).toBeAnError(/.*/, "error.consumption.attributes.cannotSucceedAttributesWithDeletionInfo");
+        expect(result).toBeAnError(/.*/, "error.consumption.attributes.cannotSucceedSharedAttributesDeletedByPeer");
     });
 });
 
