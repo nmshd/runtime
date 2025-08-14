@@ -553,7 +553,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             });
         });
 
-        test("returns an error when a predecessor of the existing IdentityAttribute is already shared and therefore the user should notify about the Attribute succession instead of share it.", async function () {
+        test("returns an error when a predecessor of the existing IdentityAttribute is already shared and therefore the user should notify about the Attribute succession instead of share it", async function () {
             const ownIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: TestObjectFactory.createIdentityAttribute({ owner: sender })
             });
@@ -935,7 +935,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             expect(responseItem.attributeId).toStrictEqual(existingPeerIdentityAttribute.id);
         });
 
-        test("returns AttributeAlreadySharedAcceptResponseItem when accepting an already existing PeerIdentityAttribute that has a deletionInfo", async function () {
+        test("returns AttributeAlreadySharedAcceptResponseItem when accepting an already existing PeerIdentityAttribute that is to be deleted", async function () {
             const existingPeerIdentityAttribute = await consumptionController.attributes.createPeerIdentityAttribute({
                 content: TestObjectFactory.createIdentityAttribute({ owner: sender }),
                 sourceReference: CoreId.from("aSourceReferenceId"),
