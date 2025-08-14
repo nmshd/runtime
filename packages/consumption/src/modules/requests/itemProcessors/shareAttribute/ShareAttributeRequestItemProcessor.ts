@@ -94,7 +94,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                 return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("You cannot share ThirdPartyRelationshipAttributes."));
             }
 
-            if (recipient && foundAttribute.isSharedWith(recipient)) {
+            if (recipient && (foundAttribute.peerSharingInfo.peer.equals(recipient) || foundAttribute.isSharedWith(recipient))) {
                 return ValidationResult.error(
                     ConsumptionCoreErrors.requests.invalidRequestItem("The provided RelationshipAttribute already exists in the context of the Relationship with the peer.")
                 );
