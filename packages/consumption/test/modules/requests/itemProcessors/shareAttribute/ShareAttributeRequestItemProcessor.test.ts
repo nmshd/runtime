@@ -148,7 +148,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 }),
                 expectedError: {
                     code: "error.consumption.requests.invalidRequestItem",
-                    message: "It doesn't make sense to share a RelationshipAttribute with its owner."
+                    message: "The provided RelationshipAttribute already exists in the context of the Relationship with the peer."
                 }
             }
         ])("returns $result when passing $scenario", async function (testParams) {
@@ -710,33 +710,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             });
         });
 
-        test("returns error when the initial RelationshipAttribute already exists in the context of the Relationship with the peer", async function () {
-            const relationshipAttribute = await consumptionController.attributes.createOwnRelationshipAttribute({
-                content: RelationshipAttribute.from({
-                    owner: sender,
-                    value: ProprietaryString.fromAny({ value: "aGivenName", title: "aTitle" }),
-                    confidentiality: RelationshipAttributeConfidentiality.Public,
-                    key: "aKey"
-                }),
-                peer: recipient,
-                sourceReference: CoreId.from("aSourceReferenceId")
-            });
-            const requestItem = ShareAttributeRequestItem.from({
-                mustBeAccepted: false,
-                attribute: relationshipAttribute.content,
-                sourceAttributeId: relationshipAttribute.id
-            });
-            const request = Request.from({ items: [requestItem] });
-
-            const result = await processor.canCreateOutgoingRequestItem(requestItem, request, recipient);
-
-            expect(result).errorValidationResult({
-                code: "error.consumption.requests.invalidRequestItem",
-                message: "The provided RelationshipAttribute already exists in the context of the Relationship with the peer."
-            });
-        });
-
-        test("returns error when a ThirdPartyRelationshipAttribute already exists in the context of the Relationship with the peer", async function () {
+        test("returns error when a RelationshipAttribute is already shared with the peer", async function () {
             const initialRelationshipAttribute = await consumptionController.attributes.createOwnRelationshipAttribute({
                 content: RelationshipAttribute.from({
                     owner: sender,
@@ -766,7 +740,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             });
         });
 
-        test("returns success when a ThirdPartyRelationshipAttribute already exists in the context of the Relationship with the peer but is ToBeDeletedByPeer", async function () {
+        test("returns success when a RelationshipAttribute is already shared with the peer but is ToBeDeletedByPeer", async function () {
             const initialRelationshipAttribute = await consumptionController.attributes.createOwnRelationshipAttribute({
                 content: RelationshipAttribute.from({
                     owner: sender,
@@ -806,7 +780,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             expect(result).successfulValidationResult();
         });
 
-        test("returns success when a ThirdPartyRelationshipAttribute already exists in the context of the Relationship with the peer but is DeletedByPeer", async function () {
+        test("returns success when a RelationshipAttribute is already shared with the peer but is DeletedByPeer", async function () {
             const initialRelationshipAttribute = await consumptionController.attributes.createOwnRelationshipAttribute({
                 content: RelationshipAttribute.from({
                     owner: sender,
@@ -961,7 +935,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             expect(responseItem.attributeId).toStrictEqual(existingPeerIdentityAttribute.id);
         });
 
-        test("returns ShareAttributeAcceptResponseItem when accepting an already existing PeerIdentityAttribute that has a deletionInfo", async function () {
+        test("returns AttributeAlreadySharedAcceptResponseItem when accepting an already existing PeerIdentityAttribute that has a deletionInfo", async function () {
             const existingPeerIdentityAttribute = await consumptionController.attributes.createPeerIdentityAttribute({
                 content: TestObjectFactory.createIdentityAttribute({ owner: sender }),
                 sourceReference: CoreId.from("aSourceReferenceId"),
@@ -994,8 +968,8 @@ describe("ShareAttributeRequestItemProcessor", function () {
             });
 
             const responseItem = await processor.accept(requestItem, { accept: true }, incomingRequest);
-            expect(responseItem).toBeInstanceOf(ShareAttributeAcceptResponseItem);
-            expect(responseItem.attributeId).not.toStrictEqual(existingPeerIdentityAttribute.id);
+            expect(responseItem).toBeInstanceOf(AttributeAlreadySharedAcceptResponseItem);
+            expect(responseItem.attributeId).toStrictEqual(existingPeerIdentityAttribute.id);
         });
 
         test("returns ShareAttributeAcceptResponseItem when accepting an already existing PeerIdentityAttribute that has a successor", async function () {
@@ -1137,7 +1111,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             const responseItem = ShareAttributeAcceptResponseItem.from({
                 result: ResponseItemResult.Accepted,
-                attributeId: await ConsumptionIds.attribute.generate()
+                attributeId: sourceAttribute.id
             });
 
             await processor.applyIncomingResponseItem(responseItem, requestItem, localRequest);
@@ -1161,7 +1135,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             const responseItem = ShareAttributeAcceptResponseItem.from({
                 result: ResponseItemResult.Accepted,
-                attributeId: await ConsumptionIds.attribute.generate()
+                attributeId: sourceAttribute.id
             });
 
             await processor.applyIncomingResponseItem(responseItem, requestItem, localRequest);
