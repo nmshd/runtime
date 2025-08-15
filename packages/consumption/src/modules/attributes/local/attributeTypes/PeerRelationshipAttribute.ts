@@ -32,7 +32,8 @@ export interface IPeerRelationshipAttribute extends ILocalAttribute {
 
 @type("PeerRelationshipAttribute")
 export class PeerRelationshipAttribute extends LocalAttribute implements IPeerRelationshipAttribute {
-    public override readonly technicalProperties = [
+    public override readonly technicalProperties: string[] = [
+        ...this.technicalProperties,
         "@type",
         "@context",
         nameof<PeerRelationshipAttribute>((r) => r.peerSharingInfo),

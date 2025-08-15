@@ -30,7 +30,8 @@ export interface IOwnRelationshipAttribute extends ILocalAttribute {
 
 @type("OwnRelationshipAttribute")
 export class OwnRelationshipAttribute extends LocalAttribute implements IOwnRelationshipAttribute {
-    public override readonly technicalProperties = [
+    public override readonly technicalProperties: string[] = [
+        ...this.technicalProperties,
         "@type",
         "@context",
         nameof<OwnRelationshipAttribute>((r) => r.peerSharingInfo),

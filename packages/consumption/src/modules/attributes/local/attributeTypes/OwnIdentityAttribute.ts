@@ -21,10 +21,10 @@ export interface IOwnIdentityAttribute extends ILocalAttribute {
 
 @type("OwnIdentityAttribute")
 export class OwnIdentityAttribute extends LocalAttribute implements IOwnIdentityAttribute {
-    public override readonly technicalProperties = [
+    public override readonly technicalProperties: string[] = [
+        ...this.technicalProperties,
         "@type",
         "@context",
-        // TODO: super, same for other attribute types
         nameof<OwnIdentityAttribute>((r) => r.isDefault),
         nameof<OwnIdentityAttribute>((r) => r.forwardedSharingInfos)
     ];

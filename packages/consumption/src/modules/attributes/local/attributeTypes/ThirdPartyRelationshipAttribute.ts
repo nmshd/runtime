@@ -23,7 +23,7 @@ export interface IThirdPartyRelationshipAttribute extends ILocalAttribute {
 
 @type("ThirdPartyRelationshipAttribute")
 export class ThirdPartyRelationshipAttribute extends LocalAttribute implements IThirdPartyRelationshipAttribute {
-    public override readonly technicalProperties = ["@type", "@context", nameof<ThirdPartyRelationshipAttribute>((r) => r.peerSharingInfo)];
+    public override readonly technicalProperties: string[] = [...this.technicalProperties, "@type", "@context", nameof<ThirdPartyRelationshipAttribute>((r) => r.peerSharingInfo)];
 
     @serialize({ customGenerator: (value: RelationshipAttribute) => value.toJSON(true) })
     @validate()

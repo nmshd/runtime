@@ -21,7 +21,6 @@ export interface ILocalAttribute extends ICoreSynchronizable {
     wasViewedAt?: ICoreDate;
 }
 
-// TODO: maybe make this abstract
 @type("LocalAttribute")
 export class LocalAttribute extends CoreSynchronizable implements ILocalAttribute {
     public override readonly technicalProperties = [
