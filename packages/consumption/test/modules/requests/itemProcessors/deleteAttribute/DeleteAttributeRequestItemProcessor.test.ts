@@ -17,8 +17,16 @@ import {
     ConsumptionController,
     ConsumptionIds,
     DeleteAttributeRequestItemProcessor,
+    EmittedAttributeDeletionInfo,
+    EmittedAttributeDeletionStatus,
     LocalRequest,
-    LocalRequestStatus
+    LocalRequestStatus,
+    OwnIdentityAttribute,
+    OwnIdentityAttributeSuccessorParams,
+    OwnRelationshipAttribute,
+    PeerIdentityAttribute,
+    PeerRelationshipAttribute,
+    ReceivedAttributeDeletionStatus
 } from "../../../../../src";
 import { TestUtil } from "../../../../core/TestUtil";
 
@@ -54,19 +62,17 @@ describe("DeleteAttributeRequestItemProcessor", function () {
 
     describe("canCreateOutgoingRequestItem", function () {
         test("returns success requesting the deletion of a forwarded OwnIdentityAttribute", async function () {
-            const sOwnIdentityAttribute = await consumptionController.attributes.createAttributeUnsafe({
+            const sOwnIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
                         value: "A birth name"
                     },
                     owner: accountController.identity.address
-                }),
-                shareInfo: {
-                    peer: peerAddress,
-                    sourceReference: CoreId.from("reqRef")
-                }
+                })
             });
+
+            await consumptionController.attributes.addForwardedSharingInfoToAttribute(sOwnIdentityAttribute, peerAddress, CoreId.from("aSourceReferenceId"));
 
             const requestItem = DeleteAttributeRequestItem.from({
                 mustBeAccepted: false,
@@ -79,7 +85,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
         });
 
         test("returns success requesting the deletion of an OwnRelationshipAttribute", async function () {
-            const sOwnRelationshipAttribute = await consumptionController.attributes.createAttributeUnsafe({
+            const sOwnRelationshipAttribute = await consumptionController.attributes.createOwnRelationshipAttribute({
                 content: RelationshipAttribute.from({
                     key: "customerId",
                     value: {
@@ -90,10 +96,8 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                     owner: accountController.identity.address,
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }),
-                shareInfo: {
-                    peer: peerAddress,
-                    sourceReference: CoreId.from("reqRef")
-                }
+                peer: peerAddress,
+                sourceReference: CoreId.from("aSourceReferenceId")
             });
 
             const requestItem = DeleteAttributeRequestItem.from({
@@ -106,8 +110,8 @@ describe("DeleteAttributeRequestItemProcessor", function () {
             expect(result).successfulValidationResult();
         });
 
-        test("returns an error requesting the deletion of an OwnIdentityAttribute", async function () {
-            const sOwnIdentityAttribute = await consumptionController.attributes.createAttributeUnsafe({
+        test("returns an error requesting the deletion of an OwnIdentityAttribute that is not forwarded", async function () {
+            const sOwnIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
@@ -131,7 +135,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
         });
 
         test("returns an error requesting the deletion of a PeerIdentityAttribute", async function () {
-            const sPeerIdentityAttribute = await consumptionController.attributes.createAttributeUnsafe({
+            const sPeerIdentityAttribute = await consumptionController.attributes.createPeerIdentityAttribute({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
@@ -139,10 +143,9 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                     },
                     owner: peerAddress
                 }),
-                shareInfo: {
-                    peer: peerAddress,
-                    sourceReference: CoreId.from("reqRef")
-                }
+                peer: peerAddress,
+                sourceReference: CoreId.from("aSourceReferenceId"),
+                id: CoreId.from("aPeerIdentityAttributeId")
             });
 
             const requestItem = DeleteAttributeRequestItem.from({
@@ -159,7 +162,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
         });
 
         test("returns an error requesting the deletion of a PeerRelationshipAttribute", async function () {
-            const sPeerRelationshipAttribute = await consumptionController.attributes.createAttributeUnsafe({
+            const sPeerRelationshipAttribute = await consumptionController.attributes.createPeerRelationshipAttribute({
                 content: RelationshipAttribute.from({
                     key: "customerId",
                     value: {
@@ -170,10 +173,8 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                     owner: peerAddress,
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }),
-                shareInfo: {
-                    peer: peerAddress,
-                    sourceReference: CoreId.from("reqRef")
-                }
+                peer: peerAddress,
+                sourceReference: CoreId.from("aSourceReferenceId")
             });
 
             const requestItem = DeleteAttributeRequestItem.from({
@@ -189,8 +190,8 @@ describe("DeleteAttributeRequestItemProcessor", function () {
             });
         });
 
-        test("returns an error requesting the deletion of a shared IdentityAttribute of a third party", async function () {
-            const sThirdPartySharedIdentityAttribute = await consumptionController.attributes.createAttributeUnsafe({
+        test("returns an error requesting the deletion of a PeerIdentityAttribute of a third party", async function () {
+            const sPeerIdentityAttributeOfThirdParty = await consumptionController.attributes.createPeerIdentityAttribute({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
@@ -198,15 +199,14 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                     },
                     owner: peerAddress
                 }),
-                shareInfo: {
-                    peer: CoreAddress.from("ThirdParty"),
-                    sourceReference: CoreId.from("reqRef")
-                }
+                peer: CoreAddress.from("ThirdParty"),
+                sourceReference: CoreId.from("aSourceReferenceId"),
+                id: CoreId.from("aPeerIdentityAttributeId")
             });
 
             const requestItem = DeleteAttributeRequestItem.from({
                 mustBeAccepted: false,
-                attributeId: sThirdPartySharedIdentityAttribute.id
+                attributeId: sPeerIdentityAttributeOfThirdParty.id
             });
 
             const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), peerAddress);
@@ -218,19 +218,17 @@ describe("DeleteAttributeRequestItemProcessor", function () {
         });
 
         test("returns an error requesting the deletion of an Attribute from yourself", async function () {
-            const sOwnIdentityAttribute = await consumptionController.attributes.createAttributeUnsafe({
+            const sOwnIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
                         value: "A birth name"
                     },
                     owner: accountController.identity.address
-                }),
-                shareInfo: {
-                    peer: peerAddress,
-                    sourceReference: CoreId.from("reqRef")
-                }
+                })
             });
+
+            await consumptionController.attributes.addForwardedSharingInfoToAttribute(sOwnIdentityAttribute, peerAddress, CoreId.from("aSourceReferenceId"));
 
             const requestItem = DeleteAttributeRequestItem.from({
                 mustBeAccepted: false,
@@ -246,23 +244,25 @@ describe("DeleteAttributeRequestItemProcessor", function () {
         });
 
         test("returns an error requesting the deletion of an Attribute the peer already deleted", async function () {
-            const peerDeletedAttribute = await consumptionController.attributes.createAttributeUnsafe({
+            const peerDeletedAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
                         value: "A birth name"
                     },
                     owner: accountController.identity.address
-                }),
-                shareInfo: {
-                    peer: peerAddress,
-                    sourceReference: CoreId.from("reqRef")
-                },
-                deletionInfo: {
-                    deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
-                    deletionDate: CoreDate.utc()
-                }
+                })
             });
+
+            await consumptionController.attributes.addForwardedSharingInfoToAttribute(peerDeletedAttribute, peerAddress, CoreId.from("aSourceReferenceId"));
+            await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(
+                peerDeletedAttribute,
+                EmittedAttributeDeletionInfo.from({
+                    deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
+                    deletionDate: CoreDate.utc()
+                }),
+                peerAddress
+            );
 
             const requestItem = DeleteAttributeRequestItem.from({
                 mustBeAccepted: false,
@@ -278,23 +278,25 @@ describe("DeleteAttributeRequestItemProcessor", function () {
         });
 
         test("returns an error requesting the deletion of an Attribute the peer already marked for deletion", async function () {
-            const peerToBeDeletedAttribute = await consumptionController.attributes.createAttributeUnsafe({
+            const peerToBeDeletedAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
                         value: "A birth name"
                     },
                     owner: accountController.identity.address
-                }),
-                shareInfo: {
-                    peer: peerAddress,
-                    sourceReference: CoreId.from("reqRef")
-                },
-                deletionInfo: {
-                    deletionStatus: LocalAttributeDeletionStatus.ToBeDeletedByPeer,
-                    deletionDate: CoreDate.utc().add({ days: 1 })
-                }
+                })
             });
+
+            await consumptionController.attributes.addForwardedSharingInfoToAttribute(peerToBeDeletedAttribute, peerAddress, CoreId.from("aSourceReferenceId"));
+            await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(
+                peerToBeDeletedAttribute,
+                EmittedAttributeDeletionInfo.from({
+                    deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
+                    deletionDate: CoreDate.utc().add({ days: 1 })
+                }),
+                peerAddress
+            );
 
             const requestItem = DeleteAttributeRequestItem.from({
                 mustBeAccepted: false,
@@ -312,7 +314,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
         test("returns an error requesting the deletion of an unknown Attribute", async function () {
             const requestItem = DeleteAttributeRequestItem.from({
                 mustBeAccepted: false,
-                attributeId: CoreId.from("ATTxxxxxxxxxxxxxxxxx")
+                attributeId: CoreId.from("anUnknownAttributeId")
             });
 
             const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), accountController.identity.address);
@@ -357,7 +359,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
         });
 
         test("returns success when called with a valid date in the future", async function () {
-            const rPeerIdentityAttribute = await consumptionController.attributes.createAttributeUnsafe({
+            const rPeerIdentityAttribute = await consumptionController.attributes.createPeerIdentityAttribute({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
@@ -365,10 +367,9 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                     },
                     owner: peerAddress
                 }),
-                shareInfo: {
-                    peer: peerAddress,
-                    sourceReference: CoreId.from("reqRef")
-                }
+                peer: peerAddress,
+                sourceReference: CoreId.from("aSourceReferenceId"),
+                id: CoreId.from("aPeerIdentityAttributeId")
             });
 
             const requestItem = DeleteAttributeRequestItem.from({
@@ -402,7 +403,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
         });
 
         test("returns an error when called with a valid date in the past", async function () {
-            const rPeerIdentityAttribute = await consumptionController.attributes.createAttributeUnsafe({
+            const rPeerIdentityAttribute = await consumptionController.attributes.createPeerIdentityAttribute({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
@@ -410,10 +411,9 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                     },
                     owner: peerAddress
                 }),
-                shareInfo: {
-                    peer: peerAddress,
-                    sourceReference: CoreId.from("reqRef")
-                }
+                peer: peerAddress,
+                sourceReference: CoreId.from("aSourceReferenceId"),
+                id: CoreId.from("aPeerIdentityAttributeId")
             });
 
             const requestItem = DeleteAttributeRequestItem.from({
@@ -450,7 +450,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
         });
 
         test("returns an error when called with an invalid date", async function () {
-            const rPeerIdentityAttribute = await consumptionController.attributes.createAttributeUnsafe({
+            const rPeerIdentityAttribute = await consumptionController.attributes.createPeerIdentityAttribute({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
@@ -458,10 +458,9 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                     },
                     owner: peerAddress
                 }),
-                shareInfo: {
-                    peer: peerAddress,
-                    sourceReference: CoreId.from("reqRef")
-                }
+                peer: peerAddress,
+                sourceReference: CoreId.from("aSourceReferenceId"),
+                id: CoreId.from("aPeerIdentityAttributeId")
             });
 
             const requestItem = DeleteAttributeRequestItem.from({
@@ -500,7 +499,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
 
     describe("accept", function () {
         test("returns a DeleteAttributeAcceptResponseItem", async function () {
-            const rPeerIdentityAttribute = await consumptionController.attributes.createAttributeUnsafe({
+            const rPeerIdentityAttribute = await consumptionController.attributes.createPeerIdentityAttribute({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
@@ -508,10 +507,9 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                     },
                     owner: peerAddress
                 }),
-                shareInfo: {
-                    peer: peerAddress,
-                    sourceReference: CoreId.from("reqRef")
-                }
+                peer: peerAddress,
+                sourceReference: CoreId.from("aSourceReferenceId"),
+                id: CoreId.from("aPeerIdentityAttributeId")
             });
 
             const requestItem = DeleteAttributeRequestItem.from({
@@ -548,7 +546,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
         });
 
         test("sets the deletionInfo of a PeerIdentityAttribute", async function () {
-            const rPeerIdentityAttribute = await consumptionController.attributes.createAttributeUnsafe({
+            const rPeerIdentityAttribute = await consumptionController.attributes.createPeerIdentityAttribute({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
@@ -556,10 +554,9 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                     },
                     owner: peerAddress
                 }),
-                shareInfo: {
-                    peer: peerAddress,
-                    sourceReference: CoreId.from("reqRef")
-                }
+                peer: peerAddress,
+                sourceReference: CoreId.from("aSourceReferenceId"),
+                id: CoreId.from("aPeerIdentityAttributeId")
             });
 
             const requestItem = DeleteAttributeRequestItem.from({
@@ -590,13 +587,13 @@ describe("DeleteAttributeRequestItemProcessor", function () {
             await processor.accept(requestItem, acceptParams, incomingRequest);
 
             const updatedPeerIdentityAttribute = await consumptionController.attributes.getLocalAttribute(rPeerIdentityAttribute.id);
-            expect(updatedPeerIdentityAttribute!.deletionInfo).toBeDefined();
-            expect(updatedPeerIdentityAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.ToBeDeleted);
-            expect(updatedPeerIdentityAttribute!.deletionInfo!.deletionDate).toStrictEqual(dateInFuture);
+            expect((updatedPeerIdentityAttribute as PeerIdentityAttribute).peerSharingInfo.deletionInfo).toBeDefined();
+            expect((updatedPeerIdentityAttribute as PeerIdentityAttribute).peerSharingInfo.deletionInfo!.deletionStatus).toStrictEqual(ReceivedAttributeDeletionStatus.ToBeDeleted);
+            expect((updatedPeerIdentityAttribute as PeerIdentityAttribute).peerSharingInfo.deletionInfo!.deletionDate).toStrictEqual(dateInFuture);
         });
 
         test("sets the deletionInfo of a PeerRelationshipAttribute", async function () {
-            const rPeerRelationshipAttribute = await consumptionController.attributes.createAttributeUnsafe({
+            const rPeerRelationshipAttribute = await consumptionController.attributes.createPeerRelationshipAttribute({
                 content: RelationshipAttribute.from({
                     key: "customerId",
                     value: {
@@ -607,10 +604,8 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                     owner: peerAddress,
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }),
-                shareInfo: {
-                    peer: peerAddress,
-                    sourceReference: CoreId.from("reqRef")
-                }
+                peer: peerAddress,
+                sourceReference: CoreId.from("aSourceReferenceId")
             });
 
             const requestItem = DeleteAttributeRequestItem.from({
@@ -641,9 +636,11 @@ describe("DeleteAttributeRequestItemProcessor", function () {
             await processor.accept(requestItem, acceptParams, incomingRequest);
 
             const updatedPeerRelationshipAttribute = await consumptionController.attributes.getLocalAttribute(rPeerRelationshipAttribute.id);
-            expect(updatedPeerRelationshipAttribute!.deletionInfo).toBeDefined();
-            expect(updatedPeerRelationshipAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.ToBeDeleted);
-            expect(updatedPeerRelationshipAttribute!.deletionInfo!.deletionDate).toStrictEqual(dateInFuture);
+            expect((updatedPeerRelationshipAttribute as PeerRelationshipAttribute).peerSharingInfo.deletionInfo).toBeDefined();
+            expect((updatedPeerRelationshipAttribute as PeerRelationshipAttribute).peerSharingInfo.deletionInfo!.deletionStatus).toStrictEqual(
+                ReceivedAttributeDeletionStatus.ToBeDeleted
+            );
+            expect((updatedPeerRelationshipAttribute as PeerRelationshipAttribute).peerSharingInfo.deletionInfo!.deletionDate).toStrictEqual(dateInFuture);
         });
 
         test("returns an AcceptResponseItem", async function () {
@@ -682,23 +679,25 @@ describe("DeleteAttributeRequestItemProcessor", function () {
     describe("applyIncomingResponseItem", function () {
         test("doesn't change the deletionInfo if a simple AcceptResponseItem is returned", async function () {
             const deletionDate = CoreDate.utc().subtract({ days: 1 });
-            const deletedByPeerAttribute = await consumptionController.attributes.createAttributeUnsafe({
+            const deletedByPeerAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
                         value: "A birth name"
                     },
                     owner: accountController.identity.address
-                }),
-                shareInfo: {
-                    peer: peerAddress,
-                    sourceReference: CoreId.from("reqRef")
-                },
-                deletionInfo: {
-                    deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
-                    deletionDate: deletionDate
-                }
+                })
             });
+
+            await consumptionController.attributes.addForwardedSharingInfoToAttribute(deletedByPeerAttribute, peerAddress, CoreId.from("aSourceReferenceId"));
+            await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(
+                deletedByPeerAttribute,
+                EmittedAttributeDeletionInfo.from({
+                    deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
+                    deletionDate: deletionDate
+                }),
+                peerAddress
+            );
 
             const requestItem = DeleteAttributeRequestItem.from({
                 mustBeAccepted: false,
@@ -724,30 +723,32 @@ describe("DeleteAttributeRequestItemProcessor", function () {
             await processor.applyIncomingResponseItem(responseItem, requestItem, incomingRequest);
 
             const unchangedAttribute = await consumptionController.attributes.getLocalAttribute(deletedByPeerAttribute.id);
-            expect(unchangedAttribute!.deletionInfo).toBeDefined();
-            expect(unchangedAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByPeer);
-            expect(unchangedAttribute!.deletionInfo!.deletionDate).toStrictEqual(deletionDate);
+            expect((unchangedAttribute as OwnIdentityAttribute).isDeletedOrToBeDeletedByForwardingPeer(peerAddress, "onlyDeleted")).toBe(true);
+            const peerSharingInfo = (unchangedAttribute as OwnIdentityAttribute).forwardedSharingInfos!.find((sharingInfo) => sharingInfo.peer.equals(peerAddress));
+            expect(peerSharingInfo!.deletionInfo!.deletionDate).toStrictEqual(deletionDate);
         });
 
         test("doesn't change the deletionInfo if the Attribute is DeletedByPeer", async function () {
             const deletionDate = CoreDate.utc().subtract({ days: 1 });
-            const deletedByPeerAttribute = await consumptionController.attributes.createAttributeUnsafe({
+            const deletedByPeerAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
                         value: "A birth name"
                     },
                     owner: accountController.identity.address
-                }),
-                shareInfo: {
-                    peer: peerAddress,
-                    sourceReference: CoreId.from("reqRef")
-                },
-                deletionInfo: {
-                    deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
-                    deletionDate: deletionDate
-                }
+                })
             });
+
+            await consumptionController.attributes.addForwardedSharingInfoToAttribute(deletedByPeerAttribute, peerAddress, CoreId.from("aSourceReferenceId"));
+            await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(
+                deletedByPeerAttribute,
+                EmittedAttributeDeletionInfo.from({
+                    deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
+                    deletionDate: deletionDate
+                }),
+                peerAddress
+            );
 
             const requestItem = DeleteAttributeRequestItem.from({
                 mustBeAccepted: false,
@@ -777,25 +778,23 @@ describe("DeleteAttributeRequestItemProcessor", function () {
             await processor.applyIncomingResponseItem(responseItem, requestItem, incomingRequest);
 
             const unchangedAttribute = await consumptionController.attributes.getLocalAttribute(deletedByPeerAttribute.id);
-            expect(unchangedAttribute!.deletionInfo).toBeDefined();
-            expect(unchangedAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByPeer);
-            expect(unchangedAttribute!.deletionInfo!.deletionDate).toStrictEqual(deletionDate);
+            expect((unchangedAttribute as OwnIdentityAttribute).isDeletedOrToBeDeletedByForwardingPeer(peerAddress, "onlyDeleted")).toBe(true);
+            const peerSharingInfo = (unchangedAttribute as OwnIdentityAttribute).forwardedSharingInfos!.find((sharingInfo) => sharingInfo.peer.equals(peerAddress));
+            expect(peerSharingInfo!.deletionInfo!.deletionDate).toStrictEqual(deletionDate);
         });
 
         test("sets the deletionInfo to ToBeDeletedByPeer of a forwarded OwnIdentityAttribute", async function () {
-            const sOwnIdentityAttribute = await consumptionController.attributes.createAttributeUnsafe({
+            const sOwnIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
                         value: "A birth name"
                     },
                     owner: accountController.identity.address
-                }),
-                shareInfo: {
-                    peer: peerAddress,
-                    sourceReference: CoreId.from("reqRef")
-                }
+                })
             });
+
+            await consumptionController.attributes.addForwardedSharingInfoToAttribute(sOwnIdentityAttribute, peerAddress, CoreId.from("aSourceReferenceId"));
 
             const requestItem = DeleteAttributeRequestItem.from({
                 mustBeAccepted: false,
@@ -825,13 +824,13 @@ describe("DeleteAttributeRequestItemProcessor", function () {
             await processor.applyIncomingResponseItem(responseItem, requestItem, incomingRequest);
 
             const updatedOwnIdentityAttribute = await consumptionController.attributes.getLocalAttribute(sOwnIdentityAttribute.id);
-            expect(updatedOwnIdentityAttribute!.deletionInfo).toBeDefined();
-            expect(updatedOwnIdentityAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.ToBeDeletedByPeer);
-            expect(updatedOwnIdentityAttribute!.deletionInfo!.deletionDate).toStrictEqual(deletionDate);
+            expect((updatedOwnIdentityAttribute as OwnIdentityAttribute).isDeletedOrToBeDeletedByForwardingPeer(peerAddress, "onlyToBeDeleted")).toBe(true);
+            const peerSharingInfo = (updatedOwnIdentityAttribute as OwnIdentityAttribute).forwardedSharingInfos!.find((sharingInfo) => sharingInfo.peer.equals(peerAddress));
+            expect(peerSharingInfo!.deletionInfo!.deletionDate).toStrictEqual(deletionDate);
         });
 
         test("sets the deletionInfo to ToBeDeletedByPeer of an OwnRelationshipAttribute", async function () {
-            const sOwnRelationshipAttribute = await consumptionController.attributes.createAttributeUnsafe({
+            const sOwnRelationshipAttribute = await consumptionController.attributes.createOwnRelationshipAttribute({
                 content: RelationshipAttribute.from({
                     key: "customerId",
                     value: {
@@ -842,10 +841,8 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                     owner: accountController.identity.address,
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }),
-                shareInfo: {
-                    peer: peerAddress,
-                    sourceReference: CoreId.from("reqRef")
-                }
+                peer: peerAddress,
+                sourceReference: CoreId.from("aSourceReferenceId")
             });
 
             const requestItem = DeleteAttributeRequestItem.from({
@@ -876,43 +873,38 @@ describe("DeleteAttributeRequestItemProcessor", function () {
             await processor.applyIncomingResponseItem(responseItem, requestItem, incomingRequest);
 
             const updatedOwnRelationshipAttribute = await consumptionController.attributes.getLocalAttribute(sOwnRelationshipAttribute.id);
-            expect(updatedOwnRelationshipAttribute!.deletionInfo).toBeDefined();
-            expect(updatedOwnRelationshipAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.ToBeDeletedByPeer);
-            expect(updatedOwnRelationshipAttribute!.deletionInfo!.deletionDate).toStrictEqual(deletionDate);
+            expect((updatedOwnRelationshipAttribute as OwnRelationshipAttribute).peerSharingInfo.deletionInfo).toBeDefined();
+            expect((updatedOwnRelationshipAttribute as OwnRelationshipAttribute).peerSharingInfo.deletionInfo!.deletionStatus).toStrictEqual(
+                EmittedAttributeDeletionStatus.ToBeDeletedByPeer
+            );
+            expect((updatedOwnRelationshipAttribute as OwnRelationshipAttribute).peerSharingInfo.deletionInfo!.deletionDate).toStrictEqual(deletionDate);
         });
 
         test("sets the deletionInfo to ToBeDeletedByPeer of the predecessor of a forwarded OwnIdentityAttribute", async function () {
-            const sOwnIdentityAttributeId = await ConsumptionIds.attribute.generate();
-            const sPredecessorOwnIdentityAttribute = await consumptionController.attributes.createAttributeUnsafe({
+            const sPredecessorOwnIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
                         value: "A birth name"
                     },
                     owner: accountController.identity.address
-                }),
-                shareInfo: {
-                    peer: peerAddress,
-                    sourceReference: CoreId.from("reqRef")
-                },
-                succeededBy: sOwnIdentityAttributeId
+                })
             });
 
-            const sOwnIdentityAttribute = await consumptionController.attributes.createAttributeUnsafe({
-                id: sOwnIdentityAttributeId,
+            await consumptionController.attributes.addForwardedSharingInfoToAttribute(sPredecessorOwnIdentityAttribute, peerAddress, CoreId.from("aSourceReferenceId"));
+
+            const successorParams = OwnIdentityAttributeSuccessorParams.from({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
                         value: "A succeeded birth name"
                     },
                     owner: accountController.identity.address
-                }),
-                shareInfo: {
-                    peer: peerAddress,
-                    sourceReference: CoreId.from("reqRef")
-                },
-                succeeds: sPredecessorOwnIdentityAttribute.id
+                })
             });
+            const { successor: sOwnIdentityAttribute } = await consumptionController.attributes.succeedOwnIdentityAttribute(sPredecessorOwnIdentityAttribute, successorParams);
+
+            await consumptionController.attributes.addForwardedSharingInfoToAttribute(sOwnIdentityAttribute, peerAddress, CoreId.from("anotherSourceReferenceId"));
 
             const requestItem = DeleteAttributeRequestItem.from({
                 mustBeAccepted: false,
@@ -942,49 +934,49 @@ describe("DeleteAttributeRequestItemProcessor", function () {
             await processor.applyIncomingResponseItem(responseItem, requestItem, incomingRequest);
 
             const updatedPredecessorOwnIdentityAttribute = await consumptionController.attributes.getLocalAttribute(sPredecessorOwnIdentityAttribute.id);
-            expect(updatedPredecessorOwnIdentityAttribute!.deletionInfo).toBeDefined();
-            expect(updatedPredecessorOwnIdentityAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.ToBeDeletedByPeer);
-            expect(updatedPredecessorOwnIdentityAttribute!.deletionInfo!.deletionDate).toStrictEqual(deletionDate);
+            expect((updatedPredecessorOwnIdentityAttribute as OwnIdentityAttribute).isDeletedOrToBeDeletedByForwardingPeer(peerAddress, "onlyToBeDeleted")).toBe(true);
+            const peerSharingInfo = (updatedPredecessorOwnIdentityAttribute as OwnIdentityAttribute).forwardedSharingInfos!.find((sharingInfo) =>
+                sharingInfo.peer.equals(peerAddress)
+            );
+            expect(peerSharingInfo!.deletionInfo!.deletionDate).toStrictEqual(deletionDate);
         });
 
         test("doesn't change the deletionInfo to ToBeDeletedByPeer of a DeletedByPeer predecessor of a forwarded OwnIdentityAttribute", async function () {
-            const sOwnIdentityAttributeId = await ConsumptionIds.attribute.generate();
             const predecessorDeletionDate = CoreDate.utc().subtract({ days: 1 });
 
-            const sPredecessorOwnIdentityAttribute = await consumptionController.attributes.createAttributeUnsafe({
+            const sPredecessorOwnIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
                         value: "A birth name"
                     },
                     owner: accountController.identity.address
-                }),
-                shareInfo: {
-                    peer: peerAddress,
-                    sourceReference: CoreId.from("reqRef")
-                },
-                succeededBy: sOwnIdentityAttributeId,
-                deletionInfo: {
-                    deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
-                    deletionDate: predecessorDeletionDate
-                }
+                })
             });
 
-            const sOwnIdentityAttribute = await consumptionController.attributes.createAttributeUnsafe({
-                id: sOwnIdentityAttributeId,
+            await consumptionController.attributes.addForwardedSharingInfoToAttribute(sPredecessorOwnIdentityAttribute, peerAddress, CoreId.from("aSourceReferenceId"));
+
+            const successorParams = OwnIdentityAttributeSuccessorParams.from({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
                         value: "A succeeded birth name"
                     },
                     owner: accountController.identity.address
-                }),
-                shareInfo: {
-                    peer: peerAddress,
-                    sourceReference: CoreId.from("reqRef")
-                },
-                succeeds: sPredecessorOwnIdentityAttribute.id
+                })
             });
+            const { successor: sOwnIdentityAttribute } = await consumptionController.attributes.succeedOwnIdentityAttribute(sPredecessorOwnIdentityAttribute, successorParams);
+
+            await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(
+                sPredecessorOwnIdentityAttribute,
+                EmittedAttributeDeletionInfo.from({
+                    deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
+                    deletionDate: predecessorDeletionDate
+                }),
+                peerAddress
+            );
+
+            await consumptionController.attributes.addForwardedSharingInfoToAttribute(sOwnIdentityAttribute, peerAddress, CoreId.from("anotherSourceReferenceId"));
 
             const requestItem = DeleteAttributeRequestItem.from({
                 mustBeAccepted: false,
@@ -1014,25 +1006,25 @@ describe("DeleteAttributeRequestItemProcessor", function () {
             await processor.applyIncomingResponseItem(responseItem, requestItem, incomingRequest);
 
             const updatedPredecessorOwnIdentityAttribute = await consumptionController.attributes.getLocalAttribute(sPredecessorOwnIdentityAttribute.id);
-            expect(updatedPredecessorOwnIdentityAttribute!.deletionInfo).toBeDefined();
-            expect(updatedPredecessorOwnIdentityAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByPeer);
-            expect(updatedPredecessorOwnIdentityAttribute!.deletionInfo!.deletionDate).toStrictEqual(predecessorDeletionDate);
+            expect((updatedPredecessorOwnIdentityAttribute as OwnIdentityAttribute).isDeletedOrToBeDeletedByForwardingPeer(peerAddress, "onlyDeleted")).toBe(true);
+            const peerSharingInfo = (updatedPredecessorOwnIdentityAttribute as OwnIdentityAttribute).forwardedSharingInfos!.find((sharingInfo) =>
+                sharingInfo.peer.equals(peerAddress)
+            );
+            expect(peerSharingInfo!.deletionInfo!.deletionDate).toStrictEqual(deletionDate);
         });
 
         test("sets the deletionInfo to DeletionRequestRejected of a forwarded OwnIdentityAttribute", async function () {
-            const sOwnIdentityAttribute = await consumptionController.attributes.createAttributeUnsafe({
+            const sOwnIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
                         value: "A birth name"
                     },
                     owner: accountController.identity.address
-                }),
-                shareInfo: {
-                    peer: peerAddress,
-                    sourceReference: CoreId.from("reqRef")
-                }
+                })
             });
+
+            await consumptionController.attributes.addForwardedSharingInfoToAttribute(sOwnIdentityAttribute, peerAddress, CoreId.from("aSourceReferenceId"));
 
             const requestItem = DeleteAttributeRequestItem.from({
                 mustBeAccepted: false,
@@ -1062,43 +1054,37 @@ describe("DeleteAttributeRequestItemProcessor", function () {
             const timeAfterUpdate = CoreDate.utc();
 
             const updatedOwnIdentityAttribute = await consumptionController.attributes.getLocalAttribute(sOwnIdentityAttribute.id);
-            expect(updatedOwnIdentityAttribute!.deletionInfo).toBeDefined();
-            expect(updatedOwnIdentityAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletionRequestRejected);
-            expect(updatedOwnIdentityAttribute!.deletionInfo!.deletionDate.isBetween(timeBeforeUpdate, timeAfterUpdate.add({ milliseconds: 1 }), "millisecond")).toBe(true);
+            const peerSharingInfo = (updatedOwnIdentityAttribute as OwnIdentityAttribute).forwardedSharingInfos!.find((sharingInfo) => sharingInfo.peer.equals(peerAddress));
+            expect(peerSharingInfo!.deletionInfo).toBeDefined();
+            expect(peerSharingInfo!.deletionInfo!.deletionStatus).toStrictEqual(EmittedAttributeDeletionStatus.DeletionRequestRejected);
+            expect(peerSharingInfo!.deletionInfo!.deletionDate.isBetween(timeBeforeUpdate, timeAfterUpdate.add({ milliseconds: 1 }), "millisecond")).toBe(true);
         });
 
         test("sets the deletionInfo to DeletionRequestRejected of the predecessor of a forwarded OwnIdentityAttribute", async function () {
-            const sOwnIdentityAttributeId = await ConsumptionIds.attribute.generate();
-            const sPredecessorOwnIdentityAttribute = await consumptionController.attributes.createAttributeUnsafe({
+            const sPredecessorOwnIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
                         value: "A birth name"
                     },
                     owner: accountController.identity.address
-                }),
-                shareInfo: {
-                    peer: peerAddress,
-                    sourceReference: CoreId.from("reqRef")
-                },
-                succeededBy: sOwnIdentityAttributeId
+                })
             });
 
-            const sOwnIdentityAttribute = await consumptionController.attributes.createAttributeUnsafe({
-                id: sOwnIdentityAttributeId,
+            await consumptionController.attributes.addForwardedSharingInfoToAttribute(sPredecessorOwnIdentityAttribute, peerAddress, CoreId.from("aSourceReferenceId"));
+
+            const successorParams = OwnIdentityAttributeSuccessorParams.from({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
                         value: "A succeeded birth name"
                     },
                     owner: accountController.identity.address
-                }),
-                shareInfo: {
-                    peer: peerAddress,
-                    sourceReference: CoreId.from("reqRef")
-                },
-                succeeds: sPredecessorOwnIdentityAttribute.id
+                })
             });
+            const { successor: sOwnIdentityAttribute } = await consumptionController.attributes.succeedOwnIdentityAttribute(sPredecessorOwnIdentityAttribute, successorParams);
+
+            await consumptionController.attributes.addForwardedSharingInfoToAttribute(sOwnIdentityAttribute, peerAddress, CoreId.from("anotherSourceReferenceId"));
 
             const requestItem = DeleteAttributeRequestItem.from({
                 mustBeAccepted: false,
@@ -1128,51 +1114,50 @@ describe("DeleteAttributeRequestItemProcessor", function () {
             const timeAfterUpdate = CoreDate.utc();
 
             const updatedPredecessorOwnIdentityAttribute = await consumptionController.attributes.getLocalAttribute(sPredecessorOwnIdentityAttribute.id);
-            expect(updatedPredecessorOwnIdentityAttribute!.deletionInfo).toBeDefined();
-            expect(updatedPredecessorOwnIdentityAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletionRequestRejected);
-            expect(updatedPredecessorOwnIdentityAttribute!.deletionInfo!.deletionDate.isBetween(timeBeforeUpdate, timeAfterUpdate.add({ milliseconds: 1 }), "millisecond")).toBe(
-                true
+            const peerSharingInfo = (updatedPredecessorOwnIdentityAttribute as OwnIdentityAttribute).forwardedSharingInfos!.find((sharingInfo) =>
+                sharingInfo.peer.equals(peerAddress)
             );
+            expect(peerSharingInfo!.deletionInfo).toBeDefined();
+            expect(peerSharingInfo!.deletionInfo!.deletionStatus).toStrictEqual(EmittedAttributeDeletionStatus.DeletionRequestRejected);
+            expect(peerSharingInfo!.deletionInfo!.deletionDate.isBetween(timeBeforeUpdate, timeAfterUpdate.add({ milliseconds: 1 }), "millisecond")).toBe(true);
         });
 
         test("doesn't change the deletionInfo to DeletionRequestRejected of a ToBeDeletedByPeer predecessor of a forwarded OwnIdentityAttribute", async function () {
-            const sOwnIdentityAttributeId = await ConsumptionIds.attribute.generate();
             const deletionDate = CoreDate.utc().add({ days: 1 });
 
-            const sPredecessorOwnIdentityAttribute = await consumptionController.attributes.createAttributeUnsafe({
+            const sPredecessorOwnIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
                         value: "A birth name"
                     },
                     owner: accountController.identity.address
-                }),
-                shareInfo: {
-                    peer: peerAddress,
-                    sourceReference: CoreId.from("reqRef")
-                },
-                succeededBy: sOwnIdentityAttributeId,
-                deletionInfo: {
-                    deletionStatus: LocalAttributeDeletionStatus.ToBeDeletedByPeer,
-                    deletionDate: deletionDate
-                }
+                })
             });
 
-            const sOwnIdentityAttribute = await consumptionController.attributes.createAttributeUnsafe({
-                id: sOwnIdentityAttributeId,
+            await consumptionController.attributes.addForwardedSharingInfoToAttribute(sPredecessorOwnIdentityAttribute, peerAddress, CoreId.from("aSourceReferenceId"));
+
+            const successorParams = OwnIdentityAttributeSuccessorParams.from({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
                         value: "A succeeded birth name"
                     },
                     owner: accountController.identity.address
-                }),
-                shareInfo: {
-                    peer: peerAddress,
-                    sourceReference: CoreId.from("reqRef")
-                },
-                succeeds: sPredecessorOwnIdentityAttribute.id
+                })
             });
+            const { successor: sOwnIdentityAttribute } = await consumptionController.attributes.succeedOwnIdentityAttribute(sPredecessorOwnIdentityAttribute, successorParams);
+
+            await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(
+                sPredecessorOwnIdentityAttribute,
+                EmittedAttributeDeletionInfo.from({
+                    deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
+                    deletionDate: deletionDate
+                }),
+                peerAddress
+            );
+
+            await consumptionController.attributes.addForwardedSharingInfoToAttribute(sOwnIdentityAttribute, peerAddress, CoreId.from("anotherSourceReferenceId"));
 
             const requestItem = DeleteAttributeRequestItem.from({
                 mustBeAccepted: false,
@@ -1200,49 +1185,49 @@ describe("DeleteAttributeRequestItemProcessor", function () {
             await processor.applyIncomingResponseItem(responseItem, requestItem, incomingRequest);
 
             const updatedPredecessorOwnIdentityAttribute = await consumptionController.attributes.getLocalAttribute(sPredecessorOwnIdentityAttribute.id);
-            expect(updatedPredecessorOwnIdentityAttribute!.deletionInfo).toBeDefined();
-            expect(updatedPredecessorOwnIdentityAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.ToBeDeletedByPeer);
-            expect(updatedPredecessorOwnIdentityAttribute!.deletionInfo!.deletionDate).toStrictEqual(deletionDate);
+            expect((updatedPredecessorOwnIdentityAttribute as OwnIdentityAttribute).isDeletedOrToBeDeletedByForwardingPeer(peerAddress, "onlyToBeDeleted")).toBe(true);
+            const peerSharingInfo = (updatedPredecessorOwnIdentityAttribute as OwnIdentityAttribute).forwardedSharingInfos!.find((sharingInfo) =>
+                sharingInfo.peer.equals(peerAddress)
+            );
+            expect(peerSharingInfo!.deletionInfo!.deletionDate).toStrictEqual(deletionDate);
         });
 
         test("doesn't change the deletionInfo to DeletionRequestRejected of a DeletedByPeer predecessor of a forwarded OwnIdentityAttribute", async function () {
-            const sOwnIdentityAttributeId = await ConsumptionIds.attribute.generate();
             const deletionDate = CoreDate.utc().subtract({ days: 1 });
 
-            const sPredecessorOwnIdentityAttribute = await consumptionController.attributes.createAttributeUnsafe({
+            const sPredecessorOwnIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
                         value: "A birth name"
                     },
                     owner: accountController.identity.address
-                }),
-                shareInfo: {
-                    peer: peerAddress,
-                    sourceReference: CoreId.from("reqRef")
-                },
-                succeededBy: sOwnIdentityAttributeId,
-                deletionInfo: {
-                    deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
-                    deletionDate: deletionDate
-                }
+                })
             });
 
-            const sOwnIdentityAttribute = await consumptionController.attributes.createAttributeUnsafe({
-                id: sOwnIdentityAttributeId,
+            await consumptionController.attributes.addForwardedSharingInfoToAttribute(sPredecessorOwnIdentityAttribute, peerAddress, CoreId.from("aSourceReferenceId"));
+
+            const successorParams = OwnIdentityAttributeSuccessorParams.from({
                 content: IdentityAttribute.from({
                     value: {
                         "@type": "BirthName",
                         value: "A succeeded birth name"
                     },
                     owner: accountController.identity.address
-                }),
-                shareInfo: {
-                    peer: peerAddress,
-                    sourceReference: CoreId.from("reqRef")
-                },
-                succeeds: sPredecessorOwnIdentityAttribute.id
+                })
             });
+            const { successor: sOwnIdentityAttribute } = await consumptionController.attributes.succeedOwnIdentityAttribute(sPredecessorOwnIdentityAttribute, successorParams);
+
+            await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(
+                sPredecessorOwnIdentityAttribute,
+                EmittedAttributeDeletionInfo.from({
+                    deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
+                    deletionDate: deletionDate
+                }),
+                peerAddress
+            );
+
+            await consumptionController.attributes.addForwardedSharingInfoToAttribute(sOwnIdentityAttribute, peerAddress, CoreId.from("anotherSourceReferenceId"));
 
             const requestItem = DeleteAttributeRequestItem.from({
                 mustBeAccepted: false,
@@ -1270,9 +1255,11 @@ describe("DeleteAttributeRequestItemProcessor", function () {
             await processor.applyIncomingResponseItem(responseItem, requestItem, incomingRequest);
 
             const updatedPredecessorOwnIdentityAttribute = await consumptionController.attributes.getLocalAttribute(sPredecessorOwnIdentityAttribute.id);
-            expect(updatedPredecessorOwnIdentityAttribute!.deletionInfo).toBeDefined();
-            expect(updatedPredecessorOwnIdentityAttribute!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByPeer);
-            expect(updatedPredecessorOwnIdentityAttribute!.deletionInfo!.deletionDate).toStrictEqual(deletionDate);
+            expect((updatedPredecessorOwnIdentityAttribute as OwnIdentityAttribute).isDeletedOrToBeDeletedByForwardingPeer(peerAddress, "onlyDeleted")).toBe(true);
+            const peerSharingInfo = (updatedPredecessorOwnIdentityAttribute as OwnIdentityAttribute).forwardedSharingInfos!.find((sharingInfo) =>
+                sharingInfo.peer.equals(peerAddress)
+            );
+            expect(peerSharingInfo!.deletionInfo!.deletionDate).toStrictEqual(deletionDate);
         });
     });
 });
