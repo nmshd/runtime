@@ -39,16 +39,30 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
         }
 
         if (
-            (attribute instanceof OwnIdentityAttribute && !attribute.isSharedWith(recipient)) ||
-            (attribute instanceof PeerRelationshipAttribute && !attribute.isSharedWith(recipient)) ||
+            (attribute instanceof OwnIdentityAttribute && (!attribute.isSharedWith(recipient) || attribute.isDeletedOrToBeDeletedByForwardingPeer(recipient))) ||
             (attribute instanceof OwnRelationshipAttribute &&
-                (!attribute.isSharedWith(recipient) || (attribute.peerSharingInfo.peer.equals(recipient) && attribute.peerSharingInfo.deletionInfo)))
+                ((attribute.peerSharingInfo.peer.equals(recipient) && attribute.isDeletedOrToBeDeletedByPeer()) ||
+                    (!attribute.peerSharingInfo.peer.equals(recipient) && (!attribute.isSharedWith(recipient) || attribute.isDeletedOrToBeDeletedByForwardingPeer(recipient)))))
         ) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidRequestItem(
                     "The deletion of an own Attribute can only be requested from a peer it is shared with and who hasn't deleted it or agreed to its deletion already."
                 )
             );
+        }
+
+        if (attribute instanceof PeerRelationshipAttribute) {
+            if (attribute.peerSharingInfo.peer.equals(recipient)) {
+                return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("The deletion of a PeerRelationshipAttribute cannot be requested for the owner."));
+            }
+
+            if (!attribute.isSharedWith(recipient) || attribute.isDeletedOrToBeDeletedByForwardingPeer(recipient)) {
+                return ValidationResult.error(
+                    ConsumptionCoreErrors.requests.invalidRequestItem(
+                        "The deletion of a PeerRelationshipAttribute can only be requested from a third party it is shared with and who hasn't deleted it or agreed to its deletion already."
+                    )
+                );
+            }
         }
 
         return ValidationResult.success();
