@@ -161,7 +161,69 @@ describe("DeleteAttributeRequestItemProcessor", function () {
             });
         });
 
-        test("returns an error requesting the deletion of a PeerRelationshipAttribute from its owner", async function () {
+        test("returns success requesting the deletion of a PeerRelationshipAttribute", async function () {
+            const thirdPartyAddress = CoreAddress.from("thirdPartyAddress");
+            const sPeerRelationshipAttribute = await consumptionController.attributes.createPeerRelationshipAttribute({
+                content: RelationshipAttribute.from({
+                    key: "customerId",
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "0815",
+                        title: "Customer ID"
+                    },
+                    owner: peerAddress,
+                    confidentiality: RelationshipAttributeConfidentiality.Public
+                }),
+                peer: peerAddress,
+                sourceReference: CoreId.from("aSourceReferenceId")
+            });
+
+            await consumptionController.attributes.addForwardedSharingInfoToAttribute(sPeerRelationshipAttribute, thirdPartyAddress, CoreId.from("aSourceReferenceId"));
+
+            const requestItem = DeleteAttributeRequestItem.from({
+                mustBeAccepted: false,
+                attributeId: sPeerRelationshipAttribute.id
+            });
+
+            const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), thirdPartyAddress);
+
+            expect(result).successfulValidationResult();
+        });
+
+        test("returns an error requesting the deletion of a PeerRelationshipAttribute for third party it is not forwarded to", async function () {
+            const thirdPartyAddress = CoreAddress.from("thirdPartyAddress");
+            const anotherThirdPartyAddress = CoreAddress.from("anotherThirdPartyAddress");
+            const sPeerRelationshipAttribute = await consumptionController.attributes.createPeerRelationshipAttribute({
+                content: RelationshipAttribute.from({
+                    key: "customerId",
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "0815",
+                        title: "Customer ID"
+                    },
+                    owner: peerAddress,
+                    confidentiality: RelationshipAttributeConfidentiality.Public
+                }),
+                peer: peerAddress,
+                sourceReference: CoreId.from("aSourceReferenceId")
+            });
+
+            await consumptionController.attributes.addForwardedSharingInfoToAttribute(sPeerRelationshipAttribute, thirdPartyAddress, CoreId.from("aSourceReferenceId"));
+
+            const requestItem = DeleteAttributeRequestItem.from({
+                mustBeAccepted: false,
+                attributeId: sPeerRelationshipAttribute.id
+            });
+
+            const result = await processor.canCreateOutgoingRequestItem(requestItem, Request.from({ items: [requestItem] }), anotherThirdPartyAddress);
+
+            expect(result).errorValidationResult({
+                code: "error.consumption.requests.invalidRequestItem",
+                message: `The deletion of a PeerRelationshipAttribute can only be requested from a third party it is shared with and who hasn't deleted it or agreed to its deletion already.`
+            });
+        });
+
+        test("returns an error requesting the deletion of a PeerRelationshipAttribute for its owner", async function () {
             const sPeerRelationshipAttribute = await consumptionController.attributes.createPeerRelationshipAttribute({
                 content: RelationshipAttribute.from({
                     key: "customerId",
