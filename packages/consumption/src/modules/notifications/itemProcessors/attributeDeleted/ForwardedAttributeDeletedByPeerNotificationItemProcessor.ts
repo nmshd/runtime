@@ -34,7 +34,7 @@ export class ForwardedAttributeDeletedByPeerNotificationItemProcessor extends Ab
         if (!(attribute instanceof OwnIdentityAttribute || attribute instanceof OwnRelationshipAttribute || attribute instanceof PeerRelationshipAttribute)) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.attributes.wrongTypeOfAttribute(
-                    `The Attribute ${notificationItem.attributeId} is not an own IdentityAttribute, own RelationshipAttribute or peer RelationshipAttribute.`
+                    `The Attribute ${notificationItem.attributeId} is not an own IdentityAttribute, an own RelationshipAttribute or a peer RelationshipAttribute.`
                 )
             );
         }
@@ -55,7 +55,7 @@ export class ForwardedAttributeDeletedByPeerNotificationItemProcessor extends Ab
 
         if (!(attribute instanceof OwnIdentityAttribute || attribute instanceof OwnRelationshipAttribute || attribute instanceof PeerRelationshipAttribute)) {
             throw ConsumptionCoreErrors.attributes.wrongTypeOfAttribute(
-                `The Attribute ${notificationItem.attributeId} is not an own IdentityAttribute, own RelationshipAttribute or peer RelationshipAttribute.`
+                `The Attribute ${notificationItem.attributeId} is not an own IdentityAttribute, an own RelationshipAttribute or a peer RelationshipAttribute.`
             );
         }
 

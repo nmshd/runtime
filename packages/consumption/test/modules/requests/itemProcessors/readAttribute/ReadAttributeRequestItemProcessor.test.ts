@@ -774,7 +774,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidAcceptParameters",
                     message:
-                        "The selected Attribute is not an own IdentityAttribute, own RelationshipAttribute or peer RelationshipAttribute. When accepting a ReadAttributeRequestItem with an existing Attribute it may only be such an Attribute."
+                        "The selected Attribute is not an own IdentityAttribute, an own RelationshipAttribute or a peer RelationshipAttribute. When accepting a ReadAttributeRequestItem with an existing Attribute it may only be such an Attribute."
                 });
             });
 
@@ -1216,7 +1216,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 expect(result).errorValidationResult({
                     code: "error.consumption.requests.invalidAcceptParameters",
                     message:
-                        "The selected Attribute is not an own IdentityAttribute, own RelationshipAttribute or peer RelationshipAttribute. When accepting a ReadAttributeRequestItem with an existing Attribute it may only be such an Attribute."
+                        "The selected Attribute is not an own IdentityAttribute, an own RelationshipAttribute or a peer RelationshipAttribute. When accepting a ReadAttributeRequestItem with an existing Attribute it may only be such an Attribute."
                 });
             });
 
