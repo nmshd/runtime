@@ -2,6 +2,7 @@ import { serialize, type, validate } from "@js-soft/ts-serval";
 import { IRelationshipAttribute, RelationshipAttribute, RelationshipAttributeJSON } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
+import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import {
     EmittedAttributeDeletionInfo,
     EmittedAttributeDeletionStatus,
@@ -104,9 +105,9 @@ export class PeerRelationshipAttribute extends LocalAttribute implements IPeerRe
 
     public setForwardedDeletionInfo(deletionInfo: EmittedAttributeDeletionInfo | undefined, thirdParty: CoreAddress): this {
         const sharingInfoForThirdParty = this.forwardedSharingInfos?.find((sharingInfo) => sharingInfo.peer.equals(thirdParty));
-        if (!sharingInfoForThirdParty) throw Error; // TODO:
+        if (!sharingInfoForThirdParty) throw ConsumptionCoreErrors.attributes.cannotSetAttributeDeletionInfoForPeer(this.id, thirdParty);
 
-        sharingInfoForThirdParty.deletionInfo = deletionInfo; // TODO: check if this works
+        sharingInfoForThirdParty.deletionInfo = deletionInfo;
         return this;
     }
 

@@ -1381,6 +1381,10 @@ export class AttributesController extends ConsumptionBaseController {
         peer: CoreAddress,
         overrideDeletedOrToBeDeleted = false
     ): Promise<void> {
+        if (!attribute.isSharedWith(peer, true, true)) {
+            throw ConsumptionCoreErrors.attributes.cannotSetAttributeDeletionInfoForPeer(attribute.id, peer);
+        }
+
         if (attribute.isDeletedOrToBeDeletedByForwardingPeer(peer) && !overrideDeletedOrToBeDeleted) return;
 
         attribute.setForwardedDeletionInfo(deletionInfo, peer);

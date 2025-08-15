@@ -94,6 +94,13 @@ class Attributes {
         );
     }
 
+    public cannotSetAttributeDeletionInfoForPeer(attributeId: string | CoreId, peer: CoreAddress | string) {
+        return new CoreError(
+            "error.consumption.attributes.cannotSetAttributeDeletionInfoForPeer",
+            `You cannot set the deletionInfo of Attribute '${attributeId}' for peer '${peer}' since it isn't shared with them.`
+        );
+    }
+
     public wrongRelationshipStatusToSetDeletionInfo() {
         return new CoreError(
             "error.consumption.attributes.wrongRelationshipStatusToSetDeletionInfo",
