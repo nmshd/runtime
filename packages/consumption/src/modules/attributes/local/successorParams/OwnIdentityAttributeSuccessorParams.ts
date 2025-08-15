@@ -10,7 +10,7 @@ export interface IOwnIdentityAttributeSuccessorParams extends IAbstractAttribute
     content: IdentityAttribute;
 }
 
-// TODO: do we need this type?
+// TODO: do we need this @type? And if so, it should probably also appear in the JSON
 @type("OwnIdentityAttributeSuccessorParams")
 export class OwnIdentityAttributeSuccessorParams extends AbstractAttributeSuccessorParams implements IOwnIdentityAttributeSuccessorParams {
     @validate()
