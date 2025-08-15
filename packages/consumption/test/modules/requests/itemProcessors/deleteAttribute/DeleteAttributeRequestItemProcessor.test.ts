@@ -130,7 +130,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: `The Attribute '${requestItem.attributeId.toString()}' is not an own IdentityAttribute, own RelationshipAttribute or peer RelationshipAttribute. You can only request the deletion of such Attributes.`
+                message: `The deletion of an own Attribute can only be requested from a peer it is shared with and who hasn't deleted it or agreed to its deletion already.`
             });
         });
 
@@ -157,11 +157,11 @@ describe("DeleteAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: `The Attribute '${requestItem.attributeId.toString()}' is not an own IdentityAttribute, own RelationshipAttribute or peer RelationshipAttribute. You can only request the deletion of such Attributes.`
+                message: `The Attribute '${requestItem.attributeId.toString()}' is not an own IdentityAttribute, an own RelationshipAttribute or a peer RelationshipAttribute. You can only request the deletion of such Attributes.`
             });
         });
 
-        test("returns an error requesting the deletion of a PeerRelationshipAttribute", async function () {
+        test("returns an error requesting the deletion of a PeerRelationshipAttribute from its owner", async function () {
             const sPeerRelationshipAttribute = await consumptionController.attributes.createPeerRelationshipAttribute({
                 content: RelationshipAttribute.from({
                     key: "customerId",
@@ -186,7 +186,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: `The Attribute '${requestItem.attributeId.toString()}' is not an own IdentityAttribute, own RelationshipAttribute or peer RelationshipAttribute. You can only request the deletion of such Attributes.`
+                message: `The deletion of a PeerRelationshipAttribute cannot be requested for the owner.`
             });
         });
 
@@ -197,11 +197,11 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                         "@type": "BirthName",
                         value: "A birth name"
                     },
-                    owner: peerAddress
+                    owner: CoreAddress.from("ThirdParty")
                 }),
                 peer: CoreAddress.from("ThirdParty"),
                 sourceReference: CoreId.from("aSourceReferenceId"),
-                id: CoreId.from("aPeerIdentityAttributeId")
+                id: await ConsumptionIds.attribute.generate()
             });
 
             const requestItem = DeleteAttributeRequestItem.from({
@@ -213,7 +213,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: `The Attribute '${requestItem.attributeId.toString()}' is not an own IdentityAttribute, own RelationshipAttribute or peer RelationshipAttribute. You can only request the deletion of such Attributes.`
+                message: `The Attribute '${requestItem.attributeId.toString()}' is not an own IdentityAttribute, an own RelationshipAttribute or a peer RelationshipAttribute. You can only request the deletion of such Attributes.`
             });
         });
 
@@ -239,7 +239,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: "The deletion of a shared Attribute can only be requested from the peer the Attribute is shared with."
+                message: "The deletion of an own Attribute can only be requested from a peer it is shared with and who hasn't deleted it or agreed to its deletion already."
             });
         });
 
@@ -273,7 +273,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: "The Attribute was already deleted by the peer."
+                message: "The deletion of an own Attribute can only be requested from a peer it is shared with and who hasn't deleted it or agreed to its deletion already."
             });
         });
 
@@ -307,7 +307,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: "The peer already accepted the deletion of the Attribute."
+                message: "The deletion of an own Attribute can only be requested from a peer it is shared with and who hasn't deleted it or agreed to its deletion already."
             });
         });
 
@@ -369,7 +369,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 }),
                 peer: peerAddress,
                 sourceReference: CoreId.from("aSourceReferenceId"),
-                id: CoreId.from("aPeerIdentityAttributeId")
+                id: await ConsumptionIds.attribute.generate()
             });
 
             const requestItem = DeleteAttributeRequestItem.from({
@@ -413,7 +413,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 }),
                 peer: peerAddress,
                 sourceReference: CoreId.from("aSourceReferenceId"),
-                id: CoreId.from("aPeerIdentityAttributeId")
+                id: await ConsumptionIds.attribute.generate()
             });
 
             const requestItem = DeleteAttributeRequestItem.from({
@@ -460,7 +460,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 }),
                 peer: peerAddress,
                 sourceReference: CoreId.from("aSourceReferenceId"),
-                id: CoreId.from("aPeerIdentityAttributeId")
+                id: await ConsumptionIds.attribute.generate()
             });
 
             const requestItem = DeleteAttributeRequestItem.from({
@@ -509,7 +509,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 }),
                 peer: peerAddress,
                 sourceReference: CoreId.from("aSourceReferenceId"),
-                id: CoreId.from("aPeerIdentityAttributeId")
+                id: await ConsumptionIds.attribute.generate()
             });
 
             const requestItem = DeleteAttributeRequestItem.from({
@@ -556,7 +556,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
                 }),
                 peer: peerAddress,
                 sourceReference: CoreId.from("aSourceReferenceId"),
-                id: CoreId.from("aPeerIdentityAttributeId")
+                id: await ConsumptionIds.attribute.generate()
             });
 
             const requestItem = DeleteAttributeRequestItem.from({
@@ -1010,7 +1010,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
             const peerSharingInfo = (updatedPredecessorOwnIdentityAttribute as OwnIdentityAttribute).forwardedSharingInfos!.find((sharingInfo) =>
                 sharingInfo.peer.equals(peerAddress)
             );
-            expect(peerSharingInfo!.deletionInfo!.deletionDate).toStrictEqual(deletionDate);
+            expect(peerSharingInfo!.deletionInfo!.deletionDate).toStrictEqual(predecessorDeletionDate);
         });
 
         test("sets the deletionInfo to DeletionRequestRejected of a forwarded OwnIdentityAttribute", async function () {
