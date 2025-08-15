@@ -326,11 +326,20 @@ export class ThenSteps {
         }
 
         expect(forwardedOwnIdentityAttribute).toBeDefined();
-        expect(forwardedOwnIdentityAttribute instanceof OwnIdentityAttribute).toBe(true);
         expect(forwardedOwnIdentityAttribute.id.toString()).toBe(attribute.id.toString());
         expect(forwardedOwnIdentityAttribute.content.toJSON()).toStrictEqual(attribute.content.toJSON());
         expect(forwardedOwnIdentityAttribute.forwardedSharingInfos).toBeDefined();
         expect(forwardedOwnIdentityAttribute.isSharedWith(this.context.peerAddress)).toBe(true);
+    }
+
+    public async theOwnIdentityAttributeIsDeletedByPeer(attribute: OwnIdentityAttribute, peer: CoreAddress): Promise<void> {
+        const attributesDeletedByPeer = await this.context.consumptionController.attributes.getLocalAttributes({
+            id: attribute.id.toString(),
+            "peerSharingInfo.peer": peer.toString(),
+            "peerSharingInfo.deletionInfo.deletionStatus": { $ne: EmittedAttributeDeletionStatus.DeletedByPeer }
+        });
+
+        expect(attributesDeletedByPeer).toBeDefined();
     }
 
     public async anOwnRelationshipAttributeIsCreated(): Promise<void> {
