@@ -36,7 +36,7 @@ describe("IdentityController", function () {
 
         const result = await account1.identity.checkIfIdentityIsDeleted();
         expect(result.value.isDeleted).toBe(true);
-        expect(result.value.deletionDate).toBe(identityDeletionProcess.cache!.gracePeriodEndsAt!.toString());
+        expect(result.value.deletionDate).toBe(identityDeletionProcess.gracePeriodEndsAt!.toString());
     });
 
     test("should return actual deletionDate for Identity that is deleted", async function () {
@@ -46,6 +46,6 @@ describe("IdentityController", function () {
         const result = await account2.identity.checkIfIdentityIsDeleted();
         expect(result.value.isDeleted).toBe(true);
         expect(result.value.deletionDate).toBeDefined();
-        expect(result.value.deletionDate).not.toBe(identityDeletionProcess.cache!.gracePeriodEndsAt!.toString());
+        expect(result.value.deletionDate).not.toBe(identityDeletionProcess.gracePeriodEndsAt!.toString());
     });
 });

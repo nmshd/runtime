@@ -52,7 +52,6 @@ describe("OwnRelationshipAttributeDVO", () => {
         expect(dvo.isTechnical).toBe((ownSharedRelationshipAttribute.content as RelationshipAttributeJSON).isTechnical);
         expect(dvo.createdAt).toStrictEqual(ownSharedRelationshipAttribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.isValid).toBe(true);
         expect(dvo.isDraft).toBe(false);
         expect(dvo.owner).toStrictEqual(ownSharedRelationshipAttribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");

@@ -20,7 +20,8 @@ describe("TransferFileOwnershipRequestItem", () => {
     test("should serialize the fileReference of the RequestItem to a truncatedFileReference", function () {
         const requestItem = TransferFileOwnershipRequestItem.from({
             mustBeAccepted: true,
-            fileReference: fileReference
+            fileReference,
+            ownershipToken: "anOwnershipToken"
         });
 
         const requestItemJson = requestItem.toJSON();
@@ -31,7 +32,8 @@ describe("TransferFileOwnershipRequestItem", () => {
         const requestItemJson = {
             "@type": "TransferFileOwnershipRequestItemJSON",
             mustBeAccepted: true,
-            fileReference: fileReference.truncate()
+            fileReference: fileReference.truncate(),
+            ownershipToken: "anOwnershipToken"
         };
 
         const requestItem = TransferFileOwnershipRequestItem.from(requestItemJson);

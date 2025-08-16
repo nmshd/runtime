@@ -43,7 +43,6 @@ export function createAppConfig(...configs: (AppConfigOverwrite | AppConfig)[]):
             sse: { enabled: false, location: "sse" },
             decider: { enabled: true, location: "@nmshd/runtime:DeciderModule" },
             request: { enabled: true, location: "@nmshd/runtime:RequestModule" },
-            attributeListener: { enabled: true, location: "@nmshd/runtime:AttributeListenerModule" },
             notification: { enabled: true, location: "@nmshd/runtime:NotificationModule" }
         }
     };
