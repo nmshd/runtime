@@ -59,9 +59,7 @@ export class DeleteThirdPartyRelationshipAttributeAndNotifyPeerUseCase extends U
         await this.attributesController.executeFullAttributeDeletionProcess(thirdPartyRelationshipAttribute);
 
         const messageRecipientsValidationResult = await this.messageController.validateMessageRecipients([thirdPartyRelationshipAttribute.shareInfo.peer]);
-        if (messageRecipientsValidationResult.isError) {
-            return Result.ok({});
-        }
+        if (messageRecipientsValidationResult.isError) return Result.ok({});
 
         const notificationId = await ConsumptionIds.notification.generate();
         const notificationItem = ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem.from({ attributeId: thirdPartyRelationshipAttributeId });
