@@ -1,4 +1,4 @@
-export * from "./OwnSharedAttributeDeletedByOwnerNotificationItem";
-export * from "./PeerSharedAttributeDeletedByPeerNotificationItem";
+export * from "./ForwardedAttributeDeletedByPeerNotificationItem";
+export * from "./OwnAttributeDeletedByOwnerNotificationItem";
+export * from "./PeerRelationshipAttributeDeletedByPeerNotificationItem";
 export * from "./PeerSharedAttributeSucceededNotificationItem";
-export * from "./ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem";

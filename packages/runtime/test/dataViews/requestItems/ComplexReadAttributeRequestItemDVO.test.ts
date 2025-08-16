@@ -21,7 +21,7 @@ import {
     TransportServices
 } from "../../../src";
 import {
-    cleanupAttributes,
+    cleanupForwardedSharingInfos,
     establishRelationship,
     exchangeAndAcceptRequestByMessage,
     exchangeMessageWithRequest,
@@ -54,7 +54,7 @@ afterAll(() => serviceProvider.stop());
 beforeEach(async function () {
     eventBus1.reset();
     eventBus2.reset();
-    await cleanupAttributes([runtimeServices1, runtimeServices2], true);
+    await cleanupForwardedSharingInfos([runtimeServices1, runtimeServices2]);
 });
 
 describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () => {
@@ -75,7 +75,7 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         address1 = (await transportServices1.account.getIdentityInfo()).value.address;
         address2 = (await transportServices2.account.getIdentityInfo()).value.address;
         const repositoryAttribute = (
-            await consumptionServices2.attributes.createRepositoryAttribute({
+            await consumptionServices2.attributes.createOwnIdentityAttribute({
                 content: {
                     value: StreetAddress.from({
                         street: "aStreet",
@@ -168,7 +168,7 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         expect(identityAttributeQueryDVO.valueHints.propertyHints!["houseNo"].max).toBe(100);
         expect(requestItemDVO.mustBeAccepted).toBe(true);
         const resultItem = identityAttributeQueryDVO.results[0];
-        expect(resultItem.type).toBe("RepositoryAttributeDVO");
+        expect(resultItem.type).toBe("OwnIdentityAttributeDVO");
         expect(resultItem.content["@type"]).toBe("IdentityAttribute");
         expect(resultItem.content.value["@type"]).toBe("StreetAddress");
         expect((resultItem.content.value as StreetAddressJSON).street).toBe("aStreet");
@@ -183,7 +183,7 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
     test("check the MessageDVO for the recipient after acceptance", async () => {
         const baselineNumberOfAttributes = (
             await consumptionServices1.attributes.getAttributes({
-                query: { "content.value.@type": "StreetAddress", "shareInfo.peer": address1 }
+                query: { "content.value.@type": "StreetAddress", "forwardedSharingInfos.peer": address1 }
             })
         ).value.length;
         const recipientMessage = await exchangeMessageWithRequest(runtimeServices1, runtimeServices2, requestContent);
@@ -235,7 +235,7 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         expect(responseItem.attribute).toBeDefined();
         const recipientAddress = (await transportServices2.account.getIdentityInfo()).value.address;
         expect(responseItem.attribute.owner).toBe(recipientAddress);
-        expect(responseItem.attribute.type).toBe("SharedToPeerAttributeDVO");
+        expect(responseItem.attribute.type).toBe("OwnIdentityAttributeDVO");
 
         const attributeValue = responseItem.attribute.value as StreetAddressJSON;
         expect(attributeValue["@type"]).toBe("StreetAddress");
@@ -249,7 +249,7 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         const attributeResult = await consumptionServices2.attributes.getAttributes({
-            query: { "content.value.@type": "StreetAddress", "shareInfo.peer": dvo.createdBy.id }
+            query: { "content.value.@type": "StreetAddress", "forwardedSharingInfos.peer": dvo.createdBy.id }
         });
         expect(attributeResult).toBeSuccessful();
         const numberOfAttributes = attributeResult.value.length;
@@ -274,8 +274,9 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
-        const baselineNumberOfAttributes = (await consumptionServices1.attributes.getAttributes({ query: { "content.value.@type": "StreetAddress", "shareInfo.peer": address2 } }))
-            .value.length;
+        const baselineNumberOfAttributes = (
+            await consumptionServices1.attributes.getAttributes({ query: { "content.value.@type": "StreetAddress", "peerSharingInfo.peer": address2 } })
+        ).value.length;
         const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
         const dto = senderMessage;
         const dvo = (await expander1.expandMessageDTO(senderMessage)) as RequestMessageDVO;
@@ -319,7 +320,7 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         const attributeResult = await consumptionServices1.attributes.getAttributes({
-            query: { "content.value.@type": "StreetAddress", "shareInfo.peer": dvo.request.peer.id }
+            query: { "content.value.@type": "StreetAddress", "peerSharingInfo.peer": dvo.request.peer.id }
         });
         expect(attributeResult).toBeSuccessful();
         const numberOfAttributes = attributeResult.value.length;
@@ -358,7 +359,7 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
         address1 = (await transportServices1.account.getIdentityInfo()).value.address;
         address2 = (await transportServices2.account.getIdentityInfo()).value.address;
         const recipientAddress = (await transportServices2.account.getIdentityInfo()).value.address;
-        const attribute = await consumptionServices2.attributes.createRepositoryAttribute({
+        const attribute = await consumptionServices2.attributes.createOwnIdentityAttribute({
             content: {
                 value: StreetAddress.from({
                     street: "aStreet",
@@ -443,7 +444,7 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
         expect(iqlQueryDVO.results).toHaveLength(1);
         expect(requestItemDVO.mustBeAccepted).toBe(true);
         const resultItem = iqlQueryDVO.results[0];
-        expect(resultItem.type).toBe("RepositoryAttributeDVO");
+        expect(resultItem.type).toBe("OwnIdentityAttributeDVO");
         expect(resultItem.content["@type"]).toBe("IdentityAttribute");
         expect(resultItem.content.value["@type"]).toBe("StreetAddress");
         expect((resultItem.content.value as StreetAddressJSON).street).toBe("aStreet");
@@ -499,7 +500,7 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
         expect(responseItem.attribute).toBeDefined();
         const recipientAddress = (await transportServices2.account.getIdentityInfo()).value.address;
         expect(responseItem.attribute.owner).toBe(recipientAddress);
-        expect(responseItem.attribute.type).toBe("SharedToPeerAttributeDVO");
+        expect(responseItem.attribute.type).toBe("OwnIdentityAttributeDVO");
 
         const attributeValue = responseItem.attribute.value as StreetAddressJSON;
         expect(attributeValue["@type"]).toBe("StreetAddress");
@@ -513,7 +514,7 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         const attributeResult = await consumptionServices2.attributes.getAttributes({
-            query: { "content.value.@type": "StreetAddress", "shareInfo.peer": dvo.createdBy.id }
+            query: { "content.value.@type": "StreetAddress", "forwardedSharingInfos.peer": dvo.createdBy.id }
         });
         expect(attributeResult).toBeSuccessful();
         expect(attributeResult.value).toHaveLength(1);
@@ -537,8 +538,9 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
-        const baselineNumberOfAttributes = (await consumptionServices1.attributes.getAttributes({ query: { "content.value.@type": "StreetAddress", "shareInfo.peer": address2 } }))
-            .value.length;
+        const baselineNumberOfAttributes = (
+            await consumptionServices1.attributes.getAttributes({ query: { "content.value.@type": "StreetAddress", "peerSharingInfo.peer": address2 } })
+        ).value.length;
         const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
 
         const dto = senderMessage;
@@ -576,7 +578,7 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         const attributeResult = await consumptionServices1.attributes.getAttributes({
-            query: { "content.value.@type": "StreetAddress", "shareInfo.peer": dvo.request.peer.id }
+            query: { "content.value.@type": "StreetAddress", "peerSharingInfo.peer": dvo.request.peer.id }
         });
         expect(attributeResult).toBeSuccessful();
         const numberOfAttributes = attributeResult.value.length;

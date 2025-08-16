@@ -356,7 +356,7 @@ describe("RelationshipTemplateDVO", () => {
 
         const attributeResult = await requestor.consumption.attributes.getAttributes({
             query: {
-                "shareInfo.peer": templator.address
+                "peerSharingInfo.peer": templator.address
             }
         });
         expect(attributeResult).toBeSuccessful();
@@ -385,7 +385,7 @@ describe("RelationshipTemplateDVO", () => {
 
         const attributeResultTemplator = await templator.consumption.attributes.getAttributes({
             query: {
-                "shareInfo.peer": requestor.address
+                "peerSharingInfo.peer": requestor.address
             }
         });
         expect(attributeResultTemplator).toBeSuccessful();
