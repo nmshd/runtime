@@ -9,6 +9,7 @@ import { ISerializable, Serializable } from "@js-soft/ts-serval";
 import { EventEmitter2EventBus, sleep } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
+import { assert } from "console";
 import fs from "fs";
 import { DurationLike } from "luxon";
 import path from "path";
@@ -394,7 +395,17 @@ export class TestUtil {
     ): Promise<{ acceptedRelationshipFromSelf: Relationship; acceptedRelationshipPeer: Relationship }> {
         const pendingRelationshipFromSelf = await TestUtil.addPendingRelationship(from, to, template);
 
-        const acceptedRelationshipFromSelf = await from.relationships.accept(pendingRelationshipFromSelf.id);
+        return await this.acceptPendingRelationship(from, to, pendingRelationshipFromSelf);
+    }
+
+    public static async acceptPendingRelationship(
+        from: AccountController,
+        to: AccountController,
+        pendingRelationship: Relationship
+    ): Promise<{ acceptedRelationshipFromSelf: Relationship; acceptedRelationshipPeer: Relationship }> {
+        assert(pendingRelationship.status === RelationshipStatus.Pending);
+
+        const acceptedRelationshipFromSelf = await from.relationships.accept(pendingRelationship.id);
         expect(acceptedRelationshipFromSelf.status).toStrictEqual(RelationshipStatus.Active);
 
         // Get accepted relationship
