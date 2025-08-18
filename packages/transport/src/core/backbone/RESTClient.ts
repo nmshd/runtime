@@ -88,7 +88,13 @@ export class RESTClient {
             // eslint-disable-next-line @typescript-eslint/no-require-imports
             const httpsAgent = require("https")?.Agent;
 
-            if (httpsAgent) resultingRequestConfig.httpsAgent = new httpsAgent({ ...this.config.httpsAgentOptions, proxyEnv: process.env } satisfies HTTPSAgentOptions);
+            if (httpsAgent) {
+                resultingRequestConfig.httpsAgent = new httpsAgent({
+                    ...this.config.httpsAgentOptions,
+                    // @ts-expect-error @types/node does not have proxyEnv, but it can already be used
+                    proxyEnv: process.env
+                } satisfies HTTPSAgentOptions);
+            }
         } catch (_) {
             // ignore
         }
@@ -97,7 +103,13 @@ export class RESTClient {
             // eslint-disable-next-line @typescript-eslint/no-require-imports
             const agent = require("http")?.Agent;
 
-            if (agent) resultingRequestConfig.httpAgent = new agent({ ...this.config.httpAgentOptions, proxyEnv: process.env } satisfies HTTPSAgentOptions);
+            if (agent) {
+                resultingRequestConfig.httpAgent = new agent({
+                    ...this.config.httpAgentOptions,
+                    // @ts-expect-error @types/node does not have proxyEnv, but it can already be used
+                    proxyEnv: process.env
+                } satisfies HTTPSAgentOptions);
+            }
         } catch (_) {
             // ignore
         }
