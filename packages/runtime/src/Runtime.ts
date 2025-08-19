@@ -13,7 +13,7 @@ import {
     SettingsController
 } from "@nmshd/consumption";
 import { ICoreAddress } from "@nmshd/core-types";
-import { initializeNewProviders, loadProviderFromConfig, ProviderInitConfig } from "@nmshd/crypto";
+import { initializeProviders, newInitializedProviders, ProviderInitConfig } from "@nmshd/crypto";
 import { RuntimeHealth } from "@nmshd/runtime-types";
 import {
     AccountController,
@@ -152,7 +152,7 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
             const calConfig = await calMap.get("initializedProviders");
             if (calConfig === null) {
                 this.logger.trace("Initializing Crypto Layer with new config");
-                const calConfig = await initializeNewProviders(this.runtimeConfig.calStorageConfig, this.runtimeConfig.calFactory);
+                const calConfig = await newInitializedProviders(this.runtimeConfig.calStorageConfig, this.runtimeConfig.calFactory);
                 if (!calConfig) {
                     throw RuntimeErrors.startup.failedCalInit();
                 }
@@ -161,7 +161,7 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
             } else {
                 this.logger.trace("Initializing Crypto Layer with saved config");
                 const calConfigloaded = ProviderInitConfig.deserialize(calConfig);
-                await loadProviderFromConfig(calConfigloaded, this.runtimeConfig.calStorageConfig, this.runtimeConfig.calFactory);
+                await initializeProviders(calConfigloaded, this.runtimeConfig.calStorageConfig, this.runtimeConfig.calFactory);
             }
             this.logger.trace("Crypto Layer initialized");
         } else {

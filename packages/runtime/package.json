@@ -67,7 +67,7 @@
         "@nmshd/consumption": "*",
         "@nmshd/content": "*",
         "@nmshd/core-types": "*",
-        "@nmshd/crypto": "2.2.0-alpha.7",
+        "@nmshd/crypto": "^2.2.0-alpha.8",
         "@nmshd/iql": "^1.0.3",
         "@nmshd/runtime-types": "*",
         "@nmshd/transport": "*",
@@ -82,10 +82,10 @@
         "ts-simple-nameof": "^1.3.1"
     },
     "devDependencies": {
-        "@nmshd/rs-crypto-node": "0.14.0",
         "@js-soft/docdb-access-loki": "1.3.0",
         "@js-soft/docdb-access-mongo": "1.3.0",
         "@js-soft/node-logger": "1.2.0",
+        "@nmshd/rs-crypto-node": "0.14.0",
         "@types/json-stringify-safe": "^5.0.3",
         "@types/lodash": "^4.17.20",
         "@types/luxon": "^3.6.2",
