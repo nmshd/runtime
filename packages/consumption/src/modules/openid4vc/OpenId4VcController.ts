@@ -12,6 +12,8 @@ export class OpenId4VcController extends ConsumptionBaseController {
         // This is a dummy implementation for the sake of example.
         // In a real implementation, you would process the credential offer here.
 
+        this.log.info("Processing credential offer:", credentialOffer);
+
         // TODO: insert holder code here
 
         // currently we are simply creating a dummy IdentityAttribute
