@@ -31,7 +31,8 @@
         "@credo-ts/askar": "v0.6.0-alpha-20250704130724",
         "@credo-ts/core": "v0.6.0-alpha-20250704130724",
         "@credo-ts/node": "v0.6.0-alpha-20250704130724",
-        "@credo-ts/openid4vc": "v0.6.0-alpha-20250704130724"
+        "@credo-ts/openid4vc": "v0.6.0-alpha-20250704130724",
+        "@openwallet-foundation/askar-nodejs": "^0.3.2"
     },
     "devDependencies": {
         "@js-soft/eslint-config-ts": "^2.0.3",

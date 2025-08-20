@@ -19284,6 +19284,25 @@ export const SentNotificationRequest: any = {
     }
 }
 
+export const ResolveCredentialOfferRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/ResolveCredentialOfferRequest",
+    "definitions": {
+        "ResolveCredentialOfferRequest": {
+            "type": "object",
+            "properties": {
+                "credentialOfferUrl": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "credentialOfferUrl"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
 export const CreateSettingRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/CreateSettingRequest",
