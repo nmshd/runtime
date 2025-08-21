@@ -354,13 +354,21 @@ describe("RelationshipTemplateDVO", () => {
         expect(item.items[0].type).toBe("ProposeAttributeRequestItemDVO");
         expect(item.items[1].type).toBe("ProposeAttributeRequestItemDVO");
 
-        const attributeResult = await requestor.consumption.attributes.getAttributes({
+        const attributesWithPeerSharingInfo = await requestor.consumption.attributes.getAttributes({
             query: {
                 "peerSharingInfo.peer": templator.address
             }
         });
-        expect(attributeResult).toBeSuccessful();
-        expect(attributeResult.value).toHaveLength(4);
+        expect(attributesWithPeerSharingInfo).toBeSuccessful();
+        expect(attributesWithPeerSharingInfo.value).toHaveLength(2);
+
+        const attributesWithForwardedSharingInfos = await requestor.consumption.attributes.getAttributes({
+            query: {
+                "forwardedSharingInfos.peer": templator.address
+            }
+        });
+        expect(attributesWithForwardedSharingInfos).toBeSuccessful();
+        expect(attributesWithForwardedSharingInfos.value).toHaveLength(2);
 
         await syncUntilHasRelationships(templator.transport);
         await templator.eventBus.waitForEvent(OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent);
@@ -383,12 +391,12 @@ describe("RelationshipTemplateDVO", () => {
         expect(dvo.content.items).toHaveLength(2);
         expect(dvo.isDecidable).toBe(false);
 
-        const attributeResultTemplator = await templator.consumption.attributes.getAttributes({
+        const attributesWithPeerSharingInfoOfTemplator = await templator.consumption.attributes.getAttributes({
             query: {
                 "peerSharingInfo.peer": requestor.address
             }
         });
-        expect(attributeResultTemplator).toBeSuccessful();
-        expect(attributeResultTemplator.value).toHaveLength(4);
+        expect(attributesWithPeerSharingInfoOfTemplator).toBeSuccessful();
+        expect(attributesWithPeerSharingInfoOfTemplator.value).toHaveLength(4);
     });
 });
