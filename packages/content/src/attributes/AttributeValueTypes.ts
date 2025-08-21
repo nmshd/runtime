@@ -165,6 +165,7 @@ import {
     ZipCode,
     ZipCodeJSON
 } from "./types";
+import { IVerifiableCredential, VerifiableCredential, VerifiableCredentialJSON } from "./types/VerifiableCredential";
 
 // ################################################ Editable IdentityAttribute Value Types ###################################################################
 
@@ -250,6 +251,7 @@ export module AttributeValues {
                 FaxNumber,
                 IdentityFileReference,
                 SchematizedXML,
+                VerifiableCredential,
                 JobTitle,
                 Nationality,
                 PersonName,
@@ -274,6 +276,7 @@ export module AttributeValues {
                 "FaxNumber",
                 "IdentityFileReference",
                 "SchematizedXML",
+                "VerifiableCredential",
                 "JobTitle",
                 "Nationality",
                 "PersonName",
@@ -308,6 +311,7 @@ export module AttributeValues {
                 | HouseNumberJSON
                 | MiddleNameJSON
                 | SchematizedXMLJSON
+                | VerifiableCredentialJSON
                 | StateJSON
                 // | StatementJSON
                 | StreetJSON
@@ -332,6 +336,7 @@ export module AttributeValues {
                 | IHouseNumber
                 | IMiddleName
                 | ISchematizedXML
+                | IVerifiableCredential
                 | IState
                 // | IStatement
                 | IStreet
@@ -356,6 +361,7 @@ export module AttributeValues {
                 | HouseNumber
                 | MiddleName
                 | SchematizedXML
+                | VerifiableCredential
                 | State
                 // | Statement
                 | Street
@@ -380,6 +386,7 @@ export module AttributeValues {
                 HouseNumber,
                 MiddleName,
                 SchematizedXML,
+                VerifiableCredential,
                 State,
                 // Statement,
                 Street,
@@ -405,6 +412,7 @@ export module AttributeValues {
                 "HouseNumber",
                 "MiddleName",
                 "SchematizedXML",
+                "VerifiableCredential",
                 "State",
                 // "Statement",
                 "Street",
