@@ -1,3 +1,4 @@
+import { IdentityAttribute } from "@nmshd/content";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../consumption/ConsumptionController";
 import { ConsumptionControllerName } from "../../consumption/ConsumptionControllerName";
@@ -18,17 +19,21 @@ export class OpenId4VcController extends ConsumptionBaseController {
         const res = await holder.resolveCredentialOffer(credentialOffer);
         this._log.error("Resolved credential offer:", res);
 
-        const credential = await holder.requestAndStoreCredentials(res, { credentialsToRequest: ["EmployeeIdCard-sdjwt"] });
-        this._log.error("Fetched credentials:", credential);
+        const credentials = await holder.requestAndStoreCredentials(res, { credentialsToRequest: ["EmployeeIdCard-sdjwt"] });
+        this._log.error("Fetched credentials:", credentials);
 
-        // TODO: ask britta
-        // currently we are simply creating a dummy IdentityAttribute
-        /* await this._parent.attributes.createRepositoryAttribute({
+        const response = JSON.parse(JSON.stringify(credentials));
+        const attribute = await this._parent.attributes.createRepositoryAttribute({
             content: IdentityAttribute.from({
-                value: { value: credentialOffer },
+                value: {
+                    "@type": "VerifieableCredential",
+                    value: response
+                },
                 owner: this.parent.accountController.identity.address
             })
-        }); */
+        });
+
+        this._log.error("Created attribute:", attribute);
 
         return {
             status: "success",
