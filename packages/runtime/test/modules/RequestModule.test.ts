@@ -1,5 +1,5 @@
 import { sleep } from "@js-soft/ts-utils";
-import { DecideRequestItemParametersJSON } from "@nmshd/consumption";
+import { DecideRequestItemParametersJSON, OwnIdentityAttribute, OwnIdentityAttributeJSON, OwnRelationshipAttribute, OwnRelationshipAttributeJSON } from "@nmshd/consumption";
 import {
     GivenName,
     IdentityAttribute,
@@ -534,44 +534,53 @@ describe("Handling the rejection and the revocation of a Relationship by the Req
         });
     }, 30000);
 
-    afterEach(async () => {
+    afterEach(() => {
         sRuntimeServices.eventBus.reset();
         rRuntimeServices.eventBus.reset();
-
-        const rRepositoryAttributes = (await rRuntimeServices.consumption.attributes.getOwnIdentityAttributes({})).value;
-        for (const rRepositoryAttribute of rRepositoryAttributes) {
-            await rRuntimeServices.consumption.attributes.deleteAttributeAndNotify({ attributeId: rRepositoryAttribute.id });
-        }
     });
 
     afterAll(async () => await runtimeServiceProvider.stop());
 
     test("deletion of the Attributes shared between both Identities involved in the rejected Relationship and keeping the remaining Attributes", async () => {
         const sRelationship = await establishPendingRelationshipWithPredefinedRequestFlow(sRuntimeServices, rRuntimeServices, createdRelationshipAttributeForFurtherSharing);
-        expect((await sRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(4);
-        expect((await rRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(4);
+        expect((await sRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(3);
+        expect((await rRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(3);
 
         await sRuntimeServices.transport.relationships.rejectRelationship({ relationshipId: sRelationship.id });
         await sRuntimeServices.eventBus.waitForRunningEventHandlers();
         await syncUntilHasRelationships(rRuntimeServices.transport, 1);
         await rRuntimeServices.eventBus.waitForRunningEventHandlers();
 
-        expect((await sRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(1);
-        expect((await rRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(1);
+        const sAttributes = (await sRuntimeServices.consumption.attributes.getAttributes({})).value;
+        expect(sAttributes).toHaveLength(1);
+        expect(sAttributes[0]["@type"]).toBe("OwnRelationshipAttribute");
+        expect(OwnRelationshipAttribute.from(sAttributes[0] as OwnRelationshipAttributeJSON).isSharedWith(CoreAddress.from(rRuntimeServices.address))).toBe(false);
+
+        const rAttributes = (await rRuntimeServices.consumption.attributes.getAttributes({})).value;
+        expect(rAttributes).toHaveLength(1);
+        expect(rAttributes[0]["@type"]).toBe("OwnIdentityAttribute");
+        expect(OwnIdentityAttribute.from(rAttributes[0] as OwnIdentityAttributeJSON).isSharedWith(CoreAddress.from(sRuntimeServices.address))).toBe(false);
     });
 
     test("deletion of the Attributes shared between both Identities involved in the revoked Relationship and keeping the remaining Attributes", async () => {
         const sRelationship = await establishPendingRelationshipWithPredefinedRequestFlow(sRuntimeServices, rRuntimeServices, createdRelationshipAttributeForFurtherSharing);
-        expect((await sRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(4);
-        expect((await rRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(4);
+        expect((await sRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(3);
+        expect((await rRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(3);
 
         await rRuntimeServices.transport.relationships.revokeRelationship({ relationshipId: sRelationship.id });
         await rRuntimeServices.eventBus.waitForRunningEventHandlers();
         await syncUntilHasRelationships(sRuntimeServices.transport, 1);
         await sRuntimeServices.eventBus.waitForRunningEventHandlers();
 
-        expect((await rRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(1);
-        expect((await sRuntimeServices.consumption.attributes.getAttributes({})).value).toHaveLength(1);
+        const rAttributes = (await rRuntimeServices.consumption.attributes.getAttributes({})).value;
+        expect(rAttributes).toHaveLength(1);
+        expect(rAttributes[0]["@type"]).toBe("OwnIdentityAttribute");
+        expect(OwnIdentityAttribute.from(rAttributes[0] as OwnIdentityAttributeJSON).isSharedWith(CoreAddress.from(sRuntimeServices.address))).toBe(false);
+
+        const sAttributes = (await sRuntimeServices.consumption.attributes.getAttributes({})).value;
+        expect(sAttributes).toHaveLength(1);
+        expect(sAttributes[0]["@type"]).toBe("OwnRelationshipAttribute");
+        expect(OwnRelationshipAttribute.from(sAttributes[0] as OwnRelationshipAttributeJSON).isSharedWith(CoreAddress.from(rRuntimeServices.address))).toBe(false);
     });
 
     async function establishPendingRelationshipWithPredefinedRequestFlow(
