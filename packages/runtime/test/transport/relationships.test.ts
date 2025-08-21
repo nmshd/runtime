@@ -1162,27 +1162,27 @@ describe("RelationshipDecomposition", () => {
     });
 
     test("attributes should be deleted", async () => {
-        const ownSharedAttributes = (await services1.consumption.attributes.getOwnAttributesSharedWithPeer({ peer: services2.address })).value;
-        expect(ownSharedAttributes).toHaveLength(0);
+        const forwardedOwnAttributes = (await services1.consumption.attributes.getOwnAttributesSharedWithPeer({ peer: services2.address })).value;
+        expect(forwardedOwnAttributes).toHaveLength(0);
 
-        const peerSharedAttributes = (await services1.consumption.attributes.getPeerAttributes({ peer: services2.address })).value;
-        expect(peerSharedAttributes).toHaveLength(0);
+        const peerAttributes = (await services1.consumption.attributes.getPeerAttributes({ peer: services2.address })).value;
+        expect(peerAttributes).toHaveLength(0);
 
-        const ownSharedAttributesControl = (await services1.consumption.attributes.getOwnAttributesSharedWithPeer({ peer: services3.address })).value;
-        expect(ownSharedAttributesControl).not.toHaveLength(0);
+        const forwardedOwnAttributesControl = (await services1.consumption.attributes.getOwnAttributesSharedWithPeer({ peer: services3.address })).value;
+        expect(forwardedOwnAttributesControl).not.toHaveLength(0);
 
-        const peerSharedAttributesControl = (await services1.consumption.attributes.getPeerAttributes({ peer: services3.address })).value;
-        expect(peerSharedAttributesControl).not.toHaveLength(0);
+        const peerAttributesControl = (await services1.consumption.attributes.getPeerAttributes({ peer: services3.address })).value;
+        expect(peerAttributesControl).not.toHaveLength(0);
     });
 
     test("attributes should be marked as deleted for peer", async () => {
-        const ownSharedAttributes = (await services2.consumption.attributes.getOwnAttributesSharedWithPeer({ peer: services1.address })).value;
-        expect(ownSharedAttributes).toHaveLength(1);
-        expect(ownSharedAttributes[0].forwardedSharingInfos![0].deletionInfo!.deletionStatus).toBe(EmittedAttributeDeletionStatus.DeletedByPeer);
+        const forwardedOwnAttributes = (await services2.consumption.attributes.getOwnAttributesSharedWithPeer({ peer: services1.address })).value;
+        expect(forwardedOwnAttributes).toHaveLength(1);
+        expect(forwardedOwnAttributes[0].forwardedSharingInfos![0].deletionInfo!.deletionStatus).toBe(EmittedAttributeDeletionStatus.DeletedByPeer);
 
-        const peerSharedAttributes = (await services2.consumption.attributes.getPeerAttributes({ peer: services1.address })).value;
-        expect(peerSharedAttributes).toHaveLength(1);
-        expect(peerSharedAttributes[0].peerSharingInfo!.deletionInfo!.deletionStatus).toBe(ReceivedAttributeDeletionStatus.DeletedByOwner);
+        const peerAttributes = (await services2.consumption.attributes.getPeerAttributes({ peer: services1.address })).value;
+        expect(peerAttributes).toHaveLength(1);
+        expect(peerAttributes[0].peerSharingInfo!.deletionInfo!.deletionStatus).toBe(ReceivedAttributeDeletionStatus.DeletedByOwner);
     });
 
     test("notifications should be deleted", async () => {
