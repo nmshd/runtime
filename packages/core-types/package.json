@@ -53,10 +53,12 @@
         "@js-soft/ts-serval": "2.0.13",
         "@nmshd/crypto": "^2.1.2",
         "json-stringify-safe": "^5.0.1",
-        "luxon": "^3.7.1"
+        "luxon": "^3.7.1",
+        "uuid": "^11.1.0"
     },
     "devDependencies": {
-        "@types/luxon": "^3.7.1"
+        "@types/luxon": "^3.7.1",
+        "@types/uuid": "^10.0.0"
     },
     "publishConfig": {
         "access": "public",
