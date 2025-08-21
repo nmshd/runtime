@@ -1,5 +1,5 @@
 import { ApplicationError, Result, sleep } from "@js-soft/ts-utils";
-import { AcceptReadAttributeRequestItemParametersJSON, ForwardedAttributeDeletionStatus, PeerAttributeDeletionStatus } from "@nmshd/consumption";
+import { AcceptReadAttributeRequestItemParametersJSON, EmittedAttributeDeletionStatus, ReceivedAttributeDeletionStatus } from "@nmshd/consumption";
 import {
     GivenName,
     IdentityAttribute,
@@ -1178,11 +1178,11 @@ describe("RelationshipDecomposition", () => {
     test("attributes should be marked as deleted for peer", async () => {
         const ownSharedAttributes = (await services2.consumption.attributes.getOwnAttributesSharedWithPeer({ peer: services1.address })).value;
         expect(ownSharedAttributes).toHaveLength(1);
-        expect(ownSharedAttributes[0].forwardedSharingInfos![0].deletionInfo!.deletionStatus).toBe(ForwardedAttributeDeletionStatus.DeletedByPeer);
+        expect(ownSharedAttributes[0].forwardedSharingInfos![0].deletionInfo!.deletionStatus).toBe(EmittedAttributeDeletionStatus.DeletedByPeer);
 
         const peerSharedAttributes = (await services2.consumption.attributes.getPeerAttributes({ peer: services1.address })).value;
         expect(peerSharedAttributes).toHaveLength(1);
-        expect(peerSharedAttributes[0].peerSharingInfo!.deletionInfo!.deletionStatus).toBe(PeerAttributeDeletionStatus.DeletedByOwner);
+        expect(peerSharedAttributes[0].peerSharingInfo!.deletionInfo!.deletionStatus).toBe(ReceivedAttributeDeletionStatus.DeletedByOwner);
     });
 
     test("notifications should be deleted", async () => {

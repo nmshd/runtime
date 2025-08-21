@@ -1,4 +1,4 @@
-import { PeerAttributeDeletionStatus } from "@nmshd/consumption";
+import { ReceivedAttributeDeletionStatus } from "@nmshd/consumption";
 import {
     CreateAttributeAcceptResponseItemJSON,
     DeleteAttributeAcceptResponseItemJSON,
@@ -1438,7 +1438,7 @@ describe("DeciderModule", () => {
             expect((responseContent.items[0] as DeleteAttributeAcceptResponseItemJSON).deletionDate).toBe(deletionDate);
 
             const updatedSharedAttribute = (await recipient.consumption.attributes.getAttribute({ id: sharedAttribute.id })).value;
-            expect(updatedSharedAttribute.peerSharingInfo!.deletionInfo!.deletionStatus).toBe(PeerAttributeDeletionStatus.ToBeDeleted);
+            expect(updatedSharedAttribute.peerSharingInfo!.deletionInfo!.deletionStatus).toBe(ReceivedAttributeDeletionStatus.ToBeDeleted);
             expect(updatedSharedAttribute.peerSharingInfo!.deletionInfo!.deletionDate).toBe(deletionDate);
         });
 
