@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { AttributesController } from "@nmshd/consumption";
+import { AttributesController, AttributeWithForwardedSharingInfos } from "@nmshd/consumption";
 import { CoreId } from "@nmshd/core-types";
 import { AccountController, Relationship, RelationshipsController, RelationshipStatus } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
@@ -47,6 +47,17 @@ export class DeleteSharedAttributesForRejectedOrRevokedRelationshipUseCase exten
             }
 
             await this.attributesController.executeFullAttributeDeletionProcess(sharedAttribute);
+        }
+
+        const queryForForwardedAttributes = {
+            "@type": { $in: ["OwnIdentityAttribute", "OwnRelationshipAttribute", "PeerRelationshipAttribute"] },
+            forwardedSharingInfos: { $exists: true }
+        };
+        const forwardedAttributes = (await this.attributesController.getLocalAttributes(queryForForwardedAttributes)) as AttributeWithForwardedSharingInfos[];
+        const attributesForwardedToPeer = forwardedAttributes.filter((attr) => attr.isSharedWith(relationship.peer.address));
+
+        for (const attributeForwardedToPeer of attributesForwardedToPeer) {
+            await this.attributesController.removeForwardedSharingInfoFromAttribute(attributeForwardedToPeer, relationship.peer.address);
         }
 
         await this.accountController.syncDatawallet();
