@@ -277,7 +277,7 @@ describe("CreateRelationshipAttributeRequestItemDVO", () => {
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         const attributeResult = await sConsumptionServices.attributes.getAttributes({
-            query: { "content.value.@type": "ProprietaryString", "forwardedSharingInfos.peer": dvo.request.peer.id }
+            query: { "content.value.@type": "ProprietaryString", "peerSharingInfo.peer": dvo.request.peer.id }
         });
         expect(attributeResult).toBeSuccessful();
         const numberOfAttributes = attributeResult.value.length;
@@ -305,7 +305,7 @@ describe("CreateRelationshipAttributeRequestItemDVO", () => {
         expect((attributeResult.value[numberOfAttributes - 1].content.value as ProprietaryStringJSON).value).toBe("0815");
 
         const relationshipAttributeResult = await sConsumptionServices.attributes.getAttributes({
-            query: { "forwardedSharingInfos.peer": dvo.request.peer.id, "content.@type": "RelationshipAttribute" }
+            query: { "peerSharingInfo.peer": dvo.request.peer.id, "content.@type": "RelationshipAttribute" }
         });
         expect(relationshipAttributeResult).toBeSuccessful();
     });
