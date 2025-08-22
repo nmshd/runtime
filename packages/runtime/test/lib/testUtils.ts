@@ -859,12 +859,12 @@ export async function cleanupAttributes(services: TestRuntimeServices[]): Promis
 }
 
 export async function cleanupForwardedSharingInfos(services: TestRuntimeServices[]): Promise<void> {
-    const query = { forwardedSharingInfos: "" };
+    const query = { forwardedSharingInfos: { $exists: true } };
     await Promise.all(
         services.map(async (services) => {
             const servicesAttributeController = services.consumption.attributes["getAttributeUseCase"]["attributeController"];
 
-            const servicesAttributes = (await servicesAttributeController.getLocalAttributes({ query })) as AttributeWithForwardedSharingInfos[];
+            const servicesAttributes = (await servicesAttributeController.getLocalAttributes(query)) as AttributeWithForwardedSharingInfos[];
             for (const attribute of servicesAttributes) {
                 attribute.forwardedSharingInfos = undefined;
                 await servicesAttributeController.updateAttributeUnsafe(attribute);
