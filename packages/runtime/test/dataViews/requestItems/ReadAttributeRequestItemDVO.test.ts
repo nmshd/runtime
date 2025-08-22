@@ -59,7 +59,8 @@ afterAll(() => serviceProvider.stop());
 beforeEach(async function () {
     eventBus1.reset();
     eventBus2.reset();
-    await cleanupForwardedSharingInfos([runtimeServices1, runtimeServices2]);
+    await cleanupForwardedSharingInfos([runtimeServices2]);
+    await cleanupAttributes([runtimeServices1]);
 });
 
 describe("ReadAttributeRequestItemDVO with IdentityAttributeQuery", () => {
