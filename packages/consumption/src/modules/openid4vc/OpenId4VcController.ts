@@ -1,4 +1,3 @@
-import { IdentityAttribute } from "@nmshd/content";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../consumption/ConsumptionController";
 import { ConsumptionControllerName } from "../../consumption/ConsumptionControllerName";
@@ -22,23 +21,28 @@ export class OpenId4VcController extends ConsumptionBaseController {
         const credentials = await holder.requestAndStoreCredentials(res, { credentialsToRequest: ["EmployeeIdCard-sdjwt"] });
         this._log.error("Fetched credentials:", credentials);
 
-        const response = JSON.parse(JSON.stringify(credentials));
-        const attribute = await this._parent.attributes.createRepositoryAttribute({
-            content: IdentityAttribute.from({
-                value: {
-                    "@type": "VerifieableCredential",
-                    value: response
-                },
-                owner: this.parent.accountController.identity.address
-            })
-        });
+        const attributes = [];
 
-        this._log.error("Created attribute:", attribute);
+        for (const credential of credentials) {
+            const response = JSON.parse(JSON.stringify(credential));
+            const attribute = await this._parent.attributes.createRepositoryAttribute({
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "VerifiableCredential",
+                        value: response
+                    },
+                    owner: this.parent.accountController.identity.address
+                })
+            });
+            this._log.error("Created attribute:", attribute);
+            attributes.push(attribute);
+        }
 
         return {
             status: "success",
             message: "Credential offer processed successfully",
-            data: credentialOffer
+            data: credentialOfferm,
+            attributes: attributes
         };
     }
 }
