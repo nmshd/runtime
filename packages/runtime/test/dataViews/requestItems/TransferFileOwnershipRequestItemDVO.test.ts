@@ -230,13 +230,13 @@ describe("TransferFileOwnershipRequestItemDVO", () => {
         expect(responseItemDVO.id).toBe(responseItemDVO.attributeId);
     });
 
-    test("check the MessageDVO for the recipient after they deleted the shared Attribute", async () => {
+    test("check the MessageDVO for the recipient after they deleted the forwarded IdentityAttribute", async () => {
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
         const requestId = (senderMessage.content as RequestJSON).id!;
         const localRequest = (await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: requestId })).value;
-        const sharedAttributeId = (localRequest.response!.content.items[0] as TransferFileOwnershipAcceptResponseItemJSON).attributeId;
+        const forwardedAttributeId = (localRequest.response!.content.items[0] as TransferFileOwnershipAcceptResponseItemJSON).attributeId;
 
-        await rRuntimeServices.consumption.attributes.deleteAttributeAndNotify({ attributeId: sharedAttributeId });
+        await rRuntimeServices.consumption.attributes.deleteAttributeAndNotify({ attributeId: forwardedAttributeId });
 
         const recipientMessage = (await rRuntimeServices.transport.messages.getMessage({ id: senderMessage.id })).value;
         const dvo = (await rExpander.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
@@ -244,44 +244,13 @@ describe("TransferFileOwnershipRequestItemDVO", () => {
         expect(responseItemDVO.type).toBe("AttributeAlreadyDeletedAcceptResponseItemDVO");
     });
 
-    test("check the MessageDVO for the recipient after they deleted the RepositoryAttribute", async () => {
+    test("check the MessageDVO for the sender after they deleted the PeerIdentityAttribute", async () => {
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
         const requestId = (senderMessage.content as RequestJSON).id!;
         const localRequest = (await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: requestId })).value;
-        const sharedAttributeId = (localRequest.response!.content.items[0] as TransferFileOwnershipAcceptResponseItemJSON).attributeId;
-        const sharedAttribute = (await rRuntimeServices.consumption.attributes.getAttribute({ id: sharedAttributeId })).value;
+        const receivedAttributeId = (localRequest.response!.content.items[0] as TransferFileOwnershipAcceptResponseItemJSON).attributeId;
 
-        await rRuntimeServices.consumption.attributes.deleteAttributeAndNotify({ attributeId: sharedAttribute.id });
-
-        const recipientMessage = (await rRuntimeServices.transport.messages.getMessage({ id: senderMessage.id })).value;
-        const dvo = (await rExpander.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
-        const responseItemDVO = dvo.request.response!.content.items[0] as TransferFileOwnershipAcceptResponseItemDVO;
-        expect(responseItemDVO.type).toBe("TransferFileOwnershipAcceptResponseItemDVO");
-        expect(responseItemDVO.attribute).toBeDefined();
-    });
-
-    test("check the MessageDVO for the recipient after they deleted the shared and RepositoryAttribute", async () => {
-        const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
-        const requestId = (senderMessage.content as RequestJSON).id!;
-        const localRequest = (await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: requestId })).value;
-        const sharedAttributeId = (localRequest.response!.content.items[0] as TransferFileOwnershipAcceptResponseItemJSON).attributeId;
-
-        await rRuntimeServices.consumption.attributes.deleteAttributeAndNotify({ attributeId: sharedAttributeId });
-        await rRuntimeServices.consumption.attributes.deleteAttributeAndNotify({ attributeId: sharedAttributeId });
-
-        const recipientMessage = (await rRuntimeServices.transport.messages.getMessage({ id: senderMessage.id })).value;
-        const dvo = (await rExpander.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
-        const responseItemDVO = dvo.request.response!.content.items[0];
-        expect(responseItemDVO.type).toBe("AttributeAlreadyDeletedAcceptResponseItemDVO");
-    });
-
-    test("check the MessageDVO for the sender after they deleted the shared Attribute", async () => {
-        const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
-        const requestId = (senderMessage.content as RequestJSON).id!;
-        const localRequest = (await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: requestId })).value;
-        const sharedAttributeId = (localRequest.response!.content.items[0] as TransferFileOwnershipAcceptResponseItemJSON).attributeId;
-
-        await sRuntimeServices.consumption.attributes.deleteAttributeAndNotify({ attributeId: sharedAttributeId });
+        await sRuntimeServices.consumption.attributes.deleteAttributeAndNotify({ attributeId: receivedAttributeId });
 
         const senderMessageAfterDeletion = (await sRuntimeServices.transport.messages.getMessage({ id: senderMessage.id })).value;
         const dvo = (await sExpander.expandMessageDTO(senderMessageAfterDeletion)) as RequestMessageDVO;
