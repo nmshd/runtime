@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { AttributesController } from "@nmshd/consumption";
+import { AttributesController, AttributeWithForwardedSharingInfos } from "@nmshd/consumption";
 import { CoreId } from "@nmshd/core-types";
 import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { Relationship, RelationshipsController } from "@nmshd/transport";
@@ -40,15 +40,26 @@ export class GetAttributesForRelationshipUseCase extends UseCase<GetAttributesFo
         }
 
         const peerAddress = relationship.peer.address.toString();
-        const query: any = {
-            "shareInfo.peer": peerAddress
+        const queryForAttributesWithPeerSharingInfo: any = {
+            "peerSharingInfo.peer": peerAddress
+        };
+
+        const queryForForwardedAttributes: any = {
+            "@type": { $in: ["OwnIdentityAttribute", "OwnRelationshipAttribute", "PeerRelationshipAttribute"] },
+            forwardedSharingInfos: { $exists: true }
         };
 
         if (request.onlyLatestVersions ?? true) {
-            query["succeededBy"] = { $exists: false };
+            queryForAttributesWithPeerSharingInfo["succeededBy"] = { $exists: false };
+            queryForForwardedAttributes["succeededBy"] = { $exists: false };
         }
 
-        const attributes = await this.attributesController.getLocalAttributes(query, request.hideTechnical);
+        const attributes = await this.attributesController.getLocalAttributes(queryForAttributesWithPeerSharingInfo, request.hideTechnical);
+
+        const forwardedAttributes = (await this.attributesController.getLocalAttributes(queryForForwardedAttributes)) as AttributeWithForwardedSharingInfos[];
+        const attributesForwardedToPeer = forwardedAttributes.filter((attr) => attr.isSharedWith(relationship.peer.address));
+
+        attributes.push(...attributesForwardedToPeer);
 
         return Result.ok(AttributeMapper.toAttributeDTOList(attributes));
     }
