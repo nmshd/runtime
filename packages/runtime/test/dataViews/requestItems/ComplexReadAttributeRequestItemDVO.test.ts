@@ -21,6 +21,7 @@ import {
     TransportServices
 } from "../../../src";
 import {
+    cleanupAttributes,
     cleanupForwardedSharingInfos,
     establishRelationship,
     exchangeAndAcceptRequestByMessage,
@@ -54,7 +55,8 @@ afterAll(() => serviceProvider.stop());
 beforeEach(async function () {
     eventBus1.reset();
     eventBus2.reset();
-    await cleanupForwardedSharingInfos([runtimeServices1, runtimeServices2]);
+    await cleanupForwardedSharingInfos([runtimeServices2]);
+    await cleanupAttributes([runtimeServices1]);
 });
 
 describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () => {
@@ -183,7 +185,7 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
     test("check the MessageDVO for the recipient after acceptance", async () => {
         const baselineNumberOfAttributes = (
             await consumptionServices1.attributes.getAttributes({
-                query: { "content.value.@type": "StreetAddress", "forwardedSharingInfos.peer": address1 }
+                query: { "content.value.@type": "StreetAddress", "peerSharingInfo.peer": address1 }
             })
         ).value.length;
         const recipientMessage = await exchangeMessageWithRequest(runtimeServices1, runtimeServices2, requestContent);
