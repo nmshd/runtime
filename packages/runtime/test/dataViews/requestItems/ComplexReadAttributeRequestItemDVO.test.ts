@@ -74,7 +74,7 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         await establishRelationship(transportServices1, transportServices2);
         address1 = (await transportServices1.account.getIdentityInfo()).value.address;
         address2 = (await transportServices2.account.getIdentityInfo()).value.address;
-        const repositoryAttribute = (
+        const ownIdentityAttribute = (
             await consumptionServices2.attributes.createOwnIdentityAttribute({
                 content: {
                     value: StreetAddress.from({
@@ -101,7 +101,7 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
             peer: address2
         };
 
-        responseItems = [{ accept: true, existingAttributeId: repositoryAttribute.id }] as AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON[];
+        responseItems = [{ accept: true, existingAttributeId: ownIdentityAttribute.id }] as AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON[];
     }, 30000);
 
     test("check the MessageDVO for the sender", async () => {
