@@ -51,13 +51,12 @@ export class DeleteSharedAttributesForRejectedOrRevokedRelationshipUseCase exten
 
         const queryForForwardedAttributes = {
             "@type": { $in: ["OwnIdentityAttribute", "OwnRelationshipAttribute", "PeerRelationshipAttribute"] },
-            forwardedSharingInfos: { $exists: true }
+            "forwardedSharingInfos.peer": relationship.peer.address.toString()
         };
         const forwardedAttributes = (await this.attributesController.getLocalAttributes(queryForForwardedAttributes)) as AttributeWithForwardedSharingInfos[];
-        const attributesForwardedToPeer = forwardedAttributes.filter((attr) => attr.isSharedWith(relationship.peer.address));
 
-        for (const attributeForwardedToPeer of attributesForwardedToPeer) {
-            await this.attributesController.removeForwardedSharingInfoFromAttribute(attributeForwardedToPeer, relationship.peer.address);
+        for (const forwardedAttribute of forwardedAttributes) {
+            await this.attributesController.removeForwardedSharingInfoFromAttribute(forwardedAttribute, relationship.peer.address);
         }
 
         await this.accountController.syncDatawallet();

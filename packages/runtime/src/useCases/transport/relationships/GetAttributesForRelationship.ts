@@ -46,7 +46,7 @@ export class GetAttributesForRelationshipUseCase extends UseCase<GetAttributesFo
 
         const queryForForwardedAttributes: any = {
             "@type": { $in: ["OwnIdentityAttribute", "OwnRelationshipAttribute", "PeerRelationshipAttribute"] },
-            forwardedSharingInfos: { $exists: true }
+            "forwardedSharingInfos.peer": relationship.peer.address.toString()
         };
 
         if (request.onlyLatestVersions ?? true) {
@@ -55,11 +55,8 @@ export class GetAttributesForRelationshipUseCase extends UseCase<GetAttributesFo
         }
 
         const attributes = await this.attributesController.getLocalAttributes(queryForAttributesWithPeerSharingInfo, request.hideTechnical);
-
         const forwardedAttributes = (await this.attributesController.getLocalAttributes(queryForForwardedAttributes)) as AttributeWithForwardedSharingInfos[];
-        const attributesForwardedToPeer = forwardedAttributes.filter((attr) => attr.isSharedWith(relationship.peer.address));
-
-        attributes.push(...attributesForwardedToPeer);
+        attributes.push(...forwardedAttributes);
 
         return Result.ok(AttributeMapper.toAttributeDTOList(attributes));
     }
