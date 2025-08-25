@@ -1,14 +1,5 @@
 import { Inject } from "@nmshd/typescript-ioc";
-import {
-    AttributeListenersFacade,
-    AttributesFacade,
-    DraftsFacade,
-    IdentityMetadataFacade,
-    IncomingRequestsFacade,
-    NotificationsFacade,
-    OutgoingRequestsFacade,
-    SettingsFacade
-} from "./facades/consumption";
+import { AttributesFacade, DraftsFacade, IdentityMetadataFacade, IncomingRequestsFacade, NotificationsFacade, OutgoingRequestsFacade, SettingsFacade } from "./facades/consumption";
 
 export class ConsumptionServices {
     public constructor(
@@ -17,7 +8,6 @@ export class ConsumptionServices {
         @Inject public readonly settings: SettingsFacade,
         @Inject public readonly incomingRequests: IncomingRequestsFacade,
         @Inject public readonly outgoingRequests: OutgoingRequestsFacade,
-        @Inject public readonly attributeListeners: AttributeListenersFacade,
         @Inject public readonly notifications: NotificationsFacade,
         @Inject public readonly identityMetadata: IdentityMetadataFacade
     ) {}

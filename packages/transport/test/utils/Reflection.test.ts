@@ -19,7 +19,6 @@ import {
 } from "@nmshd/crypto";
 
 import {
-    CachedRelationshipTemplate,
     Device,
     File,
     FileMetadata,
@@ -76,7 +75,6 @@ const transportClassNames: string[] = [
     `${"MessageSignature"}@1`,
     `${MessageSigned.name}@1`,
     `${Message.name}@1`,
-    `${CachedRelationshipTemplate.name}@1`,
     `${Relationship.name}@1`,
     `${RelationshipTemplate.name}@1`,
     `${RelationshipCreationContentCipher.name}@1`,

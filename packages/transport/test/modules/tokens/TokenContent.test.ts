@@ -43,7 +43,7 @@ describe("TokenContent", function () {
             const tokens = await account.tokens.getTokens();
             expect(tokens).toHaveLength(1);
             const token = tokens[0];
-            const content = token.cache!.content as any;
+            const content = token.content as any;
             expect(content).toBeInstanceOf(JSONWrapper);
             expect(content.value.any).toBe("content");
             expect(content.value.submitted).toBe(true);
@@ -54,9 +54,9 @@ describe("TokenContent", function () {
             expect(tokens).toHaveLength(1);
             const token = tokens[0];
             const object = token.toJSON() as any;
-            expect(object.cache.content).toBeDefined();
-            expect(object.cache.content.any).toBe("content");
-            expect(object.cache.content.submitted).toBe(true);
+            expect(object.content).toBeDefined();
+            expect(object.content.any).toBe("content");
+            expect(object.content.submitted).toBe(true);
         });
     });
 

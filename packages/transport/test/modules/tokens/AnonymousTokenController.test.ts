@@ -14,19 +14,15 @@ describe("AnonymousTokenController", function () {
 
     function testTokens(sentToken: Token, receivedToken: Token, nowMinusSeconds: CoreDate) {
         expect(sentToken.id.toString()).toBe(receivedToken.id.toString());
-        expect(sentToken.cache).toBeDefined();
-        expect(sentToken.cachedAt?.isSameOrAfter(nowMinusSeconds)).toBe(true);
-        expect(sentToken.cache?.content).toBeInstanceOf(Serializable);
-        expect(sentToken.cache?.createdBy.toString()).toBe(sender.identity.address.toString());
-        expect(sentToken.cache?.createdByDevice.toString()).toBe(sender.activeDevice.id.toString());
-        expect(sentToken.cache?.createdAt.isSameOrAfter(nowMinusSeconds)).toBe(true);
-        expect(receivedToken.cache).toBeDefined();
-        expect(receivedToken.cachedAt?.isSameOrAfter(nowMinusSeconds)).toBe(true);
-        expect(receivedToken.cache?.content).toBeInstanceOf(Serializable);
-        expect(receivedToken.cache?.createdBy.toString()).toBe(sender.identity.address.toString());
-        expect(receivedToken.cache?.createdByDevice.toString()).toBe(sender.activeDevice.id.toString());
-        expect(receivedToken.cache?.createdAt.isSameOrAfter(nowMinusSeconds)).toBe(true);
-        expect(receivedToken.cache?.expiresAt.toISOString()).toBe(sentToken.cache?.expiresAt.toISOString());
+        expect(sentToken.content).toBeInstanceOf(Serializable);
+        expect(sentToken.createdBy.toString()).toBe(sender.identity.address.toString());
+        expect(sentToken.createdByDevice.toString()).toBe(sender.activeDevice.id.toString());
+        expect(sentToken.createdAt.isSameOrAfter(nowMinusSeconds)).toBe(true);
+        expect(receivedToken.content).toBeInstanceOf(Serializable);
+        expect(receivedToken.createdBy.toString()).toBe(sender.identity.address.toString());
+        expect(receivedToken.createdByDevice.toString()).toBe(sender.activeDevice.id.toString());
+        expect(receivedToken.createdAt.isSameOrAfter(nowMinusSeconds)).toBe(true);
+        expect(receivedToken.expiresAt.toISOString()).toBe(sentToken.expiresAt.toISOString());
     }
 
     beforeAll(async function () {
@@ -59,11 +55,11 @@ describe("AnonymousTokenController", function () {
         const receivedToken = await anonymousTokenController.loadPeerTokenByReference(reference);
 
         testTokens(sentToken, receivedToken, tempDate);
-        expect(sentToken.cache?.expiresAt.toISOString()).toBe(expiresAt.toISOString());
-        expect(sentToken.cache?.content).toBeInstanceOf(Serializable);
-        expect(receivedToken.cache?.content).toBeInstanceOf(JSONWrapper);
-        expect((sentToken.cache?.content.toJSON() as any).content).toBe("TestToken");
-        expect((receivedToken.cache?.content as any).content).toBe((sentToken.cache?.content as any).content);
+        expect(sentToken.expiresAt.toISOString()).toBe(expiresAt.toISOString());
+        expect(sentToken.content).toBeInstanceOf(Serializable);
+        expect(receivedToken.content).toBeInstanceOf(JSONWrapper);
+        expect((sentToken.content.toJSON() as any).content).toBe("TestToken");
+        expect((receivedToken.content as any).content).toBe((sentToken.content as any).content);
     });
 
     test("should throw when loading a personalized token", async function () {
@@ -91,9 +87,8 @@ describe("AnonymousTokenController", function () {
 
         const reference = sentToken.toTokenReference(sender.config.baseUrl);
         reference.forIdentityTruncated = undefined;
-        const truncatedReference = reference;
 
-        await expect(anonymousTokenController.loadPeerTokenByReference(truncatedReference)).rejects.toThrow("error.platform.recordNotFound");
+        await expect(anonymousTokenController.loadPeerTokenByReference(reference)).rejects.toThrow("error.platform.recordNotFound");
     });
 
     test("should load a password-protected token", async function () {
@@ -110,11 +105,11 @@ describe("AnonymousTokenController", function () {
         const receivedToken = await anonymousTokenController.loadPeerTokenByReference(reference, "password");
 
         testTokens(sentToken, receivedToken, tempDate);
-        expect(sentToken.cache?.expiresAt.toISOString()).toBe(expiresAt.toISOString());
-        expect(sentToken.cache?.content).toBeInstanceOf(Serializable);
-        expect(receivedToken.cache?.content).toBeInstanceOf(JSONWrapper);
-        expect((sentToken.cache?.content.toJSON() as any).content).toBe("TestToken");
-        expect((receivedToken.cache?.content as any).content).toBe((sentToken.cache?.content as any).content);
+        expect(sentToken.expiresAt.toISOString()).toBe(expiresAt.toISOString());
+        expect(sentToken.content).toBeInstanceOf(Serializable);
+        expect(receivedToken.content).toBeInstanceOf(JSONWrapper);
+        expect((sentToken.content.toJSON() as any).content).toBe("TestToken");
+        expect((receivedToken.content as any).content).toBe((sentToken.content as any).content);
         expect(receivedToken.passwordProtection!.password).toBe("password");
         expect(receivedToken.passwordProtection!.salt).toStrictEqual(sentToken.passwordProtection!.salt);
         expect(receivedToken.passwordProtection!.passwordType).toBe("pw");

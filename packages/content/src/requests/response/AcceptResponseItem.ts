@@ -8,24 +8,18 @@ import {
     CreateAttributeAcceptResponseItemJSON,
     FormFieldAcceptResponseItem,
     FormFieldAcceptResponseItemJSON,
-    FreeTextAcceptResponseItem,
-    FreeTextAcceptResponseItemJSON,
     IAttributeAlreadySharedAcceptResponseItem,
     IAttributeSuccessionAcceptResponseItem,
     ICreateAttributeAcceptResponseItem,
     IFormFieldAcceptResponseItem,
-    IFreeTextAcceptResponseItem,
     IProposeAttributeAcceptResponseItem,
     IReadAttributeAcceptResponseItem,
-    IRegisterAttributeListenerAcceptResponseItem,
     IShareAttributeAcceptResponseItem,
     ITransferFileOwnershipAcceptResponseItem,
     ProposeAttributeAcceptResponseItem,
     ProposeAttributeAcceptResponseItemJSON,
     ReadAttributeAcceptResponseItem,
     ReadAttributeAcceptResponseItemJSON,
-    RegisterAttributeListenerAcceptResponseItem,
-    RegisterAttributeListenerAcceptResponseItemJSON,
     ShareAttributeAcceptResponseItem,
     ShareAttributeAcceptResponseItemJSON,
     TransferFileOwnershipAcceptResponseItem,
@@ -46,8 +40,6 @@ export type AcceptResponseItemJSONDerivations =
     | ShareAttributeAcceptResponseItemJSON
     | ProposeAttributeAcceptResponseItemJSON
     | ReadAttributeAcceptResponseItemJSON
-    | RegisterAttributeListenerAcceptResponseItemJSON
-    | FreeTextAcceptResponseItemJSON
     | FormFieldAcceptResponseItemJSON
     | TransferFileOwnershipAcceptResponseItemJSON;
 
@@ -63,8 +55,6 @@ export type IAcceptResponseItemDerivations =
     | IShareAttributeAcceptResponseItem
     | IProposeAttributeAcceptResponseItem
     | IReadAttributeAcceptResponseItem
-    | IRegisterAttributeListenerAcceptResponseItem
-    | IFreeTextAcceptResponseItem
     | IFormFieldAcceptResponseItem
     | ITransferFileOwnershipAcceptResponseItem;
 
@@ -89,7 +79,5 @@ export type AcceptResponseItemDerivations =
     | ShareAttributeAcceptResponseItem
     | ProposeAttributeAcceptResponseItem
     | ReadAttributeAcceptResponseItem
-    | RegisterAttributeListenerAcceptResponseItem
-    | FreeTextAcceptResponseItem
     | FormFieldAcceptResponseItem
     | TransferFileOwnershipAcceptResponseItem;
