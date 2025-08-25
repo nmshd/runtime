@@ -23,8 +23,8 @@ import {
     RequestItemJSONDerivations,
     RequestJSON,
     ResponseWrapperJSON,
-    ShareAttributeAcceptResponseItemJSON,
-    ShareAttributeRequestItem
+    ShareAttributeRequestItem,
+    ShareAttributeRequestItemJSON
 } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId, PasswordLocationIndicator } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
@@ -641,13 +641,13 @@ export async function acceptIncomingShareAttributeRequest(sender: TestRuntimeSer
     });
     await recipient.consumption.incomingRequests.accept({ requestId: requestId, items: [{ accept: true }] });
 
-    const responseMessage = await syncUntilHasMessageWithResponse(sender.transport, requestId);
-    // TODO: this will need to be refactored when we remove attributeId from ShareAttributeAcceptResponseItem
-    const sharedAttributeId = (responseMessage.content.response.items[0] as ShareAttributeAcceptResponseItemJSON).attributeId;
+    await syncUntilHasMessageWithResponse(sender.transport, requestId);
     await sender.eventBus.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => {
         return e.data.request.id === requestId && e.data.newStatus === LocalRequestStatus.Completed;
     });
 
+    const request = (await sender.consumption.outgoingRequests.getRequest({ id: requestId })).value;
+    const sharedAttributeId = (request.content.items[0] as ShareAttributeRequestItemJSON).sourceAttributeId;
     const senderOwnAttribute = (await sender.consumption.attributes.getAttribute({ id: sharedAttributeId })).value;
     return senderOwnAttribute;
 }
@@ -768,7 +768,6 @@ export async function executeFullShareAndAcceptAttributeRequestFlow(
     return ownAttribute;
 }
 
-// TODO: delete this
 /**
  * Generate all possible combinations of the given arrays.
  *
