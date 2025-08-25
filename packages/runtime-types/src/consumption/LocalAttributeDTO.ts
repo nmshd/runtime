@@ -1,23 +1,30 @@
 import { IdentityAttributeJSON, RelationshipAttributeJSON } from "@nmshd/content";
 
 export interface LocalAttributeDTO {
+    "@type": "OwnIdentityAttribute" | "PeerIdentityAttribute" | "OwnRelationshipAttribute" | "PeerRelationshipAttribute" | "ThirdPartyRelationshipAttribute";
     id: string;
     createdAt: string;
     content: IdentityAttributeJSON | RelationshipAttributeJSON;
     succeeds?: string;
     succeededBy?: string;
-    shareInfo?: LocalAttributeShareInfoDTO;
-    deletionInfo?: LocalAttributeDeletionInfoDTO;
-    isDefault?: true;
     wasViewedAt?: string;
+    isDefault?: true;
+    peerSharingInfo?: PeerSharingInfoDTO;
+    forwardedSharingInfos?: ForwardedSharingInfosDTO[];
 }
 
-export interface LocalAttributeShareInfoDTO {
-    requestReference?: string;
-    notificationReference?: string;
+export interface PeerSharingInfoDTO {
     peer: string;
-    sourceAttribute?: string;
-    thirdPartyAddress?: string;
+    sourceReference: string;
+    deletionInfo?: LocalAttributeDeletionInfoDTO;
+    initialAttributePeer?: string;
+}
+
+export interface ForwardedSharingInfosDTO {
+    peer: string;
+    sourceReference: string;
+    sharedAt: string;
+    deletionInfo?: LocalAttributeDeletionInfoDTO;
 }
 
 export interface LocalAttributeDeletionInfoDTO {

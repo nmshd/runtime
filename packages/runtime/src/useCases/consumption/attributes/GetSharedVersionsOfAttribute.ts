@@ -1,15 +1,14 @@
 import { Result } from "@js-soft/ts-utils";
-import { AttributesController, LocalAttribute } from "@nmshd/consumption";
+import { AttributesController, LocalAttribute, OwnIdentityAttribute, OwnRelationshipAttribute, PeerRelationshipAttribute } from "@nmshd/consumption";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { LocalAttributeDTO } from "@nmshd/runtime-types";
-import { AccountController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { AddressString, AttributeIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { AttributeMapper } from "./AttributeMapper";
 
 export interface GetSharedVersionsOfAttributeRequest {
     attributeId: AttributeIdString;
-    peers?: AddressString[];
+    peer: AddressString;
     /**
      * default: true
      */
@@ -24,7 +23,6 @@ class Validator extends SchemaValidator<GetSharedVersionsOfAttributeRequest> {
 
 export class GetSharedVersionsOfAttributeUseCase extends UseCase<GetSharedVersionsOfAttributeRequest, LocalAttributeDTO[]> {
     public constructor(
-        @Inject private readonly accountController: AccountController,
         @Inject private readonly attributeController: AttributesController,
         @Inject validator: Validator
     ) {
@@ -32,17 +30,15 @@ export class GetSharedVersionsOfAttributeUseCase extends UseCase<GetSharedVersio
     }
 
     protected async executeInternal(request: GetSharedVersionsOfAttributeRequest): Promise<Result<LocalAttributeDTO[]>> {
-        const sourceAttributeId = CoreId.from(request.attributeId);
-        const sourceAttribute = await this.attributeController.getLocalAttribute(sourceAttributeId);
+        const localAttribute = await this.attributeController.getLocalAttribute(CoreId.from(request.attributeId));
 
-        if (!sourceAttribute) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
+        if (!localAttribute) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
 
-        if (request.peers?.length === 0) {
-            return Result.fail(RuntimeErrors.general.invalidPropertyValue("The `peers` property may not be an empty array."));
+        if (!(localAttribute instanceof OwnIdentityAttribute || localAttribute instanceof OwnRelationshipAttribute || localAttribute instanceof PeerRelationshipAttribute)) {
+            return Result.fail(RuntimeErrors.general.invalidPropertyValue("The `attributeId` property must belong to an own IdentityAttribute or a RelationshipAttribute."));
         }
 
-        const peers = request.peers?.map((address) => CoreAddress.from(address));
-        const sharedVersions = await this.attributeController.getSharedVersionsOfAttribute(sourceAttributeId, peers, request.onlyLatestVersions);
+        const sharedVersions = await this.attributeController.getSharedVersionsOfAttribute(localAttribute, CoreAddress.from(request.peer), request.onlyLatestVersions);
 
         return Result.ok(AttributeMapper.toAttributeDTOList(sharedVersions));
     }

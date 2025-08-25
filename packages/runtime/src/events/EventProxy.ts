@@ -6,15 +6,16 @@ import {
     AttributeCreatedEvent,
     AttributeDeletedEvent,
     AttributeWasViewedAtChangedEvent,
+    ForwardedAttributeDeletedByPeerEvent,
     IncomingRequestReceivedEvent,
     IncomingRequestStatusChangedEvent,
     OutgoingRequestCreatedAndCompletedEvent,
     OutgoingRequestCreatedEvent,
     OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent,
     OutgoingRequestStatusChangedEvent,
-    OwnSharedAttributeDeletedByOwnerEvent,
+    OwnAttributeDeletedByOwnerEvent,
     OwnSharedAttributeSucceededEvent,
-    PeerSharedAttributeDeletedByPeerEvent,
+    PeerRelationshipAttributeDeletedByPeerEvent,
     PeerSharedAttributeSucceededEvent,
     RepositoryAttributeSucceededEvent,
     ThirdPartyOwnedRelationshipAttributeSucceededEvent,
@@ -143,12 +144,16 @@ export class EventProxy {
             this.targetEventBus.publish(new AttributeDeletedEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
         });
 
-        this.subscribeToSourceEvent(consumption.OwnSharedAttributeDeletedByOwnerEvent, (event) => {
-            this.targetEventBus.publish(new OwnSharedAttributeDeletedByOwnerEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
+        this.subscribeToSourceEvent(consumption.OwnAttributeDeletedByOwnerEvent, (event) => {
+            this.targetEventBus.publish(new OwnAttributeDeletedByOwnerEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
         });
 
-        this.subscribeToSourceEvent(consumption.PeerSharedAttributeDeletedByPeerEvent, (event) => {
-            this.targetEventBus.publish(new PeerSharedAttributeDeletedByPeerEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
+        this.subscribeToSourceEvent(consumption.PeerRelationshipAttributeDeletedByPeerEvent, (event) => {
+            this.targetEventBus.publish(new PeerRelationshipAttributeDeletedByPeerEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
+        });
+
+        this.subscribeToSourceEvent(consumption.ForwardedAttributeDeletedByPeerEvent, (event) => {
+            this.targetEventBus.publish(new ForwardedAttributeDeletedByPeerEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
         });
 
         this.subscribeToSourceEvent(consumption.ThirdPartyRelationshipAttributeDeletedByPeerEvent, (event) => {
