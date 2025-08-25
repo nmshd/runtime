@@ -84,31 +84,32 @@ export class RESTClient {
 
         const resultingRequestConfig = _.defaultsDeep(defaults, requestConfig);
 
-        if (typeof window === "undefined" && (process.env.https_proxy ?? process.env.HTTPS_PROXY)) {
-            try {
-                const httpsProxy = (process.env.https_proxy ?? process.env.HTTPS_PROXY)!;
-                // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/naming-convention
-                const HttpsProxyAgent = require("https-proxy-agent").HttpsProxyAgent;
-                resultingRequestConfig.httpsAgent = new HttpsProxyAgent(httpsProxy, this.config.httpsAgentOptions);
-            } catch (_) {
-                // ignore
-            }
-        } else {
-            try {
-                // eslint-disable-next-line @typescript-eslint/no-require-imports
-                const httpsAgent = require("https")?.Agent;
+        try {
+            // eslint-disable-next-line @typescript-eslint/no-require-imports
+            const httpsAgent = require("https")?.Agent;
 
-                if (httpsAgent) resultingRequestConfig.httpsAgent = new httpsAgent(this.config.httpsAgentOptions);
-            } catch (_) {
-                // ignore
+            if (httpsAgent) {
+                resultingRequestConfig.httpsAgent = new httpsAgent({
+                    ...this.config.httpsAgentOptions,
+                    // @ts-expect-error @types/node does not have proxyEnv, but it can already be used
+                    proxyEnv: process.env
+                } satisfies HTTPSAgentOptions);
             }
+        } catch (_) {
+            // ignore
         }
 
         try {
             // eslint-disable-next-line @typescript-eslint/no-require-imports
             const agent = require("http")?.Agent;
 
-            if (agent) resultingRequestConfig.httpAgent = new agent(this.config.httpAgentOptions);
+            if (agent) {
+                resultingRequestConfig.httpAgent = new agent({
+                    ...this.config.httpAgentOptions,
+                    // @ts-expect-error @types/node does not have proxyEnv, but it can already be used
+                    proxyEnv: process.env
+                } satisfies HTTPSAgentOptions);
+            }
         } catch (_) {
             // ignore
         }
