@@ -217,7 +217,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
         return ValidationResult.success();
     }
 
-    // TODO: maybe have shared code with ReadAttributeRequestItemProcessor
+    // TODO: maybe have shared code with ReadAttributeRequestItemProcessor -> different PR
     public override async accept(
         _requestItem: ProposeAttributeRequestItem,
         params: AcceptProposeAttributeRequestItemParametersJSON,
@@ -254,8 +254,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
 
             const isLatestSharedVersion = latestSharedVersion[0]?.id.toString() === existingAttribute.id.toString();
             if (isLatestSharedVersion) {
-                // TODO: query for onlyToBeDeleted isn't necessary here, since getSharedVersionsOfAttribute won't return deleted attributes
-                if (latestSharedVersion[0].isDeletedOrToBeDeletedByForwardingPeer(requestInfo.peer, "onlyToBeDeleted")) {
+                if (latestSharedVersion[0].isDeletedOrToBeDeletedByForwardingPeer(requestInfo.peer)) {
                     await this.consumptionController.attributes.setForwardedDeletionInfoOfAttribute(latestSharedVersion[0], undefined, requestInfo.peer, true);
                 }
 
@@ -366,7 +365,6 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             });
 
             const { predecessor: updatedPredecessor, successor } = await this.consumptionController.attributes.succeedPeerIdentityAttribute(predecessor, successorParams);
-            // TODO: check publishing of events
             return new PeerSharedAttributeSucceededEvent(this.currentIdentityAddress.toString(), updatedPredecessor, successor);
         }
     }

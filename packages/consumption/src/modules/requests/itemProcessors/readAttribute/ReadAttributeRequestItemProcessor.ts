@@ -309,8 +309,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
             const isLatestSharedVersion = latestSharedVersion[0]?.id.equals(existingAttribute.id);
             if (isLatestSharedVersion) {
-                // TODO: query for onlyToBeDeleted isn't necessary here, since getSharedVersionsOfAttribute won't return deleted attributes
-                if (latestSharedVersion[0].isDeletedOrToBeDeletedByForwardingPeer(requestInfo.peer, "onlyToBeDeleted")) {
+                if (latestSharedVersion[0].isDeletedOrToBeDeletedByForwardingPeer(requestInfo.peer)) {
                     await this.consumptionController.attributes.setForwardedDeletionInfoOfAttribute(latestSharedVersion[0], undefined, requestInfo.peer, true);
                 }
 
@@ -466,7 +465,6 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 });
 
                 const { predecessor: updatedPredecessor, successor } = await this.consumptionController.attributes.succeedPeerIdentityAttribute(predecessor, successorParams);
-                // TODO: check publishing of events
                 return new PeerSharedAttributeSucceededEvent(this.currentIdentityAddress.toString(), updatedPredecessor, successor);
             }
 
@@ -486,7 +484,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                     predecessor,
                     successorParams
                 );
-                // TODO: check publishing of events
+
                 return new PeerSharedAttributeSucceededEvent(this.currentIdentityAddress.toString(), updatedPredecessor, successor);
             }
         }
