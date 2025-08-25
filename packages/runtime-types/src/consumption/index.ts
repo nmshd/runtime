@@ -1,4 +1,5 @@
 export * from "./AttributeTagCollectionDTO";
+export * from "./CredentialOfferDTO";
 export * from "./DraftDTO";
 export * from "./IdentityMetadataDTO";
 export * from "./LocalAttributeDTO";
