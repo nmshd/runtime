@@ -792,44 +792,6 @@ export async function executeFullShareAndAcceptAttributeRequestFlow(
     return ownSharedAttribute;
 }
 
-/**
- * Generate all possible combinations of the given arrays.
- *
- * combinations([1, 2], [a, b]) => [[1, a], [1, b], [2, a], [2, b]]
- *
- * Special Case: If only one array is given, it returns a list of lists with only the elements of the array
- *
- * combinations([1, 2]) => [[1], [2]]
- *
- * Strictly speaking this is not correct, since the combinations of an array with nothing should be nothing []
- * but in our case this makes more sense
- *
- * Beware: this contains recursion
- */
-export function combinations<T>(...arrays: T[][]): T[][] {
-    if (arrays.length < 1) {
-        throw new Error("you must enter at least one array");
-    }
-
-    const firstArray = arrays[0];
-    if (arrays.length === 1) {
-        // Wrap every element in a list
-        // This is neccessary because we want to return [[1], [2]] and not [[1, 2]] or [1, 2]
-        return firstArray.map((x) => [x]);
-    }
-
-    const [firstArr, secondArr, ...allOtherArrs] = arrays;
-
-    const result = [];
-    // Combine the elements of the first array with all combinations of the other arrays
-    for (const elem of firstArr) {
-        for (const combination of combinations(secondArr, ...allOtherArrs)) {
-            result.push([elem, ...combination]);
-        }
-    }
-    return result;
-}
-
 export async function waitForEvent<TEvent>(
     eventBus: EventBus,
     subscriptionTarget: SubscriptionTarget<TEvent>,
