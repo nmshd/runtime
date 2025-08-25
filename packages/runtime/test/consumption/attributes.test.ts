@@ -1,5 +1,6 @@
 import { AcceptRequestItemParametersJSON } from "@nmshd/consumption";
 import {
+    CreateAttributeRequestItemJSON,
     DeleteAttributeRequestItem,
     GivenNameJSON,
     ReadAttributeRequestItem,
@@ -2563,6 +2564,49 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 const result = await services1.consumption.attributes.deleteAttributeAndNotify({ attributeId: unknownAttributeId });
                 expect(result).toBeAnError(/.*/, "error.runtime.recordNotFound");
             });
+
+            test("should throw trying to notify about deletion of own IdentityAttribute when the Relationship is in status Pending", async () => {
+                const [services1, services2] = await runtimeServiceProvider.launch(2, {
+                    enableRequestModule: true,
+                    enableDeciderModule: true,
+                    enableNotificationModule: true
+                });
+
+                const ownIdentityAttribute = (
+                    await services1.consumption.attributes.createOwnIdentityAttribute({
+                        content: {
+                            value: {
+                                "@type": "GivenName",
+                                value: "aGivenName"
+                            }
+                        }
+                    })
+                ).value;
+
+                const item: ShareAttributeRequestItemJSON = {
+                    "@type": "ShareAttributeRequestItem",
+                    mustBeAccepted: true,
+                    attribute: ownIdentityAttribute.content,
+                    sourceAttributeId: ownIdentityAttribute.id
+                };
+
+                const relationshipTemplateContent: CreateOwnRelationshipTemplateRequest["content"] = {
+                    "@type": "RelationshipTemplateContent",
+                    title: "aTitle",
+                    onNewRelationship: {
+                        items: [item],
+                        "@type": "Request"
+                    }
+                };
+
+                await createRelationshipWithStatusPending(services1, services2, relationshipTemplateContent, [{ accept: true } as AcceptRequestItemParametersJSON]);
+
+                const result = await services1.consumption.attributes.deleteAttributeAndNotify({ attributeId: ownIdentityAttribute.id });
+                expect(result).toBeAnError(
+                    "The shared Attribute cannot be deleted while the Relationship to the peer is in status 'Pending'. If you want to delete it now, you'll have to revoke the pending Relationship.",
+                    "error.runtime.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending"
+                );
+            });
         });
 
         describe("Delete peer IdentityAttribute", () => {
@@ -2630,7 +2674,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 ).toBe(true);
             });
 
-            test("should notify about deletion of peer IdentityAttribute when the Relationship is in status Pending", async () => {
+            test("should throw trying to notify about deletion of peer IdentityAttribute when the Relationship is in status Pending", async () => {
                 const [services1, services2] = await runtimeServiceProvider.launch(2, {
                     enableRequestModule: true,
                     enableDeciderModule: true,
@@ -2658,22 +2702,18 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 const relationshipTemplateContent: CreateOwnRelationshipTemplateRequest["content"] = {
                     "@type": "RelationshipTemplateContent",
                     title: "aTitle",
-                    onNewRelationship: {
-                        items: [item],
-                        "@type": "Request"
-                    }
+                    onNewRelationship: { items: [item], "@type": "Request" }
                 };
 
-                await createRelationshipWithStatusPending(services1, services2, relationshipTemplateContent, [
-                    {
-                        accept: true
-                    } as AcceptRequestItemParametersJSON
-                ]);
+                await createRelationshipWithStatusPending(services1, services2, relationshipTemplateContent, [{ accept: true } as AcceptRequestItemParametersJSON]);
 
                 const peerIdentityAttribute = (await services2.consumption.attributes.getAttribute({ id: ownIdentityAttribute.id })).value;
 
-                const attributeDeletionResult = await services2.consumption.attributes.deleteAttributeAndNotify({ attributeId: peerIdentityAttribute.id });
-                expect(attributeDeletionResult).toBeSuccessful();
+                const result = await services2.consumption.attributes.deleteAttributeAndNotify({ attributeId: peerIdentityAttribute.id });
+                expect(result).toBeAnError(
+                    "The shared Attribute cannot be deleted while the Relationship to the peer is in status 'Pending'. If you want to delete it now, you'll have to revoke the pending Relationship.",
+                    "error.runtime.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending"
+                );
             });
         });
     });
@@ -2902,6 +2942,48 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                     CoreDate.from(updatedPredecessorThirdPartyRelationshipAttribute.peerSharingInfo!.deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))
                 ).toBe(true);
             });
+
+            test("should throw trying to notify peer about deletion of own RelationshipAttribute when the Relationship is in status Pending", async () => {
+                const [services1, services2] = await runtimeServiceProvider.launch(2, {
+                    enableRequestModule: true,
+                    enableDeciderModule: true,
+                    enableNotificationModule: true
+                });
+
+                const item: CreateAttributeRequestItemJSON = {
+                    "@type": "CreateAttributeRequestItem",
+                    mustBeAccepted: true,
+                    attribute: {
+                        "@type": "RelationshipAttribute",
+                        owner: "",
+                        key: "aKey",
+                        confidentiality: RelationshipAttributeConfidentiality.Public,
+                        value: {
+                            "@type": "ProprietaryString",
+                            value: "aProprietaryString",
+                            title: "aTitle"
+                        }
+                    }
+                };
+
+                const relationshipTemplateContent: CreateOwnRelationshipTemplateRequest["content"] = {
+                    "@type": "RelationshipTemplateContent",
+                    title: "aTitle",
+                    onNewRelationship: { items: [item], "@type": "Request" }
+                };
+
+                const pendingRelationship = await createRelationshipWithStatusPending(services2, services1, relationshipTemplateContent, [
+                    { accept: true } as AcceptRequestItemParametersJSON
+                ]);
+
+                const ownRelationshipAttribute = (await services1.transport.relationships.getAttributesForRelationship({ id: pendingRelationship.id })).value[0];
+
+                const result = await services1.consumption.attributes.deleteAttributeAndNotify({ attributeId: ownRelationshipAttribute.id });
+                expect(result).toBeAnError(
+                    "The shared Attribute cannot be deleted while the Relationship to the peer is in status 'Pending'. If you want to delete it now, you'll have to revoke the pending Relationship.",
+                    "error.runtime.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending"
+                );
+            });
         });
 
         describe("Delete peer RelationshipAttribute", () => {
@@ -3002,6 +3084,48 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 expect(
                     CoreDate.from(updatedPredecessorThirdPartyRelationshipAttribute.peerSharingInfo!.deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))
                 ).toBe(true);
+            });
+
+            test("should throw trying to notify peer about deletion of peer RelationshipAttribute when the Relationship is in status Pending", async () => {
+                const [services1, services2] = await runtimeServiceProvider.launch(2, {
+                    enableRequestModule: true,
+                    enableDeciderModule: true,
+                    enableNotificationModule: true
+                });
+
+                const item: CreateAttributeRequestItemJSON = {
+                    "@type": "CreateAttributeRequestItem",
+                    mustBeAccepted: true,
+                    attribute: {
+                        "@type": "RelationshipAttribute",
+                        owner: services2.address,
+                        key: "aKey",
+                        confidentiality: RelationshipAttributeConfidentiality.Public,
+                        value: {
+                            "@type": "ProprietaryString",
+                            value: "aProprietaryString",
+                            title: "aTitle"
+                        }
+                    }
+                };
+
+                const relationshipTemplateContent: CreateOwnRelationshipTemplateRequest["content"] = {
+                    "@type": "RelationshipTemplateContent",
+                    title: "aTitle",
+                    onNewRelationship: { items: [item], "@type": "Request" }
+                };
+
+                const pendingRelationship = await createRelationshipWithStatusPending(services2, services1, relationshipTemplateContent, [
+                    { accept: true } as AcceptRequestItemParametersJSON
+                ]);
+
+                const peerRelationshipAttribute = (await services1.transport.relationships.getAttributesForRelationship({ id: pendingRelationship.id })).value[0];
+
+                const result = await services1.consumption.attributes.deleteAttributeAndNotify({ attributeId: peerRelationshipAttribute.id });
+                expect(result).toBeAnError(
+                    "The shared Attribute cannot be deleted while the Relationship to the peer is in status 'Pending'. If you want to delete it now, you'll have to revoke the pending Relationship.",
+                    "error.runtime.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending"
+                );
             });
         });
 
@@ -3139,8 +3263,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 ).toBe(true);
             });
 
-            // TODO: I think we need this test also for the other DeleteAttribute use cases
-            test("should notify peer about deletion of ThirdPartyRelationshipAttribute when the Relationship is in status Pending", async () => {
+            test("should throw trying to notify peer about deletion of ThirdPartyRelationshipAttribute when the Relationship is in status Pending", async () => {
                 const [services1, services2, services3] = await runtimeServiceProvider.launch(3, {
                     enableRequestModule: true,
                     enableDeciderModule: true,
@@ -3184,10 +3307,11 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
 
                 const thirdPartyRelationshipAttribute = (await services3.consumption.attributes.getAttribute({ id: peerRelationshipAttribute.id })).value;
 
-                const attributeDeletionResult = await services3.consumption.attributes.deleteAttributeAndNotify({
-                    attributeId: thirdPartyRelationshipAttribute.id
-                });
-                expect(attributeDeletionResult).toBeSuccessful();
+                const result = await services3.consumption.attributes.deleteAttributeAndNotify({ attributeId: thirdPartyRelationshipAttribute.id });
+                expect(result).toBeAnError(
+                    "The shared Attribute cannot be deleted while the Relationship to the peer is in status 'Pending'. If you want to delete it now, you'll have to revoke the pending Relationship.",
+                    "error.runtime.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending"
+                );
             });
         });
     });
