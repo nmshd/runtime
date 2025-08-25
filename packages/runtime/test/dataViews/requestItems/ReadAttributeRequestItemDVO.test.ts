@@ -317,6 +317,19 @@ describe("ReadAttributeRequestItemDVO with IdentityAttributeQuery", () => {
     });
 
     test("check the MessageDVO for the sender after they deleted the shared Attribute", async () => {
+        const ownIdentityAttribute = (
+            await consumptionServices2.attributes.createOwnIdentityAttribute({
+                content: {
+                    value: {
+                        "@type": "GivenName",
+                        value: "aGivenName"
+                    }
+                }
+            })
+        ).value;
+
+        const responseItems = [{ accept: true, existingAttributeId: ownIdentityAttribute.id } as AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON];
+
         const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
         const requestId = (senderMessage.content as RequestJSON).id!;
         const localRequest = (await runtimeServices1.consumption.outgoingRequests.getRequest({ id: requestId })).value;
