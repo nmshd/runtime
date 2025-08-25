@@ -16,11 +16,10 @@ export interface GetAttributesRequest {
 
 export interface GetAttributesRequestQuery {
     createdAt?: string;
-    parentId?: string | string[];
     succeeds?: string | string[];
     succeededBy?: string | string[];
-    isDefault?: string;
     wasViewedAt?: string | string[];
+    isDefault?: string;
     "content.@type"?: string | string[];
     "content.tags"?: string | string[];
     "content.owner"?: string | string[];
@@ -43,11 +42,10 @@ export class GetAttributesUseCase extends UseCase<GetAttributesRequest, LocalAtt
     public static readonly queryTranslator = new QueryTranslator({
         whitelist: {
             [nameof<LocalAttributeDTO>((x) => x.createdAt)]: true,
-            [nameof<LocalAttributeDTO>((x) => x.parentId)]: true,
             [nameof<LocalAttributeDTO>((x) => x.succeeds)]: true,
             [nameof<LocalAttributeDTO>((x) => x.succeededBy)]: true,
-            [nameof<LocalAttributeDTO>((x) => x.isDefault)]: true,
             [nameof<LocalAttributeDTO>((x) => x.wasViewedAt)]: true,
+            [nameof<LocalAttributeDTO>((x) => x.isDefault)]: true,
 
             // content.abstractAttribute
             [`${nameof<LocalAttributeDTO>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.owner)}`]: true,
@@ -76,11 +74,10 @@ export class GetAttributesUseCase extends UseCase<GetAttributesRequest, LocalAtt
         },
         alias: {
             [nameof<LocalAttributeDTO>((x) => x.createdAt)]: nameof<LocalAttribute>((x) => x.createdAt),
-            [nameof<LocalAttributeDTO>((x) => x.parentId)]: nameof<LocalAttribute>((x) => x.parentId),
             [nameof<LocalAttributeDTO>((x) => x.succeeds)]: nameof<LocalAttribute>((x) => x.succeeds),
             [nameof<LocalAttributeDTO>((x) => x.succeededBy)]: nameof<LocalAttribute>((x) => x.succeededBy),
-            [nameof<LocalAttributeDTO>((x) => x.isDefault)]: nameof<LocalAttribute>((x) => x.isDefault),
             [nameof<LocalAttributeDTO>((x) => x.wasViewedAt)]: nameof<LocalAttribute>((x) => x.wasViewedAt),
+            [nameof<LocalAttributeDTO>((x) => x.isDefault)]: nameof<LocalAttribute>((x) => x.isDefault),
 
             // content.abstractAttribute
             [`${nameof<LocalAttributeDTO>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.owner)}`]: `${nameof<LocalAttribute>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.owner)}`,

@@ -5,13 +5,11 @@ import { CoreId, ICoreId } from "@nmshd/core-types";
 export interface CreateRepositoryAttributeParamsJSON {
     id?: string;
     content: IdentityAttributeJSON;
-    parentId?: string;
 }
 
 export interface ICreateRepositoryAttributeParams extends ISerializable {
     id?: ICoreId;
     content: IIdentityAttribute;
-    parentId?: ICoreId;
 }
 
 export class CreateRepositoryAttributeParams extends Serializable implements ICreateRepositoryAttributeParams {
@@ -22,10 +20,6 @@ export class CreateRepositoryAttributeParams extends Serializable implements ICr
     @serialize({ unionTypes: [IdentityAttribute, RelationshipAttribute] })
     @validate()
     public content: IdentityAttribute;
-
-    @serialize()
-    @validate({ nullable: true })
-    public parentId?: CoreId;
 
     public static from(value: ICreateRepositoryAttributeParams | CreateRepositoryAttributeParamsJSON): CreateRepositoryAttributeParams {
         return this.fromAny(value);

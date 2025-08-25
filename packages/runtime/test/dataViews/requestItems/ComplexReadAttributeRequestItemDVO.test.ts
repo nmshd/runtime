@@ -3,7 +3,7 @@ import {
     AcceptReadAttributeRequestItemParametersWithNewAttributeJSON,
     DecideRequestItemParametersJSON
 } from "@nmshd/consumption";
-import { IdentityAttributeQuery, IQLQuery, PersonName, PersonNameJSON, ReadAttributeRequestItem } from "@nmshd/content";
+import { IdentityAttributeQuery, IQLQuery, ReadAttributeRequestItem, StreetAddress, StreetAddressJSON } from "@nmshd/content";
 import {
     ConsumptionServices,
     CreateOutgoingRequestRequest,
@@ -77,12 +77,13 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         const repositoryAttribute = (
             await consumptionServices2.attributes.createRepositoryAttribute({
                 content: {
-                    value: PersonName.from({
-                        honorificPrefix: "anHonorificPrefix",
-                        givenName: "aGivenName",
-                        middleName: "aMiddleName",
-                        surname: "aSurname",
-                        honorificSuffix: "anHonorificSuffix"
+                    value: StreetAddress.from({
+                        street: "aStreet",
+                        houseNo: "aHouseNo",
+                        zipCode: "aZipCode",
+                        city: "aCity",
+                        country: "DE",
+                        recipient: "aRecipient"
                     }).toJSON()
                 }
             })
@@ -93,10 +94,7 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
                 items: [
                     ReadAttributeRequestItem.from({
                         mustBeAccepted: true,
-
-                        query: IdentityAttributeQuery.from({
-                            valueType: "PersonName"
-                        })
+                        query: IdentityAttributeQuery.from({ valueType: "StreetAddress" })
                     }).toJSON()
                 ]
             },
@@ -132,9 +130,9 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         const identityAttributeQueryDVO = requestItemDVO.query as IdentityAttributeQueryDVO;
         expect(identityAttributeQueryDVO.renderHints.technicalType).toBe("Object");
         expect(identityAttributeQueryDVO.renderHints.editType).toBe("Complex");
-        expect(identityAttributeQueryDVO.renderHints.propertyHints!["surname"].technicalType).toBe("String");
-        expect(identityAttributeQueryDVO.renderHints.propertyHints!["surname"].editType).toBe("InputLike");
-        expect(identityAttributeQueryDVO.valueHints.propertyHints!["surname"].max).toBe(100);
+        expect(identityAttributeQueryDVO.renderHints.propertyHints!["houseNo"].technicalType).toBe("String");
+        expect(identityAttributeQueryDVO.renderHints.propertyHints!["houseNo"].editType).toBe("InputLike");
+        expect(identityAttributeQueryDVO.valueHints.propertyHints!["houseNo"].max).toBe(100);
         expect(requestItemDVO.mustBeAccepted).toBe(true);
     });
 
@@ -165,25 +163,27 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         expect(identityAttributeQueryDVO.results).toHaveLength(1);
         expect(identityAttributeQueryDVO.renderHints.technicalType).toBe("Object");
         expect(identityAttributeQueryDVO.renderHints.editType).toBe("Complex");
-        expect(identityAttributeQueryDVO.renderHints.propertyHints!["surname"].technicalType).toBe("String");
-        expect(identityAttributeQueryDVO.renderHints.propertyHints!["surname"].editType).toBe("InputLike");
-        expect(identityAttributeQueryDVO.valueHints.propertyHints!["surname"].max).toBe(100);
+        expect(identityAttributeQueryDVO.renderHints.propertyHints!["houseNo"].technicalType).toBe("String");
+        expect(identityAttributeQueryDVO.renderHints.propertyHints!["houseNo"].editType).toBe("InputLike");
+        expect(identityAttributeQueryDVO.valueHints.propertyHints!["houseNo"].max).toBe(100);
         expect(requestItemDVO.mustBeAccepted).toBe(true);
         const resultItem = identityAttributeQueryDVO.results[0];
         expect(resultItem.type).toBe("RepositoryAttributeDVO");
         expect(resultItem.content["@type"]).toBe("IdentityAttribute");
-        expect(resultItem.content.value["@type"]).toBe("PersonName");
-        expect((resultItem.content.value as PersonNameJSON).givenName).toBe("aGivenName");
-        expect((resultItem.content.value as PersonNameJSON).surname).toBe("aSurname");
-        expect((resultItem.content.value as PersonNameJSON).middleName).toBe("aMiddleName");
-        expect((resultItem.content.value as PersonNameJSON).honorificPrefix).toBe("anHonorificPrefix");
-        expect((resultItem.content.value as PersonNameJSON).honorificSuffix).toBe("anHonorificSuffix");
+        expect(resultItem.content.value["@type"]).toBe("StreetAddress");
+        expect((resultItem.content.value as StreetAddressJSON).street).toBe("aStreet");
+        expect((resultItem.content.value as StreetAddressJSON).houseNo).toBe("aHouseNo");
+        expect((resultItem.content.value as StreetAddressJSON).zipCode).toBe("aZipCode");
+        expect((resultItem.content.value as StreetAddressJSON).city).toBe("aCity");
+        expect((resultItem.content.value as StreetAddressJSON).country).toBe("DE");
+        expect((resultItem.content.value as StreetAddressJSON).recipient).toBe("aRecipient");
+        expect((resultItem.content.value as StreetAddressJSON).state).toBeUndefined();
     });
 
     test("check the MessageDVO for the recipient after acceptance", async () => {
         const baselineNumberOfAttributes = (
             await consumptionServices1.attributes.getAttributes({
-                query: { "content.value.@type": "PersonName", "shareInfo.peer": address1 }
+                query: { "content.value.@type": "StreetAddress", "shareInfo.peer": address1 }
             })
         ).value.length;
         const recipientMessage = await exchangeMessageWithRequest(runtimeServices1, runtimeServices2, requestContent);
@@ -217,9 +217,9 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         const identityAttributeQueryDVO = requestItemDVO.query as IdentityAttributeQueryDVO;
         expect(identityAttributeQueryDVO.renderHints.technicalType).toBe("Object");
         expect(identityAttributeQueryDVO.renderHints.editType).toBe("Complex");
-        expect(identityAttributeQueryDVO.renderHints.propertyHints!["surname"].technicalType).toBe("String");
-        expect(identityAttributeQueryDVO.renderHints.propertyHints!["surname"].editType).toBe("InputLike");
-        expect(identityAttributeQueryDVO.valueHints.propertyHints!["surname"].max).toBe(100);
+        expect(identityAttributeQueryDVO.renderHints.propertyHints!["houseNo"].technicalType).toBe("String");
+        expect(identityAttributeQueryDVO.renderHints.propertyHints!["houseNo"].editType).toBe("InputLike");
+        expect(identityAttributeQueryDVO.valueHints.propertyHints!["houseNo"].max).toBe(100);
         expect(requestItemDVO.mustBeAccepted).toBe(true);
 
         const response = dvo.request.response;
@@ -237,30 +237,34 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         expect(responseItem.attribute.owner).toBe(recipientAddress);
         expect(responseItem.attribute.type).toBe("SharedToPeerAttributeDVO");
 
-        const attributeValue = responseItem.attribute.value as PersonNameJSON;
-        expect(attributeValue["@type"]).toBe("PersonName");
-        expect(attributeValue.givenName).toBe("aGivenName");
-        expect(attributeValue.surname).toBe("aSurname");
-        expect(attributeValue.middleName).toBe("aMiddleName");
-        expect(attributeValue.honorificPrefix).toBe("anHonorificPrefix");
-        expect(attributeValue.honorificSuffix).toBe("anHonorificSuffix");
+        const attributeValue = responseItem.attribute.value as StreetAddressJSON;
+        expect(attributeValue["@type"]).toBe("StreetAddress");
+        expect(attributeValue.street).toBe("aStreet");
+        expect(attributeValue.houseNo).toBe("aHouseNo");
+        expect(attributeValue.zipCode).toBe("aZipCode");
+        expect(attributeValue.city).toBe("aCity");
+        expect(attributeValue.country).toBe("DE");
+        expect(attributeValue.recipient).toBe("aRecipient");
+        expect(attributeValue.state).toBeUndefined();
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         const attributeResult = await consumptionServices2.attributes.getAttributes({
-            query: { "content.value.@type": "PersonName", "shareInfo.peer": dvo.createdBy.id }
+            query: { "content.value.@type": "StreetAddress", "shareInfo.peer": dvo.createdBy.id }
         });
         expect(attributeResult).toBeSuccessful();
         const numberOfAttributes = attributeResult.value.length;
         expect(numberOfAttributes - baselineNumberOfAttributes).toBe(1);
         expect(attributeResult.value[numberOfAttributes - 1].id).toBeDefined();
 
-        const returnedValue = attributeResult.value[numberOfAttributes - 1].content.value as PersonNameJSON;
-        expect(returnedValue["@type"]).toBe("PersonName");
-        expect(returnedValue.givenName).toBe("aGivenName");
-        expect(returnedValue.surname).toBe("aSurname");
-        expect(returnedValue.middleName).toBe("aMiddleName");
-        expect(returnedValue.honorificPrefix).toBe("anHonorificPrefix");
-        expect(returnedValue.honorificSuffix).toBe("anHonorificSuffix");
+        const returnedValue = attributeResult.value[numberOfAttributes - 1].content.value as StreetAddressJSON;
+        expect(returnedValue["@type"]).toBe("StreetAddress");
+        expect(attributeValue.street).toBe("aStreet");
+        expect(attributeValue.houseNo).toBe("aHouseNo");
+        expect(attributeValue.zipCode).toBe("aZipCode");
+        expect(attributeValue.city).toBe("aCity");
+        expect(attributeValue.country).toBe("DE");
+        expect(attributeValue.recipient).toBe("aRecipient");
+        expect(attributeValue.state).toBeUndefined();
 
         expect(responseItem.attributeId).toStrictEqual(attributeResult.value[numberOfAttributes - 1].id);
         expect(returnedValue).toStrictEqual(attributeValue);
@@ -270,7 +274,7 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
-        const baselineNumberOfAttributes = (await consumptionServices1.attributes.getAttributes({ query: { "content.value.@type": "PersonName", "shareInfo.peer": address2 } }))
+        const baselineNumberOfAttributes = (await consumptionServices1.attributes.getAttributes({ query: { "content.value.@type": "StreetAddress", "shareInfo.peer": address2 } }))
             .value.length;
         const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
         const dto = senderMessage;
@@ -296,9 +300,9 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         const identityAttributeQueryDVO = requestItemDVO.query as IdentityAttributeQueryDVO;
         expect(identityAttributeQueryDVO.renderHints.technicalType).toBe("Object");
         expect(identityAttributeQueryDVO.renderHints.editType).toBe("Complex");
-        expect(identityAttributeQueryDVO.renderHints.propertyHints!["surname"].technicalType).toBe("String");
-        expect(identityAttributeQueryDVO.renderHints.propertyHints!["surname"].editType).toBe("InputLike");
-        expect(identityAttributeQueryDVO.valueHints.propertyHints!["surname"].max).toBe(100);
+        expect(identityAttributeQueryDVO.renderHints.propertyHints!["houseNo"].technicalType).toBe("String");
+        expect(identityAttributeQueryDVO.renderHints.propertyHints!["houseNo"].editType).toBe("InputLike");
+        expect(identityAttributeQueryDVO.valueHints.propertyHints!["houseNo"].max).toBe(100);
 
         expect(requestItemDVO.mustBeAccepted).toBe(true);
         const response = dvo.request.response;
@@ -315,20 +319,22 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         const attributeResult = await consumptionServices1.attributes.getAttributes({
-            query: { "content.value.@type": "PersonName", "shareInfo.peer": dvo.request.peer.id }
+            query: { "content.value.@type": "StreetAddress", "shareInfo.peer": dvo.request.peer.id }
         });
         expect(attributeResult).toBeSuccessful();
         const numberOfAttributes = attributeResult.value.length;
         expect(numberOfAttributes - baselineNumberOfAttributes).toBe(1);
         expect(attributeResult.value[numberOfAttributes - 1].id).toBeDefined();
 
-        const returnedValue = attributeResult.value[numberOfAttributes - 1].content.value as PersonNameJSON;
-        expect(returnedValue["@type"]).toBe("PersonName");
-        expect(returnedValue.givenName).toBe("aGivenName");
-        expect(returnedValue.surname).toBe("aSurname");
-        expect(returnedValue.middleName).toBe("aMiddleName");
-        expect(returnedValue.honorificPrefix).toBe("anHonorificPrefix");
-        expect(returnedValue.honorificSuffix).toBe("anHonorificSuffix");
+        const returnedValue = attributeResult.value[numberOfAttributes - 1].content.value as StreetAddressJSON;
+        expect(returnedValue["@type"]).toBe("StreetAddress");
+        expect(returnedValue.street).toBe("aStreet");
+        expect(returnedValue.houseNo).toBe("aHouseNo");
+        expect(returnedValue.zipCode).toBe("aZipCode");
+        expect(returnedValue.city).toBe("aCity");
+        expect(returnedValue.country).toBe("DE");
+        expect(returnedValue.recipient).toBe("aRecipient");
+        expect(returnedValue.state).toBeUndefined();
 
         expect(responseItem.attributeId).toStrictEqual(attributeResult.value[numberOfAttributes - 1].id);
         expect(returnedValue).toStrictEqual(responseItem.attribute.content.value);
@@ -354,12 +360,13 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
         const recipientAddress = (await transportServices2.account.getIdentityInfo()).value.address;
         const attribute = await consumptionServices2.attributes.createRepositoryAttribute({
             content: {
-                value: PersonName.from({
-                    honorificPrefix: "anHonorificPrefix",
-                    givenName: "aGivenName",
-                    middleName: "aMiddleName",
-                    surname: "aSurname",
-                    honorificSuffix: "anHonorificSuffix"
+                value: StreetAddress.from({
+                    street: "aStreet",
+                    houseNo: "aHouseNo",
+                    zipCode: "aZipCode",
+                    city: "aCity",
+                    country: "DE",
+                    recipient: "aRecipient"
                 }).toJSON()
             }
         });
@@ -370,7 +377,7 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
                         mustBeAccepted: true,
 
                         query: IQLQuery.from({
-                            queryString: "PersonName"
+                            queryString: "StreetAddress"
                         })
                     }).toJSON()
                 ]
@@ -406,7 +413,7 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
         expect(requestItemDVO.query.type).toBe("IQLQueryDVO");
         expect(requestItemDVO.mustBeAccepted).toBe(true);
         const iqlQueryDVO = requestItemDVO.query as IQLQueryDVO;
-        expect(iqlQueryDVO.queryString).toBe("PersonName");
+        expect(iqlQueryDVO.queryString).toBe("StreetAddress");
     });
 
     test("check the MessageDVO for the recipient", async () => {
@@ -438,12 +445,14 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
         const resultItem = iqlQueryDVO.results[0];
         expect(resultItem.type).toBe("RepositoryAttributeDVO");
         expect(resultItem.content["@type"]).toBe("IdentityAttribute");
-        expect(resultItem.content.value["@type"]).toBe("PersonName");
-        expect((resultItem.content.value as PersonNameJSON).givenName).toBe("aGivenName");
-        expect((resultItem.content.value as PersonNameJSON).surname).toBe("aSurname");
-        expect((resultItem.content.value as PersonNameJSON).middleName).toBe("aMiddleName");
-        expect((resultItem.content.value as PersonNameJSON).honorificPrefix).toBe("anHonorificPrefix");
-        expect((resultItem.content.value as PersonNameJSON).honorificSuffix).toBe("anHonorificSuffix");
+        expect(resultItem.content.value["@type"]).toBe("StreetAddress");
+        expect((resultItem.content.value as StreetAddressJSON).street).toBe("aStreet");
+        expect((resultItem.content.value as StreetAddressJSON).houseNo).toBe("aHouseNo");
+        expect((resultItem.content.value as StreetAddressJSON).zipCode).toBe("aZipCode");
+        expect((resultItem.content.value as StreetAddressJSON).city).toBe("aCity");
+        expect((resultItem.content.value as StreetAddressJSON).country).toBe("DE");
+        expect((resultItem.content.value as StreetAddressJSON).recipient).toBe("aRecipient");
+        expect((resultItem.content.value as StreetAddressJSON).state).toBeUndefined();
     });
 
     test("check the MessageDVO for the recipient after acceptance", async () => {
@@ -492,29 +501,33 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
         expect(responseItem.attribute.owner).toBe(recipientAddress);
         expect(responseItem.attribute.type).toBe("SharedToPeerAttributeDVO");
 
-        const attributeValue = responseItem.attribute.value as PersonNameJSON;
-        expect(attributeValue["@type"]).toBe("PersonName");
-        expect(attributeValue.givenName).toBe("aGivenName");
-        expect(attributeValue.surname).toBe("aSurname");
-        expect(attributeValue.middleName).toBe("aMiddleName");
-        expect(attributeValue.honorificPrefix).toBe("anHonorificPrefix");
-        expect(attributeValue.honorificSuffix).toBe("anHonorificSuffix");
+        const attributeValue = responseItem.attribute.value as StreetAddressJSON;
+        expect(attributeValue["@type"]).toBe("StreetAddress");
+        expect(attributeValue.street).toBe("aStreet");
+        expect(attributeValue.houseNo).toBe("aHouseNo");
+        expect(attributeValue.zipCode).toBe("aZipCode");
+        expect(attributeValue.city).toBe("aCity");
+        expect(attributeValue.country).toBe("DE");
+        expect(attributeValue.recipient).toBe("aRecipient");
+        expect(attributeValue.state).toBeUndefined();
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         const attributeResult = await consumptionServices2.attributes.getAttributes({
-            query: { "content.value.@type": "PersonName", "shareInfo.peer": dvo.createdBy.id }
+            query: { "content.value.@type": "StreetAddress", "shareInfo.peer": dvo.createdBy.id }
         });
         expect(attributeResult).toBeSuccessful();
         expect(attributeResult.value).toHaveLength(1);
         expect(attributeResult.value[0].id).toBeDefined();
 
-        const returnedValue = attributeResult.value[0].content.value as PersonNameJSON;
-        expect(returnedValue["@type"]).toBe("PersonName");
-        expect(returnedValue.givenName).toBe("aGivenName");
-        expect(returnedValue.surname).toBe("aSurname");
-        expect(returnedValue.middleName).toBe("aMiddleName");
-        expect(returnedValue.honorificPrefix).toBe("anHonorificPrefix");
-        expect(returnedValue.honorificSuffix).toBe("anHonorificSuffix");
+        const returnedValue = attributeResult.value[0].content.value as StreetAddressJSON;
+        expect(returnedValue["@type"]).toBe("StreetAddress");
+        expect(returnedValue.street).toBe("aStreet");
+        expect(returnedValue.houseNo).toBe("aHouseNo");
+        expect(returnedValue.zipCode).toBe("aZipCode");
+        expect(returnedValue.city).toBe("aCity");
+        expect(returnedValue.country).toBe("DE");
+        expect(returnedValue.recipient).toBe("aRecipient");
+        expect(returnedValue.state).toBeUndefined();
 
         expect(responseItem.attributeId).toStrictEqual(attributeResult.value[0].id);
         expect(returnedValue).toStrictEqual(attributeValue);
@@ -524,7 +537,7 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
-        const baselineNumberOfAttributes = (await consumptionServices1.attributes.getAttributes({ query: { "content.value.@type": "PersonName", "shareInfo.peer": address2 } }))
+        const baselineNumberOfAttributes = (await consumptionServices1.attributes.getAttributes({ query: { "content.value.@type": "StreetAddress", "shareInfo.peer": address2 } }))
             .value.length;
         const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
 
@@ -563,20 +576,22 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         const attributeResult = await consumptionServices1.attributes.getAttributes({
-            query: { "content.value.@type": "PersonName", "shareInfo.peer": dvo.request.peer.id }
+            query: { "content.value.@type": "StreetAddress", "shareInfo.peer": dvo.request.peer.id }
         });
         expect(attributeResult).toBeSuccessful();
         const numberOfAttributes = attributeResult.value.length;
         expect(numberOfAttributes - baselineNumberOfAttributes).toBe(1);
         expect(attributeResult.value[numberOfAttributes - 1].id).toBeDefined();
 
-        const returnedValue = attributeResult.value[numberOfAttributes - 1].content.value as PersonNameJSON;
-        expect(returnedValue["@type"]).toBe("PersonName");
-        expect(returnedValue.givenName).toBe("aGivenName");
-        expect(returnedValue.surname).toBe("aSurname");
-        expect(returnedValue.middleName).toBe("aMiddleName");
-        expect(returnedValue.honorificPrefix).toBe("anHonorificPrefix");
-        expect(returnedValue.honorificSuffix).toBe("anHonorificSuffix");
+        const returnedValue = attributeResult.value[numberOfAttributes - 1].content.value as StreetAddressJSON;
+        expect(returnedValue["@type"]).toBe("StreetAddress");
+        expect(returnedValue.street).toBe("aStreet");
+        expect(returnedValue.houseNo).toBe("aHouseNo");
+        expect(returnedValue.zipCode).toBe("aZipCode");
+        expect(returnedValue.city).toBe("aCity");
+        expect(returnedValue.country).toBe("DE");
+        expect(returnedValue.recipient).toBe("aRecipient");
+        expect(returnedValue.state).toBeUndefined();
 
         expect(responseItem.attributeId).toStrictEqual(attributeResult.value[numberOfAttributes - 1].id);
         expect(returnedValue).toStrictEqual(responseItem.attribute.content.value);
