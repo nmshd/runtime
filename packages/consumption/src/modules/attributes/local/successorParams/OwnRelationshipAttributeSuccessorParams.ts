@@ -1,23 +1,22 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
+import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { RelationshipAttribute, RelationshipAttributeJSON } from "@nmshd/content";
 import { IOwnRelationshipAttributeSharingInfo, OwnRelationshipAttributeSharingInfo, OwnRelationshipAttributeSharingInfoJSON } from "../sharingInfos";
-import { AbstractAttributeSuccessorParams, AbstractAttributeSuccessorParamsJSON, IAbstractAttributeSuccessorParams } from "./AbstractAttributeSuccessorParams";
 
-export interface OwnRelationshipAttributeSuccessorParamsJSON extends AbstractAttributeSuccessorParamsJSON {
+export interface OwnRelationshipAttributeSuccessorParamsJSON {
     content: RelationshipAttributeJSON;
     peerSharingInfo: Omit<OwnRelationshipAttributeSharingInfoJSON, "deletionInfo">;
 }
 
-export interface IOwnRelationshipAttributeSuccessorParams extends IAbstractAttributeSuccessorParams {
+export interface IOwnRelationshipAttributeSuccessorParams extends ISerializable {
     content: RelationshipAttribute;
     peerSharingInfo: Omit<IOwnRelationshipAttributeSharingInfo, "deletionInfo">;
 }
 
 @type("OwnRelationshipAttributeSuccessorParams")
-export class OwnRelationshipAttributeSuccessorParams extends AbstractAttributeSuccessorParams implements IOwnRelationshipAttributeSuccessorParams {
+export class OwnRelationshipAttributeSuccessorParams extends Serializable implements IOwnRelationshipAttributeSuccessorParams {
     @validate()
     @serialize()
-    public override content: RelationshipAttribute;
+    public content: RelationshipAttribute;
 
     @validate()
     @serialize()
