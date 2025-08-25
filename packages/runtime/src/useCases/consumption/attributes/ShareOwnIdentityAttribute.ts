@@ -29,7 +29,7 @@ class Validator extends SchemaValidator<ShareOwnIdentityAttributeRequest> {
     }
 }
 
-// TODO: maybe call this ForwardOwnIdentityAttribute
+// TODO: maybe call this ForwardOwnIdentityAttribute -> different PR
 export class ShareOwnIdentityAttributeUseCase extends UseCase<ShareOwnIdentityAttributeRequest, LocalRequestDTO> {
     public constructor(
         @Inject private readonly attributeController: AttributesController,

@@ -46,7 +46,7 @@ export class DeleteAttributeAndNotifyUseCase extends UseCase<DeleteAttributeAndN
         super(validator);
     }
 
-    // TODO: what if only predecessor was shared
+    // TODO: what if only predecessor was shared -> different PR
     protected async executeInternal(request: DeleteAttributeAndNotifyRequest): Promise<Result<DeleteAttributeAndNotifyResponse>> {
         const attribute = await this.attributesController.getLocalAttribute(CoreId.from(request.attributeId));
         if (!attribute) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
