@@ -90,14 +90,11 @@ export class OwnIdentityAttribute extends LocalAttribute implements IOwnIdentity
         return this;
     }
 
-    public getPeers(includeDeletedAndToBeDeleted = false): CoreAddress[] {
-        const excludedDeletionStatuses = [EmittedAttributeDeletionStatus.DeletedByPeer, EmittedAttributeDeletionStatus.ToBeDeletedByPeer];
-
-        const sharingInfos = includeDeletedAndToBeDeleted
+    public getPeers(includeToBeDeleted = false): CoreAddress[] {
+        const sharingInfos = includeToBeDeleted
             ? this.forwardedSharingInfos
             : this.forwardedSharingInfos?.filter((sharingInfo) => {
-                  if (!sharingInfo.deletionInfo) return true;
-                  return !excludedDeletionStatuses.includes(sharingInfo.deletionInfo.deletionStatus);
+                  return sharingInfo.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.ToBeDeletedByPeer;
               });
 
         const peers = sharingInfos?.map((sharingInfo) => sharingInfo.peer);

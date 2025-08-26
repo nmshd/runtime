@@ -112,14 +112,11 @@ export class PeerRelationshipAttribute extends LocalAttribute implements IPeerRe
         return this;
     }
 
-    public getThirdParties(includeDeletedAndToBeDeleted = false): CoreAddress[] {
-        const excludedDeletionStatuses = [EmittedAttributeDeletionStatus.DeletedByPeer, EmittedAttributeDeletionStatus.ToBeDeletedByPeer];
-
-        const sharingInfos = includeDeletedAndToBeDeleted
+    public getThirdParties(includeToBeDeleted = false): CoreAddress[] {
+        const sharingInfos = includeToBeDeleted
             ? this.forwardedSharingInfos
             : this.forwardedSharingInfos?.filter((sharingInfo) => {
-                  if (!sharingInfo.deletionInfo) return true;
-                  return !excludedDeletionStatuses.includes(sharingInfo.deletionInfo.deletionStatus);
+                  return sharingInfo.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.ToBeDeletedByPeer;
               });
 
         const thirdParty = sharingInfos?.map((sharingInfo) => sharingInfo.peer);
