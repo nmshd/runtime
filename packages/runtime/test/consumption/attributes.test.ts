@@ -113,7 +113,6 @@ beforeEach(async () => {
     await cleanupAttributes([services1, services2, services3, appService]);
 });
 
-// TODO: two tests are logging errors
 describe("get attribute(s)", () => {
     let relationshipAttributeId: string;
     let identityAttributeIds: string[];
@@ -1762,6 +1761,8 @@ describe(NotifyPeerAboutOwnIdentityAttributeSuccessionUseCase.name, () => {
         };
         ({ successor: ownIdentityAttributeVersion2 } = (await services1.consumption.attributes.succeedOwnIdentityAttribute(succeedOwnIdentityAttributeRequest2)).value);
     });
+
+    afterEach(async () => await services2.transport.account.syncEverything());
 
     test("should successfully notify peer about attribute succession", async () => {
         const notificationResult = await services1.consumption.attributes.notifyPeerAboutOwnIdentityAttributeSuccession({
