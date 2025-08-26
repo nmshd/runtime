@@ -200,8 +200,6 @@ export class AppRuntime extends Runtime<AppConfig> {
         eventBus?: EventBus,
         databaseFactory?: ILokiJsDatabaseFactory
     ): Promise<AppRuntime> {
-        // TODO: JSSNMSHDD-2524 (validate app config)
-
         const mergedConfig = createAppConfig(appConfig);
 
         const runtime = new AppRuntime(mergedConfig, loggerFactory, notificationAccess, appLanguageProvider, databaseFactory, eventBus);
