@@ -1,4 +1,4 @@
-import { ReceivedAttributeDeletionStatus } from "@nmshd/consumption";
+import { ConsumptionIds, ReceivedAttributeDeletionStatus } from "@nmshd/consumption";
 import {
     CreateAttributeAcceptResponseItemJSON,
     DeleteAttributeAcceptResponseItemJSON,
@@ -1869,7 +1869,7 @@ describe("DeciderModule", () => {
                     items: [
                         {
                             "@type": "ShareAttributeRequestItem",
-                            sourceAttributeId: "sourceAttributeId",
+                            sourceAttributeId: (await ConsumptionIds.attribute.generate()).toString(),
                             attribute: {
                                 "@type": "IdentityAttribute",
                                 owner: sender.address,
@@ -1941,7 +1941,7 @@ describe("DeciderModule", () => {
                     items: [
                         {
                             "@type": "ShareAttributeRequestItem",
-                            sourceAttributeId: "sourceAttributeId",
+                            sourceAttributeId: (await ConsumptionIds.attribute.generate()).toString(),
                             attribute: {
                                 "@type": "RelationshipAttribute",
                                 owner: sender.address,
@@ -1955,6 +1955,7 @@ describe("DeciderModule", () => {
                                     description: "An Attribute's description"
                                 }
                             },
+                            thirdPartyAddress: "thirdParty",
                             mustBeAccepted: true
                         }
                     ]

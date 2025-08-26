@@ -112,6 +112,7 @@ beforeEach(async () => {
     await cleanupAttributes([services1, services2, services3, appService]);
 });
 
+// TODO: two tests are logging errors
 describe("get attribute(s)", () => {
     let relationshipAttributeId: string;
     let identityAttributeIds: string[];
