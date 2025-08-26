@@ -39,6 +39,7 @@ import {
     LocalAttributeDeletionStatus,
     MarkAttributeAsViewedUseCase,
     NotifyPeerAboutOwnIdentityAttributeSuccessionUseCase,
+    OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent,
     OwnAttributeDeletedByOwnerEvent,
     PeerRelationshipAttributeDeletedByPeerEvent,
     RelationshipChangedEvent,
@@ -2601,6 +2602,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 };
 
                 await createRelationshipWithStatusPending(services1, services2, relationshipTemplateContent, [{ accept: true } as AcceptRequestItemParametersJSON]);
+                await services1.eventBus.waitForEvent(OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent);
 
                 const result = await services1.consumption.attributes.deleteAttributeAndNotify({ attributeId: ownIdentityAttribute.id });
                 expect(result).toBeAnError(
