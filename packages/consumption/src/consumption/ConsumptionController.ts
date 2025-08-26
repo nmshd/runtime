@@ -21,6 +21,7 @@ import {
     DeleteAttributeRequestItemProcessor,
     DraftsController,
     FormFieldRequestItemProcessor,
+    ForwardedAttributeDeletedByPeerNotificationItemProcessor,
     GenericRequestItemProcessor,
     IdentityMetadataController,
     IncomingRequestsController,
@@ -41,7 +42,6 @@ import {
     ShareAttributeRequestItemProcessor,
     TransferFileOwnershipRequestItemProcessor
 } from "../modules";
-import { ForwardedAttributeDeletedByPeerNotificationItemProcessor } from "../modules/notifications/itemProcessors/attributeDeleted/ForwardedAttributeDeletedByPeerNotificationItemProcessor";
 import { ConsumptionConfig } from "./ConsumptionConfig";
 
 export class ConsumptionController {
