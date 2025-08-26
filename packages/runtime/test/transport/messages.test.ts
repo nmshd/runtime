@@ -15,7 +15,6 @@ import {
     MessageSentEvent,
     MessageWasReadAtChangedEvent,
     OutgoingRequestStatusChangedEvent,
-    OwnSharedAttributeSucceededEvent,
     PeerDeletionCancelledEvent,
     PeerToBeDeletedEvent,
     RelationshipStatus
@@ -684,7 +683,6 @@ describe("Postponed Notifications via Messages", () => {
             const notifyAboutSuccessionResult = (
                 await client1.consumption.attributes.notifyPeerAboutOwnIdentityAttributeSuccession({ attributeId: successorOfRepositoryAttribute.id, peer: client5.address })
             ).value;
-            await client1.eventBus.waitForEvent(OwnSharedAttributeSucceededEvent);
             await client5.transport.account.syncEverything();
             const successionNotificationNotYetReceived = await client5.consumption.notifications.getNotification({ id: notifyAboutSuccessionResult.notificationId });
             expect(successionNotificationNotYetReceived).toBeAnError(/.*/, "error.transport.recordNotFound");
