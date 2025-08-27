@@ -196,7 +196,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: sourceAttribute.content,
-                sourceAttributeId: sourceAttribute.id,
+                attributeId: sourceAttribute.id,
                 thirdPartyAddress: !(testParams.attribute instanceof IdentityAttribute)
                     ? testParams.attribute.owner.equals(sender)
                         ? aThirdParty
@@ -221,7 +221,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                     value: GivenName.fromAny({ value: "aGivenName" }),
                     owner: sender
                 }),
-                sourceAttributeId: CoreId.from("anIdThatDoesntExist")
+                attributeId: CoreId.from("anIdThatDoesntExist")
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -229,7 +229,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: "The Attribute with the given sourceAttributeId 'anIdThatDoesntExist' could not be found."
+                message: "The Attribute with the given attributeId 'anIdThatDoesntExist' could not be found."
             });
         });
 
@@ -246,7 +246,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                     ...sourceAttribute.content.toJSON(),
                     value: Surname.from("aSurname").toJSON()
                 }),
-                sourceAttributeId: sourceAttribute.id
+                attributeId: sourceAttribute.id
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -254,7 +254,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: `The Attribute with the given sourceAttributeId '${sourceAttribute.id.toString()}' does not match the given Attribute.`
+                message: `The Attribute with the given attributeId '${sourceAttribute.id.toString()}' does not match the given Attribute.`
             });
         });
 
@@ -272,7 +272,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                     owner: CoreAddress.from(""),
                     value: GivenName.from({ value: "aGivenName" })
                 }),
-                sourceAttributeId: sourceAttribute.id
+                attributeId: sourceAttribute.id
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -280,7 +280,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: `The Attribute with the given sourceAttributeId '${sourceAttribute.id.toString()}' does not match the given Attribute.`
+                message: `The Attribute with the given attributeId '${sourceAttribute.id.toString()}' does not match the given Attribute.`
             });
         });
 
@@ -302,7 +302,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                     value: GivenName.from({ value: "aGivenName" }),
                     tags: ["invalidTag"]
                 }),
-                sourceAttributeId: sourceAttribute.id
+                attributeId: sourceAttribute.id
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -331,7 +331,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: forwardedOwnIdentityAttribute.content,
-                sourceAttributeId: forwardedOwnIdentityAttribute.id
+                attributeId: forwardedOwnIdentityAttribute.id
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -339,7 +339,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: `The IdentityAttribute with the given sourceAttributeId '${requestItem.sourceAttributeId.toString()}' is already shared with the peer.`
+                message: `The IdentityAttribute with the given attributeId '${requestItem.attributeId.toString()}' is already shared with the peer.`
             });
         });
 
@@ -373,7 +373,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: forwardedOwnIdentityAttributeWithDeletionInfo.content,
-                sourceAttributeId: forwardedOwnIdentityAttributeWithDeletionInfo.id
+                attributeId: forwardedOwnIdentityAttributeWithDeletionInfo.id
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -412,7 +412,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: forwardedOwnIdentityAttributeWithDeletionInfo.content,
-                sourceAttributeId: forwardedOwnIdentityAttributeWithDeletionInfo.id
+                attributeId: forwardedOwnIdentityAttributeWithDeletionInfo.id
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -446,7 +446,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: true,
                 attribute: ownIdentityAttribute.content,
-                sourceAttributeId: ownIdentityAttribute.id
+                attributeId: ownIdentityAttribute.id
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -492,7 +492,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: true,
                 attribute: ownIdentityAttribute.content,
-                sourceAttributeId: ownIdentityAttribute.id
+                attributeId: ownIdentityAttribute.id
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -535,7 +535,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: true,
                 attribute: ownIdentityAttribute.content,
-                sourceAttributeId: ownIdentityAttribute.id
+                attributeId: ownIdentityAttribute.id
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -572,7 +572,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: true,
                 attribute: successorOfOwnIdentityAttribute.content,
-                sourceAttributeId: successorOfOwnIdentityAttribute.id
+                attributeId: successorOfOwnIdentityAttribute.id
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -618,7 +618,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: true,
                 attribute: successorOfOwnIdentityAttribute.content,
-                sourceAttributeId: successorOfOwnIdentityAttribute.id
+                attributeId: successorOfOwnIdentityAttribute.id
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -661,7 +661,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: true,
                 attribute: successorOfOwnIdentityAttribute.content,
-                sourceAttributeId: successorOfOwnIdentityAttribute.id
+                attributeId: successorOfOwnIdentityAttribute.id
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -690,7 +690,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: relationshipAttribute.content,
-                sourceAttributeId: relationshipAttribute.id,
+                attributeId: relationshipAttribute.id,
                 thirdPartyAddress: aThirdParty
             });
             const request = Request.from({ items: [requestItem] });
@@ -720,7 +720,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: initialRelationshipAttribute.content,
-                sourceAttributeId: initialRelationshipAttribute.id,
+                attributeId: initialRelationshipAttribute.id,
                 thirdPartyAddress: aThirdParty
             });
             const request = Request.from({ items: [requestItem] });
@@ -763,7 +763,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: initialRelationshipAttribute.content,
-                sourceAttributeId: initialRelationshipAttribute.id,
+                attributeId: initialRelationshipAttribute.id,
                 thirdPartyAddress: aThirdParty
             });
             const request = Request.from({ items: [requestItem] });
@@ -803,7 +803,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: initialRelationshipAttribute.content,
-                sourceAttributeId: initialRelationshipAttribute.id,
+                attributeId: initialRelationshipAttribute.id,
                 thirdPartyAddress: aThirdParty
             });
             const request = Request.from({ items: [requestItem] });
@@ -831,7 +831,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: relationshipAttribute.content,
-                sourceAttributeId: relationshipAttribute.id,
+                attributeId: relationshipAttribute.id,
                 thirdPartyAddress: relationshipAttribute.peerSharingInfo.peer
             });
             const request = Request.from({ items: [requestItem] });
@@ -851,7 +851,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
         test("returns ShareAttributeAcceptResponseItem when accepting a shared IdentityAttribute", async function () {
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: true,
-                sourceAttributeId: CoreId.from("aSourceAttributeId"),
+                attributeId: CoreId.from("anAttributeId"),
                 attribute: TestObjectFactory.createIdentityAttribute({ owner: sender })
             });
 
@@ -876,7 +876,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
         test("returns ShareAttributeAcceptResponseItem when accepting a shared RelationshipAttribute", async function () {
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: true,
-                sourceAttributeId: CoreId.from("aSourceAttributeId"),
+                attributeId: CoreId.from("anAttributeId"),
                 attribute: TestObjectFactory.createRelationshipAttribute({ owner: sender }),
                 thirdPartyAddress: CoreAddress.from("aThirdParty")
             });
@@ -909,7 +909,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: true,
-                sourceAttributeId: CoreId.from("aSourceAttributeId"),
+                attributeId: CoreId.from("anAttributeId"),
                 attribute: TestObjectFactory.createIdentityAttribute({ owner: sender })
             });
 
@@ -946,7 +946,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: true,
-                sourceAttributeId: CoreId.from("aSourceAttributeId"),
+                attributeId: CoreId.from("anAttributeId"),
                 attribute: TestObjectFactory.createIdentityAttribute({ owner: sender })
             });
 
@@ -985,7 +985,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: true,
-                sourceAttributeId: CoreId.from("aSourceAttributeId"),
+                attributeId: CoreId.from("anAttributeId"),
                 attribute: TestObjectFactory.createIdentityAttribute({ owner: sender })
             });
 
@@ -1019,7 +1019,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: true,
                 attribute: existingAttribute.content,
-                sourceAttributeId: existingAttribute.id
+                attributeId: existingAttribute.id
             });
             const requestId = await ConsumptionIds.request.generate();
             const request = LocalRequest.from({
@@ -1064,7 +1064,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: true,
                 attribute: existingAttribute.content,
-                sourceAttributeId: existingAttribute.id
+                attributeId: existingAttribute.id
             });
             const requestId = await ConsumptionIds.request.generate();
             const request = LocalRequest.from({
@@ -1146,7 +1146,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
         const requestItem = ShareAttributeRequestItem.from({
             mustBeAccepted: true,
             attribute: sourceAttribute.content,
-            sourceAttributeId: sourceAttribute.id,
+            attributeId: sourceAttribute.id,
             thirdPartyAddress: sourceAttribute.content instanceof RelationshipAttribute ? (sourceAttribute as OwnRelationshipAttribute).peerSharingInfo.peer : undefined
         });
 

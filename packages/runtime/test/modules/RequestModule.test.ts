@@ -620,7 +620,7 @@ describe("Handling the rejection and the revocation of a Relationship by the Req
                 {
                     "@type": "ShareAttributeRequestItem",
                     mustBeAccepted: true,
-                    sourceAttributeId: existingRelationshipAttributeForFurtherSharing.id,
+                    attributeId: existingRelationshipAttributeForFurtherSharing.id,
                     attribute: existingRelationshipAttributeForFurtherSharing.content,
                     thirdPartyAddress: existingRelationshipAttributeForFurtherSharing.peerSharingInfo?.peer
                 }

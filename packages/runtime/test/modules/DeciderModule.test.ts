@@ -212,7 +212,7 @@ describe("DeciderModule", () => {
                         },
                         {
                             "@type": "ShareAttributeRequestItem",
-                            sourceAttributeId: "sourceAttributeId",
+                            attributeId: "attributeId",
                             attribute: {
                                 "@type": "IdentityAttribute",
                                 owner: (await sender.transport.account.getIdentityInfo()).value.address,
@@ -1869,7 +1869,7 @@ describe("DeciderModule", () => {
                     items: [
                         {
                             "@type": "ShareAttributeRequestItem",
-                            sourceAttributeId: (await ConsumptionIds.attribute.generate()).toString(),
+                            attributeId: (await ConsumptionIds.attribute.generate()).toString(),
                             attribute: {
                                 "@type": "IdentityAttribute",
                                 owner: sender.address,
@@ -1941,7 +1941,7 @@ describe("DeciderModule", () => {
                     items: [
                         {
                             "@type": "ShareAttributeRequestItem",
-                            sourceAttributeId: (await ConsumptionIds.attribute.generate()).toString(),
+                            attributeId: (await ConsumptionIds.attribute.generate()).toString(),
                             attribute: {
                                 "@type": "RelationshipAttribute",
                                 owner: sender.address,

@@ -652,7 +652,7 @@ export async function acceptIncomingShareAttributeRequest(sender: TestRuntimeSer
         sharedAttributeId = (responseMessage.content.response.items[0] as CreateAttributeAcceptResponseItemJSON).attributeId;
     } else {
         const request = (await sender.consumption.outgoingRequests.getRequest({ id: requestId })).value;
-        sharedAttributeId = (request.content.items[0] as ShareAttributeRequestItemJSON).sourceAttributeId;
+        sharedAttributeId = (request.content.items[0] as ShareAttributeRequestItemJSON).attributeId;
     }
 
     const senderOwnAttribute = (await sender.consumption.attributes.getAttribute({ id: sharedAttributeId })).value;

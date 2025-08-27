@@ -56,7 +56,7 @@ export class ShareOwnIdentityAttributeUseCase extends UseCase<ShareOwnIdentityAt
                     ShareAttributeRequestItem.from({
                         ...(request.requestItemMetadata ?? {}),
                         attribute: ownIdentityAttribute.content,
-                        sourceAttributeId: ownIdentityAttribute.id,
+                        attributeId: ownIdentityAttribute.id,
                         mustBeAccepted: true
                     }).toJSON()
                 ]

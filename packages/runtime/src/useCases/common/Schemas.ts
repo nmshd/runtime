@@ -1916,7 +1916,7 @@ export const CanCreateOutgoingRequestRequest: any = {
                         }
                     ]
                 },
-                "sourceAttributeId": {
+                "attributeId": {
                     "type": "string"
                 },
                 "thirdPartyAddress": {
@@ -1926,8 +1926,8 @@ export const CanCreateOutgoingRequestRequest: any = {
             "required": [
                 "@type",
                 "attribute",
-                "mustBeAccepted",
-                "sourceAttributeId"
+                "attributeId",
+                "mustBeAccepted"
             ],
             "additionalProperties": false
         },
@@ -8505,7 +8505,7 @@ export const CreateOutgoingRequestRequest: any = {
                         }
                     ]
                 },
-                "sourceAttributeId": {
+                "attributeId": {
                     "type": "string"
                 },
                 "thirdPartyAddress": {
@@ -8515,8 +8515,8 @@ export const CreateOutgoingRequestRequest: any = {
             "required": [
                 "@type",
                 "attribute",
-                "mustBeAccepted",
-                "sourceAttributeId"
+                "attributeId",
+                "mustBeAccepted"
             ],
             "additionalProperties": false
         },
@@ -11489,7 +11489,7 @@ export const ReceivedIncomingRequestRequest: any = {
                         }
                     ]
                 },
-                "sourceAttributeId": {
+                "attributeId": {
                     "type": "string"
                 },
                 "thirdPartyAddress": {
@@ -11499,8 +11499,8 @@ export const ReceivedIncomingRequestRequest: any = {
             "required": [
                 "@type",
                 "attribute",
-                "mustBeAccepted",
-                "sourceAttributeId"
+                "attributeId",
+                "mustBeAccepted"
             ],
             "additionalProperties": false
         },

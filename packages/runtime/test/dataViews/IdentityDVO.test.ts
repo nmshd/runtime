@@ -45,7 +45,7 @@ describe("IdentityDVO after loading a relationship template sharing a DisplayNam
                         "@type": "ShareAttributeRequestItem",
                         mustBeAccepted: true,
                         attribute: senderAttribute.value.content,
-                        sourceAttributeId: senderAttribute.value.id
+                        attributeId: senderAttribute.value.id
                     } as ShareAttributeRequestItemJSON
                 ]
             }

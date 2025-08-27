@@ -1203,7 +1203,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     peer: aThirdParty,
                     sourceReference: await ConsumptionIds.request.generate(),
                     initialAttributePeer: CoreAddress.from("anotherThirdParty"),
-                    id: CoreId.from("sourceAttributeId")
+                    id: CoreId.from("attributeId")
                 });
 
                 const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {

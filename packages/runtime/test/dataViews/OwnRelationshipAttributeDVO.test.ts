@@ -96,7 +96,7 @@ describe("OwnRelationshipAttributeDVO", () => {
             services3,
             ShareAttributeRequestItem.from({
                 attribute: ownRelationshipAttribute.content,
-                sourceAttributeId: ownRelationshipAttribute.id,
+                attributeId: ownRelationshipAttribute.id,
                 thirdPartyAddress: services2.address,
                 mustBeAccepted: true
             })

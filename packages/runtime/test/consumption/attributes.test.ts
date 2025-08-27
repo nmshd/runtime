@@ -291,7 +291,7 @@ describe("get attribute(s)", () => {
                 services2,
                 ShareAttributeRequestItem.from({
                     attribute: identityAttribute.content,
-                    sourceAttributeId: identityAttribute.id,
+                    attributeId: identityAttribute.id,
                     mustBeAccepted: true
                 })
             );
@@ -1485,7 +1485,7 @@ describe(ShareOwnIdentityAttributeUseCase.name, () => {
         });
 
         expect(repeatedShareRequestResult).toBeAnError(
-            `The IdentityAttribute with the given sourceAttributeId '${sOwnIdentityAttribute.id}' is already shared with the peer.`,
+            `The IdentityAttribute with the given attributeId '${sOwnIdentityAttribute.id}' is already shared with the peer.`,
             "error.consumption.requests.invalidRequestItem"
         );
     });
@@ -2590,7 +2590,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                     "@type": "ShareAttributeRequestItem",
                     mustBeAccepted: true,
                     attribute: ownIdentityAttribute.content,
-                    sourceAttributeId: ownIdentityAttribute.id
+                    attributeId: ownIdentityAttribute.id
                 };
 
                 const relationshipTemplateContent: CreateOwnRelationshipTemplateRequest["content"] = {
@@ -2700,7 +2700,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                     "@type": "ShareAttributeRequestItem",
                     mustBeAccepted: true,
                     attribute: ownIdentityAttribute.content,
-                    sourceAttributeId: ownIdentityAttribute.id
+                    attributeId: ownIdentityAttribute.id
                 };
 
                 const relationshipTemplateContent: CreateOwnRelationshipTemplateRequest["content"] = {
@@ -3290,7 +3290,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                     "@type": "ShareAttributeRequestItem",
                     mustBeAccepted: true,
                     attribute: peerRelationshipAttribute.content,
-                    sourceAttributeId: peerRelationshipAttribute.id,
+                    attributeId: peerRelationshipAttribute.id,
                     thirdPartyAddress: services1.address
                 };
 
@@ -3345,7 +3345,7 @@ describe("ThirdPartyRelationshipAttributes", () => {
             services3,
             ShareAttributeRequestItem.from({
                 attribute: ownRelationshipAttribute.content,
-                sourceAttributeId: ownRelationshipAttribute.id,
+                attributeId: ownRelationshipAttribute.id,
                 thirdPartyAddress: services2.address,
                 mustBeAccepted: true
             })
@@ -3363,7 +3363,7 @@ describe("ThirdPartyRelationshipAttributes", () => {
             services3,
             ShareAttributeRequestItem.from({
                 attribute: ownRelationshipAttribute.content,
-                sourceAttributeId: ownRelationshipAttribute.id,
+                attributeId: ownRelationshipAttribute.id,
                 thirdPartyAddress: services1.address,
                 mustBeAccepted: true
             })
