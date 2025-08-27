@@ -147,6 +147,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
 
             attribute = foundLocalAttribute.content;
 
+            // TODO: ToBeDeleted?
             const successorsSharedWithPeer = await this.consumptionController.attributes.getSharedSuccessorsOfAttribute(foundLocalAttribute, requestInfo.peer);
 
             if (successorsSharedWithPeer.length > 0) {
@@ -250,7 +251,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
                 if (!(existingAttribute instanceof OwnIdentityAttribute)) throw new Error("This should never occur, but is required for the compiler.");
             }
 
-            const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfAttribute(existingAttribute, requestInfo.peer, undefined, true);
+            const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfAttribute(existingAttribute, requestInfo.peer);
 
             const isLatestSharedVersion = latestSharedVersion[0]?.id.toString() === existingAttribute.id.toString();
             if (isLatestSharedVersion) {

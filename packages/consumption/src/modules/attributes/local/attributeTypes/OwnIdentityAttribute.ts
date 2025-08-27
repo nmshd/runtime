@@ -42,19 +42,17 @@ export class OwnIdentityAttribute extends LocalAttribute implements IOwnIdentity
     @validate({ nullable: true })
     public forwardedSharingInfos?: ForwardedSharingInfo[];
 
-    public isSharedWith(peerAddress: CoreAddress, includeToBeDeleted = false, includeDeleted = false): boolean {
+    public isForwardedTo(peerAddress: CoreAddress, excludeToBeDeleted = false): boolean {
         if (!this.forwardedSharingInfos) return false;
 
-        const sharingInfosWithPeer = this.forwardedSharingInfos.filter((sharingInfo) => sharingInfo.peer.equals(peerAddress));
+        const sharingInfosWithPeer = this.forwardedSharingInfos.filter(
+            (sharingInfo) => sharingInfo.peer.equals(peerAddress) && sharingInfo.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.DeletedByPeer
+        );
         if (sharingInfosWithPeer.length === 0) return false;
 
-        const excludedDeletionStatuses: any = [];
-        if (!includeToBeDeleted) excludedDeletionStatuses.push(EmittedAttributeDeletionStatus.ToBeDeletedByPeer);
-        if (!includeDeleted) excludedDeletionStatuses.push(EmittedAttributeDeletionStatus.DeletedByPeer);
+        if (!excludeToBeDeleted) return true;
 
-        if (excludedDeletionStatuses.length === 0) return true;
-
-        return sharingInfosWithPeer.some((sharingInfo) => !sharingInfo.deletionInfo || !excludedDeletionStatuses.includes(sharingInfo.deletionInfo.deletionStatus));
+        return sharingInfosWithPeer.some((sharingInfo) => !sharingInfo.deletionInfo);
     }
 
     public isDeletedOrToBeDeletedByForwardingPeer(peerAddress: CoreAddress): boolean {

@@ -39,10 +39,10 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
         }
 
         if (
-            (attribute instanceof OwnIdentityAttribute && (!attribute.isSharedWith(recipient) || attribute.isDeletedOrToBeDeletedByForwardingPeer(recipient))) ||
+            (attribute instanceof OwnIdentityAttribute && !attribute.isForwardedTo(recipient, true)) ||
             (attribute instanceof OwnRelationshipAttribute &&
                 ((attribute.peerSharingInfo.peer.equals(recipient) && attribute.isDeletedOrToBeDeletedByPeer()) ||
-                    (!attribute.peerSharingInfo.peer.equals(recipient) && (!attribute.isSharedWith(recipient) || attribute.isDeletedOrToBeDeletedByForwardingPeer(recipient)))))
+                    (!attribute.peerSharingInfo.peer.equals(recipient) && !attribute.isForwardedTo(recipient, true))))
         ) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidRequestItem(
@@ -56,7 +56,7 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
                 return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("The deletion of a PeerRelationshipAttribute cannot be requested for the owner."));
             }
 
-            if (!attribute.isSharedWith(recipient) || attribute.isDeletedOrToBeDeletedByForwardingPeer(recipient)) {
+            if (!attribute.isForwardedTo(recipient, true)) {
                 return ValidationResult.error(
                     ConsumptionCoreErrors.requests.invalidRequestItem(
                         "The deletion of a PeerRelationshipAttribute can only be requested from a third party it is shared with and who hasn't deleted it or agreed to its deletion already."

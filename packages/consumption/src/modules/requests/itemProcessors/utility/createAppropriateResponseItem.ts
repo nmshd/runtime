@@ -42,7 +42,7 @@ export default async function createAppropriateResponseItem(
 > {
     const ownIdentityAttribute = await getOwnIdentityAttribute(identityAttribute, attributesController);
 
-    const latestSharedVersions = await attributesController.getSharedVersionsOfAttribute(ownIdentityAttribute, requestInfo.peer, undefined, true);
+    const latestSharedVersions = await attributesController.getSharedVersionsOfAttribute(ownIdentityAttribute, requestInfo.peer);
     const latestSharedVersion = latestSharedVersions.length > 0 ? latestSharedVersions[0] : undefined;
 
     if (!latestSharedVersion) {

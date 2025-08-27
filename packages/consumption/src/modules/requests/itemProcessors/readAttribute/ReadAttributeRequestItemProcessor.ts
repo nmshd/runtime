@@ -134,6 +134,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             attribute = foundLocalAttribute.content;
 
             if ((requestItem.query instanceof IdentityAttributeQuery || requestItem.query instanceof IQLQuery) && foundLocalAttribute instanceof OwnIdentityAttribute) {
+                // TODO: ToBeDeleted?
                 const successorsSharedWithPeer = await this.consumptionController.attributes.getSharedSuccessorsOfAttribute(foundLocalAttribute, requestInfo.peer);
 
                 if (successorsSharedWithPeer.length > 0) {
@@ -305,7 +306,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 if (!(existingAttribute instanceof OwnIdentityAttribute)) throw new Error("This should never occur, but is required for the compiler.");
             }
 
-            const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfAttribute(existingAttribute, requestInfo.peer, undefined, true);
+            const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfAttribute(existingAttribute, requestInfo.peer);
 
             const isLatestSharedVersion = latestSharedVersion[0]?.id.equals(existingAttribute.id);
             if (isLatestSharedVersion) {

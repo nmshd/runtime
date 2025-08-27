@@ -924,16 +924,15 @@ export class AttributesController extends ConsumptionBaseController {
         attribute: SharableAttributeTypes,
         peerAddress: CoreAddress,
         onlyLatestVersion = true,
-        includeToBeDeleted = false,
-        includeDeleted = false
+        excludeToBeDeleted = false
     ): Promise<SharableAttributeTypes[]> {
         const localAttribute = await this.getLocalAttribute(attribute.id);
         if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
         if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
-        const sharedAttribute = attribute.isSharedWith(peerAddress, includeToBeDeleted, includeDeleted) ? [attribute] : [];
-        const sharedPredecessors = await this.getSharedPredecessorsOfAttribute(attribute, peerAddress, includeToBeDeleted, includeDeleted);
-        const sharedSuccessors = await this.getSharedSuccessorsOfAttribute(attribute, peerAddress, includeToBeDeleted, includeDeleted);
+        const sharedAttribute = attribute.isForwardedTo(peerAddress, excludeToBeDeleted) ? [attribute] : [];
+        const sharedPredecessors = await this.getSharedPredecessorsOfAttribute(attribute, peerAddress, excludeToBeDeleted);
+        const sharedSuccessors = await this.getSharedSuccessorsOfAttribute(attribute, peerAddress, excludeToBeDeleted);
 
         const sharedAttributeVersions = [...sharedSuccessors.reverse(), ...sharedAttribute, ...sharedPredecessors];
 
@@ -945,8 +944,7 @@ export class AttributesController extends ConsumptionBaseController {
     public async getSharedPredecessorsOfAttribute<SharableAttributeTypes extends OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute>(
         referenceAttribute: SharableAttributeTypes,
         peerAddress: CoreAddress,
-        includeToBeDeleted = false,
-        includeDeleted = false
+        excludeToBeDeleted = false
     ): Promise<SharableAttributeTypes[]> {
         const matchingPredecessors: SharableAttributeTypes[] = [];
         while (referenceAttribute.succeeds) {
@@ -955,7 +953,7 @@ export class AttributesController extends ConsumptionBaseController {
 
             referenceAttribute = predecessor;
 
-            if (referenceAttribute.isSharedWith(peerAddress, includeToBeDeleted, includeDeleted)) matchingPredecessors.push(referenceAttribute);
+            if (referenceAttribute.isForwardedTo(peerAddress, excludeToBeDeleted)) matchingPredecessors.push(referenceAttribute);
         }
 
         return matchingPredecessors;
@@ -964,8 +962,7 @@ export class AttributesController extends ConsumptionBaseController {
     public async getSharedSuccessorsOfAttribute<SharableAttributeTypes extends OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute>(
         referenceAttribute: SharableAttributeTypes,
         peerAddress: CoreAddress,
-        includeToBeDeleted = false,
-        includeDeleted = false
+        excludeToBeDeleted = false
     ): Promise<SharableAttributeTypes[]> {
         const matchingSuccessors: SharableAttributeTypes[] = [];
         while (referenceAttribute.succeededBy) {
@@ -974,7 +971,7 @@ export class AttributesController extends ConsumptionBaseController {
 
             referenceAttribute = successor;
 
-            if (referenceAttribute.isSharedWith(peerAddress, includeToBeDeleted, includeDeleted)) matchingSuccessors.push(referenceAttribute);
+            if (referenceAttribute.isForwardedTo(peerAddress, excludeToBeDeleted)) matchingSuccessors.push(referenceAttribute);
         }
 
         return matchingSuccessors;
@@ -1350,11 +1347,11 @@ export class AttributesController extends ConsumptionBaseController {
         peer: CoreAddress,
         overrideDeletedOrToBeDeleted = false
     ): Promise<void> {
-        if (!attribute.isSharedWith(peer, true, true)) {
+        if (attribute.isDeletedOrToBeDeletedByForwardingPeer(peer) && !overrideDeletedOrToBeDeleted) return;
+
+        if (!attribute.isForwardedTo(peer)) {
             throw ConsumptionCoreErrors.attributes.cannotSetAttributeDeletionInfoForPeer(attribute.id, peer);
         }
-
-        if (attribute.isDeletedOrToBeDeletedByForwardingPeer(peer) && !overrideDeletedOrToBeDeleted) return;
 
         attribute.setForwardedDeletionInfo(deletionInfo, peer);
         await this.updateAttributeUnsafe(attribute);
