@@ -9,7 +9,7 @@ import { ValidationResult } from "../../../common";
 import { LocalNotification } from "../../local/LocalNotification";
 import { AbstractNotificationItemProcessor } from "../AbstractNotificationItemProcessor";
 
-// TODO: this needs to be renamed, too -> different PR
+// TODO: naming with Received?
 export class PeerAttributeSucceededNotificationItemProcessor extends AbstractNotificationItemProcessor<PeerAttributeSucceededNotificationItem> {
     private readonly _logger: ILogger;
 

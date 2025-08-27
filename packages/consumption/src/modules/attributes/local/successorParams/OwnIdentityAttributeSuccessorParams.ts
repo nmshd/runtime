@@ -9,7 +9,6 @@ export interface IOwnIdentityAttributeSuccessorParams extends ISerializable {
     content: IdentityAttribute;
 }
 
-// TODO: do we need this @type? And if so, it should probably also appear in the JSON
 @type("OwnIdentityAttributeSuccessorParams")
 export class OwnIdentityAttributeSuccessorParams extends Serializable implements IOwnIdentityAttributeSuccessorParams {
     @validate()
