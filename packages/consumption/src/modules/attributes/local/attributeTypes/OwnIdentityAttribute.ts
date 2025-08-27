@@ -57,21 +57,13 @@ export class OwnIdentityAttribute extends LocalAttribute implements IOwnIdentity
         return sharingInfosWithPeer.some((sharingInfo) => !sharingInfo.deletionInfo || !excludedDeletionStatuses.includes(sharingInfo.deletionInfo.deletionStatus));
     }
 
-    public isDeletedOrToBeDeletedByForwardingPeer(peerAddress: CoreAddress, queriedDeletionStatus?: "onlyDeleted" | "onlyToBeDeleted"): boolean {
+    public isDeletedOrToBeDeletedByForwardingPeer(peerAddress: CoreAddress): boolean {
         if (!this.forwardedSharingInfos) return false;
 
         const sharingInfosWithPeer = this.forwardedSharingInfos.filter((sharingInfo) => sharingInfo.peer.equals(peerAddress));
         if (sharingInfosWithPeer.length === 0) return false;
 
-        let deletionStatuses;
-        switch (queriedDeletionStatus) {
-            case "onlyDeleted":
-                deletionStatuses = [EmittedAttributeDeletionStatus.DeletedByPeer];
-            case "onlyToBeDeleted":
-                deletionStatuses = [EmittedAttributeDeletionStatus.ToBeDeletedByPeer];
-            default:
-                deletionStatuses = [EmittedAttributeDeletionStatus.DeletedByPeer, EmittedAttributeDeletionStatus.ToBeDeletedByPeer];
-        }
+        const deletionStatuses = [EmittedAttributeDeletionStatus.DeletedByPeer, EmittedAttributeDeletionStatus.ToBeDeletedByPeer];
 
         const hasSharingInfoWithDeletionStatus = sharingInfosWithPeer.some(
             (sharingInfo) => sharingInfo.deletionInfo && deletionStatuses.includes(sharingInfo.deletionInfo.deletionStatus)
@@ -80,6 +72,14 @@ export class OwnIdentityAttribute extends LocalAttribute implements IOwnIdentity
             (sharingInfo) => !sharingInfo.deletionInfo || !deletionStatuses.includes(sharingInfo.deletionInfo.deletionStatus)
         );
         return hasSharingInfoWithDeletionStatus && !hasSharingInfoWithoutDeletionStatus;
+    }
+
+    public isToBeDeletedByForwardingPeer(peerAddress: CoreAddress): boolean {
+        if (!this.forwardedSharingInfos) return false;
+
+        return this.forwardedSharingInfos.some(
+            (sharingInfo) => sharingInfo.peer.equals(peerAddress) && sharingInfo.deletionInfo?.deletionStatus === EmittedAttributeDeletionStatus.ToBeDeletedByPeer
+        );
     }
 
     public setForwardedDeletionInfo(deletionInfo: EmittedAttributeDeletionInfo | undefined, peer: CoreAddress): this {

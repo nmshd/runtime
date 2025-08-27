@@ -70,7 +70,7 @@ export default async function createAppropriateResponseItem(
     }
 
     if (latestSharedVersion.id.equals(ownIdentityAttribute.id)) {
-        if (latestSharedVersion.isDeletedOrToBeDeletedByForwardingPeer(requestInfo.peer, "onlyToBeDeleted")) {
+        if (latestSharedVersion.isToBeDeletedByForwardingPeer(requestInfo.peer)) {
             await attributesController.setForwardedDeletionInfoOfAttribute(latestSharedVersion, undefined, requestInfo.peer, true);
         }
 
