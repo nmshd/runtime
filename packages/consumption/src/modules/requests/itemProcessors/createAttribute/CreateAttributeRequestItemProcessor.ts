@@ -11,7 +11,7 @@ import {
 } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { PeerIdentityAttribute, PeerIdentityAttributeSharingInfo, PeerIdentityAttributeSuccessorParams, PeerSharedAttributeSucceededEvent } from "../../../attributes";
+import { AttributeSucceededEvent, PeerIdentityAttribute, PeerIdentityAttributeSharingInfo, PeerIdentityAttributeSuccessorParams } from "../../../attributes";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
@@ -161,7 +161,7 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
         responseItem: CreateAttributeAcceptResponseItem | AttributeSuccessionAcceptResponseItem | AttributeAlreadySharedAcceptResponseItem | RejectResponseItem,
         requestItem: CreateAttributeRequestItem,
         requestInfo: LocalRequestInfo
-    ): Promise<PeerSharedAttributeSucceededEvent | void> {
+    ): Promise<AttributeSucceededEvent | void> {
         if (responseItem instanceof AttributeAlreadySharedAcceptResponseItem) return;
 
         if (requestItem.attribute.owner.toString() === "") requestItem.attribute.owner = requestInfo.peer;
@@ -215,7 +215,7 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
                 peerSharingInfo
             });
             const { predecessor: updatedPredecessor, successor } = await this.consumptionController.attributes.succeedPeerIdentityAttribute(predecessor, successorParams);
-            return new PeerSharedAttributeSucceededEvent(this.currentIdentityAddress.toString(), updatedPredecessor, successor);
+            return new AttributeSucceededEvent(this.currentIdentityAddress.toString(), updatedPredecessor, successor);
         }
     }
 }

@@ -3,7 +3,7 @@ import { IdentityAttribute, PeerSharedAttributeSucceededNotificationItem, Relati
 import { TransportLoggerFactory } from "@nmshd/transport";
 import { ConsumptionController } from "../../../../consumption/ConsumptionController";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { LocalAttribute, PeerIdentityAttribute, PeerIdentityAttributeSuccessorParams, PeerRelationshipAttribute, PeerSharedAttributeSucceededEvent } from "../../../attributes";
+import { AttributeSucceededEvent, LocalAttribute, PeerIdentityAttribute, PeerIdentityAttributeSuccessorParams, PeerRelationshipAttribute } from "../../../attributes";
 import { PeerRelationshipAttributeSuccessorParams } from "../../../attributes/local/successorParams/PeerRelationshipAttributeSuccessorParams";
 import { ValidationResult } from "../../../common";
 import { LocalNotification } from "../../local/LocalNotification";
@@ -73,7 +73,7 @@ export class PeerSharedAttributeSucceededNotificationItemProcessor extends Abstr
         // return await this.consumptionController.attributes.validateThirdPartyRelationshipAttributeSuccession(predecessor, successorParams);
     }
 
-    public override async process(notificationItem: PeerSharedAttributeSucceededNotificationItem, notification: LocalNotification): Promise<PeerSharedAttributeSucceededEvent> {
+    public override async process(notificationItem: PeerSharedAttributeSucceededNotificationItem, notification: LocalNotification): Promise<AttributeSucceededEvent> {
         let updatedPredecessor: LocalAttribute;
         let successor: LocalAttribute;
 
@@ -114,7 +114,7 @@ export class PeerSharedAttributeSucceededNotificationItemProcessor extends Abstr
         }
 
         const ownAddress = this.accountController.identity.address.toString();
-        return new PeerSharedAttributeSucceededEvent(ownAddress, updatedPredecessor, successor);
+        return new AttributeSucceededEvent(ownAddress, updatedPredecessor, successor);
     }
 
     public override async rollback(notificationItem: PeerSharedAttributeSucceededNotificationItem, notification: LocalNotification): Promise<void> {

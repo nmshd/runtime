@@ -27,14 +27,7 @@ import { ConsumptionCoreErrors } from "../../consumption/ConsumptionCoreErrors";
 import { ConsumptionError } from "../../consumption/ConsumptionError";
 import { ConsumptionIds } from "../../consumption/ConsumptionIds";
 import { flattenObject, ValidationResult } from "../common";
-import {
-    AttributeCreatedEvent,
-    AttributeDeletedEvent,
-    AttributeWasViewedAtChangedEvent,
-    OwnSharedAttributeSucceededEvent,
-    RepositoryAttributeSucceededEvent,
-    ThirdPartyRelationshipAttributeSucceededEvent
-} from "./events";
+import { AttributeCreatedEvent, AttributeDeletedEvent, AttributeSucceededEvent, AttributeWasViewedAtChangedEvent } from "./events";
 import { AttributeTagCollection, IAttributeTag } from "./local/AttributeTagCollection";
 import {
     AttributeWithForwardedSharingInfos,
@@ -481,7 +474,7 @@ export class AttributesController extends ConsumptionBaseController {
         await this.updateAttributeUnsafe(predecessor);
 
         // TODO: maybe publish same succeeded event for all attributes, publish events only for own Attributes and ThirdPartyRelationshipAttributes
-        this.eventBus.publish(new RepositoryAttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
+        this.eventBus.publish(new AttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
         return { predecessor, successor };
     }
 
@@ -545,7 +538,7 @@ export class AttributesController extends ConsumptionBaseController {
         predecessor.succeededBy = successor.id;
         await this.updateAttributeUnsafe(predecessor);
 
-        this.eventBus.publish(new OwnSharedAttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
+        this.eventBus.publish(new AttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
         return { predecessor, successor };
     }
 
@@ -600,7 +593,7 @@ export class AttributesController extends ConsumptionBaseController {
         predecessor.succeededBy = successor.id;
         await this.updateAttributeUnsafe(predecessor);
 
-        this.eventBus.publish(new ThirdPartyRelationshipAttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
+        this.eventBus.publish(new AttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
         return { predecessor, successor };
     }
 

@@ -15,12 +15,12 @@ import { TransportCoreErrors } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import {
+    AttributeSucceededEvent,
     OwnIdentityAttribute,
     OwnIdentityAttributeSuccessorParams,
     PeerIdentityAttribute,
     PeerIdentityAttributeSharingInfo,
     PeerIdentityAttributeSuccessorParams,
-    PeerSharedAttributeSucceededEvent,
     ReceivedAttributeDeletionStatus
 } from "../../../attributes";
 import { LocalAttribute } from "../../../attributes/local/attributeTypes";
@@ -315,7 +315,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
         responseItem: ProposeAttributeAcceptResponseItem | AttributeSuccessionAcceptResponseItem | AttributeAlreadySharedAcceptResponseItem | RejectResponseItem,
         _requestItem: ProposeAttributeRequestItem,
         requestInfo: LocalRequestInfo
-    ): Promise<PeerSharedAttributeSucceededEvent | void> {
+    ): Promise<AttributeSucceededEvent | void> {
         if (responseItem instanceof RejectResponseItem) return;
 
         if (responseItem instanceof AttributeAlreadySharedAcceptResponseItem) {
@@ -365,7 +365,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             });
 
             const { predecessor: updatedPredecessor, successor } = await this.consumptionController.attributes.succeedPeerIdentityAttribute(predecessor, successorParams);
-            return new PeerSharedAttributeSucceededEvent(this.currentIdentityAddress.toString(), updatedPredecessor, successor);
+            return new AttributeSucceededEvent(this.currentIdentityAddress.toString(), updatedPredecessor, successor);
         }
     }
 }

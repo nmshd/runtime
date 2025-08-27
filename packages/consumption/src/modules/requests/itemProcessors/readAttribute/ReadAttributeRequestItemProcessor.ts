@@ -19,6 +19,7 @@ import { RelationshipStatus, TransportCoreErrors } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import {
+    AttributeSucceededEvent,
     OwnIdentityAttribute,
     OwnIdentityAttributeSuccessorParams,
     OwnRelationshipAttribute,
@@ -26,7 +27,6 @@ import {
     PeerIdentityAttributeSharingInfo,
     PeerIdentityAttributeSuccessorParams,
     PeerRelationshipAttribute,
-    PeerSharedAttributeSucceededEvent,
     ReceivedAttributeDeletionStatus,
     ThirdPartyRelationshipAttribute,
     ThirdPartyRelationshipAttributeSharingInfo,
@@ -390,7 +390,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         responseItem: ReadAttributeAcceptResponseItem | AttributeSuccessionAcceptResponseItem | AttributeAlreadySharedAcceptResponseItem | RejectResponseItem,
         _requestItem: ReadAttributeRequestItem,
         requestInfo: LocalRequestInfo
-    ): Promise<PeerSharedAttributeSucceededEvent | void> {
+    ): Promise<AttributeSucceededEvent | void> {
         if (responseItem instanceof RejectResponseItem) return;
 
         if (responseItem instanceof AttributeAlreadySharedAcceptResponseItem) {
@@ -465,7 +465,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 });
 
                 const { predecessor: updatedPredecessor, successor } = await this.consumptionController.attributes.succeedPeerIdentityAttribute(predecessor, successorParams);
-                return new PeerSharedAttributeSucceededEvent(this.currentIdentityAddress.toString(), updatedPredecessor, successor);
+                return new AttributeSucceededEvent(this.currentIdentityAddress.toString(), updatedPredecessor, successor);
             }
 
             if (predecessor instanceof ThirdPartyRelationshipAttribute && responseItem.successorContent instanceof RelationshipAttribute) {
@@ -485,7 +485,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                     successorParams
                 );
 
-                return new PeerSharedAttributeSucceededEvent(this.currentIdentityAddress.toString(), updatedPredecessor, successor);
+                return new AttributeSucceededEvent(this.currentIdentityAddress.toString(), updatedPredecessor, successor);
             }
         }
     }
