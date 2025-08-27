@@ -23,6 +23,7 @@ import { anything, reset, spy, when } from "ts-mockito";
 import {
     AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON,
     AcceptReadAttributeRequestItemParametersWithNewAttributeJSON,
+    AttributeSucceededEvent,
     ConsumptionController,
     ConsumptionIds,
     EmittedAttributeDeletionInfo,
@@ -35,7 +36,6 @@ import {
     PeerIdentityAttribute,
     PeerRelationshipAttribute,
     PeerRelationshipAttributeSharingInfo,
-    PeerSharedAttributeSucceededEvent,
     ReadAttributeRequestItemProcessor,
     ReceivedAttributeDeletionInfo,
     ReceivedAttributeDeletionStatus,
@@ -3202,7 +3202,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             });
 
             const event = await processor.applyIncomingResponseItem(responseItem, requestItem, incomingRequest);
-            expect(event).toBeInstanceOf(PeerSharedAttributeSucceededEvent);
+            expect(event).toBeInstanceOf(AttributeSucceededEvent);
 
             const successorPeerIdentityAttribute = await consumptionController.attributes.getLocalAttribute(successorId);
             expect((successorPeerIdentityAttribute as PeerIdentityAttribute).peerSharingInfo.peer).toStrictEqual(recipient);
@@ -3259,7 +3259,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             });
 
             const event = await processor.applyIncomingResponseItem(responseItem, requestItem, incomingRequest);
-            expect(event).toBeInstanceOf(PeerSharedAttributeSucceededEvent);
+            expect(event).toBeInstanceOf(AttributeSucceededEvent);
 
             const successorPeerIdentityAttribute = await consumptionController.attributes.getLocalAttribute(successorId);
             expect((successorPeerIdentityAttribute as PeerIdentityAttribute).peerSharingInfo.peer).toStrictEqual(recipient);

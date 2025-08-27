@@ -34,6 +34,7 @@ import fs from "fs";
 import _ from "lodash";
 import { DateTime } from "luxon";
 import {
+    AttributeSucceededEvent,
     ConsumptionServices,
     CreateAndShareRelationshipAttributeRequest,
     CreateOutgoingRequestRequest,
@@ -50,7 +51,6 @@ import {
     NotifyPeerAboutOwnIdentityAttributeSuccessionRequest,
     NotifyPeerAboutOwnIdentityAttributeSuccessionResponse,
     OutgoingRequestStatusChangedEvent,
-    PeerSharedAttributeSucceededEvent,
     RelationshipChangedEvent,
     RelationshipDTO,
     RelationshipStatus,
@@ -707,7 +707,7 @@ export async function executeFullNotifyPeerAboutAttributeSuccessionFlow(
 export async function waitForRecipientToReceiveNotification(recipient: TestRuntimeServices, notifyResult: NotifyPeerAboutOwnIdentityAttributeSuccessionResponse): Promise<void> {
     await syncUntilHasMessageWithNotification(recipient.transport, notifyResult.notificationId);
 
-    await recipient.eventBus.waitForEvent(PeerSharedAttributeSucceededEvent, (e) => {
+    await recipient.eventBus.waitForEvent(AttributeSucceededEvent, (e) => {
         return e.data.successor.id === notifyResult.successor.id;
     });
 }

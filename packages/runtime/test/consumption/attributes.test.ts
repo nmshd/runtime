@@ -14,6 +14,7 @@ import { CoreDate, CoreId, CoreIdHelper } from "@nmshd/core-types";
 import assert from "assert";
 import {
     AttributeCreatedEvent,
+    AttributeSucceededEvent,
     AttributeWasViewedAtChangedEvent,
     CanCreateOwnIdentityAttributeRequest,
     CanCreateOwnIdentityAttributeUseCase,
@@ -44,7 +45,6 @@ import {
     PeerRelationshipAttributeDeletedByPeerEvent,
     RelationshipChangedEvent,
     RelationshipStatus,
-    RepositoryAttributeSucceededEvent,
     SetAttributeDeletionInfoOfDeletionProposedRelationshipUseCase,
     ShareOwnIdentityAttributeRequest,
     ShareOwnIdentityAttributeUseCase,
@@ -1604,7 +1604,7 @@ describe(SucceedOwnIdentityAttributeUseCase.name, () => {
         const { predecessor: updatedPredecessor, successor } = result.value;
         expect(updatedPredecessor.succeededBy).toStrictEqual(successor.id);
         expect((successor as any).content.value.value).toBe("anotherGivenName");
-        await services1.eventBus.waitForEvent(RepositoryAttributeSucceededEvent, (e) => {
+        await services1.eventBus.waitForEvent(AttributeSucceededEvent, (e) => {
             return e.data.predecessor.id === updatedPredecessor.id && e.data.successor.id === successor.id;
         });
     });
@@ -1635,7 +1635,7 @@ describe(SucceedOwnIdentityAttributeUseCase.name, () => {
         expect(result.isError).toBe(false);
         const { predecessor: updatedPredecessor, successor } = result.value;
         expect((successor as any).content.value.value).toBe("anotherGivenName");
-        await services1.eventBus.waitForEvent(RepositoryAttributeSucceededEvent, (e) => {
+        await services1.eventBus.waitForEvent(AttributeSucceededEvent, (e) => {
             return e.data.predecessor.id === updatedPredecessor.id && e.data.successor.id === successor.id;
         });
     });

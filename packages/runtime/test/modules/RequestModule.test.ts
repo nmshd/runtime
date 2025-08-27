@@ -554,12 +554,12 @@ describe("Handling the rejection and the revocation of a Relationship by the Req
         const sAttributes = (await sRuntimeServices.consumption.attributes.getAttributes({})).value;
         expect(sAttributes).toHaveLength(1);
         expect(sAttributes[0]["@type"]).toBe("OwnRelationshipAttribute");
-        expect(OwnRelationshipAttribute.from(sAttributes[0] as OwnRelationshipAttributeJSON).isSharedWith(CoreAddress.from(rRuntimeServices.address))).toBe(false);
+        expect(OwnRelationshipAttribute.from(sAttributes[0] as OwnRelationshipAttributeJSON).isForwardedTo(CoreAddress.from(rRuntimeServices.address))).toBe(false);
 
         const rAttributes = (await rRuntimeServices.consumption.attributes.getAttributes({})).value;
         expect(rAttributes).toHaveLength(1);
         expect(rAttributes[0]["@type"]).toBe("OwnIdentityAttribute");
-        expect(OwnIdentityAttribute.from(rAttributes[0] as OwnIdentityAttributeJSON).isSharedWith(CoreAddress.from(sRuntimeServices.address))).toBe(false);
+        expect(OwnIdentityAttribute.from(rAttributes[0] as OwnIdentityAttributeJSON).isForwardedTo(CoreAddress.from(sRuntimeServices.address))).toBe(false);
     });
 
     test("deletion of the Attributes shared between both Identities involved in the revoked Relationship and keeping the remaining Attributes", async () => {
@@ -575,12 +575,12 @@ describe("Handling the rejection and the revocation of a Relationship by the Req
         const rAttributes = (await rRuntimeServices.consumption.attributes.getAttributes({})).value;
         expect(rAttributes).toHaveLength(1);
         expect(rAttributes[0]["@type"]).toBe("OwnIdentityAttribute");
-        expect(OwnIdentityAttribute.from(rAttributes[0] as OwnIdentityAttributeJSON).isSharedWith(CoreAddress.from(sRuntimeServices.address))).toBe(false);
+        expect(OwnIdentityAttribute.from(rAttributes[0] as OwnIdentityAttributeJSON).isForwardedTo(CoreAddress.from(sRuntimeServices.address))).toBe(false);
 
         const sAttributes = (await sRuntimeServices.consumption.attributes.getAttributes({})).value;
         expect(sAttributes).toHaveLength(1);
         expect(sAttributes[0]["@type"]).toBe("OwnRelationshipAttribute");
-        expect(OwnRelationshipAttribute.from(sAttributes[0] as OwnRelationshipAttributeJSON).isSharedWith(CoreAddress.from(rRuntimeServices.address))).toBe(false);
+        expect(OwnRelationshipAttribute.from(sAttributes[0] as OwnRelationshipAttributeJSON).isForwardedTo(CoreAddress.from(rRuntimeServices.address))).toBe(false);
     });
 
     async function establishPendingRelationshipWithPredefinedRequestFlow(

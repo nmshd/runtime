@@ -3,11 +3,11 @@ import { IdentityAttribute, Notification, PeerSharedAttributeSucceededNotificati
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { AccountController, Transport } from "@nmshd/transport";
 import {
+    AttributeSucceededEvent,
     ConsumptionController,
     LocalNotification,
     LocalNotificationSource,
     LocalNotificationStatus,
-    PeerSharedAttributeSucceededEvent,
     PeerSharedAttributeSucceededNotificationItemProcessor
 } from "../../../../../src";
 import { TestUtil } from "../../../../core/TestUtil";
@@ -90,7 +90,7 @@ describe("PeerSharedAttributeSucceededNotificationItemProcessor", function () {
 
         /* Run process() and validate its results. */
         const event = await processor.process(notificationItem, notification);
-        expect(event).toBeInstanceOf(PeerSharedAttributeSucceededEvent);
+        expect(event).toBeInstanceOf(AttributeSucceededEvent);
         const { predecessor, successor } = event.data;
         expect(notificationItem.successorId.equals(successor.id)).toBe(true);
         expect(notificationItem.predecessorId.equals(predecessor.id)).toBe(true);
@@ -161,7 +161,7 @@ describe("PeerSharedAttributeSucceededNotificationItemProcessor", function () {
 
         /* Run process() and validate its results. */
         const event = await processor.process(notificationItem, notification);
-        expect(event).toBeInstanceOf(PeerSharedAttributeSucceededEvent);
+        expect(event).toBeInstanceOf(AttributeSucceededEvent);
         const { predecessor, successor } = event.data;
         expect(notificationItem.successorId.equals(successor.id)).toBe(true);
         expect(notificationItem.predecessorId.equals(predecessor.id)).toBe(true);

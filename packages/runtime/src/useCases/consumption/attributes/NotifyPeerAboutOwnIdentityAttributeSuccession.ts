@@ -47,7 +47,6 @@ export class NotifyPeerAboutOwnIdentityAttributeSuccessionUseCase extends UseCas
         if (!(attribute instanceof OwnIdentityAttribute)) return Result.fail(RuntimeErrors.attributes.isNotOwnIdentityAttribute(attributeId));
 
         const peerAddress = CoreAddress.from(request.peer);
-        // TODO: ToBeDeleted?
         const candidatePredecessors = await this.attributeController.getSharedVersionsOfAttribute(attribute, peerAddress);
 
         if (candidatePredecessors.length === 0) {

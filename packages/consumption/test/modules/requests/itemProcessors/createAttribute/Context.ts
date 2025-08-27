@@ -306,7 +306,7 @@ export class ThenSteps {
         expect(createdForwardedOwnIdentityAttribute).toBeDefined();
         expect(createdForwardedOwnIdentityAttribute instanceof OwnIdentityAttribute).toBe(true);
         expect(createdForwardedOwnIdentityAttribute.forwardedSharingInfos).toBeDefined();
-        expect(createdForwardedOwnIdentityAttribute.isSharedWith(this.context.peerAddress)).toBe(true);
+        expect(createdForwardedOwnIdentityAttribute.isForwardedTo(this.context.peerAddress)).toBe(true);
         if (value) expect(createdForwardedOwnIdentityAttribute.content.value.toJSON()).toStrictEqual(value);
     }
 
@@ -329,7 +329,7 @@ export class ThenSteps {
         expect(forwardedOwnIdentityAttribute.id.toString()).toBe(attribute.id.toString());
         expect(forwardedOwnIdentityAttribute.content.toJSON()).toStrictEqual(attribute.content.toJSON());
         expect(forwardedOwnIdentityAttribute.forwardedSharingInfos).toBeDefined();
-        expect(forwardedOwnIdentityAttribute.isSharedWith(this.context.peerAddress)).toBe(true);
+        expect(forwardedOwnIdentityAttribute.isForwardedTo(this.context.peerAddress)).toBe(true);
     }
 
     public async theOwnIdentityAttributeIsDeletedByPeer(attribute: OwnIdentityAttribute, peer: CoreAddress): Promise<void> {

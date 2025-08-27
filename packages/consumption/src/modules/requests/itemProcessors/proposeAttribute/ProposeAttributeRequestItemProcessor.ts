@@ -147,8 +147,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
 
             attribute = foundLocalAttribute.content;
 
-            // TODO: ToBeDeleted?
-            const successorsSharedWithPeer = await this.consumptionController.attributes.getSharedSuccessorsOfAttribute(foundLocalAttribute, requestInfo.peer);
+            const successorsSharedWithPeer = await this.consumptionController.attributes.getSharedSuccessorsOfAttribute(foundLocalAttribute, requestInfo.peer, true);
 
             if (successorsSharedWithPeer.length > 0) {
                 return ValidationResult.error(

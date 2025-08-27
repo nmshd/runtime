@@ -50,8 +50,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
 
             // TODO: this also applies to RelationshipAttributes that can be shared with third parties
             if (recipient) {
-                if (foundAttribute.isForwardedTo(recipient)) {
-                    // TODO: should this error be thrown if the attribute is to be deleted by the forwarding peer?
+                if (foundAttribute.isForwardedTo(recipient, true)) {
                     return ValidationResult.error(
                         ConsumptionCoreErrors.requests.invalidRequestItem(
                             `The IdentityAttribute with the given sourceAttributeId '${requestItem.sourceAttributeId.toString()}' is already shared with the peer.`
@@ -59,8 +58,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                     );
                 }
 
-                // TODO: ToBedeleted?
-                const sharedSuccessors = await this.consumptionController.attributes.getSharedSuccessorsOfAttribute(foundAttribute, recipient, true);
+                const sharedSuccessors = await this.consumptionController.attributes.getSharedSuccessorsOfAttribute(foundAttribute, recipient);
                 if (sharedSuccessors.length > 0) {
                     return ValidationResult.error(
                         ConsumptionCoreErrors.requests.invalidRequestItem(
@@ -69,7 +67,6 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                     );
                 }
 
-                // TODO: tobedeleted?
                 const sharedPredecessors = await this.consumptionController.attributes.getSharedPredecessorsOfAttribute(foundAttribute, recipient);
                 if (sharedPredecessors.length > 0) {
                     return ValidationResult.error(
@@ -97,8 +94,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                 return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("You cannot share ThirdPartyRelationshipAttributes."));
             }
 
-            if (recipient && (foundAttribute.peerSharingInfo.peer.equals(recipient) || foundAttribute.isForwardedTo(recipient))) {
-                // TODO: what about ToBeDeleted?
+            if (recipient && (foundAttribute.peerSharingInfo.peer.equals(recipient) || foundAttribute.isForwardedTo(recipient, true))) {
                 return ValidationResult.error(
                     ConsumptionCoreErrors.requests.invalidRequestItem("The provided RelationshipAttribute already exists in the context of the Relationship with the peer.")
                 );

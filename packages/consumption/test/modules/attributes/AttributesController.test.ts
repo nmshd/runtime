@@ -237,7 +237,7 @@ describe("AttributesController", function () {
 
             const forwardedAttribute = await consumptionController.attributes.addForwardedSharingInfoToAttribute(attribute, peer, sourceReference);
             expect(forwardedAttribute).toBeInstanceOf(OwnIdentityAttribute);
-            expect(forwardedAttribute.isSharedWith(peer)).toBe(true);
+            expect(forwardedAttribute.isForwardedTo(peer)).toBe(true);
         });
 
         test("should allow to create a PeerIdentityAttribute", async function () {
@@ -316,7 +316,7 @@ describe("AttributesController", function () {
             );
 
             expect(forwardedOwnRelationshipAttribute).toBeInstanceOf(OwnRelationshipAttribute);
-            expect(forwardedOwnRelationshipAttribute.isSharedWith(peerAddress)).toBe(true);
+            expect(forwardedOwnRelationshipAttribute.isForwardedTo(peerAddress)).toBe(true);
         });
 
         test("should allow to create a PeerRelationshipAttribute", async function () {
@@ -371,7 +371,7 @@ describe("AttributesController", function () {
             );
 
             expect(forwardedPeerRelationshipAttribute).toBeInstanceOf(PeerRelationshipAttribute);
-            expect(forwardedPeerRelationshipAttribute.isSharedWith(peerAddress)).toBe(true);
+            expect(forwardedPeerRelationshipAttribute.isForwardedTo(peerAddress)).toBe(true);
         });
 
         test("should allow to create a ThirdPartyRelationshipAttribute", async function () {

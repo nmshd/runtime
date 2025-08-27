@@ -19,13 +19,12 @@ import { IdentityDeletionProcessStatus } from "@nmshd/transport";
 import assert from "assert";
 import { DateTime } from "luxon";
 import {
+    AttributeSucceededEvent,
     GetRelationshipsQuery,
     IncomingRequestReceivedEvent,
     IncomingRequestStatusChangedEvent,
     LocalAttributeDTO,
     LocalRequestStatus,
-    OwnSharedAttributeSucceededEvent,
-    PeerSharedAttributeSucceededEvent,
     RelationshipAuditLogEntryReason,
     RelationshipChangedEvent,
     RelationshipDTO,
@@ -691,7 +690,7 @@ describe("Attributes for the relationship", () => {
 
         await syncUntilHasMessageWithNotification(services2.transport, ownNotificationId);
 
-        await services1.eventBus.waitForEvent(OwnSharedAttributeSucceededEvent, (e) => {
+        await services1.eventBus.waitForEvent(AttributeSucceededEvent, (e) => {
             return e.data.successor.id === ownRelationshipAttributeV1.id;
         });
 
@@ -746,7 +745,7 @@ describe("Attributes for the relationship", () => {
 
         await syncUntilHasMessageWithNotification(services1.transport, peerNotificationId);
 
-        await services1.eventBus.waitForEvent(PeerSharedAttributeSucceededEvent, (e) => {
+        await services1.eventBus.waitForEvent(AttributeSucceededEvent, (e) => {
             return e.data.successor.id === peerRelationshipAttributeV1.id;
         });
     });
