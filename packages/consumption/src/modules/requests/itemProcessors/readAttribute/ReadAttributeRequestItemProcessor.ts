@@ -399,54 +399,12 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
             if (attribute.peerSharingInfo.deletionInfo?.deletionStatus !== ReceivedAttributeDeletionStatus.ToBeDeleted) return;
 
-            // TODO: refactor this nicely -> other PR
+            // TODO: refactor this nicely with one function for received Attributes -> other PR
             attribute.peerSharingInfo.deletionInfo = undefined;
             await this.consumptionController.attributes.updateAttributeUnsafe(attribute);
             return;
         }
 
-        if (responseItem instanceof ReadAttributeAcceptResponseItem) {
-            if (responseItem.attribute instanceof IdentityAttribute) {
-                await this.consumptionController.attributes.createPeerIdentityAttribute({
-                    id: responseItem.attributeId,
-                    content: responseItem.attribute,
-                    peer: requestInfo.peer,
-                    sourceReference: requestInfo.id
-                });
-                return;
-            }
-
-            if (responseItem.thirdPartyAddress) {
-                await this.consumptionController.attributes.createThirdPartyRelationshipAttribute({
-                    id: responseItem.attributeId,
-                    content: responseItem.attribute,
-                    peer: requestInfo.peer,
-                    sourceReference: requestInfo.id,
-                    initialAttributePeer: responseItem.thirdPartyAddress
-                });
-                return;
-            }
-
-            if (responseItem.attribute.owner.toString() === this.currentIdentityAddress.toString()) {
-                await this.consumptionController.attributes.createOwnRelationshipAttribute({
-                    id: responseItem.attributeId,
-                    content: responseItem.attribute,
-                    peer: requestInfo.peer,
-                    sourceReference: requestInfo.id
-                });
-                return;
-            }
-
-            await this.consumptionController.attributes.createPeerRelationshipAttribute({
-                id: responseItem.attributeId,
-                content: responseItem.attribute,
-                peer: requestInfo.peer,
-                sourceReference: requestInfo.id
-            });
-            return;
-        }
-
-        // TODO: move up and early return
         if (responseItem instanceof AttributeSuccessionAcceptResponseItem) {
             const predecessor = await this.consumptionController.attributes.getLocalAttribute(responseItem.predecessorId);
             if (!predecessor) return;
@@ -484,9 +442,47 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                     predecessor,
                     successorParams
                 );
-
                 return new AttributeSucceededEvent(this.currentIdentityAddress.toString(), updatedPredecessor, successor);
             }
+            return;
         }
+
+        if (responseItem.attribute instanceof IdentityAttribute) {
+            await this.consumptionController.attributes.createPeerIdentityAttribute({
+                id: responseItem.attributeId,
+                content: responseItem.attribute,
+                peer: requestInfo.peer,
+                sourceReference: requestInfo.id
+            });
+            return;
+        }
+
+        if (responseItem.thirdPartyAddress) {
+            await this.consumptionController.attributes.createThirdPartyRelationshipAttribute({
+                id: responseItem.attributeId,
+                content: responseItem.attribute,
+                peer: requestInfo.peer,
+                sourceReference: requestInfo.id,
+                initialAttributePeer: responseItem.thirdPartyAddress
+            });
+            return;
+        }
+
+        if (responseItem.attribute.owner.equals(this.currentIdentityAddress)) {
+            await this.consumptionController.attributes.createOwnRelationshipAttribute({
+                id: responseItem.attributeId,
+                content: responseItem.attribute,
+                peer: requestInfo.peer,
+                sourceReference: requestInfo.id
+            });
+            return;
+        }
+
+        await this.consumptionController.attributes.createPeerRelationshipAttribute({
+            id: responseItem.attributeId,
+            content: responseItem.attribute,
+            peer: requestInfo.peer,
+            sourceReference: requestInfo.id
+        });
     }
 }
