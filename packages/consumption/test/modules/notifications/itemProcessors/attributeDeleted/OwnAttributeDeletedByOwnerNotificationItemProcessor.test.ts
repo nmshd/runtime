@@ -295,7 +295,7 @@ describe("OwnAttributeDeletedByPeerNotificationItemProcessor", function () {
             id: CoreId.from("attributeId")
         });
 
-        const { successor: successorPeerSharedIdentityAttribute } = await consumptionController.attributes.succeedPeerIdentityAttribute(predecessorPeerIdentityAttribute, {
+        const { successor: successorPeerIdentityAttribute } = await consumptionController.attributes.succeedPeerIdentityAttribute(predecessorPeerIdentityAttribute, {
             content: IdentityAttribute.from({
                 value: {
                     "@type": "BirthName",
@@ -311,7 +311,7 @@ describe("OwnAttributeDeletedByPeerNotificationItemProcessor", function () {
         });
 
         const notificationItem = OwnAttributeDeletedByOwnerNotificationItem.from({
-            attributeId: successorPeerSharedIdentityAttribute.id
+            attributeId: successorPeerIdentityAttribute.id
         });
         const notification = LocalNotification.from({
             id: CoreId.from("notificationRef"),

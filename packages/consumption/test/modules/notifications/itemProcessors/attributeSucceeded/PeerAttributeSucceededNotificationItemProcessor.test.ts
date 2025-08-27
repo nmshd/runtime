@@ -1,5 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { IdentityAttribute, Notification, PeerSharedAttributeSucceededNotificationItem, RelationshipAttribute, RelationshipAttributeConfidentiality } from "@nmshd/content";
+import { IdentityAttribute, Notification, PeerAttributeSucceededNotificationItem, RelationshipAttribute, RelationshipAttributeConfidentiality } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { AccountController, Transport } from "@nmshd/transport";
 import {
@@ -15,7 +15,7 @@ import { MockEventBus } from "../../../MockEventBus";
 
 const mockEventBus = new MockEventBus();
 
-describe("PeerSharedAttributeSucceededNotificationItemProcessor", function () {
+describe("PeerAttributeSucceededNotificationItemProcessor", function () {
     let connection: IDatabaseConnection;
     let transport: Transport;
 
@@ -55,7 +55,7 @@ describe("PeerSharedAttributeSucceededNotificationItemProcessor", function () {
             id: CoreId.from("attributeId")
         });
 
-        const notificationItem = PeerSharedAttributeSucceededNotificationItem.from({
+        const notificationItem = PeerAttributeSucceededNotificationItem.from({
             predecessorId: peerIdentityAttribute.id,
             successorId: CoreId.from("newAttributeId"),
             successorContent: IdentityAttribute.from({
@@ -123,7 +123,7 @@ describe("PeerSharedAttributeSucceededNotificationItemProcessor", function () {
             sourceReference: CoreId.from("reqRef")
         });
 
-        const notificationItem = PeerSharedAttributeSucceededNotificationItem.from({
+        const notificationItem = PeerAttributeSucceededNotificationItem.from({
             predecessorId: peerRelationshipAttribute.id,
             successorId: CoreId.from("newAttributeId"),
             successorContent: RelationshipAttribute.from({
@@ -192,7 +192,7 @@ describe("PeerSharedAttributeSucceededNotificationItemProcessor", function () {
             id: CoreId.from("attributeId")
         });
 
-        const notificationItem = PeerSharedAttributeSucceededNotificationItem.from({
+        const notificationItem = PeerAttributeSucceededNotificationItem.from({
             predecessorId: peerIdentityAttribute.id,
             successorId: CoreId.from("newAttributeId"),
             successorContent: IdentityAttribute.from({

@@ -2,7 +2,7 @@ export * from "./itemProcessors/AbstractNotificationItemProcessor";
 export * from "./itemProcessors/attributeDeleted/ForwardedAttributeDeletedByPeerNotificationItemProcessor";
 export * from "./itemProcessors/attributeDeleted/OwnAttributeDeletedByOwnerNotificationItemProcessor";
 export * from "./itemProcessors/attributeDeleted/PeerRelationshipAttributeDeletedByPeerNotificationItemProcessor";
-export * from "./itemProcessors/attributeSucceeded/PeerSharedAttributeSucceededNotificationItemProcessor";
+export * from "./itemProcessors/attributeSucceeded/PeerAttributeSucceededNotificationItemProcessor";
 export * from "./itemProcessors/NotificationItemConstructor";
 export * from "./itemProcessors/NotificationItemProcessorConstructor";
 export * from "./itemProcessors/NotificationItemProcessorRegistry";

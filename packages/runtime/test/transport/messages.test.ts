@@ -712,13 +712,13 @@ describe("Postponed Notifications via Messages", () => {
             const processedDeletionNotificationResult = await client5.consumption.notifications.processNotificationById({ notificationId: postponedDeletionNotification.id });
             expect(processedDeletionNotificationResult).toBeSuccessful();
 
-            const peerSharedIdentityAttribute = (await client5.consumption.attributes.getAttribute({ id: ownSharedIdentityAttribute.id })).value;
-            assert(peerSharedIdentityAttribute.succeededBy);
-            assert(peerSharedIdentityAttribute.peerSharingInfo!.deletionInfo?.deletionDate);
-            assert(peerSharedIdentityAttribute.peerSharingInfo!.deletionInfo.deletionStatus, LocalAttributeDeletionStatus.DeletedByOwner);
+            const peerIdentityAttribute = (await client5.consumption.attributes.getAttribute({ id: ownSharedIdentityAttribute.id })).value;
+            assert(peerIdentityAttribute.succeededBy);
+            assert(peerIdentityAttribute.peerSharingInfo!.deletionInfo?.deletionDate);
+            assert(peerIdentityAttribute.peerSharingInfo!.deletionInfo.deletionStatus, LocalAttributeDeletionStatus.DeletedByOwner);
 
-            const timeOfSuccession = (await client5.consumption.attributes.getAttribute({ id: peerSharedIdentityAttribute.succeededBy })).value.createdAt;
-            const timeOfDeletionByOwner = peerSharedIdentityAttribute.peerSharingInfo!.deletionInfo.deletionDate;
+            const timeOfSuccession = (await client5.consumption.attributes.getAttribute({ id: peerIdentityAttribute.succeededBy })).value.createdAt;
+            const timeOfDeletionByOwner = peerIdentityAttribute.peerSharingInfo!.deletionInfo.deletionDate;
             expect(CoreDate.from(timeOfAcceptanceOfReactivation).isBefore(CoreDate.from(timeOfSuccession))).toBe(true);
             expect(CoreDate.from(timeOfSuccession).isBefore(CoreDate.from(timeOfDeletionByOwner))).toBe(true);
         });

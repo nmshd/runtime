@@ -2638,8 +2638,8 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 expect(peerIdentityAttributeVersion1.succeeds).toBeDefined();
 
                 await services2.consumption.attributes.deleteAttributeAndNotify({ attributeId: peerIdentityAttributeVersion0.id });
-                const updatedRecipientPeerSharedIdentityAttributeVersion1 = (await services2.consumption.attributes.getAttribute({ id: peerIdentityAttributeVersion1.id })).value;
-                expect(updatedRecipientPeerSharedIdentityAttributeVersion1.succeeds).toBeUndefined();
+                const updatedRecipientPeerIdentityAttributeVersion1 = (await services2.consumption.attributes.getAttribute({ id: peerIdentityAttributeVersion1.id })).value;
+                expect(updatedRecipientPeerIdentityAttributeVersion1.succeeds).toBeUndefined();
             });
 
             test("should notify about deletion of peer IdentityAttribute", async () => {
@@ -3014,8 +3014,8 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
             test("should set the 'succeeds' property of the peer RelationshipAttribute successor to undefined", async () => {
                 expect(peerRelationshipAttributeVersion1.succeeds).toBeDefined();
                 await services2.consumption.attributes.deleteAttributeAndNotify({ attributeId: peerRelationshipAttributeVersion0.id });
-                const updatedPeerSharedIdentityAttributeVersion1 = (await services2.consumption.attributes.getAttribute({ id: peerRelationshipAttributeVersion1.id })).value;
-                expect(updatedPeerSharedIdentityAttributeVersion1.succeeds).toBeUndefined();
+                const updatedPeerIdentityAttributeVersion1 = (await services2.consumption.attributes.getAttribute({ id: peerRelationshipAttributeVersion1.id })).value;
+                expect(updatedPeerIdentityAttributeVersion1.succeeds).toBeUndefined();
             });
 
             test("should notify owner about deletion of peer RelationshipAttribute", async () => {
