@@ -1,5 +1,5 @@
 import { ILogger } from "@js-soft/logging-abstractions";
-import { IdentityAttribute, PeerSharedAttributeSucceededNotificationItem, RelationshipAttribute } from "@nmshd/content";
+import { IdentityAttribute, PeerAttributeSucceededNotificationItem, RelationshipAttribute } from "@nmshd/content";
 import { TransportLoggerFactory } from "@nmshd/transport";
 import { ConsumptionController } from "../../../../consumption/ConsumptionController";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
@@ -10,16 +10,16 @@ import { LocalNotification } from "../../local/LocalNotification";
 import { AbstractNotificationItemProcessor } from "../AbstractNotificationItemProcessor";
 
 // TODO: this needs to be renamed, too -> different PR
-export class PeerSharedAttributeSucceededNotificationItemProcessor extends AbstractNotificationItemProcessor<PeerSharedAttributeSucceededNotificationItem> {
+export class PeerAttributeSucceededNotificationItemProcessor extends AbstractNotificationItemProcessor<PeerAttributeSucceededNotificationItem> {
     private readonly _logger: ILogger;
 
     public constructor(consumptionController: ConsumptionController) {
         super(consumptionController);
-        this._logger = TransportLoggerFactory.getLogger(PeerSharedAttributeSucceededNotificationItemProcessor);
+        this._logger = TransportLoggerFactory.getLogger(PeerAttributeSucceededNotificationItemProcessor);
     }
 
     public override async checkPrerequisitesOfIncomingNotificationItem(
-        notificationItem: PeerSharedAttributeSucceededNotificationItem,
+        notificationItem: PeerAttributeSucceededNotificationItem,
         notification: LocalNotification
     ): Promise<ValidationResult> {
         if (!notification.peer.equals(notificationItem.successorContent.owner)) {
@@ -73,7 +73,7 @@ export class PeerSharedAttributeSucceededNotificationItemProcessor extends Abstr
         // return await this.consumptionController.attributes.validateThirdPartyRelationshipAttributeSuccession(predecessor, successorParams);
     }
 
-    public override async process(notificationItem: PeerSharedAttributeSucceededNotificationItem, notification: LocalNotification): Promise<AttributeSucceededEvent> {
+    public override async process(notificationItem: PeerAttributeSucceededNotificationItem, notification: LocalNotification): Promise<AttributeSucceededEvent> {
         let updatedPredecessor: LocalAttribute;
         let successor: LocalAttribute;
 
@@ -117,11 +117,11 @@ export class PeerSharedAttributeSucceededNotificationItemProcessor extends Abstr
         return new AttributeSucceededEvent(ownAddress, updatedPredecessor, successor);
     }
 
-    public override async rollback(notificationItem: PeerSharedAttributeSucceededNotificationItem, notification: LocalNotification): Promise<void> {
+    public override async rollback(notificationItem: PeerAttributeSucceededNotificationItem, notification: LocalNotification): Promise<void> {
         await this.rollbackPartialWork(notificationItem, notification);
     }
 
-    private async rollbackPartialWork(notificationItem: PeerSharedAttributeSucceededNotificationItem, _notification: LocalNotification): Promise<void> {
+    private async rollbackPartialWork(notificationItem: PeerAttributeSucceededNotificationItem, _notification: LocalNotification): Promise<void> {
         const successor = await this.consumptionController.attributes.getLocalAttribute(notificationItem.successorId);
         if (successor) {
             await this.consumptionController.attributes

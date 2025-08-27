@@ -8,7 +8,7 @@ import {
     LocalNotification,
     LocalNotificationSource,
     LocalNotificationStatus,
-    PeerSharedAttributeSucceededNotificationItemProcessor
+    PeerAttributeSucceededNotificationItemProcessor
 } from "../../../../../src";
 import { TestUtil } from "../../../../core/TestUtil";
 import { MockEventBus } from "../../../MockEventBus";
@@ -82,7 +82,7 @@ describe("PeerSharedAttributeSucceededNotificationItemProcessor", function () {
             }),
             receivedByDevice: CoreId.from("deviceId")
         });
-        const processor = new PeerSharedAttributeSucceededNotificationItemProcessor(consumptionController);
+        const processor = new PeerAttributeSucceededNotificationItemProcessor(consumptionController);
 
         /* Run and check validation. */
         const checkResult = await processor.checkPrerequisitesOfIncomingNotificationItem(notificationItem, notification);
@@ -153,7 +153,7 @@ describe("PeerSharedAttributeSucceededNotificationItemProcessor", function () {
             }),
             receivedByDevice: CoreId.from("deviceId")
         });
-        const processor = new PeerSharedAttributeSucceededNotificationItemProcessor(consumptionController);
+        const processor = new PeerAttributeSucceededNotificationItemProcessor(consumptionController);
 
         /* Run and check validation. */
         const checkResult = await processor.checkPrerequisitesOfIncomingNotificationItem(notificationItem, notification);
@@ -220,7 +220,7 @@ describe("PeerSharedAttributeSucceededNotificationItemProcessor", function () {
             }),
             receivedByDevice: CoreId.from("deviceId")
         });
-        const processor = new PeerSharedAttributeSucceededNotificationItemProcessor(consumptionController);
+        const processor = new PeerAttributeSucceededNotificationItemProcessor(consumptionController);
 
         const checkResult = await processor.checkPrerequisitesOfIncomingNotificationItem(notificationItem, notification);
         expect(checkResult).errorValidationResult({

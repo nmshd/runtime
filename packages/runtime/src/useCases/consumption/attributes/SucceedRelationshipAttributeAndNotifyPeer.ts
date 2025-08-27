@@ -7,7 +7,7 @@ import {
     OwnRelationshipAttributeSharingInfo,
     OwnRelationshipAttributeSuccessorParams
 } from "@nmshd/consumption";
-import { AttributeValues, Notification, PeerSharedAttributeSucceededNotificationItem, RelationshipAttribute } from "@nmshd/content";
+import { AttributeValues, Notification, PeerAttributeSucceededNotificationItem, RelationshipAttribute } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
 import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { AccountController, MessageController } from "@nmshd/transport";
@@ -73,7 +73,7 @@ export class SucceedRelationshipAttributeAndNotifyPeerUseCase extends UseCase<Su
 
         const { predecessor: updatedPredecessor, successor } = await this.attributeController.succeedOwnRelationshipAttribute(predecessor, successorParams, false);
 
-        const notificationItem = PeerSharedAttributeSucceededNotificationItem.from({
+        const notificationItem = PeerAttributeSucceededNotificationItem.from({
             predecessorId: predecessor.id,
             successorId: successor.id,
             successorContent: successor.content

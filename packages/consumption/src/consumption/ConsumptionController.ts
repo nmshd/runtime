@@ -6,8 +6,8 @@ import {
     FormFieldRequestItem,
     ForwardedAttributeDeletedByPeerNotificationItem,
     OwnAttributeDeletedByOwnerNotificationItem,
+    PeerAttributeSucceededNotificationItem,
     PeerRelationshipAttributeDeletedByPeerNotificationItem,
-    PeerSharedAttributeSucceededNotificationItem,
     ProposeAttributeRequestItem,
     ReadAttributeRequestItem,
     ShareAttributeRequestItem,
@@ -31,8 +31,8 @@ import {
     NotificationsController,
     OutgoingRequestsController,
     OwnAttributeDeletedByOwnerNotificationItemProcessor,
+    PeerAttributeSucceededNotificationItemProcessor,
     PeerRelationshipAttributeDeletedByPeerNotificationItemProcessor,
-    PeerSharedAttributeSucceededNotificationItemProcessor,
     ProposeAttributeRequestItemProcessor,
     ReadAttributeRequestItemProcessor,
     RequestItemConstructor,
@@ -157,7 +157,7 @@ export class ConsumptionController {
 
     private getDefaultNotificationItemProcessors() {
         return new Map<NotificationItemConstructor, NotificationItemProcessorConstructor>([
-            [PeerSharedAttributeSucceededNotificationItem, PeerSharedAttributeSucceededNotificationItemProcessor],
+            [PeerAttributeSucceededNotificationItem, PeerAttributeSucceededNotificationItemProcessor],
             [OwnAttributeDeletedByOwnerNotificationItem, OwnAttributeDeletedByOwnerNotificationItemProcessor],
             [PeerRelationshipAttributeDeletedByPeerNotificationItem, PeerRelationshipAttributeDeletedByPeerNotificationItemProcessor],
             [ForwardedAttributeDeletedByPeerNotificationItem, ForwardedAttributeDeletedByPeerNotificationItemProcessor]

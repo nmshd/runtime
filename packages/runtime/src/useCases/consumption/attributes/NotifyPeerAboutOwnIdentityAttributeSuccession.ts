@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController, ConsumptionIds, LocalAttribute, OwnIdentityAttribute } from "@nmshd/consumption";
-import { Notification, PeerSharedAttributeSucceededNotificationItem } from "@nmshd/content";
+import { Notification, PeerAttributeSucceededNotificationItem } from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { AccountController, MessageController } from "@nmshd/transport";
@@ -68,7 +68,7 @@ export class NotifyPeerAboutOwnIdentityAttributeSuccessionUseCase extends UseCas
         const notificationId = await ConsumptionIds.notification.generate();
         const updatedAttribute = await this.attributeController.addForwardedSharingInfoToAttribute(attribute, peerAddress, notificationId);
 
-        const notificationItem = PeerSharedAttributeSucceededNotificationItem.from({
+        const notificationItem = PeerAttributeSucceededNotificationItem.from({
             predecessorId: latestVersionSharedWithPeer.id,
             successorId: updatedAttribute.id,
             successorContent: updatedAttribute.content
