@@ -2873,8 +2873,8 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
             test("should set the 'succeeds' property of the own RelationshipAttribute successor to undefined", async () => {
                 expect(ownRelationshipAttributeVersion1.succeeds).toBeDefined();
                 await services1.consumption.attributes.deleteAttributeAndNotify({ attributeId: ownRelationshipAttributeVersion0.id });
-                const updatedOwnSharedIdentityAttributeVersion1 = (await services1.consumption.attributes.getAttribute({ id: ownRelationshipAttributeVersion1.id })).value;
-                expect(updatedOwnSharedIdentityAttributeVersion1.succeeds).toBeUndefined();
+                const updatedOwnIdentityAttributeVersion1 = (await services1.consumption.attributes.getAttribute({ id: ownRelationshipAttributeVersion1.id })).value;
+                expect(updatedOwnIdentityAttributeVersion1.succeeds).toBeUndefined();
             });
 
             test("should notify peer about deletion of own RelationshipAttribute", async () => {
@@ -3490,10 +3490,10 @@ describe(SetAttributeDeletionInfoOfDeletionProposedRelationshipUseCase.name, () 
         const result = await services2.consumption.attributes.setAttributeDeletionInfoOfDeletionProposedRelationship({ relationshipId });
         expect(result).toBeSuccessful();
 
-        const ownSharedAttributes = (await services2.consumption.attributes.getOwnAttributesSharedWithPeer({ peer: services1.address })).value;
-        expect(ownSharedAttributes).toHaveLength(1);
-        expect(ownSharedAttributes[0].forwardedSharingInfos![0].deletionInfo!.deletionStatus).toBe(LocalAttributeDeletionStatus.DeletedByPeer);
-        expect(ownSharedAttributes[0].forwardedSharingInfos![0].deletionInfo!.deletionDate).toStrictEqual(deletionDate);
+        const ownAttributesSharedWithPeer = (await services2.consumption.attributes.getOwnAttributesSharedWithPeer({ peer: services1.address })).value;
+        expect(ownAttributesSharedWithPeer).toHaveLength(1);
+        expect(ownAttributesSharedWithPeer[0].forwardedSharingInfos![0].deletionInfo!.deletionStatus).toBe(LocalAttributeDeletionStatus.DeletedByPeer);
+        expect(ownAttributesSharedWithPeer[0].forwardedSharingInfos![0].deletionInfo!.deletionDate).toStrictEqual(deletionDate);
     });
 
     test("peer Attributes should not be updated if they are already marked as deleted", async () => {

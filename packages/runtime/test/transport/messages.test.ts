@@ -655,7 +655,7 @@ describe("Postponed Notifications via Messages", () => {
         });
 
         test("should be able to receive Notifications sent on a terminated Relationship in the right order after the Relationship was reactivated", async () => {
-            const ownSharedIdentityAttribute = await executeFullCreateAndShareOwnIdentityAttributeFlow(client1, client5, {
+            const ownIdentityAttribute = await executeFullCreateAndShareOwnIdentityAttributeFlow(client1, client5, {
                 content: {
                     value: {
                         "@type": "GivenName",
@@ -687,7 +687,7 @@ describe("Postponed Notifications via Messages", () => {
             const successionNotificationNotYetReceived = await client5.consumption.notifications.getNotification({ id: notifyAboutSuccessionResult.notificationId });
             expect(successionNotificationNotYetReceived).toBeAnError(/.*/, "error.transport.recordNotFound");
 
-            const notifyAboutDeletionResult = (await client1.consumption.attributes.deleteAttributeAndNotify({ attributeId: ownSharedIdentityAttribute.id })).value;
+            const notifyAboutDeletionResult = (await client1.consumption.attributes.deleteAttributeAndNotify({ attributeId: ownIdentityAttribute.id })).value;
             await client1.eventBus.waitForEvent(AttributeDeletedEvent);
             await client5.transport.account.syncEverything();
             const deletionNotificationNotYetReceived = await client5.consumption.notifications.getNotification({ id: notifyAboutDeletionResult.notificationIds[0] });
@@ -712,7 +712,7 @@ describe("Postponed Notifications via Messages", () => {
             const processedDeletionNotificationResult = await client5.consumption.notifications.processNotificationById({ notificationId: postponedDeletionNotification.id });
             expect(processedDeletionNotificationResult).toBeSuccessful();
 
-            const peerIdentityAttribute = (await client5.consumption.attributes.getAttribute({ id: ownSharedIdentityAttribute.id })).value;
+            const peerIdentityAttribute = (await client5.consumption.attributes.getAttribute({ id: ownIdentityAttribute.id })).value;
             assert(peerIdentityAttribute.succeededBy);
             assert(peerIdentityAttribute.peerSharingInfo!.deletionInfo?.deletionDate);
             assert(peerIdentityAttribute.peerSharingInfo!.deletionInfo.deletionStatus, LocalAttributeDeletionStatus.DeletedByOwner);

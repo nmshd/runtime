@@ -61,7 +61,7 @@ beforeAll(async () => {
 
 beforeEach(async () => {
     await cleanupAttributes([sRuntimeServices, rRuntimeServices]);
-    const sOwnSharedIdentityAttribute = await executeFullCreateAndShareOwnIdentityAttributeFlow(sRuntimeServices, rRuntimeServices, {
+    const sOwnIdentityAttribute = await executeFullCreateAndShareOwnIdentityAttributeFlow(sRuntimeServices, rRuntimeServices, {
         content: {
             value: {
                 "@type": "GivenName",
@@ -70,7 +70,7 @@ beforeEach(async () => {
         }
     });
 
-    attributeId = sOwnSharedIdentityAttribute.id;
+    attributeId = sOwnIdentityAttribute.id;
 
     requestContent = {
         content: {
