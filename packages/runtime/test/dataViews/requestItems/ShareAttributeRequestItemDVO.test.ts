@@ -1,5 +1,5 @@
 import { DecideRequestItemParametersJSON } from "@nmshd/consumption";
-import { AbstractStringJSON, DisplayNameJSON, RequestJSON, ShareAttributeAcceptResponseItemJSON, ShareAttributeRequestItemJSON } from "@nmshd/content";
+import { AbstractStringJSON, DisplayNameJSON, ShareAttributeRequestItemJSON } from "@nmshd/content";
 import {
     AcceptResponseItemDVO,
     ConsumptionServices,
@@ -41,6 +41,8 @@ let responseItems: DecideRequestItemParametersJSON[];
 let sAddress: string;
 let rAddress: string;
 
+let sharedAttributeId: string;
+
 beforeAll(async () => {
     const runtimeServices = await serviceProvider.launch(2, { enableRequestModule: true });
     sRuntimeServices = runtimeServices[0];
@@ -63,14 +65,17 @@ beforeAll(async () => {
 afterAll(() => serviceProvider.stop());
 
 beforeEach(async () => {
-    const senderAttribute = await sConsumptionServices.attributes.createOwnIdentityAttribute({
-        content: {
-            value: {
-                "@type": "DisplayName",
-                value: "aDisplayName"
+    const senderAttribute = (
+        await sConsumptionServices.attributes.createOwnIdentityAttribute({
+            content: {
+                value: {
+                    "@type": "DisplayName",
+                    value: "aDisplayName"
+                }
             }
-        }
-    });
+        })
+    ).value;
+    sharedAttributeId = senderAttribute.id;
 
     requestContent = {
         content: {
@@ -78,8 +83,8 @@ beforeEach(async () => {
                 {
                     "@type": "ShareAttributeRequestItem",
                     mustBeAccepted: true,
-                    attribute: senderAttribute.value.content,
-                    attributeId: senderAttribute.value.id
+                    attribute: senderAttribute.content,
+                    attributeId: senderAttribute.id
                 } as ShareAttributeRequestItemJSON
             ]
         },
@@ -202,9 +207,8 @@ describe("ShareAttributeRequestItemDVO", () => {
         expect(response!.content.result).toBe("Accepted");
         expect(response!.content.items).toHaveLength(1);
         const responseItem = response!.content.items[0] as AcceptResponseItemDVO;
-        expect(responseItem.type).toBe("ShareAttributeAcceptResponseItemDVO");
+        expect(responseItem.type).toBe("AcceptResponseItemDVO");
         expect(requestItemDVO.response).toStrictEqual(responseItem);
-        expect(requestItemDVO.attribute.id).toStrictEqual((responseItem as any).attributeId);
 
         const attributeResult = await rConsumptionServices.attributes.getAttributes({
             query: { "content.value.@type": "DisplayName", "peerSharingInfo.peer": dvo.createdBy.id }
@@ -272,9 +276,8 @@ describe("ShareAttributeRequestItemDVO", () => {
         expect(response!.content.items).toHaveLength(1);
         const responseItem = response!.content.items[0] as AcceptResponseItemDVO;
         expect(responseItem.result).toBe("Accepted");
-        expect(responseItem.type).toBe("ShareAttributeAcceptResponseItemDVO");
+        expect(responseItem.type).toBe("AcceptResponseItemDVO");
         expect(requestItemDVO.response).toStrictEqual(responseItem);
-        expect(requestItemDVO.attribute.id).toStrictEqual((responseItem as any).attributeId);
 
         const attributeResult = await sConsumptionServices.attributes.getAttributes({
             query: { "content.value.@type": "DisplayName", "forwardedSharingInfos.peer": dvo.request.peer.id }
@@ -311,29 +314,21 @@ describe("ShareAttributeRequestItemDVO", () => {
 
     test("check the MessageDVO for the recipient after they deleted the shared Attribute", async () => {
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
-        const requestId = (senderMessage.content as RequestJSON).id!;
-        const localRequest = (await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: requestId })).value;
-        const sharedAttributeId = (localRequest.response!.content.items[0] as ShareAttributeAcceptResponseItemJSON).attributeId;
-
         await rRuntimeServices.consumption.attributes.deleteAttributeAndNotify({ attributeId: sharedAttributeId });
 
         const recipientMessage = (await rRuntimeServices.transport.messages.getMessage({ id: senderMessage.id })).value;
         const dvo = (await rExpander.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
         const responseItemDVO = dvo.request.response!.content.items[0];
-        expect(responseItemDVO.type).toBe("AttributeAlreadyDeletedAcceptResponseItemDVO");
+        expect(responseItemDVO.type).toBe("AcceptResponseItemDVO");
     });
 
     test("check the MessageDVO for the sender after they deleted the shared Attribute", async () => {
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
-        const requestId = (senderMessage.content as RequestJSON).id!;
-        const localRequest = (await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: requestId })).value;
-        const sharedAttributeId = (localRequest.response!.content.items[0] as ShareAttributeAcceptResponseItemJSON).attributeId;
-
         await sRuntimeServices.consumption.attributes.deleteAttributeAndNotify({ attributeId: sharedAttributeId });
 
         const senderMessageAfterDeletion = (await sRuntimeServices.transport.messages.getMessage({ id: senderMessage.id })).value;
         const dvo = (await sExpander.expandMessageDTO(senderMessageAfterDeletion)) as RequestMessageDVO;
         const responseItemDVO = dvo.request.response!.content.items[0];
-        expect(responseItemDVO.type).toBe("AttributeAlreadyDeletedAcceptResponseItemDVO");
+        expect(responseItemDVO.type).toBe("AcceptResponseItemDVO");
     });
 });

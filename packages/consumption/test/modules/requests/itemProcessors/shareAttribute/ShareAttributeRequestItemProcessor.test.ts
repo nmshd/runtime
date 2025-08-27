@@ -1,5 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import {
+    AcceptResponseItem,
     AttributeAlreadySharedAcceptResponseItem,
     GivenName,
     IdentityAttribute,
@@ -8,7 +9,6 @@ import {
     RelationshipAttributeConfidentiality,
     Request,
     ResponseItemResult,
-    ShareAttributeAcceptResponseItem,
     ShareAttributeRequestItem,
     Surname
 } from "@nmshd/content";
@@ -848,7 +848,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
     describe("accept", function () {
         const sender = CoreAddress.from("Sender");
 
-        test("returns ShareAttributeAcceptResponseItem when accepting a shared IdentityAttribute", async function () {
+        test("returns AcceptResponseItem when accepting a shared IdentityAttribute", async function () {
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: true,
                 attributeId: CoreId.from("anAttributeId"),
@@ -866,14 +866,14 @@ describe("ShareAttributeRequestItemProcessor", function () {
             });
 
             const responseItem = await processor.accept(requestItem, { accept: true }, incomingRequest);
-            expect(responseItem).toBeInstanceOf(ShareAttributeAcceptResponseItem);
+            expect(responseItem).toBeInstanceOf(AcceptResponseItem);
 
-            const createdAttribute = await consumptionController.attributes.getLocalAttribute(responseItem.attributeId);
+            const createdAttribute = await consumptionController.attributes.getLocalAttribute(requestItem.attributeId);
             expect((createdAttribute as PeerIdentityAttribute).peerSharingInfo.peer).toStrictEqual(sender);
             expect(createdAttribute!.content.owner).toStrictEqual(sender);
         });
 
-        test("returns ShareAttributeAcceptResponseItem when accepting a shared RelationshipAttribute", async function () {
+        test("returns AcceptResponseItem when accepting a shared RelationshipAttribute", async function () {
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: true,
                 attributeId: CoreId.from("anAttributeId"),
@@ -892,9 +892,9 @@ describe("ShareAttributeRequestItemProcessor", function () {
             });
 
             const responseItem = await processor.accept(requestItem, { accept: true }, incomingRequest);
-            expect(responseItem).toBeInstanceOf(ShareAttributeAcceptResponseItem);
+            expect(responseItem).toBeInstanceOf(AcceptResponseItem);
 
-            const createdAttribute = await consumptionController.attributes.getLocalAttribute(responseItem.attributeId);
+            const createdAttribute = await consumptionController.attributes.getLocalAttribute(requestItem.attributeId);
             expect((createdAttribute! as PeerIdentityAttribute).peerSharingInfo.peer).toStrictEqual(sender);
             expect(createdAttribute!.content.owner).toStrictEqual(sender);
         });
@@ -925,7 +925,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             const responseItem = await processor.accept(requestItem, { accept: true }, incomingRequest);
             expect(responseItem).toBeInstanceOf(AttributeAlreadySharedAcceptResponseItem);
-            expect(responseItem.attributeId).toStrictEqual(existingPeerIdentityAttribute.id);
+            expect((responseItem as AttributeAlreadySharedAcceptResponseItem).attributeId).toStrictEqual(existingPeerIdentityAttribute.id);
         });
 
         test("returns AttributeAlreadySharedAcceptResponseItem when accepting an already existing PeerIdentityAttribute that is to be deleted", async function () {
@@ -962,10 +962,10 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             const responseItem = await processor.accept(requestItem, { accept: true }, incomingRequest);
             expect(responseItem).toBeInstanceOf(AttributeAlreadySharedAcceptResponseItem);
-            expect(responseItem.attributeId).toStrictEqual(existingPeerIdentityAttribute.id);
+            expect((responseItem as AttributeAlreadySharedAcceptResponseItem).attributeId).toStrictEqual(existingPeerIdentityAttribute.id);
         });
 
-        test("returns ShareAttributeAcceptResponseItem when accepting an already existing PeerIdentityAttribute that has a successor", async function () {
+        test("returns AttributeAlreadySharedAcceptResponseItem when accepting an already existing PeerIdentityAttribute that has a successor", async function () {
             const existingPeerIdentityAttribute = await consumptionController.attributes.createPeerIdentityAttribute({
                 content: TestObjectFactory.createIdentityAttribute({ owner: sender, value: GivenName.from({ value: "aGivenName" }) }),
                 sourceReference: CoreId.from("aSourceReferenceId"),
@@ -985,8 +985,8 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: true,
-                attributeId: CoreId.from("anAttributeId"),
-                attribute: TestObjectFactory.createIdentityAttribute({ owner: sender })
+                attributeId: existingPeerIdentityAttribute.id,
+                attribute: existingPeerIdentityAttribute.content
             });
 
             const incomingRequest = LocalRequest.from({
@@ -1000,8 +1000,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             });
 
             const responseItem = await processor.accept(requestItem, { accept: true }, incomingRequest);
-            expect(responseItem).toBeInstanceOf(ShareAttributeAcceptResponseItem);
-            expect(responseItem.attributeId).not.toStrictEqual(existingPeerIdentityAttribute.id);
+            expect(responseItem).toBeInstanceOf(AttributeAlreadySharedAcceptResponseItem);
         });
     });
 
@@ -1097,57 +1096,47 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
     describe("applyIncomingResponseItem", function () {
         test("in case of an IdentityAttribute, adds a ForwardedSharingInfo to the Attribute from the RequestItem for the peer of the Request", async function () {
-            const sourceAttributeContent = TestObjectFactory.createIdentityAttribute({ owner: testAccount.identity.address });
-            const sourceAttribute = await consumptionController.attributes.createOwnIdentityAttribute({ content: sourceAttributeContent });
+            const sharedAttributeContent = TestObjectFactory.createIdentityAttribute({ owner: testAccount.identity.address });
+            const sharedAttribute = await consumptionController.attributes.createOwnIdentityAttribute({ content: sharedAttributeContent });
 
-            const { localRequest, requestItem } = await createLocalRequest({ sourceAttribute });
+            const { localRequest, requestItem } = await createLocalRequest({ sharedAttribute: sharedAttribute });
 
-            const responseItem = ShareAttributeAcceptResponseItem.from({
-                result: ResponseItemResult.Accepted,
-                attributeId: sourceAttribute.id
-            });
+            const responseItem = AcceptResponseItem.from({ result: ResponseItemResult.Accepted });
 
             await processor.applyIncomingResponseItem(responseItem, requestItem, localRequest);
 
-            const forwardedAttribute = await consumptionController.attributes.getLocalAttribute(responseItem.attributeId);
-            expect(forwardedAttribute!.id).toStrictEqual(responseItem.attributeId);
-            expect(forwardedAttribute!.id).toStrictEqual(sourceAttribute.id);
+            const forwardedAttribute = await consumptionController.attributes.getLocalAttribute(sharedAttribute.id);
             expect((forwardedAttribute! as OwnIdentityAttribute).isForwardedTo(localRequest.peer)).toBe(true);
             expect(forwardedAttribute!.content.owner).toStrictEqual(testAccount.identity.address);
         });
 
         test("in case of a RelationshipAttribute, adds a ForwardedSharingInfo to the Attribute from the RequestItem for the peer of the Request", async function () {
-            const sourceAttributeContent = TestObjectFactory.createRelationshipAttribute({ owner: testAccount.identity.address });
-            const sourceAttribute = await consumptionController.attributes.createOwnRelationshipAttribute({
-                content: sourceAttributeContent,
+            const sharedAttributeContent = TestObjectFactory.createRelationshipAttribute({ owner: testAccount.identity.address });
+            const sharedAttribute = await consumptionController.attributes.createOwnRelationshipAttribute({
+                content: sharedAttributeContent,
                 sourceReference: CoreId.from("aSourceReferenceId"),
                 peer: aThirdParty
             });
 
-            const { localRequest, requestItem } = await createLocalRequest({ sourceAttribute });
+            const { localRequest, requestItem } = await createLocalRequest({ sharedAttribute: sharedAttribute });
 
-            const responseItem = ShareAttributeAcceptResponseItem.from({
-                result: ResponseItemResult.Accepted,
-                attributeId: sourceAttribute.id
-            });
+            const responseItem = AcceptResponseItem.from({ result: ResponseItemResult.Accepted });
 
             await processor.applyIncomingResponseItem(responseItem, requestItem, localRequest);
 
-            const forwardedAttribute = await consumptionController.attributes.getLocalAttribute(responseItem.attributeId);
-            expect(forwardedAttribute!.id).toStrictEqual(responseItem.attributeId);
-            expect(forwardedAttribute!.id).toStrictEqual(sourceAttribute.id);
+            const forwardedAttribute = await consumptionController.attributes.getLocalAttribute(sharedAttribute.id);
             expect((forwardedAttribute! as OwnRelationshipAttribute).isForwardedTo(localRequest.peer)).toBe(true);
             expect(forwardedAttribute!.content.owner).toStrictEqual(testAccount.identity.address);
             expect((forwardedAttribute! as OwnRelationshipAttribute).peerSharingInfo.peer).toStrictEqual(aThirdParty);
         });
     });
 
-    async function createLocalRequest({ sourceAttribute }: { sourceAttribute: LocalAttribute }): Promise<{ localRequest: LocalRequest; requestItem: ShareAttributeRequestItem }> {
+    async function createLocalRequest({ sharedAttribute }: { sharedAttribute: LocalAttribute }): Promise<{ localRequest: LocalRequest; requestItem: ShareAttributeRequestItem }> {
         const requestItem = ShareAttributeRequestItem.from({
             mustBeAccepted: true,
-            attribute: sourceAttribute.content,
-            attributeId: sourceAttribute.id,
-            thirdPartyAddress: sourceAttribute.content instanceof RelationshipAttribute ? (sourceAttribute as OwnRelationshipAttribute).peerSharingInfo.peer : undefined
+            attribute: sharedAttribute.content,
+            attributeId: sharedAttribute.id,
+            thirdPartyAddress: sharedAttribute.content instanceof RelationshipAttribute ? (sharedAttribute as OwnRelationshipAttribute).peerSharingInfo.peer : undefined
         });
 
         const requestId = await ConsumptionIds.request.generate();

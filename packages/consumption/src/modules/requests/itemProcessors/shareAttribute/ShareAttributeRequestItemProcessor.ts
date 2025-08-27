@@ -1,4 +1,5 @@
 import {
+    AcceptResponseItem,
     AttributeAlreadySharedAcceptResponseItem,
     IdentityAttribute,
     RejectResponseItem,
@@ -6,7 +7,6 @@ import {
     RelationshipAttributeConfidentiality,
     Request,
     ResponseItemResult,
-    ShareAttributeAcceptResponseItem,
     ShareAttributeRequestItem
 } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
@@ -158,10 +158,10 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
         requestItem: ShareAttributeRequestItem,
         _params: AcceptRequestItemParametersJSON,
         requestInfo: LocalRequestInfo
-    ): Promise<ShareAttributeAcceptResponseItem | AttributeAlreadySharedAcceptResponseItem> {
+    ): Promise<AcceptResponseItem | AttributeAlreadySharedAcceptResponseItem> {
         const isThirdPartyRelationshipAttribute = !!requestItem.thirdPartyAddress;
         if (isThirdPartyRelationshipAttribute) {
-            const thirdPartyRelationshipAttribute = await this.consumptionController.attributes.createThirdPartyRelationshipAttribute({
+            await this.consumptionController.attributes.createThirdPartyRelationshipAttribute({
                 id: requestItem.attributeId,
                 content: requestItem.attribute as RelationshipAttribute,
                 peer: requestInfo.peer,
@@ -169,11 +169,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                 initialAttributePeer: requestItem.thirdPartyAddress!
             });
 
-            // TODO: returning the attributeId is unnecessary now
-            return ShareAttributeAcceptResponseItem.from({
-                attributeId: thirdPartyRelationshipAttribute.id,
-                result: ResponseItemResult.Accepted
-            });
+            return AcceptResponseItem.from({ result: ResponseItemResult.Accepted });
         }
 
         // TODO: check if this is also required for ThirdPartyRelationshipAttributes
@@ -196,21 +192,18 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             });
         }
 
-        const localAttribute = await this.consumptionController.attributes.createPeerIdentityAttribute({
+        await this.consumptionController.attributes.createPeerIdentityAttribute({
             content: requestItem.attribute as IdentityAttribute,
             peer: requestInfo.peer,
             sourceReference: requestInfo.id,
             id: requestItem.attributeId
         });
 
-        return ShareAttributeAcceptResponseItem.from({
-            attributeId: localAttribute.id,
-            result: ResponseItemResult.Accepted
-        });
+        return AcceptResponseItem.from({ result: ResponseItemResult.Accepted });
     }
 
     public override async applyIncomingResponseItem(
-        responseItem: ShareAttributeAcceptResponseItem | AttributeAlreadySharedAcceptResponseItem | RejectResponseItem,
+        responseItem: AcceptResponseItem | AttributeAlreadySharedAcceptResponseItem | RejectResponseItem,
         requestItem: ShareAttributeRequestItem,
         requestInfo: LocalRequestInfo
     ): Promise<void> {

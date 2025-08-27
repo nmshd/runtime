@@ -50,7 +50,6 @@ import {
     ResponseItemResult,
     ResponseJSON,
     SexJSON,
-    ShareAttributeAcceptResponseItemJSON,
     ShareAttributeRequestItemJSON,
     SurnameJSON,
     ThirdPartyRelationshipAttributeQueryJSON,
@@ -133,7 +132,6 @@ import {
     ResponseDVO,
     ResponseItemDVO,
     ResponseItemGroupDVO,
-    ShareAttributeAcceptResponseItemDVO,
     ShareAttributeRequestItemDVO,
     ThirdPartyRelationshipAttributeQueryDVO,
     TransferFileOwnershipAcceptResponseItemDVO,
@@ -569,11 +567,8 @@ export class DataViewExpander {
                 const shareAttributeRequestItem = requestItem as ShareAttributeRequestItemJSON;
                 const attributeDVO = await this.expandAttribute(shareAttributeRequestItem.attribute);
 
-                if (responseItemDVO?.result === ResponseItemResult.Accepted) {
-                    // We have to manually copy the attribute id here, otherwise we could not link to the local attribute
-                    const shareAttributeResponseItem = responseItemDVO as ShareAttributeAcceptResponseItemDVO | undefined;
-                    if (shareAttributeResponseItem) attributeDVO.id = shareAttributeResponseItem.attributeId;
-                }
+                // We have to manually copy the attribute id here, otherwise we could not link to the local attribute
+                attributeDVO.id = shareAttributeRequestItem.attributeId;
 
                 return {
                     ...shareAttributeRequestItem,
@@ -775,29 +770,6 @@ export class DataViewExpander {
                         name: name,
                         attribute: localAttributeDVOForPropose
                     } as ProposeAttributeAcceptResponseItemDVO;
-
-                case "ShareAttributeAcceptResponseItem":
-                    const shareAttributeResponseItem = responseItem as ShareAttributeAcceptResponseItemJSON;
-
-                    const localAttributeResultForShare = await this.consumption.attributes.getAttribute({ id: shareAttributeResponseItem.attributeId });
-                    if (localAttributeResultForShare.isError) {
-                        if (!localAttributeResultForShare.error.equals(RuntimeErrors.general.recordNotFound())) throw localAttributeResultForShare.error;
-
-                        return {
-                            type: "AttributeAlreadyDeletedAcceptResponseItemDVO",
-                            id: shareAttributeResponseItem.attributeId,
-                            name: name
-                        } as AttributeAlreadyDeletedAcceptResponseItemDVO;
-                    }
-
-                    const localAttributeDVOForShare = await this.expandLocalAttributeDTO(localAttributeResultForShare.value);
-                    return {
-                        ...shareAttributeResponseItem,
-                        type: "ShareAttributeAcceptResponseItemDVO",
-                        id: shareAttributeResponseItem.attributeId,
-                        name: name,
-                        attribute: localAttributeDVOForShare
-                    } as ShareAttributeAcceptResponseItemDVO;
 
                 case "FormFieldAcceptResponseItem":
                     const formFieldResponseItem = responseItem as FormFieldAcceptResponseItemJSON;

@@ -2927,9 +2927,6 @@ export const CompleteOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/CreateAttributeAcceptResponseItemJSON"
                 },
                 {
-                    "$ref": "#/definitions/ShareAttributeAcceptResponseItemJSON"
-                },
-                {
                     "$ref": "#/definitions/ProposeAttributeAcceptResponseItemJSON"
                 },
                 {
@@ -4497,34 +4494,6 @@ export const CompleteOutgoingRequestRequest: any = {
                 "@type": {
                     "type": "string",
                     "const": "CreateAttributeAcceptResponseItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "result": {
-                    "type": "string",
-                    "const": "Accepted"
-                },
-                "attributeId": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "attributeId",
-                "result"
-            ],
-            "additionalProperties": false
-        },
-        "ShareAttributeAcceptResponseItemJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ShareAttributeAcceptResponseItem"
                 },
                 "@context": {
                     "type": "string"
@@ -4924,9 +4893,6 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                     "$ref": "#/definitions/CreateAttributeAcceptResponseItemJSON"
                 },
                 {
-                    "$ref": "#/definitions/ShareAttributeAcceptResponseItemJSON"
-                },
-                {
                     "$ref": "#/definitions/ProposeAttributeAcceptResponseItemJSON"
                 },
                 {
@@ -6494,34 +6460,6 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                 "@type": {
                     "type": "string",
                     "const": "CreateAttributeAcceptResponseItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "result": {
-                    "type": "string",
-                    "const": "Accepted"
-                },
-                "attributeId": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "attributeId",
-                "result"
-            ],
-            "additionalProperties": false
-        },
-        "ShareAttributeAcceptResponseItemJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ShareAttributeAcceptResponseItem"
                 },
                 "@context": {
                     "type": "string"

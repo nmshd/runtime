@@ -1001,7 +1001,6 @@ export class AttributesController extends ConsumptionBaseController {
                 value: trimmedValue
             }
         });
-        query["succeededBy"] = { $exists: false };
 
         if (!includeDeletedAndToBeDeleted) query["sharingInfo.deletionInfo"] = { $exists: false };
 

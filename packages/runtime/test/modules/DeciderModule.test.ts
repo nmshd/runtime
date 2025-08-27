@@ -17,7 +17,6 @@ import {
     Request,
     ResponseItemGroupJSON,
     ResponseResult,
-    ShareAttributeAcceptResponseItemJSON,
     TransferFileOwnershipAcceptResponseItemJSON
 } from "@nmshd/content";
 import { CoreAddress, CoreDate } from "@nmshd/core-types";
@@ -243,7 +242,7 @@ describe("DeciderModule", () => {
             expect(responseContent.result).toBe(ResponseResult.Accepted);
             expect(responseContent.items).toHaveLength(2);
             expect(responseContent.items[0]["@type"]).toBe("CreateAttributeAcceptResponseItem");
-            expect(responseContent.items[1]["@type"]).toBe("ShareAttributeAcceptResponseItem");
+            expect(responseContent.items[1]["@type"]).toBe("AcceptResponseItem");
         });
 
         test("decides a Request given a GeneralRequestConfig with all fields set", async () => {
@@ -1863,13 +1862,14 @@ describe("DeciderModule", () => {
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
+            const attributeId = (await ConsumptionIds.attribute.generate()).toString();
             const receivedRequestResult = await recipient.consumption.incomingRequests.received({
                 receivedRequest: {
                     "@type": "Request",
                     items: [
                         {
                             "@type": "ShareAttributeRequestItem",
-                            attributeId: (await ConsumptionIds.attribute.generate()).toString(),
+                            attributeId,
                             attribute: {
                                 "@type": "IdentityAttribute",
                                 owner: sender.address,
@@ -1899,10 +1899,9 @@ describe("DeciderModule", () => {
             const responseContent = requestAfterAction.response!.content;
             expect(responseContent.result).toBe(ResponseResult.Accepted);
             expect(responseContent.items).toHaveLength(1);
-            expect(responseContent.items[0]["@type"]).toBe("ShareAttributeAcceptResponseItem");
+            expect(responseContent.items[0]["@type"]).toBe("AcceptResponseItem");
 
-            const sharedAttributeId = (responseContent.items[0] as ShareAttributeAcceptResponseItemJSON).attributeId;
-            const sharedAttributeResult = await recipient.consumption.attributes.getAttribute({ id: sharedAttributeId });
+            const sharedAttributeResult = await recipient.consumption.attributes.getAttribute({ id: attributeId });
             expect(sharedAttributeResult).toBeSuccessful();
 
             const sharedAttribute = sharedAttributeResult.value;
@@ -1935,13 +1934,14 @@ describe("DeciderModule", () => {
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
+            const attributeId = (await ConsumptionIds.attribute.generate()).toString();
             const receivedRequestResult = await recipient.consumption.incomingRequests.received({
                 receivedRequest: {
                     "@type": "Request",
                     items: [
                         {
                             "@type": "ShareAttributeRequestItem",
-                            attributeId: (await ConsumptionIds.attribute.generate()).toString(),
+                            attributeId,
                             attribute: {
                                 "@type": "RelationshipAttribute",
                                 owner: sender.address,
@@ -1976,10 +1976,9 @@ describe("DeciderModule", () => {
             const responseContent = requestAfterAction.response!.content;
             expect(responseContent.result).toBe(ResponseResult.Accepted);
             expect(responseContent.items).toHaveLength(1);
-            expect(responseContent.items[0]["@type"]).toBe("ShareAttributeAcceptResponseItem");
+            expect(responseContent.items[0]["@type"]).toBe("AcceptResponseItem");
 
-            const sharedAttributeId = (responseContent.items[0] as ShareAttributeAcceptResponseItemJSON).attributeId;
-            const sharedAttributeResult = await recipient.consumption.attributes.getAttribute({ id: sharedAttributeId });
+            const sharedAttributeResult = await recipient.consumption.attributes.getAttribute({ id: attributeId });
             expect(sharedAttributeResult).toBeSuccessful();
 
             const sharedAttribute = sharedAttributeResult.value;

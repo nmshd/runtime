@@ -32,7 +32,6 @@ export interface AcceptResponseItemDVO extends ResponseItemDVO {
         | "ProposeAttributeAcceptResponseItemDVO"
         | "CreateAttributeAcceptResponseItemDVO"
         | "DeleteAttributeAcceptResponseItemDVO"
-        | "ShareAttributeAcceptResponseItemDVO"
         | "FormFieldAcceptResponseItemDVO"
         | "TransferFileOwnershipAcceptResponseItemDVO"
         | "AttributeSuccessionAcceptResponseItemDVO"
@@ -63,12 +62,6 @@ export interface CreateAttributeAcceptResponseItemDVO extends AcceptResponseItem
 export interface DeleteAttributeAcceptResponseItemDVO extends AcceptResponseItemDVO {
     type: "DeleteAttributeAcceptResponseItemDVO";
     deletionDate: string;
-}
-
-export interface ShareAttributeAcceptResponseItemDVO extends AcceptResponseItemDVO {
-    type: "ShareAttributeAcceptResponseItemDVO";
-    attributeId: string;
-    attribute: LocalAttributeDVO;
 }
 
 export interface FormFieldAcceptResponseItemDVO extends AcceptResponseItemDVO {
