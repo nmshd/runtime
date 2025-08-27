@@ -466,16 +466,19 @@ export class AttributesController extends ConsumptionBaseController {
             succeeds: predecessor.id,
             isDefault: predecessor.isDefault
         });
-        await this.attributes.create(successor);
+        await this.succeedAttributeUnsafe(predecessor, successor);
 
         await this.removeDefault(predecessor);
 
-        predecessor.succeededBy = successor.id;
-        await this.updateAttributeUnsafe(predecessor);
-
-        // TODO: maybe publish same succeeded event for all attributes, publish events only for own Attributes and ThirdPartyRelationshipAttributes
         this.eventBus.publish(new AttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
         return { predecessor, successor };
+    }
+
+    private async succeedAttributeUnsafe(predecessor: LocalAttribute, successor: LocalAttribute): Promise<void> {
+        await this.attributes.create(successor);
+
+        predecessor.succeededBy = successor.id;
+        await this.updateAttributeUnsafe(predecessor);
     }
 
     private async removeDefault(attribute: OwnIdentityAttribute): Promise<OwnIdentityAttribute> {
@@ -506,10 +509,7 @@ export class AttributesController extends ConsumptionBaseController {
             peerSharingInfo: parsedSuccessorParams.peerSharingInfo,
             succeeds: predecessor.id
         });
-        await this.attributes.create(successor);
-
-        predecessor.succeededBy = successor.id;
-        await this.updateAttributeUnsafe(predecessor);
+        await this.succeedAttributeUnsafe(predecessor, successor);
 
         return { predecessor, successor };
     }
@@ -533,10 +533,7 @@ export class AttributesController extends ConsumptionBaseController {
             peerSharingInfo: parsedSuccessorParams.peerSharingInfo,
             succeeds: predecessor.id
         });
-        await this.attributes.create(successor);
-
-        predecessor.succeededBy = successor.id;
-        await this.updateAttributeUnsafe(predecessor);
+        await this.succeedAttributeUnsafe(predecessor, successor);
 
         this.eventBus.publish(new AttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
         return { predecessor, successor };
@@ -561,10 +558,7 @@ export class AttributesController extends ConsumptionBaseController {
             peerSharingInfo: parsedSuccessorParams.peerSharingInfo,
             succeeds: predecessor.id
         });
-        await this.attributes.create(successor);
-
-        predecessor.succeededBy = successor.id;
-        await this.updateAttributeUnsafe(predecessor);
+        await this.succeedAttributeUnsafe(predecessor, successor);
 
         return { predecessor, successor };
     }
@@ -588,29 +582,11 @@ export class AttributesController extends ConsumptionBaseController {
             peerSharingInfo: parsedSuccessorParams.peerSharingInfo,
             succeeds: predecessor.id
         });
-        await this.attributes.create(successor);
-
-        predecessor.succeededBy = successor.id;
-        await this.updateAttributeUnsafe(predecessor);
+        await this.succeedAttributeUnsafe(predecessor, successor);
 
         this.eventBus.publish(new AttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
         return { predecessor, successor };
     }
-
-    // TODO: check if we want to use this shared code in the succeed functions above
-    // private async succeedAttributeUnsafe(
-    //     predecessor: LocalAttribute,
-    //     successor: LocalAttribute
-    // ): Promise<{ predecessor: LocalAttribute; successor: LocalAttribute }> {
-    //     await this.attributes.create(successor);
-
-    //     predecessor.succeededBy = successor.id;
-    //     await this.updateAttributeUnsafe(predecessor);
-
-    //     // TODO: publish events only for own Attributes and ThirdPartyRelationshipAttributes
-    //     this.eventBus.publish(new AttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
-    //     return { predecessor, successor };
-    // }
 
     public async validateOwnIdentityAttributeSuccession(
         predecessor: OwnIdentityAttribute,
