@@ -32,15 +32,9 @@ export class FakeKeyManagmentService implements KeyManagementService {
     public static readonly backend = "fakeKeyManagementService";
     public readonly backend = FakeKeyManagmentService.backend;
 
-    // we use a global variable to store the keys - this is surely not save but ok for a prototype
     public keystore: Map<string, string>;
     public constructor() {
-        if ((global as any).fakeKmsKeystore) {
-            this.keystore = (global as any).fakeKmsKeystore as Map<string, string>;
-        } else {
-            this.keystore = new Map<string, string>();
-            (global as any).fakeKmsKeystore = this.keystore;
-        }
+        this.keystore = new Map<string, string>();
     }
 
     public isOperationSupported(agentContext: AgentContext, operation: KmsOperation): boolean {
