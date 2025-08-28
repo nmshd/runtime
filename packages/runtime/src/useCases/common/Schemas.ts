@@ -1779,6 +1779,9 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/SchematizedXMLJSON"
                 },
                 {
+                    "$ref": "#/definitions/VerifiableCredentialJSON"
+                },
+                {
                     "$ref": "#/definitions/StateJSON"
                 },
                 {
@@ -2201,6 +2204,34 @@ export const CanCreateOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
+        "VerifiableCredentialJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "VerifiableCredential"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "value": {}
+            },
+            "required": [
+                "@type",
+                "title",
+                "value"
+            ],
+            "additionalProperties": false
+        },
         "StateJSON": {
             "type": "object",
             "properties": {
@@ -2490,6 +2521,7 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "FaxNumber",
                 "IdentityFileReference",
                 "SchematizedXML",
+                "VerifiableCredential",
                 "JobTitle",
                 "Nationality",
                 "PersonName",
@@ -2521,6 +2553,7 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "HouseNumber",
                 "MiddleName",
                 "SchematizedXML",
+                "VerifiableCredential",
                 "State",
                 "Street",
                 "Surname",
@@ -4225,6 +4258,9 @@ export const CompleteOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/SchematizedXMLJSON"
                 },
                 {
+                    "$ref": "#/definitions/VerifiableCredentialJSON"
+                },
+                {
                     "$ref": "#/definitions/StateJSON"
                 },
                 {
@@ -4643,6 +4679,34 @@ export const CompleteOutgoingRequestRequest: any = {
             },
             "required": [
                 "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "VerifiableCredentialJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "VerifiableCredential"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "value": {}
+            },
+            "required": [
+                "@type",
+                "title",
                 "value"
             ],
             "additionalProperties": false
@@ -6670,6 +6734,9 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                     "$ref": "#/definitions/SchematizedXMLJSON"
                 },
                 {
+                    "$ref": "#/definitions/VerifiableCredentialJSON"
+                },
+                {
                     "$ref": "#/definitions/StateJSON"
                 },
                 {
@@ -7088,6 +7155,34 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
             },
             "required": [
                 "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "VerifiableCredentialJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "VerifiableCredential"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "value": {}
+            },
+            "required": [
+                "@type",
+                "title",
                 "value"
             ],
             "additionalProperties": false
@@ -9729,6 +9824,9 @@ export const CreateOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/SchematizedXMLJSON"
                 },
                 {
+                    "$ref": "#/definitions/VerifiableCredentialJSON"
+                },
+                {
                     "$ref": "#/definitions/StateJSON"
                 },
                 {
@@ -10151,6 +10249,34 @@ export const CreateOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
+        "VerifiableCredentialJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "VerifiableCredential"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "value": {}
+            },
+            "required": [
+                "@type",
+                "title",
+                "value"
+            ],
+            "additionalProperties": false
+        },
         "StateJSON": {
             "type": "object",
             "properties": {
@@ -10440,6 +10566,7 @@ export const CreateOutgoingRequestRequest: any = {
                 "FaxNumber",
                 "IdentityFileReference",
                 "SchematizedXML",
+                "VerifiableCredential",
                 "JobTitle",
                 "Nationality",
                 "PersonName",
@@ -10471,6 +10598,7 @@ export const CreateOutgoingRequestRequest: any = {
                 "HouseNumber",
                 "MiddleName",
                 "SchematizedXML",
+                "VerifiableCredential",
                 "State",
                 "Street",
                 "Surname",
@@ -13178,6 +13306,9 @@ export const ReceivedIncomingRequestRequest: any = {
                     "$ref": "#/definitions/SchematizedXMLJSON"
                 },
                 {
+                    "$ref": "#/definitions/VerifiableCredentialJSON"
+                },
+                {
                     "$ref": "#/definitions/StateJSON"
                 },
                 {
@@ -13600,6 +13731,34 @@ export const ReceivedIncomingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
+        "VerifiableCredentialJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "VerifiableCredential"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "value": {}
+            },
+            "required": [
+                "@type",
+                "title",
+                "value"
+            ],
+            "additionalProperties": false
+        },
         "StateJSON": {
             "type": "object",
             "properties": {
@@ -13889,6 +14048,7 @@ export const ReceivedIncomingRequestRequest: any = {
                 "FaxNumber",
                 "IdentityFileReference",
                 "SchematizedXML",
+                "VerifiableCredential",
                 "JobTitle",
                 "Nationality",
                 "PersonName",
@@ -13920,6 +14080,7 @@ export const ReceivedIncomingRequestRequest: any = {
                 "HouseNumber",
                 "MiddleName",
                 "SchematizedXML",
+                "VerifiableCredential",
                 "State",
                 "Street",
                 "Surname",
@@ -15495,6 +15656,7 @@ export const ExecuteIdentityAttributeQueryRequest: any = {
                 "FaxNumber",
                 "IdentityFileReference",
                 "SchematizedXML",
+                "VerifiableCredential",
                 "JobTitle",
                 "Nationality",
                 "PersonName",
@@ -15526,6 +15688,7 @@ export const ExecuteIdentityAttributeQueryRequest: any = {
                 "HouseNumber",
                 "MiddleName",
                 "SchematizedXML",
+                "VerifiableCredential",
                 "State",
                 "Street",
                 "Surname",
@@ -15616,6 +15779,7 @@ export const ExecuteIQLQueryRequest: any = {
                 "FaxNumber",
                 "IdentityFileReference",
                 "SchematizedXML",
+                "VerifiableCredential",
                 "JobTitle",
                 "Nationality",
                 "PersonName",
@@ -15647,6 +15811,7 @@ export const ExecuteIQLQueryRequest: any = {
                 "HouseNumber",
                 "MiddleName",
                 "SchematizedXML",
+                "VerifiableCredential",
                 "State",
                 "Street",
                 "Surname",
@@ -18286,6 +18451,9 @@ export const SucceedRepositoryAttributeRequest: any = {
                     "$ref": "#/definitions/SchematizedXMLJSON"
                 },
                 {
+                    "$ref": "#/definitions/VerifiableCredentialJSON"
+                },
+                {
                     "$ref": "#/definitions/StateJSON"
                 },
                 {
@@ -18708,6 +18876,34 @@ export const SucceedRepositoryAttributeRequest: any = {
             ],
             "additionalProperties": false
         },
+        "VerifiableCredentialJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "VerifiableCredential"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "value": {}
+            },
+            "required": [
+                "@type",
+                "title",
+                "value"
+            ],
+            "additionalProperties": false
+        },
         "StateJSON": {
             "type": "object",
             "properties": {
@@ -18888,6 +19084,7 @@ export const ValidateIQLQueryRequest: any = {
                 "FaxNumber",
                 "IdentityFileReference",
                 "SchematizedXML",
+                "VerifiableCredential",
                 "JobTitle",
                 "Nationality",
                 "PersonName",
@@ -18919,6 +19116,7 @@ export const ValidateIQLQueryRequest: any = {
                 "HouseNumber",
                 "MiddleName",
                 "SchematizedXML",
+                "VerifiableCredential",
                 "State",
                 "Street",
                 "Surname",
@@ -23879,6 +24077,41 @@ export const Sex: any = {
             },
             "required": [
                 "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
+export const VerifiableCredential: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/VerifiableCredential",
+    "definitions": {
+        "VerifiableCredential": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "VerifiableCredential"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "value": {}
+            },
+            "required": [
+                "@type",
+                "title",
                 "value"
             ],
             "additionalProperties": false
