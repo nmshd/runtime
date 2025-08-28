@@ -252,7 +252,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
 
             if (!(attribute instanceof OwnIdentityAttribute || attribute instanceof OwnRelationshipAttribute || attribute instanceof PeerRelationshipAttribute)) {
                 throw new ConsumptionError(
-                    `The attribute ${forwardedAttributeId} of a created DeleteAttributeRequestItem is no own IdentityAttribute, own RelationshipAttribute or peer RelationshipAttribute.`
+                    `The attribute ${forwardedAttributeId} of a created DeleteAttributeRequestItem is not an OwnIdentityAttribute, an OwnRelationshipAttribute or a PeerRelationshipAttribute.`
                 );
             }
             const deletionInfo = EmittedAttributeDeletionInfo.from({

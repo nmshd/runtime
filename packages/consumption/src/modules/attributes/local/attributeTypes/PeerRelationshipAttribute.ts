@@ -72,6 +72,10 @@ export class PeerRelationshipAttribute extends LocalAttribute implements IPeerRe
         return deletionStatuses.includes(this.peerSharingInfo.deletionInfo.deletionStatus);
     }
 
+    public isToBeDeleted(): boolean {
+        return this.peerSharingInfo.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.ToBeDeleted;
+    }
+
     public isDeletedOrToBeDeletedByForwardingPeer(peerAddress: CoreAddress): boolean {
         if (!this.forwardedSharingInfos) return false;
 

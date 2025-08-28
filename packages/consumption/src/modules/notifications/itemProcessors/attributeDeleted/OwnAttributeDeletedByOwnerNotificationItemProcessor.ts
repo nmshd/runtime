@@ -31,13 +31,12 @@ export class OwnAttributeDeletedByOwnerNotificationItemProcessor extends Abstrac
         notification: LocalNotification
     ): Promise<ValidationResult> {
         const attribute = await this.consumptionController.attributes.getLocalAttribute(notificationItem.attributeId);
-
         if (!attribute) return ValidationResult.success();
 
         if (!(attribute instanceof PeerIdentityAttribute || attribute instanceof PeerRelationshipAttribute || attribute instanceof ThirdPartyRelationshipAttribute)) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.attributes.wrongTypeOfAttribute(
-                    `The Attribute ${notificationItem.attributeId} is not a peer IdentityAttribute, peer RelationshipAttribute or ThirdPartyRelationshipAttribute.`
+                    `The Attribute ${notificationItem.attributeId} is not a PeerIdentityAttribute, a PeerRelationshipAttribute or a ThirdPartyRelationshipAttribute.`
                 )
             );
         }
@@ -55,9 +54,11 @@ export class OwnAttributeDeletedByOwnerNotificationItemProcessor extends Abstrac
 
         if (!(attribute instanceof PeerIdentityAttribute || attribute instanceof PeerRelationshipAttribute || attribute instanceof ThirdPartyRelationshipAttribute)) {
             throw ConsumptionCoreErrors.attributes.wrongTypeOfAttribute(
-                `The Attribute ${notificationItem.attributeId} is not a peer IdentityAttribute, peer RelationshipAttribute or ThirdPartyRelationshipAttribute.`
+                `The Attribute ${notificationItem.attributeId} is not a PeerIdentityAttribute, a PeerRelationshipAttribute or a ThirdPartyRelationshipAttribute.`
             );
         }
+
+        if (attribute.isToBeDeleted()) return;
 
         if (attribute instanceof PeerIdentityAttribute || attribute instanceof PeerRelationshipAttribute) {
             const deletionInfo = ReceivedAttributeDeletionInfo.from({
@@ -89,12 +90,7 @@ export class OwnAttributeDeletedByOwnerNotificationItemProcessor extends Abstrac
 
         const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute);
         for (const attr of [attribute, ...predecessors]) {
-            if (
-                attr.peerSharingInfo.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.ToBeDeleted ||
-                attr.peerSharingInfo.deletionInfo?.deletionStatus === ThirdPartyRelationshipAttributeDeletionStatus.ToBeDeleted
-            ) {
-                continue;
-            }
+            if (attr.isToBeDeleted()) continue;
 
             attr.peerSharingInfo.deletionInfo = undefined;
             await this.consumptionController.attributes.updateAttributeUnsafe(attr);

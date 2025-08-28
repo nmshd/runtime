@@ -331,9 +331,9 @@ describe("ForwardedAttributeDeletedByPeerNotificationItemProcessor", function ()
                     "@type": "BirthName",
                     value: "aBirthName"
                 },
-                owner: CoreAddress.from("initialPeer")
+                owner: CoreAddress.from("peer")
             }),
-            peer: CoreAddress.from("initialPeer"),
+            peer: CoreAddress.from("peer"),
             sourceReference: CoreId.from("reqRef"),
             id: CoreId.from("anId")
         });
@@ -345,7 +345,7 @@ describe("ForwardedAttributeDeletedByPeerNotificationItemProcessor", function ()
             source: LocalNotificationSource.from({ type: "Message", reference: CoreId.from("messageRef") }),
             status: LocalNotificationStatus.Open,
             isOwn: false,
-            peer: CoreAddress.from("naughtyPeer"),
+            peer: CoreAddress.from("peer"),
             createdAt: CoreDate.utc(),
             content: Notification.from({ id: CoreId.from("notificationRef"), items: [notificationItem] }),
             receivedByDevice: CoreId.from("deviceId")

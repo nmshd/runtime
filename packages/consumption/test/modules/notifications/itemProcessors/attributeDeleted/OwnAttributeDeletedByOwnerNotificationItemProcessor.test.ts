@@ -266,13 +266,12 @@ describe("OwnAttributeDeletedByPeerNotificationItemProcessor", function () {
         expect(checkResult.isError()).toBe(false);
 
         /* Run process() and validate its results. */
-        const event = await processor.process(notificationItem, notification);
-        expect(event).toBeInstanceOf(OwnAttributeDeletedByOwnerEvent);
-        const updatedAttribute = (event as OwnAttributeDeletedByOwnerEvent).data as PeerIdentityAttribute;
-        expect(notificationItem.attributeId.equals(updatedAttribute.id)).toBe(true);
-        expect(updatedAttribute.peerSharingInfo.deletionInfo!.deletionStatus).toStrictEqual(ReceivedAttributeDeletionStatus.ToBeDeleted);
+        const processResult = await processor.process(notificationItem, notification);
+        expect(processResult).toBeUndefined();
+        const attributeAfterProcessing = (await consumptionController.attributes.getLocalAttribute(peerIdentityAttribute.id)) as PeerIdentityAttribute;
+        expect(attributeAfterProcessing.peerSharingInfo.deletionInfo!.deletionStatus).toStrictEqual(ReceivedAttributeDeletionStatus.ToBeDeleted);
 
-        const databaseAttribute = (await consumptionController.attributes.getLocalAttribute(updatedAttribute.id)) as PeerIdentityAttribute;
+        const databaseAttribute = (await consumptionController.attributes.getLocalAttribute(attributeAfterProcessing.id)) as PeerIdentityAttribute;
         expect(databaseAttribute.peerSharingInfo.deletionInfo!.deletionStatus).toStrictEqual(ReceivedAttributeDeletionStatus.ToBeDeleted);
 
         /* Manually trigger and verify rollback. */
@@ -383,6 +382,35 @@ describe("OwnAttributeDeletedByPeerNotificationItemProcessor", function () {
         /* Manually trigger and verify rollback. */
         const rollbackResult = await processor.rollback(notificationItem, notification);
         expect(rollbackResult).toBeUndefined();
+    });
+
+    test("should throw if Attribute type is wrong", async function () {
+        const ownIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
+            content: IdentityAttribute.from({
+                value: {
+                    "@type": "BirthName",
+                    value: "aBirthName"
+                },
+                owner: testAccount.identity.address
+            })
+        });
+
+        const notificationItem = OwnAttributeDeletedByOwnerNotificationItem.from({ attributeId: ownIdentityAttribute.id });
+
+        const notification = LocalNotification.from({
+            id: CoreId.from("notificationRef"),
+            source: LocalNotificationSource.from({ type: "Message", reference: CoreId.from("messageRef") }),
+            status: LocalNotificationStatus.Open,
+            isOwn: false,
+            peer: CoreAddress.from("peer"),
+            createdAt: CoreDate.utc(),
+            content: Notification.from({ id: CoreId.from("notificationRef"), items: [notificationItem] }),
+            receivedByDevice: CoreId.from("deviceId")
+        });
+        const processor = new OwnAttributeDeletedByOwnerNotificationItemProcessor(consumptionController);
+
+        const checkResult = await processor.checkPrerequisitesOfIncomingNotificationItem(notificationItem, notification);
+        expect(checkResult).errorValidationResult({ code: "error.consumption.attributes.wrongTypeOfAttribute" });
     });
 
     test("should throw if sender is not peer of Attribute", async function () {
