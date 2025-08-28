@@ -1,6 +1,20 @@
-import { transformPrivateKeyToPrivateJwk } from "@credo-ts/askar";
-import { Agent, Buffer, ConsoleLogger, DidKey, LogLevel, type InitConfig, type KeyDidCreateOptions, type ModulesMap, type VerificationMethod } from "@credo-ts/core";
-import { agentDependencies } from "@credo-ts/node";
+import {
+    Agent,
+    ConsoleLogger,
+    DependencyManager,
+    DidKey,
+    InjectionSymbols,
+    KeyDidCreateOptions,
+    LogLevel,
+    type InitConfig,
+    type ModulesMap,
+    type VerificationMethod
+} from "@credo-ts/core";
+import { KeyManagementModuleConfig } from "@credo-ts/core/build/modules/kms";
+import { JsonWebKey } from "crypto";
+import { FakeKeyManagmentService } from "./FakeKeyManagmentService";
+import { FakeStorageService } from "./FakeStorageService";
+import { agentDependencies } from "./LocalAgentDependencies";
 
 export class BaseAgent<AgentModules extends ModulesMap> {
     public port: number;
@@ -11,6 +25,7 @@ export class BaseAgent<AgentModules extends ModulesMap> {
     public didKey!: DidKey;
     public kid!: string;
     public verificationMethod!: VerificationMethod;
+    private readonly keyStorage: Map<string, JsonWebKey> = new Map<string, JsonWebKey>();
 
     public constructor({ port, name, modules }: { port: number; name: string; modules: AgentModules }) {
         this.name = name;
@@ -23,33 +38,51 @@ export class BaseAgent<AgentModules extends ModulesMap> {
         } satisfies InitConfig;
 
         this.config = config;
-
-        this.agent = new Agent({
-            config,
-            dependencies: agentDependencies,
-            modules
-        });
+        const dependencyManager = new DependencyManager();
+        dependencyManager.registerInstance(InjectionSymbols.StorageService, new FakeStorageService());
+        // dependencyManager.registerInstance(InjectionSymbols.StorageUpdateService, new FakeStorageService());
+        if (!dependencyManager.isRegistered(InjectionSymbols.StorageService)) {
+            // eslint-disable-next-line no-console
+            console.log("StorageService not registered!!!");
+        }
+        this.agent = new Agent(
+            {
+                config,
+                dependencies: agentDependencies,
+                modules
+            },
+            dependencyManager
+        );
     }
 
-    public async initializeAgent(secretPrivateKey: string): Promise<any> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    public async initializeAgent(privateKey: string): Promise<any> {
+        // as we are not using askar we need to set the storage version
+        const storrage = this.agent.dependencyManager.resolve<FakeStorageService<any>>(InjectionSymbols.StorageService);
+        const versionRecord = { id: "STORAGE_VERSION_RECORD_ID", storageVersion: "0.5.0", value: "0.5.0" };
+        await storrage.save(this.agent.context, versionRecord);
+        // as we are not using askar we need to setup our own key management service
+        const kmsConfig = this.agent.dependencyManager.resolve(KeyManagementModuleConfig);
+        // TODO: think about adding the local key storrage to the FakeKMS constructor
+        kmsConfig.registerBackend(new FakeKeyManagmentService());
+
+        if (kmsConfig.backends.length === 0) throw new Error("No KMS backend registered");
+
         await this.agent.initialize();
 
-        const { privateJwk } = transformPrivateKeyToPrivateJwk({
-            type: {
-                crv: "Ed25519",
-                kty: "OKP"
-            },
-            privateKey: Buffer.from(secretPrivateKey)
-        });
-
-        const { keyId } = await this.agent.kms.importKey({
-            privateJwk
-        });
+        // create a uuid based key id
+        const keyId = crypto.randomUUID();
 
         const didCreateResult = await this.agent.dids.create<KeyDidCreateOptions>({
             method: "key",
             options: {
-                keyId
+                createKey: {
+                    type: {
+                        crv: "Ed25519",
+                        kty: "OKP"
+                    },
+                    keyId: keyId
+                }
             }
         });
 

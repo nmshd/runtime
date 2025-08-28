@@ -1,3 +1,4 @@
+import { IdentityAttribute } from "@nmshd/content";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../consumption/ConsumptionController";
 import { ConsumptionControllerName } from "../../consumption/ConsumptionControllerName";
@@ -15,6 +16,7 @@ export class OpenId4VcController extends ConsumptionBaseController {
         this._log.error("Processing credential offer:", credentialOffer);
 
         const holder = new Holder(3000, "OpenId4VcHolder");
+        await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
         const res = await holder.resolveCredentialOffer(credentialOffer);
         this._log.error("Resolved credential offer:", res);
 
@@ -24,15 +26,18 @@ export class OpenId4VcController extends ConsumptionBaseController {
         const attributes = [];
 
         for (const credential of credentials) {
-            const response = JSON.parse(JSON.stringify(credential));
-            const attribute = await this._parent.attributes.createRepositoryAttribute({
-                content: IdentityAttribute.from({
-                    value: {
-                        "@type": "VerifiableCredential",
-                        value: response
-                    },
-                    owner: this.parent.accountController.identity.address
-                })
+            const owner = this.parent.accountController.identity.address;
+            const identityAttribute = IdentityAttribute.from({
+                value: {
+                    "@type": "VerifiableCredential",
+                    value: credential,
+                    title: "Employee ID Card",
+                    description: "An employee ID card credential"
+                },
+                owner: owner
+            });
+            const attribute = await this.parent.attributes.createRepositoryAttribute({
+                content: identityAttribute
             });
             this._log.error("Created attribute:", attribute);
             attributes.push(attribute);
@@ -41,8 +46,7 @@ export class OpenId4VcController extends ConsumptionBaseController {
         return {
             status: "success",
             message: "Credential offer processed successfully",
-            data: credentialOfferm,
-            attributes: attributes
+            data: credentialOffer
         };
     }
 }

@@ -1,4 +1,3 @@
-import { AskarModule, AskarModuleConfigStoreOptions } from "@credo-ts/askar";
 import { DidJwk, DidKey, JwkDidCreateOptions, KeyDidCreateOptions, Kms, Mdoc, W3cJsonLdVerifiableCredential, W3cJwtVerifiableCredential, X509Module } from "@credo-ts/core";
 import {
     OpenId4VcHolderModule,
@@ -9,17 +8,14 @@ import {
     type OpenId4VciResolvedCredentialOffer,
     type OpenId4VpResolvedAuthorizationRequest
 } from "@credo-ts/openid4vc";
-import { askar } from "@openwallet-foundation/askar-nodejs";
 import { BaseAgent } from "./BaseAgent";
 
-function getOpenIdHolderModules(askarStorageConfig: AskarModuleConfigStoreOptions) {
+function getOpenIdHolderModules() {
     return {
-        askar: new AskarModule({ askar, store: askarStorageConfig }),
         openId4VcHolder: new OpenId4VcHolderModule(),
         x509: new X509Module({
             getTrustedCertificatesForVerification: (_agentContext, { certificateChain }) => {
                 // console.log(greenText(`dyncamically trusting certificate ${certificateChain[0].getIssuerNameField("C")} for verification of ${verification.type}`, true));
-
                 return [certificateChain[0].toString("pem")];
             }
         })
@@ -36,14 +32,13 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         super({
             port,
             name,
-            modules: getOpenIdHolderModules({
-                id: name,
-                key: name
-            })
+            modules: getOpenIdHolderModules()
         });
     }
 
     public static async build(): Promise<Holder> {
+        // the faked storrage service needs to be dependency injected before the agent is initialized
+
         const holder = new Holder(3000, `OpenId4VcHolder ${Math.random().toString()}`);
         await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
 
