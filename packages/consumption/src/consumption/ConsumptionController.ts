@@ -28,6 +28,7 @@ import {
     NotificationItemProcessorConstructor,
     NotificationItemProcessorRegistry,
     NotificationsController,
+    OpenId4VcController,
     OutgoingRequestsController,
     OwnSharedAttributeDeletedByOwnerNotificationItemProcessor,
     PeerSharedAttributeDeletedByPeerNotificationItemProcessor,
@@ -79,6 +80,11 @@ export class ConsumptionController {
     private _notifications: NotificationsController;
     public get notifications(): NotificationsController {
         return this._notifications;
+    }
+
+    private _openId4Vc: OpenId4VcController;
+    public get openId4Vc(): OpenId4VcController {
+        return this._openId4Vc;
     }
 
     private _identityMetadata: IdentityMetadataController;
@@ -138,6 +144,9 @@ export class ConsumptionController {
         this._identityMetadata = await new IdentityMetadataController(this).init();
 
         this._settings = await new SettingsController(this).init();
+
+        this._openId4Vc = await new OpenId4VcController(this).init();
+
         return this;
     }
 
