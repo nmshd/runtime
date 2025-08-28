@@ -59,6 +59,9 @@
         }
     },
     "dependencies": {
+        "@credo-ts/askar": "v0.6.0-alpha-20250704130724",
+        "@credo-ts/core": "v0.6.0-alpha-20250704130724",
+        "@credo-ts/openid4vc": "v0.6.0-alpha-20250704130724",
         "@js-soft/docdb-querytranslator": "^1.1.5",
         "@js-soft/ts-serval": "2.0.13",
         "@js-soft/ts-utils": "2.3.4",
@@ -66,13 +69,10 @@
         "@nmshd/core-types": "*",
         "@nmshd/iql": "^1.0.3",
         "@nmshd/transport": "*",
+        "jose": "^6.0.13",
         "lodash": "^4.17.21",
         "ts-simple-nameof": "^1.3.3",
-        "@credo-ts/askar": "v0.6.0-alpha-20250704130724",
-        "@credo-ts/core": "v0.6.0-alpha-20250704130724",
-        "@credo-ts/node": "v0.6.0-alpha-20250704130724",
-        "@credo-ts/openid4vc": "v0.6.0-alpha-20250704130724",
-        "@openwallet-foundation/askar-nodejs": "^0.3.2"
+        "ws": "^8.18.3"
     },
     "devDependencies": {
         "@js-soft/docdb-access-loki": "1.3.0",
