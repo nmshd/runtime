@@ -9,7 +9,6 @@ import { ValidationResult } from "../../../common";
 import { LocalNotification } from "../../local/LocalNotification";
 import { AbstractNotificationItemProcessor } from "../AbstractNotificationItemProcessor";
 
-// TODO: naming with Received?
 export class PeerAttributeSucceededNotificationItemProcessor extends AbstractNotificationItemProcessor<PeerAttributeSucceededNotificationItem> {
     private readonly _logger: ILogger;
 
@@ -29,7 +28,6 @@ export class PeerAttributeSucceededNotificationItemProcessor extends AbstractNot
         const predecessor = await this.consumptionController.attributes.getLocalAttribute(notificationItem.predecessorId);
         if (!predecessor) return ValidationResult.error(ConsumptionCoreErrors.attributes.predecessorDoesNotExist());
 
-        // TODO: this wasn't implemented for ThirdPartyRelationshipAttributes so far
         if (!(predecessor instanceof PeerIdentityAttribute || predecessor instanceof PeerRelationshipAttribute)) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.attributes.wrongTypeOfAttribute(
@@ -55,22 +53,12 @@ export class PeerAttributeSucceededNotificationItemProcessor extends AbstractNot
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangeContentType());
         }
 
-        // if (predecessor instanceof PeerRelationshipAttribute) {
         const successorParams = PeerRelationshipAttributeSuccessorParams.from({
             id: notificationItem.successorId,
             content: notificationItem.successorContent,
             peerSharingInfo: { sourceReference: notification.id, peer: notification.peer }
         });
         return await this.consumptionController.attributes.validatePeerRelationshipAttributeSuccession(predecessor, successorParams);
-        // }
-
-        // TODO: evaluate if this should be implemented for ThirdPartyRelationshipAttributes now
-        // const successorParams = {
-        //     id: notificationItem.successorId,
-        //     content: notificationItem.successorContent,
-        //     sharingInfo: { sourceReference: notification.id, peer: notification.peer }
-        // };
-        // return await this.consumptionController.attributes.validateThirdPartyRelationshipAttributeSuccession(predecessor, successorParams);
     }
 
     public override async process(notificationItem: PeerAttributeSucceededNotificationItem, notification: LocalNotification): Promise<AttributeSucceededEvent> {
