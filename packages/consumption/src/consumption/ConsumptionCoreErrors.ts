@@ -81,10 +81,8 @@ class Attributes {
         return new CoreError("error.consumption.attributes.successionMustNotChangePeer", "The peer of the shared Attribute must not change.");
     }
 
-    public successionMustNotChangeThirdParty(comment?: string) {
-        let errorMessage = "The thirdPartyAddress of the shared Attribute must not change.";
-        if (comment) errorMessage += ` ${comment}`;
-        return new CoreError("error.consumption.attributes.successionMustNotChangeThirdParty", errorMessage);
+    public successionMustNotChangeInitialAttributePeer() {
+        return new CoreError("error.consumption.attributes.successionMustNotChangeInitialAttributePeer", "The initialAttributePeer must not change.");
     }
 
     public cannotSucceedAttributesWithASuccessor(successorId: string | CoreId) {

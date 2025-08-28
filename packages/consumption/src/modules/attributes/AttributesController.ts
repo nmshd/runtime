@@ -671,6 +671,10 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangePeer());
         }
 
+        if (predecessor.content.key !== successor.content.key) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangeKey());
+        }
+
         if (predecessor.peerSharingInfo.deletionInfo?.deletionStatus === EmittedAttributeDeletionStatus.DeletedByPeer) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedSharedAttributesDeletedByPeer());
         }
@@ -701,6 +705,10 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangePeer());
         }
 
+        if (predecessor.content.key !== successor.content.key) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangeKey());
+        }
+
         if (predecessor.peerSharingInfo.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.DeletedByOwner) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedSharedAttributesDeletedByPeer());
         }
@@ -729,6 +737,14 @@ export class AttributesController extends ConsumptionBaseController {
 
         if (!predecessor.peerSharingInfo.peer.equals(successor.peerSharingInfo.peer)) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangePeer());
+        }
+
+        if (predecessor.content.key !== successor.content.key) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangeKey());
+        }
+
+        if (!predecessor.peerSharingInfo.initialAttributePeer.equals(successor.peerSharingInfo.initialAttributePeer)) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangeInitialAttributePeer());
         }
 
         if (
