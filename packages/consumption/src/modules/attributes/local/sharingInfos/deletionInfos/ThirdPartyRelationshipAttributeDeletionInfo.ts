@@ -1,4 +1,4 @@
-import { serialize, validate } from "@js-soft/ts-serval";
+import { serialize, type, validate } from "@js-soft/ts-serval";
 import { AbstractAttributeDeletionInfo, AbstractAttributeDeletionInfoJSON, IAbstractAttributeDeletionInfo } from "./AbstractAttributeDeletionInfo";
 
 export enum ThirdPartyRelationshipAttributeDeletionStatus {
@@ -15,6 +15,7 @@ export interface IThirdPartyRelationshipAttributeDeletionInfo extends IAbstractA
     deletionStatus: ThirdPartyRelationshipAttributeDeletionStatus;
 }
 
+@type("ThirdPartyRelationshipAttributeDeletionInfo")
 export class ThirdPartyRelationshipAttributeDeletionInfo extends AbstractAttributeDeletionInfo implements IThirdPartyRelationshipAttributeDeletionInfo {
     @serialize()
     @validate({

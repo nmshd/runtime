@@ -1,4 +1,4 @@
-import { serialize, validate } from "@js-soft/ts-serval";
+import { serialize, type, validate } from "@js-soft/ts-serval";
 import { AbstractAttributeSharingInfo, AbstractAttributeSharingInfoJSON, IAbstractAttributeSharingInfo } from "./AbstractAttributeSharingInfo";
 import { IReceivedAttributeDeletionInfo, ReceivedAttributeDeletionInfo, ReceivedAttributeDeletionInfoJSON } from "./deletionInfos";
 
@@ -10,6 +10,7 @@ export interface IPeerIdentityAttributeSharingInfo extends IAbstractAttributeSha
     deletionInfo?: IReceivedAttributeDeletionInfo;
 }
 
+@type("PeerIdentityAttributeSharingInfo")
 export class PeerIdentityAttributeSharingInfo extends AbstractAttributeSharingInfo implements IPeerIdentityAttributeSharingInfo {
     @serialize()
     @validate({ nullable: true })

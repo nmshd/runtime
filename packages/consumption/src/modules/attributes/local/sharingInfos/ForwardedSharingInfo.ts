@@ -1,4 +1,4 @@
-import { serialize, validate } from "@js-soft/ts-serval";
+import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreDate, ICoreDate } from "@nmshd/core-types";
 import { AbstractAttributeSharingInfo, AbstractAttributeSharingInfoJSON, IAbstractAttributeSharingInfo } from "./AbstractAttributeSharingInfo";
 import { EmittedAttributeDeletionInfo, EmittedAttributeDeletionInfoJSON, IEmittedAttributeDeletionInfo } from "./deletionInfos";
@@ -13,6 +13,7 @@ export interface IForwardedSharingInfo extends IAbstractAttributeSharingInfo {
     deletionInfo?: IEmittedAttributeDeletionInfo;
 }
 
+@type("ForwardedSharingInfo")
 export class ForwardedSharingInfo extends AbstractAttributeSharingInfo implements IForwardedSharingInfo {
     @serialize()
     @validate()

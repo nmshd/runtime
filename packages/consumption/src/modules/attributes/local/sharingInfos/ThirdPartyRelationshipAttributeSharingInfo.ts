@@ -1,4 +1,4 @@
-import { serialize, validate } from "@js-soft/ts-serval";
+import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreAddress, ICoreAddress } from "@nmshd/core-types";
 import { AbstractAttributeSharingInfo, AbstractAttributeSharingInfoJSON, IAbstractAttributeSharingInfo } from "./AbstractAttributeSharingInfo";
 import { IThirdPartyRelationshipAttributeDeletionInfo, ThirdPartyRelationshipAttributeDeletionInfo, ThirdPartyRelationshipAttributeDeletionInfoJSON } from "./deletionInfos";
@@ -13,6 +13,7 @@ export interface IThirdPartyRelationshipAttributeSharingInfo extends IAbstractAt
     deletionInfo?: IThirdPartyRelationshipAttributeDeletionInfo;
 }
 
+@type("ThirdPartyRelationshipAttributeSharingInfo")
 export class ThirdPartyRelationshipAttributeSharingInfo extends AbstractAttributeSharingInfo implements IThirdPartyRelationshipAttributeSharingInfo {
     @serialize()
     @validate()

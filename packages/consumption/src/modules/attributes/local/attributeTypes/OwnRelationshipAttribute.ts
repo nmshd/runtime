@@ -19,7 +19,6 @@ export interface OwnRelationshipAttributeJSON extends LocalAttributeJSON {
     "@type": "OwnRelationshipAttribute";
     content: RelationshipAttributeJSON;
     peerSharingInfo: OwnRelationshipAttributeSharingInfoJSON;
-    // TODO: rename forwardedSharingInfo, also everywhere else
     forwardedSharingInfos?: ForwardedSharingInfoJSON[];
 }
 

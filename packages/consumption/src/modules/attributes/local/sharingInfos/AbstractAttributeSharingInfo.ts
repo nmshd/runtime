@@ -11,6 +11,7 @@ import {
     ThirdPartyRelationshipAttributeDeletionInfo,
     ThirdPartyRelationshipAttributeDeletionInfoJSON
 } from "./deletionInfos";
+
 export interface AbstractAttributeSharingInfoJSON {
     peer: string;
     sourceReference: string;

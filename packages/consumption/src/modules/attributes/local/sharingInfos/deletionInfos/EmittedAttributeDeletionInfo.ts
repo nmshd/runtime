@@ -1,4 +1,4 @@
-import { serialize, validate } from "@js-soft/ts-serval";
+import { serialize, type, validate } from "@js-soft/ts-serval";
 import { AbstractAttributeDeletionInfo, AbstractAttributeDeletionInfoJSON, IAbstractAttributeDeletionInfo } from "./AbstractAttributeDeletionInfo";
 
 export enum EmittedAttributeDeletionStatus {
@@ -16,6 +16,7 @@ export interface IEmittedAttributeDeletionInfo extends IAbstractAttributeDeletio
     deletionStatus: EmittedAttributeDeletionStatus;
 }
 
+@type("EmittedAttributeDeletionInfo")
 export class EmittedAttributeDeletionInfo extends AbstractAttributeDeletionInfo implements IEmittedAttributeDeletionInfo {
     @serialize()
     @validate({

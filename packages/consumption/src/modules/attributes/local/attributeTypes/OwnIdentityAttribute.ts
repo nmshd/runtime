@@ -10,6 +10,7 @@ export interface OwnIdentityAttributeJSON extends LocalAttributeJSON {
     "@type": "OwnIdentityAttribute";
     content: IdentityAttributeJSON;
     isDefault?: true;
+    // TODO: rename forwardedSharingInfo, also everywhere else
     forwardedSharingInfos?: ForwardedSharingInfoJSON[];
 }
 
