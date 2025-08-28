@@ -180,10 +180,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
 
         if (existingPeerIdentityAttribute) {
             if (existingPeerIdentityAttribute.peerSharingInfo.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.ToBeDeleted) {
-                // TODO: refactor using AttributesController function
-                // TODO: test
-                existingPeerIdentityAttribute.peerSharingInfo.deletionInfo = undefined;
-                await this.consumptionController.attributes.updateAttributeUnsafe(existingPeerIdentityAttribute);
+                await this.consumptionController.attributes.setPeerDeletionInfoOfPeerAttribute(existingPeerIdentityAttribute, undefined, true);
             }
 
             return AttributeAlreadySharedAcceptResponseItem.from({
@@ -217,7 +214,6 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             return;
         }
 
-        // TODO: write test for this
         if (responseItem instanceof AttributeAlreadySharedAcceptResponseItem && sharedAttribute.isToBeDeletedByForwardingPeer(requestInfo.peer)) {
             await this.consumptionController.attributes.setForwardedDeletionInfoOfAttribute(sharedAttribute, undefined, requestInfo.peer, true);
             return;

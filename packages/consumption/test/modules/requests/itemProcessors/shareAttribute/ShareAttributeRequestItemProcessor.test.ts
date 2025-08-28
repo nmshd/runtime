@@ -963,6 +963,9 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const responseItem = await processor.accept(requestItem, { accept: true }, incomingRequest);
             expect(responseItem).toBeInstanceOf(AttributeAlreadySharedAcceptResponseItem);
             expect((responseItem as AttributeAlreadySharedAcceptResponseItem).attributeId).toStrictEqual(existingPeerIdentityAttribute.id);
+
+            const updatedAttribute = (await consumptionController.attributes.getLocalAttribute(existingPeerIdentityAttribute.id)) as PeerIdentityAttribute;
+            expect(updatedAttribute.peerSharingInfo.deletionInfo).toBeUndefined();
         });
 
         test("returns AttributeAlreadySharedAcceptResponseItem when accepting an already existing PeerIdentityAttribute that has a successor", async function () {
@@ -1128,6 +1131,33 @@ describe("ShareAttributeRequestItemProcessor", function () {
             expect((forwardedAttribute! as OwnRelationshipAttribute).isForwardedTo(localRequest.peer)).toBe(true);
             expect(forwardedAttribute!.content.owner).toStrictEqual(testAccount.identity.address);
             expect((forwardedAttribute! as OwnRelationshipAttribute).peerSharingInfo.peer).toStrictEqual(aThirdParty);
+        });
+
+        test("in case of an already shared Attribute that is ToBeDeletedByPeer, removes the deletionInfo", async function () {
+            const sharedAttributeContent = TestObjectFactory.createIdentityAttribute({ owner: testAccount.identity.address });
+            const sharedAttribute = await consumptionController.attributes.createOwnIdentityAttribute({ content: sharedAttributeContent });
+
+            await consumptionController.attributes.addForwardedSharingInfoToAttribute(
+                sharedAttribute,
+                CoreAddress.from("did:e:a-domain:dids:anidentity"),
+                CoreId.from("aSourceReferenceId")
+            );
+
+            const deletionInfo = EmittedAttributeDeletionInfo.from({
+                deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
+                deletionDate: CoreDate.utc().add({ days: 1 })
+            });
+            await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(sharedAttribute, deletionInfo, CoreAddress.from("did:e:a-domain:dids:anidentity"));
+
+            const { localRequest, requestItem } = await createLocalRequest({ sharedAttribute: sharedAttribute });
+
+            const responseItem = AttributeAlreadySharedAcceptResponseItem.from({ result: ResponseItemResult.Accepted, attributeId: sharedAttribute.id });
+
+            await processor.applyIncomingResponseItem(responseItem, requestItem, localRequest);
+
+            const forwardedAttribute = (await consumptionController.attributes.getLocalAttribute(sharedAttribute.id)) as OwnIdentityAttribute;
+            expect(forwardedAttribute.isForwardedTo(localRequest.peer, true)).toBe(true);
+            expect(forwardedAttribute.forwardedSharingInfos![0].deletionInfo).toBeUndefined();
         });
     });
 
