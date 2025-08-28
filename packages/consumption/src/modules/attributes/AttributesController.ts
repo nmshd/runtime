@@ -1130,7 +1130,6 @@ export class AttributesController extends ConsumptionBaseController {
         });
     }
 
-    // TODO: only allow IdentityAttributes as arguments?
     public async validateTagsOfAttribute(attribute: IdentityAttribute | RelationshipAttribute): Promise<ValidationResult> {
         if (attribute instanceof RelationshipAttribute) return ValidationResult.success();
         if (!attribute.tags || attribute.tags.length === 0) return ValidationResult.success();
@@ -1329,7 +1328,8 @@ export class AttributesController extends ConsumptionBaseController {
 
     private async setDeletionInfoOfThirdPartyRelationshipAttributes(peer: CoreAddress, deletionDate: CoreDate): Promise<void> {
         const deletionInfo = ThirdPartyRelationshipAttributeDeletionInfo.from({
-            deletionStatus: ThirdPartyRelationshipAttributeDeletionStatus.DeletedByPeer, // TODO: might also need to be DeletedByOwner -> resolve in further PR
+            // TODO: might also need to be DeletedByOwner -> refactor deletionStatus in further PR
+            deletionStatus: ThirdPartyRelationshipAttributeDeletionStatus.DeletedByPeer,
             deletionDate
         });
 
