@@ -1485,7 +1485,7 @@ describe(ShareOwnIdentityAttributeUseCase.name, () => {
         });
 
         expect(repeatedShareRequestResult).toBeAnError(
-            `The IdentityAttribute with the given attributeId '${sOwnIdentityAttribute.id}' is already shared with the peer.`,
+            `The Attribute with the given attributeId '${sOwnIdentityAttribute.id}' is already shared with the peer.`,
             "error.consumption.requests.invalidRequestItem"
         );
     });
@@ -1517,7 +1517,7 @@ describe(ShareOwnIdentityAttributeUseCase.name, () => {
             peer: services2.address
         });
         expect(response).toBeAnError(
-            `The predecessor '${predecesssorOwnIdentityAttribute.id}' of the IdentityAttribute is already shared with the peer. Instead of sharing it, you should notify the peer about the Attribute succession.`,
+            `The predecessor '${predecesssorOwnIdentityAttribute.id}' of the Attribute is already shared with the peer. Instead of sharing it, you should notify the peer about the Attribute succession.`,
             "error.consumption.requests.invalidRequestItem"
         );
     });
