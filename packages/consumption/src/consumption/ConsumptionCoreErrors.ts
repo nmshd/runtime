@@ -6,6 +6,13 @@ class Attributes {
         return new CoreError("error.consumption.attributes.attributeDoesNotExist", "The specified Attribute does not exist.");
     }
 
+    public cannotAddForwardedSharingInfoToAttribute(attributeId: CoreId, peer: CoreAddress) {
+        return new CoreError(
+            "error.consumption.attributes.cannotAddForwardedSharingInfoToAttribute",
+            `The Attribute '${attributeId.toString()} is already forwarded to peer '${peer.toString()}'.`
+        );
+    }
+
     public successorIsNotAValidAttribute(error: any) {
         return new CoreError(
             "error.consumption.attributes.successorIsNotAValidAttribute",

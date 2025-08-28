@@ -123,6 +123,31 @@ export class PeerRelationshipAttribute extends LocalAttribute implements IPeerRe
         return thirdParty;
     }
 
+    public getForwardedSharingInfoForPeer(peer: CoreAddress): ForwardedSharingInfo | undefined {
+        return this.forwardedSharingInfos?.find(
+            (sharingInfo) => sharingInfo.peer.equals(peer) && sharingInfo.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.DeletedByPeer
+        );
+    }
+
+    public upsertForwardedSharingInfoForPeer(peer: CoreAddress, sharingInfo: ForwardedSharingInfo): this {
+        if (!this.forwardedSharingInfos) {
+            this.forwardedSharingInfos = [sharingInfo];
+            return this;
+        }
+
+        const indexForPeer = this.forwardedSharingInfos.findIndex(
+            (sharingInfo) => sharingInfo.peer.equals(peer) && sharingInfo.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.DeletedByPeer
+        );
+
+        if (indexForPeer === -1) {
+            this.forwardedSharingInfos.push(sharingInfo);
+            return this;
+        }
+
+        this.forwardedSharingInfos[indexForPeer] = sharingInfo;
+        return this;
+    }
+
     public static override from(value: IPeerRelationshipAttribute | PeerRelationshipAttributeJSON): PeerRelationshipAttribute {
         return super.fromAny(value) as PeerRelationshipAttribute;
     }

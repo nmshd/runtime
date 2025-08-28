@@ -435,11 +435,17 @@ export class AttributesController extends ConsumptionBaseController {
         if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
         if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
-        // TODO: check if forwardedSharingInfo with that peer already exists: no deletionInfo - throw, deleted - pass, tobedeleted - override
+        if (attribute.isForwardedTo(peer, true)) throw ConsumptionCoreErrors.attributes.cannotAddForwardedSharingInfoToAttribute(attribute.id, peer);
 
-        const sharingInfo = ForwardedSharingInfo.from({ peer, sourceReference, sharedAt: CoreDate.utc() });
+        const sharingInfo = attribute.isToBeDeletedByForwardingPeer(peer)
+            ? (() => {
+                  const sharingInfoForPeer = attribute.getForwardedSharingInfoForPeer(peer)!;
+                  sharingInfoForPeer.deletionInfo = undefined;
+                  return sharingInfoForPeer;
+              })()
+            : ForwardedSharingInfo.from({ peer, sourceReference, sharedAt: CoreDate.utc() });
 
-        (attribute.forwardedSharingInfos ??= []).push(sharingInfo);
+        attribute.upsertForwardedSharingInfoForPeer(peer, sharingInfo);
         await this.updateAttributeUnsafe(attribute);
 
         // TODO: publish event?
