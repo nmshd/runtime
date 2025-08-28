@@ -1010,11 +1010,7 @@ export class AttributesController extends ConsumptionBaseController {
         return (await this.getAttributeWithSameValue(trimmedValue, queryForOwnIdentityAttributeDuplicates)) as OwnIdentityAttribute | undefined;
     }
 
-    public async getPeerIdentityAttributeWithSameValue(
-        value: AttributeValues.Identity.Json,
-        peer: string,
-        includeDeletedAndToBeDeleted = false
-    ): Promise<PeerIdentityAttribute | undefined> {
+    public async getPeerIdentityAttributeWithSameValue(value: AttributeValues.Identity.Json, peer: string): Promise<PeerIdentityAttribute | undefined> {
         const trimmedValue = this.trimAttributeValue(value);
         const query = flattenObject({
             "@type": "PeerIdentityAttribute",
@@ -1023,13 +1019,32 @@ export class AttributesController extends ConsumptionBaseController {
                 value: trimmedValue
             }
         });
-
-        if (!includeDeletedAndToBeDeleted) query["sharingInfo.deletionInfo"] = { $exists: false };
+        query["peerSharingInfo.deletionInfo.deletionStatus"] = { $ne: ReceivedAttributeDeletionStatus.DeletedByOwner };
 
         return (await this.getAttributeWithSameValue(trimmedValue, query)) as PeerIdentityAttribute | undefined;
     }
 
-    private async getAttributeWithSameValue(value: AttributeValues.Identity.Json, query: any): Promise<LocalAttribute | undefined> {
+    public async getThirdPartyRelationshipAttributeWithSameValue(
+        value: AttributeValues.Relationship.Json,
+        peer: string,
+        key: string
+    ): Promise<ThirdPartyRelationshipAttribute | undefined> {
+        const query = flattenObject({
+            "@type": "ThirdPartyRelationshipAttribute",
+            content: {
+                owner: peer,
+                value: value,
+                key: key
+            }
+        });
+        query["peerSharingInfo.deletionInfo.deletionStatus"] = {
+            $nin: [ThirdPartyRelationshipAttributeDeletionStatus.DeletedByOwner, ThirdPartyRelationshipAttributeDeletionStatus.DeletedByPeer]
+        };
+
+        return (await this.getAttributeWithSameValue(value, query)) as ThirdPartyRelationshipAttribute | undefined;
+    }
+
+    private async getAttributeWithSameValue(value: AttributeValues.Identity.Json | AttributeValues.Relationship.Json, query: any): Promise<LocalAttribute | undefined> {
         const matchingAttributes = await this.getLocalAttributes(query);
 
         const attributeDuplicate = matchingAttributes.find((duplicate) => _.isEqual(duplicate.content.value.toJSON(), value));

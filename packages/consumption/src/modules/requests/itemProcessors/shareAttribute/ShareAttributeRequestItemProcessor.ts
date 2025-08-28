@@ -13,7 +13,13 @@ import { CoreAddress } from "@nmshd/core-types";
 import { RelationshipStatus } from "@nmshd/transport";
 import _ from "lodash";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { OwnIdentityAttribute, OwnRelationshipAttribute, PeerRelationshipAttribute, ReceivedAttributeDeletionStatus } from "../../../attributes";
+import {
+    OwnIdentityAttribute,
+    OwnRelationshipAttribute,
+    PeerRelationshipAttribute,
+    ReceivedAttributeDeletionStatus,
+    ThirdPartyRelationshipAttributeDeletionStatus
+} from "../../../attributes";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
@@ -163,6 +169,23 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
     ): Promise<AcceptResponseItem | AttributeAlreadySharedAcceptResponseItem> {
         const isThirdPartyRelationshipAttribute = !!requestItem.thirdPartyAddress;
         if (isThirdPartyRelationshipAttribute) {
+            const existingThirdPartyRelationshipAttribute = await this.consumptionController.attributes.getThirdPartyRelationshipAttributeWithSameValue(
+                (requestItem.attribute.value as any).toJSON(),
+                requestInfo.peer.toString(),
+                (requestItem.attribute as RelationshipAttribute).key
+            );
+
+            if (existingThirdPartyRelationshipAttribute) {
+                if (existingThirdPartyRelationshipAttribute.peerSharingInfo.deletionInfo?.deletionStatus === ThirdPartyRelationshipAttributeDeletionStatus.ToBeDeleted) {
+                    await this.consumptionController.attributes.setPeerDeletionInfoOfThirdPartyRelationshipAttribute(existingThirdPartyRelationshipAttribute, undefined, true);
+                }
+
+                return AttributeAlreadySharedAcceptResponseItem.from({
+                    result: ResponseItemResult.Accepted,
+                    attributeId: existingThirdPartyRelationshipAttribute.id
+                });
+            }
+
             await this.consumptionController.attributes.createThirdPartyRelationshipAttribute({
                 id: requestItem.attributeId,
                 content: requestItem.attribute as RelationshipAttribute,
@@ -174,7 +197,6 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             return AcceptResponseItem.from({ result: ResponseItemResult.Accepted });
         }
 
-        // TODO: check if this is also required for ThirdPartyRelationshipAttributes
         const existingPeerIdentityAttribute = await this.consumptionController.attributes.getPeerIdentityAttributeWithSameValue(
             (requestItem.attribute.value as any).toJSON(),
             requestInfo.peer.toString()

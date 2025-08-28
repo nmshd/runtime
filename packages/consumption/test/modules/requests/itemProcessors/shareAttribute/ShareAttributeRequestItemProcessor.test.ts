@@ -30,6 +30,9 @@ import {
     ReceivedAttributeDeletionInfo,
     ReceivedAttributeDeletionStatus,
     ShareAttributeRequestItemProcessor,
+    ThirdPartyRelationshipAttribute,
+    ThirdPartyRelationshipAttributeDeletionInfo,
+    ThirdPartyRelationshipAttributeDeletionStatus,
     ValidationResult
 } from "../../../../../src";
 import { TestUtil } from "../../../../core/TestUtil";
@@ -917,12 +920,26 @@ describe("ShareAttributeRequestItemProcessor", function () {
             expect(createdAttribute!.content.owner).toStrictEqual(sender);
         });
 
-        test("returns AcceptResponseItem when accepting a shared RelationshipAttribute", async function () {
+        test("returns AcceptResponseItem when accepting an already existing PeerIdentityAttribute that is DeletedByOwner", async function () {
+            const existingPeerIdentityAttribute = await consumptionController.attributes.createPeerIdentityAttribute({
+                content: TestObjectFactory.createIdentityAttribute({ owner: sender }),
+                sourceReference: CoreId.from("aSourceReferenceId"),
+                peer: sender,
+                id: CoreId.from("aPeerIdentityAttributeId")
+            });
+
+            await consumptionController.attributes.setPeerDeletionInfoOfPeerAttribute(
+                existingPeerIdentityAttribute,
+                ReceivedAttributeDeletionInfo.from({
+                    deletionStatus: ReceivedAttributeDeletionStatus.DeletedByOwner,
+                    deletionDate: CoreDate.utc().subtract({ days: 1 })
+                })
+            );
+
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: true,
-                attributeId: CoreId.from("anAttributeId"),
-                attribute: TestObjectFactory.createRelationshipAttribute({ owner: sender }),
-                thirdPartyAddress: CoreAddress.from("aThirdParty")
+                attributeId: CoreId.from("anotherAttributeId"),
+                attribute: existingPeerIdentityAttribute.content
             });
 
             const incomingRequest = LocalRequest.from({
@@ -937,10 +954,6 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             const responseItem = await processor.accept(requestItem, { accept: true }, incomingRequest);
             expect(responseItem).toBeInstanceOf(AcceptResponseItem);
-
-            const createdAttribute = await consumptionController.attributes.getLocalAttribute(requestItem.attributeId);
-            expect((createdAttribute! as PeerIdentityAttribute).peerSharingInfo.peer).toStrictEqual(sender);
-            expect(createdAttribute!.content.owner).toStrictEqual(sender);
         });
 
         test("returns AttributeAlreadySharedAcceptResponseItem when accepting an already existing PeerIdentityAttribute", async function () {
@@ -1048,6 +1061,143 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             const responseItem = await processor.accept(requestItem, { accept: true }, incomingRequest);
             expect(responseItem).toBeInstanceOf(AttributeAlreadySharedAcceptResponseItem);
+        });
+
+        test("returns AcceptResponseItem when accepting a shared RelationshipAttribute", async function () {
+            const requestItem = ShareAttributeRequestItem.from({
+                mustBeAccepted: true,
+                attributeId: CoreId.from("anAttributeId"),
+                attribute: TestObjectFactory.createRelationshipAttribute({ owner: sender }),
+                thirdPartyAddress: CoreAddress.from("aThirdParty")
+            });
+
+            const incomingRequest = LocalRequest.from({
+                id: await ConsumptionIds.request.generate(),
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({ items: [requestItem] }),
+                statusLog: []
+            });
+
+            const responseItem = await processor.accept(requestItem, { accept: true }, incomingRequest);
+            expect(responseItem).toBeInstanceOf(AcceptResponseItem);
+
+            const createdAttribute = await consumptionController.attributes.getLocalAttribute(requestItem.attributeId);
+            expect((createdAttribute! as PeerIdentityAttribute).peerSharingInfo.peer).toStrictEqual(sender);
+            expect(createdAttribute!.content.owner).toStrictEqual(sender);
+        });
+
+        test("returns AcceptResponseItem when accepting an already shared RelationshipAttribute that is DeletedByOwner", async function () {
+            const existingThirdPartyRelationshipAttribute = await consumptionController.attributes.createThirdPartyRelationshipAttribute({
+                content: TestObjectFactory.createRelationshipAttribute({ owner: sender }),
+                sourceReference: CoreId.from("aSourceReferenceId"),
+                peer: sender,
+                initialAttributePeer: aThirdParty,
+                id: CoreId.from("aThirdPartyRelationshipAttributeId")
+            });
+
+            await consumptionController.attributes.setPeerDeletionInfoOfThirdPartyRelationshipAttribute(
+                existingThirdPartyRelationshipAttribute,
+                ThirdPartyRelationshipAttributeDeletionInfo.from({
+                    deletionStatus: ThirdPartyRelationshipAttributeDeletionStatus.DeletedByOwner,
+                    deletionDate: CoreDate.utc().subtract({ days: 1 })
+                })
+            );
+
+            const requestItem = ShareAttributeRequestItem.from({
+                mustBeAccepted: true,
+                attributeId: CoreId.from("anotherAttributeId"),
+                attribute: TestObjectFactory.createRelationshipAttribute({ owner: sender }),
+                thirdPartyAddress: aThirdParty
+            });
+
+            const incomingRequest = LocalRequest.from({
+                id: await ConsumptionIds.request.generate(),
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({ items: [requestItem] }),
+                statusLog: []
+            });
+
+            const responseItem = await processor.accept(requestItem, { accept: true }, incomingRequest);
+            expect(responseItem).toBeInstanceOf(AcceptResponseItem);
+        });
+
+        test("returns AttributeAlreadySharedAcceptResponseItem when accepting an already shared RelationshipAttribute", async function () {
+            const existingThirdPartyRelationshipAttribute = await consumptionController.attributes.createThirdPartyRelationshipAttribute({
+                content: TestObjectFactory.createRelationshipAttribute({ owner: sender }),
+                sourceReference: CoreId.from("aSourceReferenceId"),
+                peer: sender,
+                initialAttributePeer: aThirdParty,
+                id: CoreId.from("aThirdPartyRelationshipAttributeId")
+            });
+
+            const requestItem = ShareAttributeRequestItem.from({
+                mustBeAccepted: true,
+                attributeId: CoreId.from("anotherAttributeId"),
+                attribute: TestObjectFactory.createRelationshipAttribute({ owner: sender }),
+                thirdPartyAddress: aThirdParty
+            });
+
+            const incomingRequest = LocalRequest.from({
+                id: await ConsumptionIds.request.generate(),
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({ items: [requestItem] }),
+                statusLog: []
+            });
+
+            const responseItem = await processor.accept(requestItem, { accept: true }, incomingRequest);
+            expect(responseItem).toBeInstanceOf(AttributeAlreadySharedAcceptResponseItem);
+            expect((responseItem as AttributeAlreadySharedAcceptResponseItem).attributeId).toStrictEqual(existingThirdPartyRelationshipAttribute.id);
+        });
+
+        test("returns AttributeAlreadySharedAcceptResponseItem when accepting an already shared RelationshipAttribute that is ToBeDeleted", async function () {
+            const existingThirdPartyRelationshipAttribute = await consumptionController.attributes.createThirdPartyRelationshipAttribute({
+                content: TestObjectFactory.createRelationshipAttribute({ owner: sender }),
+                sourceReference: CoreId.from("aSourceReferenceId"),
+                peer: sender,
+                initialAttributePeer: aThirdParty,
+                id: CoreId.from("aThirdPartyRelationshipAttributeId")
+            });
+
+            await consumptionController.attributes.setPeerDeletionInfoOfThirdPartyRelationshipAttribute(
+                existingThirdPartyRelationshipAttribute,
+                ThirdPartyRelationshipAttributeDeletionInfo.from({
+                    deletionStatus: ThirdPartyRelationshipAttributeDeletionStatus.ToBeDeleted,
+                    deletionDate: CoreDate.utc().add({ days: 1 })
+                })
+            );
+
+            const requestItem = ShareAttributeRequestItem.from({
+                mustBeAccepted: true,
+                attributeId: CoreId.from("anotherAttributeId"),
+                attribute: TestObjectFactory.createRelationshipAttribute({ owner: sender }),
+                thirdPartyAddress: aThirdParty
+            });
+
+            const incomingRequest = LocalRequest.from({
+                id: await ConsumptionIds.request.generate(),
+                createdAt: CoreDate.utc(),
+                isOwn: false,
+                peer: sender,
+                status: LocalRequestStatus.DecisionRequired,
+                content: Request.from({ items: [requestItem] }),
+                statusLog: []
+            });
+
+            const responseItem = await processor.accept(requestItem, { accept: true }, incomingRequest);
+            expect(responseItem).toBeInstanceOf(AttributeAlreadySharedAcceptResponseItem);
+            expect((responseItem as AttributeAlreadySharedAcceptResponseItem).attributeId).toStrictEqual(existingThirdPartyRelationshipAttribute.id);
+
+            const updatedAttribute = (await consumptionController.attributes.getLocalAttribute(existingThirdPartyRelationshipAttribute.id)) as ThirdPartyRelationshipAttribute;
+            expect(updatedAttribute.peerSharingInfo.deletionInfo).toBeUndefined();
         });
     });
 
