@@ -324,6 +324,38 @@ describe("ForwardedAttributeDeletedByPeerNotificationItemProcessor", function ()
         expect(rollbackResult).toBeUndefined();
     });
 
+    test("should throw if Attribute type is wrong", async function () {
+        const peerIdentityAttribute = await consumptionController.attributes.createPeerIdentityAttribute({
+            content: IdentityAttribute.from({
+                value: {
+                    "@type": "BirthName",
+                    value: "aBirthName"
+                },
+                owner: CoreAddress.from("initialPeer")
+            }),
+            peer: CoreAddress.from("initialPeer"),
+            sourceReference: CoreId.from("reqRef"),
+            id: CoreId.from("anId")
+        });
+
+        const notificationItem = ForwardedAttributeDeletedByPeerNotificationItem.from({ attributeId: peerIdentityAttribute.id });
+
+        const notification = LocalNotification.from({
+            id: CoreId.from("notificationRef"),
+            source: LocalNotificationSource.from({ type: "Message", reference: CoreId.from("messageRef") }),
+            status: LocalNotificationStatus.Open,
+            isOwn: false,
+            peer: CoreAddress.from("naughtyPeer"),
+            createdAt: CoreDate.utc(),
+            content: Notification.from({ id: CoreId.from("notificationRef"), items: [notificationItem] }),
+            receivedByDevice: CoreId.from("deviceId")
+        });
+        const processor = new ForwardedAttributeDeletedByPeerNotificationItemProcessor(consumptionController);
+
+        const checkResult = await processor.checkPrerequisitesOfIncomingNotificationItem(notificationItem, notification);
+        expect(checkResult).errorValidationResult({ code: "error.consumption.attributes.wrongTypeOfAttribute" });
+    });
+
     test("should throw if sender is not peer of Attribute", async function () {
         const ownIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
             content: IdentityAttribute.from({

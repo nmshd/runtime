@@ -34,7 +34,7 @@ export class ForwardedAttributeDeletedByPeerNotificationItemProcessor extends Ab
         if (!(attribute instanceof OwnIdentityAttribute || attribute instanceof OwnRelationshipAttribute || attribute instanceof PeerRelationshipAttribute)) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.attributes.wrongTypeOfAttribute(
-                    `The Attribute ${notificationItem.attributeId} is not an own IdentityAttribute, an own RelationshipAttribute or a peer RelationshipAttribute.`
+                    `The Attribute ${notificationItem.attributeId} is not an OwnIdentityAttribute, an OwnRelationshipAttribute or a PeerRelationshipAttribute.`
                 )
             );
         }
@@ -55,7 +55,7 @@ export class ForwardedAttributeDeletedByPeerNotificationItemProcessor extends Ab
 
         if (!(attribute instanceof OwnIdentityAttribute || attribute instanceof OwnRelationshipAttribute || attribute instanceof PeerRelationshipAttribute)) {
             throw ConsumptionCoreErrors.attributes.wrongTypeOfAttribute(
-                `The Attribute ${notificationItem.attributeId} is not an own IdentityAttribute, an own RelationshipAttribute or a peer RelationshipAttribute.`
+                `The Attribute ${notificationItem.attributeId} is not an OwnIdentityAttribute, an OwnRelationshipAttribute or a PeerRelationshipAttribute.`
             );
         }
 
@@ -77,11 +77,7 @@ export class ForwardedAttributeDeletedByPeerNotificationItemProcessor extends Ab
             return;
         }
 
-        const predecessors = await this.consumptionController.attributes.getPredecessorsOfAttribute(attribute);
-        for (const attr of [attribute, ...predecessors]) {
-            // the previous deletionState cannot be unambiguously known, either it was undefined or 'ToBeDeletedByPeer'
-            attr.setForwardedDeletionInfo(undefined, notification.peer);
-            await this.consumptionController.attributes.updateAttributeUnsafe(attr);
-        }
+        // the previous deletionState cannot be unambiguously known, either it was undefined or 'ToBeDeletedByPeer'
+        await this.consumptionController.attributes.setForwardedDeletionInfoOfAttributeAndPredecessors(attribute, undefined, notification.peer, true);
     }
 }
