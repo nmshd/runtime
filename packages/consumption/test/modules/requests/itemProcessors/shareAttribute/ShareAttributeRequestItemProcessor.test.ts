@@ -96,7 +96,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 result: "error",
                 expectedError: {
                     code: "error.consumption.requests.invalidRequestItem",
-                    message: "The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes."
+                    message: /The Attribute with the given attributeId '.*' is not an OwnIdentityAttribute, an OwnRelationshipAttribute or a PeerRelationshipAttribute\./
                 },
                 attribute: IdentityAttribute.from({
                     value: GivenName.fromAny({ value: "aGivenName" }),
@@ -339,7 +339,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: `The IdentityAttribute with the given attributeId '${requestItem.attributeId.toString()}' is already shared with the peer.`
+                message: `The Attribute with the given attributeId '${requestItem.attributeId.toString()}' is already shared with the peer.`
             });
         });
 
@@ -454,7 +454,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: `The provided IdentityAttribute is outdated. Its successor '${forwardedSuccessor.id.toString()}' is already shared with the peer.`
+                message: `The provided Attribute is outdated. Its successor '${forwardedSuccessor.id.toString()}' is already shared with the peer.`
             });
         });
 
@@ -543,7 +543,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: `The provided IdentityAttribute is outdated. Its successor '${forwardedSuccessor.id.toString()}' is already shared with the peer.`
+                message: `The provided Attribute is outdated. Its successor '${forwardedSuccessor.id.toString()}' is already shared with the peer.`
             });
         });
 
@@ -580,7 +580,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: `The predecessor '${forwardedPredecessor.id.toString()}' of the IdentityAttribute is already shared with the peer. Instead of sharing it, you should notify the peer about the Attribute succession.`
+                message: `The predecessor '${forwardedPredecessor.id.toString()}' of the Attribute is already shared with the peer. Instead of sharing it, you should notify the peer about the Attribute succession.`
             });
         });
 
@@ -669,7 +669,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: `The predecessor '${forwardedPredecessor.id.toString()}' of the IdentityAttribute is already shared with the peer. Instead of sharing it, you should notify the peer about the Attribute succession.`
+                message: `The predecessor '${forwardedPredecessor.id.toString()}' of the Attribute is already shared with the peer. Instead of sharing it, you should notify the peer about the Attribute succession.`
             });
         });
 
@@ -699,7 +699,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: "You cannot share ThirdPartyRelationshipAttributes."
+                message: `The Attribute with the given attributeId '${requestItem.attributeId.toString()}' is not an OwnIdentityAttribute, an OwnRelationshipAttribute or a PeerRelationshipAttribute.`
             });
         });
 
@@ -729,7 +729,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: "The provided RelationshipAttribute already exists in the context of the Relationship with the peer."
+                message: `The Attribute with the given attributeId '${requestItem.attributeId.toString()}' is already shared with the peer.`
             });
         });
 
@@ -841,6 +841,50 @@ describe("ShareAttributeRequestItemProcessor", function () {
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.cannotShareRelationshipAttributeOfPendingRelationship",
                 message: "The provided RelationshipAttribute exists in the context of a pending Relationship and therefore cannot be shared."
+            });
+        });
+
+        test("returns an error when a successor of the existing RelationshipAttribute is already shared with the peer", async function () {
+            const ownRelationshipAttribute = await consumptionController.attributes.createOwnRelationshipAttribute({
+                content: TestObjectFactory.createRelationshipAttribute({ owner: sender }),
+                peer: aThirdParty,
+                sourceReference: CoreId.from("aSourceReferenceId")
+            });
+
+            const { successor: successorOfOwnRelationshipAttribute } = await consumptionController.attributes.succeedOwnRelationshipAttribute(ownRelationshipAttribute, {
+                content: {
+                    "@type": "RelationshipAttribute",
+                    owner: sender.toString(),
+                    key: "aKey",
+                    confidentiality: RelationshipAttributeConfidentiality.Public,
+                    value: {
+                        "@type": "ProprietaryString",
+                        value: "anotherValue",
+                        title: "aTitle"
+                    }
+                },
+                peerSharingInfo: { peer: aThirdParty.toString(), sourceReference: "anotherSourceReferenceId" }
+            });
+
+            const forwardedSuccessor = await consumptionController.attributes.addForwardedSharingInfoToAttribute(
+                successorOfOwnRelationshipAttribute,
+                recipient,
+                CoreId.from("aForwardingSourceReferenceId")
+            );
+
+            const requestItem = ShareAttributeRequestItem.from({
+                mustBeAccepted: true,
+                attribute: ownRelationshipAttribute.content,
+                attributeId: ownRelationshipAttribute.id,
+                thirdPartyAddress: ownRelationshipAttribute.peerSharingInfo.peer
+            });
+            const request = Request.from({ items: [requestItem] });
+
+            const result = await processor.canCreateOutgoingRequestItem(requestItem, request, recipient);
+
+            expect(result).errorValidationResult({
+                code: "error.consumption.requests.invalidRequestItem",
+                message: `The provided Attribute is outdated. Its successor '${forwardedSuccessor.id.toString()}' is already shared with the peer.`
             });
         });
     });
