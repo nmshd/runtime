@@ -5,6 +5,7 @@ import { AttributeMapper, FileMapper, IdentityDeletionProcessMapper, MessageMapp
 import {
     AttributeCreatedEvent,
     AttributeDeletedEvent,
+    AttributeForwardedSharingInfoChangedEvent,
     AttributeSucceededEvent,
     AttributeWasViewedAtChangedEvent,
     ForwardedAttributeDeletedByPeerEvent,
@@ -190,6 +191,10 @@ export class EventProxy {
                     successor: AttributeMapper.toAttributeDTO(event.data.successor)
                 })
             );
+        });
+
+        this.subscribeToSourceEvent(consumption.AttributeForwardedSharingInfoChangedEvent, (event) => {
+            this.targetEventBus.publish(new AttributeForwardedSharingInfoChangedEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
         });
 
         this.subscribeToSourceEvent(consumption.AttributeWasViewedAtChangedEvent, (event) => {

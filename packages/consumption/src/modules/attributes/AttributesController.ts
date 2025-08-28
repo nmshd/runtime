@@ -27,7 +27,7 @@ import { ConsumptionCoreErrors } from "../../consumption/ConsumptionCoreErrors";
 import { ConsumptionError } from "../../consumption/ConsumptionError";
 import { ConsumptionIds } from "../../consumption/ConsumptionIds";
 import { flattenObject, ValidationResult } from "../common";
-import { AttributeCreatedEvent, AttributeDeletedEvent, AttributeSucceededEvent, AttributeWasViewedAtChangedEvent } from "./events";
+import { AttributeCreatedEvent, AttributeDeletedEvent, AttributeForwardedSharingInfoChangedEvent, AttributeSucceededEvent, AttributeWasViewedAtChangedEvent } from "./events";
 import { AttributeTagCollection, IAttributeTag } from "./local/AttributeTagCollection";
 import {
     AttributeWithForwardedSharingInfos,
@@ -448,7 +448,7 @@ export class AttributesController extends ConsumptionBaseController {
         attribute.upsertForwardedSharingInfoForPeer(peer, sharingInfo);
         await this.updateAttributeUnsafe(attribute);
 
-        // TODO: publish event?
+        this.eventBus.publish(new AttributeForwardedSharingInfoChangedEvent(this.identity.address.toString(), attribute));
         return attribute;
     }
 
@@ -800,7 +800,7 @@ export class AttributesController extends ConsumptionBaseController {
         attribute.forwardedSharingInfos = attribute.forwardedSharingInfos?.filter((sharingInfo) => !sharingInfo.peer.equals(peer));
         await this.updateAttributeUnsafe(attribute);
 
-        // TODO: publish event?
+        this.eventBus.publish(new AttributeForwardedSharingInfoChangedEvent(this.identity.address.toString(), attribute));
         return attribute;
     }
 

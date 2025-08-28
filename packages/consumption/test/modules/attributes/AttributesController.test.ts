@@ -21,6 +21,7 @@ import { anything, reset, spy, verify, when } from "ts-mockito";
 import {
     AttributeCreatedEvent,
     AttributeDeletedEvent,
+    AttributeForwardedSharingInfoChangedEvent,
     AttributesController,
     AttributeTagCollection,
     ConsumptionController,
@@ -238,6 +239,25 @@ describe("AttributesController", function () {
             const forwardedAttribute = await consumptionController.attributes.addForwardedSharingInfoToAttribute(attribute, peer, sourceReference);
             expect(forwardedAttribute).toBeInstanceOf(OwnIdentityAttribute);
             expect(forwardedAttribute.isForwardedTo(peer)).toBe(true);
+        });
+
+        test("should publish an event adding a ForwardedSharingInfo to an OwnIdentityAttribute", async function () {
+            const attributeParams = {
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "Nationality",
+                        value: "DE"
+                    },
+                    owner: testAccount.identity.address
+                })
+            };
+            const attribute = await consumptionController.attributes.createOwnIdentityAttribute(attributeParams);
+
+            const peer = CoreAddress.from("address");
+            const sourceReference = CoreId.from("aSourceReferenceId");
+
+            const forwardedAttribute = await consumptionController.attributes.addForwardedSharingInfoToAttribute(attribute, peer, sourceReference);
+            mockEventBus.expectLastPublishedEvent(AttributeForwardedSharingInfoChangedEvent, forwardedAttribute);
         });
 
         test("should throw trying to add a ForwardedSharingInfo to an OwnIdentityAttribute if it is already forwarded", async function () {
