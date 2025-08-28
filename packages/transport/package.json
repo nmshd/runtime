@@ -92,7 +92,7 @@
         "@types/luxon": "^3.7.1",
         "@types/qs": "^6.14.0",
         "correlation-id": "^5.2.0",
-        "expect": "^30.0.5",
+        "expect": "^30.1.1",
         "testcontainers": "^11.5.1",
         "ts-mockito": "^2.6.1"
     },
