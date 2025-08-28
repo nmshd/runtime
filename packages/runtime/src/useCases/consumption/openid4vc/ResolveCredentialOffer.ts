@@ -1,5 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
 import { OpenId4VcController } from "@nmshd/consumption";
+import { VerifiableCredentialDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
 import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
@@ -13,7 +14,7 @@ class Validator extends SchemaValidator<ResolveCredentialOfferRequest> {
     }
 }
 
-export class ResolveCredentialOfferUseCase extends UseCase<ResolveCredentialOfferRequest, void> {
+export class ResolveCredentialOfferUseCase extends UseCase<ResolveCredentialOfferRequest, VerifiableCredentialDTO> {
     public constructor(
         @Inject private readonly openId4VcContoller: OpenId4VcController,
         @Inject validator: Validator
@@ -21,9 +22,8 @@ export class ResolveCredentialOfferUseCase extends UseCase<ResolveCredentialOffe
         super(validator);
     }
 
-    protected override executeInternal(request: ResolveCredentialOfferRequest): Promise<Result<void>> {
-        return this.openId4VcContoller.processCredentialOffer(request.credentialOfferUrl).then(() => {
-            return Result.ok<void>(undefined);
-        });
+    protected override async executeInternal(request: ResolveCredentialOfferRequest): Promise<Result<VerifiableCredentialDTO>> {
+        const result = await this.openId4VcContoller.processCredentialOffer(request.credentialOfferUrl);
+        return Result.ok({ status: result.status, message: result.message, data: result.data } as VerifiableCredentialDTO);
     }
 }
