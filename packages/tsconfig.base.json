@@ -20,6 +20,7 @@
         "noImplicitOverride": true,
         "useDefineForClassFields": false,
         "lib": ["ES2022", "DOM"],
-        "composite": true
+        "composite": true,
+        "skipLibCheck": true
     }
 }
