@@ -13,11 +13,22 @@ afterAll(async () => await runtimeServiceProvider.stop());
 
 describe("OpenID4VC", () => {
     test("should process a given credential offer", async () => {
+        // this should fetch its own credential offer url
+        const response = await fetch(`https://openid4vc-service.is.enmeshed.eu/issuance/credentialOffers`, {
+            method: "POST",
+            headers: {
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                credentialConfigurationIds: ["EmployeeIdCard-sdjwt"]
+            })
+        });
+        const data = await response.json();
         const result = await consumptionServices.openId4Vc.resolveCredentialOffer({
-            credentialOfferUrl:
-                "openid-credential-offer://?credential_offer_uri=https%3A%2F%2Fopenid4vc-service.is.enmeshed.eu%2Foid4vci%2Fissuer123%2Foffers%2F989f2291-1957-4c71-ac5c-88db744916d7"
+            credentialOfferUrl: data.result.credentialOffer
         });
         // @ts-expect-error
         expect(result._isSuccess).toBe(true);
-    }, 10000);
+    }, 10000000);
 });
