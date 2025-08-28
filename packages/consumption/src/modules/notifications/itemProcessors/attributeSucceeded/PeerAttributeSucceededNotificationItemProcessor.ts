@@ -31,7 +31,7 @@ export class PeerAttributeSucceededNotificationItemProcessor extends AbstractNot
         if (!(predecessor instanceof PeerIdentityAttribute || predecessor instanceof PeerRelationshipAttribute)) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.attributes.wrongTypeOfAttribute(
-                    `The Attribute ${notificationItem.predecessorId} is not a peer IdentityAttribute or peer RelationshipAttribute.`
+                    `The Attribute ${notificationItem.predecessorId} is not a PeerIdentityAttribute or a PeerRelationshipAttribute.`
                 )
             );
         }
@@ -71,7 +71,7 @@ export class PeerAttributeSucceededNotificationItemProcessor extends AbstractNot
 
             if (!(predecessor instanceof PeerIdentityAttribute || predecessor instanceof PeerRelationshipAttribute)) {
                 throw ConsumptionCoreErrors.attributes.wrongTypeOfAttribute(
-                    `The Attribute ${notificationItem.predecessorId} is not a peer IdentityAttribute or peer RelationshipAttribute.`
+                    `The Attribute ${notificationItem.predecessorId} is not a PeerIdentityAttribute or a PeerRelationshipAttribute.`
                 );
             }
 
@@ -101,8 +101,7 @@ export class PeerAttributeSucceededNotificationItemProcessor extends AbstractNot
             throw e;
         }
 
-        const ownAddress = this.accountController.identity.address.toString();
-        return new AttributeSucceededEvent(ownAddress, updatedPredecessor, successor);
+        return new AttributeSucceededEvent(this.currentIdentityAddress.toString(), updatedPredecessor, successor);
     }
 
     public override async rollback(notificationItem: PeerAttributeSucceededNotificationItem, notification: LocalNotification): Promise<void> {
