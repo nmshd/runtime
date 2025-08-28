@@ -10,13 +10,12 @@ import { TransportCoreErrors } from "../../core/TransportCoreErrors";
 import { TransportIds } from "../../core/TransportIds";
 import { RelationshipChangedEvent, RelationshipDecomposedBySelfEvent, RelationshipReactivationCompletedEvent, RelationshipReactivationRequestedEvent } from "../../events";
 import { AccountController } from "../accounts/AccountController";
+import { Identity } from "../accounts/data/Identity";
 import { RelationshipTemplate } from "../relationshipTemplates/local/RelationshipTemplate";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
 import { RelationshipSecretController } from "./RelationshipSecretController";
 import { BackbonePutRelationshipsResponse } from "./backbone/BackbonePutRelationship";
-import { BackboneRelationship } from "./backbone/BackboneRelationship";
 import { RelationshipClient } from "./backbone/RelationshipClient";
-import { CachedRelationship } from "./local/CachedRelationship";
 import { PeerDeletionInfo } from "./local/PeerDeletionInfo";
 import { Relationship } from "./local/Relationship";
 import { RelationshipAuditLog } from "./local/RelationshipAuditLog";
@@ -56,60 +55,8 @@ export class RelationshipsController extends TransportController {
         return relationships;
     }
 
-    public async updateCache(ids: string[]): Promise<Relationship[]> {
-        if (ids.length < 1) {
-            return [];
-        }
-
-        const resultItems = (await this.client.getRelationships({ ids })).value;
-        const promises = [];
-        for await (const resultItem of resultItems) {
-            promises.push(this.updateExistingRelationshipInDb(resultItem.id, resultItem));
-        }
-        return await Promise.all(promises);
-    }
-
-    public async fetchCaches(ids: CoreId[]): Promise<{ id: CoreId; cache: CachedRelationship }[]> {
-        if (ids.length === 0) return [];
-
-        const backboneRelationships = await (await this.client.getRelationships({ ids: ids.map((id) => id.id) })).value.collect();
-
-        const decryptionPromises = backboneRelationships.map(async (r) => {
-            const relationshipDoc = await this.relationships.read(r.id);
-            if (!relationshipDoc) {
-                this._log.error(
-                    `Relationship '${r.id}' not found in local database and the cache fetching was therefore skipped. This should not happen and might be a bug in the application logic.`
-                );
-                return;
-            }
-
-            const relationship = Relationship.from(relationshipDoc);
-
-            return {
-                id: CoreId.from(r.id),
-                cache: await this.decryptRelationship(r, relationship.relationshipSecretId)
-            };
-        });
-
-        const caches = await Promise.all(decryptionPromises);
-        return caches.filter((c) => c !== undefined);
-    }
-
-    @log()
-    private async updateExistingRelationshipInDb(id: string, response: BackboneRelationship) {
-        const relationshipDoc = await this.relationships.read(id);
-        if (!relationshipDoc) throw TransportCoreErrors.general.recordNotFound(Relationship, id);
-
-        const relationship = Relationship.from(relationshipDoc);
-
-        await this.updateCacheOfRelationship(relationship, response);
-        relationship.status = response.status;
-        await this.relationships.update(relationshipDoc, relationship);
-        return relationship;
-    }
-
     public async getRelationshipToIdentity(address: CoreAddress, status?: RelationshipStatus): Promise<Relationship | undefined> {
-        const query: any = { peerAddress: address.toString() };
+        const query: any = { [`${nameof<Relationship>((r) => r.peer)}.${nameof<Identity>((r) => r.address)}`]: address.toString() };
         if (status) query[`${nameof<Relationship>((r) => r.status)}`] = status;
         const relationships = await this.relationships.find(query);
 
@@ -158,9 +105,6 @@ export class RelationshipsController extends TransportController {
         }
 
         const template = (parameters as SendRelationshipParameters).template;
-        if (!template.cache) {
-            throw this.newCacheEmptyError(RelationshipTemplate, template.id.toString());
-        }
 
         const secretId = await TransportIds.relationshipSecret.generate();
         const creationContentCipher = await this.prepareCreationContent(secretId, template, parameters.creationContent);
@@ -173,7 +117,7 @@ export class RelationshipsController extends TransportController {
 
         const backboneResponse = result.value;
 
-        const newRelationship = Relationship.fromBackboneAndCreationContent(backboneResponse, template, template.cache.identity, parameters.creationContent, secretId);
+        const newRelationship = Relationship.fromBackboneAndCreationContent(backboneResponse, template.identity, parameters.creationContent, secretId);
 
         await this.relationships.create(newRelationship);
 
@@ -184,11 +128,8 @@ export class RelationshipsController extends TransportController {
 
     public async canSendRelationship(parameters: ISendRelationshipParameters): Promise<Result<void, CoreError>> {
         const template = (parameters as SendRelationshipParameters).template;
-        if (!template.cache) {
-            throw this.newCacheEmptyError(RelationshipTemplate, template.id.toString());
-        }
 
-        const peerAddress = template.cache.createdBy;
+        const peerAddress = template.createdBy;
         const existingRelationshipToPeer = await this.getExistingRelationshipToIdentity(peerAddress);
 
         if (existingRelationshipToPeer) {
@@ -246,10 +187,11 @@ export class RelationshipsController extends TransportController {
     }
 
     public async accept(relationshipId: CoreId): Promise<Relationship> {
-        const relationship = await this.getRelationshipWithCache(relationshipId);
+        const relationship = await this.getRelationship(relationshipId);
+        if (!relationship) throw TransportCoreErrors.general.recordNotFound(Relationship, relationshipId.toString());
         this.assertRelationshipStatus(relationship, RelationshipStatus.Pending);
 
-        const lastAuditLogEntry = relationship.cache.auditLog[relationship.cache.auditLog.length - 1];
+        const lastAuditLogEntry = relationship.auditLog[relationship.auditLog.length - 1];
         if (!lastAuditLogEntry.createdBy.equals(relationship.peer.address)) {
             throw TransportCoreErrors.relationships.operationOnlyAllowedForPeer(`Only your peer can accept the relationship ${relationshipId.toString()}`);
         }
@@ -257,10 +199,11 @@ export class RelationshipsController extends TransportController {
     }
 
     public async reject(relationshipId: CoreId): Promise<Relationship> {
-        const relationship = await this.getRelationshipWithCache(relationshipId);
+        const relationship = await this.getRelationship(relationshipId);
+        if (!relationship) throw TransportCoreErrors.general.recordNotFound(Relationship, relationshipId.toString());
         this.assertRelationshipStatus(relationship, RelationshipStatus.Pending);
 
-        const lastAuditLogEntry = relationship.cache.auditLog[relationship.cache.auditLog.length - 1];
+        const lastAuditLogEntry = relationship.auditLog[relationship.auditLog.length - 1];
         if (!lastAuditLogEntry.createdBy.equals(relationship.peer.address)) {
             throw TransportCoreErrors.relationships.operationOnlyAllowedForPeer(
                 `Only your peer can reject the relationship ${relationshipId.toString()}. Revoke the relationship instead.`
@@ -270,10 +213,11 @@ export class RelationshipsController extends TransportController {
     }
 
     public async revoke(relationshipId: CoreId): Promise<Relationship> {
-        const relationship = await this.getRelationshipWithCache(relationshipId);
+        const relationship = await this.getRelationship(relationshipId);
+        if (!relationship) throw TransportCoreErrors.general.recordNotFound(Relationship, relationshipId.toString());
         this.assertRelationshipStatus(relationship, RelationshipStatus.Pending);
 
-        const lastAuditLogEntry = relationship.cache.auditLog[relationship.cache.auditLog.length - 1];
+        const lastAuditLogEntry = relationship.auditLog[relationship.auditLog.length - 1];
         if (lastAuditLogEntry.createdBy.equals(relationship.peer.address)) {
             throw TransportCoreErrors.relationships.operationOnlyAllowedForPeer(
                 `Only your peer can revoke the relationship ${relationshipId.toString()}. Reject the relationship instead.`
@@ -283,17 +227,19 @@ export class RelationshipsController extends TransportController {
     }
 
     public async terminate(relationshipId: CoreId): Promise<Relationship> {
-        const relationship = await this.getRelationshipWithCache(relationshipId);
+        const relationship = await this.getRelationship(relationshipId);
+        if (!relationship) throw TransportCoreErrors.general.recordNotFound(Relationship, relationshipId.toString());
         this.assertRelationshipStatus(relationship, RelationshipStatus.Active);
 
         return await this.completeOperationWithBackboneCall(RelationshipAuditLogEntryReason.Termination, relationshipId);
     }
 
     public async requestReactivation(relationshipId: CoreId): Promise<Relationship> {
-        const relationship = await this.getRelationshipWithCache(relationshipId);
+        const relationship = await this.getRelationship(relationshipId);
+        if (!relationship) throw TransportCoreErrors.general.recordNotFound(Relationship, relationshipId.toString());
         this.assertRelationshipStatus(relationship, RelationshipStatus.Terminated);
 
-        const lastAuditLogEntry = relationship.cache.auditLog[relationship.cache.auditLog.length - 1];
+        const lastAuditLogEntry = relationship.auditLog[relationship.auditLog.length - 1];
         if (lastAuditLogEntry.reason === RelationshipAuditLogEntryReason.ReactivationRequested) {
             if (lastAuditLogEntry.createdBy.equals(relationship.peer.address)) {
                 throw TransportCoreErrors.relationships.reactivationAlreadyRequested(
@@ -307,10 +253,11 @@ export class RelationshipsController extends TransportController {
     }
 
     public async rejectReactivation(relationshipId: CoreId): Promise<Relationship> {
-        const relationship = await this.getRelationshipWithCache(relationshipId);
+        const relationship = await this.getRelationship(relationshipId);
+        if (!relationship) throw TransportCoreErrors.general.recordNotFound(Relationship, relationshipId.toString());
         this.assertRelationshipStatus(relationship, RelationshipStatus.Terminated);
 
-        const lastAuditLogEntry = relationship.cache.auditLog[relationship.cache.auditLog.length - 1];
+        const lastAuditLogEntry = relationship.auditLog[relationship.auditLog.length - 1];
         if (lastAuditLogEntry.reason !== RelationshipAuditLogEntryReason.ReactivationRequested) {
             throw TransportCoreErrors.relationships.reactivationNotRequested(relationshipId.toString());
         }
@@ -324,10 +271,11 @@ export class RelationshipsController extends TransportController {
     }
 
     public async revokeReactivation(relationshipId: CoreId): Promise<Relationship> {
-        const relationship = await this.getRelationshipWithCache(relationshipId);
+        const relationship = await this.getRelationship(relationshipId);
+        if (!relationship) throw TransportCoreErrors.general.recordNotFound(Relationship, relationshipId.toString());
         this.assertRelationshipStatus(relationship, RelationshipStatus.Terminated);
 
-        const lastAuditLogEntry = relationship.cache.auditLog[relationship.cache.auditLog.length - 1];
+        const lastAuditLogEntry = relationship.auditLog[relationship.auditLog.length - 1];
         if (lastAuditLogEntry.reason !== RelationshipAuditLogEntryReason.ReactivationRequested) {
             throw TransportCoreErrors.relationships.reactivationNotRequested(relationshipId.toString());
         }
@@ -340,10 +288,11 @@ export class RelationshipsController extends TransportController {
     }
 
     public async acceptReactivation(relationshipId: CoreId): Promise<Relationship> {
-        const relationship = await this.getRelationshipWithCache(relationshipId);
+        const relationship = await this.getRelationship(relationshipId);
+        if (!relationship) throw TransportCoreErrors.general.recordNotFound(Relationship, relationshipId.toString());
         this.assertRelationshipStatus(relationship, RelationshipStatus.Terminated);
 
-        const lastAuditLogEntry = relationship.cache.auditLog[relationship.cache.auditLog.length - 1];
+        const lastAuditLogEntry = relationship.auditLog[relationship.auditLog.length - 1];
         if (lastAuditLogEntry.reason !== RelationshipAuditLogEntryReason.ReactivationRequested) {
             throw TransportCoreErrors.relationships.reactivationNotRequested(relationshipId.toString());
         }
@@ -355,7 +304,8 @@ export class RelationshipsController extends TransportController {
     }
 
     public async decompose(relationshipId: CoreId): Promise<void> {
-        const relationship = await this.getRelationshipWithCache(relationshipId);
+        const relationship = await this.getRelationship(relationshipId);
+        if (!relationship) throw TransportCoreErrors.general.recordNotFound(Relationship, relationshipId.toString());
         this.assertRelationshipStatus(relationship, RelationshipStatus.Terminated, RelationshipStatus.DeletionProposed);
 
         const result = await this.client.decomposeRelationship(relationshipId.toString());
@@ -370,59 +320,14 @@ export class RelationshipsController extends TransportController {
         this.eventBus.publish(new RelationshipDecomposedBySelfEvent(this.parent.identity.address.toString(), { relationshipId }));
     }
 
-    private async getRelationshipWithCache(id: CoreId): Promise<Relationship & { cache: CachedRelationship }> {
-        const relationship = await this.getRelationship(id);
-        if (!relationship) throw TransportCoreErrors.general.recordNotFound(Relationship, id.toString());
-        if (!relationship.cache) await this.updateCacheOfRelationship(relationship);
-        if (!relationship.cache) throw this.newCacheEmptyError(Relationship, id.toString());
-
-        return relationship as Relationship & { cache: CachedRelationship };
-    }
-
     private assertRelationshipStatus(relationship: Relationship, ...status: RelationshipStatus[]) {
         if (status.includes(relationship.status)) return;
 
         throw TransportCoreErrors.relationships.wrongRelationshipStatus(relationship.id.toString(), relationship.status);
     }
 
-    private async updateCacheOfRelationship(relationship: Relationship, response?: BackboneRelationship) {
-        response ??= (await this.client.getRelationship(relationship.id.toString())).value;
-
-        const cachedRelationship = await this.decryptRelationship(response, relationship.relationshipSecretId);
-
-        relationship.setCache(cachedRelationship);
-    }
-
-    private async decryptRelationship(response: BackboneRelationship, relationshipSecretId: CoreId) {
-        if (!response.creationContent) throw new TransportError("Creation content is missing");
-
-        const templateId = CoreId.from(response.relationshipTemplateId);
-
-        this._log.trace(`Parsing relationship template ${templateId} for ${response.id}...`);
-        const template = await this.parent.relationshipTemplates.getRelationshipTemplate(templateId);
-        if (!template) {
-            throw TransportCoreErrors.general.recordNotFound(RelationshipTemplate, templateId.toString());
-        }
-
-        this._log.trace(`Parsing relationship creation content of ${response.id}...`);
-
-        const creationContent = await this.decryptCreationContent(response.creationContent, CoreAddress.from(response.from), relationshipSecretId);
-
-        const cachedRelationship = CachedRelationship.from({
-            creationContent: creationContent.content,
-            template,
-            auditLog: RelationshipAuditLog.fromBackboneAuditLog(response.auditLog)
-        });
-
-        return cachedRelationship;
-    }
-
     private async prepareCreationContent(relationshipSecretId: CoreId, template: RelationshipTemplate, content: ISerializable): Promise<RelationshipCreationContentCipher> {
-        if (!template.cache) {
-            throw this.newCacheEmptyError(RelationshipTemplate, template.id.toString());
-        }
-
-        const publicCreationContentCrypto = await this.secrets.createRequestorSecrets(template.cache, relationshipSecretId);
+        const publicCreationContentCrypto = await this.secrets.createRequestorSecrets(template, relationshipSecretId);
 
         const creationContent: RelationshipCreationContentWrapper = RelationshipCreationContentWrapper.from({
             content,
@@ -461,7 +366,7 @@ export class RelationshipsController extends TransportController {
 
             await this.secrets.convertSecrets(relationship.relationshipSecretId, cipher.publicCreationResponseContentCrypto);
         }
-        relationship.cache!.auditLog = RelationshipAuditLog.fromBackboneAuditLog(backboneRelationship.auditLog);
+        relationship.auditLog = RelationshipAuditLog.fromBackboneAuditLog(backboneRelationship.auditLog);
         relationship.status = backboneRelationship.status;
 
         await this.relationships.update(relationshipDoc, relationship);
@@ -516,14 +421,13 @@ export class RelationshipsController extends TransportController {
         const template = await this.parent.relationshipTemplates.getRelationshipTemplate(templateId);
 
         if (!template) throw TransportCoreErrors.general.recordNotFound(RelationshipTemplate, templateId.toString());
-        if (!template.cache) throw this.newCacheEmptyError(RelationshipTemplate, template.id.toString());
 
         const secretId = await TransportIds.relationshipSecret.generate();
         const creationContentCipher = RelationshipCreationContentCipher.fromBase64(backboneRelationship.creationContent);
-        await this.secrets.createTemplatorSecrets(secretId, template.cache, creationContentCipher.publicCreationContentCrypto);
+        await this.secrets.createTemplatorSecrets(secretId, template, creationContentCipher.publicCreationContentCrypto);
 
         const creationContent = await this.decryptCreationContent(backboneRelationship.creationContent, CoreAddress.from(backboneRelationship.from), secretId);
-        const relationship = Relationship.fromBackboneAndCreationContent(backboneRelationship, template, creationContent.identity, creationContent.content, secretId);
+        const relationship = Relationship.fromBackboneAndCreationContent(backboneRelationship, creationContent.identity, creationContent.content, secretId);
 
         await this.relationships.create(relationship);
         return relationship;
@@ -583,14 +487,6 @@ export class RelationshipsController extends TransportController {
 
         const relationship = Relationship.from(relationshipDoc);
 
-        if (!relationship.cache) {
-            await this.updateCacheOfRelationship(relationship);
-        }
-
-        if (!relationship.cache) {
-            throw this.newCacheEmptyError(Relationship, id.toString());
-        }
-
         let backboneResponse: BackbonePutRelationshipsResponse;
         switch (operation) {
             case RelationshipAuditLogEntryReason.AcceptanceOfCreation:
@@ -631,7 +527,7 @@ export class RelationshipsController extends TransportController {
                 throw new TransportError("operation not supported");
         }
         relationship.status = backboneResponse.status;
-        relationship.cache.auditLog = RelationshipAuditLog.fromBackboneAuditLog(backboneResponse.auditLog);
+        relationship.auditLog = RelationshipAuditLog.fromBackboneAuditLog(backboneResponse.auditLog);
 
         await this.relationships.update(relationshipDoc, relationship);
         this.publishEventAfterCompletedOperation(operation, relationship);
