@@ -56,9 +56,7 @@ export class GetPeerSharedAttributesUseCase extends UseCase<GetPeerSharedAttribu
         const flattenedQuery = flattenObject(query);
         const dbQuery = GetAttributesUseCase.queryTranslator.parse(flattenedQuery);
 
-        if (request.onlyLatestVersions ?? true) {
-            dbQuery["succeededBy"] = { $exists: false };
-        }
+        if (request.onlyLatestVersions ?? true) dbQuery["succeededBy"] = { $exists: false };
 
         const attributes = await this.attributeController.getLocalAttributes(dbQuery, request.hideTechnical);
 
