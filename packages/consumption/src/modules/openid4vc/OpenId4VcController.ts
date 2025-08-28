@@ -46,7 +46,7 @@ export class OpenId4VcController extends ConsumptionBaseController {
         return {
             status: "success",
             message: "Credential offer processed successfully",
-            data: credentialOffer
+            data: JSON.stringify(credentials)
         };
     }
 }
