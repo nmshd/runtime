@@ -497,6 +497,64 @@ describe("AttributesController", function () {
             expect(updatedAttribute.forwardedSharingInfos).toHaveLength(1);
             expect(updatedAttribute.forwardedSharingInfos![0].deletionInfo).toBeUndefined();
         });
+
+        test("should remove a ForwardedSharingInfo from an Attribute", async function () {
+            const attributeParams = {
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "Nationality",
+                        value: "DE"
+                    },
+                    owner: testAccount.identity.address
+                })
+            };
+            const attribute = await consumptionController.attributes.createOwnIdentityAttribute(attributeParams);
+
+            const peer = CoreAddress.from("address");
+
+            const forwardedAttribute = await consumptionController.attributes.addForwardedSharingInfoToAttribute(attribute, peer, CoreId.from("aSourceReferenceId"));
+            expect(forwardedAttribute.isForwardedTo(peer)).toBe(true);
+
+            const updatedAttribute = await consumptionController.attributes.removeForwardedSharingInfoFromAttribute(forwardedAttribute, peer);
+            expect(updatedAttribute.isForwardedTo(peer)).toBe(false);
+        });
+
+        test("should publish an event removing a ForwardedSharingInfo from an Attribute", async function () {
+            const attributeParams = {
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "Nationality",
+                        value: "DE"
+                    },
+                    owner: testAccount.identity.address
+                })
+            };
+            const attribute = await consumptionController.attributes.createOwnIdentityAttribute(attributeParams);
+
+            const peer = CoreAddress.from("address");
+            const forwardedAttribute = await consumptionController.attributes.addForwardedSharingInfoToAttribute(attribute, peer, CoreId.from("aSourceReferenceId"));
+            mockEventBus.clearPublishedEvents();
+
+            const updatedAttribute = await consumptionController.attributes.removeForwardedSharingInfoFromAttribute(forwardedAttribute, peer);
+            mockEventBus.expectLastPublishedEvent(AttributeForwardedSharingInfoChangedEvent, updatedAttribute);
+        });
+
+        test("should not change Attribute trying to remove a ForwardedSharingInfo from an Attribute without ForwardedSharingInfo", async function () {
+            const attributeParams = {
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "Nationality",
+                        value: "DE"
+                    },
+                    owner: testAccount.identity.address
+                })
+            };
+            const attributeWithoutForwardedSharingInfo = await consumptionController.attributes.createOwnIdentityAttribute(attributeParams);
+
+            const peer = CoreAddress.from("address");
+            const unchangedAttribute = await consumptionController.attributes.removeForwardedSharingInfoFromAttribute(attributeWithoutForwardedSharingInfo, peer);
+            expect(unchangedAttribute).toStrictEqual(attributeWithoutForwardedSharingInfo);
+        });
     });
 
     describe("query Attributes", function () {
