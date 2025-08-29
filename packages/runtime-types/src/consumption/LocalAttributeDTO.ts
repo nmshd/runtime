@@ -10,7 +10,7 @@ export interface LocalAttributeDTO {
     wasViewedAt?: string;
     isDefault?: true;
     peerSharingInfo?: PeerSharingInfoDTO;
-    forwardedSharingInfos?: ForwardedSharingInfosDTO[];
+    forwardedSharingInfos?: ForwardedSharingInfoDTO[];
 }
 
 export interface PeerSharingInfoDTO {
@@ -20,7 +20,7 @@ export interface PeerSharingInfoDTO {
     initialAttributePeer?: string;
 }
 
-export interface ForwardedSharingInfosDTO {
+export interface ForwardedSharingInfoDTO {
     peer: string;
     sourceReference: string;
     sharedAt: string;

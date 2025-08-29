@@ -8,7 +8,7 @@ import {
     PeerRelationshipAttribute,
     ThirdPartyRelationshipAttribute
 } from "@nmshd/consumption";
-import { ForwardedSharingInfosDTO, LocalAttributeDTO, PeerSharingInfoDTO } from "@nmshd/runtime-types";
+import { ForwardedSharingInfoDTO, LocalAttributeDTO, PeerSharingInfoDTO } from "@nmshd/runtime-types";
 
 export class AttributeMapper {
     public static toAttributeDTO(attribute: LocalAttribute): LocalAttributeDTO {
@@ -48,6 +48,6 @@ export class AttributeMapper {
     private static toForwardedSharingInfos(attribute: LocalAttribute) {
         if (!("forwardedSharingInfos" in attribute)) return undefined;
 
-        return (attribute as AttributeWithForwardedSharingInfos).forwardedSharingInfos?.map((sharingInfo) => sharingInfo.toJSON()) as ForwardedSharingInfosDTO[];
+        return (attribute as AttributeWithForwardedSharingInfos).forwardedSharingInfos?.map((sharingInfo) => sharingInfo.toJSON()) as ForwardedSharingInfoDTO[];
     }
 }
