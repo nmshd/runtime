@@ -14523,11 +14523,34 @@ export const GetPeerAttributesRequest: any = {
     }
 }
 
-export const GetSharedVersionsOfAttributeRequest: any = {
+export const GetVersionsOfAttributeRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetSharedVersionsOfAttributeRequest",
+    "$ref": "#/definitions/GetVersionsOfAttributeRequest",
     "definitions": {
-        "GetSharedVersionsOfAttributeRequest": {
+        "GetVersionsOfAttributeRequest": {
+            "type": "object",
+            "properties": {
+                "attributeId": {
+                    "$ref": "#/definitions/AttributeIdString"
+                }
+            },
+            "required": [
+                "attributeId"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeIdString": {
+            "type": "string",
+            "pattern": "ATT[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const GetVersionsOfAttributeSharedWithPeerRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetVersionsOfAttributeSharedWithPeerRequest",
+    "definitions": {
+        "GetVersionsOfAttributeSharedWithPeerRequest": {
             "type": "object",
             "properties": {
                 "attributeId": {
@@ -14554,29 +14577,6 @@ export const GetSharedVersionsOfAttributeRequest: any = {
         "AddressString": {
             "type": "string",
             "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
-        }
-    }
-}
-
-export const GetVersionsOfAttributeRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetVersionsOfAttributeRequest",
-    "definitions": {
-        "GetVersionsOfAttributeRequest": {
-            "type": "object",
-            "properties": {
-                "attributeId": {
-                    "$ref": "#/definitions/AttributeIdString"
-                }
-            },
-            "required": [
-                "attributeId"
-            ],
-            "additionalProperties": false
-        },
-        "AttributeIdString": {
-            "type": "string",
-            "pattern": "ATT[A-Za-z0-9]{17}"
         }
     }
 }
