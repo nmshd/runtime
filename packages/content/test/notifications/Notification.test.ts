@@ -1,6 +1,6 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
-import { IdentityAttribute, Notification, PeerSharedAttributeSucceededNotificationItem, Surname } from "../../src";
+import { IdentityAttribute, Notification, PeerAttributeSucceededNotificationItem, Surname } from "../../src";
 
 describe("Notification", function () {
     test("should create a Notification from JSON", function () {
@@ -8,7 +8,7 @@ describe("Notification", function () {
             "@type": "Notification",
             id: "aNotificationId",
             items: [
-                PeerSharedAttributeSucceededNotificationItem.from({
+                PeerAttributeSucceededNotificationItem.from({
                     predecessorId: CoreId.from("anAttributeId"),
                     successorId: CoreId.from("anotherAttributeId"),
                     successorContent: IdentityAttribute.from({

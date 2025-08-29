@@ -106,48 +106,6 @@ describe("validateAttributeMatchesWithQuery", function () {
             });
         });
 
-        test("returns an error when the given Attribute id belongs to a peer Attribute", async function () {
-            const thirdPartyAttributeId = await ConsumptionIds.attribute.generate();
-            await consumptionController.attributes.createSharedLocalAttribute({
-                id: thirdPartyAttributeId,
-                content: TestObjectFactory.createIdentityAttribute({
-                    owner: aThirdParty
-                }),
-                peer: aThirdParty,
-                requestReference: await ConsumptionIds.request.generate()
-            });
-
-            const requestItem = ReadAttributeRequestItem.from({
-                mustBeAccepted: true,
-                query: IdentityAttributeQuery.from({ valueType: "GivenName" })
-            });
-            const requestId = await ConsumptionIds.request.generate();
-            const request = LocalRequest.from({
-                id: requestId,
-                createdAt: CoreDate.utc(),
-                isOwn: false,
-                peer: sender,
-                status: LocalRequestStatus.DecisionRequired,
-                content: Request.from({
-                    id: requestId,
-                    items: [requestItem]
-                }),
-                statusLog: []
-            });
-
-            const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
-                accept: true,
-                existingAttributeId: thirdPartyAttributeId.toString()
-            };
-
-            const result = await readProcessor.canAccept(requestItem, acceptParams, request);
-
-            expect(result).errorValidationResult({
-                code: "error.consumption.requests.attributeQueryMismatch",
-                message: "The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes."
-            });
-        });
-
         test("returns an error when the new IdentityAttribute to be created and shared belongs to a third party", async function () {
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
@@ -183,7 +141,7 @@ describe("validateAttributeMatchesWithQuery", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.attributeQueryMismatch",
-                message: "The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes."
+                message: "The provided IdentityAttribute belongs to someone else. You can only share OwnIdentityAttributes."
             });
         });
 
@@ -388,7 +346,7 @@ describe("validateAttributeMatchesWithQuery", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.attributeQueryMismatch",
-                message: "The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes."
+                message: "The provided IdentityAttribute belongs to someone else. You can only share OwnIdentityAttributes."
             });
         });
     });
@@ -829,7 +787,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 statusLog: []
             });
 
-            const localAttribute = await consumptionController.attributes.createRepositoryAttribute({
+            const localAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: TestObjectFactory.createIdentityAttribute({
                     owner: recipient
                 })
@@ -872,7 +830,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 statusLog: []
             });
 
-            const localAttribute = await consumptionController.attributes.createSharedLocalAttribute({
+            const localAttribute = await consumptionController.attributes.createPeerRelationshipAttribute({
                 content: RelationshipAttribute.from({
                     key: "aKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public,
@@ -883,7 +841,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                     })
                 }),
                 peer: aThirdParty,
-                requestReference: await ConsumptionIds.request.generate()
+                sourceReference: await ConsumptionIds.request.generate()
             });
 
             const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
@@ -925,7 +883,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 statusLog: []
             });
 
-            const localAttribute = await consumptionController.attributes.createSharedLocalAttribute({
+            const localAttribute = await consumptionController.attributes.createPeerRelationshipAttribute({
                 content: RelationshipAttribute.from({
                     key: "aKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public,
@@ -936,7 +894,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                     })
                 }),
                 peer: aThirdParty,
-                requestReference: await ConsumptionIds.request.generate()
+                sourceReference: await ConsumptionIds.request.generate()
             });
 
             const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
@@ -976,7 +934,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                 statusLog: []
             });
 
-            const localAttribute = await consumptionController.attributes.createSharedLocalAttribute({
+            const localAttribute = await consumptionController.attributes.createOwnRelationshipAttribute({
                 content: RelationshipAttribute.from({
                     key: "AnotherKey",
                     confidentiality: RelationshipAttributeConfidentiality.Public,
@@ -987,7 +945,7 @@ describe("validateAttributeMatchesWithQuery", function () {
                     })
                 }),
                 peer: aThirdParty,
-                requestReference: await ConsumptionIds.request.generate()
+                sourceReference: await ConsumptionIds.request.generate()
             });
 
             const acceptParams: AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON = {
