@@ -240,7 +240,7 @@ export class AttributesController extends ConsumptionBaseController {
         const attribute = this.trimAttribute(params.content);
 
         if (!attribute.owner.equals(this.identity.address)) {
-            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute("When creating an OwnIdentityAttribute, the owner must match the own address");
+            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute("When creating an OwnIdentityAttribute, the owner must match the own address.");
         }
 
         await this.validateAttributeCreation(attribute);
@@ -306,8 +306,12 @@ export class AttributesController extends ConsumptionBaseController {
     public async createPeerIdentityAttribute(params: { content: IdentityAttribute; peer: CoreAddress; sourceReference: CoreId; id: CoreId }): Promise<PeerIdentityAttribute> {
         const attribute = this.trimAttribute(params.content);
 
+        if (attribute.owner.equals(this.identity.address)) {
+            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute("When creating a PeerIdentityAttribute, the owner must not match the own address.");
+        }
+
         if (!attribute.owner.equals(params.peer)) {
-            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute("When creating a PeerIdentityAttribute, the owner must match the address of the peer");
+            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute("When creating a PeerIdentityAttribute, the owner must match the address of the peer.");
         }
 
         await this.validateAttributeCreation(attribute);
@@ -337,7 +341,11 @@ export class AttributesController extends ConsumptionBaseController {
         const attribute = params.content;
 
         if (!attribute.owner.equals(this.identity.address)) {
-            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute("When creating an OwnRelationshipAttribute, the owner must match the own address");
+            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute("When creating an OwnRelationshipAttribute, the owner must match the own address.");
+        }
+
+        if (params.peer.equals(this.identity.address)) {
+            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute("When creating an OwnRelationshipAttribute, the peer must not match the own address.");
         }
 
         await this.validateAttributeCreation(attribute);
@@ -366,8 +374,12 @@ export class AttributesController extends ConsumptionBaseController {
     }): Promise<PeerRelationshipAttribute> {
         const attribute = params.content;
 
+        if (attribute.owner.equals(this.identity.address)) {
+            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute("When creating a PeerRelationshipAttribute, the owner must not match the own address.");
+        }
+
         if (!attribute.owner.equals(params.peer)) {
-            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute("When creating a PeerRelationshipAttribute, the owner must match the address of the peer");
+            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute("When creating a PeerRelationshipAttribute, the owner must match the address of the peer.");
         }
 
         await this.validateAttributeCreation(attribute);
@@ -397,11 +409,20 @@ export class AttributesController extends ConsumptionBaseController {
     }): Promise<ThirdPartyRelationshipAttribute> {
         const attribute = params.content;
 
+        if (attribute.owner.equals(this.identity.address)) {
+            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute("When creating a ThirdPartyRelationshipAttribute, the owner must not match the own address.");
+        }
+
         if (!(attribute.owner.equals(params.peer) || attribute.owner.equals(params.initialAttributePeer))) {
             throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute(
-                "When creating a ThirdPartyRelationshipAttribute, the owner must match the address of the peer or initial Attribute peer"
+                "When creating a ThirdPartyRelationshipAttribute, the owner must match the address of the peer or initial Attribute peer."
             );
         }
+
+        if (params.peer.equals(params.initialAttributePeer)) {
+            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute("When creating a ThirdPartyRelationshipAttribute, the peer must not match the initialAttributePeer.");
+        }
+
         await this.validateAttributeCreation(attribute);
 
         const peerSharingInfo = ThirdPartyRelationshipAttributeSharingInfo.from({
