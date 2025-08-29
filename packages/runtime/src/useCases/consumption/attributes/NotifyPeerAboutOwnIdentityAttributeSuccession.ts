@@ -8,15 +8,15 @@ import { Inject } from "@nmshd/typescript-ioc";
 import { AddressString, AttributeIdString, NotificationIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { AttributeMapper } from "./AttributeMapper";
 
+export interface NotifyPeerAboutOwnIdentityAttributeSuccessionRequest {
+    attributeId: AttributeIdString;
+    peer: AddressString;
+}
+
 export interface NotifyPeerAboutOwnIdentityAttributeSuccessionResponse {
     predecessor: LocalAttributeDTO;
     successor: LocalAttributeDTO;
     notificationId: NotificationIdString;
-}
-
-export interface NotifyPeerAboutOwnIdentityAttributeSuccessionRequest {
-    attributeId: AttributeIdString;
-    peer: AddressString;
 }
 
 class Validator extends SchemaValidator<NotifyPeerAboutOwnIdentityAttributeSuccessionRequest> {

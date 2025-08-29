@@ -32,7 +32,7 @@ describe("PeerRelationshipAttributeDVO", () => {
     test("check a ProprietaryString", async () => {
         const ownRelationshipAttribute = await executeFullCreateAndShareRelationshipAttributeFlow(services2, services1, {
             content: {
-                key: "Some key",
+                key: "aKey",
                 value: {
                     "@type": "ProprietaryString",
                     title: "aTitle",
@@ -82,7 +82,7 @@ describe("PeerRelationshipAttributeDVO", () => {
     test("check a ProprietaryString that was forwarded to a third party", async () => {
         const ownRelationshipAttribute = await executeFullCreateAndShareRelationshipAttributeFlow(services2, services1, {
             content: {
-                key: "Some key",
+                key: "aKey",
                 value: {
                     "@type": "ProprietaryString",
                     title: "aTitle",

@@ -32,7 +32,7 @@ describe("ThirdPartyRelationshipAttributeDVO", () => {
     test("check a ProprietaryString that was forwarded to a third party", async () => {
         const ownRelationshipAttribute = await executeFullCreateAndShareRelationshipAttributeFlow(services1, services2, {
             content: {
-                key: "Some key",
+                key: "aKey",
                 value: {
                     "@type": "ProprietaryString",
                     title: "aTitle",
