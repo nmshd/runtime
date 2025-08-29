@@ -668,7 +668,7 @@ describe("Postponed Notifications via Messages", () => {
             const terminatedRelationship = (await syncUntilHasRelationships(client5.transport))[0];
             expect(terminatedRelationship.status).toBe(RelationshipStatus.Terminated);
 
-            const { successor: successorOfRepositoryAttribute } = (
+            const { successor: successorOfOwnIdentityAttribute } = (
                 await client1.consumption.attributes.succeedOwnIdentityAttribute({
                     predecessorId: (await client1.consumption.attributes.getOwnIdentityAttributes({})).value[0].id,
                     successorContent: {
@@ -681,7 +681,7 @@ describe("Postponed Notifications via Messages", () => {
             ).value;
 
             const notifyAboutSuccessionResult = (
-                await client1.consumption.attributes.notifyPeerAboutOwnIdentityAttributeSuccession({ attributeId: successorOfRepositoryAttribute.id, peer: client5.address })
+                await client1.consumption.attributes.notifyPeerAboutOwnIdentityAttributeSuccession({ attributeId: successorOfOwnIdentityAttribute.id, peer: client5.address })
             ).value;
             await client5.transport.account.syncEverything();
             const successionNotificationNotYetReceived = await client5.consumption.notifications.getNotification({ id: notifyAboutSuccessionResult.notificationId });

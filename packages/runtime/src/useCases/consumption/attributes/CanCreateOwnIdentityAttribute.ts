@@ -64,7 +64,7 @@ export class CanCreateOwnIdentityAttributeUseCase extends UseCase<CanCreateOwnId
 
         const ownIdentityAttributeDuplicate = await this.attributesController.getOwnIdentityAttributeWithSameValue(request.content.value);
         if (ownIdentityAttributeDuplicate) {
-            const error = RuntimeErrors.attributes.cannotCreateDuplicateRepositoryAttribute(ownIdentityAttributeDuplicate.id);
+            const error = RuntimeErrors.attributes.cannotCreateDuplicateOwnIdentityAttribute(ownIdentityAttributeDuplicate.id);
             return Result.ok({ isSuccess: false, code: error.code, message: error.message });
         }
 

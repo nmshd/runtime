@@ -219,27 +219,12 @@ class Attributes {
     public peerHasNoPreviousVersionOfAttribute(attributeId: CoreId | string, peer: CoreAddress | string): ApplicationError {
         return new ApplicationError(
             "error.runtime.attributes.peerHasNoPreviousVersionOfAttribute",
-            `The peer '${peer.toString()}' doesn't have any previous version of the Attribute '${attributeId.toString()}'. Either you haven't shared it before or the peer has deleted it or is about to do so.`
+            `The peer '${peer.toString()}' doesn't have any previous version of the Attribute '${attributeId.toString()}'. Either you haven't shared it before or the peer has deleted it.`
         );
     }
 
     public isNotOwnRelationshipAttribute(attributeId: CoreId | string): ApplicationError {
         return new ApplicationError("error.runtime.attributes.isNotOwnRelationshipAttribute", `The Attribute '${attributeId.toString()}' is not an OwnRelationshipAttribute.`);
-    }
-
-    public isNotPeerRelationshipAttribute(attributeId: CoreId | string): ApplicationError {
-        return new ApplicationError("error.runtime.attributes.isNotPeerRelationshipAttribute", `The Attribute '${attributeId.toString()}' is not a PeerRelationshipAttribute.`);
-    }
-
-    public isNotPeerIdentityAttribute(attributeId: CoreId | string): ApplicationError {
-        return new ApplicationError("error.runtime.attributes.isNotPeerIdentityAttribute", `The Attribute '${attributeId.toString()}' is not a peer shared Attribute.`);
-    }
-
-    public isNotThirdPartyRelationshipAttribute(attributeId: CoreId | string): ApplicationError {
-        return new ApplicationError(
-            "error.runtime.attributes.isNotThirdPartyRelationshipAttribute",
-            `Attribute '${attributeId.toString()}' is not a ThirdPartyRelationshipAttribute.`
-        );
     }
 
     public hasSuccessor(predecessor: LocalAttribute): ApplicationError {
@@ -249,10 +234,10 @@ class Attributes {
         );
     }
 
-    public cannotCreateDuplicateRepositoryAttribute(attributeId: CoreId | string): ApplicationError {
+    public cannotCreateDuplicateOwnIdentityAttribute(attributeId: CoreId | string): ApplicationError {
         return new ApplicationError(
-            "error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute",
-            `The RepositoryAttribute cannot be created because it has the same content.value as the already existing RepositoryAttribute with id '${attributeId.toString()}'.`
+            "error.runtime.attributes.cannotCreateDuplicateOwnIdentityAttribute",
+            `The OwnIdentityAttribute cannot be created because it has the same content.value as the already existing OwnIdentityAttribute with id '${attributeId.toString()}'.`
         );
     }
 

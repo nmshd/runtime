@@ -45,7 +45,7 @@ export class CreateOwnIdentityAttributeUseCase extends UseCase<CreateOwnIdentity
     protected async executeInternal(request: CreateOwnIdentityAttributeRequest): Promise<Result<LocalAttributeDTO>> {
         const ownIdentityAttributeDuplicate = await this.attributesController.getOwnIdentityAttributeWithSameValue(request.content.value);
         if (ownIdentityAttributeDuplicate) {
-            return Result.fail(RuntimeErrors.attributes.cannotCreateDuplicateRepositoryAttribute(ownIdentityAttributeDuplicate.id));
+            return Result.fail(RuntimeErrors.attributes.cannotCreateDuplicateOwnIdentityAttribute(ownIdentityAttributeDuplicate.id));
         }
 
         const createdLocalAttribute = await this.attributesController.createOwnIdentityAttribute({

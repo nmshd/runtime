@@ -663,7 +663,7 @@ describe("get OwnIdentityAttributes, own Attributes shared with peer and peer At
 });
 
 describe(CanCreateOwnIdentityAttributeUseCase.name, () => {
-    const canCreateRepositoryAttributeRequest: CanCreateOwnIdentityAttributeRequest = {
+    const canCreateOwnIdentityAttributeRequest: CanCreateOwnIdentityAttributeRequest = {
         content: {
             value: {
                 "@type": "GivenName",
@@ -793,27 +793,27 @@ describe(CanCreateOwnIdentityAttributeUseCase.name, () => {
         });
     });
 
-    test("should allow to create a RepositoryAttribute", async () => {
-        const result = await services1.consumption.attributes.canCreateOwnIdentityAttribute(canCreateRepositoryAttributeRequest);
+    test("should allow to create a OwnIdentityAttribute", async () => {
+        const result = await services1.consumption.attributes.canCreateOwnIdentityAttribute(canCreateOwnIdentityAttributeRequest);
         expect(result.value.isSuccess).toBe(true);
     });
 
-    test("should not allow to create a RepositoryAttribute duplicate", async () => {
-        const repositoryAttribute = (await services1.consumption.attributes.createOwnIdentityAttribute(canCreateRepositoryAttributeRequest)).value;
+    test("should not allow to create a OwnIdentityAttribute duplicate", async () => {
+        const ownIdentityAttribute = (await services1.consumption.attributes.createOwnIdentityAttribute(canCreateOwnIdentityAttributeRequest)).value;
 
-        const result = await services1.consumption.attributes.canCreateOwnIdentityAttribute(canCreateRepositoryAttributeRequest);
+        const result = await services1.consumption.attributes.canCreateOwnIdentityAttribute(canCreateOwnIdentityAttributeRequest);
 
         assert(!result.value.isSuccess);
 
         expect(result.value.isSuccess).toBe(false);
         expect(result.value.message).toBe(
-            `The RepositoryAttribute cannot be created because it has the same content.value as the already existing RepositoryAttribute with id '${repositoryAttribute.id.toString()}'.`
+            `The OwnIdentityAttribute cannot be created because it has the same content.value as the already existing OwnIdentityAttribute with id '${ownIdentityAttribute.id.toString()}'.`
         );
-        expect(result.value.code).toBe("error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute");
+        expect(result.value.code).toBe("error.runtime.attributes.cannotCreateDuplicateOwnIdentityAttribute");
     });
 
-    test("should not allow to create a RepositoryAttribute if there exists a duplicate after trimming", async () => {
-        const canCreateUntrimmedRepositoryAttributeRequest: CanCreateOwnIdentityAttributeRequest = {
+    test("should not allow to create a OwnIdentityAttribute if there exists a duplicate after trimming", async () => {
+        const canCreateUntrimmedOwnIdentityAttributeRequest: CanCreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
                     "@type": "GivenName",
@@ -822,20 +822,20 @@ describe(CanCreateOwnIdentityAttributeUseCase.name, () => {
                 tags: ["x:tag1", "x:tag2"]
             }
         };
-        const repositoryAttribute = (await services1.consumption.attributes.createOwnIdentityAttribute(canCreateRepositoryAttributeRequest)).value;
+        const ownIdentityAttribute = (await services1.consumption.attributes.createOwnIdentityAttribute(canCreateOwnIdentityAttributeRequest)).value;
 
-        const result = await services1.consumption.attributes.canCreateOwnIdentityAttribute(canCreateUntrimmedRepositoryAttributeRequest);
+        const result = await services1.consumption.attributes.canCreateOwnIdentityAttribute(canCreateUntrimmedOwnIdentityAttributeRequest);
 
         assert(!result.value.isSuccess);
 
         expect(result.value.isSuccess).toBe(false);
         expect(result.value.message).toBe(
-            `The RepositoryAttribute cannot be created because it has the same content.value as the already existing RepositoryAttribute with id '${repositoryAttribute.id.toString()}'.`
+            `The OwnIdentityAttribute cannot be created because it has the same content.value as the already existing OwnIdentityAttribute with id '${ownIdentityAttribute.id.toString()}'.`
         );
-        expect(result.value.code).toBe("error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute");
+        expect(result.value.code).toBe("error.runtime.attributes.cannotCreateDuplicateOwnIdentityAttribute");
     });
 
-    test("should not allow to create a duplicate RepositoryAttribute even if the tags are different", async () => {
+    test("should not allow to create a duplicate OwnIdentityAttribute even if the tags are different", async () => {
         const createAttributeRequest: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
@@ -845,7 +845,7 @@ describe(CanCreateOwnIdentityAttributeUseCase.name, () => {
                 tags: ["x:tag1", "x:tag2"]
             }
         };
-        const repositoryAttribute = (await services1.consumption.attributes.createOwnIdentityAttribute(createAttributeRequest)).value;
+        const ownIdentityAttribute = (await services1.consumption.attributes.createOwnIdentityAttribute(createAttributeRequest)).value;
 
         const canCreateAttributeRequest: CanCreateOwnIdentityAttributeRequest = {
             content: {
@@ -863,12 +863,12 @@ describe(CanCreateOwnIdentityAttributeUseCase.name, () => {
 
         expect(result.value.isSuccess).toBe(false);
         expect(result.value.message).toBe(
-            `The RepositoryAttribute cannot be created because it has the same content.value as the already existing RepositoryAttribute with id '${repositoryAttribute.id.toString()}'.`
+            `The OwnIdentityAttribute cannot be created because it has the same content.value as the already existing OwnIdentityAttribute with id '${ownIdentityAttribute.id.toString()}'.`
         );
-        expect(result.value.code).toBe("error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute");
+        expect(result.value.code).toBe("error.runtime.attributes.cannotCreateDuplicateOwnIdentityAttribute");
     });
 
-    test("should allow to create another RepositoryAttribute even if the tags are duplicates", async () => {
+    test("should allow to create another OwnIdentityAttribute even if the tags are duplicates", async () => {
         const request: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
@@ -894,8 +894,8 @@ describe(CanCreateOwnIdentityAttributeUseCase.name, () => {
         expect(result.value.isSuccess).toBe(true);
     });
 
-    test("should allow to create a RepositoryAttribute duplicate of a predecessor", async () => {
-        const predecessor = await services1.consumption.attributes.createOwnIdentityAttribute(canCreateRepositoryAttributeRequest);
+    test("should allow to create a OwnIdentityAttribute duplicate of a predecessor", async () => {
+        const predecessor = await services1.consumption.attributes.createOwnIdentityAttribute(canCreateOwnIdentityAttributeRequest);
         await services1.consumption.attributes.succeedOwnIdentityAttribute({
             predecessorId: predecessor.value.id,
             successorContent: {
@@ -906,11 +906,11 @@ describe(CanCreateOwnIdentityAttributeUseCase.name, () => {
             }
         });
 
-        const result = await services1.consumption.attributes.canCreateOwnIdentityAttribute(canCreateRepositoryAttributeRequest);
+        const result = await services1.consumption.attributes.canCreateOwnIdentityAttribute(canCreateOwnIdentityAttributeRequest);
         expect(result.value.isSuccess).toBe(true);
     });
 
-    test("should allow to create a RepositoryAttribute that is the same as an existing RepositoryAttribute without an optional property", async () => {
+    test("should allow to create a OwnIdentityAttribute that is the same as an existing OwnIdentityAttribute without an optional property", async () => {
         const createAttributeWithOptionalPropertyRequest: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
@@ -948,7 +948,7 @@ describe(CanCreateOwnIdentityAttributeUseCase.name, () => {
         expect(result.value.isSuccess).toBe(true);
     });
 
-    test("should not allow to create a RepositoryAttribute with invalid tags", async () => {
+    test("should not allow to create a OwnIdentityAttribute with invalid tags", async () => {
         const canCreateAttributeRequest: CanCreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
@@ -1006,7 +1006,7 @@ describe(CreateOwnIdentityAttributeUseCase.name, () => {
         await services1.eventBus.waitForEvent(AttributeCreatedEvent, (e) => e.data.id === attribute.id);
     });
 
-    test("should create a RepositoryAttribute that is the default if it is the first of its value type", async () => {
+    test("should create a OwnIdentityAttribute that is the default if it is the first of its value type", async () => {
         const request: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
@@ -1020,7 +1020,7 @@ describe(CreateOwnIdentityAttributeUseCase.name, () => {
         expect(attribute.isDefault).toBe(true);
     });
 
-    test("should create a RepositoryAttribute that is not the default if it is not the first of its value type", async () => {
+    test("should create a OwnIdentityAttribute that is not the default if it is not the first of its value type", async () => {
         const request: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
@@ -1139,7 +1139,7 @@ describe(CreateOwnIdentityAttributeUseCase.name, () => {
         });
     });
 
-    test("should not create a duplicate RepositoryAttribute", async () => {
+    test("should not create a duplicate OwnIdentityAttribute", async () => {
         const request: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
@@ -1155,12 +1155,12 @@ describe(CreateOwnIdentityAttributeUseCase.name, () => {
 
         const result2 = await services1.consumption.attributes.createOwnIdentityAttribute(request);
         expect(result2).toBeAnError(
-            `The RepositoryAttribute cannot be created because it has the same content.value as the already existing RepositoryAttribute with id '${result.value.id.toString()}'.`,
-            "error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute"
+            `The OwnIdentityAttribute cannot be created because it has the same content.value as the already existing OwnIdentityAttribute with id '${result.value.id.toString()}'.`,
+            "error.runtime.attributes.cannotCreateDuplicateOwnIdentityAttribute"
         );
     });
 
-    test("should not create a RepositoryAttribute if there would be a duplicate after trimming", async () => {
+    test("should not create a OwnIdentityAttribute if there would be a duplicate after trimming", async () => {
         const request: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
@@ -1186,12 +1186,12 @@ describe(CreateOwnIdentityAttributeUseCase.name, () => {
 
         const result2 = await services1.consumption.attributes.createOwnIdentityAttribute(untrimmedRequest);
         expect(result2).toBeAnError(
-            `The RepositoryAttribute cannot be created because it has the same content.value as the already existing RepositoryAttribute with id '${result.value.id.toString()}'.`,
-            "error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute"
+            `The OwnIdentityAttribute cannot be created because it has the same content.value as the already existing OwnIdentityAttribute with id '${result.value.id.toString()}'.`,
+            "error.runtime.attributes.cannotCreateDuplicateOwnIdentityAttribute"
         );
     });
 
-    test("should not prevent the creation when the RepositoryAttribute duplicate got succeeded", async () => {
+    test("should not prevent the creation when the OwnIdentityAttribute duplicate got succeeded", async () => {
         const request: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
@@ -1220,7 +1220,7 @@ describe(CreateOwnIdentityAttributeUseCase.name, () => {
         expect(result2).toBeSuccessful();
     });
 
-    test("should create a RepositoryAttribute that is the same as an existing RepositoryAttribute without an optional property", async () => {
+    test("should create a OwnIdentityAttribute that is the same as an existing OwnIdentityAttribute without an optional property", async () => {
         const request: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
@@ -1259,7 +1259,7 @@ describe(CreateOwnIdentityAttributeUseCase.name, () => {
         expect(result2).toBeSuccessful();
     });
 
-    test("should not create a duplicate RepositoryAttribute even if the tags are different", async () => {
+    test("should not create a duplicate OwnIdentityAttribute even if the tags are different", async () => {
         const request: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
@@ -1285,8 +1285,8 @@ describe(CreateOwnIdentityAttributeUseCase.name, () => {
 
         const result2 = await services1.consumption.attributes.createOwnIdentityAttribute(request2);
         expect(result2).toBeAnError(
-            `The RepositoryAttribute cannot be created because it has the same content.value as the already existing RepositoryAttribute with id '${result.value.id.toString()}'.`,
-            "error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute"
+            `The OwnIdentityAttribute cannot be created because it has the same content.value as the already existing OwnIdentityAttribute with id '${result.value.id.toString()}'.`,
+            "error.runtime.attributes.cannotCreateDuplicateOwnIdentityAttribute"
         );
 
         const request3: CreateOwnIdentityAttributeRequest = {
@@ -1301,8 +1301,8 @@ describe(CreateOwnIdentityAttributeUseCase.name, () => {
 
         const result3 = await services1.consumption.attributes.createOwnIdentityAttribute(request3);
         expect(result3).toBeAnError(
-            `The RepositoryAttribute cannot be created because it has the same content.value as the already existing RepositoryAttribute with id '${result.value.id.toString()}'.`,
-            "error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute"
+            `The OwnIdentityAttribute cannot be created because it has the same content.value as the already existing OwnIdentityAttribute with id '${result.value.id.toString()}'.`,
+            "error.runtime.attributes.cannotCreateDuplicateOwnIdentityAttribute"
         );
 
         const request4: CreateOwnIdentityAttributeRequest = {
@@ -1316,12 +1316,12 @@ describe(CreateOwnIdentityAttributeUseCase.name, () => {
 
         const result4 = await services1.consumption.attributes.createOwnIdentityAttribute(request4);
         expect(result4).toBeAnError(
-            `The RepositoryAttribute cannot be created because it has the same content.value as the already existing RepositoryAttribute with id '${result.value.id.toString()}'.`,
-            "error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute"
+            `The OwnIdentityAttribute cannot be created because it has the same content.value as the already existing OwnIdentityAttribute with id '${result.value.id.toString()}'.`,
+            "error.runtime.attributes.cannotCreateDuplicateOwnIdentityAttribute"
         );
     });
 
-    test("should create a RepositoryAttribute even if the tags are duplicates", async () => {
+    test("should create a OwnIdentityAttribute even if the tags are duplicates", async () => {
         const request: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
@@ -1500,7 +1500,7 @@ describe(ShareOwnIdentityAttributeUseCase.name, () => {
             }
         });
 
-        const { successor: successorRepositoryAttribute } = (
+        const { successor: successorOwnIdentityAttribute } = (
             await services1.consumption.attributes.succeedOwnIdentityAttribute({
                 predecessorId: predecesssorOwnIdentityAttribute.id,
                 successorContent: {
@@ -1513,7 +1513,7 @@ describe(ShareOwnIdentityAttributeUseCase.name, () => {
         ).value;
 
         const response = await services1.consumption.attributes.shareOwnIdentityAttribute({
-            attributeId: successorRepositoryAttribute.id,
+            attributeId: successorOwnIdentityAttribute.id,
             peer: services2.address
         });
         expect(response).toBeAnError(
