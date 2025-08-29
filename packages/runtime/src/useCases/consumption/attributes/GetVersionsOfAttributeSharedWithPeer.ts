@@ -6,7 +6,7 @@ import { Inject } from "@nmshd/typescript-ioc";
 import { AddressString, AttributeIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { AttributeMapper } from "./AttributeMapper";
 
-export interface GetSharedVersionsOfAttributeRequest {
+export interface GetVersionsOfAttributeSharedWithPeerRequest {
     attributeId: AttributeIdString;
     peer: AddressString;
     /**
@@ -15,13 +15,13 @@ export interface GetSharedVersionsOfAttributeRequest {
     onlyLatestVersions?: boolean;
 }
 
-class Validator extends SchemaValidator<GetSharedVersionsOfAttributeRequest> {
+class Validator extends SchemaValidator<GetVersionsOfAttributeSharedWithPeerRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
-        super(schemaRepository.getSchema("GetSharedVersionsOfAttributeRequest"));
+        super(schemaRepository.getSchema("GetVersionsOfAttributeSharedWithPeerRequest"));
     }
 }
 
-export class GetSharedVersionsOfAttributeUseCase extends UseCase<GetSharedVersionsOfAttributeRequest, LocalAttributeDTO[]> {
+export class GetVersionsOfAttributeSharedWithPeerUseCase extends UseCase<GetVersionsOfAttributeSharedWithPeerRequest, LocalAttributeDTO[]> {
     public constructor(
         @Inject private readonly attributeController: AttributesController,
         @Inject validator: Validator
@@ -29,7 +29,7 @@ export class GetSharedVersionsOfAttributeUseCase extends UseCase<GetSharedVersio
         super(validator);
     }
 
-    protected async executeInternal(request: GetSharedVersionsOfAttributeRequest): Promise<Result<LocalAttributeDTO[]>> {
+    protected async executeInternal(request: GetVersionsOfAttributeSharedWithPeerRequest): Promise<Result<LocalAttributeDTO[]>> {
         const localAttribute = await this.attributeController.getLocalAttribute(CoreId.from(request.attributeId));
 
         if (!localAttribute) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
@@ -42,7 +42,7 @@ export class GetSharedVersionsOfAttributeUseCase extends UseCase<GetSharedVersio
             );
         }
 
-        const sharedVersions = await this.attributeController.getSharedVersionsOfAttribute(localAttribute, CoreAddress.from(request.peer), request.onlyLatestVersions);
+        const sharedVersions = await this.attributeController.getVersionsOfAttributeSharedWithPeer(localAttribute, CoreAddress.from(request.peer), request.onlyLatestVersions);
 
         return Result.ok(AttributeMapper.toAttributeDTOList(sharedVersions));
     }

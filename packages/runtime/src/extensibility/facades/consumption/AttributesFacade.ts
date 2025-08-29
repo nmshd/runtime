@@ -35,9 +35,9 @@ import {
     GetOwnIdentityAttributesUseCase,
     GetPeerAttributesRequest,
     GetPeerAttributesUseCase,
-    GetSharedVersionsOfAttributeRequest,
-    GetSharedVersionsOfAttributeUseCase,
     GetVersionsOfAttributeRequest,
+    GetVersionsOfAttributeSharedWithPeerRequest,
+    GetVersionsOfAttributeSharedWithPeerUseCase,
     GetVersionsOfAttributeUseCase,
     MarkAttributeAsViewedRequest,
     MarkAttributeAsViewedUseCase,
@@ -69,7 +69,7 @@ export class AttributesFacade {
         @Inject private readonly getAttributeUseCase: GetAttributeUseCase,
         @Inject private readonly getAttributesUseCase: GetAttributesUseCase,
         @Inject private readonly getVersionsOfAttributeUseCase: GetVersionsOfAttributeUseCase,
-        @Inject private readonly getSharedVersionsOfAttributeUseCase: GetSharedVersionsOfAttributeUseCase,
+        @Inject private readonly getVersionsOfAttributeSharedWithPeerUseCase: GetVersionsOfAttributeSharedWithPeerUseCase,
         @Inject private readonly executeIdentityAttributeQueryUseCase: ExecuteIdentityAttributeQueryUseCase,
         @Inject private readonly executeRelationshipAttributeQueryUseCase: ExecuteRelationshipAttributeQueryUseCase,
         @Inject private readonly executeThirdPartyRelationshipAttributeQueryUseCase: ExecuteThirdPartyRelationshipAttributeQueryUseCase,
@@ -120,8 +120,8 @@ export class AttributesFacade {
         return await this.getVersionsOfAttributeUseCase.execute(request);
     }
 
-    public async getSharedVersionsOfAttribute(request: GetSharedVersionsOfAttributeRequest): Promise<Result<LocalAttributeDTO[]>> {
-        return await this.getSharedVersionsOfAttributeUseCase.execute(request);
+    public async getVersionsOfAttributeSharedWithPeer(request: GetVersionsOfAttributeSharedWithPeerRequest): Promise<Result<LocalAttributeDTO[]>> {
+        return await this.getVersionsOfAttributeSharedWithPeerUseCase.execute(request);
     }
 
     public async executeIdentityAttributeQuery(request: ExecuteIdentityAttributeQueryRequest): Promise<Result<LocalAttributeDTO[]>> {

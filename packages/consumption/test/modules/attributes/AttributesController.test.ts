@@ -2430,12 +2430,12 @@ describe("AttributesController", function () {
         });
 
         test("should return all shared predecessors for a single peer", async function () {
-            const result = await consumptionController.attributes.getSharedPredecessorsOfAttribute(ownIdentityAttributeV2, CoreAddress.from("peerB"));
+            const result = await consumptionController.attributes.getPredecessorsOfAttributeSharedWithPeer(ownIdentityAttributeV2, CoreAddress.from("peerB"));
             expect(JSON.stringify(result)).toStrictEqual(JSON.stringify([forwardedOwnIdentityAttributeV1PeerAAndPeerB]));
         });
 
         test("should return all shared successors for a single peer", async function () {
-            const result = await consumptionController.attributes.getSharedSuccessorsOfAttribute(ownIdentityAttributeV0, CoreAddress.from("peerB"));
+            const result = await consumptionController.attributes.getSuccessorsOfAttributeSharedWithPeer(ownIdentityAttributeV0, CoreAddress.from("peerB"));
             expect(JSON.stringify(result)).toStrictEqual(JSON.stringify([forwardedOwnIdentityAttributeV1PeerAAndPeerB, forwardedOwnIdentityAttributeV2PeerB]));
         });
 
@@ -2443,10 +2443,10 @@ describe("AttributesController", function () {
             const allVersions = [ownIdentityAttributeV0, forwardedOwnIdentityAttributeV1PeerAAndPeerB, forwardedOwnIdentityAttributeV2PeerB];
             const allforwardedOwnAttributeVersionsPeerB = [forwardedOwnIdentityAttributeV2PeerB, forwardedOwnIdentityAttributeV1PeerAAndPeerB];
             for (const version of allVersions) {
-                const resultA = await consumptionController.attributes.getSharedVersionsOfAttribute(version, CoreAddress.from("peerA"), false);
+                const resultA = await consumptionController.attributes.getVersionsOfAttributeSharedWithPeer(version, CoreAddress.from("peerA"), false);
                 expect(JSON.stringify(resultA)).toStrictEqual(JSON.stringify([forwardedOwnIdentityAttributeV1PeerAAndPeerB]));
 
-                const resultB = await consumptionController.attributes.getSharedVersionsOfAttribute(version, CoreAddress.from("peerB"), false);
+                const resultB = await consumptionController.attributes.getVersionsOfAttributeSharedWithPeer(version, CoreAddress.from("peerB"), false);
                 expect(JSON.stringify(resultB)).toStrictEqual(JSON.stringify(allforwardedOwnAttributeVersionsPeerB));
             }
         });
@@ -2454,10 +2454,10 @@ describe("AttributesController", function () {
         test("should return only latest shared version for a single peer", async function () {
             const allVersions = [ownIdentityAttributeV0, forwardedOwnIdentityAttributeV1PeerAAndPeerB, forwardedOwnIdentityAttributeV2PeerB];
             for (const version of allVersions) {
-                const resultA = await consumptionController.attributes.getSharedVersionsOfAttribute(version, CoreAddress.from("peerA"));
+                const resultA = await consumptionController.attributes.getVersionsOfAttributeSharedWithPeer(version, CoreAddress.from("peerA"));
                 expect(resultA).toStrictEqual([forwardedOwnIdentityAttributeV1PeerAAndPeerB]);
 
-                const resultB = await consumptionController.attributes.getSharedVersionsOfAttribute(version, CoreAddress.from("peerB"));
+                const resultB = await consumptionController.attributes.getVersionsOfAttributeSharedWithPeer(version, CoreAddress.from("peerB"));
                 expect(resultB).toStrictEqual([forwardedOwnIdentityAttributeV2PeerB]);
             }
         });
@@ -2475,7 +2475,7 @@ describe("AttributesController", function () {
                 createdAt: CoreDate.utc()
             });
 
-            await expect(consumptionController.attributes.getSharedVersionsOfAttribute(notExistingAttribute, CoreAddress.from("peerAddress"))).rejects.toThrow(
+            await expect(consumptionController.attributes.getVersionsOfAttributeSharedWithPeer(notExistingAttribute, CoreAddress.from("peerAddress"))).rejects.toThrow(
                 "error.transport.recordNotFound"
             );
         });
@@ -2496,7 +2496,7 @@ describe("AttributesController", function () {
                 sourceReference: CoreId.from("aSourceReferenceId")
             });
 
-            const result = await consumptionController.attributes.getSharedVersionsOfAttribute(ownRelationshipAttribute, CoreAddress.from("thirdPartyAddress"));
+            const result = await consumptionController.attributes.getVersionsOfAttributeSharedWithPeer(ownRelationshipAttribute, CoreAddress.from("thirdPartyAddress"));
             expect(result).toHaveLength(0);
         });
     });

@@ -942,7 +942,7 @@ export class AttributesController extends ConsumptionBaseController {
         return false;
     }
 
-    public async getSharedVersionsOfAttribute<SharableAttributeTypes extends OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute>(
+    public async getVersionsOfAttributeSharedWithPeer<SharableAttributeTypes extends OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute>(
         attribute: SharableAttributeTypes,
         peerAddress: CoreAddress,
         onlyLatestVersion = true,
@@ -953,8 +953,8 @@ export class AttributesController extends ConsumptionBaseController {
         if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
         const sharedAttribute = attribute.isForwardedTo(peerAddress, excludeToBeDeleted) ? [attribute] : [];
-        const sharedPredecessors = await this.getSharedPredecessorsOfAttribute(attribute, peerAddress, excludeToBeDeleted);
-        const sharedSuccessors = await this.getSharedSuccessorsOfAttribute(attribute, peerAddress, excludeToBeDeleted);
+        const sharedPredecessors = await this.getPredecessorsOfAttributeSharedWithPeer(attribute, peerAddress, excludeToBeDeleted);
+        const sharedSuccessors = await this.getSuccessorsOfAttributeSharedWithPeer(attribute, peerAddress, excludeToBeDeleted);
 
         const sharedAttributeVersions = [...sharedSuccessors.reverse(), ...sharedAttribute, ...sharedPredecessors];
 
@@ -963,7 +963,7 @@ export class AttributesController extends ConsumptionBaseController {
         return sharedAttributeVersions;
     }
 
-    public async getSharedPredecessorsOfAttribute<SharableAttributeTypes extends OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute>(
+    public async getPredecessorsOfAttributeSharedWithPeer<SharableAttributeTypes extends OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute>(
         referenceAttribute: SharableAttributeTypes,
         peerAddress: CoreAddress,
         excludeToBeDeleted = false
@@ -981,7 +981,7 @@ export class AttributesController extends ConsumptionBaseController {
         return matchingPredecessors;
     }
 
-    public async getSharedSuccessorsOfAttribute<SharableAttributeTypes extends OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute>(
+    public async getSuccessorsOfAttributeSharedWithPeer<SharableAttributeTypes extends OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute>(
         referenceAttribute: SharableAttributeTypes,
         peerAddress: CoreAddress,
         excludeToBeDeleted = false

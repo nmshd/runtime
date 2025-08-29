@@ -147,7 +147,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
 
             attribute = foundLocalAttribute.content;
 
-            const successorsSharedWithPeer = await this.consumptionController.attributes.getSharedSuccessorsOfAttribute(foundLocalAttribute, requestInfo.peer, true);
+            const successorsSharedWithPeer = await this.consumptionController.attributes.getSuccessorsOfAttributeSharedWithPeer(foundLocalAttribute, requestInfo.peer, true);
 
             if (successorsSharedWithPeer.length > 0) {
                 return ValidationResult.error(
@@ -250,7 +250,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
                 if (!(existingAttribute instanceof OwnIdentityAttribute)) throw new Error("This should never occur, but is required for the compiler.");
             }
 
-            const latestSharedVersion = await this.consumptionController.attributes.getSharedVersionsOfAttribute(existingAttribute, requestInfo.peer);
+            const latestSharedVersion = await this.consumptionController.attributes.getVersionsOfAttributeSharedWithPeer(existingAttribute, requestInfo.peer);
 
             const isLatestSharedVersion = latestSharedVersion[0]?.id.toString() === existingAttribute.id.toString();
             if (isLatestSharedVersion) {

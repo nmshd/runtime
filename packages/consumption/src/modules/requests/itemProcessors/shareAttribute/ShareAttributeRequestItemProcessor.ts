@@ -61,7 +61,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                 );
             }
 
-            const sharedSuccessors = await this.consumptionController.attributes.getSharedSuccessorsOfAttribute(foundAttribute, recipient);
+            const sharedSuccessors = await this.consumptionController.attributes.getSuccessorsOfAttributeSharedWithPeer(foundAttribute, recipient);
             if (sharedSuccessors.length > 0) {
                 return ValidationResult.error(
                     ConsumptionCoreErrors.requests.invalidRequestItem(
@@ -70,7 +70,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                 );
             }
 
-            const sharedPredecessors = await this.consumptionController.attributes.getSharedPredecessorsOfAttribute(foundAttribute, recipient);
+            const sharedPredecessors = await this.consumptionController.attributes.getPredecessorsOfAttributeSharedWithPeer(foundAttribute, recipient);
             if (sharedPredecessors.length > 0) {
                 return ValidationResult.error(
                     ConsumptionCoreErrors.requests.invalidRequestItem(
