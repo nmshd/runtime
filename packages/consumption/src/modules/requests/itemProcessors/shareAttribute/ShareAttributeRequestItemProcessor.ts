@@ -169,10 +169,12 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
     ): Promise<AcceptResponseItem | AttributeAlreadySharedAcceptResponseItem> {
         const isThirdPartyRelationshipAttribute = !!requestItem.thirdPartyAddress;
         if (isThirdPartyRelationshipAttribute) {
+            const attribute = requestItem.attribute as RelationshipAttribute;
             const existingThirdPartyRelationshipAttribute = await this.consumptionController.attributes.getThirdPartyRelationshipAttributeWithSameValue(
-                (requestItem.attribute.value as any).toJSON(),
+                (attribute.value as any).toJSON(),
                 requestInfo.peer.toString(),
-                (requestItem.attribute as RelationshipAttribute).key
+                attribute.owner.toString(),
+                attribute.key
             );
 
             if (existingThirdPartyRelationshipAttribute) {

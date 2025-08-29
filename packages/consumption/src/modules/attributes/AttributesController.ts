@@ -760,12 +760,12 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangePeer());
         }
 
-        if (predecessor.content.key !== successor.content.key) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangeKey());
-        }
-
         if (!predecessor.peerSharingInfo.initialAttributePeer.equals(successor.peerSharingInfo.initialAttributePeer)) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangeInitialAttributePeer());
+        }
+
+        if (predecessor.content.key !== successor.content.key) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangeKey());
         }
 
         if (
@@ -906,12 +906,12 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async getVersionsOfAttribute<T extends LocalAttribute>(attribute: T): Promise<T[]> {
-        const predecessors = await this.getPredecessorsOfAttribute(attribute);
-        const successors = await this.getSuccessorsOfAttribute(attribute);
-
         const localAttribute = await this.getLocalAttribute(attribute.id);
         if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
         if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
+
+        const predecessors = await this.getPredecessorsOfAttribute(attribute);
+        const successors = await this.getSuccessorsOfAttribute(attribute);
 
         const allAttributeVersions = [...successors.reverse(), attribute, ...predecessors];
         return allAttributeVersions;
@@ -963,12 +963,12 @@ export class AttributesController extends ConsumptionBaseController {
         return false;
     }
 
-    public async getVersionsOfAttributeSharedWithPeer<SharableAttributeTypes extends OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute>(
-        attribute: SharableAttributeTypes,
+    public async getVersionsOfAttributeSharedWithPeer<T extends AttributeWithForwardedSharingInfos>(
+        attribute: T,
         peerAddress: CoreAddress,
         onlyLatestVersion = true,
         excludeToBeDeleted = false
-    ): Promise<SharableAttributeTypes[]> {
+    ): Promise<T[]> {
         const localAttribute = await this.getLocalAttribute(attribute.id);
         if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
         if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
@@ -984,14 +984,14 @@ export class AttributesController extends ConsumptionBaseController {
         return sharedAttributeVersions;
     }
 
-    public async getPredecessorsOfAttributeSharedWithPeer<SharableAttributeTypes extends OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute>(
-        referenceAttribute: SharableAttributeTypes,
+    public async getPredecessorsOfAttributeSharedWithPeer<T extends AttributeWithForwardedSharingInfos>(
+        referenceAttribute: T,
         peerAddress: CoreAddress,
         excludeToBeDeleted = false
-    ): Promise<SharableAttributeTypes[]> {
-        const matchingPredecessors: SharableAttributeTypes[] = [];
+    ): Promise<T[]> {
+        const matchingPredecessors: T[] = [];
         while (referenceAttribute.succeeds) {
-            const predecessor = (await this.getLocalAttribute(referenceAttribute.succeeds)) as SharableAttributeTypes | undefined;
+            const predecessor = (await this.getLocalAttribute(referenceAttribute.succeeds)) as T | undefined;
             if (!predecessor) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, referenceAttribute.succeeds.toString());
 
             referenceAttribute = predecessor;
@@ -1002,14 +1002,14 @@ export class AttributesController extends ConsumptionBaseController {
         return matchingPredecessors;
     }
 
-    public async getSuccessorsOfAttributeSharedWithPeer<SharableAttributeTypes extends OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute>(
-        referenceAttribute: SharableAttributeTypes,
+    public async getSuccessorsOfAttributeSharedWithPeer<T extends AttributeWithForwardedSharingInfos>(
+        referenceAttribute: T,
         peerAddress: CoreAddress,
         excludeToBeDeleted = false
-    ): Promise<SharableAttributeTypes[]> {
-        const matchingSuccessors: SharableAttributeTypes[] = [];
+    ): Promise<T[]> {
+        const matchingSuccessors: T[] = [];
         while (referenceAttribute.succeededBy) {
-            const successor = (await this.getLocalAttribute(referenceAttribute.succeededBy)) as SharableAttributeTypes | undefined;
+            const successor = (await this.getLocalAttribute(referenceAttribute.succeededBy)) as T | undefined;
             if (!successor) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, referenceAttribute.succeededBy.toString());
 
             referenceAttribute = successor;
@@ -1031,13 +1031,13 @@ export class AttributesController extends ConsumptionBaseController {
         return (await this.getAttributeWithSameValue(trimmedValue, queryForOwnIdentityAttributeDuplicates)) as OwnIdentityAttribute | undefined;
     }
 
-    public async getPeerIdentityAttributeWithSameValue(value: AttributeValues.Identity.Json, peer: string): Promise<PeerIdentityAttribute | undefined> {
+    public async getPeerIdentityAttributeWithSameValue(value: AttributeValues.Identity.Json, owner: string): Promise<PeerIdentityAttribute | undefined> {
         const trimmedValue = this.trimAttributeValue(value);
         const query = flattenObject({
             "@type": "PeerIdentityAttribute",
             content: {
-                owner: peer,
-                value: trimmedValue
+                value: trimmedValue,
+                owner: owner
             }
         });
         query["peerSharingInfo.deletionInfo.deletionStatus"] = { $ne: ReceivedAttributeDeletionStatus.DeletedByOwner };
@@ -1048,16 +1048,18 @@ export class AttributesController extends ConsumptionBaseController {
     public async getThirdPartyRelationshipAttributeWithSameValue(
         value: AttributeValues.Relationship.Json,
         peer: string,
+        owner: string,
         key: string
     ): Promise<ThirdPartyRelationshipAttribute | undefined> {
         const query = flattenObject({
             "@type": "ThirdPartyRelationshipAttribute",
             content: {
-                owner: peer,
                 value: value,
+                owner: owner,
                 key: key
             }
         });
+        query["peerSharingInfo.peer"] = peer;
         query["peerSharingInfo.deletionInfo.deletionStatus"] = {
             $nin: [ThirdPartyRelationshipAttributeDeletionStatus.DeletedByOwner, ThirdPartyRelationshipAttributeDeletionStatus.DeletedByPeer]
         };
@@ -1093,7 +1095,6 @@ export class AttributesController extends ConsumptionBaseController {
     ): Promise<OwnRelationshipAttribute[] | PeerRelationshipAttribute[]> {
         const query = {
             "@type": { $in: ["OwnRelationshipAttribute", "PeerRelationshipAttribute"] },
-            "content.@type": "RelationshipAttribute",
             "content.owner": owner.toString(),
             "content.key": key,
             "content.value.@type": valueType,
