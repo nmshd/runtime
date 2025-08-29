@@ -166,33 +166,6 @@ export class EventProxy {
             );
         });
 
-        this.subscribeToSourceEvent(consumption.AttributeSucceededEvent, (event) => {
-            this.targetEventBus.publish(
-                new AttributeSucceededEvent(event.eventTargetAddress, {
-                    predecessor: AttributeMapper.toAttributeDTO(event.data.predecessor),
-                    successor: AttributeMapper.toAttributeDTO(event.data.successor)
-                })
-            );
-        });
-
-        this.subscribeToSourceEvent(consumption.AttributeSucceededEvent, (event) => {
-            this.targetEventBus.publish(
-                new AttributeSucceededEvent(event.eventTargetAddress, {
-                    predecessor: AttributeMapper.toAttributeDTO(event.data.predecessor),
-                    successor: AttributeMapper.toAttributeDTO(event.data.successor)
-                })
-            );
-        });
-
-        this.subscribeToSourceEvent(consumption.AttributeSucceededEvent, (event) => {
-            this.targetEventBus.publish(
-                new AttributeSucceededEvent(event.eventTargetAddress, {
-                    predecessor: AttributeMapper.toAttributeDTO(event.data.predecessor),
-                    successor: AttributeMapper.toAttributeDTO(event.data.successor)
-                })
-            );
-        });
-
         this.subscribeToSourceEvent(consumption.AttributeForwardedSharingInfoChangedEvent, (event) => {
             this.targetEventBus.publish(new AttributeForwardedSharingInfoChangedEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
         });
