@@ -140,7 +140,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             if (!(foundLocalAttribute instanceof OwnIdentityAttribute)) {
                 return ValidationResult.error(
                     ConsumptionCoreErrors.requests.invalidAcceptParameters(
-                        "The selected Attribute is not an own IdentityAttribute. When accepting a ProposeAttributeRequestItem with an existing Attribute it may only be an own IdentityAttribute."
+                        "The selected Attribute is not an OwnIdentityAttribute. When accepting a ProposeAttributeRequestItem with an existing Attribute it may only be an OwnIdentityAttribute."
                     )
                 );
             }
@@ -231,7 +231,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
 
             if (!(existingAttribute instanceof OwnIdentityAttribute)) {
                 throw ConsumptionCoreErrors.requests.invalidAcceptParameters(
-                    "The selected Attribute is not an own IdentityAttribute. When accepting a ProposeAttributeRequestItem with an existing Attribute it may only be an own IdentityAttribute."
+                    "The selected Attribute is not an OwnIdentityAttribute. When accepting a ProposeAttributeRequestItem with an existing Attribute it may only be an OwnIdentityAttribute."
                 );
             }
 

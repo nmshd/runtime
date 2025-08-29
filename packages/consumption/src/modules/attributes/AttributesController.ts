@@ -240,7 +240,7 @@ export class AttributesController extends ConsumptionBaseController {
         const attribute = this.trimAttribute(params.content);
 
         if (!attribute.owner.equals(this.identity.address)) {
-            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute("When creating an own IdentityAttribute, the owner must match the own address");
+            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute("When creating an OwnIdentityAttribute, the owner must match the own address");
         }
 
         await this.validateAttributeCreation(attribute);
@@ -307,7 +307,7 @@ export class AttributesController extends ConsumptionBaseController {
         const attribute = this.trimAttribute(params.content);
 
         if (!attribute.owner.equals(params.peer)) {
-            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute("When creating a peer IdentityAttribute, the owner must match the address of the peer");
+            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute("When creating a PeerIdentityAttribute, the owner must match the address of the peer");
         }
 
         await this.validateAttributeCreation(attribute);
@@ -337,7 +337,7 @@ export class AttributesController extends ConsumptionBaseController {
         const attribute = params.content;
 
         if (!attribute.owner.equals(this.identity.address)) {
-            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute("When creating an own RelationshipAttribute, the owner must match the own address");
+            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute("When creating an OwnRelationshipAttribute, the owner must match the own address");
         }
 
         await this.validateAttributeCreation(attribute);
@@ -367,7 +367,7 @@ export class AttributesController extends ConsumptionBaseController {
         const attribute = params.content;
 
         if (!attribute.owner.equals(params.peer)) {
-            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute("When creating a peer RelationshipAttribute, the owner must match the address of the peer");
+            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute("When creating a PeerRelationshipAttribute, the owner must match the address of the peer");
         }
 
         await this.validateAttributeCreation(attribute);

@@ -157,7 +157,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: `The Attribute '${requestItem.attributeId.toString()}' is not an own IdentityAttribute, an own RelationshipAttribute or a peer RelationshipAttribute. You can only request the deletion of such Attributes.`
+                message: `The Attribute '${requestItem.attributeId.toString()}' is not an OwnIdentityAttribute, an OwnRelationshipAttribute or a PeerRelationshipAttribute. You can only request the deletion of such Attributes.`
             });
         });
 
@@ -275,7 +275,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.invalidRequestItem",
-                message: `The Attribute '${requestItem.attributeId.toString()}' is not an own IdentityAttribute, an own RelationshipAttribute or a peer RelationshipAttribute. You can only request the deletion of such Attributes.`
+                message: `The Attribute '${requestItem.attributeId.toString()}' is not an OwnIdentityAttribute, an OwnRelationshipAttribute or a PeerRelationshipAttribute. You can only request the deletion of such Attributes.`
             });
         });
 

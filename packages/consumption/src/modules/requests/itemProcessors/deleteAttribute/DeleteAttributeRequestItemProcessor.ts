@@ -33,7 +33,7 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
         if (!(attribute instanceof OwnIdentityAttribute || attribute instanceof OwnRelationshipAttribute || attribute instanceof PeerRelationshipAttribute)) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidRequestItem(
-                    `The Attribute '${requestItem.attributeId.toString()}' is not an own IdentityAttribute, an own RelationshipAttribute or a peer RelationshipAttribute. You can only request the deletion of such Attributes.`
+                    `The Attribute '${requestItem.attributeId.toString()}' is not an OwnIdentityAttribute, an OwnRelationshipAttribute or a PeerRelationshipAttribute. You can only request the deletion of such Attributes.`
                 )
             );
         }

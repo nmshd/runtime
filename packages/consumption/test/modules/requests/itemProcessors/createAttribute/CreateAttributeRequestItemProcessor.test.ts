@@ -50,7 +50,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
 
             await When.iCallCanCreateOutgoingRequestItemWith({ attribute: identityAttributeOfSender });
             await Then.theCanCreateResultShouldBeAnErrorWith({
-                message: "Cannot create own IdentityAttributes with a CreateAttributeRequestItem. Use a ShareAttributeRequestItem instead."
+                message: "Cannot create OwnIdentityAttributes with a CreateAttributeRequestItem. Use a ShareAttributeRequestItem instead."
             });
         });
 

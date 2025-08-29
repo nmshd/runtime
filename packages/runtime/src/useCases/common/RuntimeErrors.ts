@@ -199,20 +199,20 @@ class Notifications {
 
 class Attributes {
     public isNotOwnIdentityAttribute(attributeId: CoreId | string): ApplicationError {
-        return new ApplicationError("error.runtime.attributes.isNotOwnIdentityAttribute", `The Attribute '${attributeId.toString()}' is not an own IdentityAttribute.`);
+        return new ApplicationError("error.runtime.attributes.isNotOwnIdentityAttribute", `The Attribute '${attributeId.toString()}' is not an OwnIdentityAttribute.`);
     }
 
     public ownIdentityAttributeHasAlreadyBeenSharedWithPeer(attributeId: CoreId | string, peer: CoreAddress | string): ApplicationError {
         return new ApplicationError(
             "error.runtime.attributes.ownIdentityAttributeHasAlreadyBeenSharedWithPeer",
-            `The own IdentityAttribute '${attributeId.toString()}' has already been shared with peer '${peer.toString()}'.'.`
+            `The OwnIdentityAttribute '${attributeId.toString()}' has already been shared with peer '${peer.toString()}'.'.`
         );
     }
 
     public successorOfOwnIdentityAttributeHasAlreadyBeenSharedWithPeer(attributeId: CoreId | string, successorId: CoreId | string, peer: CoreAddress | string): ApplicationError {
         return new ApplicationError(
             "error.runtime.attributes.successorOfOwnIdentityAttributeHasAlreadyBeenSharedWithPeer",
-            `A successor '${successorId.toString()}' of the own IdentityAttribute '${attributeId.toString()}' has already been shared with peer '${peer.toString()}'.'.`
+            `A successor '${successorId.toString()}' of the OwnIdentityAttribute '${attributeId.toString()}' has already been shared with peer '${peer.toString()}'.'.`
         );
     }
 
@@ -224,11 +224,11 @@ class Attributes {
     }
 
     public isNotOwnRelationshipAttribute(attributeId: CoreId | string): ApplicationError {
-        return new ApplicationError("error.runtime.attributes.isNotOwnRelationshipAttribute", `The Attribute '${attributeId.toString()}' is not an own RelationshipAttribute.`);
+        return new ApplicationError("error.runtime.attributes.isNotOwnRelationshipAttribute", `The Attribute '${attributeId.toString()}' is not an OwnRelationshipAttribute.`);
     }
 
     public isNotPeerRelationshipAttribute(attributeId: CoreId | string): ApplicationError {
-        return new ApplicationError("error.runtime.attributes.isNotPeerRelationshipAttribute", `The Attribute '${attributeId.toString()}' is not a peer RelationshipAttribute.`);
+        return new ApplicationError("error.runtime.attributes.isNotPeerRelationshipAttribute", `The Attribute '${attributeId.toString()}' is not a PeerRelationshipAttribute.`);
     }
 
     public isNotPeerIdentityAttribute(attributeId: CoreId | string): ApplicationError {
@@ -257,7 +257,7 @@ class Attributes {
     }
 
     public setDefaultOwnIdentityAttributesIsDisabled(): ApplicationError {
-        return new ApplicationError("error.runtime.attributes.setDefaultOwnIdentityAttributesIsDisabled", "Setting default own IdentityAttributes is disabled for this Account.");
+        return new ApplicationError("error.runtime.attributes.setDefaultOwnIdentityAttributesIsDisabled", "Setting default OwnIdentityAttributes is disabled for this Account.");
     }
 
     public cannotDeleteSharedAttributeWhileRelationshipIsPending(): ApplicationError {

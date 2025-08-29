@@ -129,7 +129,7 @@ class Attributes {
     }
 
     public setDefaultOwnIdentityAttributesIsDisabled() {
-        return new CoreError("error.consumption.attributes.setDefaultOwnIdentityAttributesIsDisabled", "Setting default own IdentityAttributes is disabled for this Account.");
+        return new CoreError("error.consumption.attributes.setDefaultOwnIdentityAttributesIsDisabled", "Setting default OwnIdentityAttributes is disabled for this Account.");
     }
 
     public invalidTags(tags: string[]): ApplicationError {

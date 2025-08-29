@@ -83,12 +83,12 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
         if (requestItem.attribute instanceof IdentityAttribute) {
             if (!(foundAttribute instanceof OwnIdentityAttribute)) {
                 return ValidationResult.error(
-                    ConsumptionCoreErrors.requests.invalidRequestItem("The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes.")
+                    ConsumptionCoreErrors.requests.invalidRequestItem("The provided IdentityAttribute belongs to someone else. You can only share OwnIdentityAttributes.")
                 );
             }
 
             if (requestItem.thirdPartyAddress) {
-                return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("When sharing an own IdentityAttribute, no thirdPartyAddress may be specified."));
+                return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("When sharing an OwnIdentityAttribute, no thirdPartyAddress may be specified."));
             }
 
             const tagValidationResult = await this.consumptionController.attributes.validateTagsOfAttribute(requestItem.attribute);

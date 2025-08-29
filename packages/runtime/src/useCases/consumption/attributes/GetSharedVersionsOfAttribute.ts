@@ -35,7 +35,11 @@ export class GetSharedVersionsOfAttributeUseCase extends UseCase<GetSharedVersio
         if (!localAttribute) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
 
         if (!(localAttribute instanceof OwnIdentityAttribute || localAttribute instanceof OwnRelationshipAttribute || localAttribute instanceof PeerRelationshipAttribute)) {
-            return Result.fail(RuntimeErrors.general.invalidPropertyValue("The `attributeId` property must belong to an own IdentityAttribute or a RelationshipAttribute."));
+            return Result.fail(
+                RuntimeErrors.general.invalidPropertyValue(
+                    "The `attributeId` property must belong to an OwnIdentityAttribute, an OwnRelationshipAttribute or a PeerRelationshipAttribute."
+                )
+            );
         }
 
         const sharedVersions = await this.attributeController.getSharedVersionsOfAttribute(localAttribute, CoreAddress.from(request.peer), request.onlyLatestVersions);

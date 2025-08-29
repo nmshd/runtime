@@ -46,7 +46,7 @@ describe("ForwardedAttributeDeletedByPeerNotificationItemProcessor", function ()
         mockEventBus.clearPublishedEvents();
     });
 
-    test("runs all processor methods for an own IdentityAttribute", async function () {
+    test("runs all processor methods for an OwnIdentityAttribute", async function () {
         const ownIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
             content: IdentityAttribute.from({
                 value: {
@@ -91,7 +91,7 @@ describe("ForwardedAttributeDeletedByPeerNotificationItemProcessor", function ()
         expect(attributeAfterRollback.forwardedSharingInfos![0].deletionInfo).toBeUndefined();
     });
 
-    test("runs all processor methods for an own RelationshipAttribute", async function () {
+    test("runs all processor methods for an OwnRelationshipAttribute", async function () {
         const peerRelationshipAttribute = await consumptionController.attributes.createOwnRelationshipAttribute({
             content: RelationshipAttribute.from({
                 key: "aKey",
@@ -141,7 +141,7 @@ describe("ForwardedAttributeDeletedByPeerNotificationItemProcessor", function ()
         expect(attributeAfterRollback.forwardedSharingInfos![0].deletionInfo).toBeUndefined();
     });
 
-    test("runs all processor methods for a peer RelationshipAttribute", async function () {
+    test("runs all processor methods for a PeerRelationshipAttribute", async function () {
         const peerRelationshipAttribute = await consumptionController.attributes.createPeerRelationshipAttribute({
             content: RelationshipAttribute.from({
                 key: "aKey",

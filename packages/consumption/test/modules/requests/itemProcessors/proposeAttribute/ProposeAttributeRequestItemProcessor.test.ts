@@ -361,7 +361,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
 
         beforeAll(() => (recipient = accountController.identity.address));
 
-        test("returns success when called with the id of an existing own IdentityAttribute", async function () {
+        test("returns success when called with the id of an existing OwnIdentityAttribute", async function () {
             const existingOwnIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: TestObjectFactory.createIdentityAttribute({ owner: recipient })
             });
@@ -859,7 +859,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
         beforeAll(() => (recipient = accountController.identity.address));
 
         describe("accept with existing Attribute", function () {
-            test("accept with existing own IdentityAttribute", async function () {
+            test("accept with existing OwnIdentityAttribute", async function () {
                 const ownIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                     content: TestObjectFactory.createIdentityAttribute({ owner: recipient })
                 });
@@ -2213,7 +2213,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
     });
 
     describe("applyIncomingResponseItem", function () {
-        test("creates a new peer IdentityAttribute with the Attribute received in the ResponseItem", async function () {
+        test("creates a new PeerIdentityAttribute with the Attribute received in the ResponseItem", async function () {
             const requestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: true,
                 query: IdentityAttributeQuery.from({ valueType: "GivenName" }),
@@ -2249,7 +2249,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             expect((createdAttribute as PeerIdentityAttribute).peerSharingInfo.sourceReference).toStrictEqual(requestId);
         });
 
-        test("succeeds an existing peer IdentityAttribute with the Attribute received in the ResponseItem", async function () {
+        test("succeeds an existing PeerIdentityAttribute with the Attribute received in the ResponseItem", async function () {
             const sender = CoreAddress.from("Sender");
 
             const predecessorIdentityAttribute = await consumptionController.attributes.createPeerIdentityAttribute({
@@ -2295,7 +2295,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             expect(updatedPredecessorPeerIdentityAttribute!.succeededBy).toStrictEqual(successorPeerIdentityAttribute!.id);
         });
 
-        test("succeeds an existing peer IdentityAttribute that is ToBeDeleted with the Attribute received in the ResponseItem", async function () {
+        test("succeeds an existing PeerIdentityAttribute that is ToBeDeleted with the Attribute received in the ResponseItem", async function () {
             const recipient = CoreAddress.from("Recipient");
 
             const predecessorPeerIdentityAttribute = await consumptionController.attributes.createPeerIdentityAttribute({
@@ -2357,7 +2357,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             expect((updatedPredecessorPeerIdentityAttribute as PeerIdentityAttribute).peerSharingInfo.deletionInfo).toStrictEqual(deletionInfo);
         });
 
-        test("removes deletionInfo of an existing peer IdentityAttribute that is ToBeDeleted if it is shared again", async function () {
+        test("removes deletionInfo of an existing PeerIdentityAttribute that is ToBeDeleted if it is shared again", async function () {
             const recipient = CoreAddress.from("Recipient");
 
             const existingPeerIdentityAttribute = await consumptionController.attributes.createPeerIdentityAttribute({

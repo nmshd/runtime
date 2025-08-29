@@ -248,7 +248,7 @@ describe("get attribute(s)", () => {
             expect(attributeIds).toStrictEqual(expect.arrayContaining(identityAttributeIds));
         });
 
-        test("should allow to get only default own IdentityAttributes", async function () {
+        test("should allow to get only default OwnIdentityAttributes", async function () {
             const result = await appService.consumption.attributes.getAttributes({
                 query: { isDefault: "true" }
             });
@@ -263,7 +263,7 @@ describe("get attribute(s)", () => {
             expect(attributeIds).not.toContain(appAttributeIds[2]);
         });
 
-        test("should allow get Attributes that are not default own IdentityAttributes", async function () {
+        test("should allow get Attributes that are not default OwnIdentityAttributes", async function () {
             const result = await appService.consumption.attributes.getAttributes({
                 query: { isDefault: "!true" }
             });
@@ -378,7 +378,7 @@ describe("attribute queries", () => {
     });
 });
 
-describe("get own IdentityAttributes, own Attributes shared with peer and peer Attributes", () => {
+describe("get OwnIdentityAttributes, own Attributes shared with peer and peer Attributes", () => {
     // own = services1, peer = services 2
     let services1OwnSurnameV0: LocalAttributeDTO;
     let services1OwnSurnameV1: LocalAttributeDTO;
@@ -510,14 +510,14 @@ describe("get own IdentityAttributes, own Attributes shared with peer and peer A
     });
 
     describe(GetOwnIdentityAttributesUseCase.name, () => {
-        test("get only latest version of own IdentityAttributes", async () => {
+        test("get only latest version of OwnIdentityAttributes", async () => {
             const result = await services1.consumption.attributes.getOwnIdentityAttributes({});
             expect(result).toBeSuccessful();
             const ownIdentityAttributes = result.value;
             expect(ownIdentityAttributes).toStrictEqual([services1OwnSurnameV1, services1OwnGivenNameV1]);
         });
 
-        test("get all versions of own IdentityAttributes", async () => {
+        test("get all versions of OwnIdentityAttributes", async () => {
             const result = await services1.consumption.attributes.getOwnIdentityAttributes({ onlyLatestVersions: false });
             expect(result).toBeSuccessful();
             const ownIdentityAttributes = result.value;
@@ -1366,7 +1366,7 @@ describe(ShareOwnIdentityAttributeUseCase.name, () => {
         ).value;
     });
 
-    test("should send a sharing request containing an own IdentityAttribute", async () => {
+    test("should send a sharing request containing an OwnIdentityAttribute", async () => {
         const shareRequest: ShareOwnIdentityAttributeRequest = {
             attributeId: sOwnIdentityAttribute.id,
             peer: services2.address
@@ -1384,7 +1384,7 @@ describe(ShareOwnIdentityAttributeUseCase.name, () => {
         expect(sOwnIdentityAttribute.id).toBe(rPeerIdentityAttribute.id);
     });
 
-    test("should send a sharing request containing an own IdentityAttribute with metadata", async () => {
+    test("should send a sharing request containing an OwnIdentityAttribute with metadata", async () => {
         const expiresAt = CoreDate.utc().add({ days: 1 }).toString();
         const shareRequest: ShareOwnIdentityAttributeRequest = {
             attributeId: sOwnIdentityAttribute.id,
@@ -1413,7 +1413,7 @@ describe(ShareOwnIdentityAttributeUseCase.name, () => {
         expect(request.content.items[0].metadata).toStrictEqual({ aKey: "aValue" });
     });
 
-    test("should send a sharing request containing an own IdentityAttribute that was already shared but deleted by the peer", async () => {
+    test("should send a sharing request containing an OwnIdentityAttribute that was already shared but deleted by the peer", async () => {
         const shareRequest: ShareOwnIdentityAttributeRequest = {
             attributeId: sOwnIdentityAttribute.id,
             peer: services2.address
@@ -1438,7 +1438,7 @@ describe(ShareOwnIdentityAttributeUseCase.name, () => {
         expect(shareRequestResult2).toBeSuccessful();
     });
 
-    test("should send a sharing request containing an own IdentityAttribute that was already shared but is to be deleted by the peer", async () => {
+    test("should send a sharing request containing an OwnIdentityAttribute that was already shared but is to be deleted by the peer", async () => {
         const shareRequest: ShareOwnIdentityAttributeRequest = {
             attributeId: sOwnIdentityAttribute.id,
             peer: services2.address
@@ -1476,7 +1476,7 @@ describe(ShareOwnIdentityAttributeUseCase.name, () => {
         expect(shareRequestResult2).toBeSuccessful();
     });
 
-    test("should reject attempts to share the same own IdentityAttribute more than once with the same peer", async () => {
+    test("should reject attempts to share the same OwnIdentityAttribute more than once with the same peer", async () => {
         await executeFullShareOwnIdentityAttributeFlow(services1, services3, sOwnIdentityAttribute.id);
 
         const repeatedShareRequestResult = await services1.consumption.attributes.shareOwnIdentityAttribute({
@@ -1522,7 +1522,7 @@ describe(ShareOwnIdentityAttributeUseCase.name, () => {
         );
     });
 
-    test("should reject sharing a peer IdentityAttribute", async () => {
+    test("should reject sharing a PeerIdentityAttribute", async () => {
         await executeFullShareOwnIdentityAttributeFlow(services1, services2, sOwnIdentityAttribute.id);
         const rPeerIdentityAttribute = (await services2.consumption.attributes.getAttribute({ id: sOwnIdentityAttribute.id })).value;
 
@@ -1557,7 +1557,7 @@ describe(ShareOwnIdentityAttributeUseCase.name, () => {
         expect(shareRequestResult).toBeAnError(/.*/, "error.runtime.attributes.isNotOwnIdentityAttribute");
     });
 
-    test("should throw if own IdentityAttribute doesn't exist", async () => {
+    test("should throw if OwnIdentityAttribute doesn't exist", async () => {
         const shareRequest: ShareOwnIdentityAttributeRequest = {
             attributeId: (await new CoreIdHelper("ATT").generate()).toString(),
             peer: services1.address
@@ -1566,7 +1566,7 @@ describe(ShareOwnIdentityAttributeUseCase.name, () => {
         expect(shareRequestResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
     });
 
-    test("should throw if id of own IdentityAttribute is invalid ", async () => {
+    test("should throw if id of OwnIdentityAttribute is invalid ", async () => {
         const shareRequest: ShareOwnIdentityAttributeRequest = {
             attributeId: CoreId.from("faulty").toString(),
             peer: services1.address
@@ -1772,12 +1772,12 @@ describe(NotifyPeerAboutOwnIdentityAttributeSuccessionUseCase.name, () => {
         expect(notificationResult).toBeSuccessful();
     });
 
-    test("should add forwardedSharingInfo to successor of own IdentityAttribute of sender", async () => {
+    test("should add forwardedSharingInfo to successor of OwnIdentityAttribute of sender", async () => {
         const { successor: updatedOwnIdentityAttributeVersion1 } = await executeFullNotifyPeerAboutAttributeSuccessionFlow(services1, services2, ownIdentityAttributeVersion1.id);
         expect(updatedOwnIdentityAttributeVersion1.forwardedSharingInfos![0].peer).toBe(services2.address);
     });
 
-    test("should create successor peer IdentityAttribute for recipient", async () => {
+    test("should create successor PeerIdentityAttribute for recipient", async () => {
         await executeFullNotifyPeerAboutAttributeSuccessionFlow(services1, services2, ownIdentityAttributeVersion1.id);
 
         const recipientPeerIdentityAttributeVersion1 = (await services2.consumption.attributes.getAttribute({ id: ownIdentityAttributeVersion1.id })).value;
@@ -1835,7 +1835,7 @@ describe(NotifyPeerAboutOwnIdentityAttributeSuccessionUseCase.name, () => {
         expect(notificationResult).toBeAnError(/.*/, "error.runtime.attributes.peerHasNoPreviousVersionOfAttribute");
     });
 
-    test("should throw if the successor own IdentityAttribute was deleted", async () => {
+    test("should throw if the successor OwnIdentityAttribute was deleted", async () => {
         await services1.consumption.attributes.deleteAttributeAndNotify({ attributeId: ownIdentityAttributeVersion1.id });
 
         const notificationResult = await services1.consumption.attributes.notifyPeerAboutOwnIdentityAttributeSuccession({
@@ -1962,7 +1962,7 @@ describe(SucceedRelationshipAttributeAndNotifyPeerUseCase.name, () => {
         });
     });
 
-    test("should succeed an own RelationshipAttribute and notify peer", async () => {
+    test("should succeed an OwnRelationshipAttribute and notify peer", async () => {
         const result = await services1.consumption.attributes.succeedRelationshipAttributeAndNotifyPeer({
             predecessorId: sOwnRelationshipAttribute.id,
             successorContent: {
@@ -1992,7 +1992,7 @@ describe(SucceedRelationshipAttributeAndNotifyPeerUseCase.name, () => {
         expect(recipientPredecessor.succeededBy).toBe(recipientSuccessor.id);
     });
 
-    test("should throw trying to change the value type succeeding an own RelationshipAttribute", async () => {
+    test("should throw trying to change the value type succeeding an OwnRelationshipAttribute", async () => {
         const result = await services1.consumption.attributes.succeedRelationshipAttributeAndNotifyPeer({
             predecessorId: sOwnRelationshipAttribute.id,
             successorContent: {
@@ -2035,7 +2035,7 @@ describe(SucceedRelationshipAttributeAndNotifyPeerUseCase.name, () => {
 });
 
 describe(ChangeDefaultOwnIdentityAttributeUseCase.name, () => {
-    test("should change default own IdentityAttribute", async () => {
+    test("should change default OwnIdentityAttribute", async () => {
         const defaultAttribute = (
             await appService.consumption.attributes.createOwnIdentityAttribute({
                 content: {
@@ -2072,7 +2072,7 @@ describe(ChangeDefaultOwnIdentityAttributeUseCase.name, () => {
         expect(updatedFormerDefaultAttribute.isDefault).toBeUndefined();
     });
 
-    test("should return an error if the new default Attribute is not an own IdentityAttribute", async () => {
+    test("should return an error if the new default Attribute is not an OwnIdentityAttribute", async () => {
         await appService.consumption.attributes.createOwnIdentityAttribute({
             content: {
                 value: {
@@ -2092,7 +2092,7 @@ describe(ChangeDefaultOwnIdentityAttributeUseCase.name, () => {
         });
         const result = await appService.consumption.attributes.changeDefaultOwnIdentityAttribute({ attributeId: desiredSharedDefaultAttribute.id });
         expect(result).toBeAnError(
-            `Attribute '${desiredSharedDefaultAttribute.id.toString()}' is not an own IdentityAttribute.`,
+            `Attribute '${desiredSharedDefaultAttribute.id.toString()}' is not an OwnIdentityAttribute.`,
             "error.runtime.attributes.isNotOwnIdentityAttribute"
         );
     });
@@ -2154,7 +2154,7 @@ describe(ChangeDefaultOwnIdentityAttributeUseCase.name, () => {
         expect(attribute.isDefault).toBeUndefined();
 
         const result = await services1.consumption.attributes.changeDefaultOwnIdentityAttribute({ attributeId: attribute.id });
-        expect(result).toBeAnError("Setting default own IdentityAttributes is disabled for this Account.", "error.runtime.attributes.setDefaultOwnIdentityAttributesIsDisabled");
+        expect(result).toBeAnError("Setting default OwnIdentityAttributes is disabled for this Account.", "error.runtime.attributes.setDefaultOwnIdentityAttributesIsDisabled");
     });
 });
 
@@ -2313,7 +2313,7 @@ describe("Get (shared) versions of Attribute", () => {
     }
 
     describe(GetVersionsOfAttributeUseCase.name, () => {
-        test("should get all versions of an own IdentityAttribute", async () => {
+        test("should get all versions of an OwnIdentityAttribute", async () => {
             await setUpOwnIdentityAttributeVersions();
             for (const version of sOwnIdentityAttributeVersions) {
                 const result = await services1.consumption.attributes.getVersionsOfAttribute({ attributeId: version.id });
@@ -2324,7 +2324,7 @@ describe("Get (shared) versions of Attribute", () => {
             }
         });
 
-        test("should get all versions of a peer IdentityAttribute", async () => {
+        test("should get all versions of a PeerIdentityAttribute", async () => {
             await setUpIdentityAttributeVersions();
             const rPeerIdentityAttributeVersion2 = (await services2.consumption.attributes.getAttribute({ id: sOwnIdentityAttributeVersion2.id })).value;
             const rPeerIdentityAttributeVersion0 = (await services2.consumption.attributes.getAttribute({ id: sOwnIdentityAttributeVersion0.id })).value;
@@ -2339,7 +2339,7 @@ describe("Get (shared) versions of Attribute", () => {
             }
         });
 
-        test("should get all versions of an own RelationshipAttribute", async () => {
+        test("should get all versions of an OwnRelationshipAttribute", async () => {
             await setUpRelationshipAttributeVersions();
             const sOwnRelationshipAttributeVersions = [sOwnRelationshipAttributeVersion2, sOwnRelationshipAttributeVersion1, sOwnRelationshipAttributeVersion0];
             for (const version of sOwnRelationshipAttributeVersions) {
@@ -2351,7 +2351,7 @@ describe("Get (shared) versions of Attribute", () => {
             }
         });
 
-        test("should get all versions of a peer RelationshipAttribute", async () => {
+        test("should get all versions of a PeerRelationshipAttribute", async () => {
             await setUpRelationshipAttributeVersions();
             const rPeerRelationshipAttributeVersion2 = (await services2.consumption.attributes.getAttribute({ id: sOwnRelationshipAttributeVersion2.id })).value;
             const rPeerRelationshipAttributeVersion1 = (await services2.consumption.attributes.getAttribute({ id: sOwnRelationshipAttributeVersion1.id })).value;
@@ -2378,7 +2378,7 @@ describe("Get (shared) versions of Attribute", () => {
             await setUpIdentityAttributeVersions();
         });
 
-        test("should get only latest version of an own IdentityAttribute shared with a peer", async () => {
+        test("should get only latest version of an OwnIdentityAttribute shared with a peer", async () => {
             for (const version of sOwnIdentityAttributeVersions) {
                 const result1 = await services1.consumption.attributes.getSharedVersionsOfAttribute({ attributeId: version.id, peer: services2.address });
                 expect(result1.isSuccess).toBe(true);
@@ -2392,7 +2392,7 @@ describe("Get (shared) versions of Attribute", () => {
             }
         });
 
-        test("should get all versions of an own IdentityAttribute shared with a peer", async () => {
+        test("should get all versions of an OwnIdentityAttribute shared with a peer", async () => {
             for (const version of sOwnIdentityAttributeVersions) {
                 const returnedVersionsForPeer2 = (
                     await services1.consumption.attributes.getSharedVersionsOfAttribute({
@@ -2506,8 +2506,8 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
             peerIdentityAttributeVersion1 = (await services2.consumption.attributes.getAttribute({ id: ownIdentityAttributeVersion1.id })).value;
         });
 
-        describe("Delete own IdentityAttribute", () => {
-            test("should delete an own IdentityAttribute", async () => {
+        describe("Delete OwnIdentityAttribute", () => {
+            test("should delete an OwnIdentityAttribute", async () => {
                 const deletionResult = await services1.consumption.attributes.deleteAttributeAndNotify({ attributeId: ownIdentityAttributeVersion0.id });
                 expect(deletionResult).toBeSuccessful();
 
@@ -2515,7 +2515,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 expect(getDeletedAttributeResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
             });
 
-            test("should delete a succeeded own IdentityAttribute and its predecessors", async () => {
+            test("should delete a succeeded OwnIdentityAttribute and its predecessors", async () => {
                 const deletionResult = await services1.consumption.attributes.deleteAttributeAndNotify({ attributeId: ownIdentityAttributeVersion1.id });
                 expect(deletionResult).toBeSuccessful();
 
@@ -2523,14 +2523,14 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 expect(getDeletedAttributeResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
             });
 
-            test("should set 'succeeds' of successor own IdentityAttribute to undefined if predecessor own IdentityAttribute is deleted", async () => {
+            test("should set 'succeeds' of successor OwnIdentityAttribute to undefined if predecessor OwnIdentityAttribute is deleted", async () => {
                 expect(ownIdentityAttributeVersion1.succeeds).toBeDefined();
                 await services1.consumption.attributes.deleteAttributeAndNotify({ attributeId: ownIdentityAttributeVersion0.id });
                 const updatedOwnIdentityAttributeVersion1 = (await services1.consumption.attributes.getAttribute({ id: ownIdentityAttributeVersion1.id })).value;
                 expect(updatedOwnIdentityAttributeVersion1.succeeds).toBeUndefined();
             });
 
-            test("should notify about deletion of own IdentityAttribute", async () => {
+            test("should notify about deletion of OwnIdentityAttribute", async () => {
                 const notificationIds = (await services1.consumption.attributes.deleteAttributeAndNotify({ attributeId: ownIdentityAttributeVersion0.id })).value.notificationIds;
 
                 const timeBeforeUpdate = CoreDate.utc();
@@ -2545,7 +2545,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 expect(CoreDate.from(updatedPeerIdentityAttribute.peerSharingInfo!.deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))).toBe(true);
             });
 
-            test("should notify about deletion of succeeded own IdentityAttribute", async () => {
+            test("should notify about deletion of succeeded OwnIdentityAttribute", async () => {
                 const notificationIds = (await services1.consumption.attributes.deleteAttributeAndNotify({ attributeId: ownIdentityAttributeVersion1.id })).value.notificationIds;
 
                 const timeBeforeUpdate = CoreDate.utc();
@@ -2568,7 +2568,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 expect(result).toBeAnError(/.*/, "error.runtime.recordNotFound");
             });
 
-            test("should throw trying to notify about deletion of own IdentityAttribute when the Relationship is in status Pending", async () => {
+            test("should throw trying to notify about deletion of OwnIdentityAttribute when the Relationship is in status Pending", async () => {
                 const [services1, services2] = await runtimeServiceProvider.launch(2, {
                     enableRequestModule: true,
                     enableDeciderModule: true,
@@ -2613,8 +2613,8 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
             });
         });
 
-        describe("Delete peer IdentityAttribute", () => {
-            test("should delete a peer IdentityAttribute", async () => {
+        describe("Delete PeerIdentityAttribute", () => {
+            test("should delete a PeerIdentityAttribute", async () => {
                 expect(peerIdentityAttributeVersion0).toBeDefined();
 
                 const deletionResult = await services2.consumption.attributes.deleteAttributeAndNotify({ attributeId: peerIdentityAttributeVersion0.id });
@@ -2624,7 +2624,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 expect(getDeletedAttributeResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
             });
 
-            test("should delete the predecessor of a peer IdentityAttribute", async () => {
+            test("should delete the predecessor of a PeerIdentityAttribute", async () => {
                 expect(peerIdentityAttributeVersion1).toBeDefined();
 
                 const deletionResult = await services2.consumption.attributes.deleteAttributeAndNotify({ attributeId: peerIdentityAttributeVersion1.id });
@@ -2634,7 +2634,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 expect(getDeletedPredecessorResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
             });
 
-            test("should set the 'succeeds' property of the peer IdentityAttribute successor to undefined", async () => {
+            test("should set the 'succeeds' property of the PeerIdentityAttribute successor to undefined", async () => {
                 expect(peerIdentityAttributeVersion1.succeeds).toBeDefined();
 
                 await services2.consumption.attributes.deleteAttributeAndNotify({ attributeId: peerIdentityAttributeVersion0.id });
@@ -2642,7 +2642,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 expect(updatedRecipientPeerIdentityAttributeVersion1.succeeds).toBeUndefined();
             });
 
-            test("should notify about deletion of peer IdentityAttribute", async () => {
+            test("should notify about deletion of PeerIdentityAttribute", async () => {
                 const notificationIds = (await services2.consumption.attributes.deleteAttributeAndNotify({ attributeId: peerIdentityAttributeVersion0.id })).value.notificationIds;
 
                 const timeBeforeUpdate = CoreDate.utc();
@@ -2660,7 +2660,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 );
             });
 
-            test("should notify about deletion of succeeded peer IdentityAttribute", async () => {
+            test("should notify about deletion of succeeded PeerIdentityAttribute", async () => {
                 const notificationIds = (await services2.consumption.attributes.deleteAttributeAndNotify({ attributeId: peerIdentityAttributeVersion1.id })).value.notificationIds;
 
                 const timeBeforeUpdate = CoreDate.utc();
@@ -2678,7 +2678,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 ).toBe(true);
             });
 
-            test("should throw trying to notify about deletion of peer IdentityAttribute when the Relationship is in status Pending", async () => {
+            test("should throw trying to notify about deletion of PeerIdentityAttribute when the Relationship is in status Pending", async () => {
                 const [services1, services2] = await runtimeServiceProvider.launch(2, {
                     enableRequestModule: true,
                     enableDeciderModule: true,
@@ -2849,8 +2849,8 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 .value;
         });
 
-        describe("Delete own RelationshipAttribute", () => {
-            test("should delete an own RelationshipAttribute", async () => {
+        describe("Delete OwnRelationshipAttribute", () => {
+            test("should delete an OwnRelationshipAttribute", async () => {
                 expect(ownRelationshipAttributeVersion0).toBeDefined();
 
                 const deletionResult = await services1.consumption.attributes.deleteAttributeAndNotify({ attributeId: ownRelationshipAttributeVersion0.id });
@@ -2860,7 +2860,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 expect(getDeletedAttributeResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
             });
 
-            test("should delete a succeeded own RelationshipAttribute and its predecessors", async () => {
+            test("should delete a succeeded OwnRelationshipAttribute and its predecessors", async () => {
                 expect(ownRelationshipAttributeVersion1).toBeDefined();
 
                 const deletionResult = await services1.consumption.attributes.deleteAttributeAndNotify({ attributeId: ownRelationshipAttributeVersion1.id });
@@ -2870,14 +2870,14 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 expect(getDeletedPredecessorResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
             });
 
-            test("should set the 'succeeds' property of the own RelationshipAttribute successor to undefined", async () => {
+            test("should set the 'succeeds' property of the OwnRelationshipAttribute successor to undefined", async () => {
                 expect(ownRelationshipAttributeVersion1.succeeds).toBeDefined();
                 await services1.consumption.attributes.deleteAttributeAndNotify({ attributeId: ownRelationshipAttributeVersion0.id });
                 const updatedOwnIdentityAttributeVersion1 = (await services1.consumption.attributes.getAttribute({ id: ownRelationshipAttributeVersion1.id })).value;
                 expect(updatedOwnIdentityAttributeVersion1.succeeds).toBeUndefined();
             });
 
-            test("should notify peer about deletion of own RelationshipAttribute", async () => {
+            test("should notify peer about deletion of OwnRelationshipAttribute", async () => {
                 const notificationIds = (await services1.consumption.attributes.deleteAttributeAndNotify({ attributeId: ownRelationshipAttributeVersion0.id })).value
                     .notificationIds;
 
@@ -2893,7 +2893,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 expect(CoreDate.from(updatedPeerRelationshipAttribute.peerSharingInfo!.deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))).toBe(true);
             });
 
-            test("should notify peer about deletion of succeeded own RelationshipAttribute", async () => {
+            test("should notify peer about deletion of succeeded OwnRelationshipAttribute", async () => {
                 const notificationIds = (await services1.consumption.attributes.deleteAttributeAndNotify({ attributeId: ownRelationshipAttributeVersion1.id })).value
                     .notificationIds;
 
@@ -2911,7 +2911,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 ).toBe(true);
             });
 
-            test("should notify third party about deletion of own RelationshipAttribute", async () => {
+            test("should notify third party about deletion of OwnRelationshipAttribute", async () => {
                 const notificationIds = (await services1.consumption.attributes.deleteAttributeAndNotify({ attributeId: ownRelationshipAttributeVersion0.id })).value
                     .notificationIds;
 
@@ -2929,7 +2929,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 );
             });
 
-            test("should notify third party about deletion of succeeded own RelationshipAttribute", async () => {
+            test("should notify third party about deletion of succeeded OwnRelationshipAttribute", async () => {
                 const notificationIds = (await services1.consumption.attributes.deleteAttributeAndNotify({ attributeId: ownRelationshipAttributeVersion1.id })).value
                     .notificationIds;
 
@@ -2947,7 +2947,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 ).toBe(true);
             });
 
-            test("should throw trying to notify peer about deletion of own RelationshipAttribute when the Relationship is in status Pending", async () => {
+            test("should throw trying to notify peer about deletion of OwnRelationshipAttribute when the Relationship is in status Pending", async () => {
                 const [services1, services2] = await runtimeServiceProvider.launch(2, {
                     enableRequestModule: true,
                     enableDeciderModule: true,
@@ -2990,8 +2990,8 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
             });
         });
 
-        describe("Delete peer RelationshipAttribute", () => {
-            test("should delete a peer RelationshipAttribute", async () => {
+        describe("Delete PeerRelationshipAttribute", () => {
+            test("should delete a PeerRelationshipAttribute", async () => {
                 expect(peerRelationshipAttributeVersion0).toBeDefined();
 
                 const deletionResult = await services2.consumption.attributes.deleteAttributeAndNotify({ attributeId: peerRelationshipAttributeVersion0.id });
@@ -3001,7 +3001,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 expect(getDeletedAttributeResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
             });
 
-            test("should delete a succeeded peer RelationshipAttribute and its predecessors", async () => {
+            test("should delete a succeeded PeerRelationshipAttribute and its predecessors", async () => {
                 expect(peerRelationshipAttributeVersion1).toBeDefined();
 
                 const deletionResult = await services2.consumption.attributes.deleteAttributeAndNotify({ attributeId: peerRelationshipAttributeVersion1.id });
@@ -3011,14 +3011,14 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 expect(getDeletedPredecessorResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
             });
 
-            test("should set the 'succeeds' property of the peer RelationshipAttribute successor to undefined", async () => {
+            test("should set the 'succeeds' property of the PeerRelationshipAttribute successor to undefined", async () => {
                 expect(peerRelationshipAttributeVersion1.succeeds).toBeDefined();
                 await services2.consumption.attributes.deleteAttributeAndNotify({ attributeId: peerRelationshipAttributeVersion0.id });
                 const updatedPeerIdentityAttributeVersion1 = (await services2.consumption.attributes.getAttribute({ id: peerRelationshipAttributeVersion1.id })).value;
                 expect(updatedPeerIdentityAttributeVersion1.succeeds).toBeUndefined();
             });
 
-            test("should notify owner about deletion of peer RelationshipAttribute", async () => {
+            test("should notify owner about deletion of PeerRelationshipAttribute", async () => {
                 const notificationIds = (await services2.consumption.attributes.deleteAttributeAndNotify({ attributeId: peerRelationshipAttributeVersion0.id })).value
                     .notificationIds;
 
@@ -3034,7 +3034,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 expect(CoreDate.from(updatedOwnRelationshipAttribute.peerSharingInfo!.deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))).toBe(true);
             });
 
-            test("should notify owner about deletion of succeeded peer RelationshipAttribute", async () => {
+            test("should notify owner about deletion of succeeded PeerRelationshipAttribute", async () => {
                 const notificationIds = (await services2.consumption.attributes.deleteAttributeAndNotify({ attributeId: peerRelationshipAttributeVersion1.id })).value
                     .notificationIds;
 
@@ -3052,7 +3052,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 ).toBe(true);
             });
 
-            test("should notify third party about deletion of peer RelationshipAttribute", async () => {
+            test("should notify third party about deletion of PeerRelationshipAttribute", async () => {
                 const notificationIds = (await services2.consumption.attributes.deleteAttributeAndNotify({ attributeId: forwardedPeerRelationshipAttributeVersion0.id })).value
                     .notificationIds;
 
@@ -3070,7 +3070,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 );
             });
 
-            test("should notify third party about deletion of succeeded peer RelationshipAttribute", async () => {
+            test("should notify third party about deletion of succeeded PeerRelationshipAttribute", async () => {
                 const notificationIds = (await services2.consumption.attributes.deleteAttributeAndNotify({ attributeId: forwardedPeerRelationshipAttributeVersion1.id })).value
                     .notificationIds;
 
@@ -3090,7 +3090,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 ).toBe(true);
             });
 
-            test("should throw trying to notify peer about deletion of peer RelationshipAttribute when the Relationship is in status Pending", async () => {
+            test("should throw trying to notify peer about deletion of PeerRelationshipAttribute when the Relationship is in status Pending", async () => {
                 const [services1, services2] = await runtimeServiceProvider.launch(2, {
                     enableRequestModule: true,
                     enableDeciderModule: true,
@@ -3339,7 +3339,7 @@ describe("ThirdPartyRelationshipAttributes", () => {
         });
     });
 
-    test("should forward an own RelationshipAttribute", async () => {
+    test("should forward an OwnRelationshipAttribute", async () => {
         ownRelationshipAttribute = await executeFullShareAndAcceptAttributeRequestFlow(
             services1,
             services3,
@@ -3357,7 +3357,7 @@ describe("ThirdPartyRelationshipAttributes", () => {
         expect(thirdPartyRelationshipAttribute.peerSharingInfo!.initialAttributePeer).toBe(services2.address);
     });
 
-    test("should forward a peer RelationshipAttribute", async () => {
+    test("should forward a PeerRelationshipAttribute", async () => {
         const peerRelationshipAttribute = await executeFullShareAndAcceptAttributeRequestFlow(
             services2,
             services3,

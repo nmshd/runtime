@@ -41,7 +41,7 @@ describe("PeerAttributeSucceededNotificationItemProcessor", function () {
         mockEventBus.clearPublishedEvents();
     });
 
-    test("runs all processor methods for a peer IdentityAttribute", async function () {
+    test("runs all processor methods for a PeerIdentityAttribute", async function () {
         const peerIdentityAttribute = await consumptionController.attributes.createPeerIdentityAttribute({
             content: IdentityAttribute.from({
                 value: {
@@ -107,7 +107,7 @@ describe("PeerAttributeSucceededNotificationItemProcessor", function () {
         expect(predecessorAfterRollback!.succeededBy).toBeUndefined();
     });
 
-    test("runs all processor methods for a peer RelationshipAttribute", async function () {
+    test("runs all processor methods for a PeerRelationshipAttribute", async function () {
         const peerRelationshipAttribute = await consumptionController.attributes.createPeerRelationshipAttribute({
             content: RelationshipAttribute.from({
                 key: "aKey",

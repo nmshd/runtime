@@ -46,7 +46,7 @@ describe("PeerRelationshipAttributeDeletedByPeerNotificationItemProcessor", func
         mockEventBus.clearPublishedEvents();
     });
 
-    test("runs all processor methods for an own RelationshipAttribute", async function () {
+    test("runs all processor methods for an OwnRelationshipAttribute", async function () {
         const ownRelationshipAttribute = await consumptionController.attributes.createOwnRelationshipAttribute({
             content: RelationshipAttribute.from({
                 key: "aKey",

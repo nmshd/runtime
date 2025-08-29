@@ -32,7 +32,7 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
             if (senderIsAttributeOwner) {
                 return ValidationResult.error(
                     ConsumptionCoreErrors.requests.invalidRequestItem(
-                        "Cannot create own IdentityAttributes with a CreateAttributeRequestItem. Use a ShareAttributeRequestItem instead."
+                        "Cannot create OwnIdentityAttributes with a CreateAttributeRequestItem. Use a ShareAttributeRequestItem instead."
                     )
                 );
             }

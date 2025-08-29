@@ -141,7 +141,7 @@ describe("validateAttributeMatchesWithQuery", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.attributeQueryMismatch",
-                message: "The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes."
+                message: "The provided IdentityAttribute belongs to someone else. You can only share OwnIdentityAttributes."
             });
         });
 
@@ -346,7 +346,7 @@ describe("validateAttributeMatchesWithQuery", function () {
 
             expect(result).errorValidationResult({
                 code: "error.consumption.requests.attributeQueryMismatch",
-                message: "The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes."
+                message: "The provided IdentityAttribute belongs to someone else. You can only share OwnIdentityAttributes."
             });
         });
     });
