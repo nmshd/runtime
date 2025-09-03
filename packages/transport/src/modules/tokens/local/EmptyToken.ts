@@ -11,7 +11,8 @@ export interface IEmptyToken extends ISerializable {
     passwordProtection: IPasswordProtection;
 }
 
-@type("Token")
+@type("EmptyToken")
+
 export class EmptyToken extends Serializable implements IEmptyToken {
     @validate()
     @serialize()
