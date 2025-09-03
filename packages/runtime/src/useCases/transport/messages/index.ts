@@ -2,6 +2,7 @@ export * from "./DownloadAttachment";
 export * from "./GetAttachmentMetadata";
 export * from "./GetMessage";
 export * from "./GetMessages";
+export * from "./GetMessagesPaged";
 export * from "./MarkMessageAsRead";
 export * from "./MarkMessageAsUnread";
 export * from "./MessageMapper";
