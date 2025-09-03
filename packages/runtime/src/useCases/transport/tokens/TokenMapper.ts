@@ -1,5 +1,5 @@
-import { TokenDTO } from "@nmshd/runtime-types";
-import { Token } from "@nmshd/transport";
+import { EmptyTokenDTO, TokenDTO } from "@nmshd/runtime-types";
+import { EmptyToken, Token } from "@nmshd/transport";
 import { Container } from "@nmshd/typescript-ioc";
 import { ConfigHolder } from "../../../ConfigHolder";
 import { PasswordProtectionMapper } from "../../common";
@@ -24,6 +24,21 @@ export class TokenMapper {
                 url: reference.toUrl()
             },
             isEphemeral: ephemeral
+        };
+    }
+
+    public static toEmptyTokenDTO(token: EmptyToken): EmptyTokenDTO {
+        const backboneBaseUrl = Container.get<ConfigHolder>(ConfigHolder).getConfig().transportLibrary.baseUrl;
+        const reference = token.toTokenReference(backboneBaseUrl);
+
+        return {
+            id: token.id.toString(),
+            expiresAt: token.expiresAt.toString(),
+            passwordProtection: PasswordProtectionMapper.toPasswordProtectionDTO(token.passwordProtection),
+            reference: {
+                truncated: reference.truncate(),
+                url: reference.toUrl()
+            }
         };
     }
 

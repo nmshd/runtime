@@ -170,6 +170,10 @@ class Tokens {
     public invalidTokenContent(id: string) {
         return new CoreError("error.transport.tokens.invalidTokenContent", `The content of Token '${id}' is not of type TokenContent.`);
     }
+
+    public emptyToken(id: string) {
+        return new CoreError("error.transport.tokens.emptyToken", `The content, createdBy and/or createdByDevice of the Token '${id}' are empty.`);
+    }
 }
 
 class General {
