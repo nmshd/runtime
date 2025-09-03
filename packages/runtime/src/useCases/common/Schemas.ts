@@ -23481,6 +23481,31 @@ export const LoadPeerTokenRequest: any = {
     }
 }
 
+export const UpdateTokenContentRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/UpdateTokenContentRequest",
+    "definitions": {
+        "UpdateTokenContentRequest": {
+            "type": "object",
+            "properties": {
+                "reference": {
+                    "$ref": "#/definitions/TokenReferenceString"
+                },
+                "content": {}
+            },
+            "required": [
+                "reference",
+                "content"
+            ],
+            "additionalProperties": false
+        },
+        "TokenReferenceString": {
+            "type": "string",
+            "pattern": "VE9L.{84}"
+        }
+    }
+}
+
 export const City: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/City",

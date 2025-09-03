@@ -11,7 +11,9 @@ import {
     GetTokensUseCase,
     GetTokenUseCase,
     LoadPeerTokenRequest,
-    LoadPeerTokenUseCase
+    LoadPeerTokenUseCase,
+    UpdateTokenContentRequest,
+    UpdateTokenContentUseCase
 } from "../../../useCases";
 
 export class TokensFacade {
@@ -20,7 +22,8 @@ export class TokensFacade {
         @Inject private readonly loadPeerTokenUseCase: LoadPeerTokenUseCase,
         @Inject private readonly getTokensUseCase: GetTokensUseCase,
         @Inject private readonly getTokenUseCase: GetTokenUseCase,
-        @Inject private readonly deleteTokenUseCase: DeleteTokenUseCase
+        @Inject private readonly deleteTokenUseCase: DeleteTokenUseCase,
+        @Inject private readonly updateTokenContentUseCase: UpdateTokenContentUseCase
     ) {}
 
     public async createOwnToken(request: CreateOwnTokenRequest): Promise<Result<TokenDTO>> {
@@ -41,5 +44,9 @@ export class TokensFacade {
 
     public async deleteToken(request: DeleteTokenRequest): Promise<Result<void>> {
         return await this.deleteTokenUseCase.execute(request);
+    }
+
+    public async updateTokenContent(request: UpdateTokenContentRequest): Promise<Result<TokenDTO>> {
+        return await this.updateTokenContentUseCase.execute(request);
     }
 }

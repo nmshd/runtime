@@ -1,7 +1,7 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
 import { TokenDTO } from "@nmshd/runtime-types";
-import { AccountController, TokenController, TokenReference } from "@nmshd/transport";
+import { TokenController, TokenReference } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { RuntimeErrors, SchemaRepository, SchemaValidator, TokenReferenceString, UseCase } from "../../common";
 import { TokenMapper } from "./TokenMapper";
@@ -20,7 +20,6 @@ class Validator extends SchemaValidator<UpdateTokenContentRequest> {
 export class UpdateTokenContentUseCase extends UseCase<UpdateTokenContentRequest, TokenDTO> {
     public constructor(
         @Inject private readonly tokenController: TokenController,
-        @Inject private readonly accountController: AccountController,
         @Inject validator: Validator
     ) {
         super(validator);
