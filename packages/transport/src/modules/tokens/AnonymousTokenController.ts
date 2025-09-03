@@ -1,9 +1,10 @@
 import { Serializable } from "@js-soft/ts-serval";
-import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId, Random, RandomCharacterRange } from "@nmshd/core-types";
 import { CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
 import { CoreCrypto, IConfig, ICorrelator, TransportCoreErrors } from "../../core";
 import { PasswordProtection } from "../../core/types/PasswordProtection";
 import { AnonymousTokenClient } from "./backbone/AnonymousTokenClient";
+import { EmptyToken } from "./local/EmptyToken";
 import { Token } from "./local/Token";
 import { TokenReference } from "./transmission/TokenReference";
 
@@ -13,13 +14,29 @@ export class AnonymousTokenController {
         this.client = new AnonymousTokenClient(config, correlator);
     }
 
+    public async createEmptyToken(): Promise<EmptyToken> {
+        const secretKey = await CoreCrypto.generateSecretKey();
+        const password = await Random.string(16, RandomCharacterRange.Alphanumeric + RandomCharacterRange.SpecialCharacters);
+
+        const salt = await CoreCrypto.random(16);
+        const passwordProtection = PasswordProtection.from({ password, passwordType: "pw", salt });
+
+        const expiresAt = CoreDate.utc().add({ minutes: 2 });
+
+        const hashedPassword = (await CoreCrypto.deriveHashOutOfPassword(password, salt)).toBase64();
+        const response = (await this.client.createToken({ password: hashedPassword, expiresAt: expiresAt.toISOString() })).value;
+
+        return EmptyToken.from({ id: CoreId.from(response.id), secretKey: secretKey, expiresAt, passwordProtection });
+    }
+
     public async loadPeerTokenByReference(reference: TokenReference, password?: string): Promise<Token> {
-        if (reference.passwordProtection && !password) throw TransportCoreErrors.general.noPasswordProvided();
+        if (reference.passwordProtection && !reference.passwordProtection.password && !password) throw TransportCoreErrors.general.noPasswordProvided();
+
         const passwordProtection = reference.passwordProtection
             ? PasswordProtection.from({
                   salt: reference.passwordProtection.salt,
                   passwordType: reference.passwordProtection.passwordType,
-                  password: password!,
+                  password: (password ?? reference.passwordProtection.password)!,
                   passwordLocationIndicator: reference.passwordProtection.passwordLocationIndicator
               })
             : undefined;
@@ -34,6 +51,8 @@ export class AnonymousTokenController {
 
         const hashedPassword = passwordProtection ? (await CoreCrypto.deriveHashOutOfPassword(passwordProtection.password, passwordProtection.salt)).toBase64() : undefined;
         const response = (await this.client.getToken(id.toString(), hashedPassword)).value;
+
+        if (!response.content || !response.createdBy || !response.createdByDevice) throw TransportCoreErrors.tokens.emptyToken(id.toString());
 
         const cipher = CryptoCipher.fromBase64(response.content);
         const plaintextTokenBuffer = await CoreCrypto.decrypt(cipher, secretKey);

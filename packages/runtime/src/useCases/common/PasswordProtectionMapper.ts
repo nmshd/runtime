@@ -3,6 +3,8 @@ import { PasswordProtectionDTO } from "@nmshd/runtime-types";
 import { PasswordProtection, PasswordProtectionCreationParameters } from "@nmshd/transport";
 
 export class PasswordProtectionMapper {
+    public static toPasswordProtectionDTO(passwordProtection: PasswordProtection): PasswordProtectionDTO;
+    public static toPasswordProtectionDTO(passwordProtection?: PasswordProtection): PasswordProtectionDTO | undefined;
     public static toPasswordProtectionDTO(passwordProtection?: PasswordProtection): PasswordProtectionDTO | undefined {
         if (!passwordProtection) return;
 

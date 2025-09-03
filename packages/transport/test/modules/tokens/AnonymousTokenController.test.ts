@@ -129,4 +129,17 @@ describe("AnonymousTokenController", function () {
         await expect(anonymousTokenController.loadPeerTokenByReference(reference, "wrong-password")).rejects.toThrow("error.platform.recordNotFound");
         await expect(anonymousTokenController.loadPeerTokenByReference(reference)).rejects.toThrow("error.transport.noPasswordProvided");
     });
+
+    test("should create an empty token", async () => {
+        const token = await anonymousTokenController.createEmptyToken();
+
+        expect(token.passwordProtection.password).toBeDefined();
+        expect(token.passwordProtection.passwordLocationIndicator).toBeUndefined();
+    });
+
+    test("should get a proper error when trying to load an empty token", async () => {
+        const token = await anonymousTokenController.createEmptyToken();
+
+        await expect(anonymousTokenController.loadPeerTokenByReference(token.toTokenReference(sender.config.baseUrl))).rejects.toThrow("error.transport.tokens.emptyToken");
+    });
 });
