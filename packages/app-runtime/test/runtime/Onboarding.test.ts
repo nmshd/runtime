@@ -85,7 +85,7 @@ describe("Onboarding", function () {
         expect(recoveryKitResponse2).toBeSuccessful();
     });
 
-    test("should onboard with an anonomously created empty token", async () => {
+    test("should onboard with an anonymously created empty token", async () => {
         const emptyToken = await onboardingRuntime.anonymousServices.tokens.createEmptyToken();
 
         const device = await services.transportServices.devices.createDevice({});
