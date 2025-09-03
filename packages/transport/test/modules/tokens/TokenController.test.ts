@@ -426,6 +426,15 @@ describe("TokenController", function () {
         expect(anonymousFetchedToken.cache!.createdBy.toString()).toBe(sender.identity.address.toString());
     });
 
+    test("should check if a token is empty", async function () {
+        const anonymousTokenController = new AnonymousTokenController(transport.config);
+        const sentToken = await anonymousTokenController.createEmptyToken();
+        const reference = sentToken.toTokenReference(sender.config.baseUrl);
+
+        const isEmptyToken = await sender.tokens.isEmptyToken(reference);
+        expect(isEmptyToken).toBe(true);
+    });
+
     describe("Token deletion", function () {
         let sentToken: Token;
         let receivedToken: Token;

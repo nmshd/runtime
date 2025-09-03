@@ -33,6 +33,9 @@ export class FillDeviceOnboardingTokenWithNewDeviceUseCase extends UseCase<FillD
         const passwordProtection = reference.passwordProtection;
         if (!passwordProtection?.password) throw RuntimeErrors.devices.referenceNotPointingToAnEmptyToken();
 
+        const isEmptyToken = await this.tokenController.isEmptyToken(reference);
+        if (!isEmptyToken) throw RuntimeErrors.devices.referenceNotPointingToAnEmptyToken();
+
         const device = await this.devicesController.sendDevice({ isAdmin: request.isAdmin });
         await this.accountController.syncDatawallet();
 

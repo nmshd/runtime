@@ -347,4 +347,13 @@ export class TokenController extends TransportController {
 
         return token;
     }
+
+    public async isEmptyToken(reference: TokenReference): Promise<boolean> {
+        if (!reference.passwordProtection?.password) throw TransportCoreErrors.general.noPasswordProvided();
+
+        const hashedPassword = (await CoreCrypto.deriveHashOutOfPassword(reference.passwordProtection.password, reference.passwordProtection.salt)).toBase64();
+        const response = (await this.client.getToken(reference.id.toString(), hashedPassword)).value;
+
+        return !response.content;
+    }
 }
