@@ -37,7 +37,7 @@ export class AnonymousTokenController {
             ? PasswordProtection.from({
                   salt: reference.passwordProtection.salt,
                   passwordType: reference.passwordProtection.passwordType,
-                  password: (password ?? reference.passwordProtection.password) as string,
+                  password: (password ?? reference.passwordProtection.password)!,
                   passwordLocationIndicator: reference.passwordProtection.passwordLocationIndicator
               })
             : undefined;
