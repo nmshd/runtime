@@ -608,7 +608,7 @@ describe("get OwnIdentityAttributes, own Attributes shared with peer and peer At
     });
 
     describe(GetPeerAttributesUseCase.name, () => {
-        // point of view of services 2 => own shared attributes are peer shared attributes
+        // point of view of services 2 => own attributes are peer attributes
         let allReceivedAttributes: LocalAttributeDTO[];
         let onlyLatestReceivedAttributes: LocalAttributeDTO[];
         let notTechnicalReceivedAttributes: LocalAttributeDTO[];
