@@ -35,7 +35,7 @@ export class SharedPasswordProtection extends Serializable implements ISharedPas
 
         const splittedPasswordParts = value.split("&");
         if (![2, 3, 4].includes(splittedPasswordParts.length)) {
-            throw new CoreError("error.core-types.invalidTruncatedReference", "The password part of a TruncatedReference must consist of exactly 2 or 3 components.");
+            throw new CoreError("error.core-types.invalidTruncatedReference", "The password part of a TruncatedReference must consist of 2, 3 or 4 components.");
         }
 
         const passwordType = splittedPasswordParts[0] as "pw" | `pin${number}`;
