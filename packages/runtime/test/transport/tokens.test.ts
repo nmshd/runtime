@@ -55,6 +55,16 @@ describe("Tokens", () => {
         expect(token.content).toStrictEqual(uploadedToken.content);
     });
 
+    test("should throw an error when tying to load an empty token", async function () {
+        const emptyTokenResult = await runtimeServices1.anonymous.tokens.createEmptyToken();
+        expect(emptyTokenResult).toBeSuccessful();
+
+        const emptyToken = emptyTokenResult.value;
+
+        const result = await runtimeServices1.transport.tokens.loadPeerToken({ reference: emptyToken.reference.truncated, ephemeral: false });
+        expect(result).toBeAnError(/.*/, "error.transport.tokens.emptyToken");
+    });
+
     describe("Delete Token", () => {
         test("accessing invalid Token id causes an error", async () => {
             const response = await runtimeServices1.transport.tokens.deleteToken({ tokenId: UNKNOWN_TOKEN_ID });

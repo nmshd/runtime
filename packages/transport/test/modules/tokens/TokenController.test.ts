@@ -2,7 +2,7 @@ import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { JSONWrapper, Serializable } from "@js-soft/ts-serval";
 import { CoreDate, CoreId, CoreIdHelper } from "@nmshd/core-types";
 import { CoreBuffer, CryptoEncryption, CryptoSecretKey } from "@nmshd/crypto";
-import { AccountController, CoreCrypto, Token, TokenContentFile, TokenContentRelationshipTemplate, Transport } from "../../../src";
+import { AccountController, AnonymousTokenController, CoreCrypto, Token, TokenContentFile, TokenContentRelationshipTemplate, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("TokenController", function () {
@@ -394,6 +394,45 @@ describe("TokenController", function () {
         const receivedToken2 = await recipient.tokens.loadPeerTokenByReference(reference2, false, "1234");
         const fetchCachesResult = await recipient.tokens.fetchCaches([receivedToken1.id, receivedToken2.id]);
         expect(fetchCachesResult).toHaveLength(2);
+    });
+
+    test("should throw an error when tying to load an empty token", async function () {
+        const anonymousTokenController = new AnonymousTokenController(transport.config);
+        const sentToken = await anonymousTokenController.createEmptyToken();
+
+        const reference = sentToken.toTokenReference(sender.config.baseUrl);
+        await expect(recipient.tokens.loadPeerTokenByReference(reference, true)).rejects.toThrow("error.transport.tokens.emptyToken");
+    });
+
+    test("should fill the content of an empty token", async function () {
+        const anonymousTokenController = new AnonymousTokenController(transport.config);
+        const sentToken = await anonymousTokenController.createEmptyToken();
+        const reference = sentToken.toTokenReference(sender.config.baseUrl);
+
+        const content = Serializable.fromAny({ content: "TestToken" });
+        const updatedSentToken = await sender.tokens.updateTokenContent({
+            content: content,
+            id: reference.id,
+            passwordProtection: reference.passwordProtection!,
+            secretKey: reference.key
+        });
+
+        expect(updatedSentToken.cache).toBeDefined();
+        expect((updatedSentToken.cache!.content.toJSON() as any).content).toBe("TestToken");
+
+        const anonymousFetchedToken = await anonymousTokenController.loadPeerTokenByReference(reference);
+        expect(anonymousFetchedToken).toBeDefined();
+        expect((anonymousFetchedToken.cache!.content.toJSON() as any).content).toBe("TestToken");
+        expect(anonymousFetchedToken.cache!.createdBy.toString()).toBe(sender.identity.address.toString());
+    });
+
+    test("should check if a token is empty", async function () {
+        const anonymousTokenController = new AnonymousTokenController(transport.config);
+        const sentToken = await anonymousTokenController.createEmptyToken();
+        const reference = sentToken.toTokenReference(sender.config.baseUrl);
+
+        const isEmptyToken = await sender.tokens.isEmptyToken(reference);
+        expect(isEmptyToken).toBe(true);
     });
 
     describe("Token deletion", function () {

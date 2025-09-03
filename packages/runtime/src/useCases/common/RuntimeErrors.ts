@@ -328,6 +328,12 @@ class DeciderModule {
     }
 }
 
+class Devices {
+    public referenceNotPointingToAnEmptyToken() {
+        return new ApplicationError("error.runtime.devices.referenceNotPointingToAnEmptyToken", "The given reference is not pointing to an empty token.");
+    }
+}
+
 export class RuntimeErrors {
     public static readonly general = new General();
     public static readonly serval = new Serval();
@@ -343,4 +349,5 @@ export class RuntimeErrors {
     public static readonly identityMetadata = new IdentityMetadata();
     public static readonly identityRecoveryKits = new IdentityRecoveryKits();
     public static readonly deciderModule = new DeciderModule();
+    public static readonly devices = new Devices();
 }
