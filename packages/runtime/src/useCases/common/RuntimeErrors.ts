@@ -330,10 +330,7 @@ class DeciderModule {
 
 class Devices {
     public referenceNotPointingToAnEmptyToken() {
-        return new ApplicationError(
-            "error.runtime.devices.referenceNotPointingToAnEmptyToken",
-            "The given reference is not pointing to an empty token. Make sure to create an empty password-protected token."
-        );
+        return new ApplicationError("error.runtime.devices.referenceNotPointingToAnEmptyToken", "The given reference is not pointing to an empty token.");
     }
 }
 
