@@ -2,6 +2,7 @@ export * from "./AnnouncementDTO";
 export * from "./ChallengeDTO";
 export * from "./DeviceDTO";
 export * from "./DeviceOnboardingInfoDTO";
+export * from "./EmptyTokenDTO";
 export * from "./FileDTO";
 export * from "./IdentityDeletionProcessDTO";
 export * from "./IdentityDTO";
