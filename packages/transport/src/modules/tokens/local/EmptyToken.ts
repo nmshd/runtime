@@ -25,10 +25,6 @@ export class EmptyToken extends Serializable implements IEmptyToken {
     @serialize()
     public expiresAt: CoreDate;
 
-    @validate({ nullable: true })
-    @serialize()
-    public password: string;
-
     @validate()
     @serialize()
     public passwordProtection: PasswordProtection;
