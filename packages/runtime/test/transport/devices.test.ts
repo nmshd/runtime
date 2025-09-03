@@ -1,4 +1,4 @@
-import { LanguageISO639 } from "@nmshd/core-types";
+import { CoreDate, LanguageISO639 } from "@nmshd/core-types";
 import { DeviceMapper } from "../../src";
 import { RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 
@@ -50,5 +50,24 @@ describe("Devices", () => {
         expect(anonymousFetchedTokenResult).toBeSuccessful();
         expect(anonymousFetchedTokenResult.value.content["@type"]).toBe("TokenContentDeviceSharedSecret");
         expect(anonymousFetchedTokenResult.value.createdBy).toBe(runtimeServices.address);
+    });
+
+    test("should rollback the creation of a new device when updating the token failed", async function () {
+        const testStartTime = CoreDate.utc();
+
+        const createTokenResult = await runtimeServices.transport.tokens.createOwnToken({
+            content: {},
+            ephemeral: true,
+            expiresAt: testStartTime.add({ minutes: 10 }).toISOString()
+        });
+        expect(createTokenResult).toBeSuccessful();
+
+        const token = createTokenResult.value;
+
+        const result = await runtimeServices.transport.devices.fillDeviceOnboardingTokenWithNewDevice({ reference: token.reference.truncated });
+        expect(result).toBeAnError(/.*/, "error.runtime.devices.referenceNotPointingToAnEmptyToken");
+
+        const devicesResult = await runtimeServices.transport.devices.getDevices();
+        expect(devicesResult.value.filter((d) => CoreDate.from(d.createdAt).isAfter(testStartTime))).toHaveLength(0);
     });
 });

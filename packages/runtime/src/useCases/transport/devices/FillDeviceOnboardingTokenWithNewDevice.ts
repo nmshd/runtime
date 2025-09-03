@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
 import { TokenDTO } from "@nmshd/runtime-types";
-import { AccountController, DevicesController, TokenContentDeviceSharedSecret, TokenController, TokenReference } from "@nmshd/transport";
+import { AccountController, Device, DevicesController, TokenContentDeviceSharedSecret, TokenController, TokenReference } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { RuntimeErrors, SchemaRepository, SchemaValidator, TokenReferenceString, UseCase } from "../../common";
 import { TokenMapper } from "../tokens/TokenMapper";
@@ -28,24 +28,33 @@ export class FillDeviceOnboardingTokenWithNewDeviceUseCase extends UseCase<FillD
     }
 
     protected async executeInternal(request: FillDeviceOnboardingTokenWithNewDeviceRequest): Promise<Result<TokenDTO>> {
-        const device = await this.devicesController.sendDevice({ isAdmin: request.isAdmin });
-        await this.accountController.syncDatawallet();
-
-        const sharedSecret = await this.devicesController.getSharedSecret(device.id, request.profileName);
-        const tokenContent = TokenContentDeviceSharedSecret.from({ sharedSecret });
-
         const reference = TokenReference.fromTruncated(request.reference);
 
         const passwordProtection = reference.passwordProtection;
         if (!passwordProtection?.password) throw RuntimeErrors.devices.referenceNotPointingToAnEmptyToken();
 
-        const response = await this.tokenController.updateTokenContent({
-            id: reference.id,
-            content: tokenContent,
-            secretKey: reference.key,
-            passwordProtection: reference.passwordProtection!
-        });
+        const device = await this.devicesController.sendDevice({ isAdmin: request.isAdmin });
+        await this.accountController.syncDatawallet();
 
-        return Result.ok(TokenMapper.toTokenDTO(response, true));
+        const sharedSecret = await this.devicesController.getSharedSecret(device.id, request.profileName);
+
+        try {
+            const response = await this.tokenController.updateTokenContent({
+                id: reference.id,
+                content: TokenContentDeviceSharedSecret.from({ sharedSecret }),
+                secretKey: reference.key,
+                passwordProtection: reference.passwordProtection!
+            });
+
+            return Result.ok(TokenMapper.toTokenDTO(response, true));
+        } catch (e) {
+            await this.rollback(device);
+            throw e;
+        }
+    }
+
+    private async rollback(device: Device) {
+        await this.devicesController.delete(device);
+        await this.accountController.syncDatawallet();
     }
 }
