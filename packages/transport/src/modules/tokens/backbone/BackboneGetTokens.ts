@@ -4,10 +4,10 @@ export interface BackboneGetTokensRequest {
 
 export interface BackboneGetTokensResponse {
     id: string;
-    content: string;
+    content?: string;
     createdAt: string;
-    createdBy: string;
-    createdByDevice: string;
+    createdBy?: string;
+    createdByDevice?: string;
     expiresAt: string;
     forIdentity?: string;
 }

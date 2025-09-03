@@ -8,5 +8,4 @@ export interface BackbonePostTokensRequest {
 export interface BackbonePostTokensResponse {
     id: string;
     createdAt: string;
-    createdByDevice: string;
 }

@@ -31,11 +31,12 @@ export class PasswordProtection extends Serializable implements IPasswordProtect
         return this.fromAny(value);
     }
 
-    public toSharedPasswordProtection(): SharedPasswordProtection {
+    public toSharedPasswordProtection(includeCleartextPassword?: boolean): SharedPasswordProtection {
         return SharedPasswordProtection.from({
             passwordType: this.passwordType,
             salt: this.salt,
-            passwordLocationIndicator: this.passwordLocationIndicator
+            passwordLocationIndicator: this.passwordLocationIndicator,
+            password: includeCleartextPassword ? this.password : undefined
         });
     }
 
