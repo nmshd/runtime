@@ -8,5 +8,4 @@ export interface EmptyTokenDTO {
         truncated: string;
         url: string;
     };
-    isEphemeral: boolean;
 }

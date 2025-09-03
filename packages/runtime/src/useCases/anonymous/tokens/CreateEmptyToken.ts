@@ -12,6 +12,6 @@ export class CreateEmptyTokenUseCase extends UseCase<void, EmptyTokenDTO> {
 
     protected async executeInternal(): Promise<Result<EmptyTokenDTO>> {
         const createdToken = await this.anonymousTokenController.createEmptyToken();
-        return Result.ok(TokenMapper.toEmptyTokenDTO(createdToken, true));
+        return Result.ok(TokenMapper.toEmptyTokenDTO(createdToken));
     }
 }

@@ -32,7 +32,7 @@ export class TokenMapper {
         };
     }
 
-    public static toEmptyTokenDTO(token: EmptyToken, ephemeral: boolean): EmptyTokenDTO {
+    public static toEmptyTokenDTO(token: EmptyToken): EmptyTokenDTO {
         const backboneBaseUrl = Container.get<ConfigHolder>(ConfigHolder).getConfig().transportLibrary.baseUrl;
         const reference = token.toTokenReference(backboneBaseUrl);
 
@@ -43,8 +43,7 @@ export class TokenMapper {
             reference: {
                 truncated: reference.truncate(),
                 url: reference.toUrl()
-            },
-            isEphemeral: ephemeral
+            }
         };
     }
 
