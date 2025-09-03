@@ -88,11 +88,7 @@ describe("Onboarding", function () {
     test("should onboard with an anonymously created empty token", async () => {
         const emptyToken = await onboardingRuntime.anonymousServices.tokens.createEmptyToken();
 
-        const device = await services.transportServices.devices.createDevice({});
-        const onboardingInfo = await services.transportServices.devices.getDeviceOnboardingInfo({ id: device.value.id });
-
-        const tokenContent = TokenContentDeviceSharedSecret.from({ sharedSecret: DeviceMapper.toDeviceSharedSecret(onboardingInfo.value) });
-        const result = await services.transportServices.tokens.updateTokenContent({ reference: emptyToken.value.reference.truncated, content: tokenContent.toJSON() });
+        const result = await services.transportServices.devices.fillDeviceOnboardingTokenWithNewDevice({ reference: emptyToken.value.reference.truncated });
         expect(result).toBeSuccessful();
 
         const token = await onboardingRuntime.anonymousServices.tokens.loadPeerToken({ reference: emptyToken.value.reference.truncated });

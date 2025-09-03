@@ -1,20 +1,19 @@
 import { LanguageISO639 } from "@nmshd/core-types";
-import { DeviceMapper, TransportServices } from "../../src";
-import { RuntimeServiceProvider } from "../lib";
+import { DeviceMapper } from "../../src";
+import { RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
-let transportServices1: TransportServices;
+let runtimeServices: TestRuntimeServices;
 
 beforeAll(async () => {
-    const runtimeServices = await serviceProvider.launch(1);
-    transportServices1 = runtimeServices[0].transport;
+    [runtimeServices] = await serviceProvider.launch(1);
 }, 30000);
 afterAll(async () => await serviceProvider.stop());
 
 describe("Devices", () => {
     test("should map the DeviceOnboardingInfoDTO to a DeviceSharedSecret", async () => {
-        const createDeviceResult = await transportServices1.devices.createDevice({});
-        const onboardingInfo = (await transportServices1.devices.getDeviceOnboardingInfo({ id: createDeviceResult.value.id })).value;
+        const createDeviceResult = await runtimeServices.transport.devices.createDevice({});
+        const onboardingInfo = (await runtimeServices.transport.devices.getDeviceOnboardingInfo({ id: createDeviceResult.value.id })).value;
         expect(onboardingInfo).toBeDefined();
 
         const sharedSecret = DeviceMapper.toDeviceSharedSecret(onboardingInfo);
@@ -22,12 +21,34 @@ describe("Devices", () => {
     });
 
     test("should set the communication language", async () => {
-        const result = await transportServices1.devices.setCommunicationLanguage({ communicationLanguage: LanguageISO639.fr });
+        const result = await runtimeServices.transport.devices.setCommunicationLanguage({ communicationLanguage: LanguageISO639.fr });
         expect(result).toBeSuccessful();
     });
 
     test("should not set the communication language with an invalid language", async () => {
-        const result = await transportServices1.devices.setCommunicationLanguage({ communicationLanguage: "fra" as any as LanguageISO639 });
+        const result = await runtimeServices.transport.devices.setCommunicationLanguage({ communicationLanguage: "fra" as any as LanguageISO639 });
         expect(result).toBeAnError("communicationLanguage must be equal to one of the allowed values", "error.runtime.validation.invalidPropertyValue");
+    });
+
+    test("should fill the content of an empty token", async function () {
+        const emptyTokenResult = await runtimeServices.anonymous.tokens.createEmptyToken();
+        expect(emptyTokenResult).toBeSuccessful();
+
+        const emptyToken = emptyTokenResult.value;
+
+        const result = await runtimeServices.transport.devices.fillDeviceOnboardingTokenWithNewDevice({ reference: emptyToken.reference.truncated });
+        expect(result).toBeSuccessful();
+        expect(result.value.content["@type"]).toBe("TokenContentDeviceSharedSecret");
+        expect(result.value.createdBy).toBe(runtimeServices.address);
+
+        const deviceId = result.value.content.sharedSecret.id;
+
+        const deviceResult = await runtimeServices.transport.devices.getDevice({ id: deviceId });
+        expect(deviceResult).toBeSuccessful();
+
+        const anonymousFetchedTokenResult = await runtimeServices.anonymous.tokens.loadPeerToken({ reference: emptyToken.reference.truncated });
+        expect(anonymousFetchedTokenResult).toBeSuccessful();
+        expect(anonymousFetchedTokenResult.value.content["@type"]).toBe("TokenContentDeviceSharedSecret");
+        expect(anonymousFetchedTokenResult.value.createdBy).toBe(runtimeServices.address);
     });
 });

@@ -21792,6 +21792,35 @@ export const DeleteDeviceRequest: any = {
     }
 }
 
+export const FillDeviceOnboardingTokenWithNewDeviceRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/FillDeviceOnboardingTokenWithNewDeviceRequest",
+    "definitions": {
+        "FillDeviceOnboardingTokenWithNewDeviceRequest": {
+            "type": "object",
+            "properties": {
+                "reference": {
+                    "$ref": "#/definitions/TokenReferenceString"
+                },
+                "profileName": {
+                    "type": "string"
+                },
+                "isAdmin": {
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "reference"
+            ],
+            "additionalProperties": false
+        },
+        "TokenReferenceString": {
+            "type": "string",
+            "pattern": "VE9L.{84}"
+        }
+    }
+}
+
 export const GetDeviceRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/GetDeviceRequest",
@@ -23477,31 +23506,6 @@ export const LoadPeerTokenRequest: any = {
         "URLTokenReferenceString": {
             "type": "string",
             "pattern": "^https?:\\/\\/.*\\/r\\/TOK[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
-        }
-    }
-}
-
-export const UpdateTokenContentRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/UpdateTokenContentRequest",
-    "definitions": {
-        "UpdateTokenContentRequest": {
-            "type": "object",
-            "properties": {
-                "reference": {
-                    "$ref": "#/definitions/TokenReferenceString"
-                },
-                "content": {}
-            },
-            "required": [
-                "reference",
-                "content"
-            ],
-            "additionalProperties": false
-        },
-        "TokenReferenceString": {
-            "type": "string",
-            "pattern": "VE9L.{84}"
         }
     }
 }
