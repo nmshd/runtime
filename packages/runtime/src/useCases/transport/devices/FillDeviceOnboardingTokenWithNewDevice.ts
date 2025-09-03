@@ -2,7 +2,7 @@ import { Result } from "@js-soft/ts-utils";
 import { TokenDTO } from "@nmshd/runtime-types";
 import { AccountController, DevicesController, TokenContentDeviceSharedSecret, TokenController, TokenReference } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { SchemaRepository, SchemaValidator, TokenReferenceString, UseCase } from "../../common";
+import { RuntimeErrors, SchemaRepository, SchemaValidator, TokenReferenceString, UseCase } from "../../common";
 import { TokenMapper } from "../tokens/TokenMapper";
 
 export interface FillDeviceOnboardingTokenWithNewDeviceRequest {
@@ -37,11 +37,7 @@ export class FillDeviceOnboardingTokenWithNewDeviceUseCase extends UseCase<FillD
         const reference = TokenReference.fromTruncated(request.reference);
 
         const passwordProtection = reference.passwordProtection;
-        if (passwordProtection && !passwordProtection.password) {
-            // TODO: use proper error
-            // invalidReference because no password provided
-            throw new Error("RuntimeErrors.general.noPasswordProvided()");
-        }
+        if (!passwordProtection?.password) throw RuntimeErrors.devices.referenceNotPointingToAnEmptyToken();
 
         const response = await this.tokenController.updateTokenContent({
             id: reference.id,
