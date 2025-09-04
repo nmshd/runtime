@@ -18189,7 +18189,14 @@ export const FillDeviceOnboardingTokenWithNewDeviceRequest: any = {
             "type": "object",
             "properties": {
                 "reference": {
-                    "$ref": "#/definitions/TokenReferenceString"
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/TokenReferenceString"
+                        },
+                        {
+                            "$ref": "#/definitions/URLTokenReferenceString"
+                        }
+                    ]
                 },
                 "profileName": {
                     "type": "string"
@@ -18206,6 +18213,10 @@ export const FillDeviceOnboardingTokenWithNewDeviceRequest: any = {
         "TokenReferenceString": {
             "type": "string",
             "pattern": "VE9L.{84}"
+        },
+        "URLTokenReferenceString": {
+            "type": "string",
+            "pattern": "^https?:\\/\\/.*\\/r\\/TOK[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
         }
     }
 }
