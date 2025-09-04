@@ -7,14 +7,14 @@ import { LocalAccountMapper } from "./data/LocalAccountMapper";
 export class AccountServices {
     public constructor(protected readonly multiAccountController: MultiAccountController) {}
 
-    public async createAccount(name: string): Promise<LocalAccountDTO> {
-        const [localAccount] = await this.multiAccountController.createAccount(name);
+    public async createAccount(name: string, deviceName?: string): Promise<LocalAccountDTO> {
+        const [localAccount] = await this.multiAccountController.createAccount(name, deviceName);
         return LocalAccountMapper.toLocalAccountDTO(localAccount);
     }
 
-    public async onboardAccount(onboardingInfo: DeviceOnboardingInfoDTO, name?: string): Promise<LocalAccountDTO> {
+    public async onboardAccount(onboardingInfo: DeviceOnboardingInfoDTO, name?: string, deviceName?: string): Promise<LocalAccountDTO> {
         const sharedSecret = DeviceMapper.toDeviceSharedSecret(onboardingInfo);
-        const [localAccount] = await this.multiAccountController.onboardDevice(sharedSecret, name);
+        const [localAccount] = await this.multiAccountController.onboardDevice(sharedSecret, name, deviceName);
         return LocalAccountMapper.toLocalAccountDTO(localAccount);
     }
 

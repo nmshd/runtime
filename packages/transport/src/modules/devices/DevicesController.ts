@@ -41,11 +41,6 @@ export class DevicesController extends TransportController {
     }
 
     public async sendDevice(parameters: ISendDeviceParameters): Promise<Device> {
-        if (!parameters.name) {
-            const devices = await this.parent.devices.list();
-            parameters.name = `Device ${devices.length + 1}`;
-        }
-
         const parsedParams = SendDeviceParameters.from(parameters);
         const device = await this.createDevice(parsedParams);
 
