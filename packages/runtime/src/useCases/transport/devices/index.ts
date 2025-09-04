@@ -7,4 +7,5 @@ export * from "./GetDevice";
 export * from "./GetDeviceOnboardingInfo";
 export * from "./GetDevices";
 export * from "./SetCommunicationLanguage";
+export * from "./UpdateCurrentDevice";
 export * from "./UpdateDevice";
