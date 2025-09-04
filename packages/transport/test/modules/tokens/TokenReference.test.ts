@@ -122,7 +122,7 @@ describe("TokenReference", function () {
         const truncated = reference.truncate();
         expect(truncated.length).toBeLessThan(155);
         expect(truncated.length).toBeGreaterThan(80);
-        const deserialized = TokenReference.fromTruncated(truncated);
+        const deserialized = TokenReference.from(truncated);
         expect(deserialized).toBeInstanceOf(Serializable);
         expect(deserialized).toBeInstanceOf(TokenReference);
         expect(deserialized.key).toBeInstanceOf(CryptoSecretKey);
@@ -145,7 +145,7 @@ describe("TokenReference", function () {
         const truncated = reference.truncate();
         expect(truncated.length).toBeLessThan(155);
         expect(truncated.length).toBeGreaterThan(80);
-        const deserialized = TokenReference.fromTruncated(truncated);
+        const deserialized = TokenReference.from(truncated);
         expect(deserialized).toBeInstanceOf(Serializable);
         expect(deserialized).toBeInstanceOf(TokenReference);
         expect(deserialized.key).toBeInstanceOf(CryptoSecretKey);
@@ -167,7 +167,7 @@ describe("TokenReference", function () {
         const truncated = CoreBuffer.fromUtf8(`${reference.id.toString()}|${reference.key.algorithm}|${reference.key.secretKey.toBase64URL()}`).toBase64URL();
         expect(truncated.length).toBeLessThan(155);
         expect(truncated.length).toBeGreaterThan(80);
-        const deserialized = TokenReference.fromTruncated(truncated);
+        const deserialized = TokenReference.from(truncated);
         expect(deserialized).toBeInstanceOf(Serializable);
         expect(deserialized).toBeInstanceOf(TokenReference);
         expect(deserialized.key).toBeInstanceOf(CryptoSecretKey);
@@ -222,7 +222,7 @@ describe("TokenReference", function () {
         });
 
         const truncated = CoreBuffer.fromUtf8(`${reference.id.toString()}|${reference.key.algorithm}|${reference.key.secretKey.toBase64URL()}||wrong-salt&pw`).toBase64URL();
-        expect(() => TokenReference.fromTruncated(truncated)).toThrow("The salt needs to be a Base64 value.");
+        expect(() => TokenReference.from(truncated)).toThrow("The salt needs to be a Base64 value.");
     });
 
     test("should not create a reference with a salt of wrong length", async function () {

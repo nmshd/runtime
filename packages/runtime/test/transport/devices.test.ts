@@ -30,27 +30,30 @@ describe("Devices", () => {
         expect(result).toBeAnError("communicationLanguage must be equal to one of the allowed values", "error.runtime.validation.invalidPropertyValue");
     });
 
-    test("should fill the content of an empty token", async function () {
-        const emptyTokenResult = await runtimeServices.anonymous.tokens.createEmptyToken();
-        expect(emptyTokenResult).toBeSuccessful();
+    test.each(["truncated", "url"] as ("truncated" | "url")[])(
+        "should fill the content of an empty token with a %s reference",
+        async function (referenceType: "truncated" | "url") {
+            const emptyTokenResult = await runtimeServices.anonymous.tokens.createEmptyToken();
+            expect(emptyTokenResult).toBeSuccessful();
 
-        const emptyToken = emptyTokenResult.value;
+            const emptyToken = emptyTokenResult.value;
 
-        const result = await runtimeServices.transport.devices.fillDeviceOnboardingTokenWithNewDevice({ reference: emptyToken.reference.truncated });
-        expect(result).toBeSuccessful();
-        expect(result.value.content["@type"]).toBe("TokenContentDeviceSharedSecret");
-        expect(result.value.createdBy).toBe(runtimeServices.address);
+            const result = await runtimeServices.transport.devices.fillDeviceOnboardingTokenWithNewDevice({ reference: emptyToken.reference[referenceType] });
+            expect(result).toBeSuccessful();
+            expect(result.value.content["@type"]).toBe("TokenContentDeviceSharedSecret");
+            expect(result.value.createdBy).toBe(runtimeServices.address);
 
-        const deviceId = result.value.content.sharedSecret.id;
+            const deviceId = result.value.content.sharedSecret.id;
 
-        const deviceResult = await runtimeServices.transport.devices.getDevice({ id: deviceId });
-        expect(deviceResult).toBeSuccessful();
+            const deviceResult = await runtimeServices.transport.devices.getDevice({ id: deviceId });
+            expect(deviceResult).toBeSuccessful();
 
-        const anonymousFetchedTokenResult = await runtimeServices.anonymous.tokens.loadPeerToken({ reference: emptyToken.reference.truncated });
-        expect(anonymousFetchedTokenResult).toBeSuccessful();
-        expect(anonymousFetchedTokenResult.value.content["@type"]).toBe("TokenContentDeviceSharedSecret");
-        expect(anonymousFetchedTokenResult.value.createdBy).toBe(runtimeServices.address);
-    });
+            const anonymousFetchedTokenResult = await runtimeServices.anonymous.tokens.loadPeerToken({ reference: emptyToken.reference.truncated });
+            expect(anonymousFetchedTokenResult).toBeSuccessful();
+            expect(anonymousFetchedTokenResult.value.content["@type"]).toBe("TokenContentDeviceSharedSecret");
+            expect(anonymousFetchedTokenResult.value.createdBy).toBe(runtimeServices.address);
+        }
+    );
 
     test("should rollback the creation of a new device when updating the token failed", async function () {
         const testStartTime = CoreDate.utc();
