@@ -161,7 +161,7 @@ export class MultiAccountController {
         }
     }
 
-    public async onboardDevice(deviceSharedSecret: DeviceSharedSecret, name?: string): Promise<[LocalAccount, AccountController]> {
+    public async onboardDevice(deviceSharedSecret: DeviceSharedSecret, name?: string, deviceName?: string): Promise<[LocalAccount, AccountController]> {
         const existingAccounts = await this._localAccounts.find({ address: deviceSharedSecret.identity.address.toString() });
         if (existingAccounts.length > 0 && !this.config.allowMultipleAccountsWithSameAddress) {
             throw new CoreError(
@@ -190,7 +190,7 @@ export class MultiAccountController {
 
         this._log.trace(`Initializing AccountController for local account ${id}...`);
         const accountController = new AccountController(this.transport, db, this.transport.config);
-        await accountController.init(deviceSharedSecret);
+        await accountController.init(deviceSharedSecret, deviceName);
         this._log.trace(`AccountController for local account ${id} initialized.`);
 
         this._openAccounts[id.toString()] = accountController;
@@ -212,7 +212,7 @@ export class MultiAccountController {
         return [updatedLocalAccount, accountController];
     }
 
-    public async createAccount(name: string): Promise<[LocalAccount, AccountController]> {
+    public async createAccount(name: string, deviceName?: string): Promise<[LocalAccount, AccountController]> {
         const id = await CoreIdHelper.notPrefixed.generate();
 
         let localAccount = LocalAccount.from({
@@ -230,7 +230,7 @@ export class MultiAccountController {
 
         this._log.trace(`Initializing AccountController for local account ${id}...`);
         const accountController = new AccountController(this.transport, db, this.transport.config);
-        await accountController.init();
+        await accountController.init(undefined, deviceName);
         this._log.trace(`AccountController for local account ${id} initialized.`);
 
         this._openAccounts[id.toString()] = accountController;
