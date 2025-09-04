@@ -28,7 +28,7 @@ export class FillDeviceOnboardingTokenWithNewDeviceUseCase extends UseCase<FillD
     }
 
     protected async executeInternal(request: FillDeviceOnboardingTokenWithNewDeviceRequest): Promise<Result<TokenDTO>> {
-        const reference = TokenReference.fromTruncated(request.reference);
+        const reference = TokenReference.from(request.reference);
 
         const passwordProtection = reference.passwordProtection;
         if (!passwordProtection?.password) throw RuntimeErrors.devices.referenceNotPointingToAnEmptyToken();
