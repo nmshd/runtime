@@ -2,7 +2,7 @@ import { Result } from "@js-soft/ts-utils";
 import { TokenDTO } from "@nmshd/runtime-types";
 import { AccountController, Device, DevicesController, TokenContentDeviceSharedSecret, TokenController, TokenReference } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { RuntimeErrors, SchemaRepository, SchemaValidator, TokenReferenceString, UseCase } from "../../common";
+import { RuntimeErrors, SchemaRepository, SchemaValidator, TokenReferenceString, URLTokenReferenceString, UseCase } from "../../common";
 import { TokenMapper } from "../tokens/TokenMapper";
 
 export interface FillDeviceOnboardingTokenWithNewDeviceRequest {
