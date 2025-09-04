@@ -17,6 +17,8 @@ import {
     GetDeviceUseCase,
     SetCommunicationLanguageRequest,
     SetCommunicationLanguageUseCase,
+    UpdateCurrentDeviceRequest,
+    UpdateCurrentDeviceUseCase,
     UpdateDeviceRequest,
     UpdateDeviceUseCase
 } from "../../../useCases";
@@ -26,6 +28,7 @@ export class DevicesFacade {
         @Inject private readonly getDeviceUseCase: GetDeviceUseCase,
         @Inject private readonly getDevicesUseCase: GetDevicesUseCase,
         @Inject private readonly createDeviceUseCase: CreateDeviceUseCase,
+        @Inject private readonly updateCurrentDeviceUseCase: UpdateCurrentDeviceUseCase,
         @Inject private readonly updateDeviceUseCase: UpdateDeviceUseCase,
         @Inject private readonly deleteDeviceUseCase: DeleteDeviceUseCase,
         @Inject private readonly getDeviceOnboardingInfoUseCase: GetDeviceOnboardingInfoUseCase,
@@ -65,6 +68,10 @@ export class DevicesFacade {
 
     public async fillDeviceOnboardingTokenWithNewDevice(request: FillDeviceOnboardingTokenWithNewDeviceRequest): Promise<Result<TokenDTO, ApplicationError>> {
         return await this.fillDeviceOnboardingTokenWithNewDeviceUseCase.execute(request);
+    }
+
+    public async updateCurrentDevice(request: UpdateCurrentDeviceRequest): Promise<Result<DeviceDTO, ApplicationError>> {
+        return await this.updateCurrentDeviceUseCase.execute(request);
     }
 
     public async updateDevice(request: UpdateDeviceRequest): Promise<Result<DeviceDTO, ApplicationError>> {

@@ -22085,6 +22085,25 @@ export const SetCommunicationLanguageRequest: any = {
     }
 }
 
+export const UpdateCurrentDeviceRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/UpdateCurrentDeviceRequest",
+    "definitions": {
+        "UpdateCurrentDeviceRequest": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+}
+
 export const UpdateDeviceRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/UpdateDeviceRequest",
