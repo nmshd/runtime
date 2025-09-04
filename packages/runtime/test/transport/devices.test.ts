@@ -73,4 +73,22 @@ describe("Devices", () => {
         const devicesResult = await runtimeServices.transport.devices.getDevices();
         expect(devicesResult.value.filter((d) => CoreDate.from(d.createdAt).isAfter(testStartTime))).toHaveLength(0);
     });
+
+    test("should update the current device", async () => {
+        const newName = "Updated Device Name";
+        const newDescription = "Updated Device Description";
+
+        const updateResult = await runtimeServices.transport.devices.updateCurrentDevice({ name: newName, description: newDescription });
+        expect(updateResult).toBeSuccessful();
+        expect(updateResult.value.name).toBe(newName);
+        expect(updateResult.value.description).toBe(newDescription);
+
+        const devicesResult = await runtimeServices.transport.devices.getDevices();
+        expect(devicesResult).toBeSuccessful();
+
+        const currentDevice = devicesResult.value.find((d) => d.isCurrentDevice);
+        expect(currentDevice).toBeDefined();
+        expect(currentDevice!.name).toBe(newName);
+        expect(currentDevice!.description).toBe(newDescription);
+    });
 });
