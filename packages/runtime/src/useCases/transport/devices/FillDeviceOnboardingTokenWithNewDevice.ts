@@ -6,7 +6,7 @@ import { RuntimeErrors, SchemaRepository, SchemaValidator, TokenReferenceString,
 import { TokenMapper } from "../tokens/TokenMapper";
 
 export interface FillDeviceOnboardingTokenWithNewDeviceRequest {
-    reference: TokenReferenceString;
+    reference: TokenReferenceString | URLTokenReferenceString;
     profileName?: string;
     isAdmin?: boolean;
 }
