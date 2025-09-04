@@ -58,7 +58,23 @@ export class Reference extends Serializable implements IReference {
         return link;
     }
 
-    public static fromTruncated(value: string): Reference {
+    protected static validateId(value: any, helper: CoreIdHelper): void {
+        if (!value?.id) return;
+
+        if (!helper.validate(value.id)) {
+            throw new ValidationError(this.name, "id", `id must start with '${helper.prefix}' but is '${value.id}'`);
+        }
+    }
+
+    public static from(value: IReference | string): Reference {
+        if (typeof value !== "string") return this.fromAny(value);
+
+        if (value.startsWith("http")) return this.fromUrl(value);
+
+        return this.fromTruncated(value);
+    }
+
+    private static fromTruncated(value: string): Reference {
         const truncatedBuffer = CoreBuffer.fromBase64URL(value);
         const splitted = truncatedBuffer.toUtf8().split("|");
 
@@ -86,7 +102,7 @@ export class Reference extends Serializable implements IReference {
         });
     }
 
-    public static fromUrl(value: string): Reference {
+    private static fromUrl(value: string): Reference {
         const url = new URL(value);
 
         const pathMatch = url.pathname.match(/^(?<baseUrlPath>.*)\/r\/(?<referenceId>[^/]+)$/)?.groups;
@@ -133,21 +149,5 @@ export class Reference extends Serializable implements IReference {
             algorithm,
             secretKey: CoreBuffer.fromBase64URL(secretKey)
         });
-    }
-
-    protected static validateId(value: any, helper: CoreIdHelper): void {
-        if (!value?.id) return;
-
-        if (!helper.validate(value.id)) {
-            throw new ValidationError(this.name, "id", `id must start with '${helper.prefix}' but is '${value.id}'`);
-        }
-    }
-
-    public static from(value: IReference | string): Reference {
-        if (typeof value !== "string") return this.fromAny(value);
-
-        if (value.startsWith("http")) return this.fromUrl(value);
-
-        return this.fromTruncated(value);
     }
 }
