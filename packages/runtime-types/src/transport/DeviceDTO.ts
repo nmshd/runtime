@@ -3,7 +3,7 @@ export interface DeviceDTO {
     isAdmin: boolean;
     publicKey?: string;
     certificate?: string;
-    name: string;
+    name?: string;
     description?: string;
     createdAt: string;
     createdByDevice: string;

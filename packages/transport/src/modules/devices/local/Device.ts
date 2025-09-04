@@ -21,7 +21,7 @@ export interface IDevice extends ICoreSynchronizable {
     isAdmin?: boolean;
     publicKey?: ICryptoSignaturePublicKey;
     certificate?: string;
-    name: string;
+    name?: string;
     description?: string;
     createdAt: CoreDate;
     createdByDevice: CoreId;
@@ -65,9 +65,9 @@ export class Device extends CoreSynchronizable implements IDevice {
     @serialize()
     public certificate?: string;
 
-    @validate()
+    @validate({ nullable: true })
     @serialize()
-    public name: string;
+    public name?: string;
 
     @validate({ nullable: true })
     @serialize()
