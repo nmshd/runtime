@@ -21,7 +21,7 @@ export class DeviceController extends TransportController {
         return this.device.publicKey;
     }
 
-    public get name(): string {
+    public get name(): string | undefined {
         return this.device.name;
     }
 

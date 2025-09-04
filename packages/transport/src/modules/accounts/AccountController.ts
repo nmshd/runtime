@@ -115,7 +115,7 @@ export class AccountController {
     }
 
     @log()
-    public async init(deviceSharedSecret?: DeviceSharedSecret): Promise<AccountController> {
+    public async init(deviceSharedSecret?: DeviceSharedSecret, deviceName?: string): Promise<AccountController> {
         this.info = await this.db.getMap("AccountInfo");
         this.unpushedDatawalletModifications = await this.db.getCollection(DbCollectionName.UnpushedDatawalletModifications);
 
@@ -140,14 +140,14 @@ export class AccountController {
 
                 // Identity creation
                 this._log.trace("No account information found. Creating new account...");
-                const result = await this.createIdentityAndDevice();
+                const result = await this.createIdentityAndDevice(deviceName);
 
                 identityCreated = true;
                 device = result.device;
                 this.deviceAuthClient = new DeviceAuthClient(this.config, this.authenticator, this.transport.correlator);
             } else {
                 // Device Onboarding
-                device = await this.onboardDevice(deviceSharedSecret);
+                device = await this.onboardDevice(deviceSharedSecret, deviceName);
                 deviceUpdated = true;
             }
         } else if (!deviceSharedSecret && availableIdentityDoc && availableDeviceDoc) {
@@ -256,7 +256,7 @@ export class AccountController {
     }
 
     @log()
-    private async createIdentityAndDevice(): Promise<{ identity: Identity; device: Device }> {
+    private async createIdentityAndDevice(deviceName?: string): Promise<{ identity: Identity; device: Device }> {
         const [identityKeypair, devicePwdD1, deviceKeypair, privBaseShared, privBaseDevice] = await Promise.all([
             // Generate identity keypair
             CoreCrypto.generateSignatureKeypair(),
@@ -319,7 +319,7 @@ export class AccountController {
             createdAt: CoreDate.from(createdIdentity.createdAt),
             createdByDevice: deviceId,
             id: deviceId,
-            name: "Device 1",
+            name: deviceName,
             lastLoginAt: CoreDate.utc(),
             operatingSystem: deviceInfo.operatingSystem,
             publicKey: deviceKeypair.publicKey,
@@ -374,7 +374,7 @@ export class AccountController {
         return { identity, device };
     }
 
-    public async onboardDevice(deviceSharedSecret: DeviceSharedSecret): Promise<Device> {
+    public async onboardDevice(deviceSharedSecret: DeviceSharedSecret, deviceName?: string): Promise<Device> {
         this._log.trace("Onboarding device for existing identity...");
         const [devicePwdDn, deviceKeypair, deviceInfo, privBaseDevice] = await Promise.all([
             // Generate strong device password
@@ -388,7 +388,7 @@ export class AccountController {
 
         const device = Device.from({
             id: deviceSharedSecret.id,
-            name: deviceSharedSecret.name ?? "",
+            name: deviceName ?? deviceSharedSecret.name,
             description: deviceSharedSecret.description,
             lastLoginAt: CoreDate.utc(),
             createdAt: deviceSharedSecret.createdAt,
