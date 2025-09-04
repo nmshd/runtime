@@ -9,9 +9,9 @@ export interface ISendDeviceParameters extends ISerializable {
 
 @type("SendDeviceParameters")
 export class SendDeviceParameters extends Serializable implements ISendDeviceParameters {
-    @validate()
+    @validate({ nullable: true })
     @serialize()
-    public name: string;
+    public name?: string;
 
     @validate({ nullable: true })
     @serialize()

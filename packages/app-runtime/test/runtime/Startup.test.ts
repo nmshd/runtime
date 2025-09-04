@@ -53,7 +53,7 @@ describe("Runtime Startup", function () {
     });
 
     test("should create an account", async function () {
-        localAccount = await runtime.accountServices.createAccount("Profil 1");
+        localAccount = await runtime.accountServices.createAccount("aProfileName", "aDeviceName");
 
         expect(localAccount).toBeDefined();
     });
@@ -62,6 +62,17 @@ describe("Runtime Startup", function () {
         const selectedAccount = await runtime.selectAccount(localAccount.id);
         expect(selectedAccount).toBeDefined();
         expect(selectedAccount.account.id.toString()).toBe(localAccount.id.toString());
+    });
+
+    test("should have set the device name", async function () {
+        const selectedAccount = await runtime.selectAccount(localAccount.id);
+        expect(selectedAccount).toBeDefined();
+
+        const devicesResult = await selectedAccount.transportServices.devices.getDevices();
+
+        const devices = devicesResult.value;
+        expect(devices).toHaveLength(1);
+        expect(devices[0].name).toBe("aDeviceName");
     });
 });
 

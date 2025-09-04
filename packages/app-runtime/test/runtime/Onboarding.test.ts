@@ -100,4 +100,21 @@ describe("Onboarding", function () {
         const onboardResult = await onboardingRuntime.accountServices.onboardAccount(deviceOnboardingDTO);
         expect(onboardResult.address).toBe((await services.transportServices.account.getIdentityInfo()).value.address);
     });
+
+    test("should store the device name during onboarding", async function () {
+        const createDeviceResult = await services.transportServices.devices.createDevice({});
+        const onboardingInfoResult = await services.transportServices.devices.getDeviceOnboardingInfo({ id: createDeviceResult.value.id });
+
+        const result = await onboardingRuntime.accountServices.onboardAccount(onboardingInfoResult.value, undefined, "aDeviceName");
+        expect(result.address).toBe((await services.transportServices.account.getIdentityInfo()).value.address);
+
+        const services2 = await onboardingRuntime.getServices(result.id);
+        const devicesResult = await services2.transportServices.devices.getDevices();
+        const devices = devicesResult.value;
+        expect(devices.find((d) => d.isCurrentDevice)!.name).toBe("aDeviceName");
+
+        await services.transportServices.account.syncDatawallet();
+        const devicesAfterSync = (await services.transportServices.devices.getDevices()).value;
+        expect(devicesAfterSync.find((d) => d.id === createDeviceResult.value.id)!.name).toBe("aDeviceName");
+    });
 });
