@@ -272,10 +272,10 @@ describe("ProposeAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         expect(resultItem2.content.value["@type"]).toBe("Surname");
         expect((resultItem2.content.value as SurnameJSON).value).toBe("Weigl");
 
-        const givenNameRepositoryResult = await consumptionServices2.attributes.getAttributes({
+        const givenNameResult = await consumptionServices2.attributes.getAttributes({
             query: { "@type": "OwnIdentityAttribute", "content.value.@type": "GivenName" }
         });
-        expect(givenNameRepositoryResult.value).toHaveLength(1);
+        expect(givenNameResult.value).toHaveLength(1);
     });
 
     test("check the MessageDVO for the recipient after acceptance", async () => {
@@ -343,16 +343,16 @@ describe("ProposeAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         expect((responseItem.attribute.content.value as GivenNameJSON).value).toBe("Marlene");
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
-        const givenNameRepositoryResult = await consumptionServices2.attributes.getAttributes({
+        const givenNameResult = await consumptionServices2.attributes.getAttributes({
             query: {
                 "@type": "OwnIdentityAttribute",
                 "content.value.@type": "GivenName"
             }
         });
-        expect(givenNameRepositoryResult.value).toHaveLength(1);
+        expect(givenNameResult.value).toHaveLength(1);
 
-        const surnameRepositoryResult = await consumptionServices2.attributes.getAttributes({ query: { "@type": "OwnIdentityAttribute", "content.value.@type": "Surname" } });
-        expect(surnameRepositoryResult.value).toHaveLength(2);
+        const surnameResult = await consumptionServices2.attributes.getAttributes({ query: { "@type": "OwnIdentityAttribute", "content.value.@type": "Surname" } });
+        expect(surnameResult.value).toHaveLength(2);
 
         const givenNameShareResult = await consumptionServices2.attributes.getAttributes({
             query: { "content.value.@type": "GivenName", "forwardedSharingInfos.peer": dvo.createdBy.id }

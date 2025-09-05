@@ -793,12 +793,12 @@ describe(CanCreateOwnIdentityAttributeUseCase.name, () => {
         });
     });
 
-    test("should allow to create a OwnIdentityAttribute", async () => {
+    test("should allow to create an OwnIdentityAttribute", async () => {
         const result = await services1.consumption.attributes.canCreateOwnIdentityAttribute(canCreateOwnIdentityAttributeRequest);
         expect(result.value.isSuccess).toBe(true);
     });
 
-    test("should not allow to create a OwnIdentityAttribute duplicate", async () => {
+    test("should not allow to create an OwnIdentityAttribute duplicate", async () => {
         const ownIdentityAttribute = (await services1.consumption.attributes.createOwnIdentityAttribute(canCreateOwnIdentityAttributeRequest)).value;
 
         const result = await services1.consumption.attributes.canCreateOwnIdentityAttribute(canCreateOwnIdentityAttributeRequest);
@@ -812,7 +812,7 @@ describe(CanCreateOwnIdentityAttributeUseCase.name, () => {
         expect(result.value.code).toBe("error.runtime.attributes.cannotCreateDuplicateOwnIdentityAttribute");
     });
 
-    test("should not allow to create a OwnIdentityAttribute if there exists a duplicate after trimming", async () => {
+    test("should not allow to create an OwnIdentityAttribute if there exists a duplicate after trimming", async () => {
         const canCreateUntrimmedOwnIdentityAttributeRequest: CanCreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
@@ -894,7 +894,7 @@ describe(CanCreateOwnIdentityAttributeUseCase.name, () => {
         expect(result.value.isSuccess).toBe(true);
     });
 
-    test("should allow to create a OwnIdentityAttribute duplicate of a predecessor", async () => {
+    test("should allow to create an OwnIdentityAttribute duplicate of a predecessor", async () => {
         const predecessor = await services1.consumption.attributes.createOwnIdentityAttribute(canCreateOwnIdentityAttributeRequest);
         await services1.consumption.attributes.succeedOwnIdentityAttribute({
             predecessorId: predecessor.value.id,
@@ -910,7 +910,7 @@ describe(CanCreateOwnIdentityAttributeUseCase.name, () => {
         expect(result.value.isSuccess).toBe(true);
     });
 
-    test("should allow to create a OwnIdentityAttribute that is the same as an existing OwnIdentityAttribute without an optional property", async () => {
+    test("should allow to create an OwnIdentityAttribute that is the same as an existing OwnIdentityAttribute without an optional property", async () => {
         const createAttributeWithOptionalPropertyRequest: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
@@ -948,7 +948,7 @@ describe(CanCreateOwnIdentityAttributeUseCase.name, () => {
         expect(result.value.isSuccess).toBe(true);
     });
 
-    test("should not allow to create a OwnIdentityAttribute with invalid tags", async () => {
+    test("should not allow to create an OwnIdentityAttribute with invalid tags", async () => {
         const canCreateAttributeRequest: CanCreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
@@ -970,7 +970,7 @@ describe(CanCreateOwnIdentityAttributeUseCase.name, () => {
 });
 
 describe(CreateOwnIdentityAttributeUseCase.name, () => {
-    test("should create a repository attribute", async () => {
+    test("should create an OwnIdentityAttribute", async () => {
         const request: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
@@ -988,7 +988,7 @@ describe(CreateOwnIdentityAttributeUseCase.name, () => {
         await services1.eventBus.waitForEvent(AttributeCreatedEvent, (e) => e.data.id === attribute.id);
     });
 
-    test("should trim a repository attribute before creation", async () => {
+    test("should trim an OwnIdentityAttribute before creation", async () => {
         const request: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
@@ -1006,7 +1006,7 @@ describe(CreateOwnIdentityAttributeUseCase.name, () => {
         await services1.eventBus.waitForEvent(AttributeCreatedEvent, (e) => e.data.id === attribute.id);
     });
 
-    test("should create a OwnIdentityAttribute that is the default if it is the first of its value type", async () => {
+    test("should create an OwnIdentityAttribute that is the default if it is the first of its value type", async () => {
         const request: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
@@ -1020,7 +1020,7 @@ describe(CreateOwnIdentityAttributeUseCase.name, () => {
         expect(attribute.isDefault).toBe(true);
     });
 
-    test("should create a OwnIdentityAttribute that is not the default if it is not the first of its value type", async () => {
+    test("should create an OwnIdentityAttribute that is not the default if it is not the first of its value type", async () => {
         const request: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
@@ -1160,7 +1160,7 @@ describe(CreateOwnIdentityAttributeUseCase.name, () => {
         );
     });
 
-    test("should not create a OwnIdentityAttribute if there would be a duplicate after trimming", async () => {
+    test("should not create an OwnIdentityAttribute if there would be a duplicate after trimming", async () => {
         const request: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
@@ -1220,7 +1220,7 @@ describe(CreateOwnIdentityAttributeUseCase.name, () => {
         expect(result2).toBeSuccessful();
     });
 
-    test("should create a OwnIdentityAttribute that is the same as an existing OwnIdentityAttribute without an optional property", async () => {
+    test("should create an OwnIdentityAttribute that is the same as an existing OwnIdentityAttribute without an optional property", async () => {
         const request: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
@@ -1321,7 +1321,7 @@ describe(CreateOwnIdentityAttributeUseCase.name, () => {
         );
     });
 
-    test("should create a OwnIdentityAttribute even if the tags are duplicates", async () => {
+    test("should create an OwnIdentityAttribute even if the tags are duplicates", async () => {
         const request: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
@@ -1577,7 +1577,7 @@ describe(ShareOwnIdentityAttributeUseCase.name, () => {
 });
 
 describe(SucceedOwnIdentityAttributeUseCase.name, () => {
-    test("should succeed a repository attribute", async () => {
+    test("should succeed an OwnIdentityAttribute", async () => {
         const createAttributeRequest: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
@@ -1609,7 +1609,7 @@ describe(SucceedOwnIdentityAttributeUseCase.name, () => {
         });
     });
 
-    test("should trim the successor of a repository attribute", async () => {
+    test("should trim the successor of an OwnIdentityAttribute", async () => {
         const createAttributeRequest: CreateOwnIdentityAttributeRequest = {
             content: {
                 value: {
