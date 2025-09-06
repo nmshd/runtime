@@ -41,14 +41,14 @@ describe("Onboarding", function () {
             passwordProtection: { password: "aPassword" }
         });
 
-        const token = await onboardingRuntime.anonymousServices.tokens.loadPeerToken({ reference: recoveryKitResponse.value.truncatedReference, password: "aPassword" });
+        const token = await onboardingRuntime.anonymousServices.tokens.loadPeerToken({ reference: recoveryKitResponse.value.reference.truncated, password: "aPassword" });
         const deviceOnboardingDTO = DeviceMapper.toDeviceOnboardingInfoDTO(DeviceSharedSecret.from(token.value.content.sharedSecret));
 
         const result = await onboardingRuntime.accountServices.onboardAccount(deviceOnboardingDTO);
         expect(result.address!).toBe((await services.transportServices.account.getIdentityInfo()).value.address);
 
         const anonymousTokenResponse = await onboardingRuntime.anonymousServices.tokens.loadPeerToken({
-            reference: recoveryKitResponse.value.truncatedReference,
+            reference: recoveryKitResponse.value.reference.truncated,
             password: "aPassword"
         });
         expect(anonymousTokenResponse).toBeAnError(
@@ -65,7 +65,7 @@ describe("Onboarding", function () {
             passwordProtection: { password: "aPassword" }
         });
 
-        const token = await onboardingRuntime.anonymousServices.tokens.loadPeerToken({ reference: recoveryKitResponse.value.truncatedReference, password: "aPassword" });
+        const token = await onboardingRuntime.anonymousServices.tokens.loadPeerToken({ reference: recoveryKitResponse.value.reference.truncated, password: "aPassword" });
         const deviceOnboardingDTO = DeviceMapper.toDeviceOnboardingInfoDTO(DeviceSharedSecret.from(token.value.content.sharedSecret));
 
         const result = await onboardingRuntime.accountServices.onboardAccount(deviceOnboardingDTO);

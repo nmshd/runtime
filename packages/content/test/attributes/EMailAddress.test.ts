@@ -11,7 +11,7 @@ describe("Test valid EMailAddresses", () => {
 });
 
 describe("Test invalid EMailAddresses", () => {
-    const invalidEMailAddresses = ["Hugo Becker@gmx.de", "Becker@gmx", "Becker@gmx-.de", "Becker@gmx-.de", ".Becker@gmx.de", "test@.address", "test@test..address"];
+    const invalidEMailAddresses = ["aGivenName aSurname@gmx.de", "aSurname@gmx", "aSurname@gmx-.de", "aSurname@gmx-.de", ".aSurname@gmx.de", "test@.address", "test@test..address"];
 
     test.each(invalidEMailAddresses)("EMail %s is recognized as invalid", (email) => {
         const invalidEMailAddressCall = () => {

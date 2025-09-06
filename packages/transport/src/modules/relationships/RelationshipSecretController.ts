@@ -18,7 +18,7 @@ import { CoreUtil } from "../../core/CoreUtil";
 import { TransportCoreErrors } from "../../core/TransportCoreErrors";
 import { TransportIds } from "../../core/TransportIds";
 import { AccountController } from "../accounts/AccountController";
-import { CachedRelationshipTemplate } from "../relationshipTemplates/local/CachedRelationshipTemplate";
+import { RelationshipTemplate } from "../relationshipTemplates/local/RelationshipTemplate";
 import { RelationshipTemplatePublicKey } from "../relationshipTemplates/transmission/RelationshipTemplatePublicKey";
 import { SecretContainerCipher } from "../secrets/data/SecretContainerCipher";
 import { SecretController } from "../secrets/SecretController";
@@ -54,7 +54,7 @@ export class RelationshipSecretController extends SecretController {
         return secret;
     }
 
-    public async createRequestorSecrets(template: CachedRelationshipTemplate, relationshipSecretId: CoreId): Promise<CryptoRelationshipPublicRequest> {
+    public async createRequestorSecrets(template: RelationshipTemplate, relationshipSecretId: CoreId): Promise<CryptoRelationshipPublicRequest> {
         const secrets = await CryptoRelationshipRequestSecrets.fromPeer(template.templateKey, template.identity.publicKey);
         await this.storeSecret(secrets, relationshipSecretId.toString(), "");
 
@@ -65,7 +65,7 @@ export class RelationshipSecretController extends SecretController {
     @log()
     public async createTemplatorSecrets(
         relationshipSecretId: CoreId,
-        template: CachedRelationshipTemplate,
+        template: RelationshipTemplate,
         publicRequestCrypto: CryptoRelationshipPublicRequest
     ): Promise<SecretContainerCipher> {
         const templateKeyId = template.templateKey.id.toString();

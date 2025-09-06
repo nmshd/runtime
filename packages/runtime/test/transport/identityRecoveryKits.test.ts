@@ -25,8 +25,8 @@ afterEach(async () => {
     const backupDevices = devices.filter((device) => device.isBackupDevice);
     for (const backupDevice of backupDevices) {
         const matchingTokens = await tokenController.getTokens({
-            "cache.content.@type": "TokenContentDeviceSharedSecret",
-            "cache.content.sharedSecret.id": backupDevice.id.toString()
+            "content.@type": "TokenContentDeviceSharedSecret",
+            "content.sharedSecret.id": backupDevice.id.toString()
         });
 
         for (const matchingToken of matchingTokens) {

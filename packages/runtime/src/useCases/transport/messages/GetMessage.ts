@@ -32,11 +32,7 @@ export class GetMessageUseCase extends UseCase<GetMessageRequest, MessageWithAtt
             return Result.fail(RuntimeErrors.general.recordNotFound(Message));
         }
 
-        if (!message.cache) {
-            return Result.fail(RuntimeErrors.general.cacheEmpty(Message, message.id.toString()));
-        }
-
-        const attachments = await Promise.all(message.cache.attachments.map((id) => this.fileController.getFile(id)));
+        const attachments = await Promise.all(message.attachments.map((id) => this.fileController.getFile(id)));
         if (attachments.some((f) => !f)) {
             throw new Error("A file could not be fetched.");
         }

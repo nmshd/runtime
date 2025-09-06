@@ -1,6 +1,5 @@
 import { QueryTranslator } from "@js-soft/docdb-querytranslator";
 import {
-    AbstractAttributeJSON,
     IdentityAttribute,
     IdentityAttributeJSON,
     IdentityAttributeQuery,
@@ -11,7 +10,6 @@ import {
     RelationshipAttributeQuery,
     ThirdPartyRelationshipAttributeQuery
 } from "@nmshd/content";
-import { CoreDate } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionError } from "../../../consumption/ConsumptionError";
 import { LocalAttribute } from "./LocalAttribute";
@@ -26,8 +24,6 @@ export class IdentityAttributeQueryTranslator {
         whitelist: {
             [nameof<IIdentityAttributeQuery>((x) => x.tags)]: true,
             [nameof<IIdentityAttributeQuery>((x) => x.valueType)]: true,
-            [nameof<IIdentityAttributeQuery>((x) => x.validFrom)]: true,
-            [nameof<IIdentityAttributeQuery>((x) => x.validTo)]: true,
             attributeType: true
         },
         alias: {
@@ -52,26 +48,6 @@ export class IdentityAttributeQueryTranslator {
                         $contains: t
                     }
                 }));
-            },
-            // validFrom
-            [nameof<IIdentityAttributeQuery>((x) => x.validFrom)]: (query: any, input: any) => {
-                if (!input) {
-                    return;
-                }
-                const validFromUtcString = CoreDate.from(input).toISOString();
-                query[`${nameof<LocalAttribute>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.validFrom)}`] = {
-                    $gte: validFromUtcString
-                };
-            },
-            // validTo
-            [nameof<IIdentityAttributeQuery>((x) => x.validTo)]: (query: any, input: any) => {
-                if (!input) {
-                    return;
-                }
-                const validToUtcString = CoreDate.from(input).toISOString();
-                query[`${nameof<LocalAttribute>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.validTo)}`] = {
-                    $lte: validToUtcString
-                };
             }
         }
     });
@@ -85,8 +61,6 @@ export class RelationshipAttributeQueryTranslator {
     private static readonly translator = new QueryTranslator({
         whitelist: {
             [nameof<IRelationshipAttributeQuery>((x) => x.key)]: true,
-            [nameof<IRelationshipAttributeQuery>((x) => x.validFrom)]: true,
-            [nameof<IRelationshipAttributeQuery>((x) => x.validTo)]: true,
             [nameof<IRelationshipAttributeQuery>((x) => x.owner)]: true,
             attributeType: true
         },
@@ -97,28 +71,6 @@ export class RelationshipAttributeQueryTranslator {
             attributeType: `${nameof<LocalAttribute>((x) => x.content)}.@type`,
             // owner
             [nameof<IRelationshipAttributeQuery>((x) => x.owner)]: `${nameof<LocalAttribute>((x) => x.content)}.${nameof<RelationshipAttribute>((x) => x.owner)}`
-        },
-        custom: {
-            // validFrom
-            [nameof<IRelationshipAttributeQuery>((x) => x.validFrom)]: (query: any, input: any) => {
-                if (!input) {
-                    return;
-                }
-                const validFromUtcString = CoreDate.from(input).toISOString();
-                query[`${nameof<LocalAttribute>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.validFrom)}`] = {
-                    $gte: validFromUtcString
-                };
-            },
-            // validTo
-            [nameof<IRelationshipAttributeQuery>((x) => x.validTo)]: (query: any, input: any) => {
-                if (!input) {
-                    return;
-                }
-                const validToUtcString = CoreDate.from(input).toISOString();
-                query[`${nameof<LocalAttribute>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.validTo)}`] = {
-                    $lte: validToUtcString
-                };
-            }
         }
     });
 }
@@ -131,8 +83,6 @@ export class ThirdPartyRelationshipAttributeQueryTranslator {
     private static readonly translator = new QueryTranslator({
         whitelist: {
             [nameof<IThirdPartyRelationshipAttributeQuery>((x) => x.key)]: true,
-            [nameof<IThirdPartyRelationshipAttributeQuery>((x) => x.validFrom)]: true,
-            [nameof<IThirdPartyRelationshipAttributeQuery>((x) => x.validTo)]: true,
             [nameof<IThirdPartyRelationshipAttributeQuery>((x) => x.owner)]: true,
             [nameof<IThirdPartyRelationshipAttributeQuery>((x) => x.thirdParty)]: true,
             attributeType: true
@@ -146,28 +96,6 @@ export class ThirdPartyRelationshipAttributeQueryTranslator {
             [nameof<IThirdPartyRelationshipAttributeQuery>((x) => x.owner)]: `${nameof<LocalAttribute>((x) => x.content)}.${nameof<RelationshipAttribute>((x) => x.owner)}`,
             // peer
             [nameof<IThirdPartyRelationshipAttributeQuery>((x) => x.thirdParty)]: `${nameof<LocalAttribute>((x) => x.shareInfo)}.${nameof<LocalAttributeShareInfo>((x) => x.peer)}`
-        },
-        custom: {
-            // validFrom
-            [nameof<IThirdPartyRelationshipAttributeQuery>((x) => x.validFrom)]: (query: any, input: any) => {
-                if (!input) {
-                    return;
-                }
-                const validFromUtcString = CoreDate.from(input).toISOString();
-                query[`${nameof<LocalAttribute>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.validFrom)}`] = {
-                    $gte: validFromUtcString
-                };
-            },
-            // validTo
-            [nameof<IThirdPartyRelationshipAttributeQuery>((x) => x.validTo)]: (query: any, input: any) => {
-                if (!input) {
-                    return;
-                }
-                const validToUtcString = CoreDate.from(input).toISOString();
-                query[`${nameof<LocalAttribute>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.validTo)}`] = {
-                    $lte: validToUtcString
-                };
-            }
         }
     });
 }
