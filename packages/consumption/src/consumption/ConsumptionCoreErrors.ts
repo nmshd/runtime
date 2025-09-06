@@ -52,13 +52,6 @@ class Attributes {
         );
     }
 
-    public cannotSucceedChildOfComplexAttribute(parentId: string | CoreId) {
-        return new CoreError(
-            "error.consumption.attributes.cannotSucceedChildOfComplexAttribute",
-            `The Attribute you want to succeed is a child Attribute of a complex Attribute (id: '${parentId}'), and cannot be succeeded on its own. Instead, succeed the parent which will implicitly succeed all its children.`
-        );
-    }
-
     public successorMustNotYetExist() {
         return new CoreError(
             "error.consumption.attributes.successorMustNotYetExist",
@@ -188,10 +181,6 @@ class Attributes {
             "error.consumption.attributes.cannotSucceedAttributesWithASuccessor",
             `The Attribute you want to succeed has a successor (id: ${successorId}). You cannot succeed Attributes with a successor. Instead, succeed the successor.`
         );
-    }
-
-    public invalidParentSuccessor(parentSuccessorId: string | CoreId) {
-        return new CoreError("error.consumption.attributes.invalidParentSuccessor", `The complex parent successor (id: '${parentSuccessorId}') does not exist.`);
     }
 
     public cannotSucceedAttributesWithDeletionInfo() {

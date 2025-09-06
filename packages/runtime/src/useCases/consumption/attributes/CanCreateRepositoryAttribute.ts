@@ -1,6 +1,7 @@
+import { ServalError } from "@js-soft/ts-serval";
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController } from "@nmshd/consumption";
-import { AttributeValues } from "@nmshd/content";
+import { AttributeValues, IdentityAttribute } from "@nmshd/content";
 import { AccountController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationResult } from "../../common";
@@ -51,6 +52,14 @@ export class CanCreateRepositoryAttributeUseCase extends UseCase<CanCreateReposi
         if (attributeValueValidationResult.isInvalid()) {
             const failures = attributeValueValidationResult.getFailures();
             return Result.ok({ isSuccess: false, code: failures[0].error.code, message: failures[0].error.message });
+        }
+
+        try {
+            IdentityAttribute.from({ owner: "", value: request.content.value, tags: request.content.tags });
+        } catch (e: any) {
+            if (!(e instanceof ServalError)) throw e;
+
+            return Result.ok({ isSuccess: false, code: "error.runtime.validation.invalidPropertyValue", message: e.message });
         }
 
         const repositoryAttributeDuplicate = await this.attributesController.getRepositoryAttributeWithSameValue(request.content.value);
