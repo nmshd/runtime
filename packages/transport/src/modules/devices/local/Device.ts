@@ -20,7 +20,7 @@ export interface DeviceInfo {
 export interface IDevice extends ICoreSynchronizable {
     isAdmin?: boolean;
     publicKey?: ICryptoSignaturePublicKey;
-    name: string;
+    name?: string;
     description?: string;
     createdAt: CoreDate;
     createdByDevice: CoreId;
@@ -59,9 +59,9 @@ export class Device extends CoreSynchronizable implements IDevice {
     @serialize()
     public publicKey?: CryptoSignaturePublicKey;
 
-    @validate()
+    @validate({ nullable: true })
     @serialize()
-    public name: string;
+    public name?: string;
 
     @validate({ nullable: true })
     @serialize()

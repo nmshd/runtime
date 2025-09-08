@@ -47,6 +47,25 @@ describe("Anonymous tokens", () => {
         expect(result).toBeAnError(/.*/, "error.transport.general.notIntendedForYou");
     });
 
+    test("should create an empty token", async () => {
+        const result = await noLoginRuntime.anonymousServices.tokens.createEmptyToken();
+        expect(result).toBeSuccessful();
+
+        const token = result.value;
+        expect(token.passwordProtection.password).toBeDefined();
+        expect(token.passwordProtection.passwordIsPin).toBeUndefined();
+        expect(token.passwordProtection.passwordLocationIndicator).toBeUndefined();
+    });
+
+    test("should get a proper error when trying to load an empty token", async () => {
+        const emptyTokenResult = await noLoginRuntime.anonymousServices.tokens.createEmptyToken();
+        expect(emptyTokenResult).toBeSuccessful();
+
+        const emptyToken = emptyTokenResult.value;
+        const result = await noLoginRuntime.anonymousServices.tokens.loadPeerToken({ reference: emptyToken.reference.truncated });
+        expect(result).toBeAnError(/.*/, "error.transport.tokens.emptyToken");
+    });
+
     describe("Password-protected tokens", () => {
         let tokenReference: string;
 

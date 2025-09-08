@@ -46,12 +46,12 @@ describe("Reference", () => {
         });
 
         expect(reference.toUrl("anAppName")).toBe(
-            "https://backbone.example.com/r/ANID1234?app=anAppName#M3xsZXJKeVg4eWRKREVYb3dxMlBNTW50UlhYQTI3d2dISllBX0JqbkZ4NTVZfDEyMzR8cHcmWVRFMllubDBaWE5zYjI1bmMyRnNkQT09"
+            "https://backbone.example.com/r/ANID1234?app=anAppName#M3xsZXJKeVg4eWRKREVYb3dxMlBNTW50UlhYQTI3d2dISllBX0JqbkZ4NTVZfDEyMzR8cHcmWVRFMllubDBaWE5zYjI1bmMyRnNkQT09JiY"
         );
     });
 
-    test("fromUrl", () => {
-        const reference = Reference.fromUrl("https://backbone.example.com/r/ANID1234#M3xsZXJKeVg4eWRKREVYb3dxMlBNTW50UlhYQTI3d2dISllBX0JqbkZ4NTVZfHw");
+    test("from with a url reference", () => {
+        const reference = Reference.from("https://backbone.example.com/r/ANID1234#M3xsZXJKeVg4eWRKREVYb3dxMlBNTW50UlhYQTI3d2dISllBX0JqbkZ4NTVZfHw");
 
         expect(reference).toBeInstanceOf(Reference);
 
@@ -63,8 +63,8 @@ describe("Reference", () => {
         expect(reference.passwordProtection).toBeUndefined();
     });
 
-    test("fromUrl with all fields used", () => {
-        const reference = Reference.fromUrl(
+    test("from with a url reference with all fields used", () => {
+        const reference = Reference.from(
             "https://backbone.example.com/r/ANID1234?app=anAppName#M3xsZXJKeVg4eWRKREVYb3dxMlBNTW50UlhYQTI3d2dISllBX0JqbkZ4NTVZfDEyMzR8cHcmWVRFMllubDBaWE5zYjI1bmMyRnNkQT09"
         );
 
@@ -80,8 +80,8 @@ describe("Reference", () => {
         expect(reference.passwordProtection!.salt.toUtf8()).toBe("a16byteslongsalt");
     });
 
-    test("fromUrl with multiple /r/", () => {
-        const reference = Reference.fromUrl("https://backbone.example.com/r/anotherPathSegment/r/r/ANID1234#M3xsZXJKeVg4eWRKREVYb3dxMlBNTW50UlhYQTI3d2dISllBX0JqbkZ4NTVZfHw");
+    test("from with a url reference with multiple /r/", () => {
+        const reference = Reference.from("https://backbone.example.com/r/anotherPathSegment/r/r/ANID1234#M3xsZXJKeVg4eWRKREVYb3dxMlBNTW50UlhYQTI3d2dISllBX0JqbkZ4NTVZfHw");
 
         expect(reference).toBeInstanceOf(Reference);
 
