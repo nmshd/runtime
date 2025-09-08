@@ -106,7 +106,7 @@ describe("ProposeAttributeRequestItemDVO with IdentityAttributeQuery", () => {
             content: {
                 value: {
                     "@type": "GivenName",
-                    value: "Marlene"
+                    value: "aGivenName"
                 }
             }
         });
@@ -115,7 +115,7 @@ describe("ProposeAttributeRequestItemDVO with IdentityAttributeQuery", () => {
             content: {
                 value: {
                     "@type": "Surname",
-                    value: "Weigl"
+                    value: "aSurname"
                 }
             }
         });
@@ -129,7 +129,7 @@ describe("ProposeAttributeRequestItemDVO with IdentityAttributeQuery", () => {
                         }),
                         attribute: IdentityAttribute.from({
                             owner: CoreAddress.from(""),
-                            value: GivenName.from("Theodor")
+                            value: GivenName.from("anotherGivenName")
                         })
                     }).toJSON(),
                     ProposeAttributeRequestItem.from({
@@ -139,7 +139,7 @@ describe("ProposeAttributeRequestItemDVO with IdentityAttributeQuery", () => {
                         }),
                         attribute: IdentityAttribute.from({
                             owner: CoreAddress.from(""),
-                            value: Surname.from("Weigl-Rostock")
+                            value: Surname.from("anotherSurname")
                         })
                     }).toJSON()
                 ]
@@ -188,7 +188,7 @@ describe("ProposeAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         expect(requestItemDVO.attribute.type).toBe("DraftIdentityAttributeDVO");
         const value = requestItemDVO.attribute.value as AbstractStringJSON;
         expect(value["@type"]).toBe("GivenName");
-        expect(value.value).toBe("Theodor");
+        expect(value.value).toBe("anotherGivenName");
         expect(requestItemDVO.attribute.renderHints.editType).toBe("InputLike");
         expect(requestItemDVO.attribute.valueHints.max).toBe(100);
         expect(requestItemDVO.attribute.isDraft).toBe(true);
@@ -222,7 +222,7 @@ describe("ProposeAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         expect(requestItemDVO.attribute.type).toBe("DraftIdentityAttributeDVO");
         const givenNameValue = requestItemDVO.attribute.value as AbstractStringJSON;
         expect(givenNameValue["@type"]).toBe("GivenName");
-        expect(givenNameValue.value).toBe("Theodor");
+        expect(givenNameValue.value).toBe("anotherGivenName");
         expect(requestItemDVO.attribute.renderHints.editType).toBe("InputLike");
         expect(requestItemDVO.attribute.valueHints.max).toBe(100);
         expect(requestItemDVO.attribute.isDraft).toBe(true);
@@ -241,7 +241,7 @@ describe("ProposeAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         expect(resultItem.type).toBe("RepositoryAttributeDVO");
         expect(resultItem.content["@type"]).toBe("IdentityAttribute");
         expect(resultItem.content.value["@type"]).toBe("GivenName");
-        expect((resultItem.content.value as GivenNameJSON).value).toBe("Marlene");
+        expect((resultItem.content.value as GivenNameJSON).value).toBe("aGivenName");
 
         requestItemDVO = dvo.request.content.items[1] as ProposeAttributeRequestItemDVO;
         expect(requestItemDVO.type).toBe("ProposeAttributeRequestItemDVO");
@@ -251,7 +251,7 @@ describe("ProposeAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         expect(requestItemDVO.attribute.type).toBe("DraftIdentityAttributeDVO");
         const value = requestItemDVO.attribute.value as AbstractStringJSON;
         expect(value["@type"]).toBe("Surname");
-        expect(value.value).toBe("Weigl-Rostock");
+        expect(value.value).toBe("anotherSurname");
         expect(requestItemDVO.attribute.renderHints.editType).toBe("InputLike");
         expect(requestItemDVO.attribute.valueHints.max).toBe(100);
         expect(requestItemDVO.attribute.isDraft).toBe(true);
@@ -270,7 +270,7 @@ describe("ProposeAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         expect(resultItem2.type).toBe("RepositoryAttributeDVO");
         expect(resultItem2.content["@type"]).toBe("IdentityAttribute");
         expect(resultItem2.content.value["@type"]).toBe("Surname");
-        expect((resultItem2.content.value as SurnameJSON).value).toBe("Weigl");
+        expect((resultItem2.content.value as SurnameJSON).value).toBe("aSurname");
 
         const givenNameRepositoryResult = await consumptionServices2.attributes.getAttributes({
             query: { shareInfo: "!", "content.value.@type": "GivenName" }
@@ -319,7 +319,7 @@ describe("ProposeAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         expect(requestItemDVO.attribute.type).toBe("DraftIdentityAttributeDVO");
         const value = requestItemDVO.attribute.value as AbstractStringJSON;
         expect(value["@type"]).toBe("GivenName");
-        expect(value.value).toBe("Theodor");
+        expect(value.value).toBe("anotherGivenName");
         expect(requestItemDVO.attribute.renderHints.editType).toBe("InputLike");
         expect(requestItemDVO.attribute.valueHints.max).toBe(100);
         expect(requestItemDVO.attribute.isDraft).toBe(true);
@@ -340,7 +340,7 @@ describe("ProposeAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         expect(responseItem.attribute.owner).toBe(recipientAddress);
         expect(responseItem.attribute.type).toBe("SharedToPeerAttributeDVO");
         expect(responseItem.attribute.content.value["@type"]).toBe("GivenName");
-        expect((responseItem.attribute.content.value as GivenNameJSON).value).toBe("Marlene");
+        expect((responseItem.attribute.content.value as GivenNameJSON).value).toBe("aGivenName");
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         const givenNameRepositoryResult = await consumptionServices2.attributes.getAttributes({
@@ -361,7 +361,7 @@ describe("ProposeAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         expect(givenNameShareResult.value).toHaveLength(1);
 
         const givenName = givenNameShareResult.value[0].content.value as GivenNameJSON;
-        expect(givenName.value).toBe("Marlene");
+        expect(givenName.value).toBe("aGivenName");
         expect(responseItem.attributeId).toStrictEqual(givenNameShareResult.value[0].id);
 
         const responseItem2 = response!.content.items[1] as ProposeAttributeAcceptResponseItemDVO;
@@ -382,7 +382,7 @@ describe("ProposeAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         expect(surnameShareResult.value[0].id).toBeDefined();
 
         const surname = surnameShareResult.value[0].content.value as SurnameJSON;
-        expect(surname.value).toBe("Weigl-Rostock");
+        expect(surname.value).toBe("anotherSurname");
 
         expect(responseItem2.attributeId).toStrictEqual(surnameShareResult.value[0].id);
         expect(surname.value).toStrictEqual((responseItem2.attribute.content.value as SurnameJSON).value);
@@ -428,7 +428,7 @@ describe("ProposeAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         expect(requestItemDVO.attribute.type).toBe("DraftIdentityAttributeDVO");
         const value = requestItemDVO.attribute.value as AbstractStringJSON;
         expect(value["@type"]).toBe("GivenName");
-        expect(value.value).toBe("Theodor");
+        expect(value.value).toBe("anotherGivenName");
         expect(requestItemDVO.attribute.renderHints.editType).toBe("InputLike");
         expect(requestItemDVO.attribute.valueHints.max).toBe(100);
         expect(requestItemDVO.attribute.isDraft).toBe(true);
@@ -462,7 +462,7 @@ describe("ProposeAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         expect(numberOfGivenNames - baselineNumberOfGivenNames).toBe(1);
         expect(givenNameResult.value[numberOfGivenNames - 1].id).toBeDefined();
         const givenName = givenNameResult.value[numberOfGivenNames - 1].content.value as GivenNameJSON;
-        expect(givenName.value).toBe("Marlene");
+        expect(givenName.value).toBe("aGivenName");
 
         expect(responseItem.attributeId).toStrictEqual(givenNameResult.value[numberOfGivenNames - 1].id);
         expect(givenName.value).toStrictEqual((responseItem.attribute.content.value as GivenNameJSON).value);
@@ -476,7 +476,7 @@ describe("ProposeAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         expect(surnameResult.value[numberOfSurnames - 1].id).toBeDefined();
 
         const surname = surnameResult.value[numberOfSurnames - 1].content.value as SurnameJSON;
-        expect(surname.value).toBe("Weigl-Rostock");
+        expect(surname.value).toBe("anotherSurname");
 
         expect(responseItem2.attributeId).toStrictEqual(surnameResult.value[numberOfSurnames - 1].id);
         expect(surname.value).toStrictEqual((responseItem2.attribute.content.value as SurnameJSON).value);
@@ -519,7 +519,7 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
             content: {
                 value: {
                     "@type": "GivenName",
-                    value: "Theodor"
+                    value: "aGivenName"
                 },
                 tags: ["x:predecessor"]
             }
@@ -533,7 +533,7 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
                 successorContent: {
                     value: {
                         "@type": "GivenName",
-                        value: "Franz"
+                        value: "anotherGivenName"
                     },
                     tags: ["x:successor"]
                 }
@@ -550,7 +550,7 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
                         }),
                         attribute: IdentityAttribute.from({
                             owner: CoreAddress.from(""),
-                            value: GivenName.from("Theodor")
+                            value: GivenName.from("aGivenName")
                         })
                     }).toJSON()
                 ]
@@ -612,14 +612,14 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
         expect(responseItem.predecessor!.owner).toBe(recipientAddress);
         expect(responseItem.predecessor!.type).toBe("SharedToPeerAttributeDVO");
         expect(responseItem.predecessor!.content.value["@type"]).toBe("GivenName");
-        expect((responseItem.predecessor!.content.value as GivenNameJSON).value).toBe("Theodor");
+        expect((responseItem.predecessor!.content.value as GivenNameJSON).value).toBe("aGivenName");
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         expect(responseItem.successor).toBeDefined();
         expect(responseItem.successor.owner).toBe(recipientAddress);
         expect(responseItem.successor.type).toBe("SharedToPeerAttributeDVO");
         expect(responseItem.successor.content.value["@type"]).toBe("GivenName");
-        expect((responseItem.successor.content.value as GivenNameJSON).value).toBe("Franz");
+        expect((responseItem.successor.content.value as GivenNameJSON).value).toBe("anotherGivenName");
 
         const predecessorResult = await consumptionServices2.attributes.getAttributes({
             query: { "content.value.@type": "GivenName", "shareInfo.peer": dvo.createdBy.id, "content.tags": "x:predecessor" }
@@ -628,7 +628,7 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
         expect(predecessorResult.value).toHaveLength(1);
         expect(predecessorResult.value[0].id).toBeDefined();
         const predecessorName = predecessorResult.value[0].content.value as GivenNameJSON;
-        expect(predecessorName.value).toBe("Theodor");
+        expect(predecessorName.value).toBe("aGivenName");
         expect(responseItem.predecessorId).toStrictEqual(predecessorResult.value[0].id);
         expect(predecessorName.value).toStrictEqual((responseItem.predecessor!.content.value as GivenNameJSON).value);
 
@@ -639,7 +639,7 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
         expect(successorResult.value).toHaveLength(1);
         expect(successorResult.value[0].id).toBeDefined();
         const successorName = successorResult.value[0].content.value as GivenNameJSON;
-        expect(successorName.value).toBe("Franz");
+        expect(successorName.value).toBe("anotherGivenName");
         expect(responseItem.successorId).toStrictEqual(successorResult.value[0].id);
         expect(successorName.value).toStrictEqual((responseItem.successor.content.value as GivenNameJSON).value);
 
@@ -690,14 +690,14 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
         expect(responseItem.predecessor!.owner).toBe(recipientAddress);
         expect(responseItem.predecessor!.type).toBe("PeerAttributeDVO");
         expect(responseItem.predecessor!.content.value["@type"]).toBe("GivenName");
-        expect((responseItem.predecessor!.content.value as GivenNameJSON).value).toBe("Theodor");
+        expect((responseItem.predecessor!.content.value as GivenNameJSON).value).toBe("aGivenName");
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         expect(responseItem.successor).toBeDefined();
         expect(responseItem.successor.owner).toBe(recipientAddress);
         expect(responseItem.successor.type).toBe("PeerAttributeDVO");
         expect(responseItem.successor.content.value["@type"]).toBe("GivenName");
-        expect((responseItem.successor.content.value as GivenNameJSON).value).toBe("Franz");
+        expect((responseItem.successor.content.value as GivenNameJSON).value).toBe("anotherGivenName");
 
         const predecessorResult = await consumptionServices1.attributes.getAttributes({
             query: { "content.value.@type": "GivenName", "shareInfo.peer": dvo.request.peer.id, "content.tags": "x:predecessor" }
@@ -706,7 +706,7 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
         expect(predecessorResult.value).toHaveLength(1);
         expect(predecessorResult.value[0].id).toBeDefined();
         const predecessorName = predecessorResult.value[0].content.value as GivenNameJSON;
-        expect(predecessorName.value).toBe("Theodor");
+        expect(predecessorName.value).toBe("aGivenName");
         expect(responseItem.predecessorId).toStrictEqual(predecessorResult.value[0].id);
         expect(predecessorName.value).toStrictEqual((responseItem.predecessor!.content.value as GivenNameJSON).value);
 
@@ -717,7 +717,7 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
         expect(successorResult.value).toHaveLength(1);
         expect(successorResult.value[0].id).toBeDefined();
         const successorName = successorResult.value[0].content.value as GivenNameJSON;
-        expect(successorName.value).toBe("Franz");
+        expect(successorName.value).toBe("anotherGivenName");
         expect(responseItem.successorId).toStrictEqual(successorResult.value[0].id);
         expect(successorName.value).toStrictEqual((responseItem.successor.content.value as GivenNameJSON).value);
     });
@@ -791,7 +791,7 @@ describe("AttributeAlreadySharedAcceptResponseItemDVO with IdentityAttributeQuer
             content: {
                 value: {
                     "@type": "GivenName",
-                    value: "Theodor"
+                    value: "aGivenName"
                 }
             }
         });
@@ -807,7 +807,7 @@ describe("AttributeAlreadySharedAcceptResponseItemDVO with IdentityAttributeQuer
                         }),
                         attribute: IdentityAttribute.from({
                             owner: CoreAddress.from(""),
-                            value: GivenName.from("Theodor")
+                            value: GivenName.from("aGivenName")
                         })
                     }).toJSON()
                 ]
@@ -882,7 +882,7 @@ describe("AttributeAlreadySharedAcceptResponseItemDVO with IdentityAttributeQuer
         expect(responseItem.attribute.owner).toBe(recipientAddress);
         expect(responseItem.attribute.type).toBe("SharedToPeerAttributeDVO");
         expect(responseItem.attribute.content.value["@type"]).toBe("GivenName");
-        expect((responseItem.attribute.content.value as GivenNameJSON).value).toBe("Theodor");
+        expect((responseItem.attribute.content.value as GivenNameJSON).value).toBe("aGivenName");
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         await syncUntilHasMessageWithResponse(transportServices1, recipientMessage.content.id!);
@@ -932,7 +932,7 @@ describe("AttributeAlreadySharedAcceptResponseItemDVO with IdentityAttributeQuer
         expect(responseItem.attribute.owner).toBe(recipientAddress);
         expect(responseItem.attribute.type).toBe("PeerAttributeDVO");
         expect(responseItem.attribute.content.value["@type"]).toBe("GivenName");
-        expect((responseItem.attribute.content.value as GivenNameJSON).value).toBe("Theodor");
+        expect((responseItem.attribute.content.value as GivenNameJSON).value).toBe("aGivenName");
         expect(requestItemDVO.response).toStrictEqual(responseItem);
     });
 
