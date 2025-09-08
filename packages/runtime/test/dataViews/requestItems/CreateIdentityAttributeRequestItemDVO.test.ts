@@ -66,7 +66,7 @@ beforeAll(async () => {
                         owner: rAddress,
                         value: {
                             "@type": "DisplayName",
-                            value: "Richard Receiver"
+                            value: "aDisplayName"
                         }
                     }
                 }
@@ -111,7 +111,7 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
         expect(requestItemDVO.attribute.type).toBe("DraftIdentityAttributeDVO");
         const value = requestItemDVO.attribute.value as AbstractStringJSON;
         expect(value["@type"]).toBe("DisplayName");
-        expect(value.value).toBe("Richard Receiver");
+        expect(value.value).toBe("aDisplayName");
         expect(requestItemDVO.attribute.renderHints.editType).toBe("InputLike");
         expect(requestItemDVO.attribute.valueHints.max).toBe(100);
         expect(requestItemDVO.attribute.isDraft).toBe(true);
@@ -143,7 +143,7 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
         expect(requestItemDVO.attribute.type).toBe("DraftIdentityAttributeDVO");
         const value = requestItemDVO.attribute.value as AbstractStringJSON;
         expect(value["@type"]).toBe("DisplayName");
-        expect(value.value).toBe("Richard Receiver");
+        expect(value.value).toBe("aDisplayName");
         expect(requestItemDVO.attribute.renderHints.technicalType).toBe("String");
         expect(requestItemDVO.attribute.renderHints.editType).toBe("InputLike");
         expect(requestItemDVO.attribute.valueHints.max).toBe(100);
@@ -181,7 +181,7 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
         expect(requestItemDVO.attribute.type).toBe("DraftIdentityAttributeDVO");
         const value = requestItemDVO.attribute.value as AbstractStringJSON;
         expect(value["@type"]).toBe("DisplayName");
-        expect(value.value).toBe("Richard Receiver");
+        expect(value.value).toBe("aDisplayName");
         expect(requestItemDVO.attribute.renderHints.technicalType).toBe("String");
         expect(requestItemDVO.attribute.renderHints.editType).toBe("InputLike");
         expect(requestItemDVO.attribute.valueHints.max).toBe(100);
@@ -204,7 +204,7 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
         expect(attributeResult).toBeSuccessful();
         expect(attributeResult.value).toHaveLength(1);
         expect(attributeResult.value[0].id).toBeDefined();
-        expect((attributeResult.value[0].content.value as DisplayNameJSON).value).toBe("Richard Receiver");
+        expect((attributeResult.value[0].content.value as DisplayNameJSON).value).toBe("aDisplayName");
 
         expect(responseItem.attributeId).toStrictEqual(attributeResult.value[0].id);
         expect(responseItem.attribute).toBeDefined();
@@ -250,7 +250,7 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
         expect(requestItemDVO.attribute.type).toBe("DraftIdentityAttributeDVO");
         const value = requestItemDVO.attribute.value as AbstractStringJSON;
         expect(value["@type"]).toBe("DisplayName");
-        expect(value.value).toBe("Richard Receiver");
+        expect(value.value).toBe("aDisplayName");
         expect(requestItemDVO.attribute.renderHints.technicalType).toBe("String");
         expect(requestItemDVO.attribute.renderHints.editType).toBe("InputLike");
         expect(requestItemDVO.attribute.valueHints.max).toBe(100);
@@ -277,7 +277,7 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
         expect(attributeResult).toBeSuccessful();
         const numberOfAttributes = attributeResult.value.length;
         expect(attributeResult.value[numberOfAttributes - 1].id).toBeDefined();
-        expect((attributeResult.value[numberOfAttributes - 1].content.value as DisplayNameJSON).value).toBe("Richard Receiver");
+        expect((attributeResult.value[numberOfAttributes - 1].content.value as DisplayNameJSON).value).toBe("aDisplayName");
 
         expect(responseItem.attributeId).toStrictEqual(attributeResult.value[numberOfAttributes - 1].id);
         expect(responseItem.attribute).toBeDefined();
@@ -304,7 +304,7 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
         const dvo = await sExpander.expandAddress(senderMessage.recipients[0].address);
         const numberOfItems = dvo.items!.length;
-        expect(dvo.name).toBe("Richard Receiver");
+        expect(dvo.name).toBe("aDisplayName");
         expect(numberOfItems - baselineNumberOfItems).toBe(1);
     });
 
