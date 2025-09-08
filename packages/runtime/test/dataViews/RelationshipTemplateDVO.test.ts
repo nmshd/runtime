@@ -100,7 +100,7 @@ describe("RelationshipTemplateDVO", () => {
                                 }),
                                 attribute: IdentityAttribute.from({
                                     owner: CoreAddress.from(""),
-                                    value: GivenName.from("Theo")
+                                    value: GivenName.from("aGivenName")
                                 })
                             }).toJSON(),
                             ProposeAttributeRequestItem.from({
