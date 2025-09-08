@@ -177,7 +177,7 @@ describe("OwnIdentityAttributeDVO", () => {
         expect(dvo.valueHints.values![61]).toStrictEqual({ key: "DE", displayName: "i18n://attributes.values.countries.DE" });
     });
 
-    test("check the CommunicationLanguage", async () => {
+    test("check the CommunicationLanguage for forwarded OwnIdentityAttribute", async () => {
         const attribute = await executeFullCreateAndShareOwnIdentityAttributeFlow(services1, services2, requests[4]);
 
         const dvo = (await services1.expander.expandLocalAttributeDTO(attribute)) as OwnIdentityAttributeDVO;
