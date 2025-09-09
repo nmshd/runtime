@@ -65,8 +65,8 @@ describe("Reference", () => {
             })
         });
 
-        expect(reference.toUrl("anAppName")).toBe(
-            "https://backbone.example.com/r/ANID1234?app=anAppName#M3xsZXJKeVg4eWRKREVYb3dxMlBNTW50UlhYQTI3d2dISllBX0JqbkZ4NTVZfHxwdyZZVEUyWW5sMFpYTnNiMjVuYzJGc2RBPT0mYVBhc3N3b3Jk"
+        expect(reference.toUrl()).toBe(
+            "https://backbone.example.com/r/ANID1234#M3xsZXJKeVg4eWRKREVYb3dxMlBNTW50UlhYQTI3d2dISllBX0JqbkZ4NTVZfHxwdyZZVEUyWW5sMFpYTnNiMjVuYzJGc2RBPT0mJmFQYXNzd29yZA"
         );
     });
 
