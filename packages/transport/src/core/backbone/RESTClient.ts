@@ -3,7 +3,7 @@ import { CoreIdHelper } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import formDataLib from "form-data";
-import { AgentOptions } from "http";
+import { AgentOptions as HTTPAgentOptions } from "http";
 import { AgentOptions as HTTPSAgentOptions } from "https";
 import _ from "lodash";
 import { ICorrelator } from "../ICorrelator";
@@ -40,7 +40,7 @@ export interface IRESTClientConfig {
     platformTimeout: number;
     platformMaxRedirects: number;
     platformAdditionalHeaders?: Record<string, string>;
-    httpAgentOptions: AgentOptions;
+    httpAgentOptions: HTTPAgentOptions;
     httpsAgentOptions: HTTPSAgentOptions;
     debug: boolean;
     baseUrl: string;
@@ -95,7 +95,7 @@ export class RESTClient {
                     ...this.config.httpAgentOptions,
                     // @ts-expect-error @types/node does not have proxyEnv, but it can already be used
                     proxyEnv: process.env
-                } satisfies AgentOptions);
+                } satisfies HTTPAgentOptions);
 
                 resultingRequestConfig.httpsAgent = new httpsAgent({
                     ...this.config.httpsAgentOptions,
