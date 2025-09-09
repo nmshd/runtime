@@ -3,7 +3,7 @@ import { CoreIdHelper } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import formDataLib from "form-data";
-import { AgentOptions } from "http";
+import { AgentOptions as HTTPAgentOptions } from "http";
 import { AgentOptions as HTTPSAgentOptions } from "https";
 import _ from "lodash";
 import { ICorrelator } from "../ICorrelator";
@@ -40,7 +40,7 @@ export interface IRESTClientConfig {
     platformTimeout: number;
     platformMaxRedirects: number;
     platformAdditionalHeaders?: Record<string, string>;
-    httpAgentOptions: AgentOptions;
+    httpAgentOptions: HTTPAgentOptions;
     httpsAgentOptions: HTTPSAgentOptions;
     debug: boolean;
     baseUrl: string;
@@ -84,31 +84,25 @@ export class RESTClient {
 
         const resultingRequestConfig = _.defaultsDeep(defaults, requestConfig);
 
-        if (typeof window === "undefined" && (process.env.https_proxy ?? process.env.HTTPS_PROXY)) {
-            try {
-                const httpsProxy = (process.env.https_proxy ?? process.env.HTTPS_PROXY)!;
-                // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/naming-convention
-                const HttpsProxyAgent = require("https-proxy-agent").HttpsProxyAgent;
-                resultingRequestConfig.httpsAgent = new HttpsProxyAgent(httpsProxy, this.config.httpsAgentOptions);
-            } catch (_) {
-                // ignore
-            }
-        } else {
-            try {
-                // eslint-disable-next-line @typescript-eslint/no-require-imports
-                const httpsAgent = require("https")?.Agent;
-
-                if (httpsAgent) resultingRequestConfig.httpsAgent = new httpsAgent(this.config.httpsAgentOptions);
-            } catch (_) {
-                // ignore
-            }
-        }
-
         try {
             // eslint-disable-next-line @typescript-eslint/no-require-imports
-            const agent = require("http")?.Agent;
+            const httpAgent = require("http")?.Agent;
+            // eslint-disable-next-line @typescript-eslint/no-require-imports
+            const httpsAgent = require("https")?.Agent;
 
-            if (agent) resultingRequestConfig.httpAgent = new agent(this.config.httpAgentOptions);
+            if (httpAgent && httpsAgent) {
+                resultingRequestConfig.httpAgent = new httpAgent({
+                    ...this.config.httpAgentOptions,
+                    // @ts-expect-error @types/node does not have proxyEnv, but it can already be used
+                    proxyEnv: process.env
+                } satisfies HTTPAgentOptions);
+
+                resultingRequestConfig.httpsAgent = new httpsAgent({
+                    ...this.config.httpsAgentOptions,
+                    // @ts-expect-error @types/node does not have proxyEnv, but it can already be used
+                    proxyEnv: process.env
+                } satisfies HTTPSAgentOptions);
+            }
         } catch (_) {
             // ignore
         }
