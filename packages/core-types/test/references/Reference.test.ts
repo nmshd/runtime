@@ -70,6 +70,26 @@ describe("Reference", () => {
         );
     });
 
+    test("toUrl without a cleartext password but with a passwordLocationIndicator in the passwordProtection reference fields used", () => {
+        const reference = Reference.from({
+            id: CoreId.from("ANID1234"),
+            backboneBaseUrl: "https://backbone.example.com",
+            key: CryptoSecretKey.from({
+                secretKey: CoreBuffer.from("lerJyX8ydJDEXowq2PMMntRXXA27wgHJYA_BjnFx55Y"),
+                algorithm: CryptoEncryptionAlgorithm.XCHACHA20_POLY1305
+            }),
+            passwordProtection: SharedPasswordProtection.from({
+                passwordType: "pw",
+                salt: CoreBuffer.fromUtf8("a16byteslongsalt"),
+                passwordLocationIndicator: 4
+            })
+        });
+
+        expect(reference.toUrl()).toBe(
+            "https://backbone.example.com/r/ANID1234#M3xsZXJKeVg4eWRKREVYb3dxMlBNTW50UlhYQTI3d2dISllBX0JqbkZ4NTVZfHxwdyZZVEUyWW5sMFpYTnNiMjVuYzJGc2RBPT0mNA"
+        );
+    });
+
     test("from with a url reference", () => {
         const reference = Reference.from("https://backbone.example.com/r/ANID1234#M3xsZXJKeVg4eWRKREVYb3dxMlBNTW50UlhYQTI3d2dISllBX0JqbkZ4NTVZfHw");
 

@@ -62,6 +62,6 @@ export class SharedPasswordProtection extends Serializable implements ISharedPas
 
         if (this.passwordLocationIndicator === undefined && this.password === undefined) return base;
 
-        return `${base}&${this.passwordLocationIndicator ?? ""}&${this.password ?? ""}`;
+        return `${base}&${this.passwordLocationIndicator ?? ""}${this.password ? `&${this.password}` : ""}`;
     }
 }
