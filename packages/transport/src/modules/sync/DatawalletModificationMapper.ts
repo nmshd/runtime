@@ -22,9 +22,6 @@ export class DatawalletModificationMapper {
             case "Delete":
                 type = DatawalletModificationType.Delete;
                 break;
-            case "CacheChanged":
-                type = DatawalletModificationType.CacheChanged;
-                break;
             default:
                 throw new TransportError("Unsupported DatawalletModificationType '${backboneDatawalletModification.type}'");
         }
@@ -34,6 +31,9 @@ export class DatawalletModificationMapper {
         switch (backboneDatawalletModification.payloadCategory) {
             case "TechnicalData":
                 payloadCategory = DatawalletModificationCategory.TechnicalData;
+                break;
+            case "Content":
+                payloadCategory = DatawalletModificationCategory.Content;
                 break;
             case "Userdata":
                 payloadCategory = DatawalletModificationCategory.Userdata;

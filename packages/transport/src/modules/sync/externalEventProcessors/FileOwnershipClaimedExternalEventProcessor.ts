@@ -14,10 +14,7 @@ export class FileOwnershipClaimedExternalEventProcessor extends ExternalEventPro
     public override async execute(externalEvent: ExternalEvent): Promise<File | undefined> {
         const payload = FileOwnershipClaimedExternalEventData.fromAny(externalEvent.payload);
 
-        const files = await this.accountController.files.updateCache([payload.fileId]);
-        if (files.length === 0) return;
-
-        const file = files[0];
+        const file = await this.accountController.files.updateFileFromBackbone(payload.fileId);
 
         file.clearOwnershipToken();
         const updatedFile = await this.accountController.files.updateFile(file);

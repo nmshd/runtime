@@ -62,8 +62,8 @@ export class CreateIdentityRecoveryKitUseCase extends UseCase<CreateIdentityReco
     private async removeBackupDevices(backupDevices: Device[]) {
         for (const backupDevice of backupDevices) {
             const matchingTokens = await this.tokenController.getTokens({
-                "cache.content.@type": "TokenContentDeviceSharedSecret",
-                "cache.content.sharedSecret.id": backupDevice.id.toString()
+                "content.@type": "TokenContentDeviceSharedSecret",
+                "content.sharedSecret.id": backupDevice.id.toString()
             });
 
             for (const matchingToken of matchingTokens) {
