@@ -50,9 +50,7 @@ export class SucceedRepositoryAttributeUseCase extends UseCase<SucceedRepository
         };
         const predecessorId = CoreId.from(request.predecessorId);
         const validationResult = await this.attributeController.validateRepositoryAttributeSuccession(predecessorId, successorParams);
-        if (validationResult.isError()) {
-            return Result.fail(validationResult.error);
-        }
+        if (validationResult.isError()) return Result.fail(validationResult.error);
 
         const { predecessor: updatedPredecessor, successor } = await this.attributeController.succeedRepositoryAttribute(predecessorId, successorParams, false);
         await this.accountController.syncDatawallet();
