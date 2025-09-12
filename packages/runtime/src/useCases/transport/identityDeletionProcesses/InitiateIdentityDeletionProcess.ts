@@ -25,10 +25,7 @@ export class InitiateIdentityDeletionProcessUseCase extends UseCase<InitiateIden
     }
 
     protected async executeInternal(request: InitiateIdentityDeletionProcessRequest): Promise<Result<IdentityDeletionProcessDTO>> {
-        const identityDeletionProcess = await this.identityDeletionProcessController.getIdentityDeletionProcessByStatus(
-            IdentityDeletionProcessStatus.Approved,
-            IdentityDeletionProcessStatus.WaitingForApproval
-        );
+        const identityDeletionProcess = await this.identityDeletionProcessController.getIdentityDeletionProcessByStatus(IdentityDeletionProcessStatus.Approved);
         if (identityDeletionProcess) return Result.fail(RuntimeErrors.identityDeletionProcess.activeIdentityDeletionProcessAlreadyExists());
 
         const initiatedIdentityDeletionProcess = await this.identityDeletionProcessController.initiateIdentityDeletionProcess(request.lengthOfGracePeriodInDays);

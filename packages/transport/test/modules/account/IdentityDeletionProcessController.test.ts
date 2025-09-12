@@ -24,10 +24,7 @@ describe("IdentityDeletionProcessController", function () {
     });
 
     afterEach(async function () {
-        const activeIdentityDeletionProcess = await account.identityDeletionProcess.getIdentityDeletionProcessByStatus(
-            IdentityDeletionProcessStatus.Approved,
-            IdentityDeletionProcessStatus.WaitingForApproval
-        );
+        const activeIdentityDeletionProcess = await account.identityDeletionProcess.getIdentityDeletionProcessByStatus(IdentityDeletionProcessStatus.Approved);
         if (!activeIdentityDeletionProcess) {
             return;
         }
