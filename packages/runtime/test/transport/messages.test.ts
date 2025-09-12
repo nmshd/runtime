@@ -1,5 +1,5 @@
 import { sleep } from "@js-soft/ts-utils";
-import { ConsumptionIds } from "@nmshd/consumption";
+import { ConsumptionIds, LocalAttributeDeletionStatus, LocalRequestStatus } from "@nmshd/consumption";
 import { ConsentRequestItemJSON, Notification } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
 import { IdentityDeletionProcessStatus, RelationshipStatus } from "@nmshd/transport";
@@ -8,6 +8,7 @@ import {
     AttributeDeletedEvent,
     GetMessagesQuery,
     IncomingRequestReceivedEvent,
+    LocalRequestDTO,
     MessageReceivedEvent,
     MessageSentEvent,
     MessageWasReadAtChangedEvent,
