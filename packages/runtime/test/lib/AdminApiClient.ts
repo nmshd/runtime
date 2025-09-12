@@ -1,8 +1,6 @@
-import { Result } from "@js-soft/ts-utils";
 import { LanguageISO639 } from "@nmshd/core-types";
 import axios, { Axios } from "axios";
-import { AnnouncementSeverity, IdentityDeletionProcessDTO, TransportServices } from "../../src";
-import { syncUntilHasIdentityDeletionProcess } from "./testUtils";
+import { AnnouncementSeverity } from "../../src";
 
 let adminClient: Axios | undefined;
 
@@ -28,30 +26,6 @@ export async function getBackboneAdminApiClient(): Promise<Axios> {
         }
     });
     return adminClient;
-}
-
-export async function startIdentityDeletionProcessFromBackboneAdminApi(transportService: TransportServices, accountAddress: string): Promise<IdentityDeletionProcessDTO> {
-    const adminApiClient = await getBackboneAdminApiClient();
-    const deletionProcess = await adminApiClient.post<{ result: { id: string } }>(`/api/v1/Identities/${accountAddress}/DeletionProcesses`);
-
-    await syncUntilHasIdentityDeletionProcess(transportService, deletionProcess.data.result.id);
-
-    const activeIdentityDeletionProcess = await transportService.identityDeletionProcesses.getActiveIdentityDeletionProcess();
-
-    return activeIdentityDeletionProcess.value;
-}
-
-export async function cancelIdentityDeletionProcessFromBackboneAdminApi(
-    transportService: TransportServices,
-    accountAddress: string,
-    identityDeletionProcessId: string
-): Promise<Result<IdentityDeletionProcessDTO>> {
-    const adminApiClient = await getBackboneAdminApiClient();
-    await adminApiClient.put<void>(`/api/v1/Identities/${accountAddress}/DeletionProcesses/${identityDeletionProcessId}/Cancel`);
-
-    await syncUntilHasIdentityDeletionProcess(transportService, identityDeletionProcessId);
-
-    return await transportService.identityDeletionProcesses.getIdentityDeletionProcess({ id: identityDeletionProcessId });
 }
 
 export async function createAnnouncement(request: CreateAnnouncementRequest): Promise<CreateAnnouncementResponse> {
