@@ -577,8 +577,6 @@ describe("Message errors", () => {
             let abortResult;
             if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Approved) {
                 abortResult = await client2.transport.identityDeletionProcesses.cancelIdentityDeletionProcess();
-            } else if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.WaitingForApproval) {
-                abortResult = await client2.transport.identityDeletionProcesses.rejectIdentityDeletionProcess();
             }
             await syncUntilHasEvent(client1, PeerDeletionCancelledEvent);
             if (abortResult?.isError) throw abortResult.error;
@@ -738,8 +736,6 @@ describe("Postponed Notifications via Messages", () => {
             let abortResult;
             if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Approved) {
                 abortResult = await client1.transport.identityDeletionProcesses.cancelIdentityDeletionProcess();
-            } else if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.WaitingForApproval) {
-                abortResult = await client1.transport.identityDeletionProcesses.rejectIdentityDeletionProcess();
             }
             await syncUntilHasEvent(client5, PeerDeletionCancelledEvent, (e) => e.data.id === relationshipId);
             if (abortResult?.isError) throw abortResult.error;

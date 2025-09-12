@@ -6,9 +6,6 @@ export interface CachedIdentityDeletionProcessJSON {
     status: IdentityDeletionProcessStatus;
     createdAt?: string;
     createdByDevice?: string;
-    approvalPeriodEndsAt?: string;
-    rejectedAt?: string;
-    rejectedByDevice?: string;
     approvedAt?: string;
     approvedByDevice?: string;
     gracePeriodEndsAt?: string;
@@ -20,9 +17,6 @@ export interface ICachedIdentityDeletionProcess {
     status: IdentityDeletionProcessStatus;
     createdAt?: CoreDate;
     createdByDevice?: CoreId;
-    approvalPeriodEndsAt?: CoreDate;
-    rejectedAt?: CoreDate;
-    rejectedByDevice?: CoreId;
     approvedAt?: CoreDate;
     approvedByDevice?: CoreId;
     gracePeriodEndsAt?: CoreDate;
@@ -43,18 +37,6 @@ export class CachedIdentityDeletionProcess extends Serializable implements ICach
     @validate({ nullable: true })
     @serialize()
     public createdByDevice?: CoreId;
-
-    @validate({ nullable: true })
-    @serialize()
-    public approvalPeriodEndsAt?: CoreDate;
-
-    @validate({ nullable: true })
-    @serialize()
-    public rejectedAt?: CoreDate;
-
-    @validate({ nullable: true })
-    @serialize()
-    public rejectedByDevice?: CoreId;
 
     @validate({ nullable: true })
     @serialize()

@@ -1,28 +1,23 @@
 import { CoreIdHelper } from "@nmshd/core-types";
 import { IdentityDeletionProcessStatus } from "@nmshd/transport";
 import {
-    ApproveIdentityDeletionProcessUseCase,
     CancelIdentityDeletionProcessUseCase,
     GetActiveIdentityDeletionProcessUseCase,
     GetIdentityDeletionProcessesUseCase,
     GetIdentityDeletionProcessUseCase,
     IdentityDeletionProcessStatusChangedEvent,
     InitiateIdentityDeletionProcessUseCase,
-    RejectIdentityDeletionProcessUseCase,
     TransportServices
 } from "../../src";
 import { MockEventBus, RuntimeServiceProvider } from "../lib";
-import { cancelIdentityDeletionProcessFromBackboneAdminApi, startIdentityDeletionProcessFromBackboneAdminApi } from "../lib/AdminApiClient";
 
 const serviceProvider = new RuntimeServiceProvider();
 let transportService: TransportServices;
-let accountAddress: string;
 let eventBus: MockEventBus;
 
 beforeAll(async () => {
     const runtimeServices = await serviceProvider.launch(1);
     transportService = runtimeServices[0].transport;
-    accountAddress = runtimeServices[0].address;
     eventBus = runtimeServices[0].eventBus;
 }, 30000);
 
@@ -42,33 +37,12 @@ afterEach(async () => {
     let abortResult;
     if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Approved) {
         abortResult = await transportService.identityDeletionProcesses.cancelIdentityDeletionProcess();
-    } else if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.WaitingForApproval) {
-        abortResult = await transportService.identityDeletionProcesses.rejectIdentityDeletionProcess();
     }
 
     if (abortResult?.isError) throw abortResult.error;
 });
 
 describe("IdentityDeletionProcess", () => {
-    test("should start and cancel an IdentityDeletionProcess using the Backbone Admin Api", async function () {
-        const initiatedIdentityDeletionProcess = await startIdentityDeletionProcessFromBackboneAdminApi(transportService, accountAddress);
-        expect(initiatedIdentityDeletionProcess.status).toStrictEqual(IdentityDeletionProcessStatus.WaitingForApproval);
-
-        await expect(eventBus).toHavePublished(IdentityDeletionProcessStatusChangedEvent, (e) => e.data!.id === initiatedIdentityDeletionProcess.id);
-        await expect(eventBus).toHavePublished(IdentityDeletionProcessStatusChangedEvent, (e) => e.data!.status === IdentityDeletionProcessStatus.WaitingForApproval);
-
-        await transportService.identityDeletionProcesses.approveIdentityDeletionProcess();
-        eventBus.reset();
-
-        const result = await cancelIdentityDeletionProcessFromBackboneAdminApi(transportService, accountAddress, initiatedIdentityDeletionProcess.id.toString());
-        expect(result).toBeSuccessful();
-        const identityDeletionProcess = result.value;
-        expect(identityDeletionProcess.status).toStrictEqual(IdentityDeletionProcessStatus.Cancelled);
-
-        await expect(eventBus).toHavePublished(IdentityDeletionProcessStatusChangedEvent, (e) => e.data!.id === initiatedIdentityDeletionProcess.id);
-        await expect(eventBus).toHavePublished(IdentityDeletionProcessStatusChangedEvent, (e) => e.data!.status === IdentityDeletionProcessStatus.Cancelled);
-    });
-
     describe(InitiateIdentityDeletionProcessUseCase.name, () => {
         test("should initiate an IdentityDeletionProcess", async function () {
             const result = await transportService.identityDeletionProcesses.initiateIdentityDeletionProcess();
@@ -82,16 +56,6 @@ describe("IdentityDeletionProcess", () => {
         });
 
         test("should return an error trying to initiate an IdentityDeletionProcess if there already is one approved", async function () {
-            await transportService.identityDeletionProcesses.initiateIdentityDeletionProcess();
-            const result = await transportService.identityDeletionProcesses.initiateIdentityDeletionProcess();
-            expect(result).toBeAnError(
-                "There is already an active IdentityDeletionProcess. You cannot start another, as there may only be one active IdentityDeletionProcess per Identity.",
-                "error.runtime.identityDeletionProcess.activeIdentityDeletionProcessAlreadyExists"
-            );
-        });
-
-        test("should return an error trying to initiate an IdentityDeletionProcess if there already is one waiting for approval", async function () {
-            await startIdentityDeletionProcessFromBackboneAdminApi(transportService, accountAddress);
             await transportService.identityDeletionProcesses.initiateIdentityDeletionProcess();
             const result = await transportService.identityDeletionProcesses.initiateIdentityDeletionProcess();
             expect(result).toBeAnError(
@@ -144,7 +108,6 @@ describe("IdentityDeletionProcess", () => {
             await serviceProvider.stop();
             const runtimeServices = await serviceProvider.launch(1);
             transportService = runtimeServices[0].transport;
-            accountAddress = runtimeServices[0].address;
             eventBus = runtimeServices[0].eventBus;
 
             const cancelledIdentityDeletionProcess = (await transportService.identityDeletionProcesses.initiateIdentityDeletionProcess()).value;
@@ -167,7 +130,6 @@ describe("IdentityDeletionProcess", () => {
             await serviceProvider.stop();
             const runtimeServices = await serviceProvider.launch(1);
             transportService = runtimeServices[0].transport;
-            accountAddress = runtimeServices[0].address;
             eventBus = runtimeServices[0].eventBus;
 
             const result = await transportService.identityDeletionProcesses.getIdentityDeletionProcesses();
@@ -194,50 +156,6 @@ describe("IdentityDeletionProcess", () => {
         test("should return an error trying to cancel an IdentityDeletionProcess if there is none active", async function () {
             const result = await transportService.identityDeletionProcesses.cancelIdentityDeletionProcess();
             expect(result).toBeAnError("No approved IdentityDeletionProcess found.", "error.runtime.identityDeletionProcess.noApprovedIdentityDeletionProcess");
-        });
-    });
-
-    describe(ApproveIdentityDeletionProcessUseCase.name, () => {
-        test("should approve a waiting for approval IdentityDeletionProcess", async function () {
-            await startIdentityDeletionProcessFromBackboneAdminApi(transportService, accountAddress);
-            const result = await transportService.identityDeletionProcesses.approveIdentityDeletionProcess();
-            expect(result).toBeSuccessful();
-
-            const approvedIdentityDeletionProcess = result.value;
-            expect(approvedIdentityDeletionProcess.status).toBe(IdentityDeletionProcessStatus.Approved);
-
-            await expect(eventBus).toHavePublished(IdentityDeletionProcessStatusChangedEvent, (e) => e.data!.id === approvedIdentityDeletionProcess.id);
-            await expect(eventBus).toHavePublished(IdentityDeletionProcessStatusChangedEvent, (e) => e.data!.status === IdentityDeletionProcessStatus.Approved);
-        });
-
-        test("should return an error trying to approve an IdentityDeletionProcess if there is none active", async function () {
-            const result = await transportService.identityDeletionProcesses.approveIdentityDeletionProcess();
-            expect(result).toBeAnError(
-                "No IdentityDeletionProcess waiting for decision found.",
-                "error.runtime.identityDeletionProcess.noWaitingForApprovalIdentityDeletionProcess"
-            );
-        });
-    });
-
-    describe(RejectIdentityDeletionProcessUseCase.name, () => {
-        test("should reject a waiting for approval IdentityDeletionProcess", async function () {
-            await startIdentityDeletionProcessFromBackboneAdminApi(transportService, accountAddress);
-            const result = await transportService.identityDeletionProcesses.rejectIdentityDeletionProcess();
-            expect(result).toBeSuccessful();
-
-            const rejectedIdentityDeletionProcess = result.value;
-            expect(rejectedIdentityDeletionProcess.status).toBe(IdentityDeletionProcessStatus.Rejected);
-
-            await expect(eventBus).toHavePublished(IdentityDeletionProcessStatusChangedEvent, (e) => e.data!.id === rejectedIdentityDeletionProcess.id);
-            await expect(eventBus).toHavePublished(IdentityDeletionProcessStatusChangedEvent, (e) => e.data!.status === IdentityDeletionProcessStatus.Rejected);
-        });
-
-        test("should return an error trying to reject an IdentityDeletionProcess if there is none active", async function () {
-            const result = await transportService.identityDeletionProcesses.rejectIdentityDeletionProcess();
-            expect(result).toBeAnError(
-                "No IdentityDeletionProcess waiting for decision found.",
-                "error.runtime.identityDeletionProcess.noWaitingForApprovalIdentityDeletionProcess"
-            );
         });
     });
 });
