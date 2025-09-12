@@ -1,21 +1,24 @@
 import { sleep } from "@js-soft/ts-utils";
-import { ConsumptionIds, LocalAttributeDeletionStatus, LocalRequestStatus } from "@nmshd/consumption";
+import { ConsumptionIds } from "@nmshd/consumption";
 import { ConsentRequestItemJSON, Notification } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
-import { IdentityDeletionProcessStatus, RelationshipStatus } from "@nmshd/transport";
 import assert from "assert";
 import {
     AttributeDeletedEvent,
     GetMessagesQuery,
+    IdentityDeletionProcessStatus,
     IncomingRequestReceivedEvent,
+    LocalAttributeDeletionStatus,
     LocalRequestDTO,
+    LocalRequestStatus,
     MessageReceivedEvent,
     MessageSentEvent,
     MessageWasReadAtChangedEvent,
     OutgoingRequestStatusChangedEvent,
     OwnSharedAttributeSucceededEvent,
     PeerDeletionCancelledEvent,
-    PeerToBeDeletedEvent
+    PeerToBeDeletedEvent,
+    RelationshipStatus
 } from "../../src";
 import {
     cleanupMessages,
