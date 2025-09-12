@@ -21,7 +21,7 @@ import { MockEventBus } from "../../../MockEventBus";
 
 const mockEventBus = new MockEventBus();
 
-describe("OwnAttributeDeletedByPeerNotificationItemProcessor", function () {
+describe("OwnAttributeDeletedByOwnerNotificationItemProcessor", function () {
     let connection: IDatabaseConnection;
     let transport: Transport;
 
@@ -218,7 +218,7 @@ describe("OwnAttributeDeletedByPeerNotificationItemProcessor", function () {
         expect(attributeAfterRollback.peerSharingInfo.deletionInfo).toBeUndefined();
     });
 
-    test("runs all processor methods for an attribute that is to be deleted", async function () {
+    test("runs all processor methods for an Attribute that is to be deleted", async function () {
         const peerIdentityAttribute = await consumptionController.attributes.createPeerIdentityAttribute({
             content: IdentityAttribute.from({
                 value: {
@@ -236,7 +236,7 @@ describe("OwnAttributeDeletedByPeerNotificationItemProcessor", function () {
             peerIdentityAttribute,
             ReceivedAttributeDeletionInfo.from({
                 deletionStatus: ReceivedAttributeDeletionStatus.ToBeDeleted,
-                deletionDate: CoreDate.utc().subtract({ days: 1 })
+                deletionDate: CoreDate.utc().add({ days: 1 })
             })
         );
 
@@ -280,7 +280,7 @@ describe("OwnAttributeDeletedByPeerNotificationItemProcessor", function () {
         expect(attributeAfterRollback.peerSharingInfo.deletionInfo?.deletionStatus).toStrictEqual(ReceivedAttributeDeletionStatus.ToBeDeleted);
     });
 
-    test("runs all processor methods for a succeeded attribute", async function () {
+    test("runs all processor methods for a succeeded Attribute", async function () {
         const predecessorPeerIdentityAttribute = await consumptionController.attributes.createPeerIdentityAttribute({
             content: IdentityAttribute.from({
                 value: {
@@ -347,7 +347,7 @@ describe("OwnAttributeDeletedByPeerNotificationItemProcessor", function () {
         expect(predecessorAfterRollback.peerSharingInfo.deletionInfo).toBeUndefined();
     });
 
-    test("runs all processor methods for an unknown attribute", async function () {
+    test("runs all processor methods for an unknown Attribute", async function () {
         const unknownAttributeId = CoreId.from("ATT");
 
         const notificationItem = OwnAttributeDeletedByOwnerNotificationItem.from({

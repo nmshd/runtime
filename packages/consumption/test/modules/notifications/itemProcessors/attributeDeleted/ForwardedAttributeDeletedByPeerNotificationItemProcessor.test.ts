@@ -92,7 +92,7 @@ describe("ForwardedAttributeDeletedByPeerNotificationItemProcessor", function ()
     });
 
     test("runs all processor methods for an OwnRelationshipAttribute", async function () {
-        const peerRelationshipAttribute = await consumptionController.attributes.createOwnRelationshipAttribute({
+        const ownRelationshipAttribute = await consumptionController.attributes.createOwnRelationshipAttribute({
             content: RelationshipAttribute.from({
                 key: "aKey",
                 value: {
@@ -106,9 +106,9 @@ describe("ForwardedAttributeDeletedByPeerNotificationItemProcessor", function ()
             peer: CoreAddress.from("initialPeer"),
             sourceReference: CoreId.from("reqRef")
         });
-        await consumptionController.attributes.addForwardedSharingInfoToAttribute(peerRelationshipAttribute, CoreAddress.from("thirdParty"), CoreId.from("reRef2"));
+        await consumptionController.attributes.addForwardedSharingInfoToAttribute(ownRelationshipAttribute, CoreAddress.from("thirdParty"), CoreId.from("reRef2"));
 
-        const notificationItem = ForwardedAttributeDeletedByPeerNotificationItem.from({ attributeId: peerRelationshipAttribute.id });
+        const notificationItem = ForwardedAttributeDeletedByPeerNotificationItem.from({ attributeId: ownRelationshipAttribute.id });
         const notification = LocalNotification.from({
             id: CoreId.from("notificationRef"),
             source: LocalNotificationSource.from({ type: "Message", reference: CoreId.from("messageRef") }),
@@ -191,7 +191,7 @@ describe("ForwardedAttributeDeletedByPeerNotificationItemProcessor", function ()
         expect(attributeAfterRollback.forwardedSharingInfos![0].deletionInfo).toBeUndefined();
     });
 
-    test("runs all processor methods for an attribute that is to be deleted by peer", async function () {
+    test("runs all processor methods for an Attribute that is to be deleted by peer", async function () {
         const ownIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
             content: IdentityAttribute.from({
                 value: {
@@ -242,7 +242,7 @@ describe("ForwardedAttributeDeletedByPeerNotificationItemProcessor", function ()
         expect(attributeAfterRollback.forwardedSharingInfos![0].deletionInfo).toBeUndefined();
     });
 
-    test("runs all processor methods for a succeeded attribute", async function () {
+    test("runs all processor methods for a succeeded Attribute", async function () {
         const predecessorOwnIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
             content: IdentityAttribute.from({
                 value: {
@@ -295,7 +295,7 @@ describe("ForwardedAttributeDeletedByPeerNotificationItemProcessor", function ()
         expect(predecessorAfterRollback.forwardedSharingInfos![0].deletionInfo).toBeUndefined();
     });
 
-    test("runs all processor methods for an unknown attribute", async function () {
+    test("runs all processor methods for an unknown Attribute", async function () {
         const unknownAttributeId = CoreId.from("ATT");
 
         const notificationItem = ForwardedAttributeDeletedByPeerNotificationItem.from({ attributeId: unknownAttributeId });
