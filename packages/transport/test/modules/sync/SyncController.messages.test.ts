@@ -22,7 +22,7 @@ describe("MessageSync", function () {
 
         await TestUtil.syncUntilHasMessages(b1);
 
-        const b1Messages = await b1.messages.getMessages();
+        const b1Messages = (await b1.messages.getMessages()).messages;
         expect(b1Messages[0].toJSON()).toStrictEqualExcluding(a1Message.toJSON(), "cachedAt", "isOwn", "cache.recipients[0].receivedAt", "cache.recipients[0].receivedByDevice");
     });
 
@@ -38,7 +38,7 @@ describe("MessageSync", function () {
 
         await TestUtil.syncUntilHasMessages(b2);
 
-        const b2Messages = await b2.messages.getMessages();
+        const b2Messages = (await b2.messages.getMessages()).messages;
 
         expect(b2Messages[0].toJSON()).toStrictEqualExcluding(a1Message.toJSON(), "cachedAt", "isOwn", "cache.recipients[0].receivedAt", "cache.recipients[0].receivedByDevice");
     });
@@ -57,7 +57,7 @@ describe("MessageSync", function () {
 
         await TestUtil.syncUntilHasMessages(b1);
 
-        const b1Messages = await b1.messages.getMessages();
+        const b1Messages = (await b1.messages.getMessages()).messages;
         expect(b1Messages[0].toJSON()).toStrictEqualExcluding(
             a2Message.toJSON() as any,
             "cachedAt",
