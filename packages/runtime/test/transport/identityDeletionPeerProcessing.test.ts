@@ -31,8 +31,6 @@ afterEach(async () => {
     let abortResult;
     if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Approved) {
         abortResult = await services1.transport.identityDeletionProcesses.cancelIdentityDeletionProcess();
-    } else if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.WaitingForApproval) {
-        abortResult = await services1.transport.identityDeletionProcesses.rejectIdentityDeletionProcess();
     }
     await syncUntilHasEvent(services2, PeerDeletionCancelledEvent, (e) => e.data.id === relationshipId);
 

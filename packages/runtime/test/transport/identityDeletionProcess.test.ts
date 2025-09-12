@@ -13,13 +13,11 @@ import { MockEventBus, RuntimeServiceProvider } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let transportService: TransportServices;
-let accountAddress: string;
 let eventBus: MockEventBus;
 
 beforeAll(async () => {
     const runtimeServices = await serviceProvider.launch(1);
     transportService = runtimeServices[0].transport;
-    accountAddress = runtimeServices[0].address;
     eventBus = runtimeServices[0].eventBus;
 }, 30000);
 
@@ -39,8 +37,6 @@ afterEach(async () => {
     let abortResult;
     if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Approved) {
         abortResult = await transportService.identityDeletionProcesses.cancelIdentityDeletionProcess();
-    } else if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.WaitingForApproval) {
-        abortResult = await transportService.identityDeletionProcesses.rejectIdentityDeletionProcess();
     }
 
     if (abortResult?.isError) throw abortResult.error;
@@ -112,7 +108,6 @@ describe("IdentityDeletionProcess", () => {
             await serviceProvider.stop();
             const runtimeServices = await serviceProvider.launch(1);
             transportService = runtimeServices[0].transport;
-            accountAddress = runtimeServices[0].address;
             eventBus = runtimeServices[0].eventBus;
 
             const cancelledIdentityDeletionProcess = (await transportService.identityDeletionProcesses.initiateIdentityDeletionProcess()).value;
@@ -135,7 +130,6 @@ describe("IdentityDeletionProcess", () => {
             await serviceProvider.stop();
             const runtimeServices = await serviceProvider.launch(1);
             transportService = runtimeServices[0].transport;
-            accountAddress = runtimeServices[0].address;
             eventBus = runtimeServices[0].eventBus;
 
             const result = await transportService.identityDeletionProcesses.getIdentityDeletionProcesses();

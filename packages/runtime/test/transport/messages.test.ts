@@ -2,23 +2,19 @@ import { sleep } from "@js-soft/ts-utils";
 import { ConsumptionIds } from "@nmshd/consumption";
 import { ConsentRequestItemJSON, Notification } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
+import { IdentityDeletionProcessStatus, RelationshipStatus } from "@nmshd/transport";
 import assert from "assert";
 import {
     AttributeDeletedEvent,
     GetMessagesQuery,
-    IdentityDeletionProcessStatus,
     IncomingRequestReceivedEvent,
-    LocalAttributeDeletionStatus,
-    LocalRequestDTO,
-    LocalRequestStatus,
     MessageReceivedEvent,
     MessageSentEvent,
     MessageWasReadAtChangedEvent,
     OutgoingRequestStatusChangedEvent,
     OwnSharedAttributeSucceededEvent,
     PeerDeletionCancelledEvent,
-    PeerToBeDeletedEvent,
-    RelationshipStatus
+    PeerToBeDeletedEvent
 } from "../../src";
 import {
     cleanupMessages,
@@ -577,8 +573,6 @@ describe("Message errors", () => {
             let abortResult;
             if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Approved) {
                 abortResult = await client2.transport.identityDeletionProcesses.cancelIdentityDeletionProcess();
-            } else if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.WaitingForApproval) {
-                abortResult = await client2.transport.identityDeletionProcesses.rejectIdentityDeletionProcess();
             }
             await syncUntilHasEvent(client1, PeerDeletionCancelledEvent);
             if (abortResult?.isError) throw abortResult.error;
@@ -738,8 +732,6 @@ describe("Postponed Notifications via Messages", () => {
             let abortResult;
             if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Approved) {
                 abortResult = await client1.transport.identityDeletionProcesses.cancelIdentityDeletionProcess();
-            } else if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.WaitingForApproval) {
-                abortResult = await client1.transport.identityDeletionProcesses.rejectIdentityDeletionProcess();
             }
             await syncUntilHasEvent(client5, PeerDeletionCancelledEvent, (e) => e.data.id === relationshipId);
             if (abortResult?.isError) throw abortResult.error;
