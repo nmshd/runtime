@@ -11,8 +11,6 @@ export interface IdentityDeletionProcessDTO {
     createdAt?: string;
     createdByDevice?: string;
     approvalPeriodEndsAt?: string;
-    rejectedAt?: string;
-    rejectedByDevice?: string;
     approvedAt?: string;
     approvedByDevice?: string;
     gracePeriodEndsAt?: string;
