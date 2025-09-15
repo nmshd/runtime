@@ -43,11 +43,11 @@ export class OwnIdentityAttribute extends LocalAttribute implements IOwnIdentity
     @validate({ nullable: true })
     public forwardedSharingInfos?: ForwardedSharingInfo[];
 
-    public isForwardedTo(peerAddress: CoreAddress, excludeToBeDeleted = false): boolean {
+    public isForwardedTo(peer: CoreAddress, excludeToBeDeleted = false): boolean {
         if (!this.forwardedSharingInfos) return false;
 
         const sharingInfosWithPeer = this.forwardedSharingInfos.filter(
-            (sharingInfo) => sharingInfo.peer.equals(peerAddress) && sharingInfo.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.DeletedByPeer
+            (sharingInfo) => sharingInfo.peer.equals(peer) && sharingInfo.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.DeletedByPeer
         );
         if (sharingInfosWithPeer.length === 0) return false;
 
@@ -56,10 +56,10 @@ export class OwnIdentityAttribute extends LocalAttribute implements IOwnIdentity
         return sharingInfosWithPeer.some((sharingInfo) => !sharingInfo.deletionInfo);
     }
 
-    public isDeletedOrToBeDeletedByForwardingPeer(peerAddress: CoreAddress): boolean {
+    public isDeletedOrToBeDeletedByForwardingPeer(peer: CoreAddress): boolean {
         if (!this.forwardedSharingInfos) return false;
 
-        const sharingInfosWithPeer = this.forwardedSharingInfos.filter((sharingInfo) => sharingInfo.peer.equals(peerAddress));
+        const sharingInfosWithPeer = this.forwardedSharingInfos.filter((sharingInfo) => sharingInfo.peer.equals(peer));
         if (sharingInfosWithPeer.length === 0) return false;
 
         const deletionStatuses = [EmittedAttributeDeletionStatus.DeletedByPeer, EmittedAttributeDeletionStatus.ToBeDeletedByPeer];
@@ -73,11 +73,11 @@ export class OwnIdentityAttribute extends LocalAttribute implements IOwnIdentity
         return hasSharingInfoWithDeletionStatus && !hasSharingInfoWithoutDeletionStatus;
     }
 
-    public isToBeDeletedByForwardingPeer(peerAddress: CoreAddress): boolean {
+    public isToBeDeletedByForwardingPeer(peer: CoreAddress): boolean {
         if (!this.forwardedSharingInfos) return false;
 
         return this.forwardedSharingInfos.some(
-            (sharingInfo) => sharingInfo.peer.equals(peerAddress) && sharingInfo.deletionInfo?.deletionStatus === EmittedAttributeDeletionStatus.ToBeDeletedByPeer
+            (sharingInfo) => sharingInfo.peer.equals(peer) && sharingInfo.deletionInfo?.deletionStatus === EmittedAttributeDeletionStatus.ToBeDeletedByPeer
         );
     }
 
