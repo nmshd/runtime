@@ -80,7 +80,8 @@
         "@js-soft/node-logger": "1.2.0",
         "@nmshd/crypto": "2.1.2",
         "@types/lodash": "^4.17.20",
-        "ts-mockito": "^2.6.1"
+        "ts-mockito": "^2.6.1",
+        "libsodium-wrappers": "^0.7.9"
     },
     "publishConfig": {
         "access": "public",

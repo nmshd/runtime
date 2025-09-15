@@ -19482,6 +19482,53 @@ export const SentNotificationRequest: any = {
     }
 }
 
+export const FetchedCredentialOfferRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/FetchedCredentialOfferRequest",
+    "definitions": {
+        "FetchedCredentialOfferRequest": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "string"
+                },
+                "pinCode":{
+                    "type": "string"
+                },
+                "requestedCredentials":{
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "required": [
+                "data"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
+export const FetchProofRequestRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/FetchedCredentialOfferRequest",
+    "definitions": {
+        "FetchedCredentialOfferRequest": {
+            "type": "object",
+            "properties": {
+                "proofRequestUrl": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "proofRequestUrl"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
 export const ResolveCredentialOfferRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/ResolveCredentialOfferRequest",

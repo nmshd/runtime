@@ -1,15 +1,4 @@
-import {
-    Agent,
-    ConsoleLogger,
-    DependencyManager,
-    DidKey,
-    InjectionSymbols,
-    KeyDidCreateOptions,
-    LogLevel,
-    type InitConfig,
-    type ModulesMap,
-    type VerificationMethod
-} from "@credo-ts/core";
+import { Agent, ConsoleLogger, DependencyManager, DidKey, InjectionSymbols, LogLevel, type InitConfig, type ModulesMap, type VerificationMethod } from "@credo-ts/core";
 import { KeyManagementModuleConfig } from "@credo-ts/core/build/modules/kms";
 import { JsonWebKey } from "crypto";
 import { FakeKeyManagmentService } from "./FakeKeyManagmentService";
@@ -70,9 +59,13 @@ export class BaseAgent<AgentModules extends ModulesMap> {
 
         await this.agent.initialize();
 
-        // create a uuid based key id
-        const keyId = crypto.randomUUID();
-
+        /* create a uuid based key id
+        const keyId = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+            const r = (Math.random() * 16) | 0;
+            const v = c === "x" ? r : (r & 0x3) | 0x8;
+            return v.toString(16);
+        });
+        
         const didCreateResult = await this.agent.dids.create<KeyDidCreateOptions>({
             method: "key",
             options: {
@@ -93,6 +86,7 @@ export class BaseAgent<AgentModules extends ModulesMap> {
         const verificationMethod = didCreateResult.didState.didDocument?.dereferenceKey(this.kid, ["authentication"]);
         if (!verificationMethod) throw new Error("No verification method found");
         this.verificationMethod = verificationMethod;
+        */
     }
 
     public async shutdown(): Promise<void> {

@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { DidJwk, DidKey, JwkDidCreateOptions, KeyDidCreateOptions, Kms, Mdoc, W3cJsonLdVerifiableCredential, W3cJwtVerifiableCredential, X509Module } from "@credo-ts/core";
 import {
     OpenId4VcHolderModule,
@@ -112,6 +113,8 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
                   }
         );
 
+        console.log("Token response:", JSON.stringify(tokenResponse));
+
         const credentialResponse = await this.agent.modules.openId4VcHolder.requestCredentials({
             resolvedCredentialOffer,
             clientId: options.clientId,
@@ -160,6 +163,8 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
             ...tokenResponse
         });
 
+        console.log("Credential response:", credentialResponse);
+
         const storedCredentials = await Promise.all(
             credentialResponse.credentials.map((response) => {
                 // TODO: handle batch issuance
@@ -173,6 +178,8 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
                 return this.agent.sdJwtVc.store(credential.compact);
             })
         );
+
+        console.log("Stored credentials:", storedCredentials);
 
         return storedCredentials;
     }
