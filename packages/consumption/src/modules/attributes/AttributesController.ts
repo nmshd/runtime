@@ -30,7 +30,7 @@ import { flattenObject, ValidationResult } from "../common";
 import { AttributeCreatedEvent, AttributeDeletedEvent, AttributeForwardedSharingInfosChangedEvent, AttributeSucceededEvent, AttributeWasViewedAtChangedEvent } from "./events";
 import { AttributeTagCollection, IAttributeTag } from "./local/AttributeTagCollection";
 import {
-    AttributeWithForwardedSharingInfos,
+    ForwardableAttribute,
     LocalAttribute,
     LocalAttributeJSON,
     OwnIdentityAttribute,
@@ -451,7 +451,7 @@ export class AttributesController extends ConsumptionBaseController {
         if (tagValidationResult.isError()) throw tagValidationResult.error;
     }
 
-    public async addForwardedSharingInfoToAttribute<T extends AttributeWithForwardedSharingInfos>(attribute: T, peer: CoreAddress, sourceReference: CoreId): Promise<T> {
+    public async addForwardedSharingInfoToAttribute<T extends ForwardableAttribute>(attribute: T, peer: CoreAddress, sourceReference: CoreId): Promise<T> {
         const localAttribute = await this.getLocalAttribute(attribute.id);
         if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
         if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
@@ -827,13 +827,13 @@ export class AttributesController extends ConsumptionBaseController {
             await this.deleteAttributeUnsafe(attribute.id);
         }
 
-        const forwardedAttributes = (await this.getLocalAttributes({ "forwardedSharingInfos.peer": peer.toString() })) as AttributeWithForwardedSharingInfos[];
+        const forwardedAttributes = (await this.getLocalAttributes({ "forwardedSharingInfos.peer": peer.toString() })) as ForwardableAttribute[];
         for (const attribute of forwardedAttributes) {
             await this.removeForwardedSharingInfoFromAttribute(attribute, peer);
         }
     }
 
-    public async removeForwardedSharingInfoFromAttribute<T extends AttributeWithForwardedSharingInfos>(attribute: T, peer: CoreAddress): Promise<T> {
+    public async removeForwardedSharingInfoFromAttribute<T extends ForwardableAttribute>(attribute: T, peer: CoreAddress): Promise<T> {
         attribute.forwardedSharingInfos = attribute.forwardedSharingInfos?.filter((sharingInfo) => !sharingInfo.peer.equals(peer));
         await this.updateAttributeUnsafe(attribute);
 
@@ -963,7 +963,7 @@ export class AttributesController extends ConsumptionBaseController {
         return false;
     }
 
-    public async getVersionsOfAttributeSharedWithPeer<T extends AttributeWithForwardedSharingInfos>(
+    public async getVersionsOfAttributeSharedWithPeer<T extends ForwardableAttribute>(
         attribute: T,
         peerAddress: CoreAddress,
         onlyLatestVersion = true,
@@ -984,7 +984,7 @@ export class AttributesController extends ConsumptionBaseController {
         return sharedAttributeVersions;
     }
 
-    public async getPredecessorsOfAttributeSharedWithPeer<T extends AttributeWithForwardedSharingInfos>(
+    public async getPredecessorsOfAttributeSharedWithPeer<T extends ForwardableAttribute>(
         referenceAttribute: T,
         peerAddress: CoreAddress,
         excludeToBeDeleted = false
@@ -1002,11 +1002,7 @@ export class AttributesController extends ConsumptionBaseController {
         return matchingPredecessors;
     }
 
-    public async getSuccessorsOfAttributeSharedWithPeer<T extends AttributeWithForwardedSharingInfos>(
-        referenceAttribute: T,
-        peerAddress: CoreAddress,
-        excludeToBeDeleted = false
-    ): Promise<T[]> {
+    public async getSuccessorsOfAttributeSharedWithPeer<T extends ForwardableAttribute>(referenceAttribute: T, peerAddress: CoreAddress, excludeToBeDeleted = false): Promise<T[]> {
         const matchingSuccessors: T[] = [];
         while (referenceAttribute.succeededBy) {
             const successor = (await this.getLocalAttribute(referenceAttribute.succeededBy)) as T | undefined;

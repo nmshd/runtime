@@ -1,6 +1,6 @@
 import {
-    AttributeWithForwardedSharingInfos,
     AttributeWithPeerSharingInfo,
+    ForwardableAttribute,
     LocalAttribute,
     OwnIdentityAttribute,
     OwnRelationshipAttribute,
@@ -48,6 +48,6 @@ export class AttributeMapper {
     private static toForwardedSharingInfos(attribute: LocalAttribute) {
         if (!("forwardedSharingInfos" in attribute)) return undefined;
 
-        return (attribute as AttributeWithForwardedSharingInfos).forwardedSharingInfos?.map((sharingInfo) => sharingInfo.toJSON()) as ForwardedSharingInfoDTO[];
+        return (attribute as ForwardableAttribute).forwardedSharingInfos?.map((sharingInfo) => sharingInfo.toJSON()) as ForwardedSharingInfoDTO[];
     }
 }

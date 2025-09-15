@@ -2,11 +2,11 @@ import { Event, EventBus, Result, sleep, SubscriptionTarget } from "@js-soft/ts-
 import {
     AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON,
     AcceptRequestItemParametersJSON,
-    AttributeWithForwardedSharingInfos,
     ConsumptionIds,
     DecideRequestItemGroupParametersJSON,
     DecideRequestItemParametersJSON,
-    DecideRequestParametersJSON
+    DecideRequestParametersJSON,
+    ForwardableAttribute
 } from "@nmshd/consumption";
 import {
     ArbitraryRelationshipCreationContent,
@@ -832,7 +832,7 @@ export async function cleanupForwardedSharingInfos(services: TestRuntimeServices
         services.map(async (services) => {
             const servicesAttributeController = services.consumption.attributes["getAttributeUseCase"]["attributeController"];
 
-            const servicesAttributes = (await servicesAttributeController.getLocalAttributes(query)) as AttributeWithForwardedSharingInfos[];
+            const servicesAttributes = (await servicesAttributeController.getLocalAttributes(query)) as ForwardableAttribute[];
             for (const attribute of servicesAttributes) {
                 attribute.forwardedSharingInfos = undefined;
                 await servicesAttributeController.updateAttributeUnsafe(attribute);

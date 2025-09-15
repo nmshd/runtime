@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { AttributesController, AttributeWithForwardedSharingInfos } from "@nmshd/consumption";
+import { AttributesController, ForwardableAttribute } from "@nmshd/consumption";
 import { CoreId } from "@nmshd/core-types";
 import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { Relationship, RelationshipsController } from "@nmshd/transport";
@@ -55,7 +55,7 @@ export class GetAttributesForRelationshipUseCase extends UseCase<GetAttributesFo
         }
 
         const attributes = await this.attributesController.getLocalAttributes(queryForAttributesWithPeerSharingInfo, request.hideTechnical);
-        const forwardedAttributes = (await this.attributesController.getLocalAttributes(queryForForwardedAttributes)) as AttributeWithForwardedSharingInfos[];
+        const forwardedAttributes = (await this.attributesController.getLocalAttributes(queryForForwardedAttributes)) as ForwardableAttribute[];
         attributes.push(...forwardedAttributes);
 
         return Result.ok(AttributeMapper.toAttributeDTOList(attributes));

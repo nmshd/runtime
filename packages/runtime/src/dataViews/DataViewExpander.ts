@@ -1,7 +1,7 @@
 import { Serializable, SerializableBase } from "@js-soft/ts-serval";
 import {
-    AttributeWithForwardedSharingInfos,
     ConsumptionController,
+    ForwardableAttribute,
     LocalRequestStatus,
     OwnIdentityAttribute,
     OwnRelationshipAttribute,
@@ -1142,7 +1142,7 @@ export class DataViewExpander {
         return await Promise.all(attributesPromise);
     }
 
-    private expandForwardingPeers(localAttribute: AttributeWithForwardedSharingInfos): string[] | undefined {
+    private expandForwardingPeers(localAttribute: ForwardableAttribute): string[] | undefined {
         if (!localAttribute.forwardedSharingInfos || localAttribute.forwardedSharingInfos.length === 0) return;
 
         if (localAttribute instanceof OwnIdentityAttribute) {
@@ -1152,7 +1152,7 @@ export class DataViewExpander {
         return localAttribute.getThirdParties().map((thirdPartyAddress) => thirdPartyAddress.toString());
     }
 
-    private expandForwardedSharingInfos(localAttribute: AttributeWithForwardedSharingInfos): ForwardedSharingInfoDVO[] | undefined {
+    private expandForwardedSharingInfos(localAttribute: ForwardableAttribute): ForwardedSharingInfoDVO[] | undefined {
         if (!localAttribute.forwardedSharingInfos || localAttribute.forwardedSharingInfos.length === 0) return;
 
         return localAttribute.forwardedSharingInfos.map((sharingInfo) => {
