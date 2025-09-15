@@ -21,7 +21,7 @@ import { anything, reset, spy, verify, when } from "ts-mockito";
 import {
     AttributeCreatedEvent,
     AttributeDeletedEvent,
-    AttributeForwardedSharingInfoChangedEvent,
+    AttributeForwardedSharingInfosChangedEvent,
     AttributesController,
     AttributeTagCollection,
     ConsumptionController,
@@ -422,7 +422,7 @@ describe("AttributesController", function () {
             const sourceReference = CoreId.from("aSourceReferenceId");
 
             const forwardedAttribute = await consumptionController.attributes.addForwardedSharingInfoToAttribute(attribute, peer, sourceReference);
-            mockEventBus.expectLastPublishedEvent(AttributeForwardedSharingInfoChangedEvent, forwardedAttribute);
+            mockEventBus.expectLastPublishedEvent(AttributeForwardedSharingInfosChangedEvent, forwardedAttribute);
         });
 
         test("should throw trying to add a ForwardedSharingInfo to an Attribute if it is already forwarded", async function () {
@@ -536,7 +536,7 @@ describe("AttributesController", function () {
             mockEventBus.clearPublishedEvents();
 
             const updatedAttribute = await consumptionController.attributes.removeForwardedSharingInfoFromAttribute(forwardedAttribute, peer);
-            mockEventBus.expectLastPublishedEvent(AttributeForwardedSharingInfoChangedEvent, updatedAttribute);
+            mockEventBus.expectLastPublishedEvent(AttributeForwardedSharingInfosChangedEvent, updatedAttribute);
         });
 
         test("should not change Attribute trying to remove a ForwardedSharingInfo from an Attribute without ForwardedSharingInfo", async function () {
