@@ -133,7 +133,7 @@ export class PeerRelationshipAttribute extends LocalAttribute implements IPeerRe
         return uniquePeers;
     }
 
-    public getForwardedSharingInfoForPeer(peer: CoreAddress): ForwardedSharingInfo | undefined {
+    public getForwardedSharingInfoNotDeletedByPeer(peer: CoreAddress): ForwardedSharingInfo | undefined {
         return this.forwardedSharingInfos?.find(
             (sharingInfo) => sharingInfo.peer.equals(peer) && sharingInfo.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.DeletedByPeer
         );

@@ -460,7 +460,7 @@ export class AttributesController extends ConsumptionBaseController {
 
         const sharingInfo = attribute.isToBeDeletedByForwardingPeer(peer)
             ? (() => {
-                  const sharingInfoForPeer = attribute.getForwardedSharingInfoForPeer(peer)!;
+                  const sharingInfoForPeer = attribute.getForwardedSharingInfoNotDeletedByPeer(peer)!;
                   sharingInfoForPeer.deletionInfo = undefined;
                   return sharingInfoForPeer;
               })()
