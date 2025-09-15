@@ -101,7 +101,9 @@ export class OwnRelationshipAttribute extends LocalAttribute implements IOwnRela
     }
 
     public setForwardedDeletionInfo(deletionInfo: EmittedAttributeDeletionInfo | undefined, thirdParty: CoreAddress): this {
-        const sharingInfoForThirdParty = this.forwardedSharingInfos?.find((sharingInfo) => sharingInfo.peer.equals(thirdParty));
+        const sharingInfoForThirdParty = this.forwardedSharingInfos?.find(
+            (sharingInfo) => sharingInfo.peer.equals(thirdParty) && sharingInfo.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.DeletedByPeer
+        );
         if (!sharingInfoForThirdParty) throw ConsumptionCoreErrors.attributes.cannotSetAttributeDeletionInfoForPeer(this.id, thirdParty);
 
         sharingInfoForThirdParty.deletionInfo = deletionInfo;

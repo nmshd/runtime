@@ -82,7 +82,9 @@ export class OwnIdentityAttribute extends LocalAttribute implements IOwnIdentity
     }
 
     public setForwardedDeletionInfo(deletionInfo: EmittedAttributeDeletionInfo | undefined, peer: CoreAddress): this {
-        const sharingInfoForPeer = this.forwardedSharingInfos?.find((sharingInfo) => sharingInfo.peer.equals(peer));
+        const sharingInfoForPeer = this.forwardedSharingInfos?.find(
+            (sharingInfo) => sharingInfo.peer.equals(peer) && sharingInfo.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.DeletedByPeer
+        );
         if (!sharingInfoForPeer) throw ConsumptionCoreErrors.attributes.cannotSetAttributeDeletionInfoForPeer(this.id, peer);
 
         sharingInfoForPeer.deletionInfo = deletionInfo;
