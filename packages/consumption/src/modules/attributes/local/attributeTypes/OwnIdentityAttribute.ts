@@ -53,7 +53,7 @@ export class OwnIdentityAttribute extends LocalAttribute implements IOwnIdentity
 
         if (!excludeToBeDeleted) return true;
 
-        return sharingInfosWithPeer.some((sharingInfo) => !sharingInfo.deletionInfo);
+        return sharingInfosWithPeer.some((sharingInfo) => sharingInfo.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.ToBeDeletedByPeer);
     }
 
     public isDeletedOrToBeDeletedByForwardingPeer(peer: CoreAddress): boolean {

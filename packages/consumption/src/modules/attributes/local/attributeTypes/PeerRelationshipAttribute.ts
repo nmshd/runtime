@@ -62,7 +62,7 @@ export class PeerRelationshipAttribute extends LocalAttribute implements IPeerRe
 
         if (!excludeToBeDeleted) return true;
 
-        return sharingInfosWithPeer.some((sharingInfo) => !sharingInfo.deletionInfo);
+        return sharingInfosWithPeer.some((sharingInfo) => sharingInfo.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.ToBeDeletedByPeer);
     }
 
     public isDeletedByOwnerOrToBeDeleted(): boolean {

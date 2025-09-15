@@ -60,7 +60,7 @@ export class OwnRelationshipAttribute extends LocalAttribute implements IOwnRela
 
         if (!excludeToBeDeleted) return true;
 
-        return sharingInfosWithPeer.some((sharingInfo) => !sharingInfo.deletionInfo);
+        return sharingInfosWithPeer.some((sharingInfo) => sharingInfo.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.ToBeDeletedByPeer);
     }
 
     public isDeletedOrToBeDeletedByPeer(): boolean {
