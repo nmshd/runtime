@@ -111,16 +111,20 @@ export class OwnRelationshipAttribute extends LocalAttribute implements IOwnRela
     }
 
     public getThirdParties(includeToBeDeleted = false): CoreAddress[] {
+        const forwardedSharingInfosNotDeletedByPeer = this.forwardedSharingInfos?.filter(
+            (sharingInfo) => sharingInfo.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.DeletedByPeer
+        );
+        if (!forwardedSharingInfosNotDeletedByPeer) return [];
+
         const sharingInfos = includeToBeDeleted
-            ? this.forwardedSharingInfos
-            : this.forwardedSharingInfos?.filter((sharingInfo) => {
+            ? forwardedSharingInfosNotDeletedByPeer
+            : forwardedSharingInfosNotDeletedByPeer.filter((sharingInfo) => {
                   return sharingInfo.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.ToBeDeletedByPeer;
               });
 
-        const thirdParty = sharingInfos?.map((sharingInfo) => sharingInfo.peer);
-        if (!thirdParty) return [];
-
-        return thirdParty;
+        const peers = sharingInfos.map((sharingInfo) => sharingInfo.peer.toString());
+        const uniquePeers = Array.from(new Set(peers)).map((address) => CoreAddress.from(address));
+        return uniquePeers;
     }
 
     public getForwardedSharingInfoForPeer(peer: CoreAddress): ForwardedSharingInfo | undefined {
