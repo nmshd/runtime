@@ -456,7 +456,7 @@ export class AttributesController extends ConsumptionBaseController {
         if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
         if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
-        if (attribute.isForwardedTo(peer, true)) throw ConsumptionCoreErrors.attributes.cannotAddForwardedSharingInfoToAttribute(attribute.id, peer);
+        if (attribute.isForwardedTo(peer, true)) throw ConsumptionCoreErrors.attributes.alreadyForwarded(attribute.id, peer);
 
         const sharingInfo = attribute.isToBeDeletedByForwardingPeer(peer)
             ? (() => {

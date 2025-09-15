@@ -440,7 +440,7 @@ describe("AttributesController", function () {
 
             await expect(
                 consumptionController.attributes.addForwardedSharingInfoToAttribute(attribute, CoreAddress.from("peer"), CoreId.from("aSourceReferenceId"))
-            ).rejects.toThrow("error.consumption.attributes.cannotAddForwardedSharingInfoToAttribute");
+            ).rejects.toThrow("error.consumption.attributes.alreadyForwarded");
         });
 
         test("should allow to add a ForwardedSharingInfo to an Attribute if it is already forwarded but DeletedByPeer", async function () {
