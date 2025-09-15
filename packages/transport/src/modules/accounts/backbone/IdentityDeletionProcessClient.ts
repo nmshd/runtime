@@ -17,12 +17,4 @@ export class IdentityDeletionProcessClient extends RESTClientAuthenticate {
     public async cancelIdentityDeletionProcess(identityDeletionProcessId: string): Promise<ClientResult<BackboneIdentityDeletionProcess>> {
         return await this.put<BackboneIdentityDeletionProcess>(`/api/v1/Identities/Self/DeletionProcesses/${identityDeletionProcessId}/Cancel`, {});
     }
-
-    public async approveIdentityDeletionProcess(identityDeletionProcessId: string): Promise<ClientResult<BackboneIdentityDeletionProcess>> {
-        return await this.put<BackboneIdentityDeletionProcess>(`/api/v1/Identities/Self/DeletionProcesses/${identityDeletionProcessId}/Approve`, {});
-    }
-
-    public async rejectIdentityDeletionProcess(identityDeletionProcessId: string): Promise<ClientResult<BackboneIdentityDeletionProcess>> {
-        return await this.put<BackboneIdentityDeletionProcess>(`/api/v1/Identities/Self/DeletionProcesses/${identityDeletionProcessId}/Reject`, {});
-    }
 }

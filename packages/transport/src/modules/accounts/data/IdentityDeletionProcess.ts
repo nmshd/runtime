@@ -9,9 +9,6 @@ export interface IdentityDeletionProcessJSON {
     status: IdentityDeletionProcessStatus;
     createdAt?: string;
     createdByDevice?: string;
-    approvalPeriodEndsAt?: string;
-    rejectedAt?: string;
-    rejectedByDevice?: string;
     approvedAt?: string;
     approvedByDevice?: string;
     gracePeriodEndsAt?: string;
@@ -24,9 +21,6 @@ export interface IIdentityDeletionProcess {
     status: IdentityDeletionProcessStatus;
     createdAt?: CoreDate;
     createdByDevice?: CoreId;
-    approvalPeriodEndsAt?: CoreDate;
-    rejectedAt?: CoreDate;
-    rejectedByDevice?: CoreId;
     approvedAt?: CoreDate;
     approvedByDevice?: CoreId;
     gracePeriodEndsAt?: CoreDate;
@@ -40,13 +34,10 @@ export class IdentityDeletionProcess extends CoreSynchronizable implements IIden
         nameof<IdentityDeletionProcess>((r) => r.id),
         nameof<IdentityDeletionProcess>((r) => r.status),
         nameof<IdentityDeletionProcess>((r) => r.createdAt),
-        nameof<IdentityDeletionProcess>((r) => r.createdByDevice),
-        nameof<IdentityDeletionProcess>((r) => r.approvalPeriodEndsAt)
+        nameof<IdentityDeletionProcess>((r) => r.createdByDevice)
     ];
 
     public override readonly contentProperties = [
-        nameof<IdentityDeletionProcess>((r) => r.rejectedAt),
-        nameof<IdentityDeletionProcess>((r) => r.rejectedByDevice),
         nameof<IdentityDeletionProcess>((r) => r.approvedAt),
         nameof<IdentityDeletionProcess>((r) => r.approvedByDevice),
         nameof<IdentityDeletionProcess>((r) => r.gracePeriodEndsAt),
@@ -65,18 +56,6 @@ export class IdentityDeletionProcess extends CoreSynchronizable implements IIden
     @validate({ nullable: true })
     @serialize()
     public createdByDevice?: CoreId;
-
-    @validate({ nullable: true })
-    @serialize()
-    public approvalPeriodEndsAt?: CoreDate;
-
-    @validate({ nullable: true })
-    @serialize()
-    public rejectedAt?: CoreDate;
-
-    @validate({ nullable: true })
-    @serialize()
-    public rejectedByDevice?: CoreId;
 
     @validate({ nullable: true })
     @serialize()
