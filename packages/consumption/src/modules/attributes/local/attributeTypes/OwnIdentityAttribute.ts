@@ -91,7 +91,7 @@ export class OwnIdentityAttribute extends LocalAttribute implements IOwnIdentity
         return this;
     }
 
-    public getPeers(includeToBeDeleted = false): CoreAddress[] {
+    public getForwardedPeers(includeToBeDeleted = false): CoreAddress[] {
         const forwardedSharingInfosNotDeletedByPeer = this.forwardedSharingInfos?.filter(
             (sharingInfo) => sharingInfo.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.DeletedByPeer
         );

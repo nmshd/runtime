@@ -1146,10 +1146,10 @@ export class DataViewExpander {
         if (!localAttribute.forwardedSharingInfos || localAttribute.forwardedSharingInfos.length === 0) return;
 
         if (localAttribute instanceof OwnIdentityAttribute) {
-            return localAttribute.getPeers().map((peerAddress) => peerAddress.toString());
+            return localAttribute.getForwardedPeers().map((peerAddress) => peerAddress.toString());
         }
 
-        return localAttribute.getThirdParties().map((thirdPartyAddress) => thirdPartyAddress.toString());
+        return localAttribute.getForwardedPeers().map((thirdPartyAddress) => thirdPartyAddress.toString());
     }
 
     private expandForwardedSharingInfos(localAttribute: ForwardableAttribute): ForwardedSharingInfoDVO[] | undefined {

@@ -110,7 +110,7 @@ export class OwnRelationshipAttribute extends LocalAttribute implements IOwnRela
         return this;
     }
 
-    public getThirdParties(includeToBeDeleted = false): CoreAddress[] {
+    public getForwardedPeers(includeToBeDeleted = false): CoreAddress[] {
         const forwardedSharingInfosNotDeletedByPeer = this.forwardedSharingInfos?.filter(
             (sharingInfo) => sharingInfo.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.DeletedByPeer
         );

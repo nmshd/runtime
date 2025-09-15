@@ -77,7 +77,7 @@ export class DeleteAttributeAndNotifyUseCase extends UseCase<DeleteAttributeAndN
     private async notifyAboutDeletionOfOwnIdentityAttribute(attribute: OwnIdentityAttribute): Promise<Result<DeleteAttributeAndNotifyResponse>> {
         const notificationItem = OwnAttributeDeletedByOwnerNotificationItem.from({ attributeId: attribute.id });
 
-        const forwardingPeers = attribute.getPeers(true);
+        const forwardingPeers = attribute.getForwardedPeers(true);
         if (forwardingPeers.length === 0) return Result.ok({ notificationIds: [] });
 
         return await this.notifyForwardingPeers(forwardingPeers, notificationItem);
@@ -92,7 +92,7 @@ export class DeleteAttributeAndNotifyUseCase extends UseCase<DeleteAttributeAndN
         const peerNotificationResult = await this.notifyPeer(attribute.peerSharingInfo.peer, notificationItem);
         if (peerNotificationResult.isError) return peerNotificationResult;
 
-        const forwardingPeers = attribute.getThirdParties(true);
+        const forwardingPeers = attribute.getForwardedPeers(true);
         if (forwardingPeers.length === 0) return peerNotificationResult;
 
         const forwardingNotificationResult = await this.notifyForwardingPeers(forwardingPeers, notificationItem);
