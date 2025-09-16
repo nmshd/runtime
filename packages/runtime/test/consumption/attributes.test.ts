@@ -55,7 +55,7 @@ import {
 import {
     RuntimeServiceProvider,
     TestRuntimeServices,
-    acceptIncomingShareAttributeRequest,
+    acceptIncomingCreateOrShareAttributeRequest,
     cleanupAttributes,
     createRelationshipWithStatusPending,
     ensureActiveRelationship,
@@ -1375,7 +1375,7 @@ describe(ShareOwnIdentityAttributeUseCase.name, () => {
         expect(shareRequestResult).toBeSuccessful();
 
         const shareRequestId = shareRequestResult.value.id;
-        const sUpdatedOwnIdentityAttribute = await acceptIncomingShareAttributeRequest(services1, services2, shareRequestId);
+        const sUpdatedOwnIdentityAttribute = await acceptIncomingCreateOrShareAttributeRequest(services1, services2, shareRequestId);
         expect(sUpdatedOwnIdentityAttribute.forwardedSharingInfos![0].peer).toBe(services2.address);
         expect(sUpdatedOwnIdentityAttribute.forwardedSharingInfos![0].sourceReference).toBe(shareRequestId);
 
@@ -1421,7 +1421,7 @@ describe(ShareOwnIdentityAttributeUseCase.name, () => {
         const shareRequestResult = await services1.consumption.attributes.shareOwnIdentityAttribute(shareRequest);
 
         const shareRequestId = shareRequestResult.value.id;
-        await acceptIncomingShareAttributeRequest(services1, services2, shareRequestId);
+        await acceptIncomingCreateOrShareAttributeRequest(services1, services2, shareRequestId);
 
         const rPeerIdentityAttribute = (await services2.consumption.attributes.getAttribute({ id: sOwnIdentityAttribute.id })).value;
         const deleteResult = await services2.consumption.attributes.deleteAttributeAndNotify({ attributeId: rPeerIdentityAttribute.id });
@@ -1446,7 +1446,7 @@ describe(ShareOwnIdentityAttributeUseCase.name, () => {
         const shareRequestResult = await services1.consumption.attributes.shareOwnIdentityAttribute(shareRequest);
 
         const shareRequestId = shareRequestResult.value.id;
-        await acceptIncomingShareAttributeRequest(services1, services2, shareRequestId);
+        await acceptIncomingCreateOrShareAttributeRequest(services1, services2, shareRequestId);
 
         const requestParams = {
             content: {
@@ -1900,7 +1900,7 @@ describe(CreateAndShareRelationshipAttributeUseCase.name, () => {
         expect(requestResult).toBeSuccessful();
 
         const requestId = requestResult.value.id;
-        const sOwnRelationshipAttribute = await acceptIncomingShareAttributeRequest(services1, services2, requestId);
+        const sOwnRelationshipAttribute = await acceptIncomingCreateOrShareAttributeRequest(services1, services2, requestId);
         const rPeerRelationshipAttribute = (await services2.consumption.attributes.getAttribute({ id: sOwnRelationshipAttribute.id })).value;
 
         expect(sOwnRelationshipAttribute.content.value).toStrictEqual(createAndShareRelationshipAttributeRequest.content.value);
@@ -2256,7 +2256,7 @@ describe("Get (shared) versions of Attribute", () => {
                 peer: services3.address
             });
             const shareRequestId = shareRequestResult.value.id;
-            sOwnIdentityAttributeVersion2 = await acceptIncomingShareAttributeRequest(services1, services3, shareRequestId);
+            sOwnIdentityAttributeVersion2 = await acceptIncomingCreateOrShareAttributeRequest(services1, services3, shareRequestId);
         }
     }
 

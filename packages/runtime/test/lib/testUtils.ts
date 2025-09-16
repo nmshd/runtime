@@ -631,11 +631,11 @@ export async function executeFullShareOwnIdentityAttributeFlow(sender: TestRunti
     const shareRequestResult = await sender.consumption.attributes.shareOwnIdentityAttribute(shareRequest);
     const shareRequestId = shareRequestResult.value.id;
 
-    const senderOwnIdentityAttribute = await acceptIncomingShareAttributeRequest(sender, recipient, shareRequestId);
+    const senderOwnIdentityAttribute = await acceptIncomingCreateOrShareAttributeRequest(sender, recipient, shareRequestId);
     return senderOwnIdentityAttribute;
 }
 
-export async function acceptIncomingShareAttributeRequest(sender: TestRuntimeServices, recipient: TestRuntimeServices, requestId: string): Promise<LocalAttributeDTO> {
+export async function acceptIncomingCreateOrShareAttributeRequest(sender: TestRuntimeServices, recipient: TestRuntimeServices, requestId: string): Promise<LocalAttributeDTO> {
     await syncUntilHasMessageWithRequest(recipient.transport, requestId);
     await recipient.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => {
         return e.data.request.id === requestId && (e.data.newStatus === LocalRequestStatus.ManualDecisionRequired || e.data.newStatus === LocalRequestStatus.Decided);
@@ -667,7 +667,7 @@ export async function executeFullCreateAndShareRelationshipAttributeFlow(
     const requestResult = await sender.consumption.attributes.createAndShareRelationshipAttribute({ ...request, peer: recipient.address });
     const requestId = requestResult.value.id;
 
-    const senderOwnRelationshipAttribute = await acceptIncomingShareAttributeRequest(sender, recipient, requestId);
+    const senderOwnRelationshipAttribute = await acceptIncomingCreateOrShareAttributeRequest(sender, recipient, requestId);
     return senderOwnRelationshipAttribute;
 }
 
@@ -771,7 +771,7 @@ export async function executeFullShareAndAcceptAttributeRequestFlow(
         content: createRequestResult.value.content
     });
 
-    const ownAttribute = await acceptIncomingShareAttributeRequest(owner, peer, createRequestResult.value.id);
+    const ownAttribute = await acceptIncomingCreateOrShareAttributeRequest(owner, peer, createRequestResult.value.id);
     return ownAttribute;
 }
 
