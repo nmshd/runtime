@@ -97,11 +97,18 @@ class Attributes {
     }
 
     public cannotSetAttributeDeletionInfo(attributeId: string | CoreId, peer?: CoreAddress | string) {
-        const errorMessageWithPeer = `You cannot set the deletionInfo of Attribute '${attributeId}' for peer '${peer}' since it isn't shared with them or already deleted by them.`;
-        const errorMessageWithoutPeer = `You cannot set the deletionInfo of Attribute '${attributeId}' since it is already deleted by the peer.`;
+        const errorMessageWithPeer = `You cannot set the deletionInfo of Attribute '${attributeId.toString()}' for peer '${peer?.toString()}' since it isn't shared with them or already deleted by them.`;
+        const errorMessageWithoutPeer = `You cannot set the deletionInfo of Attribute '${attributeId.toString()}' since it is already deleted by the peer.`;
         const errorMessage = peer ? errorMessageWithPeer : errorMessageWithoutPeer;
 
         return new CoreError("error.consumption.attributes.cannotSetAttributeDeletionInfo", errorMessage);
+    }
+
+    public cannotSetForwardedSharingInfoForPeer(attributeId: string | CoreId, peer: CoreAddress | string) {
+        return new CoreError(
+            "error.consumption.attributes.cannotSetForwardedSharingInfoForPeer",
+            `You cannot set the forwardedSharingInfo of Attribute '${attributeId.toString()}' for peer '${peer.toString()}' since they are the peer of the Relationship in whose context the RelationshipAttribute exists.`
+        );
     }
 
     public wrongRelationshipStatusToSetDeletionInfo() {

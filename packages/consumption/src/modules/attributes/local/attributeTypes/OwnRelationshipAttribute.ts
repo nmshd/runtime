@@ -139,6 +139,8 @@ export class OwnRelationshipAttribute extends LocalAttribute implements IOwnRela
     }
 
     public upsertForwardedSharingInfoForPeer(peer: CoreAddress, sharingInfo: ForwardedSharingInfo): this {
+        if (peer.equals(this.peerSharingInfo.peer)) throw ConsumptionCoreErrors.attributes.cannotSetForwardedSharingInfoForPeer(this.id, peer);
+
         if (!this.forwardedSharingInfos) {
             this.forwardedSharingInfos = [sharingInfo];
             return this;
