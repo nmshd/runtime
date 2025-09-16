@@ -13833,6 +13833,19 @@ export const GetOwnAttributesSharedWithPeerRequest: any = {
         "GetOwnAttributesSharedWithPeerRequestQuery": {
             "type": "object",
             "properties": {
+                "@type": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
                 "createdAt": {
                     "type": "string"
                 },
@@ -14264,6 +14277,19 @@ export const GetPeerAttributesRequest: any = {
         "GetPeerAttributesRequestQuery": {
             "type": "object",
             "properties": {
+                "@type": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
                 "createdAt": {
                     "type": "string"
                 },

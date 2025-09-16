@@ -18,6 +18,7 @@ export interface GetOwnAttributesSharedWithPeerRequest {
 }
 
 export interface GetOwnAttributesSharedWithPeerRequestQuery {
+    "@type"?: string | string[];
     createdAt?: string;
     wasViewedAt?: string | string[];
     isDefault?: string;
