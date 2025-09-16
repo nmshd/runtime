@@ -2,7 +2,7 @@ import { ILogger, ILoggerFactory } from "@js-soft/logging-abstractions";
 import { Serializable } from "@js-soft/ts-serval";
 import { EventBus, Result } from "@js-soft/ts-utils";
 import { ICoreAddress, Reference, SharedPasswordProtection } from "@nmshd/core-types";
-import { AnonymousServices, DeviceMapper, RuntimeServices } from "@nmshd/runtime";
+import { AnonymousServices, RuntimeServices } from "@nmshd/runtime";
 import { BackboneIds, TokenContentDeviceSharedSecret } from "@nmshd/transport";
 import { AppRuntimeErrors } from "./AppRuntimeErrors";
 import { IUIBridge } from "./extensibility";
@@ -139,43 +139,6 @@ export class AppStringProcessor {
                 return Result.fail(AppRuntimeErrors.appStringProcessor.deviceOnboardingNotAllowed());
         }
 
-        return Result.ok(undefined);
-    }
-
-    public async processDeviceOnboardingReference(url: string): Promise<Result<void>> {
-        url = url.trim();
-
-        let reference: Reference;
-
-        try {
-            reference = Reference.from(url);
-        } catch (_) {
-            return Result.fail(AppRuntimeErrors.appStringProcessor.invalidReference());
-        }
-
-        if (!BackboneIds.token.validate(reference.id)) return Result.fail(AppRuntimeErrors.appStringProcessor.noDeviceOnboardingCode());
-
-        const tokenResultHolder = reference.passwordProtection
-            ? await this._fetchPasswordProtectedItemWithRetry(
-                  async (password) => await this.runtime.anonymousServices.tokens.loadPeerToken({ reference: reference.truncate(), password }),
-                  reference.passwordProtection
-              )
-            : { result: await this.runtime.anonymousServices.tokens.loadPeerToken({ reference: reference.truncate() }) };
-
-        if (tokenResultHolder.result.isError && tokenResultHolder.result.error.equals(AppRuntimeErrors.appStringProcessor.passwordNotProvided())) {
-            return Result.ok(undefined);
-        }
-
-        if (tokenResultHolder.result.isError) {
-            return Result.fail(tokenResultHolder.result.error);
-        }
-
-        const tokenDTO = tokenResultHolder.result.value;
-        const tokenContent = this.parseTokenContent(tokenDTO.content);
-        if (!(tokenContent instanceof TokenContentDeviceSharedSecret)) return Result.fail(AppRuntimeErrors.appStringProcessor.noDeviceOnboardingCode());
-
-        const uiBridge = await this.runtime.uiBridge();
-        await uiBridge.showDeviceOnboarding(DeviceMapper.toDeviceOnboardingInfoDTO(tokenContent.sharedSecret));
         return Result.ok(undefined);
     }
 
