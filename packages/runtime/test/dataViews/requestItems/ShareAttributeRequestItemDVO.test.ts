@@ -38,7 +38,6 @@ let sEventBus: MockEventBus;
 let rEventBus: MockEventBus;
 let requestContent: CreateOutgoingRequestRequest;
 let responseItems: DecideRequestItemParametersJSON[];
-let sAddress: string;
 let rAddress: string;
 
 let sharedAttributeId: string;
@@ -56,7 +55,6 @@ beforeAll(async () => {
     sEventBus = sRuntimeServices.eventBus;
     rEventBus = rRuntimeServices.eventBus;
     await establishRelationship(sTransportServices, rTransportServices);
-    sAddress = (await sTransportServices.account.getIdentityInfo()).value.address;
     rAddress = (await rTransportServices.account.getIdentityInfo()).value.address;
 
     responseItems = [{ accept: true }];
@@ -223,20 +221,13 @@ describe("ShareAttributeRequestItemDVO", () => {
     });
 
     test("check the sender's dvo for the recipient", async () => {
-        const baselineNumberOfItems = (await rExpander.expandAddress(sAddress)).items?.length ?? 0;
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
         const dvo = await rExpander.expandAddress(senderMessage.createdBy);
         expect(dvo.name).toBe("aDisplayName");
-        const numberOfItems = dvo.items!.length;
-        expect(numberOfItems - baselineNumberOfItems).toBe(1);
+        expect(dvo.items).toHaveLength(1);
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
-        const baselineNumberOfAttributes = (
-            await sConsumptionServices.attributes.getAttributes({
-                query: { "content.value.@type": "DisplayName", "forwardedSharingInfos.peer": rAddress }
-            })
-        ).value.length;
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
         const dto = senderMessage;
         const dvo = (await sExpander.expandMessageDTO(senderMessage)) as RequestMessageDVO;
@@ -283,14 +274,13 @@ describe("ShareAttributeRequestItemDVO", () => {
             query: { "content.value.@type": "DisplayName", "forwardedSharingInfos.peer": dvo.request.peer.id }
         });
         expect(attributeResult).toBeSuccessful();
-        const numberOfAttributes = attributeResult.value.length;
-        expect(numberOfAttributes - baselineNumberOfAttributes).toBe(1);
-        expect(attributeResult.value[numberOfAttributes - 1].id).toBeDefined();
-        expect((attributeResult.value[numberOfAttributes - 1].content.value as DisplayNameJSON).value).toBe("aDisplayName");
+        const attributes = attributeResult.value;
+        expect(attributes).toHaveLength(1);
+        expect(attributes[0].id).toBeDefined();
+        expect((attributes[0].content.value as DisplayNameJSON).value).toBe("aDisplayName");
     });
 
     test("check the attributes for the sender", async () => {
-        const baselineNumberOfAttributes = (await sConsumptionServices.attributes.getOwnAttributesSharedWithPeer({ peer: rAddress })).value.length;
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
         const dvo = (await sExpander.expandMessageDTO(senderMessage)) as RequestMessageDVO;
         const attributeResult = await sConsumptionServices.attributes.getOwnAttributesSharedWithPeer({
@@ -298,10 +288,10 @@ describe("ShareAttributeRequestItemDVO", () => {
         });
 
         expect(attributeResult).toBeSuccessful();
-        const numberOfAttributes = attributeResult.value.length;
-        expect(numberOfAttributes - baselineNumberOfAttributes).toBe(1);
-        expect(attributeResult.value[numberOfAttributes - 1].id).toBeDefined();
-        expect((attributeResult.value[numberOfAttributes - 1].content.value as DisplayNameJSON).value).toBe("aDisplayName");
+        const attributes = attributeResult.value;
+        expect(attributes).toHaveLength(1);
+        expect(attributes[0].id).toBeDefined();
+        expect((attributes[0].content.value as DisplayNameJSON).value).toBe("aDisplayName");
     });
 
     test("check the recipient's dvo for the sender", async () => {
