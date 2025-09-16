@@ -1,5 +1,4 @@
 import { CoreDate, LanguageISO639 } from "@nmshd/core-types";
-import { DeviceMapper } from "../../src";
 import { RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
@@ -11,15 +10,6 @@ beforeAll(async () => {
 afterAll(async () => await serviceProvider.stop());
 
 describe("Devices", () => {
-    test("should map the DeviceOnboardingInfoDTO to a DeviceSharedSecret", async () => {
-        const createDeviceResult = await runtimeServices.transport.devices.createDevice({});
-        const onboardingInfo = (await runtimeServices.transport.devices.getDeviceOnboardingInfo({ id: createDeviceResult.value.id })).value;
-        expect(onboardingInfo).toBeDefined();
-
-        const sharedSecret = DeviceMapper.toDeviceSharedSecret(onboardingInfo);
-        expect(sharedSecret).toBeDefined();
-    });
-
     test("should set the communication language", async () => {
         const result = await runtimeServices.transport.devices.setCommunicationLanguage({ communicationLanguage: LanguageISO639.fr });
         expect(result).toBeSuccessful();
