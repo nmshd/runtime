@@ -1,6 +1,7 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { IdentityAttribute, IdentityAttributeJSON, IIdentityAttribute } from "@nmshd/content";
 import { nameof } from "ts-simple-nameof";
+import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import {
     IPeerIdentityAttributeSharingInfo,
     PeerIdentityAttributeSharingInfo,
@@ -44,7 +45,11 @@ export class PeerIdentityAttribute extends LocalAttribute implements IPeerIdenti
         return this.peerSharingInfo.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.ToBeDeleted;
     }
 
-    public setPeerDeletionInfo(deletionInfo: ReceivedAttributeDeletionInfo | undefined): this {
+    public setPeerDeletionInfo(deletionInfo: ReceivedAttributeDeletionInfo | undefined, overrideDeleted = false): this {
+        if (!overrideDeleted && this.peerSharingInfo.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.DeletedByOwner) {
+            throw ConsumptionCoreErrors.attributes.cannotSetAttributeDeletionInfo(this.id);
+        }
+
         this.peerSharingInfo.deletionInfo = deletionInfo;
         return this;
     }

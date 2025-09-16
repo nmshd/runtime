@@ -86,7 +86,7 @@ export class OwnIdentityAttribute extends LocalAttribute implements IOwnIdentity
             (sharingInfo) => sharingInfo.peer.equals(peer) && (overrideDeleted || sharingInfo.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.DeletedByPeer)
         );
 
-        if (!sharingInfoForPeer) throw ConsumptionCoreErrors.attributes.cannotSetAttributeDeletionInfoForPeer(this.id, peer);
+        if (!sharingInfoForPeer) throw ConsumptionCoreErrors.attributes.cannotSetAttributeDeletionInfo(this.id, peer);
 
         sharingInfoForPeer.deletionInfo = deletionInfo;
         return this;

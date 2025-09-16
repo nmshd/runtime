@@ -1414,7 +1414,7 @@ export class AttributesController extends ConsumptionBaseController {
     ): Promise<void> {
         if (attribute.isDeletedOrToBeDeletedByPeer() && !overrideDeletedOrToBeDeleted) return;
 
-        attribute.setPeerDeletionInfo(deletionInfo);
+        attribute.setPeerDeletionInfo(deletionInfo, overrideDeletedOrToBeDeleted);
         await this.parent.attributes.updateAttributeUnsafe(attribute);
     }
 
@@ -1425,7 +1425,7 @@ export class AttributesController extends ConsumptionBaseController {
     ): Promise<void> {
         if (attribute.isDeletedByOwnerOrToBeDeleted() && !overrideDeletedOrToBeDeleted) return;
 
-        attribute.setPeerDeletionInfo(deletionInfo);
+        attribute.setPeerDeletionInfo(deletionInfo, overrideDeletedOrToBeDeleted);
         await this.parent.attributes.updateAttributeUnsafe(attribute);
     }
 
@@ -1436,7 +1436,7 @@ export class AttributesController extends ConsumptionBaseController {
     ): Promise<void> {
         if (attribute.isDeletedByOwnerOrPeerOrToBeDeleted() && !overrideDeletedOrToBeDeleted) return;
 
-        attribute.setPeerDeletionInfo(deletionInfo);
+        attribute.setPeerDeletionInfo(deletionInfo, overrideDeletedOrToBeDeleted);
         await this.parent.attributes.updateAttributeUnsafe(attribute);
     }
 

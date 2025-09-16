@@ -1,6 +1,7 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { IRelationshipAttribute, RelationshipAttribute, RelationshipAttributeJSON } from "@nmshd/content";
 import { nameof } from "ts-simple-nameof";
+import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import {
     IThirdPartyRelationshipAttributeSharingInfo,
     ThirdPartyRelationshipAttributeDeletionInfo,
@@ -48,7 +49,20 @@ export class ThirdPartyRelationshipAttribute extends LocalAttribute implements I
         return this.peerSharingInfo.deletionInfo?.deletionStatus === ThirdPartyRelationshipAttributeDeletionStatus.ToBeDeleted;
     }
 
-    public setPeerDeletionInfo(deletionInfo: ThirdPartyRelationshipAttributeDeletionInfo | undefined): this {
+    // public setPeerDeletionInfo(deletionInfo: ThirdPartyRelationshipAttributeDeletionInfo | undefined): this {
+    //     this.peerSharingInfo.deletionInfo = deletionInfo;
+    //     return this;
+    // }
+
+    public setPeerDeletionInfo(deletionInfo: ThirdPartyRelationshipAttributeDeletionInfo | undefined, overrideDeleted = false): this {
+        if (
+            !overrideDeleted &&
+            (this.peerSharingInfo.deletionInfo?.deletionStatus === ThirdPartyRelationshipAttributeDeletionStatus.DeletedByOwner ||
+                this.peerSharingInfo.deletionInfo?.deletionStatus === ThirdPartyRelationshipAttributeDeletionStatus.DeletedByPeer)
+        ) {
+            throw ConsumptionCoreErrors.attributes.cannotSetAttributeDeletionInfo(this.id);
+        }
+
         this.peerSharingInfo.deletionInfo = deletionInfo;
         return this;
     }

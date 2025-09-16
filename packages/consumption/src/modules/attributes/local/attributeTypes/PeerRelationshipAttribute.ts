@@ -101,7 +101,11 @@ export class PeerRelationshipAttribute extends LocalAttribute implements IPeerRe
         );
     }
 
-    public setPeerDeletionInfo(deletionInfo: ReceivedAttributeDeletionInfo | undefined): this {
+    public setPeerDeletionInfo(deletionInfo: ReceivedAttributeDeletionInfo | undefined, overrideDeleted = false): this {
+        if (!overrideDeleted && this.peerSharingInfo.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.DeletedByOwner) {
+            throw ConsumptionCoreErrors.attributes.cannotSetAttributeDeletionInfo(this.id);
+        }
+
         this.peerSharingInfo.deletionInfo = deletionInfo;
         return this;
     }
@@ -111,7 +115,7 @@ export class PeerRelationshipAttribute extends LocalAttribute implements IPeerRe
             (sharingInfo) => sharingInfo.peer.equals(peer) && (overrideDeleted || sharingInfo.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.DeletedByPeer)
         );
 
-        if (!sharingInfoForPeer) throw ConsumptionCoreErrors.attributes.cannotSetAttributeDeletionInfoForPeer(this.id, peer);
+        if (!sharingInfoForPeer) throw ConsumptionCoreErrors.attributes.cannotSetAttributeDeletionInfo(this.id, peer);
 
         sharingInfoForPeer.deletionInfo = deletionInfo;
         return this;
