@@ -100,13 +100,14 @@ export class OwnRelationshipAttribute extends LocalAttribute implements IOwnRela
         return this;
     }
 
-    public setForwardedDeletionInfo(deletionInfo: EmittedAttributeDeletionInfo | undefined, peer: CoreAddress): this {
-        const sharingInfoForThirdParty = this.forwardedSharingInfos?.find(
-            (sharingInfo) => sharingInfo.peer.equals(peer) && sharingInfo.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.DeletedByPeer
+    public setForwardedDeletionInfo(deletionInfo: EmittedAttributeDeletionInfo | undefined, peer: CoreAddress, overrideDeleted = false): this {
+        const sharingInfoForPeer = this.forwardedSharingInfos?.find(
+            (sharingInfo) => sharingInfo.peer.equals(peer) && (overrideDeleted || sharingInfo.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.DeletedByPeer)
         );
-        if (!sharingInfoForThirdParty) throw ConsumptionCoreErrors.attributes.cannotSetAttributeDeletionInfoForPeer(this.id, peer);
 
-        sharingInfoForThirdParty.deletionInfo = deletionInfo;
+        if (!sharingInfoForPeer) throw ConsumptionCoreErrors.attributes.cannotSetAttributeDeletionInfoForPeer(this.id, peer);
+
+        sharingInfoForPeer.deletionInfo = deletionInfo;
         return this;
     }
 

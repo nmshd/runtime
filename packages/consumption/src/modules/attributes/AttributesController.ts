@@ -1403,7 +1403,7 @@ export class AttributesController extends ConsumptionBaseController {
     ): Promise<void> {
         if (attribute.isDeletedOrToBeDeletedByForwardingPeer(peer) && !overrideDeletedOrToBeDeleted) return;
 
-        attribute.setForwardedDeletionInfo(deletionInfo, peer);
+        attribute.setForwardedDeletionInfo(deletionInfo, peer, overrideDeletedOrToBeDeleted);
         await this.updateAttributeUnsafe(attribute);
     }
 
