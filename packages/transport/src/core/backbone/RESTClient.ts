@@ -92,6 +92,7 @@ export class RESTClient {
 
             if (httpAgent && httpsAgent) {
                 resultingRequestConfig.httpAgent = new httpAgent({ ...this.config.httpAgentOptions, proxyEnv: process.env } satisfies HTTPAgentOptions);
+                resultingRequestConfig.httpsAgent = new httpsAgent({ ...this.config.httpsAgentOptions, proxyEnv: process.env } satisfies HTTPSAgentOptions);
             }
         } catch (_) {
             // ignore
