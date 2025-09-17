@@ -105,7 +105,7 @@ describe("IQLQueryExpanded", () => {
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
         expect(dvo.forwardingPeers).toBeUndefined();
-        expect(dvo.forwardedSharingInfos).toBeUndefined();
+        expect(dvo.forwardedSharingDetails).toBeUndefined();
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");
@@ -128,7 +128,7 @@ describe("IQLQueryExpanded", () => {
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
         expect(dvo.forwardingPeers).toBeUndefined();
-        expect(dvo.forwardedSharingInfos).toBeUndefined();
+        expect(dvo.forwardedSharingDetails).toBeUndefined();
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");
@@ -152,7 +152,7 @@ describe("IQLQueryExpanded", () => {
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
         expect(dvo.forwardingPeers).toBeUndefined();
-        expect(dvo.forwardedSharingInfos).toBeUndefined();
+        expect(dvo.forwardedSharingDetails).toBeUndefined();
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");
@@ -195,7 +195,7 @@ describe("IQLQueryExpanded", () => {
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
         expect(dvo.forwardingPeers).toBeUndefined();
-        expect(dvo.forwardedSharingInfos).toBeUndefined();
+        expect(dvo.forwardedSharingDetails).toBeUndefined();
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");
@@ -238,7 +238,7 @@ describe("IQLQueryExpanded", () => {
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
         expect(dvo.forwardingPeers).toBeUndefined();
-        expect(dvo.forwardedSharingInfos).toBeUndefined();
+        expect(dvo.forwardedSharingDetails).toBeUndefined();
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");
@@ -278,7 +278,7 @@ describe("IQLQueryExpanded", () => {
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
         expect(dvo.forwardingPeers).toBeUndefined();
-        expect(dvo.forwardedSharingInfos).toBeUndefined();
+        expect(dvo.forwardedSharingDetails).toBeUndefined();
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");
@@ -302,7 +302,7 @@ describe("IQLQueryExpanded", () => {
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
         expect(dvo.forwardingPeers).toBeUndefined();
-        expect(dvo.forwardedSharingInfos).toBeUndefined();
+        expect(dvo.forwardedSharingDetails).toBeUndefined();
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");

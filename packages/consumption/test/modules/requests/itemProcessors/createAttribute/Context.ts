@@ -202,7 +202,7 @@ export class GivenSteps {
 
         const createdOwnIdentityAttribute = await this.context.consumptionController.attributes.createOwnIdentityAttribute({ content: attribute });
 
-        const forwardedOwnIdentityAttribute = await this.context.consumptionController.attributes.addForwardedSharingInfoToAttribute(
+        const forwardedOwnIdentityAttribute = await this.context.consumptionController.attributes.addForwardedSharingDetailsToAttribute(
             createdOwnIdentityAttribute,
             this.context.translateTestIdentity(params.peer)!,
             CoreId.from("aSourceReferenceId")
@@ -237,7 +237,7 @@ export class GivenSteps {
 
         const createdOwnIdentityAttribute = await this.context.consumptionController.attributes.createOwnIdentityAttribute({ content: attribute });
 
-        const forwardedOwnIdentityAttribute = await this.context.consumptionController.attributes.addForwardedSharingInfoToAttribute(
+        const forwardedOwnIdentityAttribute = await this.context.consumptionController.attributes.addForwardedSharingDetailsToAttribute(
             createdOwnIdentityAttribute,
             this.context.translateTestIdentity(params.peer)!,
             CoreId.from("aSourceReferenceId")
@@ -305,7 +305,7 @@ export class ThenSteps {
 
         expect(createdForwardedOwnIdentityAttribute).toBeDefined();
         expect(createdForwardedOwnIdentityAttribute instanceof OwnIdentityAttribute).toBe(true);
-        expect(createdForwardedOwnIdentityAttribute.forwardedSharingInfos).toBeDefined();
+        expect(createdForwardedOwnIdentityAttribute.forwardedSharingDetails).toBeDefined();
         expect(createdForwardedOwnIdentityAttribute.isForwardedTo(this.context.peerAddress)).toBe(true);
         if (value) expect(createdForwardedOwnIdentityAttribute.content.value.toJSON()).toStrictEqual(value);
     }
@@ -328,15 +328,15 @@ export class ThenSteps {
         expect(forwardedOwnIdentityAttribute).toBeDefined();
         expect(forwardedOwnIdentityAttribute.id.toString()).toBe(attribute.id.toString());
         expect(forwardedOwnIdentityAttribute.content.toJSON()).toStrictEqual(attribute.content.toJSON());
-        expect(forwardedOwnIdentityAttribute.forwardedSharingInfos).toBeDefined();
+        expect(forwardedOwnIdentityAttribute.forwardedSharingDetails).toBeDefined();
         expect(forwardedOwnIdentityAttribute.isForwardedTo(this.context.peerAddress)).toBe(true);
     }
 
     public async theOwnIdentityAttributeIsDeletedByPeer(attribute: OwnIdentityAttribute, peer: CoreAddress): Promise<void> {
         const attributesDeletedByPeer = await this.context.consumptionController.attributes.getLocalAttributes({
             id: attribute.id.toString(),
-            "peerSharingInfo.peer": peer.toString(),
-            "peerSharingInfo.deletionInfo.deletionStatus": { $ne: EmittedAttributeDeletionStatus.DeletedByPeer }
+            "peerSharingDetails.peer": peer.toString(),
+            "peerSharingDetails.deletionInfo.deletionStatus": { $ne: EmittedAttributeDeletionStatus.DeletedByPeer }
         });
 
         expect(attributesDeletedByPeer).toBeDefined();
@@ -358,9 +358,9 @@ export class ThenSteps {
         }
 
         expect(createdAttribute).toBeDefined();
-        expect(createdAttribute.peerSharingInfo).toBeDefined();
-        expect(createdAttribute.peerSharingInfo.peer.toString()).toStrictEqual(this.context.peerAddress.toString());
-        expect(createdAttribute.forwardedSharingInfos).toBeUndefined();
+        expect(createdAttribute.peerSharingDetails).toBeDefined();
+        expect(createdAttribute.peerSharingDetails.peer.toString()).toStrictEqual(this.context.peerAddress.toString());
+        expect(createdAttribute.forwardedSharingDetails).toBeUndefined();
     }
 
     public theIdOfTheAlreadySharedAttributeMatches(id: CoreId): Promise<void> {
@@ -464,7 +464,7 @@ export class WhenSteps {
     public async iMarkMyOwnRelationshipAttributeAsDeletedByPeer(attribute: OwnRelationshipAttribute): Promise<void> {
         this.context.fillTestIdentitiesOfObject(attribute);
 
-        attribute.peerSharingInfo.deletionInfo = EmittedAttributeDeletionInfo.from({
+        attribute.peerSharingDetails.deletionInfo = EmittedAttributeDeletionInfo.from({
             deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
             deletionDate: CoreDate.utc().subtract({ minutes: 5 })
         });

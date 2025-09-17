@@ -6,26 +6,26 @@ import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreEr
 import {
     EmittedAttributeDeletionInfo,
     EmittedAttributeDeletionStatus,
-    ForwardedSharingInfo,
-    ForwardedSharingInfoJSON,
-    IForwardedSharingInfo,
-    IOwnRelationshipAttributeSharingInfo,
-    OwnRelationshipAttributeSharingInfo,
-    OwnRelationshipAttributeSharingInfoJSON
-} from "../sharingInfos";
+    ForwardedSharingDetails,
+    ForwardedSharingDetailsJSON,
+    IForwardedSharingDetails,
+    IOwnRelationshipAttributeSharingDetails,
+    OwnRelationshipAttributeSharingDetails,
+    OwnRelationshipAttributeSharingDetailsJSON
+} from "../sharingDetails";
 import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./LocalAttribute";
 
 export interface OwnRelationshipAttributeJSON extends LocalAttributeJSON {
     "@type": "OwnRelationshipAttribute";
     content: RelationshipAttributeJSON;
-    peerSharingInfo: OwnRelationshipAttributeSharingInfoJSON;
-    forwardedSharingInfos?: ForwardedSharingInfoJSON[];
+    peerSharingDetails: OwnRelationshipAttributeSharingDetailsJSON;
+    forwardedSharingDetails?: ForwardedSharingDetailsJSON[];
 }
 
 export interface IOwnRelationshipAttribute extends ILocalAttribute {
     content: IRelationshipAttribute;
-    peerSharingInfo: IOwnRelationshipAttributeSharingInfo;
-    forwardedSharingInfos?: IForwardedSharingInfo[];
+    peerSharingDetails: IOwnRelationshipAttributeSharingDetails;
+    forwardedSharingDetails?: IForwardedSharingDetails[];
 }
 
 @type("OwnRelationshipAttribute")
@@ -34,8 +34,8 @@ export class OwnRelationshipAttribute extends LocalAttribute implements IOwnRela
         ...this.technicalProperties,
         "@type",
         "@context",
-        nameof<OwnRelationshipAttribute>((r) => r.peerSharingInfo),
-        nameof<OwnRelationshipAttribute>((r) => r.forwardedSharingInfos)
+        nameof<OwnRelationshipAttribute>((r) => r.peerSharingDetails),
+        nameof<OwnRelationshipAttribute>((r) => r.forwardedSharingDetails)
     ];
 
     @serialize({ customGenerator: (value: RelationshipAttribute) => value.toJSON(true) })
@@ -44,51 +44,51 @@ export class OwnRelationshipAttribute extends LocalAttribute implements IOwnRela
 
     @serialize()
     @validate()
-    public peerSharingInfo: OwnRelationshipAttributeSharingInfo;
+    public peerSharingDetails: OwnRelationshipAttributeSharingDetails;
 
-    @serialize({ type: ForwardedSharingInfo })
+    @serialize({ type: ForwardedSharingDetails })
     @validate({ nullable: true })
-    public forwardedSharingInfos?: ForwardedSharingInfo[];
+    public forwardedSharingDetails?: ForwardedSharingDetails[];
 
     public isForwardedTo(peer: CoreAddress, excludeToBeDeleted = false): boolean {
-        if (!this.forwardedSharingInfos) return false;
+        if (!this.forwardedSharingDetails) return false;
 
-        const sharingInfosWithPeer = this.forwardedSharingInfos.filter(
-            (sharingInfo) => sharingInfo.peer.equals(peer) && sharingInfo.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.DeletedByPeer
+        const sharingDetailsWithPeer = this.forwardedSharingDetails.filter(
+            (sharingDetails) => sharingDetails.peer.equals(peer) && sharingDetails.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.DeletedByPeer
         );
-        if (sharingInfosWithPeer.length === 0) return false;
+        if (sharingDetailsWithPeer.length === 0) return false;
 
         if (!excludeToBeDeleted) return true;
 
-        return sharingInfosWithPeer.some((sharingInfo) => sharingInfo.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.ToBeDeletedByPeer);
+        return sharingDetailsWithPeer.some((sharingDetails) => sharingDetails.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.ToBeDeletedByPeer);
     }
 
     public isDeletedOrToBeDeletedByPeer(): boolean {
-        if (!this.peerSharingInfo.deletionInfo) return false;
+        if (!this.peerSharingDetails.deletionInfo) return false;
 
         const deletionStatuses = [EmittedAttributeDeletionStatus.DeletedByPeer, EmittedAttributeDeletionStatus.ToBeDeletedByPeer];
-        return deletionStatuses.includes(this.peerSharingInfo.deletionInfo.deletionStatus);
+        return deletionStatuses.includes(this.peerSharingDetails.deletionInfo.deletionStatus);
     }
 
     public isDeletedOrToBeDeletedByForwardingPeer(peer: CoreAddress): boolean {
-        if (!this.forwardedSharingInfos) return false;
+        if (!this.forwardedSharingDetails) return false;
 
-        const sharingInfosWithPeer = this.forwardedSharingInfos.filter((sharingInfo) => sharingInfo.peer.equals(peer));
-        if (sharingInfosWithPeer.length === 0) return false;
+        const sharingDetailsWithPeer = this.forwardedSharingDetails.filter((sharingDetails) => sharingDetails.peer.equals(peer));
+        if (sharingDetailsWithPeer.length === 0) return false;
 
         const deletionStatuses = [EmittedAttributeDeletionStatus.DeletedByPeer, EmittedAttributeDeletionStatus.ToBeDeletedByPeer];
 
-        const hasSharingInfoWithDeletionStatus = sharingInfosWithPeer.some(
-            (sharingInfo) => sharingInfo.deletionInfo && deletionStatuses.includes(sharingInfo.deletionInfo.deletionStatus)
+        const hasSharingDetailsWithDeletionStatus = sharingDetailsWithPeer.some(
+            (sharingDetails) => sharingDetails.deletionInfo && deletionStatuses.includes(sharingDetails.deletionInfo.deletionStatus)
         );
-        const hasSharingInfoWithoutDeletionStatus = sharingInfosWithPeer.some(
-            (sharingInfo) => !sharingInfo.deletionInfo || !deletionStatuses.includes(sharingInfo.deletionInfo.deletionStatus)
+        const hasSharingDetailsWithoutDeletionStatus = sharingDetailsWithPeer.some(
+            (sharingDetails) => !sharingDetails.deletionInfo || !deletionStatuses.includes(sharingDetails.deletionInfo.deletionStatus)
         );
-        return hasSharingInfoWithDeletionStatus && !hasSharingInfoWithoutDeletionStatus;
+        return hasSharingDetailsWithDeletionStatus && !hasSharingDetailsWithoutDeletionStatus;
     }
 
     public hasDeletionStatusUnequalDeletedByPeer(peer: CoreAddress): boolean {
-        if (!this.forwardedSharingInfos) return false;
+        if (!this.forwardedSharingDetails) return false;
 
         const deletionStatuses = [
             EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
@@ -96,72 +96,73 @@ export class OwnRelationshipAttribute extends LocalAttribute implements IOwnRela
             EmittedAttributeDeletionStatus.DeletionRequestRejected
         ];
 
-        return this.forwardedSharingInfos.some(
-            (sharingInfo) => sharingInfo.peer.equals(peer) && sharingInfo.deletionInfo && deletionStatuses.includes(sharingInfo.deletionInfo.deletionStatus)
+        return this.forwardedSharingDetails.some(
+            (sharingDetails) => sharingDetails.peer.equals(peer) && sharingDetails.deletionInfo && deletionStatuses.includes(sharingDetails.deletionInfo.deletionStatus)
         );
     }
 
     public setPeerDeletionInfo(deletionInfo: EmittedAttributeDeletionInfo | undefined, overrideDeleted = false): this {
-        if (!overrideDeleted && this.peerSharingInfo.deletionInfo?.deletionStatus === EmittedAttributeDeletionStatus.DeletedByPeer) {
+        if (!overrideDeleted && this.peerSharingDetails.deletionInfo?.deletionStatus === EmittedAttributeDeletionStatus.DeletedByPeer) {
             throw ConsumptionCoreErrors.attributes.cannotSetAttributeDeletionInfo(this.id);
         }
 
-        this.peerSharingInfo.deletionInfo = deletionInfo;
+        this.peerSharingDetails.deletionInfo = deletionInfo;
         return this;
     }
 
     public setForwardedDeletionInfo(deletionInfo: EmittedAttributeDeletionInfo | undefined, peer: CoreAddress, overrideDeleted = false): this {
-        const sharingInfoForPeer = this.forwardedSharingInfos?.find(
-            (sharingInfo) => sharingInfo.peer.equals(peer) && (overrideDeleted || sharingInfo.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.DeletedByPeer)
+        const sharingDetailsForPeer = this.forwardedSharingDetails?.find(
+            (sharingDetails) =>
+                sharingDetails.peer.equals(peer) && (overrideDeleted || sharingDetails.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.DeletedByPeer)
         );
 
-        if (!sharingInfoForPeer) throw ConsumptionCoreErrors.attributes.cannotSetAttributeDeletionInfo(this.id, peer);
+        if (!sharingDetailsForPeer) throw ConsumptionCoreErrors.attributes.cannotSetAttributeDeletionInfo(this.id, peer);
 
-        sharingInfoForPeer.deletionInfo = deletionInfo;
+        sharingDetailsForPeer.deletionInfo = deletionInfo;
         return this;
     }
 
     public getForwardedPeers(includeToBeDeleted = false): CoreAddress[] {
-        const forwardedSharingInfosNotDeletedByPeer = this.forwardedSharingInfos?.filter(
-            (sharingInfo) => sharingInfo.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.DeletedByPeer
+        const forwardedSharingDetailsNotDeletedByPeer = this.forwardedSharingDetails?.filter(
+            (sharingDetails) => sharingDetails.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.DeletedByPeer
         );
-        if (!forwardedSharingInfosNotDeletedByPeer) return [];
+        if (!forwardedSharingDetailsNotDeletedByPeer) return [];
 
-        const sharingInfos = includeToBeDeleted
-            ? forwardedSharingInfosNotDeletedByPeer
-            : forwardedSharingInfosNotDeletedByPeer.filter((sharingInfo) => {
-                  return sharingInfo.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.ToBeDeletedByPeer;
+        const sharingDetails = includeToBeDeleted
+            ? forwardedSharingDetailsNotDeletedByPeer
+            : forwardedSharingDetailsNotDeletedByPeer.filter((sharingDetails) => {
+                  return sharingDetails.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.ToBeDeletedByPeer;
               });
 
-        const peers = sharingInfos.map((sharingInfo) => sharingInfo.peer.toString());
+        const peers = sharingDetails.map((sharingDetails) => sharingDetails.peer.toString());
         const uniquePeers = Array.from(new Set(peers)).map((address) => CoreAddress.from(address));
         return uniquePeers;
     }
 
-    public getForwardedSharingInfoNotDeletedByPeer(peer: CoreAddress): ForwardedSharingInfo | undefined {
-        return this.forwardedSharingInfos?.find(
-            (sharingInfo) => sharingInfo.peer.equals(peer) && sharingInfo.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.DeletedByPeer
+    public getForwardedSharingDetailsNotDeletedByPeer(peer: CoreAddress): ForwardedSharingDetails | undefined {
+        return this.forwardedSharingDetails?.find(
+            (sharingDetails) => sharingDetails.peer.equals(peer) && sharingDetails.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.DeletedByPeer
         );
     }
 
-    public upsertForwardedSharingInfoForPeer(peer: CoreAddress, sharingInfo: ForwardedSharingInfo): this {
-        if (peer.equals(this.peerSharingInfo.peer)) throw ConsumptionCoreErrors.attributes.cannotSetForwardedSharingInfoForPeer(this.id, peer);
+    public upsertForwardedSharingDetailsForPeer(peer: CoreAddress, sharingDetails: ForwardedSharingDetails): this {
+        if (peer.equals(this.peerSharingDetails.peer)) throw ConsumptionCoreErrors.attributes.cannotSetForwardedSharingDetailsForPeer(this.id, peer);
 
-        if (!this.forwardedSharingInfos) {
-            this.forwardedSharingInfos = [sharingInfo];
+        if (!this.forwardedSharingDetails) {
+            this.forwardedSharingDetails = [sharingDetails];
             return this;
         }
 
-        const indexForPeer = this.forwardedSharingInfos.findIndex(
-            (sharingInfo) => sharingInfo.peer.equals(peer) && sharingInfo.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.DeletedByPeer
+        const indexForPeer = this.forwardedSharingDetails.findIndex(
+            (sharingDetails) => sharingDetails.peer.equals(peer) && sharingDetails.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.DeletedByPeer
         );
 
         if (indexForPeer === -1) {
-            this.forwardedSharingInfos.push(sharingInfo);
+            this.forwardedSharingDetails.push(sharingDetails);
             return this;
         }
 
-        this.forwardedSharingInfos[indexForPeer] = sharingInfo;
+        this.forwardedSharingDetails[indexForPeer] = sharingDetails;
         return this;
     }
 

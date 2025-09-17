@@ -209,7 +209,7 @@ describe("ShareAttributeRequestItemDVO", () => {
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         const attributeResult = await rConsumptionServices.attributes.getAttributes({
-            query: { "content.value.@type": "DisplayName", "peerSharingInfo.peer": dvo.createdBy.id }
+            query: { "content.value.@type": "DisplayName", "peerSharingDetails.peer": dvo.createdBy.id }
         });
         expect(attributeResult).toBeSuccessful();
         expect(attributeResult.value).toHaveLength(1);
@@ -271,7 +271,7 @@ describe("ShareAttributeRequestItemDVO", () => {
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         const attributeResult = await sConsumptionServices.attributes.getAttributes({
-            query: { "content.value.@type": "DisplayName", "forwardedSharingInfos.peer": dvo.request.peer.id }
+            query: { "content.value.@type": "DisplayName", "forwardedSharingDetails.peer": dvo.request.peer.id }
         });
         expect(attributeResult).toBeSuccessful();
         const attributes = attributeResult.value;

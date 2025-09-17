@@ -152,7 +152,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 requestItem.query instanceof ThirdPartyRelationshipAttributeQuery &&
                 (foundLocalAttribute instanceof OwnRelationshipAttribute || foundLocalAttribute instanceof PeerRelationshipAttribute)
             ) {
-                const initialPeer = foundLocalAttribute.peerSharingInfo.peer.toString();
+                const initialPeer = foundLocalAttribute.peerSharingDetails.peer.toString();
                 const queriedThirdParties = requestItem.query.thirdParty.map((aThirdParty) => aThirdParty.toString());
 
                 if (
@@ -317,13 +317,13 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 });
             }
 
-            const updatedAttribute = await this.consumptionController.attributes.addForwardedSharingInfoToAttribute(existingAttribute, requestInfo.peer, requestInfo.id);
+            const updatedAttribute = await this.consumptionController.attributes.addForwardedSharingDetailsToAttribute(existingAttribute, requestInfo.peer, requestInfo.id);
 
             const wasNotSharedBefore = latestSharedVersion.length === 0;
             if (wasNotSharedBefore) {
                 const thirdPartyAddress =
                     existingAttribute instanceof OwnRelationshipAttribute || existingAttribute instanceof PeerRelationshipAttribute
-                        ? existingAttribute.peerSharingInfo.peer
+                        ? existingAttribute.peerSharingDetails.peer
                         : undefined;
 
                 return ReadAttributeAcceptResponseItem.from({
@@ -395,10 +395,10 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             const attribute = await this.consumptionController.attributes.getLocalAttribute(responseItem.attributeId);
             if (!attribute || !(attribute instanceof PeerIdentityAttribute || attribute instanceof ThirdPartyRelationshipAttribute)) return;
 
-            if (attribute.peerSharingInfo.deletionInfo?.deletionStatus !== ReceivedAttributeDeletionStatus.ToBeDeleted) return;
+            if (attribute.peerSharingDetails.deletionInfo?.deletionStatus !== ReceivedAttributeDeletionStatus.ToBeDeleted) return;
 
             // TODO: AttributesController function (shared for PeerIdentityAttribute and ThirdPartyRelationshipAttribute) -> other PR where deletionStatus is refactored
-            attribute.peerSharingInfo.deletionInfo = undefined;
+            attribute.peerSharingDetails.deletionInfo = undefined;
             await this.consumptionController.attributes.updateAttributeUnsafe(attribute);
             return;
         }

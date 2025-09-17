@@ -40,7 +40,7 @@ export class PeerRelationshipAttributeDeletedByPeerNotificationItemProcessor ext
             );
         }
 
-        if (!notification.peer.equals(attribute.peerSharingInfo.peer)) {
+        if (!notification.peer.equals(attribute.peerSharingDetails.peer)) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.senderIsNotPeerOfSharedAttribute(notification.peer, notificationItem.attributeId));
         }
 

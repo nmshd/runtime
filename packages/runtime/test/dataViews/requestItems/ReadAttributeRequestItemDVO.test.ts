@@ -25,7 +25,7 @@ import {
 } from "../../../src";
 import {
     cleanupAttributes,
-    cleanupForwardedSharingInfos,
+    cleanupForwardedSharingDetails,
     establishRelationship,
     exchangeAndAcceptRequestByMessage,
     exchangeMessageWithRequest,
@@ -59,7 +59,7 @@ afterAll(() => serviceProvider.stop());
 beforeEach(async function () {
     eventBus1.reset();
     eventBus2.reset();
-    await cleanupForwardedSharingInfos([runtimeServices2]);
+    await cleanupForwardedSharingDetails([runtimeServices2]);
     await cleanupAttributes([runtimeServices1]);
 });
 
@@ -228,7 +228,7 @@ describe("ReadAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         const attributeResult = await consumptionServices2.attributes.getAttributes({
-            query: { "content.value.@type": "GivenName", "forwardedSharingInfos.peer": dvo.createdBy.id }
+            query: { "content.value.@type": "GivenName", "forwardedSharingDetails.peer": dvo.createdBy.id }
         });
         expect(attributeResult).toBeSuccessful();
         expect(attributeResult.value).toHaveLength(1);
@@ -246,7 +246,7 @@ describe("ReadAttributeRequestItemDVO with IdentityAttributeQuery", () => {
 
     test("check the MessageDVO for the sender after acceptance", async () => {
         const baselineNumberOfAttributes = (
-            await consumptionServices1.attributes.getAttributes({ query: { "content.value.@type": "GivenName", "peerSharingInfo.peer": address2 } })
+            await consumptionServices1.attributes.getAttributes({ query: { "content.value.@type": "GivenName", "peerSharingDetails.peer": address2 } })
         ).value.length;
         const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
         const dto = senderMessage;
@@ -288,7 +288,7 @@ describe("ReadAttributeRequestItemDVO with IdentityAttributeQuery", () => {
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         const attributeResult = await consumptionServices1.attributes.getAttributes({
-            query: { "content.value.@type": "GivenName", "peerSharingInfo.peer": dvo.request.peer.id }
+            query: { "content.value.@type": "GivenName", "peerSharingDetails.peer": dvo.request.peer.id }
         });
         expect(attributeResult).toBeSuccessful();
         const numberOfAttributes = attributeResult.value.length;
@@ -496,7 +496,7 @@ describe("ReadAttributeRequestItemDVO with IQL and results", () => {
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         const attributeResult = await consumptionServices2.attributes.getAttributes({
-            query: { "content.value.@type": "GivenName", "forwardedSharingInfos.peer": dvo.createdBy.id }
+            query: { "content.value.@type": "GivenName", "forwardedSharingDetails.peer": dvo.createdBy.id }
         });
         expect(attributeResult).toBeSuccessful();
         expect(attributeResult.value).toHaveLength(1);
@@ -514,7 +514,7 @@ describe("ReadAttributeRequestItemDVO with IQL and results", () => {
 
     test("check the MessageDVO for the sender after acceptance", async () => {
         const baselineNumberOfAttributes = (
-            await consumptionServices1.attributes.getAttributes({ query: { "content.value.@type": "GivenName", "peerSharingInfo.peer": address2 } })
+            await consumptionServices1.attributes.getAttributes({ query: { "content.value.@type": "GivenName", "peerSharingDetails.peer": address2 } })
         ).value.length;
         const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
 
@@ -553,7 +553,7 @@ describe("ReadAttributeRequestItemDVO with IQL and results", () => {
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         const attributeResult = await consumptionServices1.attributes.getAttributes({
-            query: { "content.value.@type": "GivenName", "peerSharingInfo.peer": dvo.request.peer.id }
+            query: { "content.value.@type": "GivenName", "peerSharingDetails.peer": dvo.request.peer.id }
         });
         expect(attributeResult).toBeSuccessful();
         const numberOfAttributes = attributeResult.value.length;
@@ -728,7 +728,7 @@ describe("ReadAttributeRequestItemDVO with IQL and fallback", () => {
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         const attributeResult = await consumptionServices2.attributes.getAttributes({
-            query: { "content.value.@type": "Surname", "forwardedSharingInfos.peer": dvo.createdBy.id }
+            query: { "content.value.@type": "Surname", "forwardedSharingDetails.peer": dvo.createdBy.id }
         });
         expect(attributeResult).toBeSuccessful();
         expect(attributeResult.value).toHaveLength(1);
@@ -745,8 +745,9 @@ describe("ReadAttributeRequestItemDVO with IQL and fallback", () => {
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {
-        const baselineNumberOfAttributes = (await consumptionServices1.attributes.getAttributes({ query: { "content.value.@type": "Surname", "peerSharingInfo.peer": address2 } }))
-            .value.length;
+        const baselineNumberOfAttributes = (
+            await consumptionServices1.attributes.getAttributes({ query: { "content.value.@type": "Surname", "peerSharingDetails.peer": address2 } })
+        ).value.length;
         const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
         const dto = senderMessage;
         const dvo = (await expander1.expandMessageDTO(senderMessage)) as RequestMessageDVO;
@@ -783,7 +784,7 @@ describe("ReadAttributeRequestItemDVO with IQL and fallback", () => {
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         const attributeResult = await consumptionServices1.attributes.getAttributes({
-            query: { "content.value.@type": "Surname", "peerSharingInfo.peer": dvo.request.peer.id }
+            query: { "content.value.@type": "Surname", "peerSharingDetails.peer": dvo.request.peer.id }
         });
         expect(attributeResult).toBeSuccessful();
         const numberOfAttributes = attributeResult.value.length;
@@ -931,7 +932,7 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
         expect((responseItem.successor.content.value as GivenNameJSON).value).toBe("anotherGivenName");
 
         const predecessorResult = await consumptionServices2.attributes.getAttributes({
-            query: { "content.value.@type": "GivenName", "forwardedSharingInfos.peer": dvo.createdBy.id, "content.tags": "x:predecessor" }
+            query: { "content.value.@type": "GivenName", "forwardedSharingDetails.peer": dvo.createdBy.id, "content.tags": "x:predecessor" }
         });
         expect(predecessorResult).toBeSuccessful();
         expect(predecessorResult.value).toHaveLength(1);
@@ -942,7 +943,7 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
         expect(predecessorName.value).toStrictEqual((responseItem.predecessor!.content.value as GivenNameJSON).value);
 
         const successorResult = await consumptionServices2.attributes.getAttributes({
-            query: { "content.value.@type": "GivenName", "forwardedSharingInfos.peer": dvo.createdBy.id, "content.tags": "x:successor" }
+            query: { "content.value.@type": "GivenName", "forwardedSharingDetails.peer": dvo.createdBy.id, "content.tags": "x:successor" }
         });
         expect(successorResult).toBeSuccessful();
         expect(successorResult.value).toHaveLength(1);
@@ -1009,7 +1010,7 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
         expect((responseItem.successor.content.value as GivenNameJSON).value).toBe("anotherGivenName");
 
         const predecessorResult = await consumptionServices1.attributes.getAttributes({
-            query: { "content.value.@type": "GivenName", "peerSharingInfo.peer": dvo.request.peer.id, "content.tags": "x:predecessor" }
+            query: { "content.value.@type": "GivenName", "peerSharingDetails.peer": dvo.request.peer.id, "content.tags": "x:predecessor" }
         });
         expect(predecessorResult).toBeSuccessful();
         expect(predecessorResult.value).toHaveLength(1);
@@ -1020,7 +1021,7 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
         expect(predecessorName.value).toStrictEqual((responseItem.predecessor!.content.value as GivenNameJSON).value);
 
         const successorResult = await consumptionServices1.attributes.getAttributes({
-            query: { "content.value.@type": "GivenName", "peerSharingInfo.peer": dvo.request.peer.id, "content.tags": "x:successor" }
+            query: { "content.value.@type": "GivenName", "peerSharingDetails.peer": dvo.request.peer.id, "content.tags": "x:successor" }
         });
         expect(successorResult).toBeSuccessful();
         expect(successorResult.value).toHaveLength(1);

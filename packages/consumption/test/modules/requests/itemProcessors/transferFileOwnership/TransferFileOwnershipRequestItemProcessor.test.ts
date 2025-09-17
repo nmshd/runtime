@@ -314,9 +314,9 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
             expect(claimedFile!.toFileReference(recipientAccountController.config.baseUrl)).toStrictEqual(senderFileReference);
 
             const ownIdentityAttribute = (await recipientConsumptionController.attributes.getLocalAttribute(responseItem.attributeId)) as OwnIdentityAttribute;
-            expect(ownIdentityAttribute.forwardedSharingInfos).toHaveLength(1);
-            expect(ownIdentityAttribute.forwardedSharingInfos![0].peer).toStrictEqual(sender);
-            expect(ownIdentityAttribute.forwardedSharingInfos![0].sourceReference).toStrictEqual(incomingRequest.id);
+            expect(ownIdentityAttribute.forwardedSharingDetails).toHaveLength(1);
+            expect(ownIdentityAttribute.forwardedSharingDetails![0].peer).toStrictEqual(sender);
+            expect(ownIdentityAttribute.forwardedSharingDetails![0].sourceReference).toStrictEqual(incomingRequest.id);
             expect(ownIdentityAttribute.content.value).toBeInstanceOf(IdentityFileReference);
             expect((ownIdentityAttribute.content.value as IdentityFileReference).value).toStrictEqual(senderFileReference.truncate());
             expect(ownIdentityAttribute.content.tags).toStrictEqual(["x:tag"]);
@@ -393,8 +393,8 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
             expect(claimedFile!.owner).toStrictEqual(recipient);
 
             const peerIdentityAttribute = (await senderConsumptionController.attributes.getLocalAttribute(responseItem.attributeId)) as PeerIdentityAttribute;
-            expect(peerIdentityAttribute.peerSharingInfo.peer).toStrictEqual(recipient);
-            expect(peerIdentityAttribute.peerSharingInfo.sourceReference).toStrictEqual(requestInfo.id);
+            expect(peerIdentityAttribute.peerSharingDetails.peer).toStrictEqual(recipient);
+            expect(peerIdentityAttribute.peerSharingDetails.sourceReference).toStrictEqual(requestInfo.id);
             expect(peerIdentityAttribute.content.tags).toStrictEqual(["x:tag"]);
 
             const peerTruncatedFileReference = (peerIdentityAttribute.content.value as IdentityFileReference).value;

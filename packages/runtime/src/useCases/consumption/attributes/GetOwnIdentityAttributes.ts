@@ -20,13 +20,13 @@ export interface GetOwnIdentityAttributesRequestQuery {
     isDefault?: string;
     "content.tags"?: string | string[];
     "content.value.@type"?: string | string[];
-    forwardedSharingInfos?: string | string[];
-    "forwardedSharingInfos.peer"?: string | string[];
-    "forwardedSharingInfos.sourceReference"?: string | string[];
-    "forwardedSharingInfos.sharedAt"?: string | string[];
-    "forwardedSharingInfos.deletionInfo"?: string | string[];
-    "forwardedSharingInfos.deletionInfo.deletionStatus"?: string | string[];
-    "forwardedSharingInfos.deletionInfo.deletionDate"?: string | string[];
+    forwardedSharingDetails?: string | string[];
+    "forwardedSharingDetails.peer"?: string | string[];
+    "forwardedSharingDetails.sourceReference"?: string | string[];
+    "forwardedSharingDetails.sharedAt"?: string | string[];
+    "forwardedSharingDetails.deletionInfo"?: string | string[];
+    "forwardedSharingDetails.deletionInfo.deletionStatus"?: string | string[];
+    "forwardedSharingDetails.deletionInfo.deletionDate"?: string | string[];
 }
 
 export interface GetOwnIdentityAttributesResponse extends Array<LocalAttributeDTO> {}

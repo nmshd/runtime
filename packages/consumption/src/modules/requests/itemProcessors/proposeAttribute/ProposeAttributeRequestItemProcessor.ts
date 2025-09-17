@@ -263,7 +263,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
                 });
             }
 
-            const updatedAttribute = await this.consumptionController.attributes.addForwardedSharingInfoToAttribute(existingAttribute, requestInfo.peer, requestInfo.id);
+            const updatedAttribute = await this.consumptionController.attributes.addForwardedSharingDetailsToAttribute(existingAttribute, requestInfo.peer, requestInfo.id);
 
             const wasNotSharedBefore = latestSharedVersion.length === 0;
             if (wasNotSharedBefore) {
@@ -321,7 +321,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             const attribute = await this.consumptionController.attributes.getLocalAttribute(responseItem.attributeId);
             if (!attribute || !(attribute instanceof PeerIdentityAttribute)) return;
 
-            if (attribute.peerSharingInfo.deletionInfo?.deletionStatus !== ReceivedAttributeDeletionStatus.ToBeDeleted) return;
+            if (attribute.peerSharingDetails.deletionInfo?.deletionStatus !== ReceivedAttributeDeletionStatus.ToBeDeleted) return;
 
             await this.consumptionController.attributes.setPeerDeletionInfoOfPeerAttribute(attribute, undefined, true);
             return;

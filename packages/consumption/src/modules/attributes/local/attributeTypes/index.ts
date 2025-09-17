@@ -1,4 +1,4 @@
-export * from "./AttributeWithPeerSharingInfo";
+export * from "./AttributeWithPeerSharingDetails";
 export * from "./ForwardableAttribute";
 export * from "./LocalAttribute";
 export * from "./OwnIdentityAttribute";

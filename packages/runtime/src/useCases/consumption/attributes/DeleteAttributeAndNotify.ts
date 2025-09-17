@@ -89,7 +89,7 @@ export class DeleteAttributeAndNotifyUseCase extends UseCase<DeleteAttributeAndN
                 ? OwnAttributeDeletedByOwnerNotificationItem.from({ attributeId: attribute.id })
                 : PeerRelationshipAttributeDeletedByPeerNotificationItem.from({ attributeId: attribute.id });
 
-        const peerNotificationResult = await this.notifyPeer(attribute.peerSharingInfo.peer, notificationItem);
+        const peerNotificationResult = await this.notifyPeer(attribute.peerSharingDetails.peer, notificationItem);
         if (peerNotificationResult.isError) return peerNotificationResult;
 
         const forwardingPeers = attribute.getForwardedPeers(true);
@@ -104,7 +104,7 @@ export class DeleteAttributeAndNotifyUseCase extends UseCase<DeleteAttributeAndN
 
     private async notifyAboutDeletionOfReceivedAttribute(attribute: PeerIdentityAttribute | ThirdPartyRelationshipAttribute) {
         const notificationItem = ForwardedAttributeDeletedByPeerNotificationItem.from({ attributeId: attribute.id });
-        return await this.notifyPeer(attribute.peerSharingInfo.peer, notificationItem);
+        return await this.notifyPeer(attribute.peerSharingDetails.peer, notificationItem);
     }
 
     private async notifyForwardingPeers(

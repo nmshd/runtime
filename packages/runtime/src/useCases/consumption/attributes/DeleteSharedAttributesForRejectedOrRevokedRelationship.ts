@@ -36,8 +36,8 @@ export class DeleteSharedAttributesForRejectedOrRevokedRelationshipUseCase exten
         }
 
         const sharedAttributes = await this.attributesController.getLocalAttributes({
-            "peerSharingInfo.peer": relationship.peer.address.toString(),
-            forwardedSharingInfos: { $exists: false }
+            "peerSharingDetails.peer": relationship.peer.address.toString(),
+            forwardedSharingDetails: { $exists: false }
         });
 
         for (const sharedAttribute of sharedAttributes) {
@@ -51,12 +51,12 @@ export class DeleteSharedAttributesForRejectedOrRevokedRelationshipUseCase exten
 
         const queryForForwardedAttributes = {
             "@type": { $in: ["OwnIdentityAttribute", "OwnRelationshipAttribute", "PeerRelationshipAttribute"] },
-            "forwardedSharingInfos.peer": relationship.peer.address.toString()
+            "forwardedSharingDetails.peer": relationship.peer.address.toString()
         };
         const forwardedAttributes = (await this.attributesController.getLocalAttributes(queryForForwardedAttributes)) as ForwardableAttribute[];
 
         for (const forwardedAttribute of forwardedAttributes) {
-            await this.attributesController.removeForwardedSharingInfoFromAttribute(forwardedAttribute, relationship.peer.address);
+            await this.attributesController.removeForwardedSharingDetailsFromAttribute(forwardedAttribute, relationship.peer.address);
         }
 
         await this.accountController.syncDatawallet();

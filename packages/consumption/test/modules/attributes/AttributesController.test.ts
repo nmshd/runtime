@@ -21,7 +21,7 @@ import { anything, reset, spy, verify, when } from "ts-mockito";
 import {
     AttributeCreatedEvent,
     AttributeDeletedEvent,
-    AttributeForwardedSharingInfosChangedEvent,
+    AttributeForwardedSharingDetailsChangedEvent,
     AttributesController,
     AttributeTagCollection,
     ConsumptionController,
@@ -239,8 +239,8 @@ describe("AttributesController", function () {
             expect(peerIdentityAttribute).toBeInstanceOf(PeerIdentityAttribute);
             expect(peerIdentityAttribute.content.toJSON()).toStrictEqual(content.toJSON());
             expect(peerIdentityAttribute.content.value).toBeInstanceOf(Nationality);
-            expect(peerIdentityAttribute.peerSharingInfo.peer.toString()).toBe("address");
-            expect(peerIdentityAttribute.peerSharingInfo.sourceReference.toString()).toBe("aSourceReferenceId");
+            expect(peerIdentityAttribute.peerSharingDetails.peer.toString()).toBe("address");
+            expect(peerIdentityAttribute.peerSharingDetails.sourceReference.toString()).toBe("aSourceReferenceId");
 
             mockEventBus.expectLastPublishedEvent(AttributeCreatedEvent);
         });
@@ -265,8 +265,8 @@ describe("AttributesController", function () {
 
             expect(ownRelationshipAttribute).toBeInstanceOf(OwnRelationshipAttribute);
             expect(ownRelationshipAttribute.content.value).toBeInstanceOf(ProprietaryString);
-            expect(ownRelationshipAttribute.peerSharingInfo.peer.toString()).toBe(peerAddress.toString());
-            expect(ownRelationshipAttribute.peerSharingInfo.sourceReference.toString()).toBe("aSourceReferenceId");
+            expect(ownRelationshipAttribute.peerSharingDetails.peer.toString()).toBe(peerAddress.toString());
+            expect(ownRelationshipAttribute.peerSharingDetails.sourceReference.toString()).toBe("aSourceReferenceId");
 
             mockEventBus.expectLastPublishedEvent(AttributeCreatedEvent);
         });
@@ -291,8 +291,8 @@ describe("AttributesController", function () {
 
             expect(peerRelationshipAttribute).toBeInstanceOf(PeerRelationshipAttribute);
             expect(peerRelationshipAttribute.content.value).toBeInstanceOf(ProprietaryString);
-            expect(peerRelationshipAttribute.peerSharingInfo.peer.toString()).toBe(peerAddress.toString());
-            expect(peerRelationshipAttribute.peerSharingInfo.sourceReference.toString()).toBe("aSourceReferenceId");
+            expect(peerRelationshipAttribute.peerSharingDetails.peer.toString()).toBe(peerAddress.toString());
+            expect(peerRelationshipAttribute.peerSharingDetails.sourceReference.toString()).toBe("aSourceReferenceId");
 
             mockEventBus.expectLastPublishedEvent(AttributeCreatedEvent);
         });
@@ -320,15 +320,15 @@ describe("AttributesController", function () {
 
             expect(thirdPartyRelationshipAttribute).toBeInstanceOf(ThirdPartyRelationshipAttribute);
             expect(thirdPartyRelationshipAttribute.content.value).toBeInstanceOf(ProprietaryString);
-            expect(thirdPartyRelationshipAttribute.peerSharingInfo.peer.toString()).toBe(peerAddress.toString());
-            expect(thirdPartyRelationshipAttribute.peerSharingInfo.sourceReference.toString()).toBe("aSourceReferenceId");
+            expect(thirdPartyRelationshipAttribute.peerSharingDetails.peer.toString()).toBe(peerAddress.toString());
+            expect(thirdPartyRelationshipAttribute.peerSharingDetails.sourceReference.toString()).toBe("aSourceReferenceId");
 
             mockEventBus.expectLastPublishedEvent(AttributeCreatedEvent);
         });
     });
 
-    describe("change ForwardedSharingInfo of Attributes", function () {
-        test("should allow to add a ForwardedSharingInfo to an OwnIdentityAttribute", async function () {
+    describe("change ForwardedSharingDetails of Attributes", function () {
+        test("should allow to add a ForwardedSharingDetails to an OwnIdentityAttribute", async function () {
             const attributeParams = {
                 content: IdentityAttribute.from({
                     value: {
@@ -343,12 +343,12 @@ describe("AttributesController", function () {
             const peer = CoreAddress.from("address");
             const sourceReference = CoreId.from("aSourceReferenceId");
 
-            const forwardedAttribute = await consumptionController.attributes.addForwardedSharingInfoToAttribute(attribute, peer, sourceReference);
+            const forwardedAttribute = await consumptionController.attributes.addForwardedSharingDetailsToAttribute(attribute, peer, sourceReference);
             expect(forwardedAttribute).toBeInstanceOf(OwnIdentityAttribute);
             expect(forwardedAttribute.isForwardedTo(peer)).toBe(true);
         });
 
-        test("should allow to add a ForwardedSharingInfo to an OwnRelationshipAttribute", async function () {
+        test("should allow to add a ForwardedSharingDetails to an OwnRelationshipAttribute", async function () {
             const thirdPartyAddress = CoreAddress.from("thirdPartyAdress");
             const peerAddress = CoreAddress.from("peerAddress");
 
@@ -367,7 +367,7 @@ describe("AttributesController", function () {
                 sourceReference: CoreId.from("aSourceReferenceId")
             });
 
-            const forwardedOwnRelationshipAttribute = await consumptionController.attributes.addForwardedSharingInfoToAttribute(
+            const forwardedOwnRelationshipAttribute = await consumptionController.attributes.addForwardedSharingDetailsToAttribute(
                 ownRelationshipAttribute,
                 peerAddress,
                 CoreId.from("anotherSourceReferenceId")
@@ -377,7 +377,7 @@ describe("AttributesController", function () {
             expect(forwardedOwnRelationshipAttribute.isForwardedTo(peerAddress)).toBe(true);
         });
 
-        test("should allow to add a ForwardedSharingInfo to a PeerRelationshipAttribute", async function () {
+        test("should allow to add a ForwardedSharingDetails to a PeerRelationshipAttribute", async function () {
             const thirdPartyAddress = CoreAddress.from("thirdPartyAdress");
             const peerAddress = CoreAddress.from("peerAddress");
 
@@ -396,7 +396,7 @@ describe("AttributesController", function () {
                 sourceReference: CoreId.from("aSourceReferenceId")
             });
 
-            const forwardedPeerRelationshipAttribute = await consumptionController.attributes.addForwardedSharingInfoToAttribute(
+            const forwardedPeerRelationshipAttribute = await consumptionController.attributes.addForwardedSharingDetailsToAttribute(
                 peerRelationshipAttribute,
                 peerAddress,
                 CoreId.from("anotherSourceReferenceId")
@@ -406,7 +406,7 @@ describe("AttributesController", function () {
             expect(forwardedPeerRelationshipAttribute.isForwardedTo(peerAddress)).toBe(true);
         });
 
-        test("should publish an event adding a ForwardedSharingInfo to an Attribute", async function () {
+        test("should publish an event adding a ForwardedSharingDetails to an Attribute", async function () {
             const attributeParams = {
                 content: IdentityAttribute.from({
                     value: {
@@ -421,11 +421,11 @@ describe("AttributesController", function () {
             const peer = CoreAddress.from("address");
             const sourceReference = CoreId.from("aSourceReferenceId");
 
-            const forwardedAttribute = await consumptionController.attributes.addForwardedSharingInfoToAttribute(attribute, peer, sourceReference);
-            mockEventBus.expectLastPublishedEvent(AttributeForwardedSharingInfosChangedEvent, forwardedAttribute);
+            const forwardedAttribute = await consumptionController.attributes.addForwardedSharingDetailsToAttribute(attribute, peer, sourceReference);
+            mockEventBus.expectLastPublishedEvent(AttributeForwardedSharingDetailsChangedEvent, forwardedAttribute);
         });
 
-        test("should throw trying to add a ForwardedSharingInfo to an Attribute if it is already forwarded", async function () {
+        test("should throw trying to add a ForwardedSharingDetails to an Attribute if it is already forwarded", async function () {
             const attributeParams = {
                 content: IdentityAttribute.from({
                     value: {
@@ -436,14 +436,14 @@ describe("AttributesController", function () {
                 })
             };
             const attribute = await consumptionController.attributes.createOwnIdentityAttribute(attributeParams);
-            await consumptionController.attributes.addForwardedSharingInfoToAttribute(attribute, CoreAddress.from("peer"), CoreId.from("aSourceReferenceId"));
+            await consumptionController.attributes.addForwardedSharingDetailsToAttribute(attribute, CoreAddress.from("peer"), CoreId.from("aSourceReferenceId"));
 
             await expect(
-                consumptionController.attributes.addForwardedSharingInfoToAttribute(attribute, CoreAddress.from("peer"), CoreId.from("aSourceReferenceId"))
+                consumptionController.attributes.addForwardedSharingDetailsToAttribute(attribute, CoreAddress.from("peer"), CoreId.from("aSourceReferenceId"))
             ).rejects.toThrow("error.consumption.attributes.alreadyForwarded");
         });
 
-        test("should allow to add a ForwardedSharingInfo to an Attribute if it is already forwarded but DeletedByPeer", async function () {
+        test("should allow to add a ForwardedSharingDetails to an Attribute if it is already forwarded but DeletedByPeer", async function () {
             const attributeParams = {
                 content: IdentityAttribute.from({
                     value: {
@@ -454,7 +454,7 @@ describe("AttributesController", function () {
                 })
             };
             const attribute = await consumptionController.attributes.createOwnIdentityAttribute(attributeParams);
-            await consumptionController.attributes.addForwardedSharingInfoToAttribute(attribute, CoreAddress.from("peer"), CoreId.from("aSourceReferenceId"));
+            await consumptionController.attributes.addForwardedSharingDetailsToAttribute(attribute, CoreAddress.from("peer"), CoreId.from("aSourceReferenceId"));
 
             const deletionInfo = EmittedAttributeDeletionInfo.from({
                 deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
@@ -462,15 +462,15 @@ describe("AttributesController", function () {
             });
             await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(attribute, deletionInfo, CoreAddress.from("peer"));
 
-            const updatedAttribute = await consumptionController.attributes.addForwardedSharingInfoToAttribute(
+            const updatedAttribute = await consumptionController.attributes.addForwardedSharingDetailsToAttribute(
                 attribute,
                 CoreAddress.from("peer"),
                 CoreId.from("aSourceReferenceId")
             );
-            expect(updatedAttribute.forwardedSharingInfos).toHaveLength(2);
+            expect(updatedAttribute.forwardedSharingDetails).toHaveLength(2);
         });
 
-        test("should updated a ForwardedSharingInfo of an Attribute if it is already forwarded but ToBeDeletedByPeer", async function () {
+        test("should updated a ForwardedSharingDetails of an Attribute if it is already forwarded but ToBeDeletedByPeer", async function () {
             const attributeParams = {
                 content: IdentityAttribute.from({
                     value: {
@@ -481,7 +481,7 @@ describe("AttributesController", function () {
                 })
             };
             const attribute = await consumptionController.attributes.createOwnIdentityAttribute(attributeParams);
-            await consumptionController.attributes.addForwardedSharingInfoToAttribute(attribute, CoreAddress.from("peer"), CoreId.from("aSourceReferenceId"));
+            await consumptionController.attributes.addForwardedSharingDetailsToAttribute(attribute, CoreAddress.from("peer"), CoreId.from("aSourceReferenceId"));
 
             const deletionInfo = EmittedAttributeDeletionInfo.from({
                 deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
@@ -489,16 +489,16 @@ describe("AttributesController", function () {
             });
             await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(attribute, deletionInfo, CoreAddress.from("peer"));
 
-            const updatedAttribute = await consumptionController.attributes.addForwardedSharingInfoToAttribute(
+            const updatedAttribute = await consumptionController.attributes.addForwardedSharingDetailsToAttribute(
                 attribute,
                 CoreAddress.from("peer"),
                 CoreId.from("aSourceReferenceId")
             );
-            expect(updatedAttribute.forwardedSharingInfos).toHaveLength(1);
-            expect(updatedAttribute.forwardedSharingInfos![0].deletionInfo).toBeUndefined();
+            expect(updatedAttribute.forwardedSharingDetails).toHaveLength(1);
+            expect(updatedAttribute.forwardedSharingDetails![0].deletionInfo).toBeUndefined();
         });
 
-        test("should remove a ForwardedSharingInfo from an Attribute", async function () {
+        test("should remove a ForwardedSharingDetails from an Attribute", async function () {
             const attributeParams = {
                 content: IdentityAttribute.from({
                     value: {
@@ -512,14 +512,14 @@ describe("AttributesController", function () {
 
             const peer = CoreAddress.from("address");
 
-            const forwardedAttribute = await consumptionController.attributes.addForwardedSharingInfoToAttribute(attribute, peer, CoreId.from("aSourceReferenceId"));
+            const forwardedAttribute = await consumptionController.attributes.addForwardedSharingDetailsToAttribute(attribute, peer, CoreId.from("aSourceReferenceId"));
             expect(forwardedAttribute.isForwardedTo(peer)).toBe(true);
 
-            const updatedAttribute = await consumptionController.attributes.removeForwardedSharingInfoFromAttribute(forwardedAttribute, peer);
+            const updatedAttribute = await consumptionController.attributes.removeForwardedSharingDetailsFromAttribute(forwardedAttribute, peer);
             expect(updatedAttribute.isForwardedTo(peer)).toBe(false);
         });
 
-        test("should publish an event removing a ForwardedSharingInfo from an Attribute", async function () {
+        test("should publish an event removing a ForwardedSharingDetails from an Attribute", async function () {
             const attributeParams = {
                 content: IdentityAttribute.from({
                     value: {
@@ -532,14 +532,14 @@ describe("AttributesController", function () {
             const attribute = await consumptionController.attributes.createOwnIdentityAttribute(attributeParams);
 
             const peer = CoreAddress.from("address");
-            const forwardedAttribute = await consumptionController.attributes.addForwardedSharingInfoToAttribute(attribute, peer, CoreId.from("aSourceReferenceId"));
+            const forwardedAttribute = await consumptionController.attributes.addForwardedSharingDetailsToAttribute(attribute, peer, CoreId.from("aSourceReferenceId"));
             mockEventBus.clearPublishedEvents();
 
-            const updatedAttribute = await consumptionController.attributes.removeForwardedSharingInfoFromAttribute(forwardedAttribute, peer);
-            mockEventBus.expectLastPublishedEvent(AttributeForwardedSharingInfosChangedEvent, updatedAttribute);
+            const updatedAttribute = await consumptionController.attributes.removeForwardedSharingDetailsFromAttribute(forwardedAttribute, peer);
+            mockEventBus.expectLastPublishedEvent(AttributeForwardedSharingDetailsChangedEvent, updatedAttribute);
         });
 
-        test("should not change Attribute trying to remove a ForwardedSharingInfo from an Attribute without ForwardedSharingInfo", async function () {
+        test("should not change Attribute trying to remove a ForwardedSharingDetails from an Attribute without ForwardedSharingDetails", async function () {
             const attributeParams = {
                 content: IdentityAttribute.from({
                     value: {
@@ -549,11 +549,11 @@ describe("AttributesController", function () {
                     owner: testAccount.identity.address
                 })
             };
-            const attributeWithoutForwardedSharingInfo = await consumptionController.attributes.createOwnIdentityAttribute(attributeParams);
+            const attributeWithoutForwardedSharingDetails = await consumptionController.attributes.createOwnIdentityAttribute(attributeParams);
 
             const peer = CoreAddress.from("address");
-            const unchangedAttribute = await consumptionController.attributes.removeForwardedSharingInfoFromAttribute(attributeWithoutForwardedSharingInfo, peer);
-            expect(unchangedAttribute).toStrictEqual(attributeWithoutForwardedSharingInfo);
+            const unchangedAttribute = await consumptionController.attributes.removeForwardedSharingDetailsFromAttribute(attributeWithoutForwardedSharingDetails, peer);
+            expect(unchangedAttribute).toStrictEqual(attributeWithoutForwardedSharingDetails);
         });
     });
 
@@ -916,7 +916,7 @@ describe("AttributesController", function () {
                 })
             };
             const ownIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute(ownIdentityAttributeParams);
-            await consumptionController.attributes.addForwardedSharingInfoToAttribute(ownIdentityAttribute, CoreAddress.from("a-fake-peer"), CoreId.from("a-fake-reference"));
+            await consumptionController.attributes.addForwardedSharingDetailsToAttribute(ownIdentityAttribute, CoreAddress.from("a-fake-peer"), CoreId.from("a-fake-reference"));
 
             const iqlQuery: IIQLQuery = { queryString: "Nationality=DE" };
             const matchedAttributes = await consumptionController.attributes.executeIQLQuery(iqlQuery);
@@ -1490,7 +1490,7 @@ describe("AttributesController", function () {
                         owner: consumptionController.accountController.identity.address
                     })
                 });
-                await consumptionController.attributes.addForwardedSharingInfoToAttribute(predecessor, CoreAddress.from("peer"), CoreId.from("aSourceReferenceId"));
+                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(predecessor, CoreAddress.from("peer"), CoreId.from("aSourceReferenceId"));
                 await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(
                     predecessor,
                     EmittedAttributeDeletionInfo.from({
@@ -1643,7 +1643,7 @@ describe("AttributesController", function () {
                         owner: consumptionController.accountController.identity.address
                     })
                 });
-                const predecessorForwardedOwnIdentityAttribute = await consumptionController.attributes.addForwardedSharingInfoToAttribute(
+                const predecessorForwardedOwnIdentityAttribute = await consumptionController.attributes.addForwardedSharingDetailsToAttribute(
                     predecessorOwnIdentityAttribute,
                     CoreAddress.from("peer"),
                     CoreId.from("aSourceReferenceId")
@@ -2084,7 +2084,7 @@ describe("AttributesController", function () {
         });
 
         test("should return all versions of a possibly succeeded forwarded OwnIdentityAttribute", async function () {
-            const forwardedOwnIdentityAttributeVersion0 = await consumptionController.attributes.addForwardedSharingInfoToAttribute(
+            const forwardedOwnIdentityAttributeVersion0 = await consumptionController.attributes.addForwardedSharingDetailsToAttribute(
                 ownIdentityAttributeVersion0,
                 CoreAddress.from("peerA"),
                 CoreId.from("aSourceReferenceId")
@@ -2095,7 +2095,7 @@ describe("AttributesController", function () {
                 JSON.stringify([ownIdentityAttributeVersion2, ownIdentityAttributeVersion1, forwardedOwnIdentityAttributeVersion0])
             );
 
-            const forwardedOwnIdentityAttributeVersion1 = await consumptionController.attributes.addForwardedSharingInfoToAttribute(
+            const forwardedOwnIdentityAttributeVersion1 = await consumptionController.attributes.addForwardedSharingDetailsToAttribute(
                 ownIdentityAttributeVersion1,
                 CoreAddress.from("peerB"),
                 CoreId.from("anotherSourceReferenceId")
@@ -2371,19 +2371,19 @@ describe("AttributesController", function () {
                 ownIdentityAttributeParamsV2
             ));
 
-            const forwardedOwnIdentityAttributeV1PeerA = await consumptionController.attributes.addForwardedSharingInfoToAttribute(
+            const forwardedOwnIdentityAttributeV1PeerA = await consumptionController.attributes.addForwardedSharingDetailsToAttribute(
                 ownIdentityAttributeV1,
                 CoreAddress.from("peerA"),
                 CoreId.from("aSourceReferenceId")
             );
 
-            forwardedOwnIdentityAttributeV1PeerAAndPeerB = await consumptionController.attributes.addForwardedSharingInfoToAttribute(
+            forwardedOwnIdentityAttributeV1PeerAAndPeerB = await consumptionController.attributes.addForwardedSharingDetailsToAttribute(
                 forwardedOwnIdentityAttributeV1PeerA,
                 CoreAddress.from("peerB"),
                 CoreId.from("anotherSourceReferenceId")
             );
 
-            forwardedOwnIdentityAttributeV2PeerB = await consumptionController.attributes.addForwardedSharingInfoToAttribute(
+            forwardedOwnIdentityAttributeV2PeerB = await consumptionController.attributes.addForwardedSharingDetailsToAttribute(
                 ownIdentityAttributeV2,
                 CoreAddress.from("peerB"),
                 CoreId.from("aPeerBSourceReferenceId")

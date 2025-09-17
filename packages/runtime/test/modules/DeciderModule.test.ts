@@ -1437,8 +1437,8 @@ describe("DeciderModule", () => {
             expect((responseContent.items[0] as DeleteAttributeAcceptResponseItemJSON).deletionDate).toBe(deletionDate);
 
             const updatedSharedAttribute = (await recipient.consumption.attributes.getAttribute({ id: sharedAttribute.id })).value;
-            expect(updatedSharedAttribute.peerSharingInfo!.deletionInfo!.deletionStatus).toBe(ReceivedAttributeDeletionStatus.ToBeDeleted);
-            expect(updatedSharedAttribute.peerSharingInfo!.deletionInfo!.deletionDate).toBe(deletionDate);
+            expect(updatedSharedAttribute.peerSharingDetails!.deletionInfo!.deletionStatus).toBe(ReceivedAttributeDeletionStatus.ToBeDeleted);
+            expect(updatedSharedAttribute.peerSharingDetails!.deletionInfo!.deletionDate).toBe(deletionDate);
         });
 
         test("accepts a ProposeAttributeRequestItem given a ProposeAttributeRequestItemConfig with all fields set for an IdentityAttribute", async () => {
@@ -2037,7 +2037,7 @@ describe("DeciderModule", () => {
             const sharedAttributeId = (responseContent.items[0] as TransferFileOwnershipAcceptResponseItemJSON).attributeId;
             const sharedAttribute = (await recipient.consumption.attributes.getAttribute({ id: sharedAttributeId })).value;
             expect(sharedAttribute.content.value["@type"]).toBe("IdentityFileReference");
-            expect(sharedAttribute.forwardedSharingInfos).toHaveLength(1);
+            expect(sharedAttribute.forwardedSharingDetails).toHaveLength(1);
         });
     });
 

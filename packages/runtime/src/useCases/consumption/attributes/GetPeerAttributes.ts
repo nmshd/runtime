@@ -27,19 +27,19 @@ export interface GetPeerAttributesRequestQuery {
     "content.isTechnical"?: string;
     "content.confidentiality"?: string | string[];
     "content.value.@type"?: string | string[];
-    peerSharingInfo?: string | string[];
-    "peerSharingInfo.sourceReference"?: string | string[];
-    "peerSharingInfo.initialAttributePeer"?: string | string[];
-    "peerSharingInfo.deletionInfo"?: string | string[];
-    "peerSharingInfo.deletionInfo.deletionStatus"?: string | string[];
-    "peerSharingInfo.deletionInfo.deletionDate"?: string | string[];
-    forwardedSharingInfos?: string | string[];
-    "forwardedSharingInfos.peer"?: string | string[];
-    "forwardedSharingInfos.sourceReference"?: string | string[];
-    "forwardedSharingInfos.sharedAt"?: string | string[];
-    "forwardedSharingInfos.deletionInfo"?: string | string[];
-    "forwardedSharingInfos.deletionInfo.deletionStatus"?: string | string[];
-    "forwardedSharingInfos.deletionInfo.deletionDate"?: string | string[];
+    peerSharingDetails?: string | string[];
+    "peerSharingDetails.sourceReference"?: string | string[];
+    "peerSharingDetails.initialAttributePeer"?: string | string[];
+    "peerSharingDetails.deletionInfo"?: string | string[];
+    "peerSharingDetails.deletionInfo.deletionStatus"?: string | string[];
+    "peerSharingDetails.deletionInfo.deletionDate"?: string | string[];
+    forwardedSharingDetails?: string | string[];
+    "forwardedSharingDetails.peer"?: string | string[];
+    "forwardedSharingDetails.sourceReference"?: string | string[];
+    "forwardedSharingDetails.sharedAt"?: string | string[];
+    "forwardedSharingDetails.deletionInfo"?: string | string[];
+    "forwardedSharingDetails.deletionInfo.deletionStatus"?: string | string[];
+    "forwardedSharingDetails.deletionInfo.deletionDate"?: string | string[];
 }
 
 class Validator extends SchemaValidator<GetPeerAttributesRequest> {
@@ -63,7 +63,7 @@ export class GetPeerAttributesUseCase extends UseCase<GetPeerAttributesRequest, 
         const dbQuery = GetAttributesUseCase.queryTranslator.parse(flattenedQuery);
 
         dbQuery["@type"] = { $in: ["PeerIdentityAttribute", "PeerRelationshipAttribute", "ThirdPartyRelationshipAttribute"] };
-        dbQuery["peerSharingInfo.peer"] = request.peer;
+        dbQuery["peerSharingDetails.peer"] = request.peer;
 
         if (request.onlyLatestVersions ?? true) dbQuery["succeededBy"] = { $exists: false };
 

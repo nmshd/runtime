@@ -28,17 +28,17 @@ export interface GetOwnAttributesSharedWithPeerRequestQuery {
     "content.isTechnical"?: string;
     "content.confidentiality"?: string | string[];
     "content.value.@type"?: string | string[];
-    peerSharingInfo?: string | string[];
-    "peerSharingInfo.sourceReference"?: string | string[];
-    "peerSharingInfo.deletionInfo"?: string | string[];
-    "peerSharingInfo.deletionInfo.deletionStatus"?: string | string[];
-    "peerSharingInfo.deletionInfo.deletionDate"?: string | string[];
-    forwardedSharingInfos?: string | string[];
-    "forwardedSharingInfos.sourceReference"?: string | string[];
-    "forwardedSharingInfos.sharedAt"?: string | string[];
-    "forwardedSharingInfos.deletionInfo"?: string | string[];
-    "forwardedSharingInfos.deletionInfo.deletionStatus"?: string | string[];
-    "forwardedSharingInfos.deletionInfo.deletionDate"?: string | string[];
+    peerSharingDetails?: string | string[];
+    "peerSharingDetails.sourceReference"?: string | string[];
+    "peerSharingDetails.deletionInfo"?: string | string[];
+    "peerSharingDetails.deletionInfo.deletionStatus"?: string | string[];
+    "peerSharingDetails.deletionInfo.deletionDate"?: string | string[];
+    forwardedSharingDetails?: string | string[];
+    "forwardedSharingDetails.sourceReference"?: string | string[];
+    "forwardedSharingDetails.sharedAt"?: string | string[];
+    "forwardedSharingDetails.deletionInfo"?: string | string[];
+    "forwardedSharingDetails.deletionInfo.deletionStatus"?: string | string[];
+    "forwardedSharingDetails.deletionInfo.deletionDate"?: string | string[];
 }
 
 class Validator extends SchemaValidator<GetOwnAttributesSharedWithPeerRequest> {
@@ -62,7 +62,7 @@ export class GetOwnAttributesSharedWithPeerUseCase extends UseCase<GetOwnAttribu
         const dbQuery = GetAttributesUseCase.queryTranslator.parse(flattenedQuery);
 
         dbQuery["@type"] = { $in: ["OwnIdentityAttribute", "OwnRelationshipAttribute"] };
-        dbQuery["$or"] = [{ "peerSharingInfo.peer": request.peer }, { "forwardedSharingInfos.peer": request.peer }];
+        dbQuery["$or"] = [{ "peerSharingDetails.peer": request.peer }, { "forwardedSharingDetails.peer": request.peer }];
 
         if (request.onlyLatestVersions ?? true) dbQuery["succeededBy"] = { $exists: false };
 

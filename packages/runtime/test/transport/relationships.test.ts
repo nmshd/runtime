@@ -1177,11 +1177,11 @@ describe("RelationshipDecomposition", () => {
     test("attributes should be marked as deleted for peer", async () => {
         const forwardedOwnAttributes = (await services2.consumption.attributes.getOwnAttributesSharedWithPeer({ peer: services1.address })).value;
         expect(forwardedOwnAttributes).toHaveLength(1);
-        expect(forwardedOwnAttributes[0].forwardedSharingInfos![0].deletionInfo!.deletionStatus).toBe(EmittedAttributeDeletionStatus.DeletedByPeer);
+        expect(forwardedOwnAttributes[0].forwardedSharingDetails![0].deletionInfo!.deletionStatus).toBe(EmittedAttributeDeletionStatus.DeletedByPeer);
 
         const peerAttributes = (await services2.consumption.attributes.getPeerAttributes({ peer: services1.address })).value;
         expect(peerAttributes).toHaveLength(1);
-        expect(peerAttributes[0].peerSharingInfo!.deletionInfo!.deletionStatus).toBe(ReceivedAttributeDeletionStatus.DeletedByOwner);
+        expect(peerAttributes[0].peerSharingDetails!.deletionInfo!.deletionStatus).toBe(ReceivedAttributeDeletionStatus.DeletedByOwner);
     });
 
     test("notifications should be deleted", async () => {

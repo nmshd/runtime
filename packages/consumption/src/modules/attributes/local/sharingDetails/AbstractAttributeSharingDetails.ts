@@ -12,19 +12,19 @@ import {
     ThirdPartyRelationshipAttributeDeletionInfoJSON
 } from "./deletionInfos";
 
-export interface AbstractAttributeSharingInfoJSON {
+export interface AbstractAttributeSharingDetailsJSON {
     peer: string;
     sourceReference: string;
     deletionInfo?: EmittedAttributeDeletionInfoJSON | ReceivedAttributeDeletionInfoJSON | ThirdPartyRelationshipAttributeDeletionInfoJSON;
 }
 
-export interface IAbstractAttributeSharingInfo extends ISerializable {
+export interface IAbstractAttributeSharingDetails extends ISerializable {
     peer: ICoreAddress;
     sourceReference: ICoreId;
     deletionInfo?: IEmittedAttributeDeletionInfo | IReceivedAttributeDeletionInfo | IThirdPartyRelationshipAttributeDeletionInfo;
 }
 
-export abstract class AbstractAttributeSharingInfo extends Serializable implements IAbstractAttributeSharingInfo {
+export abstract class AbstractAttributeSharingDetails extends Serializable implements IAbstractAttributeSharingDetails {
     @validate()
     @serialize()
     public peer: CoreAddress;

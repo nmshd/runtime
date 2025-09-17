@@ -354,21 +354,21 @@ describe("RelationshipTemplateDVO", () => {
         expect(item.items[0].type).toBe("ProposeAttributeRequestItemDVO");
         expect(item.items[1].type).toBe("ProposeAttributeRequestItemDVO");
 
-        const attributesWithPeerSharingInfo = await requestor.consumption.attributes.getAttributes({
+        const attributesWithPeerSharingDetails = await requestor.consumption.attributes.getAttributes({
             query: {
-                "peerSharingInfo.peer": templator.address
+                "peerSharingDetails.peer": templator.address
             }
         });
-        expect(attributesWithPeerSharingInfo).toBeSuccessful();
-        expect(attributesWithPeerSharingInfo.value).toHaveLength(2);
+        expect(attributesWithPeerSharingDetails).toBeSuccessful();
+        expect(attributesWithPeerSharingDetails.value).toHaveLength(2);
 
-        const attributesWithForwardedSharingInfos = await requestor.consumption.attributes.getAttributes({
+        const attributesWithForwardedSharingDetails = await requestor.consumption.attributes.getAttributes({
             query: {
-                "forwardedSharingInfos.peer": templator.address
+                "forwardedSharingDetails.peer": templator.address
             }
         });
-        expect(attributesWithForwardedSharingInfos).toBeSuccessful();
-        expect(attributesWithForwardedSharingInfos.value).toHaveLength(2);
+        expect(attributesWithForwardedSharingDetails).toBeSuccessful();
+        expect(attributesWithForwardedSharingDetails.value).toHaveLength(2);
 
         await syncUntilHasRelationships(templator.transport);
         await templator.eventBus.waitForEvent(OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent);
@@ -391,12 +391,12 @@ describe("RelationshipTemplateDVO", () => {
         expect(dvo.content.items).toHaveLength(2);
         expect(dvo.isDecidable).toBe(false);
 
-        const attributesWithPeerSharingInfoOfTemplator = await templator.consumption.attributes.getAttributes({
+        const attributesWithPeerSharingDetailsOfTemplator = await templator.consumption.attributes.getAttributes({
             query: {
-                "peerSharingInfo.peer": requestor.address
+                "peerSharingDetails.peer": requestor.address
             }
         });
-        expect(attributesWithPeerSharingInfoOfTemplator).toBeSuccessful();
-        expect(attributesWithPeerSharingInfoOfTemplator.value).toHaveLength(4);
+        expect(attributesWithPeerSharingDetailsOfTemplator).toBeSuccessful();
+        expect(attributesWithPeerSharingDetailsOfTemplator.value).toHaveLength(4);
     });
 });

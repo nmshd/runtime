@@ -701,7 +701,7 @@ export class RequestsWhen {
                 owner: this.context.currentIdentity
             })
         });
-        await this.context.consumptionController.attributes.addForwardedSharingInfoToAttribute(
+        await this.context.consumptionController.attributes.addForwardedSharingDetailsToAttribute(
             sOwnIdentityAttribute1,
             CoreAddress.from("did:e:a-domain:dids:anidentity"),
             CoreId.from("shareSourceReference1")
@@ -716,7 +716,7 @@ export class RequestsWhen {
                 owner: this.context.currentIdentity
             })
         });
-        await this.context.consumptionController.attributes.addForwardedSharingInfoToAttribute(
+        await this.context.consumptionController.attributes.addForwardedSharingDetailsToAttribute(
             sOwnIdentityAttribute2,
             CoreAddress.from("did:e:a-domain:dids:anidentity"),
             CoreId.from("shareSourceReference2")
@@ -731,7 +731,7 @@ export class RequestsWhen {
                 owner: this.context.currentIdentity
             })
         });
-        await this.context.consumptionController.attributes.addForwardedSharingInfoToAttribute(
+        await this.context.consumptionController.attributes.addForwardedSharingDetailsToAttribute(
             sSucceededOwnIdentityAttribute2,
             CoreAddress.from("did:e:a-domain:dids:anidentity"),
             CoreId.from("shareSourceReference3")
@@ -1083,8 +1083,8 @@ export class RequestsThen {
         expect(sUpdatedOwnIdentityAttributes).toBeDefined();
         expect(sUpdatedOwnIdentityAttributes).toHaveLength(3);
         for (const sUpdatedOwnIdentityAttribute of sUpdatedOwnIdentityAttributes) {
-            expect((sUpdatedOwnIdentityAttribute as OwnIdentityAttribute).forwardedSharingInfos![0].deletionInfo).toBeDefined();
-            expect((sUpdatedOwnIdentityAttribute as OwnIdentityAttribute).forwardedSharingInfos![0].deletionInfo!.deletionStatus).toBe(
+            expect((sUpdatedOwnIdentityAttribute as OwnIdentityAttribute).forwardedSharingDetails![0].deletionInfo).toBeDefined();
+            expect((sUpdatedOwnIdentityAttribute as OwnIdentityAttribute).forwardedSharingDetails![0].deletionInfo!.deletionStatus).toBe(
                 EmittedAttributeDeletionStatus.DeletionRequestSent
             );
         }

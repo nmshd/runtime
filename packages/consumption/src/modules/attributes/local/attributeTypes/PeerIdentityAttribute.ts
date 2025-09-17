@@ -3,28 +3,28 @@ import { IdentityAttribute, IdentityAttributeJSON, IIdentityAttribute } from "@n
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import {
-    IPeerIdentityAttributeSharingInfo,
-    PeerIdentityAttributeSharingInfo,
-    PeerIdentityAttributeSharingInfoJSON,
+    IPeerIdentityAttributeSharingDetails,
+    PeerIdentityAttributeSharingDetails,
+    PeerIdentityAttributeSharingDetailsJSON,
     ReceivedAttributeDeletionInfo,
     ReceivedAttributeDeletionStatus
-} from "../sharingInfos";
+} from "../sharingDetails";
 import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./LocalAttribute";
 
 export interface PeerIdentityAttributeJSON extends LocalAttributeJSON {
     "@type": "PeerIdentityAttribute";
     content: IdentityAttributeJSON;
-    peerSharingInfo: PeerIdentityAttributeSharingInfoJSON;
+    peerSharingDetails: PeerIdentityAttributeSharingDetailsJSON;
 }
 
 export interface IPeerIdentityAttribute extends ILocalAttribute {
     content: IIdentityAttribute;
-    peerSharingInfo: IPeerIdentityAttributeSharingInfo;
+    peerSharingDetails: IPeerIdentityAttributeSharingDetails;
 }
 
 @type("PeerIdentityAttribute")
 export class PeerIdentityAttribute extends LocalAttribute implements IPeerIdentityAttribute {
-    public override readonly technicalProperties: string[] = [...this.technicalProperties, "@type", "@context", nameof<PeerIdentityAttribute>((r) => r.peerSharingInfo)];
+    public override readonly technicalProperties: string[] = [...this.technicalProperties, "@type", "@context", nameof<PeerIdentityAttribute>((r) => r.peerSharingDetails)];
 
     @serialize({ customGenerator: (value: IdentityAttribute) => value.toJSON(true) })
     @validate()
@@ -32,25 +32,25 @@ export class PeerIdentityAttribute extends LocalAttribute implements IPeerIdenti
 
     @serialize()
     @validate()
-    public peerSharingInfo: PeerIdentityAttributeSharingInfo;
+    public peerSharingDetails: PeerIdentityAttributeSharingDetails;
 
     public isDeletedByOwnerOrToBeDeleted(): boolean {
-        if (!this.peerSharingInfo.deletionInfo) return false;
+        if (!this.peerSharingDetails.deletionInfo) return false;
 
         const deletionStatuses = [ReceivedAttributeDeletionStatus.DeletedByOwner, ReceivedAttributeDeletionStatus.ToBeDeleted];
-        return deletionStatuses.includes(this.peerSharingInfo.deletionInfo.deletionStatus);
+        return deletionStatuses.includes(this.peerSharingDetails.deletionInfo.deletionStatus);
     }
 
     public isToBeDeleted(): boolean {
-        return this.peerSharingInfo.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.ToBeDeleted;
+        return this.peerSharingDetails.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.ToBeDeleted;
     }
 
     public setPeerDeletionInfo(deletionInfo: ReceivedAttributeDeletionInfo | undefined, overrideDeleted = false): this {
-        if (!overrideDeleted && this.peerSharingInfo.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.DeletedByOwner) {
+        if (!overrideDeleted && this.peerSharingDetails.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.DeletedByOwner) {
             throw ConsumptionCoreErrors.attributes.cannotSetAttributeDeletionInfo(this.id);
         }
 
-        this.peerSharingInfo.deletionInfo = deletionInfo;
+        this.peerSharingDetails.deletionInfo = deletionInfo;
         return this;
     }
 

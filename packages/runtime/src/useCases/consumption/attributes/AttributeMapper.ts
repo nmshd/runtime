@@ -1,5 +1,5 @@
 import {
-    AttributeWithPeerSharingInfo,
+    AttributeWithPeerSharingDetails,
     ForwardableAttribute,
     LocalAttribute,
     OwnIdentityAttribute,
@@ -8,7 +8,7 @@ import {
     PeerRelationshipAttribute,
     ThirdPartyRelationshipAttribute
 } from "@nmshd/consumption";
-import { ForwardedSharingInfoDTO, LocalAttributeDTO, PeerSharingInfoDTO } from "@nmshd/runtime-types";
+import { ForwardedSharingDetailsDTO, LocalAttributeDTO, PeerSharingDetailsDTO } from "@nmshd/runtime-types";
 
 export class AttributeMapper {
     public static toAttributeDTO(attribute: LocalAttribute): LocalAttributeDTO {
@@ -21,8 +21,8 @@ export class AttributeMapper {
             succeededBy: attribute.succeededBy?.toString(),
             wasViewedAt: attribute.wasViewedAt?.toString(),
             isDefault: attribute instanceof OwnIdentityAttribute ? attribute.isDefault : undefined,
-            peerSharingInfo: this.toPeerSharingInfo(attribute),
-            forwardedSharingInfos: this.toForwardedSharingInfos(attribute)
+            peerSharingDetails: this.toPeerSharingDetails(attribute),
+            forwardedSharingDetails: this.toForwardedSharingDetails(attribute)
         };
     }
 
@@ -39,15 +39,15 @@ export class AttributeMapper {
         throw new Error("Type of LocalAttribute not found.");
     }
 
-    private static toPeerSharingInfo(attribute: LocalAttribute) {
-        if (!("peerSharingInfo" in attribute)) return undefined;
+    private static toPeerSharingDetails(attribute: LocalAttribute) {
+        if (!("peerSharingDetails" in attribute)) return undefined;
 
-        return (attribute as AttributeWithPeerSharingInfo).peerSharingInfo.toJSON() as PeerSharingInfoDTO;
+        return (attribute as AttributeWithPeerSharingDetails).peerSharingDetails.toJSON() as PeerSharingDetailsDTO;
     }
 
-    private static toForwardedSharingInfos(attribute: LocalAttribute) {
-        if (!("forwardedSharingInfos" in attribute)) return undefined;
+    private static toForwardedSharingDetails(attribute: LocalAttribute) {
+        if (!("forwardedSharingDetails" in attribute)) return undefined;
 
-        return (attribute as ForwardableAttribute).forwardedSharingInfos?.map((sharingInfo) => sharingInfo.toJSON()) as ForwardedSharingInfoDTO[];
+        return (attribute as ForwardableAttribute).forwardedSharingDetails?.map((sharingDetails) => sharingDetails.toJSON()) as ForwardedSharingDetailsDTO[];
     }
 }

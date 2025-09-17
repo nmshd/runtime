@@ -103,13 +103,13 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("You cannot share ThirdPartyRelationshipAttributes."));
         }
 
-        if (recipient && foundAttribute.peerSharingInfo.peer.equals(recipient)) {
+        if (recipient && foundAttribute.peerSharingDetails.peer.equals(recipient)) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidRequestItem("The provided RelationshipAttribute already exists in the context of the Relationship with the peer.")
             );
         }
 
-        const initialPeer = foundAttribute.peerSharingInfo.peer;
+        const initialPeer = foundAttribute.peerSharingDetails.peer;
         const queryForNonPendingRelationships = {
             "peer.address": initialPeer.toString(),
             status: { $in: [RelationshipStatus.Active, RelationshipStatus.Terminated, RelationshipStatus.DeletionProposed] }
@@ -178,7 +178,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             );
 
             if (existingThirdPartyRelationshipAttribute) {
-                if (existingThirdPartyRelationshipAttribute.peerSharingInfo.deletionInfo?.deletionStatus === ThirdPartyRelationshipAttributeDeletionStatus.ToBeDeleted) {
+                if (existingThirdPartyRelationshipAttribute.peerSharingDetails.deletionInfo?.deletionStatus === ThirdPartyRelationshipAttributeDeletionStatus.ToBeDeleted) {
                     await this.consumptionController.attributes.setPeerDeletionInfoOfThirdPartyRelationshipAttribute(existingThirdPartyRelationshipAttribute, undefined, true);
                 }
 
@@ -205,7 +205,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
         );
 
         if (existingPeerIdentityAttribute) {
-            if (existingPeerIdentityAttribute.peerSharingInfo.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.ToBeDeleted) {
+            if (existingPeerIdentityAttribute.peerSharingDetails.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.ToBeDeleted) {
                 await this.consumptionController.attributes.setPeerDeletionInfoOfPeerAttribute(existingPeerIdentityAttribute, undefined, true);
             }
 
@@ -245,6 +245,6 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             return;
         }
 
-        await this.consumptionController.attributes.addForwardedSharingInfoToAttribute(sharedAttribute, requestInfo.peer, requestInfo.id);
+        await this.consumptionController.attributes.addForwardedSharingDetailsToAttribute(sharedAttribute, requestInfo.peer, requestInfo.id);
     }
 }

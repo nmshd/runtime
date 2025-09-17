@@ -9,18 +9,18 @@ export interface LocalAttributeDTO {
     succeededBy?: string;
     wasViewedAt?: string;
     isDefault?: true;
-    peerSharingInfo?: PeerSharingInfoDTO;
-    forwardedSharingInfos?: ForwardedSharingInfoDTO[];
+    peerSharingDetails?: PeerSharingDetailsDTO;
+    forwardedSharingDetails?: ForwardedSharingDetailsDTO[];
 }
 
-export interface PeerSharingInfoDTO {
+export interface PeerSharingDetailsDTO {
     peer: string;
     sourceReference: string;
     deletionInfo?: LocalAttributeDeletionInfoDTO;
     initialAttributePeer?: string;
 }
 
-export interface ForwardedSharingInfoDTO {
+export interface ForwardedSharingDetailsDTO {
     peer: string;
     sourceReference: string;
     sharedAt: string;

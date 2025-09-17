@@ -602,7 +602,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 })
             });
 
-            await consumptionController.attributes.addForwardedSharingInfoToAttribute(successorOwnIdentityAttribute, sender, await CoreIdHelper.notPrefixed.generate());
+            await consumptionController.attributes.addForwardedSharingDetailsToAttribute(successorOwnIdentityAttribute, sender, await CoreIdHelper.notPrefixed.generate());
 
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
@@ -794,7 +794,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     }
                 });
 
-                await consumptionController.attributes.addForwardedSharingInfoToAttribute(successorOwnIdentityAttribute, sender, await ConsumptionIds.request.generate());
+                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(successorOwnIdentityAttribute, sender, await ConsumptionIds.request.generate());
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -1565,8 +1565,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 expect(result).toBeInstanceOf(ReadAttributeAcceptResponseItem);
 
                 const updatedAttribute = (await consumptionController.attributes.getLocalAttribute(attribute.id)) as OwnIdentityAttribute;
-                expect(updatedAttribute.forwardedSharingInfos).toHaveLength(1);
-                expect(updatedAttribute.forwardedSharingInfos![0].peer).toStrictEqual(incomingRequest.peer);
+                expect(updatedAttribute.forwardedSharingDetails).toHaveLength(1);
+                expect(updatedAttribute.forwardedSharingDetails![0].peer).toStrictEqual(incomingRequest.peer);
             });
 
             test("accept with existing OwnIdentityAttribute and new tags", async function () {
@@ -1607,8 +1607,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const ownIdentityAttributeSuccessor = await consumptionController.attributes.getLocalAttribute((result as ReadAttributeAcceptResponseItem).attributeId);
                 expect(ownIdentityAttributeSuccessor!.succeeds).toStrictEqual(ownIdentityAttribute.id);
                 expect((ownIdentityAttributeSuccessor!.content as IdentityAttribute).tags).toStrictEqual(["x:anExistingTag", "x:aNewTag"]);
-                expect((ownIdentityAttributeSuccessor as OwnIdentityAttribute).forwardedSharingInfos).toHaveLength(1);
-                expect((ownIdentityAttributeSuccessor as OwnIdentityAttribute).forwardedSharingInfos![0].peer).toStrictEqual(sender);
+                expect((ownIdentityAttributeSuccessor as OwnIdentityAttribute).forwardedSharingDetails).toHaveLength(1);
+                expect((ownIdentityAttributeSuccessor as OwnIdentityAttribute).forwardedSharingDetails![0].peer).toStrictEqual(sender);
 
                 const updatedOwnIdentityAttribute = (await consumptionController.attributes.getLocalAttribute(ownIdentityAttribute.id)) as OwnIdentityAttribute;
                 expect(updatedOwnIdentityAttribute.succeededBy).toStrictEqual(ownIdentityAttributeSuccessor!.id);
@@ -1621,7 +1621,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     })
                 });
 
-                await consumptionController.attributes.addForwardedSharingInfoToAttribute(predecessorOwnIdentityAttribute, sender, CoreId.from("initialRequest"));
+                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(predecessorOwnIdentityAttribute, sender, CoreId.from("initialRequest"));
 
                 const { successor: successorOwnIdentityAttribute } = await consumptionController.attributes.succeedOwnIdentityAttribute(predecessorOwnIdentityAttribute, {
                     content: IdentityAttribute.from({
@@ -1670,7 +1670,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     })
                 });
 
-                await consumptionController.attributes.addForwardedSharingInfoToAttribute(predecessor, sender, CoreId.from("initialRequest"));
+                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(predecessor, sender, CoreId.from("initialRequest"));
 
                 const { successor } = await consumptionController.attributes.succeedOwnIdentityAttribute(predecessor, {
                     content: IdentityAttribute.from({
@@ -1712,8 +1712,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 )) as OwnIdentityAttribute;
                 expect(createdSuccessor.succeeds).toStrictEqual(successor.id);
                 expect(createdSuccessor.content.tags).toStrictEqual(["x:anExistingTag", "x:aNewTag"]);
-                expect(createdSuccessor.forwardedSharingInfos).toHaveLength(1);
-                expect(createdSuccessor.forwardedSharingInfos![0].peer).toStrictEqual(sender);
+                expect(createdSuccessor.forwardedSharingDetails).toHaveLength(1);
+                expect(createdSuccessor.forwardedSharingDetails![0].peer).toStrictEqual(sender);
 
                 const updatedSuccessor = (await consumptionController.attributes.getLocalAttribute(successor.id)) as OwnIdentityAttribute;
                 expect(updatedSuccessor.succeededBy).toStrictEqual(createdSuccessor.id);
@@ -1725,7 +1725,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         owner: accountController.identity.address
                     })
                 });
-                await consumptionController.attributes.addForwardedSharingInfoToAttribute(predecessor, sender, CoreId.from("reqRef"));
+                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(predecessor, sender, CoreId.from("reqRef"));
 
                 const deletionInfo = EmittedAttributeDeletionInfo.from({
                     deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
@@ -1772,9 +1772,9 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 expect((result as ReadAttributeAcceptResponseItem).attributeId).toStrictEqual(successor.id);
 
                 const updatedSuccessor = (await consumptionController.attributes.getLocalAttribute(successor.id)) as OwnIdentityAttribute;
-                expect(updatedSuccessor.forwardedSharingInfos).toHaveLength(1);
-                expect(updatedSuccessor.forwardedSharingInfos![0].peer).toStrictEqual(sender);
-                expect(updatedSuccessor.forwardedSharingInfos![0].deletionInfo).toBeUndefined();
+                expect(updatedSuccessor.forwardedSharingDetails).toHaveLength(1);
+                expect(updatedSuccessor.forwardedSharingDetails![0].peer).toStrictEqual(sender);
+                expect(updatedSuccessor.forwardedSharingDetails![0].deletionInfo).toBeUndefined();
             });
 
             test("accept with existing IdentityAttribute whose predecessor was already shared but is ToBeDeletedByPeer", async function () {
@@ -1783,7 +1783,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         owner: accountController.identity.address
                     })
                 });
-                await consumptionController.attributes.addForwardedSharingInfoToAttribute(predecessor, sender, CoreId.from("reqRef"));
+                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(predecessor, sender, CoreId.from("reqRef"));
 
                 const deletionInfo = EmittedAttributeDeletionInfo.from({
                     deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
@@ -1831,14 +1831,14 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 expect((result as AttributeSuccessionAcceptResponseItem).successorId).toStrictEqual(successor.id);
 
                 const updatedPredecessor = (await consumptionController.attributes.getLocalAttribute(predecessor.id)) as OwnIdentityAttribute;
-                expect(updatedPredecessor.forwardedSharingInfos).toHaveLength(1);
-                expect(updatedPredecessor.forwardedSharingInfos![0].peer).toStrictEqual(sender);
-                expect(updatedPredecessor.forwardedSharingInfos![0].deletionInfo!.deletionStatus).toStrictEqual(EmittedAttributeDeletionStatus.ToBeDeletedByPeer);
+                expect(updatedPredecessor.forwardedSharingDetails).toHaveLength(1);
+                expect(updatedPredecessor.forwardedSharingDetails![0].peer).toStrictEqual(sender);
+                expect(updatedPredecessor.forwardedSharingDetails![0].deletionInfo!.deletionStatus).toStrictEqual(EmittedAttributeDeletionStatus.ToBeDeletedByPeer);
 
                 const updatedSuccessor = (await consumptionController.attributes.getLocalAttribute(successor.id)) as OwnIdentityAttribute;
-                expect(updatedSuccessor.forwardedSharingInfos).toHaveLength(1);
-                expect(updatedSuccessor.forwardedSharingInfos![0].peer).toStrictEqual(sender);
-                expect(updatedSuccessor.forwardedSharingInfos![0].deletionInfo).toBeUndefined();
+                expect(updatedSuccessor.forwardedSharingDetails).toHaveLength(1);
+                expect(updatedSuccessor.forwardedSharingDetails![0].peer).toStrictEqual(sender);
+                expect(updatedSuccessor.forwardedSharingDetails![0].deletionInfo).toBeUndefined();
             });
 
             test("accept with existing IdentityAttribute that is already shared and the latest shared version", async function () {
@@ -1847,7 +1847,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         owner: accountController.identity.address
                     })
                 });
-                await consumptionController.attributes.addForwardedSharingInfoToAttribute(ownIdentityAttribute, sender, CoreId.from("reqRef"));
+                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(ownIdentityAttribute, sender, CoreId.from("reqRef"));
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -1885,7 +1885,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         tags: ["x:anExistingTag"]
                     })
                 });
-                await consumptionController.attributes.addForwardedSharingInfoToAttribute(ownIdentityAttribute, sender, CoreId.from("reqRef"));
+                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(ownIdentityAttribute, sender, CoreId.from("reqRef"));
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -1925,7 +1925,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         owner: accountController.identity.address
                     })
                 });
-                await consumptionController.attributes.addForwardedSharingInfoToAttribute(ownIdentityAttribute, sender, CoreId.from("reqRef"));
+                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(ownIdentityAttribute, sender, CoreId.from("reqRef"));
 
                 const deletionInfo = EmittedAttributeDeletionInfo.from({
                     deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
@@ -1962,11 +1962,11 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 expect((result as ReadAttributeAcceptResponseItem).attributeId).toStrictEqual(ownIdentityAttribute.id);
 
                 const updatedOwnIdentityAttribute = (await consumptionController.attributes.getLocalAttribute(ownIdentityAttribute.id)) as OwnIdentityAttribute;
-                expect(updatedOwnIdentityAttribute.forwardedSharingInfos).toHaveLength(2);
-                expect(updatedOwnIdentityAttribute.forwardedSharingInfos![0].peer).toStrictEqual(sender);
-                expect(updatedOwnIdentityAttribute.forwardedSharingInfos![0].deletionInfo!.deletionStatus).toBe(EmittedAttributeDeletionStatus.DeletedByPeer);
-                expect(updatedOwnIdentityAttribute.forwardedSharingInfos![1].peer).toStrictEqual(sender);
-                expect(updatedOwnIdentityAttribute.forwardedSharingInfos![1].deletionInfo).toBeUndefined();
+                expect(updatedOwnIdentityAttribute.forwardedSharingDetails).toHaveLength(2);
+                expect(updatedOwnIdentityAttribute.forwardedSharingDetails![0].peer).toStrictEqual(sender);
+                expect(updatedOwnIdentityAttribute.forwardedSharingDetails![0].deletionInfo!.deletionStatus).toBe(EmittedAttributeDeletionStatus.DeletedByPeer);
+                expect(updatedOwnIdentityAttribute.forwardedSharingDetails![1].peer).toStrictEqual(sender);
+                expect(updatedOwnIdentityAttribute.forwardedSharingDetails![1].deletionInfo).toBeUndefined();
             });
 
             test("accept with existing IdentityAttribute that is already shared and the latest shared version but is ToBeDeletedByPeer", async function () {
@@ -1975,7 +1975,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         owner: accountController.identity.address
                     })
                 });
-                await consumptionController.attributes.addForwardedSharingInfoToAttribute(ownIdentityAttribute, sender, CoreId.from("reqRef"));
+                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(ownIdentityAttribute, sender, CoreId.from("reqRef"));
 
                 const deletionInfo = EmittedAttributeDeletionInfo.from({
                     deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
@@ -2012,8 +2012,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 expect((result as AttributeAlreadySharedAcceptResponseItem).attributeId).toStrictEqual(ownIdentityAttribute.id);
 
                 const updatedOwnIdentityAttribute = (await consumptionController.attributes.getLocalAttribute(ownIdentityAttribute.id)) as OwnIdentityAttribute;
-                expect(updatedOwnIdentityAttribute.forwardedSharingInfos).toHaveLength(1);
-                expect(updatedOwnIdentityAttribute.forwardedSharingInfos![0].deletionInfo).toBeUndefined();
+                expect(updatedOwnIdentityAttribute.forwardedSharingDetails).toHaveLength(1);
+                expect(updatedOwnIdentityAttribute.forwardedSharingDetails![0].deletionInfo).toBeUndefined();
             });
 
             test("accept with existing OwnRelationshipAttribute that exists in the context of a Relationship with a third party", async function () {
@@ -2060,8 +2060,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 expect((result as ReadAttributeAcceptResponseItem).attributeId).toStrictEqual(ownRelationshipAttribute.id);
 
                 const updatedOwnRelationshipAttribute = (await consumptionController.attributes.getLocalAttribute(ownRelationshipAttribute.id)) as OwnRelationshipAttribute;
-                expect(updatedOwnRelationshipAttribute.forwardedSharingInfos).toHaveLength(1);
-                expect(updatedOwnRelationshipAttribute.forwardedSharingInfos![0].peer).toStrictEqual(sender);
+                expect(updatedOwnRelationshipAttribute.forwardedSharingDetails).toHaveLength(1);
+                expect(updatedOwnRelationshipAttribute.forwardedSharingDetails![0].peer).toStrictEqual(sender);
             });
 
             test("accept with existing PeerRelationshipAttribute that exists in the context of a Relationship with a third party", async function () {
@@ -2108,8 +2108,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 expect((result as ReadAttributeAcceptResponseItem).attributeId).toStrictEqual(peerRelationshipAttribute.id);
 
                 const updatedPeerRelationshipAttribute = (await consumptionController.attributes.getLocalAttribute(peerRelationshipAttribute.id)) as PeerRelationshipAttribute;
-                expect(updatedPeerRelationshipAttribute.forwardedSharingInfos).toHaveLength(1);
-                expect(updatedPeerRelationshipAttribute.forwardedSharingInfos![0].peer).toStrictEqual(sender);
+                expect(updatedPeerRelationshipAttribute.forwardedSharingDetails).toHaveLength(1);
+                expect(updatedPeerRelationshipAttribute.forwardedSharingDetails![0].peer).toStrictEqual(sender);
             });
 
             test("accept with existing OwnRelationshipAttribute that exists in the context of a Relationship with a third party whose predecessor was already shared", async function () {
@@ -2122,7 +2122,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     peer: thirdPartyAddress,
                     sourceReference: CoreId.from("reqRef")
                 });
-                await consumptionController.attributes.addForwardedSharingInfoToAttribute(predecessor, sender, CoreId.from("initialRequest"));
+                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(predecessor, sender, CoreId.from("initialRequest"));
 
                 const { successor } = await consumptionController.attributes.succeedOwnRelationshipAttribute(predecessor, {
                     content: RelationshipAttribute.from({
@@ -2171,8 +2171,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 expect((result as AttributeSuccessionAcceptResponseItem).successorId).toStrictEqual(successor.id);
 
                 const updatedSuccessor = (await consumptionController.attributes.getLocalAttribute(successor.id)) as OwnRelationshipAttribute;
-                expect(updatedSuccessor.forwardedSharingInfos).toHaveLength(1);
-                expect(updatedSuccessor.forwardedSharingInfos![0].peer).toStrictEqual(sender);
+                expect(updatedSuccessor.forwardedSharingDetails).toHaveLength(1);
+                expect(updatedSuccessor.forwardedSharingDetails![0].peer).toStrictEqual(sender);
             });
 
             test("accept with existing PeerRelationshipAttribute that exists in the context of a Relationship with a third party whose predecessor was already shared", async function () {
@@ -2185,7 +2185,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     peer: thirdPartyAddress,
                     sourceReference: CoreId.from("reqRef")
                 });
-                await consumptionController.attributes.addForwardedSharingInfoToAttribute(predecessor, sender, CoreId.from("initialRequest"));
+                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(predecessor, sender, CoreId.from("initialRequest"));
 
                 const { successor } = await consumptionController.attributes.succeedPeerRelationshipAttribute(predecessor, {
                     content: RelationshipAttribute.from({
@@ -2235,8 +2235,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 expect((result as AttributeSuccessionAcceptResponseItem).successorId).toStrictEqual(successor.id);
 
                 const updatedSuccessor = (await consumptionController.attributes.getLocalAttribute(successor.id)) as PeerRelationshipAttribute;
-                expect(updatedSuccessor.forwardedSharingInfos).toHaveLength(1);
-                expect(updatedSuccessor.forwardedSharingInfos![0].peer).toStrictEqual(sender);
+                expect(updatedSuccessor.forwardedSharingDetails).toHaveLength(1);
+                expect(updatedSuccessor.forwardedSharingDetails![0].peer).toStrictEqual(sender);
             });
         });
 
@@ -2277,8 +2277,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 const createdAttribute = await consumptionController.attributes.getLocalAttribute((result as ReadAttributeAcceptResponseItem).attributeId);
                 expect(createdAttribute instanceof OwnIdentityAttribute).toBe(true);
-                expect((createdAttribute as OwnIdentityAttribute).forwardedSharingInfos).toHaveLength(1);
-                expect((createdAttribute as OwnIdentityAttribute).forwardedSharingInfos![0].peer).toStrictEqual(sender);
+                expect((createdAttribute as OwnIdentityAttribute).forwardedSharingDetails).toHaveLength(1);
+                expect((createdAttribute as OwnIdentityAttribute).forwardedSharingDetails![0].peer).toStrictEqual(sender);
             });
 
             test("trim the new IdentityAttribute", async function () {
@@ -2367,7 +2367,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const createdAttribute = await consumptionController.attributes.getLocalAttribute((result as ReadAttributeAcceptResponseItem).attributeId);
                 expect(createdAttribute).toBeDefined();
                 expect(createdAttribute instanceof OwnRelationshipAttribute).toBe(true);
-                expect((createdAttribute as OwnRelationshipAttribute).peerSharingInfo.peer).toStrictEqual(sender);
+                expect((createdAttribute as OwnRelationshipAttribute).peerSharingDetails.peer).toStrictEqual(sender);
             });
 
             test("accept with new IdentityAttribute that is a duplicate", async function () {
@@ -2566,7 +2566,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         value: GivenName.fromAny({ value: "aGivenName" })
                     })
                 });
-                await consumptionController.attributes.addForwardedSharingInfoToAttribute(existingOwnIdentityAttribute, sender, CoreId.from("reqRef"));
+                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(existingOwnIdentityAttribute, sender, CoreId.from("reqRef"));
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -2610,7 +2610,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         value: GivenName.fromAny({ value: "aGivenName" })
                     })
                 });
-                await consumptionController.attributes.addForwardedSharingInfoToAttribute(existingOwnIdentityAttribute, sender, CoreId.from("reqRef"));
+                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(existingOwnIdentityAttribute, sender, CoreId.from("reqRef"));
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -2655,7 +2655,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         tags: ["x:tag1"]
                     })
                 });
-                await consumptionController.attributes.addForwardedSharingInfoToAttribute(existingOwnIdentityAttribute, sender, CoreId.from("reqRef"));
+                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(existingOwnIdentityAttribute, sender, CoreId.from("reqRef"));
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -2708,7 +2708,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         tags: ["x:tag1"]
                     })
                 });
-                await consumptionController.attributes.addForwardedSharingInfoToAttribute(existingOwnIdentityAttribute, sender, CoreId.from("reqRef"));
+                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(existingOwnIdentityAttribute, sender, CoreId.from("reqRef"));
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -2760,7 +2760,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         value: GivenName.fromAny({ value: "aGivenName" })
                     })
                 });
-                await consumptionController.attributes.addForwardedSharingInfoToAttribute(existingOwnIdentityAttribute, sender, CoreId.from("reqRef"));
+                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(existingOwnIdentityAttribute, sender, CoreId.from("reqRef"));
 
                 const deletionInfo = EmittedAttributeDeletionInfo.from({
                     deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
@@ -2803,11 +2803,11 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 expect((result as ReadAttributeAcceptResponseItem).attributeId).toStrictEqual(existingOwnIdentityAttribute.id);
 
                 const updatedOwnIdentityAttribute = (await consumptionController.attributes.getLocalAttribute(existingOwnIdentityAttribute.id)) as OwnIdentityAttribute;
-                expect(updatedOwnIdentityAttribute.forwardedSharingInfos).toHaveLength(2);
-                expect(updatedOwnIdentityAttribute.forwardedSharingInfos![0].peer).toStrictEqual(sender);
-                expect(updatedOwnIdentityAttribute.forwardedSharingInfos![0].deletionInfo!.deletionStatus).toBe(EmittedAttributeDeletionStatus.DeletedByPeer);
-                expect(updatedOwnIdentityAttribute.forwardedSharingInfos![1].peer).toStrictEqual(sender);
-                expect(updatedOwnIdentityAttribute.forwardedSharingInfos![1].deletionInfo).toBeUndefined();
+                expect(updatedOwnIdentityAttribute.forwardedSharingDetails).toHaveLength(2);
+                expect(updatedOwnIdentityAttribute.forwardedSharingDetails![0].peer).toStrictEqual(sender);
+                expect(updatedOwnIdentityAttribute.forwardedSharingDetails![0].deletionInfo!.deletionStatus).toBe(EmittedAttributeDeletionStatus.DeletedByPeer);
+                expect(updatedOwnIdentityAttribute.forwardedSharingDetails![1].peer).toStrictEqual(sender);
+                expect(updatedOwnIdentityAttribute.forwardedSharingDetails![1].deletionInfo).toBeUndefined();
             });
 
             test("accept with new IdentityAttribute that is already shared but ToBeDeletedByPeer", async function () {
@@ -2817,7 +2817,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         value: GivenName.fromAny({ value: "aGivenName" })
                     })
                 });
-                await consumptionController.attributes.addForwardedSharingInfoToAttribute(existingOwnIdentityAttribute, sender, CoreId.from("reqRef"));
+                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(existingOwnIdentityAttribute, sender, CoreId.from("reqRef"));
 
                 const deletionInfo = EmittedAttributeDeletionInfo.from({
                     deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
@@ -2860,8 +2860,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 expect((result as AttributeAlreadySharedAcceptResponseItem).attributeId).toStrictEqual(existingOwnIdentityAttribute.id);
 
                 const updatedOwnIdentityAttribute = (await consumptionController.attributes.getLocalAttribute(existingOwnIdentityAttribute.id)) as OwnIdentityAttribute;
-                expect(updatedOwnIdentityAttribute.forwardedSharingInfos).toHaveLength(1);
-                expect(updatedOwnIdentityAttribute.forwardedSharingInfos![0].deletionInfo).toBeUndefined();
+                expect(updatedOwnIdentityAttribute.forwardedSharingDetails).toHaveLength(1);
+                expect(updatedOwnIdentityAttribute.forwardedSharingDetails![0].deletionInfo).toBeUndefined();
             });
 
             test("accept with new IdentityAttribute whose predecessor is already shared", async function () {
@@ -2871,7 +2871,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         value: GivenName.fromAny({ value: "aGivenName" })
                     })
                 });
-                await consumptionController.attributes.addForwardedSharingInfoToAttribute(existingOwnIdentityAttributePredecessor, sender, CoreId.from("reqRef"));
+                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(existingOwnIdentityAttributePredecessor, sender, CoreId.from("reqRef"));
 
                 const existingOwnIdentityAttributeSuccessor = (
                     await consumptionController.attributes.succeedOwnIdentityAttribute(existingOwnIdentityAttributePredecessor, {
@@ -2918,8 +2918,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 expect((result as AttributeSuccessionAcceptResponseItem).successorId).toStrictEqual(existingOwnIdentityAttributeSuccessor.id);
 
                 const updatedOwnIdentityAttributeSuccessor = await consumptionController.attributes.getLocalAttribute(existingOwnIdentityAttributeSuccessor.id);
-                expect((updatedOwnIdentityAttributeSuccessor as OwnIdentityAttribute).forwardedSharingInfos).toHaveLength(1);
-                expect((updatedOwnIdentityAttributeSuccessor as OwnIdentityAttribute).forwardedSharingInfos![0].peer).toStrictEqual(sender);
+                expect((updatedOwnIdentityAttributeSuccessor as OwnIdentityAttribute).forwardedSharingDetails).toHaveLength(1);
+                expect((updatedOwnIdentityAttributeSuccessor as OwnIdentityAttribute).forwardedSharingDetails![0].peer).toStrictEqual(sender);
             });
 
             test("accept with new IdentityAttribute whose predecessor is already shared with different tags", async function () {
@@ -2929,7 +2929,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         value: GivenName.fromAny({ value: "aGivenName" })
                     })
                 });
-                await consumptionController.attributes.addForwardedSharingInfoToAttribute(existingOwnIdentityAttributePredecessor, sender, CoreId.from("reqRef"));
+                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(existingOwnIdentityAttributePredecessor, sender, CoreId.from("reqRef"));
 
                 const existingOwnIdentityAttributeSuccessor = (
                     await consumptionController.attributes.succeedOwnIdentityAttribute(existingOwnIdentityAttributePredecessor, {
@@ -2979,12 +2979,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const createdSuccessor = await consumptionController.attributes.getLocalAttribute((result as AttributeSuccessionAcceptResponseItem).successorId);
                 expect(createdSuccessor!.succeeds).toStrictEqual(existingOwnIdentityAttributeSuccessor.id);
                 expect((createdSuccessor!.content as IdentityAttribute).tags).toStrictEqual(["x:tag1", "x:tag2"]);
-                expect((createdSuccessor as OwnIdentityAttribute).forwardedSharingInfos).toHaveLength(1);
-                expect((createdSuccessor as OwnIdentityAttribute).forwardedSharingInfos![0].peer).toStrictEqual(sender);
+                expect((createdSuccessor as OwnIdentityAttribute).forwardedSharingDetails).toHaveLength(1);
+                expect((createdSuccessor as OwnIdentityAttribute).forwardedSharingDetails![0].peer).toStrictEqual(sender);
 
                 const updatedExistingOwnIdentityAttributeSuccessor = await consumptionController.attributes.getLocalAttribute(existingOwnIdentityAttributeSuccessor.id);
                 expect(updatedExistingOwnIdentityAttributeSuccessor!.succeededBy).toStrictEqual(createdSuccessor!.id);
-                expect((updatedExistingOwnIdentityAttributeSuccessor as OwnIdentityAttribute).forwardedSharingInfos).toBeUndefined();
+                expect((updatedExistingOwnIdentityAttributeSuccessor as OwnIdentityAttribute).forwardedSharingDetails).toBeUndefined();
             });
 
             test("accept with new IdentityAttribute whose predecessor is already shared but DeletedByPeer", async function () {
@@ -2994,7 +2994,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         value: GivenName.fromAny({ value: "aGivenName" })
                     })
                 });
-                await consumptionController.attributes.addForwardedSharingInfoToAttribute(existingOwnIdentityAttributePredecessor, sender, CoreId.from("reqRef"));
+                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(existingOwnIdentityAttributePredecessor, sender, CoreId.from("reqRef"));
 
                 const deletionInfo = EmittedAttributeDeletionInfo.from({
                     deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
@@ -3053,7 +3053,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         value: GivenName.fromAny({ value: "aGivenName" })
                     })
                 });
-                await consumptionController.attributes.addForwardedSharingInfoToAttribute(existingOwnIdentityAttributePredecessor, sender, CoreId.from("reqRef"));
+                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(existingOwnIdentityAttributePredecessor, sender, CoreId.from("reqRef"));
 
                 const deletionInfo = EmittedAttributeDeletionInfo.from({
                     deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
@@ -3106,9 +3106,9 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 expect((result as AttributeSuccessionAcceptResponseItem).successorId).toStrictEqual(existingOwnIdentityAttributeSuccessor.id);
 
                 const updatedOwnIdentityAttributeSuccessor = await consumptionController.attributes.getLocalAttribute(existingOwnIdentityAttributeSuccessor.id);
-                expect((updatedOwnIdentityAttributeSuccessor as OwnIdentityAttribute).forwardedSharingInfos).toHaveLength(1);
-                expect((updatedOwnIdentityAttributeSuccessor as OwnIdentityAttribute).forwardedSharingInfos![0].peer).toStrictEqual(sender);
-                expect((updatedOwnIdentityAttributeSuccessor as OwnIdentityAttribute).forwardedSharingInfos![0].deletionInfo).toBeUndefined();
+                expect((updatedOwnIdentityAttributeSuccessor as OwnIdentityAttribute).forwardedSharingDetails).toHaveLength(1);
+                expect((updatedOwnIdentityAttributeSuccessor as OwnIdentityAttribute).forwardedSharingDetails![0].peer).toStrictEqual(sender);
+                expect((updatedOwnIdentityAttributeSuccessor as OwnIdentityAttribute).forwardedSharingDetails![0].deletionInfo).toBeUndefined();
             });
         });
     });
@@ -3149,8 +3149,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             const createdAttribute = await consumptionController.attributes.getLocalAttribute(attributeId);
             expect(createdAttribute instanceof PeerIdentityAttribute).toBe(true);
-            expect((createdAttribute as PeerIdentityAttribute).peerSharingInfo.peer).toStrictEqual(recipient);
-            expect((createdAttribute as PeerIdentityAttribute).peerSharingInfo.sourceReference).toStrictEqual(requestId);
+            expect((createdAttribute as PeerIdentityAttribute).peerSharingDetails.peer).toStrictEqual(recipient);
+            expect((createdAttribute as PeerIdentityAttribute).peerSharingDetails.sourceReference).toStrictEqual(requestId);
         });
 
         test("succeeds an existing PeerIdentityAttribute with the Attribute received in the ResponseItem", async function () {
@@ -3197,7 +3197,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             expect(event).toBeInstanceOf(AttributeSucceededEvent);
 
             const successorPeerIdentityAttribute = await consumptionController.attributes.getLocalAttribute(successorId);
-            expect((successorPeerIdentityAttribute as PeerIdentityAttribute).peerSharingInfo.peer).toStrictEqual(recipient);
+            expect((successorPeerIdentityAttribute as PeerIdentityAttribute).peerSharingDetails.peer).toStrictEqual(recipient);
             expect(successorPeerIdentityAttribute!.succeeds).toStrictEqual(predecessorPeerIdentityAttribute.id);
 
             const updatedPredecessorPeerIdentityAttribute = await consumptionController.attributes.getLocalAttribute(predecessorPeerIdentityAttribute.id);
@@ -3254,13 +3254,13 @@ describe("ReadAttributeRequestItemProcessor", function () {
             expect(event).toBeInstanceOf(AttributeSucceededEvent);
 
             const successorPeerIdentityAttribute = await consumptionController.attributes.getLocalAttribute(successorId);
-            expect((successorPeerIdentityAttribute as PeerIdentityAttribute).peerSharingInfo.peer).toStrictEqual(recipient);
-            expect((successorPeerIdentityAttribute as PeerIdentityAttribute).peerSharingInfo.deletionInfo).toBeUndefined();
+            expect((successorPeerIdentityAttribute as PeerIdentityAttribute).peerSharingDetails.peer).toStrictEqual(recipient);
+            expect((successorPeerIdentityAttribute as PeerIdentityAttribute).peerSharingDetails.deletionInfo).toBeUndefined();
             expect(successorPeerIdentityAttribute!.succeeds).toStrictEqual(predecessorPeerIdentityAttribute.id);
 
             const updatedPredecessorPeerIdentityAttribute = await consumptionController.attributes.getLocalAttribute(predecessorPeerIdentityAttribute.id);
             expect(updatedPredecessorPeerIdentityAttribute!.succeededBy).toStrictEqual(successorPeerIdentityAttribute!.id);
-            expect((updatedPredecessorPeerIdentityAttribute as PeerIdentityAttribute).peerSharingInfo.deletionInfo).toStrictEqual(deletionInfo);
+            expect((updatedPredecessorPeerIdentityAttribute as PeerIdentityAttribute).peerSharingDetails.deletionInfo).toStrictEqual(deletionInfo);
         });
 
         test("succeeds an existing ThirdPartyRelationshipAttribute with the Attribute received in the ResponseItem", async function () {
@@ -3314,9 +3314,9 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             const successorThirdPartyRelationshipAttribute = await consumptionController.attributes.getLocalAttribute(successorId);
             expect(successorThirdPartyRelationshipAttribute instanceof ThirdPartyRelationshipAttribute).toBe(true);
-            expect((successorThirdPartyRelationshipAttribute as ThirdPartyRelationshipAttribute).peerSharingInfo.peer).toStrictEqual(recipient);
-            expect((successorThirdPartyRelationshipAttribute as ThirdPartyRelationshipAttribute).peerSharingInfo.sourceReference).toStrictEqual(requestId);
-            expect((successorThirdPartyRelationshipAttribute as ThirdPartyRelationshipAttribute).peerSharingInfo.initialAttributePeer).toStrictEqual(thirdPartyAddress);
+            expect((successorThirdPartyRelationshipAttribute as ThirdPartyRelationshipAttribute).peerSharingDetails.peer).toStrictEqual(recipient);
+            expect((successorThirdPartyRelationshipAttribute as ThirdPartyRelationshipAttribute).peerSharingDetails.sourceReference).toStrictEqual(requestId);
+            expect((successorThirdPartyRelationshipAttribute as ThirdPartyRelationshipAttribute).peerSharingDetails.initialAttributePeer).toStrictEqual(thirdPartyAddress);
             expect(successorThirdPartyRelationshipAttribute!.succeeds).toStrictEqual(predecessorThirdPartyRelationshipAttribute.id);
 
             const updatedPredecessorThirdPartyRelationshipAttribute = await consumptionController.attributes.getLocalAttribute(predecessorThirdPartyRelationshipAttribute.id);
@@ -3366,7 +3366,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             await processor.applyIncomingResponseItem(responseItem, requestItem, incomingRequest);
 
             const updatedExistingPeerIdentityAttribute = await consumptionController.attributes.getLocalAttribute(existingPeerIdentityAttribute.id);
-            expect((updatedExistingPeerIdentityAttribute as PeerIdentityAttribute).peerSharingInfo.deletionInfo).toBeUndefined();
+            expect((updatedExistingPeerIdentityAttribute as PeerIdentityAttribute).peerSharingDetails.deletionInfo).toBeUndefined();
         });
     });
 });
