@@ -77,7 +77,7 @@ export class ForwardedAttributeDeletedByPeerNotificationItemProcessor extends Ab
             return;
         }
 
-        // the previous deletionState cannot be unambiguously known, either it was undefined or 'ToBeDeletedByPeer'
+        // the previous deletionState cannot be unambiguously known
         await this.consumptionController.attributes.setForwardedDeletionInfoOfAttributeAndPredecessors(attribute, undefined, notification.peer, true);
     }
 }

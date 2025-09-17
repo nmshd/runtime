@@ -89,7 +89,7 @@ export class PeerRelationshipAttributeDeletedByPeerNotificationItemProcessor ext
             return;
         }
 
-        // the previous deletionState cannot be unambiguously known, either it was undefined or 'ToBeDeletedByPeer'
+        // the previous deletionState cannot be unambiguously known
         return attribute instanceof OwnRelationshipAttribute
             ? await this.consumptionController.attributes.setPeerDeletionInfoOfOwnRelationshipAttributeAndPredecessors(attribute, undefined, true)
             : await this.consumptionController.attributes.setPeerDeletionInfoOfThirdPartyRelationshipAttributeAndPredecessors(attribute, undefined, true);
