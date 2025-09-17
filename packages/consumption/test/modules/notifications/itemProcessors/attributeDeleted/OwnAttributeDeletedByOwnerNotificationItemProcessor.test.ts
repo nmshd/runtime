@@ -302,10 +302,7 @@ describe("OwnAttributeDeletedByOwnerNotificationItemProcessor", function () {
                 },
                 owner: CoreAddress.from("peer")
             }),
-            peerSharingInfo: {
-                peer: CoreAddress.from("peer"),
-                sourceReference: CoreId.from("notRef")
-            },
+            sourceReference: CoreId.from("notRef"),
             id: CoreId.from("succeededAttributeId")
         });
 

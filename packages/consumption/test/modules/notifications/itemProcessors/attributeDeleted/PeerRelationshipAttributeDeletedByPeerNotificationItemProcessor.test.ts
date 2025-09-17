@@ -251,10 +251,7 @@ describe("PeerRelationshipAttributeDeletedByPeerNotificationItemProcessor", func
                 owner: testAccount.identity.address,
                 confidentiality: RelationshipAttributeConfidentiality.Public
             }),
-            peerSharingInfo: {
-                peer: CoreAddress.from("peer"),
-                sourceReference: CoreId.from("reqRefB")
-            }
+            sourceReference: CoreId.from("reqRefB")
         });
 
         const notificationItem = PeerRelationshipAttributeDeletedByPeerNotificationItem.from({
