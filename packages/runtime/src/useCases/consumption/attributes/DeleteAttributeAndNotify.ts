@@ -60,7 +60,7 @@ export class DeleteAttributeAndNotifyUseCase extends UseCase<DeleteAttributeAndN
         } else if (attribute instanceof OwnRelationshipAttribute || attribute instanceof PeerRelationshipAttribute) {
             result = await this.notifyAboutDeletionOfRelationshipAttribute(attribute);
         } else if (attribute instanceof PeerIdentityAttribute || attribute instanceof ThirdPartyRelationshipAttribute) {
-            result = await this.notifyAboutDeletionOfForwardedAttribute(attribute);
+            result = await this.notifyAboutDeletionOfReceivedAttribute(attribute);
         } else {
             throw new Error("Type of LocalAttribute not found.");
         }
@@ -102,9 +102,8 @@ export class DeleteAttributeAndNotifyUseCase extends UseCase<DeleteAttributeAndN
         return Result.ok({ notificationIds });
     }
 
-    private async notifyAboutDeletionOfForwardedAttribute(attribute: PeerIdentityAttribute | ThirdPartyRelationshipAttribute) {
+    private async notifyAboutDeletionOfReceivedAttribute(attribute: PeerIdentityAttribute | ThirdPartyRelationshipAttribute) {
         const notificationItem = ForwardedAttributeDeletedByPeerNotificationItem.from({ attributeId: attribute.id });
-
         return await this.notifyPeer(attribute.peerSharingInfo.peer, notificationItem);
     }
 
@@ -139,8 +138,16 @@ export class DeleteAttributeAndNotifyUseCase extends UseCase<DeleteAttributeAndN
         peer: CoreAddress,
         notificationItem: OwnAttributeDeletedByOwnerNotificationItem | PeerRelationshipAttributeDeletedByPeerNotificationItem | ForwardedAttributeDeletedByPeerNotificationItem
     ): Promise<Result<DeleteAttributeAndNotifyResponse>> {
-        const messageRecipientsValidationResult = await this.messageController.validateMessageRecipients([peer]);
-        if (messageRecipientsValidationResult.isError) {
+        const relationship = await this.relationshipsController.getRelationshipToIdentity(peer);
+        if (
+            !relationship ||
+            relationship.peerDeletionInfo?.deletionStatus === PeerDeletionStatus.Deleted ||
+            ![RelationshipStatus.Pending, RelationshipStatus.Active, RelationshipStatus.Terminated].includes(relationship.status)
+        ) {
+            return Result.ok({ notificationIds: [] });
+        }
+
+        if (relationship.status === RelationshipStatus.Pending) {
             return Result.fail(RuntimeErrors.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending());
         }
 
