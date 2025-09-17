@@ -16,8 +16,7 @@ import {
     OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent,
     OutgoingRequestStatusChangedEvent,
     OwnAttributeDeletedByOwnerEvent,
-    PeerRelationshipAttributeDeletedByPeerEvent,
-    ThirdPartyRelationshipAttributeDeletedByPeerEvent
+    PeerRelationshipAttributeDeletedByPeerEvent
 } from "./consumption";
 import {
     DatawalletSynchronizedEvent,
@@ -151,10 +150,6 @@ export class EventProxy {
 
         this.subscribeToSourceEvent(consumption.ForwardedAttributeDeletedByPeerEvent, (event) => {
             this.targetEventBus.publish(new ForwardedAttributeDeletedByPeerEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
-        });
-
-        this.subscribeToSourceEvent(consumption.ThirdPartyRelationshipAttributeDeletedByPeerEvent, (event) => {
-            this.targetEventBus.publish(new ThirdPartyRelationshipAttributeDeletedByPeerEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
         });
 
         this.subscribeToSourceEvent(consumption.AttributeSucceededEvent, (event) => {

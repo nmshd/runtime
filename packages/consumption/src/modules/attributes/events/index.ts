@@ -6,4 +6,3 @@ export * from "./AttributeWasViewedAtChangedEvent";
 export * from "./ForwardedAttributeDeletedByPeerEvent";
 export * from "./OwnAttributeDeletedByOwnerEvent";
 export * from "./PeerRelationshipAttributeDeletedByPeerEvent";
-export * from "./ThirdPartyRelationshipAttributeDeletedByPeerEvent";

@@ -16,4 +16,3 @@ export * from "./OwnAttributeDeletedByOwnerEvent";
 export * from "./PeerRelationshipAttributeDeletedByPeerEvent";
 export * from "./RelationshipEvent";
 export * from "./RelationshipTemplateProcessedEvent";
-export * from "./ThirdPartyRelationshipAttributeDeletedByPeerEvent";
