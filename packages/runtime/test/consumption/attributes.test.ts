@@ -3347,7 +3347,6 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
     });
 });
 
-// TODO: we'll run into problems if both the initial owner and peer of the RelationshipAttribute forward it to the same third party, since it has the same id, but duplicate ids of LocalAttributes are prevented
 describe("ThirdPartyRelationshipAttributes", () => {
     let ownRelationshipAttribute: LocalAttributeDTO;
     beforeEach(async () => {

@@ -216,7 +216,6 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
         return ValidationResult.success();
     }
 
-    // TODO: maybe have shared code with ReadAttributeRequestItemProcessor -> different PR
     public override async accept(
         _requestItem: ProposeAttributeRequestItem,
         params: AcceptProposeAttributeRequestItemParametersJSON,
