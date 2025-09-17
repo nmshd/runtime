@@ -71,9 +71,8 @@ export class OwnAttributeDeletedByOwnerNotificationItemProcessor extends Abstrac
             return new OwnAttributeDeletedByOwnerEvent(this.currentIdentityAddress.toString(), attribute);
         }
 
-        const deletionStatus = attribute.peerIsOwner() ? ThirdPartyRelationshipAttributeDeletionStatus.DeletedByOwner : ThirdPartyRelationshipAttributeDeletionStatus.DeletedByPeer;
         const deletionInfo = ThirdPartyRelationshipAttributeDeletionInfo.from({
-            deletionStatus,
+            deletionStatus: ThirdPartyRelationshipAttributeDeletionStatus.DeletedByOwner,
             deletionDate: CoreDate.utc()
         });
 
