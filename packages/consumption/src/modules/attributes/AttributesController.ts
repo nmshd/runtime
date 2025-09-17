@@ -458,7 +458,7 @@ export class AttributesController extends ConsumptionBaseController {
 
         if (attribute.isForwardedTo(peer, true)) throw ConsumptionCoreErrors.attributes.alreadyForwarded(attribute.id, peer);
 
-        const sharingInfo = attribute.isToBeDeletedByForwardingPeer(peer)
+        const sharingInfo = attribute.hasDeletionStatusUnequalDeletedByPeer(peer)
             ? (() => {
                   const sharingInfoForPeer = attribute.getForwardedSharingInfoNotDeletedByPeer(peer)!;
                   sharingInfoForPeer.deletionInfo = undefined;

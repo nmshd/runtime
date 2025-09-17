@@ -87,11 +87,17 @@ export class OwnRelationshipAttribute extends LocalAttribute implements IOwnRela
         return hasSharingInfoWithDeletionStatus && !hasSharingInfoWithoutDeletionStatus;
     }
 
-    public isToBeDeletedByForwardingPeer(peer: CoreAddress): boolean {
+    public hasDeletionStatusUnequalDeletedByPeer(peer: CoreAddress): boolean {
         if (!this.forwardedSharingInfos) return false;
 
+        const deletionStatuses = [
+            EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
+            EmittedAttributeDeletionStatus.DeletionRequestSent,
+            EmittedAttributeDeletionStatus.DeletionRequestRejected
+        ];
+
         return this.forwardedSharingInfos.some(
-            (sharingInfo) => sharingInfo.peer.equals(peer) && sharingInfo.deletionInfo?.deletionStatus === EmittedAttributeDeletionStatus.ToBeDeletedByPeer
+            (sharingInfo) => sharingInfo.peer.equals(peer) && sharingInfo.deletionInfo && deletionStatuses.includes(sharingInfo.deletionInfo.deletionStatus)
         );
     }
 

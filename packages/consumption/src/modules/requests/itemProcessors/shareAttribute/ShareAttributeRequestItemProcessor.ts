@@ -240,7 +240,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             return;
         }
 
-        if (responseItem instanceof AttributeAlreadySharedAcceptResponseItem && sharedAttribute.isToBeDeletedByForwardingPeer(requestInfo.peer)) {
+        if (responseItem instanceof AttributeAlreadySharedAcceptResponseItem && sharedAttribute.hasDeletionStatusUnequalDeletedByPeer(requestInfo.peer)) {
             await this.consumptionController.attributes.setForwardedDeletionInfoOfAttribute(sharedAttribute, undefined, requestInfo.peer, true);
             return;
         }
