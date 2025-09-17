@@ -91,17 +91,7 @@ export class RESTClient {
             const httpsAgent = require("https")?.Agent;
 
             if (httpAgent && httpsAgent) {
-                resultingRequestConfig.httpAgent = new httpAgent({
-                    ...this.config.httpAgentOptions,
-                    // @ts-expect-error @types/node does not have proxyEnv, but it can already be used
-                    proxyEnv: process.env
-                } satisfies HTTPAgentOptions);
-
-                resultingRequestConfig.httpsAgent = new httpsAgent({
-                    ...this.config.httpsAgentOptions,
-                    // @ts-expect-error @types/node does not have proxyEnv, but it can already be used
-                    proxyEnv: process.env
-                } satisfies HTTPSAgentOptions);
+                resultingRequestConfig.httpAgent = new httpAgent({ ...this.config.httpAgentOptions, proxyEnv: process.env } satisfies HTTPAgentOptions);
             }
         } catch (_) {
             // ignore
