@@ -74,14 +74,6 @@ class Attributes {
         );
     }
 
-    public successionMustNotChangePeer() {
-        return new CoreError("error.consumption.attributes.successionMustNotChangePeer", "The peer of the shared Attribute must not change.");
-    }
-
-    public successionMustNotChangeInitialAttributePeer() {
-        return new CoreError("error.consumption.attributes.successionMustNotChangeInitialAttributePeer", "The initialAttributePeer must not change.");
-    }
-
     public cannotSucceedAttributesWithASuccessor(successorId: string | CoreId) {
         return new CoreError(
             "error.consumption.attributes.cannotSucceedAttributesWithASuccessor",

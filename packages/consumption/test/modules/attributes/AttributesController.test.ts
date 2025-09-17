@@ -1283,10 +1283,7 @@ describe("AttributesController", function () {
                         },
                         owner: consumptionController.accountController.identity.address
                     }),
-                    peerSharingInfo: {
-                        sourceReference: CoreId.from("aFurtherSourceReferenceId"),
-                        peer: CoreAddress.from("peer")
-                    },
+                    sourceReference: CoreId.from("aFurtherSourceReferenceId"),
                     id: CoreId.from("aSuccessorId")
                 });
 
@@ -1436,10 +1433,7 @@ describe("AttributesController", function () {
                         },
                         owner: CoreAddress.from("peer")
                     }),
-                    peerSharingInfo: {
-                        sourceReference: CoreId.from("anotherSourceReferenceId"),
-                        peer: CoreAddress.from("peer")
-                    },
+                    sourceReference: CoreId.from("anotherSourceReferenceId"),
                     id: CoreId.from("aSuccessorId")
                 });
 
@@ -1478,10 +1472,7 @@ describe("AttributesController", function () {
                         },
                         owner: CoreAddress.from("peer")
                     }),
-                    peerSharingInfo: {
-                        sourceReference: CoreId.from("anotherSourceReferenceId"),
-                        peer: CoreAddress.from("peer")
-                    },
+                    sourceReference: CoreId.from("anotherSourceReferenceId"),
                     id: CoreId.from("aSuccessorId")
                 });
 
@@ -1700,10 +1691,7 @@ describe("AttributesController", function () {
                         owner: CoreAddress.from("peer")
                     }),
                     id: CoreId.from("aPeerIdentityAttributeSuccessorId"),
-                    peerSharingInfo: {
-                        peer: CoreAddress.from("peer"),
-                        sourceReference: CoreId.from("anotherSourceReferenceId")
-                    }
+                    sourceReference: CoreId.from("anotherSourceReferenceId")
                 };
 
                 const { predecessor: updatedPredecessor, successor } = await consumptionController.attributes.succeedPeerIdentityAttribute(predecessor, successorParams);
@@ -1742,10 +1730,7 @@ describe("AttributesController", function () {
                         owner: consumptionController.accountController.identity.address,
                         confidentiality: RelationshipAttributeConfidentiality.Public
                     }),
-                    peerSharingInfo: {
-                        peer: CoreAddress.from("peerAddress"),
-                        sourceReference: CoreId.from("anotherSourceReferenceId")
-                    }
+                    sourceReference: CoreId.from("anotherSourceReferenceId")
                 };
 
                 const { predecessor: updatedPredecessor, successor } = await consumptionController.attributes.succeedOwnRelationshipAttribute(predecessor, successorParams);
@@ -1784,10 +1769,8 @@ describe("AttributesController", function () {
                         owner: CoreAddress.from("peerAddress"),
                         confidentiality: RelationshipAttributeConfidentiality.Public
                     }),
-                    peerSharingInfo: {
-                        peer: CoreAddress.from("peerAddress"),
-                        sourceReference: CoreId.from("anotherSourceReferenceId")
-                    },
+                    sourceReference: CoreId.from("anotherSourceReferenceId"),
+
                     id: CoreId.from("aPeerRelationshipAttributeSuccessorId")
                 };
 
@@ -1829,11 +1812,7 @@ describe("AttributesController", function () {
                         owner: CoreAddress.from("thirdPartyAddress"),
                         confidentiality: RelationshipAttributeConfidentiality.Public
                     }),
-                    peerSharingInfo: {
-                        peer: CoreAddress.from("peerAddress"),
-                        sourceReference: CoreId.from("anotherSourceReferenceId"),
-                        initialAttributePeer: CoreAddress.from("thirdPartyAddress")
-                    },
+                    sourceReference: CoreId.from("anotherSourceReferenceId"),
                     id: CoreId.from("aThirdPartyRelationshipAttributeSuccessorId")
                 };
 
@@ -2150,10 +2129,7 @@ describe("AttributesController", function () {
                     },
                     owner: CoreAddress.from("peer")
                 }),
-                peerSharingInfo: {
-                    peer: CoreAddress.from("peer"),
-                    sourceReference: CoreId.from("notRefB")
-                },
+                sourceReference: CoreId.from("notRefB"),
                 id: CoreId.from("aPeerIdentityAttributeSuccessorId1")
             };
             const successorParams2: IPeerIdentityAttributeSuccessorParams = {
@@ -2164,10 +2140,7 @@ describe("AttributesController", function () {
                     },
                     owner: CoreAddress.from("peer")
                 }),
-                peerSharingInfo: {
-                    peer: CoreAddress.from("peer"),
-                    sourceReference: CoreId.from("notRefC")
-                },
+                sourceReference: CoreId.from("notRefC"),
                 id: CoreId.from("anotherPeerIdentityAttributeSuccessorId")
             };
 
@@ -2211,10 +2184,7 @@ describe("AttributesController", function () {
                     owner: consumptionController.accountController.identity.address,
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }),
-                peerSharingInfo: {
-                    peer: CoreAddress.from("peerAddress"),
-                    sourceReference: CoreId.from("anotherSourceReferenceId")
-                }
+                sourceReference: CoreId.from("anotherSourceReferenceId")
             };
             const successorParams2: IOwnRelationshipAttributeSuccessorParams = {
                 content: RelationshipAttribute.from({
@@ -2227,10 +2197,7 @@ describe("AttributesController", function () {
                     owner: consumptionController.accountController.identity.address,
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }),
-                peerSharingInfo: {
-                    peer: CoreAddress.from("peerAddress"),
-                    sourceReference: CoreId.from("aFurtherSourceReferenceId")
-                }
+                sourceReference: CoreId.from("aFurtherSourceReferenceId")
             };
 
             const onlyVersion0 = await consumptionController.attributes.getVersionsOfAttribute(version0);
@@ -2272,10 +2239,7 @@ describe("AttributesController", function () {
                     owner: CoreAddress.from("peerAddress"),
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }),
-                peerSharingInfo: {
-                    peer: CoreAddress.from("peerAddress"),
-                    sourceReference: CoreId.from("anotherSourceReferenceId")
-                },
+                sourceReference: CoreId.from("anotherSourceReferenceId"),
                 id: CoreId.from("aPeerRelationshipAttributeSuccessorId")
             };
             const successorParams2: IPeerRelationshipAttributeSuccessorParams = {
@@ -2289,10 +2253,7 @@ describe("AttributesController", function () {
                     owner: CoreAddress.from("peerAddress"),
                     confidentiality: RelationshipAttributeConfidentiality.Public
                 }),
-                peerSharingInfo: {
-                    peer: CoreAddress.from("peerAddress"),
-                    sourceReference: CoreId.from("aFurtherSourceReferenceId")
-                },
+                sourceReference: CoreId.from("aFurtherSourceReferenceId"),
                 id: CoreId.from("anotherPeerRelationshipAttributeSuccessorId")
             };
 

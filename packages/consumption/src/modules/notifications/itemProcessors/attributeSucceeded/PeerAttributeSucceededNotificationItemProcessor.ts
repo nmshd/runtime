@@ -44,7 +44,7 @@ export class PeerAttributeSucceededNotificationItemProcessor extends AbstractNot
             const successorParams = PeerIdentityAttributeSuccessorParams.from({
                 id: notificationItem.successorId,
                 content: notificationItem.successorContent,
-                peerSharingInfo: { sourceReference: notification.id, peer: notification.peer }
+                sourceReference: notification.id
             });
             return await this.consumptionController.attributes.validatePeerIdentityAttributeSuccession(predecessor, successorParams);
         }
@@ -56,7 +56,7 @@ export class PeerAttributeSucceededNotificationItemProcessor extends AbstractNot
         const successorParams = PeerRelationshipAttributeSuccessorParams.from({
             id: notificationItem.successorId,
             content: notificationItem.successorContent,
-            peerSharingInfo: { sourceReference: notification.id, peer: notification.peer }
+            sourceReference: notification.id
         });
         return await this.consumptionController.attributes.validatePeerRelationshipAttributeSuccession(predecessor, successorParams);
     }
@@ -79,7 +79,7 @@ export class PeerAttributeSucceededNotificationItemProcessor extends AbstractNot
                 const successorParams = PeerIdentityAttributeSuccessorParams.from({
                     id: notificationItem.successorId,
                     content: notificationItem.successorContent as IdentityAttribute,
-                    peerSharingInfo: { sourceReference: notification.id, peer: notification.peer }
+                    sourceReference: notification.id
                 });
 
                 const attributesAfterSuccession = await this.consumptionController.attributes.succeedPeerIdentityAttribute(predecessor, successorParams, false);
@@ -88,7 +88,7 @@ export class PeerAttributeSucceededNotificationItemProcessor extends AbstractNot
                 const successorParams = PeerRelationshipAttributeSuccessorParams.from({
                     id: notificationItem.successorId,
                     content: notificationItem.successorContent as RelationshipAttribute,
-                    peerSharingInfo: { sourceReference: notification.id, peer: notification.peer }
+                    sourceReference: notification.id
                 });
 
                 const attributesAfterSuccession = await this.consumptionController.attributes.succeedPeerRelationshipAttribute(predecessor, successorParams, false);

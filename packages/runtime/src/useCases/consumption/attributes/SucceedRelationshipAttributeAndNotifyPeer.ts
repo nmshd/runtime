@@ -1,12 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import {
-    AttributesController,
-    ConsumptionCoreErrors,
-    ConsumptionIds,
-    OwnRelationshipAttribute,
-    OwnRelationshipAttributeSharingInfo,
-    OwnRelationshipAttributeSuccessorParams
-} from "@nmshd/consumption";
+import { AttributesController, ConsumptionCoreErrors, ConsumptionIds, OwnRelationshipAttribute, OwnRelationshipAttributeSuccessorParams } from "@nmshd/consumption";
 import { AttributeValues, Notification, PeerAttributeSucceededNotificationItem, RelationshipAttribute } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
 import { LocalAttributeDTO } from "@nmshd/runtime-types";
@@ -65,7 +58,7 @@ export class SucceedRelationshipAttributeAndNotifyPeerUseCase extends UseCase<Su
 
         const successorParams = OwnRelationshipAttributeSuccessorParams.from({
             content: successorContent,
-            peerSharingInfo: OwnRelationshipAttributeSharingInfo.from({ peer, sourceReference: notificationId })
+            sourceReference: notificationId
         });
 
         const validationResult = await this.attributeController.validateOwnRelationshipAttributeSuccession(predecessor, successorParams);

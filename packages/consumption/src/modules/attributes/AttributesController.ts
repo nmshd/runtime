@@ -529,12 +529,17 @@ export class AttributesController extends ConsumptionBaseController {
             if (validationResult.isError()) throw validationResult.error;
         }
 
+        const peerSharingInfo = PeerIdentityAttributeSharingInfo.from({
+            peer: predecessor.peerSharingInfo.peer,
+            sourceReference: parsedSuccessorParams.sourceReference
+        });
+
         const successor = PeerIdentityAttribute.from({
             id: parsedSuccessorParams.id,
             content: attribute,
             createdAt: CoreDate.utc(),
-            peerSharingInfo: parsedSuccessorParams.peerSharingInfo,
-            succeeds: predecessor.id
+            succeeds: predecessor.id,
+            peerSharingInfo
         });
         await this.succeedAttributeUnsafe(predecessor, successor);
 
@@ -553,12 +558,17 @@ export class AttributesController extends ConsumptionBaseController {
             if (validationResult.isError()) throw validationResult.error;
         }
 
+        const peerSharingInfo = OwnRelationshipAttributeSharingInfo.from({
+            peer: predecessor.peerSharingInfo.peer,
+            sourceReference: parsedSuccessorParams.sourceReference
+        });
+
         const successor = OwnRelationshipAttribute.from({
             id: await ConsumptionIds.attribute.generate(),
             content: parsedSuccessorParams.content,
             createdAt: CoreDate.utc(),
-            peerSharingInfo: parsedSuccessorParams.peerSharingInfo,
-            succeeds: predecessor.id
+            succeeds: predecessor.id,
+            peerSharingInfo
         });
         await this.succeedAttributeUnsafe(predecessor, successor);
 
@@ -578,12 +588,17 @@ export class AttributesController extends ConsumptionBaseController {
             if (validationResult.isError()) throw validationResult.error;
         }
 
+        const peerSharingInfo = PeerRelationshipAttributeSharingInfo.from({
+            peer: predecessor.peerSharingInfo.peer,
+            sourceReference: parsedSuccessorParams.sourceReference
+        });
+
         const successor = PeerRelationshipAttribute.from({
             id: parsedSuccessorParams.id,
             content: parsedSuccessorParams.content,
             createdAt: CoreDate.utc(),
-            peerSharingInfo: parsedSuccessorParams.peerSharingInfo,
-            succeeds: predecessor.id
+            succeeds: predecessor.id,
+            peerSharingInfo
         });
         await this.succeedAttributeUnsafe(predecessor, successor);
 
@@ -602,12 +617,18 @@ export class AttributesController extends ConsumptionBaseController {
             if (validationResult.isError()) throw validationResult.error;
         }
 
+        const peerSharingInfo = ThirdPartyRelationshipAttributeSharingInfo.from({
+            peer: predecessor.peerSharingInfo.peer,
+            sourceReference: parsedSuccessorParams.sourceReference,
+            initialAttributePeer: predecessor.peerSharingInfo.initialAttributePeer
+        });
+
         const successor = ThirdPartyRelationshipAttribute.from({
             id: parsedSuccessorParams.id,
             content: parsedSuccessorParams.content,
             createdAt: CoreDate.utc(),
-            peerSharingInfo: parsedSuccessorParams.peerSharingInfo,
-            succeeds: predecessor.id
+            succeeds: predecessor.id,
+            peerSharingInfo
         });
         await this.succeedAttributeUnsafe(predecessor, successor);
 
@@ -650,17 +671,18 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successorIsNotAValidAttribute(e));
         }
 
+        const peerSharingInfo = PeerIdentityAttributeSharingInfo.from({
+            peer: predecessor.peerSharingInfo.peer,
+            sourceReference: parsedSuccessorParams.sourceReference
+        });
+
         const successor = PeerIdentityAttribute.from({
             id: parsedSuccessorParams.id,
             content: parsedSuccessorParams.content,
             createdAt: CoreDate.utc(),
             succeeds: predecessor.id,
-            peerSharingInfo: parsedSuccessorParams.peerSharingInfo
+            peerSharingInfo
         });
-
-        if (!predecessor.peerSharingInfo.peer.equals(successor.peerSharingInfo.peer)) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangePeer());
-        }
 
         if (predecessor.peerSharingInfo.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.DeletedByOwner) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedSharedAttributesDeletedByPeer());
@@ -680,17 +702,18 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successorIsNotAValidAttribute(e));
         }
 
+        const peerSharingInfo = OwnRelationshipAttributeSharingInfo.from({
+            peer: predecessor.peerSharingInfo.peer,
+            sourceReference: parsedSuccessorParams.sourceReference
+        });
+
         const successor = OwnRelationshipAttribute.from({
             id: await ConsumptionIds.attribute.generate(),
             content: parsedSuccessorParams.content,
             createdAt: CoreDate.utc(),
             succeeds: predecessor.id,
-            peerSharingInfo: parsedSuccessorParams.peerSharingInfo
+            peerSharingInfo
         });
-
-        if (!predecessor.peerSharingInfo.peer.equals(successor.peerSharingInfo.peer)) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangePeer());
-        }
 
         if (predecessor.content.key !== successor.content.key) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangeKey());
@@ -714,17 +737,18 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successorIsNotAValidAttribute(e));
         }
 
+        const peerSharingInfo = PeerRelationshipAttributeSharingInfo.from({
+            peer: predecessor.peerSharingInfo.peer,
+            sourceReference: parsedSuccessorParams.sourceReference
+        });
+
         const successor = PeerRelationshipAttribute.from({
             id: parsedSuccessorParams.id,
             content: parsedSuccessorParams.content,
             createdAt: CoreDate.utc(),
             succeeds: predecessor.id,
-            peerSharingInfo: parsedSuccessorParams.peerSharingInfo
+            peerSharingInfo
         });
-
-        if (!predecessor.peerSharingInfo.peer.equals(successor.peerSharingInfo.peer)) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangePeer());
-        }
 
         if (predecessor.content.key !== successor.content.key) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangeKey());
@@ -748,21 +772,19 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successorIsNotAValidAttribute(e));
         }
 
+        const peerSharingInfo = ThirdPartyRelationshipAttributeSharingInfo.from({
+            peer: predecessor.peerSharingInfo.peer,
+            sourceReference: parsedSuccessorParams.sourceReference,
+            initialAttributePeer: predecessor.peerSharingInfo.initialAttributePeer
+        });
+
         const successor = ThirdPartyRelationshipAttribute.from({
             id: parsedSuccessorParams.id,
             content: parsedSuccessorParams.content,
             createdAt: CoreDate.utc(),
             succeeds: predecessor.id,
-            peerSharingInfo: parsedSuccessorParams.peerSharingInfo
+            peerSharingInfo
         });
-
-        if (!predecessor.peerSharingInfo.peer.equals(successor.peerSharingInfo.peer)) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangePeer());
-        }
-
-        if (!predecessor.peerSharingInfo.initialAttributePeer.equals(successor.peerSharingInfo.initialAttributePeer)) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangeInitialAttributePeer());
-        }
 
         if (predecessor.content.key !== successor.content.key) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangeKey());

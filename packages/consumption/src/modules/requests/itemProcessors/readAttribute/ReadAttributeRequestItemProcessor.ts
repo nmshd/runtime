@@ -24,12 +24,10 @@ import {
     OwnIdentityAttributeSuccessorParams,
     OwnRelationshipAttribute,
     PeerIdentityAttribute,
-    PeerIdentityAttributeSharingInfo,
     PeerIdentityAttributeSuccessorParams,
     PeerRelationshipAttribute,
     ReceivedAttributeDeletionStatus,
     ThirdPartyRelationshipAttribute,
-    ThirdPartyRelationshipAttributeSharingInfo,
     ThirdPartyRelationshipAttributeSuccessorParams
 } from "../../../attributes";
 import { LocalAttribute } from "../../../attributes/local/attributeTypes";
@@ -412,14 +410,10 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             if (!(predecessor instanceof PeerIdentityAttribute || predecessor instanceof ThirdPartyRelationshipAttribute)) return;
 
             if (predecessor instanceof PeerIdentityAttribute && responseItem.successorContent instanceof IdentityAttribute) {
-                const peerSharingInfo = PeerIdentityAttributeSharingInfo.from({
-                    peer: requestInfo.peer,
-                    sourceReference: requestInfo.id
-                });
                 const successorParams = PeerIdentityAttributeSuccessorParams.from({
                     id: responseItem.successorId,
                     content: responseItem.successorContent,
-                    peerSharingInfo
+                    sourceReference: requestInfo.id
                 });
 
                 const { predecessor: updatedPredecessor, successor } = await this.consumptionController.attributes.succeedPeerIdentityAttribute(predecessor, successorParams);
@@ -427,15 +421,10 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             }
 
             if (predecessor instanceof ThirdPartyRelationshipAttribute && responseItem.successorContent instanceof RelationshipAttribute) {
-                const peerSharingInfo = ThirdPartyRelationshipAttributeSharingInfo.from({
-                    peer: requestInfo.peer,
-                    sourceReference: requestInfo.id,
-                    initialAttributePeer: predecessor.peerSharingInfo.initialAttributePeer
-                });
                 const successorParams = ThirdPartyRelationshipAttributeSuccessorParams.from({
                     id: responseItem.successorId,
                     content: responseItem.successorContent,
-                    peerSharingInfo
+                    sourceReference: requestInfo.id
                 });
 
                 const { predecessor: updatedPredecessor, successor } = await this.consumptionController.attributes.succeedThirdPartyRelationshipAttribute(

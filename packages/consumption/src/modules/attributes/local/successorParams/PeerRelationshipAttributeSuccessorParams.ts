@@ -1,18 +1,17 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { RelationshipAttribute, RelationshipAttributeJSON } from "@nmshd/content";
 import { CoreId, ICoreId } from "@nmshd/core-types";
-import { IPeerRelationshipAttributeSharingInfo, PeerRelationshipAttributeSharingInfo, PeerRelationshipAttributeSharingInfoJSON } from "../sharingInfos";
 
 export interface PeerRelationshipAttributeSuccessorParamsJSON {
     content: RelationshipAttributeJSON;
     id: string;
-    peerSharingInfo: Omit<PeerRelationshipAttributeSharingInfoJSON, "deletionInfo">;
+    sourceReference: string;
 }
 
 export interface IPeerRelationshipAttributeSuccessorParams extends ISerializable {
     content: RelationshipAttribute;
     id: ICoreId;
-    peerSharingInfo: Omit<IPeerRelationshipAttributeSharingInfo, "deletionInfo">;
+    sourceReference: ICoreId;
 }
 
 @type("PeerRelationshipAttributeSuccessorParams")
@@ -27,7 +26,7 @@ export class PeerRelationshipAttributeSuccessorParams extends Serializable imple
 
     @validate()
     @serialize()
-    public peerSharingInfo: Omit<PeerRelationshipAttributeSharingInfo, "deletionInfo">;
+    public sourceReference: CoreId;
 
     public static from(value: IPeerRelationshipAttributeSuccessorParams | PeerRelationshipAttributeSuccessorParamsJSON): PeerRelationshipAttributeSuccessorParams {
         return this.fromAny(value);

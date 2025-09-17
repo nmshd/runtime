@@ -19,7 +19,6 @@ import {
     OwnIdentityAttribute,
     OwnIdentityAttributeSuccessorParams,
     PeerIdentityAttribute,
-    PeerIdentityAttributeSharingInfo,
     PeerIdentityAttributeSuccessorParams,
     ReceivedAttributeDeletionStatus
 } from "../../../attributes";
@@ -354,14 +353,10 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
 
             if (!(predecessor instanceof PeerIdentityAttribute && responseItem.successorContent instanceof IdentityAttribute)) return;
 
-            const peerSharingInfo = PeerIdentityAttributeSharingInfo.from({
-                peer: requestInfo.peer,
-                sourceReference: requestInfo.id
-            });
             const successorParams = PeerIdentityAttributeSuccessorParams.from({
                 id: responseItem.successorId,
                 content: responseItem.successorContent,
-                peerSharingInfo
+                sourceReference: requestInfo.id
             });
 
             const { predecessor: updatedPredecessor, successor } = await this.consumptionController.attributes.succeedPeerIdentityAttribute(predecessor, successorParams);

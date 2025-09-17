@@ -866,7 +866,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                         title: "aTitle"
                     }
                 },
-                peerSharingInfo: { peer: aThirdParty.toString(), sourceReference: "anotherSourceReferenceId" }
+                sourceReference: "anotherSourceReferenceId"
             });
 
             const forwardedSuccessor = await consumptionController.attributes.addForwardedSharingInfoToAttribute(
@@ -1036,10 +1036,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const successorParams: IPeerIdentityAttributeSuccessorParams = {
                 content: TestObjectFactory.createIdentityAttribute({ owner: sender, value: GivenName.from({ value: "anotherGivenName" }) }),
                 id: CoreId.from("aPeerIdentityAttributeSuccessorId"),
-                peerSharingInfo: {
-                    peer: sender,
-                    sourceReference: CoreId.from("anotherSourceReferenceId")
-                }
+                sourceReference: CoreId.from("anotherSourceReferenceId")
             };
             await consumptionController.attributes.succeedPeerIdentityAttribute(existingPeerIdentityAttribute, successorParams);
 

@@ -32,10 +32,8 @@ import {
     LocalRequestStatus,
     OwnIdentityAttribute,
     OwnRelationshipAttribute,
-    OwnRelationshipAttributeSharingInfo,
     PeerIdentityAttribute,
     PeerRelationshipAttribute,
-    PeerRelationshipAttributeSharingInfo,
     ReadAttributeRequestItemProcessor,
     ReceivedAttributeDeletionInfo,
     ReceivedAttributeDeletionStatus,
@@ -2137,10 +2135,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         key: "aKey",
                         owner: accountController.identity.address
                     }),
-                    peerSharingInfo: OwnRelationshipAttributeSharingInfo.from({
-                        peer: thirdPartyAddress,
-                        sourceReference: CoreId.from("successionNotification")
-                    })
+                    sourceReference: CoreId.from("successionNotification")
                 });
 
                 const requestItem = ReadAttributeRequestItem.from({
@@ -2203,10 +2198,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         key: "aKey",
                         owner: thirdPartyAddress
                     }),
-                    peerSharingInfo: PeerRelationshipAttributeSharingInfo.from({
-                        peer: thirdPartyAddress,
-                        sourceReference: CoreId.from("successionNotification")
-                    }),
+                    sourceReference: CoreId.from("successionNotification"),
                     id: CoreId.from("attributeId")
                 });
 
