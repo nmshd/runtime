@@ -3,9 +3,15 @@ import { sleep } from "@js-soft/ts-utils";
 import { IdentityAttribute, IdentityFileReference, Request, ResponseItemResult, TransferFileOwnershipAcceptResponseItem, TransferFileOwnershipRequestItem } from "@nmshd/content";
 import { CoreAddress, CoreDate } from "@nmshd/core-types";
 import { AccountController, FileOwnershipClaimedEvent } from "@nmshd/transport";
-import { OwnIdentityAttribute } from "src/modules/attributes/local/attributeTypes/OwnIdentityAttribute";
-import { PeerIdentityAttribute } from "src/modules/attributes/local/attributeTypes/PeerIdentityAttribute";
-import { ConsumptionController, ConsumptionIds, LocalRequest, LocalRequestStatus, TransferFileOwnershipRequestItemProcessor } from "../../../../../src";
+import {
+    ConsumptionController,
+    ConsumptionIds,
+    LocalRequest,
+    LocalRequestStatus,
+    OwnIdentityAttribute,
+    PeerIdentityAttribute,
+    TransferFileOwnershipRequestItemProcessor
+} from "../../../../../src";
 import { TestUtil } from "../../../../core/TestUtil";
 
 describe("TransferFileOwnershipRequestItemProcessor", function () {

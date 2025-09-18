@@ -2,9 +2,6 @@ import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { IdentityAttribute, Notification, OwnAttributeDeletedByOwnerNotificationItem, RelationshipAttribute, RelationshipAttributeConfidentiality } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { AccountController, Transport } from "@nmshd/transport";
-import { PeerIdentityAttribute } from "src/modules/attributes/local/attributeTypes/PeerIdentityAttribute";
-import { PeerRelationshipAttribute } from "src/modules/attributes/local/attributeTypes/PeerRelationshipAttribute";
-import { ThirdPartyRelationshipAttribute } from "src/modules/attributes/local/attributeTypes/ThirdPartyRelationshipAttribute";
 import {
     ConsumptionController,
     LocalNotification,
@@ -12,8 +9,11 @@ import {
     LocalNotificationStatus,
     OwnAttributeDeletedByOwnerEvent,
     OwnAttributeDeletedByOwnerNotificationItemProcessor,
+    PeerIdentityAttribute,
+    PeerRelationshipAttribute,
     ReceivedAttributeDeletionInfo,
     ReceivedAttributeDeletionStatus,
+    ThirdPartyRelationshipAttribute,
     ThirdPartyRelationshipAttributeDeletionStatus
 } from "../../../../../src";
 import { TestUtil } from "../../../../core/TestUtil";

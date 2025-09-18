@@ -41,6 +41,7 @@ import {
     LocalRequestStatus,
     LocalResponse,
     OutgoingRequestsController,
+    OwnIdentityAttribute,
     ProposeAttributeRequestItemProcessor,
     ReadAttributeRequestItemProcessor,
     ReceivedIncomingRequestParameters,
@@ -50,7 +51,6 @@ import {
     ValidationResult
 } from "../../../src";
 
-import { OwnIdentityAttribute } from "src/modules/attributes/local/attributeTypes/OwnIdentityAttribute";
 import { TestUtil } from "../../core/TestUtil";
 import { MockEventBus } from "../MockEventBus";
 import { TestObjectFactory } from "./testHelpers/TestObjectFactory";
