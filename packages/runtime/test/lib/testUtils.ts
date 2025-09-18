@@ -6,7 +6,9 @@ import {
     DecideRequestItemGroupParametersJSON,
     DecideRequestItemParametersJSON,
     DecideRequestParametersJSON,
-    ForwardableAttribute
+    OwnIdentityAttribute,
+    OwnRelationshipAttribute,
+    PeerRelationshipAttribute
 } from "@nmshd/consumption";
 import {
     ArbitraryRelationshipCreationContent,
@@ -832,7 +834,11 @@ export async function cleanupForwardedSharingDetails(services: TestRuntimeServic
         services.map(async (services) => {
             const servicesAttributeController = services.consumption.attributes["getAttributeUseCase"]["attributeController"];
 
-            const servicesAttributes = (await servicesAttributeController.getLocalAttributes(query)) as ForwardableAttribute[];
+            const servicesAttributes = (await servicesAttributeController.getLocalAttributes(query)) as (
+                | OwnIdentityAttribute
+                | OwnRelationshipAttribute
+                | PeerRelationshipAttribute
+            )[];
             for (const attribute of servicesAttributes) {
                 attribute.forwardedSharingDetails = undefined;
                 await servicesAttributeController.updateAttributeUnsafe(attribute);

@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { AttributesController, ForwardableAttribute } from "@nmshd/consumption";
+import { AttributesController, OwnIdentityAttribute, OwnRelationshipAttribute, PeerRelationshipAttribute } from "@nmshd/consumption";
 import { CoreId } from "@nmshd/core-types";
 import { AccountController, Relationship, RelationshipsController, RelationshipStatus } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
@@ -53,7 +53,11 @@ export class DeleteSharedAttributesForRejectedOrRevokedRelationshipUseCase exten
             "@type": { $in: ["OwnIdentityAttribute", "OwnRelationshipAttribute", "PeerRelationshipAttribute"] },
             "forwardedSharingDetails.peer": relationship.peer.address.toString()
         };
-        const forwardedAttributes = (await this.attributesController.getLocalAttributes(queryForForwardedAttributes)) as ForwardableAttribute[];
+        const forwardedAttributes = (await this.attributesController.getLocalAttributes(queryForForwardedAttributes)) as (
+            | OwnIdentityAttribute
+            | OwnRelationshipAttribute
+            | PeerRelationshipAttribute
+        )[];
 
         for (const forwardedAttribute of forwardedAttributes) {
             await this.attributesController.removeForwardedSharingDetailsFromAttribute(forwardedAttribute, relationship.peer.address);

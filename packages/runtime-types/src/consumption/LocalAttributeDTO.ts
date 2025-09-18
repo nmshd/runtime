@@ -32,11 +32,4 @@ export interface LocalAttributeDeletionInfoDTO {
     deletionDate: string;
 }
 
-export enum LocalAttributeDeletionStatus {
-    DeletionRequestSent = "DeletionRequestSent",
-    DeletionRequestRejected = "DeletionRequestRejected",
-    ToBeDeleted = "ToBeDeleted",
-    ToBeDeletedByPeer = "ToBeDeletedByPeer",
-    DeletedByPeer = "DeletedByPeer",
-    DeletedByOwner = "DeletedByOwner"
-}
+export type LocalAttributeDeletionStatus = "DeletionRequestSent" | "DeletionRequestRejected" | "ToBeDeleted" | "ToBeDeletedByPeer" | "DeletedByPeer" | "DeletedByOwner";
