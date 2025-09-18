@@ -8,7 +8,6 @@ import {
     GetMessagesQuery,
     IdentityDeletionProcessStatus,
     IncomingRequestReceivedEvent,
-    LocalAttributeDeletionStatus,
     LocalRequestDTO,
     LocalRequestStatus,
     MessageReceivedEvent,
@@ -713,7 +712,7 @@ describe("Postponed Notifications via Messages", () => {
             const peerIdentityAttribute = (await client5.consumption.attributes.getAttribute({ id: ownIdentityAttribute.id })).value;
             assert(peerIdentityAttribute.succeededBy);
             assert(peerIdentityAttribute.peerSharingDetails!.deletionInfo?.deletionDate);
-            assert(peerIdentityAttribute.peerSharingDetails!.deletionInfo.deletionStatus, LocalAttributeDeletionStatus.DeletedByOwner);
+            assert(peerIdentityAttribute.peerSharingDetails!.deletionInfo.deletionStatus, "DeletedByOwner");
 
             const timeOfSuccession = (await client5.consumption.attributes.getAttribute({ id: peerIdentityAttribute.succeededBy })).value.createdAt;
             const timeOfDeletionByOwner = peerIdentityAttribute.peerSharingDetails!.deletionInfo.deletionDate;

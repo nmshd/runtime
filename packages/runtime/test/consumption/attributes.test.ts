@@ -37,7 +37,6 @@ import {
     GetVersionsOfAttributeSharedWithPeerUseCase,
     GetVersionsOfAttributeUseCase,
     LocalAttributeDTO,
-    LocalAttributeDeletionStatus,
     MarkAttributeAsViewedUseCase,
     NotifyPeerAboutOwnIdentityAttributeSuccessionUseCase,
     OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent,
@@ -1432,7 +1431,7 @@ describe(ShareOwnIdentityAttributeUseCase.name, () => {
             return e.data.id === sOwnIdentityAttribute.id;
         });
         const sUpdatedOwnIdentityAttribute = (await services1.consumption.attributes.getAttribute({ id: sOwnIdentityAttribute.id })).value;
-        expect(sUpdatedOwnIdentityAttribute.forwardedSharingDetails![0].deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByPeer);
+        expect(sUpdatedOwnIdentityAttribute.forwardedSharingDetails![0].deletionInfo!.deletionStatus).toBe("DeletedByPeer");
 
         const shareRequestResult2 = await services1.consumption.attributes.shareOwnIdentityAttribute(shareRequest);
         expect(shareRequestResult2).toBeSuccessful();
@@ -1470,7 +1469,7 @@ describe(ShareOwnIdentityAttributeUseCase.name, () => {
         await exchangeAndAcceptRequestByMessage(services1, services2, requestParams, responseItems);
 
         const sUpdatedOwnIdentityAttribute = (await services1.consumption.attributes.getAttribute({ id: sOwnIdentityAttribute.id })).value;
-        expect(sUpdatedOwnIdentityAttribute.forwardedSharingDetails![0].deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.ToBeDeletedByPeer);
+        expect(sUpdatedOwnIdentityAttribute.forwardedSharingDetails![0].deletionInfo!.deletionStatus).toBe("ToBeDeletedByPeer");
 
         const shareRequestResult2 = await services1.consumption.attributes.shareOwnIdentityAttribute(shareRequest);
         expect(shareRequestResult2).toBeSuccessful();
@@ -1806,7 +1805,7 @@ describe(NotifyPeerAboutOwnIdentityAttributeSuccessionUseCase.name, () => {
             return e.data.id === ownIdentityAttributeVersion0.id;
         });
         const updatedOwnIdentityAttribute = (await services1.consumption.attributes.getAttribute({ id: ownIdentityAttributeVersion0.id })).value;
-        expect(updatedOwnIdentityAttribute.forwardedSharingDetails![0].deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByPeer);
+        expect(updatedOwnIdentityAttribute.forwardedSharingDetails![0].deletionInfo!.deletionStatus).toBe("DeletedByPeer");
 
         await executeFullShareOwnIdentityAttributeFlow(services1, services2, ownIdentityAttributeVersion0.id);
 
@@ -1826,7 +1825,7 @@ describe(NotifyPeerAboutOwnIdentityAttributeSuccessionUseCase.name, () => {
             return e.data.id === ownIdentityAttributeVersion0.id;
         });
         const updatedOwnIdentityAttribute = (await services1.consumption.attributes.getAttribute({ id: ownIdentityAttributeVersion0.id })).value;
-        expect(updatedOwnIdentityAttribute.forwardedSharingDetails![0].deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByPeer);
+        expect(updatedOwnIdentityAttribute.forwardedSharingDetails![0].deletionInfo!.deletionStatus).toBe("DeletedByPeer");
 
         const notificationResult = await services1.consumption.attributes.notifyPeerAboutOwnIdentityAttributeSuccession({
             attributeId: ownIdentityAttributeVersion1.id,
@@ -2018,7 +2017,7 @@ describe(SucceedRelationshipAttributeAndNotifyPeerUseCase.name, () => {
             return e.data.id === sOwnRelationshipAttribute.id;
         });
         const updatedOwnRelationshipAttribute = (await services1.consumption.attributes.getAttribute({ id: sOwnRelationshipAttribute.id })).value;
-        expect(updatedOwnRelationshipAttribute.peerSharingDetails!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByPeer);
+        expect(updatedOwnRelationshipAttribute.peerSharingDetails!.deletionInfo!.deletionStatus).toBe("DeletedByPeer");
 
         const result = await services1.consumption.attributes.succeedRelationshipAttributeAndNotifyPeer({
             predecessorId: sOwnRelationshipAttribute.id,
@@ -2551,7 +2550,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 const timeAfterUpdate = CoreDate.utc();
 
                 const updatedPeerIdentityAttribute = (await services2.consumption.attributes.getAttribute({ id: peerIdentityAttributeVersion0.id })).value;
-                expect(updatedPeerIdentityAttribute.peerSharingDetails!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByOwner);
+                expect(updatedPeerIdentityAttribute.peerSharingDetails!.deletionInfo!.deletionStatus).toBe("DeletedByOwner");
                 expect(CoreDate.from(updatedPeerIdentityAttribute.peerSharingDetails!.deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))).toBe(true);
             });
 
@@ -2566,7 +2565,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 const timeAfterUpdate = CoreDate.utc();
 
                 const updatedPeerIdentityAttributePredecessor = (await services2.consumption.attributes.getAttribute({ id: peerIdentityAttributeVersion0.id })).value;
-                expect(updatedPeerIdentityAttributePredecessor.peerSharingDetails!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByOwner);
+                expect(updatedPeerIdentityAttributePredecessor.peerSharingDetails!.deletionInfo!.deletionStatus).toBe("DeletedByOwner");
                 expect(
                     CoreDate.from(updatedPeerIdentityAttributePredecessor.peerSharingDetails!.deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))
                 ).toBe(true);
@@ -2664,7 +2663,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 const timeAfterUpdate = CoreDate.utc();
 
                 const updatedOwnIdentityAttribute = (await services1.consumption.attributes.getAttribute({ id: ownIdentityAttributeVersion0.id })).value;
-                expect(updatedOwnIdentityAttribute.forwardedSharingDetails![0].deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByPeer);
+                expect(updatedOwnIdentityAttribute.forwardedSharingDetails![0].deletionInfo!.deletionStatus).toBe("DeletedByPeer");
                 expect(CoreDate.from(updatedOwnIdentityAttribute.forwardedSharingDetails![0].deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))).toBe(
                     true
                 );
@@ -2682,7 +2681,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 const timeAfterUpdate = CoreDate.utc();
 
                 const updatedOwnIdentityAttributePredecessor = (await services1.consumption.attributes.getAttribute({ id: ownIdentityAttributeVersion0.id })).value;
-                expect(updatedOwnIdentityAttributePredecessor.forwardedSharingDetails![0].deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByPeer);
+                expect(updatedOwnIdentityAttributePredecessor.forwardedSharingDetails![0].deletionInfo!.deletionStatus).toBe("DeletedByPeer");
                 expect(
                     CoreDate.from(updatedOwnIdentityAttributePredecessor.forwardedSharingDetails![0].deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))
                 ).toBe(true);
@@ -2899,7 +2898,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 const timeAfterUpdate = CoreDate.utc();
 
                 const updatedPeerRelationshipAttribute = (await services2.consumption.attributes.getAttribute({ id: ownRelationshipAttributeVersion0.id })).value;
-                expect(updatedPeerRelationshipAttribute.peerSharingDetails!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByOwner);
+                expect(updatedPeerRelationshipAttribute.peerSharingDetails!.deletionInfo!.deletionStatus).toBe("DeletedByOwner");
                 expect(CoreDate.from(updatedPeerRelationshipAttribute.peerSharingDetails!.deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))).toBe(
                     true
                 );
@@ -2917,7 +2916,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 const timeAfterUpdate = CoreDate.utc();
 
                 const updatedPredecessorPeerRelationshipAttribute = (await services2.consumption.attributes.getAttribute({ id: ownRelationshipAttributeVersion0.id })).value;
-                expect(updatedPredecessorPeerRelationshipAttribute.peerSharingDetails!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByOwner);
+                expect(updatedPredecessorPeerRelationshipAttribute.peerSharingDetails!.deletionInfo!.deletionStatus).toBe("DeletedByOwner");
                 expect(
                     CoreDate.from(updatedPredecessorPeerRelationshipAttribute.peerSharingDetails!.deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))
                 ).toBe(true);
@@ -2935,7 +2934,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 const timeAfterUpdate = CoreDate.utc();
 
                 const updatedThirdPartyRelationshipAttribute = (await services3.consumption.attributes.getAttribute({ id: ownRelationshipAttributeVersion0.id })).value;
-                expect(updatedThirdPartyRelationshipAttribute.peerSharingDetails!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByOwner);
+                expect(updatedThirdPartyRelationshipAttribute.peerSharingDetails!.deletionInfo!.deletionStatus).toBe("DeletedByOwner");
                 expect(
                     CoreDate.from(updatedThirdPartyRelationshipAttribute.peerSharingDetails!.deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))
                 ).toBe(true);
@@ -2953,9 +2952,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 const timeAfterUpdate = CoreDate.utc();
 
                 const updatedPredecessorThirdPartyRelationshipAttribute = (await services3.consumption.attributes.getAttribute({ id: ownRelationshipAttributeVersion0.id })).value;
-                expect(updatedPredecessorThirdPartyRelationshipAttribute.peerSharingDetails!.deletionInfo!.deletionStatus).toStrictEqual(
-                    LocalAttributeDeletionStatus.DeletedByOwner
-                );
+                expect(updatedPredecessorThirdPartyRelationshipAttribute.peerSharingDetails!.deletionInfo!.deletionStatus).toBe("DeletedByOwner");
                 expect(
                     CoreDate.from(updatedPredecessorThirdPartyRelationshipAttribute.peerSharingDetails!.deletionInfo!.deletionDate).isBetween(
                         timeBeforeUpdate,
@@ -3047,7 +3044,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 const timeAfterUpdate = CoreDate.utc();
 
                 const updatedOwnRelationshipAttribute = (await services1.consumption.attributes.getAttribute({ id: peerRelationshipAttributeVersion0.id })).value;
-                expect(updatedOwnRelationshipAttribute.peerSharingDetails!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByPeer);
+                expect(updatedOwnRelationshipAttribute.peerSharingDetails!.deletionInfo!.deletionStatus).toBe("DeletedByPeer");
                 expect(CoreDate.from(updatedOwnRelationshipAttribute.peerSharingDetails!.deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))).toBe(
                     true
                 );
@@ -3065,7 +3062,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 const timeAfterUpdate = CoreDate.utc();
 
                 const updatedPredecessorOwnRelationshipAttribute = (await services1.consumption.attributes.getAttribute({ id: peerRelationshipAttributeVersion0.id })).value;
-                expect(updatedPredecessorOwnRelationshipAttribute.peerSharingDetails!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByPeer);
+                expect(updatedPredecessorOwnRelationshipAttribute.peerSharingDetails!.deletionInfo!.deletionStatus).toBe("DeletedByPeer");
                 expect(
                     CoreDate.from(updatedPredecessorOwnRelationshipAttribute.peerSharingDetails!.deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))
                 ).toBe(true);
@@ -3083,7 +3080,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 const timeAfterUpdate = CoreDate.utc();
 
                 const updatedThirdPartyRelationshipAttribute = (await services3.consumption.attributes.getAttribute({ id: forwardedPeerRelationshipAttributeVersion0.id })).value;
-                expect(updatedThirdPartyRelationshipAttribute.peerSharingDetails!.deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByPeer);
+                expect(updatedThirdPartyRelationshipAttribute.peerSharingDetails!.deletionInfo!.deletionStatus).toBe("DeletedByPeer");
                 expect(
                     CoreDate.from(updatedThirdPartyRelationshipAttribute.peerSharingDetails!.deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))
                 ).toBe(true);
@@ -3103,9 +3100,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 const updatedPredecessorThirdPartyRelationshipAttribute = (
                     await services3.consumption.attributes.getAttribute({ id: forwardedPeerRelationshipAttributeVersion0.id })
                 ).value;
-                expect(updatedPredecessorThirdPartyRelationshipAttribute.peerSharingDetails!.deletionInfo!.deletionStatus).toStrictEqual(
-                    LocalAttributeDeletionStatus.DeletedByPeer
-                );
+                expect(updatedPredecessorThirdPartyRelationshipAttribute.peerSharingDetails!.deletionInfo!.deletionStatus).toBe("DeletedByPeer");
                 expect(
                     CoreDate.from(updatedPredecessorThirdPartyRelationshipAttribute.peerSharingDetails!.deletionInfo!.deletionDate).isBetween(
                         timeBeforeUpdate,
@@ -3206,7 +3201,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
 
                 const updatedOwnRelationshipAttribute = (await services1.consumption.attributes.getAttribute({ id: thirdPartyRelationshipAttributeForwardedByOwnerVersion0.id }))
                     .value;
-                expect(updatedOwnRelationshipAttribute.forwardedSharingDetails![0].deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByPeer);
+                expect(updatedOwnRelationshipAttribute.forwardedSharingDetails![0].deletionInfo!.deletionStatus).toBe("DeletedByPeer");
                 expect(
                     CoreDate.from(updatedOwnRelationshipAttribute.forwardedSharingDetails![0].deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))
                 ).toBe(true);
@@ -3230,9 +3225,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 const updatedOwnRelationshipAttributePredecessor = (
                     await services1.consumption.attributes.getAttribute({ id: thirdPartyRelationshipAttributeForwardedByOwnerVersion0.id })
                 ).value;
-                expect(updatedOwnRelationshipAttributePredecessor.forwardedSharingDetails![0].deletionInfo!.deletionStatus).toStrictEqual(
-                    LocalAttributeDeletionStatus.DeletedByPeer
-                );
+                expect(updatedOwnRelationshipAttributePredecessor.forwardedSharingDetails![0].deletionInfo!.deletionStatus).toBe("DeletedByPeer");
                 expect(
                     CoreDate.from(updatedOwnRelationshipAttributePredecessor.forwardedSharingDetails![0].deletionInfo!.deletionDate).isBetween(
                         timeBeforeUpdate,
@@ -3258,7 +3251,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
 
                 const updatedPeerRelationshipAttribute = (await services2.consumption.attributes.getAttribute({ id: thirdPartyRelationshipAttributeForwardedByPeerVersion0.id }))
                     .value;
-                expect(updatedPeerRelationshipAttribute.forwardedSharingDetails![0].deletionInfo!.deletionStatus).toStrictEqual(LocalAttributeDeletionStatus.DeletedByPeer);
+                expect(updatedPeerRelationshipAttribute.forwardedSharingDetails![0].deletionInfo!.deletionStatus).toBe("DeletedByPeer");
                 expect(
                     CoreDate.from(updatedPeerRelationshipAttribute.forwardedSharingDetails![0].deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))
                 ).toBe(true);
@@ -3282,9 +3275,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 const updatedPeerRelationshipAttributePredecessor = (
                     await services2.consumption.attributes.getAttribute({ id: thirdPartyRelationshipAttributeForwardedByPeerVersion0.id })
                 ).value;
-                expect(updatedPeerRelationshipAttributePredecessor.forwardedSharingDetails![0].deletionInfo!.deletionStatus).toStrictEqual(
-                    LocalAttributeDeletionStatus.DeletedByPeer
-                );
+                expect(updatedPeerRelationshipAttributePredecessor.forwardedSharingDetails![0].deletionInfo!.deletionStatus).toBe("DeletedByPeer");
                 expect(
                     CoreDate.from(updatedPeerRelationshipAttributePredecessor.forwardedSharingDetails![0].deletionInfo!.deletionDate).isBetween(
                         timeBeforeUpdate,
@@ -3490,7 +3481,7 @@ describe(SetAttributeDeletionInfoOfDeletionProposedRelationshipUseCase.name, () 
 
         const peerAttributes = (await services2.consumption.attributes.getPeerAttributes({ peer: services1.address })).value;
         expect(peerAttributes).toHaveLength(1);
-        expect(peerAttributes[0].peerSharingDetails!.deletionInfo!.deletionStatus).toBe(LocalAttributeDeletionStatus.DeletedByOwner);
+        expect(peerAttributes[0].peerSharingDetails!.deletionInfo!.deletionStatus).toBe("DeletedByOwner");
         expect(peerAttributes[0].peerSharingDetails!.deletionInfo!.deletionDate).toStrictEqual(deletionDate);
     });
 
@@ -3517,7 +3508,7 @@ describe(SetAttributeDeletionInfoOfDeletionProposedRelationshipUseCase.name, () 
 
         const ownAttributesSharedWithPeer = (await services2.consumption.attributes.getOwnAttributesSharedWithPeer({ peer: services1.address })).value;
         expect(ownAttributesSharedWithPeer).toHaveLength(1);
-        expect(ownAttributesSharedWithPeer[0].forwardedSharingDetails![0].deletionInfo!.deletionStatus).toBe(LocalAttributeDeletionStatus.DeletedByPeer);
+        expect(ownAttributesSharedWithPeer[0].forwardedSharingDetails![0].deletionInfo!.deletionStatus).toBe("DeletedByPeer");
         expect(ownAttributesSharedWithPeer[0].forwardedSharingDetails![0].deletionInfo!.deletionDate).toStrictEqual(deletionDate);
     });
 
@@ -3551,7 +3542,7 @@ describe(SetAttributeDeletionInfoOfDeletionProposedRelationshipUseCase.name, () 
         expect(result).toBeSuccessful();
 
         const peerIdentityAttributeAfterDecomposition = (await services2.consumption.attributes.getAttribute({ id: ownIdentityAttribute.id })).value;
-        expect(peerIdentityAttributeAfterDecomposition.peerSharingDetails!.deletionInfo!.deletionStatus).toBe(LocalAttributeDeletionStatus.DeletedByOwner);
+        expect(peerIdentityAttributeAfterDecomposition.peerSharingDetails!.deletionInfo!.deletionStatus).toBe("DeletedByOwner");
         expect(peerIdentityAttributeAfterDecomposition.peerSharingDetails!.deletionInfo!.deletionDate).toStrictEqual(dateOfAttributeDeletion);
     });
 
@@ -3584,7 +3575,7 @@ describe(SetAttributeDeletionInfoOfDeletionProposedRelationshipUseCase.name, () 
         expect(result).toBeSuccessful();
 
         const ownIdentityAttributeAfterDecomposition = (await services2.consumption.attributes.getAttribute({ id: ownIdentityAttribute.id })).value;
-        expect(ownIdentityAttributeAfterDecomposition.forwardedSharingDetails![0].deletionInfo!.deletionStatus).toBe(LocalAttributeDeletionStatus.DeletedByPeer);
+        expect(ownIdentityAttributeAfterDecomposition.forwardedSharingDetails![0].deletionInfo!.deletionStatus).toBe("DeletedByPeer");
         expect(ownIdentityAttributeAfterDecomposition.forwardedSharingDetails![0].deletionInfo!.deletionDate).toStrictEqual(dateOfAttributeDeletion);
     });
 
