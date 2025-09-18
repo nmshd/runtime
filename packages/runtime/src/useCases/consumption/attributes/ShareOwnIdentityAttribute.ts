@@ -1,5 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
-import { AttributesController, CreateOutgoingRequestParameters, ErrorValidationResult, LocalAttribute, OutgoingRequestsController, OwnIdentityAttribute } from "@nmshd/consumption";
+import { AttributesController, CreateOutgoingRequestParameters, ErrorValidationResult, OutgoingRequestsController } from "@nmshd/consumption";
+import { LocalAttribute } from "@nmshd/consumption/src/modules/attributes/local/attributeTypes/LocalAttribute";
+import { OwnIdentityAttribute } from "@nmshd/consumption/src/modules/attributes/local/attributeTypes/OwnIdentityAttribute";
 import { Request, ShareAttributeRequestItem } from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { LocalRequestDTO } from "@nmshd/runtime-types";

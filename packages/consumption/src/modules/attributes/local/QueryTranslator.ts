@@ -12,7 +12,9 @@ import {
 } from "@nmshd/content";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionError } from "../../../consumption/ConsumptionError";
-import { LocalAttribute, OwnRelationshipAttribute, PeerRelationshipAttribute } from "./attributeTypes";
+import { LocalAttribute } from "./attributeTypes/LocalAttribute";
+import { OwnRelationshipAttribute } from "./attributeTypes/OwnRelationshipAttribute";
+import { PeerRelationshipAttribute } from "./attributeTypes/PeerRelationshipAttribute";
 import { ThirdPartyRelationshipAttributeSharingDetails } from "./sharingDetails";
 
 export class IdentityAttributeQueryTranslator {

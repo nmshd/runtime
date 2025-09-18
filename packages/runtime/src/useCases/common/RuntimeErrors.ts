@@ -1,5 +1,5 @@
 import { ApplicationError } from "@js-soft/ts-utils";
-import { LocalAttribute } from "@nmshd/consumption";
+import { LocalAttribute } from "@nmshd/consumption/src/modules/attributes/local/attributeTypes/LocalAttribute";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
 
 class General {

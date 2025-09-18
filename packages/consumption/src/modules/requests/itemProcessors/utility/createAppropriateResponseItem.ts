@@ -7,7 +7,8 @@ import {
     ReadAttributeAcceptResponseItem,
     ResponseItemResult
 } from "@nmshd/content";
-import { AttributesController, OwnIdentityAttribute } from "../../../attributes";
+import { AttributesController } from "../../../attributes";
+import { OwnIdentityAttribute } from "../../../attributes/local/attributeTypes/OwnIdentityAttribute";
 import { LocalRequestInfo } from "../IRequestItemProcessor";
 
 export default async function createAppropriateResponseItem(

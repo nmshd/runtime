@@ -13,13 +13,10 @@ import { CoreAddress } from "@nmshd/core-types";
 import { RelationshipStatus } from "@nmshd/transport";
 import _ from "lodash";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import {
-    OwnIdentityAttribute,
-    OwnRelationshipAttribute,
-    PeerRelationshipAttribute,
-    ReceivedAttributeDeletionStatus,
-    ThirdPartyRelationshipAttributeDeletionStatus
-} from "../../../attributes";
+import { ReceivedAttributeDeletionStatus, ThirdPartyRelationshipAttributeDeletionStatus } from "../../../attributes";
+import { OwnIdentityAttribute } from "../../../attributes/local/attributeTypes/OwnIdentityAttribute";
+import { OwnRelationshipAttribute } from "../../../attributes/local/attributeTypes/OwnRelationshipAttribute";
+import { PeerRelationshipAttribute } from "../../../attributes/local/attributeTypes/PeerRelationshipAttribute";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";

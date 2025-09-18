@@ -3,7 +3,10 @@ import { IdentityAttribute, PeerAttributeSucceededNotificationItem, Relationship
 import { TransportLoggerFactory } from "@nmshd/transport";
 import { ConsumptionController } from "../../../../consumption/ConsumptionController";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { AttributeSucceededEvent, LocalAttribute, PeerIdentityAttribute, PeerIdentityAttributeSuccessorParams, PeerRelationshipAttribute } from "../../../attributes";
+import { AttributeSucceededEvent, PeerIdentityAttributeSuccessorParams } from "../../../attributes";
+import { LocalAttribute } from "../../../attributes/local/attributeTypes/LocalAttribute";
+import { PeerIdentityAttribute } from "../../../attributes/local/attributeTypes/PeerIdentityAttribute";
+import { PeerRelationshipAttribute } from "../../../attributes/local/attributeTypes/PeerRelationshipAttribute";
 import { PeerRelationshipAttributeSuccessorParams } from "../../../attributes/local/successorParams/PeerRelationshipAttributeSuccessorParams";
 import { ValidationResult } from "../../../common";
 import { LocalNotification } from "../../local/LocalNotification";

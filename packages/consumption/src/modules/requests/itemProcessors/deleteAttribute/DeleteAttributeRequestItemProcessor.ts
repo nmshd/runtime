@@ -4,16 +4,16 @@ import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreEr
 import {
     EmittedAttributeDeletionInfo,
     EmittedAttributeDeletionStatus,
-    OwnIdentityAttribute,
-    OwnRelationshipAttribute,
-    PeerIdentityAttribute,
-    PeerRelationshipAttribute,
     ReceivedAttributeDeletionInfo,
     ReceivedAttributeDeletionStatus,
-    ThirdPartyRelationshipAttribute,
     ThirdPartyRelationshipAttributeDeletionInfo,
     ThirdPartyRelationshipAttributeDeletionStatus
 } from "../../../attributes";
+import { OwnIdentityAttribute } from "../../../attributes/local/attributeTypes/OwnIdentityAttribute";
+import { OwnRelationshipAttribute } from "../../../attributes/local/attributeTypes/OwnRelationshipAttribute";
+import { PeerIdentityAttribute } from "../../../attributes/local/attributeTypes/PeerIdentityAttribute";
+import { PeerRelationshipAttribute } from "../../../attributes/local/attributeTypes/PeerRelationshipAttribute";
+import { ThirdPartyRelationshipAttribute } from "../../../attributes/local/attributeTypes/ThirdPartyRelationshipAttribute";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 import { LocalRequestInfo } from "../IRequestItemProcessor";
