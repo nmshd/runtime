@@ -2,16 +2,12 @@ import { AttributeWithPeerSharingDetails } from "@nmshd/consumption/src/modules/
 import { ForwardableAttribute } from "@nmshd/consumption/src/modules/attributes/local/attributeTypes/ForwardableAttribute";
 import { LocalAttribute } from "@nmshd/consumption/src/modules/attributes/local/attributeTypes/LocalAttribute";
 import { OwnIdentityAttribute } from "@nmshd/consumption/src/modules/attributes/local/attributeTypes/OwnIdentityAttribute";
-import { OwnRelationshipAttribute } from "@nmshd/consumption/src/modules/attributes/local/attributeTypes/OwnRelationshipAttribute";
-import { PeerIdentityAttribute } from "@nmshd/consumption/src/modules/attributes/local/attributeTypes/PeerIdentityAttribute";
-import { PeerRelationshipAttribute } from "@nmshd/consumption/src/modules/attributes/local/attributeTypes/PeerRelationshipAttribute";
-import { ThirdPartyRelationshipAttribute } from "@nmshd/consumption/src/modules/attributes/local/attributeTypes/ThirdPartyRelationshipAttribute";
 import { ForwardedSharingDetailsDTO, LocalAttributeDTO, PeerSharingDetailsDTO } from "@nmshd/runtime-types";
 
 export class AttributeMapper {
     public static toAttributeDTO(attribute: LocalAttribute): LocalAttributeDTO {
         return {
-            "@type": this.toType(attribute),
+            "@type": (attribute.constructor as any).name,
             id: attribute.id.toString(),
             content: attribute.content.toJSON(),
             createdAt: attribute.createdAt.toString(),
@@ -26,15 +22,6 @@ export class AttributeMapper {
 
     public static toAttributeDTOList(attributes: LocalAttribute[]): LocalAttributeDTO[] {
         return attributes.map((attribute) => this.toAttributeDTO(attribute));
-    }
-
-    private static toType(attribute: LocalAttribute) {
-        if (attribute instanceof OwnIdentityAttribute) return "OwnIdentityAttribute";
-        if (attribute instanceof PeerIdentityAttribute) return "PeerIdentityAttribute";
-        if (attribute instanceof OwnRelationshipAttribute) return "OwnRelationshipAttribute";
-        if (attribute instanceof PeerRelationshipAttribute) return "PeerRelationshipAttribute";
-        if (attribute instanceof ThirdPartyRelationshipAttribute) return "ThirdPartyRelationshipAttribute";
-        throw new Error("Type of LocalAttribute not found.");
     }
 
     private static toPeerSharingDetails(attribute: LocalAttribute) {
