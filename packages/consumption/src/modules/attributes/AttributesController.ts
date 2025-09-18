@@ -29,14 +29,16 @@ import { ConsumptionIds } from "../../consumption/ConsumptionIds";
 import { flattenObject, ValidationResult } from "../common";
 import { AttributeCreatedEvent, AttributeDeletedEvent, AttributeForwardedSharingDetailsChangedEvent, AttributeSucceededEvent, AttributeWasViewedAtChangedEvent } from "./events";
 import { AttributeTagCollection, IAttributeTag } from "./local/AttributeTagCollection";
-
-import { ForwardableAttribute } from "./local/attributeTypes/ForwardableAttribute";
-import { LocalAttribute, LocalAttributeJSON } from "./local/attributeTypes/LocalAttribute";
-import { OwnIdentityAttribute } from "./local/attributeTypes/OwnIdentityAttribute";
-import { OwnRelationshipAttribute } from "./local/attributeTypes/OwnRelationshipAttribute";
-import { PeerIdentityAttribute } from "./local/attributeTypes/PeerIdentityAttribute";
-import { PeerRelationshipAttribute } from "./local/attributeTypes/PeerRelationshipAttribute";
-import { ThirdPartyRelationshipAttribute } from "./local/attributeTypes/ThirdPartyRelationshipAttribute";
+import {
+    ForwardableAttribute,
+    LocalAttribute,
+    LocalAttributeJSON,
+    OwnIdentityAttribute,
+    OwnRelationshipAttribute,
+    PeerIdentityAttribute,
+    PeerRelationshipAttribute,
+    ThirdPartyRelationshipAttribute
+} from "./local/attributeTypes";
 import { IdentityAttributeQueryTranslator, RelationshipAttributeQueryTranslator, ThirdPartyRelationshipAttributeQueryTranslator } from "./local/QueryTranslator";
 import {
     EmittedAttributeDeletionInfo,

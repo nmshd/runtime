@@ -1,7 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { AttributesController } from "@nmshd/consumption";
-import { LocalAttribute } from "@nmshd/consumption/src/modules/attributes/local/attributeTypes/LocalAttribute";
-import { OwnIdentityAttribute } from "@nmshd/consumption/src/modules/attributes/local/attributeTypes/OwnIdentityAttribute";
+import { AttributesController, LocalAttribute, OwnIdentityAttribute } from "@nmshd/consumption";
 import { CoreId } from "@nmshd/core-types";
 import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { AccountController } from "@nmshd/transport";

@@ -1,5 +1,5 @@
 import { TransportDataEvent } from "@nmshd/transport";
-import { ForwardableAttribute } from "../local/attributeTypes/ForwardableAttribute";
+import { ForwardableAttribute } from "../local/attributeTypes";
 
 export class AttributeForwardedSharingDetailsChangedEvent extends TransportDataEvent<ForwardableAttribute> {
     public static readonly namespace = "consumption.attributeForwardedSharingDetailsChanged";

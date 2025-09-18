@@ -11,8 +11,7 @@ import {
 } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { AttributeSucceededEvent, PeerIdentityAttributeSuccessorParams } from "../../../attributes";
-import { PeerIdentityAttribute } from "../../../attributes/local/attributeTypes/PeerIdentityAttribute";
+import { AttributeSucceededEvent, PeerIdentityAttribute, PeerIdentityAttributeSuccessorParams } from "../../../attributes";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";

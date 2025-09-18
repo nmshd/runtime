@@ -1,6 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { AttributesController, ConsumptionCoreErrors, ConsumptionIds, OwnRelationshipAttributeSuccessorParams } from "@nmshd/consumption";
-import { OwnRelationshipAttribute } from "@nmshd/consumption/src/modules/attributes/local/attributeTypes/OwnRelationshipAttribute";
+import { AttributesController, ConsumptionCoreErrors, ConsumptionIds, OwnRelationshipAttribute, OwnRelationshipAttributeSuccessorParams } from "@nmshd/consumption";
 import { AttributeValues, Notification, PeerAttributeSucceededNotificationItem, RelationshipAttribute } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
 import { LocalAttributeDTO } from "@nmshd/runtime-types";

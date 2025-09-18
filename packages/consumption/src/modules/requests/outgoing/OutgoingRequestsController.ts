@@ -8,10 +8,7 @@ import { ConsumptionControllerName } from "../../../consumption/ConsumptionContr
 import { ConsumptionCoreErrors } from "../../../consumption/ConsumptionCoreErrors";
 import { ConsumptionError } from "../../../consumption/ConsumptionError";
 import { ConsumptionIds } from "../../../consumption/ConsumptionIds";
-import { EmittedAttributeDeletionInfo, EmittedAttributeDeletionStatus } from "../../attributes";
-import { OwnIdentityAttribute } from "../../attributes/local/attributeTypes/OwnIdentityAttribute";
-import { OwnRelationshipAttribute } from "../../attributes/local/attributeTypes/OwnRelationshipAttribute";
-import { PeerRelationshipAttribute } from "../../attributes/local/attributeTypes/PeerRelationshipAttribute";
+import { EmittedAttributeDeletionInfo, EmittedAttributeDeletionStatus, OwnIdentityAttribute, OwnRelationshipAttribute, PeerRelationshipAttribute } from "../../attributes";
 import { ValidationResult } from "../../common/ValidationResult";
 import { OutgoingRequestCreatedAndCompletedEvent, OutgoingRequestCreatedEvent, OutgoingRequestStatusChangedEvent } from "../events";
 import { RequestItemProcessorRegistry } from "../itemProcessors/RequestItemProcessorRegistry";

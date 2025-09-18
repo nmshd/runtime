@@ -1,7 +1,4 @@
-import { AttributeWithPeerSharingDetails } from "@nmshd/consumption/src/modules/attributes/local/attributeTypes/AttributeWithPeerSharingDetails";
-import { ForwardableAttribute } from "@nmshd/consumption/src/modules/attributes/local/attributeTypes/ForwardableAttribute";
-import { LocalAttribute } from "@nmshd/consumption/src/modules/attributes/local/attributeTypes/LocalAttribute";
-import { OwnIdentityAttribute } from "@nmshd/consumption/src/modules/attributes/local/attributeTypes/OwnIdentityAttribute";
+import { AttributeWithPeerSharingDetails, ForwardableAttribute, LocalAttribute, OwnIdentityAttribute } from "@nmshd/consumption";
 import { ForwardedSharingDetailsDTO, LocalAttributeDTO, PeerSharingDetailsDTO } from "@nmshd/runtime-types";
 
 export class AttributeMapper {

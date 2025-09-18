@@ -1,6 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { AttributesController } from "@nmshd/consumption";
-import { ForwardableAttribute } from "@nmshd/consumption/src/modules/attributes/local/attributeTypes/ForwardableAttribute";
+import { AttributesController, ForwardableAttribute } from "@nmshd/consumption";
 import { CoreId } from "@nmshd/core-types";
 import { AccountController, Relationship, RelationshipsController, RelationshipStatus } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";

@@ -7,12 +7,12 @@ import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreEr
 import {
     EmittedAttributeDeletionInfo,
     EmittedAttributeDeletionStatus,
+    OwnRelationshipAttribute,
     PeerRelationshipAttributeDeletedByPeerEvent,
+    ThirdPartyRelationshipAttribute,
     ThirdPartyRelationshipAttributeDeletionInfo,
     ThirdPartyRelationshipAttributeDeletionStatus
 } from "../../../attributes";
-import { OwnRelationshipAttribute } from "../../../attributes/local/attributeTypes/OwnRelationshipAttribute";
-import { ThirdPartyRelationshipAttribute } from "../../../attributes/local/attributeTypes/ThirdPartyRelationshipAttribute";
 import { ValidationResult } from "../../../common";
 import { LocalNotification } from "../../local/LocalNotification";
 import { AbstractNotificationItemProcessor } from "../AbstractNotificationItemProcessor";

@@ -6,14 +6,14 @@ import { ConsumptionController } from "../../../../consumption/ConsumptionContro
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import {
     OwnAttributeDeletedByOwnerEvent,
+    PeerIdentityAttribute,
+    PeerRelationshipAttribute,
     ReceivedAttributeDeletionInfo,
     ReceivedAttributeDeletionStatus,
+    ThirdPartyRelationshipAttribute,
     ThirdPartyRelationshipAttributeDeletionInfo,
     ThirdPartyRelationshipAttributeDeletionStatus
 } from "../../../attributes";
-import { PeerIdentityAttribute } from "../../../attributes/local/attributeTypes/PeerIdentityAttribute";
-import { PeerRelationshipAttribute } from "../../../attributes/local/attributeTypes/PeerRelationshipAttribute";
-import { ThirdPartyRelationshipAttribute } from "../../../attributes/local/attributeTypes/ThirdPartyRelationshipAttribute";
 import { ValidationResult } from "../../../common";
 import { LocalNotification } from "../../local/LocalNotification";
 import { AbstractNotificationItemProcessor } from "../AbstractNotificationItemProcessor";

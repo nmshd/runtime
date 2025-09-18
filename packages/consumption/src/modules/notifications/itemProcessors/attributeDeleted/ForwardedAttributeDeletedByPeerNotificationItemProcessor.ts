@@ -4,10 +4,14 @@ import { CoreDate } from "@nmshd/core-types";
 import { TransportLoggerFactory } from "@nmshd/transport";
 import { ConsumptionController } from "../../../../consumption/ConsumptionController";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { EmittedAttributeDeletionInfo, EmittedAttributeDeletionStatus, ForwardedAttributeDeletedByPeerEvent } from "../../../attributes";
-import { OwnIdentityAttribute } from "../../../attributes/local/attributeTypes/OwnIdentityAttribute";
-import { OwnRelationshipAttribute } from "../../../attributes/local/attributeTypes/OwnRelationshipAttribute";
-import { PeerRelationshipAttribute } from "../../../attributes/local/attributeTypes/PeerRelationshipAttribute";
+import {
+    EmittedAttributeDeletionInfo,
+    EmittedAttributeDeletionStatus,
+    ForwardedAttributeDeletedByPeerEvent,
+    OwnIdentityAttribute,
+    OwnRelationshipAttribute,
+    PeerRelationshipAttribute
+} from "../../../attributes";
 import { ValidationResult } from "../../../common";
 import { LocalNotification } from "../../local/LocalNotification";
 import { AbstractNotificationItemProcessor } from "../AbstractNotificationItemProcessor";

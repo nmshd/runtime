@@ -1,9 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { AttributesController } from "@nmshd/consumption";
-import { LocalAttribute } from "@nmshd/consumption/src/modules/attributes/local/attributeTypes/LocalAttribute";
-import { OwnIdentityAttribute } from "@nmshd/consumption/src/modules/attributes/local/attributeTypes/OwnIdentityAttribute";
-import { OwnRelationshipAttribute } from "@nmshd/consumption/src/modules/attributes/local/attributeTypes/OwnRelationshipAttribute";
-import { PeerRelationshipAttribute } from "@nmshd/consumption/src/modules/attributes/local/attributeTypes/PeerRelationshipAttribute";
+import { AttributesController, LocalAttribute, OwnIdentityAttribute, OwnRelationshipAttribute, PeerRelationshipAttribute } from "@nmshd/consumption";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";

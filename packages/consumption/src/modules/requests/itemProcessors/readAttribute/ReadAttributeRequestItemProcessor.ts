@@ -20,17 +20,17 @@ import { nameof } from "ts-simple-nameof";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import {
     AttributeSucceededEvent,
+    OwnIdentityAttribute,
     OwnIdentityAttributeSuccessorParams,
+    OwnRelationshipAttribute,
+    PeerIdentityAttribute,
     PeerIdentityAttributeSuccessorParams,
+    PeerRelationshipAttribute,
     ReceivedAttributeDeletionStatus,
+    ThirdPartyRelationshipAttribute,
     ThirdPartyRelationshipAttributeSuccessorParams
 } from "../../../attributes";
-import { LocalAttribute } from "../../../attributes/local/attributeTypes/LocalAttribute";
-import { OwnIdentityAttribute } from "../../../attributes/local/attributeTypes/OwnIdentityAttribute";
-import { OwnRelationshipAttribute } from "../../../attributes/local/attributeTypes/OwnRelationshipAttribute";
-import { PeerIdentityAttribute } from "../../../attributes/local/attributeTypes/PeerIdentityAttribute";
-import { PeerRelationshipAttribute } from "../../../attributes/local/attributeTypes/PeerRelationshipAttribute";
-import { ThirdPartyRelationshipAttribute } from "../../../attributes/local/attributeTypes/ThirdPartyRelationshipAttribute";
+import { LocalAttribute } from "../../../attributes/local/attributeTypes";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 import { LocalRequestInfo } from "../IRequestItemProcessor";

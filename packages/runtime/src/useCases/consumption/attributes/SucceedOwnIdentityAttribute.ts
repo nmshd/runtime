@@ -1,6 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { AttributesController, ConsumptionCoreErrors, OwnIdentityAttributeSuccessorParamsJSON } from "@nmshd/consumption";
-import { OwnIdentityAttribute } from "@nmshd/consumption/src/modules/attributes/local/attributeTypes/OwnIdentityAttribute";
+import { AttributesController, ConsumptionCoreErrors, OwnIdentityAttribute, OwnIdentityAttributeSuccessorParamsJSON } from "@nmshd/consumption";
 import { AttributeValues } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
 import { LocalAttributeDTO } from "@nmshd/runtime-types";

@@ -3,15 +3,15 @@ import { Result } from "@js-soft/ts-utils";
 import {
     AbstractAttributeDeletionInfoJSON,
     AttributesController,
+    AttributeWithPeerSharingDetails,
+    ForwardableAttribute,
     ForwardedSharingDetailsJSON,
+    LocalAttribute,
+    OwnIdentityAttribute,
     PeerSharingDetailsJSON,
+    ThirdPartyRelationshipAttribute,
     ThirdPartyRelationshipAttributeSharingDetailsJSON
 } from "@nmshd/consumption";
-import { AttributeWithPeerSharingDetails } from "@nmshd/consumption/src/modules/attributes/local/attributeTypes/AttributeWithPeerSharingDetails";
-import { ForwardableAttribute } from "@nmshd/consumption/src/modules/attributes/local/attributeTypes/ForwardableAttribute";
-import { LocalAttribute } from "@nmshd/consumption/src/modules/attributes/local/attributeTypes/LocalAttribute";
-import { OwnIdentityAttribute } from "@nmshd/consumption/src/modules/attributes/local/attributeTypes/OwnIdentityAttribute";
-import { ThirdPartyRelationshipAttribute } from "@nmshd/consumption/src/modules/attributes/local/attributeTypes/ThirdPartyRelationshipAttribute";
 import { AbstractAttributeJSON, IdentityAttribute, IdentityAttributeJSON, RelationshipAttributeJSON } from "@nmshd/content";
 import { ForwardedSharingDetailsDTO, LocalAttributeDeletionInfoDTO, LocalAttributeDTO, PeerSharingDetailsDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";

@@ -1,11 +1,14 @@
 import { Result } from "@js-soft/ts-utils";
-import { AttributesController, ConsumptionIds } from "@nmshd/consumption";
-import { LocalAttribute } from "@nmshd/consumption/src/modules/attributes/local/attributeTypes/LocalAttribute";
-import { OwnIdentityAttribute } from "@nmshd/consumption/src/modules/attributes/local/attributeTypes/OwnIdentityAttribute";
-import { OwnRelationshipAttribute } from "@nmshd/consumption/src/modules/attributes/local/attributeTypes/OwnRelationshipAttribute";
-import { PeerIdentityAttribute } from "@nmshd/consumption/src/modules/attributes/local/attributeTypes/PeerIdentityAttribute";
-import { PeerRelationshipAttribute } from "@nmshd/consumption/src/modules/attributes/local/attributeTypes/PeerRelationshipAttribute";
-import { ThirdPartyRelationshipAttribute } from "@nmshd/consumption/src/modules/attributes/local/attributeTypes/ThirdPartyRelationshipAttribute";
+import {
+    AttributesController,
+    ConsumptionIds,
+    LocalAttribute,
+    OwnIdentityAttribute,
+    OwnRelationshipAttribute,
+    PeerIdentityAttribute,
+    PeerRelationshipAttribute,
+    ThirdPartyRelationshipAttribute
+} from "@nmshd/consumption";
 import {
     ForwardedAttributeDeletedByPeerNotificationItem,
     Notification,
