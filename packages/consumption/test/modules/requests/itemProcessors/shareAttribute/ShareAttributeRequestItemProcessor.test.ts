@@ -14,6 +14,11 @@ import {
 } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { AccountController, Transport } from "@nmshd/transport";
+import { LocalAttribute } from "src/modules/attributes/local/attributeTypes/LocalAttribute";
+import { OwnIdentityAttribute } from "src/modules/attributes/local/attributeTypes/OwnIdentityAttribute";
+import { OwnRelationshipAttribute } from "src/modules/attributes/local/attributeTypes/OwnRelationshipAttribute";
+import { PeerIdentityAttribute } from "src/modules/attributes/local/attributeTypes/PeerIdentityAttribute";
+import { ThirdPartyRelationshipAttribute } from "src/modules/attributes/local/attributeTypes/ThirdPartyRelationshipAttribute";
 import { anything, reset, spy, when } from "ts-mockito";
 import {
     ConsumptionController,
@@ -21,16 +26,11 @@ import {
     EmittedAttributeDeletionInfo,
     EmittedAttributeDeletionStatus,
     IPeerIdentityAttributeSuccessorParams,
-    LocalAttribute,
     LocalRequest,
     LocalRequestStatus,
-    OwnIdentityAttribute,
-    OwnRelationshipAttribute,
-    PeerIdentityAttribute,
     ReceivedAttributeDeletionInfo,
     ReceivedAttributeDeletionStatus,
     ShareAttributeRequestItemProcessor,
-    ThirdPartyRelationshipAttribute,
     ThirdPartyRelationshipAttributeDeletionInfo,
     ThirdPartyRelationshipAttributeDeletionStatus,
     ValidationResult

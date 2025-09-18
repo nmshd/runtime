@@ -12,6 +12,11 @@ import {
 } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { AccountController, Transport, TransportCoreErrors } from "@nmshd/transport";
+import { LocalAttribute } from "src/modules/attributes/local/attributeTypes/LocalAttribute";
+import { OwnIdentityAttribute } from "src/modules/attributes/local/attributeTypes/OwnIdentityAttribute";
+import { OwnRelationshipAttribute } from "src/modules/attributes/local/attributeTypes/OwnRelationshipAttribute";
+import { PeerIdentityAttribute } from "src/modules/attributes/local/attributeTypes/PeerIdentityAttribute";
+import { PeerRelationshipAttribute } from "src/modules/attributes/local/attributeTypes/PeerRelationshipAttribute";
 import {
     ConsumptionController,
     ConsumptionCoreErrors,
@@ -20,11 +25,6 @@ import {
     EmittedAttributeDeletionInfo,
     EmittedAttributeDeletionStatus,
     IOwnIdentityAttributeSuccessorParams,
-    LocalAttribute,
-    OwnIdentityAttribute,
-    OwnRelationshipAttribute,
-    PeerIdentityAttribute,
-    PeerRelationshipAttribute,
     ValidationResult
 } from "../../../../../src";
 import { TestUtil } from "../../../../core/TestUtil";

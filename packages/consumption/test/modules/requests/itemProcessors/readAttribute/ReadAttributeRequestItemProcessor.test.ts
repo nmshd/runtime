@@ -19,6 +19,11 @@ import {
 } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId, CoreIdHelper } from "@nmshd/core-types";
 import { AccountController, Transport } from "@nmshd/transport";
+import { OwnIdentityAttribute } from "src/modules/attributes/local/attributeTypes/OwnIdentityAttribute";
+import { OwnRelationshipAttribute } from "src/modules/attributes/local/attributeTypes/OwnRelationshipAttribute";
+import { PeerIdentityAttribute } from "src/modules/attributes/local/attributeTypes/PeerIdentityAttribute";
+import { PeerRelationshipAttribute } from "src/modules/attributes/local/attributeTypes/PeerRelationshipAttribute";
+import { ThirdPartyRelationshipAttribute } from "src/modules/attributes/local/attributeTypes/ThirdPartyRelationshipAttribute";
 import { anything, reset, spy, when } from "ts-mockito";
 import {
     AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON,
@@ -30,14 +35,9 @@ import {
     EmittedAttributeDeletionStatus,
     LocalRequest,
     LocalRequestStatus,
-    OwnIdentityAttribute,
-    OwnRelationshipAttribute,
-    PeerIdentityAttribute,
-    PeerRelationshipAttribute,
     ReadAttributeRequestItemProcessor,
     ReceivedAttributeDeletionInfo,
     ReceivedAttributeDeletionStatus,
-    ThirdPartyRelationshipAttribute,
     ValidationResult
 } from "../../../../../src";
 import { TestUtil } from "../../../../core/TestUtil";

@@ -12,6 +12,10 @@ import {
 } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId, CoreIdHelper } from "@nmshd/core-types";
 import { AccountController, Transport } from "@nmshd/transport";
+import { OwnIdentityAttribute } from "src/modules/attributes/local/attributeTypes/OwnIdentityAttribute";
+import { OwnRelationshipAttribute } from "src/modules/attributes/local/attributeTypes/OwnRelationshipAttribute";
+import { PeerIdentityAttribute } from "src/modules/attributes/local/attributeTypes/PeerIdentityAttribute";
+import { PeerRelationshipAttribute } from "src/modules/attributes/local/attributeTypes/PeerRelationshipAttribute";
 import {
     AcceptDeleteAttributeRequestItemParametersJSON,
     ConsumptionController,
@@ -21,11 +25,7 @@ import {
     EmittedAttributeDeletionStatus,
     LocalRequest,
     LocalRequestStatus,
-    OwnIdentityAttribute,
     OwnIdentityAttributeSuccessorParams,
-    OwnRelationshipAttribute,
-    PeerIdentityAttribute,
-    PeerRelationshipAttribute,
     ReceivedAttributeDeletionStatus
 } from "../../../../../src";
 import { TestUtil } from "../../../../core/TestUtil";

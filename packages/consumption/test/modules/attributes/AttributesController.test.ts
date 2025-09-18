@@ -16,6 +16,11 @@ import {
 } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { AccountController, ClientResult, TagClient, Transport } from "@nmshd/transport";
+import { OwnIdentityAttribute } from "src/modules/attributes/local/attributeTypes/OwnIdentityAttribute";
+import { OwnRelationshipAttribute } from "src/modules/attributes/local/attributeTypes/OwnRelationshipAttribute";
+import { PeerIdentityAttribute } from "src/modules/attributes/local/attributeTypes/PeerIdentityAttribute";
+import { PeerRelationshipAttribute } from "src/modules/attributes/local/attributeTypes/PeerRelationshipAttribute";
+import { ThirdPartyRelationshipAttribute } from "src/modules/attributes/local/attributeTypes/ThirdPartyRelationshipAttribute";
 import { IPeerRelationshipAttributeSuccessorParams } from "src/modules/attributes/local/successorParams/PeerRelationshipAttributeSuccessorParams";
 import { anything, reset, spy, verify, when } from "ts-mockito";
 import {
@@ -30,15 +35,10 @@ import {
     IOwnRelationshipAttributeSuccessorParams,
     IPeerIdentityAttributeSuccessorParams,
     IThirdPartyRelationshipAttributeSuccessorParams,
-    OwnIdentityAttribute,
     OwnIdentityAttributeSuccessorParams,
-    OwnRelationshipAttribute,
-    PeerIdentityAttribute,
     PeerIdentityAttributeSuccessorParams,
-    PeerRelationshipAttribute,
     ReceivedAttributeDeletionInfo,
-    ReceivedAttributeDeletionStatus,
-    ThirdPartyRelationshipAttribute
+    ReceivedAttributeDeletionStatus
 } from "../../../src";
 import { TestUtil } from "../../core/TestUtil";
 import { MockEventBus } from "../MockEventBus";
