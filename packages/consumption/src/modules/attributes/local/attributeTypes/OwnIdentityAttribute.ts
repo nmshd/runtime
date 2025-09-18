@@ -29,7 +29,6 @@ export class OwnIdentityAttribute extends LocalAttribute implements IOwnIdentity
         nameof<OwnIdentityAttribute>((r) => r.forwardedSharingDetails)
     ];
 
-    // TODO: maybe we can get rid of this customGenerator -> different PR
     @serialize({ customGenerator: (value: IdentityAttribute) => value.toJSON(true) })
     @validate()
     public override content: IdentityAttribute;
