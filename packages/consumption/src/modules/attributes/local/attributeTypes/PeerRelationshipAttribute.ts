@@ -128,7 +128,7 @@ export class PeerRelationshipAttribute extends LocalAttribute implements IPeerRe
         return this;
     }
 
-    public getForwardedPeers(includeToBeDeleted = false): CoreAddress[] {
+    public getForwardingPeers(includeToBeDeleted = false): CoreAddress[] {
         const forwardedSharingDetailsNotDeletedByPeer = this.forwardedSharingDetails?.filter(
             (sharingDetails) => sharingDetails.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.DeletedByPeer
         );
