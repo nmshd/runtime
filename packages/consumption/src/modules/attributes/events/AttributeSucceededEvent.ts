@@ -1,5 +1,5 @@
 import { TransportDataEvent } from "@nmshd/transport";
-import { LocalAttribute } from "../local/attributeTypes";
+import { LocalAttribute } from "../local/attributeTypes/LocalAttribute";
 
 export interface AttributeSucceededEventData {
     predecessor: LocalAttribute;

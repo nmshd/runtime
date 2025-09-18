@@ -16,13 +16,13 @@ import { nameof } from "ts-simple-nameof";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import {
     AttributeSucceededEvent,
+    LocalAttribute,
     OwnIdentityAttribute,
     OwnIdentityAttributeSuccessorParams,
     PeerIdentityAttribute,
     PeerIdentityAttributeSuccessorParams,
     ReceivedAttributeDeletionStatus
 } from "../../../attributes";
-import { LocalAttribute } from "../../../attributes/local/attributeTypes";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 import { LocalRequestInfo } from "../IRequestItemProcessor";
