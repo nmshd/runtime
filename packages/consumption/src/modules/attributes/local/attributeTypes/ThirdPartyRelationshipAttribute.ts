@@ -54,11 +54,6 @@ export class ThirdPartyRelationshipAttribute extends LocalAttribute implements I
         return this.peerSharingDetails.deletionInfo?.deletionStatus === ThirdPartyRelationshipAttributeDeletionStatus.ToBeDeleted;
     }
 
-    // public setPeerDeletionInfo(deletionInfo: ThirdPartyRelationshipAttributeDeletionInfo | undefined): this {
-    //     this.peerSharingDetails.deletionInfo = deletionInfo;
-    //     return this;
-    // }
-
     public setPeerDeletionInfo(deletionInfo: ThirdPartyRelationshipAttributeDeletionInfo | undefined, overrideDeleted = false): this {
         if (
             !overrideDeleted &&
