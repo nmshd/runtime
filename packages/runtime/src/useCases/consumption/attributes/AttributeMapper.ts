@@ -56,15 +56,17 @@ export class AttributeMapper {
     private static toForwardedSharingDetails(attribute: LocalAttribute): ForwardedSharingDetailsDTO[] | undefined {
         if (!(attribute instanceof OwnIdentityAttribute || attribute instanceof OwnRelationshipAttribute || attribute instanceof PeerRelationshipAttribute)) return undefined;
 
-        return attribute.forwardedSharingDetails?.map((detail) => this.toForwardedSharingDetailsDTO(detail));
+        return attribute.forwardedSharingDetails?.map((sharingDetails) => this.toForwardedSharingDetailsDTO(sharingDetails));
     }
 
-    private static toForwardedSharingDetailsDTO(detail: ForwardedSharingDetails): ForwardedSharingDetailsDTO {
+    private static toForwardedSharingDetailsDTO(sharingDetails: ForwardedSharingDetails): ForwardedSharingDetailsDTO {
         return {
-            peer: detail.peer.toString(),
-            sourceReference: detail.sourceReference.toString(),
-            sharedAt: detail.sharedAt.toString(),
-            deletionInfo: detail.deletionInfo ? { deletionStatus: detail.deletionInfo.deletionStatus, deletionDate: detail.deletionInfo.deletionDate.toString() } : undefined
+            peer: sharingDetails.peer.toString(),
+            sourceReference: sharingDetails.sourceReference.toString(),
+            sharedAt: sharingDetails.sharedAt.toString(),
+            deletionInfo: sharingDetails.deletionInfo
+                ? { deletionStatus: sharingDetails.deletionInfo.deletionStatus, deletionDate: sharingDetails.deletionInfo.deletionDate.toString() }
+                : undefined
         };
     }
 }
