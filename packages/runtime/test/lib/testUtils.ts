@@ -5,9 +5,9 @@ import {
     ConsumptionIds,
     DecideRequestItemGroupParametersJSON,
     DecideRequestItemParametersJSON,
-    DecideRequestParametersJSON
+    DecideRequestParametersJSON,
+    ForwardableAttribute
 } from "@nmshd/consumption";
-import { ForwardableAttribute } from "@nmshd/consumption/dist/modules/attributes/local/attributeTypes/ForwardableAttribute";
 import {
     ArbitraryRelationshipCreationContent,
     ArbitraryRelationshipCreationContentJSON,
