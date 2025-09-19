@@ -835,6 +835,9 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async deleteAttribute(attribute: LocalAttribute): Promise<void> {
+        const localAttribute = await this.getLocalAttribute(attribute.id);
+        if (localAttribute && !_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
+
         await this.deleteAttributeUnsafe(attribute.id);
         this.eventBus.publish(new AttributeDeletedEvent(this.identity.address.toString(), attribute));
     }
@@ -863,6 +866,10 @@ export class AttributesController extends ConsumptionBaseController {
         attribute: T,
         peer: CoreAddress
     ): Promise<T> {
+        const localAttribute = await this.getLocalAttribute(attribute.id);
+        if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
+        if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
+        
         attribute.forwardedSharingDetails = attribute.forwardedSharingDetails?.filter((sharingDetails) => !sharingDetails.peer.equals(peer));
         await this.updateAttributeUnsafe(attribute);
 
@@ -981,6 +988,14 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async isSubsequentInSuccession(predecessor: LocalAttribute, successor: LocalAttribute): Promise<boolean> {
+        const predecessorLocalAttribute = await this.getLocalAttribute(predecessor.id);
+        if (!predecessorLocalAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, predecessor.id.toString());
+        if (!_.isEqual(predecessor, predecessorLocalAttribute)) throw ConsumptionCoreErrors.attributes.predecessorDoesNotExist();
+
+        const successorlocalAttribute = await this.getLocalAttribute(successor.id);
+        if (!successorlocalAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, successor.id.toString());
+        if (!_.isEqual(successor, successorlocalAttribute)) throw ConsumptionCoreErrors.attributes.successorDoesNotExist();
+
         while (predecessor.succeededBy) {
             const directSuccessor = await this.getLocalAttribute(predecessor.succeededBy);
             if (!directSuccessor) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, predecessor.succeededBy.toString());
@@ -1018,6 +1033,10 @@ export class AttributesController extends ConsumptionBaseController {
         peerAddress: CoreAddress,
         excludeToBeDeleted = false
     ): Promise<T[]> {
+        const localAttribute = await this.getLocalAttribute(referenceAttribute.id);
+        if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, referenceAttribute.id.toString());
+        if (!_.isEqual(referenceAttribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
+        
         const matchingPredecessors: T[] = [];
         while (referenceAttribute.succeeds) {
             const predecessor = (await this.getLocalAttribute(referenceAttribute.succeeds)) as T | undefined;
@@ -1036,6 +1055,10 @@ export class AttributesController extends ConsumptionBaseController {
         peerAddress: CoreAddress,
         excludeToBeDeleted = false
     ): Promise<T[]> {
+        const localAttribute = await this.getLocalAttribute(referenceAttribute.id);
+        if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, referenceAttribute.id.toString());
+        if (!_.isEqual(referenceAttribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
+        
         const matchingSuccessors: T[] = [];
         while (referenceAttribute.succeededBy) {
             const successor = (await this.getLocalAttribute(referenceAttribute.succeededBy)) as T | undefined;
@@ -1434,6 +1457,10 @@ export class AttributesController extends ConsumptionBaseController {
         peer: CoreAddress,
         overrideDeletedOrToBeDeleted = false
     ): Promise<void> {
+        const localAttribute = await this.getLocalAttribute(attribute.id);
+        if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
+        if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
+        
         if (attribute.isDeletedOrToBeDeletedByForwardingPeer(peer) && !overrideDeletedOrToBeDeleted) return;
 
         attribute.setDeletionInfoForForwardingPeer(deletionInfo, peer, overrideDeletedOrToBeDeleted);
@@ -1445,6 +1472,10 @@ export class AttributesController extends ConsumptionBaseController {
         deletionInfo: EmittedAttributeDeletionInfo | undefined,
         overrideDeletedOrToBeDeleted = false
     ): Promise<void> {
+        const localAttribute = await this.getLocalAttribute(attribute.id);
+        if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
+        if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
+
         if (attribute.isDeletedOrToBeDeletedByPeer() && !overrideDeletedOrToBeDeleted) return;
 
         attribute.setPeerDeletionInfo(deletionInfo, overrideDeletedOrToBeDeleted);
@@ -1456,6 +1487,10 @@ export class AttributesController extends ConsumptionBaseController {
         deletionInfo: ReceivedAttributeDeletionInfo | undefined,
         overrideDeletedOrToBeDeleted = false
     ): Promise<void> {
+        const localAttribute = await this.getLocalAttribute(attribute.id);
+        if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
+        if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
+
         if (attribute.isDeletedByOwnerOrToBeDeleted() && !overrideDeletedOrToBeDeleted) return;
 
         attribute.setPeerDeletionInfo(deletionInfo, overrideDeletedOrToBeDeleted);
@@ -1467,6 +1502,10 @@ export class AttributesController extends ConsumptionBaseController {
         deletionInfo: ThirdPartyRelationshipAttributeDeletionInfo | undefined,
         overrideDeletedOrToBeDeleted = false
     ): Promise<void> {
+        const localAttribute = await this.getLocalAttribute(attribute.id);
+        if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
+        if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
+
         if (attribute.isDeletedByOwnerOrPeerOrToBeDeleted() && !overrideDeletedOrToBeDeleted) return;
 
         attribute.setPeerDeletionInfo(deletionInfo, overrideDeletedOrToBeDeleted);
