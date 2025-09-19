@@ -76,7 +76,7 @@ export async function exchangeMessageWithRequestAndSendResponse(
     return { rResponseMessage, sResponseMessage };
 }
 
-export async function exchangeTemplateAndReceiverRequiresManualDecision(
+export async function exchangeTemplateAndRecipientRequiresManualDecision(
     sRuntimeServices: TestRuntimeServices,
     rRuntimeServices: TestRuntimeServices,
     templateContent: any,
@@ -102,13 +102,13 @@ export async function exchangeTemplateAndReceiverRequiresManualDecision(
     };
 }
 
-export async function exchangeTemplateAndReceiverSendsResponse(
+export async function exchangeTemplateAndRecipientSendsResponse(
     sRuntimeServices: TestRuntimeServices,
     rRuntimeServices: TestRuntimeServices,
     templateContent: any,
     actionLowerCase: "accept" | "reject"
 ): Promise<RelationshipRequestWithRelationshipIfAccepted> {
-    const { request, source: templateId } = await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent);
+    const { request, source: templateId } = await exchangeTemplateAndRecipientRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent);
     const decidedRequest = (
         await rRuntimeServices.consumption.incomingRequests[actionLowerCase]({
             requestId: request.id,
