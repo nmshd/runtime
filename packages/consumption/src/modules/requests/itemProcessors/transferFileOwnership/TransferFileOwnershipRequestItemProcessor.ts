@@ -144,12 +144,12 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
             })
         });
 
-        await this.consumptionController.attributes.addForwardedSharingDetailsToAttribute(ownIdentityAttribute, requestInfo.peer, requestInfo.id);
+        const updatedAttribute = await this.consumptionController.attributes.addForwardedSharingDetailsToAttribute(ownIdentityAttribute, requestInfo.peer, requestInfo.id);
 
         return TransferFileOwnershipAcceptResponseItem.from({
             result: ResponseItemResult.Accepted,
-            attributeId: ownIdentityAttribute.id,
-            attribute: ownIdentityAttribute.content
+            attributeId: updatedAttribute.id,
+            attribute: updatedAttribute.content
         });
     }
 

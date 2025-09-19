@@ -46,25 +46,25 @@ export default async function createAppropriateResponseItem(
     const latestSharedVersion = latestSharedVersions.length > 0 ? latestSharedVersions[0] : undefined;
 
     if (!latestSharedVersion) {
-        await attributesController.addForwardedSharingDetailsToAttribute(ownIdentityAttribute, requestInfo.peer, requestInfo.id);
+        const updatedAttribute = await attributesController.addForwardedSharingDetailsToAttribute(ownIdentityAttribute, requestInfo.peer, requestInfo.id);
 
         switch (itemType) {
             case "Create":
                 return CreateAttributeAcceptResponseItem.from({
                     result: ResponseItemResult.Accepted,
-                    attributeId: ownIdentityAttribute.id
+                    attributeId: updatedAttribute.id
                 });
             case "Read":
                 return ReadAttributeAcceptResponseItem.from({
                     result: ResponseItemResult.Accepted,
                     attributeId: ownIdentityAttribute.id,
-                    attribute: ownIdentityAttribute.content
+                    attribute: updatedAttribute.content
                 });
             case "Propose":
                 return ProposeAttributeAcceptResponseItem.from({
                     result: ResponseItemResult.Accepted,
                     attributeId: ownIdentityAttribute.id,
-                    attribute: ownIdentityAttribute.content
+                    attribute: updatedAttribute.content
                 });
         }
     }
@@ -80,12 +80,12 @@ export default async function createAppropriateResponseItem(
         });
     }
 
-    await attributesController.addForwardedSharingDetailsToAttribute(ownIdentityAttribute, requestInfo.peer, requestInfo.id);
+    const updatedAttribute = await attributesController.addForwardedSharingDetailsToAttribute(ownIdentityAttribute, requestInfo.peer, requestInfo.id);
 
     return AttributeSuccessionAcceptResponseItem.from({
         result: ResponseItemResult.Accepted,
-        successorId: ownIdentityAttribute.id,
-        successorContent: ownIdentityAttribute.content,
+        successorId: updatedAttribute.id,
+        successorContent: updatedAttribute.content,
         predecessorId: latestSharedVersion.id
     });
 }
