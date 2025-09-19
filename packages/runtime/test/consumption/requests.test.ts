@@ -24,8 +24,8 @@ import {
 import {
     exchangeMessageWithRequestAndRequireManualDecision,
     exchangeMessageWithRequestAndSendResponse,
-    exchangeTemplateAndReceiverRequiresManualDecision,
-    exchangeTemplateAndReceiverSendsResponse
+    exchangeTemplateAndRecipientRequiresManualDecision,
+    exchangeTemplateAndRecipientSendsResponse
 } from "../lib/testUtilsWithInactiveModules";
 
 describe("Requests", () => {
@@ -486,7 +486,7 @@ describe("Requests", () => {
         });
 
         test(`recipient: call can${action} for incoming Request`, async () => {
-            const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent)).request;
+            const request = (await exchangeTemplateAndRecipientRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent)).request;
             const result = await rConsumptionServices.incomingRequests[`can${action}`]({
                 requestId: request.id,
                 items: [
@@ -507,7 +507,7 @@ describe("Requests", () => {
         });
 
         test(`recipient: ${actionLowerCase} incoming Request`, async () => {
-            const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent)).request;
+            const request = (await exchangeTemplateAndRecipientRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent)).request;
             let triggeredEvent: IncomingRequestStatusChangedEvent | undefined;
             rEventBus.subscribeOnce(IncomingRequestStatusChangedEvent, (event) => {
                 triggeredEvent = event;
@@ -538,7 +538,7 @@ describe("Requests", () => {
         });
 
         test("recipient: complete incoming Request", async () => {
-            const { request, relationship } = await exchangeTemplateAndReceiverSendsResponse(sRuntimeServices, rRuntimeServices, templateContent, actionLowerCase);
+            const { request, relationship } = await exchangeTemplateAndRecipientSendsResponse(sRuntimeServices, rRuntimeServices, templateContent, actionLowerCase);
             await rConsumptionServices.incomingRequests[actionLowerCase]({
                 requestId: request.id,
                 items: [
@@ -630,7 +630,7 @@ describe("Requests", () => {
         afterAll(async () => await runtimeServiceProvider.stop());
 
         test("change status of Request when querying it if the underlying RelationshipTemplate is expired", async () => {
-            const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent, DateTime.utc().plus({ seconds: 3 })))
+            const request = (await exchangeTemplateAndRecipientRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent, DateTime.utc().plus({ seconds: 3 })))
                 .request;
 
             let triggeredEvent: IncomingRequestStatusChangedEvent | undefined;
@@ -653,7 +653,7 @@ describe("Requests", () => {
         });
 
         test("change status of Request when querying Requests if the underlying RelationshipTemplate is expired", async () => {
-            const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent, DateTime.utc().plus({ seconds: 3 })))
+            const request = (await exchangeTemplateAndRecipientRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent, DateTime.utc().plus({ seconds: 3 })))
                 .request;
 
             let triggeredEvent: IncomingRequestStatusChangedEvent | undefined;
@@ -676,7 +676,7 @@ describe("Requests", () => {
         });
 
         test("can not delete a Request when it is not expired", async () => {
-            const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent)).request;
+            const request = (await exchangeTemplateAndRecipientRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent)).request;
 
             await expect(rConsumptionServices.incomingRequests.delete({ requestId: request.id })).resolves.toBeAnError(
                 "is in status 'ManualDecisionRequired'. At the moment, you can only delete incoming Requests that are expired.",
@@ -685,7 +685,7 @@ describe("Requests", () => {
         });
 
         test("can delete a Request when it is expired", async () => {
-            const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent, DateTime.utc().plus({ seconds: 3 })))
+            const request = (await exchangeTemplateAndRecipientRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent, DateTime.utc().plus({ seconds: 3 })))
                 .request;
 
             await sleep(3000);
@@ -710,7 +710,7 @@ describe("Requests", () => {
             const actionLowerCase = action.toLowerCase() as "accept" | "reject";
 
             test(`recipient: cannot ${actionLowerCase} incoming Request`, async () => {
-                const request = (await exchangeTemplateAndReceiverRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent, DateTime.utc().plus({ seconds: 3 })))
+                const request = (await exchangeTemplateAndRecipientRequiresManualDecision(sRuntimeServices, rRuntimeServices, templateContent, DateTime.utc().plus({ seconds: 3 })))
                     .request;
 
                 let triggeredEvent: IncomingRequestStatusChangedEvent | undefined;
